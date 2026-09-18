@@ -161,7 +161,9 @@
     eventName: function (name) { return CONSTANTS.AELLUX_EVENT_NAME_PREFFIX + toCamelCase(name); },
     noConflict: function () { return old$Instance; },
 
-    initModuleLoader: function () { },
+    uxmRegister: function (name, object) { Aellux[toCamelCase(name)] = object; },
+
+    startAellux: function () { },
     dispatchFrom: function (from, event, options) {
       var obj = document.createEvent("Event");
       obj.initEvent(Aellux.eventName(event), false, false);

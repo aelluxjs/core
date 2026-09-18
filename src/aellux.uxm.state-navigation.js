@@ -3,14 +3,15 @@
 (function () {
   "use strict";
 
+  const moduleName = "state-navigation";
   const globalSnapshot = {};
 
-  Aellux.stateNavigation = {
+  Aellux.uxmRegister(moduleName, {
     init, destroy,
     tabOpen, ajaxHref, flowStep, formUpdate, updateBaseTitle,
     normalize,
     globalSnapshot
-  };
+  });
 
   const globalRemoveSnapshot = {};
   let globalSnapshotString = "";

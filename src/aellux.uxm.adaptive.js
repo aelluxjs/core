@@ -4,8 +4,9 @@
   "use strict";
 
 
+  const moduleName = "adaptive";
   const attr = {
-    adaptive: Aellux.attr("adaptive")
+    adaptive: Aellux.attr(moduleName)
   };
   const modifier = {
     shapeHorizontal: Aellux.className("shape-horizontal"),
@@ -14,7 +15,7 @@
   };
   const mountDOM = new Map();
 
-  Aellux.adaptive = { init, destroy, mountDOM };
+  Aellux.uxmRegister(moduleName, { init, destroy, mountDOM });
 
   async function init() {
     mountDOM.set(`[${attr.adaptive}]`, {

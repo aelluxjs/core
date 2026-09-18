@@ -3,7 +3,8 @@
 (function () {
   "use strict";
 
-  Aellux.preferences = { init, destroy, update, get, set };
+  const moduleName = "preferences";
+  Aellux.uxmRegister(moduleName, { init, destroy, update, get, set });
 
 
   const userPreferences = Object.create(null);

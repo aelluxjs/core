@@ -3,12 +3,13 @@
 (function () {
   "use strict";
 
-  Aellux.feedback = {
+  const moduleName = "feedback";
+  Aellux.uxmRegister(moduleName, {
     init, destroy,
     warning, error, success, announce,
     busy, validate, progress,
     on, off, send
-  };
+  });
 
 
   const handlers = new Map();

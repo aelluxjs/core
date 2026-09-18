@@ -2,8 +2,9 @@
   /*! Aellux | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   (function() {
     "use strict";
+    const moduleName = "adaptive";
     const attr = {
-      adaptive: Aellux.attr("adaptive")
+      adaptive: Aellux.attr(moduleName)
     };
     const modifier = {
       shapeHorizontal: Aellux.className("shape-horizontal"),
@@ -11,7 +12,7 @@
       shapeSquare: Aellux.className("shape-square")
     };
     const mountDOM = /* @__PURE__ */ new Map();
-    Aellux.adaptive = { init, destroy, mountDOM };
+    Aellux.uxmRegister(moduleName, { init, destroy, mountDOM });
     async function init() {
       mountDOM.set(`[${attr.adaptive}]`, {
         update: updateAdaptive,

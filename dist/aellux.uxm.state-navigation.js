@@ -2,8 +2,9 @@
   /*! Aellux | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   (function() {
     "use strict";
+    const moduleName = "state-navigation";
     const globalSnapshot = {};
-    Aellux.stateNavigation = {
+    Aellux.uxmRegister(moduleName, {
       init,
       destroy,
       tabOpen,
@@ -13,7 +14,7 @@
       updateBaseTitle,
       normalize,
       globalSnapshot
-    };
+    });
     const globalRemoveSnapshot = {};
     let globalSnapshotString = "";
     let skipHashChange = null;

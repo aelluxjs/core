@@ -11,7 +11,8 @@
       /*! Aellux | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
       (function() {
         "use strict";
-        Aellux.preferences = { init, destroy, update, get, set };
+        const moduleName = "preferences";
+        Aellux.uxmRegister(moduleName, { init, destroy, update, get, set });
         const userPreferences = /* @__PURE__ */ Object.create(null);
         const defaultPreferences = /* @__PURE__ */ Object.create(null);
         const computedPreferences = /* @__PURE__ */ Object.create(null);
@@ -137,8 +138,9 @@
       /*! Aellux | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
       (function() {
         "use strict";
+        const moduleName = "state-navigation";
         const globalSnapshot = {};
-        Aellux.stateNavigation = {
+        Aellux.uxmRegister(moduleName, {
           init,
           destroy,
           tabOpen,
@@ -148,7 +150,7 @@
           updateBaseTitle,
           normalize,
           globalSnapshot
-        };
+        });
         const globalRemoveSnapshot = {};
         let globalSnapshotString = "";
         let skipHashChange = null;
@@ -278,8 +280,9 @@
       /*! Aellux | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
       (function() {
         "use strict";
+        const moduleName = "adaptive";
         const attr = {
-          adaptive: Aellux.attr("adaptive")
+          adaptive: Aellux.attr(moduleName)
         };
         const modifier = {
           shapeHorizontal: Aellux.className("shape-horizontal"),
@@ -287,7 +290,7 @@
           shapeSquare: Aellux.className("shape-square")
         };
         const mountDOM = /* @__PURE__ */ new Map();
-        Aellux.adaptive = { init, destroy, mountDOM };
+        Aellux.uxmRegister(moduleName, { init, destroy, mountDOM });
         async function init() {
           mountDOM.set(`[${attr.adaptive}]`, {
             update: updateAdaptive,
@@ -365,7 +368,8 @@
       /*! Aellux | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
       (function() {
         "use strict";
-        Aellux.feedback = {
+        const moduleName = "feedback";
+        Aellux.uxmRegister(moduleName, {
           init,
           destroy,
           warning,
@@ -378,7 +382,7 @@
           on,
           off,
           send
-        };
+        });
         const handlers = /* @__PURE__ */ new Map();
         async function init() {
         }
@@ -435,9 +439,10 @@
       /*! Aellux | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
       (function() {
         "use strict";
-        Aellux.ajaxHref = { init, destroy, load };
+        const moduleName = "ajax-href";
+        Aellux.uxmRegister(moduleName, { init, destroy, load });
         const attr = {
-          ajaxHref: Aellux.attr("ajax-href")
+          ajaxHref: Aellux.attr(moduleName)
         };
         async function init() {
           document.addEventListener("click", onClick);

@@ -46,6 +46,8 @@ npm run build
 
 Core sources live in `src/`, build tooling in `scripts/`, and experimental components in `examples/components/`. Only core sources are built and distributed. The flat `dist/` directory contains the ES5 bootstrap and legacy fallback, ES2017 orchestrator, individual core UXMs, and the full core bundle. All distributed JavaScript files are classic scripts isolated in IIFEs, with minified versions and source maps. `src/aellux.full.esm.js` is only a bundler entry: it generates `aellux.full.js` and `aellux.full.min.js`, not an ESM distribution. Obsolete generated artifacts are removed after a successful build. The build uses [esbuild](https://esbuild.github.io/api/) for bundling and minification; modern browser APIs are not polyfilled.
 
+Use the [UXM scaffold](templates/README.md) to create new core modules or experimental components. Templates remain outside the build inputs.
+
 Serve the repository over HTTP after building to use `index.htm` and the examples.
 
 ```html

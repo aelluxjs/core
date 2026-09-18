@@ -144,7 +144,10 @@
       noConflict: function() {
         return old$Instance;
       },
-      initModuleLoader: function() {
+      uxmRegister: function(name, object) {
+        Aellux[toCamelCase(name)] = object;
+      },
+      startAellux: function() {
       },
       dispatchFrom: function(from, event, options) {
         var obj = document.createEvent("Event");

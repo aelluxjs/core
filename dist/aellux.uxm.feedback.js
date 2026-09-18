@@ -2,7 +2,8 @@
   /*! Aellux | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   (function() {
     "use strict";
-    Aellux.feedback = {
+    const moduleName = "feedback";
+    Aellux.uxmRegister(moduleName, {
       init,
       destroy,
       warning,
@@ -15,7 +16,7 @@
       on,
       off,
       send
-    };
+    });
     const handlers = /* @__PURE__ */ new Map();
     async function init() {
     }

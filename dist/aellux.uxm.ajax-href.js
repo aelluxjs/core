@@ -2,9 +2,10 @@
   /*! Aellux | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   (function() {
     "use strict";
-    Aellux.ajaxHref = { init, destroy, load };
+    const moduleName = "ajax-href";
+    Aellux.uxmRegister(moduleName, { init, destroy, load });
     const attr = {
-      ajaxHref: Aellux.attr("ajax-href")
+      ajaxHref: Aellux.attr(moduleName)
     };
     async function init() {
       document.addEventListener("click", onClick);
