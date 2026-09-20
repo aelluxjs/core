@@ -1,14 +1,14 @@
 (function () {
   "use strict";
 
-  const moduleName = "scrollbox";
+  const extensionName = "scrollbox";
   const templates = Object.create(null);
 
-  Aellux.uxmRegister(moduleName, { init, destroy, templates });
+  Aellux.extRegister(extensionName, { init, destroy, templates });
 
   let BScroll;
 
-  async function init() {
+  function init() {
     // BScroll = await import(Aellux.options.dependencies.scrollbox.betterScroll);
     // // Executa assim que o DOM estiver pronto
     // if (document.readyState === 'loading') {

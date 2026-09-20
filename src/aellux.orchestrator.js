@@ -1,14 +1,14 @@
 /*! Aellux | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
 
 // Aellux orchestrator: extends the bootstrap with shared modern-runtime services.
-// Loads and caches configured UX modules, initializes them, and dispatches the Ready event.
+// Loads and caches configured Aellux Extensions, initializes them, and dispatches the Ready event.
 // Ready signals that the orchestrator is initialized and available; it does not guarantee
-// successful UX module initialization or completed DOM mounting. Component-specific events
+// successful Aellux Extension initialization or completed DOM mounting. Component-specific events
 // such as AdaptiveUpdate report their own readiness or updates.
-// Routes explicit DOM update/unmount requests through module connectDOM declarations,
+// Routes explicit DOM update/unmount requests through extension mountDOM declarations,
 // forwards browser observer notifications, and provides layout scheduling and fetch helpers.
 // Uses ES2017 syntax, Promises, and modern browser APIs; legacy fallback
-// selection belongs to the bootstrap, while feature-specific behavior belongs to UX modules.
+// selection belongs to the bootstrap, while feature-specific behavior belongs to Aellux Extensions.
 
 "use strict";
 
@@ -16,25 +16,23 @@ const root =
   typeof globalThis !== "undefined"
     ? globalThis
     : window;
-const modulePromises = {};
+const extensionPromises = {};
 
 root.Aellux = Object.assign(AelluxForceUpdate, root.Aellux, {
   async startAellux() {
-    const allModules = [];
-    Aellux.options.load.forEach(mName => allModules.push(
-      loadUXM(mName)
-        .then(module => {
-          if ("init" in module && typeof module.init === "function" &&
-            "destroy" in module && typeof module.destroy === "function")
-            return module.init();
-        }).catch(error => {
-          console.error(
-            `[Aellux] UX module "${mName}" failed to initialize.`,
-            error
-          );
-        })
-    ));
-    await Promise.all(allModules);
+    if (root.Aellux.bundledExtensions) {
+      Object.keys(root.Aellux.bundledExtensions)
+        .forEach(extensionName => Aellux.ext(extensionName));
+    }
+
+    const waitExtensions = [];
+
+    if (root.Aellux.extPaths) {
+      Object.keys(root.Aellux.extPaths)
+        .forEach(extensionName => waitExtensions.push(loadExtension(extensionName)));
+    }
+
+    await Promise.all(waitExtensions);
 
     Aellux.dispatch("Ready");
 
@@ -63,12 +61,8 @@ root.Aellux = Object.assign(AelluxForceUpdate, root.Aellux, {
     from.dispatchEvent(new CustomEvent(Aellux.eventName(event), options));
   },
 
-  wait(moduleName) {
-    const key = toCamelCase(moduleName);
-    if (key in Aellux) { return Promise.resolve(Aellux[key]); }
-    if (modulePromises[key]) { return modulePromises[key]; }
-    if (Aellux.options.load.indexOf(moduleName) > -1) { return loadUXM(moduleName); }
-    return Promise.reject()
+  wait(extensionName) {
+    return loadExtension(extensionName);
   },
 
   observe(element, type) { Aellux.observers[type].observe(element); },
@@ -78,7 +72,7 @@ root.Aellux = Object.assign(AelluxForceUpdate, root.Aellux, {
   observers: Object.freeze({
     resize: new ResizeObserver(resizeObserverCallback),
     mutation: new MutationObserver(mutationObserverCallback),
-    intersection: new IntersectionObserver(mutationObserverCallback)
+    intersection: new IntersectionObserver(intersectionObserverCallback)
   }),
 
   waitLayout: createLayoutScheduler(),
@@ -96,30 +90,64 @@ function observerCallback(entries, event) {
   }
 }
 
-function loadUXM(mName) {
-  const key = toCamelCase(mName);
+function loadExtension(extensionName) {
+  extensionName = fromCamelCase(extensionName);
+  const key = toCamelCase(extensionName);
 
-  if (modulePromises[key])
-    return modulePromises[key];
+  if (extensionPromises[key])
+    return extensionPromises[key];
+
+  if (Aellux[key]) {
+    if (!Aellux[key].initialized) {
+      try {
+        Aellux[key].init();
+        Aellux[key].initialized = true;
+      } catch (error) {
+        console.error(
+          `[Aellux] Aellux Extension "${extensionName}" failed to initialize.`,
+          error
+        );
+        extensionPromises[key] = Promise.resolve(null);
+        return extensionPromises[key];
+      }
+    }
+    extensionPromises[key] = Promise.resolve(Aellux[key]);
+    return extensionPromises[key];
+  }
+
+  if (!(extensionName in Aellux.extPaths)) { return Promise.reject(); }
 
   const bundledLoader =
-    Aellux.bundledModules ?
-      Aellux.bundledModules[mName] :
+    Aellux.bundledExtensions ?
+      Aellux.bundledExtensions[extensionName] :
       null;
 
-  modulePromises[key] =
+  extensionPromises[key] =
     (bundledLoader
       ? Promise.resolve().then(() => bundledLoader())
-      : loadScript(key, `${Aellux.aelluxBasePath}${Aellux.uxmFilename(mName)}`))
-      .then(() => Aellux[key])
-      .catch(() => Promise.reject());
+      : loadScript(
+        key,
+        Aellux.extPaths[extensionName].replace(/^\.\//, Aellux.aelluxBasePath)
+      ))
+      .then(() => {
+        Aellux[key].init();
+        Aellux[key].initialized = true;
+        return Aellux[key];
+      })
+      .catch((error) => {
+        console.error(
+          `[Aellux] Aellux Extension "${extensionName}" failed to initialize.`,
+          error
+        );
+        return null;
+      });
 
-  return modulePromises[key];
+  return extensionPromises[key];
 }
 
 async function loadScript(name, scriptPath) {
   return new Promise((resolve, reject) => {
-    var attr = Aellux.attr("uxm");
+    var attr = Aellux.attr("ext");
     var script = document.createElement("script");
     script.src = scriptPath;
     script.setAttribute(attr, name);
@@ -215,10 +243,10 @@ function AelluxForceUnmount(root) { return AelluxForce(root, "unmount"); }
 function AelluxForce(root, method) {
   resolveRoots(root)
     .forEach(rootElement => {
-      Aellux.options.load.forEach(mName => {
-        const key = toCamelCase(mName);
+      Object.keys(Aellux.extPaths).forEach(extensionName => {
+        const key = toCamelCase(extensionName);
+        if (!Aellux[key] || !Aellux[key].initialized || !Aellux[key].mountDOM) return;
         const mounter = Aellux[key].mountDOM;
-        if (!mounter) return;
         for (const [attr, controller] of mounter) {
           if (!(method in controller)) continue;
           const elements = findElements(rootElement, attr);

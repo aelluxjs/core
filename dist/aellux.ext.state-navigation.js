@@ -2,9 +2,9 @@
   /*! Aellux | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   (function() {
     "use strict";
-    const moduleName = "state-navigation";
+    const extensionName = "state-navigation";
     const globalSnapshot = {};
-    Aellux.uxmRegister(moduleName, {
+    Aellux.extRegister(extensionName, {
       init,
       destroy,
       tabOpen,
@@ -105,7 +105,6 @@
         skipHashChange = null;
         return;
       }
-      if (window.location.hash.length < 2) return;
       updateSnapshotData(window.location.hash.substring(1));
       dispatchEventRestore();
     }
@@ -135,4 +134,4 @@
     }
   })();
 })();
-//# sourceMappingURL=aellux.uxm.state-navigation.js.map
+//# sourceMappingURL=aellux.ext.state-navigation.js.map

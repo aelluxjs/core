@@ -2,9 +2,9 @@
   "use strict";
 
 
-  const moduleName = "tab-group";
+  const extensionName = "tab-group";
   const attr = {
-    tabGroup: Aellux.attr(moduleName),
+    tabGroup: Aellux.attr(extensionName),
     tabPanel: Aellux.attr("tab-panel"),
     tab: Aellux.attr("tab"),
     title: Aellux.attr("title"),
@@ -16,9 +16,9 @@
   const mountDOM = new Map();
   const controllers = new WeakMap();
 
-  Aellux.uxmRegister(moduleName, { init, destroy, mountDOM });
+  Aellux.extRegister(extensionName, { init, destroy, mountDOM });
 
-  async function init() {
+  function init() {
     mountDOM.set(`[${attr.tabGroup}]`, { update: updateTabGroup, unmount: unmountTabGroup });
     Aellux.on("SnapshotRestore", onSnapshotRestore);
   }

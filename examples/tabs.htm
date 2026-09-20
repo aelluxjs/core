@@ -8,13 +8,20 @@
   <link href="./style.css" rel="stylesheet" />
   <script src="../dist/aellux.min.js" type="text/javascript"></script>
 
+  <link rel="aellux-ext" href="adaptive" data-ae-load-style data-ae-load-when="[data-ae-adaptive]" />
+
   <script>
     var start = Date.now();
 
     $ae.init({
-      runtime: "full",
-      load: ["preferences", "state-navigation", "adaptive", "feedback", "ajax-href"]
+      build: "min"
     });
+
+    $ae.ext("preferences"); //CORE
+    $ae.ext("adaptive", { loadWhen: "[data-ae-adaptive]", loadStyle: true }); //CORE
+    $ae.ext("state-navigation"); //CORE
+    $ae.ext("state-navigation"); //CORE
+    $ae.ext("drawer", "https://drawercdnurl/");//External
 
     $ae.on("Legacy", function () {
 

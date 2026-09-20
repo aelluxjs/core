@@ -2,12 +2,12 @@
   /*! Aellux | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   (function() {
     "use strict";
-    const moduleName = "ajax-href";
-    Aellux.uxmRegister(moduleName, { init, destroy, load });
+    const extensionName = "ajax-href";
+    Aellux.extRegister(extensionName, { init, destroy, load });
     const attr = {
-      ajaxHref: Aellux.attr(moduleName)
+      ajaxHref: Aellux.attr(extensionName)
     };
-    async function init() {
+    function init() {
       document.addEventListener("click", onClick);
     }
     async function destroy() {
@@ -84,4 +84,4 @@
     }
   })();
 })();
-//# sourceMappingURL=aellux.uxm.ajax-href.js.map
+//# sourceMappingURL=aellux.ext.ajax-href.js.map

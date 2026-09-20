@@ -5,7 +5,7 @@ import { copyFile, mkdir, readFile, readdir, unlink, writeFile } from "node:fs/p
 import { basename, join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { createContext, runInContext } from "node:vm";
-import { generateAdaptiveCSS } from "../src/aellux.uxm.adaptive.css.js";
+import { generateAdaptiveCSS } from "../src/aellux.ext.adaptive.css.js";
 
 const projectRoot = fileURLToPath(new URL("../", import.meta.url));
 const sourceDirectory = join(projectRoot, "src");
@@ -32,18 +32,20 @@ const bootstrapContext = createContext({
 bootstrapContext.window = bootstrapContext;
 runInContext(await readFile(bootstrapPath, "utf8"), bootstrapContext);
 await writeFile(
-  join(outputDirectory, "aellux.uxm.adaptive.css"),
+  join(outputDirectory, "aellux.ext.adaptive.css"),
   generateAdaptiveCSS(bootstrapContext.Aellux),
   "utf8"
 );
+generatedFiles.add("aellux.ext.adaptive.css");
 
 await build({
   absWorkingDir: projectRoot,
-  entryPoints: [join(outputDirectory, "aellux.uxm.adaptive.css")],
-  outfile: join(outputDirectory, "aellux.uxm.adaptive.min.css"),
+  entryPoints: [join(outputDirectory, "aellux.ext.adaptive.css")],
+  outfile: join(outputDirectory, "aellux.ext.adaptive.min.css"),
   minify: true,
   legalComments: "inline"
 });
+generatedFiles.add("aellux.ext.adaptive.min.css");
 
 for (const sourceFile of sourceFiles) {
   const filename = basename(sourceFile);
@@ -71,7 +73,7 @@ for (const sourceFile of sourceFiles) {
 }
 
 for (const entry of await readdir(outputDirectory, { withFileTypes: true })) {
-  if (entry.isFile() && /^aellux(?:\.[\w-]+)*\.js(?:\.map)?$/.test(entry.name) &&
+  if (entry.isFile() && /^aellux(?:\.[\w-]+)*\.(?:js|css)(?:\.map)?$/.test(entry.name) &&
     !generatedFiles.has(entry.name)) {
     await unlink(join(outputDirectory, entry.name));
     console.log(`Removed obsolete build artifact: ${entry.name}`);
@@ -80,4 +82,4 @@ for (const entry of await readdir(outputDirectory, { withFileTypes: true })) {
 
 await copyFile(join(projectRoot, "README.md"), join(outputDirectory, "README.md"));
 await copyFile(join(projectRoot, "LICENSE"), join(outputDirectory, "LICENSE"));
-console.log(`Build complete: ${sourceFiles.length * 2} JavaScript files, source maps, and adaptive CSS in dist/.`);
+console.log(`Build complete: ${sourceFiles.length * 2} JavaScript files, source maps, and Aellux Extension CSS in dist/.`);

@@ -2,9 +2,9 @@
   /*! Aellux | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   (function() {
     "use strict";
-    const moduleName = "adaptive";
+    const extensionName = "adaptive";
     const attr = {
-      adaptive: Aellux.attr(moduleName)
+      adaptive: Aellux.attr(extensionName)
     };
     const modifier = {
       shapeHorizontal: Aellux.className("shape-horizontal"),
@@ -12,16 +12,16 @@
       shapeSquare: Aellux.className("shape-square")
     };
     const mountDOM = /* @__PURE__ */ new Map();
-    Aellux.uxmRegister(moduleName, { init, destroy, mountDOM });
-    async function init() {
+    Aellux.extRegister(extensionName, { init, destroy, mountDOM });
+    function init() {
       mountDOM.set(`[${attr.adaptive}]`, {
         update: updateAdaptive,
         unmount: unmountAdaptive
       });
     }
-    async function destroy() {
+    function destroy() {
     }
-    async function updateAdaptive(adaptiveContainer) {
+    function updateAdaptive(adaptiveContainer) {
       if (!adaptiveContainer.hasAttribute("aria-busy"))
         adaptiveContainer.setAttribute("aria-busy", true);
       Aellux.observe(adaptiveContainer, "resize");
@@ -81,4 +81,4 @@
     }
   })();
 })();
-//# sourceMappingURL=aellux.uxm.adaptive.js.map
+//# sourceMappingURL=aellux.ext.adaptive.js.map

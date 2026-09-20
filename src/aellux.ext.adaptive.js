@@ -4,9 +4,9 @@
   "use strict";
 
 
-  const moduleName = "adaptive";
+  const extensionName = "adaptive";
   const attr = {
-    adaptive: Aellux.attr(moduleName)
+    adaptive: Aellux.attr(extensionName)
   };
   const modifier = {
     shapeHorizontal: Aellux.className("shape-horizontal"),
@@ -15,17 +15,18 @@
   };
   const mountDOM = new Map();
 
-  Aellux.uxmRegister(moduleName, { init, destroy, mountDOM });
+  Aellux.extRegister(extensionName, { init, destroy, mountDOM });
 
-  async function init() {
+  function init() {
     mountDOM.set(`[${attr.adaptive}]`, {
       update: updateAdaptive,
       unmount: unmountAdaptive,
     });
   }
-  async function destroy() { }
 
-  async function updateAdaptive(adaptiveContainer) {
+  function destroy() { }
+
+  function updateAdaptive(adaptiveContainer) {
     if (!adaptiveContainer.hasAttribute("aria-busy"))
       adaptiveContainer.setAttribute("aria-busy", true);
 

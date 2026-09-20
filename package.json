@@ -2,7 +2,7 @@
   "name": "aellux",
   "version": "0.1.0",
   "license": "Apache-2.0",
-  "description": "Declarative, modular UX for browser interfaces with ES2017+ runtime syntax and an ES5-compatible bootstrap and legacy fallback path",
+  "description": "Declarative, extension-based UX for browser interfaces with ES2017+ runtime syntax and an ES5-compatible bootstrap and legacy fallback path",
   "type": "module",
   "exports": {
     ".": "./dist/aellux.js",

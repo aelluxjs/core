@@ -3,8 +3,9 @@
 (function () {
   "use strict";
 
-  const moduleName = "preferences";
-  Aellux.uxmRegister(moduleName, { init, destroy, update, get, set });
+  const extensionName = "preferences";
+
+  Aellux.extRegister(extensionName, { init, destroy, update, get, set });
 
 
   const userPreferences = Object.create(null);
@@ -24,19 +25,20 @@
     active: Aellux.className("active")
   }
 
-  async function init() {
-    window.addEventListener("storage", function (event) {
-      if (event.key !== "AelluxPreferences") return;
-      const newPreferences = new URLSearchParams(event.newValue || "");
-      newPreferences.forEach((value, key) => userPreferences[key] = value);
-      update();
-    });
+  function init() {
+    window.addEventListener("storage", storageEvent);
 
     //Watch device changes
     const allQueries = Aellux.options.preferencesMediaQueries;
     Object.values(allQueries).forEach((queries) =>
-      Object.values(queries).forEach((query) =>
-        query.addEventListener("change", update)
+      Object.values(queries).forEach((query) => {
+        if (!query) return;
+        if (query.addEventListener) {
+          query.addEventListener("change", update);
+        } else if (query.addListener) {
+          query.addListener(update);
+        }
+      }
       )
     );
 
@@ -57,8 +59,22 @@
     }
   }
 
-  async function destroy() {
+  function destroy() {
+    window.removeEventListener("storage", storageEvent);
+    document.addEventListener('DOMContentLoaded', update);
 
+    const allQueries = Aellux.options.preferencesMediaQueries;
+    Object.values(allQueries).forEach((queries) =>
+      Object.values(queries).forEach((query) => {
+        if (!query) return;
+        if (query.removeEventListener) {
+          query.removeEventListener("change", update);
+        } else if (query.removeListener) {
+          query.removeListener(update);
+        }
+      }
+      )
+    );
   }
 
   function update() {
@@ -82,6 +98,16 @@
     if (userPreferences[key] === value) return;
     userPreferences[key] = value;
     saveUserPreferences();
+  }
+
+  function storageEvent(event) {
+    if (event.key !== "AelluxPreferences") return;
+    const newPreferences = new URLSearchParams(event.newValue || "");
+    Object.keys(userPreferences).forEach(key => delete userPreferences[key]);
+    newPreferences.forEach((value, key) => {
+      userPreferences[key] = value;
+    });
+    update();
   }
 
   function saveUserPreferences() {

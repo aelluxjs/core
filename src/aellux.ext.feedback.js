@@ -3,8 +3,8 @@
 (function () {
   "use strict";
 
-  const moduleName = "feedback";
-  Aellux.uxmRegister(moduleName, {
+  const extensionName = "feedback";
+  Aellux.extRegister(extensionName, {
     init, destroy,
     warning, error, success, announce,
     busy, validate, progress,
@@ -14,7 +14,7 @@
 
   const handlers = new Map();
 
-  async function init() { }
+  function init() { }
   async function destroy() { }
 
   function on(type, handler) {

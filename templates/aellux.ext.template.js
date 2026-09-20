@@ -3,16 +3,16 @@
 (function () {
   "use strict";
 
-  const moduleName = "template";
+  const extensionName = "template";
   const attr = {
-    moduleName: Aellux.attr(moduleName)
+    extensionName: Aellux.attr(extensionName)
   };
   const mountDOM = new Map();
 
-  Aellux.uxmRegister(moduleName, { init, destroy, mountDOM });
+  Aellux.extRegister(extensionName, { init, destroy, mountDOM });
 
   function init() {
-    mountDOM.set(`[${attr.moduleName}]`, {
+    mountDOM.set(`[${attr.extensionName}]`, {
       update: updateElement,
       unmount: unmountElement
     });

@@ -15,25 +15,19 @@
   var CONSTANTS = {
     AELLUX_SHORT_JS_NAME: "$ae",
     AELLUX_EVENT_NAME_PREFFIX: "Aellux",
-    AELLUX_UXM_SCRIPT_PREFFIX: "uxm",
+    AELLUX_EXT_SCRIPT_PREFIX: "ext",
     AELLUX_DATA_ATTRIBUTE_NAME_PREFFIX: "ae",
     AELLUX_CLASS_NAME_PREFFIX: "ae--",
 
     AELLUX_DEFAULT_INITIALIZATION_OPTIONS: {
-      runtime: "orchestrator",
+      build: "bundle",
+      extPath: {},
       dependencies: {
         components: {
           "interactjs": "https://cdn.jsdelivr.net/npm/interactjs@1.10.28/+esm",
           "motion": "https://cdn.jsdelivr.net/npm/motion@13.2.0/+esm"
         }
       },
-      load: [
-        "preferences",
-        "state-navigation",
-        "adaptive",
-        "feedback",
-        "ajax-href",
-      ],
       preferencesOptions: {
         colorScheme: ["auto", "light", "dark"],
         contrast: ["auto", "no-preference", "more", "less"],
@@ -93,7 +87,6 @@
   };
 
   var scriptExtension = ".js";
-  var cssExtension = ".css";
 
   var root =
     typeof globalThis !== "undefined"
@@ -133,8 +126,8 @@
 
       mergeOptions(Aellux.options, options || {});
 
-      if (Aellux.options.runtime !== "orchestrator" && Aellux.options.runtime !== "full") {
-        throw new Error("[Aellux] runtime must be orchestrator or full.");
+      if (Aellux.options.build !== "min" && Aellux.options.build !== "bundle") {
+        throw new Error("[Aellux] runtime must be min or bundle.");
       }
 
       Aellux.aelluxBasePath = aelluxBasePath;
@@ -157,11 +150,23 @@
     off: function (event, handler, options) { document.removeEventListener(Aellux.eventName(event), handler, options); },
     attr: function (name) { return "data-" + CONSTANTS.AELLUX_DATA_ATTRIBUTE_NAME_PREFFIX + "-" + name; },
     className: function (name) { return CONSTANTS.AELLUX_CLASS_NAME_PREFFIX + name; },
-    uxmFilename: function (name) { return "aellux." + CONSTANTS.AELLUX_UXM_SCRIPT_PREFFIX + "." + name + scriptExtension; },
+    extFilename: function (name) { return "aellux." + CONSTANTS.AELLUX_EXT_SCRIPT_PREFIX + "." + name + scriptExtension; },
     eventName: function (name) { return CONSTANTS.AELLUX_EVENT_NAME_PREFFIX + toCamelCase(name); },
     noConflict: function () { return old$Instance; },
 
-    uxmRegister: function (name, object) { Aellux[toCamelCase(name)] = object; },
+    extPaths: {},
+    ext: function (name, path) {
+      name = fromCamelCase(name);
+      if (!path) {
+        Aellux.extPaths[name] = "./" + Aellux.extFilename(name);
+      } else if (typeof path === "string") {
+        Aellux.extPaths[name] = path;
+      }
+    },
+    extRegister: function (name, object) {
+      Aellux[toCamelCase(name)] = object;
+      Aellux[toCamelCase(name)].initialized = false;
+    },
 
     startAellux: function () { },
     dispatchFrom: function (from, event, options) {
@@ -170,7 +175,7 @@
       from.dispatchEvent(obj);
     },
     dispatch: function (event, options) { Aellux.dispatchFrom(document, event, options); },
-    wait: function (moduleName) { throw new Error("[Aellux] Aellux não foi inicializado"); },
+    wait: function (extensionName) { throw new Error("[Aellux] Aellux não foi inicializado"); },
     observe: function (element, type) { throw new Error("[Aellux] Aellux não foi inicializado"); },
     unobserve: function (element, type) { throw new Error("[Aellux] Aellux não foi inicializado"); },
     update: function (element) { throw new Error("[Aellux] Aellux não foi inicializado"); },
@@ -179,10 +184,7 @@
   };
 
   root[CONSTANTS.AELLUX_SHORT_JS_NAME] = root.Aellux;
-  if (Aellux.minified) {
-    scriptExtension = ".min.js";
-    cssExtension = ".min.css";
-  }
+  if (Aellux.minified) { scriptExtension = ".min.js"; }
 
   function loadAellux() {
     var attr = Aellux.attr("esm");
@@ -213,18 +215,12 @@
     if (Aellux.notAvailable.length !== 0)
       return loadLegacyFallback();
 
-    if (Aellux.options.runtime === "orchestrator") {
-      Aellux.options.load.forEach(function (uxmName) {
-        var link = document.createElement("link");
-        link.rel = "preload";
-        link.as = "script";
-        link.href = aelluxBasePath + Aellux.uxmFilename(uxmName);
-        document.head.appendChild(link);
-      });
-    }
-
     var script = document.createElement("script");
-    script.src = aelluxBasePath + "aellux." + Aellux.options.runtime + scriptExtension;
+    if (Aellux.options.build === "min") {
+      script.src = aelluxBasePath + "aellux.orchestrator" + scriptExtension;
+    } else {
+      script.src = aelluxBasePath + "aellux.full" + scriptExtension;
+    }
     script.setAttribute(attr, "true");
     script.onload = function () {
       Aellux.dispatch("Awake");

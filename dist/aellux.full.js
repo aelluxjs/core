@@ -4,15 +4,15 @@
     return fn && (res = (0, fn[__getOwnPropNames(fn)[0]])(fn = 0)), res;
   };
 
-  // src/aellux.uxm.preferences.js
-  var aellux_uxm_preferences_exports = {};
-  var init_aellux_uxm_preferences = __esm({
-    "src/aellux.uxm.preferences.js"() {
+  // src/aellux.ext.preferences.js
+  var aellux_ext_preferences_exports = {};
+  var init_aellux_ext_preferences = __esm({
+    "src/aellux.ext.preferences.js"() {
       /*! Aellux | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
       (function() {
         "use strict";
-        const moduleName = "preferences";
-        Aellux.uxmRegister(moduleName, { init, destroy, update, get, set });
+        const extensionName = "preferences";
+        Aellux.extRegister(extensionName, { init, destroy, update, get, set });
         const userPreferences = /* @__PURE__ */ Object.create(null);
         const defaultPreferences = /* @__PURE__ */ Object.create(null);
         const computedPreferences = /* @__PURE__ */ Object.create(null);
@@ -27,17 +27,19 @@
         const className = {
           active: Aellux.className("active")
         };
-        async function init() {
-          window.addEventListener("storage", function(event) {
-            if (event.key !== "AelluxPreferences") return;
-            const newPreferences = new URLSearchParams(event.newValue || "");
-            newPreferences.forEach((value, key) => userPreferences[key] = value);
-            update();
-          });
+        function init() {
+          window.addEventListener("storage", storageEvent);
           const allQueries = Aellux.options.preferencesMediaQueries;
           Object.values(allQueries).forEach(
             (queries) => Object.values(queries).forEach(
-              (query) => query.addEventListener("change", update)
+              (query) => {
+                if (!query) return;
+                if (query.addEventListener) {
+                  query.addEventListener("change", update);
+                } else if (query.addListener) {
+                  query.addListener(update);
+                }
+              }
             )
           );
           Object.entries(Aellux.options.preferencesOptions).forEach(([param, options]) => defaultPreferences[param] = options[0]);
@@ -52,7 +54,22 @@
             update();
           }
         }
-        async function destroy() {
+        function destroy() {
+          window.removeEventListener("storage", storageEvent);
+          document.addEventListener("DOMContentLoaded", update);
+          const allQueries = Aellux.options.preferencesMediaQueries;
+          Object.values(allQueries).forEach(
+            (queries) => Object.values(queries).forEach(
+              (query) => {
+                if (!query) return;
+                if (query.removeEventListener) {
+                  query.removeEventListener("change", update);
+                } else if (query.removeListener) {
+                  query.removeListener(update);
+                }
+              }
+            )
+          );
         }
         function update() {
           Object.assign(computedPreferences, defaultPreferences, userPreferences);
@@ -69,6 +86,15 @@
           if (userPreferences[key] === value) return;
           userPreferences[key] = value;
           saveUserPreferences();
+        }
+        function storageEvent(event) {
+          if (event.key !== "AelluxPreferences") return;
+          const newPreferences = new URLSearchParams(event.newValue || "");
+          Object.keys(userPreferences).forEach((key) => delete userPreferences[key]);
+          newPreferences.forEach((value, key) => {
+            userPreferences[key] = value;
+          });
+          update();
         }
         function saveUserPreferences() {
           Aellux.persist.preferences.setObject(userPreferences);
@@ -123,7 +149,7 @@
           return name.replace(/-([a-z])/g, (_, c) => c.toUpperCase());
         }
         ;
-        function fromCamelCase(name) {
+        function fromCamelCase2(name) {
           return name.replace(/([A-Z])/g, "-$1").toLowerCase();
         }
         ;
@@ -131,16 +157,16 @@
     }
   });
 
-  // src/aellux.uxm.state-navigation.js
-  var aellux_uxm_state_navigation_exports = {};
-  var init_aellux_uxm_state_navigation = __esm({
-    "src/aellux.uxm.state-navigation.js"() {
+  // src/aellux.ext.state-navigation.js
+  var aellux_ext_state_navigation_exports = {};
+  var init_aellux_ext_state_navigation = __esm({
+    "src/aellux.ext.state-navigation.js"() {
       /*! Aellux | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
       (function() {
         "use strict";
-        const moduleName = "state-navigation";
+        const extensionName = "state-navigation";
         const globalSnapshot = {};
-        Aellux.uxmRegister(moduleName, {
+        Aellux.extRegister(extensionName, {
           init,
           destroy,
           tabOpen,
@@ -241,7 +267,6 @@
             skipHashChange = null;
             return;
           }
-          if (window.location.hash.length < 2) return;
           updateSnapshotData(window.location.hash.substring(1));
           dispatchEventRestore();
         }
@@ -273,16 +298,16 @@
     }
   });
 
-  // src/aellux.uxm.adaptive.js
-  var aellux_uxm_adaptive_exports = {};
-  var init_aellux_uxm_adaptive = __esm({
-    "src/aellux.uxm.adaptive.js"() {
+  // src/aellux.ext.adaptive.js
+  var aellux_ext_adaptive_exports = {};
+  var init_aellux_ext_adaptive = __esm({
+    "src/aellux.ext.adaptive.js"() {
       /*! Aellux | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
       (function() {
         "use strict";
-        const moduleName = "adaptive";
+        const extensionName = "adaptive";
         const attr = {
-          adaptive: Aellux.attr(moduleName)
+          adaptive: Aellux.attr(extensionName)
         };
         const modifier = {
           shapeHorizontal: Aellux.className("shape-horizontal"),
@@ -290,16 +315,16 @@
           shapeSquare: Aellux.className("shape-square")
         };
         const mountDOM = /* @__PURE__ */ new Map();
-        Aellux.uxmRegister(moduleName, { init, destroy, mountDOM });
-        async function init() {
+        Aellux.extRegister(extensionName, { init, destroy, mountDOM });
+        function init() {
           mountDOM.set(`[${attr.adaptive}]`, {
             update: updateAdaptive,
             unmount: unmountAdaptive
           });
         }
-        async function destroy() {
+        function destroy() {
         }
-        async function updateAdaptive(adaptiveContainer) {
+        function updateAdaptive(adaptiveContainer) {
           if (!adaptiveContainer.hasAttribute("aria-busy"))
             adaptiveContainer.setAttribute("aria-busy", true);
           Aellux.observe(adaptiveContainer, "resize");
@@ -361,15 +386,15 @@
     }
   });
 
-  // src/aellux.uxm.feedback.js
-  var aellux_uxm_feedback_exports = {};
-  var init_aellux_uxm_feedback = __esm({
-    "src/aellux.uxm.feedback.js"() {
+  // src/aellux.ext.feedback.js
+  var aellux_ext_feedback_exports = {};
+  var init_aellux_ext_feedback = __esm({
+    "src/aellux.ext.feedback.js"() {
       /*! Aellux | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
       (function() {
         "use strict";
-        const moduleName = "feedback";
-        Aellux.uxmRegister(moduleName, {
+        const extensionName = "feedback";
+        Aellux.extRegister(extensionName, {
           init,
           destroy,
           warning,
@@ -384,7 +409,7 @@
           send
         });
         const handlers = /* @__PURE__ */ new Map();
-        async function init() {
+        function init() {
         }
         async function destroy() {
         }
@@ -432,19 +457,19 @@
     }
   });
 
-  // src/aellux.uxm.ajax-href.js
-  var aellux_uxm_ajax_href_exports = {};
-  var init_aellux_uxm_ajax_href = __esm({
-    "src/aellux.uxm.ajax-href.js"() {
+  // src/aellux.ext.ajax-href.js
+  var aellux_ext_ajax_href_exports = {};
+  var init_aellux_ext_ajax_href = __esm({
+    "src/aellux.ext.ajax-href.js"() {
       /*! Aellux | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
       (function() {
         "use strict";
-        const moduleName = "ajax-href";
-        Aellux.uxmRegister(moduleName, { init, destroy, load });
+        const extensionName = "ajax-href";
+        Aellux.extRegister(extensionName, { init, destroy, load });
         const attr = {
-          ajaxHref: Aellux.attr(moduleName)
+          ajaxHref: Aellux.attr(extensionName)
         };
-        async function init() {
+        function init() {
           document.addEventListener("click", onClick);
         }
         async function destroy() {
@@ -526,22 +551,17 @@
   // src/aellux.orchestrator.js
   /*! Aellux | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   var root = typeof globalThis !== "undefined" ? globalThis : window;
-  var modulePromises = {};
+  var extensionPromises = {};
   root.Aellux = Object.assign(AelluxForceUpdate, root.Aellux, {
     async startAellux() {
-      const allModules = [];
-      Aellux.options.load.forEach((mName) => allModules.push(
-        loadUXM(mName).then((module) => {
-          if ("init" in module && typeof module.init === "function" && "destroy" in module && typeof module.destroy === "function")
-            return module.init();
-        }).catch((error) => {
-          console.error(
-            `[Aellux] UX module "${mName}" failed to initialize.`,
-            error
-          );
-        })
-      ));
-      await Promise.all(allModules);
+      if (root.Aellux.bundledExtensions) {
+        Object.keys(root.Aellux.bundledExtensions).forEach((extensionName) => Aellux.ext(extensionName));
+      }
+      const waitExtensions = [];
+      if (root.Aellux.extPaths) {
+        Object.keys(root.Aellux.extPaths).forEach((extensionName) => waitExtensions.push(loadExtension(extensionName)));
+      }
+      await Promise.all(waitExtensions);
       Aellux.dispatch("Ready");
       if (document.readyState === "loading") {
         document.addEventListener(
@@ -570,18 +590,8 @@
     dispatchFrom(from, event, options) {
       from.dispatchEvent(new CustomEvent(Aellux.eventName(event), options));
     },
-    wait(moduleName) {
-      const key = toCamelCase(moduleName);
-      if (key in Aellux) {
-        return Promise.resolve(Aellux[key]);
-      }
-      if (modulePromises[key]) {
-        return modulePromises[key];
-      }
-      if (Aellux.options.load.indexOf(moduleName) > -1) {
-        return loadUXM(moduleName);
-      }
-      return Promise.reject();
+    wait(extensionName) {
+      return loadExtension(extensionName);
     },
     observe(element, type) {
       Aellux.observers[type].observe(element);
@@ -593,11 +603,14 @@
     observers: Object.freeze({
       resize: new ResizeObserver(resizeObserverCallback),
       mutation: new MutationObserver(mutationObserverCallback),
-      intersection: new IntersectionObserver(mutationObserverCallback)
+      intersection: new IntersectionObserver(intersectionObserverCallback)
     }),
     waitLayout: createLayoutScheduler()
   });
   root[root.Aellux.shortJSName] = root.Aellux;
+  function intersectionObserverCallback(entries) {
+    observerCallback(entries, "Intersection");
+  }
   function mutationObserverCallback(entries) {
     observerCallback(entries, "Mutation");
   }
@@ -610,17 +623,51 @@
       Aellux.dispatchFrom(entry.target, `${event}Observer`, { detail: entry });
     }
   }
-  function loadUXM(mName) {
-    const key = toCamelCase(mName);
-    if (modulePromises[key])
-      return modulePromises[key];
-    const bundledLoader = Aellux.bundledModules ? Aellux.bundledModules[mName] : null;
-    modulePromises[key] = (bundledLoader ? Promise.resolve().then(() => bundledLoader()) : loadScript(key, `${Aellux.aelluxBasePath}${Aellux.uxmFilename(mName)}`)).then(() => Aellux[key]).catch(() => Promise.reject());
-    return modulePromises[key];
+  function loadExtension(extensionName) {
+    extensionName = fromCamelCase(extensionName);
+    const key = toCamelCase(extensionName);
+    if (extensionPromises[key])
+      return extensionPromises[key];
+    if (Aellux[key]) {
+      if (!Aellux[key].initialized) {
+        try {
+          Aellux[key].init();
+          Aellux[key].initialized = true;
+        } catch (error) {
+          console.error(
+            `[Aellux] Aellux Extension "${extensionName}" failed to initialize.`,
+            error
+          );
+          extensionPromises[key] = Promise.resolve(null);
+          return extensionPromises[key];
+        }
+      }
+      extensionPromises[key] = Promise.resolve(Aellux[key]);
+      return extensionPromises[key];
+    }
+    if (!(extensionName in Aellux.extPaths)) {
+      return Promise.reject();
+    }
+    const bundledLoader = Aellux.bundledExtensions ? Aellux.bundledExtensions[extensionName] : null;
+    extensionPromises[key] = (bundledLoader ? Promise.resolve().then(() => bundledLoader()) : loadScript(
+      key,
+      Aellux.extPaths[extensionName].replace(/^\.\//, Aellux.aelluxBasePath)
+    )).then(() => {
+      Aellux[key].init();
+      Aellux[key].initialized = true;
+      return Aellux[key];
+    }).catch((error) => {
+      console.error(
+        `[Aellux] Aellux Extension "${extensionName}" failed to initialize.`,
+        error
+      );
+      return null;
+    });
+    return extensionPromises[key];
   }
   async function loadScript(name, scriptPath) {
     return new Promise((resolve, reject) => {
-      var attr = Aellux.attr("uxm");
+      var attr = Aellux.attr("ext");
       var script = document.createElement("script");
       script.src = scriptPath;
       script.setAttribute(attr, name);
@@ -708,10 +755,10 @@
   }
   function AelluxForce(root3, method) {
     resolveRoots(root3).forEach((rootElement) => {
-      Aellux.options.load.forEach((mName) => {
-        const key = toCamelCase(mName);
+      Object.keys(Aellux.extPaths).forEach((extensionName) => {
+        const key = toCamelCase(extensionName);
+        if (!Aellux[key] || !Aellux[key].initialized || !Aellux[key].mountDOM) return;
         const mounter = Aellux[key].mountDOM;
-        if (!mounter) return;
         for (const [attr, controller] of mounter) {
           if (!(method in controller)) continue;
           const elements = findElements(rootElement, attr);
@@ -757,6 +804,9 @@
   function toCamelCase(name) {
     return name.replace(/-([a-z])/g, (_, c) => c.toUpperCase());
   }
+  function fromCamelCase(name) {
+    return name.replace(/([A-Z])/g, "-$1").toLowerCase();
+  }
   var pageWasHidden = false;
   window.addEventListener("pagehide", () => pageWasHidden = true);
   window.addEventListener("pageshow", (event) => {
@@ -768,12 +818,12 @@
   // src/aellux.full.esm.js
   /*! Aellux | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   var root2 = typeof globalThis !== "undefined" ? globalThis : window;
-  root2.Aellux.bundledModules = Object.freeze({
-    "preferences": () => Promise.resolve().then(() => (init_aellux_uxm_preferences(), aellux_uxm_preferences_exports)),
-    "state-navigation": () => Promise.resolve().then(() => (init_aellux_uxm_state_navigation(), aellux_uxm_state_navigation_exports)),
-    "adaptive": () => Promise.resolve().then(() => (init_aellux_uxm_adaptive(), aellux_uxm_adaptive_exports)),
-    "feedback": () => Promise.resolve().then(() => (init_aellux_uxm_feedback(), aellux_uxm_feedback_exports)),
-    "ajax-href": () => Promise.resolve().then(() => (init_aellux_uxm_ajax_href(), aellux_uxm_ajax_href_exports))
+  root2.Aellux.bundledExtensions = Object.freeze({
+    "preferences": () => Promise.resolve().then(() => (init_aellux_ext_preferences(), aellux_ext_preferences_exports)),
+    "state-navigation": () => Promise.resolve().then(() => (init_aellux_ext_state_navigation(), aellux_ext_state_navigation_exports)),
+    "adaptive": () => Promise.resolve().then(() => (init_aellux_ext_adaptive(), aellux_ext_adaptive_exports)),
+    "feedback": () => Promise.resolve().then(() => (init_aellux_ext_feedback(), aellux_ext_feedback_exports)),
+    "ajax-href": () => Promise.resolve().then(() => (init_aellux_ext_ajax_href(), aellux_ext_ajax_href_exports))
   });
 })();
 //# sourceMappingURL=aellux.full.js.map
