@@ -132,6 +132,13 @@ function loadExtension(extensionName) {
       .then(() => {
         Aellux[key].init();
         Aellux[key].initialized = true;
+        for (const [attr, controller] of (Aellux[key].mountDOM || {}))
+          Aellux.mountSelector[attr] = controller;
+
+        //Clean lazy registry
+        for (const [attr, label] of Object.entries(Aellux.mountLazySelector))
+          if (label === extensionName) delete Aellux.mountLazySelector[attr];
+
         return Aellux[key];
       })
       .catch((error) => {
@@ -240,66 +247,106 @@ function defaultRequest(url, options) {
 function AelluxForceUpdate(root) { return AelluxForce(root, "update"); }
 function AelluxForceUnmount(root) { return AelluxForce(root, "unmount"); }
 
-function AelluxForce(root, method) {
-  resolveRoots(root)
-    .forEach(rootElement => {
-      Object.keys(Aellux.extRegistry).forEach(extensionName => {
-        const key = toCamelCase(extensionName);
-        if (!Aellux[key] || !Aellux[key].initialized || !Aellux[key].mountDOM) return;
-        const mounter = Aellux[key].mountDOM;
-        for (const [attr, controller] of mounter) {
-          if (!(method in controller)) continue;
-          const elements = findElements(rootElement, attr);
-          elements.forEach(currentElement => {
-            try {
-              Promise.resolve(controller[method](currentElement))
-                .catch(error => console.error(error));
-            } catch (error) {
-              console.error(error);
-            }
-          });
+function AelluxForce(rootOrSelector, method) {
+  for (const rootElement of resolveRoots(rootOrSelector)) {
+    const mountKeys = Object.keys(Aellux.mountSelector);
+    const mountLazyKeys = Object.keys(Aellux.mountLazySelector);
+    if (mountKeys.length + mountLazyKeys.length === 0) return;
+
+    const selector = [...mountKeys, ...mountLazyKeys].join(",");
+    const allElements = findElements(rootElement, selector);
+
+    for (const currentElement of allElements) {
+      //Load needed lazies
+      for (const selector of mountLazyKeys) {
+        if (currentElement.matches(selector)) {
+          extensionLabel = Aellux.mountLazySelector[selector];
+          loadExtension(extensionLabel)
+            .then(extension => {
+              const mounter = extension.mountDOM || {};
+              for (const [attr, controller] of mounter) {
+                try {
+                  if (!currentElement.matches(attr)) { continue; }
+                  Promise.resolve(controller[method](currentElement))
+                    .catch(error => console.error(error));
+                } catch (error) {
+                  console.error(error);
+                }
+              }
+            });
         }
-      });
-    });
-}
+      }
+      //Mount readies
+      for (const selector of mountKeys) {
+        if (currentElement.matches(selector)) {
+          const controller = Aellux.mountSelector[selector];
+          try {
+            if (!controller[method]) { continue; }
+            Promise.resolve(controller[method](currentElement))
+              .catch(error => console.error(error));
+          } catch (error) {
+            console.error(error);
+          }
+        }
+      }
+    }
 
-function resolveRoots(root) {
-  if (!root) { return [document]; }
-  if (typeof root === "string") {
-    try { return Array.from(document.querySelectorAll(root)); }
-    catch (error) { return []; }
+    // Object.keys(Aellux.extRegistry).forEach(extensionName => {
+    //   const key = toCamelCase(extensionName);
+    //   if (!Aellux[key] || !Aellux[key].initialized || !Aellux[key].mountDOM) return;
+    //   const mounter = Aellux[key].mountDOM;
+    //   for (const [attr, controller] of mounter) {
+    //     if (!(method in controller)) continue;
+    //     const elements = findElements(rootElement, attr);
+    //     elements.forEach(currentElement => {
+    //       try {
+    //         Promise.resolve(controller[method](currentElement))
+    //           .catch(error => console.error(error));
+    //       } catch (error) {
+    //         console.error(error);
+    //       }
+    //     });
+    //   }
+    // });
   }
-  if (
-    root instanceof Element ||
-    root instanceof Document ||
-    root instanceof DocumentFragment
-  ) { return [root]; }
-  return [];
-}
 
-function findElements(root, selector) {
-  const elements = [];
-  if (
-    root.nodeType === Node.ELEMENT_NODE &&
-    root.matches(selector)
-  ) { elements.push(root); }
-  if (root.querySelectorAll) {
-    root.querySelectorAll(selector)
-      .forEach(function (element) {
-        elements.push(element);
-      });
+  function resolveRoots(root) {
+    if (!root) { return [document]; }
+    if (typeof root === "string") {
+      try { return Array.from(document.querySelectorAll(root)); }
+      catch (error) { return []; }
+    }
+    if (
+      root instanceof Element ||
+      root instanceof Document ||
+      root instanceof DocumentFragment
+    ) { return [root]; }
+    return [];
   }
-  return elements;
-}
 
-function toCamelCase(name) { return name.replace(/-([a-z])/g, (_, c) => c.toUpperCase()); };
-function fromCamelCase(name) { return name.replace(/([A-Z])/g, "-$1").toLowerCase(); };
-
-//BFCache
-let pageWasHidden = false;
-window.addEventListener("pagehide", () => pageWasHidden = true);
-window.addEventListener("pageshow", (event) => {
-  if (event.persisted && pageWasHidden) {// página voltou via BFCache
-    pageWasHidden = false;
+  function findElements(root, selector) {
+    const elements = [];
+    if (
+      root.nodeType === Node.ELEMENT_NODE &&
+      root.matches(selector)
+    ) { elements.push(root); }
+    if (root.querySelectorAll) {
+      root.querySelectorAll(selector)
+        .forEach(function (element) {
+          elements.push(element);
+        });
+    }
+    return elements;
   }
-});
+
+  function toCamelCase(name) { return name.replace(/-([a-z])/g, (_, c) => c.toUpperCase()); };
+  function fromCamelCase(name) { return name.replace(/([A-Z])/g, "-$1").toLowerCase(); };
+
+  //BFCache
+  let pageWasHidden = false;
+  window.addEventListener("pagehide", () => pageWasHidden = true);
+  window.addEventListener("pageshow", (event) => {
+    if (event.persisted && pageWasHidden) {// página voltou via BFCache
+      pageWasHidden = false;
+    }
+  });
