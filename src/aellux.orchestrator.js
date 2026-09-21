@@ -26,12 +26,14 @@ root.Aellux = Object.assign(AelluxForceUpdate, root.Aellux, {
     }
 
     const waitExtensions = [];
-
-    if (root.Aellux.extPaths) {
-      Object.keys(root.Aellux.extPaths)
-        .forEach(extensionName => waitExtensions.push(loadExtension(extensionName)));
+    if (root.Aellux.extRegistry) {
+      Object.keys(root.Aellux.extRegistry)
+        .forEach(extensionName => {
+          waitExtensions.push(
+            loadExtension(extensionName)
+          );
+        });
     }
-
     await Promise.all(waitExtensions);
 
     Aellux.dispatch("Ready");
@@ -61,9 +63,7 @@ root.Aellux = Object.assign(AelluxForceUpdate, root.Aellux, {
     from.dispatchEvent(new CustomEvent(Aellux.eventName(event), options));
   },
 
-  wait(extensionName) {
-    return loadExtension(extensionName);
-  },
+  wait(extensionName) { return loadExtension(extensionName); },
 
   observe(element, type) { Aellux.observers[type].observe(element); },
   unobserve(element, type) { Aellux.observers[type].unobserve(element); },
@@ -115,7 +115,7 @@ function loadExtension(extensionName) {
     return extensionPromises[key];
   }
 
-  if (!(extensionName in Aellux.extPaths)) { return Promise.reject(); }
+  if (!(extensionName in Aellux.extRegistry)) { return Promise.reject(); }
 
   const bundledLoader =
     Aellux.bundledExtensions ?
@@ -127,7 +127,7 @@ function loadExtension(extensionName) {
       ? Promise.resolve().then(() => bundledLoader())
       : loadScript(
         key,
-        Aellux.extPaths[extensionName].replace(/^\.\//, Aellux.aelluxBasePath)
+        Aellux.extRegistry[extensionName].url.replace(/^\.\//, Aellux.aelluxBasePath)
       ))
       .then(() => {
         Aellux[key].init();
@@ -243,7 +243,7 @@ function AelluxForceUnmount(root) { return AelluxForce(root, "unmount"); }
 function AelluxForce(root, method) {
   resolveRoots(root)
     .forEach(rootElement => {
-      Object.keys(Aellux.extPaths).forEach(extensionName => {
+      Object.keys(Aellux.extRegistry).forEach(extensionName => {
         const key = toCamelCase(extensionName);
         if (!Aellux[key] || !Aellux[key].initialized || !Aellux[key].mountDOM) return;
         const mounter = Aellux[key].mountDOM;

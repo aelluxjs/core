@@ -8,8 +8,7 @@
       AELLUX_DATA_ATTRIBUTE_NAME_PREFFIX: "ae",
       AELLUX_CLASS_NAME_PREFFIX: "ae--",
       AELLUX_DEFAULT_INITIALIZATION_OPTIONS: {
-        build: "bundle",
-        extPath: {},
+        mode: "full",
         dependencies: {
           components: {
             "interactjs": "https://cdn.jsdelivr.net/npm/interactjs@1.10.28/+esm",
@@ -89,6 +88,11 @@
       shortJSName: CONSTANTS.AELLUX_SHORT_JS_NAME,
       options: CONSTANTS.AELLUX_DEFAULT_INITIALIZATION_OPTIONS,
       minified: aelluxBootstrapSrc.indexOf(".min.js") !== -1,
+      legacy: false,
+      supported: false,
+      notAvailable: [],
+      observers: null,
+      waitLayout: null,
       init: function(options) {
         if (typeof document === "undefined") {
           console.log("[Aellux] Browser not supported.");
@@ -96,20 +100,18 @@
         }
         if (document.querySelector("[" + Aellux.attr("legacy") + "]") || document.querySelector("[" + Aellux.attr("esm") + "]")) return;
         mergeOptions(Aellux.options, options || {});
-        if (Aellux.options.build !== "min" && Aellux.options.build !== "bundle") {
-          throw new Error("[Aellux] runtime must be min or bundle.");
+        if (Aellux.options.mode !== "basic" && Aellux.options.mode !== "full") {
+          throw new Error("[Aellux] mode must be basic or full.");
         }
         Aellux.aelluxBasePath = aelluxBasePath;
         Aellux.notAvailable = [];
+        updatePreferencesAttributesHTML();
         addWeakStyles();
-        loadAellux();
+        loadOrchestrator();
       },
       destroy: function() {
         return false;
       },
-      legacy: false,
-      supported: false,
-      notAvailable: [],
       persist: {
         local: buildPersistMemory("localStorage"),
         session: buildPersistMemory("sessionStorage"),
@@ -131,24 +133,41 @@
       extFilename: function(name) {
         return "aellux." + CONSTANTS.AELLUX_EXT_SCRIPT_PREFIX + "." + name + scriptExtension;
       },
+      extLabel: function(filename) {
+        return filename.replace(
+          new RegExp("^.*aellux\\." + CONSTANTS.AELLUX_EXT_SCRIPT_PREFIX + "\\.([^.\\/?#]+)(?:\\.min)?\\.js(?:[?#].*)?$"),
+          "$1"
+        );
+      },
       eventName: function(name) {
         return CONSTANTS.AELLUX_EVENT_NAME_PREFFIX + toCamelCase(name);
       },
       noConflict: function() {
         return old$Instance;
       },
-      extPaths: {},
-      ext: function(name, path) {
-        name = fromCamelCase(name);
-        if (!path) {
-          Aellux.extPaths[name] = "./" + Aellux.extFilename(name);
-        } else if (typeof path === "string") {
-          Aellux.extPaths[name] = path;
+      extRegistry: {},
+      ext: function(labelOrUrl, options) {
+        var label = fromCamelCase(Aellux.extLabel(labelOrUrl));
+        var url = labelOrUrl;
+        if (label in Aellux.extRegistry) {
+          console.error("Duplicate ext");
+          return;
         }
+        if (url === label) url = Aellux.extFilename(label);
+        if (!options) options = {};
+        if (!options.loadStyle) options.loadStyle = false;
+        if (!options.loadWhen) options.loadWhen = null;
+        options.url = url;
+        options.load = options.loadWhen ? false : true;
+        options.state = "wait";
+        Aellux.extRegistry[label] = options;
       },
-      extRegister: function(name, object) {
-        Aellux[toCamelCase(name)] = object;
-        Aellux[toCamelCase(name)].initialized = false;
+      extRegister: function(label, object) {
+        label = fromCamelCase(label);
+        var key = toCamelCase(label);
+        Aellux.extRegistry[label].state = "register";
+        object.initialized = false;
+        Aellux[key] = object;
       },
       startAellux: function() {
       },
@@ -171,15 +190,13 @@
       },
       update: function(element) {
         throw new Error("[Aellux] Aellux n\xE3o foi inicializado");
-      },
-      observers: null,
-      waitLayout: null
+      }
     };
     root[CONSTANTS.AELLUX_SHORT_JS_NAME] = root.Aellux;
     if (Aellux.minified) {
       scriptExtension = ".min.js";
     }
-    function loadAellux() {
+    function loadOrchestrator() {
       var attr = Aellux.attr("esm");
       [
         "Promise",
@@ -210,9 +227,9 @@
       if (!window.NodeList || typeof window.NodeList.prototype.forEach !== "function")
         Aellux.notAvailable.push("NodeList.forEach");
       if (Aellux.notAvailable.length !== 0)
-        return loadLegacyFallback();
+        return loadLegacyOrchestratorFallback();
       var script = document.createElement("script");
-      if (Aellux.options.build === "min") {
+      if (Aellux.options.mode === "basic") {
         script.src = aelluxBasePath + "aellux.orchestrator" + scriptExtension;
       } else {
         script.src = aelluxBasePath + "aellux.full" + scriptExtension;
@@ -227,17 +244,17 @@
           script.parentNode.removeChild(script);
           console.log(error);
           console.log("[Aellux] Orchestrator failed to load, fallback to legacy.");
-          loadLegacyFallback();
+          loadLegacyOrchestratorFallback();
         });
       };
       script.onerror = function() {
         script.parentNode.removeChild(script);
         console.log("[Aellux] Orchestrator failed to load, fallback to legacy.");
-        loadLegacyFallback();
+        loadLegacyOrchestratorFallback();
       };
       document.head.appendChild(script);
     }
-    function loadLegacyFallback() {
+    function loadLegacyOrchestratorFallback() {
       var attr = Aellux.attr("legacy");
       if (typeof document === "undefined" || document.querySelector("[" + attr + "]"))
         return;
@@ -260,7 +277,6 @@
       var attr = Aellux.attr("weak-style");
       if (typeof document === "undefined" || document.querySelector("[" + attr + "]"))
         return;
-      updatePreferencesAttributesHTML();
       var p = Aellux.attr("");
       var style = document.createElement("style");
       style.setAttribute(attr, "true");
@@ -407,13 +423,6 @@
       return name.replace(/([A-Z])/g, "-$1").toLowerCase();
     }
     ;
-    function inferDistantEnvironment() {
-      if (!window.matchMedia) return false;
-      var noHover = window.matchMedia("(hover: none)").matches;
-      var noFinePointer = !window.matchMedia("(any-pointer: fine)").matches;
-      var largeViewport = window.innerWidth >= 960 && window.innerHeight >= 540;
-      return noHover && noFinePointer && largeViewport;
-    }
   })();
 })();
 //# sourceMappingURL=aellux.js.map

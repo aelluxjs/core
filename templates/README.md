@@ -12,4 +12,4 @@ Set `extensionName` to the extension's kebab-case name before calling `Aellux.ex
 
 For extensions without element behavior, remove `attr`, `mountDOM`, the DOM handlers, and their DOM registration. Keep `extensionName`, `Aellux.extRegister`, `init`, `destroy`, the IIFE, and the Apache 2.0 license identifier. Use ES2017-compatible syntax and register public APIs through `Aellux.extRegister`, without ESM exports.
 
-Call `Aellux.ext("<extension-name>")` after `Aellux.init({ build: "min" })` when a core extension should be loaded individually. To include it in the full core bundle, also add its loader to `src/aellux.full.esm.js`. Experimental components require a separate script tag and registration; they do not belong to the core bundle.
+Call `Aellux.ext("<extension-name>")` after `Aellux.init({ mode: "basic" })` when a core extension should be loaded individually. To include it in the full core bundle, also add its loader to `src/aellux.full.esm.js`. Experimental components require a separate script tag and registration; they do not belong to the core bundle.

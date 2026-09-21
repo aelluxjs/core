@@ -13,7 +13,7 @@ Browser UX is made of several independent concerns: adapting layouts to availabl
 - **Adaptive composition** Measures containers and exposes spatial information to CSS;
 - **State navigation** maintains continuity across history entries and URL changes;
 - **Persistence** retains interface choices;
-- additional extensions can provide their own declarative behaviors. In the minimal build, pages register only the extensions they need with `Aellux.ext()`.
+- additional extensions can provide their own declarative behaviors. In basic mode, pages register only the extensions they need with `Aellux.ext()`.
 
 The library is designed around three complementary layers:
 
@@ -55,13 +55,13 @@ Serve the repository over HTTP after building to use `index.htm` and the example
 ```html
 <script src="./dist/aellux.js"></script>
 <script>
-  Aellux.init({ build: "bundle" });
+  Aellux.init({ mode: "full" });
 </script>
 ```
 
-Choose `build: "bundle"` to load the orchestrator and all core Aellux Extensions from `aellux.full.js`. Choose `build: "min"` to load the orchestrator and only the extensions registered with `Aellux.ext()`. Loading `aellux.min.js` selects matching minified files. Both modes retain the legacy fallback path. Experimental example components are excluded from both distributions and are not currently activated.
+Choose `mode: "full"` to load the orchestrator and all core Aellux Extensions from `aellux.full.js`. Choose `mode: "basic"` to load the orchestrator and only the extensions registered with `Aellux.ext()`. Loading `aellux.min.js` selects matching minified files. Both modes retain the legacy fallback path. Experimental example components are excluded from both distributions and are not currently activated.
 
-The full bundle is a runtime, not a standalone bootstrap: load it through `Aellux.init({ build: "bundle" })`. Example styles remain in `examples/` and are not library runtime dependencies.
+The full bundle is a runtime, not a standalone bootstrap: load it through `Aellux.init({ mode: "full" })`. Example styles remain in `examples/` and are not library runtime dependencies.
 
 The browser distribution exposes the global `Aellux` API; it does not provide ESM named or default exports. Load it with a classic `<script>` tag.
 
@@ -122,7 +122,7 @@ Pass an options object to `Aellux.init()` to override the defaults:
 
 ```js
 Aellux.init({
-  build: "min",
+  mode: "basic",
   defaultAdaptiveCSS: true,
   useHash: true,
   adaptiveParams: {

@@ -13,15 +13,12 @@
   <script>
     var start = Date.now();
 
-    $ae.init({
-      build: "min"
-    });
+    $ae.init({ mode: "basic" });
 
     $ae.ext("preferences"); //CORE
-    $ae.ext("adaptive", { loadWhen: "[data-ae-adaptive]", loadStyle: true }); //CORE
     $ae.ext("state-navigation"); //CORE
-    $ae.ext("state-navigation"); //CORE
-    $ae.ext("drawer", "https://drawercdnurl/");//External
+    $ae.ext("feedback"); //CORE
+    $ae.ext("https://drawercdnurl/");//External
 
     $ae.on("Legacy", function () {
 

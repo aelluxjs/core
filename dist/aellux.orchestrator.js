@@ -9,8 +9,12 @@
         Object.keys(root.Aellux.bundledExtensions).forEach((extensionName) => Aellux.ext(extensionName));
       }
       const waitExtensions = [];
-      if (root.Aellux.extPaths) {
-        Object.keys(root.Aellux.extPaths).forEach((extensionName) => waitExtensions.push(loadExtension(extensionName)));
+      if (root.Aellux.extRegistry) {
+        Object.keys(root.Aellux.extRegistry).forEach((extensionName) => {
+          waitExtensions.push(
+            loadExtension(extensionName)
+          );
+        });
       }
       await Promise.all(waitExtensions);
       Aellux.dispatch("Ready");
@@ -96,13 +100,13 @@
       extensionPromises[key] = Promise.resolve(Aellux[key]);
       return extensionPromises[key];
     }
-    if (!(extensionName in Aellux.extPaths)) {
+    if (!(extensionName in Aellux.extRegistry)) {
       return Promise.reject();
     }
     const bundledLoader = Aellux.bundledExtensions ? Aellux.bundledExtensions[extensionName] : null;
     extensionPromises[key] = (bundledLoader ? Promise.resolve().then(() => bundledLoader()) : loadScript(
       key,
-      Aellux.extPaths[extensionName].replace(/^\.\//, Aellux.aelluxBasePath)
+      Aellux.extRegistry[extensionName].url.replace(/^\.\//, Aellux.aelluxBasePath)
     )).then(() => {
       Aellux[key].init();
       Aellux[key].initialized = true;
@@ -206,7 +210,7 @@
   }
   function AelluxForce(root2, method) {
     resolveRoots(root2).forEach((rootElement) => {
-      Object.keys(Aellux.extPaths).forEach((extensionName) => {
+      Object.keys(Aellux.extRegistry).forEach((extensionName) => {
         const key = toCamelCase(extensionName);
         if (!Aellux[key] || !Aellux[key].initialized || !Aellux[key].mountDOM) return;
         const mounter = Aellux[key].mountDOM;
