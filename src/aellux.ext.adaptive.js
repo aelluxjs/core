@@ -92,8 +92,6 @@
 
     //const orientation = inferOrientation(element);
 
-    adaptiveContainer.setAttribute(Aellux.attr("ready"), "");
-
     Aellux.dispatchFrom(adaptiveContainer, "AdaptiveUpdate", { detail: null });
   }
 

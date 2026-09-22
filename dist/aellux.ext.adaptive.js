@@ -74,7 +74,6 @@
           space >= spaceBreakpoints[size]
         );
       }
-      adaptiveContainer.setAttribute(Aellux.attr("ready"), "");
       Aellux.dispatchFrom(adaptiveContainer, "AdaptiveUpdate", { detail: null });
     }
     function inferOrientation(flexBox, selector = "*") {
