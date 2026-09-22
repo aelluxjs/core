@@ -171,7 +171,7 @@
       }
       if (url === label) url = Aellux.extFilename(label);
       if (!options) options = {};
-      if (!options.loadStyle) options.loadStyle = false;
+      if (typeof options.loadStyle === "undefined") options.loadStyle = false;
       if (!options.loadWhen) options.loadWhen = null;
       if (options.loadWhen) { Aellux.lazyExtensionSelectors[label] = options.loadWhen; }
       options.url = url;
