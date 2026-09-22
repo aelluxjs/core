@@ -19,14 +19,14 @@
 
   function init() {
     mountDOM.set(`[${attr.adaptive}]`, {
-      update: updateAdaptive,
+      mount: mountAdaptive,
       unmount: unmountAdaptive,
     });
   }
 
   function destroy() { }
 
-  function updateAdaptive(adaptiveContainer) {
+  function mountAdaptive(adaptiveContainer) {
     if (!adaptiveContainer.hasAttribute("aria-busy"))
       adaptiveContainer.setAttribute("aria-busy", true);
 

@@ -19,14 +19,14 @@
   Aellux.extRegister(extensionName, { init, destroy, mountDOM });
 
   function init() {
-    mountDOM.set(`[${attr.tabGroup}]`, { update: updateTabGroup, unmount: unmountTabGroup });
+    mountDOM.set(`[${attr.tabGroup}]`, { mount: mountTabGroup, unmount: unmountTabGroup });
     Aellux.on("SnapshotRestore", onSnapshotRestore);
   }
   async function destroy() {
     Aellux.off("SnapshotRestore", onSnapshotRestore);
   }
 
-  function updateTabGroup(tabGroupContainer) {
+  function mountTabGroup(tabGroupContainer) {
     updateController(tabGroupContainer);
   }
 

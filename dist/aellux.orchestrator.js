@@ -245,7 +245,7 @@
         waitExtensions.push(getExtension(extensionLabel));
       }
       await Promise.all(waitExtensions);
-      await AelluxForce(rootElement, "update");
+      await AelluxForce(rootElement, "mount");
     }
     return true;
   }
@@ -257,6 +257,7 @@
     const allElements = findElements(rootElement, selector);
     for (const element of allElements) {
       const extensionLabels = /* @__PURE__ */ new Set();
+      const elementsAffected = /* @__PURE__ */ new Set();
       for (const [extensionLabel, selector2] of Object.entries(Aellux.lazyExtensionSelectors))
         if (element.matches(selector2))
           extensionLabels.add(extensionLabel);
@@ -277,13 +278,16 @@
             const mountableElements = findElements(element, attr);
             for (const mountable of mountableElements) {
               await controller[method](mountable);
+              elementsAffected.add(mountable);
             }
           } catch (error) {
             console.error(error);
           }
         }
       }
-      ;
+      for (const element2 of elementsAffected) {
+        element2.classList[method === "mount" ? "add" : "remove"](Aellux.className("mounted"));
+      }
     }
     Aellux.dispatch("Update");
   }

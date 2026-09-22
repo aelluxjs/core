@@ -6,8 +6,8 @@ Set `extensionName` to the extension's kebab-case name before calling `Aellux.ex
 
 - `init` is synchronous: it registers DOM handlers and sets up extension-wide services without returning a Promise. Load asynchronous dependencies separately; DOM mounting and content loading may remain asynchronous.
 - `destroy` releases extension-wide listeners, observers, and other resources.
-- `mountDOM` maps selectors to `update` and `unmount` handlers consumed by the orchestrator.
-- `updateElement` sets up or updates matching elements; repeated calls must not duplicate listeners or resources.
+- `mountDOM` maps selectors to `mount` and `unmount` handlers consumed by the orchestrator.
+- `mountElement` sets up matching elements; repeated calls must not duplicate listeners or resources.
 - `unmountElement` releases resources associated with an element.
 
 For extensions without element behavior, remove `attr`, `mountDOM`, the DOM handlers, and their DOM registration. Keep `extensionName`, `Aellux.extRegister`, `init`, `destroy`, the IIFE, and the Apache 2.0 license identifier. Use ES2017-compatible syntax and register public APIs through `Aellux.extRegister`, without ESM exports.

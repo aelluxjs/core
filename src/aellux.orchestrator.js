@@ -5,7 +5,7 @@
 // Ready signals that the orchestrator is initialized and available; it does not guarantee
 // successful Aellux Extension initialization or completed DOM mounting. Component-specific events
 // such as AdaptiveUpdate report their own readiness or updates.
-// Routes explicit DOM update/unmount requests through extension mountDOM declarations,
+// Routes explicit DOM update/unmount requests through extension mount/unmount declarations,
 // forwards browser observer notifications, and provides layout scheduling and fetch helpers.
 // Uses ES2017 syntax, Promises, and modern browser APIs; legacy fallback
 // selection belongs to the bootstrap, while feature-specific behavior belongs to Aellux Extensions.
@@ -297,7 +297,7 @@ async function AelluxForceUpdate(rootOrSelector) {
     }
     await Promise.all(waitExtensions);
 
-    await AelluxForce(rootElement, "update");
+    await AelluxForce(rootElement, "mount");
   }
   return true;
 }
@@ -311,6 +311,7 @@ async function AelluxForce(rootElement, method) {
 
   for (const element of allElements) {
     const extensionLabels = new Set();
+    const elementsAffected = new Set();
 
     //Load needed lazies
     for (const [extensionLabel, selector]
@@ -334,12 +335,19 @@ async function AelluxForce(rootElement, method) {
           const mountableElements = findElements(element, attr);
           for (const mountable of mountableElements) {
             await controller[method](mountable);
+            elementsAffected.add(mountable);
           }
         } catch (error) {
           console.error(error);
         }
       }
-    };
+    }
+
+    for (const affected of elementsAffected) {
+      affected.classList[
+        method === "mount" ? "add" : "remove"
+      ](Aellux.className("mounted"));
+    }
   }
   Aellux.dispatch("Update");
 }

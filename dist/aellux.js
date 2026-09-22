@@ -5,8 +5,8 @@
       AELLUX_SHORT_JS_NAME: "$ae",
       AELLUX_EVENT_NAME_PREFFIX: "Aellux",
       AELLUX_EXT_SCRIPT_PREFIX: "ext",
-      AELLUX_DATA_ATTRIBUTE_NAME_PREFFIX: "ae",
-      AELLUX_CLASS_NAME_PREFFIX: "ae--",
+      AELLUX_DATA_ATTRIBUTE_NAME_PREFFIX: "ae-?",
+      AELLUX_CLASS_NAME_PREFFIX: "ae--?",
       AELLUX_DEFAULT_INITIALIZATION_OPTIONS: {
         mode: "full",
         dependencies: {
@@ -125,10 +125,10 @@
         document.removeEventListener(Aellux.eventName(event), handler, options);
       },
       attr: function(name) {
-        return "data-" + CONSTANTS.AELLUX_DATA_ATTRIBUTE_NAME_PREFFIX + "-" + name;
+        return "data-" + CONSTANTS.AELLUX_DATA_ATTRIBUTE_NAME_PREFFIX.replace(/\?/, name);
       },
       className: function(name) {
-        return CONSTANTS.AELLUX_CLASS_NAME_PREFFIX + name;
+        return CONSTANTS.AELLUX_CLASS_NAME_PREFFIX.replace(/\?/, name);
       },
       extFilename: function(name) {
         return "aellux." + CONSTANTS.AELLUX_EXT_SCRIPT_PREFIX + "." + name + scriptExtension;
@@ -282,10 +282,12 @@
       var attr = Aellux.attr("weak-style");
       if (typeof document === "undefined" || document.querySelector("[" + attr + "]"))
         return;
-      var p = Aellux.attr("");
       var style = document.createElement("style");
       style.setAttribute(attr, "true");
-      style.textContent = ":where(button,a[href],[role='button'],[role='tab']){touch-action:manipulation;}:where(html){color-scheme:light dark;}:where(html[" + p + "color-scheme='dark']){color-scheme:dark;}:where(html[" + p + "color-scheme='light']){color-scheme:light;}:where(body,html) {margin:0;font-family:system-ui;background-color:Canvas;color:CanvasText;}:where([" + p + "fill-viewport]) {position:fixed;height:100vh;height:100dvh;width:100vw;width:100dvw;inset:0;overflow:auto;}:where([" + p + "fill-parent]) { position: relative;box-sizing: border-box;width: 100%;height: 100%;min-width: 0;min-height: 0;overflow:auto; }[" + p + "adaptive]:not([" + p + "ready]) > *:not(progress) {display: none!important;}[" + p + "adaptive][" + p + "ready] > progress[" + p + "adaptive-progress] {display: none!important;}";
+      var content = ":where(html){color-scheme:light dark;}:where(html[?color-scheme='dark']){color-scheme:dark;}:where(html[?color-scheme='light']){color-scheme:light;}:where(body,html) {font-family:system-ui;background-color:Canvas;color:CanvasText;}:where(button,a[href],[role='button'],[role='tab']){touch-action:manipulation;}[?wait-mount]:not(.%mounted) > *:not([?loader]) {visibility: hidden!important;}[?wait-mount].%mounted > [?loader] {display: none!important;}";
+      var a = Aellux.attr("$1");
+      var c = Aellux.className("$1");
+      style.textContent = content.replace(/\?([a-z][0-9a-z\-]*)/gi, a).replace(/\%([a-z][0-9a-z\-]*)/gi, c);
       document.head.appendChild(style);
       if (!document.querySelector('meta[name="viewport"]')) {
         var meta = document.createElement("meta");

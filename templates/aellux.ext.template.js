@@ -13,7 +13,7 @@
 
   function init() {
     mountDOM.set(`[${attr.extensionName}]`, {
-      update: updateElement,
+      mount: mountElement,
       unmount: unmountElement
     });
   }
@@ -22,7 +22,7 @@
     mountDOM.clear();
   }
 
-  function updateElement(element) {
+  function mountElement(element) {
   }
 
   function unmountElement(element) {
