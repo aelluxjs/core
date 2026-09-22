@@ -23,6 +23,7 @@ const generatedFiles = new Set();
 await mkdir(outputDirectory, { recursive: true });
 
 const bootstrapPath = join(sourceDirectory, "aellux.js");
+const adaptiveExtensionPath = join(sourceDirectory, "aellux.ext.adaptive.js");
 const bootstrapContext = createContext({
   document: {
     currentScript: { src: pathToFileURL(bootstrapPath).href },
@@ -31,6 +32,8 @@ const bootstrapContext = createContext({
 });
 bootstrapContext.window = bootstrapContext;
 runInContext(await readFile(bootstrapPath, "utf8"), bootstrapContext);
+bootstrapContext.Aellux.ext("adaptive");
+runInContext(await readFile(adaptiveExtensionPath, "utf8"), bootstrapContext);
 await writeFile(
   join(outputDirectory, "aellux.ext.adaptive.css"),
   generateAdaptiveCSS(bootstrapContext.Aellux),

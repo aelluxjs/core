@@ -89,7 +89,7 @@ export const utilities = {
 };
 
 export function generateAdaptiveCSS(aellux) {
-  const states = Object.entries(aellux.options.adaptiveParams.minSizes)
+  const states = Object.entries(aellux.adaptive.adaptiveParams.minSizes)
     .sort((first, second) => first[1] - second[1])
     .map(([state]) => ({ state, className: "fits-" + state }));
   for (const state of ["shape-vertical", "shape-horizontal", "shape-square"]) {

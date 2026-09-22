@@ -7,7 +7,6 @@
 
   Aellux.extRegister(extensionName, { init, destroy, update, get, set });
 
-
   const userPreferences = Object.create(null);
   const defaultPreferences = Object.create(null);
   const computedPreferences = Object.create(null);
@@ -25,11 +24,25 @@
     active: Aellux.className("active")
   }
 
+  const prefOptions = {
+    colorScheme: ["auto", "light", "dark"],
+    contrast: ["auto", "no-preference", "more", "less"],
+    reducedMotion: ["auto", "no-preference", "reduced"],
+    reducedTransparency: ["auto", "no-preference", "reduced"],
+    forcedColors: ["auto", "no-preference", "active"],
+    textScale: [1, 1.5, 0.8],
+    interfaceScale: [1, 1.5, 0.8],
+    extendedTiming: ["off", "on"],
+    largeTargets: ["off", "on"],
+    haptics: ["on", "off"],
+    sound: ["off", "on", "low"],
+  };
+
   function init() {
     window.addEventListener("storage", storageEvent);
 
     //Watch device changes
-    const allQueries = Aellux.options.preferencesMediaQueries;
+    const allQueries = Aellux.preferencesMediaQueries;
     Object.values(allQueries).forEach((queries) =>
       Object.values(queries).forEach((query) => {
         if (!query) return;
@@ -43,7 +56,7 @@
     );
 
     //Default values
-    Object.entries(Aellux.options.preferencesOptions)
+    Object.entries(prefOptions)
       .forEach(([param, options]) => defaultPreferences[param] = options[0]);
 
     loadUserPreferences();
@@ -63,7 +76,7 @@
     window.removeEventListener("storage", storageEvent);
     document.addEventListener('DOMContentLoaded', update);
 
-    const allQueries = Aellux.options.preferencesMediaQueries;
+    const allQueries = Aellux.preferencesMediaQueries;
     Object.values(allQueries).forEach((queries) =>
       Object.values(queries).forEach((query) => {
         if (!query) return;

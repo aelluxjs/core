@@ -285,8 +285,8 @@
           }
         }
       }
-      for (const element2 of elementsAffected) {
-        element2.classList[method === "mount" ? "add" : "remove"](Aellux.className("mounted"));
+      for (const affected of elementsAffected) {
+        affected.classList[method === "mount" ? "add" : "remove"](Aellux.className("mounted"));
       }
     }
     Aellux.dispatch("Update");

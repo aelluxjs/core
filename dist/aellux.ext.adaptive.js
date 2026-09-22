@@ -12,7 +12,26 @@
       shapeSquare: Aellux.className("shape-square")
     };
     const mountDOM = /* @__PURE__ */ new Map();
-    Aellux.extRegister(extensionName, { init, destroy, mountDOM });
+    const adaptiveParams = {
+      experienceScale: {
+        near: 1,
+        far: 1.5
+      },
+      minSizes: {
+        compact: 0,
+        small: 480,
+        medium: 768,
+        large: 1024,
+        wide: 1280,
+        ultrawide: 1600
+      },
+      ratioShapes: {
+        vertical: 0.8,
+        //>square<
+        horizontal: 1.25
+      }
+    };
+    Aellux.extRegister(extensionName, { init, destroy, mountDOM, adaptiveParams });
     function init() {
       mountDOM.set(`[${attr.adaptive}]`, {
         mount: mountAdaptive,
@@ -36,7 +55,7 @@
       const width = entry.contentRect.width;
       const height = entry.contentRect.height;
       const adaptiveContainer = entry.target;
-      const params = Aellux.options.adaptiveParams;
+      const params = adaptiveParams;
       const ratioBreakpoints = params.ratioShapes;
       const ratio = height > 0 ? width / height : 0;
       adaptiveContainer.classList.toggle(modifier.shapeVertical, ratio < ratioBreakpoints.vertical);

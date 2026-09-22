@@ -124,21 +124,7 @@ Pass an options object to `Aellux.init()` to override the defaults:
 Aellux.init({
   mode: "basic",
   defaultAdaptiveCSS: true,
-  useHash: true,
-  adaptiveParams: {
-    minSizes: {
-      compact: 0,
-      small: 480,
-      medium: 768,
-      large: 1024,
-      wide: 1280,
-      ultrawide: 1600
-    },
-    ratioShapes: {
-      vertical: 0.8,
-      horizontal: 1.25
-    }
-  }
+  useHash: true
 });
 
 Aellux.ext("preferences");

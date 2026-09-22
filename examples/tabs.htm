@@ -9,11 +9,16 @@
   <script src="../dist/aellux.min.js" type="text/javascript"></script>
 
   <link rel="aellux-ext" href="adaptive" data-ae-load-style data-ae-load-when="[data-ae-adaptive]" />
+  <link rel="aellux-ext" href="ajax-href" />
+  <link rel="aellux-ext" href="feedback" />
+  <link rel="aellux-ext" href="preferences" />
+  <link rel="aellux-ext" href="state-navigation" />
 
   <script>
     var start = Date.now();
 
     $ae.init({ mode: "basic" });
+    //$ae.init({ mode: "full" });
 
     $ae.ext("preferences"); //CORE
     $ae.ext("state-navigation"); //CORE
@@ -35,11 +40,13 @@
 </head>
 
 <body>
-  <div data-ae-fill-viewport>
-    <main data-ae-fill-parent data-ae-adaptive style=" background-color: #F59E0B33;">
-      <progress data-ae-adaptive-progress style="margin:auto"></progress>
+  <div class=fill-viewport>
+    <main data-ae-adaptive data-ae-wait-mount class=fill-parent style=" background-color: #F59E0B33;">
+      <div data-ae-loader class=fill-parent style="display: flex;">
+        <span class="loader" style="margin:auto;"></span>
+      </div>
 
-      <nav data-ae-persist data-ae-tab-group>
+      <nav data-ae-tab-group data-ae-persist>
         <!-- SUPPORTS ANCHOR DIV AND BUTTON -->
         <button data-ae-tab="home" data-ae-title="# Home">
           <span>#</span>

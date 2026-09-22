@@ -27,9 +27,22 @@
         const className = {
           active: Aellux.className("active")
         };
+        const prefOptions = {
+          colorScheme: ["auto", "light", "dark"],
+          contrast: ["auto", "no-preference", "more", "less"],
+          reducedMotion: ["auto", "no-preference", "reduced"],
+          reducedTransparency: ["auto", "no-preference", "reduced"],
+          forcedColors: ["auto", "no-preference", "active"],
+          textScale: [1, 1.5, 0.8],
+          interfaceScale: [1, 1.5, 0.8],
+          extendedTiming: ["off", "on"],
+          largeTargets: ["off", "on"],
+          haptics: ["on", "off"],
+          sound: ["off", "on", "low"]
+        };
         function init() {
           window.addEventListener("storage", storageEvent);
-          const allQueries = Aellux.options.preferencesMediaQueries;
+          const allQueries = Aellux.preferencesMediaQueries;
           Object.values(allQueries).forEach(
             (queries) => Object.values(queries).forEach(
               (query) => {
@@ -42,7 +55,7 @@
               }
             )
           );
-          Object.entries(Aellux.options.preferencesOptions).forEach(([param, options]) => defaultPreferences[param] = options[0]);
+          Object.entries(prefOptions).forEach(([param, options]) => defaultPreferences[param] = options[0]);
           loadUserPreferences();
           if (document.readyState === "loading") {
             document.addEventListener(
@@ -57,7 +70,7 @@
         function destroy() {
           window.removeEventListener("storage", storageEvent);
           document.addEventListener("DOMContentLoaded", update);
-          const allQueries = Aellux.options.preferencesMediaQueries;
+          const allQueries = Aellux.preferencesMediaQueries;
           Object.values(allQueries).forEach(
             (queries) => Object.values(queries).forEach(
               (query) => {
@@ -315,7 +328,26 @@
           shapeSquare: Aellux.className("shape-square")
         };
         const mountDOM = /* @__PURE__ */ new Map();
-        Aellux.extRegister(extensionName, { init, destroy, mountDOM });
+        const adaptiveParams = {
+          experienceScale: {
+            near: 1,
+            far: 1.5
+          },
+          minSizes: {
+            compact: 0,
+            small: 480,
+            medium: 768,
+            large: 1024,
+            wide: 1280,
+            ultrawide: 1600
+          },
+          ratioShapes: {
+            vertical: 0.8,
+            //>square<
+            horizontal: 1.25
+          }
+        };
+        Aellux.extRegister(extensionName, { init, destroy, mountDOM, adaptiveParams });
         function init() {
           mountDOM.set(`[${attr.adaptive}]`, {
             mount: mountAdaptive,
@@ -339,7 +371,7 @@
           const width = entry.contentRect.width;
           const height = entry.contentRect.height;
           const adaptiveContainer = entry.target;
-          const params = Aellux.options.adaptiveParams;
+          const params = adaptiveParams;
           const ratioBreakpoints = params.ratioShapes;
           const ratio = height > 0 ? width / height : 0;
           adaptiveContainer.classList.toggle(modifier.shapeVertical, ratio < ratioBreakpoints.vertical);
@@ -834,8 +866,8 @@
           }
         }
       }
-      for (const element2 of elementsAffected) {
-        element2.classList[method === "mount" ? "add" : "remove"](Aellux.className("mounted"));
+      for (const affected of elementsAffected) {
+        affected.classList[method === "mount" ? "add" : "remove"](Aellux.className("mounted"));
       }
     }
     Aellux.dispatch("Update");

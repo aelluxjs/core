@@ -3,74 +3,11 @@
   (function() {
     var CONSTANTS = {
       AELLUX_SHORT_JS_NAME: "$ae",
-      AELLUX_EVENT_NAME_PREFFIX: "Aellux",
       AELLUX_EXT_SCRIPT_PREFIX: "ext",
-      AELLUX_DATA_ATTRIBUTE_NAME_PREFFIX: "ae-?",
       AELLUX_CLASS_NAME_PREFFIX: "ae--?",
-      AELLUX_DEFAULT_INITIALIZATION_OPTIONS: {
-        mode: "full",
-        dependencies: {
-          components: {
-            "interactjs": "https://cdn.jsdelivr.net/npm/interactjs@1.10.28/+esm",
-            "motion": "https://cdn.jsdelivr.net/npm/motion@13.2.0/+esm"
-          }
-        },
-        preferencesOptions: {
-          colorScheme: ["auto", "light", "dark"],
-          contrast: ["auto", "no-preference", "more", "less"],
-          reducedMotion: ["auto", "no-preference", "reduced"],
-          reducedTransparency: ["auto", "no-preference", "reduced"],
-          forcedColors: ["auto", "no-preference", "active"],
-          textScale: [1, 1.5, 0.8],
-          interfaceScale: [1, 1.5, 0.8],
-          extendedTiming: ["off", "on"],
-          largeTargets: ["off", "on"],
-          haptics: ["on", "off"],
-          sound: ["off", "on", "low"]
-        },
-        preferencesMediaQueries: {
-          colorScheme: {
-            "light": !window.matchMedia ? null : window.matchMedia("(prefers-color-scheme: light)"),
-            "dark": !window.matchMedia ? null : window.matchMedia("(prefers-color-scheme: dark)")
-          },
-          reducedMotion: {
-            "reduced": !window.matchMedia ? null : window.matchMedia("(prefers-reduced-motion: reduced)"),
-            "no-preference": !window.matchMedia ? null : window.matchMedia("(prefers-reduced-motion: no-preference)")
-          },
-          reducedTransparency: {
-            "reduced": !window.matchMedia ? null : window.matchMedia("(prefers-reduced-transparency: reduced)"),
-            "no-preference": !window.matchMedia ? null : window.matchMedia("(prefers-reduced-transparency: no-preference)")
-          },
-          forcedColors: {
-            "active": !window.matchMedia ? null : window.matchMedia("(forced-colors: active)"),
-            "no-preference": !window.matchMedia ? null : window.matchMedia("(forced-colors: no-preference)")
-          },
-          contrast: {
-            "more": !window.matchMedia ? null : window.matchMedia("(prefers-contrast: more)"),
-            "less": !window.matchMedia ? null : window.matchMedia("(prefers-contrast: less)"),
-            "no-preference": !window.matchMedia ? null : window.matchMedia("(prefers-contrast: no-preference)")
-          }
-        },
-        adaptiveParams: {
-          experienceScale: {
-            near: 1,
-            far: 1.5
-          },
-          minSizes: {
-            compact: 0,
-            small: 480,
-            medium: 768,
-            large: 1024,
-            wide: 1280,
-            ultrawide: 1600
-          },
-          ratioShapes: {
-            vertical: 0.8,
-            //>square<
-            horizontal: 1.25
-          }
-        }
-      }
+      AELLUX_EVENT_NAME_PREFFIX: "Aellux?",
+      AELLUX_DATA_ATTRIBUTE_NAME_PREFFIX: "ae-?",
+      AELLUX_DEFAULT_INITIALIZATION_OPTIONS: { mode: "full" }
     };
     var scriptExtension = ".js";
     var root = typeof globalThis !== "undefined" ? globalThis : window;
@@ -140,7 +77,7 @@
         );
       },
       eventName: function(name) {
-        return CONSTANTS.AELLUX_EVENT_NAME_PREFFIX + toCamelCase(name);
+        return CONSTANTS.AELLUX_EVENT_NAME_PREFFIX.replace(/\?/, toCapitalized(name));
       },
       noConflict: function() {
         return old$Instance;
@@ -195,6 +132,29 @@
       },
       update: function(element) {
         throw new Error("[Aellux] Aellux n\xE3o foi inicializado");
+      },
+      preferencesMediaQueries: {
+        colorScheme: {
+          "light": !window.matchMedia ? null : window.matchMedia("(prefers-color-scheme: light)"),
+          "dark": !window.matchMedia ? null : window.matchMedia("(prefers-color-scheme: dark)")
+        },
+        reducedMotion: {
+          "reduced": !window.matchMedia ? null : window.matchMedia("(prefers-reduced-motion: reduced)"),
+          "no-preference": !window.matchMedia ? null : window.matchMedia("(prefers-reduced-motion: no-preference)")
+        },
+        reducedTransparency: {
+          "reduced": !window.matchMedia ? null : window.matchMedia("(prefers-reduced-transparency: reduced)"),
+          "no-preference": !window.matchMedia ? null : window.matchMedia("(prefers-reduced-transparency: no-preference)")
+        },
+        forcedColors: {
+          "active": !window.matchMedia ? null : window.matchMedia("(forced-colors: active)"),
+          "no-preference": !window.matchMedia ? null : window.matchMedia("(forced-colors: no-preference)")
+        },
+        contrast: {
+          "more": !window.matchMedia ? null : window.matchMedia("(prefers-contrast: more)"),
+          "less": !window.matchMedia ? null : window.matchMedia("(prefers-contrast: less)"),
+          "no-preference": !window.matchMedia ? null : window.matchMedia("(prefers-contrast: no-preference)")
+        }
       }
     };
     root[CONSTANTS.AELLUX_SHORT_JS_NAME] = root.Aellux;
@@ -297,7 +257,7 @@
       }
     }
     function updatePreferencesAttributesHTML(preferences) {
-      var allQueries = Aellux.options.preferencesMediaQueries;
+      var allQueries = Aellux.preferencesMediaQueries;
       preferences = preferences ? preferences : Aellux.persist.preferences.getObject();
       for (var param in allQueries) {
         var queries = allQueries[param];
@@ -420,6 +380,12 @@
       }
       return target;
     }
+    function toCapitalized(name) {
+      return name.replace(/^([a-z])|-([a-z])/g, function(_, first, afterHyphen) {
+        return (first || afterHyphen).toUpperCase();
+      });
+    }
+    ;
     function toCamelCase(name) {
       return name.replace(/-([a-z])/g, function(_, c) {
         return c.toUpperCase();

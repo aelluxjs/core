@@ -15,7 +15,27 @@
   };
   const mountDOM = new Map();
 
-  Aellux.extRegister(extensionName, { init, destroy, mountDOM });
+  const adaptiveParams = {
+    experienceScale: {
+      near: 1,
+      far: 1.5
+    },
+    minSizes: {
+      compact: 0,
+      small: 480,
+      medium: 768,
+      large: 1024,
+      wide: 1280,
+      ultrawide: 1600
+    },
+    ratioShapes: {
+      vertical: 0.8,
+      //>square<
+      horizontal: 1.25
+    }
+  };
+
+  Aellux.extRegister(extensionName, { init, destroy, mountDOM, adaptiveParams });
 
   function init() {
     mountDOM.set(`[${attr.adaptive}]`, {
@@ -45,7 +65,7 @@
     const height = entry.contentRect.height;
     const adaptiveContainer = entry.target;
 
-    const params = Aellux.options.adaptiveParams;
+    const params = adaptiveParams;
     //RATIO SHAPE
     const ratioBreakpoints = params.ratioShapes;
     const ratio = height > 0 ? width / height : 0;
