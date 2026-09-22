@@ -302,7 +302,7 @@ async function AelluxForceUpdate(rootOrSelector) {
   return true;
 }
 
-async function AelluxForce(root, method) {
+async function AelluxForce(rootElement, method) {
   const mounterSelectors = Object.values(Aellux.extensionMounters);
   const lazySelectors = Object.values(Aellux.lazyExtensionSelectors);
   if (mounterSelectors.length + lazySelectors.length === 0) return;
@@ -330,10 +330,10 @@ async function AelluxForce(root, method) {
       const mounter = extension.mountDOM;
       for (const [attr, controller] of mounter) {
         try {
-          if (!controller.update) { continue; }
+          if (!controller[method]) { continue; }
           const mountableElements = findElements(element, attr);
           for (const mountable of mountableElements) {
-            await controller.update(mountable);
+            await controller[method](mountable);
           }
         } catch (error) {
           console.error(error);

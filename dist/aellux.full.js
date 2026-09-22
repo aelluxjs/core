@@ -773,14 +773,14 @@
     });
   }
   async function AelluxForceUnmount(rootOrSelector) {
-    for (const rootElement2 of resolveRoots(rootOrSelector)) {
-      await AelluxForce(rootElement2, "unmount");
+    for (const rootElement of resolveRoots(rootOrSelector)) {
+      await AelluxForce(rootElement, "unmount");
     }
     return true;
   }
   async function AelluxForceUpdate(rootOrSelector) {
-    for (const rootElement2 of resolveRoots(rootOrSelector)) {
-      const allLinks = findElements(rootElement2, "link[rel='aellux-ext']");
+    for (const rootElement of resolveRoots(rootOrSelector)) {
+      const allLinks = findElements(rootElement, "link[rel='aellux-ext']");
       for (const link of allLinks) {
         const href = link.getAttribute("href");
         const loadWhen = link.getAttribute(Aellux.attr("load-when")) || void 0;
@@ -794,11 +794,11 @@
         waitExtensions.push(getExtension(extensionLabel));
       }
       await Promise.all(waitExtensions);
-      await AelluxForce(rootElement2, "update");
+      await AelluxForce(rootElement, "update");
     }
     return true;
   }
-  async function AelluxForce(root3, method) {
+  async function AelluxForce(rootElement, method) {
     const mounterSelectors = Object.values(Aellux.extensionMounters);
     const lazySelectors = Object.values(Aellux.lazyExtensionSelectors);
     if (mounterSelectors.length + lazySelectors.length === 0) return;
@@ -820,12 +820,12 @@
         const mounter = extension.mountDOM;
         for (const [attr, controller] of mounter) {
           try {
-            if (!controller.update) {
+            if (!controller[method]) {
               continue;
             }
             const mountableElements = findElements(element, attr);
             for (const mountable of mountableElements) {
-              await controller.update(mountable);
+              await controller[method](mountable);
             }
           } catch (error) {
             console.error(error);
@@ -881,10 +881,26 @@
   // src/aellux.full.esm.js
   /*! Aellux | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   var root2 = typeof globalThis !== "undefined" ? globalThis : window;
+  function appendBundledStyle(extensionName) {
+    return new Promise((resolve) => {
+      const data = root2.Aellux.extRegistry[extensionName];
+      const url = data.url.replace(/^\.\//, root2.Aellux.aelluxBasePath);
+      const link = document.createElement("link");
+      link.rel = "stylesheet";
+      link.href = url.replace(/\.js(?=[?#]|$)/, ".css");
+      link.setAttribute(root2.Aellux.attr("ext-style"), extensionName);
+      link.onload = resolve;
+      link.onerror = resolve;
+      document.head.appendChild(link);
+    });
+  }
   root2.Aellux.bundledExtensions = Object.freeze({
     "preferences": () => Promise.resolve().then(() => (init_aellux_ext_preferences(), aellux_ext_preferences_exports)),
     "state-navigation": () => Promise.resolve().then(() => (init_aellux_ext_state_navigation(), aellux_ext_state_navigation_exports)),
-    "adaptive": () => Promise.resolve().then(() => (init_aellux_ext_adaptive(), aellux_ext_adaptive_exports)),
+    "adaptive": () => Promise.all([
+      Promise.resolve().then(() => (init_aellux_ext_adaptive(), aellux_ext_adaptive_exports)),
+      appendBundledStyle("adaptive")
+    ]),
     "feedback": () => Promise.resolve().then(() => (init_aellux_ext_feedback(), aellux_ext_feedback_exports)),
     "ajax-href": () => Promise.resolve().then(() => (init_aellux_ext_ajax_href(), aellux_ext_ajax_href_exports))
   });

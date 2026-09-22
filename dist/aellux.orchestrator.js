@@ -224,14 +224,14 @@
     });
   }
   async function AelluxForceUnmount(rootOrSelector) {
-    for (const rootElement2 of resolveRoots(rootOrSelector)) {
-      await AelluxForce(rootElement2, "unmount");
+    for (const rootElement of resolveRoots(rootOrSelector)) {
+      await AelluxForce(rootElement, "unmount");
     }
     return true;
   }
   async function AelluxForceUpdate(rootOrSelector) {
-    for (const rootElement2 of resolveRoots(rootOrSelector)) {
-      const allLinks = findElements(rootElement2, "link[rel='aellux-ext']");
+    for (const rootElement of resolveRoots(rootOrSelector)) {
+      const allLinks = findElements(rootElement, "link[rel='aellux-ext']");
       for (const link of allLinks) {
         const href = link.getAttribute("href");
         const loadWhen = link.getAttribute(Aellux.attr("load-when")) || void 0;
@@ -245,11 +245,11 @@
         waitExtensions.push(getExtension(extensionLabel));
       }
       await Promise.all(waitExtensions);
-      await AelluxForce(rootElement2, "update");
+      await AelluxForce(rootElement, "update");
     }
     return true;
   }
-  async function AelluxForce(root2, method) {
+  async function AelluxForce(rootElement, method) {
     const mounterSelectors = Object.values(Aellux.extensionMounters);
     const lazySelectors = Object.values(Aellux.lazyExtensionSelectors);
     if (mounterSelectors.length + lazySelectors.length === 0) return;
@@ -271,12 +271,12 @@
         const mounter = extension.mountDOM;
         for (const [attr, controller] of mounter) {
           try {
-            if (!controller.update) {
+            if (!controller[method]) {
               continue;
             }
             const mountableElements = findElements(element, attr);
             for (const mountable of mountableElements) {
-              await controller.update(mountable);
+              await controller[method](mountable);
             }
           } catch (error) {
             console.error(error);

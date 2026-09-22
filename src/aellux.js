@@ -169,7 +169,7 @@
         console.error("Duplicate ext");
         return;
       }
-      if (url === label) url = Aellux.extFilename(label);
+      if (url === label) url = "./" + Aellux.extFilename(label);
       if (!options) options = {};
       if (typeof options.loadStyle === "undefined") options.loadStyle = false;
       if (!options.loadWhen) options.loadWhen = null;
