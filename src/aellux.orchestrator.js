@@ -25,37 +25,36 @@ root.Aellux = Object.assign(AelluxForceUpdate, root.Aellux, {
         .forEach(extensionName => Aellux.ext(extensionName));
     }
 
-    const waitExtensions = [];
-    if (root.Aellux.extRegistry) {
-      Object.keys(root.Aellux.extRegistry)
-        .forEach(extensionName => {
-          waitExtensions.push(
-            loadExtension(extensionName)
+    await new Promise((resolve, reject) => {
+      const updateCallback = function () {
+        Aellux.update().then(function () {
+          document.removeEventListener(
+            "DOMContentLoaded", updateCallback
           );
+          resolve();
         });
-    }
-    await Promise.all(waitExtensions);
+      };
+
+      if (document.readyState === "loading")
+        document.addEventListener(
+          "DOMContentLoaded", updateCallback,
+          { once: true }
+        );
+      else
+        Aellux.update().then(() => resolve());
+    });
 
     Aellux.dispatch("Ready");
 
-    if (document.readyState === "loading") {
-      document.addEventListener(
-        "DOMContentLoaded",
-        () => { Aellux.update(); },
-        { once: true }
-      );
-    } else {
-      Aellux.update();
-    }
-
     return true;
   },
-  update(root) { AelluxForceUpdate(root); },
-  unmount(root) { AelluxForceUnmount(root); },
+  update(root) { return AelluxForceUpdate(root); },
+  unmount(root) { return AelluxForceUnmount(root); },
   destroy() {
     Aellux.observers.resize.disconnect();
     Aellux.observers.mutation.disconnect();
     Aellux.observers.intersection.disconnect();
+    document.removeEventListener("DOMContentLoaded", Aellux.update);
   },
 
   dispatchFrom(from, event, options) {
@@ -77,6 +76,7 @@ root.Aellux = Object.assign(AelluxForceUpdate, root.Aellux, {
 
   waitLayout: createLayoutScheduler(),
 });
+
 root[root.Aellux.shortJSName] = root.Aellux;
 
 function intersectionObserverCallback(entries) { observerCallback(entries, "Intersection"); }
@@ -100,8 +100,7 @@ function loadExtension(extensionName) {
   if (Aellux[key]) {
     if (!Aellux[key].initialized) {
       try {
-        Aellux[key].init();
-        Aellux[key].initialized = true;
+        extensionInitialize(key);
       } catch (error) {
         console.error(
           `[Aellux] Aellux Extension "${extensionName}" failed to initialize.`,
@@ -129,18 +128,7 @@ function loadExtension(extensionName) {
         key,
         Aellux.extRegistry[extensionName].url.replace(/^\.\//, Aellux.aelluxBasePath)
       ))
-      .then(() => {
-        Aellux[key].init();
-        Aellux[key].initialized = true;
-        for (const [attr, controller] of (Aellux[key].mountDOM || {}))
-          Aellux.mountSelector[attr] = controller;
-
-        //Clean lazy registry
-        for (const [attr, label] of Object.entries(Aellux.mountLazySelector))
-          if (label === extensionName) delete Aellux.mountLazySelector[attr];
-
-        return Aellux[key];
-      })
+      .then(() => extensionInitialize(key))
       .catch((error) => {
         console.error(
           `[Aellux] Aellux Extension "${extensionName}" failed to initialize.`,
@@ -150,6 +138,23 @@ function loadExtension(extensionName) {
       });
 
   return extensionPromises[key];
+}
+
+function extensionInitialize(extensionLabel) {
+  const extensionName = fromCamelCase(extensionLabel);
+  const key = toCamelCase(extensionLabel);
+  Aellux[key].init();
+  Aellux[key].initialized = true;
+
+  if (Aellux[key].mountDOM) {
+    const selectors = Array.from(Aellux[key].mountDOM.keys()).join(",");
+    if (selectors) Aellux.extensionMounters[extensionName] = selectors;
+  }
+
+  //Clean lazy registry
+  delete Aellux.lazyExtensionSelectors[extensionName];
+
+  return Aellux[key];
 }
 
 async function loadScript(name, scriptPath) {
@@ -247,106 +252,103 @@ function defaultRequest(url, options) {
 function AelluxForceUpdate(root) { return AelluxForce(root, "update"); }
 function AelluxForceUnmount(root) { return AelluxForce(root, "unmount"); }
 
-function AelluxForce(rootOrSelector, method) {
+async function AelluxForce(rootOrSelector, method) {
   for (const rootElement of resolveRoots(rootOrSelector)) {
-    const mountKeys = Object.keys(Aellux.mountSelector);
-    const mountLazyKeys = Object.keys(Aellux.mountLazySelector);
-    if (mountKeys.length + mountLazyKeys.length === 0) return;
+    const allLinks = findElements(rootElement, "link[rel='aellux-ext']");
+    for (const link of allLinks) {
+      const href = link.getAttribute("href");
+      const loadWhen = link.getAttribute(Aellux.attr("load-when")) || undefined;
+      const loadStyle = link.getAttribute(Aellux.attr("load-style")) || true;
+      link.setAttribute("rel", "aellux-ext-registered");
+      Aellux.ext(href, { loadWhen, loadStyle });
+    }
 
-    const selector = [...mountKeys, ...mountLazyKeys].join(",");
+    if (root.Aellux.extRegistry) {
+      const waitExtensions = [];
+      for (const [extensionLabel, options] of
+        Object.entries(root.Aellux.extRegistry)) {
+        if (options.loadWhen) continue;
+        waitExtensions.push(loadExtension(extensionLabel));
+      }
+      await Promise.all(waitExtensions);
+    }
+
+    const mounterSelectors = Object.values(Aellux.extensionMounters);
+    const lazySelectors = Object.values(Aellux.lazyExtensionSelectors);
+    if (mounterSelectors.length + lazySelectors.length === 0) continue;
+    const selector = [...mounterSelectors, ...lazySelectors].join(",");
     const allElements = findElements(rootElement, selector);
 
-    for (const currentElement of allElements) {
+    for (const element of allElements) {
+      const extensionLabels = new Set();
+
       //Load needed lazies
-      for (const selector of mountLazyKeys) {
-        if (currentElement.matches(selector)) {
-          extensionLabel = Aellux.mountLazySelector[selector];
-          loadExtension(extensionLabel)
-            .then(extension => {
-              const mounter = extension.mountDOM || {};
-              for (const [attr, controller] of mounter) {
-                try {
-                  if (!currentElement.matches(attr)) { continue; }
-                  Promise.resolve(controller[method](currentElement))
-                    .catch(error => console.error(error));
-                } catch (error) {
-                  console.error(error);
-                }
-              }
-            });
-        }
-      }
+      for (const [extensionLabel, selector]
+        of Object.entries(Aellux.lazyExtensionSelectors))
+        if (element.matches(selector)) { }
+      extensionLabels.add(extensionLabel);
+
       //Mount readies
-      for (const selector of mountKeys) {
-        if (currentElement.matches(selector)) {
-          const controller = Aellux.mountSelector[selector];
+      for (const [extensionLabel, selector]
+        of Object.entries(Aellux.extensionMounters))
+        if (element.matches(selector))
+          extensionLabels.add(extensionLabel);
+
+      for (const extensionLabel of extensionLabels) {
+        const extension = await loadExtension(extensionLabel);
+        if (!extension || !extension.mountDOM) { continue; }
+        const mounter = extension.mountDOM;
+        for (const [attr, controller] of mounter) {
           try {
-            if (!controller[method]) { continue; }
-            Promise.resolve(controller[method](currentElement))
-              .catch(error => console.error(error));
+            if (!controller[method] || !element.matches(attr)) { continue; }
+            await controller[method](element);
           } catch (error) {
             console.error(error);
           }
         }
-      }
+      };
     }
-
-    // Object.keys(Aellux.extRegistry).forEach(extensionName => {
-    //   const key = toCamelCase(extensionName);
-    //   if (!Aellux[key] || !Aellux[key].initialized || !Aellux[key].mountDOM) return;
-    //   const mounter = Aellux[key].mountDOM;
-    //   for (const [attr, controller] of mounter) {
-    //     if (!(method in controller)) continue;
-    //     const elements = findElements(rootElement, attr);
-    //     elements.forEach(currentElement => {
-    //       try {
-    //         Promise.resolve(controller[method](currentElement))
-    //           .catch(error => console.error(error));
-    //       } catch (error) {
-    //         console.error(error);
-    //       }
-    //     });
-    //   }
-    // });
   }
+  Aellux.dispatch("Update");
+}
 
-  function resolveRoots(root) {
-    if (!root) { return [document]; }
-    if (typeof root === "string") {
-      try { return Array.from(document.querySelectorAll(root)); }
-      catch (error) { return []; }
-    }
-    if (
-      root instanceof Element ||
-      root instanceof Document ||
-      root instanceof DocumentFragment
-    ) { return [root]; }
-    return [];
+function resolveRoots(root) {
+  if (!root) { return [document]; }
+  if (typeof root === "string") {
+    try { return Array.from(document.querySelectorAll(root)); }
+    catch (error) { return []; }
   }
+  if (
+    root instanceof Element ||
+    root instanceof Document ||
+    root instanceof DocumentFragment
+  ) { return [root]; }
+  return [];
+}
 
-  function findElements(root, selector) {
-    const elements = [];
-    if (
-      root.nodeType === Node.ELEMENT_NODE &&
-      root.matches(selector)
-    ) { elements.push(root); }
-    if (root.querySelectorAll) {
-      root.querySelectorAll(selector)
-        .forEach(function (element) {
-          elements.push(element);
-        });
-    }
-    return elements;
+function findElements(root, selector) {
+  const elements = [];
+  if (
+    root.nodeType === Node.ELEMENT_NODE &&
+    root.matches(selector)
+  ) { elements.push(root); }
+  if (root.querySelectorAll) {
+    root.querySelectorAll(selector)
+      .forEach(function (element) {
+        elements.push(element);
+      });
   }
+  return elements;
+}
 
-  function toCamelCase(name) { return name.replace(/-([a-z])/g, (_, c) => c.toUpperCase()); };
-  function fromCamelCase(name) { return name.replace(/([A-Z])/g, "-$1").toLowerCase(); };
+function toCamelCase(name) { return name.replace(/-([a-z])/g, (_, c) => c.toUpperCase()); };
+function fromCamelCase(name) { return name.replace(/([A-Z])/g, "-$1").toLowerCase(); };
 
-  //BFCache
-  let pageWasHidden = false;
-  window.addEventListener("pagehide", () => pageWasHidden = true);
-  window.addEventListener("pageshow", (event) => {
-    if (event.persisted && pageWasHidden) {// página voltou via BFCache
-      pageWasHidden = false;
-    }
-  });
+//BFCache
+let pageWasHidden = false;
+window.addEventListener("pagehide", () => pageWasHidden = true);
+window.addEventListener("pageshow", (event) => {
+  if (event.persisted && pageWasHidden) {// página voltou via BFCache
+    pageWasHidden = false;
+  }
+});

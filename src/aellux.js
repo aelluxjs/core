@@ -159,8 +159,8 @@
     eventName: function (name) { return CONSTANTS.AELLUX_EVENT_NAME_PREFFIX + toCamelCase(name); },
     noConflict: function () { return old$Instance; },
 
-    mountLazySelector: {},
-    mountSelector: {},
+    lazyExtensionSelectors: {},
+    extensionMounters: {},
     extRegistry: {},
     ext: function (labelOrUrl, options) {
       var label = fromCamelCase(Aellux.extLabel(labelOrUrl));
@@ -173,7 +173,7 @@
       if (!options) options = {};
       if (!options.loadStyle) options.loadStyle = false;
       if (!options.loadWhen) options.loadWhen = null;
-      if (options.loadWhen) { Aellux.mountSelector[options.loadWhen] = label; }
+      if (options.loadWhen) { Aellux.lazyExtensionSelectors[label] = options.loadWhen; }
       options.url = url;
       options.load = options.loadWhen ? false : true;
       options.state = "wait";
