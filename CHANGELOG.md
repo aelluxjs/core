@@ -12,7 +12,7 @@ All notable changes to Aellux will be documented in this file.
 - Adaptive container states and Bootstrap-compatible adaptive utilities.
 - Core Extensions for adaptive behavior, preferences, state navigation, feedback, and asynchronous links.
 - ES5-compatible boot and fallback paths with an ES2017+ orchestrator and Extensions.
-- ES5-compatible Legacy orchestrator and core Extension placeholder files using the `.legacy.js` convention.
+- Build-generated ES5-syntax Legacy variants for the orchestrator and core Extensions using the `.legacy.js` convention.
 
 ### Changed
 

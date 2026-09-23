@@ -20,7 +20,10 @@
     AELLUX_EVENT_NAME_PREFFIX: "Aellux?",
     AELLUX_DATA_ATTRIBUTE_NAME_PREFFIX: "ae-?",
 
-    AELLUX_DEFAULT_INITIALIZATION_OPTIONS: { mode: "full" }
+    AELLUX_DEFAULT_INITIALIZATION_OPTIONS: {
+      mode: "full",
+      basePath: null
+    }
   };
 
   var scriptExtension = ".js";
@@ -69,7 +72,7 @@
         throw new Error("[Aellux] mode must be basic or full.");
       }
 
-      Aellux.aelluxBasePath = aelluxBasePath;
+      Aellux.aelluxBasePath = Aellux.options.basePath || aelluxBasePath;
       Aellux.notAvailable = [];
 
       updatePreferencesAttributesHTML();//SET HTML TO PERSISTED PREFERENCES
@@ -191,14 +194,14 @@
     if (!window.NodeList || typeof window.NodeList.prototype.forEach !== "function")
       Aellux.notAvailable.push("NodeList.forEach");
 
-    if (Aellux.notAvailable.length !== 0)
+    if (Aellux.notAvailable.length !== 0 || isLegacyForced())
       return loadLegacyOrchestratorFallback();
 
     var script = document.createElement("script");
     if (Aellux.options.mode === "basic") {
-      script.src = aelluxBasePath + "aellux.orchestrator" + scriptExtension;
+      script.src = Aellux.aelluxBasePath + "aellux.orchestrator" + scriptExtension;
     } else {
-      script.src = aelluxBasePath + "aellux.full" + scriptExtension;
+      script.src = Aellux.aelluxBasePath + "aellux.full" + scriptExtension;
     }
     script.setAttribute(attr, "true");
     script.onload = function () {
@@ -235,7 +238,7 @@
     Aellux.supported = false;
 
     var script = document.createElement("script");
-    script.src = aelluxBasePath + "aellux.orchestrator.legacy" + scriptExtension;
+    script.src = Aellux.aelluxBasePath + "aellux.orchestrator.legacy" + scriptExtension;
     script.setAttribute(attr, "true");
     script.onload = function () {
       Aellux.dispatch("Legacy");
@@ -407,6 +410,11 @@
       }
     }
     return target;
+  }
+
+  function isLegacyForced() {
+    return /(?:^|[?&])aellux-debug-legacy(?:=1|=true)?(?:&|$)/i
+      .test(window.location.search);
   }
 
   function toCapitalized(name) {

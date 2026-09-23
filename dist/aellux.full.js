@@ -589,11 +589,11 @@
         Object.keys(root.Aellux.bundledExtensions).forEach((extensionName) => Aellux.ext(extensionName));
       }
       await new Promise((resolve, reject) => {
-        const updateCallback = function() {
+        const startUpdateCallback = function() {
           Aellux.update().then(function() {
             document.removeEventListener(
               "DOMContentLoaded",
-              updateCallback
+              startUpdateCallback
             );
             resolve();
           });
@@ -601,20 +601,20 @@
         if (document.readyState === "loading")
           document.addEventListener(
             "DOMContentLoaded",
-            updateCallback,
+            startUpdateCallback,
             { once: true }
           );
         else
-          Aellux.update().then(() => resolve());
+          startUpdateCallback();
       });
       Aellux.dispatch("Ready");
       return true;
     },
-    update(root3) {
-      return AelluxForceUpdate(root3);
+    update(rootOrSelector) {
+      return AelluxForceUpdate(rootOrSelector);
     },
-    unmount(root3) {
-      return AelluxForceUnmount(root3);
+    unmount(rootOrSelector) {
+      return AelluxForceUnmount(rootOrSelector);
     },
     destroy() {
       Aellux.observers.resize.disconnect();
@@ -708,12 +708,13 @@
     const extensionName = fromCamelCase(name);
     const data = Aellux.extRegistry[extensionName];
     const url = data.url.replace(/^\.\//, Aellux.aelluxBasePath);
+    const scriptURL = Aellux.legacy ? toLegacyScriptURL(url) : url;
     const loadPromises = [];
     loadPromises.push(new Promise(
       (resolve, reject) => {
-        var attr = Aellux.attr("ext");
-        var script = document.createElement("script");
-        script.src = url;
+        const attr = Aellux.attr("ext");
+        const script = document.createElement("script");
+        script.src = scriptURL;
         script.setAttribute(attr, name);
         script.onload = resolve;
         script.onerror = reject;
@@ -722,10 +723,12 @@
     ));
     if (data.loadStyle && data.loadStyle !== "false") {
       loadPromises.push(new Promise(
-        (resolve, reject) => {
-          var attrStyle = Aellux.attr("ext-style");
-          var link = document.createElement("link");
-          link.href = url.replace(/\.js(?=[?#]|$)/, ".css");
+        (resolve) => {
+          const styleDefaultURL = data.loadStyle === "true" || data.loadStyle === "";
+          const href = styleDefaultURL ? url.replace(/\.js(?=[?#]|$)/, ".css") : data.loadStyle;
+          const attrStyle = Aellux.attr("ext-style");
+          const link = document.createElement("link");
+          link.href = href;
           link.rel = "stylesheet";
           link.setAttribute(attrStyle, name);
           link.onload = resolve;
@@ -735,6 +738,12 @@
       ));
     }
     return Promise.all(loadPromises);
+  }
+  function toLegacyScriptURL(url) {
+    return url.replace(
+      /(?:\.legacy)?(?:\.min)?\.js(?=[?#]|$)/,
+      ".legacy" + (Aellux.minified ? ".min" : "") + ".js"
+    );
   }
   function createLayoutScheduler() {
     var readQueue = [];
@@ -811,6 +820,8 @@
   }
   async function AelluxForceUpdate(rootOrSelector) {
     for (const rootElement of resolveRoots(rootOrSelector)) {
+      const allWaiters = findElements(rootElement, Aellux.attr("wait-mounted"));
+      allWaiters.forEach((waiter) => waiter.setAttribute("aria-busy", "true"));
       const allLinks = findElements(rootElement, "link[rel='aellux-ext']");
       for (const link of allLinks) {
         const href = link.getAttribute("href");
@@ -826,6 +837,7 @@
       }
       await Promise.all(waitExtensions);
       await AelluxForce(rootElement, "mount");
+      allWaiters.forEach((waiter) => waiter.setAttribute("aria-busy", "false"));
     }
     return true;
   }
