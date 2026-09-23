@@ -1,205 +1,79 @@
 # Aellux
 
-Aellux is a lightweight extension-management library for modular UX behaviors in browser interfaces. It is designed to complement Bootstrap with declarative HTML attributes, adaptive CSS classes, and focused JavaScript extensions.
+Aellux is a lightweight extension-management library for modular UX behaviors in browser interfaces. It complements Bootstrap and other visual systems with declarative HTML attributes, adaptive CSS utilities, and independently loadable JavaScript Extensions.
 
-An **EXT (Aellux Extension)** is a functional unit that can be loaded and registered in the Aellux runtime. Each extension owns one focused UX responsibility and exposes its API through the global `Aellux` object.
+An **EXT (Aellux Extension)** owns one focused UX responsibility and exposes its API through the global `Aellux` object and its `$ae` alias. The Aellux boot script selects the runtime, while the orchestrator loads Extensions and coordinates `init`, `mount`, `unmount`, and `destroy`.
 
-Instead of coupling interface behavior to a single component implementation or filling markup with imperative JavaScript, Aellux lets the document describe the experience it needs. The runtime observes those declarations, loads the relevant extensions, and coordinates their lifecycle.
-
-Aellux does not replace Bootstrap. Bootstrap remains responsible for its visual system and components, while Aellux manages optional UX behaviors through independently loadable extensions. Aellux can also run without Bootstrap when a project provides its own styles.
-
-## Why Aellux?
-
-Browser UX is made of several independent concerns: adapting layouts to available space, preserving interface state during navigation, remembering user preferences, loading content, and coordinating interactive components. Aellux treats each concern as a focused Aellux Extension instead of combining every behavior into a single runtime or UI framework.
-
-- **Adaptive composition** Measures containers and exposes spatial information to CSS;
-- **State navigation** maintains continuity across history entries and URL changes;
-- **Persistence** retains interface choices;
-- additional extensions can provide their own declarative behaviors. In basic mode, pages register only the extensions they need with `Aellux.ext()`.
-
-The library is designed around three complementary layers:
-
-- **Attributes** declare the UX behaviors requested by the document.
-- **Classes** expose state that CSS can use to present those behaviors.
-- **Extensions** implement separate UX responsibilities behind those declarations.
-
-This separation keeps markup readable, CSS expressive, and JavaScript focused. It also allows each Aellux Extension to evolve independently without making adaptive composition—or any other feature—the center of the entire library.
-
-## Bootstrap Compatibility
-
-Aellux and Bootstrap have separate responsibilities and namespaces:
-
-- Bootstrap provides its grid, utilities, visual components, and optional component behaviors.
-- The Aellux boot script selects and starts the appropriate Aellux runtime.
-- The Aellux orchestrator loads extensions and coordinates their lifecycle.
-- Aellux Extensions implement modular UX behaviors through `init`, `mount`, `unmount`, and `destroy`.
-- Aellux declarations use `data-ae-*`, runtime state uses `ae--*`, and adaptive utilities use names such as `p-ux-md-2`, avoiding collisions with Bootstrap's public classes.
-
-Projects may load Aellux after Bootstrap to let Aellux adaptive utilities provide contextual overrides where intended. Bootstrap is not bundled or required by the Aellux runtime.
-
-## Current Features
-
-- Declarative activation through `data-ae-*` attributes.
-- Container-aware adaptive classes powered by `ResizeObserver`.
-- Shape detection for vertical, square, and horizontal spaces.
-- Configurable size classes from compact through ultrawide.
-- Browser history and URL hash synchronization for interface snapshots.
-- Local and session persistence helpers.
-- Dynamically loaded Aellux Extensions.
-- Read/update layout scheduling to reduce layout thrashing.
-- Native light and dark color-scheme support.
+Aellux does not require or bundle Bootstrap. Its `data-ae-*`, `ae--*`, and `*-ux-*` namespaces are designed to coexist with existing applications and frameworks.
 
 ## Quick Start
 
-### Build and distribution
+```html
+<script src="./dist/aellux.js"></script>
+<script>
+  $ae.init({ mode: "full" });
+</script>
+```
 
-Requires Node.js 20 or newer:
+Use `full` to load all core Extensions. Use `basic` to register only what the page needs:
+
+```html
+<script src="./dist/aellux.js"></script>
+<script>
+  $ae.ext("preferences");
+  $ae.ext("adaptive", {
+    loadWhen: "[data-ae-adaptive]",
+    loadStyle: true
+  });
+  $ae.init({ mode: "basic" });
+</script>
+```
+
+See [Getting Started](docs/getting-started.md) for build instructions, runtime modes, and distribution details.
+
+## Documentation
+
+- [Documentation index](docs/README.md)
+- [Runtime API](docs/runtime/api.md)
+- [Modern and Legacy runtimes](docs/runtime/modern-legacy.md)
+- [ES5 support level](docs/runtime/es5-support.md)
+- [Visual mounting states](docs/runtime/visual-mounting.md)
+- [Bootstrap integration](docs/integrations/bootstrap.md)
+- [Registering Aellux Extensions](docs/extensions/registration.md)
+- [Declarative Extension loading](docs/extensions/declarative-loading.md)
+- [Lazy loading](docs/extensions/lazy-loading.md)
+- [Optional Extension styles](docs/extensions/styles.md)
+- [Modern and Legacy Extension variants](docs/extensions/legacy-variants.md)
+- [Adaptive Extension](docs/extensions/adaptive.md)
+- [Extension scaffold](templates/README.md)
+
+## Core Capabilities
+
+- Declarative activation through `data-ae-*` attributes.
+- Selective eager or lazy Extension loading.
+- Optional styles associated with individual Extensions.
+- Idempotent DOM mounting through `$ae.update(root)`.
+- Container-aware adaptive states powered by `ResizeObserver`.
+- Browser history, preferences, feedback, persistence, and asynchronous content behaviors.
+- ES5-compatible boot script with an ES2017+ Modern runtime.
+
+## Build
+
+Node.js 20 or newer is required for build tooling:
 
 ```sh
 npm install
 npm run build
 ```
 
-Core sources live in `src/`, build tooling in `scripts/`, and experimental components in `examples/components/`. Only core sources are built and distributed. The flat `dist/` directory contains the ES5-compatible Aellux boot script and legacy fallback, ES2017 orchestrator, individual core Extensions, and the full core bundle. All distributed JavaScript files are classic scripts isolated in IIFEs, with minified versions and source maps. `src/aellux.full.esm.js` is only a bundler entry: it generates `aellux.full.js` and `aellux.full.min.js`, not an ESM distribution. Obsolete generated artifacts are removed after a successful build. The build uses [esbuild](https://esbuild.github.io/api/) for bundling and minification; modern browser APIs are not polyfilled.
-
-Use the [Aellux Extension scaffold](templates/README.md) to create new core extensions or experimental components. Templates remain outside the build inputs.
-
-Serve the repository over HTTP after building to use `index.htm` and the examples.
-
-```html
-<script src="./dist/aellux.js"></script>
-<script>
-  Aellux.init({ mode: "full" });
-</script>
-```
-
-Choose `mode: "full"` to load the orchestrator and all core Aellux Extensions from `aellux.full.js`. Choose `mode: "basic"` to load the orchestrator and only the extensions registered with `Aellux.ext()`. Loading `aellux.min.js` selects matching minified files. Both modes retain the legacy fallback path. Experimental example components are excluded from both distributions and are not currently activated.
-
-The full bundle is a runtime, not a standalone boot script: load it through `Aellux.init({ mode: "full" })`. Example styles remain in `examples/` and are not library runtime dependencies.
-
-The browser distribution exposes the global `Aellux` API; it does not provide ESM named or default exports. Load it with a classic `<script>` tag.
-
-Load the Aellux boot script and initialize Aellux after it:
-
-```html
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <title>My Aellux interface</title>
-
-    <script src="./aellux.js"></script>
-    <script>
-      Aellux.init({ mode: "full" });
-    </script>
-  </head>
-  <body>
-    <!-- Your interface -->
-  </body>
-</html>
-```
-
-The Aellux boot script automatically selects the modern classic-script runtime or the legacy fallback. In `basic` mode, the orchestrator loads extensions registered with `Aellux.ext()`; in `full` mode, the core bundle registers all core extensions.
-
-## Adaptive Composition
-
-Add `data-ae-adaptive` to a container to make its composition react to the space it actually occupies:
-
-```html
-<main data-ae-adaptive>
-  <!-- Adaptive content -->
-</main>
-```
-
-As the container changes, Aellux applies shape classes:
-
-- `ae--shape-vertical`
-- `ae--shape-square`
-- `ae--shape-horizontal`
-
-It also applies cumulative size classes when the container has enough space:
-
-- `ae--fits-compact`
-- `ae--fits-small`
-- `ae--fits-medium`
-- `ae--fits-large`
-- `ae--fits-wide`
-- `ae--fits-ultrawide`
-
-Because these classes belong to the container rather than the viewport, child layouts can adapt correctly wherever they are placed.
-
-## Configuration
-
-Pass an options object to `Aellux.init()` to override the defaults:
-
-```js
-Aellux.init({
-  mode: "basic",
-  useHash: true
-});
-
-Aellux.ext("preferences");
-Aellux.ext("state-navigation");
-Aellux.ext("adaptive");
-Aellux.ext("feedback");
-Aellux.ext("ajax-href");
-```
-
-Options are deeply merged with the library defaults, so only the values that need to change must be provided.
-
-## Runtime API
-
-The global `Aellux` object provides the main integration points:
-
-```js
-Aellux.on("Ready", handler);
-Aellux.off("Ready", handler);
-Aellux.dispatch("UpdateDOM", { detail: {} });
-
-Aellux.persist.local.set("key", "value");
-Aellux.persist.local.get("key", "fallback");
-
-Aellux.persist.session.set("key", "value");
-Aellux.persist.session.get("key", "fallback");
-```
-
-Custom events use the `Aellux` prefix. For example, `Aellux.on("Ready", handler)` listens for `AelluxReady`.
-
-`AelluxReady` signals that the orchestrator is initialized and available. It does not guarantee that every Aellux Extension initialized successfully or that elements have finished mounting. Extension failures are reported independently and do not prevent orchestrator readiness. Use component-specific events, such as `AelluxAdaptiveUpdate`, to track individual components.
-
-## Design Principles
-
-- Prefer semantic, declarative HTML over imperative setup code.
-- Adapt components to their own space, not only to the viewport.
-- Keep behavior extension-based and load only the UX capabilities requested by the page.
-- Build on browser standards such as custom events, `ResizeObserver`, History API, and Web Storage.
-- Preserve progressive enhancement by keeping the initial HTML meaningful.
-
-## Browser Support
-
-The Aellux boot script and legacy fallback use ES5-compatible syntax. The orchestrator, individual Extensions, and full bundle target ES2017 and later (ES2017+). This is a syntax baseline, not a guarantee of support in every browser implementing ES2017.
-
-All distributed JavaScript files are classic scripts isolated in IIFEs; ES modules are not required in the browser. Modern browser APIs are required separately and are not polyfilled. Depending on the selected extensions, these include:
-
-- Promises and async functions
-- `ResizeObserver`, `MutationObserver`, and `IntersectionObserver`
-- `fetch`, `CustomEvent`, and `requestAnimationFrame`
-- `URLSearchParams`
-
-The asynchronous-links EXT uses `AbortController` when available; without it, requests still run but cannot be canceled through that API. The Aellux boot script checks required runtime capabilities and selects the legacy path when those checks fail.
-
-A legacy fallback path exists, but the legacy runtime is not implemented yet.
-
-Node.js 20 or newer is required for build tooling, independently of the browser syntax baseline.
+Generated browser files are written to `dist/`. The distribution uses classic scripts isolated in IIFEs; it does not expose ESM named or default exports.
 
 ## Project Status
 
-Aellux is under active development. The core includes preferences, state navigation, adaptive composition, feedback, and asynchronous links. Experimental components remain only in `examples/components/` and are currently inactive in the examples.
+Aellux is under active development toward `0.1.0-beta.1`. Modern runtime behavior is operational; the functional Legacy runtime, Legacy Extension variants, formal diagnostics, and final Bootstrap integration tests remain beta goals.
 
-See `examples/` for development markup and experimental demonstrations.
+Track the release scope in the [0.1.0 Beta milestone](docs/milestones/0.1.0-beta.md) and delivered changes in the [changelog](CHANGELOG.md).
 
 ## License
 
-Aellux is licensed under the [Apache License 2.0](LICENSE). You may use, modify, and distribute it, including in commercial projects, subject to the license terms. The software is provided without warranties.
-
-The distribution includes the license text and retains license identifiers in normal and minified JavaScript and adaptive CSS files. Third-party dependencies remain subject to their own licenses.
+Aellux is licensed under the [Apache License 2.0](LICENSE). Third-party dependencies remain subject to their own licenses.

@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../src/aellux.ext.ajax-href.legacy.js"],
+  "sourcesContent": ["/*! Aellux | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */\n\n(function (root) {\n  \"use strict\";\n\n  if (root.console && typeof root.console.warn === \"function\") {\n    root.console.warn(\"[Aellux] Legacy Extension \\\"ajax-href\\\" is not implemented yet.\");\n  }\n})(typeof globalThis !== \"undefined\" ? globalThis : window);\n"],
+  "mappings": ";EAAA;AAEA,GAAC,SAAU,MAAM;AACf;AAEA,QAAI,KAAK,WAAW,OAAO,KAAK,QAAQ,SAAS,YAAY;AAC3D,WAAK,QAAQ,KAAK,+DAAiE;AAAA,IACrF;AAAA,EACF,GAAG,OAAO,eAAe,cAAc,aAAa,MAAM;",
+  "names": []
+}

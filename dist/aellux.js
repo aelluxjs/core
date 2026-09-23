@@ -228,7 +228,7 @@
       Aellux.legacy = true;
       Aellux.supported = false;
       var script = document.createElement("script");
-      script.src = aelluxBasePath + "aellux.legacy" + scriptExtension;
+      script.src = aelluxBasePath + "aellux.orchestrator.legacy" + scriptExtension;
       script.setAttribute(attr, "true");
       script.onload = function() {
         Aellux.dispatch("Legacy");
@@ -244,10 +244,9 @@
         return;
       var style = document.createElement("style");
       style.setAttribute(attr, "true");
-      var content = ":where(html){color-scheme:light dark;}:where(html[?color-scheme='dark']){color-scheme:dark;}:where(html[?color-scheme='light']){color-scheme:light;}:where(body,html) {font-family:system-ui;background-color:Canvas;color:CanvasText;}:where(button,a[href],[role='button'],[role='tab']){touch-action:manipulation;}[?wait-mount]:not(.%mounted) > *:not([?loader]) {visibility: hidden!important;}[?wait-mount].%mounted > [?loader] {display: none!important;}";
       var a = Aellux.attr("$1");
       var c = Aellux.className("$1");
-      style.textContent = content.replace(/\?([a-z][0-9a-z\-]*)/gi, a).replace(/\%([a-z][0-9a-z\-]*)/gi, c);
+      style.textContent = ":where(html){color-scheme:light dark;}:where(html[?color-scheme='dark']){color-scheme:dark;}:where(html[?color-scheme='light']){color-scheme:light;}:where(body,html) {font-family:system-ui;background-color:Canvas;color:CanvasText;}:where(button,a[href],[role='button'],[role='tab']){touch-action:manipulation;}[?wait-mounted]:not(.%mounted) > *:not([?loader]) {visibility: hidden!important;}[?wait-mounted].%mounted > [?loader] {display: none!important;}".replace(/\?([a-z][0-9a-z\-]*)/gi, a).replace(/\%([a-z][0-9a-z\-]*)/gi, c);
       document.head.appendChild(style);
       if (!document.querySelector('meta[name="viewport"]')) {
         var meta = document.createElement("meta");

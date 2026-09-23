@@ -1,7 +1,0 @@
-{
-  "version": 3,
-  "sources": ["../src/aellux.legacy.js"],
-  "sourcesContent": ["/*! Aellux | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */\n\n//Minimal legacy functionalities\n\r\n\"use strict\";\r\n\r\n\r\n//TAB CLICK / CLASS EVENT\n"],
-  "mappings": ";;EAAA;",
-  "names": []
-}

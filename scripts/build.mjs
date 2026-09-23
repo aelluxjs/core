@@ -52,7 +52,7 @@ generatedFiles.add("aellux.ext.adaptive.min.css");
 
 for (const sourceFile of sourceFiles) {
   const filename = basename(sourceFile);
-  const classic = filename === "aellux.js" || filename === "aellux.legacy.js";
+  const classic = filename === "aellux.js" || filename.endsWith(".legacy.js");
   const full = filename === "aellux.full.esm.js";
   const distributionFilename = full ? "aellux.full.js" : filename;
 
@@ -83,6 +83,11 @@ for (const entry of await readdir(outputDirectory, { withFileTypes: true })) {
   }
 }
 
-await copyFile(join(projectRoot, "README.md"), join(outputDirectory, "README.md"));
+const readme = await readFile(join(projectRoot, "README.md"), "utf8");
+const distributionReadme = readme.replace(
+  /\]\((docs\/|templates\/|CHANGELOG\.md)/g,
+  "](../$1"
+);
+await writeFile(join(outputDirectory, "README.md"), distributionReadme, "utf8");
 await copyFile(join(projectRoot, "LICENSE"), join(outputDirectory, "LICENSE"));
 console.log(`Build complete: ${sourceFiles.length * 2} JavaScript files, source maps, and Aellux Extension CSS in dist/.`);

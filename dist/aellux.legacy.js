@@ -1,5 +1,0 @@
-"use strict";
-(function() {
-  /*! Aellux | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
-})();
-//# sourceMappingURL=aellux.legacy.js.map

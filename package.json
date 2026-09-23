@@ -1,18 +1,39 @@
 {
-  "name": "aellux",
-  "version": "0.1.0",
+  "name": "@aelluxjs/core",
+  "version": "0.1.0-beta.1",
   "license": "Apache-2.0",
-  "description": "Declarative, extension-based UX for browser interfaces with ES2017+ runtime syntax and an ES5-compatible bootstrap and legacy fallback path",
+  "description": "Modular UX behavior management for browser interfaces with an ES5-compatible Aellux boot script and an ES2017+ runtime",
+  "keywords": [
+    "aellux",
+    "bootstrap",
+    "browser",
+    "declarative",
+    "extensions",
+    "progressive-enhancement",
+    "ux"
+  ],
+  "homepage": "https://aelluxjs.github.io/",
+  "bugs": {
+    "url": "https://github.com/aelluxjs/core/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aelluxjs/core.git"
+  },
   "type": "module",
   "exports": {
     ".": "./dist/aellux.js",
     "./bootstrap": "./dist/aellux.js",
     "./full": "./dist/aellux.full.js",
     "./orchestrator": "./dist/aellux.orchestrator.js",
+    "./orchestrator/legacy": "./dist/aellux.orchestrator.legacy.js",
     "./dist/*": "./dist/*"
   },
   "files": [
     "dist",
+    "docs",
+    "templates",
+    "CHANGELOG.md",
     "README.md",
     "LICENSE"
   ],
@@ -22,6 +43,9 @@
   },
   "engines": {
     "node": ">=20"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "devDependencies": {
     "esbuild": "^0.25.0"
