@@ -15,7 +15,9 @@ The orchestrator and Modern Extensions target ES2017+ syntax. They use Promises,
 
 When required capabilities are unavailable, or the Modern runtime fails to load, the boot script requests `aellux.orchestrator.legacy.js`.
 
-The build transpiles the Modern orchestrator and each core Extension into ES5-syntax Legacy variants. The Legacy path is still not a complete compatibility guarantee: required Web APIs and polyfills must be defined and its integration tests completed before production Legacy support can be claimed.
+The build transpiles the Modern orchestrator and each core Extension into ES5-syntax Legacy variants. The Legacy orchestrator bundle also installs the Core polyfills before starting the runtime. Extensions reuse that environment and therefore do not duplicate those polyfills in each generated file.
+
+This provides the intended compatibility layer, but it is not an unrestricted guarantee for every historical ES5 browser. The supported browser matrix and integration tests must still be completed before production Legacy support can be claimed.
 
 ## Selection Rules
 

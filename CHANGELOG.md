@@ -13,6 +13,7 @@ All notable changes to Aellux will be documented in this file.
 - Core Extensions for adaptive behavior, preferences, state navigation, feedback, and asynchronous links.
 - ES5-compatible boot and fallback paths with an ES2017+ orchestrator and Extensions.
 - Build-generated ES5-syntax Legacy variants for the orchestrator and core Extensions using the `.legacy.js` convention.
+- Core polyfills bundled once with the Legacy orchestrator for language APIs, observers, events, animation frames and networking.
 
 ### Changed
 

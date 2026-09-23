@@ -9,8 +9,21 @@
       AELLUX_DATA_ATTRIBUTE_NAME_PREFFIX: "ae-?",
       AELLUX_DEFAULT_INITIALIZATION_OPTIONS: {
         mode: "full",
+        forceLegacy: false,
         basePath: null
-      }
+      },
+      AELLUX_MODERN_API_DEPENDENCIES: [
+        "Promise",
+        "Map",
+        "ResizeObserver",
+        "MutationObserver",
+        "IntersectionObserver",
+        "CustomEvent",
+        "requestAnimationFrame",
+        "fetch",
+        { name: "Object", function: ["assign", "entries", "freeze"] },
+        { name: "Array", function: ["from", "isArray"] }
+      ]
     };
     var scriptExtension = ".js";
     var root = typeof globalThis !== "undefined" ? globalThis : window;
@@ -166,18 +179,7 @@
     }
     function loadOrchestrator() {
       var attr = Aellux.attr("esm");
-      [
-        "Promise",
-        "Map",
-        "ResizeObserver",
-        "MutationObserver",
-        "IntersectionObserver",
-        "CustomEvent",
-        "requestAnimationFrame",
-        "fetch",
-        { name: "Object", function: ["assign", "entries", "freeze"] },
-        { name: "Array", function: ["from", "isArray"] }
-      ].forEach(function(option) {
+      CONSTANTS.AELLUX_MODERN_API_DEPENDENCIES.forEach(function(option) {
         if (typeof option === "string") {
           if (typeof window[option] !== "function") {
             Aellux.notAvailable.push(option);

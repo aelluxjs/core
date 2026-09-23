@@ -1,6 +1,6 @@
 # Modern and Legacy Extension Variants
 
-> Status: the build generates ES5-syntax variants from the Modern sources; API compatibility and polyfill requirements remain under review.
+> Status: the build generates ES5-syntax variants from the Modern sources. Core polyfills are bundled once in the Legacy orchestrator; the supported browser matrix remains under review.
 
 The beta target allows an Aellux Extension to declare one of three compatibility profiles:
 
@@ -25,4 +25,4 @@ The Legacy orchestrator follows the same convention as `aellux.orchestrator.lega
 - Independent loading of JavaScript and optional styles for the selected variant.
 - Equivalent public APIs where both variants are provided.
 
-The runtime compatibility metadata and required polyfills must be defined before this document can be considered stable.
+The runtime compatibility metadata and supported browser matrix must be defined before this document can be considered stable.

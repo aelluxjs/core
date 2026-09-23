@@ -22,8 +22,16 @@
 
     AELLUX_DEFAULT_INITIALIZATION_OPTIONS: {
       mode: "full",
+      forceLegacy: false,
       basePath: null
-    }
+    },
+
+    AELLUX_MODERN_API_DEPENDENCIES: [
+      "Promise", "Map", "ResizeObserver", "MutationObserver",
+      "IntersectionObserver", "CustomEvent", "requestAnimationFrame", "fetch",
+      { name: "Object", function: ["assign", "entries", "freeze"] },
+      { name: "Array", function: ["from", "isArray"] }
+    ]
   };
 
   var scriptExtension = ".js";
@@ -171,10 +179,7 @@
   function loadOrchestrator() {
     var attr = Aellux.attr("esm");
 
-    ["Promise", "Map", "ResizeObserver", "MutationObserver",
-      "IntersectionObserver", "CustomEvent", "requestAnimationFrame", "fetch",
-      { name: "Object", function: ["assign", "entries", "freeze"] },
-      { name: "Array", function: ["from", "isArray"] }]
+    CONSTANTS.AELLUX_MODERN_API_DEPENDENCIES
       .forEach(function (option) {
         if (typeof option === "string") {
           if (typeof window[option] !== "function") {
@@ -413,7 +418,7 @@
   }
 
   function isLegacyForced() {
-    return /(?:^|[?&])aellux-debug-legacy(?:=1|=true)?(?:&|$)/i
+    return Aellux.options.forceLegacy ? true : /(?:^|[?&])aellux-debug-legacy(?:=1|=true)?(?:&|$)/i
       .test(window.location.search);
   }
 

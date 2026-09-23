@@ -26,6 +26,31 @@ const legacySourceFiles = sourceFiles.filter(sourceFile => {
   return filename === "aellux.orchestrator.js" ||
     /^aellux\.ext\.[\w-]+\.js$/.test(filename);
 });
+const legacyOrchestratorEntry = `
+require("core-js/stable");
+require("custom-event-polyfill");
+require("raf/polyfill");
+require("whatwg-fetch");
+require("mutationobserver-shim");
+require("intersection-observer");
+
+var ResizeObserverPolyfill = require("resize-observer-polyfill");
+if (typeof window.ResizeObserver !== "function") {
+  window.ResizeObserver = ResizeObserverPolyfill;
+}
+if (window.Element && !window.Element.prototype.matches) {
+  window.Element.prototype.matches =
+    window.Element.prototype.msMatchesSelector ||
+    window.Element.prototype.webkitMatchesSelector;
+}
+if (window.NodeList && !window.NodeList.prototype.forEach) {
+  window.NodeList.prototype.forEach = function (callback, thisArg) {
+    Array.prototype.forEach.call(this, callback, thisArg);
+  };
+}
+
+require("aellux-legacy-orchestrator");
+`;
 
 await mkdir(outputDirectory, { recursive: true });
 
@@ -108,25 +133,52 @@ for (const sourceFile of legacySourceFiles) {
     const outputFilename = minify
       ? distributionFilename.replace(/\.js$/, ".min.js")
       : distributionFilename;
+    const isOrchestrator = filename === "aellux.orchestrator.js";
     await build({
       absWorkingDir: projectRoot,
       stdin: {
-        contents: transformed.code,
+        contents: isOrchestrator ? legacyOrchestratorEntry : transformed.code,
         loader: "js",
         resolveDir: projectRoot,
-        sourcefile: sourceFileName
+        sourcefile: isOrchestrator
+          ? "aellux.orchestrator.legacy.entry.js"
+          : sourceFileName
       },
       outfile: join(outputDirectory, outputFilename),
+      bundle: isOrchestrator,
       platform: "browser",
       format: "iife",
       target: "es5",
       minify,
       sourcemap: true,
-      legalComments: "inline"
+      legalComments: "inline",
+      plugins: isOrchestrator
+        ? [legacyOrchestratorPlugin(transformed.code, sourceFileName)]
+        : []
     });
     generatedFiles.add(outputFilename);
     generatedFiles.add(outputFilename + ".map");
   }
+}
+
+function legacyOrchestratorPlugin(code, sourceFileName) {
+  return {
+    name: "aellux-legacy-orchestrator",
+    setup(buildContext) {
+      buildContext.onResolve(
+        { filter: /^aellux-legacy-orchestrator$/ },
+        () => ({ path: sourceFileName, namespace: "aellux-legacy" })
+      );
+      buildContext.onLoad(
+        { filter: /.*/, namespace: "aellux-legacy" },
+        () => ({
+          contents: code,
+          loader: "js",
+          resolveDir: projectRoot
+        })
+      );
+    }
+  };
 }
 
 for (const entry of await readdir(outputDirectory, { withFileTypes: true })) {

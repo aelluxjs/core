@@ -8,9 +8,21 @@ The boot script avoids modern syntax so it can perform capability detection befo
 
 ## APIs and Polyfills
 
-Syntax compatibility does not provide missing browser APIs. A functional Legacy runtime may require polyfills for features such as Promises, DOM matching, collections, events, networking, or URL handling.
+Syntax compatibility alone does not provide missing browser APIs. For this reason, `aellux.orchestrator.legacy.js` includes compatibility layers for:
 
-The final supported environments and required polyfills remain part of the `0.1.0-beta` milestone. Legacy files are generated from the same orchestrator and Extension sources, but only the Modern ES2017+ runtime should be considered fully operational until those requirements are complete.
+- ES language APIs supplied by `core-js`, including `Promise`, collections, symbols, `Object` helpers, `Array` helpers and `URLSearchParams`;
+- `fetch`;
+- `CustomEvent`;
+- `requestAnimationFrame`;
+- `MutationObserver`;
+- `IntersectionObserver`;
+- `ResizeObserver`;
+- `Element.prototype.matches`; and
+- `NodeList.prototype.forEach`.
+
+The generated Legacy Extensions do not embed these dependencies again. They are loaded after, and share the environment prepared by, the Legacy orchestrator.
+
+Browser primitives such as the DOM, `XMLHttpRequest` and `DOMParser` are still expected from the host environment. The final supported browser matrix remains part of the `0.1.0-beta` milestone, so ES5 syntax must not be interpreted as unrestricted support for every old browser.
 
 ## Build Tooling
 
