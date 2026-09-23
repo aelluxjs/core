@@ -233,10 +233,15 @@
       Aellux.legacy = true;
       Aellux.supported = false;
       var script = document.createElement("script");
-      script.src = Aellux.aelluxBasePath + "aellux.orchestrator.legacy" + scriptExtension;
+      var runtime = Aellux.options.mode === "basic" ? "aellux.orchestrator.legacy" : "aellux.full.legacy";
+      script.src = Aellux.aelluxBasePath + runtime + scriptExtension;
       script.setAttribute(attr, "true");
       script.onload = function() {
         Aellux.dispatch("Legacy");
+        Aellux.startAellux().catch(function(error) {
+          console.error(error);
+          console.error("[Aellux] Legacy runtime failed to start.");
+        });
       };
       script.onerror = function() {
         console.error("[Aellux] Legacy fallback could not be loaded.");
@@ -385,7 +390,7 @@
       return target;
     }
     function isLegacyForced() {
-      return /(?:^|[?&])aellux-debug-legacy(?:=1|=true)?(?:&|$)/i.test(window.location.search);
+      return Aellux.options.forceLegacy ? true : /(?:^|[?&])aellux-debug-legacy(?:=1|=true)?(?:&|$)/i.test(window.location.search);
     }
     function toCapitalized(name) {
       return name.replace(/^([a-z])|-([a-z])/g, function(_, first, afterHyphen) {

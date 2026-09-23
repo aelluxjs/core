@@ -25,6 +25,7 @@
     ".": "./dist/aellux.js",
     "./bootstrap": "./dist/aellux.js",
     "./full": "./dist/aellux.full.js",
+    "./full/legacy": "./dist/aellux.full.legacy.js",
     "./orchestrator": "./dist/aellux.orchestrator.js",
     "./orchestrator/legacy": "./dist/aellux.orchestrator.legacy.js",
     "./dist/*": "./dist/*"

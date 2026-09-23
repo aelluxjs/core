@@ -16,7 +16,7 @@ The orchestrator selects the Legacy filename when the boot script has selected t
 - Legacy: `aellux.ext.<name>.legacy.js`
 - Minified Legacy: `aellux.ext.<name>.legacy.min.js`
 
-The Legacy orchestrator follows the same convention as `aellux.orchestrator.legacy.js`.
+The Legacy runtime follows the same convention with `aellux.orchestrator.legacy.js` for `basic` mode and `aellux.full.legacy.js` for `full` mode.
 
 ## Requirements Under Review
 

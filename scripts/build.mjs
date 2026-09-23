@@ -4,7 +4,7 @@ import { build } from "esbuild";
 import { transformAsync } from "@babel/core";
 import presetEnv from "@babel/preset-env";
 import { copyFile, mkdir, readFile, readdir, unlink, writeFile } from "node:fs/promises";
-import { basename, join, relative } from "node:path";
+import { basename, dirname, isAbsolute, join, relative } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { createContext, runInContext } from "node:vm";
 import { generateAdaptiveCSS } from "../src/aellux.ext.adaptive.css.js";
@@ -26,7 +26,7 @@ const legacySourceFiles = sourceFiles.filter(sourceFile => {
   return filename === "aellux.orchestrator.js" ||
     /^aellux\.ext\.[\w-]+\.js$/.test(filename);
 });
-const legacyOrchestratorEntry = `
+const legacyPolyfills = `
 require("core-js/stable");
 require("custom-event-polyfill");
 require("raf/polyfill");
@@ -48,8 +48,13 @@ if (window.NodeList && !window.NodeList.prototype.forEach) {
     Array.prototype.forEach.call(this, callback, thisArg);
   };
 }
+`;
 
+const legacyOrchestratorEntry = `${legacyPolyfills}
 require("aellux-legacy-orchestrator");
+`;
+const legacyFullEntry = `${legacyPolyfills}
+require("./src/aellux.full.esm.js");
 `;
 
 await mkdir(outputDirectory, { recursive: true });
@@ -111,23 +116,7 @@ for (const sourceFile of legacySourceFiles) {
   const filename = basename(sourceFile);
   const distributionFilename = filename.replace(/\.js$/, ".legacy.js");
   const sourceFileName = relative(projectRoot, sourceFile).replace(/\\/g, "/");
-  const transformed = await transformAsync(
-    await readFile(sourceFile, "utf8"),
-    {
-      filename: sourceFile,
-      sourceFileName,
-      presets: [[presetEnv, {
-        modules: false,
-        targets: { ie: "11" },
-        useBuiltIns: false
-      }]],
-      sourceMaps: "inline"
-    }
-  );
-
-  if (!transformed || !transformed.code) {
-    throw new Error(`Failed to transpile Legacy source: ${sourceFileName}`);
-  }
+  const transformed = await transpileLegacySource(sourceFile, sourceFileName);
 
   for (const minify of [false, true]) {
     const outputFilename = minify
@@ -161,6 +150,54 @@ for (const sourceFile of legacySourceFiles) {
   }
 }
 
+for (const minify of [false, true]) {
+  const outputFilename = minify
+    ? "aellux.full.legacy.min.js"
+    : "aellux.full.legacy.js";
+  await build({
+    absWorkingDir: projectRoot,
+    stdin: {
+      contents: legacyFullEntry,
+      loader: "js",
+      resolveDir: projectRoot,
+      sourcefile: "aellux.full.legacy.entry.js"
+    },
+    outfile: join(outputDirectory, outputFilename),
+    bundle: true,
+    platform: "browser",
+    format: "iife",
+    target: "es5",
+    minify,
+    sourcemap: true,
+    legalComments: "inline",
+    plugins: [legacyBundlePlugin()]
+  });
+  generatedFiles.add(outputFilename);
+  generatedFiles.add(outputFilename + ".map");
+}
+
+async function transpileLegacySource(sourceFile, sourceFileName) {
+  const transformed = await transformAsync(
+    await readFile(sourceFile, "utf8"),
+    {
+      filename: sourceFile,
+      sourceFileName,
+      presets: [[presetEnv, {
+        modules: false,
+        targets: { ie: "11" },
+        useBuiltIns: false
+      }]],
+      sourceMaps: "inline"
+    }
+  );
+
+  if (!transformed || !transformed.code) {
+    throw new Error(`Failed to transpile Legacy source: ${sourceFileName}`);
+  }
+
+  return transformed;
+}
+
 function legacyOrchestratorPlugin(code, sourceFileName) {
   return {
     name: "aellux-legacy-orchestrator",
@@ -181,6 +218,28 @@ function legacyOrchestratorPlugin(code, sourceFileName) {
   };
 }
 
+function legacyBundlePlugin() {
+  return {
+    name: "aellux-legacy-bundle",
+    setup(buildContext) {
+      buildContext.onLoad({ filter: /\.js$/ }, async args => {
+        const sourceFileName = relative(projectRoot, args.path).replace(/\\/g, "/");
+        const sourceRelativePath = relative(sourceDirectory, args.path);
+        if (sourceRelativePath.startsWith("..") || isAbsolute(sourceRelativePath)) {
+          return null;
+        }
+
+        const transformed = await transpileLegacySource(args.path, sourceFileName);
+        return {
+          contents: transformed.code,
+          loader: "js",
+          resolveDir: dirname(args.path)
+        };
+      });
+    }
+  };
+}
+
 for (const entry of await readdir(outputDirectory, { withFileTypes: true })) {
   if (entry.isFile() && /^aellux(?:\.[\w-]+)*\.(?:js|css)(?:\.map)?$/.test(entry.name) &&
     !generatedFiles.has(entry.name)) {
@@ -196,4 +255,6 @@ const distributionReadme = readme.replace(
 );
 await writeFile(join(outputDirectory, "README.md"), distributionReadme, "utf8");
 await copyFile(join(projectRoot, "LICENSE"), join(outputDirectory, "LICENSE"));
-console.log(`Build complete: ${(sourceFiles.length + legacySourceFiles.length) * 2} JavaScript files, source maps, and Aellux Extension CSS in dist/.`);
+const generatedJavaScriptFiles = Array.from(generatedFiles)
+  .filter(filename => filename.endsWith(".js")).length;
+console.log(`Build complete: ${generatedJavaScriptFiles} JavaScript files, source maps, and Aellux Extension CSS in dist/.`);

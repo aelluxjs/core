@@ -588,7 +588,7 @@
       if (root.Aellux.bundledExtensions) {
         Object.keys(root.Aellux.bundledExtensions).forEach((extensionName) => Aellux.ext(extensionName));
       }
-      await new Promise((resolve, reject) => {
+      await new Promise((resolve) => {
         const startUpdateCallback = function() {
           Aellux.update().then(function() {
             document.removeEventListener(

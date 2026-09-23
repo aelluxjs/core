@@ -8,7 +8,7 @@ The boot script avoids modern syntax so it can perform capability detection befo
 
 ## APIs and Polyfills
 
-Syntax compatibility alone does not provide missing browser APIs. For this reason, `aellux.orchestrator.legacy.js` includes compatibility layers for:
+Syntax compatibility alone does not provide missing browser APIs. For this reason, the selected Legacy runtime, `aellux.orchestrator.legacy.js` or `aellux.full.legacy.js`, includes compatibility layers for:
 
 - ES language APIs supplied by `core-js`, including `Promise`, collections, symbols, `Object` helpers, `Array` helpers and `URLSearchParams`;
 - `fetch`;

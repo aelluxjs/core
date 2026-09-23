@@ -14,6 +14,7 @@ All notable changes to Aellux will be documented in this file.
 - ES5-compatible boot and fallback paths with an ES2017+ orchestrator and Extensions.
 - Build-generated ES5-syntax Legacy variants for the orchestrator and core Extensions using the `.legacy.js` convention.
 - Core polyfills bundled once with the Legacy orchestrator for language APIs, observers, events, animation frames and networking.
+- Legacy `basic` and `full` distributions matching the Modern runtime mode selection.
 
 ### Changed
 
