@@ -27,6 +27,7 @@ All notable changes to Aellux will be documented in this file.
 
 - Normalized generated Aellux event names, including names containing hyphens.
 - Isolated extension initialization failures so they do not prevent orchestrator readiness.
+- Preserved custom stylesheet URLs declared through `data-ae-load-style` and handled boolean `loadStyle: true` correctly.
 
 ## [0.1.0-beta.1] - Unreleased
 

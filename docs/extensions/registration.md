@@ -28,7 +28,7 @@ $ae.ext("adaptive", {
 ```
 
 - `loadWhen` delays loading until a matching element is discovered.
-- `loadStyle` requests the stylesheet derived from the Extension script URL.
+- `loadStyle: true` requests the stylesheet derived from the Extension script URL; a URL string requests that specific stylesheet.
 
 Register each label once. Duplicate declarations currently report an error and do not replace the existing registration.
 

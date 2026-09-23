@@ -12,7 +12,7 @@ Pages can register Extensions through link declarations discovered by the orches
 
 - `href` accepts an Extension label or a URL following the Aellux Extension filename convention.
 - `data-ae-load-when` provides the selector used for lazy loading.
-- `data-ae-load-style` requests the associated stylesheet. The value `false` disables it.
+- `data-ae-load-style` requests the associated stylesheet when empty or set to `true`; a stylesheet URL requests that specific resource, and `false` disables it.
 
 After processing a declaration, the orchestrator changes its relation to `aellux-ext-registered` so subsequent updates do not register it again.
 

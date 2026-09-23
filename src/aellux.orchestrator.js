@@ -176,7 +176,8 @@ async function appendExtensionAssets(name) {
   if (data.loadStyle && data.loadStyle !== "false") {
     loadPromises.push(new Promise(
       (resolve) => {
-        const styleDefaultURL = data.loadStyle === "true" || data.loadStyle === "";
+        const styleDefaultURL = data.loadStyle === true ||
+          data.loadStyle === "true" || data.loadStyle === "";
         const href = styleDefaultURL ? url.replace(/\.js(?=[?#]|$)/, ".css") : data.loadStyle;
         const attrStyle = Aellux.attr("ext-style");
         const link = document.createElement("link");
@@ -296,8 +297,10 @@ async function AelluxForceUpdate(rootOrSelector) {
     for (const link of allLinks) {
       const href = link.getAttribute("href");
       const loadWhen = link.getAttribute(Aellux.attr("load-when")) || undefined;
-      const loadStyle = link.hasAttribute(Aellux.attr("load-style")) &&
-        link.getAttribute(Aellux.attr("load-style")) !== "false"; //false/null
+      const loadStyleValue = link.getAttribute(Aellux.attr("load-style"));
+      const loadStyle = loadStyleValue === null || loadStyleValue === "false"
+        ? false
+        : loadStyleValue || true;
       link.setAttribute("rel", "aellux-ext-registered");
       Aellux.ext(href, { loadWhen, loadStyle });
     }

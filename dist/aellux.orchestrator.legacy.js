@@ -22337,7 +22337,7 @@
                 }));
                 if (data.loadStyle && data.loadStyle !== "false") {
                   loadPromises.push(new Promise(function(resolve) {
-                    var styleDefaultURL = data.loadStyle === "true" || data.loadStyle === "";
+                    var styleDefaultURL = data.loadStyle === true || data.loadStyle === "true" || data.loadStyle === "";
                     var href = styleDefaultURL ? url.replace(/\.js(?=[?#]|$)/, ".css") : data.loadStyle;
                     var attrStyle = Aellux.attr("ext-style");
                     var link = document.createElement("link");
@@ -22473,7 +22473,7 @@
       }
       function _AelluxForceUpdate() {
         _AelluxForceUpdate = _asyncToGenerator(/* @__PURE__ */ _regenerator().m(function _callee4(rootOrSelector) {
-          var _iterator2, _step2, rootElement, allWaiters, allLinks, _iterator3, _step3, link, href, loadWhen, loadStyle, waitExtensions, _i, _Object$entries, _Object$entries$_i, extensionLabel, options, _t2;
+          var _iterator2, _step2, rootElement, allWaiters, allLinks, _iterator3, _step3, link, href, loadWhen, loadStyleValue, loadStyle, waitExtensions, _i, _Object$entries, _Object$entries$_i, extensionLabel, options, _t2;
           return _regenerator().w(function(_context4) {
             while (1) switch (_context4.p = _context4.n) {
               case 0:
@@ -22497,7 +22497,8 @@
                     link = _step3.value;
                     href = link.getAttribute("href");
                     loadWhen = link.getAttribute(Aellux.attr("load-when")) || void 0;
-                    loadStyle = link.hasAttribute(Aellux.attr("load-style")) && link.getAttribute(Aellux.attr("load-style")) !== "false";
+                    loadStyleValue = link.getAttribute(Aellux.attr("load-style"));
+                    loadStyle = loadStyleValue === null || loadStyleValue === "false" ? false : loadStyleValue || true;
                     link.setAttribute("rel", "aellux-ext-registered");
                     Aellux.ext(href, {
                       loadWhen: loadWhen,
