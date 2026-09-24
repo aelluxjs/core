@@ -22545,7 +22545,12 @@
             case 22:
               _context3.p = 22;
               _t4 = _context3.v;
-              console.error(_t4);
+              Aellux2.diagnostics.report(Aellux2.diagnostics.ERROR_EXTENSION_MOUNT, {
+                cause: _t4,
+                extension: _extensionLabel2,
+                method: method,
+                selector: _selector2
+              });
             case 23:
               _context3.n = 10;
               break;
@@ -22922,7 +22927,10 @@
                   case 3:
                     _context5.p = 3;
                     _t = _context5.v;
-                    console.error("[Aellux] Extension unmount failed.", _t);
+                    Aellux.diagnostics.report(Aellux.diagnostics.ERROR_EXTENSION_UNMOUNT, {
+                      cause: _t,
+                      extensions: extensionLabels
+                    });
                   case 4:
                     _iterator = _createForOfIteratorHelper2(extensionLabels);
                     _context5.p = 5;
@@ -22958,7 +22966,10 @@
                   case 11:
                     _context5.p = 11;
                     _t2 = _context5.v;
-                    console.error("[Aellux] Extension destroy failed.", _t2);
+                    Aellux.diagnostics.report(Aellux.diagnostics.ERROR_EXTENSION_DESTROY, {
+                      cause: _t2,
+                      extension: extensionLabel
+                    });
                   case 12:
                     _context5.p = 12;
                     delete extensionPromises[key];
@@ -23032,7 +23043,10 @@
               try {
                 extensionInitialize(key);
               } catch (error) {
-                console.error('[Aellux] Aellux Extension "'.concat(extensionName, '" failed to initialize.'), error);
+                Aellux.diagnostics.report(Aellux.diagnostics.ERROR_EXTENSION_INITIALIZE, {
+                  cause: error,
+                  extension: extensionName
+                });
                 extensionPromises[key] = Promise.resolve(null);
                 return extensionPromises[key];
               }
@@ -23049,7 +23063,10 @@
           }) : appendExtensionAssets(key)).then(function() {
             return extensionInitialize(key);
           }).catch(function(error) {
-            console.error('[Aellux] Aellux Extension "'.concat(extensionName, '" failed to initialize.'), error);
+            Aellux.diagnostics.report(Aellux.diagnostics.ERROR_EXTENSION_INITIALIZE, {
+              cause: error,
+              extension: extensionName
+            });
             return null;
           });
           return extensionPromises[key];

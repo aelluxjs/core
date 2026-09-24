@@ -111,7 +111,15 @@ export function createMountHelper(root, extensionPromises) {
               setMounted(mountable, mountId, mounting);
             }
           } catch (error) {
-            console.error(error);
+            Aellux.diagnostics.report(
+              Aellux.diagnostics.ERROR_EXTENSION_MOUNT,
+              {
+                cause: error,
+                extension: extensionLabel,
+                method,
+                selector
+              }
+            );
           }
         }
       }

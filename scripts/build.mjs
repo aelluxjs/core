@@ -68,7 +68,18 @@ const bootstrapContext = createContext({
   }
 });
 bootstrapContext.window = bootstrapContext;
-runInContext(await readFile(bootstrapPath, "utf8"), bootstrapContext);
+bootstrapContext.globalThis = bootstrapContext;
+const bootstrapEvaluationBuild = await build({
+  absWorkingDir: projectRoot,
+  entryPoints: [bootstrapPath],
+  bundle: true,
+  platform: "browser",
+  format: "iife",
+  target: "es2017",
+  write: false,
+  legalComments: "none"
+});
+runInContext(bootstrapEvaluationBuild.outputFiles[0].text, bootstrapContext);
 bootstrapContext.Aellux.ext("adaptive");
 runInContext(await readFile(adaptiveExtensionPath, "utf8"), bootstrapContext);
 await writeFile(
@@ -100,7 +111,7 @@ for (const sourceFile of sourceFiles) {
       absWorkingDir: projectRoot,
       entryPoints: [sourceFile],
       outfile: join(outputDirectory, outputFilename),
-      bundle: full || orchestrator,
+      bundle: classic || full || orchestrator,
       platform: "browser",
       format: "iife",
       target: classic ? "es5" : "es2017",

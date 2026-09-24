@@ -1,4 +1,152 @@
 (function() {
+  // src/internal/build-persist-memory.js
+  /*! Aellux | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+  function buildPersistMemory(root, name, identifier) {
+    var defaultIdentifier = identifier ? identifier : "AelluxPersist";
+    var target;
+    try {
+      target = root[name] || null;
+      if (!target || typeof target.setItem !== "function" || typeof target.getItem !== "function") {
+        throw new Error("Storage unavailable");
+      }
+    } catch (error) {
+      target = {
+        data: {},
+        setItem: function(key, value) {
+          this.data[key] = value;
+        },
+        getItem: function(key) {
+          return this.data[key] ? this.data[key] : null;
+        }
+      };
+    }
+    var fallback = {
+      data: {},
+      keys: function() {
+        var keys = [];
+        for (var key in this.data) {
+          if (Object.prototype.hasOwnProperty.call(this.data, key)) {
+            keys.push(key);
+          }
+        }
+        return keys;
+      },
+      get: function(key) {
+        return this.data[key] ? this.data[key] : null;
+      },
+      set: function(key, value) {
+        this.data[key] = value;
+      },
+      toString: function() {
+        return JSON.stringify(this.data);
+      }
+    };
+    function getData() {
+      if (typeof root.URLSearchParams !== "undefined")
+        return new root.URLSearchParams(target.getItem(defaultIdentifier) || "");
+      fallback.data = JSON.parse(target.getItem(defaultIdentifier) || "{}");
+      return fallback;
+    }
+    return {
+      get: function(key, fallbackValue) {
+        return getData().get(key) || fallbackValue;
+      },
+      set: function(key, value) {
+        var data = getData();
+        data.set(key, value);
+        return target.setItem(defaultIdentifier, data.toString());
+      },
+      setObject: function(object) {
+        var data = getData();
+        for (var key in object) {
+          if (Object.prototype.hasOwnProperty.call(object, key)) {
+            data.set(key, object[key]);
+          }
+        }
+        return target.setItem(defaultIdentifier, data.toString());
+      },
+      getObject: function() {
+        var data = getData();
+        var object = {};
+        var keys = data.keys();
+        if (typeof keys.next === "function") {
+          var entry = keys.next();
+          while (!entry.done) {
+            object[entry.value] = data.get(entry.value);
+            entry = keys.next();
+          }
+        } else {
+          keys.forEach(function(key) {
+            object[key] = data.get(key);
+          });
+        }
+        return object;
+      }
+    };
+  }
+
+  // src/internal/build-preferences-media-queries.js
+  /*! Aellux | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+  function buildPreferencesMediaQueries(root) {
+    function mediaQuery(query) {
+      return typeof root.matchMedia === "function" ? root.matchMedia(query) : null;
+    }
+    return {
+      colorScheme: {
+        light: mediaQuery("(prefers-color-scheme: light)"),
+        dark: mediaQuery("(prefers-color-scheme: dark)")
+      },
+      reducedMotion: {
+        reduced: mediaQuery("(prefers-reduced-motion: reduced)"),
+        "no-preference": mediaQuery("(prefers-reduced-motion: no-preference)")
+      },
+      reducedTransparency: {
+        reduced: mediaQuery("(prefers-reduced-transparency: reduced)"),
+        "no-preference": mediaQuery("(prefers-reduced-transparency: no-preference)")
+      },
+      forcedColors: {
+        active: mediaQuery("(forced-colors: active)"),
+        "no-preference": mediaQuery("(forced-colors: no-preference)")
+      },
+      contrast: {
+        more: mediaQuery("(prefers-contrast: more)"),
+        less: mediaQuery("(prefers-contrast: less)"),
+        "no-preference": mediaQuery("(prefers-contrast: no-preference)")
+      }
+    };
+  }
+
+  // src/internal/build-diagnostics.js
+  /*! Aellux | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+  function buildDiagnostics(catalog) {
+    var diagnostics = {
+      create: function(definition, context) {
+        var error = new Error(definition.message);
+        error.name = "AelluxDiagnosticError";
+        error.code = definition.code;
+        if (context) error.context = context;
+        return error;
+      },
+      report: function(definition, context) {
+        var error = diagnostics.create(definition, context);
+        if (typeof console !== "undefined" && typeof console.error === "function") {
+          console.error(
+            "[Aellux " + definition.code + "] " + definition.message,
+            context || ""
+          );
+        }
+        return error;
+      }
+    };
+    for (var name in catalog) {
+      if (Object.prototype.hasOwnProperty.call(catalog, name)) {
+        diagnostics[name] = catalog[name];
+      }
+    }
+    return diagnostics;
+  }
+
+  // src/aellux.js
   /*! Aellux | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   (function(root) {
     var CONSTANTS = {
@@ -7,6 +155,18 @@
       AELLUX_CLASS_NAME_PREFFIX: "ae--?",
       AELLUX_EVENT_NAME_PREFFIX: "Aellux?",
       AELLUX_DATA_ATTRIBUTE_NAME_PREFFIX: "ae-?",
+      AELLUX_DIAGNOSTICS: {
+        ERROR_BOOTSTRAP_NOT_FOUND: { code: 1e3, message: "Aellux boot script could not be located." },
+        ERROR_NOT_INITIALIZED: { code: 1001, message: "Aellux has not been initialized." },
+        ERROR_INVALID_MODE: { code: 1002, message: "Aellux mode must be basic or full." },
+        ERROR_EXTENSION_DUPLICATE: { code: 1101, message: "Aellux Extension is already registered." },
+        ERROR_EXTENSION_INITIALIZE: { code: 1102, message: "Aellux Extension failed to initialize." },
+        ERROR_EXTENSION_MOUNT: { code: 1103, message: "Aellux Extension failed to mount or unmount an element." },
+        ERROR_EXTENSION_UNMOUNT: { code: 1104, message: "Aellux Extension failed to unmount." },
+        ERROR_EXTENSION_DESTROY: { code: 1105, message: "Aellux Extension failed to destroy." },
+        ERROR_LEGACY_RUNTIME_START: { code: 1201, message: "Aellux Legacy runtime failed to start." },
+        ERROR_LEGACY_RUNTIME_LOAD: { code: 1202, message: "Aellux Legacy runtime could not be loaded." }
+      },
       AELLUX_DEFAULT_INITIALIZATION_OPTIONS: {
         mode: "full",
         forceLegacy: false,
@@ -26,10 +186,11 @@
       ]
     };
     var scriptExtension = ".js";
+    var diagnostics = buildDiagnostics(CONSTANTS.AELLUX_DIAGNOSTICS);
     var bootstrapScript = document.currentScript || document.querySelector("script[src*='aellux.js'],script[src*='aellux.min.js']");
     var aelluxBootstrapSrc = root.__aelluxBootstrapURL || bootstrapScript && bootstrapScript.src;
     if (!aelluxBootstrapSrc) {
-      throw new Error("[Aellux] Bootstrap script could not be located.");
+      throw diagnostics.create(diagnostics.ERROR_BOOTSTRAP_NOT_FOUND);
     }
     var aelluxBasePath = aelluxBootstrapSrc ? aelluxBootstrapSrc.substring(
       0,
@@ -38,6 +199,7 @@
     var old$Instance = root[CONSTANTS.AELLUX_SHORT_JS_NAME];
     root.Aellux = {
       shortJSName: CONSTANTS.AELLUX_SHORT_JS_NAME,
+      diagnostics: diagnostics,
       options: CONSTANTS.AELLUX_DEFAULT_INITIALIZATION_OPTIONS,
       minified: aelluxBootstrapSrc.indexOf(".min.js") !== -1,
       legacy: false,
@@ -53,7 +215,7 @@
         if (document.querySelector("[" + Aellux.attr("legacy") + "]") || document.querySelector("[" + Aellux.attr("esm") + "]")) return;
         mergeOptions(Aellux.options, options || {});
         if (Aellux.options.mode !== "basic" && Aellux.options.mode !== "full") {
-          throw new Error("[Aellux] mode must be basic or full.");
+          throw Aellux.diagnostics.create(Aellux.diagnostics.ERROR_INVALID_MODE);
         }
         Aellux.aelluxBasePath = Aellux.options.basePath || aelluxBasePath;
         Aellux.notAvailable = [];
@@ -62,9 +224,9 @@
         loadOrchestrator();
       },
       persist: {
-        local: buildPersistMemory("localStorage"),
-        session: buildPersistMemory("sessionStorage"),
-        preferences: buildPersistMemory("localStorage", "AelluxPreferences")
+        local: buildPersistMemory(root, "localStorage"),
+        session: buildPersistMemory(root, "sessionStorage"),
+        preferences: buildPersistMemory(root, "localStorage", "AelluxPreferences")
       },
       updatePreferencesAttributesHTML: updatePreferencesAttributesHTML,
       on: function(event, handler, options) {
@@ -101,7 +263,10 @@
         var label = fromCamelCase(Aellux.extLabel(labelOrUrl));
         var url = labelOrUrl;
         if (label in Aellux.extRegistry) {
-          console.error("Duplicate ext");
+          Aellux.diagnostics.report(
+            Aellux.diagnostics.ERROR_EXTENSION_DUPLICATE,
+            { extension: label }
+          );
           return;
         }
         if (url === label) url = "./" + Aellux.extFilename(label);
@@ -136,43 +301,21 @@
         Aellux.dispatchFrom(document, event, options);
       },
       wait: function(extensionName) {
-        throw new Error("[Aellux] Aellux n\xE3o foi inicializado");
+        throw Aellux.diagnostics.create(Aellux.diagnostics.ERROR_NOT_INITIALIZED);
       },
       observe: function(element, type) {
-        throw new Error("[Aellux] Aellux n\xE3o foi inicializado");
+        throw Aellux.diagnostics.create(Aellux.diagnostics.ERROR_NOT_INITIALIZED);
       },
       unobserve: function(element, type) {
-        throw new Error("[Aellux] Aellux n\xE3o foi inicializado");
+        throw Aellux.diagnostics.create(Aellux.diagnostics.ERROR_NOT_INITIALIZED);
       },
       update: function(rootOrSelector) {
-        throw new Error("[Aellux] Aellux n\xE3o foi inicializado");
+        throw Aellux.diagnostics.create(Aellux.diagnostics.ERROR_NOT_INITIALIZED);
       },
       unmount: function(rootOrSelector) {
-        throw new Error("[Aellux] Aellux n\xE3o foi inicializado");
+        throw Aellux.diagnostics.create(Aellux.diagnostics.ERROR_NOT_INITIALIZED);
       },
-      preferencesMediaQueries: {
-        colorScheme: {
-          "light": !window.matchMedia ? null : window.matchMedia("(prefers-color-scheme: light)"),
-          "dark": !window.matchMedia ? null : window.matchMedia("(prefers-color-scheme: dark)")
-        },
-        reducedMotion: {
-          "reduced": !window.matchMedia ? null : window.matchMedia("(prefers-reduced-motion: reduced)"),
-          "no-preference": !window.matchMedia ? null : window.matchMedia("(prefers-reduced-motion: no-preference)")
-        },
-        reducedTransparency: {
-          "reduced": !window.matchMedia ? null : window.matchMedia("(prefers-reduced-transparency: reduced)"),
-          "no-preference": !window.matchMedia ? null : window.matchMedia("(prefers-reduced-transparency: no-preference)")
-        },
-        forcedColors: {
-          "active": !window.matchMedia ? null : window.matchMedia("(forced-colors: active)"),
-          "no-preference": !window.matchMedia ? null : window.matchMedia("(forced-colors: no-preference)")
-        },
-        contrast: {
-          "more": !window.matchMedia ? null : window.matchMedia("(prefers-contrast: more)"),
-          "less": !window.matchMedia ? null : window.matchMedia("(prefers-contrast: less)"),
-          "no-preference": !window.matchMedia ? null : window.matchMedia("(prefers-contrast: no-preference)")
-        }
-      }
+      preferencesMediaQueries: buildPreferencesMediaQueries(root)
     };
     root[CONSTANTS.AELLUX_SHORT_JS_NAME] = root.Aellux;
     if (Aellux.minified) {
@@ -240,12 +383,17 @@
       script.onload = function() {
         Aellux.dispatch("Legacy");
         Aellux.startAellux().catch(function(error) {
-          console.error(error);
-          console.error("[Aellux] Legacy runtime failed to start.");
+          Aellux.diagnostics.report(
+            Aellux.diagnostics.ERROR_LEGACY_RUNTIME_START,
+            { cause: error }
+          );
         });
       };
       script.onerror = function() {
-        console.error("[Aellux] Legacy fallback could not be loaded.");
+        Aellux.diagnostics.report(
+          Aellux.diagnostics.ERROR_LEGACY_RUNTIME_LOAD,
+          { url: script.src }
+        );
       };
       document.head.appendChild(script);
     }
@@ -284,89 +432,6 @@
           document.documentElement.setAttribute(Aellux.attr(hyphenized), value);
         }
       }
-    }
-    function buildPersistMemory(name, identifier) {
-      var defaultIdentifier = identifier ? identifier : "AelluxPersist";
-      try {
-        var target = window[name] || null;
-        if (!target || typeof target.setItem !== "function" || typeof target.getItem !== "function") {
-          throw new Error("Storage unavailable");
-        }
-      } catch (error) {
-        var target = {
-          data: {},
-          setItem: function(key, value) {
-            this.data[key] = value;
-          },
-          getItem: function(key) {
-            return this.data[key] ? this.data[key] : null;
-          }
-        };
-      }
-      var fallback = {
-        data: {},
-        keys: function() {
-          var keys = [];
-          for (var key in this.data) {
-            if (Object.prototype.hasOwnProperty.call(this.data, key)) {
-              keys.push(key);
-            }
-          }
-          return keys;
-        },
-        get: function(key) {
-          return this.data[key] ? this.data[key] : null;
-        },
-        set: function(key, value) {
-          this.data[key] = value;
-        },
-        toString: function() {
-          return JSON.stringify(this.data);
-        }
-      };
-      function getData() {
-        if (typeof URLSearchParams !== "undefined")
-          return new URLSearchParams(target.getItem(defaultIdentifier) || "");
-        else {
-          fallback.data = JSON.parse(target.getItem(defaultIdentifier) || "{}");
-          return fallback;
-        }
-      }
-      return {
-        get: function(key, fallback2) {
-          return getData().get(key) || fallback2;
-        },
-        set: function(key, value) {
-          var data = getData();
-          data.set(key, value);
-          return target.setItem(defaultIdentifier, data.toString());
-        },
-        setObject: function(object) {
-          var data = getData();
-          for (var key in object) {
-            var value = object[key];
-            data.set(key, value);
-          }
-          return target.setItem(defaultIdentifier, data.toString());
-        },
-        getObject: function() {
-          var data = getData();
-          var object = {};
-          var keys = data.keys();
-          if (typeof keys.next === "function") {
-            var entry = keys.next();
-            while (!entry.done) {
-              object[entry.value] = data.get(entry.value);
-              entry = keys.next();
-            }
-          } else {
-            keys.forEach(function(key) {
-              object[key] = data.get(key);
-            });
-          }
-          return object;
-        }
-      };
     }
     function mergeOptions(target, source) {
       if (!source)

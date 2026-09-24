@@ -78,7 +78,10 @@ import { createMountHelper } from "./internal/create-mount-helper.js";
         try {
           await Aellux.unmount(document, extensionLabels);
         } catch (error) {
-          console.error("[Aellux] Extension unmount failed.", error)
+          Aellux.diagnostics.report(
+            Aellux.diagnostics.ERROR_EXTENSION_UNMOUNT,
+            { cause: error, extensions: extensionLabels }
+          );
         }
 
         for (const extensionLabel of extensionLabels) {
@@ -91,7 +94,10 @@ import { createMountHelper } from "./internal/create-mount-helper.js";
               await extension.destroy();
             }
           } catch (error) {
-            console.error("[Aellux] Extension destroy failed.", error)
+            Aellux.diagnostics.report(
+              Aellux.diagnostics.ERROR_EXTENSION_DESTROY,
+              { cause: error, extension: extensionLabel }
+            );
           } finally {
             delete extensionPromises[key];
             delete Aellux.extensionMounters[extensionLabel];
@@ -145,9 +151,9 @@ import { createMountHelper } from "./internal/create-mount-helper.js";
         try {
           extensionInitialize(key);
         } catch (error) {
-          console.error(
-            `[Aellux] Aellux Extension "${extensionName}" failed to initialize.`,
-            error
+          Aellux.diagnostics.report(
+            Aellux.diagnostics.ERROR_EXTENSION_INITIALIZE,
+            { cause: error, extension: extensionName }
           );
           extensionPromises[key] = Promise.resolve(null);
           return extensionPromises[key];
@@ -170,9 +176,9 @@ import { createMountHelper } from "./internal/create-mount-helper.js";
         : appendExtensionAssets(key))
         .then(() => extensionInitialize(key))
         .catch((error) => {
-          console.error(
-            `[Aellux] Aellux Extension "${extensionName}" failed to initialize.`,
-            error
+          Aellux.diagnostics.report(
+            Aellux.diagnostics.ERROR_EXTENSION_INITIALIZE,
+            { cause: error, extension: extensionName }
           );
           return null;
         });

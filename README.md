@@ -35,6 +35,7 @@ See [Getting Started](docs/getting-started.md) for build instructions, runtime m
 
 - [Documentation index](docs/README.md)
 - [Runtime API](docs/runtime/api.md)
+- [Diagnostics](docs/runtime/diagnostics.md)
 - [Modern and Legacy runtimes](docs/runtime/modern-legacy.md)
 - [ES5 support level](docs/runtime/es5-support.md)
 - [Visual mounting states](docs/runtime/visual-mounting.md)
@@ -70,7 +71,7 @@ Generated browser files are written to `dist/`. The distribution uses classic sc
 
 ## Project Status
 
-Aellux is under active development toward `0.1.0-beta.1`. Modern runtime behavior is operational; the functional Legacy runtime, Legacy Extension variants, formal diagnostics, and final Bootstrap integration tests remain beta goals.
+Aellux is under active development toward `0.1.0-beta.1`. Modern runtime behavior and structured diagnostics are operational; final Legacy and Bootstrap integration validation remains a beta goal.
 
 Track the release scope in the [0.1.0 Beta milestone](docs/milestones/0.1.0-beta.md) and delivered changes in the [changelog](CHANGELOG.md).
 

@@ -12,6 +12,7 @@ This directory contains the detailed documentation for the Aellux `0.1.0-beta` l
 - [Modern and Legacy runtimes](runtime/modern-legacy.md)
 - [ES5 support level](runtime/es5-support.md)
 - [Visual mounting states](runtime/visual-mounting.md)
+- [Diagnostics](runtime/diagnostics.md)
 - [Bootstrap integration](integrations/bootstrap.md)
 
 ## Aellux Extensions
