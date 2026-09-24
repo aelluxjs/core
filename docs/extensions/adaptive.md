@@ -22,8 +22,8 @@ Cumulative size classes:
 - `ae--fits-small`
 - `ae--fits-medium`
 - `ae--fits-large`
-- `ae--fits-wide`
-- `ae--fits-ultrawide`
+- `ae--fits-xl`
+- `ae--fits-xxl`
 
 The Extension dispatches `AelluxAdaptiveUpdate` after applying current state.
 

@@ -3,10 +3,11 @@
   (function() {
     "use strict";
     const extensionName = "preferences";
-    Aellux.extRegister(extensionName, { init, destroy, update, get, set });
     const userPreferences = /* @__PURE__ */ Object.create(null);
     const defaultPreferences = /* @__PURE__ */ Object.create(null);
     const computedPreferences = /* @__PURE__ */ Object.create(null);
+    const mountDOM = /* @__PURE__ */ new Map();
+    Aellux.extRegister(extensionName, { init, destroy, update, get, set, mountDOM });
     const attr = {
       preference: Aellux.attr("preference"),
       option: Aellux.attr("option"),
@@ -32,6 +33,10 @@
       sound: ["off", "on", "low"]
     };
     function init() {
+      mountDOM.set(`[${attr.preference}]`, {
+        mount: mountPreferenceContainer,
+        unmount: unmountPreferenceContainer
+      });
       window.addEventListener("storage", storageEvent);
       const allQueries = Aellux.preferencesMediaQueries;
       Object.values(allQueries).forEach(
@@ -48,19 +53,11 @@
       );
       Object.entries(prefOptions).forEach(([param, options]) => defaultPreferences[param] = options[0]);
       loadUserPreferences();
-      if (document.readyState === "loading") {
-        document.addEventListener(
-          "DOMContentLoaded",
-          update,
-          { once: true }
-        );
-      } else {
-        update();
-      }
+      update();
     }
     function destroy() {
       window.removeEventListener("storage", storageEvent);
-      document.addEventListener("DOMContentLoaded", update);
+      document.removeEventListener("DOMContentLoaded", update);
       const allQueries = Aellux.preferencesMediaQueries;
       Object.values(allQueries).forEach(
         (queries) => Object.values(queries).forEach(
@@ -74,12 +71,6 @@
           }
         )
       );
-    }
-    function update() {
-      Object.assign(computedPreferences, defaultPreferences, userPreferences);
-      Aellux.updatePreferencesAttributesHTML(computedPreferences);
-      preferenceContainersUpdate();
-      Aellux.dispatch("PreferencesChange");
     }
     function get(preference) {
       const key = toCamelCase(preference);
@@ -100,38 +91,40 @@
       });
       update();
     }
+    function update() {
+      Object.assign(computedPreferences, defaultPreferences, userPreferences);
+      Aellux.updatePreferencesAttributesHTML(computedPreferences);
+      document.querySelectorAll(`[${attr.preference}]`).forEach((container) => updateContainer(container));
+      Aellux.dispatch("PreferencesChange");
+    }
+    function updateContainer(container) {
+      const preference = container.getAttribute(attr.preference);
+      const elements = container.querySelectorAll(`[${attr.option}]`);
+      const selectedLabel = container.querySelector(`[${attr.label}]`);
+      elements.forEach((element) => {
+        const value = element.getAttribute(attr.option);
+        const selected = value === get(preference);
+        element.classList.toggle(className.active, selected);
+        if (selectedLabel && selected) {
+          if (selectedLabel.value) {
+            selectedLabel.value = element.innerText;
+          } else {
+            selectedLabel.innerHTML = element.innerHTML;
+          }
+        }
+      });
+    }
     function saveUserPreferences() {
       Aellux.persist.preferences.setObject(userPreferences);
     }
     function loadUserPreferences() {
       Object.assign(userPreferences, Aellux.persist.preferences.getObject());
     }
-    function preferenceContainersUpdate() {
-      document.querySelectorAll(`[${attr.preference}]`).forEach((container) => {
-        const ready = container.getAttribute(attr.ready);
-        if (!ready) {
-          setupPreferenceContainer(container);
-        }
-        const preference = container.getAttribute(attr.preference);
-        const elements = container.querySelectorAll(`[${attr.option}]`);
-        const selectedLabel = container.querySelector(`[${attr.label}]`);
-        elements.forEach((element) => {
-          const value = element.getAttribute(attr.option);
-          const selected = value === get(preference);
-          element.classList.toggle(className.active, selected);
-          if (selectedLabel && selected) {
-            if (selectedLabel.value) {
-              selectedLabel.value = element.innerText;
-            } else {
-              selectedLabel.innerHTML = element.innerHTML;
-            }
-          }
-        });
-      });
-    }
-    function setupPreferenceContainer(container) {
+    function mountPreferenceContainer(container) {
       container.addEventListener("click", onContainerClick);
-      container.setAttribute(attr.ready, "");
+    }
+    function unmountPreferenceContainer(container) {
+      container.removeEventListener("click", onContainerClick);
     }
     function onContainerClick(event) {
       const container = event.currentTarget;

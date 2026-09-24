@@ -14,6 +14,7 @@
   }
   async function destroy() {
     document.removeEventListener("click", onClick);
+    if (previousController) { previousController.abort(); }
   }
 
   let previousController = null;

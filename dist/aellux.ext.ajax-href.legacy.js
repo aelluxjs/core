@@ -124,6 +124,9 @@
           while (1) switch (_context.n) {
             case 0:
               document.removeEventListener("click", onClick);
+              if (previousController) {
+                previousController.abort();
+              }
             case 1:
               return _context.a(2);
           }

@@ -15,7 +15,9 @@
   const handlers = new Map();
 
   function init() { }
-  async function destroy() { }
+  async function destroy() {
+    handlers.clear();
+  }
 
   function on(type, handler) {
     if (!handlers.has(type)) { handlers.set(type, new Set()); }

@@ -62,9 +62,6 @@
         addWeakStyles();
         loadOrchestrator();
       },
-      destroy: function() {
-        return false;
-      },
       persist: {
         local: buildPersistMemory("localStorage"),
         session: buildPersistMemory("sessionStorage"),
@@ -129,6 +126,8 @@
       },
       startAellux: function() {
       },
+      destroy: function() {
+      },
       dispatchFrom: function(from, event, options) {
         var obj = document.createEvent("Event");
         obj.initEvent(Aellux.eventName(event), false, false);
@@ -146,7 +145,10 @@
       unobserve: function(element, type) {
         throw new Error("[Aellux] Aellux n\xE3o foi inicializado");
       },
-      update: function(element) {
+      update: function(rootOrSelector) {
+        throw new Error("[Aellux] Aellux n\xE3o foi inicializado");
+      },
+      unmount: function(rootOrSelector) {
         throw new Error("[Aellux] Aellux n\xE3o foi inicializado");
       },
       preferencesMediaQueries: {

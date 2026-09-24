@@ -21,6 +21,7 @@
     function init() {
     }
     async function destroy() {
+      handlers.clear();
     }
     function on(type, handler) {
       if (!handlers.has(type)) {

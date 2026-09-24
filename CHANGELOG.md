@@ -22,6 +22,7 @@ All notable changes to Aellux will be documented in this file.
 - Renamed UX modules to Aellux Extensions and the public API to `ext` terminology.
 - Moved extension-specific defaults out of the Aellux boot script.
 - Made the Adaptive Extension the source of its runtime and generated CSS parameters.
+- Renamed the Adaptive `wide` and `ultrawide` states and utility aliases to `xl` and `xxl`.
 
 ### Fixed
 

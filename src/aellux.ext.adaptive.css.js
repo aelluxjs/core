@@ -8,8 +8,8 @@ export const stateAliases = {
   small: "sm",
   medium: "md",
   large: "lg",
-  wide: "wd",
-  ultrawide: "uw",
+  xl: "xl",
+  xxl: "xxl",
   "shape-vertical": "sv",
   "shape-horizontal": "sh",
   "shape-square": "ss"

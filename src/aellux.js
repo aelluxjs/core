@@ -87,7 +87,6 @@
       addWeakStyles();
       loadOrchestrator();
     },
-    destroy: function () { return false; },
     persist: {
       local: buildPersistMemory("localStorage"),
       session: buildPersistMemory("sessionStorage"),
@@ -137,6 +136,7 @@
     },
 
     startAellux: function () { },
+    destroy: function () { },
     dispatchFrom: function (from, event, options) {
       var obj = document.createEvent("Event");
       obj.initEvent(Aellux.eventName(event), false, false);
@@ -146,7 +146,8 @@
     wait: function (extensionName) { throw new Error("[Aellux] Aellux não foi inicializado"); },
     observe: function (element, type) { throw new Error("[Aellux] Aellux não foi inicializado"); },
     unobserve: function (element, type) { throw new Error("[Aellux] Aellux não foi inicializado"); },
-    update: function (element) { throw new Error("[Aellux] Aellux não foi inicializado"); },
+    update: function (rootOrSelector) { throw new Error("[Aellux] Aellux não foi inicializado"); },
+    unmount: function (rootOrSelector) { throw new Error("[Aellux] Aellux não foi inicializado"); },
 
     preferencesMediaQueries: {
       colorScheme: {

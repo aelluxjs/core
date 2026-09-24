@@ -25,8 +25,8 @@
       small: 480,
       medium: 768,
       large: 1024,
-      wide: 1280,
-      ultrawide: 1600
+      xl: 1280,
+      xxl: 1600
     },
     ratioShapes: {
       vertical: 0.8,
@@ -44,12 +44,11 @@
     });
   }
 
-  function destroy() { }
+  function destroy() {
+
+  }
 
   function mountAdaptive(adaptiveContainer) {
-    if (!adaptiveContainer.hasAttribute("aria-busy"))
-      adaptiveContainer.setAttribute("aria-busy", true);
-
     Aellux.observe(adaptiveContainer, "resize");
     adaptiveContainer.addEventListener(Aellux.eventName("ResizeObserver"), onResizeObserver);
   }

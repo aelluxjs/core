@@ -45,16 +45,18 @@
   (function() {
     "use strict";
     var extensionName = "preferences";
+    var userPreferences = /* @__PURE__ */ Object.create(null);
+    var defaultPreferences = /* @__PURE__ */ Object.create(null);
+    var computedPreferences = /* @__PURE__ */ Object.create(null);
+    var mountDOM = /* @__PURE__ */ new Map();
     Aellux.extRegister(extensionName, {
       init: init,
       destroy: destroy,
       update: update,
       get: get,
-      set: set
+      set: set,
+      mountDOM: mountDOM
     });
-    var userPreferences = /* @__PURE__ */ Object.create(null);
-    var defaultPreferences = /* @__PURE__ */ Object.create(null);
-    var computedPreferences = /* @__PURE__ */ Object.create(null);
     var attr = {
       preference: Aellux.attr("preference"),
       option: Aellux.attr("option"),
@@ -80,6 +82,10 @@
       sound: ["off", "on", "low"]
     };
     function init() {
+      mountDOM.set("[".concat(attr.preference, "]"), {
+        mount: mountPreferenceContainer,
+        unmount: unmountPreferenceContainer
+      });
       window.addEventListener("storage", storageEvent);
       var allQueries = Aellux.preferencesMediaQueries;
       Object.values(allQueries).forEach(function(queries) {
@@ -97,17 +103,11 @@
         return defaultPreferences[param] = options[0];
       });
       loadUserPreferences();
-      if (document.readyState === "loading") {
-        document.addEventListener("DOMContentLoaded", update, {
-          once: true
-        });
-      } else {
-        update();
-      }
+      update();
     }
     function destroy() {
       window.removeEventListener("storage", storageEvent);
-      document.addEventListener("DOMContentLoaded", update);
+      document.removeEventListener("DOMContentLoaded", update);
       var allQueries = Aellux.preferencesMediaQueries;
       Object.values(allQueries).forEach(function(queries) {
         return Object.values(queries).forEach(function(query) {
@@ -119,12 +119,6 @@
           }
         });
       });
-    }
-    function update() {
-      Object.assign(computedPreferences, defaultPreferences, userPreferences);
-      Aellux.updatePreferencesAttributesHTML(computedPreferences);
-      preferenceContainersUpdate();
-      Aellux.dispatch("PreferencesChange");
     }
     function get(preference) {
       var key = toCamelCase(preference);
@@ -147,38 +141,42 @@
       });
       update();
     }
+    function update() {
+      Object.assign(computedPreferences, defaultPreferences, userPreferences);
+      Aellux.updatePreferencesAttributesHTML(computedPreferences);
+      document.querySelectorAll("[".concat(attr.preference, "]")).forEach(function(container) {
+        return updateContainer(container);
+      });
+      Aellux.dispatch("PreferencesChange");
+    }
+    function updateContainer(container) {
+      var preference = container.getAttribute(attr.preference);
+      var elements = container.querySelectorAll("[".concat(attr.option, "]"));
+      var selectedLabel = container.querySelector("[".concat(attr.label, "]"));
+      elements.forEach(function(element) {
+        var value = element.getAttribute(attr.option);
+        var selected = value === get(preference);
+        element.classList.toggle(className.active, selected);
+        if (selectedLabel && selected) {
+          if (selectedLabel.value) {
+            selectedLabel.value = element.innerText;
+          } else {
+            selectedLabel.innerHTML = element.innerHTML;
+          }
+        }
+      });
+    }
     function saveUserPreferences() {
       Aellux.persist.preferences.setObject(userPreferences);
     }
     function loadUserPreferences() {
       Object.assign(userPreferences, Aellux.persist.preferences.getObject());
     }
-    function preferenceContainersUpdate() {
-      document.querySelectorAll("[".concat(attr.preference, "]")).forEach(function(container) {
-        var ready = container.getAttribute(attr.ready);
-        if (!ready) {
-          setupPreferenceContainer(container);
-        }
-        var preference = container.getAttribute(attr.preference);
-        var elements = container.querySelectorAll("[".concat(attr.option, "]"));
-        var selectedLabel = container.querySelector("[".concat(attr.label, "]"));
-        elements.forEach(function(element) {
-          var value = element.getAttribute(attr.option);
-          var selected = value === get(preference);
-          element.classList.toggle(className.active, selected);
-          if (selectedLabel && selected) {
-            if (selectedLabel.value) {
-              selectedLabel.value = element.innerText;
-            } else {
-              selectedLabel.innerHTML = element.innerHTML;
-            }
-          }
-        });
-      });
-    }
-    function setupPreferenceContainer(container) {
+    function mountPreferenceContainer(container) {
       container.addEventListener("click", onContainerClick);
-      container.setAttribute(attr.ready, "");
+    }
+    function unmountPreferenceContainer(container) {
+      container.removeEventListener("click", onContainerClick);
     }
     function onContainerClick(event) {
       var container = event.currentTarget;

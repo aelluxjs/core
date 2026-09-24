@@ -129,6 +129,8 @@
         return _regenerator().w(function(_context) {
           while (1) switch (_context.n) {
             case 0:
+              handlers.clear();
+            case 1:
               return _context.a(2);
           }
         }, _callee);
