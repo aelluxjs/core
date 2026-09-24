@@ -22189,6 +22189,7 @@
         "use strict";
         var root = typeof globalThis !== "undefined" ? globalThis : window;
         var extensionPromises = {};
+        var mountedElements = /* @__PURE__ */ new WeakMap();
         root.Aellux = Object.assign(AelluxForceUpdate, root.Aellux, {
           startAellux: function startAellux() {
             return _asyncToGenerator(/* @__PURE__ */ _regenerator().m(function _callee() {
@@ -22683,7 +22684,7 @@
         }
         function _AelluxForce() {
           _AelluxForce = _asyncToGenerator(/* @__PURE__ */ _regenerator().m(function _callee9(rootElement, method) {
-            var extensionLabels, filter, mounterSelectors, lazySelectors, _i2, _Object$entries2, _Object$entries2$_i, label, selectorString, _i3, _Object$entries3, _Object$entries3$_i, _label, _selectorString, allElements, _iterator5, _step5, element, elementsAffected, localExtensionLabels, _i4, _Object$entries4, _Object$entries4$_i, extensionLabel, selector, _i5, _Object$entries5, _Object$entries5$_i, _extensionLabel, _selector, _iterator6, _step6, _extensionLabel2, extensionPromise, extension, mounter, _iterator8, _step8, _step8$value, attr, controller, mountableElements, _iterator9, _step9, mountable, _iterator7, _step7, affected, _args9 = arguments, _t6, _t7, _t8, _t9, _t0;
+            var extensionLabels, filter, mounterSelectors, lazySelectors, _i2, _Object$entries2, _Object$entries2$_i, label, selectorString, _i3, _Object$entries3, _Object$entries3$_i, _label, _selectorString, allElements, _iterator5, _step5, element, elementsAffected, localExtensionLabels, _i4, _Object$entries4, _Object$entries4$_i, extensionLabel, selector, _i5, _Object$entries5, _Object$entries5$_i, _extensionLabel, _selector, _iterator6, _step6, _extensionLabel2, extensionPromise, extension, mounter, _iterator8, _step8, _step8$value, _selector2, controller, mountableElements, _iterator9, _step9, mountable, mountId, mounting, _iterator7, _step7, affected, _args9 = arguments, _t6, _t7, _t8, _t9, _t0;
             return _regenerator().w(function(_context9) {
               while (1) switch (_context9.p = _context9.n) {
                 case 0:
@@ -22719,7 +22720,7 @@
                   _iterator5.s();
                 case 3:
                   if ((_step5 = _iterator5.n()).done) {
-                    _context9.n = 32;
+                    _context9.n = 33;
                     break;
                   }
                   element = _step5.value;
@@ -22742,7 +22743,7 @@
                   _iterator6.s();
                 case 5:
                   if ((_step6 = _iterator6.n()).done) {
-                    _context9.n = 27;
+                    _context9.n = 28;
                     break;
                   }
                   _extensionLabel2 = _step6.value;
@@ -22751,7 +22752,7 @@
                     _context9.n = 6;
                     break;
                   }
-                  return _context9.a(3, 26);
+                  return _context9.a(3, 27);
                 case 6:
                   _context9.n = 7;
                   return extensionPromise;
@@ -22761,7 +22762,7 @@
                     _context9.n = 8;
                     break;
                   }
-                  return _context9.a(3, 26);
+                  return _context9.a(3, 27);
                 case 8:
                   mounter = extension.mountDOM;
                   _iterator8 = _createForOfIteratorHelper(mounter);
@@ -22769,112 +22770,121 @@
                   _iterator8.s();
                 case 10:
                   if ((_step8 = _iterator8.n()).done) {
-                    _context9.n = 23;
+                    _context9.n = 24;
                     break;
                   }
-                  _step8$value = _slicedToArray(_step8.value, 2), attr = _step8$value[0], controller = _step8$value[1];
+                  _step8$value = _slicedToArray(_step8.value, 2), _selector2 = _step8$value[0], controller = _step8$value[1];
                   _context9.p = 11;
                   if (controller[method]) {
                     _context9.n = 12;
                     break;
                   }
-                  return _context9.a(3, 22);
+                  return _context9.a(3, 23);
                 case 12:
-                  mountableElements = findElements(element, attr);
+                  mountableElements = findElements(element, _selector2);
                   _iterator9 = _createForOfIteratorHelper(mountableElements);
                   _context9.p = 13;
                   _iterator9.s();
                 case 14:
                   if ((_step9 = _iterator9.n()).done) {
-                    _context9.n = 17;
+                    _context9.n = 18;
                     break;
                   }
                   mountable = _step9.value;
-                  _context9.n = 15;
-                  return controller[method](mountable);
+                  mountId = "".concat(_extensionLabel2, "@").concat(_selector2);
+                  mounting = method === "mount";
+                  if (!(mounting === isMounted(mountable, mountId))) {
+                    _context9.n = 15;
+                    break;
+                  }
+                  return _context9.a(3, 17);
                 case 15:
-                  elementsAffected.add(mountable);
+                  _context9.n = 16;
+                  return controller[method](mountable);
                 case 16:
+                  elementsAffected.add(mountable);
+                  setMounted(mountable, mountId, mounting);
+                case 17:
                   _context9.n = 14;
                   break;
-                case 17:
-                  _context9.n = 19;
-                  break;
                 case 18:
-                  _context9.p = 18;
-                  _t6 = _context9.v;
-                  _iterator9.e(_t6);
+                  _context9.n = 20;
+                  break;
                 case 19:
                   _context9.p = 19;
-                  _iterator9.f();
-                  return _context9.f(19);
+                  _t6 = _context9.v;
+                  _iterator9.e(_t6);
                 case 20:
-                  _context9.n = 22;
-                  break;
+                  _context9.p = 20;
+                  _iterator9.f();
+                  return _context9.f(20);
                 case 21:
-                  _context9.p = 21;
+                  _context9.n = 23;
+                  break;
+                case 22:
+                  _context9.p = 22;
                   _t7 = _context9.v;
                   console.error(_t7);
-                case 22:
+                case 23:
                   _context9.n = 10;
                   break;
-                case 23:
-                  _context9.n = 25;
-                  break;
                 case 24:
-                  _context9.p = 24;
-                  _t8 = _context9.v;
-                  _iterator8.e(_t8);
+                  _context9.n = 26;
+                  break;
                 case 25:
                   _context9.p = 25;
-                  _iterator8.f();
-                  return _context9.f(25);
+                  _t8 = _context9.v;
+                  _iterator8.e(_t8);
                 case 26:
+                  _context9.p = 26;
+                  _iterator8.f();
+                  return _context9.f(26);
+                case 27:
                   _context9.n = 5;
                   break;
-                case 27:
-                  _context9.n = 29;
-                  break;
                 case 28:
-                  _context9.p = 28;
-                  _t9 = _context9.v;
-                  _iterator6.e(_t9);
+                  _context9.n = 30;
+                  break;
                 case 29:
                   _context9.p = 29;
-                  _iterator6.f();
-                  return _context9.f(29);
+                  _t9 = _context9.v;
+                  _iterator6.e(_t9);
                 case 30:
+                  _context9.p = 30;
+                  _iterator6.f();
+                  return _context9.f(30);
+                case 31:
                   _iterator7 = _createForOfIteratorHelper(elementsAffected);
                   try {
                     for (_iterator7.s(); !(_step7 = _iterator7.n()).done; ) {
                       affected = _step7.value;
-                      affected.classList[method === "mount" ? "add" : "remove"](Aellux.className("mounted"));
+                      affected.classList.toggle(Aellux.className("mounted"), isMounted(affected));
                     }
                   } catch (err) {
                     _iterator7.e(err);
                   } finally {
                     _iterator7.f();
                   }
-                case 31:
+                case 32:
                   _context9.n = 3;
                   break;
-                case 32:
-                  _context9.n = 34;
-                  break;
                 case 33:
-                  _context9.p = 33;
-                  _t0 = _context9.v;
-                  _iterator5.e(_t0);
+                  _context9.n = 35;
+                  break;
                 case 34:
                   _context9.p = 34;
-                  _iterator5.f();
-                  return _context9.f(34);
+                  _t0 = _context9.v;
+                  _iterator5.e(_t0);
                 case 35:
-                  Aellux.dispatch("Update");
+                  _context9.p = 35;
+                  _iterator5.f();
+                  return _context9.f(35);
                 case 36:
+                  Aellux.dispatch("Update");
+                case 37:
                   return _context9.a(2);
               }
-            }, _callee9, null, [[13, 18, 19, 20], [11, 21], [9, 24, 25, 26], [4, 28, 29, 30], [2, 33, 34, 35]]);
+            }, _callee9, null, [[13, 19, 20, 21], [11, 22], [9, 25, 26, 27], [4, 29, 30, 31], [2, 34, 35, 36]]);
           }));
           return _AelluxForce.apply(this, arguments);
         }
@@ -22905,6 +22915,21 @@
             });
           }
           return elements;
+        }
+        function isMounted(element) {
+          var mountId = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : null;
+          var mounts = mountedElements.get(element);
+          if (!mounts) return false;
+          return mountId ? mounts.has(mountId) : mounts.size > 0;
+        }
+        function setMounted(element, mountId) {
+          var mounted = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : true;
+          if (!mountedElements.has(element)) {
+            mountedElements.set(element, /* @__PURE__ */ new Set());
+          }
+          var mounts = mountedElements.get(element);
+          mounts[mounted ? "add" : "delete"](mountId);
+          if (mounts.size === 0) mountedElements.delete(element);
         }
         function toCamelCase(name) {
           return name.replace(/-([a-z])/g, function(_, c) {

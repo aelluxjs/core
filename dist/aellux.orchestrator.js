@@ -4,6 +4,7 @@
     "use strict";
     const root = typeof globalThis !== "undefined" ? globalThis : window;
     const extensionPromises = {};
+    const mountedElements = /* @__PURE__ */ new WeakMap();
     root.Aellux = Object.assign(AelluxForceUpdate, root.Aellux, {
       async startAellux() {
         if (root.Aellux.bundledExtensions) {
@@ -337,15 +338,19 @@
             continue;
           }
           const mounter = extension.mountDOM;
-          for (const [attr, controller] of mounter) {
+          for (const [selector, controller] of mounter) {
             try {
               if (!controller[method]) {
                 continue;
               }
-              const mountableElements = findElements(element, attr);
+              const mountableElements = findElements(element, selector);
               for (const mountable of mountableElements) {
+                const mountId = `${extensionLabel}@${selector}`;
+                const mounting = method === "mount";
+                if (mounting === isMounted(mountable, mountId)) continue;
                 await controller[method](mountable);
                 elementsAffected.add(mountable);
+                setMounted(mountable, mountId, mounting);
               }
             } catch (error) {
               console.error(error);
@@ -353,7 +358,10 @@
           }
         }
         for (const affected of elementsAffected) {
-          affected.classList[method === "mount" ? "add" : "remove"](Aellux.className("mounted"));
+          affected.classList.toggle(
+            Aellux.className("mounted"),
+            isMounted(affected)
+          );
         }
       }
       Aellux.dispatch("Update");
@@ -385,6 +393,19 @@
         });
       }
       return elements;
+    }
+    function isMounted(element, mountId = null) {
+      const mounts = mountedElements.get(element);
+      if (!mounts) return false;
+      return mountId ? mounts.has(mountId) : mounts.size > 0;
+    }
+    function setMounted(element, mountId, mounted = true) {
+      if (!mountedElements.has(element)) {
+        mountedElements.set(element, /* @__PURE__ */ new Set());
+      }
+      const mounts = mountedElements.get(element);
+      mounts[mounted ? "add" : "delete"](mountId);
+      if (mounts.size === 0) mountedElements.delete(element);
     }
     function toCamelCase(name) {
       return name.replace(/-([a-z])/g, (_, c) => c.toUpperCase());
