@@ -1,4 +1,47 @@
 (function() {
+  function _createForOfIteratorHelper(r, e) {
+    var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
+    if (!t) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray(r)) || e && r && "number" == typeof r.length) {
+        t && (r = t);
+        var _n = 0, F = function F2() {
+        };
+        return { s: F, n: function n() {
+          return _n >= r.length ? { done: true } : { done: false, value: r[_n++] };
+        }, e: function e2(r2) {
+          throw r2;
+        }, f: F };
+      }
+      throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+    }
+    var o, a = true, u = false;
+    return { s: function s() {
+      t = t.call(r);
+    }, n: function n() {
+      var r2 = t.next();
+      return a = r2.done, r2;
+    }, e: function e2(r2) {
+      u = true, o = r2;
+    }, f: function f() {
+      try {
+        a || null == t.return || t.return();
+      } finally {
+        if (u) throw o;
+      }
+    } };
+  }
+  function _unsupportedIterableToArray(r, a) {
+    if (r) {
+      if ("string" == typeof r) return _arrayLikeToArray(r, a);
+      var t = {}.toString.call(r).slice(8, -1);
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0;
+    }
+  }
+  function _arrayLikeToArray(r, a) {
+    (null == a || a > r.length) && (a = r.length);
+    for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
+    return n;
+  }
   function _regenerator() {
     /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/babel/babel/blob/main/packages/babel-helpers/LICENSE */
     var e, t, r = "function" == typeof Symbol ? Symbol : {}, n = r.iterator || "@@iterator", o = r.toStringTag || "@@toStringTag";
@@ -140,7 +183,7 @@
     }
     function _load() {
       _load = _asyncToGenerator(/* @__PURE__ */ _regenerator().m(function _callee2(url, selectors) {
-        var options, controller, selectorList, elements, response, html, loadedDocument, _args2 = arguments, _t;
+        var options, controller, selectorList, elements, response, html, loadedDocument, _iterator, _step, selector, currentElement, loadedElement, replacement, _args2 = arguments, _t, _t2;
         return _regenerator().w(function(_context2) {
           while (1) switch (_context2.p = _context2.n) {
             case 0:
@@ -156,17 +199,17 @@
                 }
               };
               previousController = controller;
-              selectorList = (Array.isArray(selectors) ? selectors : selectors.split(",")).map(function(selector) {
-                return selector.trim();
+              selectorList = (Array.isArray(selectors) ? selectors : selectors.split(",")).map(function(selector2) {
+                return selector2.trim();
               }).filter(Boolean);
               elements = /* @__PURE__ */ new Map();
-              selectorList.forEach(function(selector) {
-                var currentElement = document.querySelector(selector);
-                if (!currentElement) return;
-                elements.set(selector, currentElement);
+              selectorList.forEach(function(selector2) {
+                var currentElement2 = document.querySelector(selector2);
+                if (!currentElement2) return;
+                elements.set(selector2, currentElement2);
                 if (Aellux.feedback) {
-                  Aellux.feedback.busy(currentElement, "Ajax loading", true);
-                  Aellux.feedback.progress(currentElement, "Ajax loading", 0);
+                  Aellux.feedback.busy(currentElement2, "Ajax loading", true);
+                  Aellux.feedback.progress(currentElement2, "Ajax loading", 0);
                 }
               });
               _context2.p = 1;
@@ -181,51 +224,88 @@
             case 3:
               html = _context2.v;
               loadedDocument = new DOMParser().parseFromString(html, "text/html");
-              selectorList.forEach(function(selector) {
-                var currentElement = elements.get(selector);
-                if (!currentElement) return;
-                var loadedElement = loadedDocument.querySelector(selector);
-                if (!loadedElement) return;
-                var replacement = document.importNode(loadedElement, true);
-                currentElement.replaceWith(replacement);
-                if (selector === "title" && Aellux.stateNavigation) Aellux.stateNavigation.updateBaseTitle(replacement.innerText);
-                Aellux(replacement);
-                if (Aellux.feedback) {
-                  Aellux.feedback.busy(replacement, "Ajax loaded", false);
-                  Aellux.feedback.progress(replacement, "Ajax loaded", 1);
-                }
-              });
+              _iterator = _createForOfIteratorHelper(selectorList);
+              _context2.p = 4;
+              _iterator.s();
+            case 5:
+              if ((_step = _iterator.n()).done) {
+                _context2.n = 11;
+                break;
+              }
+              selector = _step.value;
+              currentElement = elements.get(selector);
+              if (currentElement) {
+                _context2.n = 6;
+                break;
+              }
+              return _context2.a(3, 10);
+            case 6:
+              loadedElement = loadedDocument.querySelector(selector);
+              if (loadedElement) {
+                _context2.n = 7;
+                break;
+              }
+              return _context2.a(3, 10);
+            case 7:
+              _context2.n = 8;
+              return Aellux.unmount(currentElement);
+            case 8:
+              replacement = document.importNode(loadedElement, true);
+              currentElement.replaceWith(replacement);
+              if (selector === "title" && Aellux.stateNavigation) Aellux.stateNavigation.updateBaseTitle(replacement.innerText);
+              _context2.n = 9;
+              return Aellux(replacement);
+            case 9:
+              if (Aellux.feedback) {
+                Aellux.feedback.busy(replacement, "Ajax loaded", false);
+                Aellux.feedback.progress(replacement, "Ajax loaded", 1);
+              }
+            case 10:
+              _context2.n = 5;
+              break;
+            case 11:
+              _context2.n = 13;
+              break;
+            case 12:
+              _context2.p = 12;
+              _t = _context2.v;
+              _iterator.e(_t);
+            case 13:
+              _context2.p = 13;
+              _iterator.f();
+              return _context2.f(13);
+            case 14:
               if (!options.ignoreHistory && Aellux.stateNavigation) {
                 Aellux.stateNavigation.ajaxHref(url, selectors);
               }
-              _context2.n = 6;
+              _context2.n = 17;
               break;
-            case 4:
-              _context2.p = 4;
-              _t = _context2.v;
-              selectorList.forEach(function(selector) {
-                var currentElement = elements.get(selector);
-                if (!currentElement) return;
+            case 15:
+              _context2.p = 15;
+              _t2 = _context2.v;
+              selectorList.forEach(function(selector2) {
+                var currentElement2 = elements.get(selector2);
+                if (!currentElement2) return;
                 if (Aellux.feedback) {
-                  Aellux.feedback.busy(currentElement, "Ajax loading", false);
-                  Aellux.feedback.progress(currentElement, "Ajax loading", 1);
+                  Aellux.feedback.busy(currentElement2, "Ajax loading", false);
+                  Aellux.feedback.progress(currentElement2, "Ajax loading", 1);
                 }
               });
-              if (!(_t.name === "AbortError")) {
-                _context2.n = 5;
+              if (!(_t2.name === "AbortError")) {
+                _context2.n = 16;
                 break;
               }
               return _context2.a(2, null);
-            case 5:
-              throw _t;
-            case 6:
-              _context2.p = 6;
+            case 16:
+              throw _t2;
+            case 17:
+              _context2.p = 17;
               if (previousController === controller) previousController = null;
-              return _context2.f(6);
-            case 7:
+              return _context2.f(17);
+            case 18:
               return _context2.a(2);
           }
-        }, _callee2, null, [[1, 4, 6, 7]]);
+        }, _callee2, null, [[4, 12, 13, 14], [1, 15, 17, 18]]);
       }));
       return _load.apply(this, arguments);
     }

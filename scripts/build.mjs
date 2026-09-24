@@ -51,7 +51,7 @@ if (window.NodeList && !window.NodeList.prototype.forEach) {
 `;
 
 const legacyOrchestratorEntry = `${legacyPolyfills}
-require("aellux-legacy-orchestrator");
+require("./src/aellux.orchestrator.js");
 `;
 const legacyFullEntry = `${legacyPolyfills}
 require("./src/aellux.full.esm.js");
@@ -91,6 +91,7 @@ for (const sourceFile of sourceFiles) {
   const filename = basename(sourceFile);
   const classic = filename === "aellux.js";
   const full = filename === "aellux.full.esm.js";
+  const orchestrator = filename === "aellux.orchestrator.js";
   const distributionFilename = full ? "aellux.full.js" : filename;
 
   for (const minify of [false, true]) {
@@ -99,7 +100,7 @@ for (const sourceFile of sourceFiles) {
       absWorkingDir: projectRoot,
       entryPoints: [sourceFile],
       outfile: join(outputDirectory, outputFilename),
-      bundle: full,
+      bundle: full || orchestrator,
       platform: "browser",
       format: "iife",
       target: classic ? "es5" : "es2017",
@@ -116,13 +117,15 @@ for (const sourceFile of legacySourceFiles) {
   const filename = basename(sourceFile);
   const distributionFilename = filename.replace(/\.js$/, ".legacy.js");
   const sourceFileName = relative(projectRoot, sourceFile).replace(/\\/g, "/");
-  const transformed = await transpileLegacySource(sourceFile, sourceFileName);
+  const isOrchestrator = filename === "aellux.orchestrator.js";
+  const transformed = isOrchestrator
+    ? null
+    : await transpileLegacySource(sourceFile, sourceFileName);
 
   for (const minify of [false, true]) {
     const outputFilename = minify
       ? distributionFilename.replace(/\.js$/, ".min.js")
       : distributionFilename;
-    const isOrchestrator = filename === "aellux.orchestrator.js";
     await build({
       absWorkingDir: projectRoot,
       stdin: {
@@ -142,7 +145,7 @@ for (const sourceFile of legacySourceFiles) {
       sourcemap: true,
       legalComments: "inline",
       plugins: isOrchestrator
-        ? [legacyOrchestratorPlugin(transformed.code, sourceFileName)]
+        ? [legacyBundlePlugin()]
         : []
     });
     generatedFiles.add(outputFilename);
@@ -196,26 +199,6 @@ async function transpileLegacySource(sourceFile, sourceFileName) {
   }
 
   return transformed;
-}
-
-function legacyOrchestratorPlugin(code, sourceFileName) {
-  return {
-    name: "aellux-legacy-orchestrator",
-    setup(buildContext) {
-      buildContext.onResolve(
-        { filter: /^aellux-legacy-orchestrator$/ },
-        () => ({ path: sourceFileName, namespace: "aellux-legacy" })
-      );
-      buildContext.onLoad(
-        { filter: /.*/, namespace: "aellux-legacy" },
-        () => ({
-          contents: code,
-          loader: "js",
-          resolveDir: projectRoot
-        })
-      );
-    }
-  };
 }
 
 function legacyBundlePlugin() {

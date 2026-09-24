@@ -54,12 +54,14 @@
       const html = await response.text();
       const loadedDocument = new DOMParser().parseFromString(html, "text/html");
 
-      selectorList.forEach(function (selector) {
+      for (const selector of selectorList) {
         const currentElement = elements.get(selector);
-        if (!currentElement) return;
+        if (!currentElement) continue;
 
         const loadedElement = loadedDocument.querySelector(selector);
-        if (!loadedElement) return;
+        if (!loadedElement) continue;
+
+        await Aellux.unmount(currentElement);
 
         const replacement = document.importNode(loadedElement, true);
         currentElement.replaceWith(replacement);
@@ -67,14 +69,14 @@
         if (selector === "title" && Aellux.stateNavigation)
           Aellux.stateNavigation.updateBaseTitle(replacement.innerText);
 
-        Aellux(replacement);
+        await Aellux(replacement);
 
         //feedback busy/progress
         if (Aellux.feedback) {
           Aellux.feedback.busy(replacement, "Ajax loaded", false);
           Aellux.feedback.progress(replacement, "Ajax loaded", 1);
         }
-      });
+      }
 
       if (!options.ignoreHistory && Aellux.stateNavigation) {
         Aellux.stateNavigation.ajaxHref(url, selectors);

@@ -1,6 +1,6 @@
 (function() {
   /*! Aellux | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
-  (function() {
+  (function(root) {
     var CONSTANTS = {
       AELLUX_SHORT_JS_NAME: "$ae",
       AELLUX_EXT_SCRIPT_PREFIX: "ext",
@@ -26,7 +26,6 @@
       ]
     };
     var scriptExtension = ".js";
-    var root = typeof globalThis !== "undefined" ? globalThis : window;
     var bootstrapScript = document.currentScript || document.querySelector("script[src*='aellux.js'],script[src*='aellux.min.js']");
     var aelluxBootstrapSrc = root.__aelluxBootstrapURL || bootstrapScript && bootstrapScript.src;
     if (!aelluxBootstrapSrc) {
@@ -410,6 +409,6 @@
       return name.replace(/([A-Z])/g, "-$1").toLowerCase();
     }
     ;
-  })();
+  })(typeof globalThis !== "undefined" ? globalThis : window);
 })();
 //# sourceMappingURL=aellux.js.map

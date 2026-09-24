@@ -11,7 +11,7 @@
 // fallback, and document.currentScript with a script-element lookup fallback.
 // Promise-based stylesheet tracking is optional and must be skipped when unavailable.
 
-(function () {
+(function (root) {
   var CONSTANTS = {
     AELLUX_SHORT_JS_NAME: "$ae",
     AELLUX_EXT_SCRIPT_PREFIX: "ext",
@@ -35,11 +35,6 @@
   };
 
   var scriptExtension = ".js";
-
-  var root =
-    typeof globalThis !== "undefined"
-      ? globalThis
-      : window;
 
   var bootstrapScript =
     document.currentScript ||
@@ -438,4 +433,5 @@
   };
   function toCamelCase(name) { return name.replace(/-([a-z])/g, function (_, c) { return c.toUpperCase(); }); };
   function fromCamelCase(name) { return name.replace(/([A-Z])/g, "-$1").toLowerCase(); };
-})();
+
+})(typeof globalThis !== "undefined" ? globalThis : window);
