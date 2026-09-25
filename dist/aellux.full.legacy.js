@@ -22527,13 +22527,13 @@
               return extensionPromise;
             case 7:
               extension = _context3.v;
-              if (!(!extension || !extension.mountDOM)) {
+              if (!(!extension || !extension.mountMap)) {
                 _context3.n = 8;
                 break;
               }
               return _context3.a(3, 27);
             case 8:
-              mounter = extension.mountDOM;
+              mounter = extension.mountMap;
               _iterator7 = _createForOfIteratorHelper(mounter);
               _context3.p = 9;
               _iterator7.s();
@@ -23139,8 +23139,8 @@
           var key = toCamelCase(extensionLabel);
           Aellux[key].init();
           Aellux[key].initialized = true;
-          if (Aellux[key].mountDOM) {
-            var selectors = Array.from(Aellux[key].mountDOM.keys()).join(",");
+          if (Aellux[key].mountMap) {
+            var selectors = Array.from(Aellux[key].mountMap.keys()).join(",");
             if (selectors) Aellux.extensionMounters[extensionName] = selectors;
           }
           delete Aellux.lazyExtensionSelectors[extensionName];
@@ -23287,14 +23287,14 @@
         var userPreferences = /* @__PURE__ */ Object.create(null);
         var defaultPreferences = /* @__PURE__ */ Object.create(null);
         var computedPreferences = /* @__PURE__ */ Object.create(null);
-        var mountDOM = /* @__PURE__ */ new Map();
+        var mountMap = /* @__PURE__ */ new Map();
         Aellux.extRegister(extensionName, {
           init: init,
           destroy: destroy,
           update: update,
           get: get,
           set: set,
-          mountDOM: mountDOM
+          mountMap: mountMap
         });
         var attr = {
           preference: Aellux.attr("preference"),
@@ -23321,7 +23321,7 @@
           sound: ["off", "on", "low"]
         };
         function init() {
-          mountDOM.set("[".concat(attr.preference, "]"), {
+          mountMap.set("[".concat(attr.preference, "]"), {
             mount: mountPreferenceContainer,
             unmount: unmountPreferenceContainer
           });
@@ -23750,7 +23750,7 @@
           shapeVertical: Aellux.className("shape-vertical"),
           shapeSquare: Aellux.className("shape-square")
         };
-        var mountDOM = /* @__PURE__ */ new Map();
+        var mountMap = /* @__PURE__ */ new Map();
         var adaptiveParams = {
           experienceScale: {
             near: 1,
@@ -23773,11 +23773,11 @@
         Aellux.extRegister(extensionName, {
           init: init,
           destroy: destroy,
-          mountDOM: mountDOM,
+          mountMap: mountMap,
           adaptiveParams: adaptiveParams
         });
         function init() {
-          mountDOM.set("[".concat(attr.adaptive, "]"), {
+          mountMap.set("[".concat(attr.adaptive, "]"), {
             mount: mountAdaptive,
             unmount: unmountAdaptive
           });

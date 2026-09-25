@@ -13,13 +13,13 @@
   const modifier = {
     active: Aellux.className("active")
   }
-  const mountDOM = new Map();
+  const mountMap = new Map();
   const controllers = new WeakMap();
 
-  Aellux.extRegister(extensionName, { init, destroy, mountDOM });
+  Aellux.extRegister(extensionName, { init, destroy, mountMap });
 
   function init() {
-    mountDOM.set(`[${attr.tabGroup}]`, { mount: mountTabGroup, unmount: unmountTabGroup });
+    mountMap.set(`[${attr.tabGroup}]`, { mount: mountTabGroup, unmount: unmountTabGroup });
     Aellux.on("SnapshotRestore", onSnapshotRestore);
   }
   async function destroy() {

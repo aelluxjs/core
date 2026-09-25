@@ -167,10 +167,10 @@
             continue;
           }
           const extension = await extensionPromise;
-          if (!extension || !extension.mountDOM) {
+          if (!extension || !extension.mountMap) {
             continue;
           }
-          const mounter = extension.mountDOM;
+          const mounter = extension.mountMap;
           for (const [selector, controller] of mounter) {
             try {
               if (!controller[method]) {
@@ -439,8 +439,8 @@
       const key = toCamelCase(extensionLabel);
       Aellux[key].init();
       Aellux[key].initialized = true;
-      if (Aellux[key].mountDOM) {
-        const selectors = Array.from(Aellux[key].mountDOM.keys()).join(",");
+      if (Aellux[key].mountMap) {
+        const selectors = Array.from(Aellux[key].mountMap.keys()).join(",");
         if (selectors) Aellux.extensionMounters[extensionName] = selectors;
       }
       delete Aellux.lazyExtensionSelectors[extensionName];

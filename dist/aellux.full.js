@@ -15,8 +15,8 @@
         const userPreferences = /* @__PURE__ */ Object.create(null);
         const defaultPreferences = /* @__PURE__ */ Object.create(null);
         const computedPreferences = /* @__PURE__ */ Object.create(null);
-        const mountDOM = /* @__PURE__ */ new Map();
-        Aellux.extRegister(extensionName, { init, destroy, update, get, set, mountDOM });
+        const mountMap = /* @__PURE__ */ new Map();
+        Aellux.extRegister(extensionName, { init, destroy, update, get, set, mountMap });
         const attr = {
           preference: Aellux.attr("preference"),
           option: Aellux.attr("option"),
@@ -42,7 +42,7 @@
           sound: ["off", "on", "low"]
         };
         function init() {
-          mountDOM.set(`[${attr.preference}]`, {
+          mountMap.set(`[${attr.preference}]`, {
             mount: mountPreferenceContainer,
             unmount: unmountPreferenceContainer
           });
@@ -320,7 +320,7 @@
           shapeVertical: Aellux.className("shape-vertical"),
           shapeSquare: Aellux.className("shape-square")
         };
-        const mountDOM = /* @__PURE__ */ new Map();
+        const mountMap = /* @__PURE__ */ new Map();
         const adaptiveParams = {
           experienceScale: {
             near: 1,
@@ -340,9 +340,9 @@
             horizontal: 1.25
           }
         };
-        Aellux.extRegister(extensionName, { init, destroy, mountDOM, adaptiveParams });
+        Aellux.extRegister(extensionName, { init, destroy, mountMap, adaptiveParams });
         function init() {
-          mountDOM.set(`[${attr.adaptive}]`, {
+          mountMap.set(`[${attr.adaptive}]`, {
             mount: mountAdaptive,
             unmount: unmountAdaptive
           });
@@ -750,10 +750,10 @@
             continue;
           }
           const extension = await extensionPromise;
-          if (!extension || !extension.mountDOM) {
+          if (!extension || !extension.mountMap) {
             continue;
           }
-          const mounter = extension.mountDOM;
+          const mounter = extension.mountMap;
           for (const [selector, controller] of mounter) {
             try {
               if (!controller[method]) {
@@ -1022,8 +1022,8 @@
       const key = toCamelCase(extensionLabel);
       Aellux[key].init();
       Aellux[key].initialized = true;
-      if (Aellux[key].mountDOM) {
-        const selectors = Array.from(Aellux[key].mountDOM.keys()).join(",");
+      if (Aellux[key].mountMap) {
+        const selectors = Array.from(Aellux[key].mountMap.keys()).join(",");
         if (selectors) Aellux.extensionMounters[extensionName] = selectors;
       }
       delete Aellux.lazyExtensionSelectors[extensionName];

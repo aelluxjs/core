@@ -22527,13 +22527,13 @@
               return extensionPromise;
             case 7:
               extension = _context3.v;
-              if (!(!extension || !extension.mountDOM)) {
+              if (!(!extension || !extension.mountMap)) {
                 _context3.n = 8;
                 break;
               }
               return _context3.a(3, 27);
             case 8:
-              mounter = extension.mountDOM;
+              mounter = extension.mountMap;
               _iterator7 = _createForOfIteratorHelper(mounter);
               _context3.p = 9;
               _iterator7.s();
@@ -23140,8 +23140,8 @@
           var key = toCamelCase(extensionLabel);
           Aellux[key].init();
           Aellux[key].initialized = true;
-          if (Aellux[key].mountDOM) {
-            var selectors = Array.from(Aellux[key].mountDOM.keys()).join(",");
+          if (Aellux[key].mountMap) {
+            var selectors = Array.from(Aellux[key].mountMap.keys()).join(",");
             if (selectors) Aellux.extensionMounters[extensionName] = selectors;
           }
           delete Aellux.lazyExtensionSelectors[extensionName];

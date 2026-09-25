@@ -11,7 +11,7 @@
       shapeVertical: Aellux.className("shape-vertical"),
       shapeSquare: Aellux.className("shape-square")
     };
-    var mountDOM = /* @__PURE__ */ new Map();
+    var mountMap = /* @__PURE__ */ new Map();
     var adaptiveParams = {
       experienceScale: {
         near: 1,
@@ -34,11 +34,11 @@
     Aellux.extRegister(extensionName, {
       init: init,
       destroy: destroy,
-      mountDOM: mountDOM,
+      mountMap: mountMap,
       adaptiveParams: adaptiveParams
     });
     function init() {
-      mountDOM.set("[".concat(attr.adaptive, "]"), {
+      mountMap.set("[".concat(attr.adaptive, "]"), {
         mount: mountAdaptive,
         unmount: unmountAdaptive
       });

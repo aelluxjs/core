@@ -97,8 +97,8 @@ export function createMountHelper(root, extensionPromises) {
           extensionPromises[toCamelCase(extensionLabel)];
         if (!extensionPromise) { continue; }
         const extension = await extensionPromise;
-        if (!extension || !extension.mountDOM) { continue; }
-        const mounter = extension.mountDOM;
+        if (!extension || !extension.mountMap) { continue; }
+        const mounter = extension.mountMap;
         for (const [selector, controller] of mounter) {
           try {
             if (!controller[method]) { continue; }

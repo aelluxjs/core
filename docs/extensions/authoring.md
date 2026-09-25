@@ -16,6 +16,23 @@ Start from [`templates/aellux.ext.template.js`](../../templates/aellux.ext.templ
 
 The runtime exposes a kebab-case name as camelCase: `tab-group` becomes `Aellux.tabGroup`.
 
+## DOM Mount Contract
+
+Extensions with element behavior expose a `mountMap`. Each key is a CSS selector and each value provides the matching `mount` and `unmount` handlers:
+
+```js
+const mountMap = new Map();
+
+mountMap.set("[data-ae-example]", {
+  mount: mountElement,
+  unmount: unmountElement
+});
+
+Aellux.extRegister(extensionName, { init, destroy, mountMap });
+```
+
+The orchestrator consumes this map during `$ae.update(root)` and `$ae.unmount(root)`. `mount` must be safe against repeated updates, and `unmount` must reverse the element-level resources created by `mount`.
+
 ## Declaring Available Builds
 
 The `builds` option describes the artifacts published by the Extension:

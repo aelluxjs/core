@@ -48,14 +48,14 @@
     var userPreferences = /* @__PURE__ */ Object.create(null);
     var defaultPreferences = /* @__PURE__ */ Object.create(null);
     var computedPreferences = /* @__PURE__ */ Object.create(null);
-    var mountDOM = /* @__PURE__ */ new Map();
+    var mountMap = /* @__PURE__ */ new Map();
     Aellux.extRegister(extensionName, {
       init: init,
       destroy: destroy,
       update: update,
       get: get,
       set: set,
-      mountDOM: mountDOM
+      mountMap: mountMap
     });
     var attr = {
       preference: Aellux.attr("preference"),
@@ -82,7 +82,7 @@
       sound: ["off", "on", "low"]
     };
     function init() {
-      mountDOM.set("[".concat(attr.preference, "]"), {
+      mountMap.set("[".concat(attr.preference, "]"), {
         mount: mountPreferenceContainer,
         unmount: unmountPreferenceContainer
       });

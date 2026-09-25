@@ -211,8 +211,8 @@ import { createMountHelper } from "./internal/create-mount-helper.js";
     Aellux[key].init();
     Aellux[key].initialized = true;
 
-    if (Aellux[key].mountDOM) {
-      const selectors = Array.from(Aellux[key].mountDOM.keys()).join(",");
+    if (Aellux[key].mountMap) {
+      const selectors = Array.from(Aellux[key].mountMap.keys()).join(",");
       if (selectors) Aellux.extensionMounters[extensionName] = selectors;
     }
 

@@ -8,9 +8,9 @@
   const userPreferences = Object.create(null);
   const defaultPreferences = Object.create(null);
   const computedPreferences = Object.create(null);
-  const mountDOM = new Map();
+  const mountMap = new Map();
 
-  Aellux.extRegister(extensionName, { init, destroy, update, get, set, mountDOM });
+  Aellux.extRegister(extensionName, { init, destroy, update, get, set, mountMap });
 
   const attr = {
     preference: Aellux.attr("preference"),
@@ -40,7 +40,7 @@
   };
 
   function init() {
-    mountDOM.set(`[${attr.preference}]`, {
+    mountMap.set(`[${attr.preference}]`, {
       mount: mountPreferenceContainer,
       unmount: unmountPreferenceContainer,
     });

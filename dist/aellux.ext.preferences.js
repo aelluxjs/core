@@ -6,8 +6,8 @@
     const userPreferences = /* @__PURE__ */ Object.create(null);
     const defaultPreferences = /* @__PURE__ */ Object.create(null);
     const computedPreferences = /* @__PURE__ */ Object.create(null);
-    const mountDOM = /* @__PURE__ */ new Map();
-    Aellux.extRegister(extensionName, { init, destroy, update, get, set, mountDOM });
+    const mountMap = /* @__PURE__ */ new Map();
+    Aellux.extRegister(extensionName, { init, destroy, update, get, set, mountMap });
     const attr = {
       preference: Aellux.attr("preference"),
       option: Aellux.attr("option"),
@@ -33,7 +33,7 @@
       sound: ["off", "on", "low"]
     };
     function init() {
-      mountDOM.set(`[${attr.preference}]`, {
+      mountMap.set(`[${attr.preference}]`, {
         mount: mountPreferenceContainer,
         unmount: unmountPreferenceContainer
       });

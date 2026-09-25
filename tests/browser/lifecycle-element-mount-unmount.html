@@ -7,14 +7,14 @@
   <script src="../../dist/aellux.js"></script>
   <script>
     var lifecycleCounts = { mount: 0, unmount: 0, events: 0 };
-    var mountDOM = new Map();
+    var mountMap = new Map();
 
     function onProbeEvent() { lifecycleCounts.events++; }
 
     $ae.ext("lifecycle-element-probe");
     $ae.extRegister("lifecycle-element-probe", {
       init: function () {
-        mountDOM.set("[data-lifecycle-element]", {
+        mountMap.set("[data-lifecycle-element]", {
           mount: function (element) {
             lifecycleCounts.mount++;
             element.addEventListener("lifecycle-probe", onProbeEvent);
@@ -26,7 +26,7 @@
         });
       },
       destroy: function () {},
-      mountDOM: mountDOM
+      mountMap: mountMap
     });
 
     AelluxValidation.run(async function (assert) {

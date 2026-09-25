@@ -24,19 +24,19 @@
   const attr = {
     extensionName: Aellux.attr(extensionName)
   };
-  const mountDOM = new Map();
+  const mountMap = new Map();
 
-  Aellux.extRegister(extensionName, { init, destroy, mountDOM });
+  Aellux.extRegister(extensionName, { init, destroy, mountMap });
 
   function init() {
-    mountDOM.set(`[${attr.extensionName}]`, {
+    mountMap.set(`[${attr.extensionName}]`, {
       mount: mountElement,
       unmount: unmountElement
     });
   }
 
   function destroy() {
-    mountDOM.clear();
+    mountMap.clear();
   }
 
   function mountElement(element) {

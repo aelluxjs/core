@@ -7,18 +7,18 @@
   <script src="../../dist/aellux.js"></script>
   <script>
     var lifecycleCounts = { mount: 0, unmount: 0, destroy: 0 };
-    var mountDOM = new Map();
+    var mountMap = new Map();
 
     $ae.ext("lifecycle-extension-probe");
     $ae.extRegister("lifecycle-extension-probe", {
       init: function () {
-        mountDOM.set("[data-lifecycle-extension]", {
+        mountMap.set("[data-lifecycle-extension]", {
           mount: function () { lifecycleCounts.mount++; },
           unmount: function () { lifecycleCounts.unmount++; }
         });
       },
       destroy: function () { lifecycleCounts.destroy++; },
-      mountDOM: mountDOM
+      mountMap: mountMap
     });
 
     AelluxValidation.run(async function (assert) {
