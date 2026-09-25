@@ -1,0 +1,18 @@
+<div class="d-flex justify-content-between flex-row gap-2 p-2 pb-4 px-0">
+  @if(prevLink)
+  <a href="{{prevLink.href}}" class="text-decoration-none d-inline-flex flex-row gap-2" style="max-width: 45%;">
+    ← <span class="text-truncate overflow-hidden d-inline-block align-middle flex-fill"
+      style="max-width:200px">{{prevLink.label}}</span>
+  </a>
+  @else
+  <a>&nbsp;</a>
+  @endif
+
+  @if(nextLink)
+  <a href="{{nextLink.href}}" class="text-decoration-none d-inline-flex flex-row justify-content-end gap-2"
+    style="width: 40%;">
+    <span class="text-truncate overflow-hidden d-inline-block align-middle flex-fill text-end"
+      style="max-width:200px">{{nextLink.label}}</span> →
+  </a>
+  @endif
+</div>

@@ -75,9 +75,9 @@ Generated browser files are written to `dist/`. The distribution uses classic sc
 
 ## Project Status
 
-Aellux is under active development toward `0.1.0-beta.1`. Modern and forced-Legacy paths, Bootstrap coexistence, Extension loading modes, and isolated failures have repeatable browser validation scenarios; broader compatibility testing remains part of the beta work.
+Aellux `0.1.0-beta.1` establishes the initial runtime, Extension contract, Modern/Legacy distributions, and repeatable browser validation scenarios. The planned `0.1.0-beta.2` cycle focuses on CI, multi-browser coverage, real Legacy validation, security, accessibility, and commercial distribution readiness.
 
-Track the release scope in the [0.1.0 Beta milestone](../docs/milestones/0.1.0-beta.md) and delivered changes in the [changelog](../CHANGELOG.md).
+Track the next cycle in the [0.1.0 Beta 2 milestone](../docs/milestones/0.1.0-beta.2.md), review the [Beta 1 milestone](../docs/milestones/0.1.0-beta.1.md), and see delivered changes in the [changelog](../CHANGELOG.md).
 
 ## License
 

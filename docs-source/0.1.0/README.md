@@ -29,6 +29,7 @@ This directory contains the detailed documentation for the Aellux `0.1.0-beta` l
 ## Project Documents
 
 - [Browser validation scenarios](validation-scenarios.md)
-- [Milestone: Aellux 0.1.0 Beta](milestones/0.1.0-beta.md)
+- [Milestone: Aellux 0.1.0 Beta 2](milestones/0.1.0-beta.2.md)
+- [Milestone: Aellux 0.1.0 Beta 1](milestones/0.1.0-beta.1.md)
 - [Extension scaffold](../templates/README.md)
 - [Changelog](../CHANGELOG.md)

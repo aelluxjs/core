@@ -1,0 +1,304 @@
+{
+  "template": "templates/docs-layout.e.htm",
+  "summary": [
+    {
+      "label": "Overview",
+      "slug": "overview",
+      "active": true,
+      "children": [
+        {
+          "label": "Home",
+          "href": "index.htm"
+        },
+        {
+          "label": "Introduction",
+          "href": "introduction.htm"
+        },
+        {
+          "label": "Getting Started",
+          "href": "getting-started.htm"
+        },
+        {
+          "label": "Logic",
+          "href": "logic.htm"
+        },
+        {
+          "label": "Editions",
+          "href": "editions.htm"
+        }
+      ]
+    },
+    {
+      "label": "Experience Design",
+      "slug": "experiences",
+      "children": [
+        {
+          "label": "Summary",
+          "href": "experiences/index.htm"
+        },
+        {
+          "label": "Surface",
+          "slug": "surface",
+          "children": [
+            {
+              "label": "Setup Scripts",
+              "href": "experiences/surface/host-lifecycle-management.htm"
+            },
+            {
+              "label": "Version Manager",
+              "href": "experiences/surface/version-manager-and-release-dispatch.htm"
+            },
+            {
+              "label": "Scoped CLI",
+              "href": "experiences/surface/scoped-cli-operations.htm"
+            },
+            {
+              "label": "Human Access",
+              "href": "experiences/surface/human-access-and-scoped-workspaces.htm"
+            },
+            {
+              "label": "Edge & Host",
+              "href": "experiences/surface/edge-and-host-integration.htm"
+            },
+            {
+              "label": "Config & Admin",
+              "href": "experiences/surface/configuration-and-admin-operations.htm"
+            },
+            {
+              "label": "Deploy Flow",
+              "href": "experiences/surface/tenant-and-app-deployment-flow.htm"
+            },
+            {
+              "label": "Registry Scan",
+              "href": "experiences/surface/registry-scan-and-reconciliation.htm"
+            },
+            {
+              "label": "Observability",
+              "href": "experiences/surface/operational-observability.htm"
+            },
+            {
+              "label": "Service Lifecycle",
+              "href": "experiences/surface/core-service-lifecycle.htm"
+            },
+            {
+              "label": "Director Rescan",
+              "href": "experiences/surface/director-rescan-and-registry-sync.htm"
+            },
+            {
+              "label": "Scoped Log",
+              "href": "experiences/surface/scoped-logging-and-status.htm"
+            }
+          ]
+        },
+        {
+          "label": "Extension",
+          "slug": "extension",
+          "children": [
+            {
+              "label": "Adapter Repleceability",
+              "href": "experiences/extension/adapter-replaceability.htm"
+            },
+            {
+              "label": "Plugin Context",
+              "href": "experiences/extension/plugin-hooks-and-context-isolation.htm"
+            },
+            {
+              "label": "Tenant & App Kits",
+              "href": "experiences/extension/tenant-and-app-kits.htm"
+            },
+            {
+              "label": "Application Surface",
+              "href": "experiences/extension/application-delivery-surface.htm"
+            },
+            {
+              "label": "Request Security",
+              "href": "experiences/extension/request-security-composition.htm"
+            },
+            {
+              "label": "Middleware & Routes",
+              "href": "experiences/extension/middleware-and-route-policy-composition.htm"
+            },
+            {
+              "label": "Developer Iteration",
+              "href": "experiences/extension/developer-iteration-and-live-refresh.htm"
+            },
+            {
+              "label": "Tenant Kits",
+              "href": "experiences/extension/tenant-kits.htm"
+            },
+            {
+              "label": "App Kits",
+              "href": "experiences/extension/app-kits.htm"
+            },
+            {
+              "label": "WS Actions",
+              "href": "experiences/extension/ws-action-dispatch.htm"
+            }
+          ]
+        },
+        {
+          "label": "Nucleus",
+          "slug": "nucleus",
+          "children": [
+            {
+              "label": "Supervision & Restart",
+              "href": "experiences/nucleus/process-supervision-and-restart-policy.htm"
+            },
+            {
+              "label": "Process Identity",
+              "href": "experiences/nucleus/process-isolation-and-identity-model.htm"
+            },
+            {
+              "label": "Topology Contracts",
+              "href": "experiences/nucleus/contracts-driven-topology.htm"
+            },
+            {
+              "label": "Tenancy Model",
+              "href": "experiences/nucleus/tenancy-and-addressing-model.htm"
+            },
+            {
+              "label": "Network Isolation",
+              "href": "experiences/nucleus/network-isolation-helpers.htm"
+            },
+            {
+              "label": "Runtime State",
+              "href": "experiences/nucleus/runtime-state-and-support-folders.htm"
+            },
+            {
+              "label": "RPC Topology",
+              "href": "experiences/nucleus/rpc-and-runtime-topology.htm"
+            },
+            {
+              "label": "Heartbeat & Reload",
+              "href": "experiences/nucleus/heartbeat-and-reload-flow.htm"
+            },
+            {
+              "label": "Runtime Bootstrap",
+              "href": "experiences/nucleus/runtime-isolation-after-bootstrap.htm"
+            },
+            {
+              "label": "Weak Loading",
+              "href": "experiences/nucleus/require-cache-flush-and-weak-loading.htm"
+            }
+          ]
+        },
+        {
+          "label": "Future",
+          "slug": "future",
+          "children": [
+            {
+              "label": "Change Registry",
+              "href": "experiences/future/operational-audit-trail-and-change-registry.htm"
+            },
+            {
+              "label": "Health Alerting",
+              "href": "experiences/future/metrics-health-export-and-alerting.htm"
+            },
+            {
+              "label": "Backup & Restore",
+              "href": "experiences/future/backup-and-restore-workflow.htm"
+            },
+            {
+              "label": "Upgrade & Rollback",
+              "href": "experiences/future/upgrade-and-rollback-orchestration.htm"
+            },
+            {
+              "label": "Secrets & Certificate",
+              "href": "experiences/future/secrets-and-certificate-lifecycle-management.htm"
+            },
+            {
+              "label": "Cleanup Policy",
+              "href": "experiences/future/retention-and-cleanup-policy.htm"
+            },
+            {
+              "label": "Healthcheck Tooling",
+              "href": "experiences/future/operator-healthcheck-and-smoke-tooling.htm"
+            },
+            {
+              "label": "Abuse Control",
+              "href": "experiences/future/abuse-control-and-capacity-governance.htm"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "label": "Core Concepts",
+      "slug": "core",
+      "children": [
+        {
+          "label": "Summary",
+          "href": "core-concepts/index.htm"
+        },
+        {
+          "label": "Architecture",
+          "href": "core-concepts/architecture.htm"
+        },
+        {
+          "label": "Request Lifecycle",
+          "href": "core-concepts/request-lifecycle.htm"
+        },
+        {
+          "label": "Tenancy",
+          "href": "core-concepts/tenancy.htm"
+        }
+      ]
+    },
+    {
+      "label": "Reference",
+      "slug": "reference",
+      "children": [
+        {
+          "label": "Summary",
+          "href": "reference/index.htm"
+        },
+        {
+          "label": "CLI",
+          "href": "reference/cli.htm"
+        },
+        {
+          "label": "Configuration",
+          "href": "reference/configuration.htm"
+        },
+        {
+          "label": "First Release",
+          "href": "reference/first-release-smoke-criteria.htm"
+        },
+        {
+          "label": "Repository Structure",
+          "href": "reference/repository-structure.htm"
+        },
+        {
+          "label": "Runtime Policy",
+          "href": "reference/runtime-policy.htm"
+        },
+        {
+          "label": "Setup and Maintenance",
+          "href": "reference/setup-and-maintenance.htm"
+        }
+      ]
+    },
+    {
+      "label": "Features",
+      "slug": "features",
+      "children": [
+        {
+          "label": "Summary",
+          "href": "features/index.htm"
+        },
+        {
+          "label": "Adapters",
+          "href": "features/adapters.htm"
+        },
+        {
+          "label": "Plugins",
+          "href": "features/plugins.htm"
+        },
+        {
+          "label": "Hooks",
+          "href": "features/hooks.htm"
+        }
+      ]
+    }
+  ]
+}

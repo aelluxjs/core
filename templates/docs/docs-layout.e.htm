@@ -1,0 +1,317 @@
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <meta name="color-scheme" content="normal">
+  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#FFFFFF">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000000">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+  @include('templates/seo-head.e.htm')
+
+  <link rel="icon" type="image/svg+xml" sizes="any" href="/favicon/favicon.svg">
+  <link rel="icon" type="image/icon" sizes="any" href="/favicon/favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/favicon/android-chrome-192x192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="/favicon/android-chrome-512x512.png">
+  <link rel="apple-touch-icon" type="image/png" sizes="180x180" href="/favicon/apple-touch-icon.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@500&display=swap" rel="stylesheet">
+
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.32.2/tocbot.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.8/css/bootstrap.min.css">
+  <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.13.1/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/github-dark.min.css">
+
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/tocbot.css">
+  <link rel="stylesheet" href="/css/scrollbar.css">
+
+  <script>
+    function closeNavbar(bsToggler) {
+      const targetSelector = bsToggler.getAttribute('data-bs-target') || navbarToggler.getAttribute('aria-controls');
+      const bsCollapse = document.querySelector(targetSelector);
+
+      // 2. If open, remove the 'show' class to hide it
+      if (bsCollapse.classList.contains('show')) {
+        bsCollapse.classList.remove('show');
+        // 3. Update ARIA state to false
+        bsToggler.setAttribute('aria-expanded', 'false');
+      }
+    }
+    window.addEventListener("click", (e) => {
+      const link = event.target.closest("a[href]");
+      const any = event.target.closest("[data-bs-toggle][data-bs-continue]");
+      if (any && !link) return;
+      const el = document.querySelector("[data-bs-toggle][data-bs-autohide=true][aria-expanded=true]");
+      if (el) closeNavbar(el);
+    });
+  </script>
+</head>
+
+<body>
+
+  <div class="section d-flex border-bottom" data-view-frame=0 style="position:sticky;top:0px;z-index:5;height: 64px;">
+    <nav class="animation_header_test navbar navbar-expand-md d-flex flex-fill p-0 m-0 user-select-none bg-white"
+      style=" --bar-color:#55606F; --bar-color2:var(--bs-link-color); --bar-bg:#F0F5F5;">
+      <div class="container-fluid gap-2" style='z-index: 1;'>
+
+        <div class="me-auto d-flex flex-row gap-2 align-items-center">
+
+          <a class="navbar-brand m-0 me-auto p-0 lh-1 fw-medium d-flex align-items-center"
+            href="https://ehecoatl.com.br/"
+            style="font-size:1.5em;letter-spacing:-0.03em;word-spacing: -.2em; min-width: 130px; color:inherit;height:35px;">
+            <svg height="50" width="130" class="d-inline-block position-absolute">
+              <use href="#ehecoatl-namebrand"></use>
+            </svg>
+          </a>
+
+        </div>
+
+        <div class="collapse navbar-collapse bg-white border-end" id="navbarSupportedContent">
+          <ul class="navbar-nav w-100 h-100 gap-1 my-0 p-2 ps-md-3 pe-3 pe-md-2 flex-column align-self-start text-white"
+            data-bs-continue="true" data-bs-toggle>
+
+            <div class="d-flex flex-row gap-2 justify-content-between py-2">
+
+              @include("templates/versions-menu.e.htm")
+
+              <div class="btn-group border rounded-pill rounded overflow-hidden" style="gap:1px;" role="group"
+                aria-label="Basic example">
+                <input type="radio" class="btn-check" name="color-mode-selected" id="radio-color-mode-light"
+                  autocomplete="off" aria-label="Light Mode">
+                <label
+                  class="btn btn-sm btn-outline-adaptive py-1 border-0 d-inline-flex justify-content-center align-items-center"
+                  for="radio-color-mode-light" onclick aria-label="Light Mode">
+                  <i class="bi bi-sun"></i>
+                  <span class="visually-hidden">Light Mode</span>
+                </label>
+
+                <input type="radio" class="btn-check" name="color-mode-selected" id="radio-color-mode-dark"
+                  autocomplete="off" aria-label="Dark Mode">
+                <label
+                  class="btn btn-sm btn-outline-adaptive py-1 border-0  d-inline-flex justify-content-center align-items-center"
+                  for="radio-color-mode-dark" onclick aria-label="Dark Mode">
+                  <i class="bi bi-moon-fill"></i>
+                  <span class="visually-hidden">Dark Mode</span>
+                </label>
+
+                <input type="radio" class="btn-check" name="color-mode-selected" id="radio-color-mode-auto"
+                  autocomplete="off" aria-label="Auto Mode">
+                <label
+                  class="btn btn-sm btn-outline-adaptive py-1 border-0 d-inline-flex justify-content-center align-items-center"
+                  for="radio-color-mode-auto" onclick aria-label="Auto Mode">
+                  <i class="bi bi-circle-half"></i>
+                  <span class="visually-hidden">Auto Mode</span>
+                </label>
+              </div>
+
+            </div>
+
+            @foreach(item of menuTree)
+            <li class="nav-item small-md fw-bold rounded-pill ps-md-1 bg-light-adaptive" style="flex:0">
+              <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" data-bs-continue=true
+                data-bs-toggle="collapse" data-bs-target="#children-{{item.slug}}">
+                {{item.label}}
+                @if(item.children !== undefined)<span class="chevron"><i
+                    class="bi bi-chevron-right small"></i></span>@endif
+              </a>
+            </li>
+
+            @if(item.children !== undefined && item.children.length)
+            <div id="children-{{item.slug}}" class="collapse border-start ms-2 @if(item.active) show @endif"
+              data-bs-parent="#navbarSupportedContent">
+              <div class="ps-2 gap-1 d-flex flex-column ">
+                @foreach(child of item.children)
+                @if(child.children !== undefined && child.children.length)
+
+                <li class="nav-item small-md fw-bold rounded-pill ps-md-1 bg-light-adaptive" style="flex:0">
+                  <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" data-bs-continue=true
+                    data-bs-toggle="collapse" data-bs-target="#children2-{{child.slug}}">
+                    {{child.label}}
+                    @if(child.children !== undefined)<span class="chevron"><i
+                        class="bi bi-chevron-right small"></i></span>@endif
+                  </a>
+                </li>
+
+                <div id="children2-{{child.slug}}" class="collapse border-start ms-2 @if(child.active) show @endif"
+                  data-bs-parent="#children-{{item.slug}}">
+                  <div class="ps-2 gap-1 d-flex flex-column ">
+                    @foreach(child2 of child.children)
+                    <li class="nav-item small-md rounded-pill ps-md-1 @if(child2.active) active @endif" style="flex:0">
+                      <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="{{child2.href}}">
+                        {{child2.label}}
+                      </a>
+                    </li>
+                    @endforeach
+                  </div>
+                </div>
+                @else
+                <li class="nav-item small-md rounded-pill ps-md-1 @if(child.active) active @endif" style="flex:0">
+                  <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="{{child.href}}">
+                    {{child.label}}
+                  </a>
+                </li>
+                @endif
+                @endforeach
+              </div>
+            </div>
+            @endif
+            @endforeach
+
+          </ul>
+        </div>
+
+        <a href="https://github.com/ehecoatl" target="_blank" rel="noopener noreferrer"
+          class=" btn btn-warning rounded-squircle p-1 btn-lg" style="aspect-ratio: 1;">
+          <i class="bi bi-github"></i>
+        </a>
+
+        <button class="navbar-toggler" type="button" data-bs-autohide="true" data-bs-toggle="collapse"
+          data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
+          aria-label="Toggle navigation">
+          <div class="hamburger">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+        </button>
+
+      </div>
+    </nav>
+  </div>
+
+  <div id="page-progress"></div>
+
+  <div class="content-block position-relative d-flex justify-content-center">
+
+    <div class="content-wrapper p-0 position-relative w-100" style=" max-width: 1024px;transition:opacity 0.5s linear;">
+
+      <div class=" toc-header position-relative bg-white p-2 position-sticky border-bottom border-md-0"
+        style="top:64px;z-index:1;">
+        <div class="menu-toggle d-flex flex-row gap-2 small">
+          <button id="button-toc-menu" class="btn btn-sm btn-outline-adaptive rounded-pill px-3 text-nowrap"
+            data-bs-autohide="true" data-bs-toggle="collapse" data-bs-target="#toc-collapse" aria-expanded="false"
+            aria-controls="toc-collapse">
+            Table of Contents
+          </button>
+          <div class="p-2  text-nowrap overflow-hidden text-truncate fw-bold" id="tocbot-current-label" onclick="
+              document.getElementById('button-toc-menu').click();
+              " style="cursor:pointer">
+            -
+          </div>
+        </div>
+        <div class="collapse toc-collapse bg-white overflow-hidden p-4 p-lg-0" id="toc-collapse"
+          style="transition:none!important">
+          <div class="h6 fw-bold p-2 pb-1">On this page</div>
+          <div class="position-relative overflow-hidden">
+            <div class="js-toc">
+
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="article p-4">
+
+        <nav id="doc-breadcrumb" style="--bs-breadcrumb-divider: '›';overflow-x:auto;overflow-y:clip;" class="w-100"
+          aria-label="breadcrumb" ajax-load="doc-breadcrumb">
+          <ol class="breadcrumb flex-nowrap">
+
+            @foreach(item of breadcrumb)
+            @if(item.href)
+            <li class="breadcrumb-item text-capitalize text-nowrap flex-shrink-0">
+              <a href="{{item.href}}">
+                {{item.label}}
+              </a>
+            </li>
+            @else
+            <li class="breadcrumb-item text-capitalize text-nowrap flex-shrink-0">
+              {{item.label}}
+            </li>
+            @endif
+            @endforeach
+
+          </ol>
+        </nav>
+
+        <div id="doc-navlinks" ajax-load="doc-navlinks">
+          @include('templates/navlinks.e.htm')
+        </div>
+
+        <div id="doc-content" style="min-height: calc(100vh - 200px);" class="js-toc-content" ajax-load="doc-content">
+          @markdown(markdownPath)
+        </div>
+
+        <div id="doc-navlinks2" ajax-load="doc-navlinks2">
+          @include('templates/navlinks.e.htm')
+        </div>
+
+        <div class="section bg-transparent" style="margin: 50vh 0;">
+          <div class="text-center small text-body opacity-50">
+            <div>2026 &copy; <a href="https://wolimp.com.br/" style="color:inherit!important;">Wolimp</a>, All Rights
+              Reserved</div>
+            <small>Ehecoatl&trade; is a trademark owned by Wolimp company.</small>
+            <div class="small mb-0 text-body">
+              Special thanks to
+              <a style="color:inherit!important;" href="https://getbootstrap.com/" target="_blank"
+                rel="noopener noreferrer">Bootstrap</a>
+              - this page layout was built around Bootstrap’s responsive components and utility classes.
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- SYNC SCRIPTS -->
+  <script src="/js/promise-value.js?t=1"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/languages/json.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/languages/bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/languages/javascript.min.js"></script>
+  <script src="/js/core-bash-highlight-v1.js"></script>
+  <script> hljs.highlightAll(); </script>
+  <!-- SYNC SCRIPTS -->
+
+  <!-- ASYNC SCRIPTS -->
+  <script src="/js/bootstrap-ajax-loader.js?t=1" async></script>
+  <script src="/js/toc-init.js?t=1" async></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.8/js/bootstrap.bundle.min.js" defer async></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.32.2/tocbot.min.js" defer async></script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      promise_value(window, "initOrRefreshToc")
+        .then(initOrRefreshToc => initOrRefreshToc());
+    });
+
+    window.addEventListener("BootstrapAjaxStart", (e) => {
+      const container = document.querySelector("#doc-content");
+      container.style.transition = null;
+      container.style.opacity = .2;
+    });
+
+    window.addEventListener("BootstrapAjaxLoaded", (e) => {
+      const container = document.querySelector("#doc-content");
+      container.style.transition = "opacity .25s linear";
+      container.style.opacity = null;
+
+      initOrRefreshToc();
+      hljs.highlightAll();
+    });
+  </script>
+  <!-- ASYNC SCRIPTS -->
+
+</body>
+
+</html>

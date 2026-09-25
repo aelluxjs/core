@@ -1,0 +1,17 @@
+<div class="dropdown">
+  <button class="btn btn-outline-adaptive btn-sm ps-3 dropdown-toggle rounded-pill" type="button"
+    data-bs-toggle="dropdown" aria-expanded="false">
+    {{route.params.version}}
+  </button>
+  <ul class="dropdown-menu dropdown-menu-start rounded-2 overflow-hidden position-absolute" style="min-width: unset;">
+
+    @forentries(entry in 'static/docs')
+    @if(entry.isFile) @continue @endif
+    <li>
+      <a class="dropdown-item small @if(route.params.version === entry.name) active @endif" data-no-ajax=true
+        href="/{{entry.name}}">{{entry.name}}</a>
+    </li>
+    @endforentries
+
+  </ul>
+</div>

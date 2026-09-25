@@ -1,0 +1,124 @@
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://wolimp.com.br/#organization",
+      "name": "Wolimp",
+      "url": "https://wolimp.com.br/",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://wolimp.com.br/favicon/favicon.svg",
+        "width": 500,
+        "height": 500
+      },
+      "brand": {
+        "@type": "Brand",
+        "name": "Wolimp"
+      }
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://core.ehecoatl.com.br/#website",
+      "name": "Ehecoatl",
+      "url": "https://core.ehecoatl.com.br/",
+      "publisher": {
+        "@id": "https://wolimp.com.br/#organization"
+      },
+      "brand": {
+        "@type": "Brand",
+        "name": "Ehecoatl"
+      },
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://core.ehecoatl.com.br/favicon/favicon.svg",
+        "width": 500,
+        "height": 500
+      },
+      "sameAs": [
+        "https://github.com/ehecoatl"
+      ]
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://docs.ehecoatl.com.br/{{route.params.version}}#webpage",
+      "url": "https://docs.ehecoatl.com.br/{{route.params.version}}",
+      "name": "{{pageTitle}}",
+      "description": "Open-source multi-tenant SaaS runtime with tenant process isolation and isolated app workers for smaller blast radius and safer white-label environments.",
+      "isPartOf": {
+        "@id": "https://docs.ehecoatl.com.br/#website"
+      },
+      "about": {
+        "@id": "https://core.ehecoatl.com.br/#software"
+      },
+      "mainEntity": {
+        "@id": "https://core.ehecoatl.com.br/#software"
+      },
+      "breadcrumb": {
+        "@id": "https://docs.ehecoatl.com.br/{{route.params.version}}/#breadcrumb"
+      },
+      "inLanguage": "en",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://docs.ehecoatl.com.br/favicon/favicon.svg",
+        "width": 500,
+        "height": 500
+      }
+    },
+    @if(breadcrumb !== undefined && breadcrumb.length)
+    {
+      "@type": "BreadcrumbList",
+      "@id": "https://docs.ehecoatl.com.br/{{route.params.version}}/#breadcrumb",
+      "itemListElement": [
+        @foreach(item of breadcrumb)
+          @if(item.href)
+            {
+              "@type": "ListItem",
+              "position": {{item.id}},
+              "name": "{{item.label}}",
+              "item": "https://docs.ehecoatl.com.br/{{route.params.version}}{{item.href}}"
+            },
+          @endif
+        @endforeach
+      ]
+    },
+    @endif
+    
+    {
+      "@type": "SoftwareSourceCode",
+      "name": "Ehecoatl Core",
+      "codeRepository": "https://github.com/ehecoatl/core",
+      "publisher": {
+        "@id": "https://wolimp.com.br/#organization"
+      }
+    },
+    {
+      "@type": "SoftwareApplication",
+      "@id": "https://core.ehecoatl.com.br/#software",
+      "name": "Ehecoatl Core",
+      "applicationCategory": "DeveloperApplication",
+      "operatingSystem": "Ubuntu, Linux",
+      "softwareVersion": "{{route.params.version}}",
+      "url": "https://core.ehecoatl.com.br/en/{{route.params.version}}",
+      "codeRepository": "https://github.com/wolimp-inc/ehecoatl-core",
+      "downloadUrl": "https://api.github.com/repos/wolimp-inc/ehecoatl-core/contents/ehecoatl-core.sh",
+      "description": "Open-source multi-tenant SaaS runtime with tenant process isolation and isolated app workers.",
+      "isAccessibleForFree": true,
+      "offers": {
+        "@type": "Offer",
+        "price": 0,
+        "priceCurrency": "USD",
+        "availability": "https://schema.org/InStock"
+      },
+      "publisher": {
+        "@id": "https://wolimp.com.br/#organization"
+      },
+      "brand": {
+        "@type": "Brand",
+        "name": "Ehecoatl Core"
+      },
+    }
+  ]
+}
+</script>
