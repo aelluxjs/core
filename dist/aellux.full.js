@@ -315,11 +315,6 @@
         const attr = {
           adaptive: Aellux.attr(extensionName)
         };
-        const modifier = {
-          shapeHorizontal: Aellux.className("shape-horizontal"),
-          shapeVertical: Aellux.className("shape-vertical"),
-          shapeSquare: Aellux.className("shape-square")
-        };
         const mountMap = /* @__PURE__ */ new Map();
         const adaptiveParams = {
           experienceScale: {
@@ -349,39 +344,9 @@
         }
         function destroy() {
         }
-        function mountAdaptive(adaptiveContainer) {
-          Aellux.observe(adaptiveContainer, "resize");
-          adaptiveContainer.addEventListener(Aellux.eventName("ResizeObserver"), onResizeObserver);
+        function mountAdaptive() {
         }
-        function unmountAdaptive(adaptiveContainer) {
-          Aellux.unobserve(adaptiveContainer, "resize");
-          adaptiveContainer.removeEventListener(Aellux.eventName("ResizeObserver"), onResizeObserver);
-        }
-        function onResizeObserver(event) {
-          const entry = event.detail;
-          const width = entry.contentRect.width;
-          const height = entry.contentRect.height;
-          const adaptiveContainer = entry.target;
-          const params = adaptiveParams;
-          const ratioBreakpoints = params.ratioShapes;
-          const ratio = height > 0 ? width / height : 0;
-          adaptiveContainer.classList.toggle(modifier.shapeVertical, ratio < ratioBreakpoints.vertical);
-          adaptiveContainer.classList.toggle(modifier.shapeHorizontal, ratio > ratioBreakpoints.horizontal);
-          adaptiveContainer.classList.toggle(
-            modifier.shapeSquare,
-            ratio >= ratioBreakpoints.vertical && ratio <= ratioBreakpoints.horizontal
-          );
-          const sizes = Object.keys(params.minSizes);
-          const spaceBreakpoints = params.minSizes;
-          const space = Math.sqrt(width * height);
-          for (var i = 0; i < sizes.length; i++) {
-            var size = sizes[i];
-            adaptiveContainer.classList.toggle(
-              Aellux.className("fits-" + size),
-              space >= spaceBreakpoints[size]
-            );
-          }
-          Aellux.dispatchFrom(adaptiveContainer, "AdaptiveUpdate", { detail: null });
+        function unmountAdaptive() {
         }
         function inferOrientation(flexBox, selector = "*") {
           return Aellux.waitLayout.read(() => {
@@ -891,9 +856,6 @@
         async destroy() {
           Aellux.waitLayout.clear();
           await Aellux.destroyExtensions();
-          Aellux.observers.resize.disconnect();
-          Aellux.observers.mutation.disconnect();
-          Aellux.observers.intersection.disconnect();
         },
         async destroyExtensions(extensionLabels) {
           if (typeof extensionLabels === "string")
@@ -938,37 +900,11 @@
         wait(extensionName) {
           return getExtension(extensionName);
         },
-        observe(element, type) {
-          Aellux.observers[type].observe(element);
-        },
-        unobserve(element, type) {
-          Aellux.observers[type].unobserve(element);
-        },
         request: defaultRequest,
-        observers: Object.freeze({
-          resize: new ResizeObserver(resizeObserverCallback),
-          mutation: new MutationObserver(mutationObserverCallback),
-          intersection: new IntersectionObserver(intersectionObserverCallback)
-        }),
         waitLayout: layoutScheduler
       }
     );
     root2[root2.Aellux.shortJSName] = root2.Aellux;
-    function intersectionObserverCallback(entries) {
-      observerCallback(entries, "Intersection");
-    }
-    function mutationObserverCallback(entries) {
-      observerCallback(entries, "Mutation");
-    }
-    function resizeObserverCallback(entries) {
-      observerCallback(entries, "Resize");
-    }
-    function observerCallback(entries, event) {
-      for (var i = 0; i < entries.length; i++) {
-        var entry = entries[i];
-        Aellux.dispatchFrom(entry.target, `${event}Observer`, { detail: entry });
-      }
-    }
     function getExtension(extensionName) {
       extensionName = fromCamelCase(extensionName);
       const key = toCamelCase(extensionName);

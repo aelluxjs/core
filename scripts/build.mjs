@@ -31,13 +31,6 @@ require("core-js/stable");
 require("custom-event-polyfill");
 require("raf/polyfill");
 require("whatwg-fetch");
-require("mutationobserver-shim");
-require("intersection-observer");
-
-var ResizeObserverPolyfill = require("resize-observer-polyfill");
-if (typeof window.ResizeObserver !== "function") {
-  window.ResizeObserver = ResizeObserverPolyfill;
-}
 if (window.Element && !window.Element.prototype.matches) {
   window.Element.prototype.matches =
     window.Element.prototype.msMatchesSelector ||

@@ -46,8 +46,7 @@ import { buildDiagnostics } from "./internal/build-diagnostics.js";
     },
 
     AELLUX_MODERN_API_DEPENDENCIES: [
-      "Promise", "Map", "ResizeObserver", "MutationObserver",
-      "IntersectionObserver", "CustomEvent", "requestAnimationFrame", "cancelAnimationFrame", "fetch",
+      "Promise", "Map", "CustomEvent", "requestAnimationFrame", "cancelAnimationFrame", "fetch",
       { name: "Object", function: ["assign", "entries", "freeze"] },
       { name: "Array", function: ["from", "isArray"] }
     ]
@@ -82,7 +81,6 @@ import { buildDiagnostics } from "./internal/build-diagnostics.js";
     legacy: false,
     supported: false,
     notAvailable: [],
-    observers: null,
     waitLayout: null,
     init: function (options) {
       if (typeof document === "undefined") { console.log("[Aellux] Browser not supported."); return; }
@@ -165,8 +163,6 @@ import { buildDiagnostics } from "./internal/build-diagnostics.js";
     dispatch: function (event, options) { Aellux.dispatchFrom(document, event, options); },
 
     wait: function (extensionName) { throw Aellux.diagnostics.create(Aellux.diagnostics.ERROR_NOT_INITIALIZED); },
-    observe: function (element, type) { throw Aellux.diagnostics.create(Aellux.diagnostics.ERROR_NOT_INITIALIZED); },
-    unobserve: function (element, type) { throw Aellux.diagnostics.create(Aellux.diagnostics.ERROR_NOT_INITIALIZED); },
     update: function (rootOrSelector) { throw Aellux.diagnostics.create(Aellux.diagnostics.ERROR_NOT_INITIALIZED); },
     unmount: function (rootOrSelector) { throw Aellux.diagnostics.create(Aellux.diagnostics.ERROR_NOT_INITIALIZED); },
 

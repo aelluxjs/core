@@ -86,9 +86,6 @@ The Legacy orchestrator provides these compatibility layers once for all Extensi
 - `fetch`;
 - `CustomEvent`;
 - `requestAnimationFrame` and `cancelAnimationFrame`;
-- `MutationObserver`;
-- `IntersectionObserver`;
-- `ResizeObserver`;
 - `Element.prototype.matches`; and
 - `NodeList.prototype.forEach`.
 

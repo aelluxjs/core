@@ -201,9 +201,6 @@
       AELLUX_MODERN_API_DEPENDENCIES: [
         "Promise",
         "Map",
-        "ResizeObserver",
-        "MutationObserver",
-        "IntersectionObserver",
         "CustomEvent",
         "requestAnimationFrame",
         "cancelAnimationFrame",
@@ -232,7 +229,6 @@
       legacy: false,
       supported: false,
       notAvailable: [],
-      observers: null,
       waitLayout: null,
       init: function(options) {
         if (typeof document === "undefined") {
@@ -329,12 +325,6 @@
         Aellux.dispatchFrom(document, event, options);
       },
       wait: function(extensionName) {
-        throw Aellux.diagnostics.create(Aellux.diagnostics.ERROR_NOT_INITIALIZED);
-      },
-      observe: function(element, type) {
-        throw Aellux.diagnostics.create(Aellux.diagnostics.ERROR_NOT_INITIALIZED);
-      },
-      unobserve: function(element, type) {
         throw Aellux.diagnostics.create(Aellux.diagnostics.ERROR_NOT_INITIALIZED);
       },
       update: function(rootOrSelector) {

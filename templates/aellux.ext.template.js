@@ -8,8 +8,8 @@
  *   aellux.ext.<name>.legacy.js with the same extensionName, API, and lifecycle.
  * - Reference build: node build-extension.mjs ./aellux.ext.<name>.js ./dist
  * - The Legacy Core provides core-js/stable language APIs, fetch, CustomEvent,
- *   requestAnimationFrame/cancelAnimationFrame, MutationObserver,
- *   IntersectionObserver, ResizeObserver, Element.matches, and NodeList.forEach.
+ *   requestAnimationFrame/cancelAnimationFrame, Element.matches, and NodeList.forEach.
+ * - Observer APIs are not polyfilled by the Core. Bundle any required polyfill.
  * - Feature-detect and bundle any other required polyfill with the Extension.
  *   DOMParser, WebSocket, Web Components, Canvas APIs, Intl data, and application
  *   dependencies are not guaranteed by the Core.

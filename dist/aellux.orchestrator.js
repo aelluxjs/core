@@ -308,9 +308,6 @@
         async destroy() {
           Aellux.waitLayout.clear();
           await Aellux.destroyExtensions();
-          Aellux.observers.resize.disconnect();
-          Aellux.observers.mutation.disconnect();
-          Aellux.observers.intersection.disconnect();
         },
         async destroyExtensions(extensionLabels) {
           if (typeof extensionLabels === "string")
@@ -355,37 +352,11 @@
         wait(extensionName) {
           return getExtension(extensionName);
         },
-        observe(element, type) {
-          Aellux.observers[type].observe(element);
-        },
-        unobserve(element, type) {
-          Aellux.observers[type].unobserve(element);
-        },
         request: defaultRequest,
-        observers: Object.freeze({
-          resize: new ResizeObserver(resizeObserverCallback),
-          mutation: new MutationObserver(mutationObserverCallback),
-          intersection: new IntersectionObserver(intersectionObserverCallback)
-        }),
         waitLayout: layoutScheduler
       }
     );
     root[root.Aellux.shortJSName] = root.Aellux;
-    function intersectionObserverCallback(entries) {
-      observerCallback(entries, "Intersection");
-    }
-    function mutationObserverCallback(entries) {
-      observerCallback(entries, "Mutation");
-    }
-    function resizeObserverCallback(entries) {
-      observerCallback(entries, "Resize");
-    }
-    function observerCallback(entries, event) {
-      for (var i = 0; i < entries.length; i++) {
-        var entry = entries[i];
-        Aellux.dispatchFrom(entry.target, `${event}Observer`, { detail: entry });
-      }
-    }
     function getExtension(extensionName) {
       extensionName = fromCamelCase(extensionName);
       const key = toCamelCase(extensionName);

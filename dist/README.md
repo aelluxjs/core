@@ -57,7 +57,7 @@ See [Getting Started](../docs/getting-started.md) for build instructions, runtim
 - Selective eager or lazy Extension loading.
 - Optional styles associated with individual Extensions.
 - Idempotent DOM mounting through `$ae.update(root)`.
-- Container-aware adaptive states powered by `ResizeObserver`.
+- Generated adaptive CSS utilities for container-scoped states.
 - Browser history, preferences, feedback, persistence, and asynchronous content behaviors.
 - ES5-compatible boot script with an ES2017+ Modern runtime.
 

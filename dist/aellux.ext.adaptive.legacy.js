@@ -6,11 +6,6 @@
     var attr = {
       adaptive: Aellux.attr(extensionName)
     };
-    var modifier = {
-      shapeHorizontal: Aellux.className("shape-horizontal"),
-      shapeVertical: Aellux.className("shape-vertical"),
-      shapeSquare: Aellux.className("shape-square")
-    };
     var mountMap = /* @__PURE__ */ new Map();
     var adaptiveParams = {
       experienceScale: {
@@ -45,35 +40,9 @@
     }
     function destroy() {
     }
-    function mountAdaptive(adaptiveContainer) {
-      Aellux.observe(adaptiveContainer, "resize");
-      adaptiveContainer.addEventListener(Aellux.eventName("ResizeObserver"), onResizeObserver);
+    function mountAdaptive() {
     }
-    function unmountAdaptive(adaptiveContainer) {
-      Aellux.unobserve(adaptiveContainer, "resize");
-      adaptiveContainer.removeEventListener(Aellux.eventName("ResizeObserver"), onResizeObserver);
-    }
-    function onResizeObserver(event) {
-      var entry = event.detail;
-      var width = entry.contentRect.width;
-      var height = entry.contentRect.height;
-      var adaptiveContainer = entry.target;
-      var params = adaptiveParams;
-      var ratioBreakpoints = params.ratioShapes;
-      var ratio = height > 0 ? width / height : 0;
-      adaptiveContainer.classList.toggle(modifier.shapeVertical, ratio < ratioBreakpoints.vertical);
-      adaptiveContainer.classList.toggle(modifier.shapeHorizontal, ratio > ratioBreakpoints.horizontal);
-      adaptiveContainer.classList.toggle(modifier.shapeSquare, ratio >= ratioBreakpoints.vertical && ratio <= ratioBreakpoints.horizontal);
-      var sizes = Object.keys(params.minSizes);
-      var spaceBreakpoints = params.minSizes;
-      var space = Math.sqrt(width * height);
-      for (var i = 0; i < sizes.length; i++) {
-        var size = sizes[i];
-        adaptiveContainer.classList.toggle(Aellux.className("fits-" + size), space >= spaceBreakpoints[size]);
-      }
-      Aellux.dispatchFrom(adaptiveContainer, "AdaptiveUpdate", {
-        detail: null
-      });
+    function unmountAdaptive() {
     }
     function inferOrientation(flexBox) {
       var selector = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : "*";

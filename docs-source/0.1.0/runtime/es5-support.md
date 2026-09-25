@@ -14,9 +14,6 @@ Syntax compatibility alone does not provide missing browser APIs. For this reaso
 - `fetch`;
 - `CustomEvent`;
 - `requestAnimationFrame` and `cancelAnimationFrame`;
-- `MutationObserver`;
-- `IntersectionObserver`;
-- `ResizeObserver`;
 - `Element.prototype.matches`; and
 - `NodeList.prototype.forEach`.
 

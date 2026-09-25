@@ -5,8 +5,8 @@
 // Ready signals that the orchestrator is initialized and available; it does not guarantee
 // successful Aellux Extension initialization or completed DOM mounting. Component-specific events
 // such as AdaptiveUpdate report their own readiness or updates.
-// Routes explicit DOM update/unmount requests through extension mount/unmount declarations,
-// forwards browser observer notifications, and provides layout scheduling and fetch helpers.
+// Routes explicit DOM update/unmount requests through extension mount/unmount declarations
+// and provides layout scheduling and fetch helpers.
 // Uses ES2017 syntax, Promises, and modern browser APIs; legacy fallback
 // selection belongs to the bootstrap, while feature-specific behavior belongs to Aellux Extensions.
 
@@ -63,10 +63,6 @@ import { createMountHelper } from "./internal/create-mount-helper.js";
       async destroy() {
         Aellux.waitLayout.clear();
         await Aellux.destroyExtensions();
-
-        Aellux.observers.resize.disconnect();
-        Aellux.observers.mutation.disconnect();
-        Aellux.observers.intersection.disconnect();
       },
       async destroyExtensions(extensionLabels) {
         if (typeof extensionLabels === "string")
@@ -117,31 +113,12 @@ import { createMountHelper } from "./internal/create-mount-helper.js";
 
       wait(extensionName) { return getExtension(extensionName); },
 
-      observe(element, type) { Aellux.observers[type].observe(element); },
-      unobserve(element, type) { Aellux.observers[type].unobserve(element); },
       request: defaultRequest,
-
-      observers: Object.freeze({
-        resize: new ResizeObserver(resizeObserverCallback),
-        mutation: new MutationObserver(mutationObserverCallback),
-        intersection: new IntersectionObserver(intersectionObserverCallback)
-      }),
 
       waitLayout: layoutScheduler,
     });
 
   root[root.Aellux.shortJSName] = root.Aellux;
-
-  function intersectionObserverCallback(entries) { observerCallback(entries, "Intersection"); }
-  function mutationObserverCallback(entries) { observerCallback(entries, "Mutation"); }
-  function resizeObserverCallback(entries) { observerCallback(entries, "Resize"); }
-  function observerCallback(entries, event) {
-    //Definir um intervalo em MS para rodar apenas a alteração mais recente
-    for (var i = 0; i < entries.length; i++) {
-      var entry = entries[i];
-      Aellux.dispatchFrom(entry.target, `${event}Observer`, { detail: entry });
-    }
-  }
 
   function getExtension(extensionName) {
     extensionName = fromCamelCase(extensionName);

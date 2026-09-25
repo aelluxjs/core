@@ -33,6 +33,6 @@ npm install --save-dev @babel/core @babel/preset-env esbuild
 node build-extension.mjs ./src/aellux.ext.example.js ./dist
 ```
 
-The Legacy Core already provides `core-js/stable`, `fetch`, `CustomEvent`, animation frame functions, `MutationObserver`, `IntersectionObserver`, `ResizeObserver`, `Element.matches`, and `NodeList.forEach`. Feature-detect and bundle any additional polyfill required by the Extension. Transpiling syntax does not polyfill missing browser APIs.
+The Legacy Core already provides `core-js/stable`, `fetch`, `CustomEvent`, animation frame functions, `Element.matches`, and `NodeList.forEach`. Observer APIs and any other additional browser APIs must be feature-detected and polyfilled by the Extension when required. Transpiling syntax does not polyfill missing browser APIs.
 
 Call `Aellux.ext("<extension-name>")` before `Aellux.init({ mode: "basic" })` when a core Extension should be loaded individually. To include it in the full core bundle, also add its loader to `src/aellux.full.esm.js`. Experimental components can be declared by URL through `$ae.ext(...)` or `<link rel="aellux-ext">`; they do not belong to the core bundle.

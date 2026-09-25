@@ -26,7 +26,7 @@ await $ae.destroyExtensions("adaptive");
 await $ae.destroy();
 ```
 
-`destroyExtensions()` unmounts and destroys selected initialized Extensions. Without labels, it processes all loaded Extensions. `destroy()` first clears pending layout work, then destroys loaded Extensions and disconnects the shared observers.
+`destroyExtensions()` unmounts and destroys selected initialized Extensions. Without labels, it processes all loaded Extensions. `destroy()` first clears pending layout work, then destroys loaded Extensions.
 
 ## Extension Access
 
