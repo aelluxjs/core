@@ -1,4 +1,29 @@
 (function() {
+  // src/internal/asset-load-helper.js
+  /*! Aellux | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+  function assetLoadHelper(asset, options) {
+    var loadCallback = options.loadCallback;
+    var errorCallback = options.errorCallback;
+    function clear() {
+      asset.onload = null;
+      asset.onerror = null;
+    }
+    asset.onload = function(event) {
+      clear();
+      if (typeof loadCallback === "function") {
+        return loadCallback(event);
+      }
+    };
+    asset.onerror = function(event) {
+      clear();
+      if (typeof errorCallback === "function") {
+        return errorCallback(event);
+      }
+    };
+    document.head.appendChild(asset);
+    return { clear: clear };
+  }
+
   // src/internal/build-persist-memory.js
   /*! Aellux | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   function buildPersistMemory(root, name, identifier) {
@@ -180,6 +205,7 @@
         "IntersectionObserver",
         "CustomEvent",
         "requestAnimationFrame",
+        "cancelAnimationFrame",
         "fetch",
         { name: "Object", function: ["assign", "entries", "freeze"] },
         { name: "Array", function: ["from", "isArray"] }
@@ -349,24 +375,25 @@
         script.src = Aellux.aelluxBasePath + "aellux.full" + scriptExtension;
       }
       script.setAttribute(attr, "true");
-      script.onload = function() {
-        Aellux.dispatch("Awake");
-        Aellux.startAellux().then(function() {
-          Aellux.legacy = false;
-          Aellux.supported = true;
-        }).catch(function(error) {
+      assetLoadHelper(script, {
+        loadCallback: function() {
+          Aellux.dispatch("Awake");
+          Aellux.startAellux().then(function() {
+            Aellux.legacy = false;
+            Aellux.supported = true;
+          }).catch(function(error) {
+            script.parentNode.removeChild(script);
+            console.log(error);
+            console.log("[Aellux] Orchestrator failed to load, fallback to legacy.");
+            loadLegacyOrchestratorFallback();
+          });
+        },
+        errorCallback: function() {
           script.parentNode.removeChild(script);
-          console.log(error);
           console.log("[Aellux] Orchestrator failed to load, fallback to legacy.");
           loadLegacyOrchestratorFallback();
-        });
-      };
-      script.onerror = function() {
-        script.parentNode.removeChild(script);
-        console.log("[Aellux] Orchestrator failed to load, fallback to legacy.");
-        loadLegacyOrchestratorFallback();
-      };
-      document.head.appendChild(script);
+        }
+      });
     }
     function loadLegacyOrchestratorFallback() {
       var attr = Aellux.attr("legacy");
@@ -380,22 +407,23 @@
       var runtime = Aellux.options.mode === "basic" ? "aellux.orchestrator.legacy" : "aellux.full.legacy";
       script.src = Aellux.aelluxBasePath + runtime + scriptExtension;
       script.setAttribute(attr, "true");
-      script.onload = function() {
-        Aellux.dispatch("Legacy");
-        Aellux.startAellux().catch(function(error) {
+      assetLoadHelper(script, {
+        loadCallback: function() {
+          Aellux.dispatch("Legacy");
+          Aellux.startAellux().catch(function(error) {
+            Aellux.diagnostics.report(
+              Aellux.diagnostics.ERROR_LEGACY_RUNTIME_START,
+              { cause: error }
+            );
+          });
+        },
+        errorCallback: function() {
           Aellux.diagnostics.report(
-            Aellux.diagnostics.ERROR_LEGACY_RUNTIME_START,
-            { cause: error }
+            Aellux.diagnostics.ERROR_LEGACY_RUNTIME_LOAD,
+            { url: script.src }
           );
-        });
-      };
-      script.onerror = function() {
-        Aellux.diagnostics.report(
-          Aellux.diagnostics.ERROR_LEGACY_RUNTIME_LOAD,
-          { url: script.src }
-        );
-      };
-      document.head.appendChild(script);
+        }
+      });
     }
     function addWeakStyles() {
       var attr = Aellux.attr("weak-style");

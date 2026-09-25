@@ -1,6 +1,7 @@
 /*! Aellux | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
 
 import "./aellux.orchestrator.js";
+import { assetLoadHelper } from "./internal/asset-load-helper.js";
 
 const root = typeof globalThis !== "undefined" ? globalThis : window;
 
@@ -13,9 +14,10 @@ function appendBundledStyle(extensionName) {
     link.rel = "stylesheet";
     link.href = url.replace(/\.js(?=[?#]|$)/, ".css");
     link.setAttribute(root.Aellux.attr("ext-style"), extensionName);
-    link.onload = resolve;
-    link.onerror = resolve;
-    document.head.appendChild(link);
+    assetLoadHelper(link, {
+      loadCallback: resolve,
+      errorCallback: resolve
+    });
   });
 }
 

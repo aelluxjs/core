@@ -1,5 +1,6 @@
 /*! Aellux | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
 
+import { assetLoadHelper } from "./internal/asset-load-helper.js";
 import { buildPersistMemory } from "./internal/build-persist-memory.js";
 import { buildPreferencesMediaQueries } from "./internal/build-preferences-media-queries.js";
 import { buildDiagnostics } from "./internal/build-diagnostics.js";
@@ -45,7 +46,7 @@ import { buildDiagnostics } from "./internal/build-diagnostics.js";
 
     AELLUX_MODERN_API_DEPENDENCIES: [
       "Promise", "Map", "ResizeObserver", "MutationObserver",
-      "IntersectionObserver", "CustomEvent", "requestAnimationFrame", "fetch",
+      "IntersectionObserver", "CustomEvent", "requestAnimationFrame", "cancelAnimationFrame", "fetch",
       { name: "Object", function: ["assign", "entries", "freeze"] },
       { name: "Array", function: ["from", "isArray"] }
     ]
@@ -160,6 +161,7 @@ import { buildDiagnostics } from "./internal/build-diagnostics.js";
       from.dispatchEvent(obj);
     },
     dispatch: function (event, options) { Aellux.dispatchFrom(document, event, options); },
+
     wait: function (extensionName) { throw Aellux.diagnostics.create(Aellux.diagnostics.ERROR_NOT_INITIALIZED); },
     observe: function (element, type) { throw Aellux.diagnostics.create(Aellux.diagnostics.ERROR_NOT_INITIALIZED); },
     unobserve: function (element, type) { throw Aellux.diagnostics.create(Aellux.diagnostics.ERROR_NOT_INITIALIZED); },
@@ -205,25 +207,27 @@ import { buildDiagnostics } from "./internal/build-diagnostics.js";
       script.src = Aellux.aelluxBasePath + "aellux.full" + scriptExtension;
     }
     script.setAttribute(attr, "true");
-    script.onload = function () {
-      Aellux.dispatch("Awake");
-      Aellux.startAellux()
-        .then(function () {
-          Aellux.legacy = false;
-          Aellux.supported = true;
-        }).catch(function (error) {
-          script.parentNode.removeChild(script);
-          console.log(error);
-          console.log("[Aellux] Orchestrator failed to load, fallback to legacy.");
-          loadLegacyOrchestratorFallback();
-        });
-    };
-    script.onerror = function () {
-      script.parentNode.removeChild(script);
-      console.log("[Aellux] Orchestrator failed to load, fallback to legacy.");
-      loadLegacyOrchestratorFallback();
-    };
-    document.head.appendChild(script);
+
+    assetLoadHelper(script, {
+      loadCallback: function () {
+        Aellux.dispatch("Awake");
+        Aellux.startAellux()
+          .then(function () {
+            Aellux.legacy = false;
+            Aellux.supported = true;
+          }).catch(function (error) {
+            script.parentNode.removeChild(script);
+            console.log(error);
+            console.log("[Aellux] Orchestrator failed to load, fallback to legacy.");
+            loadLegacyOrchestratorFallback();
+          });
+      },
+      errorCallback: function () {
+        script.parentNode.removeChild(script);
+        console.log("[Aellux] Orchestrator failed to load, fallback to legacy.");
+        loadLegacyOrchestratorFallback();
+      }
+    });
   }
 
   function loadLegacyOrchestratorFallback() {
@@ -244,23 +248,25 @@ import { buildDiagnostics } from "./internal/build-diagnostics.js";
       : "aellux.full.legacy";
     script.src = Aellux.aelluxBasePath + runtime + scriptExtension;
     script.setAttribute(attr, "true");
-    script.onload = function () {
-      Aellux.dispatch("Legacy");
-      Aellux.startAellux()
-        .catch(function (error) {
-          Aellux.diagnostics.report(
-            Aellux.diagnostics.ERROR_LEGACY_RUNTIME_START,
-            { cause: error }
-          );
-        });
-    };
-    script.onerror = function () {
-      Aellux.diagnostics.report(
-        Aellux.diagnostics.ERROR_LEGACY_RUNTIME_LOAD,
-        { url: script.src }
-      );
-    };
-    document.head.appendChild(script);
+
+    assetLoadHelper(script, {
+      loadCallback: function () {
+        Aellux.dispatch("Legacy");
+        Aellux.startAellux()
+          .catch(function (error) {
+            Aellux.diagnostics.report(
+              Aellux.diagnostics.ERROR_LEGACY_RUNTIME_START,
+              { cause: error }
+            );
+          });
+      },
+      errorCallback: function () {
+        Aellux.diagnostics.report(
+          Aellux.diagnostics.ERROR_LEGACY_RUNTIME_LOAD,
+          { url: script.src }
+        );
+      }
+    });
   }
 
   function addWeakStyles() {

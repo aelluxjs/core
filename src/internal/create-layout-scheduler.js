@@ -4,17 +4,16 @@ export function createLayoutScheduler() {
   var readQueue = [];
   var updateQueue = [];
 
-  var framePending = false;
+  var frameRequest = null;
   var phase = "idle";
 
   function scheduleFrame() {
-    if (framePending || phase !== "idle") return;
-    framePending = true;
-    requestAnimationFrame(flushFrame);
+    if (frameRequest !== null || phase !== "idle") return;
+    frameRequest = requestAnimationFrame(flushFrame);
   }
 
   function flushFrame() {
-    framePending = false;
+    frameRequest = null;
 
     phase = "read";
     var reads = readQueue.splice(0);
@@ -53,8 +52,27 @@ export function createLayoutScheduler() {
     return promise;
   }
 
+  function clear() {
+    if (frameRequest !== null) {
+      cancelAnimationFrame(frameRequest);
+      frameRequest = null;
+    }
+
+    settleQueue(readQueue);
+    settleQueue(updateQueue);
+    phase = "idle";
+  }
+
+  function settleQueue(queue) {
+    var tasks = queue.splice(0);
+    for (var i = 0; i < tasks.length; i++) {
+      tasks[i].resolve(undefined);
+    }
+  }
+
   return Object.freeze({
     read: (callback) => queueTask(readQueue, callback),
-    update: (callback) => queueTask(updateQueue, callback)
+    update: (callback) => queueTask(updateQueue, callback),
+    clear
   });
 }

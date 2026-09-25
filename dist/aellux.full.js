@@ -575,20 +575,44 @@
     }
   });
 
+  // src/internal/asset-load-helper.js
+  /*! Aellux | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+  function assetLoadHelper(asset, options) {
+    var loadCallback = options.loadCallback;
+    var errorCallback = options.errorCallback;
+    function clear() {
+      asset.onload = null;
+      asset.onerror = null;
+    }
+    asset.onload = function(event) {
+      clear();
+      if (typeof loadCallback === "function") {
+        return loadCallback(event);
+      }
+    };
+    asset.onerror = function(event) {
+      clear();
+      if (typeof errorCallback === "function") {
+        return errorCallback(event);
+      }
+    };
+    document.head.appendChild(asset);
+    return { clear };
+  }
+
   // src/internal/create-layout-scheduler.js
   /*! Aellux | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   function createLayoutScheduler() {
     var readQueue = [];
     var updateQueue = [];
-    var framePending = false;
+    var frameRequest = null;
     var phase = "idle";
     function scheduleFrame() {
-      if (framePending || phase !== "idle") return;
-      framePending = true;
-      requestAnimationFrame(flushFrame);
+      if (frameRequest !== null || phase !== "idle") return;
+      frameRequest = requestAnimationFrame(flushFrame);
     }
     function flushFrame() {
-      framePending = false;
+      frameRequest = null;
       phase = "read";
       var reads = readQueue.splice(0);
       for (var i = 0; i < reads.length; i++)
@@ -620,9 +644,25 @@
       if (phase === "idle") scheduleFrame();
       return promise;
     }
+    function clear() {
+      if (frameRequest !== null) {
+        cancelAnimationFrame(frameRequest);
+        frameRequest = null;
+      }
+      settleQueue(readQueue);
+      settleQueue(updateQueue);
+      phase = "idle";
+    }
+    function settleQueue(queue) {
+      var tasks = queue.splice(0);
+      for (var i = 0; i < tasks.length; i++) {
+        tasks[i].resolve(void 0);
+      }
+    }
     return Object.freeze({
       read: (callback) => queueTask(readQueue, callback),
-      update: (callback) => queueTask(updateQueue, callback)
+      update: (callback) => queueTask(updateQueue, callback),
+      clear
     });
   }
 
@@ -841,6 +881,7 @@
           return mountHelper.AelluxForceUnmount(rootOrSelector, extensionLabels);
         },
         async destroy() {
+          Aellux.waitLayout.clear();
           await Aellux.destroyExtensions();
           Aellux.observers.resize.disconnect();
           Aellux.observers.mutation.disconnect();
@@ -875,7 +916,9 @@
                 { cause: error, extension: extensionLabel }
               );
             } finally {
+              delete Aellux[key];
               delete extensionPromises[key];
+              delete Aellux.extRegistry[extensionLabel];
               delete Aellux.extensionMounters[extensionLabel];
               if (extension) extension.initialized = false;
             }
@@ -976,9 +1019,10 @@
           const script = document.createElement("script");
           script.src = scriptURL;
           script.setAttribute(attr, name);
-          script.onload = resolve;
-          script.onerror = reject;
-          document.head.appendChild(script);
+          assetLoadHelper(script, {
+            loadCallback: resolve,
+            errorCallback: reject
+          });
         }
       ));
       if (data.loadStyle && data.loadStyle !== "false") {
@@ -991,9 +1035,10 @@
             link.href = href;
             link.rel = "stylesheet";
             link.setAttribute(attrStyle, name);
-            link.onload = resolve;
-            link.onerror = resolve;
-            document.head.appendChild(link);
+            assetLoadHelper(link, {
+              loadCallback: resolve,
+              errorCallback: resolve
+            });
           }
         ));
       }
@@ -1046,9 +1091,10 @@
       link.rel = "stylesheet";
       link.href = url.replace(/\.js(?=[?#]|$)/, ".css");
       link.setAttribute(root.Aellux.attr("ext-style"), extensionName);
-      link.onload = resolve;
-      link.onerror = resolve;
-      document.head.appendChild(link);
+      assetLoadHelper(link, {
+        loadCallback: resolve,
+        errorCallback: resolve
+      });
     });
   }
   root.Aellux.bundledExtensions = Object.freeze({

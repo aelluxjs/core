@@ -10,6 +10,7 @@
 // Uses ES2017 syntax, Promises, and modern browser APIs; legacy fallback
 // selection belongs to the bootstrap, while feature-specific behavior belongs to Aellux Extensions.
 
+import { assetLoadHelper } from "./internal/asset-load-helper.js";
 import { createLayoutScheduler } from "./internal/create-layout-scheduler.js";
 import { createMountHelper } from "./internal/create-mount-helper.js";
 
@@ -60,6 +61,7 @@ import { createMountHelper } from "./internal/create-mount-helper.js";
         return mountHelper.AelluxForceUnmount(rootOrSelector, extensionLabels);
       },
       async destroy() {
+        Aellux.waitLayout.clear();
         await Aellux.destroyExtensions();
 
         Aellux.observers.resize.disconnect();
@@ -99,7 +101,9 @@ import { createMountHelper } from "./internal/create-mount-helper.js";
               { cause: error, extension: extensionLabel }
             );
           } finally {
+            delete Aellux[key];
             delete extensionPromises[key];
+            delete Aellux.extRegistry[extensionLabel];
             delete Aellux.extensionMounters[extensionLabel];
             if (extension) extension.initialized = false;
           }
@@ -216,9 +220,11 @@ import { createMountHelper } from "./internal/create-mount-helper.js";
         const script = document.createElement("script");
         script.src = scriptURL;
         script.setAttribute(attr, name);
-        script.onload = resolve;
-        script.onerror = reject;
-        document.head.appendChild(script);
+
+        assetLoadHelper(script, {
+          loadCallback: resolve,
+          errorCallback: reject
+        });
       }
     ));
 
@@ -233,9 +239,11 @@ import { createMountHelper } from "./internal/create-mount-helper.js";
           link.href = href;
           link.rel = "stylesheet";
           link.setAttribute(attrStyle, name);
-          link.onload = resolve;
-          link.onerror = resolve;
-          document.head.appendChild(link);
+
+          assetLoadHelper(link, {
+            loadCallback: resolve,
+            errorCallback: resolve
+          });
         }
       ));
     }

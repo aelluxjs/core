@@ -22029,19 +22029,49 @@
     }
   });
 
+  // src/internal/asset-load-helper.js
+  function assetLoadHelper(asset, options) {
+    var loadCallback = options.loadCallback;
+    var errorCallback = options.errorCallback;
+    function clear() {
+      asset.onload = null;
+      asset.onerror = null;
+    }
+    asset.onload = function(event) {
+      clear();
+      if (typeof loadCallback === "function") {
+        return loadCallback(event);
+      }
+    };
+    asset.onerror = function(event) {
+      clear();
+      if (typeof errorCallback === "function") {
+        return errorCallback(event);
+      }
+    };
+    document.head.appendChild(asset);
+    return {
+      clear: clear
+    };
+  }
+  var init_asset_load_helper = __esm({
+    "src/internal/asset-load-helper.js": function() {
+      /*! Aellux | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+    }
+  });
+
   // src/internal/create-layout-scheduler.js
   function createLayoutScheduler() {
     var readQueue = [];
     var updateQueue = [];
-    var framePending = false;
+    var frameRequest = null;
     var phase = "idle";
     function scheduleFrame() {
-      if (framePending || phase !== "idle") return;
-      framePending = true;
-      requestAnimationFrame(flushFrame);
+      if (frameRequest !== null || phase !== "idle") return;
+      frameRequest = requestAnimationFrame(flushFrame);
     }
     function flushFrame() {
-      framePending = false;
+      frameRequest = null;
       phase = "read";
       var reads = readQueue.splice(0);
       for (var i = 0; i < reads.length; i++) runTask(reads[i]);
@@ -22071,13 +22101,29 @@
       if (phase === "idle") scheduleFrame();
       return promise;
     }
+    function clear() {
+      if (frameRequest !== null) {
+        cancelAnimationFrame(frameRequest);
+        frameRequest = null;
+      }
+      settleQueue(readQueue);
+      settleQueue(updateQueue);
+      phase = "idle";
+    }
+    function settleQueue(queue) {
+      var tasks = queue.splice(0);
+      for (var i = 0; i < tasks.length; i++) {
+        tasks[i].resolve(void 0);
+      }
+    }
     return Object.freeze({
       read: function read(callback) {
         return queueTask(readQueue, callback);
       },
       update: function update(callback) {
         return queueTask(updateQueue, callback);
-      }
+      },
+      clear: clear
     });
   }
   var init_create_layout_scheduler = __esm({
@@ -22826,6 +22872,7 @@
   }
   var init_aellux_orchestrator = __esm({
     "src/aellux.orchestrator.js": function() {
+      init_asset_load_helper();
       init_create_layout_scheduler();
       init_create_mount_helper();
       /*! Aellux | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
@@ -22896,6 +22943,7 @@
               return _regenerator2().w(function(_context4) {
                 while (1) switch (_context4.n) {
                   case 0:
+                    Aellux.waitLayout.clear();
                     _context4.n = 1;
                     return Aellux.destroyExtensions();
                   case 1:
@@ -22973,7 +23021,9 @@
                     });
                   case 12:
                     _context5.p = 12;
+                    delete Aellux[key];
                     delete extensionPromises[key];
+                    delete Aellux.extRegistry[extensionLabel];
                     delete Aellux.extensionMounters[extensionLabel];
                     if (extension) extension.initialized = false;
                     return _context5.f(12);
@@ -23103,9 +23153,10 @@
                     var script = document.createElement("script");
                     script.src = scriptURL;
                     script.setAttribute(attr, name);
-                    script.onload = resolve;
-                    script.onerror = reject;
-                    document.head.appendChild(script);
+                    assetLoadHelper(script, {
+                      loadCallback: resolve,
+                      errorCallback: reject
+                    });
                   }));
                   if (data.loadStyle && data.loadStyle !== "false") {
                     loadPromises.push(new Promise(function(resolve) {
@@ -23116,9 +23167,10 @@
                       link.href = href;
                       link.rel = "stylesheet";
                       link.setAttribute(attrStyle, name);
-                      link.onload = resolve;
-                      link.onerror = resolve;
-                      document.head.appendChild(link);
+                      assetLoadHelper(link, {
+                        loadCallback: resolve,
+                        errorCallback: resolve
+                      });
                     }));
                   }
                   return _context6.a(2, Promise.all(loadPromises));
