@@ -34,6 +34,7 @@ import { buildDiagnostics } from "./internal/build-diagnostics.js";
       ERROR_EXTENSION_MOUNT: { code: 1103, message: "Aellux Extension failed to mount or unmount an element." },
       ERROR_EXTENSION_UNMOUNT: { code: 1104, message: "Aellux Extension failed to unmount." },
       ERROR_EXTENSION_DESTROY: { code: 1105, message: "Aellux Extension failed to destroy." },
+      ERROR_EXTENSION_INCOMPATIBLE: { code: 1106, message: "Aellux Extension has no compatible build for the selected runtime." },
       ERROR_LEGACY_RUNTIME_START: { code: 1201, message: "Aellux Legacy runtime failed to start." },
       ERROR_LEGACY_RUNTIME_LOAD: { code: 1202, message: "Aellux Legacy runtime could not be loaded." }
     },
@@ -139,6 +140,7 @@ import { buildDiagnostics } from "./internal/build-diagnostics.js";
       if (!options) options = {};
       if (typeof options.loadStyle === "undefined") options.loadStyle = false;
       if (!options.loadWhen) options.loadWhen = null;
+      options.builds = normalizeExtensionBuilds(options.builds);
       if (options.loadWhen) { Aellux.lazyExtensionSelectors[label] = options.loadWhen; }
       options.url = url;
       options.load = options.loadWhen ? false : true;
@@ -355,6 +357,23 @@ import { buildDiagnostics } from "./internal/build-diagnostics.js";
   function isLegacyForced() {
     return Aellux.options.forceLegacy ? true : /(?:^|[?&])aellux-debug-legacy(?:=1|=true)?(?:&|$)/i
       .test(window.location.search);
+  }
+
+  function normalizeExtensionBuilds(builds) {
+    if (typeof builds === "undefined" || builds === null || builds === "") {
+      return ["modern", "legacy"];
+    }
+    if (typeof builds === "string") builds = builds.split(/[\s,]+/);
+    if (!Array.isArray(builds)) return [];
+
+    var normalized = [];
+    for (var i = 0; i < builds.length; i++) {
+      var build = String(builds[i]).toLowerCase();
+      if ((build === "modern" || build === "legacy") && normalized.indexOf(build) === -1) {
+        normalized.push(build);
+      }
+    }
+    return normalized;
   }
 
   function toCapitalized(name) {

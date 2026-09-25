@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-test-status="pending">
+<head>
+  <meta charset="UTF-8">
+  <title>Aellux validation: Modern runtime</title>
+  <script src="./harness.js"></script>
+  <script src="../../dist/aellux.js"></script>
+  <script>
+    AelluxValidation.run(function (assert) {
+      var runtime = document.querySelector("script[data-ae-esm]");
+      return new Promise(function (resolve, reject) {
+        setTimeout(function () {
+          try {
+            assert(runtime, "Modern orchestrator script was not selected");
+            assert(Aellux.legacy === false, "Runtime was unexpectedly marked as Legacy");
+            assert(Aellux.supported === true, "Modern runtime dependencies were not accepted");
+            resolve();
+          } catch (error) {
+            reject(error);
+          }
+        }, 0);
+      });
+    });
+    $ae.init({ mode: "basic", forceLegacy: false });
+  </script>
+</head>
+<body>
+  <h1>Modern runtime</h1>
+  <pre id="validation-result">PENDING</pre>
+</body>
+</html>

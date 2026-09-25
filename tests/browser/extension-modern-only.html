@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-test-status="pending">
+<head>
+  <meta charset="UTF-8">
+  <title>Aellux validation: Modern-only Extension compatibility</title>
+  <script src="./harness.js"></script>
+  <script src="../../dist/aellux.js"></script>
+  <script>
+    var diagnosticCodes = [];
+    var originalReport = Aellux.diagnostics.report;
+    Aellux.diagnostics.report = function (definition, details) {
+      diagnosticCodes.push(definition.code);
+      return originalReport.call(Aellux.diagnostics, definition, details);
+    };
+
+    AelluxValidation.run(async function (assert) {
+      var incompatible = await $ae.wait("feedback");
+      assert(Aellux.legacy === true, "Scenario did not select the Legacy runtime");
+      assert(incompatible === null, "Modern-only Extension loaded under the Legacy runtime");
+      assert(diagnosticCodes.indexOf(1106) !== -1, "Compatibility diagnostic was not emitted");
+      assert(!document.querySelector("script[data-ae-ext='feedback']"), "Incompatible Extension asset was requested");
+      assert(Aellux.preferences, "Compatible Extension did not initialize after incompatibility");
+    });
+
+    $ae.ext("feedback", { builds: ["modern"] });
+    $ae.ext("preferences");
+    $ae.init({ mode: "basic", forceLegacy: true });
+  </script>
+</head>
+<body>
+  <h1>Modern-only Extension compatibility</h1>
+  <pre id="validation-result">PENDING</pre>
+</body>
+</html>

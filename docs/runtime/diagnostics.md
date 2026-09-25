@@ -36,3 +36,7 @@ Errors created by the helper use the name `AelluxDiagnosticError`, expose the nu
 - `1200-1299`: Legacy runtime errors.
 
 Applications should compare numeric codes or catalog entries instead of parsing console messages.
+
+## Extension Compatibility
+
+`ERROR_EXTENSION_INCOMPATIBLE` uses code `1106`. It is reported before requesting an Extension script when its declared `builds` do not provide an artifact compatible with the selected runtime. Its context contains the Extension name, selected runtime, and declared builds.

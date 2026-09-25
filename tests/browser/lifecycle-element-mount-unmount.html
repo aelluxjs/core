@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-test-status="pending">
+<head>
+  <meta charset="UTF-8">
+  <title>Aellux validation: element mount and unmount lifecycle</title>
+  <script src="./harness.js"></script>
+  <script src="../../dist/aellux.js"></script>
+  <script>
+    var lifecycleCounts = { mount: 0, unmount: 0, events: 0 };
+    var mountDOM = new Map();
+
+    function onProbeEvent() { lifecycleCounts.events++; }
+
+    $ae.ext("lifecycle-element-probe");
+    $ae.extRegister("lifecycle-element-probe", {
+      init: function () {
+        mountDOM.set("[data-lifecycle-element]", {
+          mount: function (element) {
+            lifecycleCounts.mount++;
+            element.addEventListener("lifecycle-probe", onProbeEvent);
+          },
+          unmount: function (element) {
+            lifecycleCounts.unmount++;
+            element.removeEventListener("lifecycle-probe", onProbeEvent);
+          }
+        });
+      },
+      destroy: function () {},
+      mountDOM: mountDOM
+    });
+
+    AelluxValidation.run(async function (assert) {
+      var target = document.getElementById("lifecycle-element");
+
+      assert(lifecycleCounts.mount === 1, "Element was not mounted during start");
+      assert(target.classList.contains("ae--mounted"), "Mounted class was not added");
+
+      await $ae.update(target, "lifecycle-element-probe");
+      await $ae.update(target, "lifecycle-element-probe");
+      target.dispatchEvent(new Event("lifecycle-probe"));
+
+      assert(lifecycleCounts.mount === 1, "Repeated updates duplicated the mount");
+      assert(lifecycleCounts.events === 1, "Repeated updates duplicated an event listener");
+
+      await $ae.unmount(target, "lifecycle-element-probe");
+      target.dispatchEvent(new Event("lifecycle-probe"));
+
+      assert(lifecycleCounts.unmount === 1, "Element unmount did not run exactly once");
+      assert(lifecycleCounts.events === 1, "Element listener remained after unmount");
+      assert(!target.classList.contains("ae--mounted"), "Mounted class remained after unmount");
+
+      await $ae.update(target, "lifecycle-element-probe");
+      target.dispatchEvent(new Event("lifecycle-probe"));
+
+      assert(lifecycleCounts.mount === 2, "Element could not be mounted again");
+      assert(lifecycleCounts.events === 2, "Remounted element listener is unavailable");
+    });
+
+    $ae.init({ mode: "basic" });
+  </script>
+</head>
+<body>
+  <main id="lifecycle-element" data-lifecycle-element>
+    <h1>Element mount and unmount lifecycle</h1>
+  </main>
+  <pre id="validation-result">PENDING</pre>
+</body>
+</html>

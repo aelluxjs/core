@@ -22,15 +22,24 @@ Custom URLs should preserve the `aellux.ext.<label>.js` filename convention so t
 
 ```js
 $ae.ext("adaptive", {
+  builds: ["modern", "legacy"],
   loadWhen: "[data-ae-adaptive]",
   loadStyle: true
 });
 ```
 
+- `builds` declares published JavaScript variants: `modern`, `legacy`, or both. Omitting it promises both variants.
 - `loadWhen` delays loading until a matching element is discovered.
 - `loadStyle: true` requests the stylesheet derived from the Extension script URL; a URL string requests that specific stylesheet.
 
 Register each label once. Duplicate declarations currently report an error and do not replace the existing registration.
+
+Register Extensions before calling `$ae.init()` in `basic` mode so the first document update can load eager Extensions and index lazy ones:
+
+```js
+$ae.ext("feedback");
+$ae.init({ mode: "basic" });
+```
 
 ## Extension Registration
 
@@ -49,3 +58,4 @@ An Extension script exposes its API through `Aellux.extRegister()`:
 ```
 
 Use the [Aellux Extension scaffold](../../templates/README.md) for the complete lifecycle structure.
+Third-party authors should also follow the [Extension authoring and compatibility contract](authoring.md).

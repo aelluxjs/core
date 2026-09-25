@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-test-status="pending">
+<head>
+  <meta charset="UTF-8">
+  <title>Aellux validation: lazy extension</title>
+  <script src="./harness.js"></script>
+  <script src="../../dist/aellux.js"></script>
+  <script>
+    AelluxValidation.run(function (assert) {
+      var target = document.getElementById("lazy-target");
+      var script = document.querySelector("script[data-ae-ext='adaptive']");
+      assert(Aellux.adaptive, "Lazy extension was not initialized when its selector matched");
+      assert(target.classList.contains("ae--mounted"), "Lazy extension did not mount its target");
+      assert(script, "Lazy extension script was not loaded");
+      assert(!Aellux.lazyExtensionSelectors.adaptive, "Loaded extension remained in the lazy index");
+    });
+    $ae.ext("adaptive", { loadWhen: "[data-ae-adaptive]" });
+    $ae.init({ mode: "basic" });
+  </script>
+</head>
+<body>
+  <main id="lazy-target" data-ae-adaptive>
+    <h1>Lazy extension</h1>
+  </main>
+  <pre id="validation-result">PENDING</pre>
+</body>
+</html>

@@ -19,4 +19,4 @@ The same behavior can be declared in HTML:
 
 When the selector matches, the orchestrator loads and initializes the Extension, registers its mount selectors, and mounts matching elements in the affected scope.
 
-Loading promises are cached to prevent duplicate concurrent loads. Removing an Extension from the lazy selector index as soon as loading starts, rather than after initialization, remains an explicit beta review item.
+Loading promises are cached to prevent duplicate concurrent loads. The current runtime removes the Extension from the lazy selector index after successful initialization. Moving that removal to the beginning of loading remains an explicit lifecycle review item for the beta.

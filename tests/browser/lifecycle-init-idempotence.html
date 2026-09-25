@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-test-status="pending">
+<head>
+  <meta charset="UTF-8">
+  <title>Aellux validation: lifecycle initialization idempotence</title>
+  <script src="./harness.js"></script>
+  <script src="../../dist/aellux.js"></script>
+  <script>
+    var initializationCount = 0;
+    var readyCount = 0;
+
+    $ae.ext("lifecycle-init-probe");
+    $ae.extRegister("lifecycle-init-probe", {
+      init: function () { initializationCount++; },
+      destroy: function () {}
+    });
+
+    Aellux.on("Ready", function () { readyCount++; });
+    AelluxValidation.run(async function (assert) {
+      var first = await $ae.wait("lifecycle-init-probe");
+      var second = await $ae.wait("lifecycle-init-probe");
+
+      assert(initializationCount === 1, "Extension init ran more than once");
+      assert(readyCount === 1, "Boot initialization dispatched Ready more than once");
+      assert(first === second, "Repeated wait calls returned different Extension instances");
+    });
+
+    $ae.init({ mode: "basic" });
+    $ae.init({ mode: "basic" });
+  </script>
+</head>
+<body>
+  <h1>Lifecycle initialization idempotence</h1>
+  <pre id="validation-result">PENDING</pre>
+</body>
+</html>

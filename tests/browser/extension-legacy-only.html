@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-test-status="pending">
+<head>
+  <meta charset="UTF-8">
+  <title>Aellux validation: Legacy-only Extension compatibility</title>
+  <script src="./harness.js"></script>
+  <script src="../../dist/aellux.js"></script>
+  <link rel="aellux-ext" href="feedback" data-ae-builds="legacy">
+  <script>
+    AelluxValidation.run(function (assert) {
+      var script = document.querySelector("script[data-ae-ext='feedback']");
+      assert(Aellux.legacy === false, "Scenario did not select the Modern runtime");
+      assert(Aellux.feedback, "Legacy-only Extension did not initialize under the Modern runtime");
+      assert(script, "Legacy-only Extension asset was not appended");
+      assert(/aellux\.ext\.feedback\.legacy\.js(?:$|[?#])/.test(script.src), "Legacy-only Extension selected the wrong asset");
+    });
+
+    $ae.init({ mode: "basic", forceLegacy: false });
+  </script>
+</head>
+<body>
+  <h1>Legacy-only Extension compatibility</h1>
+  <pre id="validation-result">PENDING</pre>
+</body>
+</html>

@@ -109,10 +109,11 @@
         for (const link of allLinks) {
           const href = link.getAttribute("href");
           const loadWhen = link.getAttribute(Aellux2.attr("load-when")) || void 0;
+          const builds = link.getAttribute(Aellux2.attr("builds")) || void 0;
           const loadStyleValue = link.getAttribute(Aellux2.attr("load-style"));
           const loadStyle = loadStyleValue === null || loadStyleValue === "false" ? false : loadStyleValue || true;
           link.setAttribute("rel", "aellux-ext-registered");
-          Aellux2.ext(href, { loadWhen, loadStyle });
+          Aellux2.ext(href, { builds, loadWhen, loadStyle });
         }
         const waitExtensions = [];
         for (const [extensionLabel, options] of Object.entries(root.Aellux.extRegistry)) {
@@ -390,6 +391,20 @@
       const key = toCamelCase(extensionName);
       if (extensionPromises[key])
         return extensionPromises[key];
+      const data = Aellux.extRegistry[extensionName];
+      if (data && !hasCompatibleBuild(data)) {
+        Aellux.diagnostics.report(
+          Aellux.diagnostics.ERROR_EXTENSION_INCOMPATIBLE,
+          {
+            extension: extensionName,
+            runtime: Aellux.legacy ? "legacy" : "modern",
+            builds: data.builds
+          }
+        );
+        delete Aellux.lazyExtensionSelectors[extensionName];
+        extensionPromises[key] = Promise.resolve(null);
+        return extensionPromises[key];
+      }
       if (Aellux[key]) {
         if (!Aellux[key].initialized) {
           try {
@@ -435,7 +450,8 @@
       const extensionName = fromCamelCase(name);
       const data = Aellux.extRegistry[extensionName];
       const url = data.url.replace(/^\.\//, Aellux.aelluxBasePath);
-      const scriptURL = Aellux.legacy ? toLegacyScriptURL(url) : url;
+      const useLegacyBuild = Aellux.legacy || data.builds.indexOf("modern") === -1;
+      const scriptURL = useLegacyBuild ? toLegacyScriptURL(url) : url;
       const loadPromises = [];
       loadPromises.push(new Promise(
         (resolve, reject) => {
@@ -473,6 +489,11 @@
         /(?:\.legacy)?(?:\.min)?\.js(?=[?#]|$)/,
         ".legacy" + (Aellux.minified ? ".min" : "") + ".js"
       );
+    }
+    function hasCompatibleBuild(data) {
+      if (!data || !Array.isArray(data.builds) || data.builds.length === 0) return false;
+      if (Aellux.legacy) return data.builds.indexOf("legacy") !== -1;
+      return data.builds.indexOf("modern") !== -1 || data.builds.indexOf("legacy") !== -1;
     }
     function defaultRequest(url, options) {
       var requestOptions = Object.assign(

@@ -24,6 +24,16 @@ This provides the intended compatibility layer, but it is not an unrestricted gu
 
 ## Selection Rules
 
-The boot script checks the capabilities required by the orchestrator before loading it. Missing capabilities are recorded in `Aellux.notAvailable`. A forced-Legacy development option is planned but not implemented yet.
+The boot script checks the capabilities required by the orchestrator before loading it. Missing capabilities are recorded in `Aellux.notAvailable`.
+
+Force Legacy through initialization options or the development query parameter:
+
+```js
+$ae.init({ mode: "basic", forceLegacy: true });
+```
+
+```text
+?aellux-debug-legacy=1
+```
 
 See [ES5 support level](es5-support.md) and [Modern and Legacy Extension variants](../extensions/legacy-variants.md).

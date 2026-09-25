@@ -22356,7 +22356,7 @@
     }
     function _AelluxForceUpdate() {
       _AelluxForceUpdate = _asyncToGenerator(/* @__PURE__ */ _regenerator().m(function _callee2(rootOrSelector) {
-        var extensionLabels, Aellux2, _iterator2, _step2, rootElement, allWaiters, allLinks, _iterator3, _step3, link, href, loadWhen, loadStyleValue, loadStyle, waitExtensions, _i, _Object$entries, _Object$entries$_i, extensionLabel, options, _args2 = arguments, _t2;
+        var extensionLabels, Aellux2, _iterator2, _step2, rootElement, allWaiters, allLinks, _iterator3, _step3, link, href, loadWhen, builds, loadStyleValue, loadStyle, waitExtensions, _i, _Object$entries, _Object$entries$_i, extensionLabel, options, _args2 = arguments, _t2;
         return _regenerator().w(function(_context2) {
           while (1) switch (_context2.p = _context2.n) {
             case 0:
@@ -22382,10 +22382,12 @@
                   link = _step3.value;
                   href = link.getAttribute("href");
                   loadWhen = link.getAttribute(Aellux2.attr("load-when")) || void 0;
+                  builds = link.getAttribute(Aellux2.attr("builds")) || void 0;
                   loadStyleValue = link.getAttribute(Aellux2.attr("load-style"));
                   loadStyle = loadStyleValue === null || loadStyleValue === "false" ? false : loadStyleValue || true;
                   link.setAttribute("rel", "aellux-ext-registered");
                   Aellux2.ext(href, {
+                    builds: builds,
                     loadWhen: loadWhen,
                     loadStyle: loadStyle
                   });
@@ -23088,6 +23090,17 @@
           extensionName = fromCamelCase(extensionName);
           var key = toCamelCase(extensionName);
           if (extensionPromises[key]) return extensionPromises[key];
+          var data = Aellux.extRegistry[extensionName];
+          if (data && !hasCompatibleBuild(data)) {
+            Aellux.diagnostics.report(Aellux.diagnostics.ERROR_EXTENSION_INCOMPATIBLE, {
+              extension: extensionName,
+              runtime: Aellux.legacy ? "legacy" : "modern",
+              builds: data.builds
+            });
+            delete Aellux.lazyExtensionSelectors[extensionName];
+            extensionPromises[key] = Promise.resolve(null);
+            return extensionPromises[key];
+          }
           if (Aellux[key]) {
             if (!Aellux[key].initialized) {
               try {
@@ -23138,14 +23151,15 @@
         }
         function _appendExtensionAssets() {
           _appendExtensionAssets = _asyncToGenerator2(/* @__PURE__ */ _regenerator2().m(function _callee6(name) {
-            var extensionName, data, url, scriptURL, loadPromises;
+            var extensionName, data, url, useLegacyBuild, scriptURL, loadPromises;
             return _regenerator2().w(function(_context6) {
               while (1) switch (_context6.n) {
                 case 0:
                   extensionName = fromCamelCase(name);
                   data = Aellux.extRegistry[extensionName];
                   url = data.url.replace(/^\.\//, Aellux.aelluxBasePath);
-                  scriptURL = Aellux.legacy ? toLegacyScriptURL(url) : url;
+                  useLegacyBuild = Aellux.legacy || data.builds.indexOf("modern") === -1;
+                  scriptURL = useLegacyBuild ? toLegacyScriptURL(url) : url;
                   loadPromises = [];
                   loadPromises.push(new Promise(function(resolve, reject) {
                     var attr = Aellux.attr("ext");
@@ -23180,6 +23194,11 @@
         }
         function toLegacyScriptURL(url) {
           return url.replace(/(?:\.legacy)?(?:\.min)?\.js(?=[?#]|$)/, ".legacy" + (Aellux.minified ? ".min" : "") + ".js");
+        }
+        function hasCompatibleBuild(data) {
+          if (!data || !Array.isArray(data.builds) || data.builds.length === 0) return false;
+          if (Aellux.legacy) return data.builds.indexOf("legacy") !== -1;
+          return data.builds.indexOf("modern") !== -1 || data.builds.indexOf("legacy") !== -1;
         }
         function defaultRequest(url, options) {
           var requestOptions = Object.assign({
@@ -23966,12 +23985,12 @@
           handlers.get(type).add(handler);
           return {
             off: function off2() {
-              !handlers.has(type) ? null : handlers.get(type).delete(handler);
+              removeHandler(type, handler);
             }
           };
         }
         function off(type, handler) {
-          return !handlers.has(type) ? null : handlers.get(type).delete(handler);
+          return removeHandler(type, handler);
         }
         function warning(message) {
           send({
@@ -24039,6 +24058,13 @@
           if (handlers.has("*")) handlers.get("*").forEach(function(call) {
             return call(feedback2);
           });
+        }
+        function removeHandler(type, handler) {
+          var typeHandlers = handlers.get(type);
+          if (!typeHandlers) return false;
+          var removed = typeHandlers.delete(handler);
+          if (typeHandlers.size === 0) handlers.delete(type);
+          return removed;
         }
       })();
     }

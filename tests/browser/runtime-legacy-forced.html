@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-test-status="pending">
+<head>
+  <meta charset="UTF-8">
+  <title>Aellux validation: forced Legacy runtime</title>
+  <script src="./harness.js"></script>
+  <script src="../../dist/aellux.js"></script>
+  <script>
+    AelluxValidation.run(function (assert) {
+      var runtime = document.querySelector("script[data-ae-legacy]");
+      assert(runtime, "Legacy orchestrator script was not selected");
+      assert(Aellux.legacy === true, "Runtime was not marked as Legacy");
+      assert(/aellux\.orchestrator\.legacy\.js(?:$|[?#])/.test(runtime.src), "Unexpected Legacy runtime URL");
+    });
+    $ae.init({ mode: "basic", forceLegacy: true });
+  </script>
+</head>
+<body>
+  <h1>Forced Legacy runtime</h1>
+  <pre id="validation-result">PENDING</pre>
+</body>
+</html>

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-test-status="pending">
+<head>
+  <meta charset="UTF-8">
+  <title>Aellux validation: HTML and Web Platform</title>
+  <script src="./harness.js"></script>
+  <script src="../../dist/aellux.js"></script>
+  <link rel="aellux-ext" href="adaptive" data-ae-load-when="[data-ae-adaptive]">
+  <script>
+    AelluxValidation.run(function (assert) {
+      var target = document.getElementById("adaptive-target");
+      assert(Aellux.adaptive, "Adaptive extension was not initialized");
+      assert(target.classList.contains("ae--mounted"), "Web Platform element was not mounted");
+      assert(!document.querySelector("[class*='bootstrap']"), "Scenario must not depend on a visual framework");
+    });
+    $ae.init({ mode: "basic" });
+  </script>
+</head>
+<body>
+  <main id="adaptive-target" data-ae-adaptive data-ae-wait-mounted>
+    <h1>HTML and Web Platform</h1>
+    <p>Native HTML enhanced by an Aellux Extension.</p>
+  </main>
+  <pre id="validation-result">PENDING</pre>
+</body>
+</html>

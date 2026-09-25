@@ -1,14 +1,23 @@
 # Modern and Legacy Extension Variants
 
-> Status: the build generates ES5-syntax variants from the Modern sources. Core polyfills are bundled once in the Legacy orchestrator; the supported browser matrix remains under review.
+The compatibility contract uses explicit `builds` metadata. Core polyfills are bundled once in the Legacy orchestrator, while each Extension publishes only its behavior and any additional dependencies it owns.
 
-The beta target allows an Aellux Extension to declare one of three compatibility profiles:
+The compatibility model recognizes three possible Extension profiles:
 
 - Modern-only;
 - Legacy-only; or
 - Modern and Legacy variants.
 
-The orchestrator selects the Legacy filename when the boot script has selected the Legacy runtime. Individual Extensions do not repeat environment detection.
+Declare the available artifacts when registering an Extension:
+
+```js
+$ae.ext("example", { builds: ["modern", "legacy"] });
+```
+
+- A Modern-only Extension uses `builds: ["modern"]`. A Legacy runtime reports diagnostic `1106` and does not request it.
+- A Legacy-only Extension uses `builds: ["legacy"]`. Modern browsers can execute this ES5 artifact, so Aellux selects the Legacy filename in either runtime.
+- An Extension with both builds uses `builds: ["modern", "legacy"]`, and Aellux selects the matching artifact.
+- Omitting `builds` defaults to both and promises that both files exist.
 
 ## Filename Convention
 
@@ -18,11 +27,8 @@ The orchestrator selects the Legacy filename when the boot script has selected t
 
 The Legacy runtime follows the same convention with `aellux.orchestrator.legacy.js` for `basic` mode and `aellux.full.legacy.js` for `full` mode.
 
-## Requirements Under Review
+The same metadata can be declared with `data-ae-builds="modern legacy"` on `link[rel="aellux-ext"]`.
 
-- Metadata that identifies available runtime targets.
-- A clear diagnostic when no compatible variant exists.
-- Independent loading of JavaScript and optional styles for the selected variant.
-- Equivalent public APIs where both variants are provided.
+Both variants must register the same Extension name and expose equivalent public APIs. Optional styles are independent of the JavaScript target and are shared unless an Extension explicitly manages another strategy.
 
-The runtime compatibility metadata and supported browser matrix must be defined before this document can be considered stable.
+See the [third-party authoring contract](authoring.md) for build instructions and the Legacy polyfill boundary.

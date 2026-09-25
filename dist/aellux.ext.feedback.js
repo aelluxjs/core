@@ -29,11 +29,11 @@
       }
       handlers.get(type).add(handler);
       return { off() {
-        !handlers.has(type) ? null : handlers.get(type).delete(handler);
+        removeHandler(type, handler);
       } };
     }
     function off(type, handler) {
-      return !handlers.has(type) ? null : handlers.get(type).delete(handler);
+      return removeHandler(type, handler);
     }
     function warning(message) {
       send({ type: "warning", message });
@@ -62,6 +62,13 @@
       Aellux.dispatchFrom(target, "Feedback", { detail: feedback });
       if (handlers.has(type)) handlers.get(type).forEach((call) => call(feedback));
       if (handlers.has("*")) handlers.get("*").forEach((call) => call(feedback));
+    }
+    function removeHandler(type, handler) {
+      const typeHandlers = handlers.get(type);
+      if (!typeHandlers) return false;
+      const removed = typeHandlers.delete(handler);
+      if (typeHandlers.size === 0) handlers.delete(type);
+      return removed;
     }
   })();
 })();

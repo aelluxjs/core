@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-test-status="pending">
+<head>
+  <meta charset="UTF-8">
+  <title>Aellux validation: extension without CSS</title>
+  <script src="./harness.js"></script>
+  <script src="../../dist/aellux.js"></script>
+  <script>
+    AelluxValidation.run(function (assert) {
+      assert(Aellux.feedback, "JavaScript-only extension was not initialized");
+      assert(!document.querySelector("link[data-ae-ext-style='feedback']"), "Unexpected stylesheet was loaded");
+    });
+    $ae.ext("feedback");
+    $ae.init({ mode: "basic" });
+  </script>
+</head>
+<body>
+  <h1>Extension without CSS</h1>
+  <pre id="validation-result">PENDING</pre>
+</body>
+</html>

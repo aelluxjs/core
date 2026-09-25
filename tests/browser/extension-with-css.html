@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-test-status="pending">
+<head>
+  <meta charset="UTF-8">
+  <title>Aellux validation: extension with CSS</title>
+  <script src="./harness.js"></script>
+  <script src="../../dist/aellux.js"></script>
+  <script>
+    AelluxValidation.run(function (assert) {
+      var style = document.querySelector("link[data-ae-ext-style='adaptive']");
+      var target = document.getElementById("styled-target");
+      assert(style, "Associated extension stylesheet was not appended");
+      assert(/aellux\.ext\.adaptive\.css(?:$|[?#])/.test(style.href), "Unexpected extension stylesheet URL");
+      assert(target.classList.contains("ae--mounted"), "Extension mounted state was not completed");
+    });
+    $ae.ext("adaptive", { loadStyle: true });
+    $ae.init({ mode: "basic" });
+  </script>
+</head>
+<body>
+  <main id="styled-target" data-ae-adaptive>
+    <h1>Extension with CSS</h1>
+  </main>
+  <pre id="validation-result">PENDING</pre>
+</body>
+</html>

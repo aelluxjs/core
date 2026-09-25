@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-test-status="pending">
+<head>
+  <meta charset="UTF-8">
+  <title>Aellux validation: isolated extension failure</title>
+  <script src="./harness.js"></script>
+  <script src="../../dist/aellux.js"></script>
+  <script>
+    var diagnosticCodes = [];
+    var originalReport = Aellux.diagnostics.report;
+    Aellux.diagnostics.report = function (definition, details) {
+      diagnosticCodes.push(definition.code);
+      return originalReport.call(Aellux.diagnostics, definition, details);
+    };
+
+    AelluxValidation.run(async function (assert) {
+      var missing = await $ae.wait("missing-validation");
+      assert(Aellux.feedback, "A valid extension did not survive another extension failure");
+      assert(Aellux.feedback.initialized === true, "Valid extension initialization was interrupted");
+      assert(missing === null, "Failed extension did not resolve to null");
+      assert(diagnosticCodes.indexOf(1102) !== -1, "Extension failure diagnostic was not emitted");
+    });
+    $ae.ext("components/aellux.ext.missing-validation.js");
+    $ae.ext("feedback");
+    $ae.init({ mode: "basic" });
+  </script>
+</head>
+<body>
+  <h1>Isolated extension failure</h1>
+  <pre id="validation-result">PENDING</pre>
+</body>
+</html>

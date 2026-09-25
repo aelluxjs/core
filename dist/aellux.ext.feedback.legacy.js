@@ -144,12 +144,12 @@
       handlers.get(type).add(handler);
       return {
         off: function off2() {
-          !handlers.has(type) ? null : handlers.get(type).delete(handler);
+          removeHandler(type, handler);
         }
       };
     }
     function off(type, handler) {
-      return !handlers.has(type) ? null : handlers.get(type).delete(handler);
+      return removeHandler(type, handler);
     }
     function warning(message) {
       send({
@@ -217,6 +217,13 @@
       if (handlers.has("*")) handlers.get("*").forEach(function(call) {
         return call(feedback);
       });
+    }
+    function removeHandler(type, handler) {
+      var typeHandlers = handlers.get(type);
+      if (!typeHandlers) return false;
+      var removed = typeHandlers.delete(handler);
+      if (typeHandlers.size === 0) handlers.delete(type);
+      return removed;
     }
   })();
 })();

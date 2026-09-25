@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-test-status="pending">
+<head>
+  <meta charset="UTF-8">
+  <title>Aellux validation: dynamic update</title>
+  <script src="./harness.js"></script>
+  <script src="../../dist/aellux.js"></script>
+  <script>
+    AelluxValidation.run(async function (assert) {
+      var target = document.createElement("section");
+      target.id = "dynamic-adaptive-target";
+      target.setAttribute("data-ae-adaptive", "");
+      target.textContent = "Inserted after AelluxReady";
+      document.getElementById("dynamic-root").appendChild(target);
+
+      await $ae.update(target);
+
+      assert(target.classList.contains("ae--mounted"), "Dynamically inserted element was not mounted");
+    });
+    $ae.ext("adaptive");
+    $ae.init({ mode: "basic" });
+  </script>
+</head>
+<body>
+  <main id="dynamic-root">
+    <h1>Dynamic DOM update</h1>
+  </main>
+  <pre id="validation-result">PENDING</pre>
+</body>
+</html>

@@ -12,21 +12,18 @@
   <script src="../dist/aellux.min.js" type="text/javascript"></script>
 
   <link rel="aellux-ext" href="adaptive" data-ae-load-style data-ae-load-when="[data-ae-adaptive]" />
-  <link rel="aellux-ext" href="ajax-href" />
+  <link rel="aellux-ext" href="ajax-href" data-ae-load-when="[data-ae-ajax-href]" />
   <link rel="aellux-ext" href="feedback" />
   <link rel="aellux-ext" href="preferences" />
   <link rel="aellux-ext" href="state-navigation" />
+  <link rel="aellux-ext" href="components/aellux.ext.tab-group.js"
+    data-ae-builds="modern"
+    data-ae-load-when="[data-ae-tab-group]" />
 
   <script>
     var start = Date.now();
 
     $ae.init({ mode: "basic" });
-    //$ae.init({ mode: "full" });
-
-    $ae.ext("preferences"); //CORE
-    $ae.ext("state-navigation"); //CORE
-    $ae.ext("feedback"); //CORE
-    $ae.ext("https://drawercdnurl/");//External
 
     $ae.on("Legacy", function () {
 

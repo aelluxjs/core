@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-test-status="pending">
+<head>
+  <meta charset="UTF-8">
+  <title>Aellux validation: eager extension</title>
+  <script src="./harness.js"></script>
+  <script src="../../dist/aellux.js"></script>
+  <script>
+    AelluxValidation.run(function (assert) {
+      assert(Aellux.feedback, "Eager extension API is unavailable");
+      assert(Aellux.feedback.initialized === true, "Eager extension was not initialized during start");
+      assert(Aellux.extRegistry.feedback.state === "register", "Eager extension was not registered");
+    });
+    $ae.ext("feedback");
+    $ae.init({ mode: "basic" });
+  </script>
+</head>
+<body>
+  <h1>Eager extension</h1>
+  <pre id="validation-result">PENDING</pre>
+</body>
+</html>

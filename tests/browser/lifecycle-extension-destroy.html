@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-test-status="pending">
+<head>
+  <meta charset="UTF-8">
+  <title>Aellux validation: isolated Extension destruction</title>
+  <script src="./harness.js"></script>
+  <script src="../../dist/aellux.js"></script>
+  <script>
+    var lifecycleCounts = { mount: 0, unmount: 0, destroy: 0 };
+    var mountDOM = new Map();
+
+    $ae.ext("lifecycle-extension-probe");
+    $ae.extRegister("lifecycle-extension-probe", {
+      init: function () {
+        mountDOM.set("[data-lifecycle-extension]", {
+          mount: function () { lifecycleCounts.mount++; },
+          unmount: function () { lifecycleCounts.unmount++; }
+        });
+      },
+      destroy: function () { lifecycleCounts.destroy++; },
+      mountDOM: mountDOM
+    });
+
+    AelluxValidation.run(async function (assert) {
+      assert(lifecycleCounts.mount === 1, "Extension target was not mounted");
+
+      await $ae.destroyExtensions("lifecycle-extension-probe");
+
+      assert(lifecycleCounts.unmount === 1, "Extension elements were not unmounted before destroy");
+      assert(lifecycleCounts.destroy === 1, "Extension destroy did not run exactly once");
+      assert(typeof Aellux.lifecycleExtensionProbe === "undefined", "Destroyed Extension API remains public");
+      assert(!("lifecycle-extension-probe" in Aellux.extRegistry), "Destroyed Extension remains registered");
+      assert(!("lifecycle-extension-probe" in Aellux.extensionMounters), "Destroyed Extension mounter remains indexed");
+
+      await $ae.destroyExtensions("lifecycle-extension-probe");
+      assert(lifecycleCounts.destroy === 1, "Repeated destruction called destroy again");
+    });
+
+    $ae.init({ mode: "basic" });
+  </script>
+</head>
+<body>
+  <main data-lifecycle-extension>
+    <h1>Isolated Extension destruction</h1>
+  </main>
+  <pre id="validation-result">PENDING</pre>
+</body>
+</html>

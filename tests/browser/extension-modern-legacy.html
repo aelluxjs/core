@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-test-status="pending">
+<head>
+  <meta charset="UTF-8">
+  <title>Aellux validation: Modern and Legacy extension builds</title>
+  <script src="./harness.js"></script>
+  <script src="../../dist/aellux.js"></script>
+  <script>
+    AelluxValidation.run(async function (assert) {
+      var script = document.querySelector("script[data-ae-ext='feedback']");
+      var variants = await Promise.all([
+        fetch("../../dist/aellux.ext.feedback.js"),
+        fetch("../../dist/aellux.ext.feedback.legacy.js")
+      ]);
+      assert(Aellux.feedback, "Legacy extension variant was not initialized");
+      assert(script, "Extension asset was not appended");
+      assert(/aellux\.ext\.feedback\.legacy\.js(?:$|[?#])/.test(script.src), "Legacy extension variant was not selected");
+      assert(document.querySelector("script[data-ae-legacy]"), "Scenario did not use the Legacy runtime");
+      assert(variants[0].ok, "Modern extension build is unavailable");
+      assert(variants[1].ok, "Legacy extension build is unavailable");
+    });
+    $ae.ext("feedback", { builds: ["modern", "legacy"] });
+    $ae.init({ mode: "basic", forceLegacy: true });
+  </script>
+</head>
+<body>
+  <h1>Modern and Legacy extension builds</h1>
+  <pre id="validation-result">PENDING</pre>
+</body>
+</html>

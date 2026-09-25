@@ -20,12 +20,13 @@ export function createMountHelper(root, extensionPromises) {
       for (const link of allLinks) {
         const href = link.getAttribute("href");
         const loadWhen = link.getAttribute(Aellux.attr("load-when")) || undefined;
+        const builds = link.getAttribute(Aellux.attr("builds")) || undefined;
         const loadStyleValue = link.getAttribute(Aellux.attr("load-style"));
         const loadStyle = loadStyleValue === null || loadStyleValue === "false"
           ? false
           : loadStyleValue || true;
         link.setAttribute("rel", "aellux-ext-registered");
-        Aellux.ext(href, { loadWhen, loadStyle });
+        Aellux.ext(href, { builds, loadWhen, loadStyle });
       }
 
       const waitExtensions = [];

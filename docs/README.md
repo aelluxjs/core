@@ -5,6 +5,7 @@ This directory contains the detailed documentation for the Aellux `0.1.0-beta` l
 ## Getting Started
 
 - [Installation, build, and runtime modes](getting-started.md)
+- [Compatibility for 0.1.0 Beta](compatibility.md)
 - [Runtime API](runtime/api.md)
 
 ## Runtime and Compatibility
@@ -17,6 +18,7 @@ This directory contains the detailed documentation for the Aellux `0.1.0-beta` l
 
 ## Aellux Extensions
 
+- [Authoring third-party Extensions](extensions/authoring.md)
 - [Registering Extensions with `$ae.ext(...)`](extensions/registration.md)
 - [Declarative loading with `link[rel="aellux-ext"]`](extensions/declarative-loading.md)
 - [Lazy loading](extensions/lazy-loading.md)
@@ -26,6 +28,7 @@ This directory contains the detailed documentation for the Aellux `0.1.0-beta` l
 
 ## Project Documents
 
+- [Browser validation scenarios](validation-scenarios.md)
 - [Milestone: Aellux 0.1.0 Beta](milestones/0.1.0-beta.md)
 - [Extension scaffold](../templates/README.md)
 - [Changelog](../CHANGELOG.md)

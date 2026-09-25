@@ -150,6 +150,21 @@ import { createMountHelper } from "./internal/create-mount-helper.js";
     if (extensionPromises[key])
       return extensionPromises[key];
 
+    const data = Aellux.extRegistry[extensionName];
+    if (data && !hasCompatibleBuild(data)) {
+      Aellux.diagnostics.report(
+        Aellux.diagnostics.ERROR_EXTENSION_INCOMPATIBLE,
+        {
+          extension: extensionName,
+          runtime: Aellux.legacy ? "legacy" : "modern",
+          builds: data.builds
+        }
+      );
+      delete Aellux.lazyExtensionSelectors[extensionName];
+      extensionPromises[key] = Promise.resolve(null);
+      return extensionPromises[key];
+    }
+
     if (Aellux[key]) {
       if (!Aellux[key].initialized) {
         try {
@@ -211,7 +226,8 @@ import { createMountHelper } from "./internal/create-mount-helper.js";
     const extensionName = fromCamelCase(name);
     const data = Aellux.extRegistry[extensionName];
     const url = data.url.replace(/^\.\//, Aellux.aelluxBasePath);
-    const scriptURL = Aellux.legacy ? toLegacyScriptURL(url) : url;
+    const useLegacyBuild = Aellux.legacy || data.builds.indexOf("modern") === -1;
+    const scriptURL = useLegacyBuild ? toLegacyScriptURL(url) : url;
     const loadPromises = [];
 
     loadPromises.push(new Promise(
@@ -256,6 +272,12 @@ import { createMountHelper } from "./internal/create-mount-helper.js";
       /(?:\.legacy)?(?:\.min)?\.js(?=[?#]|$)/,
       ".legacy" + (Aellux.minified ? ".min" : "") + ".js"
     );
+  }
+
+  function hasCompatibleBuild(data) {
+    if (!data || !Array.isArray(data.builds) || data.builds.length === 0) return false;
+    if (Aellux.legacy) return data.builds.indexOf("legacy") !== -1;
+    return data.builds.indexOf("modern") !== -1 || data.builds.indexOf("legacy") !== -1;
   }
 
   function defaultRequest(url, options) {
