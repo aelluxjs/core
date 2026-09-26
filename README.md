@@ -38,6 +38,7 @@ See [Getting Started](docs/getting-started.md) for build instructions, runtime m
 - [Runtime API](docs/runtime/api.md)
 - [Diagnostics](docs/runtime/diagnostics.md)
 - [Modern and Legacy runtimes](docs/runtime/modern-legacy.md)
+- [Browser support baseline](docs/runtime/browser-support.md)
 - [ES5 support level](docs/runtime/es5-support.md)
 - [Visual mounting states](docs/runtime/visual-mounting.md)
 - [Bootstrap integration](docs/integrations/bootstrap.md)
@@ -59,7 +60,7 @@ See [Getting Started](docs/getting-started.md) for build instructions, runtime m
 - Idempotent DOM mounting through `$ae.update(root)`.
 - Generated adaptive CSS utilities for container-scoped states.
 - Browser history, preferences, feedback, persistence, and asynchronous content behaviors.
-- ES5-compatible boot script with an ES2017+ Modern runtime.
+- ES5-compatible boot script with an [ES2017+ Modern browser baseline](docs/runtime/browser-support.md).
 
 ## Build
 

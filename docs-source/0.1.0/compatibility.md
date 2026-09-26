@@ -2,7 +2,7 @@
 
 Aellux `0.1.0-beta.1` is intended for progressive enhancement in existing browser interfaces. It provides an ES5-compatible boot distribution that selects an ES2017+ Modern runtime or an ES5-syntax Legacy runtime with bundled polyfills.
 
-This beta validates the runtime contract and integration strategy. It does not yet claim a final browser support matrix or unrestricted compatibility with every browser capable of parsing ES5.
+This beta validates the runtime contract and integration strategy. It publishes a preliminary ES2017 syntax baseline, but does not yet claim a final tested browser support matrix or unrestricted compatibility with every browser capable of parsing ES5.
 
 ## Runtime Profiles
 
@@ -23,6 +23,8 @@ $ae.init({ mode: "basic", forceLegacy: true });
 
 For browser testing, append `?aellux-debug-legacy=1` or `?aellux-debug-legacy=true` to the page URL.
 
+The preliminary minimum versions for parsing the Modern distribution are documented in [Browser support](runtime/browser-support.md). Those versions are syntax references rather than guarantees that every required Web Platform API is present.
+
 ## Extension Compatibility
 
 Core Extensions are distributed as Modern and generated Legacy variants. The Legacy orchestrator provides shared polyfills, so individual Legacy Extension files do not bundle the same polyfills again.
@@ -39,9 +41,9 @@ See [Bootstrap integration](integrations/bootstrap.md) and the repository's `exa
 
 ## Current Limits
 
-- The final tested browser matrix is not yet published.
+- The published browser versions are a raw ES2017 syntax baseline; a final multi-browser validation matrix is not yet available.
 - Legacy support depends on the host providing fundamental DOM capabilities.
 - Experimental components under `examples/components/` are not part of the Core compatibility contract.
 - Applications must call `$ae.update(root)` after relevant dynamic DOM insertion and `$ae.unmount(root)` before removing mounted content when cleanup is required.
 
-See [Modern and Legacy runtimes](runtime/modern-legacy.md), [ES5 support level](runtime/es5-support.md), and [Modern and Legacy Extension variants](extensions/legacy-variants.md) for details.
+See [Browser support](runtime/browser-support.md), [Modern and Legacy runtimes](runtime/modern-legacy.md), [ES5 support level](runtime/es5-support.md), and [Modern and Legacy Extension variants](extensions/legacy-variants.md) for details.

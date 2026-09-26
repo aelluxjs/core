@@ -9,7 +9,7 @@ When the required syntax and browser APIs are available, the boot script loads e
 - `aellux.orchestrator.js` in `basic` mode; or
 - `aellux.full.js` in `full` mode.
 
-The orchestrator and Modern Extensions target ES2017+ syntax. They use Promises, async functions, `fetch`, custom events, and other modern Web Platform APIs.
+The orchestrator and Modern Extensions target ES2017+ syntax. They use Promises, async functions, `fetch`, custom events, and other modern Web Platform APIs. See the [browser support baseline](browser-support.md) for preliminary minimum browser versions and the distinction between syntax support and effective runtime compatibility.
 
 ## Legacy Runtime
 
@@ -36,4 +36,4 @@ $ae.init({ mode: "basic", forceLegacy: true });
 ?aellux-debug-legacy=1
 ```
 
-See [ES5 support level](es5-support.md) and [Modern and Legacy Extension variants](../extensions/legacy-variants.md).
+See [Browser support](browser-support.md), [ES5 support level](es5-support.md), and [Modern and Legacy Extension variants](../extensions/legacy-variants.md).
