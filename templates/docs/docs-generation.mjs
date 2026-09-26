@@ -1,44 +1,32 @@
 'use strict';
 
+import fsp from "node:fs/promises";
+import path from "node:path";
 
 function formatXML(url, item) {
-  return `<url>
-      <loc>${url}/${item.href}</loc>
-    </url>`;
+  const location = `${String(url).replace(/\/+$/, ``)}/${String(item.href).replace(/^\/+/, ``)}`;
+  return `<url><loc>${location.replace(/&/g, `&amp;`).replace(/</g, `&lt;`).replace(/>/g, `&gt;`)}</loc></url>`;
 }
 
-module.exports.sitemap = async function (context = {}) {
-  const request = context.requestData;
-  const services = context.services;
-  const fluentFs = context.services?.fluentFs ?? null;
-
+async function sitemap(docsPath, baseURL) {
+  const entries = await fsp.readdir(
+    docsPath, { withFileTypes: true }
+  ) ?? [];
   let xmlBody = ``;
 
-  const docsPath = await fluentFs.assets.static.docs.path();
-  const entries = await services.storage.listEntries(docsPath) ?? [];
-  const baseURL = `https://${request.hostname}`;
-
   for (const entry of entries) {
+    if (!entry.isDirectory()) continue;
     const version = entry.name;
-    const versionURL = `${baseURL}/${version}`
     try {
-      const summarySource = await fluentFs.assets.static.readAsync(
-        `docs/${version}/summary.json`,
-        `utf8`
+      const summarySource = await fsp.readFile(
+        `${docsPath}/${version}/summary.json`,
+        { encoding: `utf8` }
       );
 
       const parsed = JSON.parse(String(summarySource ?? ``));
 
-      for (const item of parsed.summary) {
-        if (!item.children) { xmlBody += formatXML(versionURL, item); continue; }
-
-        for (const child of item.children) {
-          if (!child.children) { xmlBody += formatXML(versionURL, child); continue; }
-
-          for (const item2 of child.children) {
-            xmlBody += formatXML(versionURL, item2);
-          }
-        }
+      for (const item of flattenSummaryOrder(parsed.summary ?? [], version)) {
+        if (!item.hasChildren) xmlBody += formatXML(baseURL, item);
       }
     } catch (error) {
       return {
@@ -61,30 +49,63 @@ module.exports.sitemap = async function (context = {}) {
   };
 }
 
-module.exports.index = async function (context = {}) {
-  const request = context.requestData ?? {};
-  const route = context.tenantRoute ?? {};
-  const fluentFs = context.services?.fluentFs ?? null;
+async function generateDocs({
+  docsPath,
+  baseURL,
+  title
+}) {
+  const docs = [];
 
-  const { version } = route.params;
+  async function visit(version, directory, relativeDirectory = ``) {
+    const entries = await fsp.readdir(directory, { withFileTypes: true });
 
-  const docsRoot = `static/docs/${version}`;
+    for (const entry of entries) {
+      const relativePath = path.posix.join(relativeDirectory, entry.name);
+      const entryPath = path.join(directory, entry.name);
 
-  let markdownPath;
+      if (entry.isDirectory()) {
+        await visit(version, entryPath, relativePath);
+        continue;
+      }
 
-  const slug = String(route.params?.slug ?? `introduction`)
-    .trim()
-    .replace(/^\/+|\/+$/g, ``);
+      if (!entry.isFile() || path.extname(entry.name).toLowerCase() !== `.md`) continue;
 
-  if (route.params.folder2 !== undefined) {
-    markdownPath = `${docsRoot}/${route.params.folder1}/${route.params.folder2}/${route.params.filename}.md`;
-  } else if (route.params.folder1 !== undefined) {
-    markdownPath = `${docsRoot}/${route.params.folder1}/${route.params.filename}.md`;
-  } else if (route.params.filename !== undefined) {
-    markdownPath = `${docsRoot}/${route.params.filename}.md`;
-  } else {
-    markdownPath = `${docsRoot}/index.md`;
+      const sourceFilePath = relativePath;
+      const targetHTML = relativePath.replace(/\.md$/i, `.htm`);
+      const generated = await generate({ docsPath, baseURL, title, version, sourceFilePath });
+      docs.push({ ...generated, targetPath: `/${version}/${targetHTML}` });
+    }
   }
+
+  const versions = await fsp.readdir(docsPath, { withFileTypes: true });
+  for (const entry of versions) {
+    if (!entry.isDirectory()) continue;
+    await visit(entry.name, path.join(docsPath, entry.name));
+  }
+
+  return docs;
+}
+
+async function generate({
+  docsPath,
+  version,
+  title,
+  sourceFilePath
+}) {
+  const docsRoot = path.resolve(docsPath, version);
+  const source = String(sourceFilePath ?? `README.md`).replace(/\\/g, `/`).replace(/^\/+/, ``);
+  const relativeFile = source.endsWith(`.md`) ? source : `${source}.md`;
+  const markdownPath = path.resolve(docsRoot, relativeFile);
+  if (!markdownPath.startsWith(`${docsRoot}${path.sep}`)) {
+    return { status: 400, body: `Invalid documentation path` };
+  }
+  try {
+    await fsp.access(markdownPath);
+  } catch {
+    return { status: 404, body: `Documentation page not found` };
+  }
+  const slug = path.basename(relativeFile, `.md`);
+
 
   let menuTree = [];
   let breadcrumb = [];
@@ -93,14 +114,14 @@ module.exports.index = async function (context = {}) {
   let nextPage = null;
 
   try {
-    const configSource = await fluentFs.assets.static.readAsync(
-      `docs/${version}/summary.json`,
-      `utf8`
+    const configSource = await fsp.readFile(
+      `${docsPath}/${version}/summary.json`,
+      { encoding: `utf8` }
     );
 
     parsed = JSON.parse(String(configSource ?? ``));
 
-    const currentPath = request.path ?? request.url ?? `/`;
+    const currentPath = `/${version}/${relativeFile}`;
 
     menuTree = normalizeMenuTree(
       parsed.summary ?? [],
@@ -111,14 +132,14 @@ module.exports.index = async function (context = {}) {
     breadcrumb = buildBreadcrumb(menuTree, {
       currentPath,
       homeLabel: `Home`,
-      homeHref: `/${version}/index.htm`
+      homeHref: `/${version}/README.md`
     });
 
     const docsNavigation = buildDocsPrevNext(parsed.summary ?? [], {
       version,
       currentPath,
       homeLabel: `Home`,
-      homeHref: `/${version}/index.htm`
+      homeHref: `/${version}/README.md`
     });
 
     prevPage = docsNavigation.prev;
@@ -131,20 +152,20 @@ module.exports.index = async function (context = {}) {
     };
   }
 
-  let pageTitle = `${version} | Ehecoatl Docs`;
+  let pageTitle = `${version} | ${title}`;
 
   if (breadcrumb.length > 1) {
     pageTitle = `${breadcrumb[breadcrumb.length - 1].label} | ${pageTitle}`;
   }
 
   //ADD PREFFIX TO SUMMARY PAGES WHEN APPROPRIATE
-  if (breadcrumb[breadcrumb.length - 1].label === "Summary" && breadcrumb.length > 2) {
+  if (breadcrumb.at(-1)?.label === "Summary" && breadcrumb.length > 2) {
     pageTitle = `${breadcrumb[breadcrumb.length - 2].label} - ${pageTitle}`;
   }
 
 
   return {
-    status: markdownPath ? 200 : 404,
+    status: 200,
     headers: {
       'Content-Type': 'text/html; charset=utf-8',
       'Cache-Control': 'public, max-age=3600, s-maxage=432000' // 1 hour Browser // 5 days CDN
@@ -159,7 +180,7 @@ module.exports.index = async function (context = {}) {
         prevLink: prevPage,
         nextLink: nextPage,
         currentSlug: slug,
-        currentPath: request.path ?? null
+        currentPath: `/${version}/${relativeFile}`
       }
     }
   };
@@ -206,7 +227,7 @@ function prefixVersion(href, version) {
     .replace(/^\/+/, ``);
 
   if (!normalized) {
-    return `/${version}/index.htm`;
+    return `/${version}/README.md`;
   }
 
   return `/${version}/${normalized}`;
@@ -301,13 +322,15 @@ function getItemLabel(item = {}) {
     item.name ??
     `Untitled`
   );
-} function buildDocsPrevNext(
+}
+
+function buildDocsPrevNext(
   items = [],
   {
     version,
     currentPath = `/`,
     homeLabel = `Home`,
-    homeHref = `/index.htm`
+    homeHref = `/README.md`
   } = {}
 ) {
   const home = {
@@ -435,8 +458,10 @@ function normalizeDocsPath(path, version) {
   const versionRoot = `/${version}`;
 
   if (normalized === versionRoot || normalized === `${versionRoot}/`) {
-    return `${versionRoot}/index.htm`;
+    return `${versionRoot}/README.md`;
   }
 
   return normalized.replace(/\/+$/, ``) || `/`;
 }
+
+export default { sitemap, generateDocs };

@@ -39,7 +39,9 @@
     "LICENSE"
   ],
   "scripts": {
-    "build": "node scripts/build.mjs",
+    "build": "npm run build:core && npm run build:docs",
+    "build:core": "node scripts/build-core.mjs",
+    "build:docs": "node scripts/build-docs.mjs",
     "test:browser": "node tests/browser/run.mjs",
     "prepack": "npm run build"
   },
@@ -55,6 +57,7 @@
     "core-js": "^3.50.0",
     "custom-event-polyfill": "^1.0.7",
     "esbuild": "^0.25.0",
+    "markdown-it": "^15.0.2",
     "raf": "^3.4.1",
     "whatwg-fetch": "^3.6.20"
   }

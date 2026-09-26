@@ -5,11 +5,11 @@
   </button>
   <ul class="dropdown-menu dropdown-menu-start rounded-2 overflow-hidden position-absolute" style="min-width: unset;">
 
-    @forentries(entry in 'static/docs')
+    @forentries(entry in 'docs-source')
     @if(entry.isFile) @continue @endif
     <li>
       <a class="dropdown-item small @if(route.params.version === entry.name) active @endif" data-no-ajax=true
-        href="/{{entry.name}}">{{entry.name}}</a>
+        href="/{{entry.name}}/README.htm">{{entry.name}}</a>
     </li>
     @endforentries
 
