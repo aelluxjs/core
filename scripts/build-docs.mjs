@@ -7,7 +7,12 @@ import docsGeneration from "../templates/docs/docs-generation.mjs";
 const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const docsPath = path.join(projectRoot, "docs-source");
 const outputDirectory = path.join(projectRoot, "docs");
-const outputPath = `/${path.relative(projectRoot, outputDirectory).replaceAll(path.sep, `/`)}`;
+const publicPrefix = process.env.DOCS_PUBLIC_PREFIX ?? "/core";
+const outputPath = path.posix.join(
+  "/",
+  publicPrefix,
+  path.relative(projectRoot, outputDirectory).replaceAll(path.sep, `/`)
+);
 const baseURL = process.env.DOCS_BASE_URL ?? `https://aelluxjs.github.io${outputPath}`;
 const renderer = new ERenderer();
 
