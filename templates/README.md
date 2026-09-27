@@ -1,6 +1,6 @@
 # Aellux Extension Scaffold
 
-Copy `aellux.ext.template.js` to `src/aellux.ext.<extension-name>.js` for a core Aellux Extension, or to `examples/components/` for an experimental extension. Templates are not included in the core build.
+Copy `aellux.ext.template.js` to `src/aellux.ext.<extension-name>.js` for a core Aellux Extension, or into a separate project for an experimental Extension. Templates are not included in the core build.
 
 For a third-party package, copy both `aellux.ext.template.js` and `build-extension.mjs` into the Extension project. The complete contract is documented in [Authoring Third-Party Aellux Extensions](../docs/extensions/authoring.md).
 

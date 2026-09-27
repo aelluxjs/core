@@ -33,10 +33,10 @@ After inserting or revealing dynamic markup, update only the affected root when 
 await $ae.update(changedElement);
 ```
 
-An official integration example is available for the beta. Repeatable Bootstrap compatibility tests remain a release requirement.
+The browser validation suite includes a Bootstrap CSS coexistence scenario. Repeatable testing with Bootstrap JavaScript components remains a release requirement.
 
-## Beta Example and Scope
+## Validation Scope
 
-The repository's `examples/tabs.htm` page is the current integration example. It loads Bootstrap CSS before Aellux, exercises declarative eager and lazy Extensions, uses Adaptive CSS, and demonstrates visual mounting state.
+The `tests/browser/bootstrap-integration.html` scenario loads Bootstrap CSS before Aellux, exercises declarative lazy Extension loading, and checks that Adaptive mounts without removing Bootstrap classes.
 
-The example validates namespace and CSS coexistence. Repeatable testing with Bootstrap JavaScript components, dynamically revealed content, and listener coexistence remains part of the beta acceptance work rather than a completed compatibility guarantee.
+The scenario validates namespace and CSS coexistence. Testing with Bootstrap JavaScript components, dynamically revealed content, and listener coexistence remains part of the beta acceptance work rather than a completed compatibility guarantee.

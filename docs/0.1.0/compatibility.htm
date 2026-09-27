@@ -394,12 +394,11 @@
 <p>See <a href="extensions/authoring.htm">Authoring Third-Party Aellux Extensions</a> for lifecycle rules, filename conventions, the reference Legacy build, and the exact polyfill boundary.</p>
 <h2>Bootstrap</h2>
 <p>Aellux does not require or bundle Bootstrap. Its attributes, classes, events, and adaptive utilities use Aellux-specific namespaces. Adaptive utilities may intentionally override Bootstrap utilities when their stylesheet is loaded after Bootstrap.</p>
-<p>See <a href="integrations/bootstrap.htm">Bootstrap integration</a> and the repository's <code>examples/tabs.htm</code> integration example.</p>
+<p>See <a href="integrations/bootstrap.htm">Bootstrap integration</a> and the browser validation scenario in <code>tests/browser/bootstrap-integration.html</code>.</p>
 <h2>Current Limits</h2>
 <ul>
 <li>The published browser versions are a raw ES2017 syntax baseline; a final multi-browser validation matrix is not yet available.</li>
 <li>Legacy support depends on the host providing fundamental DOM capabilities.</li>
-<li>Experimental components under <code>examples/components/</code> are not part of the Core compatibility contract.</li>
 <li>Applications must call <code>$ae.update(root)</code> after relevant dynamic DOM insertion and <code>$ae.unmount(root)</code> before removing mounted content when cleanup is required.</li>
 </ul>
 <p>See <a href="runtime/browser-support.htm">Browser support</a>, <a href="runtime/modern-legacy.htm">Modern and Legacy runtimes</a>, <a href="runtime/es5-support.htm">ES5 support level</a>, and <a href="extensions/legacy-variants.htm">Modern and Legacy Extension variants</a> for details.</p>

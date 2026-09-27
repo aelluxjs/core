@@ -42,6 +42,7 @@ Initial public beta of the Aellux Extension runtime.
 - Removed shared Observer dependencies and polyfills from Core and the Adaptive Extension.
 - Limited the npm package to `dist/`, `CHANGELOG.md`, `README.md`, `LICENSE`, and the required `package.json`.
 - Replaced the custom documentation renderer with Eta and MarkdownIt.
+- Removed the standalone example pages and experimental Extensions; browser validation scenarios remain under `tests/`.
 
 ### Fixed
 
@@ -60,4 +61,3 @@ Initial public beta of the Aellux Extension runtime.
 - Legacy output provides ES5 syntax and documented polyfills, not unrestricted support for every historical ES5 browser.
 - Fundamental DOM capabilities remain the responsibility of the host browser.
 - Bootstrap is supported as an integration target but is not bundled or required.
-- Experimental components under `examples/components/` are not part of the Core compatibility contract.

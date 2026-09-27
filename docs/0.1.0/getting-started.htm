@@ -359,7 +359,7 @@
 <pre><code class="language-sh">npm install
 npm run build
 </code></pre>
-<p>Core sources live in <code>src/</code>, build tooling in <code>scripts/</code>, experimental components in <code>examples/components/</code>, and generated browser files in <code>dist/</code>.</p>
+<p>Core sources live in <code>src/</code>, build tooling in <code>scripts/</code>, browser validation pages in <code>tests/browser/</code>, and generated browser files in <code>dist/</code>.</p>
 <h2>Full Mode</h2>
 <p>Full mode loads the orchestrator and the complete core Extension bundle:</p>
 <pre><code class="language-html">&lt;script src=&quot;./dist/aellux.js&quot;&gt;&lt;/script&gt;
@@ -380,7 +380,7 @@ npm run build
 <p>Use <code>aellux.min.js</code> to select the matching minified runtime and Extension files.</p>
 <h2>Distribution</h2>
 <p>The browser distribution consists of classic scripts isolated in IIFEs. It does not expose ESM named or default exports. The source file <code>src/aellux.full.esm.js</code> is only the bundler entry used to generate <code>aellux.full.js</code> and <code>aellux.full.min.js</code>.</p>
-<p>Serve the repository over HTTP to run <code>index.htm</code> and the examples.</p>
+<p>Serve the repository over HTTP to run the browser validation pages linked from <code>tests/index.htm</code>.</p>
         </div>
 
         <div id="doc-navlinks2" ajax-load="doc-navlinks2">

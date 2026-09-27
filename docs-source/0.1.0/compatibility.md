@@ -37,13 +37,12 @@ See [Authoring Third-Party Aellux Extensions](extensions/authoring.md) for lifec
 
 Aellux does not require or bundle Bootstrap. Its attributes, classes, events, and adaptive utilities use Aellux-specific namespaces. Adaptive utilities may intentionally override Bootstrap utilities when their stylesheet is loaded after Bootstrap.
 
-See [Bootstrap integration](integrations/bootstrap.md) and the repository's `examples/tabs.htm` integration example.
+See [Bootstrap integration](integrations/bootstrap.md) and the browser validation scenario in `tests/browser/bootstrap-integration.html`.
 
 ## Current Limits
 
 - The published browser versions are a raw ES2017 syntax baseline; a final multi-browser validation matrix is not yet available.
 - Legacy support depends on the host providing fundamental DOM capabilities.
-- Experimental components under `examples/components/` are not part of the Core compatibility contract.
 - Applications must call `$ae.update(root)` after relevant dynamic DOM insertion and `$ae.unmount(root)` before removing mounted content when cleanup is required.
 
 See [Browser support](runtime/browser-support.md), [Modern and Legacy runtimes](runtime/modern-legacy.md), [ES5 support level](runtime/es5-support.md), and [Modern and Legacy Extension variants](extensions/legacy-variants.md) for details.
