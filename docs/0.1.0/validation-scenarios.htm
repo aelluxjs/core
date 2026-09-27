@@ -354,13 +354,13 @@
 
         <div id="doc-content" style="min-height: calc(100vh - 200px);" class="js-toc-content" ajax-load="doc-content">
           <h1>Validation Scenarios</h1>
-<p>The pages in <code>tests/browser/</code> are focused browser scenarios for the <code>0.1.0-beta</code> release. Each page reports <code>PASSED</code> or <code>FAILED</code> in its document and can also be run automatically with Chrome or Edge.</p>
+<p>The pages in <code>tests/browser/</code> are focused browser scenarios for the <code>0.1.0-beta</code> release. Each page reports <code>PASSED</code> or <code>FAILED</code> in its document. Playwright runs them in Chromium, Firefox, and WebKit, and also checks dynamic mounting and extension CSS from outside the page.</p>
 <h2>Automated Run</h2>
-<p>Build the distribution before running the scenarios:</p>
-<pre><code class="language-sh">npm run build
+<p>Install the Playwright browsers and run the scenarios:</p>
+<pre><code class="language-sh">npx playwright install
 npm run test:browser
 </code></pre>
-<p>Set <code>AELLUX_TEST_BROWSER</code> to an executable path when Chrome or Edge is not installed in a standard location. The Bootstrap scenario loads Bootstrap from jsDelivr and therefore requires network access.</p>
+<p><code>test:browser</code> builds <code>dist/</code> before testing. Use <code>npm run test:browser -- --project=chromium</code> to run only Chromium. To use an installed Chrome or Edge instead of Playwright's Chromium, set <code>AELLUX_TEST_BROWSER_CHANNEL</code> to <code>chrome</code> or <code>msedge</code> and select the Chromium project. The Bootstrap scenario loads Bootstrap from jsDelivr and therefore requires network access.</p>
 <h2>Scenario Pages</h2>
 <table>
 <thead>
@@ -440,7 +440,7 @@ npm run test:browser
 </tr>
 </tbody>
 </table>
-<p>The shared <a href="../tests/browser/harness.js"><code>harness.js</code></a> waits for <code>AelluxReady</code>, applies a timeout, records assertion failures, and exposes the final status through <code>data-test-status</code> for the automated runner.</p>
+<p>The shared <a href="../tests/browser/harness.js"><code>harness.js</code></a> waits for <code>AelluxReady</code>, applies a timeout, records assertion failures, and exposes the final status through <code>data-test-status</code> for Playwright.</p>
         </div>
 
         <div id="doc-navlinks2" ajax-load="doc-navlinks2">

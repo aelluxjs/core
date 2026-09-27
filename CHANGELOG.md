@@ -2,10 +2,6 @@
 
 All notable changes to Aellux will be documented in this file.
 
-## [Unreleased]
-
-No changes recorded after `0.1.0-beta.1` yet.
-
 ## [0.1.0-beta.1] - Unreleased
 
 Initial public beta of the Aellux Extension runtime.
@@ -24,12 +20,14 @@ Initial public beta of the Aellux Extension runtime.
 - Explicit `builds` metadata for Modern-only, Legacy-only, and dual-build Extensions, including declarative `data-ae-builds` support.
 - ES5-compatible boot and fallback paths with an ES2017+ Modern orchestrator and Extensions.
 - Build-generated ES5-syntax Legacy variants for the orchestrator and core Extensions using the `.legacy.js` convention.
-- Core polyfills bundled once with the Legacy orchestrator for language APIs, observers, events, animation frames and networking.
+- Core polyfills bundled once with the Legacy orchestrator for language APIs, events, animation frames, and networking.
 - Legacy `basic` and `full` distributions matching the Modern runtime mode selection.
 - Normal, minified, source map, Modern, Legacy, individual Extension, orchestrator, and full-bundle distribution artifacts.
 - Third-party Extension scaffold, compatibility contract, Legacy reference builder, and documented Core polyfill boundary.
 - Browser validation suite covering 17 Modern, Legacy, Bootstrap, loading, failure-isolation, and lifecycle scenarios.
-- Apache License 2.0 and beta documentation organized under `docs/`.
+- Playwright automation for the browser scenarios across Chromium, Firefox, and WebKit, including dynamic mounting and CSS checks.
+- Apache License 2.0, versioned documentation sources, and generated static documentation under `docs/`.
+- Browser support baseline for the Modern and Legacy distributions.
 
 ### Changed
 
@@ -41,6 +39,9 @@ Initial public beta of the Aellux Extension runtime.
 - Made the Adaptive Extension the source of its runtime and generated CSS parameters.
 - Renamed the Adaptive `wide` and `ultrawide` states and utility aliases to `xl` and `xxl`.
 - Organized browser validation pages and their runner under `tests/browser/`.
+- Removed shared Observer dependencies and polyfills from Core and the Adaptive Extension.
+- Limited the npm package to `dist/`, `CHANGELOG.md`, `README.md`, `LICENSE`, and the required `package.json`.
+- Replaced the custom documentation renderer with Eta and MarkdownIt.
 
 ### Fixed
 
@@ -51,6 +52,7 @@ Initial public beta of the Aellux Extension runtime.
 - Preserved custom stylesheet URLs declared through `data-ae-load-style` and handled boolean `loadStyle: true` correctly.
 - Cleared asset load handlers and pending layout work during teardown.
 - Ensured asynchronous content replacement unmounts existing Aellux behavior before replacing DOM nodes.
+- Made generated documentation URLs independent of the checkout directory name.
 
 ### Known Limitations
 

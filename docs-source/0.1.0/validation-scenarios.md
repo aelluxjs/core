@@ -1,17 +1,17 @@
 # Validation Scenarios
 
-The pages in `tests/browser/` are focused browser scenarios for the `0.1.0-beta` release. Each page reports `PASSED` or `FAILED` in its document and can also be run automatically with Chrome or Edge.
+The pages in `tests/browser/` are focused browser scenarios for the `0.1.0-beta` release. Each page reports `PASSED` or `FAILED` in its document. Playwright runs them in Chromium, Firefox, and WebKit, and also checks dynamic mounting and extension CSS from outside the page.
 
 ## Automated Run
 
-Build the distribution before running the scenarios:
+Install the Playwright browsers and run the scenarios:
 
 ```sh
-npm run build
+npx playwright install
 npm run test:browser
 ```
 
-Set `AELLUX_TEST_BROWSER` to an executable path when Chrome or Edge is not installed in a standard location. The Bootstrap scenario loads Bootstrap from jsDelivr and therefore requires network access.
+`test:browser` builds `dist/` before testing. Use `npm run test:browser -- --project=chromium` to run only Chromium. To use an installed Chrome or Edge instead of Playwright's Chromium, set `AELLUX_TEST_BROWSER_CHANNEL` to `chrome` or `msedge` and select the Chromium project. The Bootstrap scenario loads Bootstrap from jsDelivr and therefore requires network access.
 
 ## Scenario Pages
 
@@ -35,4 +35,4 @@ Set `AELLUX_TEST_BROWSER` to an executable path when Chrome or Edge is not insta
 | Modern and Legacy Extension builds | [`extension-modern-legacy.html`](../tests/browser/extension-modern-legacy.html) |
 | Isolated Extension failure | [`extension-failure-isolation.html`](../tests/browser/extension-failure-isolation.html) |
 
-The shared [`harness.js`](../tests/browser/harness.js) waits for `AelluxReady`, applies a timeout, records assertion failures, and exposes the final status through `data-test-status` for the automated runner.
+The shared [`harness.js`](../tests/browser/harness.js) waits for `AelluxReady`, applies a timeout, records assertion failures, and exposes the final status through `data-test-status` for Playwright.

@@ -68,9 +68,12 @@ Node.js 20 or newer is required for build tooling:
 
 ```sh
 npm install
+npx playwright install
 npm run build
 npm run test:browser
 ```
+
+`test:browser` rebuilds the distribution and runs the browser scenarios with Playwright in Chromium, Firefox, and WebKit. Use `npm run test:browser -- --project=chromium` to run one browser.
 
 Generated browser files are written to `dist/`. The distribution uses classic scripts isolated in IIFEs; it does not expose ESM named or default exports.
 
