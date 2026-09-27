@@ -71,7 +71,9 @@ async function generateDocs({
       if (!entry.isFile() || path.extname(entry.name).toLowerCase() !== `.md`) continue;
 
       const sourceFilePath = relativePath;
-      const targetHTML = relativePath.replace(/\.md$/i, `.htm`);
+      const targetHTML = entry.name.toLowerCase() === `readme.md`
+        ? path.posix.join(relativeDirectory, `index.htm`)
+        : relativePath.replace(/\.md$/i, `.htm`);
       const generated = await generate({ docsPath, baseURL, title, version, sourceFilePath });
       docs.push({ ...generated, targetPath: `/${version}/${targetHTML}` });
     }

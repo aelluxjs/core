@@ -9,7 +9,7 @@
   <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000000">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
-  @include('templates/docs/seo-head.e.htm')
+  <%~ include("./seo-head.e.htm") %>
 
   <link rel="icon" type="image/svg+xml" sizes="any" href="/favicon/favicon.svg">
   <link rel="icon" type="image/icon" sizes="any" href="/favicon/favicon.ico">
@@ -30,7 +30,7 @@
     href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.13.1/font/bootstrap-icons.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/github-dark.min.css">
 
-  <link rel="stylesheet" href="{{outputPath}}/css/inline-style.css">
+  <link rel="stylesheet" href="<%= it.outputPath %>/css/inline-style.css">
 
   <script>
     function closeNavbar(bsToggler) {
@@ -79,7 +79,7 @@
 
             <div class="d-flex flex-row gap-2 justify-content-between py-2">
 
-              @include("templates/docs/versions-menu.e.htm")
+              <%~ include("./versions-menu.e.htm") %>
 
               <div class="btn-group border rounded-pill rounded overflow-hidden" style="gap:1px;" role="group"
                 aria-label="Basic example">
@@ -113,56 +113,56 @@
 
             </div>
 
-            @foreach(item of menuTree)
+            <% for (const item of it.menuTree) { %>
             <li class="nav-item small-md fw-bold rounded-pill ps-md-1 bg-light-adaptive" style="flex:0">
               <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" data-bs-continue=true
-                data-bs-toggle="collapse" data-bs-target="#children-{{item.slug}}">
-                {{item.label}}
-                @if(item.children !== undefined)<span class="chevron"><i
-                    class="bi bi-chevron-right small"></i></span>@endif
+                data-bs-toggle="collapse" data-bs-target="#children-<%= item.slug %>">
+                <%= item.label %>
+                <% if (item.children !== undefined) { %><span class="chevron"><i
+                    class="bi bi-chevron-right small"></i></span><% } %>
               </a>
             </li>
 
-            @if(item.children !== undefined && item.children.length)
-            <div id="children-{{item.slug}}" class="collapse border-start ms-2 @if(item.active) show @endif"
+            <% if (item.children !== undefined && item.children.length) { %>
+            <div id="children-<%= item.slug %>" class="collapse border-start ms-2 <% if (item.active) { %> show <% } %>"
               data-bs-parent="#navbarSupportedContent">
               <div class="ps-2 gap-1 d-flex flex-column ">
-                @foreach(child of item.children)
-                @if(child.children !== undefined && child.children.length)
+                <% for (const child of item.children) { %>
+                <% if (child.children !== undefined && child.children.length) { %>
 
                 <li class="nav-item small-md fw-bold rounded-pill ps-md-1 bg-light-adaptive" style="flex:0">
                   <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" data-bs-continue=true
-                    data-bs-toggle="collapse" data-bs-target="#children2-{{child.slug}}">
-                    {{child.label}}
-                    @if(child.children !== undefined)<span class="chevron"><i
-                        class="bi bi-chevron-right small"></i></span>@endif
+                    data-bs-toggle="collapse" data-bs-target="#children2-<%= child.slug %>">
+                    <%= child.label %>
+                    <% if (child.children !== undefined) { %><span class="chevron"><i
+                        class="bi bi-chevron-right small"></i></span><% } %>
                   </a>
                 </li>
 
-                <div id="children2-{{child.slug}}" class="collapse border-start ms-2 @if(child.active) show @endif"
-                  data-bs-parent="#children-{{item.slug}}">
+                <div id="children2-<%= child.slug %>" class="collapse border-start ms-2 <% if (child.active) { %> show <% } %>"
+                  data-bs-parent="#children-<%= item.slug %>">
                   <div class="ps-2 gap-1 d-flex flex-column ">
-                    @foreach(child2 of child.children)
-                    <li class="nav-item small-md rounded-pill ps-md-1 @if(child2.active) active @endif" style="flex:0">
-                      <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="{{child2.href}}">
-                        {{child2.label}}
+                    <% for (const child2 of child.children) { %>
+                    <li class="nav-item small-md rounded-pill ps-md-1 <% if (child2.active) { %> active <% } %>" style="flex:0">
+                      <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="<%= child2.href %>">
+                        <%= child2.label %>
                       </a>
                     </li>
-                    @endforeach
+                    <% } %>
                   </div>
                 </div>
-                @else
-                <li class="nav-item small-md rounded-pill ps-md-1 @if(child.active) active @endif" style="flex:0">
-                  <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="{{child.href}}">
-                    {{child.label}}
+                <% } else { %>
+                <li class="nav-item small-md rounded-pill ps-md-1 <% if (child.active) { %> active <% } %>" style="flex:0">
+                  <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="<%= child.href %>">
+                    <%= child.label %>
                   </a>
                 </li>
-                @endif
-                @endforeach
+                <% } %>
+                <% } %>
               </div>
             </div>
-            @endif
-            @endforeach
+            <% } %>
+            <% } %>
 
           </ul>
         </div>
@@ -223,33 +223,33 @@
           aria-label="breadcrumb" ajax-load="doc-breadcrumb">
           <ol class="breadcrumb flex-nowrap">
 
-            @foreach(item of breadcrumb)
-            @if(item.href)
+            <% for (const item of it.breadcrumb) { %>
+            <% if (item.href) { %>
             <li class="breadcrumb-item text-capitalize text-nowrap flex-shrink-0">
-              <a href="{{item.href}}">
-                {{item.label}}
+              <a href="<%= item.href %>">
+                <%= item.label %>
               </a>
             </li>
-            @else
+            <% } else { %>
             <li class="breadcrumb-item text-capitalize text-nowrap flex-shrink-0">
-              {{item.label}}
+              <%= item.label %>
             </li>
-            @endif
-            @endforeach
+            <% } %>
+            <% } %>
 
           </ol>
         </nav>
 
         <div id="doc-navlinks" ajax-load="doc-navlinks">
-          @include('templates/docs/navlinks.e.htm')
+          <%~ include("./navlinks.e.htm") %>
         </div>
 
         <div id="doc-content" style="min-height: calc(100vh - 200px);" class="js-toc-content" ajax-load="doc-content">
-          @markdown(markdownPath)
+          <%~ it.contentHtml %>
         </div>
 
         <div id="doc-navlinks2" ajax-load="doc-navlinks2">
-          @include('templates/docs/navlinks.e.htm')
+          <%~ include("./navlinks.e.htm") %>
         </div>
 
         <div class="section bg-transparent" style="margin: 50vh 0;">
@@ -272,7 +272,7 @@
   </div>
 
   <!-- SYNC SCRIPTS -->
-  <script src="{{outputPath}}/js/promise-value.js?t=1"></script>
+  <script src="<%= it.outputPath %>/js/promise-value.js?t=1"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/languages/json.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/languages/bash.min.js"></script>
@@ -281,8 +281,8 @@
   <!-- SYNC SCRIPTS -->
 
   <!-- ASYNC SCRIPTS -->
-  <script src="{{outputPath}}/js/bootstrap-ajax-loader.js?t=1" async></script>
-  <script src="{{outputPath}}/js/toc-init.js?t=1" async></script>
+  <script src="<%= it.outputPath %>/js/bootstrap-ajax-loader.js?t=1" async></script>
+  <script src="<%= it.outputPath %>/js/toc-init.js?t=1" async></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.8/js/bootstrap.bundle.min.js" defer async></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.32.2/tocbot.min.js" defer async></script>
 
