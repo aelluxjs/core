@@ -2,7 +2,13 @@
 
 All notable changes to aellux.js will be documented in this file.
 
-## [0.1.0-beta.1] - Unreleased
+## [0.1.0-beta.2] - Unreleased
+
+### Changed
+
+- Bumped the package prerelease version to `0.1.0-beta.2`.
+
+## [0.1.0-beta.1]
 
 Initial public beta of the aellux.js Extension runtime.
 
