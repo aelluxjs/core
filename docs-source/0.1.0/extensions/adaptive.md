@@ -25,7 +25,7 @@ Cumulative size classes:
 - `ae--fits-xl`
 - `ae--fits-xxl`
 
-The Extension dispatches `AelluxAdaptiveUpdate` after applying current state.
+The Extension dispatches `AelluxJsAdaptiveUpdate` after applying current state.
 
 ## Styles
 

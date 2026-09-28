@@ -1,15 +1,15 @@
 # Changelog
 
-All notable changes to Aellux will be documented in this file.
+All notable changes to aellux.js will be documented in this file.
 
 ## [0.1.0-beta.1] - Unreleased
 
-Initial public beta of the Aellux Extension runtime.
+Initial public beta of the aellux.js Extension runtime.
 
 ### Added
 
-- Aellux boot script with `basic` and `full` runtime modes.
-- Programmatic Extension registration through `$ae.ext()` and declarative loading through `link[rel="aellux-ext"]`.
+- aellux.js boot script with `basic` and `full` runtime modes.
+- Programmatic Extension registration through `$ae.ext()` and declarative loading through `link[rel="aelluxjs-ext"]`.
 - Eager and selector-driven lazy Extension loading with duplicate-load protection.
 - Extension lifecycle APIs for idempotent `init`, `mount`, `unmount`, isolated destruction, and global Core destruction.
 - Optional Extension styles derived from the script URL or loaded from a custom URL.
@@ -31,10 +31,13 @@ Initial public beta of the Aellux Extension runtime.
 
 ### Changed
 
-- Renamed UX modules to Aellux Extensions and the public API to `ext` terminology.
+- Renamed the global browser object to `AelluxJs` and the event prefix to `AelluxJs`; `$ae` remains the short alias.
+- Aligned internal helpers, persistence keys, error names, browser validations, and displayed brand text with `AelluxJs` and `aellux.js`.
+- Renamed the browser history marker to `aelluxJsState` and the declarative Extension relation to `aelluxjs-ext`.
+- Renamed UX modules to aellux.js Extensions and the public API to `ext` terminology.
 - Standardized Extension element controllers around `mount` and `unmount`.
 - Renamed the Extension selector/controller map from `mountDOM` to `mountMap` across the runtime, Extensions, scaffold, documentation, and tests.
-- Moved extension-specific defaults out of the Aellux boot script.
+- Moved extension-specific defaults out of the aellux.js boot script.
 - Kept the boot body ES5-compatible and moved reusable boot, asset-loading, mounting, diagnostics, persistence, and layout behavior into build-integrated helpers.
 - Made the Adaptive Extension the source of its runtime and generated CSS parameters.
 - Renamed the Adaptive `wide` and `ultrawide` states and utility aliases to `xl` and `xxl`.
@@ -46,13 +49,13 @@ Initial public beta of the Aellux Extension runtime.
 
 ### Fixed
 
-- Normalized generated Aellux event names, including names containing hyphens.
+- Normalized generated aellux.js event names, including names containing hyphens.
 - Isolated extension initialization failures so they do not prevent orchestrator readiness.
 - Prevented duplicate or concurrent Extension loading and removed loaded Extensions from the lazy index.
 - Made repeated element updates, unmounts, Extension destruction, and global destruction release resources predictably.
 - Preserved custom stylesheet URLs declared through `data-ae-load-style` and handled boolean `loadStyle: true` correctly.
 - Cleared asset load handlers and pending layout work during teardown.
-- Ensured asynchronous content replacement unmounts existing Aellux behavior before replacing DOM nodes.
+- Ensured asynchronous content replacement unmounts existing aellux.js behavior before replacing DOM nodes.
 - Made generated documentation URLs independent of the checkout directory name.
 
 ### Known Limitations

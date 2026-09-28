@@ -1,6 +1,6 @@
 # Modern and Legacy Runtimes
 
-The Aellux boot script is responsible for capability detection and runtime selection.
+The aellux.js boot script is responsible for capability detection and runtime selection.
 
 ## Modern Runtime
 
@@ -24,7 +24,7 @@ This provides the intended compatibility layer, but it is not an unrestricted gu
 
 ## Selection Rules
 
-The boot script checks the capabilities required by the orchestrator before loading it. Missing capabilities are recorded in `Aellux.notAvailable`.
+The boot script checks the capabilities required by the orchestrator before loading it. Missing capabilities are recorded in `AelluxJs.notAvailable`.
 
 Force Legacy through initialization options or the development query parameter:
 

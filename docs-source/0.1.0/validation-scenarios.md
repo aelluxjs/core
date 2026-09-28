@@ -11,7 +11,7 @@ npx playwright install
 npm run test:browser
 ```
 
-`test:browser` builds `dist/` before testing. Use `npm run test:browser -- --project=chromium` to run only Chromium. To use an installed Chrome or Edge instead of Playwright's Chromium, set `AELLUX_TEST_BROWSER_CHANNEL` to `chrome` or `msedge` and select the Chromium project. The Bootstrap scenario loads Bootstrap from jsDelivr and therefore requires network access.
+`test:browser` builds `dist/` before testing. Use `npm run test:browser -- --project=chromium` to run only Chromium. To use an installed Chrome or Edge instead of Playwright's Chromium, set `AELLUXJS_TEST_BROWSER_CHANNEL` to `chrome` or `msedge` and select the Chromium project. The Bootstrap scenario loads Bootstrap from jsDelivr and therefore requires network access.
 
 ## Scenario Pages
 
@@ -35,4 +35,4 @@ npm run test:browser
 | Modern and Legacy Extension builds | [`extension-modern-legacy.html`](../tests/browser/extension-modern-legacy.html) |
 | Isolated Extension failure | [`extension-failure-isolation.html`](../tests/browser/extension-failure-isolation.html) |
 
-The shared [`harness.js`](../tests/browser/harness.js) waits for `AelluxReady`, applies a timeout, records assertion failures, and exposes the final status through `data-test-status` for Playwright.
+The shared [`harness.js`](../tests/browser/harness.js) waits for `AelluxJsReady`, applies a timeout, records assertion failures, and exposes the final status through `data-test-status` for Playwright.

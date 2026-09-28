@@ -2,7 +2,7 @@
 <html lang="pt-BR" data-test-status="pending">
 <head>
   <meta charset="UTF-8">
-  <title>Aellux validation: lifecycle initialization idempotence</title>
+  <title>aellux.js validation: lifecycle initialization idempotence</title>
   <script src="./harness.js"></script>
   <script src="../../dist/aellux.js"></script>
   <script>
@@ -15,8 +15,8 @@
       destroy: function () {}
     });
 
-    Aellux.on("Ready", function () { readyCount++; });
-    AelluxValidation.run(async function (assert) {
+    AelluxJs.on("Ready", function () { readyCount++; });
+    AelluxJsValidation.run(async function (assert) {
       var first = await $ae.wait("lifecycle-init-probe");
       var second = await $ae.wait("lifecycle-init-probe");
 

@@ -1,10 +1,10 @@
-# Aellux
+# aellux.js
 
-Aellux is a lightweight extension-management library for modular UX behaviors in browser interfaces. It complements Bootstrap and other visual systems with declarative HTML attributes, adaptive CSS utilities, and independently loadable JavaScript Extensions.
+aellux.js is a lightweight extension-management library for modular UX behaviors in browser interfaces. It complements Bootstrap and other visual systems with declarative HTML attributes, adaptive CSS utilities, and independently loadable JavaScript Extensions.
 
-An **EXT (Aellux Extension)** owns one focused UX responsibility and exposes its API through the global `Aellux` object and its `$ae` alias. The Aellux boot script selects the runtime, while the orchestrator loads Extensions and coordinates `init`, `mount`, `unmount`, and `destroy`.
+An **EXT (aellux.js Extension)** owns one focused UX responsibility and exposes its API through the global `AelluxJs` object and its `$ae` alias. The aellux.js boot script selects the runtime, while the orchestrator loads Extensions and coordinates `init`, `mount`, `unmount`, and `destroy`.
 
-Aellux does not require or bundle Bootstrap. Its `data-ae-*`, `ae--*`, and `*-ux-*` namespaces are designed to coexist with existing applications and frameworks.
+aellux.js does not require or bundle Bootstrap. Its `data-ae-*`, `ae--*`, and `*-ux-*` namespaces are designed to coexist with existing applications and frameworks.
 
 ## Quick Start
 
@@ -42,7 +42,7 @@ See [Getting Started](../docs/getting-started.md) for build instructions, runtim
 - [ES5 support level](../docs/runtime/es5-support.md)
 - [Visual mounting states](../docs/runtime/visual-mounting.md)
 - [Bootstrap integration](../docs/integrations/bootstrap.md)
-- [Registering Aellux Extensions](../docs/extensions/registration.md)
+- [Registering aellux.js Extensions](../docs/extensions/registration.md)
 - [Authoring third-party Extensions](../docs/extensions/authoring.md)
 - [Declarative Extension loading](../docs/extensions/declarative-loading.md)
 - [Lazy loading](../docs/extensions/lazy-loading.md)
@@ -79,10 +79,14 @@ Generated browser files are written to `dist/`. The distribution uses classic sc
 
 ## Project Status
 
-Aellux `0.1.0-beta.1` establishes the initial runtime, Extension contract, Modern/Legacy distributions, and repeatable browser validation scenarios. The planned `0.1.0-beta.2` cycle focuses on CI, multi-browser coverage, real Legacy validation, security, accessibility, and commercial distribution readiness.
+aellux.js `0.1.0-beta.1` establishes the initial runtime, Extension contract, Modern/Legacy distributions, and repeatable browser validation scenarios. The planned `0.1.0-beta.2` cycle focuses on CI, multi-browser coverage, real Legacy validation, security, accessibility, and commercial distribution readiness.
 
 Track the next cycle in the [0.1.0 Beta 2 milestone](../docs/milestones/0.1.0-beta.2.md), review the [Beta 1 milestone](../docs/milestones/0.1.0-beta.1.md), and see delivered changes in the [changelog](../CHANGELOG.md).
 
 ## License
 
-Aellux is licensed under the [Apache License 2.0](LICENSE). Third-party dependencies remain subject to their own licenses.
+aellux.js is licensed under the [Apache License 2.0](LICENSE). Third-party dependencies remain subject to their own licenses.
+
+## Author
+
+[Pec Rodrigues](https://github.com/pecrodrigues)

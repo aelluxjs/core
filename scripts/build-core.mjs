@@ -1,4 +1,4 @@
-/*! Aellux | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+/*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
 
 import { build } from "esbuild";
 import { transformAsync } from "@babel/core";
@@ -73,11 +73,11 @@ const bootstrapEvaluationBuild = await build({
   legalComments: "none"
 });
 runInContext(bootstrapEvaluationBuild.outputFiles[0].text, bootstrapContext);
-bootstrapContext.Aellux.ext("adaptive");
+bootstrapContext.AelluxJs.ext("adaptive");
 runInContext(await readFile(adaptiveExtensionPath, "utf8"), bootstrapContext);
 await writeFile(
   join(outputDirectory, "aellux.ext.adaptive.css"),
-  generateAdaptiveCSS(bootstrapContext.Aellux),
+  generateAdaptiveCSS(bootstrapContext.AelluxJs),
   "utf8"
 );
 generatedFiles.add("aellux.ext.adaptive.css");
@@ -244,4 +244,4 @@ await writeFile(join(outputDirectory, "README.md"), distributionReadme, "utf8");
 await copyFile(join(projectRoot, "LICENSE"), join(outputDirectory, "LICENSE"));
 const generatedJavaScriptFiles = Array.from(generatedFiles)
   .filter(filename => filename.endsWith(".js")).length;
-console.log(`Build complete: ${generatedJavaScriptFiles} JavaScript files, source maps, and Aellux Extension CSS in dist/.`);
+console.log(`Build complete: ${generatedJavaScriptFiles} JavaScript files, source maps, and aellux.js Extension CSS in dist/.`);

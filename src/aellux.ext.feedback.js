@@ -1,10 +1,10 @@
-/*! Aellux | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+/*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
 
 (function () {
   "use strict";
 
   const extensionName = "feedback";
-  Aellux.extRegister(extensionName, {
+  AelluxJs.extRegister(extensionName, {
     init, destroy,
     warning, error, success, announce,
     busy, validate, progress,
@@ -41,7 +41,7 @@
   function send({ type, message, value, target }) {
     target = target || document;
     const feedback = { type, message, value, target };
-    Aellux.dispatchFrom(target, "Feedback", { detail: feedback });
+    AelluxJs.dispatchFrom(target, "Feedback", { detail: feedback });
     if (handlers.has(type)) handlers.get(type).forEach(call => call(feedback));
     if (handlers.has("*")) handlers.get("*").forEach(call => call(feedback));
   }

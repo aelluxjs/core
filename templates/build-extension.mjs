@@ -1,4 +1,4 @@
-/*! Aellux | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+/*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
 
 import { transformAsync } from "@babel/core";
 import presetEnv from "@babel/preset-env";

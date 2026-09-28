@@ -1,6 +1,6 @@
-/*! Aellux | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+/*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
 
-// Required compatibility: ES5. This helper may be bundled into the Aellux boot script and must not
+// Required compatibility: ES5. This helper may be bundled into the aellux.js boot script and must not
 // introduce runtime syntax or APIs that prevent the Legacy fallback path from being reached.
 
 export function assetLoadHelper(asset, options) {

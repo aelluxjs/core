@@ -1,6 +1,6 @@
-# Aellux Documentation
+# aellux.js Documentation
 
-This directory contains the detailed documentation for the Aellux `0.1.0-beta` line.
+This directory contains the detailed documentation for the aellux.js `0.1.0-beta` line.
 
 ## Getting Started
 
@@ -17,11 +17,11 @@ This directory contains the detailed documentation for the Aellux `0.1.0-beta` l
 - [Diagnostics](runtime/diagnostics.md)
 - [Bootstrap integration](integrations/bootstrap.md)
 
-## Aellux Extensions
+## aellux.js Extensions
 
 - [Authoring third-party Extensions](extensions/authoring.md)
 - [Registering Extensions with `$ae.ext(...)`](extensions/registration.md)
-- [Declarative loading with `link[rel="aellux-ext"]`](extensions/declarative-loading.md)
+- [Declarative loading with `link[rel="aelluxjs-ext"]`](extensions/declarative-loading.md)
 - [Lazy loading](extensions/lazy-loading.md)
 - [Optional Extension styles](extensions/styles.md)
 - [Modern and Legacy Extension variants](extensions/legacy-variants.md)
@@ -30,7 +30,7 @@ This directory contains the detailed documentation for the Aellux `0.1.0-beta` l
 ## Project Documents
 
 - [Browser validation scenarios](validation-scenarios.md)
-- [Milestone: Aellux 0.1.0 Beta 2](milestones/0.1.0-beta.2.md)
-- [Milestone: Aellux 0.1.0 Beta 1](milestones/0.1.0-beta.1.md)
+- [Milestone: aellux.js 0.1.0 Beta 2](milestones/0.1.0-beta.2.md)
+- [Milestone: aellux.js 0.1.0 Beta 1](milestones/0.1.0-beta.1.md)
 - [Extension scaffold](../templates/README.md)
 - [Changelog](../CHANGELOG.md)

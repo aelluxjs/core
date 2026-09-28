@@ -1,20 +1,20 @@
-# Authoring Third-Party Aellux Extensions
+# Authoring Third-Party aellux.js Extensions
 
-An Aellux Extension is a classic browser script that registers one focused behavior through `Aellux.extRegister()`. Third-party Extensions follow the same naming, lifecycle, compatibility, and cleanup rules as Core Extensions.
+An aellux.js Extension is a classic browser script that registers one focused behavior through `AelluxJs.extRegister()`. Third-party Extensions follow the same naming, lifecycle, compatibility, and cleanup rules as Core Extensions.
 
 Start from [`templates/aellux.ext.template.js`](../../templates/aellux.ext.template.js). The scaffold contains the required structure and a compatibility summary.
 
 ## Required Contract
 
 1. Name the source and Modern artifact `aellux.ext.<name>.js`.
-2. Use the same kebab-case `<name>` as `extensionName` in `Aellux.extRegister(extensionName, api)`.
+2. Use the same kebab-case `<name>` as `extensionName` in `AelluxJs.extRegister(extensionName, api)`.
 3. Publish a classic script contained by an IIFE. Distribution files must not require ESM imports or exports.
 4. Keep `init()` synchronous and idempotent.
 5. Make every `mount` idempotent and release its listeners, observers, timers, and references in the corresponding `unmount`.
 6. Release Extension-wide resources in `destroy()`.
 7. Keep the public API and lifecycle behavior equivalent across Modern and Legacy variants.
 
-The runtime exposes a kebab-case name as camelCase: `tab-group` becomes `Aellux.tabGroup`.
+The runtime exposes a kebab-case name as camelCase: `tab-group` becomes `AelluxJs.tabGroup`.
 
 ## DOM Mount Contract
 
@@ -28,7 +28,7 @@ mountMap.set("[data-ae-example]", {
   unmount: unmountElement
 });
 
-Aellux.extRegister(extensionName, { init, destroy, mountMap });
+AelluxJs.extRegister(extensionName, { init, destroy, mountMap });
 ```
 
 The orchestrator consumes this map during `$ae.update(root)` and `$ae.unmount(root)`. `mount` must be safe against repeated updates, and `unmount` must reverse the element-level resources created by `mount`.
@@ -49,12 +49,12 @@ $ae.ext("example", { builds: ["modern", "legacy"] });
 The declarative equivalent is:
 
 ```html
-<link rel="aellux-ext"
+<link rel="aelluxjs-ext"
       href="./extensions/aellux.ext.example.js"
       data-ae-builds="modern legacy">
 ```
 
-Custom URLs must retain the `aellux.ext.<name>.js` logical filename. Aellux derives `.legacy.js` and `.min.js` variants from that URL.
+Custom URLs must retain the `aellux.ext.<name>.js` logical filename. aellux.js derives `.legacy.js` and `.min.js` variants from that URL.
 
 ## Modern and Legacy Artifacts
 
@@ -97,7 +97,7 @@ Transpilation only changes syntax. It does not create missing browser APIs, so a
 
 Use `loadStyle: true` when the stylesheet follows the Extension filename, or pass a stylesheet URL. Modern and Legacy JavaScript variants share the same CSS unless the Extension implements an explicit alternative resource strategy.
 
-Do not leave the Extension partially initialized when an optional resource fails. Report failures through `Aellux.diagnostics` and preserve usable fallback behavior whenever possible.
+Do not leave the Extension partially initialized when an optional resource fails. Report failures through `AelluxJs.diagnostics` and preserve usable fallback behavior whenever possible.
 
 ## Publication Checklist
 

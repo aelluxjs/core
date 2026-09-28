@@ -23,7 +23,7 @@
 <meta property="og:image:height" content="192" />
 <meta property="og:description"
   content="Open-source multi-tenant SaaS runtime with tenant process isolation and isolated app workers for smaller blast radius and safer white-label environments." />
-<meta property="og:site_name" content="Aellux Docs" />
+<meta property="og:site_name" content="aellux.js Docs" />
 
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Extension Authoring | 0.1.0 | aellux.js">
@@ -160,7 +160,7 @@
               <div class="ps-2 gap-1 d-flex flex-column ">
                                                 <li class="nav-item small-md rounded-pill ps-md-1 " style="flex:0">
                   <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/index.htm">
-                    Aellux Docs                  </a>
+                    aellux.js Docs                  </a>
                 </li>
                                                                 <li class="nav-item small-md rounded-pill ps-md-1 " style="flex:0">
                   <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/getting-started.htm">
@@ -357,20 +357,20 @@
   </div>        </div>
 
         <div id="doc-content" style="min-height: calc(100vh - 200px);" class="js-toc-content" ajax-load="doc-content">
-          <h1>Authoring Third-Party Aellux Extensions</h1>
-<p>An Aellux Extension is a classic browser script that registers one focused behavior through <code>Aellux.extRegister()</code>. Third-party Extensions follow the same naming, lifecycle, compatibility, and cleanup rules as Core Extensions.</p>
+          <h1>Authoring Third-Party aellux.js Extensions</h1>
+<p>An aellux.js Extension is a classic browser script that registers one focused behavior through <code>AelluxJs.extRegister()</code>. Third-party Extensions follow the same naming, lifecycle, compatibility, and cleanup rules as Core Extensions.</p>
 <p>Start from <a href="../../templates/aellux.ext.template.js"><code>templates/aellux.ext.template.js</code></a>. The scaffold contains the required structure and a compatibility summary.</p>
 <h2>Required Contract</h2>
 <ol>
 <li>Name the source and Modern artifact <code>aellux.ext.&lt;name&gt;.js</code>.</li>
-<li>Use the same kebab-case <code>&lt;name&gt;</code> as <code>extensionName</code> in <code>Aellux.extRegister(extensionName, api)</code>.</li>
+<li>Use the same kebab-case <code>&lt;name&gt;</code> as <code>extensionName</code> in <code>AelluxJs.extRegister(extensionName, api)</code>.</li>
 <li>Publish a classic script contained by an IIFE. Distribution files must not require ESM imports or exports.</li>
 <li>Keep <code>init()</code> synchronous and idempotent.</li>
 <li>Make every <code>mount</code> idempotent and release its listeners, observers, timers, and references in the corresponding <code>unmount</code>.</li>
 <li>Release Extension-wide resources in <code>destroy()</code>.</li>
 <li>Keep the public API and lifecycle behavior equivalent across Modern and Legacy variants.</li>
 </ol>
-<p>The runtime exposes a kebab-case name as camelCase: <code>tab-group</code> becomes <code>Aellux.tabGroup</code>.</p>
+<p>The runtime exposes a kebab-case name as camelCase: <code>tab-group</code> becomes <code>AelluxJs.tabGroup</code>.</p>
 <h2>DOM Mount Contract</h2>
 <p>Extensions with element behavior expose a <code>mountMap</code>. Each key is a CSS selector and each value provides the matching <code>mount</code> and <code>unmount</code> handlers:</p>
 <pre><code class="language-js">const mountMap = new Map();
@@ -380,7 +380,7 @@ mountMap.set(&quot;[data-ae-example]&quot;, {
   unmount: unmountElement
 });
 
-Aellux.extRegister(extensionName, { init, destroy, mountMap });
+AelluxJs.extRegister(extensionName, { init, destroy, mountMap });
 </code></pre>
 <p>The orchestrator consumes this map during <code>$ae.update(root)</code> and <code>$ae.unmount(root)</code>. <code>mount</code> must be safe against repeated updates, and <code>unmount</code> must reverse the element-level resources created by <code>mount</code>.</p>
 <h2>Declaring Available Builds</h2>
@@ -394,11 +394,11 @@ Aellux.extRegister(extensionName, { init, destroy, mountMap });
 <li>Omitting <code>builds</code> defaults to both variants and therefore promises that both files are published.</li>
 </ul>
 <p>The declarative equivalent is:</p>
-<pre><code class="language-html">&lt;link rel=&quot;aellux-ext&quot;
+<pre><code class="language-html">&lt;link rel=&quot;aelluxjs-ext&quot;
       href=&quot;./extensions/aellux.ext.example.js&quot;
       data-ae-builds=&quot;modern legacy&quot;&gt;
 </code></pre>
-<p>Custom URLs must retain the <code>aellux.ext.&lt;name&gt;.js</code> logical filename. Aellux derives <code>.legacy.js</code> and <code>.min.js</code> variants from that URL.</p>
+<p>Custom URLs must retain the <code>aellux.ext.&lt;name&gt;.js</code> logical filename. aellux.js derives <code>.legacy.js</code> and <code>.min.js</code> variants from that URL.</p>
 <h2>Modern and Legacy Artifacts</h2>
 <p>The Modern source baseline is ES2017+. Legacy support requires ES5 syntax; changing only the filename is not sufficient.</p>
 <p>Expected files for an Extension supporting both targets are:</p>
@@ -426,7 +426,7 @@ node build-extension.mjs ./src/aellux.ext.example.js ./dist
 <p>Transpilation only changes syntax. It does not create missing browser APIs, so an Extension is not Legacy-compatible until both its syntax and runtime dependencies are covered.</p>
 <h2>Styles and Resources</h2>
 <p>Use <code>loadStyle: true</code> when the stylesheet follows the Extension filename, or pass a stylesheet URL. Modern and Legacy JavaScript variants share the same CSS unless the Extension implements an explicit alternative resource strategy.</p>
-<p>Do not leave the Extension partially initialized when an optional resource fails. Report failures through <code>Aellux.diagnostics</code> and preserve usable fallback behavior whenever possible.</p>
+<p>Do not leave the Extension partially initialized when an optional resource fails. Report failures through <code>AelluxJs.diagnostics</code> and preserve usable fallback behavior whenever possible.</p>
 <h2>Publication Checklist</h2>
 <ul>
 <li>Modern artifact follows the filename convention.</li>

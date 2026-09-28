@@ -1,6 +1,6 @@
 # Runtime API
 
-The browser distribution exposes `Aellux` and its short alias `$ae` on the global object.
+The browser distribution exposes `AelluxJs` and its short alias `$ae` on the global object.
 
 ## Initialization
 
@@ -48,7 +48,7 @@ $ae.off("Ready", handler);
 $ae.dispatch("Example", { detail: {} });
 ```
 
-Aellux event names use the `Aellux` prefix. `Ready` becomes `AelluxReady`. Readiness means the orchestrator is available; it does not guarantee that every Extension or element mounted successfully.
+aellux.js event names use the `AelluxJs` prefix. `Ready` becomes `AelluxJsReady`. Readiness means the orchestrator is available; it does not guarantee that every Extension or element mounted successfully.
 
 ## Persistence
 

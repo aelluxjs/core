@@ -1,7 +1,7 @@
-/*! Aellux | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+/*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
 
 /*
- * Aellux Extension compatibility contract:
+ * aellux.js Extension compatibility contract:
  * - Keep this source ES2017-compatible and publish it as a classic script named
  *   aellux.ext.<name>.js. Do not expose ESM imports or exports in the final file.
  * - To support the Legacy runtime, transpile this same source to ES5 and publish
@@ -22,11 +22,11 @@
 
   const extensionName = "template";
   const attr = {
-    extensionName: Aellux.attr(extensionName)
+    extensionName: AelluxJs.attr(extensionName)
   };
   const mountMap = new Map();
 
-  Aellux.extRegister(extensionName, { init, destroy, mountMap });
+  AelluxJs.extRegister(extensionName, { init, destroy, mountMap });
 
   function init() {
     mountMap.set(`[${attr.extensionName}]`, {

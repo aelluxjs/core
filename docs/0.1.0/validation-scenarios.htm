@@ -23,7 +23,7 @@
 <meta property="og:image:height" content="192" />
 <meta property="og:description"
   content="Open-source multi-tenant SaaS runtime with tenant process isolation and isolated app workers for smaller blast radius and safer white-label environments." />
-<meta property="og:site_name" content="Aellux Docs" />
+<meta property="og:site_name" content="aellux.js Docs" />
 
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Validation Scenarios | 0.1.0 | aellux.js">
@@ -160,7 +160,7 @@
               <div class="ps-2 gap-1 d-flex flex-column ">
                                                 <li class="nav-item small-md rounded-pill ps-md-1 " style="flex:0">
                   <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/index.htm">
-                    Aellux Docs                  </a>
+                    aellux.js Docs                  </a>
                 </li>
                                                                 <li class="nav-item small-md rounded-pill ps-md-1 " style="flex:0">
                   <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/getting-started.htm">
@@ -360,7 +360,7 @@
 <pre><code class="language-sh">npx playwright install
 npm run test:browser
 </code></pre>
-<p><code>test:browser</code> builds <code>dist/</code> before testing. Use <code>npm run test:browser -- --project=chromium</code> to run only Chromium. To use an installed Chrome or Edge instead of Playwright's Chromium, set <code>AELLUX_TEST_BROWSER_CHANNEL</code> to <code>chrome</code> or <code>msedge</code> and select the Chromium project. The Bootstrap scenario loads Bootstrap from jsDelivr and therefore requires network access.</p>
+<p><code>test:browser</code> builds <code>dist/</code> before testing. Use <code>npm run test:browser -- --project=chromium</code> to run only Chromium. To use an installed Chrome or Edge instead of Playwright's Chromium, set <code>AELLUXJS_TEST_BROWSER_CHANNEL</code> to <code>chrome</code> or <code>msedge</code> and select the Chromium project. The Bootstrap scenario loads Bootstrap from jsDelivr and therefore requires network access.</p>
 <h2>Scenario Pages</h2>
 <table>
 <thead>
@@ -440,7 +440,7 @@ npm run test:browser
 </tr>
 </tbody>
 </table>
-<p>The shared <a href="../tests/browser/harness.js"><code>harness.js</code></a> waits for <code>AelluxReady</code>, applies a timeout, records assertion failures, and exposes the final status through <code>data-test-status</code> for Playwright.</p>
+<p>The shared <a href="../tests/browser/harness.js"><code>harness.js</code></a> waits for <code>AelluxJsReady</code>, applies a timeout, records assertion failures, and exposes the final status through <code>data-test-status</code> for Playwright.</p>
         </div>
 
         <div id="doc-navlinks2" ajax-load="doc-navlinks2">

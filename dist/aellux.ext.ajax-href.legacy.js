@@ -143,17 +143,17 @@
       });
     };
   }
-  /*! Aellux | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+  /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   (function() {
     "use strict";
     var extensionName = "ajax-href";
-    Aellux.extRegister(extensionName, {
+    AelluxJs.extRegister(extensionName, {
       init: init,
       destroy: destroy,
       load: load
     });
     var attr = {
-      ajaxHref: Aellux.attr(extensionName)
+      ajaxHref: AelluxJs.attr(extensionName)
     };
     function init() {
       document.addEventListener("click", onClick);
@@ -207,14 +207,14 @@
                 var currentElement2 = document.querySelector(selector2);
                 if (!currentElement2) return;
                 elements.set(selector2, currentElement2);
-                if (Aellux.feedback) {
-                  Aellux.feedback.busy(currentElement2, "Ajax loading", true);
-                  Aellux.feedback.progress(currentElement2, "Ajax loading", 0);
+                if (AelluxJs.feedback) {
+                  AelluxJs.feedback.busy(currentElement2, "Ajax loading", true);
+                  AelluxJs.feedback.progress(currentElement2, "Ajax loading", 0);
                 }
               });
               _context2.p = 1;
               _context2.n = 2;
-              return Aellux.request(url, {
+              return AelluxJs.request(url, {
                 signal: controller.signal
               });
             case 2:
@@ -248,17 +248,17 @@
               return _context2.a(3, 10);
             case 7:
               _context2.n = 8;
-              return Aellux.unmount(currentElement);
+              return AelluxJs.unmount(currentElement);
             case 8:
               replacement = document.importNode(loadedElement, true);
               currentElement.replaceWith(replacement);
-              if (selector === "title" && Aellux.stateNavigation) Aellux.stateNavigation.updateBaseTitle(replacement.innerText);
+              if (selector === "title" && AelluxJs.stateNavigation) AelluxJs.stateNavigation.updateBaseTitle(replacement.innerText);
               _context2.n = 9;
-              return Aellux(replacement);
+              return AelluxJs.update(replacement);
             case 9:
-              if (Aellux.feedback) {
-                Aellux.feedback.busy(replacement, "Ajax loaded", false);
-                Aellux.feedback.progress(replacement, "Ajax loaded", 1);
+              if (AelluxJs.feedback) {
+                AelluxJs.feedback.busy(replacement, "Ajax loaded", false);
+                AelluxJs.feedback.progress(replacement, "Ajax loaded", 1);
               }
             case 10:
               _context2.n = 5;
@@ -275,8 +275,8 @@
               _iterator.f();
               return _context2.f(13);
             case 14:
-              if (!options.ignoreHistory && Aellux.stateNavigation) {
-                Aellux.stateNavigation.ajaxHref(url, selectors);
+              if (!options.ignoreHistory && AelluxJs.stateNavigation) {
+                AelluxJs.stateNavigation.ajaxHref(url, selectors);
               }
               _context2.n = 17;
               break;
@@ -286,9 +286,9 @@
               selectorList.forEach(function(selector2) {
                 var currentElement2 = elements.get(selector2);
                 if (!currentElement2) return;
-                if (Aellux.feedback) {
-                  Aellux.feedback.busy(currentElement2, "Ajax loading", false);
-                  Aellux.feedback.progress(currentElement2, "Ajax loading", 1);
+                if (AelluxJs.feedback) {
+                  AelluxJs.feedback.busy(currentElement2, "Ajax loading", false);
+                  AelluxJs.feedback.progress(currentElement2, "Ajax loading", 1);
                 }
               });
               if (!(_t2.name === "AbortError")) {
@@ -319,7 +319,7 @@
       var selectors = link.getAttribute(attr.ajaxHref);
       if (!selectors) return;
       event.preventDefault();
-      Aellux.ajaxHref.load(link.href, selectors);
+      AelluxJs.ajaxHref.load(link.href, selectors);
     }
   })();
 })();

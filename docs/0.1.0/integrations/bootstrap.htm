@@ -23,7 +23,7 @@
 <meta property="og:image:height" content="192" />
 <meta property="og:description"
   content="Open-source multi-tenant SaaS runtime with tenant process isolation and isolated app workers for smaller blast radius and safer white-label environments." />
-<meta property="og:site_name" content="Aellux Docs" />
+<meta property="og:site_name" content="aellux.js Docs" />
 
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Bootstrap Integration | 0.1.0 | aellux.js">
@@ -160,7 +160,7 @@
               <div class="ps-2 gap-1 d-flex flex-column ">
                                                 <li class="nav-item small-md rounded-pill ps-md-1 " style="flex:0">
                   <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/index.htm">
-                    Aellux Docs                  </a>
+                    aellux.js Docs                  </a>
                 </li>
                                                                 <li class="nav-item small-md rounded-pill ps-md-1 " style="flex:0">
                   <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/getting-started.htm">
@@ -358,17 +358,17 @@
 
         <div id="doc-content" style="min-height: calc(100vh - 200px);" class="js-toc-content" ajax-load="doc-content">
           <h1>Bootstrap Integration</h1>
-<p>Aellux complements Bootstrap; it does not replace or bundle it. Bootstrap owns its visual system and components, while Aellux manages independently loadable UX behaviors.</p>
+<p>aellux.js complements Bootstrap; it does not replace or bundle it. Bootstrap owns its visual system and components, while aellux.js manages independently loadable UX behaviors.</p>
 <h2>Namespaces</h2>
 <ul>
-<li>Aellux declarations use <code>data-ae-*</code>.</li>
+<li>aellux.js declarations use <code>data-ae-*</code>.</li>
 <li>Runtime state classes use <code>ae--*</code>.</li>
 <li>Adaptive utilities use names such as <code>p-ux-md-2</code>.</li>
-<li>Aellux events use the <code>Aellux</code> prefix.</li>
+<li>aellux.js events use the <code>AelluxJs</code> prefix.</li>
 </ul>
 <p>These namespaces are designed to avoid collisions with Bootstrap's public classes and data attributes.</p>
 <h2>Loading Order</h2>
-<p>When Aellux adaptive utilities are intended to override Bootstrap utilities contextually, load the Adaptive CSS after Bootstrap:</p>
+<p>When aellux.js adaptive utilities are intended to override Bootstrap utilities contextually, load the Adaptive CSS after Bootstrap:</p>
 <pre><code class="language-html">&lt;link rel=&quot;stylesheet&quot; href=&quot;./bootstrap.min.css&quot;&gt;
 &lt;link rel=&quot;stylesheet&quot; href=&quot;./dist/aellux.ext.adaptive.css&quot;&gt;
 &lt;script src=&quot;./dist/aellux.js&quot;&gt;&lt;/script&gt;
@@ -381,7 +381,7 @@
 </code></pre>
 <p>The browser validation suite includes a Bootstrap CSS coexistence scenario. Repeatable testing with Bootstrap JavaScript components remains a release requirement.</p>
 <h2>Validation Scope</h2>
-<p>The <code>tests/browser/bootstrap-integration.html</code> scenario loads Bootstrap CSS before Aellux, exercises declarative lazy Extension loading, and checks that Adaptive mounts without removing Bootstrap classes.</p>
+<p>The <code>tests/browser/bootstrap-integration.html</code> scenario loads Bootstrap CSS before aellux.js, exercises declarative lazy Extension loading, and checks that Adaptive mounts without removing Bootstrap classes.</p>
 <p>The scenario validates namespace and CSS coexistence. Testing with Bootstrap JavaScript components, dynamically revealed content, and listener coexistence remains part of the beta acceptance work rather than a completed compatibility guarantee.</p>
         </div>
 

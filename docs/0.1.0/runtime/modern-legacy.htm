@@ -23,7 +23,7 @@
 <meta property="og:image:height" content="192" />
 <meta property="og:description"
   content="Open-source multi-tenant SaaS runtime with tenant process isolation and isolated app workers for smaller blast radius and safer white-label environments." />
-<meta property="og:site_name" content="Aellux Docs" />
+<meta property="og:site_name" content="aellux.js Docs" />
 
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Modern &amp; Legacy | 0.1.0 | aellux.js">
@@ -160,7 +160,7 @@
               <div class="ps-2 gap-1 d-flex flex-column ">
                                                 <li class="nav-item small-md rounded-pill ps-md-1 " style="flex:0">
                   <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/index.htm">
-                    Aellux Docs                  </a>
+                    aellux.js Docs                  </a>
                 </li>
                                                                 <li class="nav-item small-md rounded-pill ps-md-1 " style="flex:0">
                   <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/getting-started.htm">
@@ -358,7 +358,7 @@
 
         <div id="doc-content" style="min-height: calc(100vh - 200px);" class="js-toc-content" ajax-load="doc-content">
           <h1>Modern and Legacy Runtimes</h1>
-<p>The Aellux boot script is responsible for capability detection and runtime selection.</p>
+<p>The aellux.js boot script is responsible for capability detection and runtime selection.</p>
 <h2>Modern Runtime</h2>
 <p>When the required syntax and browser APIs are available, the boot script loads either:</p>
 <ul>
@@ -375,7 +375,7 @@
 <p>The build transpiles the Modern orchestrator and each core Extension into ES5-syntax Legacy variants. Both Legacy runtime files install the Core polyfills before starting the runtime. Individually loaded Extensions reuse that environment and therefore do not duplicate those polyfills in each generated file.</p>
 <p>This provides the intended compatibility layer, but it is not an unrestricted guarantee for every historical ES5 browser. The supported browser matrix and integration tests must still be completed before production Legacy support can be claimed.</p>
 <h2>Selection Rules</h2>
-<p>The boot script checks the capabilities required by the orchestrator before loading it. Missing capabilities are recorded in <code>Aellux.notAvailable</code>.</p>
+<p>The boot script checks the capabilities required by the orchestrator before loading it. Missing capabilities are recorded in <code>AelluxJs.notAvailable</code>.</p>
 <p>Force Legacy through initialization options or the development query parameter:</p>
 <pre><code class="language-js">$ae.init({ mode: &quot;basic&quot;, forceLegacy: true });
 </code></pre>

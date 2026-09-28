@@ -1,4 +1,4 @@
-/*! Aellux | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+/*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
 
 export const spacing = [0, 1, 2, 3, 4, 5];
 export const marginValues = [...spacing, "auto"];
@@ -121,5 +121,5 @@ export function generateAdaptiveCSS(aellux) {
     }
   }
 
-  return "/*! Aellux | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */\n\n" + rules.join("\n\n") + "\n";
+  return "/*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */\n\n" + rules.join("\n\n") + "\n";
 }

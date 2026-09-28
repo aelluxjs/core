@@ -6,7 +6,7 @@
       "slug": "overview",
       "active": true,
       "children": [
-        { "label": "Aellux Docs", "href": "README.md" },
+        { "label": "aellux.js Docs", "href": "README.md" },
         { "label": "Getting Started", "href": "getting-started.md" },
         { "label": "Compatibility", "href": "compatibility.md" },
         { "label": "Validation Scenarios", "href": "validation-scenarios.md" }

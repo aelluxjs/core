@@ -1,4 +1,4 @@
-/*! Aellux validation examples | SPDX-License-Identifier: Apache-2.0 */
+/*! aellux.js validation examples | SPDX-License-Identifier: Apache-2.0 */
 
 (function (root) {
   "use strict";
@@ -15,19 +15,19 @@
     output.textContent = status.toUpperCase() + ": " + message;
   }
 
-  root.AelluxValidation = {
+  root.AelluxJsValidation = {
     run: function (test, timeout) {
       var completed = false;
       var timer = setTimeout(function () {
-        if (!completed) setResult("failed", "AelluxReady timeout");
+        if (!completed) setResult("failed", "AelluxJsReady timeout");
       }, timeout || 15000);
 
       function assert(condition, message) {
         if (!condition) throw new Error(message);
       }
 
-      Aellux.on("Ready", function onReady() {
-        Aellux.off("Ready", onReady);
+      AelluxJs.on("Ready", function onReady() {
+        AelluxJs.off("Ready", onReady);
         try {
           var result = test(assert);
           if (result && typeof result.then === "function") {

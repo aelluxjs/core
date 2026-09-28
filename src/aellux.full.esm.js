@@ -1,4 +1,4 @@
-/*! Aellux | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+/*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
 
 import "./aellux.orchestrator.js";
 import { assetLoadHelper } from "./internal/asset-load-helper.js";
@@ -7,13 +7,13 @@ const root = typeof globalThis !== "undefined" ? globalThis : window;
 
 function appendBundledStyle(extensionName) {
   return new Promise(resolve => {
-    const data = root.Aellux.extRegistry[extensionName];
-    const url = data.url.replace(/^\.\//, root.Aellux.aelluxBasePath);
+    const data = root.AelluxJs.extRegistry[extensionName];
+    const url = data.url.replace(/^\.\//, root.AelluxJs.aelluxBasePath);
     const link = document.createElement("link");
 
     link.rel = "stylesheet";
     link.href = url.replace(/\.js(?=[?#]|$)/, ".css");
-    link.setAttribute(root.Aellux.attr("ext-style"), extensionName);
+    link.setAttribute(root.AelluxJs.attr("ext-style"), extensionName);
     assetLoadHelper(link, {
       loadCallback: resolve,
       errorCallback: resolve
@@ -21,7 +21,7 @@ function appendBundledStyle(extensionName) {
   });
 }
 
-root.Aellux.bundledExtensions = Object.freeze({
+root.AelluxJs.bundledExtensions = Object.freeze({
   "preferences": () => import("./aellux.ext.preferences.js"),
   "state-navigation": () => import("./aellux.ext.state-navigation.js"),
   "adaptive": () => Promise.all([

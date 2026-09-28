@@ -38,6 +38,63 @@ for (const scenario of scenarios) {
   });
 }
 
+test("renamed global and event prefix are available", async ({ page }) => {
+  await openScenario(page, "runtime-modern");
+  const result = await page.evaluate(() => ({
+    sameAlias: window.AelluxJs === window.$ae,
+    oldGlobal: typeof window.Aellux,
+    eventName: window.AelluxJs.eventName("Ready")
+  }));
+  expect(result).toEqual({
+    sameAlias: true,
+    oldGlobal: "undefined",
+    eventName: "AelluxJsReady"
+  });
+  const dispatchedType = await page.evaluate(() => new Promise(resolve => {
+    document.addEventListener("AelluxJsProbe", event => resolve(event.type), { once: true });
+    AelluxJs.dispatch("Probe");
+  }));
+  expect(dispatchedType).toBe("AelluxJsProbe");
+});
+
+test("renamed persistence keys and diagnostic name are used", async ({ page }) => {
+  await openScenario(page, "runtime-modern");
+  const result = await page.evaluate(() => {
+    AelluxJs.persist.local.set("probe", "local");
+    AelluxJs.persist.preferences.set("probe", "preferences");
+    return {
+      local: localStorage.getItem("AelluxJsPersist"),
+      preferences: localStorage.getItem("AelluxJsPreferences"),
+      oldLocal: localStorage.getItem("AelluxPersist"),
+      oldPreferences: localStorage.getItem("AelluxPreferences"),
+      errorName: AelluxJs.diagnostics.create(AelluxJs.diagnostics.ERROR_NOT_INITIALIZED).name
+    };
+  });
+  expect(new URLSearchParams(result.local).get("probe")).toBe("local");
+  expect(new URLSearchParams(result.preferences).get("probe")).toBe("preferences");
+  expect(result.oldLocal).toBeNull();
+  expect(result.oldPreferences).toBeNull();
+  expect(result.errorName).toBe("AelluxJsDiagnosticError");
+});
+
+test("full runtime writes the renamed history state marker", async ({ page }) => {
+  await page.goto("/tests/index.htm");
+  await page.addScriptTag({ url: "/dist/aellux.js" });
+  await page.evaluate(() => AelluxJs.init({ mode: "full" }));
+  await expect.poll(() => page.evaluate(() => AelluxJs.stateNavigation?.initialized)).toBe(true);
+  expect(await page.evaluate(() => history.state?.aelluxJsState)).toBe(true);
+  expect(await page.evaluate(() => history.state?.aelluxState)).toBeUndefined();
+});
+
+test("minified distribution exposes the renamed global", async ({ page }) => {
+  await page.goto("/tests/index.htm");
+  await page.addScriptTag({ url: "/dist/aellux.min.js" });
+  await page.evaluate(() => AelluxJs.init({ mode: "full" }));
+  await expect.poll(() => page.evaluate(() => window.AelluxJs.supported)).toBe(true);
+  expect(await page.evaluate(() => window.AelluxJs === window.$ae)).toBe(true);
+  expect(await page.evaluate(() => typeof window.Aellux)).toBe("undefined");
+});
+
 test("dynamic elements can be mounted and unmounted after initialization", async ({ page }) => {
   await openScenario(page, "dynamic-update");
   await page.evaluate(async () => {

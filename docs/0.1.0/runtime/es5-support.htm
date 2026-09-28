@@ -23,7 +23,7 @@
 <meta property="og:image:height" content="192" />
 <meta property="og:description"
   content="Open-source multi-tenant SaaS runtime with tenant process isolation and isolated app workers for smaller blast radius and safer white-label environments." />
-<meta property="og:site_name" content="Aellux Docs" />
+<meta property="og:site_name" content="aellux.js Docs" />
 
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="ES5 Support | 0.1.0 | aellux.js">
@@ -160,7 +160,7 @@
               <div class="ps-2 gap-1 d-flex flex-column ">
                                                 <li class="nav-item small-md rounded-pill ps-md-1 " style="flex:0">
                   <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/index.htm">
-                    Aellux Docs                  </a>
+                    aellux.js Docs                  </a>
                 </li>
                                                                 <li class="nav-item small-md rounded-pill ps-md-1 " style="flex:0">
                   <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/getting-started.htm">
@@ -358,7 +358,7 @@
 
         <div id="doc-content" style="min-height: calc(100vh - 200px);" class="js-toc-content" ajax-load="doc-content">
           <h1>ES5 Support Level</h1>
-<p>ES5 compatibility describes the syntax baseline of the Aellux boot script and Babel-generated Legacy variants. It does not mean unrestricted support for every historical browser capable of parsing ES5.</p>
+<p>ES5 compatibility describes the syntax baseline of the aellux.js boot script and Babel-generated Legacy variants. It does not mean unrestricted support for every historical browser capable of parsing ES5.</p>
 <h2>Boot Script</h2>
 <p>The generated <code>dist/aellux.js</code> boot script avoids modern runtime syntax so it can perform capability detection before selecting the Modern or Legacy runtime. Source-level imports only organize internal helpers during development and are bundled away. Optional APIs are checked before use where the boot process requires them.</p>
 <h2>APIs and Polyfills</h2>
@@ -372,11 +372,11 @@
 <li><code>NodeList.prototype.forEach</code>.</li>
 </ul>
 <p>The generated Legacy Extensions do not embed these dependencies again. They are loaded after, and share the environment prepared by, the Legacy orchestrator.</p>
-<p>Third-party Extensions may rely on this list only while running under the Aellux Legacy runtime. Any additional API must be feature-detected and included by the Extension's own build or loaded as an explicit dependency. Babel or another transpiler can produce ES5 syntax, but does not automatically provide missing browser APIs.</p>
+<p>Third-party Extensions may rely on this list only while running under the aellux.js Legacy runtime. Any additional API must be feature-detected and included by the Extension's own build or loaded as an explicit dependency. Babel or another transpiler can produce ES5 syntax, but does not automatically provide missing browser APIs.</p>
 <p>Browser primitives such as the DOM, <code>XMLHttpRequest</code> and <code>DOMParser</code> are still expected from the host environment. The final supported browser matrix remains part of the <code>0.1.0-beta</code> milestone, so ES5 syntax must not be interpreted as unrestricted support for every old browser.</p>
-<p>See <a href="../extensions/authoring.htm">Authoring Third-Party Aellux Extensions</a> for the publication contract and reference build.</p>
+<p>See <a href="../extensions/authoring.htm">Authoring Third-Party aellux.js Extensions</a> for the publication contract and reference build.</p>
 <h2>Build Tooling</h2>
-<p>Node.js 20 or newer is required to build Aellux. This tooling requirement is independent of the browser syntax baseline.</p>
+<p>Node.js 20 or newer is required to build aellux.js. This tooling requirement is independent of the browser syntax baseline.</p>
         </div>
 
         <div id="doc-navlinks2" ajax-load="doc-navlinks2">

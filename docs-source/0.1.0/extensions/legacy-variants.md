@@ -15,8 +15,8 @@ $ae.ext("example", { builds: ["modern", "legacy"] });
 ```
 
 - A Modern-only Extension uses `builds: ["modern"]`. A Legacy runtime reports diagnostic `1106` and does not request it.
-- A Legacy-only Extension uses `builds: ["legacy"]`. Modern browsers can execute this ES5 artifact, so Aellux selects the Legacy filename in either runtime.
-- An Extension with both builds uses `builds: ["modern", "legacy"]`, and Aellux selects the matching artifact.
+- A Legacy-only Extension uses `builds: ["legacy"]`. Modern browsers can execute this ES5 artifact, so aellux.js selects the Legacy filename in either runtime.
+- An Extension with both builds uses `builds: ["modern", "legacy"]`, and aellux.js selects the matching artifact.
 - Omitting `builds` defaults to both and promises that both files exist.
 
 ## Filename Convention
@@ -27,7 +27,7 @@ $ae.ext("example", { builds: ["modern", "legacy"] });
 
 The Legacy runtime follows the same convention with `aellux.orchestrator.legacy.js` for `basic` mode and `aellux.full.legacy.js` for `full` mode.
 
-The same metadata can be declared with `data-ae-builds="modern legacy"` on `link[rel="aellux-ext"]`.
+The same metadata can be declared with `data-ae-builds="modern legacy"` on `link[rel="aelluxjs-ext"]`.
 
 Both variants must register the same Extension name and expose equivalent public APIs. Optional styles are independent of the JavaScript target and are shared unless an Extension explicitly manages another strategy.
 

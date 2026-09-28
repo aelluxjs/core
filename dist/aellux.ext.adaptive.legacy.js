@@ -1,10 +1,10 @@
 (function() {
-  /*! Aellux | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+  /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   (function() {
     "use strict";
     var extensionName = "adaptive";
     var attr = {
-      adaptive: Aellux.attr(extensionName)
+      adaptive: AelluxJs.attr(extensionName)
     };
     var mountMap = /* @__PURE__ */ new Map();
     var adaptiveParams = {
@@ -26,7 +26,7 @@
         horizontal: 1.25
       }
     };
-    Aellux.extRegister(extensionName, {
+    AelluxJs.extRegister(extensionName, {
       init: init,
       destroy: destroy,
       mountMap: mountMap,
@@ -46,7 +46,7 @@
     }
     function inferOrientation(flexBox) {
       var selector = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : "*";
-      return Aellux.waitLayout.read(function() {
+      return AelluxJs.waitLayout.read(function() {
         var fallback = "horizontal";
         var style = getComputedStyle(flexBox);
         if (style.display === "flex" || style.display === "inline-flex") {

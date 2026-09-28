@@ -28,5 +28,5 @@ createServer(async (request, response) => {
     response.end("Not found");
   }
 }).listen(4173, "127.0.0.1", () => {
-  console.log("Aellux test server listening on http://127.0.0.1:4173");
+  console.log("aellux.js test server listening on http://127.0.0.1:4173");
 });

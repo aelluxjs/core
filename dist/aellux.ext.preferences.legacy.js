@@ -41,7 +41,7 @@
   function _arrayWithHoles(r) {
     if (Array.isArray(r)) return r;
   }
-  /*! Aellux | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+  /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   (function() {
     "use strict";
     var extensionName = "preferences";
@@ -49,7 +49,7 @@
     var defaultPreferences = /* @__PURE__ */ Object.create(null);
     var computedPreferences = /* @__PURE__ */ Object.create(null);
     var mountMap = /* @__PURE__ */ new Map();
-    Aellux.extRegister(extensionName, {
+    AelluxJs.extRegister(extensionName, {
       init: init,
       destroy: destroy,
       update: update,
@@ -58,15 +58,15 @@
       mountMap: mountMap
     });
     var attr = {
-      preference: Aellux.attr("preference"),
-      option: Aellux.attr("option"),
-      label: Aellux.attr("label"),
-      next: Aellux.attr("next"),
-      prev: Aellux.attr("prev"),
-      ready: Aellux.attr("ready")
+      preference: AelluxJs.attr("preference"),
+      option: AelluxJs.attr("option"),
+      label: AelluxJs.attr("label"),
+      next: AelluxJs.attr("next"),
+      prev: AelluxJs.attr("prev"),
+      ready: AelluxJs.attr("ready")
     };
     var className = {
-      active: Aellux.className("active")
+      active: AelluxJs.className("active")
     };
     var prefOptions = {
       colorScheme: ["auto", "light", "dark"],
@@ -87,7 +87,7 @@
         unmount: unmountPreferenceContainer
       });
       window.addEventListener("storage", storageEvent);
-      var allQueries = Aellux.preferencesMediaQueries;
+      var allQueries = AelluxJs.preferencesMediaQueries;
       Object.values(allQueries).forEach(function(queries) {
         return Object.values(queries).forEach(function(query) {
           if (!query) return;
@@ -108,7 +108,7 @@
     function destroy() {
       window.removeEventListener("storage", storageEvent);
       document.removeEventListener("DOMContentLoaded", update);
-      var allQueries = Aellux.preferencesMediaQueries;
+      var allQueries = AelluxJs.preferencesMediaQueries;
       Object.values(allQueries).forEach(function(queries) {
         return Object.values(queries).forEach(function(query) {
           if (!query) return;
@@ -131,7 +131,7 @@
       saveUserPreferences();
     }
     function storageEvent(event) {
-      if (event.key !== "AelluxPreferences") return;
+      if (event.key !== "AelluxJsPreferences") return;
       var newPreferences = new URLSearchParams(event.newValue || "");
       Object.keys(userPreferences).forEach(function(key) {
         return delete userPreferences[key];
@@ -143,11 +143,11 @@
     }
     function update() {
       Object.assign(computedPreferences, defaultPreferences, userPreferences);
-      Aellux.updatePreferencesAttributesHTML(computedPreferences);
+      AelluxJs.updatePreferencesAttributesHTML(computedPreferences);
       document.querySelectorAll("[".concat(attr.preference, "]")).forEach(function(container) {
         return updateContainer(container);
       });
-      Aellux.dispatch("PreferencesChange");
+      AelluxJs.dispatch("PreferencesChange");
     }
     function updateContainer(container) {
       var preference = container.getAttribute(attr.preference);
@@ -167,10 +167,10 @@
       });
     }
     function saveUserPreferences() {
-      Aellux.persist.preferences.setObject(userPreferences);
+      AelluxJs.persist.preferences.setObject(userPreferences);
     }
     function loadUserPreferences() {
-      Object.assign(userPreferences, Aellux.persist.preferences.getObject());
+      Object.assign(userPreferences, AelluxJs.persist.preferences.getObject());
     }
     function mountPreferenceContainer(container) {
       container.addEventListener("click", onContainerClick);

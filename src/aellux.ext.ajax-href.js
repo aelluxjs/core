@@ -1,12 +1,12 @@
-/*! Aellux | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+/*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
 
 (function () {
   "use strict";
 
   const extensionName = "ajax-href";
-  Aellux.extRegister(extensionName, { init, destroy, load });
+  AelluxJs.extRegister(extensionName, { init, destroy, load });
   const attr = {
-    ajaxHref: Aellux.attr(extensionName)
+    ajaxHref: AelluxJs.attr(extensionName)
   };
 
   function init() {
@@ -42,15 +42,15 @@
       if (!currentElement) return;
       elements.set(selector, currentElement);
       //feedback busy/progress
-      if (Aellux.feedback) {
-        Aellux.feedback.busy(currentElement, "Ajax loading", true);
-        Aellux.feedback.progress(currentElement, "Ajax loading", 0);
+      if (AelluxJs.feedback) {
+        AelluxJs.feedback.busy(currentElement, "Ajax loading", true);
+        AelluxJs.feedback.progress(currentElement, "Ajax loading", 0);
       }
       //AJAX PROGRESS UPDATE VALUE
     });
 
     try {
-      const response = await Aellux.request(url, { signal: controller.signal });
+      const response = await AelluxJs.request(url, { signal: controller.signal });
       const html = await response.text();
       const loadedDocument = new DOMParser().parseFromString(html, "text/html");
 
@@ -61,25 +61,25 @@
         const loadedElement = loadedDocument.querySelector(selector);
         if (!loadedElement) continue;
 
-        await Aellux.unmount(currentElement);
+        await AelluxJs.unmount(currentElement);
 
         const replacement = document.importNode(loadedElement, true);
         currentElement.replaceWith(replacement);
 
-        if (selector === "title" && Aellux.stateNavigation)
-          Aellux.stateNavigation.updateBaseTitle(replacement.innerText);
+        if (selector === "title" && AelluxJs.stateNavigation)
+          AelluxJs.stateNavigation.updateBaseTitle(replacement.innerText);
 
-        await Aellux(replacement);
+        await AelluxJs.update(replacement);
 
         //feedback busy/progress
-        if (Aellux.feedback) {
-          Aellux.feedback.busy(replacement, "Ajax loaded", false);
-          Aellux.feedback.progress(replacement, "Ajax loaded", 1);
+        if (AelluxJs.feedback) {
+          AelluxJs.feedback.busy(replacement, "Ajax loaded", false);
+          AelluxJs.feedback.progress(replacement, "Ajax loaded", 1);
         }
       }
 
-      if (!options.ignoreHistory && Aellux.stateNavigation) {
-        Aellux.stateNavigation.ajaxHref(url, selectors);
+      if (!options.ignoreHistory && AelluxJs.stateNavigation) {
+        AelluxJs.stateNavigation.ajaxHref(url, selectors);
       }
     }
     catch (error) {
@@ -87,9 +87,9 @@
         const currentElement = elements.get(selector);
         if (!currentElement) return;
         //feedback busy/progress
-        if (Aellux.feedback) {
-          Aellux.feedback.busy(currentElement, "Ajax loading", false);
-          Aellux.feedback.progress(currentElement, "Ajax loading", 1);
+        if (AelluxJs.feedback) {
+          AelluxJs.feedback.busy(currentElement, "Ajax loading", false);
+          AelluxJs.feedback.progress(currentElement, "Ajax loading", 1);
         }
       });
 
@@ -115,6 +115,6 @@
     if (!selectors) return;
 
     event.preventDefault();
-    Aellux.ajaxHref.load(link.href, selectors);
+    AelluxJs.ajaxHref.load(link.href, selectors);
   }
 })();

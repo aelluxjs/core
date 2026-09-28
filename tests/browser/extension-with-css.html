@@ -2,11 +2,11 @@
 <html lang="pt-BR" data-test-status="pending">
 <head>
   <meta charset="UTF-8">
-  <title>Aellux validation: extension with CSS</title>
+  <title>aellux.js validation: extension with CSS</title>
   <script src="./harness.js"></script>
   <script src="../../dist/aellux.js"></script>
   <script>
-    AelluxValidation.run(function (assert) {
+    AelluxJsValidation.run(function (assert) {
       var style = document.querySelector("link[data-ae-ext-style='adaptive']");
       var target = document.getElementById("styled-target");
       assert(style, "Associated extension stylesheet was not appended");

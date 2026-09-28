@@ -23,7 +23,7 @@
 <meta property="og:image:height" content="192" />
 <meta property="og:description"
   content="Open-source multi-tenant SaaS runtime with tenant process isolation and isolated app workers for smaller blast radius and safer white-label environments." />
-<meta property="og:site_name" content="Aellux Docs" />
+<meta property="og:site_name" content="aellux.js Docs" />
 
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Runtime API | 0.1.0 | aellux.js">
@@ -160,7 +160,7 @@
               <div class="ps-2 gap-1 d-flex flex-column ">
                                                 <li class="nav-item small-md rounded-pill ps-md-1 " style="flex:0">
                   <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/index.htm">
-                    Aellux Docs                  </a>
+                    aellux.js Docs                  </a>
                 </li>
                                                                 <li class="nav-item small-md rounded-pill ps-md-1 " style="flex:0">
                   <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/getting-started.htm">
@@ -358,7 +358,7 @@
 
         <div id="doc-content" style="min-height: calc(100vh - 200px);" class="js-toc-content" ajax-load="doc-content">
           <h1>Runtime API</h1>
-<p>The browser distribution exposes <code>Aellux</code> and its short alias <code>$ae</code> on the global object.</p>
+<p>The browser distribution exposes <code>AelluxJs</code> and its short alias <code>$ae</code> on the global object.</p>
 <h2>Initialization</h2>
 <pre><code class="language-js">$ae.init({ mode: &quot;full&quot; });
 </code></pre>
@@ -386,7 +386,7 @@ const adaptive = await $ae.wait(&quot;adaptive&quot;);
 $ae.off(&quot;Ready&quot;, handler);
 $ae.dispatch(&quot;Example&quot;, { detail: {} });
 </code></pre>
-<p>Aellux event names use the <code>Aellux</code> prefix. <code>Ready</code> becomes <code>AelluxReady</code>. Readiness means the orchestrator is available; it does not guarantee that every Extension or element mounted successfully.</p>
+<p>aellux.js event names use the <code>AelluxJs</code> prefix. <code>Ready</code> becomes <code>AelluxJsReady</code>. Readiness means the orchestrator is available; it does not guarantee that every Extension or element mounted successfully.</p>
 <h2>Persistence</h2>
 <pre><code class="language-js">$ae.persist.local.set(&quot;key&quot;, &quot;value&quot;);
 $ae.persist.local.get(&quot;key&quot;, &quot;fallback&quot;);

@@ -23,7 +23,7 @@
 <meta property="og:image:height" content="192" />
 <meta property="og:description"
   content="Open-source multi-tenant SaaS runtime with tenant process isolation and isolated app workers for smaller blast radius and safer white-label environments." />
-<meta property="og:site_name" content="Aellux Docs" />
+<meta property="og:site_name" content="aellux.js Docs" />
 
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Modern &amp; Legacy Variants | 0.1.0 | aellux.js">
@@ -160,7 +160,7 @@
               <div class="ps-2 gap-1 d-flex flex-column ">
                                                 <li class="nav-item small-md rounded-pill ps-md-1 " style="flex:0">
                   <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/index.htm">
-                    Aellux Docs                  </a>
+                    aellux.js Docs                  </a>
                 </li>
                                                                 <li class="nav-item small-md rounded-pill ps-md-1 " style="flex:0">
                   <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/getting-started.htm">
@@ -370,8 +370,8 @@
 </code></pre>
 <ul>
 <li>A Modern-only Extension uses <code>builds: [&quot;modern&quot;]</code>. A Legacy runtime reports diagnostic <code>1106</code> and does not request it.</li>
-<li>A Legacy-only Extension uses <code>builds: [&quot;legacy&quot;]</code>. Modern browsers can execute this ES5 artifact, so Aellux selects the Legacy filename in either runtime.</li>
-<li>An Extension with both builds uses <code>builds: [&quot;modern&quot;, &quot;legacy&quot;]</code>, and Aellux selects the matching artifact.</li>
+<li>A Legacy-only Extension uses <code>builds: [&quot;legacy&quot;]</code>. Modern browsers can execute this ES5 artifact, so aellux.js selects the Legacy filename in either runtime.</li>
+<li>An Extension with both builds uses <code>builds: [&quot;modern&quot;, &quot;legacy&quot;]</code>, and aellux.js selects the matching artifact.</li>
 <li>Omitting <code>builds</code> defaults to both and promises that both files exist.</li>
 </ul>
 <h2>Filename Convention</h2>
@@ -381,7 +381,7 @@
 <li>Minified Legacy: <code>aellux.ext.&lt;name&gt;.legacy.min.js</code></li>
 </ul>
 <p>The Legacy runtime follows the same convention with <code>aellux.orchestrator.legacy.js</code> for <code>basic</code> mode and <code>aellux.full.legacy.js</code> for <code>full</code> mode.</p>
-<p>The same metadata can be declared with <code>data-ae-builds=&quot;modern legacy&quot;</code> on <code>link[rel=&quot;aellux-ext&quot;]</code>.</p>
+<p>The same metadata can be declared with <code>data-ae-builds=&quot;modern legacy&quot;</code> on <code>link[rel=&quot;aelluxjs-ext&quot;]</code>.</p>
 <p>Both variants must register the same Extension name and expose equivalent public APIs. Optional styles are independent of the JavaScript target and are shared unless an Extension explicitly manages another strategy.</p>
 <p>See the <a href="authoring.htm">third-party authoring contract</a> for build instructions and the Legacy polyfill boundary.</p>
         </div>

@@ -2,15 +2,15 @@
 <html lang="pt-BR" data-test-status="pending">
 <head>
   <meta charset="UTF-8">
-  <title>Aellux validation: dynamic update</title>
+  <title>aellux.js validation: dynamic update</title>
   <script src="./harness.js"></script>
   <script src="../../dist/aellux.js"></script>
   <script>
-    AelluxValidation.run(async function (assert) {
+    AelluxJsValidation.run(async function (assert) {
       var target = document.createElement("section");
       target.id = "dynamic-adaptive-target";
       target.setAttribute("data-ae-adaptive", "");
-      target.textContent = "Inserted after AelluxReady";
+      target.textContent = "Inserted after AelluxJsReady";
       document.getElementById("dynamic-root").appendChild(target);
 
       await $ae.update(target);

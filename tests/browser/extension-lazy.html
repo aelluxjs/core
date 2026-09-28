@@ -2,17 +2,17 @@
 <html lang="pt-BR" data-test-status="pending">
 <head>
   <meta charset="UTF-8">
-  <title>Aellux validation: lazy extension</title>
+  <title>aellux.js validation: lazy extension</title>
   <script src="./harness.js"></script>
   <script src="../../dist/aellux.js"></script>
   <script>
-    AelluxValidation.run(function (assert) {
+    AelluxJsValidation.run(function (assert) {
       var target = document.getElementById("lazy-target");
       var script = document.querySelector("script[data-ae-ext='adaptive']");
-      assert(Aellux.adaptive, "Lazy extension was not initialized when its selector matched");
+      assert(AelluxJs.adaptive, "Lazy extension was not initialized when its selector matched");
       assert(target.classList.contains("ae--mounted"), "Lazy extension did not mount its target");
       assert(script, "Lazy extension script was not loaded");
-      assert(!Aellux.lazyExtensionSelectors.adaptive, "Loaded extension remained in the lazy index");
+      assert(!AelluxJs.lazyExtensionSelectors.adaptive, "Loaded extension remained in the lazy index");
     });
     $ae.ext("adaptive", { loadWhen: "[data-ae-adaptive]" });
     $ae.init({ mode: "basic" });

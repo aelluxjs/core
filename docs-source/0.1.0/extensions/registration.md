@@ -1,4 +1,4 @@
-# Registering Aellux Extensions
+# Registering aellux.js Extensions
 
 Use `$ae.ext(...)` to declare an Extension before the runtime needs it.
 
@@ -8,7 +8,7 @@ Use `$ae.ext(...)` to declare an Extension before the runtime needs it.
 $ae.ext("preferences");
 ```
 
-A label resolves to `aellux.ext.<label>.js` relative to the Aellux boot script. Loading `aellux.min.js` selects matching `.min.js` Extension files.
+A label resolves to `aellux.ext.<label>.js` relative to the aellux.js boot script. Loading `aellux.min.js` selects matching `.min.js` Extension files.
 
 ## URL
 
@@ -43,19 +43,19 @@ $ae.init({ mode: "basic" });
 
 ## Extension Registration
 
-An Extension script exposes its API through `Aellux.extRegister()`:
+An Extension script exposes its API through `AelluxJs.extRegister()`:
 
 ```js
 (function () {
   "use strict";
 
   const extensionName = "example";
-  Aellux.extRegister(extensionName, { init, destroy });
+  AelluxJs.extRegister(extensionName, { init, destroy });
 
   function init() {}
   function destroy() {}
 })();
 ```
 
-Use the [Aellux Extension scaffold](../../templates/README.md) for the complete lifecycle structure.
+Use the [aellux.js Extension scaffold](../../templates/README.md) for the complete lifecycle structure.
 Third-party authors should also follow the [Extension authoring and compatibility contract](authoring.md).

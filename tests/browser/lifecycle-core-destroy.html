@@ -2,7 +2,7 @@
 <html lang="pt-BR" data-test-status="pending">
 <head>
   <meta charset="UTF-8">
-  <title>Aellux validation: global Core destruction</title>
+  <title>aellux.js validation: global Core destruction</title>
   <script src="./harness.js"></script>
   <script src="../../dist/aellux.js"></script>
   <script>
@@ -19,18 +19,18 @@
     registerProbe("lifecycle-core-first");
     registerProbe("lifecycle-core-second");
 
-    AelluxValidation.run(async function (assert) {
+    AelluxJsValidation.run(async function (assert) {
       var queuedTaskRan = false;
-      var queuedTask = Aellux.waitLayout.update(function () { queuedTaskRan = true; });
+      var queuedTask = AelluxJs.waitLayout.update(function () { queuedTaskRan = true; });
 
       await $ae.destroy();
       await queuedTask;
 
       assert(queuedTaskRan === false, "Pending layout work ran after global destroy");
       assert(destroyedExtensions.length === 2, "Global destroy did not destroy every Extension");
-      assert(typeof Aellux.lifecycleCoreFirst === "undefined", "First Extension API remains public");
-      assert(typeof Aellux.lifecycleCoreSecond === "undefined", "Second Extension API remains public");
-      assert(Object.keys(Aellux.extRegistry).length === 0, "Extension registry was not cleared");
+      assert(typeof AelluxJs.lifecycleCoreFirst === "undefined", "First Extension API remains public");
+      assert(typeof AelluxJs.lifecycleCoreSecond === "undefined", "Second Extension API remains public");
+      assert(Object.keys(AelluxJs.extRegistry).length === 0, "Extension registry was not cleared");
     });
 
     $ae.init({ mode: "basic" });

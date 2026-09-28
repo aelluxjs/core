@@ -2,7 +2,7 @@
 <html lang="pt-BR" data-test-status="pending">
 <head>
   <meta charset="UTF-8">
-  <title>Aellux validation: element mount and unmount lifecycle</title>
+  <title>aellux.js validation: element mount and unmount lifecycle</title>
   <script src="./harness.js"></script>
   <script src="../../dist/aellux.js"></script>
   <script>
@@ -29,7 +29,7 @@
       mountMap: mountMap
     });
 
-    AelluxValidation.run(async function (assert) {
+    AelluxJsValidation.run(async function (assert) {
       var target = document.getElementById("lifecycle-element");
 
       assert(lifecycleCounts.mount === 1, "Element was not mounted during start");

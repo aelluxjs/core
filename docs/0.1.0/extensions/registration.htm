@@ -23,7 +23,7 @@
 <meta property="og:image:height" content="192" />
 <meta property="og:description"
   content="Open-source multi-tenant SaaS runtime with tenant process isolation and isolated app workers for smaller blast radius and safer white-label environments." />
-<meta property="og:site_name" content="Aellux Docs" />
+<meta property="og:site_name" content="aellux.js Docs" />
 
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Registration | 0.1.0 | aellux.js">
@@ -160,7 +160,7 @@
               <div class="ps-2 gap-1 d-flex flex-column ">
                                                 <li class="nav-item small-md rounded-pill ps-md-1 " style="flex:0">
                   <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/index.htm">
-                    Aellux Docs                  </a>
+                    aellux.js Docs                  </a>
                 </li>
                                                                 <li class="nav-item small-md rounded-pill ps-md-1 " style="flex:0">
                   <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/getting-started.htm">
@@ -357,12 +357,12 @@
   </div>        </div>
 
         <div id="doc-content" style="min-height: calc(100vh - 200px);" class="js-toc-content" ajax-load="doc-content">
-          <h1>Registering Aellux Extensions</h1>
+          <h1>Registering aellux.js Extensions</h1>
 <p>Use <code>$ae.ext(...)</code> to declare an Extension before the runtime needs it.</p>
 <h2>Label</h2>
 <pre><code class="language-js">$ae.ext(&quot;preferences&quot;);
 </code></pre>
-<p>A label resolves to <code>aellux.ext.&lt;label&gt;.js</code> relative to the Aellux boot script. Loading <code>aellux.min.js</code> selects matching <code>.min.js</code> Extension files.</p>
+<p>A label resolves to <code>aellux.ext.&lt;label&gt;.js</code> relative to the aellux.js boot script. Loading <code>aellux.min.js</code> selects matching <code>.min.js</code> Extension files.</p>
 <h2>URL</h2>
 <pre><code class="language-js">$ae.ext(&quot;./extensions/aellux.ext.example.js&quot;);
 </code></pre>
@@ -385,18 +385,18 @@
 $ae.init({ mode: &quot;basic&quot; });
 </code></pre>
 <h2>Extension Registration</h2>
-<p>An Extension script exposes its API through <code>Aellux.extRegister()</code>:</p>
+<p>An Extension script exposes its API through <code>AelluxJs.extRegister()</code>:</p>
 <pre><code class="language-js">(function () {
   &quot;use strict&quot;;
 
   const extensionName = &quot;example&quot;;
-  Aellux.extRegister(extensionName, { init, destroy });
+  AelluxJs.extRegister(extensionName, { init, destroy });
 
   function init() {}
   function destroy() {}
 })();
 </code></pre>
-<p>Use the <a href="../../templates/README.md">Aellux Extension scaffold</a> for the complete lifecycle structure.
+<p>Use the <a href="../../templates/README.md">aellux.js Extension scaffold</a> for the complete lifecycle structure.
 Third-party authors should also follow the <a href="authoring.htm">Extension authoring and compatibility contract</a>.</p>
         </div>
 

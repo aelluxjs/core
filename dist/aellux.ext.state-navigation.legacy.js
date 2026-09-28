@@ -100,12 +100,12 @@
       });
     };
   }
-  /*! Aellux | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+  /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   (function() {
     "use strict";
     var extensionName = "state-navigation";
     var globalSnapshot = {};
-    Aellux.extRegister(extensionName, {
+    AelluxJs.extRegister(extensionName, {
       init: init,
       destroy: destroy,
       tabOpen: tabOpen,
@@ -124,13 +124,13 @@
     function init() {
       window.addEventListener("popstate", onPopState);
       window.addEventListener("hashchange", onHashChange);
-      if ("useHash" in Aellux.options) {
-        useHash = Aellux.options.useHash;
+      if ("useHash" in AelluxJs.options) {
+        useHash = AelluxJs.options.useHash;
       }
       baseTitle = document.title;
       onHashChange();
       history.replaceState({
-        aelluxState: true,
+        aelluxJsState: true,
         snapshot: Object.assign({}, globalSnapshot)
       }, "");
     }
@@ -158,13 +158,13 @@
     }
     function ajaxHref(url, selectors) {
       history.replaceState({
-        aelluxState: true,
+        aelluxJsState: true,
         snapshot: globalSnapshot,
         ajaxHref: selectors
       }, "", window.location.href);
       updateSnapshotData();
       history.pushState({
-        aelluxState: true,
+        aelluxJsState: true,
         snapshot: null,
         ajaxHref: selectors
       }, "", url);
@@ -199,7 +199,7 @@
               globalSnapshot[key] = value;
               updateSnapshotData(snapshotToString(globalSnapshot));
               state = {
-                aelluxState: true,
+                aelluxJsState: true,
                 snapshot: Object.assign({}, globalSnapshot)
               };
               url = useHash ? "#".concat(globalSnapshotString) : void 0;
@@ -243,7 +243,7 @@
         },
         bubbles: true
       };
-      Aellux.dispatch(name, options);
+      AelluxJs.dispatch(name, options);
     }
     function dispatchEventRestore() {
       return dispatchSnapshotEvent("SnapshotRestore");
@@ -259,9 +259,9 @@
     }
     function onPopState(event) {
       var browserState = event.state;
-      if (!browserState || !browserState.aelluxState) return;
-      if (browserState.ajaxHref && Aellux.ajaxHref) {
-        Aellux.ajaxHref.load(window.location.href, browserState.ajaxHref, {
+      if (!browserState || !browserState.aelluxJsState) return;
+      if (browserState.ajaxHref && AelluxJs.ajaxHref) {
+        AelluxJs.ajaxHref.load(window.location.href, browserState.ajaxHref, {
           ignoreHistory: true
         });
       }

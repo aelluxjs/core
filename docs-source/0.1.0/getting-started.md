@@ -18,11 +18,11 @@ Full mode loads the orchestrator and the complete core Extension bundle:
 ```html
 <script src="./dist/aellux.js"></script>
 <script>
-  Aellux.init({ mode: "full" });
+  AelluxJs.init({ mode: "full" });
 </script>
 ```
 
-The full bundle is a runtime loaded by the Aellux boot script; it is not a standalone entry point.
+The full bundle is a runtime loaded by the aellux.js boot script; it is not a standalone entry point.
 
 ## Basic Mode
 

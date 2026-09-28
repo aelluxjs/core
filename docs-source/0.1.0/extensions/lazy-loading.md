@@ -12,7 +12,7 @@ $ae.ext("adaptive", {
 The same behavior can be declared in HTML:
 
 ```html
-<link rel="aellux-ext" href="adaptive"
+<link rel="aelluxjs-ext" href="adaptive"
       data-ae-load-when="[data-ae-adaptive]"
       data-ae-load-style>
 ```

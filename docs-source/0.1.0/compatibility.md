@@ -1,6 +1,6 @@
-# Compatibility for Aellux 0.1.0 Beta
+# Compatibility for aellux.js 0.1.0 Beta
 
-Aellux `0.1.0-beta.1` is intended for progressive enhancement in existing browser interfaces. It provides an ES5-compatible boot distribution that selects an ES2017+ Modern runtime or an ES5-syntax Legacy runtime with bundled polyfills.
+aellux.js `0.1.0-beta.1` is intended for progressive enhancement in existing browser interfaces. It provides an ES5-compatible boot distribution that selects an ES2017+ Modern runtime or an ES5-syntax Legacy runtime with bundled polyfills.
 
 This beta validates the runtime contract and integration strategy. It publishes a preliminary ES2017 syntax baseline, but does not yet claim a final tested browser support matrix or unrestricted compatibility with every browser capable of parsing ES5.
 
@@ -29,13 +29,13 @@ The preliminary minimum versions for parsing the Modern distribution are documen
 
 Core Extensions are distributed as Modern and generated Legacy variants. The Legacy orchestrator provides shared polyfills, so individual Legacy Extension files do not bundle the same polyfills again.
 
-Third-party Extensions declare their published artifacts through `builds: ["modern"]`, `builds: ["legacy"]`, or `builds: ["modern", "legacy"]`. The declarative equivalent is `data-ae-builds`. Aellux selects the available compatible artifact and reports diagnostic `1106` before requesting a Modern-only Extension from a Legacy runtime.
+Third-party Extensions declare their published artifacts through `builds: ["modern"]`, `builds: ["legacy"]`, or `builds: ["modern", "legacy"]`. The declarative equivalent is `data-ae-builds`. aellux.js selects the available compatible artifact and reports diagnostic `1106` before requesting a Modern-only Extension from a Legacy runtime.
 
-See [Authoring Third-Party Aellux Extensions](extensions/authoring.md) for lifecycle rules, filename conventions, the reference Legacy build, and the exact polyfill boundary.
+See [Authoring Third-Party aellux.js Extensions](extensions/authoring.md) for lifecycle rules, filename conventions, the reference Legacy build, and the exact polyfill boundary.
 
 ## Bootstrap
 
-Aellux does not require or bundle Bootstrap. Its attributes, classes, events, and adaptive utilities use Aellux-specific namespaces. Adaptive utilities may intentionally override Bootstrap utilities when their stylesheet is loaded after Bootstrap.
+aellux.js does not require or bundle Bootstrap. Its attributes, classes, events, and adaptive utilities use aellux.js-specific namespaces. Adaptive utilities may intentionally override Bootstrap utilities when their stylesheet is loaded after Bootstrap.
 
 See [Bootstrap integration](integrations/bootstrap.md) and the browser validation scenario in `tests/browser/bootstrap-integration.html`.
 

@@ -1,6 +1,6 @@
 # Visual Mounting States
 
-Aellux can hide content while its required Extensions and resources are mounting, display a loader, and expose completion through `ae--mounted`.
+aellux.js can hide content while its required Extensions and resources are mounting, display a loader, and expose completion through `ae--mounted`.
 
 ## Current Runtime Contract
 

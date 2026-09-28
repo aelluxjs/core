@@ -23,7 +23,7 @@ For `aellux.ext.adaptive.js`, the runtime derives `aellux.ext.adaptive.css`. Que
 The declarative equivalent is:
 
 ```html
-<link rel="aellux-ext" href="adaptive" data-ae-load-style>
+<link rel="aelluxjs-ext" href="adaptive" data-ae-load-style>
 ```
 
 ## Specific Stylesheet URL
@@ -39,7 +39,7 @@ $ae.ext("feedback", {
 The declarative equivalent places the URL directly in `data-ae-load-style`:
 
 ```html
-<link rel="aellux-ext"
+<link rel="aelluxjs-ext"
       href="feedback"
       data-ae-load-style="./styles/feedback-theme.css">
 ```

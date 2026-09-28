@@ -1,4 +1,4 @@
-/*! Aellux | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+/*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
 
 (function () {
   "use strict";
@@ -10,19 +10,19 @@
   const computedPreferences = Object.create(null);
   const mountMap = new Map();
 
-  Aellux.extRegister(extensionName, { init, destroy, update, get, set, mountMap });
+  AelluxJs.extRegister(extensionName, { init, destroy, update, get, set, mountMap });
 
   const attr = {
-    preference: Aellux.attr("preference"),
-    option: Aellux.attr("option"),
-    label: Aellux.attr("label"),
-    next: Aellux.attr("next"),
-    prev: Aellux.attr("prev"),
-    ready: Aellux.attr("ready"),
+    preference: AelluxJs.attr("preference"),
+    option: AelluxJs.attr("option"),
+    label: AelluxJs.attr("label"),
+    next: AelluxJs.attr("next"),
+    prev: AelluxJs.attr("prev"),
+    ready: AelluxJs.attr("ready"),
   }
 
   const className = {
-    active: Aellux.className("active")
+    active: AelluxJs.className("active")
   }
 
   const prefOptions = {
@@ -48,7 +48,7 @@
     window.addEventListener("storage", storageEvent);
 
     //Watch device changes
-    const allQueries = Aellux.preferencesMediaQueries;
+    const allQueries = AelluxJs.preferencesMediaQueries;
     Object.values(allQueries).forEach((queries) =>
       Object.values(queries).forEach((query) => {
         if (!query) return;
@@ -73,7 +73,7 @@
     window.removeEventListener("storage", storageEvent);
     document.removeEventListener('DOMContentLoaded', update);
 
-    const allQueries = Aellux.preferencesMediaQueries;
+    const allQueries = AelluxJs.preferencesMediaQueries;
     Object.values(allQueries).forEach((queries) =>
       Object.values(queries).forEach((query) => {
         if (!query) return;
@@ -100,7 +100,7 @@
   }
 
   function storageEvent(event) {
-    if (event.key !== "AelluxPreferences") return;
+    if (event.key !== "AelluxJsPreferences") return;
     const newPreferences = new URLSearchParams(event.newValue || "");
     Object.keys(userPreferences).forEach(key => delete userPreferences[key]);
     newPreferences.forEach((value, key) => {
@@ -111,10 +111,10 @@
 
   function update() {
     Object.assign(computedPreferences, defaultPreferences, userPreferences);
-    Aellux.updatePreferencesAttributesHTML(computedPreferences);
+    AelluxJs.updatePreferencesAttributesHTML(computedPreferences);
     document.querySelectorAll(`[${attr.preference}]`)
       .forEach(container => updateContainer(container));
-    Aellux.dispatch("PreferencesChange");
+    AelluxJs.dispatch("PreferencesChange");
   }
 
   function updateContainer(container) {
@@ -133,11 +133,11 @@
   }
 
   function saveUserPreferences() {
-    Aellux.persist.preferences.setObject(userPreferences);
+    AelluxJs.persist.preferences.setObject(userPreferences);
   }
 
   function loadUserPreferences() {
-    Object.assign(userPreferences, Aellux.persist.preferences.getObject());
+    Object.assign(userPreferences, AelluxJs.persist.preferences.getObject());
   }
 
   function mountPreferenceContainer(container) {

@@ -100,11 +100,11 @@
       });
     };
   }
-  /*! Aellux | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+  /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   (function() {
     "use strict";
     var extensionName = "feedback";
-    Aellux.extRegister(extensionName, {
+    AelluxJs.extRegister(extensionName, {
       init: init,
       destroy: destroy,
       warning: warning,
@@ -208,7 +208,7 @@
         value: value,
         target: target
       };
-      Aellux.dispatchFrom(target, "Feedback", {
+      AelluxJs.dispatchFrom(target, "Feedback", {
         detail: feedback
       });
       if (handlers.has(type)) handlers.get(type).forEach(function(call) {

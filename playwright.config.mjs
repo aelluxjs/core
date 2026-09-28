@@ -14,7 +14,7 @@ export default defineConfig({
       name: "chromium",
       use: {
         ...devices["Desktop Chrome"],
-        ...(process.env.AELLUX_TEST_BROWSER_CHANNEL ? { channel: process.env.AELLUX_TEST_BROWSER_CHANNEL } : {})
+        ...(process.env.AELLUXJS_TEST_BROWSER_CHANNEL ? { channel: process.env.AELLUXJS_TEST_BROWSER_CHANNEL } : {})
       }
     },
     { name: "firefox", use: { ...devices["Desktop Firefox"] } },

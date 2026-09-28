@@ -2,9 +2,10 @@
   "name": "@aelluxjs/core",
   "version": "0.1.0-beta.1",
   "license": "Apache-2.0",
-  "description": "Modular UX behavior management for browser interfaces with an ES5-compatible Aellux boot script and an ES2017+ runtime",
+  "description": "Modular UX behavior management for browser interfaces with an ES5-compatible aellux.js boot script and an ES2017+ runtime",
   "keywords": [
     "aellux",
+    "aellux.js",
     "bootstrap",
     "browser",
     "declarative",
@@ -32,6 +33,9 @@
   },
   "files": [
     "dist",
+    "src",
+    "scripts",
+    "tests",
     "CHANGELOG.md",
     "README.md",
     "LICENSE"

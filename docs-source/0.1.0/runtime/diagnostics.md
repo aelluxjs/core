@@ -1,12 +1,12 @@
 # Diagnostics
 
-The Aellux boot script exposes structured diagnostics through `Aellux.diagnostics` and `$ae.diagnostics`. This capability is available before the orchestrator starts, allowing boot, runtime, and Extension failures to use the same catalog.
+The aellux.js boot script exposes structured diagnostics through `AelluxJs.diagnostics` and `$ae.diagnostics`. This capability is available before the orchestrator starts, allowing boot, runtime, and Extension failures to use the same catalog.
 
-Each catalog entry contains a numeric Aellux error code and its default message:
+Each catalog entry contains a numeric aellux.js error code and its default message:
 
 ```js
 $ae.diagnostics.ERROR_NOT_INITIALIZED;
-// { code: 1001, message: "Aellux has not been initialized." }
+// { code: 1001, message: "aellux.js has not been initialized." }
 ```
 
 Use `report()` to create a diagnostic error and emit it through `console.error`:
@@ -27,7 +27,7 @@ throw $ae.diagnostics.create(
 );
 ```
 
-Errors created by the helper use the name `AelluxDiagnosticError`, expose the numeric `code`, and preserve optional details in `context`.
+Errors created by the helper use the name `AelluxJsDiagnosticError`, expose the numeric `code`, and preserve optional details in `context`.
 
 ## Code Ranges
 
