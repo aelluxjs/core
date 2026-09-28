@@ -3,7 +3,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { Eta } from "eta";
 import MarkdownIt from "markdown-it";
-import docsGeneration from "../templates/docs/docs-generation.mjs";
+import { generateDocs, resolveTemplate, sitemap } from "@wolimp/docweaver";
 
 const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const docsPath = path.join(projectRoot, "docs-source");
@@ -16,13 +16,14 @@ const outputPath = path.posix.join(
 );
 const baseURL = process.env.DOCS_BASE_URL ?? `https://aelluxjs.github.io${outputPath}`;
 const siteURL = baseURL.replace(/\/+$/, ``);
-const eta = new Eta({ views: path.join(projectRoot, "templates", "docs") });
+const themeDirectory = path.dirname(resolveTemplate());
+const eta = new Eta({ views: themeDirectory });
 const markdown = new MarkdownIt({ html: true });
 const versions = (await fsp.readdir(docsPath, { withFileTypes: true }))
   .filter((entry) => entry.isDirectory())
   .map((entry) => ({ name: entry.name }));
 
-const generatedDocs = await docsGeneration.generateDocs({
+const generatedDocs = await generateDocs({
   docsPath,
   baseURL,
   title: "aellux.js"
@@ -83,6 +84,8 @@ for (const generated of generatedDocs) {
   const html = eta.render(path.basename(template), {
     ...view,
     contentHtml,
+    title: "aellux.js Docs",
+    description: "Documentation for the aellux.js browser runtime and Extensions.",
     outputPath,
     pageURL,
     structuredDataJson,
@@ -97,15 +100,15 @@ for (const generated of generatedDocs) {
   }
 }
 
-const sitemap = await docsGeneration.sitemap(docsPath, baseURL);
-if (sitemap.status !== 200) {
-  throw new Error(`Failed to generate sitemap: ${sitemap.body}`);
+const sitemapResult = await sitemap(docsPath, baseURL);
+if (sitemapResult.status !== 200) {
+  throw new Error(`Failed to generate sitemap: ${sitemapResult.body}`);
 }
 
 await fsp.mkdir(outputDirectory, { recursive: true });
 await fsp.writeFile(
   path.join(outputDirectory, "sitemap.xml"),
-  sitemap.body
+  sitemapResult.body
     .replace(/\/README\.md(?=<\/loc>)/gi, `/index.htm`)
     .replace(/\.md(?=<\/loc>)/g, `.htm`),
   "utf8"
@@ -113,7 +116,7 @@ await fsp.writeFile(
 
 for (const folder of ["css", "js"]) {
   await fsp.cp(
-    path.join(projectRoot, "templates", "docs", folder),
+    path.join(themeDirectory, folder),
     path.join(outputDirectory, folder),
     { recursive: true, force: true }
   );
