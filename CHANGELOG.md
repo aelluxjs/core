@@ -7,7 +7,7 @@ All notable changes to aellux.js will be documented in this file.
 ### Changed
 
 - Bumped the package prerelease version to `0.1.0-beta.2`.
-- Moved documentation generation and its theme to `@wolimp/docweaver`.
+- Moved documentation generation and its theme to `@wolimp/docweaver` beta.2, using its `buildDocs` API and public path support.
 
 ## [0.1.0-beta.1]
 

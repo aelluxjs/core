@@ -58,12 +58,10 @@
     "@babel/core": "^7.29.7",
     "@babel/preset-env": "^7.29.7",
     "@playwright/test": "^1.63.0",
-    "@wolimp/docweaver": "^0.1.0-beta.1",
+    "@wolimp/docweaver": "^0.1.0-beta.2",
     "core-js": "^3.50.0",
     "custom-event-polyfill": "^1.0.7",
     "esbuild": "^0.25.0",
-    "eta": "^4.6.0",
-    "markdown-it": "^15.0.2",
     "raf": "^3.4.1",
     "whatwg-fetch": "^3.6.20"
   }
