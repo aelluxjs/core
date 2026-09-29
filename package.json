@@ -58,7 +58,7 @@
     "@babel/core": "^7.29.7",
     "@babel/preset-env": "^7.29.7",
     "@playwright/test": "^1.63.0",
-    "@wolimp/docweaver": "^0.1.0-beta.2",
+    "@wolimp/docweaver": "^0.1.0-beta.3",
     "core-js": "^3.50.0",
     "custom-event-polyfill": "^1.0.7",
     "esbuild": "^0.25.0",

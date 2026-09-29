@@ -34,7 +34,7 @@
 :root {
   --bs-font-sans-serif: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --bs-body-font-family: var(--bs-font-sans-serif);
-  --bs-headings-font-family: 'Sora', sans-serif;
+  --bs-headings-font-family: 'Geist', sans-serif;
 }
 
 h1,
