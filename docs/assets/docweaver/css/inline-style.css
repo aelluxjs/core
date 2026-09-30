@@ -397,3 +397,23 @@ h3::before {
   margin-top: -150px;
   visibility: hidden;
 }
+
+table {
+  max-width: 100%;
+  width: 100%;
+}
+
+.table-scroll-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  /* Smooth scrolling on iOS devices */
+  margin-bottom: 1.5rem;
+  /* Optional layout spacing */
+}
+
+.table-scroll-wrapper table th,
+.table-scroll-wrapper table td {
+  white-space: nowrap;
+  padding: 0.5rem;
+}
