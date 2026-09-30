@@ -67,17 +67,17 @@
         `nav [href]:not([${ajaxAttr}])`
       ];
       document.querySelectorAll(linksToUpdate.join(","))
-      .forEach((link)=>{
-        if(link.getAttribute("href")?.startsWith("#")) return;
-        link.setAttribute(
-          ajaxAttr,
-          "#doc-content,#doc-navlinks,#doc-breadcrumb"
+        .forEach((link) => {
+          if (link.getAttribute("href")?.startsWith("#")) return;
+          link.setAttribute(
+            ajaxAttr,
+            "#doc-content,#doc-navlinks,#doc-breadcrumb"
           );
-      });
+        });
     }
   );
 
-  document.addEventListener("AelluxJsAjaxStart",
+  document.addEventListener("AelluxJsAjaxHrefStart",
     (e) => {
       const container = document.querySelector("#doc-content");
       container.style.transition = null;
@@ -85,7 +85,7 @@
     }
   );
 
-  document.addEventListener("AelluxJsAjaxLoaded",
+  document.addEventListener("AelluxJsAjaxHrefLoaded",
     (e) => {
       const container = document.querySelector("#doc-content");
       container.style.transition = "opacity .25s linear";
@@ -151,47 +151,46 @@
   }
 
   document.addEventListener("DOMContentLoaded",
-  function(){
-    let currentRequest = null;
+    function () {
+      let currentRequest = null;
 
-    const progressBar = document.querySelector("#page-progress");
-    let progressTimer = null, progressTimer1 = null, progressTimer2 = null;
+      const progressBar = document.querySelector("#page-progress");
+      let progressTimer = null, progressTimer1 = null, progressTimer2 = null;
 
-  document.addEventListener("AelluxJsAjaxStart",startProgress)
-  document.addEventListener("AelluxJsAjaxComplete",finishProgress)
+      document.addEventListener("AelluxJsAjaxHrefStart", startProgress)
+      document.addEventListener("AelluxJsAjaxHrefComplete", finishProgress)
 
-    function startProgress() {
-      if (!progressBar) return;
+      function startProgress() {
+        if (!progressBar) return;
 
-      clearInterval(progressTimer);
-      clearInterval(progressTimer1);
-      clearInterval(progressTimer2);
-      progressBar.style.transition = "none";
-      progressBar.style.opacity = "1";
-      progressBar.style.width = "10%";
+        clearInterval(progressTimer);
+        clearInterval(progressTimer1);
+        clearInterval(progressTimer2);
+        progressBar.style.transition = "none";
+        progressBar.style.opacity = "1";
+        progressBar.style.width = "10%";
 
-      let progress = 10;
-      progressTimer = setInterval(() => {
-        progress += Math.random() * 12;
-        if (progress > 85) progress = 85;
-        progressBar.style.transition = null;
-        progressBar.style.width = `${progress}%`;
-      }, 200);
-    }
+        let progress = 10;
+        progressTimer = setInterval(() => {
+          progress += Math.random() * 12;
+          if (progress > 85) progress = 85;
+          progressBar.style.transition = null;
+          progressBar.style.width = `${progress}%`;
+        }, 200);
+      }
 
-    function finishProgress() {
-      if (!progressBar) return;
+      function finishProgress() {
+        if (!progressBar) return;
 
-      clearInterval(progressTimer);
-      clearInterval(progressTimer1);
-      clearInterval(progressTimer2);
-      progressBar.style.width = "100%";
-      progressTimer1 = setTimeout(() => progressBar.style.opacity = "0", 200);
-      progressTimer2 = setTimeout(() => progressBar.style.width = "0%", 450);
-    }
-  });
+        clearInterval(progressTimer);
+        clearInterval(progressTimer1);
+        clearInterval(progressTimer2);
+        progressBar.style.width = "100%";
+        progressTimer1 = setTimeout(() => progressBar.style.opacity = "0", 200);
+        progressTimer2 = setTimeout(() => progressBar.style.width = "0%", 450);
+      }
+    });
 </script>
-
 </head>
 
 <body>
