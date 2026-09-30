@@ -2,7 +2,17 @@
 
 All notable changes to aellux.js will be documented in this file.
 
-## [0.1.0-beta.2] - Unreleased
+## [0.1.0-beta.3] - 2026-09-30
+
+### Changed
+
+- Prepared the `0.1.0-beta.3` Core distribution.
+
+### Fixed
+
+- Preference option labels now update associated controls, including unchecked inputs and IDs with CSS special characters, without failing when a target is missing.
+
+## [0.1.0-beta.2]
 
 ### Changed
 
@@ -10,6 +20,7 @@ All notable changes to aellux.js will be documented in this file.
 - Moved documentation generation and its theme to `@wolimp/docweaver` beta.2, using its `buildDocs` API and public path support.
 - Updated `@wolimp/docweaver` to beta.3 and regenerated the static documentation.
 - Updated `@wolimp/docweaver` to beta.4 and regenerated the static documentation.
+- Updated `@wolimp/docweaver` to beta.5 and regenerated the static documentation.
 
 ## [0.1.0-beta.1]
 

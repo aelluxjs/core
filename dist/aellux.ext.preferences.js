@@ -105,6 +105,14 @@
         const value = element.getAttribute(attr.option);
         const selected = value === get(preference);
         element.classList.toggle(className.active, selected);
+        const labelFor = element.getAttribute("for");
+        if (labelFor) {
+          const forTarget = document.getElementById(labelFor);
+          if (forTarget) {
+            if ("value" in forTarget) forTarget.value = value;
+            if ("checked" in forTarget) forTarget.checked = selected;
+          }
+        }
         if (selectedLabel && selected) {
           if (selectedLabel.value) {
             selectedLabel.value = element.innerText;

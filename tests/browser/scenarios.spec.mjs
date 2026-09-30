@@ -95,6 +95,27 @@ test("minified distribution exposes the renamed global", async ({ page }) => {
   expect(await page.evaluate(() => typeof window.Aellux)).toBe("undefined");
 });
 
+test("preference labels update associated inputs safely", async ({ page }) => {
+  await page.goto("/tests/index.htm");
+  await page.evaluate(() => {
+    document.body.innerHTML = `
+      <div data-ae-preference="color-scheme">
+        <input id="scheme:light" type="radio" name="scheme">
+        <label data-ae-option="light" for="scheme:light">Light</label>
+        <label data-ae-option="dark" for="missing-input">Dark</label>
+      </div>`;
+  });
+  await page.addScriptTag({ url: "/dist/aellux.js" });
+  await page.evaluate(() => AelluxJs.init({ mode: "full" }));
+  await expect.poll(() => page.evaluate(() => AelluxJs.preferences?.initialized)).toBe(true);
+  await page.evaluate(() => {
+    AelluxJs.preferences.set("color-scheme", "light");
+    AelluxJs.preferences.update();
+  });
+  await expect(page.locator('[id="scheme:light"]')).toBeChecked();
+  await expect(page.locator('[id="scheme:light"]')).toHaveValue("light");
+});
+
 test("dynamic elements can be mounted and unmounted after initialization", async ({ page }) => {
   await openScenario(page, "dynamic-update");
   await page.evaluate(async () => {
