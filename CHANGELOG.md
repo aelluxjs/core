@@ -2,7 +2,17 @@
 
 All notable changes to aellux.js will be documented in this file.
 
-## [0.1.0-beta.4] - Unreleased
+## [0.1.0-beta.5] - Unreleased
+
+### Changed
+
+- Regenerated the documentation with updated navigation, code highlighting, responsive tables, and the Bootstrap bundle.
+
+### Fixed
+
+- Mount and unmount operations now dispatch their corresponding lifecycle events.
+
+## [0.1.0-beta.4] - 2026-09-30
 
 ### Changed
 

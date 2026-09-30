@@ -21493,7 +21493,7 @@
               _iterator4.f();
               return _context3.f(35);
             case 36:
-              AelluxJs2.dispatch("Update");
+              AelluxJs2.dispatch(toCapitalized(method));
             case 37:
               return _context3.a(2);
           }
@@ -21552,6 +21552,12 @@
     ;
     function fromCamelCase(name) {
       return name.replace(/([A-Z])/g, "-$1").toLowerCase();
+    }
+    ;
+    function toCapitalized(name) {
+      return name.replace(/^([a-z])|-([a-z])/g, function(_, first, afterHyphen) {
+        return (first || afterHyphen).toUpperCase();
+      });
     }
     ;
     return {

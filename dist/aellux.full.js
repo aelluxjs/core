@@ -765,7 +765,7 @@
           );
         }
       }
-      AelluxJs2.dispatch("Update");
+      AelluxJs2.dispatch(toCapitalized(method));
     }
     function resolveRoots(root3) {
       if (!root3) {
@@ -814,6 +814,12 @@
     ;
     function fromCamelCase(name) {
       return name.replace(/([A-Z])/g, "-$1").toLowerCase();
+    }
+    ;
+    function toCapitalized(name) {
+      return name.replace(/^([a-z])|-([a-z])/g, function(_, first, afterHyphen) {
+        return (first || afterHyphen).toUpperCase();
+      });
     }
     ;
     return {
