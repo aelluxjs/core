@@ -52,7 +52,7 @@
 
 <script src="/core/docs/assets/docweaver/js/toc-init.js?t=1"></script>
 
-<script src="https://cdn.jsdelivr.net/npm/@aelluxjs/core@0.1.0-beta.3/dist/aellux.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@aelluxjs/core@0.1.0-beta.4/dist/aellux.min.js"></script>
 <script>
   AelluxJs.init({ mode: "full" });
 
@@ -63,13 +63,17 @@
 
       const ajaxAttr = AelluxJs.attr("ajax-href");
       const linksToUpdate = [
-        `#doc-content [href]:not([${ajaxAttr}])`,
+        `.article [href]:not([${ajaxAttr}])`,
         `nav [href]:not([${ajaxAttr}])`
       ];
       document.querySelectorAll(linksToUpdate.join(","))
-        .forEach((link) => {
-          link.setAttribute(ajaxAttr, "#doc-content");
-        });
+      .forEach((link)=>{
+        if(link.getAttribute("href")?.startsWith("#")) return;
+        link.setAttribute(
+          ajaxAttr,
+          "#doc-content,#doc-navlinks,#doc-breadcrumb"
+          );
+      });
     }
   );
 
@@ -86,6 +90,7 @@
       const container = document.querySelector("#doc-content");
       container.style.transition = "opacity .25s linear";
       container.style.opacity = null;
+      setNavActiveByUrl(window.location.href);
     }
   );
 
@@ -111,7 +116,82 @@
       bsToggler.setAttribute('aria-expanded', 'false');
     }
   }
+
+  function comparableUrl(value) {
+    const url = new URL(value, window.location.href);
+
+    // Match by path + query, ignoring hash
+    return `${url.origin}${url.pathname}${url.search}`;
+  }
+
+  function setNavActiveByUrl(url) {
+    const target = comparableUrl(url);
+
+    document.querySelectorAll(".nav-link[href]").forEach((link) => {
+      const linkUrl = comparableUrl(link.href);
+      const navItem = link.closest(".nav-item");
+
+      navItem?.classList.toggle("active", linkUrl === target);
+      if (linkUrl === target) openAllParentCollapses(navItem);
+    });
+  }
+
+  function openAllParentCollapses(element) {
+    let collapse = element.closest(".collapse:not(.show)");
+
+    while (collapse) {
+      if (collapse.id && collapse.getAttribute('data-bs-parent')) {
+        const selector = `[data-bs-toggle][data-bs-target="#${collapse.id}"]`;
+        const button = document.querySelector(selector);
+        button.click();
+      }
+
+      collapse = collapse.parentElement?.closest(".collapse:not(.show)");
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded",
+  function(){
+    let currentRequest = null;
+
+    const progressBar = document.querySelector("#page-progress");
+    let progressTimer = null, progressTimer1 = null, progressTimer2 = null;
+
+  document.addEventListener("AelluxJsAjaxStart",startProgress)
+  document.addEventListener("AelluxJsAjaxComplete",finishProgress)
+
+    function startProgress() {
+      if (!progressBar) return;
+
+      clearInterval(progressTimer);
+      clearInterval(progressTimer1);
+      clearInterval(progressTimer2);
+      progressBar.style.transition = "none";
+      progressBar.style.opacity = "1";
+      progressBar.style.width = "10%";
+
+      let progress = 10;
+      progressTimer = setInterval(() => {
+        progress += Math.random() * 12;
+        if (progress > 85) progress = 85;
+        progressBar.style.transition = null;
+        progressBar.style.width = `${progress}%`;
+      }, 200);
+    }
+
+    function finishProgress() {
+      if (!progressBar) return;
+
+      clearInterval(progressTimer);
+      clearInterval(progressTimer1);
+      clearInterval(progressTimer2);
+      progressBar.style.width = "100%";
+      progressTimer1 = setTimeout(() => progressBar.style.opacity = "0", 200);
+      progressTimer2 = setTimeout(() => progressBar.style.width = "0%", 450);
+    }
+  });
 </script>
+
 </head>
 
 <body>

@@ -4,6 +4,10 @@ All notable changes to aellux.js will be documented in this file.
 
 ## [0.1.0-beta.4] - Unreleased
 
+### Changed
+
+- Updated `@wolimp/docweaver` to beta.6 and regenerated the static documentation.
+
 ### Fixed
 
 - Restored the AJAX link lifecycle events by using the Core `dispatch` API.
