@@ -23058,7 +23058,7 @@
                       AelluxJs.feedback.progress(currentElement2, "Ajax loading", 0);
                     }
                   });
-                  AelluxJs.dispatchEvent("AjaxHrefStart");
+                  AelluxJs.dispatch("AjaxHrefStart");
                   _context.p = 1;
                   _context.n = 2;
                   return AelluxJs.request(url, {
@@ -23125,7 +23125,7 @@
                   if (!options.ignoreHistory && AelluxJs.stateNavigation) {
                     AelluxJs.stateNavigation.ajaxHref(url, selectors);
                   }
-                  AelluxJs.dispatchEvent("AjaxHrefLoaded");
+                  AelluxJs.dispatch("AjaxHrefLoaded");
                   _context.n = 17;
                   break;
                 case 15:
@@ -23139,7 +23139,7 @@
                       AelluxJs.feedback.progress(currentElement2, "Ajax loading", 1);
                     }
                   });
-                  AelluxJs.dispatchEvent("AjaxHrefError");
+                  AelluxJs.dispatch("AjaxHrefError");
                   if (!(_t2.name === "AbortError")) {
                     _context.n = 16;
                     break;
@@ -23150,7 +23150,7 @@
                 case 17:
                   _context.p = 17;
                   if (previousController === controller) previousController = null;
-                  AelluxJs.dispatchEvent("AjaxHrefComplete");
+                  AelluxJs.dispatch("AjaxHrefComplete");
                   return _context.f(17);
                 case 18:
                   return _context.a(2);

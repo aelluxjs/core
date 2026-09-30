@@ -500,7 +500,7 @@
               AelluxJs.feedback.progress(currentElement, "Ajax loading", 0);
             }
           });
-          AelluxJs.dispatchEvent("AjaxHrefStart");
+          AelluxJs.dispatch("AjaxHrefStart");
           try {
             const response = await AelluxJs.request(url, { signal: controller.signal });
             const html = await response.text();
@@ -524,7 +524,7 @@
             if (!options.ignoreHistory && AelluxJs.stateNavigation) {
               AelluxJs.stateNavigation.ajaxHref(url, selectors);
             }
-            AelluxJs.dispatchEvent("AjaxHrefLoaded");
+            AelluxJs.dispatch("AjaxHrefLoaded");
           } catch (error) {
             selectorList.forEach(function(selector) {
               const currentElement = elements.get(selector);
@@ -534,13 +534,13 @@
                 AelluxJs.feedback.progress(currentElement, "Ajax loading", 1);
               }
             });
-            AelluxJs.dispatchEvent("AjaxHrefError");
+            AelluxJs.dispatch("AjaxHrefError");
             if (error.name === "AbortError") return null;
             throw error;
           } finally {
             if (previousController === controller)
               previousController = null;
-            AelluxJs.dispatchEvent("AjaxHrefComplete");
+            AelluxJs.dispatch("AjaxHrefComplete");
           }
         }
         function onClick(event) {

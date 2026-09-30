@@ -2,6 +2,12 @@
 
 All notable changes to aellux.js will be documented in this file.
 
+## [0.1.0-beta.4] - Unreleased
+
+### Fixed
+
+- Restored the AJAX link lifecycle events by using the Core `dispatch` API.
+
 ## [0.1.0-beta.3] - 2026-09-30
 
 ### Changed
