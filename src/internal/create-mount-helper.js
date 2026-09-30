@@ -132,7 +132,7 @@ export function createMountHelper(root, extensionPromises) {
         );
       }
     }
-    AelluxJs.dispatch("Update");
+    AelluxJs.dispatch(toCapitalized(method));
   }
 
   function resolveRoots(root) {
@@ -181,6 +181,12 @@ export function createMountHelper(root, extensionPromises) {
 
   function toCamelCase(name) { return name.replace(/-([a-z])/g, (_, c) => c.toUpperCase()); };
   function fromCamelCase(name) { return name.replace(/([A-Z])/g, "-$1").toLowerCase(); };
+
+  function toCapitalized(name) {
+    return name.replace(/^([a-z])|-([a-z])/g, function (_, first, afterHyphen) {
+      return (first || afterHyphen).toUpperCase();
+    });
+  };
 
   return {
     AelluxJsForceUpdate,
