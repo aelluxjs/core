@@ -12,7 +12,8 @@
   function init() {
     document.addEventListener("click", onClick);
   }
-  async function destroy() {
+
+  function destroy() {
     document.removeEventListener("click", onClick);
     if (previousController) { previousController.abort(); }
   }
@@ -49,6 +50,8 @@
       //AJAX PROGRESS UPDATE VALUE
     });
 
+    AelluxJs.dispatchEvent("AjaxHrefStart");
+
     try {
       const response = await AelluxJs.request(url, { signal: controller.signal });
       const html = await response.text();
@@ -81,6 +84,8 @@
       if (!options.ignoreHistory && AelluxJs.stateNavigation) {
         AelluxJs.stateNavigation.ajaxHref(url, selectors);
       }
+
+      AelluxJs.dispatchEvent("AjaxHrefLoaded");
     }
     catch (error) {
       selectorList.forEach(function (selector) {
@@ -93,12 +98,15 @@
         }
       });
 
+      AelluxJs.dispatchEvent("AjaxHrefError");
+
       if (error.name === "AbortError") return null;
       throw error;
     }
     finally {
       if (previousController === controller)
         previousController = null;
+      AelluxJs.dispatchEvent("AjaxHrefComplete");
     }
   }
 

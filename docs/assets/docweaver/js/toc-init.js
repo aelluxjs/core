@@ -38,7 +38,7 @@ async function initOrRefreshToc() {
     return;
   }
 
-  await promise_value(window, "tocbot");
+  //await promise_value(window, "tocbot");
 
   if (!tocInitialized) {
     tocbot.init(tocOptions);
