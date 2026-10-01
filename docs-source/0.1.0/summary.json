@@ -32,8 +32,7 @@
         { "label": "Declarative Loading", "href": "extensions/declarative-loading.md" },
         { "label": "Lazy Loading", "href": "extensions/lazy-loading.md" },
         { "label": "Extension Styles", "href": "extensions/styles.md" },
-        { "label": "Modern & Legacy Variants", "href": "extensions/legacy-variants.md" },
-        { "label": "Adaptive Extension", "href": "extensions/adaptive.md" }
+        { "label": "Modern & Legacy Variants", "href": "extensions/legacy-variants.md" }
       ]
     },
     {

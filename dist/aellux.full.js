@@ -312,75 +312,6 @@
     }
   });
 
-  // src/aellux.ext.adaptive.js
-  var aellux_ext_adaptive_exports = {};
-  var init_aellux_ext_adaptive = __esm({
-    "src/aellux.ext.adaptive.js"() {
-      /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
-      (function() {
-        "use strict";
-        const extensionName = "adaptive";
-        const attr = {
-          adaptive: AelluxJs.attr(extensionName)
-        };
-        const mountMap = /* @__PURE__ */ new Map();
-        const adaptiveParams = {
-          experienceScale: {
-            near: 1,
-            far: 1.5
-          },
-          minSizes: {
-            compact: 0,
-            small: 480,
-            medium: 768,
-            large: 1024,
-            xl: 1280,
-            xxl: 1600
-          },
-          ratioShapes: {
-            vertical: 0.8,
-            //>square<
-            horizontal: 1.25
-          }
-        };
-        AelluxJs.extRegister(extensionName, { init, destroy, mountMap, adaptiveParams });
-        function init() {
-          mountMap.set(`[${attr.adaptive}]`, {
-            mount: mountAdaptive,
-            unmount: unmountAdaptive
-          });
-        }
-        function destroy() {
-        }
-        function mountAdaptive() {
-        }
-        function unmountAdaptive() {
-        }
-        function inferOrientation(flexBox, selector = "*") {
-          return AelluxJs.waitLayout.read(() => {
-            const fallback = "horizontal";
-            var style = getComputedStyle(flexBox);
-            if (style.display === "flex" || style.display === "inline-flex") {
-              return style.flexDirection.indexOf("column") === 0 ? "vertical" : "horizontal";
-            }
-            if (!selector || selector.length === 0) return fallback;
-            var children = flexBox.querySelectorAll(selector);
-            if (children.length < 2) return fallback;
-            var first = children[0].getBoundingClientRect();
-            var second = children[1].getBoundingClientRect();
-            var deltaX = Math.abs(
-              second.left + second.width / 2 - (first.left + first.width / 2)
-            );
-            var deltaY = Math.abs(
-              second.top + second.height / 2 - (first.top + first.height / 2)
-            );
-            return deltaY > deltaX ? "vertical" : "horizontal";
-          });
-        }
-      })();
-    }
-  });
-
   // src/aellux.ext.feedback.js
   var aellux_ext_feedback_exports = {};
   var init_aellux_ext_feedback = __esm({
@@ -500,6 +431,9 @@
               AelluxJs.feedback.progress(currentElement, "Ajax loading", 0);
             }
           });
+          if (!options.ignoreHistory && AelluxJs.stateNavigation) {
+            AelluxJs.stateNavigation.ajaxHref(url, selectors);
+          }
           AelluxJs.dispatch("AjaxHrefStart");
           try {
             const response = await AelluxJs.request(url, { signal: controller.signal });
@@ -520,9 +454,6 @@
                 AelluxJs.feedback.busy(replacement, "Ajax loaded", false);
                 AelluxJs.feedback.progress(replacement, "Ajax loaded", 1);
               }
-            }
-            if (!options.ignoreHistory && AelluxJs.stateNavigation) {
-              AelluxJs.stateNavigation.ajaxHref(url, selectors);
             }
             AelluxJs.dispatch("AjaxHrefLoaded");
           } catch (error) {
@@ -1065,27 +996,9 @@
   // src/aellux.full.esm.js
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   var root = typeof globalThis !== "undefined" ? globalThis : window;
-  function appendBundledStyle(extensionName) {
-    return new Promise((resolve) => {
-      const data = root.AelluxJs.extRegistry[extensionName];
-      const url = data.url.replace(/^\.\//, root.AelluxJs.aelluxBasePath);
-      const link = document.createElement("link");
-      link.rel = "stylesheet";
-      link.href = url.replace(/\.js(?=[?#]|$)/, ".css");
-      link.setAttribute(root.AelluxJs.attr("ext-style"), extensionName);
-      assetLoadHelper(link, {
-        loadCallback: resolve,
-        errorCallback: resolve
-      });
-    });
-  }
   root.AelluxJs.bundledExtensions = Object.freeze({
     "preferences": () => Promise.resolve().then(() => (init_aellux_ext_preferences(), aellux_ext_preferences_exports)),
     "state-navigation": () => Promise.resolve().then(() => (init_aellux_ext_state_navigation(), aellux_ext_state_navigation_exports)),
-    "adaptive": () => Promise.all([
-      Promise.resolve().then(() => (init_aellux_ext_adaptive(), aellux_ext_adaptive_exports)),
-      appendBundledStyle("adaptive")
-    ]),
     "feedback": () => Promise.resolve().then(() => (init_aellux_ext_feedback(), aellux_ext_feedback_exports)),
     "ajax-href": () => Promise.resolve().then(() => (init_aellux_ext_ajax_href(), aellux_ext_ajax_href_exports))
   });

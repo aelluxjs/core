@@ -4,7 +4,7 @@
 // Loads and caches configured aellux.js Extensions, initializes them, and dispatches the Ready event.
 // Ready signals that the orchestrator is initialized and available; it does not guarantee
 // successful aellux.js Extension initialization or completed DOM mounting. Component-specific events
-// such as AdaptiveUpdate report their own readiness or updates.
+// such as Extension-specific events report their own readiness or updates.
 // Routes explicit DOM update/unmount requests through extension mount/unmount declarations
 // and provides layout scheduling and fetch helpers.
 // Uses ES2017 syntax, Promises, and modern browser APIs; legacy fallback

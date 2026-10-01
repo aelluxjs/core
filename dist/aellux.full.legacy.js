@@ -22555,77 +22555,6 @@
     }
   });
 
-  // src/aellux.ext.adaptive.js
-  var aellux_ext_adaptive_exports = {};
-  var init_aellux_ext_adaptive = __esm({
-    "src/aellux.ext.adaptive.js": function() {
-      /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
-      (function() {
-        "use strict";
-        var extensionName = "adaptive";
-        var attr = {
-          adaptive: AelluxJs.attr(extensionName)
-        };
-        var mountMap = /* @__PURE__ */ new Map();
-        var adaptiveParams = {
-          experienceScale: {
-            near: 1,
-            far: 1.5
-          },
-          minSizes: {
-            compact: 0,
-            small: 480,
-            medium: 768,
-            large: 1024,
-            xl: 1280,
-            xxl: 1600
-          },
-          ratioShapes: {
-            vertical: 0.8,
-            //>square<
-            horizontal: 1.25
-          }
-        };
-        AelluxJs.extRegister(extensionName, {
-          init: init,
-          destroy: destroy,
-          mountMap: mountMap,
-          adaptiveParams: adaptiveParams
-        });
-        function init() {
-          mountMap.set("[".concat(attr.adaptive, "]"), {
-            mount: mountAdaptive,
-            unmount: unmountAdaptive
-          });
-        }
-        function destroy() {
-        }
-        function mountAdaptive() {
-        }
-        function unmountAdaptive() {
-        }
-        function inferOrientation(flexBox) {
-          var selector = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : "*";
-          return AelluxJs.waitLayout.read(function() {
-            var fallback = "horizontal";
-            var style = getComputedStyle(flexBox);
-            if (style.display === "flex" || style.display === "inline-flex") {
-              return style.flexDirection.indexOf("column") === 0 ? "vertical" : "horizontal";
-            }
-            if (!selector || selector.length === 0) return fallback;
-            var children = flexBox.querySelectorAll(selector);
-            if (children.length < 2) return fallback;
-            var first = children[0].getBoundingClientRect();
-            var second = children[1].getBoundingClientRect();
-            var deltaX = Math.abs(second.left + second.width / 2 - (first.left + first.width / 2));
-            var deltaY = Math.abs(second.top + second.height / 2 - (first.top + first.height / 2));
-            return deltaY > deltaX ? "vertical" : "horizontal";
-          });
-        }
-      })();
-    }
-  });
-
   // src/aellux.ext.feedback.js
   var aellux_ext_feedback_exports = {};
   function _regenerator4() {
@@ -23064,6 +22993,9 @@
                       AelluxJs.feedback.progress(currentElement2, "Ajax loading", 0);
                     }
                   });
+                  if (!options.ignoreHistory && AelluxJs.stateNavigation) {
+                    AelluxJs.stateNavigation.ajaxHref(url, selectors);
+                  }
                   AelluxJs.dispatch("AjaxHrefStart");
                   _context.p = 1;
                   _context.n = 2;
@@ -23128,9 +23060,6 @@
                   _iterator.f();
                   return _context.f(13);
                 case 14:
-                  if (!options.ignoreHistory && AelluxJs.stateNavigation) {
-                    AelluxJs.stateNavigation.ajaxHref(url, selectors);
-                  }
                   AelluxJs.dispatch("AjaxHrefLoaded");
                   _context.n = 17;
                   break;
@@ -23183,25 +23112,10 @@
 
   // src/aellux.full.esm.js
   var aellux_full_esm_exports = {};
-  function appendBundledStyle(extensionName) {
-    return new Promise(function(resolve) {
-      var data = root.AelluxJs.extRegistry[extensionName];
-      var url = data.url.replace(/^\.\//, root.AelluxJs.aelluxBasePath);
-      var link = document.createElement("link");
-      link.rel = "stylesheet";
-      link.href = url.replace(/\.js(?=[?#]|$)/, ".css");
-      link.setAttribute(root.AelluxJs.attr("ext-style"), extensionName);
-      assetLoadHelper(link, {
-        loadCallback: resolve,
-        errorCallback: resolve
-      });
-    });
-  }
   var root;
   var init_aellux_full_esm = __esm({
     "src/aellux.full.esm.js": function() {
       init_aellux_orchestrator();
-      init_asset_load_helper();
       /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
       root = typeof globalThis !== "undefined" ? globalThis : window;
       root.AelluxJs.bundledExtensions = Object.freeze({
@@ -23214,11 +23128,6 @@
           return Promise.resolve().then(function() {
             return init_aellux_ext_state_navigation(), aellux_ext_state_navigation_exports;
           });
-        },
-        "adaptive": function adaptive() {
-          return Promise.all([Promise.resolve().then(function() {
-            return init_aellux_ext_adaptive(), aellux_ext_adaptive_exports;
-          }), appendBundledStyle("adaptive")]);
         },
         "feedback": function feedback() {
           return Promise.resolve().then(function() {

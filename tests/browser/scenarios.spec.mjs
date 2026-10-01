@@ -82,6 +82,11 @@ test("full runtime writes the renamed history state marker", async ({ page }) =>
   await page.addScriptTag({ url: "/dist/aellux.js" });
   await page.evaluate(() => AelluxJs.init({ mode: "full" }));
   await expect.poll(() => page.evaluate(() => AelluxJs.stateNavigation?.initialized)).toBe(true);
+  expect(await page.evaluate(() => ({
+    adaptive: AelluxJs.adaptive,
+    registered: Object.hasOwn(AelluxJs.extRegistry, "adaptive"),
+    bundled: Object.hasOwn(AelluxJs.bundledExtensions, "adaptive")
+  }))).toEqual({ adaptive: undefined, registered: false, bundled: false });
   expect(await page.evaluate(() => history.state?.aelluxJsState)).toBe(true);
   expect(await page.evaluate(() => history.state?.aelluxState)).toBeUndefined();
 });
@@ -121,7 +126,7 @@ test("dynamic elements can be mounted and unmounted after initialization", async
   await page.evaluate(async () => {
     const element = document.createElement("section");
     element.id = "playwright-dynamic-target";
-    element.setAttribute("data-ae-adaptive", "");
+    element.setAttribute("data-ae-preference", "color-scheme");
     document.querySelector("#dynamic-root").append(element);
     await $ae.update(element);
   });
@@ -130,15 +135,14 @@ test("dynamic elements can be mounted and unmounted after initialization", async
   await expect(page.locator("#playwright-dynamic-target")).not.toHaveClass(/ae--mounted/);
 });
 
-test("extension stylesheet is loaded and applies its utility", async ({ page }) => {
+test("extension stylesheet is loaded and applies its rule", async ({ page }) => {
   await openScenario(page, "extension-with-css");
-  const style = page.locator("link[data-ae-ext-style='adaptive']");
+  const style = page.locator("link[data-ae-ext-style='preferences']");
   await expect.poll(() => style.evaluate(link => Boolean(link.sheet))).toBe(true);
   await page.evaluate(() => {
     const element = document.createElement("div");
-    element.id = "playwright-aspect-ratio";
-    element.className = "ar-1x1";
+    element.id = "playwright-style-probe";
     document.body.append(element);
   });
-  await expect.poll(() => page.locator("#playwright-aspect-ratio").evaluate(element => getComputedStyle(element).aspectRatio)).toBe("1 / 1");
+  await expect.poll(() => page.locator("#playwright-style-probe").evaluate(element => getComputedStyle(element).outlineStyle)).toBe("solid");
 });

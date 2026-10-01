@@ -5,11 +5,11 @@
   <title>aellux.js validation: HTML and Web Platform</title>
   <script src="./harness.js"></script>
   <script src="../../dist/aellux.js"></script>
-  <link rel="aelluxjs-ext" href="adaptive" data-ae-load-when="[data-ae-adaptive]">
+  <link rel="aelluxjs-ext" href="preferences" data-ae-load-when="[data-ae-preference]">
   <script>
     AelluxJsValidation.run(function (assert) {
-      var target = document.getElementById("adaptive-target");
-      assert(AelluxJs.adaptive, "Adaptive extension was not initialized");
+      var target = document.getElementById("preference-target");
+      assert(AelluxJs.preferences, "Preferences extension was not initialized");
       assert(target.classList.contains("ae--mounted"), "Web Platform element was not mounted");
       assert(!document.querySelector("[class*='bootstrap']"), "Scenario must not depend on a visual framework");
     });
@@ -17,7 +17,7 @@
   </script>
 </head>
 <body>
-  <main id="adaptive-target" data-ae-adaptive data-ae-wait-mounted>
+  <main id="preference-target" data-ae-preference="color-scheme" data-ae-wait-mounted>
     <h1>HTML and Web Platform</h1>
     <p>Native HTML enhanced by an aellux.js Extension.</p>
   </main>

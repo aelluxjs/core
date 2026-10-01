@@ -3,18 +3,16 @@
 Lazy loading delays an Extension until a matching element is found during `$ae.update(root)`.
 
 ```js
-$ae.ext("adaptive", {
-  loadWhen: "[data-ae-adaptive]",
-  loadStyle: true
+$ae.ext("preferences", {
+  loadWhen: "[data-ae-preference]"
 });
 ```
 
 The same behavior can be declared in HTML:
 
 ```html
-<link rel="aelluxjs-ext" href="adaptive"
-      data-ae-load-when="[data-ae-adaptive]"
-      data-ae-load-style>
+<link rel="aelluxjs-ext" href="preferences"
+      data-ae-load-when="[data-ae-preference]">
 ```
 
 When the selector matches, the orchestrator loads and initializes the Extension, registers its mount selectors, and mounts matching elements in the affected scope.

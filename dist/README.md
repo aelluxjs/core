@@ -1,10 +1,10 @@
 # aellux.js
 
-aellux.js is a lightweight extension-management library for modular UX behaviors in browser interfaces. It complements Bootstrap and other visual systems with declarative HTML attributes, adaptive CSS utilities, and independently loadable JavaScript Extensions.
+aellux.js is a lightweight extension-management library for modular UX behaviors in browser interfaces. It complements Bootstrap and other visual systems with declarative HTML attributes and independently loadable JavaScript Extensions.
 
 An **EXT (aellux.js Extension)** owns one focused UX responsibility and exposes its API through the global `AelluxJs` object and its `$ae` alias. The aellux.js boot script selects the runtime, while the orchestrator loads Extensions and coordinates `init`, `mount`, `unmount`, and `destroy`.
 
-aellux.js does not require or bundle Bootstrap. Its `data-ae-*`, `ae--*`, and `*-ux-*` namespaces are designed to coexist with existing applications and frameworks.
+aellux.js does not require or bundle Bootstrap. Its `data-ae-*` and `ae--*` namespaces are designed to coexist with existing applications and frameworks.
 
 ## Quick Start
 
@@ -21,10 +21,7 @@ Use `full` to load all core Extensions. Use `basic` to register only what the pa
 <script src="./dist/aellux.js"></script>
 <script>
   $ae.ext("preferences");
-  $ae.ext("adaptive", {
-    loadWhen: "[data-ae-adaptive]",
-    loadStyle: true
-  });
+  $ae.ext("feedback");
   $ae.init({ mode: "basic" });
 </script>
 ```
@@ -48,7 +45,6 @@ See [Getting Started](../docs/getting-started.md) for build instructions, runtim
 - [Lazy loading](../docs/extensions/lazy-loading.md)
 - [Optional Extension styles](../docs/extensions/styles.md)
 - [Modern and Legacy Extension variants](../docs/extensions/legacy-variants.md)
-- [Adaptive Extension](../docs/extensions/adaptive.md)
 - [Browser validation scenarios](../docs/validation-scenarios.md)
 - [Extension scaffold](../templates/README.md)
 
@@ -58,7 +54,6 @@ See [Getting Started](../docs/getting-started.md) for build instructions, runtim
 - Selective eager or lazy Extension loading.
 - Optional styles associated with individual Extensions.
 - Idempotent DOM mounting through `$ae.update(root)`.
-- Generated adaptive CSS utilities for container-scoped states.
 - Browser history, preferences, feedback, persistence, and asynchronous content behaviors.
 - ES5-compatible boot script with an [ES2017+ Modern browser baseline](../docs/runtime/browser-support.md).
 

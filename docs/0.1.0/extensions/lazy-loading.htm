@@ -96,6 +96,7 @@
       const container = document.querySelector("#doc-content");
       container.style.transition = null;
       container.style.opacity = .2;
+      setNavActiveByUrl(window.location.href);
     }
   );
 
@@ -104,7 +105,6 @@
       const container = document.querySelector("#doc-content");
       container.style.transition = "opacity .25s linear";
       container.style.opacity = null;
-      setNavActiveByUrl(window.location.href);
     }
   );
 
@@ -393,11 +393,6 @@
                             <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/extensions/legacy-variants.htm">
                               Modern &amp; Legacy Variants                            </a>
                           </li>
-                                                                                                      <li class="nav-item small-md rounded-1 ps-md-1 "
-                            style="flex:0">
-                            <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/extensions/adaptive.htm">
-                              Adaptive Extension                            </a>
-                          </li>
                                                                         </div>
                 </div>
                                                 <li class="nav-item small-md fw-bold rounded-1 ps-md-1 bg-light-adaptive" style="flex:0">
@@ -506,15 +501,13 @@
         <div id="doc-content" style="min-height: calc(100vh - 200px);" class="js-toc-content" ajax-load="doc-content">
           <h1>Lazy Extension Loading</h1>
 <p>Lazy loading delays an Extension until a matching element is found during <code>$ae.update(root)</code>.</p>
-<pre><code class="language-js">$ae.ext(&quot;adaptive&quot;, {
-  loadWhen: &quot;[data-ae-adaptive]&quot;,
-  loadStyle: true
+<pre><code class="language-js">$ae.ext(&quot;preferences&quot;, {
+  loadWhen: &quot;[data-ae-preference]&quot;
 });
 </code></pre>
 <p>The same behavior can be declared in HTML:</p>
-<pre><code class="language-html">&lt;link rel=&quot;aelluxjs-ext&quot; href=&quot;adaptive&quot;
-      data-ae-load-when=&quot;[data-ae-adaptive]&quot;
-      data-ae-load-style&gt;
+<pre><code class="language-html">&lt;link rel=&quot;aelluxjs-ext&quot; href=&quot;preferences&quot;
+      data-ae-load-when=&quot;[data-ae-preference]&quot;&gt;
 </code></pre>
 <p>When the selector matches, the orchestrator loads and initializes the Extension, registers its mount selectors, and mounts matching elements in the affected scope.</p>
 <p>Loading promises are cached to prevent duplicate concurrent loads. The current runtime removes the Extension from the lazy selector index after successful initialization. Moving that removal to the beginning of loading remains an explicit lifecycle review item for the beta.</p>

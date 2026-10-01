@@ -5,9 +5,9 @@ aellux.js can hide content while its required Extensions and resources are mount
 ## Current Runtime Contract
 
 ```html
-<main data-ae-wait-mounted>
+<main data-ae-preference="color-scheme" data-ae-wait-mounted>
   <div data-ae-loader>Loading…</div>
-  <section data-ae-adaptive>Content</section>
+  <section>Content</section>
 </main>
 ```
 
@@ -15,7 +15,7 @@ The boot script recognizes `data-ae-wait-mounted` and provides the minimal weak 
 
 The orchestrator adds `ae--mounted` after a relevant controller completes `mount` and removes it after `unmount`. The boot script's weak CSS uses the state to reveal content and hide the loader.
 
-Place `data-ae-wait-mounted` on an element that is itself mounted by at least one Extension, as in the example where `<main>` also declares `data-ae-adaptive`. A wrapper with no matching Extension controller does not receive `ae--mounted` automatically.
+Place `data-ae-wait-mounted` on an element that is itself mounted by at least one Extension, as in the example where `<main>` also declares `data-ae-preference`. A wrapper with no matching Extension controller does not receive `ae--mounted` automatically.
 
 ## Failure Behavior
 

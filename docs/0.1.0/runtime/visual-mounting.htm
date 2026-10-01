@@ -96,6 +96,7 @@
       const container = document.querySelector("#doc-content");
       container.style.transition = null;
       container.style.opacity = .2;
+      setNavActiveByUrl(window.location.href);
     }
   );
 
@@ -104,7 +105,6 @@
       const container = document.querySelector("#doc-content");
       container.style.transition = "opacity .25s linear";
       container.style.opacity = null;
-      setNavActiveByUrl(window.location.href);
     }
   );
 
@@ -393,11 +393,6 @@
                             <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/extensions/legacy-variants.htm">
                               Modern &amp; Legacy Variants                            </a>
                           </li>
-                                                                                                      <li class="nav-item small-md rounded-1 ps-md-1 "
-                            style="flex:0">
-                            <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/extensions/adaptive.htm">
-                              Adaptive Extension                            </a>
-                          </li>
                                                                         </div>
                 </div>
                                                 <li class="nav-item small-md fw-bold rounded-1 ps-md-1 bg-light-adaptive" style="flex:0">
@@ -507,14 +502,14 @@
           <h1>Visual Mounting States</h1>
 <p>aellux.js can hide content while its required Extensions and resources are mounting, display a loader, and expose completion through <code>ae--mounted</code>.</p>
 <h2>Current Runtime Contract</h2>
-<pre><code class="language-html">&lt;main data-ae-wait-mounted&gt;
+<pre><code class="language-html">&lt;main data-ae-preference=&quot;color-scheme&quot; data-ae-wait-mounted&gt;
   &lt;div data-ae-loader&gt;Loading…&lt;/div&gt;
-  &lt;section data-ae-adaptive&gt;Content&lt;/section&gt;
+  &lt;section&gt;Content&lt;/section&gt;
 &lt;/main&gt;
 </code></pre>
 <p>The boot script recognizes <code>data-ae-wait-mounted</code> and provides the minimal weak CSS required for the waiting state.</p>
 <p>The orchestrator adds <code>ae--mounted</code> after a relevant controller completes <code>mount</code> and removes it after <code>unmount</code>. The boot script&#39;s weak CSS uses the state to reveal content and hide the loader.</p>
-<p>Place <code>data-ae-wait-mounted</code> on an element that is itself mounted by at least one Extension, as in the example where <code>&lt;main&gt;</code> also declares <code>data-ae-adaptive</code>. A wrapper with no matching Extension controller does not receive <code>ae--mounted</code> automatically.</p>
+<p>Place <code>data-ae-wait-mounted</code> on an element that is itself mounted by at least one Extension, as in the example where <code>&lt;main&gt;</code> also declares <code>data-ae-preference</code>. A wrapper with no matching Extension controller does not receive <code>ae--mounted</code> automatically.</p>
 <h2>Failure Behavior</h2>
 <p>An Extension failure must not block orchestrator readiness. Loading failures are isolated and reported through diagnostics. Applications should still verify that every waiting element has a valid mount declaration so configuration errors cannot leave it hidden.</p>
 <p>Applications should keep meaningful initial HTML and avoid making essential content depend exclusively on JavaScript mounting.</p>

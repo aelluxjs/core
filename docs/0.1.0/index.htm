@@ -96,6 +96,7 @@
       const container = document.querySelector("#doc-content");
       container.style.transition = null;
       container.style.opacity = .2;
+      setNavActiveByUrl(window.location.href);
     }
   );
 
@@ -104,7 +105,6 @@
       const container = document.querySelector("#doc-content");
       container.style.transition = "opacity .25s linear";
       container.style.opacity = null;
-      setNavActiveByUrl(window.location.href);
     }
   );
 
@@ -393,11 +393,6 @@
                             <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/extensions/legacy-variants.htm">
                               Modern &amp; Legacy Variants                            </a>
                           </li>
-                                                                                                      <li class="nav-item small-md rounded-1 ps-md-1 "
-                            style="flex:0">
-                            <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/extensions/adaptive.htm">
-                              Adaptive Extension                            </a>
-                          </li>
                                                                         </div>
                 </div>
                                                 <li class="nav-item small-md fw-bold rounded-1 ps-md-1 bg-light-adaptive" style="flex:0">
@@ -518,7 +513,6 @@
 <li><a href="extensions/lazy-loading.htm">Lazy loading</a></li>
 <li><a href="extensions/styles.htm">Optional Extension styles</a></li>
 <li><a href="extensions/legacy-variants.htm">Modern and Legacy Extension variants</a></li>
-<li><a href="extensions/adaptive.htm">Adaptive Extension</a></li>
 </ul>
 <h2>Project Documents</h2>
 <ul>

@@ -96,6 +96,7 @@
       const container = document.querySelector("#doc-content");
       container.style.transition = null;
       container.style.opacity = .2;
+      setNavActiveByUrl(window.location.href);
     }
   );
 
@@ -104,7 +105,6 @@
       const container = document.querySelector("#doc-content");
       container.style.transition = "opacity .25s linear";
       container.style.opacity = null;
-      setNavActiveByUrl(window.location.href);
     }
   );
 
@@ -393,11 +393,6 @@
                             <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/extensions/legacy-variants.htm">
                               Modern &amp; Legacy Variants                            </a>
                           </li>
-                                                                                                      <li class="nav-item small-md rounded-1 ps-md-1 "
-                            style="flex:0">
-                            <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/extensions/adaptive.htm">
-                              Adaptive Extension                            </a>
-                          </li>
                                                                         </div>
                 </div>
                                                 <li class="nav-item small-md fw-bold rounded-1 ps-md-1 bg-light-adaptive" style="flex:0">
@@ -490,9 +485,9 @@
 
         <div id="doc-navlinks" ajax-load="doc-navlinks">
           <div class="d-flex justify-content-between flex-row gap-2 p-2 pb-4 px-0">
-    <a href="/core/docs/0.1.0/extensions/adaptive.htm" class="text-decoration-none d-inline-flex flex-row gap-2" style="max-width: 45%;">
+    <a href="/core/docs/0.1.0/extensions/legacy-variants.htm" class="text-decoration-none d-inline-flex flex-row gap-2" style="max-width: 45%;">
     ← <span class="text-truncate overflow-hidden d-inline-block align-middle flex-fill"
-      style="max-width:200px">Adaptive Extension</span>
+      style="max-width:200px">Modern &amp; Legacy Variants</span>
   </a>
   
     <a href="/core/docs/0.1.0/index.htm" class="text-decoration-none d-inline-flex flex-row justify-content-end gap-2"
@@ -510,17 +505,16 @@
 <ul>
 <li>aellux.js declarations use <code>data-ae-*</code>.</li>
 <li>Runtime state classes use <code>ae--*</code>.</li>
-<li>Adaptive utilities use names such as <code>p-ux-md-2</code>.</li>
 <li>aellux.js events use the <code>AelluxJs</code> prefix.</li>
 </ul>
 <p>These namespaces are designed to avoid collisions with Bootstrap&#39;s public classes and data attributes.</p>
 <h2>Loading Order</h2>
-<p>When aellux.js adaptive utilities are intended to override Bootstrap utilities contextually, load the Adaptive CSS after Bootstrap:</p>
+<p>When an application&#39;s Extension stylesheet should take precedence over Bootstrap, load it after Bootstrap:</p>
 <pre><code class="language-html">&lt;link rel=&quot;stylesheet&quot; href=&quot;./bootstrap.min.css&quot;&gt;
-&lt;link rel=&quot;stylesheet&quot; href=&quot;./dist/aellux.ext.adaptive.css&quot;&gt;
+&lt;link rel=&quot;stylesheet&quot; href=&quot;./styles/extension.css&quot;&gt;
 &lt;script src=&quot;./dist/aellux.js&quot;&gt;&lt;/script&gt;
 </code></pre>
-<p>Adaptive utility declarations use <code>!important</code> where they are specifically intended to override Bootstrap utility declarations.</p>
+<p>The application controls the selectors and priority of its Extension stylesheet.</p>
 <h2>JavaScript Coexistence</h2>
 <p>Extensions should avoid unnecessary <code>preventDefault()</code> and <code>stopPropagation()</code>, should not remove third-party listeners, and must keep mounting idempotent when Bootstrap reveals or modifies content dynamically.</p>
 <p>After inserting or revealing dynamic markup, update only the affected root when possible:</p>
@@ -528,15 +522,15 @@
 </code></pre>
 <p>The browser validation suite includes a Bootstrap CSS coexistence scenario. Repeatable testing with Bootstrap JavaScript components remains a release requirement.</p>
 <h2>Validation Scope</h2>
-<p>The <code>tests/browser/bootstrap-integration.html</code> scenario loads Bootstrap CSS before aellux.js, exercises declarative lazy Extension loading, and checks that Adaptive mounts without removing Bootstrap classes.</p>
+<p>The <code>tests/browser/bootstrap-integration.html</code> scenario loads Bootstrap CSS before aellux.js, exercises declarative lazy Extension loading, and checks that Preferences mounts without removing Bootstrap classes.</p>
 <p>The scenario validates namespace and CSS coexistence. Testing with Bootstrap JavaScript components, dynamically revealed content, and listener coexistence remains part of the beta acceptance work rather than a completed compatibility guarantee.</p>
         </div>
 
         <div id="doc-navlinks2" ajax-load="doc-navlinks2">
           <div class="d-flex justify-content-between flex-row gap-2 p-2 pb-4 px-0">
-    <a href="/core/docs/0.1.0/extensions/adaptive.htm" class="text-decoration-none d-inline-flex flex-row gap-2" style="max-width: 45%;">
+    <a href="/core/docs/0.1.0/extensions/legacy-variants.htm" class="text-decoration-none d-inline-flex flex-row gap-2" style="max-width: 45%;">
     ← <span class="text-truncate overflow-hidden d-inline-block align-middle flex-fill"
-      style="max-width:200px">Adaptive Extension</span>
+      style="max-width:200px">Modern &amp; Legacy Variants</span>
   </a>
   
     <a href="/core/docs/0.1.0/index.htm" class="text-decoration-none d-inline-flex flex-row justify-content-end gap-2"

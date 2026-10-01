@@ -199,6 +199,9 @@
                   AelluxJs.feedback.progress(currentElement2, "Ajax loading", 0);
                 }
               });
+              if (!options.ignoreHistory && AelluxJs.stateNavigation) {
+                AelluxJs.stateNavigation.ajaxHref(url, selectors);
+              }
               AelluxJs.dispatch("AjaxHrefStart");
               _context.p = 1;
               _context.n = 2;
@@ -263,9 +266,6 @@
               _iterator.f();
               return _context.f(13);
             case 14:
-              if (!options.ignoreHistory && AelluxJs.stateNavigation) {
-                AelluxJs.stateNavigation.ajaxHref(url, selectors);
-              }
               AelluxJs.dispatch("AjaxHrefLoaded");
               _context.n = 17;
               break;

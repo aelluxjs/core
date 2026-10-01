@@ -25,7 +25,6 @@ This directory contains the detailed documentation for the aellux.js `0.1.0-beta
 - [Lazy loading](extensions/lazy-loading.md)
 - [Optional Extension styles](extensions/styles.md)
 - [Modern and Legacy Extension variants](extensions/legacy-variants.md)
-- [Adaptive Extension](extensions/adaptive.md)
 
 ## Project Documents
 

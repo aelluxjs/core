@@ -22,7 +22,7 @@ await $ae.unmount(root);
 ## Destruction
 
 ```js
-await $ae.destroyExtensions("adaptive");
+await $ae.destroyExtensions("preferences");
 await $ae.destroy();
 ```
 
@@ -31,11 +31,11 @@ await $ae.destroy();
 ## Extension Access
 
 ```js
-$ae.ext("adaptive", {
+$ae.ext("preferences", {
   builds: ["modern", "legacy"],
-  loadStyle: true
+  loadWhen: "[data-ae-preference]"
 });
-const adaptive = await $ae.wait("adaptive");
+const preferences = await $ae.wait("preferences");
 ```
 
 `ext()` registers loading information. Its `builds` option declares `modern`, `legacy`, or both published artifacts; omission defaults to both. `wait()` loads and initializes the compatible Extension when necessary, then resolves to its public API or `null` after an isolated initialization or compatibility failure.

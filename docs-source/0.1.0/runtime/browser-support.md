@@ -6,7 +6,7 @@ aellux.js uses an ES5-compatible boot script to select either the Modern or Lega
 
 The Modern distribution targets ES2017+ syntax. The following versions are a preliminary reference for browsers capable of parsing that syntax level:
 
-| Browser | Minimum reference version |
+| Browser | Min Ref |
 | --- | ---: |
 | Chrome | 55+ |
 | Firefox | 52+ |

@@ -50,6 +50,10 @@
       //AJAX PROGRESS UPDATE VALUE
     });
 
+    if (!options.ignoreHistory && AelluxJs.stateNavigation) {
+      AelluxJs.stateNavigation.ajaxHref(url, selectors);
+    }
+
     AelluxJs.dispatch("AjaxHrefStart");
 
     try {
@@ -79,10 +83,6 @@
           AelluxJs.feedback.busy(replacement, "Ajax loaded", false);
           AelluxJs.feedback.progress(replacement, "Ajax loaded", 1);
         }
-      }
-
-      if (!options.ignoreHistory && AelluxJs.stateNavigation) {
-        AelluxJs.stateNavigation.ajaxHref(url, selectors);
       }
 
       AelluxJs.dispatch("AjaxHrefLoaded");

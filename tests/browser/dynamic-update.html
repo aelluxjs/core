@@ -8,8 +8,8 @@
   <script>
     AelluxJsValidation.run(async function (assert) {
       var target = document.createElement("section");
-      target.id = "dynamic-adaptive-target";
-      target.setAttribute("data-ae-adaptive", "");
+      target.id = "dynamic-preference-target";
+      target.setAttribute("data-ae-preference", "color-scheme");
       target.textContent = "Inserted after AelluxJsReady";
       document.getElementById("dynamic-root").appendChild(target);
 
@@ -17,7 +17,7 @@
 
       assert(target.classList.contains("ae--mounted"), "Dynamically inserted element was not mounted");
     });
-    $ae.ext("adaptive");
+    $ae.ext("preferences");
     $ae.init({ mode: "basic" });
   </script>
 </head>

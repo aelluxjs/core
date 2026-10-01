@@ -15,15 +15,15 @@ $ae.ext("feedback");
 Use `true` to derive the stylesheet URL from the Extension script URL:
 
 ```js
-$ae.ext("adaptive", { loadStyle: true });
+$ae.ext("example", { loadStyle: true });
 ```
 
-For `aellux.ext.adaptive.js`, the runtime derives `aellux.ext.adaptive.css`. Query strings and fragments are preserved by the script URL handling where applicable.
+For `aellux.ext.example.js`, the runtime derives `aellux.ext.example.css`. Query strings and fragments are preserved by the script URL handling where applicable. The example Extension and stylesheet must be supplied by the application.
 
 The declarative equivalent is:
 
 ```html
-<link rel="aelluxjs-ext" href="adaptive" data-ae-load-style>
+<link rel="aelluxjs-ext" href="example" data-ae-load-style>
 ```
 
 ## Specific Stylesheet URL
@@ -48,4 +48,4 @@ Relative custom stylesheet URLs are resolved by the browser relative to the docu
 
 The orchestrator waits for requested assets before initializing and mounting the Extension. A stylesheet load error is treated as non-fatal so JavaScript behavior can continue when possible.
 
-The full core bundle always requests the Adaptive stylesheet through its bundled loader. Other Extensions remain responsible for declaring their own required assets.
+Extensions remain responsible for declaring their own required assets.

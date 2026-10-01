@@ -6,22 +6,21 @@ aellux.js complements Bootstrap; it does not replace or bundle it. Bootstrap own
 
 - aellux.js declarations use `data-ae-*`.
 - Runtime state classes use `ae--*`.
-- Adaptive utilities use names such as `p-ux-md-2`.
 - aellux.js events use the `AelluxJs` prefix.
 
 These namespaces are designed to avoid collisions with Bootstrap's public classes and data attributes.
 
 ## Loading Order
 
-When aellux.js adaptive utilities are intended to override Bootstrap utilities contextually, load the Adaptive CSS after Bootstrap:
+When an application's Extension stylesheet should take precedence over Bootstrap, load it after Bootstrap:
 
 ```html
 <link rel="stylesheet" href="./bootstrap.min.css">
-<link rel="stylesheet" href="./dist/aellux.ext.adaptive.css">
+<link rel="stylesheet" href="./styles/extension.css">
 <script src="./dist/aellux.js"></script>
 ```
 
-Adaptive utility declarations use `!important` where they are specifically intended to override Bootstrap utility declarations.
+The application controls the selectors and priority of its Extension stylesheet.
 
 ## JavaScript Coexistence
 
@@ -37,6 +36,6 @@ The browser validation suite includes a Bootstrap CSS coexistence scenario. Repe
 
 ## Validation Scope
 
-The `tests/browser/bootstrap-integration.html` scenario loads Bootstrap CSS before aellux.js, exercises declarative lazy Extension loading, and checks that Adaptive mounts without removing Bootstrap classes.
+The `tests/browser/bootstrap-integration.html` scenario loads Bootstrap CSS before aellux.js, exercises declarative lazy Extension loading, and checks that Preferences mounts without removing Bootstrap classes.
 
 The scenario validates namespace and CSS coexistence. Testing with Bootstrap JavaScript components, dynamically revealed content, and listener coexistence remains part of the beta acceptance work rather than a completed compatibility guarantee.

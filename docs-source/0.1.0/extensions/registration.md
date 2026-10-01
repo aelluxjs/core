@@ -21,10 +21,9 @@ Custom URLs should preserve the `aellux.ext.<label>.js` filename convention so t
 ## Options
 
 ```js
-$ae.ext("adaptive", {
+$ae.ext("preferences", {
   builds: ["modern", "legacy"],
-  loadWhen: "[data-ae-adaptive]",
-  loadStyle: true
+  loadWhen: "[data-ae-preference]"
 });
 ```
 
