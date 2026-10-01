@@ -115,14 +115,40 @@
     if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
 
     const link = event.target.closest(`[${attr.ajaxHref}]`);
-    if (!link || link.tagName !== "A") return;
+    if (!link || !link.href || link.tagName !== "A") return;
+    const rawHref = link.getAttribute("href");
     if (link.target && link.target !== "_self") return;
-    if (link.hasAttribute("download")) return;
+    if (rawHref && rawHref.startsWith("#")) return;
+    if (link.hasAttribute("download") || link.hasAttribute("data-no-ajax")) return;
 
     const selectors = link.getAttribute(attr.ajaxHref);
     if (!selectors) return;
 
+    const destinyUrl = comparableUrl(link.href);
+    const currentUrl = comparableUrl(window.location.href);
+    if (destinyUrl.origin !== currentUrl.origin) {
+      AelluxJs.dispatch("AjaxHrefDropOrigin");
+      return;
+    }
+    if (destinyUrl.href === currentUrl.href) {
+      if (destinyUrl.hash && destinyUrl.hash !== currentUrl.hash) return;
+      event.preventDefault();
+      AelluxJs.dispatch("AjaxHrefStart");
+      AelluxJs.dispatch("AjaxHrefLoaded");
+      AelluxJs.dispatch("AjaxHrefComplete");
+      return;
+    }
+
     event.preventDefault();
     AelluxJs.ajaxHref.load(link.href, selectors);
+  }
+
+  function comparableUrl(value) {
+    const url = new URL(value, window.location.href);
+    return {
+      origin: url.origin,
+      href: `${url.origin}${url.pathname}${url.search}`,
+      hash: url.hash
+    };
   }
 })();

@@ -427,7 +427,7 @@
       var c = AelluxJs.className("$1");
       style.textContent = ":where(html){color-scheme:light dark;}:where(html[?color-scheme='dark']){color-scheme:dark;}:where(html[?color-scheme='light']){color-scheme:light;}:where(body,html) {font-family:system-ui;background-color:Canvas;color:CanvasText;}:where(button,a[href],[role='button'],[role='tab']){touch-action:manipulation;}[?wait-mounted]:not(.%mounted) > *:not([?loader]) {visibility: hidden!important;}[?wait-mounted].%mounted > [?loader] {display: none!important;}".replace(/\?([a-z][0-9a-z\-]*)/gi, a).replace(/\%([a-z][0-9a-z\-]*)/gi, c);
       document.head.appendChild(style);
-      if (!document.querySelector('meta[name="viewport"]')) {
+      if (!document.head.querySelector('meta[name="viewport"]')) {
         var meta = document.createElement("meta");
         meta.name = "viewport";
         meta.content = "width=device-width, initial-scale=1";
@@ -452,6 +452,50 @@
           document.documentElement.setAttribute(AelluxJs.attr(hyphenized), value);
         }
       }
+      if ("colorScheme" in preferences)
+        updateColorSchemeMeta(preferences.colorScheme);
+    }
+    function updateColorSchemeMeta(preferenceColorScheme) {
+      var attr = AelluxJs.attr("theme-color");
+      var aeMetaTag = document.head.querySelector("meta[" + attr + "]") || document.createElement("meta");
+      if (preferenceColorScheme === "auto") {
+        if (aeMetaTag.parentNode)
+          aeMetaTag.parentNode.removeChild(aeMetaTag);
+        return;
+      }
+      var themeColorTags = document.head.querySelectorAll("meta[name='theme-color']");
+      if (themeColorTags.length < 2) {
+        return;
+      }
+      var color = null;
+      for (var i = 0; i < themeColorTags.length; i++) {
+        var m = themeColorTags[i];
+        var media = m.getAttribute("media") || "";
+        if (preferenceColorScheme === "dark") {
+          if (media.indexOf("dark") === -1) {
+            continue;
+          }
+          color = m.getAttribute("content");
+          break;
+        } else {
+          if (media.indexOf("dark") > -1) {
+            continue;
+          }
+          color = m.getAttribute("content");
+        }
+      }
+      if (color === null) {
+        if (aeMetaTag.parentNode)
+          aeMetaTag.parentNode.removeChild(aeMetaTag);
+        return;
+      }
+      aeMetaTag.name = "theme-color";
+      aeMetaTag.content = color;
+      aeMetaTag.setAttribute(attr, "");
+      document.head.insertBefore(
+        aeMetaTag,
+        document.head.firstChild
+      );
     }
     function mergeOptions(target, source) {
       if (!source)

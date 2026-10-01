@@ -121,6 +121,71 @@ test("preference labels update associated inputs safely", async ({ page }) => {
   await expect(page.locator('[id="scheme:light"]')).toHaveValue("light");
 });
 
+test("color scheme preference updates theme color metadata", async ({ page }) => {
+  await page.goto("/tests/index.htm");
+  await page.evaluate(() => {
+    document.head.insertAdjacentHTML("beforeend", `
+      <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff">
+      <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000000">`);
+  });
+  await page.addScriptTag({ url: "/dist/aellux.js" });
+  await page.evaluate(() => {
+    AelluxJs.persist.preferences.set("colorScheme", "dark");
+    AelluxJs.ext("preferences");
+    AelluxJs.init({ mode: "basic" });
+  });
+  await expect.poll(() => page.evaluate(() => AelluxJs.preferences?.initialized)).toBe(true);
+  const themeColor = () => page.locator("meta[data-ae-theme-color]").getAttribute("content");
+  await expect.poll(themeColor).toBe("#000000");
+
+  await page.evaluate(() => {
+    AelluxJs.preferences.set("color-scheme", "light");
+    AelluxJs.preferences.update();
+  });
+  await expect.poll(themeColor).toBe("#ffffff");
+
+  await page.evaluate(() => {
+    AelluxJs.preferences.set("color-scheme", "auto");
+    AelluxJs.preferences.update();
+  });
+  await expect(page.locator("meta[data-ae-theme-color]")).toHaveCount(0);
+});
+
+test("AJAX links preserve native navigation when appropriate", async ({ page }) => {
+  await page.goto("/tests/index.htm");
+  await page.addScriptTag({ url: "/dist/aellux.js" });
+  await page.evaluate(() => {
+    AelluxJs.ext("ajax-href");
+    AelluxJs.init({ mode: "basic" });
+  });
+  await expect.poll(() => page.evaluate(() => AelluxJs.ajaxHref?.initialized)).toBe(true);
+
+  const results = await page.evaluate(() => {
+    const results = [];
+    const listener = event => {
+      results.push(event.defaultPrevented);
+      event.preventDefault();
+    };
+    document.addEventListener("click", listener);
+    for (const [href, target] of [
+      [location.href, "_blank"],
+      ["#probe", ""],
+      [location.href, ""]
+    ]) {
+      const link = document.createElement("a");
+      link.href = href;
+      link.target = target;
+      link.setAttribute("data-ae-ajax-href", "main");
+      document.body.append(link);
+      link.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true, button: 0 }));
+      link.remove();
+    }
+    document.removeEventListener("click", listener);
+    return results;
+  });
+  expect(results).toEqual([false, false, true]);
+});
+
 test("dynamic elements can be mounted and unmounted after initialization", async ({ page }) => {
   await openScenario(page, "dynamic-update");
   await page.evaluate(async () => {

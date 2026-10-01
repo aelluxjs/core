@@ -304,13 +304,37 @@
       if (event.button !== 0) return;
       if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
       var link = event.target.closest("[".concat(attr.ajaxHref, "]"));
-      if (!link || link.tagName !== "A") return;
+      if (!link || !link.href || link.tagName !== "A") return;
+      var rawHref = link.getAttribute("href");
       if (link.target && link.target !== "_self") return;
-      if (link.hasAttribute("download")) return;
+      if (rawHref && rawHref.startsWith("#")) return;
+      if (link.hasAttribute("download") || link.hasAttribute("data-no-ajax")) return;
       var selectors = link.getAttribute(attr.ajaxHref);
       if (!selectors) return;
+      var destinyUrl = comparableUrl(link.href);
+      var currentUrl = comparableUrl(window.location.href);
+      if (destinyUrl.origin !== currentUrl.origin) {
+        AelluxJs.dispatch("AjaxHrefDropOrigin");
+        return;
+      }
+      if (destinyUrl.href === currentUrl.href) {
+        if (destinyUrl.hash && destinyUrl.hash !== currentUrl.hash) return;
+        event.preventDefault();
+        AelluxJs.dispatch("AjaxHrefStart");
+        AelluxJs.dispatch("AjaxHrefLoaded");
+        AelluxJs.dispatch("AjaxHrefComplete");
+        return;
+      }
       event.preventDefault();
       AelluxJs.ajaxHref.load(link.href, selectors);
+    }
+    function comparableUrl(value) {
+      var url = new URL(value, window.location.href);
+      return {
+        origin: url.origin,
+        href: "".concat(url.origin).concat(url.pathname).concat(url.search),
+        hash: url.hash
+      };
     }
   })();
 })();
