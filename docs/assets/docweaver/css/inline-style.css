@@ -73,7 +73,7 @@ body:after {
 
 .navbar-collapse {
   position: fixed;
-  top: 64px;
+  top: calc(64px + 57px);
   left: 0;
   height: calc(100% - 64px);
   transition: none !important;
