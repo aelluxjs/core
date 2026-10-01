@@ -410,10 +410,18 @@ table {
   /* Smooth scrolling on iOS devices */
   margin-bottom: 1.5rem;
   /* Optional layout spacing */
+  border-top: var(--bs-border-width) var(--bs-border-style) var(--bs-border-color) !important;
+  border-bottom: var(--bs-border-width) var(--bs-border-style) var(--bs-border-color) !important;
+}
+
+.table-scroll-wrapper table th {
+  background-color: rgba(var(--bs-body-color), 15%);
 }
 
 .table-scroll-wrapper table th,
 .table-scroll-wrapper table td {
   white-space: nowrap;
   padding: 0.5rem;
+  border-inline-start: var(--bs-border-width) var(--bs-border-style) var(--bs-border-color) !important;
+  border-inline-end: var(--bs-border-width) var(--bs-border-style) var(--bs-border-color) !important;
 }
