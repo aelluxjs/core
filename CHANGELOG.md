@@ -2,7 +2,15 @@
 
 All notable changes to aellux.js will be documented in this file.
 
-## [0.1.0-beta.5] - Unreleased
+## [0.1.0-beta.6] - 2026-10-01
+
+### Changed
+
+- Moved the Adaptive Extension and its generated stylesheet out of Core; the full bundle now includes only Core Extensions.
+- Updated browser validation and documentation examples to use Core Extensions.
+- Regenerated the documentation theme stylesheet.
+
+## [0.1.0-beta.5] - 2026-09-30
 
 ### Changed
 

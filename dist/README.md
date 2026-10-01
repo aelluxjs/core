@@ -74,7 +74,7 @@ Generated browser files are written to `dist/`. The distribution uses classic sc
 
 ## Project Status
 
-aellux.js `0.1.0-beta.3` is the current prerelease. Beta 1 established the initial runtime, Extension contract, Modern/Legacy distributions, and repeatable browser validation scenarios. The Beta 2 cycle focused on CI, multi-browser coverage, real Legacy validation, security, accessibility, and commercial distribution readiness.
+aellux.js `0.1.0-beta.6` is the current prerelease. Beta 1 established the initial runtime, Extension contract, Modern/Legacy distributions, and repeatable browser validation scenarios. The Beta 2 cycle focused on CI, multi-browser coverage, real Legacy validation, security, accessibility, and commercial distribution readiness.
 
 Review the [0.1.0 Beta 2 milestone](../docs/milestones/0.1.0-beta.2.md), the [Beta 1 milestone](../docs/milestones/0.1.0-beta.1.md), and delivered changes in the [changelog](../CHANGELOG.md).
 

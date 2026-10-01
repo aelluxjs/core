@@ -1,6 +1,6 @@
 # Compatibility for aellux.js 0.1.0 Beta
 
-aellux.js `0.1.0-beta.3` is intended for progressive enhancement in existing browser interfaces. It provides an ES5-compatible boot distribution that selects an ES2017+ Modern runtime or an ES5-syntax Legacy runtime with bundled polyfills.
+aellux.js `0.1.0-beta.6` is intended for progressive enhancement in existing browser interfaces. It provides an ES5-compatible boot distribution that selects an ES2017+ Modern runtime or an ES5-syntax Legacy runtime with bundled polyfills.
 
 This beta validates the runtime contract and integration strategy. It publishes a preliminary ES2017 syntax baseline, but does not yet claim a final tested browser support matrix or unrestricted compatibility with every browser capable of parsing ES5.
 

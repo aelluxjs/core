@@ -412,10 +412,11 @@ table {
   /* Optional layout spacing */
   border-top: var(--bs-border-width) var(--bs-border-style) var(--bs-border-color) !important;
   border-bottom: var(--bs-border-width) var(--bs-border-style) var(--bs-border-color) !important;
+  border-radius: var(--bs-border-radius-sm) !important;
 }
 
 .table-scroll-wrapper table th {
-  background-color: rgba(var(--bs-body-color), 15%);
+  background-color: rgba(var(--bs-body-color-rgb), 5%);
 }
 
 .table-scroll-wrapper table th,
