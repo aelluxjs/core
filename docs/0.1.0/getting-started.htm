@@ -52,7 +52,7 @@
 
 <script src="/core/docs/assets/docweaver/js/toc-init.js?t=1"></script>
 
-<script src="https://cdn.jsdelivr.net/npm/@aelluxjs/core@0.1.0-beta.6/dist/aellux.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/aelluxjs/core@main/dist/aellux.min.js"></script>
 <script>
   AelluxJs.init({ mode: "full" });
 
@@ -71,13 +71,13 @@
         `nav [href]:not([${ajaxAttr}])`
       ];
       document.querySelectorAll(linksToUpdate.join(","))
-      .forEach((link)=>{
-        if(link.getAttribute("href")?.startsWith("#")) return;
-        link.setAttribute(
-          ajaxAttr,
-          "#doc-content,#doc-navlinks,#doc-navlinks2,#doc-breadcrumb"
+        .forEach((link) => {
+          if (link.getAttribute("href")?.startsWith("#")) return;
+          link.setAttribute(
+            ajaxAttr,
+            "#doc-content,#doc-navlinks,#doc-navlinks2,#doc-breadcrumb"
           );
-      });
+        });
       document.querySelectorAll("table").forEach((table) => {
         if (table.parentElement &&
           table.parentElement.classList.contains("table-scroll-wrapper")) {
@@ -162,45 +162,45 @@
   }
 
   document.addEventListener("DOMContentLoaded",
-  function(){
-    let currentRequest = null;
+    function () {
+      let currentRequest = null;
 
-    const progressBar = document.querySelector("#page-progress");
-    let progressTimer = null, progressTimer1 = null, progressTimer2 = null;
+      const progressBar = document.querySelector("#page-progress");
+      let progressTimer = null, progressTimer1 = null, progressTimer2 = null;
 
-  document.addEventListener("AelluxJsAjaxHrefStart",startProgress)
-  document.addEventListener("AelluxJsAjaxHrefComplete",finishProgress)
+      document.addEventListener("AelluxJsAjaxHrefStart", startProgress)
+      document.addEventListener("AelluxJsAjaxHrefComplete", finishProgress)
 
-    function startProgress() {
-      if (!progressBar) return;
+      function startProgress() {
+        if (!progressBar) return;
 
-      clearInterval(progressTimer);
-      clearInterval(progressTimer1);
-      clearInterval(progressTimer2);
-      progressBar.style.transition = "none";
-      progressBar.style.opacity = "1";
-      progressBar.style.width = "10%";
+        clearInterval(progressTimer);
+        clearInterval(progressTimer1);
+        clearInterval(progressTimer2);
+        progressBar.style.transition = "none";
+        progressBar.style.opacity = "1";
+        progressBar.style.width = "10%";
 
-      let progress = 10;
-      progressTimer = setInterval(() => {
-        progress += Math.random() * 12;
-        if (progress > 85) progress = 85;
-        progressBar.style.transition = null;
-        progressBar.style.width = `${progress}%`;
-      }, 200);
-    }
+        let progress = 10;
+        progressTimer = setInterval(() => {
+          progress += Math.random() * 12;
+          if (progress > 85) progress = 85;
+          progressBar.style.transition = null;
+          progressBar.style.width = `${progress}%`;
+        }, 200);
+      }
 
-    function finishProgress() {
-      if (!progressBar) return;
+      function finishProgress() {
+        if (!progressBar) return;
 
-      clearInterval(progressTimer);
-      clearInterval(progressTimer1);
-      clearInterval(progressTimer2);
-      progressBar.style.width = "100%";
-      progressTimer1 = setTimeout(() => progressBar.style.opacity = "0", 200);
-      progressTimer2 = setTimeout(() => progressBar.style.width = "0%", 450);
-    }
-  });
+        clearInterval(progressTimer);
+        clearInterval(progressTimer1);
+        clearInterval(progressTimer2);
+        progressBar.style.width = "100%";
+        progressTimer1 = setTimeout(() => progressBar.style.opacity = "0", 200);
+        progressTimer2 = setTimeout(() => progressBar.style.width = "0%", 450);
+      }
+    });
 </script>
 
 </head>
@@ -251,31 +251,32 @@
   </ul>
 </div>
 
-                <div data-ae-preference="color-scheme" class="btn-group border rounded-1 rounded overflow-hidden" style="gap:1px;" role="group" aria-label="Basic example">
+                <div data-ae-preference="color-scheme" class="btn-group border rounded-1 rounded overflow-hidden" style="gap:1px;"
+  role="group" aria-label="Basic example">
 
-  <input type="radio" class="btn-check" name="color-mode-selected" id="radio-color-mode-light"
-    autocomplete="off" aria-label="Light Mode">
-  <label
-    class="btn  btn-outline-adaptive py-1 border-0 d-inline-flex justify-content-center align-items-center"
-    for="radio-color-mode-light" data-ae-option="light" onclick aria-label="Light Mode">
+  <input type="radio" class="btn-check" name="color-mode-selected" id="radio-color-mode-light" autocomplete="off"
+    aria-label="Light Mode">
+  <label class="btn  btn-outline-adaptive py-1 border-0 d-inline-flex justify-content-center align-items-center"
+    style="--bs-btn-border-radius: var(--bs-btn-border-radius);" for="radio-color-mode-light" data-ae-option="light"
+    onclick aria-label="Light Mode">
     <i class="bi bi-sun"></i>
     <span class="visually-hidden">Light Mode</span>
   </label>
 
-  <input type="radio" class="btn-check" name="color-mode-selected" id="radio-color-mode-dark"
-    autocomplete="off" aria-label="Dark Mode">
-  <label
-    class="btn  btn-outline-adaptive py-1 border-0  d-inline-flex justify-content-center align-items-center"
-    for="radio-color-mode-dark" data-ae-option="dark" onclick aria-label="Dark Mode">
+  <input type="radio" class="btn-check" name="color-mode-selected" id="radio-color-mode-dark" autocomplete="off"
+    aria-label="Dark Mode">
+  <label class="btn  btn-outline-adaptive py-1 border-0  d-inline-flex justify-content-center align-items-center"
+    style="--bs-btn-border-radius: var(--bs-btn-border-radius);" for="radio-color-mode-dark" data-ae-option="dark"
+    onclick aria-label="Dark Mode">
     <i class="bi bi-moon-fill"></i>
     <span class="visually-hidden">Dark Mode</span>
   </label>
 
-  <input type="radio" class="btn-check" name="color-mode-selected" id="radio-color-mode-auto"
-    autocomplete="off" aria-label="Auto Mode">
-  <label
-    class="btn  btn-outline-adaptive py-1 border-0 d-inline-flex justify-content-center align-items-center"
-    for="radio-color-mode-auto" data-ae-option="auto" onclick aria-label="Auto Mode">
+  <input type="radio" class="btn-check" name="color-mode-selected" id="radio-color-mode-auto" autocomplete="off"
+    aria-label="Auto Mode">
+  <label class="btn  btn-outline-adaptive py-1 border-0 d-inline-flex justify-content-center align-items-center"
+    style="--bs-btn-border-radius: var(--bs-btn-border-radius);" for="radio-color-mode-auto" data-ae-option="auto"
+    onclick aria-label="Auto Mode">
     <i class="bi bi-circle-half"></i>
     <span class="visually-hidden">Auto Mode</span>
   </label>
