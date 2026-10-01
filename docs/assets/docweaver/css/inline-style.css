@@ -425,4 +425,5 @@ table {
   padding: 0.5rem;
   border-inline-start: var(--bs-border-width) var(--bs-border-style) var(--bs-border-color) !important;
   border-inline-end: var(--bs-border-width) var(--bs-border-style) var(--bs-border-color) !important;
+  line-height: 1.5;
 }
