@@ -8,7 +8,7 @@
 <a class="btn btn-outline-adaptive rounded-1" href="https://github.com/aelluxjs/core">
 View on Github
 </a>
-<a class="btn btn-primary rounded-1" href="getting-started.md">
+<a class="btn btn-primary rounded-1" href="getting-started.htm">
 Get Started
 </a>
 </div>

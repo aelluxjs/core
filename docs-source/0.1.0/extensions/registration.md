@@ -8,7 +8,7 @@ Use `$ae.ext(...)` to declare an Extension before the runtime needs it.
 $ae.ext("preference");
 ```
 
-A label resolves to `aellux.ext.<label>.js` relative to the aellux.js boot script. Loading `aellux.min.js` selects matching `.min.js` Extension files.
+A name resolves to `aellux.ext.<name>.js` relative to the aellux.js boot script. Loading `aellux.min.js` selects matching `.min.js` Extension files.
 
 ## URL
 
@@ -16,7 +16,7 @@ A label resolves to `aellux.ext.<label>.js` relative to the aellux.js boot scrip
 $ae.ext("./extensions/aellux.ext.example.js");
 ```
 
-Custom URLs should preserve the `aellux.ext.<label>.js` filename convention so the runtime can derive the Extension label and optional stylesheet URL reliably.
+Custom URLs should preserve the `aellux.ext.<name>.js` filename convention so the runtime can derive the Extension name and optional stylesheet URL reliably.
 
 ## Options
 
@@ -31,7 +31,7 @@ $ae.ext("preference", {
 - `loadWhen` delays loading until a matching element is discovered.
 - `loadStyle: true` requests the stylesheet derived from the Extension script URL; a URL string requests that specific stylesheet.
 
-Register each label once. Duplicate declarations currently report an error and do not replace the existing registration.
+Register each name once. Duplicate declarations currently report an error and do not replace the existing registration.
 
 Register Extensions before calling `$ae.init()` in `basic` mode so the first document update can load eager Extensions and index lazy ones:
 

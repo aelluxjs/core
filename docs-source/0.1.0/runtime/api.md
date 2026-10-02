@@ -27,7 +27,7 @@ await $ae.destroyExtensions("preference");
 await $ae.destroy();
 ```
 
-`destroyExtensions()` unmounts and destroys selected initialized Extensions. Without labels, it processes all loaded Extensions. `destroy()` first clears pending layout work, then destroys loaded Extensions.
+`destroyExtensions()` unmounts and destroys selected initialized Extensions. Without names, it processes all loaded Extensions. `destroy()` first clears pending layout work, then destroys loaded Extensions.
 
 ## Extension Access
 
@@ -41,6 +41,8 @@ $ae.ext.preference === preference;
 ```
 
 `ext()` registers loading information. Its `builds` option declares `modern`, `legacy`, or both published artifacts; omission defaults to both. `wait()` loads and initializes the compatible Extension when necessary, then resolves to its public API or `null` after an isolated initialization or compatibility failure. Registered Extension APIs are available under `$ae.ext.<camelCaseName>`.
+
+`extName(filename)` extracts the Extension name from an `aellux.ext.<name>.js` filename.
 
 ## Events
 

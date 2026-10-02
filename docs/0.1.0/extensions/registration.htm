@@ -505,11 +505,11 @@
 <h2>Label</h2>
 <pre><code class="language-js">$ae.ext(&quot;preference&quot;);
 </code></pre>
-<p>A label resolves to <code>aellux.ext.&lt;label&gt;.js</code> relative to the aellux.js boot script. Loading <code>aellux.min.js</code> selects matching <code>.min.js</code> Extension files.</p>
+<p>A name resolves to <code>aellux.ext.&lt;name&gt;.js</code> relative to the aellux.js boot script. Loading <code>aellux.min.js</code> selects matching <code>.min.js</code> Extension files.</p>
 <h2>URL</h2>
 <pre><code class="language-js">$ae.ext(&quot;./extensions/aellux.ext.example.js&quot;);
 </code></pre>
-<p>Custom URLs should preserve the <code>aellux.ext.&lt;label&gt;.js</code> filename convention so the runtime can derive the Extension label and optional stylesheet URL reliably.</p>
+<p>Custom URLs should preserve the <code>aellux.ext.&lt;name&gt;.js</code> filename convention so the runtime can derive the Extension name and optional stylesheet URL reliably.</p>
 <h2>Options</h2>
 <pre><code class="language-js">$ae.ext(&quot;preference&quot;, {
   builds: [&quot;modern&quot;, &quot;legacy&quot;],
@@ -521,7 +521,7 @@
 <li><code>loadWhen</code> delays loading until a matching element is discovered.</li>
 <li><code>loadStyle: true</code> requests the stylesheet derived from the Extension script URL; a URL string requests that specific stylesheet.</li>
 </ul>
-<p>Register each label once. Duplicate declarations currently report an error and do not replace the existing registration.</p>
+<p>Register each name once. Duplicate declarations currently report an error and do not replace the existing registration.</p>
 <p>Register Extensions before calling <code>$ae.init()</code> in <code>basic</code> mode so the first document update can load eager Extensions and index lazy ones:</p>
 <pre><code class="language-js">$ae.ext(&quot;feedback&quot;);
 $ae.init({ mode: &quot;basic&quot; });

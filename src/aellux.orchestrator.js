@@ -57,36 +57,36 @@ import nameCase from "./internal/utils-name-case.js";
 
         return true;
       },
-      async update(rootOrSelector, extensionLabels = null) {
-        return mountHelper.AelluxJsForceUpdate(rootOrSelector, extensionLabels);
+      async update(rootOrSelector, extensionNames = null) {
+        return mountHelper.AelluxJsForceUpdate(rootOrSelector, extensionNames);
       },
-      async unmount(rootOrSelector, extensionLabels = null) {
-        return mountHelper.AelluxJsForceUnmount(rootOrSelector, extensionLabels);
+      async unmount(rootOrSelector, extensionNames = null) {
+        return mountHelper.AelluxJsForceUnmount(rootOrSelector, extensionNames);
       },
       async destroy() {
         AelluxJs.waitLayout.clear();
         await AelluxJs.destroyExtensions();
       },
-      async destroyExtensions(extensionLabels) {
-        if (typeof extensionLabels === "string")
-          extensionLabels = [extensionLabels];
+      async destroyExtensions(extensionNames) {
+        if (typeof extensionNames === "string")
+          extensionNames = [extensionNames];
 
-        if (!extensionLabels)
-          extensionLabels = Object.keys(extensionPromises)
+        if (!extensionNames)
+          extensionNames = Object.keys(extensionPromises)
 
-        extensionLabels = extensionLabels.map(_ => fromCamelCase(_));
+        extensionNames = extensionNames.map(_ => fromCamelCase(_));
 
         try {
-          await AelluxJs.unmount(document, extensionLabels);
+          await AelluxJs.unmount(document, extensionNames);
         } catch (error) {
           AelluxJs.diagnostics.report(
             AelluxJs.diagnostics.ERROR_EXTENSION_UNMOUNT,
-            { cause: error, extensions: extensionLabels }
+            { cause: error, extensions: extensionNames }
           );
         }
 
-        for (const extensionLabel of extensionLabels) {
-          const key = toCamelCase(extensionLabel);
+        for (const extensionName of extensionNames) {
+          const key = toCamelCase(extensionName);
           let extension;
           try {
             if (!extensionPromises[key]) continue;
@@ -97,7 +97,7 @@ import nameCase from "./internal/utils-name-case.js";
           } catch (error) {
             AelluxJs.diagnostics.report(
               AelluxJs.diagnostics.ERROR_EXTENSION_DESTROY,
-              { cause: error, extension: extensionLabel }
+              { cause: error, extension: extensionName }
             );
           } finally {
             delete AelluxJs.ext[key];
@@ -186,9 +186,9 @@ import nameCase from "./internal/utils-name-case.js";
     return extensionPromises[key];
   }
 
-  function extensionInitialize(extensionLabel) {
-    extensionLabel = fromCamelCase(extensionLabel);
-    const key = toCamelCase(extensionLabel);
+  function extensionInitialize(extensionName) {
+    extensionName = fromCamelCase(extensionName);
+    const key = toCamelCase(extensionName);
     const options = AelluxJs.options.extensions[key] || {};
     AelluxJs.ext[key].init(options);
     AelluxJs.ext[key].initialized = true;
@@ -204,9 +204,9 @@ import nameCase from "./internal/utils-name-case.js";
     return AelluxJs.ext[key];
   }
 
-  async function appendExtensionAssets(extensionLabel) {
-    extensionLabel = fromCamelCase(extensionLabel);
-    const key = toCamelCase(extensionLabel);
+  async function appendExtensionAssets(extensionName) {
+    extensionName = fromCamelCase(extensionName);
+    const key = toCamelCase(extensionName);
     const data = AelluxJs.extRegistry[key];
     const url = data.url.replace(/^\.\//, AelluxJs.aelluxBasePath);
     const useLegacyBuild = AelluxJs.legacy || data.builds.indexOf("modern") === -1;
@@ -218,7 +218,7 @@ import nameCase from "./internal/utils-name-case.js";
         const attr = AelluxJs.attr("ext");
         const script = document.createElement("script");
         script.src = scriptURL;
-        script.setAttribute(attr, extensionLabel);
+        script.setAttribute(attr, extensionName);
 
         assetLoadHelper(script, {
           loadCallback: resolve,
@@ -237,7 +237,7 @@ import nameCase from "./internal/utils-name-case.js";
           const link = document.createElement("link");
           link.href = href;
           link.rel = "stylesheet";
-          link.setAttribute(attrStyle, extensionLabel);
+          link.setAttribute(attrStyle, extensionName);
 
           assetLoadHelper(link, {
             loadCallback: resolve,

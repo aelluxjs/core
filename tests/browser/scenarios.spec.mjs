@@ -57,6 +57,13 @@ test("renamed global and event prefix are available", async ({ page }) => {
   expect(dispatchedType).toBe("AelluxJsProbe");
 });
 
+test("extension filename helper exposes the name terminology", async ({ page }) => {
+  await openScenario(page, "runtime-modern");
+  expect(await page.evaluate(() =>
+    AelluxJs.extName("/dist/aellux.ext.state-navigation.js")
+  )).toBe("state-navigation");
+});
+
 test("Extension names do not replace core API methods", async ({ page }) => {
   await openScenario(page, "runtime-modern");
   const result = await page.evaluate(async () => {

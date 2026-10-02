@@ -116,7 +116,7 @@ var bootstrapProperties = Object.freeze({
   attr: method,
   className: method,
   extFilename: method,
-  extLabel: method,
+  extName: method,
   eventName: method,
   noConflict: method,
   lazyExtensionSelectors: record,

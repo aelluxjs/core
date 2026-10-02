@@ -516,7 +516,7 @@ await $ae.unmount(root);
 <pre><code class="language-js">await $ae.destroyExtensions(&quot;preference&quot;);
 await $ae.destroy();
 </code></pre>
-<p><code>destroyExtensions()</code> unmounts and destroys selected initialized Extensions. Without labels, it processes all loaded Extensions. <code>destroy()</code> first clears pending layout work, then destroys loaded Extensions.</p>
+<p><code>destroyExtensions()</code> unmounts and destroys selected initialized Extensions. Without names, it processes all loaded Extensions. <code>destroy()</code> first clears pending layout work, then destroys loaded Extensions.</p>
 <h2>Extension Access</h2>
 <pre><code class="language-js">$ae.ext(&quot;preference&quot;, {
   builds: [&quot;modern&quot;, &quot;legacy&quot;],
@@ -526,6 +526,7 @@ const preference = await $ae.wait(&quot;preference&quot;);
 $ae.ext.preference === preference;
 </code></pre>
 <p><code>ext()</code> registers loading information. Its <code>builds</code> option declares <code>modern</code>, <code>legacy</code>, or both published artifacts; omission defaults to both. <code>wait()</code> loads and initializes the compatible Extension when necessary, then resolves to its public API or <code>null</code> after an isolated initialization or compatibility failure. Registered Extension APIs are available under <code>$ae.ext.&lt;camelCaseName&gt;</code>.</p>
+<p><code>extName(filename)</code> extracts the Extension name from an <code>aellux.ext.&lt;name&gt;.js</code> filename.</p>
 <h2>Events</h2>
 <pre><code class="language-js">$ae.on(&quot;Ready&quot;, handler);
 $ae.off(&quot;Ready&quot;, handler);

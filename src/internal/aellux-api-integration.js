@@ -51,7 +51,7 @@ export function createAelluxApi(root, constants) {
       return "aellux." + constants.AELLUXJS_EXT_SCRIPT_PREFIX + "." + name +
         (api.minified ? ".min.js" : ".js");
     },
-    extLabel: function (filename) {
+    extName: function (filename) {
       return filename.replace(
         new RegExp("^.*aellux\\." + constants.AELLUXJS_EXT_SCRIPT_PREFIX +
           "\\.([^.\\/?#]+)(?:\\.min)?\\.js(?:[?#].*)?$"),
@@ -65,15 +65,15 @@ export function createAelluxApi(root, constants) {
     lazyExtensionSelectors: {},
     extensionMounters: {},
     extRegistry: {},
-    ext: function (labelOrUrl, options) {
-      var label = fromCamelCase(api.extLabel(labelOrUrl));
-      var key = toCamelCase(label);
-      var url = labelOrUrl;
+    ext: function (nameOrUrl, options) {
+      var name = fromCamelCase(api.extName(nameOrUrl));
+      var key = toCamelCase(name);
+      var url = nameOrUrl;
       if (key in api.extRegistry) {
-        diagnostics.report(diagnostics.ERROR_EXTENSION_DUPLICATE, { extension: label });
+        diagnostics.report(diagnostics.ERROR_EXTENSION_DUPLICATE, { extension: name });
         return;
       }
-      if (url === api.extLabel(labelOrUrl)) url = "./" + api.extFilename(label);
+      if (url === api.extName(nameOrUrl)) url = "./" + api.extFilename(name);
       if (!options) options = {};
       if (typeof options.loadStyle === "undefined") options.loadStyle = false;
       if (!options.loadWhen) options.loadWhen = null;
@@ -84,9 +84,9 @@ export function createAelluxApi(root, constants) {
       options.state = "wait";
       api.extRegistry[key] = options;
     },
-    extRegister: function (label, object) {
-      label = fromCamelCase(label);
-      var key = toCamelCase(label);
+    extRegister: function (name, object) {
+      name = fromCamelCase(name);
+      var key = toCamelCase(name);
       api.extRegistry[key].state = "register";
       object.initialized = false;
       api.ext[key] = object;

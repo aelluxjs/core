@@ -21180,11 +21180,11 @@
     }
     function _AelluxJsForceUnmount() {
       _AelluxJsForceUnmount = _asyncToGenerator(/* @__PURE__ */ _regenerator().m(function _callee(rootOrSelector) {
-        var extensionLabels, _iterator, _step, rootElement, _args = arguments, _t;
+        var extensionNames, _iterator, _step, rootElement, _args = arguments, _t;
         return _regenerator().w(function(_context) {
           while (1) switch (_context.p = _context.n) {
             case 0:
-              extensionLabels = _args.length > 1 && _args[1] !== void 0 ? _args[1] : null;
+              extensionNames = _args.length > 1 && _args[1] !== void 0 ? _args[1] : null;
               _iterator = _createForOfIteratorHelper(resolveRoots(rootOrSelector));
               _context.p = 1;
               _iterator.s();
@@ -21195,7 +21195,7 @@
               }
               rootElement = _step.value;
               _context.n = 3;
-              return AelluxJsForce(rootElement, "unmount", extensionLabels);
+              return AelluxJsForce(rootElement, "unmount", extensionNames);
             case 3:
               _context.n = 2;
               break;
@@ -21222,11 +21222,11 @@
     }
     function _AelluxJsForceUpdate() {
       _AelluxJsForceUpdate = _asyncToGenerator(/* @__PURE__ */ _regenerator().m(function _callee2(rootOrSelector) {
-        var extensionLabels, AelluxJs2, _iterator2, _step2, rootElement, allWaiters, allLinks, _iterator3, _step3, link, href, loadWhen, builds, loadStyleValue, loadStyle, waitExtensions, _i, _Object$entries, _Object$entries$_i, key, options, _args2 = arguments, _t2;
+        var extensionNames, AelluxJs2, _iterator2, _step2, rootElement, allWaiters, allLinks, _iterator3, _step3, link, href, loadWhen, builds, loadStyleValue, loadStyle, waitExtensions, _i, _Object$entries, _Object$entries$_i, key, options, _args2 = arguments, _t2;
         return _regenerator().w(function(_context2) {
           while (1) switch (_context2.p = _context2.n) {
             case 0:
-              extensionLabels = _args2.length > 1 && _args2[1] !== void 0 ? _args2[1] : null;
+              extensionNames = _args2.length > 1 && _args2[1] !== void 0 ? _args2[1] : null;
               AelluxJs2 = root.AelluxJs;
               _iterator2 = _createForOfIteratorHelper(resolveRoots(rootOrSelector));
               _context2.p = 1;
@@ -21287,7 +21287,7 @@
               return Promise.all(waitExtensions);
             case 7:
               _context2.n = 8;
-              return AelluxJsForce(rootElement, "mount", extensionLabels);
+              return AelluxJsForce(rootElement, "mount", extensionNames);
             case 8:
               allWaiters.forEach(function(waiter) {
                 return waiter.setAttribute("aria-busy", "false");
@@ -21318,29 +21318,29 @@
     }
     function _AelluxJsForce() {
       _AelluxJsForce = _asyncToGenerator(/* @__PURE__ */ _regenerator().m(function _callee3(rootElement, method) {
-        var extensionLabels, AelluxJs2, filter, mounterSelectors, lazySelectors, _i2, _Object$entries2, _Object$entries2$_i, key, selectorString, _i3, _Object$entries3, _Object$entries3$_i, _key, _selectorString, allElements, _iterator4, _step4, element, elementsAffected, localExtensionLabels, _i4, _Object$entries4, _Object$entries4$_i, _key2, selector, _i5, _Object$entries5, _Object$entries5$_i, _key3, _selector, _iterator5, _step5, extensionLabel, extensionPromise, extension, mounter, _iterator7, _step7, _step7$value, _selector2, controller, mountableElements, _iterator8, _step8, mountable, mountId, mounting, _iterator6, _step6, affected, _args3 = arguments, _t3, _t4, _t5, _t6, _t7;
+        var extensionNames, AelluxJs2, filter, mounterSelectors, lazySelectors, _i2, _Object$entries2, _Object$entries2$_i, key, selectorString, _i3, _Object$entries3, _Object$entries3$_i, _key, _selectorString, allElements, _iterator4, _step4, element, elementsAffected, localExtensionNames, _i4, _Object$entries4, _Object$entries4$_i, _key2, selector, _i5, _Object$entries5, _Object$entries5$_i, _key3, _selector, _iterator5, _step5, extensionName, extensionPromise, extension, mounter, _iterator7, _step7, _step7$value, _selector2, controller, mountableElements, _iterator8, _step8, mountable, mountId, mounting, _iterator6, _step6, affected, _args3 = arguments, _t3, _t4, _t5, _t6, _t7;
         return _regenerator().w(function(_context3) {
           while (1) switch (_context3.p = _context3.n) {
             case 0:
-              extensionLabels = _args3.length > 2 && _args3[2] !== void 0 ? _args3[2] : null;
+              extensionNames = _args3.length > 2 && _args3[2] !== void 0 ? _args3[2] : null;
               AelluxJs2 = root.AelluxJs;
-              if (typeof extensionLabels === "string") extensionLabels = [extensionLabels];
-              if (!extensionLabels) {
+              if (typeof extensionNames === "string") extensionNames = [extensionNames];
+              if (!extensionNames) {
                 mounterSelectors = Object.values(AelluxJs2.extensionMounters);
                 lazySelectors = Object.values(AelluxJs2.lazyExtensionSelectors);
                 filter = [].concat(mounterSelectors, lazySelectors);
               } else {
                 filter = [];
-                extensionLabels = extensionLabels.map(function(_) {
+                extensionNames = extensionNames.map(function(_) {
                   return fromCamelCase2(_);
                 });
                 for (_i2 = 0, _Object$entries2 = Object.entries(AelluxJs2.extensionMounters); _i2 < _Object$entries2.length; _i2++) {
                   _Object$entries2$_i = _slicedToArray(_Object$entries2[_i2], 2), key = _Object$entries2$_i[0], selectorString = _Object$entries2$_i[1];
-                  if (extensionLabels.indexOf(fromCamelCase2(key)) !== -1) filter.push(selectorString);
+                  if (extensionNames.indexOf(fromCamelCase2(key)) !== -1) filter.push(selectorString);
                 }
                 for (_i3 = 0, _Object$entries3 = Object.entries(AelluxJs2.lazyExtensionSelectors); _i3 < _Object$entries3.length; _i3++) {
                   _Object$entries3$_i = _slicedToArray(_Object$entries3[_i3], 2), _key = _Object$entries3$_i[0], _selectorString = _Object$entries3$_i[1];
-                  if (extensionLabels.indexOf(fromCamelCase2(_key)) !== -1) filter.push(_selectorString);
+                  if (extensionNames.indexOf(fromCamelCase2(_key)) !== -1) filter.push(_selectorString);
                 }
               }
               if (!(filter.length === 0)) {
@@ -21360,20 +21360,20 @@
               }
               element = _step4.value;
               elementsAffected = /* @__PURE__ */ new Set();
-              if (extensionLabels) {
-                localExtensionLabels = new Set(extensionLabels);
+              if (extensionNames) {
+                localExtensionNames = new Set(extensionNames);
               } else {
-                localExtensionLabels = /* @__PURE__ */ new Set();
+                localExtensionNames = /* @__PURE__ */ new Set();
                 for (_i4 = 0, _Object$entries4 = Object.entries(AelluxJs2.lazyExtensionSelectors); _i4 < _Object$entries4.length; _i4++) {
                   _Object$entries4$_i = _slicedToArray(_Object$entries4[_i4], 2), _key2 = _Object$entries4$_i[0], selector = _Object$entries4$_i[1];
-                  if (element.matches(selector) && filter.indexOf(selector) !== -1) localExtensionLabels.add(fromCamelCase2(_key2));
+                  if (element.matches(selector) && filter.indexOf(selector) !== -1) localExtensionNames.add(fromCamelCase2(_key2));
                 }
                 for (_i5 = 0, _Object$entries5 = Object.entries(AelluxJs2.extensionMounters); _i5 < _Object$entries5.length; _i5++) {
                   _Object$entries5$_i = _slicedToArray(_Object$entries5[_i5], 2), _key3 = _Object$entries5$_i[0], _selector = _Object$entries5$_i[1];
-                  if (element.matches(_selector) && filter.indexOf(_selector) !== -1) localExtensionLabels.add(fromCamelCase2(_key3));
+                  if (element.matches(_selector) && filter.indexOf(_selector) !== -1) localExtensionNames.add(fromCamelCase2(_key3));
                 }
               }
-              _iterator5 = _createForOfIteratorHelper(localExtensionLabels);
+              _iterator5 = _createForOfIteratorHelper(localExtensionNames);
               _context3.p = 4;
               _iterator5.s();
             case 5:
@@ -21381,8 +21381,8 @@
                 _context3.n = 28;
                 break;
               }
-              extensionLabel = _step5.value;
-              extensionPromise = method === "mount" ? AelluxJs2.wait(extensionLabel) : extensionPromises[toCamelCase2(extensionLabel)];
+              extensionName = _step5.value;
+              extensionPromise = method === "mount" ? AelluxJs2.wait(extensionName) : extensionPromises[toCamelCase2(extensionName)];
               if (extensionPromise) {
                 _context3.n = 6;
                 break;
@@ -21426,7 +21426,7 @@
                 break;
               }
               mountable = _step8.value;
-              mountId = "".concat(extensionLabel, "@").concat(_selector2);
+              mountId = "".concat(extensionName, "@").concat(_selector2);
               mounting = method === "mount";
               if (!(mounting === isMounted(mountable, mountId))) {
                 _context3.n = 15;
@@ -21461,7 +21461,7 @@
               _t4 = _context3.v;
               AelluxJs2.diagnostics.report(AelluxJs2.diagnostics.ERROR_EXTENSION_MOUNT, {
                 cause: _t4,
-                extension: extensionLabel,
+                extension: extensionName,
                 method: method,
                 selector: _selector2
               });
@@ -21776,12 +21776,12 @@
           update: function update(rootOrSelector) {
             var _arguments = arguments;
             return _asyncToGenerator2(/* @__PURE__ */ _regenerator2().m(function _callee2() {
-              var extensionLabels;
+              var extensionNames;
               return _regenerator2().w(function(_context2) {
                 while (1) switch (_context2.n) {
                   case 0:
-                    extensionLabels = _arguments.length > 1 && _arguments[1] !== void 0 ? _arguments[1] : null;
-                    return _context2.a(2, mountHelper.AelluxJsForceUpdate(rootOrSelector, extensionLabels));
+                    extensionNames = _arguments.length > 1 && _arguments[1] !== void 0 ? _arguments[1] : null;
+                    return _context2.a(2, mountHelper.AelluxJsForceUpdate(rootOrSelector, extensionNames));
                 }
               }, _callee2);
             }))();
@@ -21789,12 +21789,12 @@
           unmount: function unmount(rootOrSelector) {
             var _arguments2 = arguments;
             return _asyncToGenerator2(/* @__PURE__ */ _regenerator2().m(function _callee3() {
-              var extensionLabels;
+              var extensionNames;
               return _regenerator2().w(function(_context3) {
                 while (1) switch (_context3.n) {
                   case 0:
-                    extensionLabels = _arguments2.length > 1 && _arguments2[1] !== void 0 ? _arguments2[1] : null;
-                    return _context3.a(2, mountHelper.AelluxJsForceUnmount(rootOrSelector, extensionLabels));
+                    extensionNames = _arguments2.length > 1 && _arguments2[1] !== void 0 ? _arguments2[1] : null;
+                    return _context3.a(2, mountHelper.AelluxJsForceUnmount(rootOrSelector, extensionNames));
                 }
               }, _callee3);
             }))();
@@ -21813,20 +21813,20 @@
               }, _callee4);
             }))();
           },
-          destroyExtensions: function destroyExtensions(extensionLabels) {
+          destroyExtensions: function destroyExtensions(extensionNames) {
             return _asyncToGenerator2(/* @__PURE__ */ _regenerator2().m(function _callee5() {
-              var _iterator, _step, extensionLabel, key, extension, _t, _t2, _t3;
+              var _iterator, _step, extensionName, key, extension, _t, _t2, _t3;
               return _regenerator2().w(function(_context5) {
                 while (1) switch (_context5.p = _context5.n) {
                   case 0:
-                    if (typeof extensionLabels === "string") extensionLabels = [extensionLabels];
-                    if (!extensionLabels) extensionLabels = Object.keys(extensionPromises);
-                    extensionLabels = extensionLabels.map(function(_) {
+                    if (typeof extensionNames === "string") extensionNames = [extensionNames];
+                    if (!extensionNames) extensionNames = Object.keys(extensionPromises);
+                    extensionNames = extensionNames.map(function(_) {
                       return fromCamelCase2(_);
                     });
                     _context5.p = 1;
                     _context5.n = 2;
-                    return AelluxJs.unmount(document, extensionLabels);
+                    return AelluxJs.unmount(document, extensionNames);
                   case 2:
                     _context5.n = 4;
                     break;
@@ -21835,10 +21835,10 @@
                     _t = _context5.v;
                     AelluxJs.diagnostics.report(AelluxJs.diagnostics.ERROR_EXTENSION_UNMOUNT, {
                       cause: _t,
-                      extensions: extensionLabels
+                      extensions: extensionNames
                     });
                   case 4:
-                    _iterator = _createForOfIteratorHelper2(extensionLabels);
+                    _iterator = _createForOfIteratorHelper2(extensionNames);
                     _context5.p = 5;
                     _iterator.s();
                   case 6:
@@ -21846,8 +21846,8 @@
                       _context5.n = 14;
                       break;
                     }
-                    extensionLabel = _step.value;
-                    key = toCamelCase2(extensionLabel);
+                    extensionName = _step.value;
+                    key = toCamelCase2(extensionName);
                     extension = void 0;
                     _context5.p = 7;
                     if (extensionPromises[key]) {
@@ -21874,7 +21874,7 @@
                     _t2 = _context5.v;
                     AelluxJs.diagnostics.report(AelluxJs.diagnostics.ERROR_EXTENSION_DESTROY, {
                       cause: _t2,
-                      extension: extensionLabel
+                      extension: extensionName
                     });
                   case 12:
                     _context5.p = 12;
@@ -21963,9 +21963,9 @@
           });
           return extensionPromises[key];
         }
-        function extensionInitialize(extensionLabel) {
-          extensionLabel = fromCamelCase2(extensionLabel);
-          var key = toCamelCase2(extensionLabel);
+        function extensionInitialize(extensionName) {
+          extensionName = fromCamelCase2(extensionName);
+          var key = toCamelCase2(extensionName);
           var options = AelluxJs.options.extensions[key] || {};
           AelluxJs.ext[key].init(options);
           AelluxJs.ext[key].initialized = true;
@@ -21980,13 +21980,13 @@
           return _appendExtensionAssets.apply(this, arguments);
         }
         function _appendExtensionAssets() {
-          _appendExtensionAssets = _asyncToGenerator2(/* @__PURE__ */ _regenerator2().m(function _callee6(extensionLabel) {
+          _appendExtensionAssets = _asyncToGenerator2(/* @__PURE__ */ _regenerator2().m(function _callee6(extensionName) {
             var key, data, url, useLegacyBuild, scriptURL, loadPromises;
             return _regenerator2().w(function(_context6) {
               while (1) switch (_context6.n) {
                 case 0:
-                  extensionLabel = fromCamelCase2(extensionLabel);
-                  key = toCamelCase2(extensionLabel);
+                  extensionName = fromCamelCase2(extensionName);
+                  key = toCamelCase2(extensionName);
                   data = AelluxJs.extRegistry[key];
                   url = data.url.replace(/^\.\//, AelluxJs.aelluxBasePath);
                   useLegacyBuild = AelluxJs.legacy || data.builds.indexOf("modern") === -1;
@@ -21996,7 +21996,7 @@
                     var attr = AelluxJs.attr("ext");
                     var script = document.createElement("script");
                     script.src = scriptURL;
-                    script.setAttribute(attr, extensionLabel);
+                    script.setAttribute(attr, extensionName);
                     assetLoadHelper(script, {
                       loadCallback: resolve,
                       errorCallback: reject
@@ -22010,7 +22010,7 @@
                       var link = document.createElement("link");
                       link.href = href;
                       link.rel = "stylesheet";
-                      link.setAttribute(attrStyle, extensionLabel);
+                      link.setAttribute(attrStyle, extensionName);
                       assetLoadHelper(link, {
                         loadCallback: resolve,
                         errorCallback: resolve

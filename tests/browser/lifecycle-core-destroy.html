@@ -8,11 +8,11 @@
   <script>
     var destroyedExtensions = [];
 
-    function registerProbe(label) {
-      $ae.ext(label);
-      $ae.extRegister(label, {
+    function registerProbe(name) {
+      $ae.ext(name);
+      $ae.extRegister(name, {
         init: function () {},
-        destroy: function () { destroyedExtensions.push(label); }
+        destroy: function () { destroyedExtensions.push(name); }
       });
     }
 
