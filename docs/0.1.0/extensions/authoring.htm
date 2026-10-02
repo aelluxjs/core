@@ -503,7 +503,7 @@
         <div id="doc-content" style="min-height: calc(100vh - 200px);" class="js-toc-content" ajax-load="doc-content">
           <h1>Authoring Third-Party aellux.js Extensions</h1>
 <p>An aellux.js Extension is a classic browser script that registers one focused behavior through <code>AelluxJs.extRegister()</code>. Third-party Extensions follow the same naming, lifecycle, compatibility, and cleanup rules as Core Extensions.</p>
-<p>Start from <a href="../../templates/aellux.ext.template.js"><code>templates/aellux.ext.template.js</code></a>. The scaffold contains the required structure and a compatibility summary.</p>
+<p>Start from <a href="https://github.com/aelluxjs/core/blob/main/templates/aellux.ext.template.js"><code>templates/aellux.ext.template.js</code></a>. The scaffold contains the required structure and a compatibility summary.</p>
 <h2>Required Contract</h2>
 <ol>
 <li>Name the source and Modern artifact <code>aellux.ext.&lt;name&gt;.js</code>.</li>
@@ -551,7 +551,7 @@ aellux.ext.example.min.js
 aellux.ext.example.legacy.js
 aellux.ext.example.legacy.min.js
 </code></pre>
-<p>The reference builder in <a href="../../templates/build-extension.mjs"><code>templates/build-extension.mjs</code></a> bundles the source as a classic script and generates all four files. Install its build dependencies in the Extension project:</p>
+<p>The reference builder in <a href="https://github.com/aelluxjs/core/blob/main/templates/build-extension.mjs"><code>templates/build-extension.mjs</code></a> bundles the source as a classic script and generates all four files. Install its build dependencies in the Extension project:</p>
 <pre><code class="language-sh">npm install --save-dev @babel/core @babel/preset-env esbuild
 node build-extension.mjs ./src/aellux.ext.example.js ./dist
 </code></pre>

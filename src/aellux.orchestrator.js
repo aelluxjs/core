@@ -13,9 +13,12 @@
 import { assetLoadHelper } from "./internal/asset-load-helper.js";
 import { createLayoutScheduler } from "./internal/create-layout-scheduler.js";
 import { createMountHelper } from "./internal/create-mount-helper.js";
+import nameCase from "./internal/utils-name-case.js";
 
 (function (root) {
   "use strict";
+
+  const { toCamelCase, fromCamelCase } = nameCase;
 
   const extensionPromises = {};
   const mountHelper = createMountHelper(root, extensionPromises);
@@ -278,9 +281,6 @@ import { createMountHelper } from "./internal/create-mount-helper.js";
       });
   };
 
-
-  function toCamelCase(name) { return name.replace(/-([a-z])/g, (_, c) => c.toUpperCase()); };
-  function fromCamelCase(name) { return name.replace(/([A-Z])/g, "-$1").toLowerCase(); };
 
   //BFCache
   // let pageWasHidden = false;

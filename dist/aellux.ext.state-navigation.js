@@ -1,4 +1,5 @@
 (() => {
+  // src/aellux.ext.state-navigation.js
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   (function() {
     "use strict";

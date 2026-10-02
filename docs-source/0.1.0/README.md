@@ -1,6 +1,23 @@
-# aellux.js Documentation
+# aellux.js 0.1.0
 
-This directory contains the detailed documentation for the aellux.js `0.1.0-beta` line.
+UX Made Easy
+
+<div class="d-flex gap-2 flex-row">
+<a class="btn btn-outline-primary btn-lg rounded-1" href="https://github.com/aelluxjs/core">
+View on Github
+</a>
+<a class="btn btn-primary btn-lg rounded-1" href="getting-started.md">
+Get Started
+</a>
+</div>
+
+## Project Goal
+
+The goal of aellux.js is to make rich browser experiences easier to build and maintain. It helps developers organize UX features into reusable, modular pieces, reduce duplicated code, and keep applications lean as they grow. For end users, the aim is a faster, more consistent, and more reliable experience across pages and devices.
+
+## How it Works
+
+Add aellux.js to a page and enable the Extensions it needs. The library coordinates those Extensions as the page loads and changes. Well-defined contracts keep the public API and Extension behavior consistent, making features easier to combine and maintain.
 
 ## Getting Started
 
@@ -29,7 +46,7 @@ This directory contains the detailed documentation for the aellux.js `0.1.0-beta
 ## Project Documents
 
 - [Browser validation scenarios](validation-scenarios.md)
-- [Milestone: aellux.js 0.1.0 Beta 2](milestones/0.1.0-beta.2.md)
-- [Milestone: aellux.js 0.1.0 Beta 1](milestones/0.1.0-beta.1.md)
-- [Extension scaffold](../templates/README.md)
-- [Changelog](../CHANGELOG.md)
+- [Milestone: aellux.js 0.1.0 Beta 2](https://github.com/aelluxjs/core/blob/main/milestones/0.1.0-beta.2.md)
+- [Milestone: aellux.js 0.1.0 Beta 1](https://github.com/aelluxjs/core/blob/main/milestones/0.1.0-beta.1.md)
+- [Extension scaffold](https://github.com/aelluxjs/core/blob/main/templates/README.md)
+- [Changelog](https://github.com/aelluxjs/core/blob/main/CHANGELOG.md)

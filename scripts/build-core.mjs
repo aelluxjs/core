@@ -54,7 +54,6 @@ for (const sourceFile of sourceFiles) {
   const filename = basename(sourceFile);
   const classic = filename === "aellux.js";
   const full = filename === "aellux.full.esm.js";
-  const orchestrator = filename === "aellux.orchestrator.js";
   const distributionFilename = full ? "aellux.full.js" : filename;
 
   for (const minify of [false, true]) {
@@ -63,7 +62,7 @@ for (const sourceFile of sourceFiles) {
       absWorkingDir: projectRoot,
       entryPoints: [sourceFile],
       outfile: join(outputDirectory, outputFilename),
-      bundle: classic || full || orchestrator,
+      bundle: true,
       platform: "browser",
       format: "iife",
       target: classic ? "es5" : "es2017",
@@ -94,22 +93,20 @@ for (const sourceFile of legacySourceFiles) {
       stdin: {
         contents: isOrchestrator ? legacyOrchestratorEntry : transformed.code,
         loader: "js",
-        resolveDir: projectRoot,
+        resolveDir: isOrchestrator ? projectRoot : sourceDirectory,
         sourcefile: isOrchestrator
           ? "aellux.orchestrator.legacy.entry.js"
           : sourceFileName
       },
       outfile: join(outputDirectory, outputFilename),
-      bundle: isOrchestrator,
+      bundle: true,
       platform: "browser",
       format: "iife",
       target: "es5",
       minify,
       sourcemap: true,
       legalComments: "inline",
-      plugins: isOrchestrator
-        ? [legacyBundlePlugin()]
-        : []
+      plugins: [legacyBundlePlugin()]
     });
     generatedFiles.add(outputFilename);
     generatedFiles.add(outputFilename + ".map");

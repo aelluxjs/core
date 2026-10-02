@@ -2,7 +2,7 @@
 
 An aellux.js Extension is a classic browser script that registers one focused behavior through `AelluxJs.extRegister()`. Third-party Extensions follow the same naming, lifecycle, compatibility, and cleanup rules as Core Extensions.
 
-Start from [`templates/aellux.ext.template.js`](../../templates/aellux.ext.template.js). The scaffold contains the required structure and a compatibility summary.
+Start from [`templates/aellux.ext.template.js`](https://github.com/aelluxjs/core/blob/main/templates/aellux.ext.template.js). The scaffold contains the required structure and a compatibility summary.
 
 ## Required Contract
 
@@ -69,7 +69,7 @@ aellux.ext.example.legacy.js
 aellux.ext.example.legacy.min.js
 ```
 
-The reference builder in [`templates/build-extension.mjs`](../../templates/build-extension.mjs) bundles the source as a classic script and generates all four files. Install its build dependencies in the Extension project:
+The reference builder in [`templates/build-extension.mjs`](https://github.com/aelluxjs/core/blob/main/templates/build-extension.mjs) bundles the source as a classic script and generates all four files. Install its build dependencies in the Extension project:
 
 ```sh
 npm install --save-dev @babel/core @babel/preset-env esbuild

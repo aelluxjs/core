@@ -171,9 +171,96 @@
     return diagnostics;
   }
 
+  // src/internal/utils-name-case.js
+  /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+  function toCapitalized(name) {
+    return name.replace(/^([a-z])|-([a-z])/g, function(_, first, afterHyphen) {
+      return (first || afterHyphen).toUpperCase();
+    });
+  }
+  function toCamelCase(name) {
+    return name.replace(/-([a-z])/g, function(_, character) {
+      return character.toUpperCase();
+    });
+  }
+  function fromCamelCase(name) {
+    return name.replace(/([A-Z])/g, "-$1").toLowerCase();
+  }
+  var utils_name_case_default = {
+    toCapitalized: toCapitalized,
+    toCamelCase: toCamelCase,
+    fromCamelCase: fromCamelCase
+  };
+
+  // src/internal/utils-preference-html.js
+  /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+  function createPreferencesHtmlHelper(root, getApi) {
+    var document2 = root.document;
+    var fromCamelCase2 = utils_name_case_default.fromCamelCase;
+    return {
+      updatePreferencesAttributesHTML: updatePreferencesAttributesHTML
+    };
+    function updatePreferencesAttributesHTML(preferences) {
+      var api = getApi();
+      var allQueries = api.preferencesMediaQueries;
+      preferences = preferences ? preferences : api.persist.preferences.getObject();
+      for (var param in allQueries) {
+        if (!Object.prototype.hasOwnProperty.call(allQueries, param)) continue;
+        var queries = allQueries[param];
+        for (var value in queries) {
+          if (!Object.prototype.hasOwnProperty.call(queries, value)) continue;
+          var query = queries[value];
+          if (!preferences || !preferences[param] || preferences[param] === "auto") {
+            if (!query || !query.matches) continue;
+          } else if (preferences[param] !== value) {
+            continue;
+          }
+          document2.documentElement.setAttribute(api.attr(fromCamelCase2(param)), value);
+        }
+      }
+      if (preferences && "colorScheme" in preferences) {
+        updateColorSchemeMeta(preferences.colorScheme);
+      }
+    }
+    function updateColorSchemeMeta(preferenceColorScheme) {
+      var api = getApi();
+      var attr = api.attr("theme-color");
+      var aeMetaTag = document2.head.querySelector("meta[" + attr + "]") || document2.createElement("meta");
+      if (preferenceColorScheme === "auto") {
+        if (aeMetaTag.parentNode) aeMetaTag.parentNode.removeChild(aeMetaTag);
+        return;
+      }
+      var themeColorTags = document2.head.querySelectorAll("meta[name='theme-color']");
+      if (themeColorTags.length < 2) return;
+      var color = null;
+      for (var i = 0; i < themeColorTags.length; i++) {
+        var meta = themeColorTags[i];
+        var media = meta.getAttribute("media") || "";
+        if (preferenceColorScheme === "dark") {
+          if (media.indexOf("dark") === -1) continue;
+          color = meta.getAttribute("content");
+          break;
+        }
+        if (media.indexOf("dark") > -1) continue;
+        color = meta.getAttribute("content");
+      }
+      if (color === null) {
+        if (aeMetaTag.parentNode) aeMetaTag.parentNode.removeChild(aeMetaTag);
+        return;
+      }
+      aeMetaTag.name = "theme-color";
+      aeMetaTag.content = color;
+      aeMetaTag.setAttribute(attr, "");
+      document2.head.insertBefore(aeMetaTag, document2.head.firstChild);
+    }
+  }
+
   // src/aellux.js
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   (function(root) {
+    var toCapitalized2 = utils_name_case_default.toCapitalized;
+    var toCamelCase2 = utils_name_case_default.toCamelCase;
+    var fromCamelCase2 = utils_name_case_default.fromCamelCase;
     var CONSTANTS = {
       AELLUXJS_SHORT_JS_NAME: "$ae",
       AELLUXJS_EXT_SCRIPT_PREFIX: "ext",
@@ -211,6 +298,10 @@
     };
     var scriptExtension = ".js";
     var diagnostics = buildDiagnostics(CONSTANTS.AELLUXJS_DIAGNOSTICS);
+    var preferencesHtml = createPreferencesHtmlHelper(root, function() {
+      return root.AelluxJs;
+    });
+    var updatePreferencesAttributesHTML = preferencesHtml.updatePreferencesAttributesHTML;
     var bootstrapScript = document.currentScript || document.querySelector("script[src*='aellux.js'],script[src*='aellux.min.js']");
     var aelluxBootstrapSrc = root.__aelluxBootstrapURL || bootstrapScript && bootstrapScript.src;
     if (!aelluxBootstrapSrc) {
@@ -274,7 +365,7 @@
         );
       },
       eventName: function(name) {
-        return CONSTANTS.AELLUXJS_EVENT_NAME_PREFFIX.replace(/\?/, toCapitalized(name));
+        return CONSTANTS.AELLUXJS_EVENT_NAME_PREFFIX.replace(/\?/, toCapitalized2(name));
       },
       noConflict: function() {
         return old$Instance;
@@ -283,7 +374,7 @@
       extensionMounters: {},
       extRegistry: {},
       ext: function(labelOrUrl, options) {
-        var label = fromCamelCase(AelluxJs.extLabel(labelOrUrl));
+        var label = fromCamelCase2(AelluxJs.extLabel(labelOrUrl));
         var url = labelOrUrl;
         if (label in AelluxJs.extRegistry) {
           AelluxJs.diagnostics.report(
@@ -306,8 +397,8 @@
         AelluxJs.extRegistry[label] = options;
       },
       extRegister: function(label, object) {
-        label = fromCamelCase(label);
-        var key = toCamelCase(label);
+        label = fromCamelCase2(label);
+        var key = toCamelCase2(label);
         AelluxJs.extRegistry[label].state = "register";
         object.initialized = false;
         AelluxJs[key] = object;
@@ -434,69 +525,6 @@
         document.head.appendChild(meta);
       }
     }
-    function updatePreferencesAttributesHTML(preferences) {
-      var allQueries = AelluxJs.preferencesMediaQueries;
-      preferences = preferences ? preferences : AelluxJs.persist.preferences.getObject();
-      for (var param in allQueries) {
-        var queries = allQueries[param];
-        for (var value in queries) {
-          var query = queries[value];
-          if (!preferences || !preferences[param] || preferences[param] === "auto") {
-            if (!query || !query.matches) {
-              continue;
-            }
-          } else if (preferences[param] !== value) {
-            continue;
-          }
-          var hyphenized = fromCamelCase(param);
-          document.documentElement.setAttribute(AelluxJs.attr(hyphenized), value);
-        }
-      }
-      if ("colorScheme" in preferences)
-        updateColorSchemeMeta(preferences.colorScheme);
-    }
-    function updateColorSchemeMeta(preferenceColorScheme) {
-      var attr = AelluxJs.attr("theme-color");
-      var aeMetaTag = document.head.querySelector("meta[" + attr + "]") || document.createElement("meta");
-      if (preferenceColorScheme === "auto") {
-        if (aeMetaTag.parentNode)
-          aeMetaTag.parentNode.removeChild(aeMetaTag);
-        return;
-      }
-      var themeColorTags = document.head.querySelectorAll("meta[name='theme-color']");
-      if (themeColorTags.length < 2) {
-        return;
-      }
-      var color = null;
-      for (var i = 0; i < themeColorTags.length; i++) {
-        var m = themeColorTags[i];
-        var media = m.getAttribute("media") || "";
-        if (preferenceColorScheme === "dark") {
-          if (media.indexOf("dark") === -1) {
-            continue;
-          }
-          color = m.getAttribute("content");
-          break;
-        } else {
-          if (media.indexOf("dark") > -1) {
-            continue;
-          }
-          color = m.getAttribute("content");
-        }
-      }
-      if (color === null) {
-        if (aeMetaTag.parentNode)
-          aeMetaTag.parentNode.removeChild(aeMetaTag);
-        return;
-      }
-      aeMetaTag.name = "theme-color";
-      aeMetaTag.content = color;
-      aeMetaTag.setAttribute(attr, "");
-      document.head.insertBefore(
-        aeMetaTag,
-        document.head.firstChild
-      );
-    }
     function mergeOptions(target, source) {
       if (!source)
         return target;
@@ -537,22 +565,6 @@
       }
       return normalized;
     }
-    function toCapitalized(name) {
-      return name.replace(/^([a-z])|-([a-z])/g, function(_, first, afterHyphen) {
-        return (first || afterHyphen).toUpperCase();
-      });
-    }
-    ;
-    function toCamelCase(name) {
-      return name.replace(/-([a-z])/g, function(_, c) {
-        return c.toUpperCase();
-      });
-    }
-    ;
-    function fromCamelCase(name) {
-      return name.replace(/([A-Z])/g, "-$1").toLowerCase();
-    }
-    ;
   })(typeof globalThis !== "undefined" ? globalThis : window);
 })();
 //# sourceMappingURL=aellux.js.map

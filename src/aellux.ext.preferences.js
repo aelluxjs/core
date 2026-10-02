@@ -1,7 +1,11 @@
 /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
 
+import nameCase from "./internal/utils-name-case.js";
+
 (function () {
   "use strict";
+
+  const { toCamelCase } = nameCase;
 
   const extensionName = "preferences";
 
@@ -174,6 +178,4 @@
     }
   }
 
-  function toCamelCase(name) { return name.replace(/-([a-z])/g, (_, c) => c.toUpperCase()); };
-  function fromCamelCase(name) { return name.replace(/([A-Z])/g, "-$1").toLowerCase(); };
 })();

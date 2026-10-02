@@ -20971,6 +20971,32 @@
     }
   });
 
+  // src/internal/utils-name-case.js
+  function toCapitalized(name) {
+    return name.replace(/^([a-z])|-([a-z])/g, function(_, first, afterHyphen) {
+      return (first || afterHyphen).toUpperCase();
+    });
+  }
+  function toCamelCase(name) {
+    return name.replace(/-([a-z])/g, function(_, character) {
+      return character.toUpperCase();
+    });
+  }
+  function fromCamelCase(name) {
+    return name.replace(/([A-Z])/g, "-$1").toLowerCase();
+  }
+  var utils_name_case_default;
+  var init_utils_name_case = __esm({
+    "src/internal/utils-name-case.js": function() {
+      /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+      utils_name_case_default = {
+        toCapitalized: toCapitalized,
+        toCamelCase: toCamelCase,
+        fromCamelCase: fromCamelCase
+      };
+    }
+  });
+
   // src/internal/create-mount-helper.js
   function _slicedToArray(r, e) {
     return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest();
@@ -21147,6 +21173,7 @@
     };
   }
   function createMountHelper(root, extensionPromises) {
+    var toCapitalized2 = utils_name_case_default.toCapitalized, toCamelCase2 = utils_name_case_default.toCamelCase, fromCamelCase2 = utils_name_case_default.fromCamelCase;
     var mountedElements = /* @__PURE__ */ new WeakMap();
     function AelluxJsForceUnmount(_x) {
       return _AelluxJsForceUnmount.apply(this, arguments);
@@ -21305,15 +21332,15 @@
               } else {
                 filter = [];
                 extensionLabels = extensionLabels.map(function(_) {
-                  return fromCamelCase(_);
+                  return fromCamelCase2(_);
                 });
                 for (_i2 = 0, _Object$entries2 = Object.entries(AelluxJs2.extensionMounters); _i2 < _Object$entries2.length; _i2++) {
                   _Object$entries2$_i = _slicedToArray(_Object$entries2[_i2], 2), label = _Object$entries2$_i[0], selectorString = _Object$entries2$_i[1];
-                  if (extensionLabels.indexOf(fromCamelCase(label)) !== -1) filter.push(selectorString);
+                  if (extensionLabels.indexOf(fromCamelCase2(label)) !== -1) filter.push(selectorString);
                 }
                 for (_i3 = 0, _Object$entries3 = Object.entries(AelluxJs2.lazyExtensionSelectors); _i3 < _Object$entries3.length; _i3++) {
                   _Object$entries3$_i = _slicedToArray(_Object$entries3[_i3], 2), _label = _Object$entries3$_i[0], _selectorString = _Object$entries3$_i[1];
-                  if (extensionLabels.indexOf(fromCamelCase(_label)) !== -1) filter.push(_selectorString);
+                  if (extensionLabels.indexOf(fromCamelCase2(_label)) !== -1) filter.push(_selectorString);
                 }
               }
               if (!(filter.length === 0)) {
@@ -21355,7 +21382,7 @@
                 break;
               }
               _extensionLabel2 = _step5.value;
-              extensionPromise = method === "mount" ? AelluxJs2.wait(_extensionLabel2) : extensionPromises[toCamelCase(_extensionLabel2)];
+              extensionPromise = method === "mount" ? AelluxJs2.wait(_extensionLabel2) : extensionPromises[toCamelCase2(_extensionLabel2)];
               if (extensionPromise) {
                 _context3.n = 6;
                 break;
@@ -21493,7 +21520,7 @@
               _iterator4.f();
               return _context3.f(35);
             case 36:
-              AelluxJs2.dispatch(toCapitalized(method));
+              AelluxJs2.dispatch(toCapitalized2(method));
             case 37:
               return _context3.a(2);
           }
@@ -21544,22 +21571,6 @@
       mounts[mounted ? "add" : "delete"](mountId);
       if (mounts.size === 0) mountedElements.delete(element);
     }
-    function toCamelCase(name) {
-      return name.replace(/-([a-z])/g, function(_, c) {
-        return c.toUpperCase();
-      });
-    }
-    ;
-    function fromCamelCase(name) {
-      return name.replace(/([A-Z])/g, "-$1").toLowerCase();
-    }
-    ;
-    function toCapitalized(name) {
-      return name.replace(/^([a-z])|-([a-z])/g, function(_, first, afterHyphen) {
-        return (first || afterHyphen).toUpperCase();
-      });
-    }
-    ;
     return {
       AelluxJsForceUpdate: AelluxJsForceUpdate,
       AelluxJsForceUnmount: AelluxJsForceUnmount
@@ -21567,6 +21578,7 @@
   }
   var init_create_mount_helper = __esm({
     "src/internal/create-mount-helper.js": function() {
+      init_utils_name_case();
       /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
     }
   });
@@ -21722,9 +21734,11 @@
       init_asset_load_helper();
       init_create_layout_scheduler();
       init_create_mount_helper();
+      init_utils_name_case();
       /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
       (function(root) {
         "use strict";
+        var toCamelCase2 = utils_name_case_default.toCamelCase, fromCamelCase2 = utils_name_case_default.fromCamelCase;
         var extensionPromises = {};
         var mountHelper = createMountHelper(root, extensionPromises);
         var layoutScheduler = createLayoutScheduler();
@@ -21808,7 +21822,7 @@
                     if (typeof extensionLabels === "string") extensionLabels = [extensionLabels];
                     if (!extensionLabels) extensionLabels = Object.keys(extensionPromises);
                     extensionLabels = extensionLabels.map(function(_) {
-                      return fromCamelCase(_);
+                      return fromCamelCase2(_);
                     });
                     _context5.p = 1;
                     _context5.n = 2;
@@ -21833,7 +21847,7 @@
                       break;
                     }
                     extensionLabel = _step.value;
-                    key = toCamelCase(extensionLabel);
+                    key = toCamelCase2(extensionLabel);
                     extension = void 0;
                     _context5.p = 7;
                     if (extensionPromises[key]) {
@@ -21901,8 +21915,8 @@
         });
         root[root.AelluxJs.shortJSName] = root.AelluxJs;
         function getExtension(extensionName) {
-          extensionName = fromCamelCase(extensionName);
-          var key = toCamelCase(extensionName);
+          extensionName = fromCamelCase2(extensionName);
+          var key = toCamelCase2(extensionName);
           if (extensionPromises[key]) return extensionPromises[key];
           var data = AelluxJs.extRegistry[extensionName];
           if (data && !hasCompatibleBuild(data)) {
@@ -21949,8 +21963,8 @@
           return extensionPromises[key];
         }
         function extensionInitialize(extensionLabel) {
-          var extensionName = fromCamelCase(extensionLabel);
-          var key = toCamelCase(extensionLabel);
+          var extensionName = fromCamelCase2(extensionLabel);
+          var key = toCamelCase2(extensionLabel);
           AelluxJs[key].init();
           AelluxJs[key].initialized = true;
           if (AelluxJs[key].mountMap) {
@@ -21969,7 +21983,7 @@
             return _regenerator2().w(function(_context6) {
               while (1) switch (_context6.n) {
                 case 0:
-                  extensionName = fromCamelCase(name);
+                  extensionName = fromCamelCase2(name);
                   data = AelluxJs.extRegistry[extensionName];
                   url = data.url.replace(/^\.\//, AelluxJs.aelluxBasePath);
                   useLegacyBuild = AelluxJs.legacy || data.builds.indexOf("modern") === -1;
@@ -22032,16 +22046,6 @@
           }).catch(function(error) {
             throw error;
           });
-        }
-        ;
-        function toCamelCase(name) {
-          return name.replace(/-([a-z])/g, function(_, c) {
-            return c.toUpperCase();
-          });
-        }
-        ;
-        function fromCamelCase(name) {
-          return name.replace(/([A-Z])/g, "-$1").toLowerCase();
         }
         ;
       })(typeof globalThis !== "undefined" ? globalThis : window);

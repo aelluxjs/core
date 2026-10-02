@@ -4,6 +4,8 @@ import { assetLoadHelper } from "./internal/asset-load-helper.js";
 import { buildPersistMemory } from "./internal/build-persist-memory.js";
 import { buildPreferencesMediaQueries } from "./internal/build-preferences-media-queries.js";
 import { buildDiagnostics } from "./internal/build-diagnostics.js";
+import nameCase from "./internal/utils-name-case.js";
+import { createPreferencesHtmlHelper } from "./internal/utils-preference-html.js";
 
 // aellux.js boot script: intentionally minimal. Apart from build-time imports, its runtime body and
 // internal helpers must remain ES5-compatible; keep feature logic out and use conservative JavaScript.
@@ -17,6 +19,10 @@ import { buildDiagnostics } from "./internal/build-diagnostics.js";
 // Promise-based stylesheet tracking is optional and must be skipped when unavailable.
 
 (function (root) {
+  var toCapitalized = nameCase.toCapitalized;
+  var toCamelCase = nameCase.toCamelCase;
+  var fromCamelCase = nameCase.fromCamelCase;
+
   var CONSTANTS = {
     AELLUXJS_SHORT_JS_NAME: "$ae",
     AELLUXJS_EXT_SCRIPT_PREFIX: "ext",
@@ -54,6 +60,8 @@ import { buildDiagnostics } from "./internal/build-diagnostics.js";
 
   var scriptExtension = ".js";
   var diagnostics = buildDiagnostics(CONSTANTS.AELLUXJS_DIAGNOSTICS);
+  var preferencesHtml = createPreferencesHtmlHelper(root, function () { return root.AelluxJs; });
+  var updatePreferencesAttributesHTML = preferencesHtml.updatePreferencesAttributesHTML;
 
   var bootstrapScript =
     document.currentScript ||
@@ -296,70 +304,6 @@ import { buildDiagnostics } from "./internal/build-diagnostics.js";
     }
   }
 
-  function updatePreferencesAttributesHTML(preferences) {
-    var allQueries = AelluxJs.preferencesMediaQueries;
-    preferences = preferences ? preferences : AelluxJs.persist.preferences.getObject();
-    for (var param in allQueries) {
-      var queries = allQueries[param];
-      for (var value in queries) {
-        var query = queries[value];
-        if (!preferences || !preferences[param] || preferences[param] === "auto") {
-          if (!query || !query.matches) { continue; }
-        } else if (preferences[param] !== value) { continue; }
-        var hyphenized = fromCamelCase(param);
-        document.documentElement.setAttribute(AelluxJs.attr(hyphenized), value);
-      }
-    }
-    if ("colorScheme" in preferences)
-      updateColorSchemeMeta(preferences.colorScheme);
-  }
-
-  function updateColorSchemeMeta(preferenceColorScheme) {
-    var attr = AelluxJs.attr("theme-color");
-    var aeMetaTag =
-      document.head.querySelector("meta[" + attr + "]") ||
-      document.createElement("meta");
-    if (preferenceColorScheme === "auto") {
-      if (aeMetaTag.parentNode)
-        aeMetaTag.parentNode.removeChild(aeMetaTag);
-      return;
-    }
-
-    var themeColorTags = document.head
-      .querySelectorAll("meta[name='theme-color']");
-    if (themeColorTags.length < 2) {
-      return;
-    }
-
-    var color = null;
-    for (var i = 0; i < themeColorTags.length; i++) {
-      var m = themeColorTags[i];
-      var media = m.getAttribute("media") || "";
-      if (preferenceColorScheme === "dark") {
-        if (media.indexOf("dark") === -1) { continue; }
-        color = m.getAttribute("content");
-        break;
-      } else {
-        if (media.indexOf("dark") > -1) { continue; }
-        color = m.getAttribute("content");
-      }
-    }
-
-    if (color === null) {
-      if (aeMetaTag.parentNode)
-        aeMetaTag.parentNode.removeChild(aeMetaTag);
-      return;
-    }
-
-    aeMetaTag.name = "theme-color";
-    aeMetaTag.content = color;
-    aeMetaTag.setAttribute(attr, "");
-    document.head.insertBefore(
-      aeMetaTag,
-      document.head.firstChild
-    );
-  }
-
   function mergeOptions(target, source) {
     if (!source)
       return target;
@@ -419,13 +363,5 @@ import { buildDiagnostics } from "./internal/build-diagnostics.js";
     }
     return normalized;
   }
-
-  function toCapitalized(name) {
-    return name.replace(/^([a-z])|-([a-z])/g, function (_, first, afterHyphen) {
-      return (first || afterHyphen).toUpperCase();
-    });
-  };
-  function toCamelCase(name) { return name.replace(/-([a-z])/g, function (_, c) { return c.toUpperCase(); }); };
-  function fromCamelCase(name) { return name.replace(/([A-Z])/g, "-$1").toLowerCase(); };
 
 })(typeof globalThis !== "undefined" ? globalThis : window);

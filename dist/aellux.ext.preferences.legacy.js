@@ -1,4 +1,26 @@
 (function() {
+  // src/internal/utils-name-case.js
+  /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+  function toCapitalized(name) {
+    return name.replace(/^([a-z])|-([a-z])/g, function(_, first, afterHyphen) {
+      return (first || afterHyphen).toUpperCase();
+    });
+  }
+  function toCamelCase(name) {
+    return name.replace(/-([a-z])/g, function(_, character) {
+      return character.toUpperCase();
+    });
+  }
+  function fromCamelCase(name) {
+    return name.replace(/([A-Z])/g, "-$1").toLowerCase();
+  }
+  var utils_name_case_default = {
+    toCapitalized: toCapitalized,
+    toCamelCase: toCamelCase,
+    fromCamelCase: fromCamelCase
+  };
+
+  // src/src/aellux.ext.preferences.js
   function _slicedToArray(r, e) {
     return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest();
   }
@@ -44,6 +66,7 @@
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   (function() {
     "use strict";
+    var toCamelCase2 = utils_name_case_default.toCamelCase;
     var extensionName = "preferences";
     var userPreferences = /* @__PURE__ */ Object.create(null);
     var defaultPreferences = /* @__PURE__ */ Object.create(null);
@@ -121,11 +144,11 @@
       });
     }
     function get(preference) {
-      var key = toCamelCase(preference);
+      var key = toCamelCase2(preference);
       return computedPreferences[key];
     }
     function set(preference, value) {
-      var key = toCamelCase(preference);
+      var key = toCamelCase2(preference);
       if (userPreferences[key] === value) return;
       userPreferences[key] = value;
       saveUserPreferences();
@@ -202,16 +225,6 @@
         var change = buttonNext ? 1 : -1;
       }
     }
-    function toCamelCase(name) {
-      return name.replace(/-([a-z])/g, function(_, c) {
-        return c.toUpperCase();
-      });
-    }
-    ;
-    function fromCamelCase(name) {
-      return name.replace(/([A-Z])/g, "-$1").toLowerCase();
-    }
-    ;
   })();
 })();
 //# sourceMappingURL=aellux.ext.preferences.legacy.js.map

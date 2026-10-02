@@ -56,5 +56,5 @@ An Extension script exposes its API through `AelluxJs.extRegister()`:
 })();
 ```
 
-Use the [aellux.js Extension scaffold](../../templates/README.md) for the complete lifecycle structure.
+Use the [aellux.js Extension scaffold](https://github.com/aelluxjs/core/blob/main/templates/README.md) for the complete lifecycle structure.
 Third-party authors should also follow the [Extension authoring and compatibility contract](authoring.md).

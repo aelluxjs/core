@@ -4,13 +4,41 @@
     return fn && (res = (0, fn[__getOwnPropNames(fn)[0]])(fn = 0)), res;
   };
 
+  // src/internal/utils-name-case.js
+  function toCapitalized(name) {
+    return name.replace(/^([a-z])|-([a-z])/g, function(_, first, afterHyphen) {
+      return (first || afterHyphen).toUpperCase();
+    });
+  }
+  function toCamelCase(name) {
+    return name.replace(/-([a-z])/g, function(_, character) {
+      return character.toUpperCase();
+    });
+  }
+  function fromCamelCase(name) {
+    return name.replace(/([A-Z])/g, "-$1").toLowerCase();
+  }
+  var utils_name_case_default;
+  var init_utils_name_case = __esm({
+    "src/internal/utils-name-case.js"() {
+      /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+      utils_name_case_default = {
+        toCapitalized,
+        toCamelCase,
+        fromCamelCase
+      };
+    }
+  });
+
   // src/aellux.ext.preferences.js
   var aellux_ext_preferences_exports = {};
   var init_aellux_ext_preferences = __esm({
     "src/aellux.ext.preferences.js"() {
+      init_utils_name_case();
       /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
       (function() {
         "use strict";
+        const { toCamelCase: toCamelCase2 } = utils_name_case_default;
         const extensionName = "preferences";
         const userPreferences = /* @__PURE__ */ Object.create(null);
         const defaultPreferences = /* @__PURE__ */ Object.create(null);
@@ -82,11 +110,11 @@
           );
         }
         function get(preference) {
-          const key = toCamelCase(preference);
+          const key = toCamelCase2(preference);
           return computedPreferences[key];
         }
         function set(preference, value) {
-          const key = toCamelCase(preference);
+          const key = toCamelCase2(preference);
           if (userPreferences[key] === value) return;
           userPreferences[key] = value;
           saveUserPreferences();
@@ -159,14 +187,6 @@
             const change = buttonNext ? 1 : -1;
           }
         }
-        function toCamelCase(name) {
-          return name.replace(/-([a-z])/g, (_, c) => c.toUpperCase());
-        }
-        ;
-        function fromCamelCase(name) {
-          return name.replace(/([A-Z])/g, "-$1").toLowerCase();
-        }
-        ;
       })();
     }
   });
@@ -606,8 +626,10 @@
   }
 
   // src/internal/create-mount-helper.js
+  init_utils_name_case();
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   function createMountHelper(root2, extensionPromises) {
+    const { toCapitalized: toCapitalized2, toCamelCase: toCamelCase2, fromCamelCase: fromCamelCase2 } = utils_name_case_default;
     const mountedElements = /* @__PURE__ */ new WeakMap();
     async function AelluxJsForceUnmount(rootOrSelector, extensionLabels = null) {
       for (const rootElement of resolveRoots(rootOrSelector)) {
@@ -652,12 +674,12 @@
         filter = [...mounterSelectors, ...lazySelectors];
       } else {
         filter = [];
-        extensionLabels = extensionLabels.map((_) => fromCamelCase(_));
+        extensionLabels = extensionLabels.map((_) => fromCamelCase2(_));
         for (const [label, selectorString] of Object.entries(AelluxJs2.extensionMounters))
-          if (extensionLabels.indexOf(fromCamelCase(label)) !== -1)
+          if (extensionLabels.indexOf(fromCamelCase2(label)) !== -1)
             filter.push(selectorString);
         for (const [label, selectorString] of Object.entries(AelluxJs2.lazyExtensionSelectors))
-          if (extensionLabels.indexOf(fromCamelCase(label)) !== -1)
+          if (extensionLabels.indexOf(fromCamelCase2(label)) !== -1)
             filter.push(selectorString);
       }
       if (filter.length === 0) return;
@@ -677,7 +699,7 @@
               localExtensionLabels.add(extensionLabel);
         }
         for (const extensionLabel of localExtensionLabels) {
-          const extensionPromise = method === "mount" ? AelluxJs2.wait(extensionLabel) : extensionPromises[toCamelCase(extensionLabel)];
+          const extensionPromise = method === "mount" ? AelluxJs2.wait(extensionLabel) : extensionPromises[toCamelCase2(extensionLabel)];
           if (!extensionPromise) {
             continue;
           }
@@ -720,7 +742,7 @@
           );
         }
       }
-      AelluxJs2.dispatch(toCapitalized(method));
+      AelluxJs2.dispatch(toCapitalized2(method));
     }
     function resolveRoots(root3) {
       if (!root3) {
@@ -763,20 +785,6 @@
       mounts[mounted ? "add" : "delete"](mountId);
       if (mounts.size === 0) mountedElements.delete(element);
     }
-    function toCamelCase(name) {
-      return name.replace(/-([a-z])/g, (_, c) => c.toUpperCase());
-    }
-    ;
-    function fromCamelCase(name) {
-      return name.replace(/([A-Z])/g, "-$1").toLowerCase();
-    }
-    ;
-    function toCapitalized(name) {
-      return name.replace(/^([a-z])|-([a-z])/g, function(_, first, afterHyphen) {
-        return (first || afterHyphen).toUpperCase();
-      });
-    }
-    ;
     return {
       AelluxJsForceUpdate,
       AelluxJsForceUnmount
@@ -784,9 +792,11 @@
   }
 
   // src/aellux.orchestrator.js
+  init_utils_name_case();
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   (function(root2) {
     "use strict";
+    const { toCamelCase: toCamelCase2, fromCamelCase: fromCamelCase2 } = utils_name_case_default;
     const extensionPromises = {};
     const mountHelper = createMountHelper(root2, extensionPromises);
     const layoutScheduler = createLayoutScheduler();
@@ -835,7 +845,7 @@
             extensionLabels = [extensionLabels];
           if (!extensionLabels)
             extensionLabels = Object.keys(extensionPromises);
-          extensionLabels = extensionLabels.map((_) => fromCamelCase(_));
+          extensionLabels = extensionLabels.map((_) => fromCamelCase2(_));
           try {
             await AelluxJs.unmount(document, extensionLabels);
           } catch (error) {
@@ -845,7 +855,7 @@
             );
           }
           for (const extensionLabel of extensionLabels) {
-            const key = toCamelCase(extensionLabel);
+            const key = toCamelCase2(extensionLabel);
             let extension;
             try {
               if (!extensionPromises[key]) continue;
@@ -879,8 +889,8 @@
     );
     root2[root2.AelluxJs.shortJSName] = root2.AelluxJs;
     function getExtension(extensionName) {
-      extensionName = fromCamelCase(extensionName);
-      const key = toCamelCase(extensionName);
+      extensionName = fromCamelCase2(extensionName);
+      const key = toCamelCase2(extensionName);
       if (extensionPromises[key])
         return extensionPromises[key];
       const data = AelluxJs.extRegistry[extensionName];
@@ -927,8 +937,8 @@
       return extensionPromises[key];
     }
     function extensionInitialize(extensionLabel) {
-      const extensionName = fromCamelCase(extensionLabel);
-      const key = toCamelCase(extensionLabel);
+      const extensionName = fromCamelCase2(extensionLabel);
+      const key = toCamelCase2(extensionLabel);
       AelluxJs[key].init();
       AelluxJs[key].initialized = true;
       if (AelluxJs[key].mountMap) {
@@ -939,7 +949,7 @@
       return AelluxJs[key];
     }
     async function appendExtensionAssets(name) {
-      const extensionName = fromCamelCase(name);
+      const extensionName = fromCamelCase2(name);
       const data = AelluxJs.extRegistry[extensionName];
       const url = data.url.replace(/^\.\//, AelluxJs.aelluxBasePath);
       const useLegacyBuild = AelluxJs.legacy || data.builds.indexOf("modern") === -1;
@@ -1005,14 +1015,6 @@
       }).catch(function(error) {
         throw error;
       });
-    }
-    ;
-    function toCamelCase(name) {
-      return name.replace(/-([a-z])/g, (_, c) => c.toUpperCase());
-    }
-    ;
-    function fromCamelCase(name) {
-      return name.replace(/([A-Z])/g, "-$1").toLowerCase();
     }
     ;
   })(typeof globalThis !== "undefined" ? globalThis : window);

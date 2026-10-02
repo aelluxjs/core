@@ -1,6 +1,10 @@
 /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
 
+import nameCase from "./utils-name-case.js";
+
 export function createMountHelper(root, extensionPromises) {
+  const { toCapitalized, toCamelCase, fromCamelCase } = nameCase;
+
   const mountedElements = new WeakMap(); //DOM, string Set
 
   async function AelluxJsForceUnmount(rootOrSelector, extensionLabels = null) {
@@ -178,15 +182,6 @@ export function createMountHelper(root, extensionPromises) {
     mounts[mounted ? "add" : "delete"](mountId);
     if (mounts.size === 0) mountedElements.delete(element);
   }
-
-  function toCamelCase(name) { return name.replace(/-([a-z])/g, (_, c) => c.toUpperCase()); };
-  function fromCamelCase(name) { return name.replace(/([A-Z])/g, "-$1").toLowerCase(); };
-
-  function toCapitalized(name) {
-    return name.replace(/^([a-z])|-([a-z])/g, function (_, first, afterHyphen) {
-      return (first || afterHyphen).toUpperCase();
-    });
-  };
 
   return {
     AelluxJsForceUpdate,
