@@ -1,12 +1,10 @@
-# aellux.js 0.1.0
-
 <div class="text-center">
-**UX Made Easy**
-
-Modular UX behavior management for browser interfaces with an ES5-compatible AelluxJs boot script and an ES2017+ runtime
+<h1>aellux.js 0.1.0</h1>
+<strong>UX Made Easy</strong>
+<p>Modular UX behavior management for browser interfaces with an ES5-compatible AelluxJs boot script and an ES2017+ runtime</p>
 </div>
 
-<div class="d-flex gap-2 flex-row justify-content-center mb-3">
+<div class="d-flex gap-2 flex-row justify-content-center my-3">
 <a class="btn btn-outline-adaptive rounded-1" href="https://github.com/aelluxjs/core">
 View on Github
 </a>

@@ -75,7 +75,7 @@
           if (link.getAttribute("href")?.startsWith("#")) return;
           link.setAttribute(
             ajaxAttr,
-            "#doc-content,#doc-navlinks,#doc-navlinks2,#doc-breadcrumb"
+            "title,#doc-content,#doc-navlinks,#doc-navlinks2,#doc-breadcrumb"
           );
         });
       document.querySelectorAll("table").forEach((table) => {
@@ -202,7 +202,6 @@
       }
     });
 </script>
-
 </head>
 
 <body>
@@ -490,10 +489,11 @@
         </div>
 
         <div id="doc-content" style="min-height: calc(100vh - 200px);" class="js-toc-content" ajax-load="doc-content">
-          <h1>aellux.js 0.1.0</h1>
-<div class="text-center">
-**UX Made Easy**<p>Modular UX behavior management for browser interfaces with an ES5-compatible AelluxJs boot script and an ES2017+ runtime</p>
-</div><div class="d-flex gap-2 flex-row justify-content-center mb-3">
+          <div class="text-center">
+<h1>aellux.js 0.1.0</h1>
+<strong>UX Made Easy</strong>
+<p>Modular UX behavior management for browser interfaces with an ES5-compatible AelluxJs boot script and an ES2017+ runtime</p>
+</div><div class="d-flex gap-2 flex-row justify-content-center my-3">
 <a class="btn btn-outline-adaptive rounded-1" href="https://github.com/aelluxjs/core">
 View on Github
 </a>

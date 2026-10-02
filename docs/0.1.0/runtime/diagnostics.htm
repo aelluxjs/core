@@ -75,7 +75,7 @@
           if (link.getAttribute("href")?.startsWith("#")) return;
           link.setAttribute(
             ajaxAttr,
-            "#doc-content,#doc-navlinks,#doc-navlinks2,#doc-breadcrumb"
+            "title,#doc-content,#doc-navlinks,#doc-navlinks2,#doc-breadcrumb"
           );
         });
       document.querySelectorAll("table").forEach((table) => {
@@ -202,7 +202,6 @@
       }
     });
 </script>
-
 </head>
 
 <body>
