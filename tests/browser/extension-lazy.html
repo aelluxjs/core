@@ -8,13 +8,13 @@
   <script>
     AelluxJsValidation.run(function (assert) {
       var target = document.getElementById("lazy-target");
-      var script = document.querySelector("script[data-ae-ext='preferences']");
-      assert(AelluxJs.preferences, "Lazy extension was not initialized when its selector matched");
+      var script = document.querySelector("script[data-ae-ext='preference']");
+      assert(AelluxJs.ext.preference, "Lazy extension was not initialized when its selector matched");
       assert(target.classList.contains("ae--mounted"), "Lazy extension did not mount its target");
       assert(script, "Lazy extension script was not loaded");
-      assert(!AelluxJs.lazyExtensionSelectors.preferences, "Loaded extension remained in the lazy index");
+      assert(!AelluxJs.lazyExtensionSelectors.preference, "Loaded extension remained in the lazy index");
     });
-    $ae.ext("preferences", { loadWhen: "[data-ae-preference]" });
+    $ae.ext("preference", { loadWhen: "[data-ae-preference]" });
     $ae.init({ mode: "basic" });
   </script>
 </head>

@@ -9,6 +9,7 @@ $ae.init({ mode: "full" });
 ```
 
 Supported runtime modes are `full` and `basic`. See [Getting Started](../getting-started.md) for their loading behavior.
+Pass Extension-specific configuration through `extensions` in `init()` options. Keys such as `"tab-group"` are normalized to `tabGroup` in `$ae.options.extensions`, and each Extension receives its matching object in `init(options)`. An Extension with no matching configuration receives `{}`.
 
 ## DOM Lifecycle
 
@@ -22,7 +23,7 @@ await $ae.unmount(root);
 ## Destruction
 
 ```js
-await $ae.destroyExtensions("preferences");
+await $ae.destroyExtensions("preference");
 await $ae.destroy();
 ```
 
@@ -31,14 +32,15 @@ await $ae.destroy();
 ## Extension Access
 
 ```js
-$ae.ext("preferences", {
+$ae.ext("preference", {
   builds: ["modern", "legacy"],
   loadWhen: "[data-ae-preference]"
 });
-const preferences = await $ae.wait("preferences");
+const preference = await $ae.wait("preference");
+$ae.ext.preference === preference;
 ```
 
-`ext()` registers loading information. Its `builds` option declares `modern`, `legacy`, or both published artifacts; omission defaults to both. `wait()` loads and initializes the compatible Extension when necessary, then resolves to its public API or `null` after an isolated initialization or compatibility failure.
+`ext()` registers loading information. Its `builds` option declares `modern`, `legacy`, or both published artifacts; omission defaults to both. `wait()` loads and initializes the compatible Extension when necessary, then resolves to its public API or `null` after an isolated initialization or compatibility failure. Registered Extension APIs are available under `$ae.ext.<camelCaseName>`.
 
 ## Events
 

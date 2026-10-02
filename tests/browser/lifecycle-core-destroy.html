@@ -28,8 +28,8 @@
 
       assert(queuedTaskRan === false, "Pending layout work ran after global destroy");
       assert(destroyedExtensions.length === 2, "Global destroy did not destroy every Extension");
-      assert(typeof AelluxJs.lifecycleCoreFirst === "undefined", "First Extension API remains public");
-      assert(typeof AelluxJs.lifecycleCoreSecond === "undefined", "Second Extension API remains public");
+      assert(typeof AelluxJs.ext.lifecycleCoreFirst === "undefined", "First Extension API remains public");
+      assert(typeof AelluxJs.ext.lifecycleCoreSecond === "undefined", "Second Extension API remains public");
       assert(Object.keys(AelluxJs.extRegistry).length === 0, "Extension registry was not cleared");
     });
 

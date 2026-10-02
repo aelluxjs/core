@@ -7,8 +7,9 @@
   <script src="../../dist/aellux.js"></script>
   <script>
     AelluxJsValidation.run(function (assert) {
-      assert(AelluxJs.feedback, "Eager extension API is unavailable");
-      assert(AelluxJs.feedback.initialized === true, "Eager extension was not initialized during start");
+      assert(AelluxJs.ext.feedback, "Eager extension API is unavailable");
+      assert(AelluxJs.ext.feedback.initialized === true, "Eager extension was not initialized during start");
+      assert(typeof AelluxJs.feedback === "undefined", "Extension API leaked onto the core object");
       assert(AelluxJs.extRegistry.feedback.state === "register", "Eager extension was not registered");
     });
     $ae.ext("feedback");

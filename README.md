@@ -2,7 +2,7 @@
 
 aellux.js is a lightweight extension-management library for modular UX behaviors in browser interfaces. It complements Bootstrap and other visual systems with declarative HTML attributes and independently loadable JavaScript Extensions.
 
-An **EXT (aellux.js Extension)** owns one focused UX responsibility and exposes its API through the global `AelluxJs` object and its `$ae` alias. The aellux.js boot script selects the runtime, while the orchestrator loads Extensions and coordinates `init`, `mount`, `unmount`, and `destroy`.
+An **EXT (aellux.js Extension)** owns one focused UX responsibility and exposes its API under `AelluxJs.ext` and its `$ae.ext` alias. The aellux.js boot script selects the runtime, while the orchestrator loads Extensions and coordinates `init`, `mount`, `unmount`, and `destroy`.
 
 aellux.js does not require or bundle Bootstrap. Its `data-ae-*` and `ae--*` namespaces are designed to coexist with existing applications and frameworks.
 
@@ -20,7 +20,7 @@ Use `full` to load all core Extensions. Use `basic` to register only what the pa
 ```html
 <script src="./dist/aellux.js"></script>
 <script>
-  $ae.ext("preferences");
+  $ae.ext("preference");
   $ae.ext("feedback");
   $ae.init({ mode: "basic" });
 </script>

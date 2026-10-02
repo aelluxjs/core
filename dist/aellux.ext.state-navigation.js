@@ -112,8 +112,8 @@
     function onPopState(event) {
       const browserState = event.state;
       if (!browserState || !browserState.aelluxJsState) return;
-      if (browserState.ajaxHref && AelluxJs.ajaxHref) {
-        AelluxJs.ajaxHref.load(
+      if (browserState.ajaxHref && AelluxJs.ext.ajaxHref) {
+        AelluxJs.ext.ajaxHref.load(
           window.location.href,
           browserState.ajaxHref,
           { ignoreHistory: true }

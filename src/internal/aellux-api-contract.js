@@ -96,7 +96,8 @@ var bootstrapProperties = Object.freeze({
     properties: Object.freeze({
       mode: text,
       forceLegacy: flag,
-      basePath: Object.freeze({ type: ["string", "null"] })
+      basePath: Object.freeze({ type: ["string", "null"] }),
+      extensions: record
     })
   }),
   minified: flag,

@@ -5,7 +5,7 @@ Use `$ae.ext(...)` to declare an Extension before the runtime needs it.
 ## Label
 
 ```js
-$ae.ext("preferences");
+$ae.ext("preference");
 ```
 
 A label resolves to `aellux.ext.<label>.js` relative to the aellux.js boot script. Loading `aellux.min.js` selects matching `.min.js` Extension files.
@@ -21,7 +21,7 @@ Custom URLs should preserve the `aellux.ext.<label>.js` filename convention so t
 ## Options
 
 ```js
-$ae.ext("preferences", {
+$ae.ext("preference", {
   builds: ["modern", "legacy"],
   loadWhen: "[data-ae-preference]"
 });

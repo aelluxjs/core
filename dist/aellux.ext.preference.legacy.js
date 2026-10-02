@@ -20,7 +20,7 @@
     fromCamelCase: fromCamelCase
   };
 
-  // src/src/aellux.ext.preferences.js
+  // src/src/aellux.ext.preference.js
   function _slicedToArray(r, e) {
     return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest();
   }
@@ -67,7 +67,7 @@
   (function() {
     "use strict";
     var toCamelCase2 = utils_name_case_default.toCamelCase;
-    var extensionName = "preferences";
+    var extensionName = "preference";
     var userPreferences = /* @__PURE__ */ Object.create(null);
     var defaultPreferences = /* @__PURE__ */ Object.create(null);
     var computedPreferences = /* @__PURE__ */ Object.create(null);
@@ -227,4 +227,4 @@
     }
   })();
 })();
-//# sourceMappingURL=aellux.ext.preferences.legacy.js.map
+//# sourceMappingURL=aellux.ext.preference.legacy.js.map

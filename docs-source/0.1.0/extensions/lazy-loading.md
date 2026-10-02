@@ -3,7 +3,7 @@
 Lazy loading delays an Extension until a matching element is found during `$ae.update(root)`.
 
 ```js
-$ae.ext("preferences", {
+$ae.ext("preference", {
   loadWhen: "[data-ae-preference]"
 });
 ```
@@ -11,7 +11,7 @@ $ae.ext("preferences", {
 The same behavior can be declared in HTML:
 
 ```html
-<link rel="aelluxjs-ext" href="preferences"
+<link rel="aelluxjs-ext" href="preference"
       data-ae-load-when="[data-ae-preference]">
 ```
 

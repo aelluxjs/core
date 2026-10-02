@@ -31,7 +31,7 @@ Basic mode loads the orchestrator and only the Extensions registered by the page
 ```html
 <script src="./dist/aellux.js"></script>
 <script>
-  $ae.ext("preferences");
+  $ae.ext("preference");
   $ae.ext("feedback");
   $ae.init({ mode: "basic" });
 </script>

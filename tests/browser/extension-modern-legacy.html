@@ -12,7 +12,7 @@
         fetch("../../dist/aellux.ext.feedback.js"),
         fetch("../../dist/aellux.ext.feedback.legacy.js")
       ]);
-      assert(AelluxJs.feedback, "Legacy extension variant was not initialized");
+      assert(AelluxJs.ext.feedback, "Legacy extension variant was not initialized");
       assert(script, "Extension asset was not appended");
       assert(/aellux\.ext\.feedback\.legacy\.js(?:$|[?#])/.test(script.src), "Legacy extension variant was not selected");
       assert(document.querySelector("script[data-ae-legacy]"), "Scenario did not use the Legacy runtime");

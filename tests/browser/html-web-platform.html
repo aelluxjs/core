@@ -5,11 +5,11 @@
   <title>aellux.js validation: HTML and Web Platform</title>
   <script src="./harness.js"></script>
   <script src="../../dist/aellux.js"></script>
-  <link rel="aelluxjs-ext" href="preferences" data-ae-load-when="[data-ae-preference]">
+  <link rel="aelluxjs-ext" href="preference" data-ae-load-when="[data-ae-preference]">
   <script>
     AelluxJsValidation.run(function (assert) {
       var target = document.getElementById("preference-target");
-      assert(AelluxJs.preferences, "Preferences extension was not initialized");
+      assert(AelluxJs.ext.preference, "Preference extension was not initialized");
       assert(target.classList.contains("ae--mounted"), "Web Platform element was not mounted");
       assert(!document.querySelector("[class*='bootstrap']"), "Scenario must not depend on a visual framework");
     });

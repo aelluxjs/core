@@ -67,26 +67,27 @@ export function createAelluxApi(root, constants) {
     extRegistry: {},
     ext: function (labelOrUrl, options) {
       var label = fromCamelCase(api.extLabel(labelOrUrl));
+      var key = toCamelCase(label);
       var url = labelOrUrl;
-      if (label in api.extRegistry) {
+      if (key in api.extRegistry) {
         diagnostics.report(diagnostics.ERROR_EXTENSION_DUPLICATE, { extension: label });
         return;
       }
-      if (url === label) url = "./" + api.extFilename(label);
+      if (url === api.extLabel(labelOrUrl)) url = "./" + api.extFilename(label);
       if (!options) options = {};
       if (typeof options.loadStyle === "undefined") options.loadStyle = false;
       if (!options.loadWhen) options.loadWhen = null;
       options.builds = normalizeExtensionBuilds(options.builds);
-      if (options.loadWhen) api.lazyExtensionSelectors[label] = options.loadWhen;
+      if (options.loadWhen) api.lazyExtensionSelectors[key] = options.loadWhen;
       options.url = url;
       options.load = options.loadWhen ? false : true;
       options.state = "wait";
-      api.extRegistry[label] = options;
+      api.extRegistry[key] = options;
     },
     extRegister: function (label, object) {
       label = fromCamelCase(label);
       var key = toCamelCase(label);
-      api.extRegistry[label].state = "register";
+      api.extRegistry[key].state = "register";
       object.initialized = false;
       api.ext[key] = object;
     },

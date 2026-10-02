@@ -7,7 +7,7 @@ import nameCase from "./internal/utils-name-case.js";
 
   const { toCamelCase } = nameCase;
 
-  const extensionName = "preferences";
+  const extensionName = "preference";
 
   const userPreferences = Object.create(null);
   const defaultPreferences = Object.create(null);

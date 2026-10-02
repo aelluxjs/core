@@ -7,7 +7,7 @@
   <script src="../../dist/aellux.js"></script>
   <script>
     AelluxJsValidation.run(function (assert) {
-      assert(AelluxJs.feedback, "JavaScript-only extension was not initialized");
+      assert(AelluxJs.ext.feedback, "JavaScript-only extension was not initialized");
       assert(!document.querySelector("link[data-ae-ext-style='feedback']"), "Unexpected stylesheet was loaded");
     });
     $ae.ext("feedback");

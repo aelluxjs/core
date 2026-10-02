@@ -5,8 +5,8 @@ import "./aellux.orchestrator.js";
 const root = typeof globalThis !== "undefined" ? globalThis : window;
 
 root.AelluxJs.bundledExtensions = Object.freeze({
-  "preferences": () => import("./aellux.ext.preferences.js"),
-  "state-navigation": () => import("./aellux.ext.state-navigation.js"),
+  "preference": () => import("./aellux.ext.preference.js"),
+  "stateNavigation": () => import("./aellux.ext.state-navigation.js"),
   "feedback": () => import("./aellux.ext.feedback.js"),
-  "ajax-href": () => import("./aellux.ext.ajax-href.js")
+  "ajaxHref": () => import("./aellux.ext.ajax-href.js")
 });

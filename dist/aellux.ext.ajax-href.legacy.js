@@ -195,13 +195,13 @@
                 var currentElement2 = document.querySelector(selector2);
                 if (!currentElement2) return;
                 elements.set(selector2, currentElement2);
-                if (AelluxJs.feedback) {
-                  AelluxJs.feedback.busy(currentElement2, "Ajax loading", true);
-                  AelluxJs.feedback.progress(currentElement2, "Ajax loading", 0);
+                if (AelluxJs.ext.feedback) {
+                  AelluxJs.ext.feedback.busy(currentElement2, "Ajax loading", true);
+                  AelluxJs.ext.feedback.progress(currentElement2, "Ajax loading", 0);
                 }
               });
-              if (!options.ignoreHistory && AelluxJs.stateNavigation) {
-                AelluxJs.stateNavigation.ajaxHref(url, selectors);
+              if (!options.ignoreHistory && AelluxJs.ext.stateNavigation) {
+                AelluxJs.ext.stateNavigation.ajaxHref(url, selectors);
               }
               AelluxJs.dispatch("AjaxHrefStart");
               _context.p = 1;
@@ -244,13 +244,13 @@
             case 8:
               replacement = document.importNode(loadedElement, true);
               currentElement.replaceWith(replacement);
-              if (selector === "title" && AelluxJs.stateNavigation) AelluxJs.stateNavigation.updateBaseTitle(replacement.innerText);
+              if (selector === "title" && AelluxJs.ext.stateNavigation) AelluxJs.ext.stateNavigation.updateBaseTitle(replacement.innerText);
               _context.n = 9;
               return AelluxJs.update(replacement);
             case 9:
-              if (AelluxJs.feedback) {
-                AelluxJs.feedback.busy(replacement, "Ajax loaded", false);
-                AelluxJs.feedback.progress(replacement, "Ajax loaded", 1);
+              if (AelluxJs.ext.feedback) {
+                AelluxJs.ext.feedback.busy(replacement, "Ajax loaded", false);
+                AelluxJs.ext.feedback.progress(replacement, "Ajax loaded", 1);
               }
             case 10:
               _context.n = 5;
@@ -276,9 +276,9 @@
               selectorList.forEach(function(selector2) {
                 var currentElement2 = elements.get(selector2);
                 if (!currentElement2) return;
-                if (AelluxJs.feedback) {
-                  AelluxJs.feedback.busy(currentElement2, "Ajax loading", false);
-                  AelluxJs.feedback.progress(currentElement2, "Ajax loading", 1);
+                if (AelluxJs.ext.feedback) {
+                  AelluxJs.ext.feedback.busy(currentElement2, "Ajax loading", false);
+                  AelluxJs.ext.feedback.progress(currentElement2, "Ajax loading", 1);
                 }
               });
               AelluxJs.dispatch("AjaxHrefError");
@@ -327,7 +327,7 @@
         return;
       }
       event.preventDefault();
-      AelluxJs.ajaxHref.load(link.href, selectors);
+      AelluxJs.ext.ajaxHref.load(link.href, selectors);
     }
     function comparableUrl(value) {
       var url = new URL(value, window.location.href);

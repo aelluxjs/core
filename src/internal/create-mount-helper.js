@@ -34,10 +34,10 @@ export function createMountHelper(root, extensionPromises) {
       }
 
       const waitExtensions = [];
-      for (const [extensionLabel, options] of
+      for (const [key, options] of
         Object.entries(root.AelluxJs.extRegistry)) {
         if (options.loadWhen) continue;
-        waitExtensions.push(AelluxJs.wait(extensionLabel));
+        waitExtensions.push(AelluxJs.wait(key));
       }
       await Promise.all(waitExtensions);
 
@@ -62,12 +62,12 @@ export function createMountHelper(root, extensionPromises) {
       filter = [];
       extensionLabels = extensionLabels.map(_ => fromCamelCase(_));
 
-      for (const [label, selectorString] of Object.entries(AelluxJs.extensionMounters))
-        if (extensionLabels.indexOf(fromCamelCase(label)) !== -1)
+      for (const [key, selectorString] of Object.entries(AelluxJs.extensionMounters))
+        if (extensionLabels.indexOf(fromCamelCase(key)) !== -1)
           filter.push(selectorString);
 
-      for (const [label, selectorString] of Object.entries(AelluxJs.lazyExtensionSelectors))
-        if (extensionLabels.indexOf(fromCamelCase(label)) !== -1)
+      for (const [key, selectorString] of Object.entries(AelluxJs.lazyExtensionSelectors))
+        if (extensionLabels.indexOf(fromCamelCase(key)) !== -1)
           filter.push(selectorString);
     }
 
@@ -83,16 +83,16 @@ export function createMountHelper(root, extensionPromises) {
       } else {
         localExtensionLabels = new Set();
         //Load needed lazies
-        for (const [extensionLabel, selector]
+        for (const [key, selector]
           of Object.entries(AelluxJs.lazyExtensionSelectors))
           if (element.matches(selector) && filter.indexOf(selector) !== -1)
-            localExtensionLabels.add(extensionLabel);
+            localExtensionLabels.add(fromCamelCase(key));
 
         //Mount readies
-        for (const [extensionLabel, selector]
+        for (const [key, selector]
           of Object.entries(AelluxJs.extensionMounters))
           if (element.matches(selector) && filter.indexOf(selector) !== -1)
-            localExtensionLabels.add(extensionLabel);
+            localExtensionLabels.add(fromCamelCase(key));
       }
 
       for (const extensionLabel of localExtensionLabels) {

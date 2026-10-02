@@ -138,9 +138,9 @@
           AelluxJs2.ext(href, { builds, loadWhen, loadStyle });
         }
         const waitExtensions = [];
-        for (const [extensionLabel, options] of Object.entries(root.AelluxJs.extRegistry)) {
+        for (const [key, options] of Object.entries(root.AelluxJs.extRegistry)) {
           if (options.loadWhen) continue;
-          waitExtensions.push(AelluxJs2.wait(extensionLabel));
+          waitExtensions.push(AelluxJs2.wait(key));
         }
         await Promise.all(waitExtensions);
         await AelluxJsForce(rootElement, "mount", extensionLabels);
@@ -160,11 +160,11 @@
       } else {
         filter = [];
         extensionLabels = extensionLabels.map((_) => fromCamelCase2(_));
-        for (const [label, selectorString] of Object.entries(AelluxJs2.extensionMounters))
-          if (extensionLabels.indexOf(fromCamelCase2(label)) !== -1)
+        for (const [key, selectorString] of Object.entries(AelluxJs2.extensionMounters))
+          if (extensionLabels.indexOf(fromCamelCase2(key)) !== -1)
             filter.push(selectorString);
-        for (const [label, selectorString] of Object.entries(AelluxJs2.lazyExtensionSelectors))
-          if (extensionLabels.indexOf(fromCamelCase2(label)) !== -1)
+        for (const [key, selectorString] of Object.entries(AelluxJs2.lazyExtensionSelectors))
+          if (extensionLabels.indexOf(fromCamelCase2(key)) !== -1)
             filter.push(selectorString);
       }
       if (filter.length === 0) return;
@@ -176,12 +176,12 @@
           localExtensionLabels = new Set(extensionLabels);
         } else {
           localExtensionLabels = /* @__PURE__ */ new Set();
-          for (const [extensionLabel, selector] of Object.entries(AelluxJs2.lazyExtensionSelectors))
+          for (const [key, selector] of Object.entries(AelluxJs2.lazyExtensionSelectors))
             if (element.matches(selector) && filter.indexOf(selector) !== -1)
-              localExtensionLabels.add(extensionLabel);
-          for (const [extensionLabel, selector] of Object.entries(AelluxJs2.extensionMounters))
+              localExtensionLabels.add(fromCamelCase2(key));
+          for (const [key, selector] of Object.entries(AelluxJs2.extensionMounters))
             if (element.matches(selector) && filter.indexOf(selector) !== -1)
-              localExtensionLabels.add(extensionLabel);
+              localExtensionLabels.add(fromCamelCase2(key));
         }
         for (const extensionLabel of localExtensionLabels) {
           const extensionPromise = method === "mount" ? AelluxJs2.wait(extensionLabel) : extensionPromises[toCamelCase2(extensionLabel)];
@@ -285,12 +285,11 @@
     const mountHelper = createMountHelper(root, extensionPromises);
     const layoutScheduler = createLayoutScheduler();
     root.AelluxJs = Object.assign(
-      mountHelper.AelluxJsForceUpdate,
       root.AelluxJs,
       {
         async startAelluxJs() {
           if (root.AelluxJs.bundledExtensions) {
-            Object.keys(root.AelluxJs.bundledExtensions).forEach((extensionName) => AelluxJs.ext(extensionName));
+            Object.keys(root.AelluxJs.bundledExtensions).forEach((key) => AelluxJs.ext(key));
           }
           await new Promise((resolve) => {
             const startUpdateCallback = function() {
@@ -353,10 +352,11 @@
                 { cause: error, extension: extensionLabel }
               );
             } finally {
-              delete AelluxJs[key];
+              delete AelluxJs.ext[key];
               delete extensionPromises[key];
-              delete AelluxJs.extRegistry[extensionLabel];
-              delete AelluxJs.extensionMounters[extensionLabel];
+              delete AelluxJs.extRegistry[key];
+              delete AelluxJs.extensionMounters[key];
+              delete AelluxJs.lazyExtensionSelectors[key];
               if (extension) extension.initialized = false;
             }
           }
@@ -377,7 +377,7 @@
       const key = toCamelCase2(extensionName);
       if (extensionPromises[key])
         return extensionPromises[key];
-      const data = AelluxJs.extRegistry[extensionName];
+      const data = AelluxJs.extRegistry[key];
       if (data && !hasCompatibleBuild(data)) {
         AelluxJs.diagnostics.report(
           AelluxJs.diagnostics.ERROR_EXTENSION_INCOMPATIBLE,
@@ -387,14 +387,14 @@
             builds: data.builds
           }
         );
-        delete AelluxJs.lazyExtensionSelectors[extensionName];
+        delete AelluxJs.lazyExtensionSelectors[key];
         extensionPromises[key] = Promise.resolve(null);
         return extensionPromises[key];
       }
-      if (AelluxJs[key]) {
-        if (!AelluxJs[key].initialized) {
+      if (AelluxJs.ext[key]) {
+        if (!AelluxJs.ext[key].initialized) {
           try {
-            extensionInitialize(key);
+            extensionInitialize(extensionName);
           } catch (error) {
             AelluxJs.diagnostics.report(
               AelluxJs.diagnostics.ERROR_EXTENSION_INITIALIZE,
@@ -404,14 +404,14 @@
             return extensionPromises[key];
           }
         }
-        extensionPromises[key] = Promise.resolve(AelluxJs[key]);
+        extensionPromises[key] = Promise.resolve(AelluxJs.ext[key]);
         return extensionPromises[key];
       }
-      if (!(extensionName in AelluxJs.extRegistry)) {
+      if (!(key in AelluxJs.extRegistry)) {
         return Promise.reject();
       }
-      const bundledLoader = AelluxJs.bundledExtensions ? AelluxJs.bundledExtensions[extensionName] : null;
-      extensionPromises[key] = (bundledLoader ? Promise.resolve().then(() => bundledLoader()) : appendExtensionAssets(key)).then(() => extensionInitialize(key)).catch((error) => {
+      const bundledLoader = AelluxJs.bundledExtensions ? AelluxJs.bundledExtensions[key] : null;
+      extensionPromises[key] = (bundledLoader ? Promise.resolve().then(() => bundledLoader()) : appendExtensionAssets(extensionName)).then(() => extensionInitialize(extensionName)).catch((error) => {
         AelluxJs.diagnostics.report(
           AelluxJs.diagnostics.ERROR_EXTENSION_INITIALIZE,
           { cause: error, extension: extensionName }
@@ -421,20 +421,22 @@
       return extensionPromises[key];
     }
     function extensionInitialize(extensionLabel) {
-      const extensionName = fromCamelCase2(extensionLabel);
+      extensionLabel = fromCamelCase2(extensionLabel);
       const key = toCamelCase2(extensionLabel);
-      AelluxJs[key].init();
-      AelluxJs[key].initialized = true;
-      if (AelluxJs[key].mountMap) {
-        const selectors = Array.from(AelluxJs[key].mountMap.keys()).join(",");
-        if (selectors) AelluxJs.extensionMounters[extensionName] = selectors;
+      const options = AelluxJs.options.extensions[key] || {};
+      AelluxJs.ext[key].init(options);
+      AelluxJs.ext[key].initialized = true;
+      if (AelluxJs.ext[key].mountMap) {
+        const selectors = Array.from(AelluxJs.ext[key].mountMap.keys()).join(",");
+        if (selectors) AelluxJs.extensionMounters[key] = selectors;
       }
-      delete AelluxJs.lazyExtensionSelectors[extensionName];
-      return AelluxJs[key];
+      delete AelluxJs.lazyExtensionSelectors[key];
+      return AelluxJs.ext[key];
     }
-    async function appendExtensionAssets(name) {
-      const extensionName = fromCamelCase2(name);
-      const data = AelluxJs.extRegistry[extensionName];
+    async function appendExtensionAssets(extensionLabel) {
+      extensionLabel = fromCamelCase2(extensionLabel);
+      const key = toCamelCase2(extensionLabel);
+      const data = AelluxJs.extRegistry[key];
       const url = data.url.replace(/^\.\//, AelluxJs.aelluxBasePath);
       const useLegacyBuild = AelluxJs.legacy || data.builds.indexOf("modern") === -1;
       const scriptURL = useLegacyBuild ? toLegacyScriptURL(url) : url;
@@ -444,7 +446,7 @@
           const attr = AelluxJs.attr("ext");
           const script = document.createElement("script");
           script.src = scriptURL;
-          script.setAttribute(attr, name);
+          script.setAttribute(attr, extensionLabel);
           assetLoadHelper(script, {
             loadCallback: resolve,
             errorCallback: reject
@@ -460,7 +462,7 @@
             const link = document.createElement("link");
             link.href = href;
             link.rel = "stylesheet";
-            link.setAttribute(attrStyle, name);
+            link.setAttribute(attrStyle, extensionLabel);
             assetLoadHelper(link, {
               loadCallback: resolve,
               errorCallback: resolve

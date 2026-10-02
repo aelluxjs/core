@@ -3,7 +3,7 @@
 Pages can register Extensions through link declarations discovered by the orchestrator:
 
 ```html
-<link rel="aelluxjs-ext" href="preferences"
+<link rel="aelluxjs-ext" href="preference"
       data-ae-builds="modern legacy"
       data-ae-load-when="[data-ae-preference]">
 ```

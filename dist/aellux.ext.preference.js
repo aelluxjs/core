@@ -20,12 +20,12 @@
     fromCamelCase
   };
 
-  // src/aellux.ext.preferences.js
+  // src/aellux.ext.preference.js
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   (function() {
     "use strict";
     const { toCamelCase: toCamelCase2 } = utils_name_case_default;
-    const extensionName = "preferences";
+    const extensionName = "preference";
     const userPreferences = /* @__PURE__ */ Object.create(null);
     const defaultPreferences = /* @__PURE__ */ Object.create(null);
     const computedPreferences = /* @__PURE__ */ Object.create(null);
@@ -175,4 +175,4 @@
     }
   })();
 })();
-//# sourceMappingURL=aellux.ext.preferences.js.map
+//# sourceMappingURL=aellux.ext.preference.js.map

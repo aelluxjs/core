@@ -36,6 +36,6 @@ The browser validation suite includes a Bootstrap CSS coexistence scenario. Repe
 
 ## Validation Scope
 
-The `tests/browser/bootstrap-integration.html` scenario loads Bootstrap CSS before aellux.js, exercises declarative lazy Extension loading, and checks that Preferences mounts without removing Bootstrap classes.
+The `tests/browser/bootstrap-integration.html` scenario loads Bootstrap CSS before aellux.js, exercises declarative lazy Extension loading, and checks that Preference mounts without removing Bootstrap classes.
 
 The scenario validates namespace and CSS coexistence. Testing with Bootstrap JavaScript components, dynamically revealed content, and listener coexistence remains part of the beta acceptance work rather than a completed compatibility guarantee.

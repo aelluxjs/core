@@ -28,7 +28,7 @@
 
   AelluxJs.extRegister(extensionName, { init, destroy, mountMap });
 
-  function init() {
+  function init(options) {
     mountMap.set(`[${attr.extensionName}]`, {
       mount: mountElement,
       unmount: unmountElement

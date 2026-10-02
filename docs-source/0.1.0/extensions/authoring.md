@@ -9,12 +9,13 @@ Start from [`templates/aellux.ext.template.js`](https://github.com/aelluxjs/core
 1. Name the source and Modern artifact `aellux.ext.<name>.js`.
 2. Use the same kebab-case `<name>` as `extensionName` in `AelluxJs.extRegister(extensionName, api)`.
 3. Publish a classic script contained by an IIFE. Distribution files must not require ESM imports or exports.
-4. Keep `init()` synchronous and idempotent.
+4. Keep `init(options)` synchronous and idempotent.
 5. Make every `mount` idempotent and release its listeners, observers, timers, and references in the corresponding `unmount`.
 6. Release Extension-wide resources in `destroy()`.
 7. Keep the public API and lifecycle behavior equivalent across Modern and Legacy variants.
 
-The runtime exposes a kebab-case name as camelCase: `tab-group` becomes `AelluxJs.tabGroup`.
+The runtime exposes a kebab-case name as camelCase under `AelluxJs.ext`: `tab-group` becomes `AelluxJs.ext.tabGroup`.
+An Extension receives its configuration as the `options` argument to `init(options)`. Supply it through `$ae.init({ extensions: { "tab-group": { initialTab: "overview" } } })`; the boot script normalizes `tab-group` to `tabGroup` in `$ae.options.extensions`. Extensions without a matching entry receive `{}`.
 
 ## DOM Mount Contract
 

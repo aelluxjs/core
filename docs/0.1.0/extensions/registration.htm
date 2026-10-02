@@ -504,7 +504,7 @@
           <h1>Registering aellux.js Extensions</h1>
 <p>Use <code>$ae.ext(...)</code> to declare an Extension before the runtime needs it.</p>
 <h2>Label</h2>
-<pre><code class="language-js">$ae.ext(&quot;preferences&quot;);
+<pre><code class="language-js">$ae.ext(&quot;preference&quot;);
 </code></pre>
 <p>A label resolves to <code>aellux.ext.&lt;label&gt;.js</code> relative to the aellux.js boot script. Loading <code>aellux.min.js</code> selects matching <code>.min.js</code> Extension files.</p>
 <h2>URL</h2>
@@ -512,7 +512,7 @@
 </code></pre>
 <p>Custom URLs should preserve the <code>aellux.ext.&lt;label&gt;.js</code> filename convention so the runtime can derive the Extension label and optional stylesheet URL reliably.</p>
 <h2>Options</h2>
-<pre><code class="language-js">$ae.ext(&quot;preferences&quot;, {
+<pre><code class="language-js">$ae.ext(&quot;preference&quot;, {
   builds: [&quot;modern&quot;, &quot;legacy&quot;],
   loadWhen: &quot;[data-ae-preference]&quot;
 });

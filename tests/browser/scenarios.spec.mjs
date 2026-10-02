@@ -57,6 +57,70 @@ test("renamed global and event prefix are available", async ({ page }) => {
   expect(dispatchedType).toBe("AelluxJsProbe");
 });
 
+test("Extension names do not replace core API methods", async ({ page }) => {
+  await openScenario(page, "runtime-modern");
+  const result = await page.evaluate(async () => {
+    const coreRequest = AelluxJs.request;
+    AelluxJs.ext("request");
+    AelluxJs.extRegister("request", { init() {} });
+    const extension = await AelluxJs.wait("request");
+    return {
+      coreRequestPreserved: AelluxJs.request === coreRequest,
+      extension: AelluxJs.ext.request === extension,
+      initialized: extension.initialized,
+      apiIsObject: typeof AelluxJs === "object"
+    };
+  });
+  expect(result).toEqual({
+    coreRequestPreserved: true,
+    extension: true,
+    initialized: true,
+    apiIsObject: true
+  });
+});
+
+for (const forceLegacy of [false, true]) {
+  test(`Extension init receives normalized options in ${forceLegacy ? "Legacy" : "Modern"} runtime`, async ({ page }) => {
+    await page.goto("/tests/index.htm");
+    await page.addScriptTag({ url: "/dist/aellux.js" });
+    await page.evaluate((legacy) => {
+      AelluxJs.ext("option-probe");
+      AelluxJs.extRegister("option-probe", {
+        init(options) { window.optionProbeOptions = options; }
+      });
+      AelluxJs.ext("empty-probe");
+      AelluxJs.extRegister("empty-probe", {
+        init(options) { window.emptyProbeOptions = options; }
+      });
+      AelluxJs.init({
+        mode: "basic",
+        forceLegacy: legacy,
+        extensions: {
+          "option-probe": { enabled: true },
+          alreadyCamel: { retained: true }
+        }
+      });
+    }, forceLegacy);
+
+    await expect.poll(() => page.evaluate(() => AelluxJs.ext.optionProbe?.initialized)).toBe(true);
+    expect(await page.evaluate(() => ({
+      legacy: AelluxJs.legacy,
+      sameObject: window.optionProbeOptions === AelluxJs.options.extensions.optionProbe,
+      enabled: window.optionProbeOptions.enabled,
+      camelKeyRetained: AelluxJs.options.extensions.alreadyCamel.retained,
+      hyphenKeyRemoved: !Object.hasOwn(AelluxJs.options.extensions, "option-probe"),
+      emptyOptions: Object.keys(window.emptyProbeOptions).length === 0
+    }))).toEqual({
+      legacy: forceLegacy,
+      sameObject: true,
+      enabled: true,
+      camelKeyRetained: true,
+      hyphenKeyRemoved: true,
+      emptyOptions: true
+    });
+  });
+}
+
 test("renamed persistence keys and diagnostic name are used", async ({ page }) => {
   await openScenario(page, "runtime-modern");
   const result = await page.evaluate(() => {
@@ -81,7 +145,13 @@ test("full runtime writes the renamed history state marker", async ({ page }) =>
   await page.goto("/tests/index.htm");
   await page.addScriptTag({ url: "/dist/aellux.js" });
   await page.evaluate(() => AelluxJs.init({ mode: "full" }));
-  await expect.poll(() => page.evaluate(() => AelluxJs.stateNavigation?.initialized)).toBe(true);
+  await expect.poll(() => page.evaluate(() => AelluxJs.ext.stateNavigation?.initialized)).toBe(true);
+  expect(await page.evaluate(() => ({
+    registered: Object.hasOwn(AelluxJs.extRegistry, "stateNavigation"),
+    bundled: Object.hasOwn(AelluxJs.bundledExtensions, "stateNavigation"),
+    oldRegistered: Object.hasOwn(AelluxJs.extRegistry, "state-navigation"),
+    oldBundled: Object.hasOwn(AelluxJs.bundledExtensions, "state-navigation")
+  }))).toEqual({ registered: true, bundled: true, oldRegistered: false, oldBundled: false });
   expect(await page.evaluate(() => ({
     adaptive: AelluxJs.adaptive,
     registered: Object.hasOwn(AelluxJs.extRegistry, "adaptive"),
@@ -112,10 +182,10 @@ test("preference labels update associated inputs safely", async ({ page }) => {
   });
   await page.addScriptTag({ url: "/dist/aellux.js" });
   await page.evaluate(() => AelluxJs.init({ mode: "full" }));
-  await expect.poll(() => page.evaluate(() => AelluxJs.preferences?.initialized)).toBe(true);
+  await expect.poll(() => page.evaluate(() => AelluxJs.ext.preference?.initialized)).toBe(true);
   await page.evaluate(() => {
-    AelluxJs.preferences.set("color-scheme", "light");
-    AelluxJs.preferences.update();
+    AelluxJs.ext.preference.set("color-scheme", "light");
+    AelluxJs.ext.preference.update();
   });
   await expect(page.locator('[id="scheme:light"]')).toBeChecked();
   await expect(page.locator('[id="scheme:light"]')).toHaveValue("light");
@@ -131,22 +201,22 @@ test("color scheme preference updates theme color metadata", async ({ page }) =>
   await page.addScriptTag({ url: "/dist/aellux.js" });
   await page.evaluate(() => {
     AelluxJs.persist.preferences.set("colorScheme", "dark");
-    AelluxJs.ext("preferences");
+    AelluxJs.ext("preference");
     AelluxJs.init({ mode: "basic" });
   });
-  await expect.poll(() => page.evaluate(() => AelluxJs.preferences?.initialized)).toBe(true);
+  await expect.poll(() => page.evaluate(() => AelluxJs.ext.preference?.initialized)).toBe(true);
   const themeColor = () => page.locator("meta[data-ae-theme-color]").getAttribute("content");
   await expect.poll(themeColor).toBe("#000000");
 
   await page.evaluate(() => {
-    AelluxJs.preferences.set("color-scheme", "light");
-    AelluxJs.preferences.update();
+    AelluxJs.ext.preference.set("color-scheme", "light");
+    AelluxJs.ext.preference.update();
   });
   await expect.poll(themeColor).toBe("#ffffff");
 
   await page.evaluate(() => {
-    AelluxJs.preferences.set("color-scheme", "auto");
-    AelluxJs.preferences.update();
+    AelluxJs.ext.preference.set("color-scheme", "auto");
+    AelluxJs.ext.preference.update();
   });
   await expect(page.locator("meta[data-ae-theme-color]")).toHaveCount(0);
 });
@@ -158,7 +228,7 @@ test("AJAX links preserve native navigation when appropriate", async ({ page }) 
     AelluxJs.ext("ajax-href");
     AelluxJs.init({ mode: "basic" });
   });
-  await expect.poll(() => page.evaluate(() => AelluxJs.ajaxHref?.initialized)).toBe(true);
+  await expect.poll(() => page.evaluate(() => AelluxJs.ext.ajaxHref?.initialized)).toBe(true);
 
   const results = await page.evaluate(() => {
     const results = [];
@@ -202,7 +272,7 @@ test("dynamic elements can be mounted and unmounted after initialization", async
 
 test("extension stylesheet is loaded and applies its rule", async ({ page }) => {
   await openScenario(page, "extension-with-css");
-  const style = page.locator("link[data-ae-ext-style='preferences']");
+  const style = page.locator("link[data-ae-ext-style='preference']");
   await expect.poll(() => style.evaluate(link => Boolean(link.sheet))).toBe(true);
   await page.evaluate(() => {
     const element = document.createElement("div");
@@ -210,4 +280,34 @@ test("extension stylesheet is loaded and applies its rule", async ({ page }) => 
     document.body.append(element);
   });
   await expect.poll(() => page.locator("#playwright-style-probe").evaluate(element => getComputedStyle(element).outlineStyle)).toBe("solid");
+});
+
+test("compound extension names use camelCase registry keys and hyphenated assets", async ({ page }) => {
+  await page.goto("/tests/index.htm");
+  await page.addScriptTag({ url: "/dist/aellux.js" });
+  const initial = await page.evaluate(() => {
+    AelluxJs.ext("stateNavigation", {
+      loadWhen: "#state-navigation-probe",
+      loadStyle: "/tests/browser/extension-style.css"
+    });
+    const registryKey = Object.hasOwn(AelluxJs.extRegistry, "stateNavigation");
+    const lazyKey = Object.hasOwn(AelluxJs.lazyExtensionSelectors, "stateNavigation");
+    document.body.insertAdjacentHTML("beforeend", '<div id="state-navigation-probe"></div>');
+    AelluxJs.init({ mode: "basic" });
+    return { registryKey, lazyKey };
+  });
+  expect(initial).toEqual({ registryKey: true, lazyKey: true });
+  await expect.poll(() => page.evaluate(() => AelluxJs.ext.stateNavigation?.initialized)).toBe(true);
+  const result = await page.evaluate(() => ({
+    registryKey: Object.hasOwn(AelluxJs.extRegistry, "stateNavigation"),
+    oldRegistryKey: Object.hasOwn(AelluxJs.extRegistry, "state-navigation"),
+    lazyKeyCleared: !Object.hasOwn(AelluxJs.lazyExtensionSelectors, "stateNavigation"),
+    script: document.querySelector("script[data-ae-ext='state-navigation']")?.getAttribute("src"),
+    style: Boolean(document.querySelector("link[data-ae-ext-style='state-navigation']"))
+  }));
+  expect(result.registryKey).toBe(true);
+  expect(result.oldRegistryKey).toBe(false);
+  expect(result.lazyKeyCleared).toBe(true);
+  expect(result.script).toMatch(/aellux\.ext\.state-navigation\.js$/);
+  expect(result.style).toBe(true);
 });

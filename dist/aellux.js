@@ -24,6 +24,36 @@
     return { clear: clear };
   }
 
+  // src/internal/build-diagnostics.js
+  /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+  function buildDiagnostics(catalog) {
+    var diagnostics = {
+      create: function(definition, context) {
+        var error = new Error(definition.message);
+        error.name = "AelluxJsDiagnosticError";
+        error.code = definition.code;
+        if (context) error.context = context;
+        return error;
+      },
+      report: function(definition, context) {
+        var error = diagnostics.create(definition, context);
+        if (typeof console !== "undefined" && typeof console.error === "function") {
+          console.error(
+            "[aellux.js " + definition.code + "] " + definition.message,
+            context || ""
+          );
+        }
+        return error;
+      }
+    };
+    for (var name in catalog) {
+      if (Object.prototype.hasOwnProperty.call(catalog, name)) {
+        diagnostics[name] = catalog[name];
+      }
+    }
+    return diagnostics;
+  }
+
   // src/internal/build-persist-memory.js
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   function buildPersistMemory(root, name, identifier) {
@@ -141,36 +171,6 @@
     };
   }
 
-  // src/internal/build-diagnostics.js
-  /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
-  function buildDiagnostics(catalog) {
-    var diagnostics = {
-      create: function(definition, context) {
-        var error = new Error(definition.message);
-        error.name = "AelluxJsDiagnosticError";
-        error.code = definition.code;
-        if (context) error.context = context;
-        return error;
-      },
-      report: function(definition, context) {
-        var error = diagnostics.create(definition, context);
-        if (typeof console !== "undefined" && typeof console.error === "function") {
-          console.error(
-            "[aellux.js " + definition.code + "] " + definition.message,
-            context || ""
-          );
-        }
-        return error;
-      }
-    };
-    for (var name in catalog) {
-      if (Object.prototype.hasOwnProperty.call(catalog, name)) {
-        diagnostics[name] = catalog[name];
-      }
-    }
-    return diagnostics;
-  }
-
   // src/internal/utils-name-case.js
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   function toCapitalized(name) {
@@ -255,12 +255,144 @@
     }
   }
 
-  // src/aellux.js
+  // src/internal/aellux-api-integration.js
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
-  (function(root) {
+  function createAelluxApi(root, constants) {
     var toCapitalized2 = utils_name_case_default.toCapitalized;
     var toCamelCase2 = utils_name_case_default.toCamelCase;
     var fromCamelCase2 = utils_name_case_default.fromCamelCase;
+    var diagnostics = buildDiagnostics(constants.AELLUXJS_DIAGNOSTICS);
+    var oldShortInstance = root[constants.AELLUXJS_SHORT_JS_NAME];
+    var document2 = root.document;
+    var api;
+    var preferencesHtml = createPreferencesHtmlHelper(root, function() {
+      return api;
+    });
+    api = {
+      shortJSName: constants.AELLUXJS_SHORT_JS_NAME,
+      diagnostics: diagnostics,
+      options: constants.AELLUXJS_DEFAULT_INITIALIZATION_OPTIONS,
+      minified: false,
+      legacy: false,
+      supported: false,
+      notAvailable: [],
+      waitLayout: null,
+      init: function() {
+        throw diagnostics.create(diagnostics.ERROR_NOT_INITIALIZED);
+      },
+      persist: {
+        local: buildPersistMemory(root, "localStorage"),
+        session: buildPersistMemory(root, "sessionStorage"),
+        preferences: buildPersistMemory(root, "localStorage", "AelluxJsPreferences")
+      },
+      updatePreferencesAttributesHTML: preferencesHtml.updatePreferencesAttributesHTML,
+      on: function(event, handler, options) {
+        document2.addEventListener(api.eventName(event), handler, options);
+      },
+      off: function(event, handler, options) {
+        document2.removeEventListener(api.eventName(event), handler, options);
+      },
+      attr: function(name) {
+        return "data-" + constants.AELLUXJS_DATA_ATTRIBUTE_NAME_PREFFIX.replace(/\?/, name);
+      },
+      className: function(name) {
+        return constants.AELLUXJS_CLASS_NAME_PREFFIX.replace(/\?/, name);
+      },
+      extFilename: function(name) {
+        return "aellux." + constants.AELLUXJS_EXT_SCRIPT_PREFIX + "." + name + (api.minified ? ".min.js" : ".js");
+      },
+      extLabel: function(filename) {
+        return filename.replace(
+          new RegExp("^.*aellux\\." + constants.AELLUXJS_EXT_SCRIPT_PREFIX + "\\.([^.\\/?#]+)(?:\\.min)?\\.js(?:[?#].*)?$"),
+          "$1"
+        );
+      },
+      eventName: function(name) {
+        return constants.AELLUXJS_EVENT_NAME_PREFFIX.replace(/\?/, toCapitalized2(name));
+      },
+      noConflict: function() {
+        return oldShortInstance;
+      },
+      lazyExtensionSelectors: {},
+      extensionMounters: {},
+      extRegistry: {},
+      ext: function(labelOrUrl, options) {
+        var label = fromCamelCase2(api.extLabel(labelOrUrl));
+        var key = toCamelCase2(label);
+        var url = labelOrUrl;
+        if (key in api.extRegistry) {
+          diagnostics.report(diagnostics.ERROR_EXTENSION_DUPLICATE, { extension: label });
+          return;
+        }
+        if (url === api.extLabel(labelOrUrl)) url = "./" + api.extFilename(label);
+        if (!options) options = {};
+        if (typeof options.loadStyle === "undefined") options.loadStyle = false;
+        if (!options.loadWhen) options.loadWhen = null;
+        options.builds = normalizeExtensionBuilds(options.builds);
+        if (options.loadWhen) api.lazyExtensionSelectors[key] = options.loadWhen;
+        options.url = url;
+        options.load = options.loadWhen ? false : true;
+        options.state = "wait";
+        api.extRegistry[key] = options;
+      },
+      extRegister: function(label, object) {
+        label = fromCamelCase2(label);
+        var key = toCamelCase2(label);
+        api.extRegistry[key].state = "register";
+        object.initialized = false;
+        api.ext[key] = object;
+      },
+      startAelluxJs: function() {
+      },
+      destroy: function() {
+      },
+      destroyExtensions: function() {
+        throw diagnostics.create(diagnostics.ERROR_NOT_INITIALIZED);
+      },
+      dispatchFrom: function(from, event, options) {
+        var obj = document2.createEvent("Event");
+        obj.initEvent(api.eventName(event), false, false);
+        from.dispatchEvent(obj);
+      },
+      dispatch: function(event, options) {
+        api.dispatchFrom(document2, event, options);
+      },
+      wait: function() {
+        throw diagnostics.create(diagnostics.ERROR_NOT_INITIALIZED);
+      },
+      update: function() {
+        throw diagnostics.create(diagnostics.ERROR_NOT_INITIALIZED);
+      },
+      unmount: function() {
+        throw diagnostics.create(diagnostics.ERROR_NOT_INITIALIZED);
+      },
+      request: function() {
+        throw diagnostics.create(diagnostics.ERROR_NOT_INITIALIZED);
+      },
+      preferencesMediaQueries: buildPreferencesMediaQueries(root)
+    };
+    return api;
+    function normalizeExtensionBuilds(builds) {
+      if (typeof builds === "undefined" || builds === null || builds === "") {
+        return ["modern", "legacy"];
+      }
+      if (typeof builds === "string") builds = builds.split(/[\s,]+/);
+      if (!Array.isArray(builds)) return [];
+      var normalized = [];
+      for (var i = 0; i < builds.length; i++) {
+        var build = String(builds[i]).toLowerCase();
+        if ((build === "modern" || build === "legacy") && normalized.indexOf(build) === -1) {
+          normalized.push(build);
+        }
+      }
+      return normalized;
+    }
+  }
+
+  // src/aellux.js
+  /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+  (function(root) {
+    var toCamelCase2 = utils_name_case_default.toCamelCase;
     var CONSTANTS = {
       AELLUXJS_SHORT_JS_NAME: "$ae",
       AELLUXJS_EXT_SCRIPT_PREFIX: "ext",
@@ -283,7 +415,8 @@
       AELLUXJS_DEFAULT_INITIALIZATION_OPTIONS: {
         mode: "full",
         forceLegacy: false,
-        basePath: null
+        basePath: null,
+        extensions: {}
       },
       AELLUXJS_MODERN_API_DEPENDENCIES: [
         "Promise",
@@ -297,139 +430,38 @@
       ]
     };
     var scriptExtension = ".js";
-    var diagnostics = buildDiagnostics(CONSTANTS.AELLUXJS_DIAGNOSTICS);
-    var preferencesHtml = createPreferencesHtmlHelper(root, function() {
-      return root.AelluxJs;
-    });
-    var updatePreferencesAttributesHTML = preferencesHtml.updatePreferencesAttributesHTML;
+    var api = createAelluxApi(root, CONSTANTS);
+    var diagnostics = api.diagnostics;
     var bootstrapScript = document.currentScript || document.querySelector("script[src*='aellux.js'],script[src*='aellux.min.js']");
     var aelluxBootstrapSrc = root.__aelluxBootstrapURL || bootstrapScript && bootstrapScript.src;
     if (!aelluxBootstrapSrc) {
       throw diagnostics.create(diagnostics.ERROR_BOOTSTRAP_NOT_FOUND);
     }
-    var aelluxBasePath = aelluxBootstrapSrc ? aelluxBootstrapSrc.substring(
+    var aelluxBasePath = aelluxBootstrapSrc.substring(
       0,
       aelluxBootstrapSrc.lastIndexOf("/") + 1
-    ) : "";
-    var old$Instance = root[CONSTANTS.AELLUXJS_SHORT_JS_NAME];
-    root.AelluxJs = {
-      shortJSName: CONSTANTS.AELLUXJS_SHORT_JS_NAME,
-      diagnostics: diagnostics,
-      options: CONSTANTS.AELLUXJS_DEFAULT_INITIALIZATION_OPTIONS,
-      minified: aelluxBootstrapSrc.indexOf(".min.js") !== -1,
-      legacy: false,
-      supported: false,
-      notAvailable: [],
-      waitLayout: null,
-      init: function(options) {
-        if (typeof document === "undefined") {
-          console.log("[aellux.js] Browser not supported.");
-          return;
-        }
-        if (document.querySelector("[" + AelluxJs.attr("legacy") + "]") || document.querySelector("[" + AelluxJs.attr("esm") + "]")) return;
-        mergeOptions(AelluxJs.options, options || {});
-        if (AelluxJs.options.mode !== "basic" && AelluxJs.options.mode !== "full") {
-          throw AelluxJs.diagnostics.create(AelluxJs.diagnostics.ERROR_INVALID_MODE);
-        }
-        AelluxJs.aelluxBasePath = AelluxJs.options.basePath || aelluxBasePath;
-        AelluxJs.notAvailable = [];
-        updatePreferencesAttributesHTML();
-        addWeakStyles();
-        loadOrchestrator();
-      },
-      persist: {
-        local: buildPersistMemory(root, "localStorage"),
-        session: buildPersistMemory(root, "sessionStorage"),
-        preferences: buildPersistMemory(root, "localStorage", "AelluxJsPreferences")
-      },
-      updatePreferencesAttributesHTML: updatePreferencesAttributesHTML,
-      on: function(event, handler, options) {
-        document.addEventListener(AelluxJs.eventName(event), handler, options);
-      },
-      off: function(event, handler, options) {
-        document.removeEventListener(AelluxJs.eventName(event), handler, options);
-      },
-      attr: function(name) {
-        return "data-" + CONSTANTS.AELLUXJS_DATA_ATTRIBUTE_NAME_PREFFIX.replace(/\?/, name);
-      },
-      className: function(name) {
-        return CONSTANTS.AELLUXJS_CLASS_NAME_PREFFIX.replace(/\?/, name);
-      },
-      extFilename: function(name) {
-        return "aellux." + CONSTANTS.AELLUXJS_EXT_SCRIPT_PREFIX + "." + name + scriptExtension;
-      },
-      extLabel: function(filename) {
-        return filename.replace(
-          new RegExp("^.*aellux\\." + CONSTANTS.AELLUXJS_EXT_SCRIPT_PREFIX + "\\.([^.\\/?#]+)(?:\\.min)?\\.js(?:[?#].*)?$"),
-          "$1"
-        );
-      },
-      eventName: function(name) {
-        return CONSTANTS.AELLUXJS_EVENT_NAME_PREFFIX.replace(/\?/, toCapitalized2(name));
-      },
-      noConflict: function() {
-        return old$Instance;
-      },
-      lazyExtensionSelectors: {},
-      extensionMounters: {},
-      extRegistry: {},
-      ext: function(labelOrUrl, options) {
-        var label = fromCamelCase2(AelluxJs.extLabel(labelOrUrl));
-        var url = labelOrUrl;
-        if (label in AelluxJs.extRegistry) {
-          AelluxJs.diagnostics.report(
-            AelluxJs.diagnostics.ERROR_EXTENSION_DUPLICATE,
-            { extension: label }
-          );
-          return;
-        }
-        if (url === label) url = "./" + AelluxJs.extFilename(label);
-        if (!options) options = {};
-        if (typeof options.loadStyle === "undefined") options.loadStyle = false;
-        if (!options.loadWhen) options.loadWhen = null;
-        options.builds = normalizeExtensionBuilds(options.builds);
-        if (options.loadWhen) {
-          AelluxJs.lazyExtensionSelectors[label] = options.loadWhen;
-        }
-        options.url = url;
-        options.load = options.loadWhen ? false : true;
-        options.state = "wait";
-        AelluxJs.extRegistry[label] = options;
-      },
-      extRegister: function(label, object) {
-        label = fromCamelCase2(label);
-        var key = toCamelCase2(label);
-        AelluxJs.extRegistry[label].state = "register";
-        object.initialized = false;
-        AelluxJs[key] = object;
-      },
-      startAelluxJs: function() {
-      },
-      destroy: function() {
-      },
-      dispatchFrom: function(from, event, options) {
-        var obj = document.createEvent("Event");
-        obj.initEvent(AelluxJs.eventName(event), false, false);
-        from.dispatchEvent(obj);
-      },
-      dispatch: function(event, options) {
-        AelluxJs.dispatchFrom(document, event, options);
-      },
-      wait: function(extensionName) {
-        throw AelluxJs.diagnostics.create(AelluxJs.diagnostics.ERROR_NOT_INITIALIZED);
-      },
-      update: function(rootOrSelector) {
-        throw AelluxJs.diagnostics.create(AelluxJs.diagnostics.ERROR_NOT_INITIALIZED);
-      },
-      unmount: function(rootOrSelector) {
-        throw AelluxJs.diagnostics.create(AelluxJs.diagnostics.ERROR_NOT_INITIALIZED);
-      },
-      preferencesMediaQueries: buildPreferencesMediaQueries(root)
+    );
+    api.minified = aelluxBootstrapSrc.indexOf(".min.js") !== -1;
+    root.AelluxJs = api;
+    root[api.shortJSName] = api;
+    api.init = function(options) {
+      if (typeof document === "undefined") {
+        console.log("[aellux.js] Browser not supported.");
+        return;
+      }
+      if (document.querySelector("[" + api.attr("legacy") + "]") || document.querySelector("[" + api.attr("esm") + "]")) return;
+      mergeOptions(api.options, options || {});
+      api.options.extensions = normalizeExtensionOptions(api.options.extensions);
+      if (api.options.mode !== "basic" && api.options.mode !== "full") {
+        throw diagnostics.create(diagnostics.ERROR_INVALID_MODE);
+      }
+      api.aelluxBasePath = api.options.basePath || aelluxBasePath;
+      api.notAvailable = [];
+      api.updatePreferencesAttributesHTML();
+      addWeakStyles();
+      loadOrchestrator();
     };
-    root[CONSTANTS.AELLUXJS_SHORT_JS_NAME] = root.AelluxJs;
-    if (AelluxJs.minified) {
-      scriptExtension = ".min.js";
-    }
+    if (api.minified) scriptExtension = ".min.js";
     function loadOrchestrator() {
       var attr = AelluxJs.attr("esm");
       CONSTANTS.AELLUXJS_MODERN_API_DEPENDENCIES.forEach(function(option) {
@@ -546,6 +578,24 @@
         }
       }
       return target;
+    }
+    function normalizeExtensionOptions(extensions) {
+      var normalized = {};
+      if (!extensions || typeof extensions !== "object" || Array.isArray(extensions)) {
+        return normalized;
+      }
+      for (var name in extensions) {
+        if (!Object.prototype.hasOwnProperty.call(extensions, name)) continue;
+        var key = toCamelCase2(name);
+        var value = extensions[name];
+        if (!value || typeof value !== "object" || Array.isArray(value)) value = {};
+        if (Object.prototype.hasOwnProperty.call(normalized, key)) {
+          mergeOptions(normalized[key], value);
+        } else {
+          normalized[key] = value;
+        }
+      }
+      return normalized;
     }
     function isLegacyForced() {
       return AelluxJs.options.forceLegacy ? true : /(?:^|[?&])aellux-debug-legacy(?:=1|=true)?(?:&|$)/i.test(window.location.search);

@@ -7,14 +7,14 @@
     integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
   <script src="./harness.js"></script>
   <script src="../../dist/aellux.js"></script>
-  <link rel="aelluxjs-ext" href="preferences" data-ae-load-when="[data-ae-preference]">
+  <link rel="aelluxjs-ext" href="preference" data-ae-load-when="[data-ae-preference]">
   <script>
     AelluxJsValidation.run(function (assert) {
       var target = document.getElementById("bootstrap-card");
       var button = document.getElementById("bootstrap-button");
       var bootstrapStyle = document.getElementById("bootstrap-css");
       assert(bootstrapStyle.sheet, "Bootstrap stylesheet did not load");
-      assert(AelluxJs.preferences, "Preferences extension was not initialized with Bootstrap present");
+      assert(AelluxJs.ext.preference, "Preference extension was not initialized with Bootstrap present");
       assert(target.classList.contains("ae--mounted"), "Bootstrap component was not mounted");
       assert(target.classList.contains("card"), "aellux.js removed a Bootstrap class");
       assert(button.classList.contains("btn-primary"), "aellux.js changed a Bootstrap utility class");

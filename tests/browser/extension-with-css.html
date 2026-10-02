@@ -7,13 +7,13 @@
   <script src="../../dist/aellux.js"></script>
   <script>
     AelluxJsValidation.run(function (assert) {
-      var style = document.querySelector("link[data-ae-ext-style='preferences']");
+      var style = document.querySelector("link[data-ae-ext-style='preference']");
       var target = document.getElementById("styled-target");
       assert(style, "Associated extension stylesheet was not appended");
       assert(/extension-style\.css(?:$|[?#])/.test(style.href), "Unexpected extension stylesheet URL");
       assert(target.classList.contains("ae--mounted"), "Extension mounted state was not completed");
     });
-    $ae.ext("preferences", { loadStyle: "./extension-style.css" });
+    $ae.ext("preference", { loadStyle: "./extension-style.css" });
     $ae.init({ mode: "basic" });
   </script>
 </head>

@@ -24,14 +24,14 @@ import nameCase from "./internal/utils-name-case.js";
   const mountHelper = createMountHelper(root, extensionPromises);
   const layoutScheduler = createLayoutScheduler();
 
+  // Keep the boot API object: its methods close over the same instance.
   root.AelluxJs = Object.assign(
-    mountHelper.AelluxJsForceUpdate,
     root.AelluxJs,
     {
       async startAelluxJs() {
         if (root.AelluxJs.bundledExtensions) {
           Object.keys(root.AelluxJs.bundledExtensions)
-            .forEach(extensionName => AelluxJs.ext(extensionName));
+            .forEach(key => AelluxJs.ext(key));
         }
 
         await new Promise((resolve) => {
@@ -100,10 +100,11 @@ import nameCase from "./internal/utils-name-case.js";
               { cause: error, extension: extensionLabel }
             );
           } finally {
-            delete AelluxJs[key];
+            delete AelluxJs.ext[key];
             delete extensionPromises[key];
-            delete AelluxJs.extRegistry[extensionLabel];
-            delete AelluxJs.extensionMounters[extensionLabel];
+            delete AelluxJs.extRegistry[key];
+            delete AelluxJs.extensionMounters[key];
+            delete AelluxJs.lazyExtensionSelectors[key];
             if (extension) extension.initialized = false;
           }
         }
@@ -130,7 +131,7 @@ import nameCase from "./internal/utils-name-case.js";
     if (extensionPromises[key])
       return extensionPromises[key];
 
-    const data = AelluxJs.extRegistry[extensionName];
+    const data = AelluxJs.extRegistry[key];
     if (data && !hasCompatibleBuild(data)) {
       AelluxJs.diagnostics.report(
         AelluxJs.diagnostics.ERROR_EXTENSION_INCOMPATIBLE,
@@ -140,15 +141,15 @@ import nameCase from "./internal/utils-name-case.js";
           builds: data.builds
         }
       );
-      delete AelluxJs.lazyExtensionSelectors[extensionName];
+      delete AelluxJs.lazyExtensionSelectors[key];
       extensionPromises[key] = Promise.resolve(null);
       return extensionPromises[key];
     }
 
-    if (AelluxJs[key]) {
-      if (!AelluxJs[key].initialized) {
+    if (AelluxJs.ext[key]) {
+      if (!AelluxJs.ext[key].initialized) {
         try {
-          extensionInitialize(key);
+          extensionInitialize(extensionName);
         } catch (error) {
           AelluxJs.diagnostics.report(
             AelluxJs.diagnostics.ERROR_EXTENSION_INITIALIZE,
@@ -158,22 +159,22 @@ import nameCase from "./internal/utils-name-case.js";
           return extensionPromises[key];
         }
       }
-      extensionPromises[key] = Promise.resolve(AelluxJs[key]);
+      extensionPromises[key] = Promise.resolve(AelluxJs.ext[key]);
       return extensionPromises[key];
     }
 
-    if (!(extensionName in AelluxJs.extRegistry)) { return Promise.reject(); }
+    if (!(key in AelluxJs.extRegistry)) { return Promise.reject(); }
 
     const bundledLoader =
       AelluxJs.bundledExtensions ?
-        AelluxJs.bundledExtensions[extensionName] :
+        AelluxJs.bundledExtensions[key] :
         null;
 
     extensionPromises[key] =
       (bundledLoader
         ? Promise.resolve().then(() => bundledLoader())
-        : appendExtensionAssets(key))
-        .then(() => extensionInitialize(key))
+        : appendExtensionAssets(extensionName))
+        .then(() => extensionInitialize(extensionName))
         .catch((error) => {
           AelluxJs.diagnostics.report(
             AelluxJs.diagnostics.ERROR_EXTENSION_INITIALIZE,
@@ -186,25 +187,27 @@ import nameCase from "./internal/utils-name-case.js";
   }
 
   function extensionInitialize(extensionLabel) {
-    const extensionName = fromCamelCase(extensionLabel);
+    extensionLabel = fromCamelCase(extensionLabel);
     const key = toCamelCase(extensionLabel);
-    AelluxJs[key].init();
-    AelluxJs[key].initialized = true;
+    const options = AelluxJs.options.extensions[key] || {};
+    AelluxJs.ext[key].init(options);
+    AelluxJs.ext[key].initialized = true;
 
-    if (AelluxJs[key].mountMap) {
-      const selectors = Array.from(AelluxJs[key].mountMap.keys()).join(",");
-      if (selectors) AelluxJs.extensionMounters[extensionName] = selectors;
+    if (AelluxJs.ext[key].mountMap) {
+      const selectors = Array.from(AelluxJs.ext[key].mountMap.keys()).join(",");
+      if (selectors) AelluxJs.extensionMounters[key] = selectors;
     }
 
     //Clean lazy registry
-    delete AelluxJs.lazyExtensionSelectors[extensionName];
+    delete AelluxJs.lazyExtensionSelectors[key];
 
-    return AelluxJs[key];
+    return AelluxJs.ext[key];
   }
 
-  async function appendExtensionAssets(name) {
-    const extensionName = fromCamelCase(name);
-    const data = AelluxJs.extRegistry[extensionName];
+  async function appendExtensionAssets(extensionLabel) {
+    extensionLabel = fromCamelCase(extensionLabel);
+    const key = toCamelCase(extensionLabel);
+    const data = AelluxJs.extRegistry[key];
     const url = data.url.replace(/^\.\//, AelluxJs.aelluxBasePath);
     const useLegacyBuild = AelluxJs.legacy || data.builds.indexOf("modern") === -1;
     const scriptURL = useLegacyBuild ? toLegacyScriptURL(url) : url;
@@ -215,7 +218,7 @@ import nameCase from "./internal/utils-name-case.js";
         const attr = AelluxJs.attr("ext");
         const script = document.createElement("script");
         script.src = scriptURL;
-        script.setAttribute(attr, name);
+        script.setAttribute(attr, extensionLabel);
 
         assetLoadHelper(script, {
           loadCallback: resolve,
@@ -234,7 +237,7 @@ import nameCase from "./internal/utils-name-case.js";
           const link = document.createElement("link");
           link.href = href;
           link.rel = "stylesheet";
-          link.setAttribute(attrStyle, name);
+          link.setAttribute(attrStyle, extensionLabel);
 
           assetLoadHelper(link, {
             loadCallback: resolve,

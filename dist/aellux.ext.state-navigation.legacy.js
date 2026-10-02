@@ -261,8 +261,8 @@
     function onPopState(event) {
       var browserState = event.state;
       if (!browserState || !browserState.aelluxJsState) return;
-      if (browserState.ajaxHref && AelluxJs.ajaxHref) {
-        AelluxJs.ajaxHref.load(window.location.href, browserState.ajaxHref, {
+      if (browserState.ajaxHref && AelluxJs.ext.ajaxHref) {
+        AelluxJs.ext.ajaxHref.load(window.location.href, browserState.ajaxHref, {
           ignoreHistory: true
         });
       }

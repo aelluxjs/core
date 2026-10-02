@@ -19,7 +19,7 @@ function fromCamelCase(name) {
 }
 
 export default {
-  toCapitalized: toCapitalized,
-  toCamelCase: toCamelCase,
-  fromCamelCase: fromCamelCase
+  toCapitalized,
+  toCamelCase,
+  fromCamelCase
 };

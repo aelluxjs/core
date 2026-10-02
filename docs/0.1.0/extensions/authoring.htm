@@ -509,12 +509,13 @@
 <li>Name the source and Modern artifact <code>aellux.ext.&lt;name&gt;.js</code>.</li>
 <li>Use the same kebab-case <code>&lt;name&gt;</code> as <code>extensionName</code> in <code>AelluxJs.extRegister(extensionName, api)</code>.</li>
 <li>Publish a classic script contained by an IIFE. Distribution files must not require ESM imports or exports.</li>
-<li>Keep <code>init()</code> synchronous and idempotent.</li>
+<li>Keep <code>init(options)</code> synchronous and idempotent.</li>
 <li>Make every <code>mount</code> idempotent and release its listeners, observers, timers, and references in the corresponding <code>unmount</code>.</li>
 <li>Release Extension-wide resources in <code>destroy()</code>.</li>
 <li>Keep the public API and lifecycle behavior equivalent across Modern and Legacy variants.</li>
 </ol>
-<p>The runtime exposes a kebab-case name as camelCase: <code>tab-group</code> becomes <code>AelluxJs.tabGroup</code>.</p>
+<p>The runtime exposes a kebab-case name as camelCase under <code>AelluxJs.ext</code>: <code>tab-group</code> becomes <code>AelluxJs.ext.tabGroup</code>.
+An Extension receives its configuration as the <code>options</code> argument to <code>init(options)</code>. Supply it through <code>$ae.init({ extensions: { &quot;tab-group&quot;: { initialTab: &quot;overview&quot; } } })</code>; the boot script normalizes <code>tab-group</code> to <code>tabGroup</code> in <code>$ae.options.extensions</code>. Extensions without a matching entry receive <code>{}</code>.</p>
 <h2>DOM Mount Contract</h2>
 <p>Extensions with element behavior expose a <code>mountMap</code>. Each key is a CSS selector and each value provides the matching <code>mount</code> and <code>unmount</code> handlers:</p>
 <pre><code class="language-js">const mountMap = new Map();

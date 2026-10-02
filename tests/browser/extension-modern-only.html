@@ -19,11 +19,11 @@
       assert(incompatible === null, "Modern-only Extension loaded under the Legacy runtime");
       assert(diagnosticCodes.indexOf(1106) !== -1, "Compatibility diagnostic was not emitted");
       assert(!document.querySelector("script[data-ae-ext='feedback']"), "Incompatible Extension asset was requested");
-      assert(AelluxJs.preferences, "Compatible Extension did not initialize after incompatibility");
+      assert(AelluxJs.ext.preference, "Compatible Extension did not initialize after incompatibility");
     });
 
     $ae.ext("feedback", { builds: ["modern"] });
-    $ae.ext("preferences");
+    $ae.ext("preference");
     $ae.init({ mode: "basic", forceLegacy: true });
   </script>
 </head>

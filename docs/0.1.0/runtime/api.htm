@@ -506,25 +506,27 @@
 <h2>Initialization</h2>
 <pre><code class="language-js">$ae.init({ mode: &quot;full&quot; });
 </code></pre>
-<p>Supported runtime modes are <code>full</code> and <code>basic</code>. See <a href="../getting-started.htm">Getting Started</a> for their loading behavior.</p>
+<p>Supported runtime modes are <code>full</code> and <code>basic</code>. See <a href="../getting-started.htm">Getting Started</a> for their loading behavior.
+Pass Extension-specific configuration through <code>extensions</code> in <code>init()</code> options. Keys such as <code>&quot;tab-group&quot;</code> are normalized to <code>tabGroup</code> in <code>$ae.options.extensions</code>, and each Extension receives its matching object in <code>init(options)</code>. An Extension with no matching configuration receives <code>{}</code>.</p>
 <h2>DOM Lifecycle</h2>
 <pre><code class="language-js">await $ae.update(root);
 await $ae.unmount(root);
 </code></pre>
 <p><code>update(root)</code> discovers matching declarations, loads required Extensions, and requests idempotent <code>mount</code> operations. <code>unmount(root)</code> requests the corresponding cleanup operations. When <code>root</code> is omitted, the document is used.</p>
 <h2>Destruction</h2>
-<pre><code class="language-js">await $ae.destroyExtensions(&quot;preferences&quot;);
+<pre><code class="language-js">await $ae.destroyExtensions(&quot;preference&quot;);
 await $ae.destroy();
 </code></pre>
 <p><code>destroyExtensions()</code> unmounts and destroys selected initialized Extensions. Without labels, it processes all loaded Extensions. <code>destroy()</code> first clears pending layout work, then destroys loaded Extensions.</p>
 <h2>Extension Access</h2>
-<pre><code class="language-js">$ae.ext(&quot;preferences&quot;, {
+<pre><code class="language-js">$ae.ext(&quot;preference&quot;, {
   builds: [&quot;modern&quot;, &quot;legacy&quot;],
   loadWhen: &quot;[data-ae-preference]&quot;
 });
-const preferences = await $ae.wait(&quot;preferences&quot;);
+const preference = await $ae.wait(&quot;preference&quot;);
+$ae.ext.preference === preference;
 </code></pre>
-<p><code>ext()</code> registers loading information. Its <code>builds</code> option declares <code>modern</code>, <code>legacy</code>, or both published artifacts; omission defaults to both. <code>wait()</code> loads and initializes the compatible Extension when necessary, then resolves to its public API or <code>null</code> after an isolated initialization or compatibility failure.</p>
+<p><code>ext()</code> registers loading information. Its <code>builds</code> option declares <code>modern</code>, <code>legacy</code>, or both published artifacts; omission defaults to both. <code>wait()</code> loads and initializes the compatible Extension when necessary, then resolves to its public API or <code>null</code> after an isolated initialization or compatibility failure. Registered Extension APIs are available under <code>$ae.ext.&lt;camelCaseName&gt;</code>.</p>
 <h2>Events</h2>
 <pre><code class="language-js">$ae.on(&quot;Ready&quot;, handler);
 $ae.off(&quot;Ready&quot;, handler);
