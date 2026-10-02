@@ -45,7 +45,7 @@ const legacyOrchestratorEntry = `${legacyPolyfills}
 require("./src/aellux.orchestrator.js");
 `;
 const legacyFullEntry = `${legacyPolyfills}
-require("./src/aellux.full.esm.js");
+require("./src/aellux.full.js");
 `;
 
 await mkdir(outputDirectory, { recursive: true });
@@ -54,7 +54,7 @@ for (const sourceFile of sourceFiles) {
   const filename = basename(sourceFile);
   const classic = filename === "aellux.js";
   const moduleEntry = filename === "aellux.esm.js";
-  const full = filename === "aellux.full.esm.js";
+  const full = filename === "aellux.full.js";
   const distributionFilename = full ? "aellux.full.js" : filename;
 
   for (const minify of [false, true]) {

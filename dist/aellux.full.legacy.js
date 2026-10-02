@@ -23133,11 +23133,11 @@
     }
   });
 
-  // src/aellux.full.esm.js
-  var aellux_full_esm_exports = {};
+  // src/aellux.full.js
+  var aellux_full_exports = {};
   var root;
-  var init_aellux_full_esm = __esm({
-    "src/aellux.full.esm.js": function() {
+  var init_aellux_full = __esm({
+    "src/aellux.full.js": function() {
       init_aellux_orchestrator();
       /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
       root = typeof globalThis !== "undefined" ? globalThis : window;
@@ -23179,6 +23179,6 @@
       Array.prototype.forEach.call(this, callback, thisArg);
     };
   }
-  init_aellux_full_esm();
+  init_aellux_full();
 })();
 //# sourceMappingURL=aellux.full.legacy.js.map

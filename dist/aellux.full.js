@@ -1021,7 +1021,7 @@
     ;
   })(typeof globalThis !== "undefined" ? globalThis : window);
 
-  // src/aellux.full.esm.js
+  // src/aellux.full.js
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   var root = typeof globalThis !== "undefined" ? globalThis : window;
   root.AelluxJs.bundledExtensions = Object.freeze({

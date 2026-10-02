@@ -41,6 +41,6 @@ Use `aellux.min.js` to select the matching minified runtime and Extension files.
 
 ## Distribution
 
-The browser distribution consists of classic scripts isolated in IIFEs. It does not expose ESM named or default exports. The source file `src/aellux.full.esm.js` is only the bundler entry used to generate `aellux.full.js` and `aellux.full.min.js`.
+The browser distribution consists of classic scripts isolated in IIFEs. It does not expose ESM named or default exports. The source file `src/aellux.full.js` is only the bundler entry used to generate `aellux.full.js` and `aellux.full.min.js`.
 
 Serve the repository over HTTP to run the browser validation pages linked from `tests/index.htm`.
