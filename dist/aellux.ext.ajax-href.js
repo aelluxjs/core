@@ -8,7 +8,7 @@
     const attr = {
       ajaxHref: AelluxJs.attr(extensionName)
     };
-    function init() {
+    function init(options) {
       document.addEventListener("click", onClick);
     }
     function destroy() {

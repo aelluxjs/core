@@ -69,7 +69,7 @@
           haptics: ["on", "off"],
           sound: ["off", "on", "low"]
         };
-        function init() {
+        function init(options) {
           mountMap.set(`[${attr.preference}]`, {
             mount: mountPreferenceContainer,
             unmount: unmountPreferenceContainer
@@ -88,7 +88,7 @@
               }
             )
           );
-          Object.entries(prefOptions).forEach(([param, options]) => defaultPreferences[param] = options[0]);
+          Object.entries(prefOptions).forEach(([param, options2]) => defaultPreferences[param] = options2[0]);
           loadUserPreferences();
           update();
         }
@@ -216,7 +216,7 @@
         let skipHashChange = null;
         let baseTitle = "";
         let useHash = true;
-        function init() {
+        function init(options) {
           window.addEventListener("popstate", onPopState);
           window.addEventListener("hashchange", onHashChange);
           if ("useHash" in AelluxJs.options) {
@@ -355,7 +355,7 @@
           send
         });
         const handlers = /* @__PURE__ */ new Map();
-        function init() {
+        function init(options) {
         }
         async function destroy() {
           handlers.clear();
@@ -423,7 +423,7 @@
         const attr = {
           ajaxHref: AelluxJs.attr(extensionName)
         };
-        function init() {
+        function init(options) {
           document.addEventListener("click", onClick);
         }
         function destroy() {

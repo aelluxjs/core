@@ -122,7 +122,7 @@
     var skipHashChange = null;
     var baseTitle = "";
     var useHash = true;
-    function init() {
+    function init(options) {
       window.addEventListener("popstate", onPopState);
       window.addEventListener("hashchange", onHashChange);
       if ("useHash" in AelluxJs.options) {

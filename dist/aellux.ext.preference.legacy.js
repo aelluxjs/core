@@ -104,7 +104,7 @@
       haptics: ["on", "off"],
       sound: ["off", "on", "low"]
     };
-    function init() {
+    function init(options) {
       mountMap.set("[".concat(attr.preference, "]"), {
         mount: mountPreferenceContainer,
         unmount: unmountPreferenceContainer
@@ -122,8 +122,8 @@
         });
       });
       Object.entries(prefOptions).forEach(function(_ref) {
-        var _ref2 = _slicedToArray(_ref, 2), param = _ref2[0], options = _ref2[1];
-        return defaultPreferences[param] = options[0];
+        var _ref2 = _slicedToArray(_ref, 2), param = _ref2[0], options2 = _ref2[1];
+        return defaultPreferences[param] = options2[0];
       });
       loadUserPreferences();
       update();

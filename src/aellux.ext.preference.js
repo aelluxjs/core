@@ -43,7 +43,7 @@ import nameCase from "./internal/utils-name-case.js";
     sound: ["off", "on", "low"],
   };
 
-  function init() {
+  function init(options) {
     mountMap.set(`[${attr.preference}]`, {
       mount: mountPreferenceContainer,
       unmount: unmountPreferenceContainer,

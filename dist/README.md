@@ -26,6 +26,16 @@ Use `full` to load all core Extensions. Use `basic` to register only what the pa
 </script>
 ```
 
+Third-party modules and adapters can import the shared API:
+
+```js
+import AelluxJs from "@aelluxjs/core";
+
+AelluxJs.attr("preference");
+```
+
+The module creates the core API if needed. The browser boot script still starts the runtime through `$ae.init()`.
+
 See [Getting Started](../docs/getting-started.md) for build instructions, runtime modes, and distribution details.
 
 ## Documentation

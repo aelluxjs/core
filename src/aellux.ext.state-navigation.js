@@ -19,7 +19,7 @@
   let baseTitle = "";
   let useHash = true;
 
-  function init() {
+  function init(options) {
     window.addEventListener("popstate", onPopState);
     window.addEventListener("hashchange", onHashChange);
 

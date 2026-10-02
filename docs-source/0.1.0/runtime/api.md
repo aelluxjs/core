@@ -2,6 +2,14 @@
 
 The browser distribution exposes `AelluxJs` and its short alias `$ae` on the global object.
 
+Modules can import the shared API through `@aelluxjs/core`:
+
+```js
+import AelluxJs from "@aelluxjs/core";
+```
+
+This entry creates the core API when it is absent. The browser boot script starts the runtime through `init()`.
+
 ## Initialization
 
 ```js

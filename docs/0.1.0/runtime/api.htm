@@ -502,6 +502,10 @@
         <div id="doc-content" style="min-height: calc(100vh - 200px);" class="js-toc-content" ajax-load="doc-content">
           <h1>Runtime API</h1>
 <p>The browser distribution exposes <code>AelluxJs</code> and its short alias <code>$ae</code> on the global object.</p>
+<p>Modules can import the shared API through <code>@aelluxjs/core</code>:</p>
+<pre><code class="language-js">import AelluxJs from &quot;@aelluxjs/core&quot;;
+</code></pre>
+<p>This entry creates the core API when it is absent. The browser boot script starts the runtime through <code>init()</code>.</p>
 <h2>Initialization</h2>
 <pre><code class="language-js">$ae.init({ mode: &quot;full&quot; });
 </code></pre>

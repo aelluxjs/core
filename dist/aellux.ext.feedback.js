@@ -19,7 +19,7 @@
       send
     });
     const handlers = /* @__PURE__ */ new Map();
-    function init() {
+    function init(options) {
     }
     async function destroy() {
       handlers.clear();

@@ -55,7 +55,7 @@
       haptics: ["on", "off"],
       sound: ["off", "on", "low"]
     };
-    function init() {
+    function init(options) {
       mountMap.set(`[${attr.preference}]`, {
         mount: mountPreferenceContainer,
         unmount: unmountPreferenceContainer
@@ -74,7 +74,7 @@
           }
         )
       );
-      Object.entries(prefOptions).forEach(([param, options]) => defaultPreferences[param] = options[0]);
+      Object.entries(prefOptions).forEach(([param, options2]) => defaultPreferences[param] = options2[0]);
       loadUserPreferences();
       update();
     }

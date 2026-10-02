@@ -389,11 +389,10 @@
     }
   }
 
-  // src/aellux.js
+  // src/internal/create-aellux-constants.js
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
-  (function(root) {
-    var toCamelCase2 = utils_name_case_default.toCamelCase;
-    var CONSTANTS = {
+  function createAelluxConstants() {
+    return {
       AELLUXJS_SHORT_JS_NAME: "$ae",
       AELLUXJS_EXT_SCRIPT_PREFIX: "ext",
       AELLUXJS_CLASS_NAME_PREFFIX: "ae--?",
@@ -429,8 +428,16 @@
         { name: "Array", function: ["from", "isArray"] }
       ]
     };
+  }
+
+  // src/aellux.js
+  /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+  (function(root) {
+    var toCamelCase2 = utils_name_case_default.toCamelCase;
+    var CONSTANTS = createAelluxConstants();
     var scriptExtension = ".js";
-    var api = createAelluxApi(root, CONSTANTS);
+    var existingApi = root.AelluxJs;
+    var api = existingApi && existingApi.shortJSName === CONSTANTS.AELLUXJS_SHORT_JS_NAME && existingApi.extRegistry && existingApi.diagnostics ? existingApi : createAelluxApi(root, CONSTANTS);
     var diagnostics = api.diagnostics;
     var bootstrapScript = document.currentScript || document.querySelector("script[src*='aellux.js'],script[src*='aellux.min.js']");
     var aelluxBootstrapSrc = root.__aelluxBootstrapURL || bootstrapScript && bootstrapScript.src;

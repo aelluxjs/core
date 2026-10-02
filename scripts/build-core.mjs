@@ -53,6 +53,7 @@ await mkdir(outputDirectory, { recursive: true });
 for (const sourceFile of sourceFiles) {
   const filename = basename(sourceFile);
   const classic = filename === "aellux.js";
+  const moduleEntry = filename === "aellux.esm.js";
   const full = filename === "aellux.full.esm.js";
   const distributionFilename = full ? "aellux.full.js" : filename;
 
@@ -64,7 +65,7 @@ for (const sourceFile of sourceFiles) {
       outfile: join(outputDirectory, outputFilename),
       bundle: true,
       platform: "browser",
-      format: "iife",
+      format: moduleEntry ? "esm" : "iife",
       target: classic ? "es5" : "es2017",
       minify,
       sourcemap: true,

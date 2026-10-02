@@ -23,8 +23,12 @@
   },
   "type": "module",
   "exports": {
-    ".": "./dist/aellux.js",
-    "./bootstrap": "./dist/aellux.js",
+    ".": {
+      "import": "./dist/aellux.esm.js",
+      "default": "./dist/aellux.js"
+    },
+    "./boot": "./dist/aellux.js",
+    "./esm": "./dist/aellux.esm.js",
     "./full": "./dist/aellux.full.js",
     "./full/legacy": "./dist/aellux.full.legacy.js",
     "./orchestrator": "./dist/aellux.orchestrator.js",

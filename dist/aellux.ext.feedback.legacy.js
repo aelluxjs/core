@@ -120,7 +120,7 @@
       send: send
     });
     var handlers = /* @__PURE__ */ new Map();
-    function init() {
+    function init(options) {
     }
     function destroy() {
       return _destroy.apply(this, arguments);

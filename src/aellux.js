@@ -2,6 +2,7 @@
 
 import { assetLoadHelper } from "./internal/asset-load-helper.js";
 import { createAelluxApi } from "./internal/aellux-api-integration.js";
+import { createAelluxConstants } from "./internal/create-aellux-constants.js";
 import nameCase from "./internal/utils-name-case.js";
 
 // aellux.js boot script: intentionally minimal. Apart from build-time imports, its runtime body and
@@ -18,44 +19,14 @@ import nameCase from "./internal/utils-name-case.js";
 (function (root) {
   var toCamelCase = nameCase.toCamelCase;
 
-  var CONSTANTS = {
-    AELLUXJS_SHORT_JS_NAME: "$ae",
-    AELLUXJS_EXT_SCRIPT_PREFIX: "ext",
-
-    AELLUXJS_CLASS_NAME_PREFFIX: "ae--?",
-    AELLUXJS_EVENT_NAME_PREFFIX: "AelluxJs?",
-    AELLUXJS_DATA_ATTRIBUTE_NAME_PREFFIX: "ae-?",
-
-    AELLUXJS_DIAGNOSTICS: {
-      ERROR_BOOTSTRAP_NOT_FOUND: { code: 1000, message: "aellux.js boot script could not be located." },
-      ERROR_NOT_INITIALIZED: { code: 1001, message: "aellux.js has not been initialized." },
-      ERROR_INVALID_MODE: { code: 1002, message: "aellux.js mode must be basic or full." },
-      ERROR_EXTENSION_DUPLICATE: { code: 1101, message: "aellux.js Extension is already registered." },
-      ERROR_EXTENSION_INITIALIZE: { code: 1102, message: "aellux.js Extension failed to initialize." },
-      ERROR_EXTENSION_MOUNT: { code: 1103, message: "aellux.js Extension failed to mount or unmount an element." },
-      ERROR_EXTENSION_UNMOUNT: { code: 1104, message: "aellux.js Extension failed to unmount." },
-      ERROR_EXTENSION_DESTROY: { code: 1105, message: "aellux.js Extension failed to destroy." },
-      ERROR_EXTENSION_INCOMPATIBLE: { code: 1106, message: "aellux.js Extension has no compatible build for the selected runtime." },
-      ERROR_LEGACY_RUNTIME_START: { code: 1201, message: "aellux.js Legacy runtime failed to start." },
-      ERROR_LEGACY_RUNTIME_LOAD: { code: 1202, message: "aellux.js Legacy runtime could not be loaded." }
-    },
-
-    AELLUXJS_DEFAULT_INITIALIZATION_OPTIONS: {
-      mode: "full",
-      forceLegacy: false,
-      basePath: null,
-      extensions: {}
-    },
-
-    AELLUXJS_MODERN_API_DEPENDENCIES: [
-      "Promise", "Map", "CustomEvent", "requestAnimationFrame", "cancelAnimationFrame", "fetch",
-      { name: "Object", function: ["assign", "entries", "freeze"] },
-      { name: "Array", function: ["from", "isArray"] }
-    ]
-  };
+  var CONSTANTS = createAelluxConstants();
 
   var scriptExtension = ".js";
-  var api = createAelluxApi(root, CONSTANTS);
+  var existingApi = root.AelluxJs;
+  var api = existingApi &&
+    existingApi.shortJSName === CONSTANTS.AELLUXJS_SHORT_JS_NAME &&
+    existingApi.extRegistry && existingApi.diagnostics
+    ? existingApi : createAelluxApi(root, CONSTANTS);
   var diagnostics = api.diagnostics;
 
   var bootstrapScript =

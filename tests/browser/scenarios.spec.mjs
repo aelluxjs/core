@@ -57,6 +57,43 @@ test("renamed global and event prefix are available", async ({ page }) => {
   expect(dispatchedType).toBe("AelluxJsProbe");
 });
 
+test("ESM entry exports the shared core API", async ({ page }) => {
+  await page.goto("/tests/index.htm");
+  const created = await page.evaluate(async () => {
+    const AelluxJs = (await import("/dist/aellux.esm.js")).default;
+    window.importedAelluxJs = AelluxJs;
+    return {
+      sharedApi: AelluxJs === globalThis.AelluxJs,
+      sharedAlias: AelluxJs === globalThis.$ae,
+      attribute: AelluxJs.attr("preference"),
+      extensionName: AelluxJs.extName("aellux.ext.state-navigation.js")
+    };
+  });
+  expect(created).toEqual({
+    sharedApi: true,
+    sharedAlias: true,
+    attribute: "data-ae-preference",
+    extensionName: "state-navigation"
+  });
+
+  await page.addScriptTag({ url: "/dist/aellux.js" });
+  expect(await page.evaluate(async () => {
+    const AelluxJs = (await import("/dist/aellux.esm.js")).default;
+    return AelluxJs === window.importedAelluxJs &&
+      AelluxJs === globalThis.AelluxJs && AelluxJs === globalThis.$ae;
+  })).toBe(true);
+  await page.evaluate(() => window.importedAelluxJs.init({ mode: "basic" }));
+  await expect.poll(() => page.evaluate(() => window.importedAelluxJs.supported)).toBe(true);
+
+  await page.goto("/tests/index.htm");
+  await page.addScriptTag({ url: "/dist/aellux.js" });
+  expect(await page.evaluate(async () => {
+    const api = globalThis.AelluxJs;
+    const AelluxJs = (await import("/dist/aellux.esm.js")).default;
+    return AelluxJs === api && globalThis.$ae === api;
+  })).toBe(true);
+});
+
 test("extension filename helper exposes the name terminology", async ({ page }) => {
   await openScenario(page, "runtime-modern");
   expect(await page.evaluate(() =>

@@ -22142,7 +22142,7 @@
           haptics: ["on", "off"],
           sound: ["off", "on", "low"]
         };
-        function init() {
+        function init(options) {
           mountMap.set("[".concat(attr.preference, "]"), {
             mount: mountPreferenceContainer,
             unmount: unmountPreferenceContainer
@@ -22160,8 +22160,8 @@
             });
           });
           Object.entries(prefOptions).forEach(function(_ref) {
-            var _ref2 = _slicedToArray2(_ref, 2), param = _ref2[0], options = _ref2[1];
-            return defaultPreferences[param] = options[0];
+            var _ref2 = _slicedToArray2(_ref, 2), param = _ref2[0], options2 = _ref2[1];
+            return defaultPreferences[param] = options2[0];
           });
           loadUserPreferences();
           update();
@@ -22393,7 +22393,7 @@
         var skipHashChange = null;
         var baseTitle = "";
         var useHash = true;
-        function init() {
+        function init(options) {
           window.addEventListener("popstate", onPopState);
           window.addEventListener("hashchange", onHashChange);
           if ("useHash" in AelluxJs.options) {
@@ -22678,7 +22678,7 @@
           send: send
         });
         var handlers = /* @__PURE__ */ new Map();
-        function init() {
+        function init(options) {
         }
         function destroy() {
           return _destroy.apply(this, arguments);
@@ -22948,7 +22948,7 @@
         var attr = {
           ajaxHref: AelluxJs.attr(extensionName)
         };
-        function init() {
+        function init(options) {
           document.addEventListener("click", onClick);
         }
         function destroy() {
