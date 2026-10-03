@@ -1,20 +1,20 @@
 /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
 
-import nameCase from "./utils-name-case.js";
+import utilsNameCase from "./utils-name-case.js";
 
 // Build-time imports aside, this helper must remain ES5-compatible for the boot bundle.
 // getApi lets the boot publish AelluxJs after creating this helper.
-export function createPreferencesHtmlHelper(root, getApi) {
+export function createPreferenceHtmlHelper(root, getApi) {
   var document = root.document;
-  var fromCamelCase = nameCase.fromCamelCase;
+  var fromCamelCase = utilsNameCase.fromCamelCase;
 
   return {
-    updatePreferencesAttributesHTML: updatePreferencesAttributesHTML
+    updatePreferenceAttributesHTML: updatePreferenceAttributesHTML
   };
 
-  function updatePreferencesAttributesHTML(preferences) {
+  function updatePreferenceAttributesHTML(preferences) {
     var api = getApi();
-    var allQueries = api.preferencesMediaQueries;
+    var allQueries = api.registry.preferenceMediaQueries;
     preferences = preferences ? preferences : api.persist.preferences.getObject();
     for (var param in allQueries) {
       if (!Object.prototype.hasOwnProperty.call(allQueries, param)) continue;

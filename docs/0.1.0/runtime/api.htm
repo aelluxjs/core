@@ -531,6 +531,7 @@ $ae.ext.preference === preference;
 </code></pre>
 <p><code>ext()</code> registers loading information in <code>$ae.registry.ext</code> using camelCase keys. Its <code>builds</code> option declares <code>modern</code>, <code>legacy</code>, or both published artifacts; omission defaults to both. <code>wait()</code> loads and initializes the compatible Extension when necessary, then resolves to its public API or <code>null</code> after an isolated initialization or compatibility failure. Registered Extension APIs are available under <code>$ae.ext.&lt;camelCaseName&gt;</code>. <code>$ae.registry.dep</code> is available for dependency records. The lazy selector and mount indexes are <code>$ae.registry.lazyExtSelectors</code> and <code>$ae.registry.extMounters</code>.</p>
 <p><code>extName(filename)</code> extracts the Extension name from an <code>aellux.ext.&lt;name&gt;.js</code> filename.</p>
+<p>Preference media queries are available in <code>$ae.registry.preferenceMediaQueries</code>.</p>
 <h2>Events</h2>
 <pre><code class="language-js">$ae.on(&quot;Ready&quot;, handler);
 $ae.off(&quot;Ready&quot;, handler);

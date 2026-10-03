@@ -110,7 +110,7 @@
         unmount: unmountPreferenceContainer
       });
       window.addEventListener("storage", storageEvent);
-      var allQueries = AelluxJs.preferencesMediaQueries;
+      var allQueries = AelluxJs.registry.preferenceMediaQueries;
       Object.values(allQueries).forEach(function(queries) {
         return Object.values(queries).forEach(function(query) {
           if (!query) return;
@@ -131,7 +131,7 @@
     function destroy() {
       window.removeEventListener("storage", storageEvent);
       document.removeEventListener("DOMContentLoaded", update);
-      var allQueries = AelluxJs.preferencesMediaQueries;
+      var allQueries = AelluxJs.registry.preferenceMediaQueries;
       Object.values(allQueries).forEach(function(queries) {
         return Object.values(queries).forEach(function(query) {
           if (!query) return;
@@ -166,7 +166,7 @@
     }
     function update() {
       Object.assign(computedPreferences, defaultPreferences, userPreferences);
-      AelluxJs.updatePreferencesAttributesHTML(computedPreferences);
+      AelluxJs.updatePreferenceAttributesHTML(computedPreferences);
       document.querySelectorAll("[".concat(attr.preference, "]")).forEach(function(container) {
         return updateContainer(container);
       });

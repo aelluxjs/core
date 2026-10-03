@@ -24,7 +24,7 @@ This provides the intended compatibility layer, but it is not an unrestricted gu
 
 ## Selection Rules
 
-The boot script checks the capabilities required by the orchestrator before loading it. Missing capabilities are recorded in `AelluxJs.notAvailable`.
+The boot script checks the capabilities required by the orchestrator before loading it. Missing capabilities are recorded in `AelluxJs.diagnostics.notAvailable`.
 
 Force Legacy through initialization options or the development query parameter:
 

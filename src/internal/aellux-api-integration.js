@@ -2,31 +2,28 @@
 
 import { buildDiagnostics } from "./build-diagnostics.js";
 import { buildPersistMemory } from "./build-persist-memory.js";
-import { buildPreferencesMediaQueries } from "./build-preferences-media-queries.js";
-import nameCase from "./utils-name-case.js";
-import { createPreferencesHtmlHelper } from "./utils-preference-html.js";
+import { buildPreferenceMediaQueries } from "./build-preference-media-queries.js";
+import utilsNameCase from "./utils-name-case.js";
+import { createPreferenceHtmlHelper } from "./utils-preference-html.js";
 
 // Build-time imports aside, keep this factory ES5-compatible for the boot bundle.
 // The caller publishes the returned object and replaces init with the boot loader.
 export function createAelluxApi(root, constants) {
-  var toCapitalized = nameCase.toCapitalized;
-  var toCamelCase = nameCase.toCamelCase;
-  var fromCamelCase = nameCase.fromCamelCase;
+  var toCapitalized = utilsNameCase.toCapitalized;
+  var toCamelCase = utilsNameCase.toCamelCase;
+  var fromCamelCase = utilsNameCase.fromCamelCase;
 
   var diagnostics = buildDiagnostics(constants.AELLUXJS_DIAGNOSTICS);
   var oldShortInstance = root[constants.AELLUXJS_SHORT_JS_NAME];
   var document = root.document;
   var api;
-  var preferencesHtml = createPreferencesHtmlHelper(root, function () { return api; });
+  var preferenceHtml = createPreferenceHtmlHelper(root, function () { return api; });
 
   api = {
     shortJSName: constants.AELLUXJS_SHORT_JS_NAME,
     diagnostics: diagnostics,
     options: constants.AELLUXJS_DEFAULT_INITIALIZATION_OPTIONS,
     minified: false,
-    legacy: false,
-    supported: false,
-    notAvailable: [],
     waitLayout: null,
     init: function () { throw diagnostics.create(diagnostics.ERROR_NOT_INITIALIZED); },
     persist: {
@@ -34,8 +31,7 @@ export function createAelluxApi(root, constants) {
       session: buildPersistMemory(root, "sessionStorage"),
       preferences: buildPersistMemory(root, "localStorage", "AelluxJsPreferences")
     },
-    preferencesMediaQueries: buildPreferencesMediaQueries(root),
-    updatePreferencesAttributesHTML: preferencesHtml.updatePreferencesAttributesHTML,
+    updatePreferenceAttributesHTML: preferenceHtml.updatePreferenceAttributesHTML,
     on: function (event, handler, options) {
       document.addEventListener(api.eventName(event), handler, options);
     },
@@ -71,7 +67,8 @@ export function createAelluxApi(root, constants) {
       ext: {},
       dep: {},
       lazyExtSelectors: {},
-      extMounters: {}
+      extMounters: {},
+      preferenceMediaQueries: buildPreferenceMediaQueries(root)
     },
     ext: function (nameOrUrl, options) {
       var name = fromCamelCase(api.extName(nameOrUrl));

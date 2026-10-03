@@ -1,11 +1,11 @@
 /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
 
-import nameCase from "./internal/utils-name-case.js";
+import utilsNameCase from "./internal/utils-name-case.js";
 
 (function () {
   "use strict";
 
-  const { toCamelCase } = nameCase;
+  const { toCamelCase } = utilsNameCase;
 
   const extensionName = "preference";
 
@@ -52,7 +52,7 @@ import nameCase from "./internal/utils-name-case.js";
     window.addEventListener("storage", storageEvent);
 
     //Watch device changes
-    const allQueries = AelluxJs.preferencesMediaQueries;
+    const allQueries = AelluxJs.registry.preferenceMediaQueries;
     Object.values(allQueries).forEach((queries) =>
       Object.values(queries).forEach((query) => {
         if (!query) return;
@@ -77,7 +77,7 @@ import nameCase from "./internal/utils-name-case.js";
     window.removeEventListener("storage", storageEvent);
     document.removeEventListener('DOMContentLoaded', update);
 
-    const allQueries = AelluxJs.preferencesMediaQueries;
+    const allQueries = AelluxJs.registry.preferenceMediaQueries;
     Object.values(allQueries).forEach((queries) =>
       Object.values(queries).forEach((query) => {
         if (!query) return;
@@ -115,7 +115,7 @@ import nameCase from "./internal/utils-name-case.js";
 
   function update() {
     Object.assign(computedPreferences, defaultPreferences, userPreferences);
-    AelluxJs.updatePreferencesAttributesHTML(computedPreferences);
+    AelluxJs.updatePreferenceAttributesHTML(computedPreferences);
     document.querySelectorAll(`[${attr.preference}]`)
       .forEach(container => updateContainer(container));
     AelluxJs.dispatch("PreferencesChange");

@@ -518,7 +518,7 @@
 <p>The build transpiles the Modern orchestrator and each core Extension into ES5-syntax Legacy variants. Both Legacy runtime files install the Core polyfills before starting the runtime. Individually loaded Extensions reuse that environment and therefore do not duplicate those polyfills in each generated file.</p>
 <p>This provides the intended compatibility layer, but it is not an unrestricted guarantee for every historical ES5 browser. The supported browser matrix and integration tests must still be completed before production Legacy support can be claimed.</p>
 <h2>Selection Rules</h2>
-<p>The boot script checks the capabilities required by the orchestrator before loading it. Missing capabilities are recorded in <code>AelluxJs.notAvailable</code>.</p>
+<p>The boot script checks the capabilities required by the orchestrator before loading it. Missing capabilities are recorded in <code>AelluxJs.diagnostics.notAvailable</code>.</p>
 <p>Force Legacy through initialization options or the development query parameter:</p>
 <pre><code class="language-js">$ae.init({ mode: &quot;basic&quot;, forceLegacy: true });
 </code></pre>

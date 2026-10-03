@@ -19,7 +19,7 @@ This table is a raw syntax baseline, not a complete browser-support guarantee. A
 
 ## Effective Compatibility
 
-Before selecting the Modern runtime, the boot script checks the capabilities listed in its Modern dependency catalog. Missing capabilities are recorded in `AelluxJs.notAvailable`, and aellux.js selects the Legacy runtime when necessary.
+Before selecting the Modern runtime, the boot script checks the capabilities listed in its Modern dependency catalog. Missing capabilities are recorded in `AelluxJs.diagnostics.notAvailable`, and aellux.js selects the Legacy runtime when necessary.
 
 Each aellux.js Extension remains responsible for feature-detecting browser APIs outside the Core compatibility contract. If an Extension requires an unavailable API, its build must provide or load the corresponding fallback.
 

@@ -69,6 +69,12 @@ test("ESM entry exports the shared core API", async ({ page }) => {
       dependencyRegistry: Object.keys(AelluxJs.registry.dep).length,
       lazySelectors: Object.keys(AelluxJs.registry.lazyExtSelectors).length,
       extMounters: Object.keys(AelluxJs.registry.extMounters).length,
+      preferenceMediaQueries: Object.hasOwn(AelluxJs.registry.preferenceMediaQueries, "colorScheme"),
+      oldPreferenceMediaQueries: Object.hasOwn(AelluxJs, "preferencesMediaQueries"),
+      diagnosticsLegacy: AelluxJs.diagnostics.legacy,
+      diagnosticsSupported: AelluxJs.diagnostics.supported,
+      diagnosticsNotAvailable: AelluxJs.diagnostics.notAvailable.length,
+      oldRuntimeStatus: ["legacy", "supported", "notAvailable"].some(key => Object.hasOwn(AelluxJs, key)),
       oldRegistry: Object.hasOwn(AelluxJs, "extRegistry"),
       oldLazySelectors: Object.hasOwn(AelluxJs, "lazyExtensionSelectors"),
       oldExtensionMounters: Object.hasOwn(AelluxJs, "extensionMounters"),
@@ -85,6 +91,12 @@ test("ESM entry exports the shared core API", async ({ page }) => {
     dependencyRegistry: 0,
     lazySelectors: 0,
     extMounters: 0,
+    preferenceMediaQueries: true,
+    oldPreferenceMediaQueries: false,
+    diagnosticsLegacy: false,
+    diagnosticsSupported: false,
+    diagnosticsNotAvailable: 0,
+    oldRuntimeStatus: false,
     oldRegistry: false,
     oldLazySelectors: false,
     oldExtensionMounters: false,
@@ -101,7 +113,7 @@ test("ESM entry exports the shared core API", async ({ page }) => {
       AelluxJs === globalThis.AelluxJs && AelluxJs === globalThis.$ae;
   })).toBe(true);
   await page.evaluate(() => window.importedAelluxJs.init({ mode: "basic" }));
-  await expect.poll(() => page.evaluate(() => window.importedAelluxJs.supported)).toBe(true);
+  await expect.poll(() => page.evaluate(() => window.importedAelluxJs.diagnostics.supported)).toBe(true);
 
   await page.goto("/tests/index.htm");
   await page.addScriptTag({ url: "/dist/aellux.js" });
@@ -166,7 +178,7 @@ for (const forceLegacy of [false, true]) {
 
     await expect.poll(() => page.evaluate(() => AelluxJs.ext.optionProbe?.initialized)).toBe(true);
     expect(await page.evaluate(() => ({
-      legacy: AelluxJs.legacy,
+      legacy: AelluxJs.diagnostics.legacy,
       sameObject: window.optionProbeOptions === AelluxJs.options.extensions.optionProbe,
       enabled: window.optionProbeOptions.enabled,
       camelKeyRetained: AelluxJs.options.extensions.alreadyCamel.retained,
@@ -227,7 +239,7 @@ test("minified distribution exposes the renamed global", async ({ page }) => {
   await page.goto("/tests/index.htm");
   await page.addScriptTag({ url: "/dist/aellux.min.js" });
   await page.evaluate(() => AelluxJs.init({ mode: "full" }));
-  await expect.poll(() => page.evaluate(() => window.AelluxJs.supported)).toBe(true);
+  await expect.poll(() => page.evaluate(() => window.AelluxJs.diagnostics.supported)).toBe(true);
   expect(await page.evaluate(() => window.AelluxJs === window.$ae)).toBe(true);
   expect(await page.evaluate(() => typeof window.Aellux)).toBe("undefined");
 });

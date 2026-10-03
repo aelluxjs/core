@@ -1,9 +1,9 @@
 /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
 
-import nameCase from "./utils-name-case.js";
+import utilsNameCase from "./utils-name-case.js";
 
 export function createMountHelper(root, extensionPromises) {
-  const { toCapitalized, toCamelCase, fromCamelCase } = nameCase;
+  const { toCapitalized, toCamelCase, fromCamelCase } = utilsNameCase;
 
   const mountedElements = new WeakMap(); //DOM, string Set
 

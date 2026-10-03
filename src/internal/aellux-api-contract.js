@@ -84,13 +84,19 @@ var diagnosticNames = [
 ];
 
 var diagnosticProperties = { create: method, report: method };
+diagnosticProperties.legacy = flag;
+diagnosticProperties.supported = flag;
+diagnosticProperties.notAvailable = list;
 for (var i = 0; i < diagnosticNames.length; i++) {
   diagnosticProperties[diagnosticNames[i]] = diagnosticDefinition;
 }
 
 var bootstrapProperties = Object.freeze({
   shortJSName: Object.freeze({ type: "string", "const": "$ae" }),
-  diagnostics: Object.freeze({ type: "object", properties: Object.freeze(diagnosticProperties) }),
+  diagnostics: Object.freeze({
+    type: "object",
+    properties: Object.freeze(diagnosticProperties)
+  }),
   options: Object.freeze({
     type: "object",
     properties: Object.freeze({
@@ -101,16 +107,13 @@ var bootstrapProperties = Object.freeze({
     })
   }),
   minified: flag,
-  legacy: flag,
-  supported: flag,
-  notAvailable: list,
   waitLayout: Object.freeze({ type: "null" }),
   init: method,
   persist: Object.freeze({
     type: "object",
     properties: Object.freeze({ local: memory, session: memory, preferences: memory })
   }),
-  updatePreferencesAttributesHTML: method,
+  updatePreferenceAttributesHTML: method,
   on: method,
   off: method,
   attr: method,
@@ -125,7 +128,8 @@ var bootstrapProperties = Object.freeze({
       ext: record,
       dep: record,
       lazyExtSelectors: record,
-      extMounters: record
+      extMounters: record,
+      preferenceMediaQueries: mediaQueries
     })
   }),
   ext: extensionNamespace,
@@ -138,8 +142,7 @@ var bootstrapProperties = Object.freeze({
   wait: method,
   update: method,
   unmount: method,
-  request: method,
-  preferencesMediaQueries: mediaQueries
+  request: method
 });
 
 var layoutScheduler = Object.freeze({

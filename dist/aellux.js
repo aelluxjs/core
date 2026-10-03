@@ -28,6 +28,9 @@
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   function buildDiagnostics(catalog) {
     var diagnostics = {
+      legacy: false,
+      supported: false,
+      notAvailable: [],
       create: function(definition, context) {
         var error = new Error(definition.message);
         error.name = "AelluxJsDiagnosticError";
@@ -140,9 +143,9 @@
     };
   }
 
-  // src/internal/build-preferences-media-queries.js
+  // src/internal/build-preference-media-queries.js
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
-  function buildPreferencesMediaQueries(root) {
+  function buildPreferenceMediaQueries(root) {
     function mediaQuery(query) {
       return typeof root.matchMedia === "function" ? root.matchMedia(query) : null;
     }
@@ -194,15 +197,15 @@
 
   // src/internal/utils-preference-html.js
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
-  function createPreferencesHtmlHelper(root, getApi) {
+  function createPreferenceHtmlHelper(root, getApi) {
     var document2 = root.document;
     var fromCamelCase2 = utils_name_case_default.fromCamelCase;
     return {
-      updatePreferencesAttributesHTML: updatePreferencesAttributesHTML
+      updatePreferenceAttributesHTML: updatePreferenceAttributesHTML
     };
-    function updatePreferencesAttributesHTML(preferences) {
+    function updatePreferenceAttributesHTML(preferences) {
       var api = getApi();
-      var allQueries = api.preferencesMediaQueries;
+      var allQueries = api.registry.preferenceMediaQueries;
       preferences = preferences ? preferences : api.persist.preferences.getObject();
       for (var param in allQueries) {
         if (!Object.prototype.hasOwnProperty.call(allQueries, param)) continue;
@@ -265,7 +268,7 @@
     var oldShortInstance = root[constants.AELLUXJS_SHORT_JS_NAME];
     var document2 = root.document;
     var api;
-    var preferencesHtml = createPreferencesHtmlHelper(root, function() {
+    var preferenceHtml = createPreferenceHtmlHelper(root, function() {
       return api;
     });
     api = {
@@ -273,9 +276,6 @@
       diagnostics: diagnostics,
       options: constants.AELLUXJS_DEFAULT_INITIALIZATION_OPTIONS,
       minified: false,
-      legacy: false,
-      supported: false,
-      notAvailable: [],
       waitLayout: null,
       init: function() {
         throw diagnostics.create(diagnostics.ERROR_NOT_INITIALIZED);
@@ -285,8 +285,7 @@
         session: buildPersistMemory(root, "sessionStorage"),
         preferences: buildPersistMemory(root, "localStorage", "AelluxJsPreferences")
       },
-      preferencesMediaQueries: buildPreferencesMediaQueries(root),
-      updatePreferencesAttributesHTML: preferencesHtml.updatePreferencesAttributesHTML,
+      updatePreferenceAttributesHTML: preferenceHtml.updatePreferenceAttributesHTML,
       on: function(event, handler, options) {
         document2.addEventListener(api.eventName(event), handler, options);
       },
@@ -322,7 +321,8 @@
         ext: {},
         dep: {},
         lazyExtSelectors: {},
-        extMounters: {}
+        extMounters: {},
+        preferenceMediaQueries: buildPreferenceMediaQueries(root)
       },
       ext: function(nameOrUrl, options) {
         var name = fromCamelCase2(api.extName(nameOrUrl));
@@ -346,6 +346,13 @@
       extAttach: function(name, object) {
         name = fromCamelCase2(name);
         var key = toCamelCase2(name);
+        if (!(key in api.registry.ext)) {
+          api.registry.ext[key] = {
+            loadWhen: null,
+            state: null,
+            loadStyle: false
+          };
+        }
         api.registry.ext[key].state = "register";
         object.initialized = false;
         api.ext[key] = object;
@@ -446,7 +453,7 @@
     var CONSTANTS = createAelluxConstants();
     var scriptExtension = ".js";
     var existingApi = root.AelluxJs;
-    var api = existingApi && existingApi.shortJSName === CONSTANTS.AELLUXJS_SHORT_JS_NAME && existingApi.registry && existingApi.registry.ext && existingApi.registry.dep && existingApi.registry.lazyExtSelectors && existingApi.registry.extMounters && existingApi.diagnostics ? existingApi : createAelluxApi(root, CONSTANTS);
+    var api = existingApi && existingApi.shortJSName === CONSTANTS.AELLUXJS_SHORT_JS_NAME && existingApi.registry && existingApi.registry.ext && existingApi.registry.dep && existingApi.registry.lazyExtSelectors && existingApi.registry.extMounters && existingApi.registry.preferenceMediaQueries && existingApi.diagnostics ? existingApi : createAelluxApi(root, CONSTANTS);
     var diagnostics = api.diagnostics;
     var bootstrapScript = document.currentScript || document.querySelector("script[src*='aellux.js'],script[src*='aellux.min.js']");
     var aelluxBootstrapSrc = root.__aelluxBootstrapURL || bootstrapScript && bootstrapScript.src;
@@ -472,8 +479,8 @@
         throw diagnostics.create(diagnostics.ERROR_INVALID_MODE);
       }
       api.aelluxBasePath = api.options.basePath || aelluxBasePath;
-      api.notAvailable = [];
-      api.updatePreferencesAttributesHTML();
+      api.diagnostics.notAvailable = [];
+      api.updatePreferenceAttributesHTML();
       addWeakStyles();
       loadOrchestrator();
     };
@@ -483,21 +490,21 @@
       CONSTANTS.AELLUXJS_MODERN_API_DEPENDENCIES.forEach(function(option) {
         if (typeof option === "string") {
           if (typeof window[option] !== "function") {
-            AelluxJs.notAvailable.push(option);
+            AelluxJs.diagnostics.notAvailable.push(option);
           }
         } else {
           option.function.forEach(function(method) {
             if (!window[option.name] || typeof window[option.name][method] !== "function") {
-              AelluxJs.notAvailable.push(option.name + "." + method);
+              AelluxJs.diagnostics.notAvailable.push(option.name + "." + method);
             }
           });
         }
       });
       if (!window.Element || typeof window.Element.prototype.matches !== "function")
-        AelluxJs.notAvailable.push("Element.matches");
+        AelluxJs.diagnostics.notAvailable.push("Element.matches");
       if (!window.NodeList || typeof window.NodeList.prototype.forEach !== "function")
-        AelluxJs.notAvailable.push("NodeList.forEach");
-      if (AelluxJs.notAvailable.length !== 0 || isLegacyForced())
+        AelluxJs.diagnostics.notAvailable.push("NodeList.forEach");
+      if (AelluxJs.diagnostics.notAvailable.length !== 0 || isLegacyForced())
         return loadLegacyOrchestratorFallback();
       var script = document.createElement("script");
       if (AelluxJs.options.mode === "basic") {
@@ -510,8 +517,8 @@
         loadCallback: function() {
           AelluxJs.dispatch("Awake");
           AelluxJs.startAelluxJs().then(function() {
-            AelluxJs.legacy = false;
-            AelluxJs.supported = true;
+            AelluxJs.diagnostics.legacy = false;
+            AelluxJs.diagnostics.supported = true;
           }).catch(function(error) {
             script.parentNode.removeChild(script);
             console.log(error);
@@ -530,10 +537,10 @@
       var attr = AelluxJs.attr("legacy");
       if (typeof document === "undefined" || document.querySelector("[" + attr + "]"))
         return;
-      if (AelluxJs.notAvailable.length !== 0)
-        console.log("[aellux.js] " + AelluxJs.notAvailable.join(", ") + " not available in browser.");
-      AelluxJs.legacy = true;
-      AelluxJs.supported = false;
+      if (AelluxJs.diagnostics.notAvailable.length !== 0)
+        console.log("[aellux.js] " + AelluxJs.diagnostics.notAvailable.join(", ") + " not available in browser.");
+      AelluxJs.diagnostics.legacy = true;
+      AelluxJs.diagnostics.supported = false;
       var script = document.createElement("script");
       var runtime = AelluxJs.options.mode === "basic" ? "aellux.orchestrator.legacy" : "aellux.full.legacy";
       script.src = AelluxJs.aelluxBasePath + runtime + scriptExtension;

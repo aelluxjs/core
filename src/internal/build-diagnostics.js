@@ -5,6 +5,9 @@
 
 export function buildDiagnostics(catalog) {
   var diagnostics = {
+    legacy: false,
+    supported: false,
+    notAvailable: [],
     create: function (definition, context) {
       var error = new Error(definition.message);
       error.name = "AelluxJsDiagnosticError";

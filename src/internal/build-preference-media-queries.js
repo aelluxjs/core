@@ -3,7 +3,7 @@
 // Required compatibility: ES5. This helper is bundled into the aellux.js boot script and must not
 // introduce runtime syntax or APIs that prevent the Legacy fallback path from being reached.
 
-export function buildPreferencesMediaQueries(root) {
+export function buildPreferenceMediaQueries(root) {
   function mediaQuery(query) {
     return typeof root.matchMedia === "function" ? root.matchMedia(query) : null;
   }

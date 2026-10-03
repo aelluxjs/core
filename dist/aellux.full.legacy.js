@@ -21922,7 +21922,7 @@
           if (data && !hasCompatibleBuild(data)) {
             AelluxJs.diagnostics.report(AelluxJs.diagnostics.ERROR_EXTENSION_INCOMPATIBLE, {
               extension: extensionName,
-              runtime: AelluxJs.legacy ? "legacy" : "modern",
+              runtime: AelluxJs.diagnostics.legacy ? "legacy" : "modern",
               builds: data.builds
             });
             delete AelluxJs.registry.lazyExtSelectors[key];
@@ -21988,7 +21988,7 @@
                   key = toCamelCase2(extensionName);
                   data = AelluxJs.registry.ext[key];
                   url = data.url.replace(/^\.\//, AelluxJs.aelluxBasePath);
-                  useLegacyBuild = AelluxJs.legacy || data.builds.indexOf("modern") === -1;
+                  useLegacyBuild = AelluxJs.diagnostics.legacy || data.builds.indexOf("modern") === -1;
                   scriptURL = useLegacyBuild ? toLegacyScriptURL(url) : url;
                   loadPromises = [];
                   loadPromises.push(new Promise(function(resolve, reject) {
@@ -22027,7 +22027,7 @@
         }
         function hasCompatibleBuild(data) {
           if (!data || !Array.isArray(data.builds) || data.builds.length === 0) return false;
-          if (AelluxJs.legacy) return data.builds.indexOf("legacy") !== -1;
+          if (AelluxJs.diagnostics.legacy) return data.builds.indexOf("legacy") !== -1;
           return data.builds.indexOf("modern") !== -1 || data.builds.indexOf("legacy") !== -1;
         }
         function defaultRequest(url, options) {
@@ -22148,7 +22148,7 @@
             unmount: unmountPreferenceContainer
           });
           window.addEventListener("storage", storageEvent);
-          var allQueries = AelluxJs.preferencesMediaQueries;
+          var allQueries = AelluxJs.registry.preferenceMediaQueries;
           Object.values(allQueries).forEach(function(queries) {
             return Object.values(queries).forEach(function(query) {
               if (!query) return;
@@ -22169,7 +22169,7 @@
         function destroy() {
           window.removeEventListener("storage", storageEvent);
           document.removeEventListener("DOMContentLoaded", update);
-          var allQueries = AelluxJs.preferencesMediaQueries;
+          var allQueries = AelluxJs.registry.preferenceMediaQueries;
           Object.values(allQueries).forEach(function(queries) {
             return Object.values(queries).forEach(function(query) {
               if (!query) return;
@@ -22204,7 +22204,7 @@
         }
         function update() {
           Object.assign(computedPreferences, defaultPreferences, userPreferences);
-          AelluxJs.updatePreferencesAttributesHTML(computedPreferences);
+          AelluxJs.updatePreferenceAttributesHTML(computedPreferences);
           document.querySelectorAll("[".concat(attr.preference, "]")).forEach(function(container) {
             return updateContainer(container);
           });

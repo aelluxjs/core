@@ -15,7 +15,7 @@
 
     AelluxJsValidation.run(async function (assert) {
       var incompatible = await $ae.wait("feedback");
-      assert(AelluxJs.legacy === true, "Scenario did not select the Legacy runtime");
+      assert(AelluxJs.diagnostics.legacy === true, "Scenario did not select the Legacy runtime");
       assert(incompatible === null, "Modern-only Extension loaded under the Legacy runtime");
       assert(diagnosticCodes.indexOf(1106) !== -1, "Compatibility diagnostic was not emitted");
       assert(!document.querySelector("script[data-ae-ext='feedback']"), "Incompatible Extension asset was requested");

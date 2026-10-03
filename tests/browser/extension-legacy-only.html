@@ -9,7 +9,7 @@
   <script>
     AelluxJsValidation.run(function (assert) {
       var script = document.querySelector("script[data-ae-ext='feedback']");
-      assert(AelluxJs.legacy === false, "Scenario did not select the Modern runtime");
+      assert(AelluxJs.diagnostics.legacy === false, "Scenario did not select the Modern runtime");
       assert(AelluxJs.ext.feedback, "Legacy-only Extension did not initialize under the Modern runtime");
       assert(script, "Legacy-only Extension asset was not appended");
       assert(/aellux\.ext\.feedback\.legacy\.js(?:$|[?#])/.test(script.src), "Legacy-only Extension selected the wrong asset");

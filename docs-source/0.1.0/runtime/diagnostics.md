@@ -2,6 +2,8 @@
 
 The aellux.js boot script exposes structured diagnostics through `AelluxJs.diagnostics` and `$ae.diagnostics`. This capability is available before the orchestrator starts, allowing boot, runtime, and Extension failures to use the same catalog.
 
+Runtime status is also available there: `diagnostics.legacy` identifies the selected Legacy runtime, `diagnostics.supported` indicates that the Modern runtime started successfully, and `diagnostics.notAvailable` lists missing Modern browser capabilities.
+
 Each catalog entry contains a numeric aellux.js error code and its default message:
 
 ```js

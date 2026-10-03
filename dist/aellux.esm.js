@@ -2,6 +2,9 @@
 /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
 function buildDiagnostics(catalog) {
   var diagnostics = {
+    legacy: false,
+    supported: false,
+    notAvailable: [],
     create: function(definition, context) {
       var error = new Error(definition.message);
       error.name = "AelluxJsDiagnosticError";
@@ -114,9 +117,9 @@ function buildPersistMemory(root2, name, identifier) {
   };
 }
 
-// src/internal/build-preferences-media-queries.js
+// src/internal/build-preference-media-queries.js
 /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
-function buildPreferencesMediaQueries(root2) {
+function buildPreferenceMediaQueries(root2) {
   function mediaQuery(query) {
     return typeof root2.matchMedia === "function" ? root2.matchMedia(query) : null;
   }
@@ -168,15 +171,15 @@ var utils_name_case_default = {
 
 // src/internal/utils-preference-html.js
 /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
-function createPreferencesHtmlHelper(root2, getApi) {
+function createPreferenceHtmlHelper(root2, getApi) {
   var document = root2.document;
   var fromCamelCase2 = utils_name_case_default.fromCamelCase;
   return {
-    updatePreferencesAttributesHTML
+    updatePreferenceAttributesHTML
   };
-  function updatePreferencesAttributesHTML(preferences) {
+  function updatePreferenceAttributesHTML(preferences) {
     var api = getApi();
-    var allQueries = api.preferencesMediaQueries;
+    var allQueries = api.registry.preferenceMediaQueries;
     preferences = preferences ? preferences : api.persist.preferences.getObject();
     for (var param in allQueries) {
       if (!Object.prototype.hasOwnProperty.call(allQueries, param)) continue;
@@ -239,7 +242,7 @@ function createAelluxApi(root2, constants) {
   var oldShortInstance = root2[constants.AELLUXJS_SHORT_JS_NAME];
   var document = root2.document;
   var api;
-  var preferencesHtml = createPreferencesHtmlHelper(root2, function() {
+  var preferenceHtml = createPreferenceHtmlHelper(root2, function() {
     return api;
   });
   api = {
@@ -247,9 +250,6 @@ function createAelluxApi(root2, constants) {
     diagnostics,
     options: constants.AELLUXJS_DEFAULT_INITIALIZATION_OPTIONS,
     minified: false,
-    legacy: false,
-    supported: false,
-    notAvailable: [],
     waitLayout: null,
     init: function() {
       throw diagnostics.create(diagnostics.ERROR_NOT_INITIALIZED);
@@ -259,8 +259,7 @@ function createAelluxApi(root2, constants) {
       session: buildPersistMemory(root2, "sessionStorage"),
       preferences: buildPersistMemory(root2, "localStorage", "AelluxJsPreferences")
     },
-    preferencesMediaQueries: buildPreferencesMediaQueries(root2),
-    updatePreferencesAttributesHTML: preferencesHtml.updatePreferencesAttributesHTML,
+    updatePreferenceAttributesHTML: preferenceHtml.updatePreferenceAttributesHTML,
     on: function(event, handler, options) {
       document.addEventListener(api.eventName(event), handler, options);
     },
@@ -296,7 +295,8 @@ function createAelluxApi(root2, constants) {
       ext: {},
       dep: {},
       lazyExtSelectors: {},
-      extMounters: {}
+      extMounters: {},
+      preferenceMediaQueries: buildPreferenceMediaQueries(root2)
     },
     ext: function(nameOrUrl, options) {
       var name = fromCamelCase2(api.extName(nameOrUrl));
@@ -320,6 +320,13 @@ function createAelluxApi(root2, constants) {
     extAttach: function(name, object) {
       name = fromCamelCase2(name);
       var key = toCamelCase2(name);
+      if (!(key in api.registry.ext)) {
+        api.registry.ext[key] = {
+          loadWhen: null,
+          state: null,
+          loadStyle: false
+        };
+      }
       api.registry.ext[key].state = "register";
       object.initialized = false;
       api.ext[key] = object;

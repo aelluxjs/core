@@ -9,7 +9,7 @@
     AelluxJsValidation.run(function (assert) {
       var runtime = document.querySelector("script[data-ae-legacy]");
       assert(runtime, "Legacy orchestrator script was not selected");
-      assert(AelluxJs.legacy === true, "Runtime was not marked as Legacy");
+      assert(AelluxJs.diagnostics.legacy === true, "Runtime was not marked as Legacy");
       assert(/aellux\.orchestrator\.legacy\.js(?:$|[?#])/.test(runtime.src), "Unexpected Legacy runtime URL");
     });
     $ae.init({ mode: "basic", forceLegacy: true });

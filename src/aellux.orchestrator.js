@@ -13,12 +13,12 @@
 import { assetLoadHelper } from "./internal/asset-load-helper.js";
 import { createLayoutScheduler } from "./internal/create-layout-scheduler.js";
 import { createMountHelper } from "./internal/create-mount-helper.js";
-import nameCase from "./internal/utils-name-case.js";
+import utilsNameCase from "./internal/utils-name-case.js";
 
 (function (root) {
   "use strict";
 
-  const { toCamelCase, fromCamelCase } = nameCase;
+  const { toCamelCase, fromCamelCase } = utilsNameCase;
 
   const extensionPromises = {};
   const mountHelper = createMountHelper(root, extensionPromises);
@@ -137,7 +137,7 @@ import nameCase from "./internal/utils-name-case.js";
         AelluxJs.diagnostics.ERROR_EXTENSION_INCOMPATIBLE,
         {
           extension: extensionName,
-          runtime: AelluxJs.legacy ? "legacy" : "modern",
+          runtime: AelluxJs.diagnostics.legacy ? "legacy" : "modern",
           builds: data.builds
         }
       );
@@ -209,7 +209,7 @@ import nameCase from "./internal/utils-name-case.js";
     const key = toCamelCase(extensionName);
     const data = AelluxJs.registry.ext[key];
     const url = data.url.replace(/^\.\//, AelluxJs.aelluxBasePath);
-    const useLegacyBuild = AelluxJs.legacy || data.builds.indexOf("modern") === -1;
+    const useLegacyBuild = AelluxJs.diagnostics.legacy || data.builds.indexOf("modern") === -1;
     const scriptURL = useLegacyBuild ? toLegacyScriptURL(url) : url;
     const loadPromises = [];
 
@@ -259,7 +259,7 @@ import nameCase from "./internal/utils-name-case.js";
 
   function hasCompatibleBuild(data) {
     if (!data || !Array.isArray(data.builds) || data.builds.length === 0) return false;
-    if (AelluxJs.legacy) return data.builds.indexOf("legacy") !== -1;
+    if (AelluxJs.diagnostics.legacy) return data.builds.indexOf("legacy") !== -1;
     return data.builds.indexOf("modern") !== -1 || data.builds.indexOf("legacy") !== -1;
   }
 

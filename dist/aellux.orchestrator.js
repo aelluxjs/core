@@ -383,7 +383,7 @@
           AelluxJs.diagnostics.ERROR_EXTENSION_INCOMPATIBLE,
           {
             extension: extensionName,
-            runtime: AelluxJs.legacy ? "legacy" : "modern",
+            runtime: AelluxJs.diagnostics.legacy ? "legacy" : "modern",
             builds: data.builds
           }
         );
@@ -438,7 +438,7 @@
       const key = toCamelCase2(extensionName);
       const data = AelluxJs.registry.ext[key];
       const url = data.url.replace(/^\.\//, AelluxJs.aelluxBasePath);
-      const useLegacyBuild = AelluxJs.legacy || data.builds.indexOf("modern") === -1;
+      const useLegacyBuild = AelluxJs.diagnostics.legacy || data.builds.indexOf("modern") === -1;
       const scriptURL = useLegacyBuild ? toLegacyScriptURL(url) : url;
       const loadPromises = [];
       loadPromises.push(new Promise(
@@ -480,7 +480,7 @@
     }
     function hasCompatibleBuild(data) {
       if (!data || !Array.isArray(data.builds) || data.builds.length === 0) return false;
-      if (AelluxJs.legacy) return data.builds.indexOf("legacy") !== -1;
+      if (AelluxJs.diagnostics.legacy) return data.builds.indexOf("legacy") !== -1;
       return data.builds.indexOf("modern") !== -1 || data.builds.indexOf("legacy") !== -1;
     }
     function defaultRequest(url, options) {

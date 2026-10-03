@@ -3,7 +3,7 @@
 import { assetLoadHelper } from "./internal/asset-load-helper.js";
 import { createAelluxApi } from "./internal/aellux-api-integration.js";
 import { createAelluxConstants } from "./internal/create-aellux-constants.js";
-import nameCase from "./internal/utils-name-case.js";
+import utilsNameCase from "./internal/utils-name-case.js";
 
 // aellux.js boot script: intentionally minimal. Apart from build-time imports, its runtime body and
 // internal helpers must remain ES5-compatible; keep feature logic out and use conservative JavaScript.
@@ -17,7 +17,7 @@ import nameCase from "./internal/utils-name-case.js";
 // Promise-based stylesheet tracking is optional and must be skipped when unavailable.
 
 (function (root) {
-  var toCamelCase = nameCase.toCamelCase;
+  var toCamelCase = utilsNameCase.toCamelCase;
 
   var CONSTANTS = createAelluxConstants();
 
@@ -28,7 +28,8 @@ import nameCase from "./internal/utils-name-case.js";
     existingApi.registry && existingApi.registry.ext &&
     existingApi.registry.dep &&
     existingApi.registry.lazyExtSelectors &&
-    existingApi.registry.extMounters && existingApi.diagnostics
+    existingApi.registry.extMounters &&
+    existingApi.registry.preferenceMediaQueries && existingApi.diagnostics
     ? existingApi : createAelluxApi(root, CONSTANTS);
   var diagnostics = api.diagnostics;
 
@@ -63,9 +64,9 @@ import nameCase from "./internal/utils-name-case.js";
     }
 
     api.aelluxBasePath = api.options.basePath || aelluxBasePath;
-    api.notAvailable = [];
+    api.diagnostics.notAvailable = [];
 
-    api.updatePreferencesAttributesHTML(); // Set HTML to persisted preferences.
+    api.updatePreferenceAttributesHTML(); // Set HTML to persisted preferences.
     addWeakStyles();
     loadOrchestrator();
   };
@@ -78,23 +79,23 @@ import nameCase from "./internal/utils-name-case.js";
       .forEach(function (option) {
         if (typeof option === "string") {
           if (typeof window[option] !== "function") {
-            AelluxJs.notAvailable.push(option);
+            AelluxJs.diagnostics.notAvailable.push(option);
           }
         } else {
           option.function.forEach(function (method) {
             if (!window[option.name] || typeof window[option.name][method] !== "function") {
-              AelluxJs.notAvailable.push(option.name + "." + method);
+              AelluxJs.diagnostics.notAvailable.push(option.name + "." + method);
             }
           });
         }
       });
 
     if (!window.Element || typeof window.Element.prototype.matches !== "function")
-      AelluxJs.notAvailable.push("Element.matches");
+      AelluxJs.diagnostics.notAvailable.push("Element.matches");
     if (!window.NodeList || typeof window.NodeList.prototype.forEach !== "function")
-      AelluxJs.notAvailable.push("NodeList.forEach");
+      AelluxJs.diagnostics.notAvailable.push("NodeList.forEach");
 
-    if (AelluxJs.notAvailable.length !== 0 || isLegacyForced())
+    if (AelluxJs.diagnostics.notAvailable.length !== 0 || isLegacyForced())
       return loadLegacyOrchestratorFallback();
 
     var script = document.createElement("script");
@@ -110,8 +111,8 @@ import nameCase from "./internal/utils-name-case.js";
         AelluxJs.dispatch("Awake");
         AelluxJs.startAelluxJs()
           .then(function () {
-            AelluxJs.legacy = false;
-            AelluxJs.supported = true;
+            AelluxJs.diagnostics.legacy = false;
+            AelluxJs.diagnostics.supported = true;
           }).catch(function (error) {
             script.parentNode.removeChild(script);
             console.log(error);
@@ -133,11 +134,11 @@ import nameCase from "./internal/utils-name-case.js";
       document.querySelector("[" + attr + "]"))
       return;
 
-    if (AelluxJs.notAvailable.length !== 0)
-      console.log("[aellux.js] " + AelluxJs.notAvailable.join(", ") + " not available in browser.");
+    if (AelluxJs.diagnostics.notAvailable.length !== 0)
+      console.log("[aellux.js] " + AelluxJs.diagnostics.notAvailable.join(", ") + " not available in browser.");
 
-    AelluxJs.legacy = true;
-    AelluxJs.supported = false;
+    AelluxJs.diagnostics.legacy = true;
+    AelluxJs.diagnostics.supported = false;
 
     var script = document.createElement("script");
     var runtime = AelluxJs.options.mode === "basic"

@@ -12,8 +12,8 @@
         setTimeout(function () {
           try {
             assert(runtime, "Modern orchestrator script was not selected");
-            assert(AelluxJs.legacy === false, "Runtime was unexpectedly marked as Legacy");
-            assert(AelluxJs.supported === true, "Modern runtime dependencies were not accepted");
+            assert(AelluxJs.diagnostics.legacy === false, "Runtime was unexpectedly marked as Legacy");
+            assert(AelluxJs.diagnostics.supported === true, "Modern runtime dependencies were not accepted");
             resolve();
           } catch (error) {
             reject(error);

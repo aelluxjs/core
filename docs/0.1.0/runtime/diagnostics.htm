@@ -502,6 +502,7 @@
         <div id="doc-content" style="min-height: calc(100vh - 200px);" class="js-toc-content" ajax-load="doc-content">
           <h1>Diagnostics</h1>
 <p>The aellux.js boot script exposes structured diagnostics through <code>AelluxJs.diagnostics</code> and <code>$ae.diagnostics</code>. This capability is available before the orchestrator starts, allowing boot, runtime, and Extension failures to use the same catalog.</p>
+<p>Runtime status is also available there: <code>diagnostics.legacy</code> identifies the selected Legacy runtime, <code>diagnostics.supported</code> indicates that the Modern runtime started successfully, and <code>diagnostics.notAvailable</code> lists missing Modern browser capabilities.</p>
 <p>Each catalog entry contains a numeric aellux.js error code and its default message:</p>
 <pre><code class="language-js">$ae.diagnostics.ERROR_NOT_INITIALIZED;
 // { code: 1001, message: &quot;aellux.js has not been initialized.&quot; }

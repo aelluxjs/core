@@ -52,6 +52,8 @@ $ae.ext.preference === preference;
 
 `extName(filename)` extracts the Extension name from an `aellux.ext.<name>.js` filename.
 
+Preference media queries are available in `$ae.registry.preferenceMediaQueries`.
+
 ## Events
 
 ```js
