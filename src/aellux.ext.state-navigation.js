@@ -6,7 +6,7 @@
   const extensionName = "state-navigation";
   const globalSnapshot = {};
 
-  AelluxJs.extRegister(extensionName, {
+  AelluxJs.extAttach(extensionName, {
     init, destroy,
     tabOpen, ajaxHref, flowStep, formUpdate, updateBaseTitle,
     normalize,

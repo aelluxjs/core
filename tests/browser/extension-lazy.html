@@ -12,7 +12,7 @@
       assert(AelluxJs.ext.preference, "Lazy extension was not initialized when its selector matched");
       assert(target.classList.contains("ae--mounted"), "Lazy extension did not mount its target");
       assert(script, "Lazy extension script was not loaded");
-      assert(!AelluxJs.lazyExtensionSelectors.preference, "Loaded extension remained in the lazy index");
+      assert(!AelluxJs.registry.lazyExtSelectors.preference, "Loaded extension remained in the lazy index");
     });
     $ae.ext("preference", { loadWhen: "[data-ae-preference]" });
     $ae.init({ mode: "basic" });

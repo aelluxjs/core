@@ -102,9 +102,9 @@ import nameCase from "./internal/utils-name-case.js";
           } finally {
             delete AelluxJs.ext[key];
             delete extensionPromises[key];
-            delete AelluxJs.extRegistry[key];
-            delete AelluxJs.extensionMounters[key];
-            delete AelluxJs.lazyExtensionSelectors[key];
+            delete AelluxJs.registry.ext[key];
+            delete AelluxJs.registry.extMounters[key];
+            delete AelluxJs.registry.lazyExtSelectors[key];
             if (extension) extension.initialized = false;
           }
         }
@@ -131,7 +131,7 @@ import nameCase from "./internal/utils-name-case.js";
     if (extensionPromises[key])
       return extensionPromises[key];
 
-    const data = AelluxJs.extRegistry[key];
+    const data = AelluxJs.registry.ext[key];
     if (data && !hasCompatibleBuild(data)) {
       AelluxJs.diagnostics.report(
         AelluxJs.diagnostics.ERROR_EXTENSION_INCOMPATIBLE,
@@ -141,7 +141,7 @@ import nameCase from "./internal/utils-name-case.js";
           builds: data.builds
         }
       );
-      delete AelluxJs.lazyExtensionSelectors[key];
+      delete AelluxJs.registry.lazyExtSelectors[key];
       extensionPromises[key] = Promise.resolve(null);
       return extensionPromises[key];
     }
@@ -163,7 +163,7 @@ import nameCase from "./internal/utils-name-case.js";
       return extensionPromises[key];
     }
 
-    if (!(key in AelluxJs.extRegistry)) { return Promise.reject(); }
+    if (!(key in AelluxJs.registry.ext)) { return Promise.reject(); }
 
     const bundledLoader =
       AelluxJs.bundledExtensions ?
@@ -195,11 +195,11 @@ import nameCase from "./internal/utils-name-case.js";
 
     if (AelluxJs.ext[key].mountMap) {
       const selectors = Array.from(AelluxJs.ext[key].mountMap.keys()).join(",");
-      if (selectors) AelluxJs.extensionMounters[key] = selectors;
+      if (selectors) AelluxJs.registry.extMounters[key] = selectors;
     }
 
     //Clean lazy registry
-    delete AelluxJs.lazyExtensionSelectors[key];
+    delete AelluxJs.registry.lazyExtSelectors[key];
 
     return AelluxJs.ext[key];
   }
@@ -207,7 +207,7 @@ import nameCase from "./internal/utils-name-case.js";
   async function appendExtensionAssets(extensionName) {
     extensionName = fromCamelCase(extensionName);
     const key = toCamelCase(extensionName);
-    const data = AelluxJs.extRegistry[key];
+    const data = AelluxJs.registry.ext[key];
     const url = data.url.replace(/^\.\//, AelluxJs.aelluxBasePath);
     const useLegacyBuild = AelluxJs.legacy || data.builds.indexOf("modern") === -1;
     const scriptURL = useLegacyBuild ? toLegacyScriptURL(url) : url;

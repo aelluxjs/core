@@ -501,12 +501,12 @@
 
         <div id="doc-content" style="min-height: calc(100vh - 200px);" class="js-toc-content" ajax-load="doc-content">
           <h1>Authoring Third-Party aellux.js Extensions</h1>
-<p>An aellux.js Extension is a classic browser script that registers one focused behavior through <code>AelluxJs.extRegister()</code>. Third-party Extensions follow the same naming, lifecycle, compatibility, and cleanup rules as Core Extensions.</p>
+<p>An aellux.js Extension is a classic browser script that attaches one focused behavior through <code>AelluxJs.extAttach()</code>. Third-party Extensions follow the same naming, lifecycle, compatibility, and cleanup rules as Core Extensions.</p>
 <p>Start from <a href="https://github.com/aelluxjs/core/blob/main/templates/aellux.ext.template.js"><code>templates/aellux.ext.template.js</code></a>. The scaffold contains the required structure and a compatibility summary.</p>
 <h2>Required Contract</h2>
 <ol>
 <li>Name the source and Modern artifact <code>aellux.ext.&lt;name&gt;.js</code>.</li>
-<li>Use the same kebab-case <code>&lt;name&gt;</code> as <code>extensionName</code> in <code>AelluxJs.extRegister(extensionName, api)</code>.</li>
+<li>Use the same kebab-case <code>&lt;name&gt;</code> as <code>extensionName</code> in <code>AelluxJs.extAttach(extensionName, api)</code>.</li>
 <li>Publish a classic script contained by an IIFE. Distribution files must not require ESM imports or exports.</li>
 <li>Keep <code>init(options)</code> synchronous and idempotent.</li>
 <li>Make every <code>mount</code> idempotent and release its listeners, observers, timers, and references in the corresponding <code>unmount</code>.</li>
@@ -524,7 +524,7 @@ mountMap.set(&quot;[data-ae-example]&quot;, {
   unmount: unmountElement
 });
 
-AelluxJs.extRegister(extensionName, { init, destroy, mountMap });
+AelluxJs.extAttach(extensionName, { init, destroy, mountMap });
 </code></pre>
 <p>The orchestrator consumes this map during <code>$ae.update(root)</code> and <code>$ae.unmount(root)</code>. <code>mount</code> must be safe against repeated updates, and <code>unmount</code> must reverse the element-level resources created by <code>mount</code>.</p>
 <h2>Declaring Available Builds</h2>

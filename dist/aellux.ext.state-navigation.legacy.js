@@ -106,7 +106,7 @@
     "use strict";
     var extensionName = "state-navigation";
     var globalSnapshot = {};
-    AelluxJs.extRegister(extensionName, {
+    AelluxJs.extAttach(extensionName, {
       init: init,
       destroy: destroy,
       tabOpen: tabOpen,

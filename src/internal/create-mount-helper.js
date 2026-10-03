@@ -35,7 +35,7 @@ export function createMountHelper(root, extensionPromises) {
 
       const waitExtensions = [];
       for (const [key, options] of
-        Object.entries(root.AelluxJs.extRegistry)) {
+        Object.entries(root.AelluxJs.registry.ext)) {
         if (options.loadWhen) continue;
         waitExtensions.push(AelluxJs.wait(key));
       }
@@ -55,18 +55,18 @@ export function createMountHelper(root, extensionPromises) {
 
     var filter;
     if (!extensionNames) {
-      const mounterSelectors = Object.values(AelluxJs.extensionMounters);
-      const lazySelectors = Object.values(AelluxJs.lazyExtensionSelectors);
+      const mounterSelectors = Object.values(AelluxJs.registry.extMounters);
+      const lazySelectors = Object.values(AelluxJs.registry.lazyExtSelectors);
       filter = [...mounterSelectors, ...lazySelectors];
     } else {
       filter = [];
       extensionNames = extensionNames.map(_ => fromCamelCase(_));
 
-      for (const [key, selectorString] of Object.entries(AelluxJs.extensionMounters))
+      for (const [key, selectorString] of Object.entries(AelluxJs.registry.extMounters))
         if (extensionNames.indexOf(fromCamelCase(key)) !== -1)
           filter.push(selectorString);
 
-      for (const [key, selectorString] of Object.entries(AelluxJs.lazyExtensionSelectors))
+      for (const [key, selectorString] of Object.entries(AelluxJs.registry.lazyExtSelectors))
         if (extensionNames.indexOf(fromCamelCase(key)) !== -1)
           filter.push(selectorString);
     }
@@ -84,13 +84,13 @@ export function createMountHelper(root, extensionPromises) {
         localExtensionNames = new Set();
         //Load needed lazies
         for (const [key, selector]
-          of Object.entries(AelluxJs.lazyExtensionSelectors))
+          of Object.entries(AelluxJs.registry.lazyExtSelectors))
           if (element.matches(selector) && filter.indexOf(selector) !== -1)
             localExtensionNames.add(fromCamelCase(key));
 
         //Mount readies
         for (const [key, selector]
-          of Object.entries(AelluxJs.extensionMounters))
+          of Object.entries(AelluxJs.registry.extMounters))
           if (element.matches(selector) && filter.indexOf(selector) !== -1)
             localExtensionNames.add(fromCamelCase(key));
       }

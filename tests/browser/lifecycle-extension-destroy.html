@@ -10,7 +10,7 @@
     var mountMap = new Map();
 
     $ae.ext("lifecycle-extension-probe");
-    $ae.extRegister("lifecycle-extension-probe", {
+    $ae.extAttach("lifecycle-extension-probe", {
       init: function () {
         mountMap.set("[data-lifecycle-extension]", {
           mount: function () { lifecycleCounts.mount++; },
@@ -29,8 +29,8 @@
       assert(lifecycleCounts.unmount === 1, "Extension elements were not unmounted before destroy");
       assert(lifecycleCounts.destroy === 1, "Extension destroy did not run exactly once");
       assert(typeof AelluxJs.ext.lifecycleExtensionProbe === "undefined", "Destroyed Extension API remains public");
-      assert(!("lifecycleExtensionProbe" in AelluxJs.extRegistry), "Destroyed Extension remains registered");
-      assert(!("lifecycleExtensionProbe" in AelluxJs.extensionMounters), "Destroyed Extension mounter remains indexed");
+      assert(!("lifecycleExtensionProbe" in AelluxJs.registry.ext), "Destroyed Extension remains registered");
+      assert(!("lifecycleExtensionProbe" in AelluxJs.registry.extMounters), "Destroyed Extension mounter remains indexed");
 
       await $ae.destroyExtensions("lifecycle-extension-probe");
       assert(lifecycleCounts.destroy === 1, "Repeated destruction called destroy again");

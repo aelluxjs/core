@@ -21264,7 +21264,7 @@
                 _iterator3.f();
               }
               waitExtensions = [];
-              _i = 0, _Object$entries = Object.entries(root.AelluxJs.extRegistry);
+              _i = 0, _Object$entries = Object.entries(root.AelluxJs.registry.ext);
             case 3:
               if (!(_i < _Object$entries.length)) {
                 _context2.n = 6;
@@ -21326,19 +21326,19 @@
               AelluxJs2 = root.AelluxJs;
               if (typeof extensionNames === "string") extensionNames = [extensionNames];
               if (!extensionNames) {
-                mounterSelectors = Object.values(AelluxJs2.extensionMounters);
-                lazySelectors = Object.values(AelluxJs2.lazyExtensionSelectors);
+                mounterSelectors = Object.values(AelluxJs2.registry.extMounters);
+                lazySelectors = Object.values(AelluxJs2.registry.lazyExtSelectors);
                 filter = [].concat(mounterSelectors, lazySelectors);
               } else {
                 filter = [];
                 extensionNames = extensionNames.map(function(_) {
                   return fromCamelCase2(_);
                 });
-                for (_i2 = 0, _Object$entries2 = Object.entries(AelluxJs2.extensionMounters); _i2 < _Object$entries2.length; _i2++) {
+                for (_i2 = 0, _Object$entries2 = Object.entries(AelluxJs2.registry.extMounters); _i2 < _Object$entries2.length; _i2++) {
                   _Object$entries2$_i = _slicedToArray(_Object$entries2[_i2], 2), key = _Object$entries2$_i[0], selectorString = _Object$entries2$_i[1];
                   if (extensionNames.indexOf(fromCamelCase2(key)) !== -1) filter.push(selectorString);
                 }
-                for (_i3 = 0, _Object$entries3 = Object.entries(AelluxJs2.lazyExtensionSelectors); _i3 < _Object$entries3.length; _i3++) {
+                for (_i3 = 0, _Object$entries3 = Object.entries(AelluxJs2.registry.lazyExtSelectors); _i3 < _Object$entries3.length; _i3++) {
                   _Object$entries3$_i = _slicedToArray(_Object$entries3[_i3], 2), _key = _Object$entries3$_i[0], _selectorString = _Object$entries3$_i[1];
                   if (extensionNames.indexOf(fromCamelCase2(_key)) !== -1) filter.push(_selectorString);
                 }
@@ -21364,11 +21364,11 @@
                 localExtensionNames = new Set(extensionNames);
               } else {
                 localExtensionNames = /* @__PURE__ */ new Set();
-                for (_i4 = 0, _Object$entries4 = Object.entries(AelluxJs2.lazyExtensionSelectors); _i4 < _Object$entries4.length; _i4++) {
+                for (_i4 = 0, _Object$entries4 = Object.entries(AelluxJs2.registry.lazyExtSelectors); _i4 < _Object$entries4.length; _i4++) {
                   _Object$entries4$_i = _slicedToArray(_Object$entries4[_i4], 2), _key2 = _Object$entries4$_i[0], selector = _Object$entries4$_i[1];
                   if (element.matches(selector) && filter.indexOf(selector) !== -1) localExtensionNames.add(fromCamelCase2(_key2));
                 }
-                for (_i5 = 0, _Object$entries5 = Object.entries(AelluxJs2.extensionMounters); _i5 < _Object$entries5.length; _i5++) {
+                for (_i5 = 0, _Object$entries5 = Object.entries(AelluxJs2.registry.extMounters); _i5 < _Object$entries5.length; _i5++) {
                   _Object$entries5$_i = _slicedToArray(_Object$entries5[_i5], 2), _key3 = _Object$entries5$_i[0], _selector = _Object$entries5$_i[1];
                   if (element.matches(_selector) && filter.indexOf(_selector) !== -1) localExtensionNames.add(fromCamelCase2(_key3));
                 }
@@ -21880,9 +21880,9 @@
                     _context5.p = 12;
                     delete AelluxJs.ext[key];
                     delete extensionPromises[key];
-                    delete AelluxJs.extRegistry[key];
-                    delete AelluxJs.extensionMounters[key];
-                    delete AelluxJs.lazyExtensionSelectors[key];
+                    delete AelluxJs.registry.ext[key];
+                    delete AelluxJs.registry.extMounters[key];
+                    delete AelluxJs.registry.lazyExtSelectors[key];
                     if (extension) extension.initialized = false;
                     return _context5.f(12);
                   case 13:
@@ -21919,14 +21919,14 @@
           extensionName = fromCamelCase2(extensionName);
           var key = toCamelCase2(extensionName);
           if (extensionPromises[key]) return extensionPromises[key];
-          var data = AelluxJs.extRegistry[key];
+          var data = AelluxJs.registry.ext[key];
           if (data && !hasCompatibleBuild(data)) {
             AelluxJs.diagnostics.report(AelluxJs.diagnostics.ERROR_EXTENSION_INCOMPATIBLE, {
               extension: extensionName,
               runtime: AelluxJs.legacy ? "legacy" : "modern",
               builds: data.builds
             });
-            delete AelluxJs.lazyExtensionSelectors[key];
+            delete AelluxJs.registry.lazyExtSelectors[key];
             extensionPromises[key] = Promise.resolve(null);
             return extensionPromises[key];
           }
@@ -21946,7 +21946,7 @@
             extensionPromises[key] = Promise.resolve(AelluxJs.ext[key]);
             return extensionPromises[key];
           }
-          if (!(key in AelluxJs.extRegistry)) {
+          if (!(key in AelluxJs.registry.ext)) {
             return Promise.reject();
           }
           var bundledLoader = AelluxJs.bundledExtensions ? AelluxJs.bundledExtensions[key] : null;
@@ -21971,9 +21971,9 @@
           AelluxJs.ext[key].initialized = true;
           if (AelluxJs.ext[key].mountMap) {
             var selectors = Array.from(AelluxJs.ext[key].mountMap.keys()).join(",");
-            if (selectors) AelluxJs.extensionMounters[key] = selectors;
+            if (selectors) AelluxJs.registry.extMounters[key] = selectors;
           }
-          delete AelluxJs.lazyExtensionSelectors[key];
+          delete AelluxJs.registry.lazyExtSelectors[key];
           return AelluxJs.ext[key];
         }
         function appendExtensionAssets(_x) {
@@ -21987,7 +21987,7 @@
                 case 0:
                   extensionName = fromCamelCase2(extensionName);
                   key = toCamelCase2(extensionName);
-                  data = AelluxJs.extRegistry[key];
+                  data = AelluxJs.registry.ext[key];
                   url = data.url.replace(/^\.\//, AelluxJs.aelluxBasePath);
                   useLegacyBuild = AelluxJs.legacy || data.builds.indexOf("modern") === -1;
                   scriptURL = useLegacyBuild ? toLegacyScriptURL(url) : url;

@@ -10,7 +10,7 @@
 
     function registerProbe(name) {
       $ae.ext(name);
-      $ae.extRegister(name, {
+      $ae.extAttach(name, {
         init: function () {},
         destroy: function () { destroyedExtensions.push(name); }
       });
@@ -30,7 +30,7 @@
       assert(destroyedExtensions.length === 2, "Global destroy did not destroy every Extension");
       assert(typeof AelluxJs.ext.lifecycleCoreFirst === "undefined", "First Extension API remains public");
       assert(typeof AelluxJs.ext.lifecycleCoreSecond === "undefined", "Second Extension API remains public");
-      assert(Object.keys(AelluxJs.extRegistry).length === 0, "Extension registry was not cleared");
+      assert(Object.keys(AelluxJs.registry.ext).length === 0, "Extension registry was not cleared");
     });
 
     $ae.init({ mode: "basic" });

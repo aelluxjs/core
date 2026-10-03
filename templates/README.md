@@ -4,7 +4,7 @@ Copy `aellux.ext.template.js` to `src/aellux.ext.<extension-name>.js` for a core
 
 For a third-party package, copy both `aellux.ext.template.js` and `build-extension.mjs` into the Extension project. The complete contract is documented in [Authoring Third-Party aellux.js Extensions](../docs/extensions/authoring.md).
 
-Set `extensionName` to the extension's kebab-case name before calling `AelluxJs.extRegister(extensionName, api)`. The bootstrap converts that name to the camelCase API key under `AelluxJs.ext`: `tab-group` registers `AelluxJs.ext.tabGroup`. Use `AelluxJs.attr(extensionName)` for the extension's primary attribute, when applicable. Initialize any constants exposed by the API before registering it.
+Set `extensionName` to the extension's kebab-case name before calling `AelluxJs.extAttach(extensionName, api)`. The bootstrap converts that name to the camelCase API key under `AelluxJs.ext`: `tab-group` registers `AelluxJs.ext.tabGroup`. Use `AelluxJs.attr(extensionName)` for the extension's primary attribute, when applicable. Initialize any constants exposed by the API before attaching it.
 
 - `init(options)` is synchronous: it receives the Extension's object from `AelluxJs.options.extensions` (or `{}`), registers DOM handlers, and sets up extension-wide services without returning a Promise. Load asynchronous dependencies separately; DOM mounting and content loading may remain asynchronous.
 - `destroy` releases extension-wide listeners, observers, and other resources.
@@ -12,7 +12,7 @@ Set `extensionName` to the extension's kebab-case name before calling `AelluxJs.
 - `mountElement` sets up matching elements; repeated calls must not duplicate listeners or resources.
 - `unmountElement` releases resources associated with an element.
 
-For extensions without element behavior, remove `attr`, `mountMap`, the DOM handlers, and their DOM registration. Keep `extensionName`, `AelluxJs.extRegister`, `init`, `destroy`, the IIFE, and the Apache 2.0 license identifier. Use ES2017-compatible syntax and register public APIs through `AelluxJs.extRegister`, without ESM exports.
+For extensions without element behavior, remove `attr`, `mountMap`, the DOM handlers, and their DOM registration. Keep `extensionName`, `AelluxJs.extAttach`, `init`, `destroy`, the IIFE, and the Apache 2.0 license identifier. Use ES2017-compatible syntax and attach public APIs through `AelluxJs.extAttach`, without ESM exports.
 
 ## Compatibility Builds
 

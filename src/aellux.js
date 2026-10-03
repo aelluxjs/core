@@ -25,7 +25,10 @@ import nameCase from "./internal/utils-name-case.js";
   var existingApi = root.AelluxJs;
   var api = existingApi &&
     existingApi.shortJSName === CONSTANTS.AELLUXJS_SHORT_JS_NAME &&
-    existingApi.extRegistry && existingApi.diagnostics
+    existingApi.registry && existingApi.registry.ext &&
+    existingApi.registry.dep &&
+    existingApi.registry.lazyExtSelectors &&
+    existingApi.registry.extMounters && existingApi.diagnostics
     ? existingApi : createAelluxApi(root, CONSTANTS);
   var diagnostics = api.diagnostics;
 

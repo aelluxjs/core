@@ -10,7 +10,7 @@
     var readyCount = 0;
 
     $ae.ext("lifecycle-init-probe");
-    $ae.extRegister("lifecycle-init-probe", {
+    $ae.extAttach("lifecycle-init-probe", {
       init: function () { initializationCount++; },
       destroy: function () {}
     });

@@ -26,7 +26,7 @@
   };
   const mountMap = new Map();
 
-  AelluxJs.extRegister(extensionName, { init, destroy, mountMap });
+  AelluxJs.extAttach(extensionName, { init, destroy, mountMap });
 
   function init(options) {
     mountMap.set(`[${attr.extensionName}]`, {

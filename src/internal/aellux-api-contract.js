@@ -5,7 +5,7 @@
 // Every listed property is required in its phase. `optionalProperties` lists fields
 // created only after init() or by the full bundle. The planned Extension namespace
 // keeps public Extension APIs at AelluxJs.ext.<camelCaseName> (also $ae.ext.<camelCaseName>).
-// `dynamicProperties` describes those APIs; their names come from extRegistry.
+// `dynamicProperties` describes those APIs; their names come from registry.ext.
 
 (function (root) {
 "use strict";
@@ -19,7 +19,7 @@ var record = Object.freeze({ type: "object", additionalProperties: true });
 var extensionNamespace = Object.freeze({
   type: "function",
   dynamicProperties: Object.freeze({
-    namesFrom: "extRegistry",
+    namesFrom: "registry.ext",
     nameFormat: "camelCase",
     type: "object"
   })
@@ -119,11 +119,17 @@ var bootstrapProperties = Object.freeze({
   extName: method,
   eventName: method,
   noConflict: method,
-  lazyExtensionSelectors: record,
-  extensionMounters: record,
-  extRegistry: record,
+  registry: Object.freeze({
+    type: "object",
+    properties: Object.freeze({
+      ext: record,
+      dep: record,
+      lazyExtSelectors: record,
+      extMounters: record
+    })
+  }),
   ext: extensionNamespace,
-  extRegister: method,
+  extAttach: method,
   startAelluxJs: method,
   destroy: method,
   destroyExtensions: method,

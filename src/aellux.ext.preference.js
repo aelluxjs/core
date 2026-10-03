@@ -14,7 +14,7 @@ import nameCase from "./internal/utils-name-case.js";
   const computedPreferences = Object.create(null);
   const mountMap = new Map();
 
-  AelluxJs.extRegister(extensionName, { init, destroy, update, get, set, mountMap });
+  AelluxJs.extAttach(extensionName, { init, destroy, update, get, set, mountMap });
 
   const attr = {
     preference: AelluxJs.attr("preference"),

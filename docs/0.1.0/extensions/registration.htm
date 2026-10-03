@@ -526,13 +526,13 @@
 <pre><code class="language-js">$ae.ext(&quot;feedback&quot;);
 $ae.init({ mode: &quot;basic&quot; });
 </code></pre>
-<h2>Extension Registration</h2>
-<p>An Extension script exposes its API through <code>AelluxJs.extRegister()</code>:</p>
+<h2>Extension Attachment</h2>
+<p>An Extension script exposes its API through <code>AelluxJs.extAttach()</code>:</p>
 <pre><code class="language-js">(function () {
   &quot;use strict&quot;;
 
   const extensionName = &quot;example&quot;;
-  AelluxJs.extRegister(extensionName, { init, destroy });
+  AelluxJs.extAttach(extensionName, { init, destroy });
 
   function init() {}
   function destroy() {}

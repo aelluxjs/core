@@ -12,7 +12,7 @@
     function onProbeEvent() { lifecycleCounts.events++; }
 
     $ae.ext("lifecycle-element-probe");
-    $ae.extRegister("lifecycle-element-probe", {
+    $ae.extAttach("lifecycle-element-probe", {
       init: function () {
         mountMap.set("[data-lifecycle-element]", {
           mount: function (element) {

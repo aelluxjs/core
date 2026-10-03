@@ -1,13 +1,13 @@
 # Authoring Third-Party aellux.js Extensions
 
-An aellux.js Extension is a classic browser script that registers one focused behavior through `AelluxJs.extRegister()`. Third-party Extensions follow the same naming, lifecycle, compatibility, and cleanup rules as Core Extensions.
+An aellux.js Extension is a classic browser script that attaches one focused behavior through `AelluxJs.extAttach()`. Third-party Extensions follow the same naming, lifecycle, compatibility, and cleanup rules as Core Extensions.
 
 Start from [`templates/aellux.ext.template.js`](https://github.com/aelluxjs/core/blob/main/templates/aellux.ext.template.js). The scaffold contains the required structure and a compatibility summary.
 
 ## Required Contract
 
 1. Name the source and Modern artifact `aellux.ext.<name>.js`.
-2. Use the same kebab-case `<name>` as `extensionName` in `AelluxJs.extRegister(extensionName, api)`.
+2. Use the same kebab-case `<name>` as `extensionName` in `AelluxJs.extAttach(extensionName, api)`.
 3. Publish a classic script contained by an IIFE. Distribution files must not require ESM imports or exports.
 4. Keep `init(options)` synchronous and idempotent.
 5. Make every `mount` idempotent and release its listeners, observers, timers, and references in the corresponding `unmount`.
@@ -29,7 +29,7 @@ mountMap.set("[data-ae-example]", {
   unmount: unmountElement
 });
 
-AelluxJs.extRegister(extensionName, { init, destroy, mountMap });
+AelluxJs.extAttach(extensionName, { init, destroy, mountMap });
 ```
 
 The orchestrator consumes this map during `$ae.update(root)` and `$ae.unmount(root)`. `mount` must be safe against repeated updates, and `unmount` must reverse the element-level resources created by `mount`.

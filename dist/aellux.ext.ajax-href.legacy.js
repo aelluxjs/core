@@ -148,7 +148,7 @@
   (function() {
     "use strict";
     var extensionName = "ajax-href";
-    AelluxJs.extRegister(extensionName, {
+    AelluxJs.extAttach(extensionName, {
       init: init,
       destroy: destroy,
       load: load

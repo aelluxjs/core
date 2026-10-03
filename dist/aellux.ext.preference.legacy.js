@@ -72,7 +72,7 @@
     var defaultPreferences = /* @__PURE__ */ Object.create(null);
     var computedPreferences = /* @__PURE__ */ Object.create(null);
     var mountMap = /* @__PURE__ */ new Map();
-    AelluxJs.extRegister(extensionName, {
+    AelluxJs.extAttach(extensionName, {
       init: init,
       destroy: destroy,
       update: update,

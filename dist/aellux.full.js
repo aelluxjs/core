@@ -44,7 +44,7 @@
         const defaultPreferences = /* @__PURE__ */ Object.create(null);
         const computedPreferences = /* @__PURE__ */ Object.create(null);
         const mountMap = /* @__PURE__ */ new Map();
-        AelluxJs.extRegister(extensionName, { init, destroy, update, get, set, mountMap });
+        AelluxJs.extAttach(extensionName, { init, destroy, update, get, set, mountMap });
         const attr = {
           preference: AelluxJs.attr("preference"),
           option: AelluxJs.attr("option"),
@@ -200,7 +200,7 @@
         "use strict";
         const extensionName = "state-navigation";
         const globalSnapshot = {};
-        AelluxJs.extRegister(extensionName, {
+        AelluxJs.extAttach(extensionName, {
           init,
           destroy,
           tabOpen,
@@ -340,7 +340,7 @@
       (function() {
         "use strict";
         const extensionName = "feedback";
-        AelluxJs.extRegister(extensionName, {
+        AelluxJs.extAttach(extensionName, {
           init,
           destroy,
           warning,
@@ -419,7 +419,7 @@
       (function() {
         "use strict";
         const extensionName = "ajax-href";
-        AelluxJs.extRegister(extensionName, { init, destroy, load });
+        AelluxJs.extAttach(extensionName, { init, destroy, load });
         const attr = {
           ajaxHref: AelluxJs.attr(extensionName)
         };
@@ -653,7 +653,7 @@
           AelluxJs2.ext(href, { builds, loadWhen, loadStyle });
         }
         const waitExtensions = [];
-        for (const [key, options] of Object.entries(root2.AelluxJs.extRegistry)) {
+        for (const [key, options] of Object.entries(root2.AelluxJs.registry.ext)) {
           if (options.loadWhen) continue;
           waitExtensions.push(AelluxJs2.wait(key));
         }
@@ -669,16 +669,16 @@
         extensionNames = [extensionNames];
       var filter;
       if (!extensionNames) {
-        const mounterSelectors = Object.values(AelluxJs2.extensionMounters);
-        const lazySelectors = Object.values(AelluxJs2.lazyExtensionSelectors);
+        const mounterSelectors = Object.values(AelluxJs2.registry.extMounters);
+        const lazySelectors = Object.values(AelluxJs2.registry.lazyExtSelectors);
         filter = [...mounterSelectors, ...lazySelectors];
       } else {
         filter = [];
         extensionNames = extensionNames.map((_) => fromCamelCase2(_));
-        for (const [key, selectorString] of Object.entries(AelluxJs2.extensionMounters))
+        for (const [key, selectorString] of Object.entries(AelluxJs2.registry.extMounters))
           if (extensionNames.indexOf(fromCamelCase2(key)) !== -1)
             filter.push(selectorString);
-        for (const [key, selectorString] of Object.entries(AelluxJs2.lazyExtensionSelectors))
+        for (const [key, selectorString] of Object.entries(AelluxJs2.registry.lazyExtSelectors))
           if (extensionNames.indexOf(fromCamelCase2(key)) !== -1)
             filter.push(selectorString);
       }
@@ -691,10 +691,10 @@
           localExtensionNames = new Set(extensionNames);
         } else {
           localExtensionNames = /* @__PURE__ */ new Set();
-          for (const [key, selector] of Object.entries(AelluxJs2.lazyExtensionSelectors))
+          for (const [key, selector] of Object.entries(AelluxJs2.registry.lazyExtSelectors))
             if (element.matches(selector) && filter.indexOf(selector) !== -1)
               localExtensionNames.add(fromCamelCase2(key));
-          for (const [key, selector] of Object.entries(AelluxJs2.extensionMounters))
+          for (const [key, selector] of Object.entries(AelluxJs2.registry.extMounters))
             if (element.matches(selector) && filter.indexOf(selector) !== -1)
               localExtensionNames.add(fromCamelCase2(key));
         }
@@ -870,9 +870,9 @@
             } finally {
               delete AelluxJs.ext[key];
               delete extensionPromises[key];
-              delete AelluxJs.extRegistry[key];
-              delete AelluxJs.extensionMounters[key];
-              delete AelluxJs.lazyExtensionSelectors[key];
+              delete AelluxJs.registry.ext[key];
+              delete AelluxJs.registry.extMounters[key];
+              delete AelluxJs.registry.lazyExtSelectors[key];
               if (extension) extension.initialized = false;
             }
           }
@@ -893,7 +893,7 @@
       const key = toCamelCase2(extensionName);
       if (extensionPromises[key])
         return extensionPromises[key];
-      const data = AelluxJs.extRegistry[key];
+      const data = AelluxJs.registry.ext[key];
       if (data && !hasCompatibleBuild(data)) {
         AelluxJs.diagnostics.report(
           AelluxJs.diagnostics.ERROR_EXTENSION_INCOMPATIBLE,
@@ -903,7 +903,7 @@
             builds: data.builds
           }
         );
-        delete AelluxJs.lazyExtensionSelectors[key];
+        delete AelluxJs.registry.lazyExtSelectors[key];
         extensionPromises[key] = Promise.resolve(null);
         return extensionPromises[key];
       }
@@ -923,7 +923,7 @@
         extensionPromises[key] = Promise.resolve(AelluxJs.ext[key]);
         return extensionPromises[key];
       }
-      if (!(key in AelluxJs.extRegistry)) {
+      if (!(key in AelluxJs.registry.ext)) {
         return Promise.reject();
       }
       const bundledLoader = AelluxJs.bundledExtensions ? AelluxJs.bundledExtensions[key] : null;
@@ -944,15 +944,15 @@
       AelluxJs.ext[key].initialized = true;
       if (AelluxJs.ext[key].mountMap) {
         const selectors = Array.from(AelluxJs.ext[key].mountMap.keys()).join(",");
-        if (selectors) AelluxJs.extensionMounters[key] = selectors;
+        if (selectors) AelluxJs.registry.extMounters[key] = selectors;
       }
-      delete AelluxJs.lazyExtensionSelectors[key];
+      delete AelluxJs.registry.lazyExtSelectors[key];
       return AelluxJs.ext[key];
     }
     async function appendExtensionAssets(extensionName) {
       extensionName = fromCamelCase2(extensionName);
       const key = toCamelCase2(extensionName);
-      const data = AelluxJs.extRegistry[key];
+      const data = AelluxJs.registry.ext[key];
       const url = data.url.replace(/^\.\//, AelluxJs.aelluxBasePath);
       const useLegacyBuild = AelluxJs.legacy || data.builds.indexOf("modern") === -1;
       const scriptURL = useLegacyBuild ? toLegacyScriptURL(url) : url;

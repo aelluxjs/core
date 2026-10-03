@@ -65,6 +65,15 @@ test("ESM entry exports the shared core API", async ({ page }) => {
     return {
       sharedApi: AelluxJs === globalThis.AelluxJs,
       sharedAlias: AelluxJs === globalThis.$ae,
+      extensionRegistry: Object.keys(AelluxJs.registry.ext).length,
+      dependencyRegistry: Object.keys(AelluxJs.registry.dep).length,
+      lazySelectors: Object.keys(AelluxJs.registry.lazyExtSelectors).length,
+      extMounters: Object.keys(AelluxJs.registry.extMounters).length,
+      oldRegistry: Object.hasOwn(AelluxJs, "extRegistry"),
+      oldLazySelectors: Object.hasOwn(AelluxJs, "lazyExtensionSelectors"),
+      oldExtensionMounters: Object.hasOwn(AelluxJs, "extensionMounters"),
+      oldRegistryLazySelectors: Object.hasOwn(AelluxJs.registry, "lazyExtensionSelectors"),
+      oldRegistryExtensionMounters: Object.hasOwn(AelluxJs.registry, "extensionMounters"),
       attribute: AelluxJs.attr("preference"),
       extensionName: AelluxJs.extName("aellux.ext.state-navigation.js")
     };
@@ -72,6 +81,15 @@ test("ESM entry exports the shared core API", async ({ page }) => {
   expect(created).toEqual({
     sharedApi: true,
     sharedAlias: true,
+    extensionRegistry: 0,
+    dependencyRegistry: 0,
+    lazySelectors: 0,
+    extMounters: 0,
+    oldRegistry: false,
+    oldLazySelectors: false,
+    oldExtensionMounters: false,
+    oldRegistryLazySelectors: false,
+    oldRegistryExtensionMounters: false,
     attribute: "data-ae-preference",
     extensionName: "state-navigation"
   });
@@ -106,7 +124,7 @@ test("Extension names do not replace core API methods", async ({ page }) => {
   const result = await page.evaluate(async () => {
     const coreRequest = AelluxJs.request;
     AelluxJs.ext("request");
-    AelluxJs.extRegister("request", { init() {} });
+    AelluxJs.extAttach("request", { init() {} });
     const extension = await AelluxJs.wait("request");
     return {
       coreRequestPreserved: AelluxJs.request === coreRequest,
@@ -129,11 +147,11 @@ for (const forceLegacy of [false, true]) {
     await page.addScriptTag({ url: "/dist/aellux.js" });
     await page.evaluate((legacy) => {
       AelluxJs.ext("option-probe");
-      AelluxJs.extRegister("option-probe", {
+      AelluxJs.extAttach("option-probe", {
         init(options) { window.optionProbeOptions = options; }
       });
       AelluxJs.ext("empty-probe");
-      AelluxJs.extRegister("empty-probe", {
+      AelluxJs.extAttach("empty-probe", {
         init(options) { window.emptyProbeOptions = options; }
       });
       AelluxJs.init({
@@ -191,14 +209,14 @@ test("full runtime writes the renamed history state marker", async ({ page }) =>
   await page.evaluate(() => AelluxJs.init({ mode: "full" }));
   await expect.poll(() => page.evaluate(() => AelluxJs.ext.stateNavigation?.initialized)).toBe(true);
   expect(await page.evaluate(() => ({
-    registered: Object.hasOwn(AelluxJs.extRegistry, "stateNavigation"),
+    registered: Object.hasOwn(AelluxJs.registry.ext, "stateNavigation"),
     bundled: Object.hasOwn(AelluxJs.bundledExtensions, "stateNavigation"),
-    oldRegistered: Object.hasOwn(AelluxJs.extRegistry, "state-navigation"),
+    oldRegistered: Object.hasOwn(AelluxJs.registry.ext, "state-navigation"),
     oldBundled: Object.hasOwn(AelluxJs.bundledExtensions, "state-navigation")
   }))).toEqual({ registered: true, bundled: true, oldRegistered: false, oldBundled: false });
   expect(await page.evaluate(() => ({
     adaptive: AelluxJs.adaptive,
-    registered: Object.hasOwn(AelluxJs.extRegistry, "adaptive"),
+    registered: Object.hasOwn(AelluxJs.registry.ext, "adaptive"),
     bundled: Object.hasOwn(AelluxJs.bundledExtensions, "adaptive")
   }))).toEqual({ adaptive: undefined, registered: false, bundled: false });
   expect(await page.evaluate(() => history.state?.aelluxJsState)).toBe(true);
@@ -334,8 +352,8 @@ test("compound extension names use camelCase registry keys and hyphenated assets
       loadWhen: "#state-navigation-probe",
       loadStyle: "/tests/browser/extension-style.css"
     });
-    const registryKey = Object.hasOwn(AelluxJs.extRegistry, "stateNavigation");
-    const lazyKey = Object.hasOwn(AelluxJs.lazyExtensionSelectors, "stateNavigation");
+    const registryKey = Object.hasOwn(AelluxJs.registry.ext, "stateNavigation");
+    const lazyKey = Object.hasOwn(AelluxJs.registry.lazyExtSelectors, "stateNavigation");
     document.body.insertAdjacentHTML("beforeend", '<div id="state-navigation-probe"></div>');
     AelluxJs.init({ mode: "basic" });
     return { registryKey, lazyKey };
@@ -343,9 +361,9 @@ test("compound extension names use camelCase registry keys and hyphenated assets
   expect(initial).toEqual({ registryKey: true, lazyKey: true });
   await expect.poll(() => page.evaluate(() => AelluxJs.ext.stateNavigation?.initialized)).toBe(true);
   const result = await page.evaluate(() => ({
-    registryKey: Object.hasOwn(AelluxJs.extRegistry, "stateNavigation"),
-    oldRegistryKey: Object.hasOwn(AelluxJs.extRegistry, "state-navigation"),
-    lazyKeyCleared: !Object.hasOwn(AelluxJs.lazyExtensionSelectors, "stateNavigation"),
+    registryKey: Object.hasOwn(AelluxJs.registry.ext, "stateNavigation"),
+    oldRegistryKey: Object.hasOwn(AelluxJs.registry.ext, "state-navigation"),
+    lazyKeyCleared: !Object.hasOwn(AelluxJs.registry.lazyExtSelectors, "stateNavigation"),
     script: document.querySelector("script[data-ae-ext='state-navigation']")?.getAttribute("src"),
     style: Boolean(document.querySelector("link[data-ae-ext-style='state-navigation']"))
   }));

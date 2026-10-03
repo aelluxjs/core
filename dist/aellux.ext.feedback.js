@@ -4,7 +4,7 @@
   (function() {
     "use strict";
     const extensionName = "feedback";
-    AelluxJs.extRegister(extensionName, {
+    AelluxJs.extAttach(extensionName, {
       init,
       destroy,
       warning,

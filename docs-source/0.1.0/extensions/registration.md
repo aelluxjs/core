@@ -40,16 +40,16 @@ $ae.ext("feedback");
 $ae.init({ mode: "basic" });
 ```
 
-## Extension Registration
+## Extension Attachment
 
-An Extension script exposes its API through `AelluxJs.extRegister()`:
+An Extension script exposes its API through `AelluxJs.extAttach()`:
 
 ```js
 (function () {
   "use strict";
 
   const extensionName = "example";
-  AelluxJs.extRegister(extensionName, { init, destroy });
+  AelluxJs.extAttach(extensionName, { init, destroy });
 
   function init() {}
   function destroy() {}

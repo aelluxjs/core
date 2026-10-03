@@ -4,7 +4,7 @@
   "use strict";
 
   const extensionName = "ajax-href";
-  AelluxJs.extRegister(extensionName, { init, destroy, load });
+  AelluxJs.extAttach(extensionName, { init, destroy, load });
   const attr = {
     ajaxHref: AelluxJs.attr(extensionName)
   };

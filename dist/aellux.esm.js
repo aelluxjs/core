@@ -259,6 +259,7 @@ function createAelluxApi(root2, constants) {
       session: buildPersistMemory(root2, "sessionStorage"),
       preferences: buildPersistMemory(root2, "localStorage", "AelluxJsPreferences")
     },
+    preferencesMediaQueries: buildPreferencesMediaQueries(root2),
     updatePreferencesAttributesHTML: preferencesHtml.updatePreferencesAttributesHTML,
     on: function(event, handler, options) {
       document.addEventListener(api.eventName(event), handler, options);
@@ -267,13 +268,16 @@ function createAelluxApi(root2, constants) {
       document.removeEventListener(api.eventName(event), handler, options);
     },
     attr: function(name) {
+      name = fromCamelCase2(name);
       return "data-" + constants.AELLUXJS_DATA_ATTRIBUTE_NAME_PREFFIX.replace(/\?/, name);
     },
     className: function(name) {
+      name = fromCamelCase2(name);
       return constants.AELLUXJS_CLASS_NAME_PREFFIX.replace(/\?/, name);
     },
-    extFilename: function(name) {
-      return "aellux." + constants.AELLUXJS_EXT_SCRIPT_PREFIX + "." + name + (api.minified ? ".min.js" : ".js");
+    extFilename: function(extensionName) {
+      extensionName = fromCamelCase2(extensionName);
+      return "aellux." + constants.AELLUXJS_EXT_SCRIPT_PREFIX + "." + extensionName + (api.minified ? ".min.js" : ".js");
     },
     extName: function(filename) {
       return filename.replace(
@@ -282,19 +286,23 @@ function createAelluxApi(root2, constants) {
       );
     },
     eventName: function(name) {
-      return constants.AELLUXJS_EVENT_NAME_PREFFIX.replace(/\?/, toCapitalized2(name));
+      name = toCapitalized2(name);
+      return constants.AELLUXJS_EVENT_NAME_PREFFIX.replace(/\?/, name);
     },
     noConflict: function() {
       return oldShortInstance;
     },
-    lazyExtensionSelectors: {},
-    extensionMounters: {},
-    extRegistry: {},
+    registry: {
+      ext: {},
+      dep: {},
+      lazyExtSelectors: {},
+      extMounters: {}
+    },
     ext: function(nameOrUrl, options) {
       var name = fromCamelCase2(api.extName(nameOrUrl));
       var key = toCamelCase2(name);
       var url = nameOrUrl;
-      if (key in api.extRegistry) {
+      if (key in api.registry.ext) {
         diagnostics.report(diagnostics.ERROR_EXTENSION_DUPLICATE, { extension: name });
         return;
       }
@@ -303,33 +311,26 @@ function createAelluxApi(root2, constants) {
       if (typeof options.loadStyle === "undefined") options.loadStyle = false;
       if (!options.loadWhen) options.loadWhen = null;
       options.builds = normalizeExtensionBuilds(options.builds);
-      if (options.loadWhen) api.lazyExtensionSelectors[key] = options.loadWhen;
+      if (options.loadWhen) api.registry.lazyExtSelectors[key] = options.loadWhen;
       options.url = url;
       options.load = options.loadWhen ? false : true;
       options.state = "wait";
-      api.extRegistry[key] = options;
+      api.registry.ext[key] = options;
     },
-    extRegister: function(name, object) {
+    extAttach: function(name, object) {
       name = fromCamelCase2(name);
       var key = toCamelCase2(name);
-      api.extRegistry[key].state = "register";
+      api.registry.ext[key].state = "register";
       object.initialized = false;
       api.ext[key] = object;
     },
-    startAelluxJs: function() {
-    },
-    destroy: function() {
-    },
-    destroyExtensions: function() {
-      throw diagnostics.create(diagnostics.ERROR_NOT_INITIALIZED);
+    dispatch: function(event, options) {
+      api.dispatchFrom(document, event, options);
     },
     dispatchFrom: function(from, event, options) {
       var obj = document.createEvent("Event");
       obj.initEvent(api.eventName(event), false, false);
       from.dispatchEvent(obj);
-    },
-    dispatch: function(event, options) {
-      api.dispatchFrom(document, event, options);
     },
     wait: function() {
       throw diagnostics.create(diagnostics.ERROR_NOT_INITIALIZED);
@@ -343,7 +344,15 @@ function createAelluxApi(root2, constants) {
     request: function() {
       throw diagnostics.create(diagnostics.ERROR_NOT_INITIALIZED);
     },
-    preferencesMediaQueries: buildPreferencesMediaQueries(root2)
+    startAelluxJs: function() {
+      throw diagnostics.create(diagnostics.ERROR_NOT_INITIALIZED);
+    },
+    destroyExtensions: function() {
+      throw diagnostics.create(diagnostics.ERROR_NOT_INITIALIZED);
+    },
+    destroy: function() {
+      throw diagnostics.create(diagnostics.ERROR_NOT_INITIALIZED);
+    }
   };
   return api;
   function normalizeExtensionBuilds(builds) {

@@ -30,7 +30,7 @@
     const defaultPreferences = /* @__PURE__ */ Object.create(null);
     const computedPreferences = /* @__PURE__ */ Object.create(null);
     const mountMap = /* @__PURE__ */ new Map();
-    AelluxJs.extRegister(extensionName, { init, destroy, update, get, set, mountMap });
+    AelluxJs.extAttach(extensionName, { init, destroy, update, get, set, mountMap });
     const attr = {
       preference: AelluxJs.attr("preference"),
       option: AelluxJs.attr("option"),
