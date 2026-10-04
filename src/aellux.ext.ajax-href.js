@@ -1,9 +1,13 @@
 /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
 
-(function () {
+(function (root) {
   "use strict";
 
+  const AelluxJs = root.AelluxJs;
   const extensionName = "ajax-href";
+  if (!AelluxJs) {
+    throw new Error(`[aellux.js] Cannot attach the "${extensionName}" extension: root.AelluxJs is not defined. Load the aellux.js boot script before this extension.`);
+  }
   AelluxJs.extAttach(extensionName, { init, destroy, load });
   const attr = {
     ajaxHref: AelluxJs.attr(extensionName)
@@ -151,4 +155,4 @@
       hash: url.hash
     };
   }
-})();
+})(typeof globalThis !== "undefined" ? globalThis : window);

@@ -2,12 +2,16 @@
 
 import utilsNameCase from "./internal/utils-name-case.js";
 
-(function () {
+(function (root) {
   "use strict";
 
+  const AelluxJs = root.AelluxJs;
   const { toCamelCase } = utilsNameCase;
 
   const extensionName = "preference";
+  if (!AelluxJs) {
+    throw new Error(`[aellux.js] Cannot attach the "${extensionName}" extension: root.AelluxJs is not defined. Load the aellux.js boot script before this extension.`);
+  }
 
   const userPreferences = Object.create(null);
   const defaultPreferences = Object.create(null);
@@ -178,4 +182,4 @@ import utilsNameCase from "./internal/utils-name-case.js";
     }
   }
 
-})();
+})(typeof globalThis !== "undefined" ? globalThis : window);

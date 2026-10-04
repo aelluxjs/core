@@ -241,11 +241,10 @@ function createAelluxApi(root2, constants) {
   var diagnostics = buildDiagnostics(constants.AELLUXJS_DIAGNOSTICS);
   var oldShortInstance = root2[constants.AELLUXJS_SHORT_JS_NAME];
   var document = root2.document;
-  var api;
   var preferenceHtml = createPreferenceHtmlHelper(root2, function() {
     return api;
   });
-  api = {
+  var api = {
     shortJSName: constants.AELLUXJS_SHORT_JS_NAME,
     diagnostics,
     options: constants.AELLUXJS_DEFAULT_INITIALIZATION_OPTIONS,

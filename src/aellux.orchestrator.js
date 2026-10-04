@@ -284,14 +284,4 @@ import utilsNameCase from "./internal/utils-name-case.js";
       });
   };
 
-
-  //BFCache
-  // let pageWasHidden = false;
-  // window.addEventListener("pagehide", () => pageWasHidden = true);
-  // window.addEventListener("pageshow", (event) => {
-  //   if (event.persisted && pageWasHidden) {// página voltou via BFCache
-  //     pageWasHidden = false;
-  //   }
-  // });
-
 })(typeof globalThis !== "undefined" ? globalThis : window);

@@ -22,10 +22,14 @@
 
   // src/aellux.ext.preference.js
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
-  (function() {
+  (function(root) {
     "use strict";
+    const AelluxJs = root.AelluxJs;
     const { toCamelCase: toCamelCase2 } = utils_name_case_default;
     const extensionName = "preference";
+    if (!AelluxJs) {
+      throw new Error(`[aellux.js] Cannot attach the "${extensionName}" extension: root.AelluxJs is not defined. Load the aellux.js boot script before this extension.`);
+    }
     const userPreferences = /* @__PURE__ */ Object.create(null);
     const defaultPreferences = /* @__PURE__ */ Object.create(null);
     const computedPreferences = /* @__PURE__ */ Object.create(null);
@@ -173,6 +177,6 @@
         const change = buttonNext ? 1 : -1;
       }
     }
-  })();
+  })(typeof globalThis !== "undefined" ? globalThis : window);
 })();
 //# sourceMappingURL=aellux.ext.preference.js.map

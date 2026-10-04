@@ -145,9 +145,13 @@
     };
   }
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
-  (function() {
+  (function(root) {
     "use strict";
+    var AelluxJs = root.AelluxJs;
     var extensionName = "ajax-href";
+    if (!AelluxJs) {
+      throw new Error('[aellux.js] Cannot attach the "'.concat(extensionName, '" extension: root.AelluxJs is not defined. Load the aellux.js boot script before this extension.'));
+    }
     AelluxJs.extAttach(extensionName, {
       init: init,
       destroy: destroy,
@@ -337,6 +341,6 @@
         hash: url.hash
       };
     }
-  })();
+  })(typeof globalThis !== "undefined" ? globalThis : window);
 })();
 //# sourceMappingURL=aellux.ext.ajax-href.legacy.js.map

@@ -22102,15 +22102,19 @@
     "src/aellux.ext.preference.js": function() {
       init_utils_name_case();
       /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
-      (function() {
+      (function(root2) {
         "use strict";
+        var AelluxJs2 = root2.AelluxJs;
         var toCamelCase2 = utils_name_case_default.toCamelCase;
         var extensionName = "preference";
+        if (!AelluxJs2) {
+          throw new Error('[aellux.js] Cannot attach the "'.concat(extensionName, '" extension: root.AelluxJs is not defined. Load the aellux.js boot script before this extension.'));
+        }
         var userPreferences = /* @__PURE__ */ Object.create(null);
         var defaultPreferences = /* @__PURE__ */ Object.create(null);
         var computedPreferences = /* @__PURE__ */ Object.create(null);
         var mountMap = /* @__PURE__ */ new Map();
-        AelluxJs.extAttach(extensionName, {
+        AelluxJs2.extAttach(extensionName, {
           init: init,
           destroy: destroy,
           update: update,
@@ -22119,15 +22123,15 @@
           mountMap: mountMap
         });
         var attr = {
-          preference: AelluxJs.attr("preference"),
-          option: AelluxJs.attr("option"),
-          label: AelluxJs.attr("label"),
-          next: AelluxJs.attr("next"),
-          prev: AelluxJs.attr("prev"),
-          ready: AelluxJs.attr("ready")
+          preference: AelluxJs2.attr("preference"),
+          option: AelluxJs2.attr("option"),
+          label: AelluxJs2.attr("label"),
+          next: AelluxJs2.attr("next"),
+          prev: AelluxJs2.attr("prev"),
+          ready: AelluxJs2.attr("ready")
         };
         var className = {
-          active: AelluxJs.className("active")
+          active: AelluxJs2.className("active")
         };
         var prefOptions = {
           colorScheme: ["auto", "light", "dark"],
@@ -22148,7 +22152,7 @@
             unmount: unmountPreferenceContainer
           });
           window.addEventListener("storage", storageEvent);
-          var allQueries = AelluxJs.registry.preferenceMediaQueries;
+          var allQueries = AelluxJs2.registry.preferenceMediaQueries;
           Object.values(allQueries).forEach(function(queries) {
             return Object.values(queries).forEach(function(query) {
               if (!query) return;
@@ -22169,7 +22173,7 @@
         function destroy() {
           window.removeEventListener("storage", storageEvent);
           document.removeEventListener("DOMContentLoaded", update);
-          var allQueries = AelluxJs.registry.preferenceMediaQueries;
+          var allQueries = AelluxJs2.registry.preferenceMediaQueries;
           Object.values(allQueries).forEach(function(queries) {
             return Object.values(queries).forEach(function(query) {
               if (!query) return;
@@ -22204,11 +22208,11 @@
         }
         function update() {
           Object.assign(computedPreferences, defaultPreferences, userPreferences);
-          AelluxJs.updatePreferenceAttributesHTML(computedPreferences);
+          AelluxJs2.updatePreferenceAttributesHTML(computedPreferences);
           document.querySelectorAll("[".concat(attr.preference, "]")).forEach(function(container) {
             return updateContainer(container);
           });
-          AelluxJs.dispatch("PreferencesChange");
+          AelluxJs2.dispatch("PreferencesChange");
         }
         function updateContainer(container) {
           var preference2 = container.getAttribute(attr.preference);
@@ -22236,10 +22240,10 @@
           });
         }
         function saveUserPreferences() {
-          AelluxJs.persist.preferences.setObject(userPreferences);
+          AelluxJs2.persist.preferences.setObject(userPreferences);
         }
         function loadUserPreferences() {
-          Object.assign(userPreferences, AelluxJs.persist.preferences.getObject());
+          Object.assign(userPreferences, AelluxJs2.persist.preferences.getObject());
         }
         function mountPreferenceContainer(container) {
           container.addEventListener("click", onContainerClick);
@@ -22263,7 +22267,7 @@
             var change = buttonNext ? 1 : -1;
           }
         }
-      })();
+      })(typeof globalThis !== "undefined" ? globalThis : window);
     }
   });
 
@@ -22373,19 +22377,23 @@
   var init_aellux_ext_state_navigation = __esm({
     "src/aellux.ext.state-navigation.js": function() {
       /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
-      (function() {
+      (function(root2) {
         "use strict";
+        var AelluxJs2 = root2.AelluxJs;
         var extensionName = "state-navigation";
+        if (!AelluxJs2) {
+          throw new Error('[aellux.js] Cannot attach the "'.concat(extensionName, '" extension: root.AelluxJs is not defined. Load the aellux.js boot script before this extension.'));
+        }
         var globalSnapshot = {};
-        AelluxJs.extAttach(extensionName, {
+        AelluxJs2.extAttach(extensionName, {
           init: init,
           destroy: destroy,
           tabOpen: tabOpen,
           ajaxHref: ajaxHref2,
           flowStep: flowStep,
-          formUpdate: formUpdate,
+          formFocus: formFocus,
           updateBaseTitle: updateBaseTitle,
-          normalize: normalize,
+          setState: setState,
           globalSnapshot: globalSnapshot
         });
         var globalRemoveSnapshot = {};
@@ -22396,8 +22404,8 @@
         function init(options) {
           window.addEventListener("popstate", onPopState);
           window.addEventListener("hashchange", onHashChange);
-          if ("useHash" in AelluxJs.options) {
-            useHash = AelluxJs.options.useHash;
+          if ("useHash" in AelluxJs2.options) {
+            useHash = AelluxJs2.options.useHash;
           }
           baseTitle = document.title;
           onHashChange();
@@ -22424,6 +22432,7 @@
           return _destroy.apply(this, arguments);
         }
         function updateBaseTitle(title) {
+          baseTitle = title;
         }
         function tabOpen(tabGroupId, tabId, title) {
           return change(tabGroupId, tabId, title);
@@ -22441,24 +22450,27 @@
             ajaxHref: selectors
           }, "", url);
         }
-        function flowStep(flowId, step, options) {
+        function flowStep(flowId, stepId, title) {
+          return change(flowId, stepId, title);
         }
-        function formUpdate(formId, event, value, options) {
+        function formFocus(formId, focusId, title) {
+          return change(formId, focusId, title);
         }
-        function normalize(key, value) {
+        function setState(key, value) {
           var title = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : void 0;
-          var silent = arguments.length > 3 ? arguments[3] : void 0;
+          var silent = arguments.length > 3 && arguments[3] !== void 0 ? arguments[3] : false;
           return change(key, value, title, silent);
         }
-        function change(_x, _x2, _x3) {
+        function change(_x, _x2) {
           return _change.apply(this, arguments);
         }
         function _change() {
-          _change = _asyncToGenerator3(/* @__PURE__ */ _regenerator3().m(function _callee2(key, value, title) {
-            var silent, state, url, _args2 = arguments;
+          _change = _asyncToGenerator3(/* @__PURE__ */ _regenerator3().m(function _callee2(key, value) {
+            var title, silent, state, url, _args2 = arguments;
             return _regenerator3().w(function(_context2) {
               while (1) switch (_context2.n) {
                 case 0:
+                  title = _args2.length > 2 && _args2[2] !== void 0 ? _args2[2] : void 0;
                   silent = _args2.length > 3 && _args2[3] !== void 0 ? _args2[3] : false;
                   if (!(globalSnapshot.title === title && globalSnapshot[key] === value)) {
                     _context2.n = 1;
@@ -22515,7 +22527,7 @@
             },
             bubbles: true
           };
-          AelluxJs.dispatch(name, options);
+          AelluxJs2.dispatch(name, options);
         }
         function dispatchEventRestore() {
           return dispatchSnapshotEvent("SnapshotRestore");
@@ -22532,8 +22544,8 @@
         function onPopState(event) {
           var browserState = event.state;
           if (!browserState || !browserState.aelluxJsState) return;
-          if (browserState.ajaxHref && AelluxJs.ext.ajaxHref) {
-            AelluxJs.ext.ajaxHref.load(window.location.href, browserState.ajaxHref, {
+          if (browserState.ajaxHref && AelluxJs2.ext.ajaxHref) {
+            AelluxJs2.ext.ajaxHref.load(window.location.href, browserState.ajaxHref, {
               ignoreHistory: true
             });
           }
@@ -22550,7 +22562,7 @@
             if (skipHashChange === window.location.hash) skipHashChange = null;
           }, 0);
         }
-      })();
+      })(typeof globalThis !== "undefined" ? globalThis : window);
     }
   });
 
@@ -22660,10 +22672,14 @@
   var init_aellux_ext_feedback = __esm({
     "src/aellux.ext.feedback.js": function() {
       /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
-      (function() {
+      (function(root2) {
         "use strict";
+        var AelluxJs2 = root2.AelluxJs;
         var extensionName = "feedback";
-        AelluxJs.extAttach(extensionName, {
+        if (!AelluxJs2) {
+          throw new Error('[aellux.js] Cannot attach the "'.concat(extensionName, '" extension: root.AelluxJs is not defined. Load the aellux.js boot script before this extension.'));
+        }
+        AelluxJs2.extAttach(extensionName, {
           init: init,
           destroy: destroy,
           warning: warning,
@@ -22767,7 +22783,7 @@
             value: value,
             target: target
           };
-          AelluxJs.dispatchFrom(target, "Feedback", {
+          AelluxJs2.dispatchFrom(target, "Feedback", {
             detail: feedback2
           });
           if (handlers.has(type)) handlers.get(type).forEach(function(call) {
@@ -22784,7 +22800,7 @@
           if (typeHandlers.size === 0) handlers.delete(type);
           return removed;
         }
-      })();
+      })(typeof globalThis !== "undefined" ? globalThis : window);
     }
   });
 
@@ -22937,16 +22953,20 @@
   var init_aellux_ext_ajax_href = __esm({
     "src/aellux.ext.ajax-href.js": function() {
       /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
-      (function() {
+      (function(root2) {
         "use strict";
+        var AelluxJs2 = root2.AelluxJs;
         var extensionName = "ajax-href";
-        AelluxJs.extAttach(extensionName, {
+        if (!AelluxJs2) {
+          throw new Error('[aellux.js] Cannot attach the "'.concat(extensionName, '" extension: root.AelluxJs is not defined. Load the aellux.js boot script before this extension.'));
+        }
+        AelluxJs2.extAttach(extensionName, {
           init: init,
           destroy: destroy,
           load: load
         });
         var attr = {
-          ajaxHref: AelluxJs.attr(extensionName)
+          ajaxHref: AelluxJs2.attr(extensionName)
         };
         function init(options) {
           document.addEventListener("click", onClick);
@@ -22987,18 +23007,18 @@
                     var currentElement2 = document.querySelector(selector2);
                     if (!currentElement2) return;
                     elements.set(selector2, currentElement2);
-                    if (AelluxJs.ext.feedback) {
-                      AelluxJs.ext.feedback.busy(currentElement2, "Ajax loading", true);
-                      AelluxJs.ext.feedback.progress(currentElement2, "Ajax loading", 0);
+                    if (AelluxJs2.ext.feedback) {
+                      AelluxJs2.ext.feedback.busy(currentElement2, "Ajax loading", true);
+                      AelluxJs2.ext.feedback.progress(currentElement2, "Ajax loading", 0);
                     }
                   });
-                  if (!options.ignoreHistory && AelluxJs.ext.stateNavigation) {
-                    AelluxJs.ext.stateNavigation.ajaxHref(url, selectors);
+                  if (!options.ignoreHistory && AelluxJs2.ext.stateNavigation) {
+                    AelluxJs2.ext.stateNavigation.ajaxHref(url, selectors);
                   }
-                  AelluxJs.dispatch("AjaxHrefStart");
+                  AelluxJs2.dispatch("AjaxHrefStart");
                   _context.p = 1;
                   _context.n = 2;
-                  return AelluxJs.request(url, {
+                  return AelluxJs2.request(url, {
                     signal: controller.signal
                   });
                 case 2:
@@ -23032,17 +23052,17 @@
                   return _context.a(3, 10);
                 case 7:
                   _context.n = 8;
-                  return AelluxJs.unmount(currentElement);
+                  return AelluxJs2.unmount(currentElement);
                 case 8:
                   replacement = document.importNode(loadedElement, true);
                   currentElement.replaceWith(replacement);
-                  if (selector === "title" && AelluxJs.ext.stateNavigation) AelluxJs.ext.stateNavigation.updateBaseTitle(replacement.innerText);
+                  if (selector === "title" && AelluxJs2.ext.stateNavigation) AelluxJs2.ext.stateNavigation.updateBaseTitle(replacement.innerText);
                   _context.n = 9;
-                  return AelluxJs.update(replacement);
+                  return AelluxJs2.update(replacement);
                 case 9:
-                  if (AelluxJs.ext.feedback) {
-                    AelluxJs.ext.feedback.busy(replacement, "Ajax loaded", false);
-                    AelluxJs.ext.feedback.progress(replacement, "Ajax loaded", 1);
+                  if (AelluxJs2.ext.feedback) {
+                    AelluxJs2.ext.feedback.busy(replacement, "Ajax loaded", false);
+                    AelluxJs2.ext.feedback.progress(replacement, "Ajax loaded", 1);
                   }
                 case 10:
                   _context.n = 5;
@@ -23059,7 +23079,7 @@
                   _iterator.f();
                   return _context.f(13);
                 case 14:
-                  AelluxJs.dispatch("AjaxHrefLoaded");
+                  AelluxJs2.dispatch("AjaxHrefLoaded");
                   _context.n = 17;
                   break;
                 case 15:
@@ -23068,12 +23088,12 @@
                   selectorList.forEach(function(selector2) {
                     var currentElement2 = elements.get(selector2);
                     if (!currentElement2) return;
-                    if (AelluxJs.ext.feedback) {
-                      AelluxJs.ext.feedback.busy(currentElement2, "Ajax loading", false);
-                      AelluxJs.ext.feedback.progress(currentElement2, "Ajax loading", 1);
+                    if (AelluxJs2.ext.feedback) {
+                      AelluxJs2.ext.feedback.busy(currentElement2, "Ajax loading", false);
+                      AelluxJs2.ext.feedback.progress(currentElement2, "Ajax loading", 1);
                     }
                   });
-                  AelluxJs.dispatch("AjaxHrefError");
+                  AelluxJs2.dispatch("AjaxHrefError");
                   if (!(_t2.name === "AbortError")) {
                     _context.n = 16;
                     break;
@@ -23084,7 +23104,7 @@
                 case 17:
                   _context.p = 17;
                   if (previousController === controller) previousController = null;
-                  AelluxJs.dispatch("AjaxHrefComplete");
+                  AelluxJs2.dispatch("AjaxHrefComplete");
                   return _context.f(17);
                 case 18:
                   return _context.a(2);
@@ -23107,19 +23127,19 @@
           var destinyUrl = comparableUrl(link.href);
           var currentUrl = comparableUrl(window.location.href);
           if (destinyUrl.origin !== currentUrl.origin) {
-            AelluxJs.dispatch("AjaxHrefDropOrigin");
+            AelluxJs2.dispatch("AjaxHrefDropOrigin");
             return;
           }
           if (destinyUrl.href === currentUrl.href) {
             if (destinyUrl.hash && destinyUrl.hash !== currentUrl.hash) return;
             event.preventDefault();
-            AelluxJs.dispatch("AjaxHrefStart");
-            AelluxJs.dispatch("AjaxHrefLoaded");
-            AelluxJs.dispatch("AjaxHrefComplete");
+            AelluxJs2.dispatch("AjaxHrefStart");
+            AelluxJs2.dispatch("AjaxHrefLoaded");
+            AelluxJs2.dispatch("AjaxHrefComplete");
             return;
           }
           event.preventDefault();
-          AelluxJs.ext.ajaxHref.load(link.href, selectors);
+          AelluxJs2.ext.ajaxHref.load(link.href, selectors);
         }
         function comparableUrl(value) {
           var url = new URL(value, window.location.href);
@@ -23129,7 +23149,7 @@
             hash: url.hash
           };
         }
-      })();
+      })(typeof globalThis !== "undefined" ? globalThis : window);
     }
   });
 

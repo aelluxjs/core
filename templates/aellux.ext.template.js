@@ -17,10 +17,14 @@
  *   ["modern", "legacy"] when registering the Extension through $ae.ext().
  */
 
-(function () {
+(function (root) {
   "use strict";
 
+  const AelluxJs = root.AelluxJs;
   const extensionName = "template";
+  if (!AelluxJs) {
+    throw new Error(`[aellux.js] Cannot attach the "${extensionName}" extension: root.AelluxJs is not defined. Load the aellux.js boot script before this extension.`);
+  }
   const attr = {
     extensionName: AelluxJs.attr(extensionName)
   };
@@ -44,4 +48,4 @@
 
   function unmountElement(element) {
   }
-})();
+})(typeof globalThis !== "undefined" ? globalThis : window);

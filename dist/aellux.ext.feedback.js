@@ -1,9 +1,13 @@
 (() => {
   // src/aellux.ext.feedback.js
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
-  (function() {
+  (function(root) {
     "use strict";
+    const AelluxJs = root.AelluxJs;
     const extensionName = "feedback";
+    if (!AelluxJs) {
+      throw new Error(`[aellux.js] Cannot attach the "${extensionName}" extension: root.AelluxJs is not defined. Load the aellux.js boot script before this extension.`);
+    }
     AelluxJs.extAttach(extensionName, {
       init,
       destroy,
@@ -71,6 +75,6 @@
       if (typeHandlers.size === 0) handlers.delete(type);
       return removed;
     }
-  })();
+  })(typeof globalThis !== "undefined" ? globalThis : window);
 })();
 //# sourceMappingURL=aellux.ext.feedback.js.map

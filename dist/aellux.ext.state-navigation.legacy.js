@@ -102,9 +102,13 @@
     };
   }
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
-  (function() {
+  (function(root) {
     "use strict";
+    var AelluxJs = root.AelluxJs;
     var extensionName = "state-navigation";
+    if (!AelluxJs) {
+      throw new Error('[aellux.js] Cannot attach the "'.concat(extensionName, '" extension: root.AelluxJs is not defined. Load the aellux.js boot script before this extension.'));
+    }
     var globalSnapshot = {};
     AelluxJs.extAttach(extensionName, {
       init: init,
@@ -112,9 +116,9 @@
       tabOpen: tabOpen,
       ajaxHref: ajaxHref,
       flowStep: flowStep,
-      formUpdate: formUpdate,
+      formFocus: formFocus,
       updateBaseTitle: updateBaseTitle,
-      normalize: normalize,
+      setState: setState,
       globalSnapshot: globalSnapshot
     });
     var globalRemoveSnapshot = {};
@@ -153,6 +157,7 @@
       return _destroy.apply(this, arguments);
     }
     function updateBaseTitle(title) {
+      baseTitle = title;
     }
     function tabOpen(tabGroupId, tabId, title) {
       return change(tabGroupId, tabId, title);
@@ -170,24 +175,27 @@
         ajaxHref: selectors
       }, "", url);
     }
-    function flowStep(flowId, step, options) {
+    function flowStep(flowId, stepId, title) {
+      return change(flowId, stepId, title);
     }
-    function formUpdate(formId, event, value, options) {
+    function formFocus(formId, focusId, title) {
+      return change(formId, focusId, title);
     }
-    function normalize(key, value) {
+    function setState(key, value) {
       var title = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : void 0;
-      var silent = arguments.length > 3 ? arguments[3] : void 0;
+      var silent = arguments.length > 3 && arguments[3] !== void 0 ? arguments[3] : false;
       return change(key, value, title, silent);
     }
-    function change(_x, _x2, _x3) {
+    function change(_x, _x2) {
       return _change.apply(this, arguments);
     }
     function _change() {
-      _change = _asyncToGenerator(/* @__PURE__ */ _regenerator().m(function _callee2(key, value, title) {
-        var silent, state, url, _args2 = arguments;
+      _change = _asyncToGenerator(/* @__PURE__ */ _regenerator().m(function _callee2(key, value) {
+        var title, silent, state, url, _args2 = arguments;
         return _regenerator().w(function(_context2) {
           while (1) switch (_context2.n) {
             case 0:
+              title = _args2.length > 2 && _args2[2] !== void 0 ? _args2[2] : void 0;
               silent = _args2.length > 3 && _args2[3] !== void 0 ? _args2[3] : false;
               if (!(globalSnapshot.title === title && globalSnapshot[key] === value)) {
                 _context2.n = 1;
@@ -279,6 +287,6 @@
         if (skipHashChange === window.location.hash) skipHashChange = null;
       }, 0);
     }
-  })();
+  })(typeof globalThis !== "undefined" ? globalThis : window);
 })();
 //# sourceMappingURL=aellux.ext.state-navigation.legacy.js.map

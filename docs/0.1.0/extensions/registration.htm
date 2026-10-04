@@ -528,15 +528,19 @@ $ae.init({ mode: &quot;basic&quot; });
 </code></pre>
 <h2>Extension Attachment</h2>
 <p>An Extension script exposes its API through <code>AelluxJs.extAttach()</code>:</p>
-<pre><code class="language-js">(function () {
+<pre><code class="language-js">(function (root) {
   &quot;use strict&quot;;
 
+  const AelluxJs = root.AelluxJs;
   const extensionName = &quot;example&quot;;
+  if (!AelluxJs) {
+    throw new Error(`[aellux.js] Cannot attach the &quot;${extensionName}&quot; extension: root.AelluxJs is not defined. Load the aellux.js boot script before this extension.`);
+  }
   AelluxJs.extAttach(extensionName, { init, destroy });
 
   function init() {}
   function destroy() {}
-})();
+})(typeof globalThis !== &quot;undefined&quot; ? globalThis : window);
 </code></pre>
 <p>Use the <a href="https://github.com/aelluxjs/core/blob/main/templates/README.md">aellux.js Extension scaffold</a> for the complete lifecycle structure.
 Third-party authors should also follow the <a href="authoring.htm">Extension authoring and compatibility contract</a>.</p>

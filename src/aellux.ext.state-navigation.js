@@ -1,15 +1,19 @@
 /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
 
-(function () {
+(function (root) {
   "use strict";
 
+  const AelluxJs = root.AelluxJs;
   const extensionName = "state-navigation";
+  if (!AelluxJs) {
+    throw new Error(`[aellux.js] Cannot attach the "${extensionName}" extension: root.AelluxJs is not defined. Load the aellux.js boot script before this extension.`);
+  }
   const globalSnapshot = {};
 
   AelluxJs.extAttach(extensionName, {
     init, destroy,
-    tabOpen, ajaxHref, flowStep, formUpdate, updateBaseTitle,
-    normalize,
+    tabOpen, ajaxHref, flowStep, formFocus, updateBaseTitle,
+    setState,
     globalSnapshot
   });
 
@@ -39,7 +43,7 @@
   }
 
   function updateBaseTitle(title) {
-
+    baseTitle = title;
   }
 
   function tabOpen(tabGroupId, tabId, title) {
@@ -52,19 +56,20 @@
     history.pushState({ aelluxJsState: true, snapshot: null, ajaxHref: selectors }, "", url);
   }
 
-  function flowStep(flowId, step, options) {
+  function flowStep(flowId, stepId, title) {
+    return change(flowId, stepId, title);
+  }
+
+  function formFocus(formId, focusId, title) {
+    return change(formId, focusId, title);
 
   }
 
-  function formUpdate(formId, event, value, options) {
-
-  }
-
-  function normalize(key, value, title = undefined, silent) {
+  function setState(key, value, title = undefined, silent = false) {
     return change(key, value, title, silent);
   }
 
-  async function change(key, value, title, silent = false) {
+  async function change(key, value, title = undefined, silent = false) {
     if (globalSnapshot.title === title &&
       globalSnapshot[key] === value) return;
 
@@ -154,4 +159,4 @@
         skipHashChange = null;
     }, 0);
   }
-})();
+})(typeof globalThis !== "undefined" ? globalThis : window);

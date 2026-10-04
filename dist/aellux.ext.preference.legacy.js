@@ -64,10 +64,14 @@
     if (Array.isArray(r)) return r;
   }
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
-  (function() {
+  (function(root) {
     "use strict";
+    var AelluxJs = root.AelluxJs;
     var toCamelCase2 = utils_name_case_default.toCamelCase;
     var extensionName = "preference";
+    if (!AelluxJs) {
+      throw new Error('[aellux.js] Cannot attach the "'.concat(extensionName, '" extension: root.AelluxJs is not defined. Load the aellux.js boot script before this extension.'));
+    }
     var userPreferences = /* @__PURE__ */ Object.create(null);
     var defaultPreferences = /* @__PURE__ */ Object.create(null);
     var computedPreferences = /* @__PURE__ */ Object.create(null);
@@ -225,6 +229,6 @@
         var change = buttonNext ? 1 : -1;
       }
     }
-  })();
+  })(typeof globalThis !== "undefined" ? globalThis : window);
 })();
 //# sourceMappingURL=aellux.ext.preference.legacy.js.map

@@ -45,15 +45,19 @@ $ae.init({ mode: "basic" });
 An Extension script exposes its API through `AelluxJs.extAttach()`:
 
 ```js
-(function () {
+(function (root) {
   "use strict";
 
+  const AelluxJs = root.AelluxJs;
   const extensionName = "example";
+  if (!AelluxJs) {
+    throw new Error(`[aellux.js] Cannot attach the "${extensionName}" extension: root.AelluxJs is not defined. Load the aellux.js boot script before this extension.`);
+  }
   AelluxJs.extAttach(extensionName, { init, destroy });
 
   function init() {}
   function destroy() {}
-})();
+})(typeof globalThis !== "undefined" ? globalThis : window);
 ```
 
 Use the [aellux.js Extension scaffold](https://github.com/aelluxjs/core/blob/main/templates/README.md) for the complete lifecycle structure.
