@@ -4,6 +4,7 @@ import { assetLoadHelper } from "./internal/asset-load-helper.js";
 import { createAelluxApi } from "./internal/aellux-api-integration.js";
 import { createAelluxConstants } from "./internal/create-aellux-constants.js";
 import utilsNameCase from "./internal/utils-name-case.js";
+import createWeakCss from "./internal/create-weak-css.js";
 
 // aellux.js boot script: intentionally minimal. Apart from build-time imports, its runtime body and
 // internal helpers must remain ES5-compatible; keep feature logic out and use conservative JavaScript.
@@ -51,18 +52,23 @@ import utilsNameCase from "./internal/utils-name-case.js";
   root.AelluxJs = api;
   root[api.shortJSName] = api;
   api.init = function (options) {
-    if (typeof document === "undefined") { console.log("[aellux.js] Browser not supported."); return; }
+    api.options.verboseLevel = diagnostics.update(options);
+
+    if (typeof document === "undefined") {
+      diagnostics.warn(diagnostics.WARN_BROWSER_UNSUPPORTED);
+      return;
+    }
 
     if (document.querySelector("[" + api.attr("legacy") + "]") ||
       document.querySelector("[" + api.attr("esm") + "]")) return; //Already loaded
 
     mergeOptions(api.options, options || {});
+    api.options.verboseLevel = diagnostics.verboseLevel;
     api.options.extensions = normalizeExtensionOptions(api.options.extensions);
 
     if (api.options.mode !== "basic" && api.options.mode !== "full") {
       throw diagnostics.create(diagnostics.ERROR_INVALID_MODE);
     }
-
     api.aelluxBasePath = api.options.basePath || aelluxBasePath;
     api.diagnostics.notAvailable = [];
 
@@ -115,14 +121,13 @@ import utilsNameCase from "./internal/utils-name-case.js";
             AelluxJs.diagnostics.supported = true;
           }).catch(function (error) {
             script.parentNode.removeChild(script);
-            console.log(error);
-            console.log("[aellux.js] Orchestrator failed to load, fallback to legacy.");
+            diagnostics.report(diagnostics.ERROR_MODERN_RUNTIME_START, { cause: error });
             loadLegacyOrchestratorFallback();
           });
       },
       errorCallback: function () {
         script.parentNode.removeChild(script);
-        console.log("[aellux.js] Orchestrator failed to load, fallback to legacy.");
+        diagnostics.report(diagnostics.ERROR_MODERN_RUNTIME_LOAD, { url: script.src });
         loadLegacyOrchestratorFallback();
       }
     });
@@ -135,7 +140,10 @@ import utilsNameCase from "./internal/utils-name-case.js";
       return;
 
     if (AelluxJs.diagnostics.notAvailable.length !== 0)
-      console.log("[aellux.js] " + AelluxJs.diagnostics.notAvailable.join(", ") + " not available in browser.");
+      diagnostics.warn(diagnostics.WARN_BROWSER_CAPABILITIES, {
+        notAvailable: AelluxJs.diagnostics.notAvailable
+      });
+    diagnostics.announce(diagnostics.ANNOUNCE_LEGACY_FALLBACK);
 
     AelluxJs.diagnostics.legacy = true;
     AelluxJs.diagnostics.supported = false;
@@ -177,29 +185,7 @@ import utilsNameCase from "./internal/utils-name-case.js";
     style.setAttribute(attr, "true");
     var a = AelluxJs.attr("$1");
     var c = AelluxJs.className("$1");
-    style.textContent = (":where(html){color-scheme:light dark;}" +
-      ":where(html[?color-scheme='dark']){color-scheme:dark;}" + //pref force
-      ":where(html[?color-scheme='light']){color-scheme:light;}" + //pref force
-      ":where(body,html) {font-family:system-ui;background-color:Canvas;color:CanvasText;}" +
-      ":where(button,a[href],[role='button'],[role='tab']){touch-action:manipulation;}" +
-      "[?wait-mounted]:not(.%mounted) > *:not([?loader]) {visibility: hidden!important;}" +
-      "[?wait-mounted].%mounted > [?loader] {display: none!important;}" +
-      ":where([?present-motion]) {" +
-      "--ae-from-opacity:0;--ae-pop-opacity:1;--ae-unpop-opacity:0;" +
-      "--ae-from-transform:scale(0.5);--ae-pop-transform:scale(1);--ae-unpop-transform:scale(1.2);" +
-      "--ae-pop-ease:ease-out;--ae-unpop-ease:ease-in;" +
-      "--ae-pop-duration:250ms;--ae-unpop-duration:250ms;" +
-      "transition-property:opacity,transform;" +
-      "}" +
-      ":where([?present-motion]:not(.%popping, .%pop, .%unpopping)) {" +
-      "transition-duration:var(--ae-pop-duration),var(--ae-pop-duration);transition-timing-function:linear,var(--ae-pop-ease,linear);opacity:var(--ae-from-opacity,0);transform:var(--ae-from-transform);" +
-      "}" +
-      ":where([?present-motion].%popping,[?present-motion].%pop) {" +
-      "transition-duration:var(--ae-pop-duration),var(--ae-pop-duration);transition-timing-function:linear,var(--ae-pop-ease,linear);opacity:var(--ae-pop-opacity,1);transform:var(--ae-pop-transform);" +
-      "}" +
-      ":where([?present-motion].%unpopping) {" +
-      "transition-duration:var(--ae-unpop-duration),var(--ae-unpop-duration);transition-timing-function:linear,var(--ae-unpop-ease,linear);opacity:var(--ae-unpop-opacity,0);transform:var(--ae-unpop-transform);" +
-      "}")
+    style.textContent = createWeakCss()
       .replace(/\?([a-z][0-9a-z\-]*)/gi, a)
       .replace(/\%([a-z][0-9a-z\-]*)/gi, c);
     document.head.appendChild(style);

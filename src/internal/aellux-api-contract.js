@@ -73,17 +73,39 @@ var diagnosticNames = [
   "ERROR_BOOTSTRAP_NOT_FOUND",
   "ERROR_NOT_INITIALIZED",
   "ERROR_INVALID_MODE",
+  "ERROR_INVALID_VERBOSE_LEVEL",
   "ERROR_EXTENSION_DUPLICATE",
   "ERROR_EXTENSION_INITIALIZE",
   "ERROR_EXTENSION_MOUNT",
   "ERROR_EXTENSION_UNMOUNT",
   "ERROR_EXTENSION_DESTROY",
   "ERROR_EXTENSION_INCOMPATIBLE",
+  "ERROR_EXTENSION_SELECTOR",
   "ERROR_LEGACY_RUNTIME_START",
-  "ERROR_LEGACY_RUNTIME_LOAD"
+  "ERROR_LEGACY_RUNTIME_LOAD",
+  "ERROR_MODERN_RUNTIME_START",
+  "ERROR_MODERN_RUNTIME_LOAD",
+  "WARN_BROWSER_UNSUPPORTED",
+  "WARN_BROWSER_CAPABILITIES",
+  "ANNOUNCE_LEGACY_FALLBACK"
 ];
 
-var diagnosticProperties = { create: method, report: method };
+var diagnosticProperties = {
+  create: method,
+  update: method,
+  report: method,
+  warn: method,
+  announce: method,
+  verboseLevel: Object.freeze({ type: "integer", "enum": Object.freeze([0, 1, 2]) }),
+  levels: Object.freeze({
+    type: "object",
+    properties: Object.freeze({
+      error: Object.freeze({ type: "integer", "const": 0 }),
+      warn: Object.freeze({ type: "integer", "const": 1 }),
+      announce: Object.freeze({ type: "integer", "const": 2 })
+    })
+  })
+};
 diagnosticProperties.legacy = flag;
 diagnosticProperties.supported = flag;
 diagnosticProperties.notAvailable = list;
@@ -101,6 +123,10 @@ var bootstrapProperties = Object.freeze({
     type: "object",
     properties: Object.freeze({
       mode: text,
+      verboseLevel: Object.freeze({
+        type: ["integer", "string"],
+        "enum": Object.freeze([0, 1, 2, "error", "warn", "announce"])
+      }),
       forceLegacy: flag,
       basePath: Object.freeze({ type: ["string", "null"] }),
       extensions: record
@@ -117,6 +143,10 @@ var bootstrapProperties = Object.freeze({
   on: method,
   off: method,
   attr: method,
+  attrMem: Object.freeze({
+    type: "object",
+    properties: Object.freeze({ save: method, restore: method })
+  }),
   className: method,
   extFilename: method,
   extName: method,

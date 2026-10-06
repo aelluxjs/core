@@ -27,10 +27,25 @@
   // src/internal/build-diagnostics.js
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   function buildDiagnostics(catalog) {
+    var levels = { error: 0, warn: 1, announce: 2 };
+    var consoleMethods = ["error", "warn", "info"];
     var diagnostics = {
       legacy: false,
       supported: false,
       notAvailable: [],
+      levels: levels,
+      verboseLevel: levels.error,
+      update: function(options) {
+        var requestedLevel = options && Object.prototype.hasOwnProperty.call(options, "verboseLevel") ? options.verboseLevel : diagnostics.verboseLevel;
+        if (typeof requestedLevel === "string" && Object.prototype.hasOwnProperty.call(levels, requestedLevel)) {
+          requestedLevel = levels[requestedLevel];
+        }
+        if (requestedLevel !== levels.error && requestedLevel !== levels.warn && requestedLevel !== levels.announce) {
+          throw diagnostics.create(diagnostics.ERROR_INVALID_VERBOSE_LEVEL);
+        }
+        diagnostics.verboseLevel = requestedLevel;
+        return requestedLevel;
+      },
       create: function(definition, context) {
         var error = new Error(definition.message);
         error.name = "AelluxJsDiagnosticError";
@@ -39,16 +54,30 @@
         return error;
       },
       report: function(definition, context) {
-        var error = diagnostics.create(definition, context);
-        if (typeof console !== "undefined" && typeof console.error === "function") {
-          console.error(
-            "[aellux.js " + definition.code + "] " + definition.message,
-            context || ""
-          );
-        }
-        return error;
+        return emit(levels.error, definition, context);
+      },
+      warn: function(definition, context) {
+        return emit(levels.warn, definition, context);
+      },
+      announce: function(definition, context) {
+        return emit(levels.announce, definition, context);
       }
     };
+    function getVerboseLevel() {
+      return diagnostics.verboseLevel;
+    }
+    function emit(level, definition, context) {
+      var diagnostic = diagnostics.create(definition, context);
+      var verboseLevel = getVerboseLevel();
+      var consoleMethod = consoleMethods[level];
+      if ((level === levels.error || level <= verboseLevel) && typeof console !== "undefined" && typeof console[consoleMethod] === "function") {
+        console[consoleMethod](
+          "[aellux.js " + definition.code + "] " + definition.message,
+          context || ""
+        );
+      }
+      return diagnostic;
+    }
     for (var name in catalog) {
       if (Object.prototype.hasOwnProperty.call(catalog, name)) {
         diagnostics[name] = catalog[name];
@@ -174,6 +203,31 @@
     };
   }
 
+  // src/internal/create-initial-attr-memory.js
+  /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+  var savedAttributes;
+  function saveAttr(target, attributes) {
+    if (!savedAttributes) savedAttributes = /* @__PURE__ */ new WeakMap();
+    var snapshot = [];
+    for (var i = 0; i < attributes.length; i++) {
+      var name = attributes[i];
+      snapshot.push([name, target.getAttribute(name)]);
+    }
+    savedAttributes.set(target, snapshot);
+  }
+  function restoreAttr(target) {
+    if (!savedAttributes) return;
+    var snapshot = savedAttributes.get(target);
+    if (!snapshot) return;
+    for (var i = 0; i < snapshot.length; i++) {
+      var name = snapshot[i][0];
+      var value = snapshot[i][1];
+      if (value === null) target.removeAttribute(name);
+      else target.setAttribute(name, value);
+    }
+    savedAttributes.delete(target);
+  }
+
   // src/internal/utils-name-case.js
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   function toCapitalized(name) {
@@ -264,6 +318,7 @@
     var toCapitalized2 = utils_name_case_default.toCapitalized;
     var toCamelCase2 = utils_name_case_default.toCamelCase;
     var fromCamelCase2 = utils_name_case_default.fromCamelCase;
+    var options = constants.AELLUXJS_DEFAULT_INITIALIZATION_OPTIONS;
     var diagnostics = buildDiagnostics(constants.AELLUXJS_DIAGNOSTICS);
     var oldShortInstance = root[constants.AELLUXJS_SHORT_JS_NAME];
     var document2 = root.document;
@@ -273,7 +328,7 @@
     var api = {
       shortJSName: constants.AELLUXJS_SHORT_JS_NAME,
       diagnostics: diagnostics,
-      options: constants.AELLUXJS_DEFAULT_INITIALIZATION_OPTIONS,
+      options: options,
       minified: false,
       waitLayout: null,
       init: function() {
@@ -285,16 +340,17 @@
         preferences: buildPersistMemory(root, "localStorage", "AelluxJsPreferences")
       },
       updatePreferenceAttributesHTML: preferenceHtml.updatePreferenceAttributesHTML,
-      on: function(event, handler, options) {
-        document2.addEventListener(api.eventName(event), handler, options);
+      on: function(event, handler, options2) {
+        document2.addEventListener(api.eventName(event), handler, options2);
       },
-      off: function(event, handler, options) {
-        document2.removeEventListener(api.eventName(event), handler, options);
+      off: function(event, handler, options2) {
+        document2.removeEventListener(api.eventName(event), handler, options2);
       },
       attr: function(name) {
         name = fromCamelCase2(name);
         return "data-" + constants.AELLUXJS_DATA_ATTRIBUTE_NAME_PREFFIX.replace(/\?/, name);
       },
+      attrMem: { save: saveAttr, restore: restoreAttr },
       className: function(name) {
         name = fromCamelCase2(name);
         return constants.AELLUXJS_CLASS_NAME_PREFFIX.replace(/\?/, name);
@@ -323,7 +379,7 @@
         extMounters: {},
         preferenceMediaQueries: buildPreferenceMediaQueries(root)
       },
-      ext: function(nameOrUrl, options) {
+      ext: function(nameOrUrl, options2) {
         var name = fromCamelCase2(api.extName(nameOrUrl));
         var key = toCamelCase2(name);
         var url = nameOrUrl;
@@ -332,15 +388,15 @@
           return;
         }
         if (url === api.extName(nameOrUrl)) url = "./" + api.extFilename(name);
-        if (!options) options = {};
-        if (typeof options.loadStyle === "undefined") options.loadStyle = false;
-        if (!options.loadWhen) options.loadWhen = null;
-        options.builds = normalizeExtensionBuilds(options.builds);
-        if (options.loadWhen) api.registry.lazyExtSelectors[key] = options.loadWhen;
-        options.url = url;
-        options.load = options.loadWhen ? false : true;
-        options.state = "wait";
-        api.registry.ext[key] = options;
+        if (!options2) options2 = {};
+        if (typeof options2.loadStyle === "undefined") options2.loadStyle = false;
+        if (!options2.loadWhen) options2.loadWhen = null;
+        options2.builds = normalizeExtensionBuilds(options2.builds);
+        if (options2.loadWhen) api.registry.lazyExtSelectors[key] = options2.loadWhen;
+        options2.url = url;
+        options2.load = options2.loadWhen ? false : true;
+        options2.state = "wait";
+        api.registry.ext[key] = options2;
       },
       extAttach: function(name, object) {
         name = fromCamelCase2(name);
@@ -356,13 +412,13 @@
         object.initialized = false;
         api.ext[key] = object;
       },
-      dispatch: function(event, options) {
-        api.dispatchFrom(document2, event, options);
+      dispatch: function(event, options2) {
+        return api.dispatchFrom(document2, event, options2);
       },
-      dispatchFrom: function(from, event, options) {
+      dispatchFrom: function(from, event, options2) {
         var obj = document2.createEvent("Event");
         obj.initEvent(api.eventName(event), false, false);
-        from.dispatchEvent(obj);
+        return from.dispatchEvent(obj);
       },
       wait: function() {
         throw diagnostics.create(diagnostics.ERROR_NOT_INITIALIZED);
@@ -417,17 +473,25 @@
         ERROR_BOOTSTRAP_NOT_FOUND: { code: 1e3, message: "aellux.js boot script could not be located." },
         ERROR_NOT_INITIALIZED: { code: 1001, message: "aellux.js has not been initialized." },
         ERROR_INVALID_MODE: { code: 1002, message: "aellux.js mode must be basic or full." },
+        ERROR_INVALID_VERBOSE_LEVEL: { code: 1003, message: "aellux.js verboseLevel must be 0, 1, 2, or the matching error, warn, announce key." },
         ERROR_EXTENSION_DUPLICATE: { code: 1101, message: "aellux.js Extension is already registered." },
         ERROR_EXTENSION_INITIALIZE: { code: 1102, message: "aellux.js Extension failed to initialize." },
         ERROR_EXTENSION_MOUNT: { code: 1103, message: "aellux.js Extension failed to mount or unmount an element." },
         ERROR_EXTENSION_UNMOUNT: { code: 1104, message: "aellux.js Extension failed to unmount." },
         ERROR_EXTENSION_DESTROY: { code: 1105, message: "aellux.js Extension failed to destroy." },
         ERROR_EXTENSION_INCOMPATIBLE: { code: 1106, message: "aellux.js Extension has no compatible build for the selected runtime." },
+        ERROR_EXTENSION_SELECTOR: { code: 1107, message: "aellux.js Extension failed to iterate a selector." },
         ERROR_LEGACY_RUNTIME_START: { code: 1201, message: "aellux.js Legacy runtime failed to start." },
-        ERROR_LEGACY_RUNTIME_LOAD: { code: 1202, message: "aellux.js Legacy runtime could not be loaded." }
+        ERROR_LEGACY_RUNTIME_LOAD: { code: 1202, message: "aellux.js Legacy runtime could not be loaded." },
+        ERROR_MODERN_RUNTIME_START: { code: 1203, message: "aellux.js Modern runtime failed to start; trying Legacy runtime." },
+        ERROR_MODERN_RUNTIME_LOAD: { code: 1204, message: "aellux.js Modern runtime could not be loaded; trying Legacy runtime." },
+        WARN_BROWSER_UNSUPPORTED: { code: 2e3, message: "Browser environment is not available." },
+        WARN_BROWSER_CAPABILITIES: { code: 2001, message: "Some browser capabilities are unavailable; trying Legacy runtime." },
+        ANNOUNCE_LEGACY_FALLBACK: { code: 3e3, message: "aellux.js is starting the Legacy runtime." }
       },
       AELLUXJS_DEFAULT_INITIALIZATION_OPTIONS: {
         mode: "full",
+        verboseLevel: 0,
         forceLegacy: false,
         basePath: null,
         extensions: {}
@@ -443,6 +507,12 @@
         { name: "Array", function: ["from", "isArray"] }
       ]
     };
+  }
+
+  // src/internal/create-weak-css.js
+  /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+  function createWeakCss() {
+    return "\n:where(html) { color-scheme: light dark; }\n:where(html[?color-scheme='dark']) { color-scheme: dark; }\n:where(html[?color-scheme='light']) { color-scheme: light; }\n:where(body,html) { font-family: system-ui; background-color: Canvas; color: CanvasText; }\n:where(button,a[href],[role='button'],[role='tab']) { touch-action: manipulation; }\n[?wait-mounted]:not(.%mounted) > *:not([?loader]) { visibility: hidden !important; }\n[?wait-mounted].%mounted > [?loader] { display: none !important; }\n:where([?present-motion]) {\n  --ae-from-opacity: 0;\n  --ae-pop-opacity: 1;\n  --ae-unpop-opacity: 0;\n  --ae-from-transform: scale(0.5);\n  --ae-pop-transform: scale(1);\n  --ae-unpop-transform: scale(1.2);\n  --ae-pop-ease: ease-out;\n  --ae-unpop-ease: ease-in;\n  --ae-pop-duration: 250ms;\n  --ae-unpop-duration: 250ms;\n  transition-property: opacity, transform;\n}\n:where([?present-motion]:not(.%popping, .%pop, .%unpopping, [hidden])) {\n  transition-duration: var(--ae-pop-duration), var(--ae-pop-duration);\n  transition-timing-function: linear, var(--ae-pop-ease, linear);\n  opacity: var(--ae-from-opacity, 0);\n  transform: var(--ae-from-transform);\n}\n:where([?present-motion].%popping, [?present-motion].%pop) {\n  transition-duration: var(--ae-pop-duration), var(--ae-pop-duration);\n  transition-timing-function: linear, var(--ae-pop-ease, linear);\n  opacity: var(--ae-pop-opacity, 1);\n  transform: var(--ae-pop-transform);\n}\n:where([?present-motion].%unpopping) {\n  transition-duration: var(--ae-unpop-duration), var(--ae-unpop-duration);\n  transition-timing-function: linear, var(--ae-unpop-ease, linear);\n  opacity: var(--ae-unpop-opacity, 0);\n  transform: var(--ae-unpop-transform);\n}";
   }
 
   // src/aellux.js
@@ -467,12 +537,14 @@
     root.AelluxJs = api;
     root[api.shortJSName] = api;
     api.init = function(options) {
+      api.options.verboseLevel = diagnostics.update(options);
       if (typeof document === "undefined") {
-        console.log("[aellux.js] Browser not supported.");
+        diagnostics.warn(diagnostics.WARN_BROWSER_UNSUPPORTED);
         return;
       }
       if (document.querySelector("[" + api.attr("legacy") + "]") || document.querySelector("[" + api.attr("esm") + "]")) return;
       mergeOptions(api.options, options || {});
+      api.options.verboseLevel = diagnostics.verboseLevel;
       api.options.extensions = normalizeExtensionOptions(api.options.extensions);
       if (api.options.mode !== "basic" && api.options.mode !== "full") {
         throw diagnostics.create(diagnostics.ERROR_INVALID_MODE);
@@ -520,14 +592,13 @@
             AelluxJs.diagnostics.supported = true;
           }).catch(function(error) {
             script.parentNode.removeChild(script);
-            console.log(error);
-            console.log("[aellux.js] Orchestrator failed to load, fallback to legacy.");
+            diagnostics.report(diagnostics.ERROR_MODERN_RUNTIME_START, { cause: error });
             loadLegacyOrchestratorFallback();
           });
         },
         errorCallback: function() {
           script.parentNode.removeChild(script);
-          console.log("[aellux.js] Orchestrator failed to load, fallback to legacy.");
+          diagnostics.report(diagnostics.ERROR_MODERN_RUNTIME_LOAD, { url: script.src });
           loadLegacyOrchestratorFallback();
         }
       });
@@ -537,7 +608,10 @@
       if (typeof document === "undefined" || document.querySelector("[" + attr + "]"))
         return;
       if (AelluxJs.diagnostics.notAvailable.length !== 0)
-        console.log("[aellux.js] " + AelluxJs.diagnostics.notAvailable.join(", ") + " not available in browser.");
+        diagnostics.warn(diagnostics.WARN_BROWSER_CAPABILITIES, {
+          notAvailable: AelluxJs.diagnostics.notAvailable
+        });
+      diagnostics.announce(diagnostics.ANNOUNCE_LEGACY_FALLBACK);
       AelluxJs.diagnostics.legacy = true;
       AelluxJs.diagnostics.supported = false;
       var script = document.createElement("script");
@@ -570,7 +644,7 @@
       style.setAttribute(attr, "true");
       var a = AelluxJs.attr("$1");
       var c = AelluxJs.className("$1");
-      style.textContent = ":where(html){color-scheme:light dark;}:where(html[?color-scheme='dark']){color-scheme:dark;}:where(html[?color-scheme='light']){color-scheme:light;}:where(body,html) {font-family:system-ui;background-color:Canvas;color:CanvasText;}:where(button,a[href],[role='button'],[role='tab']){touch-action:manipulation;}[?wait-mounted]:not(.%mounted) > *:not([?loader]) {visibility: hidden!important;}[?wait-mounted].%mounted > [?loader] {display: none!important;}:where([?present-motion]) {--ae-from-opacity:0;--ae-pop-opacity:1;--ae-unpop-opacity:0;--ae-from-transform:scale(0.5);--ae-pop-transform:scale(1);--ae-unpop-transform:scale(1.2);--ae-pop-ease:ease-out;--ae-unpop-ease:ease-in;--ae-pop-duration:250ms;--ae-unpop-duration:250ms;transition-property:opacity,transform;}:where([?present-motion]:not(.%popping, .%pop, .%unpopping)) {transition-duration:var(--ae-pop-duration),var(--ae-pop-duration);transition-timing-function:linear,var(--ae-pop-ease,linear);opacity:var(--ae-from-opacity,0);transform:var(--ae-from-transform);}:where([?present-motion].%popping,[?present-motion].%pop) {transition-duration:var(--ae-pop-duration),var(--ae-pop-duration);transition-timing-function:linear,var(--ae-pop-ease,linear);opacity:var(--ae-pop-opacity,1);transform:var(--ae-pop-transform);}:where([?present-motion].%unpopping) {transition-duration:var(--ae-unpop-duration),var(--ae-unpop-duration);transition-timing-function:linear,var(--ae-unpop-ease,linear);opacity:var(--ae-unpop-opacity,0);transform:var(--ae-unpop-transform);}".replace(/\?([a-z][0-9a-z\-]*)/gi, a).replace(/\%([a-z][0-9a-z\-]*)/gi, c);
+      style.textContent = createWeakCss().replace(/\?([a-z][0-9a-z\-]*)/gi, a).replace(/\%([a-z][0-9a-z\-]*)/gi, c);
       document.head.appendChild(style);
       if (!document.head.querySelector('meta[name="viewport"]')) {
         var meta = document.createElement("meta");

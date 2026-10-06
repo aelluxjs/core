@@ -38,6 +38,62 @@ for (const scenario of scenarios) {
   });
 }
 
+test("diagnostic verbosity normalizes a named level", async ({ page }) => {
+  await page.goto("/tests/index.htm");
+  await page.addScriptTag({ url: "/dist/aellux.js" });
+  const result = await page.evaluate(() => {
+    const levels = AelluxJs.diagnostics.levels;
+    AelluxJs.init({ mode: "basic", verboseLevel: "warn" });
+    const calls = [];
+    const original = {
+      error: console.error,
+      warn: console.warn,
+      info: console.info
+    };
+    console.error = () => calls.push("error");
+    console.warn = () => calls.push("warn");
+    console.info = () => calls.push("info");
+    try {
+      const definition = { code: 9999, message: "Probe" };
+      AelluxJs.diagnostics.report(definition);
+      AelluxJs.diagnostics.warn(definition);
+      AelluxJs.diagnostics.announce(definition);
+    } finally {
+      console.error = original.error;
+      console.warn = original.warn;
+      console.info = original.info;
+    }
+    return {
+      levels,
+      configured: AelluxJs.options.verboseLevel,
+      diagnosticLevel: AelluxJs.diagnostics.verboseLevel,
+      calls
+    };
+  });
+  expect(result).toEqual({
+    levels: { error: 0, warn: 1, announce: 2 },
+    configured: 1,
+    diagnosticLevel: 1,
+    calls: ["error", "warn"]
+  });
+});
+
+test("diagnostic verbosity can change after init without other options", async ({ page }) => {
+  await page.goto("/tests/index.htm");
+  await page.addScriptTag({ url: "/dist/aellux.js" });
+  const result = await page.evaluate(() => {
+    AelluxJs.init();
+    const initial = AelluxJs.diagnostics.verboseLevel;
+    AelluxJs.init({ verboseLevel: "announce" });
+    return {
+      initial,
+      configured: AelluxJs.options.verboseLevel,
+      active: AelluxJs.diagnostics.verboseLevel
+    };
+  });
+  expect(result).toEqual({ initial: 0, configured: 2, active: 2 });
+});
+
 test("renamed global and event prefix are available", async ({ page }) => {
   await openScenario(page, "runtime-modern");
   const result = await page.evaluate(() => ({

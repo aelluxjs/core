@@ -14,18 +14,26 @@ export function createAelluxConstants() {
       ERROR_BOOTSTRAP_NOT_FOUND: { code: 1000, message: "aellux.js boot script could not be located." },
       ERROR_NOT_INITIALIZED: { code: 1001, message: "aellux.js has not been initialized." },
       ERROR_INVALID_MODE: { code: 1002, message: "aellux.js mode must be basic or full." },
+      ERROR_INVALID_VERBOSE_LEVEL: { code: 1003, message: "aellux.js verboseLevel must be 0, 1, 2, or the matching error, warn, announce key." },
       ERROR_EXTENSION_DUPLICATE: { code: 1101, message: "aellux.js Extension is already registered." },
       ERROR_EXTENSION_INITIALIZE: { code: 1102, message: "aellux.js Extension failed to initialize." },
       ERROR_EXTENSION_MOUNT: { code: 1103, message: "aellux.js Extension failed to mount or unmount an element." },
       ERROR_EXTENSION_UNMOUNT: { code: 1104, message: "aellux.js Extension failed to unmount." },
       ERROR_EXTENSION_DESTROY: { code: 1105, message: "aellux.js Extension failed to destroy." },
       ERROR_EXTENSION_INCOMPATIBLE: { code: 1106, message: "aellux.js Extension has no compatible build for the selected runtime." },
+      ERROR_EXTENSION_SELECTOR: { code: 1107, message: "aellux.js Extension failed to iterate a selector." },
       ERROR_LEGACY_RUNTIME_START: { code: 1201, message: "aellux.js Legacy runtime failed to start." },
-      ERROR_LEGACY_RUNTIME_LOAD: { code: 1202, message: "aellux.js Legacy runtime could not be loaded." }
+      ERROR_LEGACY_RUNTIME_LOAD: { code: 1202, message: "aellux.js Legacy runtime could not be loaded." },
+      ERROR_MODERN_RUNTIME_START: { code: 1203, message: "aellux.js Modern runtime failed to start; trying Legacy runtime." },
+      ERROR_MODERN_RUNTIME_LOAD: { code: 1204, message: "aellux.js Modern runtime could not be loaded; trying Legacy runtime." },
+      WARN_BROWSER_UNSUPPORTED: { code: 2000, message: "Browser environment is not available." },
+      WARN_BROWSER_CAPABILITIES: { code: 2001, message: "Some browser capabilities are unavailable; trying Legacy runtime." },
+      ANNOUNCE_LEGACY_FALLBACK: { code: 3000, message: "aellux.js is starting the Legacy runtime." }
     },
 
     AELLUXJS_DEFAULT_INITIALIZATION_OPTIONS: {
       mode: "full",
+      verboseLevel: 0,
       forceLegacy: false,
       basePath: null,
       extensions: {}

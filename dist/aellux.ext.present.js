@@ -11,6 +11,7 @@
     const attr = {
       present: AelluxJs.attr(extensionName),
       autoUnpop: AelluxJs.attr("auto-unpop"),
+      presentMotion: AelluxJs.attr("present-motion"),
       unpopOnOutside: AelluxJs.attr("unpop-on-outside"),
       trigger: AelluxJs.attr("trigger"),
       //toggle,pop,unpop
@@ -34,12 +35,32 @@
       toggle,
       trigger
     });
+    const POP = "Pop", UNPOP = "Unpop", BEFORE = "Before", PING = "ping", MILLISECOND = "ms", SECOND = "s", ARIA_EXPANDED = "aria-expanded", ARIA_CONTROLS = "aria-controls";
     const presentElements = /* @__PURE__ */ new Map();
+    const triggerTargets = /* @__PURE__ */ new Map();
+    const attrMemoryUsers = /* @__PURE__ */ new WeakMap();
+    const initialAttributes = [
+      "hidden",
+      ARIA_EXPANDED,
+      ARIA_CONTROLS,
+      attr.presentMotion
+    ];
     function init(options) {
       mountMap.set(`[${attr.present}]`, {
-        mount: mountElement,
-        unmount: unmountElement
+        mount: mountPresentContainer,
+        unmount: unmountPresentContainer
       });
+      mountMap.set(
+        `[${[
+          attr.trigger,
+          attr.dismiss,
+          attr.target
+        ].join("],[")}]`,
+        {
+          mount: mountTriggerElement,
+          unmount: unmountTriggerElement
+        }
+      );
       document.addEventListener("click", OnClick);
     }
     function destroy() {
@@ -49,13 +70,35 @@
         controller.stop();
       }
       presentElements.clear();
+      triggerTargets.clear();
     }
-    function mountElement(element) {
-      const controller = {
+    function mountPresentContainer(element) {
+      if (presentElements.has(element)) return;
+      const presentMotion = element.querySelector(`:scope>[${attr.presentMotion}]`) || element;
+      rememberAttributes(element);
+      if (presentMotion !== element) rememberAttributes(presentMotion);
+      if (presentMotion === element) {
+        if (!presentMotion.hasAttribute(attr.presentMotion))
+          presentMotion.setAttribute(attr.presentMotion, "auto");
+      } else {
+        if (!element.hidden) {
+          element.hidden = presentMotion.hidden;
+        }
+        presentMotion.hidden = false;
+      }
+      const presentController = {
         interruptTransition: null,
         direction: null,
         timeout: null,
+        presentMotion,
+        classList: presentMotion.classList,
+        triggers: /* @__PURE__ */ new Set(),
+        setAriaExpanded: function(value) {
+          element.setAttribute(ARIA_EXPANDED, value);
+          this.triggers.forEach(updateTriggerAriaExpanded);
+        },
         stop: function() {
+          this.classList.remove(...Object.values(className));
           if (this.interruptTransition !== null && typeof this.interruptTransition === "function") {
             this.interruptTransition();
             this.interruptTransition = null;
@@ -66,14 +109,95 @@
           }
         }
       };
-      presentElements.set(element, controller);
-      autoUnpopSchedule(element, controller);
+      presentController.setAriaExpanded(
+        element.hidden ? "false" : "true"
+      );
+      if (!element.hidden) {
+        presentController.classList.add(className.pop);
+      }
+      presentElements.set(element, presentController);
+      for (const [triggerElement, targets] of triggerTargets) {
+        if (targets.has(element)) {
+          presentController.triggers.add(triggerElement);
+          updateTriggerAriaExpanded(triggerElement);
+        }
+      }
+      autoUnpopSchedule(element, presentController);
     }
-    function unmountElement(element) {
+    function unmountPresentContainer(element) {
       if (!presentElements.has(element)) return;
       const controller = presentElements.get(element);
       controller.stop();
       presentElements.delete(element);
+      controller.triggers.forEach(updateTriggerAriaExpanded);
+      if (controller.presentMotion !== element)
+        restoreAttributes(controller.presentMotion);
+      restoreAttributes(element);
+    }
+    function mountTriggerElement(triggerElement) {
+      if (triggerTargets.has(triggerElement)) return;
+      const targetIds = /* @__PURE__ */ new Set();
+      const targets = /* @__PURE__ */ new Set();
+      const targetSelector = triggerElement.getAttribute(attr.target);
+      const dismiss = triggerElement.getAttribute(attr.dismiss);
+      const container = triggerElement.closest(`[${attr.present}]`);
+      if (dismiss || targetSelector) {
+        iterateSelector(document, dismiss || targetSelector, (present) => {
+          if (!present.id) {
+            return;
+          }
+          targetIds.add(present.id);
+          targets.add(present);
+          const controller = presentElements.get(present);
+          if (controller) {
+            controller.triggers.add(triggerElement);
+          }
+        });
+      } else if (container && container.id) {
+        targetIds.add(container.id);
+        targets.add(container);
+        const controller = presentElements.get(container);
+        if (controller) {
+          controller.triggers.add(triggerElement);
+        }
+      }
+      if (targets.size === 0) return;
+      rememberAttributes(triggerElement);
+      triggerTargets.set(triggerElement, targets);
+      const initial = triggerElement.getAttribute(ARIA_CONTROLS);
+      if (initial) {
+        initial.trim().split(/\s+/).forEach((x) => targetIds.add(x));
+      }
+      updateTriggerAriaExpanded(triggerElement);
+      triggerElement.setAttribute(ARIA_CONTROLS, [...targetIds].join(" "));
+    }
+    function unmountTriggerElement(element) {
+      var _a;
+      const targets = triggerTargets.get(element);
+      if (!targets) return;
+      for (const target of targets) {
+        (_a = presentElements.get(target)) == null ? void 0 : _a.triggers.delete(element);
+      }
+      triggerTargets.delete(element);
+      restoreAttributes(element);
+    }
+    function updateTriggerAriaExpanded(triggerElement) {
+      const targets = triggerTargets.get(triggerElement);
+      if (!targets) return;
+      const expanded = [...targets].some((target) => {
+        const controller = presentElements.get(target);
+        return controller && target.getAttribute(ARIA_EXPANDED) === "true";
+      });
+      triggerElement.setAttribute(ARIA_EXPANDED, String(expanded));
+    }
+    function pop(element) {
+      return presentTransition(element, true);
+    }
+    function unpop(element) {
+      return presentTransition(element, false);
+    }
+    function toggle(element, goto) {
+      return presentTransition(element, goto);
     }
     function trigger(element, trigger2) {
       switch (trigger2) {
@@ -91,72 +215,87 @@
           break;
       }
     }
-    function pop(element) {
-      return changeState(element, true);
-    }
-    function unpop(element) {
-      return changeState(element, false);
-    }
-    function toggle(element, gotoVisible = void 0) {
-      return changeState(element, gotoVisible);
-    }
-    function changeState(element, gotoVisible = void 0) {
+    function presentTransition(element, gotoVisible) {
       const controller = presentElements.get(element);
       if (!controller) return;
       if (controller.direction === null)
-        controller.direction = element.hidden ? "unpop" : "pop";
+        controller.direction = element.hidden ? UNPOP : POP;
       if (typeof gotoVisible === "undefined" || gotoVisible === null)
-        gotoVisible = controller.direction === "pop" ? false : true;
-      const newDirection = gotoVisible ? "pop" : "unpop";
+        gotoVisible = controller.direction === POP ? false : true;
+      const newDirection = gotoVisible ? POP : UNPOP;
       if (element.hidden && !gotoVisible || newDirection === controller.direction) {
+        return;
+      }
+      const allowEvent = AelluxJs.dispatchFrom(
+        element,
+        `${BEFORE}${newDirection}`,
+        { bubbles: true, cancelable: true }
+      );
+      if (!allowEvent) {
         return;
       }
       controller.stop();
       controller.direction = newDirection;
       new Promise((completeTransition, interruptTransition) => {
         controller.interruptTransition = interruptTransition;
-        const c = className[`${newDirection}ping`];
-        const duration = root.getComputedStyle(element).getPropertyValue(`--ae-${newDirection}-duration`).trim();
+        const c = className[`${newDirection}${PING}`.toLowerCase()];
+        const duration = root.getComputedStyle(controller.presentMotion).getPropertyValue(`--ae-${newDirection}-duration`.toLowerCase()).trim();
         const time = getString2Time(duration);
-        element.classList.remove(...Object.values(className));
-        AelluxJs.dispatchFrom(element, `${newDirection}ping`);
+        controller.classList.add(c);
         element.hidden = false;
-        element.classList.add(c);
-        controller.timeout = setTimeout(() => {
-          element.classList.remove(c);
-          element.hidden = gotoVisible ? false : true;
-          controller.interruptTransition = null;
-          controller.timeout = null;
-          completeTransition();
-        }, time);
+        controller.timeout = setTimeout(
+          finishTransition,
+          time,
+          element,
+          controller,
+          c,
+          gotoVisible,
+          completeTransition
+        );
+        AelluxJs.dispatchFrom(element, `${newDirection}${PING}`, { bubbles: true });
       }).then(() => {
         if (gotoVisible && !element.hidden) {
           autoUnpopSchedule(element, controller);
-          element.classList.add(className.pop);
-          AelluxJs.dispatchFrom(element, "Pop");
+          controller.classList.add(className.pop);
+          controller.setAriaExpanded("true");
+          AelluxJs.dispatchFrom(element, POP, { bubbles: true });
         }
         if (!gotoVisible && element.hidden) {
-          AelluxJs.dispatchFrom(element, "Unpop");
+          controller.setAriaExpanded("false");
+          AelluxJs.dispatchFrom(element, UNPOP, { bubbles: true });
         }
       }).catch((interrupt) => {
       });
     }
+    function finishTransition(element, controller, c, gotoVisible, completeTransition) {
+      controller.classList.remove(c);
+      element.hidden = gotoVisible ? false : true;
+      controller.interruptTransition = null;
+      controller.timeout = null;
+      completeTransition();
+    }
     function autoUnpopSchedule(element, controller) {
-      const autoUnpop = element.getAttribute(attr.autoUnpop);
-      if (!element.hidden && autoUnpop) {
-        const autoTime = getString2Time(autoUnpop);
-        controller.timeout = setTimeout(() => {
-          controller.timeout = null;
-          unpop(element);
-        }, autoTime);
+      const autoUnpopValue = element.getAttribute(attr.autoUnpop);
+      if (!element.hidden && autoUnpopValue) {
+        const autoTime = getString2Time(autoUnpopValue);
+        controller.timeout = setTimeout(
+          autoUnpop,
+          autoTime,
+          element,
+          controller
+        );
       }
     }
+    function autoUnpop(element, controller) {
+      controller.timeout = null;
+      unpop(element);
+    }
     function outsideClickAutoUnpop(currentExceptions) {
-      for (const container of presentElements.keys()) {
-        if (container.hidden === true || container.getAttribute(attr.unpopOnOutside) === "false" || currentExceptions.some((e) => container.contains(e))) {
+      for (const pContainer of presentElements.keys()) {
+        if (pContainer.hidden === true || pContainer.getAttribute(attr.unpopOnOutside) === "false" || currentExceptions.some((e) => pContainer.contains(e))) {
           continue;
         }
-        unpop(container);
+        unpop(pContainer);
       }
     }
     function OnClick(event) {
@@ -169,10 +308,14 @@
         const triggerAttr = button.getAttribute(attr.trigger);
         const targetSelector = button.getAttribute(attr.target);
         if (targetSelector) {
-          document.querySelectorAll(targetSelector).forEach((element) => {
-            exceptions.push(element);
-            trigger(element, triggerAttr);
-          });
+          iterateSelector(
+            document,
+            targetSelector,
+            (element) => {
+              exceptions.push(element);
+              trigger(element, triggerAttr);
+            }
+          );
         } else if (container) {
           exceptions.push(container);
           trigger(container, triggerAttr);
@@ -184,10 +327,14 @@
         const dismiss = button.getAttribute(attr.dismiss);
         const targetSelector = button.getAttribute(attr.target);
         if (dismiss || targetSelector) {
-          document.querySelectorAll(dismiss || targetSelector).forEach((element) => {
-            exceptions.push(element);
-            unpop(element);
-          });
+          iterateSelector(
+            document,
+            dismiss || targetSelector,
+            (element) => {
+              exceptions.push(element);
+              unpop(element);
+            }
+          );
         } else if (container) {
           exceptions.push(container);
           unpop(container);
@@ -196,11 +343,41 @@
       }
       outsideClickAutoUnpop(exceptions);
     }
+    function iterateSelector(element, selector, callback) {
+      try {
+        element.querySelectorAll(selector).forEach((element2) => {
+          try {
+            callback(element2);
+          } catch (error) {
+          }
+        });
+      } catch (error) {
+        AelluxJs.diagnostics.report(
+          AelluxJs.diagnostics.ERROR_EXTENSION_SELECTOR,
+          { cause: error, extension: extensionName, selector }
+        );
+      }
+    }
+    function rememberAttributes(element) {
+      const users = attrMemoryUsers.get(element) || 0;
+      if (users === 0) AelluxJs.attrMem.save(element, initialAttributes);
+      attrMemoryUsers.set(element, users + 1);
+    }
+    function restoreAttributes(element) {
+      const users = attrMemoryUsers.get(element);
+      if (!users) return;
+      if (users > 1) {
+        attrMemoryUsers.set(element, users - 1);
+        return;
+      }
+      attrMemoryUsers.delete(element);
+      AelluxJs.attrMem.restore(element);
+    }
     function getString2Time(string) {
       return string ? parseFloat(string) * getMillisecondsMulti(string) : 0;
     }
     function getMillisecondsMulti(value) {
-      return !value.endsWith("ms") && value.endsWith("s") ? 1e3 : 1;
+      return !value.endsWith(MILLISECOND) && value.endsWith(SECOND) ? 1e3 : 1;
     }
   })(typeof globalThis !== "undefined" ? globalThis : window);
 })();

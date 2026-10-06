@@ -21906,7 +21906,7 @@
             }))();
           },
           dispatchFrom: function dispatchFrom(from, event, options) {
-            from.dispatchEvent(new CustomEvent(AelluxJs.eventName(event), options));
+            return from.dispatchEvent(new CustomEvent(AelluxJs.eventName(event), options));
           },
           wait: function wait(extensionName) {
             return getExtension(extensionName);

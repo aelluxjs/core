@@ -3,6 +3,7 @@
 import { buildDiagnostics } from "./build-diagnostics.js";
 import { buildPersistMemory } from "./build-persist-memory.js";
 import { buildPreferenceMediaQueries } from "./build-preference-media-queries.js";
+import { saveAttr, restoreAttr } from "./create-initial-attr-memory.js";
 import utilsNameCase from "./utils-name-case.js";
 import { createPreferenceHtmlHelper } from "./utils-preference-html.js";
 
@@ -13,6 +14,7 @@ export function createAelluxApi(root, constants) {
   var toCamelCase = utilsNameCase.toCamelCase;
   var fromCamelCase = utilsNameCase.fromCamelCase;
 
+  var options = constants.AELLUXJS_DEFAULT_INITIALIZATION_OPTIONS;
   var diagnostics = buildDiagnostics(constants.AELLUXJS_DIAGNOSTICS);
   var oldShortInstance = root[constants.AELLUXJS_SHORT_JS_NAME];
   var document = root.document;
@@ -21,7 +23,7 @@ export function createAelluxApi(root, constants) {
   var api = {
     shortJSName: constants.AELLUXJS_SHORT_JS_NAME,
     diagnostics: diagnostics,
-    options: constants.AELLUXJS_DEFAULT_INITIALIZATION_OPTIONS,
+    options: options,
     minified: false,
     waitLayout: null,
     init: function () { throw diagnostics.create(diagnostics.ERROR_NOT_INITIALIZED); },
@@ -41,6 +43,7 @@ export function createAelluxApi(root, constants) {
       name = fromCamelCase(name);
       return "data-" + constants.AELLUXJS_DATA_ATTRIBUTE_NAME_PREFFIX.replace(/\?/, name);
     },
+    attrMem: { save: saveAttr, restore: restoreAttr },
     className: function (name) {
       name = fromCamelCase(name);
       return constants.AELLUXJS_CLASS_NAME_PREFFIX.replace(/\?/, name);
@@ -102,11 +105,13 @@ export function createAelluxApi(root, constants) {
       object.initialized = false;
       api.ext[key] = object;
     },
-    dispatch: function (event, options) { api.dispatchFrom(document, event, options); },
+    dispatch: function (event, options) { return api.dispatchFrom(document, event, options); },
     dispatchFrom: function (from, event, options) {
       var obj = document.createEvent("Event");
-      obj.initEvent(api.eventName(event), false, false);
-      from.dispatchEvent(obj);
+      var bubbles = options ? options.bubbles : false;
+      var cancelable = options ? options.cancelable : false;
+      obj.initEvent(api.eventName(event), bubbles, cancelable);
+      return from.dispatchEvent(obj);
     },
     wait: function () { throw diagnostics.create(diagnostics.ERROR_NOT_INITIALIZED); },
     update: function () { throw diagnostics.create(diagnostics.ERROR_NOT_INITIALIZED); },
