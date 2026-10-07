@@ -21459,7 +21459,7 @@
             case 22:
               _context3.p = 22;
               _t4 = _context3.v;
-              AelluxJs2.diagnostics.report(AelluxJs2.diagnostics.ERROR_EXTENSION_MOUNT, {
+              AelluxJs2.diagnostics.error(AelluxJs2.diagnostics.ERROR_EXTENSION_MOUNT, {
                 cause: _t4,
                 extension: extensionName,
                 method: method,
@@ -21832,7 +21832,7 @@
                   case 3:
                     _context5.p = 3;
                     _t = _context5.v;
-                    AelluxJs.diagnostics.report(AelluxJs.diagnostics.ERROR_EXTENSION_UNMOUNT, {
+                    AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_EXTENSION_UNMOUNT, {
                       cause: _t,
                       extensions: extensionNames
                     });
@@ -21871,7 +21871,7 @@
                   case 11:
                     _context5.p = 11;
                     _t2 = _context5.v;
-                    AelluxJs.diagnostics.report(AelluxJs.diagnostics.ERROR_EXTENSION_DESTROY, {
+                    AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_EXTENSION_DESTROY, {
                       cause: _t2,
                       extension: extensionName
                     });
@@ -21920,7 +21920,7 @@
           if (extensionPromises[key]) return extensionPromises[key];
           var data = AelluxJs.registry.ext[key];
           if (data && !hasCompatibleBuild(data)) {
-            AelluxJs.diagnostics.report(AelluxJs.diagnostics.ERROR_EXTENSION_INCOMPATIBLE, {
+            AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_EXTENSION_INCOMPATIBLE, {
               extension: extensionName,
               runtime: AelluxJs.diagnostics.legacy ? "legacy" : "modern",
               builds: data.builds
@@ -21934,7 +21934,7 @@
               try {
                 extensionInitialize(extensionName);
               } catch (error) {
-                AelluxJs.diagnostics.report(AelluxJs.diagnostics.ERROR_EXTENSION_INITIALIZE, {
+                AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_EXTENSION_INITIALIZE, {
                   cause: error,
                   extension: extensionName
                 });
@@ -21954,7 +21954,7 @@
           }) : appendExtensionAssets(extensionName)).then(function() {
             return extensionInitialize(extensionName);
           }).catch(function(error) {
-            AelluxJs.diagnostics.report(AelluxJs.diagnostics.ERROR_EXTENSION_INITIALIZE, {
+            AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_EXTENSION_INITIALIZE, {
               cause: error,
               extension: extensionName
             });
@@ -23600,7 +23600,7 @@
               }
             });
           } catch (error) {
-            AelluxJs2.diagnostics.report(AelluxJs2.diagnostics.ERROR_EXTENSION_SELECTOR, {
+            AelluxJs2.diagnostics.error(AelluxJs2.diagnostics.ERROR_EXTENSION_SELECTOR, {
               cause: error,
               extension: extensionName,
               selector: selector

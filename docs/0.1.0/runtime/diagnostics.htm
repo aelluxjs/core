@@ -503,28 +503,89 @@
           <h1>Diagnostics</h1>
 <p>The aellux.js boot script exposes structured diagnostics through <code>AelluxJs.diagnostics</code> and <code>$ae.diagnostics</code>. This capability is available before the orchestrator starts, allowing boot, runtime, and Extension failures to use the same catalog.</p>
 <p>Runtime status is also available there: <code>diagnostics.legacy</code> identifies the selected Legacy runtime, <code>diagnostics.supported</code> indicates that the Modern runtime started successfully, and <code>diagnostics.notAvailable</code> lists missing Modern browser capabilities.</p>
-<p>Each catalog entry contains a numeric aellux.js error code and its default message:</p>
+<p>Each catalog entry contains a numeric aellux.js diagnostic code and its default message:</p>
 <pre><code class="language-js">$ae.diagnostics.ERROR_NOT_INITIALIZED;
 // { code: 1001, message: &quot;aellux.js has not been initialized.&quot; }
 </code></pre>
-<p>Use <code>report()</code> to create a diagnostic error and emit it through <code>console.error</code>:</p>
-<pre><code class="language-js">const diagnostic = $ae.diagnostics.report(
+<h2>Choosing a severity</h2>
+<p>Choose the method from the outcome of the event, not from the current <code>verboseLevel</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Use when</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>error()</code></td>
+<td>An operation failed or could not complete as intended.</td>
+<td>An Extension failed to initialize.</td>
+</tr>
+<tr>
+<td><code>warn()</code></td>
+<td>The system can continue, but a limitation or unexpected condition needs attention.</td>
+<td>A browser capability is missing and the Legacy runtime will be used.</td>
+</tr>
+<tr>
+<td><code>info()</code></td>
+<td>An expected state change is useful to observe.</td>
+<td>The Legacy runtime is starting.</td>
+</tr>
+</tbody></table>
+<p>All three methods accept a catalog definition and an optional context object, return an <code>AelluxJsDiagnosticError</code>, and record the event in the diagnostic history. <code>error()</code> writes to <code>console.error</code>, <code>warn()</code> to <code>console.warn</code>, and <code>info()</code> to <code>console.info</code> when their level is visible.</p>
+<p>For example:</p>
+<pre><code class="language-js">const diagnostic = $ae.diagnostics.error(
   $ae.diagnostics.ERROR_EXTENSION_INITIALIZE,
   { extension: &quot;example&quot;, cause: error }
 );
+
+$ae.diagnostics.warn(
+  $ae.diagnostics.WARN_BROWSER_CAPABILITIES,
+  { notAvailable: [&quot;CustomEvent&quot;] }
+);
+
+$ae.diagnostics.info($ae.diagnostics.INFO_LEGACY_FALLBACK);
 </code></pre>
-<p>Use <code>create()</code> when the caller must throw or otherwise handle the error without logging it immediately:</p>
+<p>Use <code>create()</code> when the caller must throw or otherwise handle the error without logging or recording it immediately:</p>
 <pre><code class="language-js">throw $ae.diagnostics.create(
   $ae.diagnostics.ERROR_NOT_INITIALIZED,
   { operation: &quot;update&quot; }
 );
 </code></pre>
 <p>Errors created by the helper use the name <code>AelluxJsDiagnosticError</code>, expose the numeric <code>code</code>, and preserve optional details in <code>context</code>.</p>
+<h2>Verbosity and history</h2>
+<p>Set <code>verboseLevel</code> in <code>init()</code> to control console output. The default is <code>&quot;error&quot;</code> (or <code>0</code>). You can pass a name or its integer value:</p>
+<table>
+<thead>
+<tr>
+<th><code>verboseLevel</code></th>
+<th>Console output</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>&quot;error&quot;</code> or <code>0</code></td>
+<td>Errors only.</td>
+</tr>
+<tr>
+<td><code>&quot;warn&quot;</code> or <code>1</code></td>
+<td>Errors and warnings.</td>
+</tr>
+<tr>
+<td><code>&quot;info&quot;</code> or <code>2</code></td>
+<td>Errors, warnings, and informational messages.</td>
+</tr>
+</tbody></table>
+<pre><code class="language-js">$ae.init({ verboseLevel: &quot;warn&quot; });
+</code></pre>
+<p><code>error()</code>, <code>warn()</code>, and <code>info()</code> are always recorded, even when the selected level hides them from the console. Call <code>$ae.diagnostics.showHistory(10)</code> to print the last 10 entries with timestamps; omit the argument to print all entries. The method also returns the selected entries, including their timestamp, level, code, message, and context. Passing <code>0</code> prints and returns no entries. Replaying history does not record new diagnostics.</p>
 <h2>Code Ranges</h2>
 <ul>
 <li><code>1000-1099</code>: boot and Core usage errors.</li>
 <li><code>1100-1199</code>: Extension lifecycle errors.</li>
-<li><code>1200-1299</code>: Legacy runtime errors.</li>
+<li><code>1200-1299</code>: runtime errors.</li>
+<li><code>2000-2099</code>: warnings.</li>
+<li><code>3000-3099</code>: informational messages.</li>
 </ul>
 <p>Applications should compare numeric codes or catalog entries instead of parsing console messages.</p>
 <h2>Extension Compatibility</h2>

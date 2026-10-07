@@ -909,7 +909,7 @@
               }
             });
           } catch (error) {
-            AelluxJs2.diagnostics.report(
+            AelluxJs2.diagnostics.error(
               AelluxJs2.diagnostics.ERROR_EXTENSION_SELECTOR,
               { cause: error, extension: extensionName, selector }
             );
@@ -1129,7 +1129,7 @@
                 setMounted(mountable, mountId, mounting);
               }
             } catch (error) {
-              AelluxJs2.diagnostics.report(
+              AelluxJs2.diagnostics.error(
                 AelluxJs2.diagnostics.ERROR_EXTENSION_MOUNT,
                 {
                   cause: error,
@@ -1254,7 +1254,7 @@
           try {
             await AelluxJs.unmount(document, extensionNames);
           } catch (error) {
-            AelluxJs.diagnostics.report(
+            AelluxJs.diagnostics.error(
               AelluxJs.diagnostics.ERROR_EXTENSION_UNMOUNT,
               { cause: error, extensions: extensionNames }
             );
@@ -1269,7 +1269,7 @@
                 await extension.destroy();
               }
             } catch (error) {
-              AelluxJs.diagnostics.report(
+              AelluxJs.diagnostics.error(
                 AelluxJs.diagnostics.ERROR_EXTENSION_DESTROY,
                 { cause: error, extension: extensionName }
               );
@@ -1301,7 +1301,7 @@
         return extensionPromises[key];
       const data = AelluxJs.registry.ext[key];
       if (data && !hasCompatibleBuild(data)) {
-        AelluxJs.diagnostics.report(
+        AelluxJs.diagnostics.error(
           AelluxJs.diagnostics.ERROR_EXTENSION_INCOMPATIBLE,
           {
             extension: extensionName,
@@ -1318,7 +1318,7 @@
           try {
             extensionInitialize(extensionName);
           } catch (error) {
-            AelluxJs.diagnostics.report(
+            AelluxJs.diagnostics.error(
               AelluxJs.diagnostics.ERROR_EXTENSION_INITIALIZE,
               { cause: error, extension: extensionName }
             );
@@ -1334,7 +1334,7 @@
       }
       const bundledLoader = AelluxJs.bundledExtensions ? AelluxJs.bundledExtensions[key] : null;
       extensionPromises[key] = (bundledLoader ? Promise.resolve().then(() => bundledLoader()) : appendExtensionAssets(extensionName)).then(() => extensionInitialize(extensionName)).catch((error) => {
-        AelluxJs.diagnostics.report(
+        AelluxJs.diagnostics.error(
           AelluxJs.diagnostics.ERROR_EXTENSION_INITIALIZE,
           { cause: error, extension: extensionName }
         );

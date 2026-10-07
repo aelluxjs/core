@@ -4,8 +4,9 @@
 // introduce runtime syntax or APIs that prevent the Legacy fallback path from being reached.
 
 export function buildDiagnostics(catalog) {
-  var levels = { error: 0, warn: 1, announce: 2 };
+  var levels = { error: 0, warn: 1, info: 2 };
   var consoleMethods = ["error", "warn", "info"];
+  var history = [];
   var diagnostics = {
     legacy: false,
     supported: false,
@@ -22,7 +23,7 @@ export function buildDiagnostics(catalog) {
       }
       if (requestedLevel !== levels.error &&
         requestedLevel !== levels.warn &&
-        requestedLevel !== levels.announce) {
+        requestedLevel !== levels.info) {
         throw diagnostics.create(diagnostics.ERROR_INVALID_VERBOSE_LEVEL);
       }
       diagnostics.verboseLevel = requestedLevel;
@@ -35,14 +36,32 @@ export function buildDiagnostics(catalog) {
       if (context) error.context = context;
       return error;
     },
-    report: function (definition, context) {
+    error: function (definition, context) {
       return emit(levels.error, definition, context);
     },
     warn: function (definition, context) {
       return emit(levels.warn, definition, context);
     },
-    announce: function (definition, context) {
-      return emit(levels.announce, definition, context);
+    info: function (definition, context) {
+      return emit(levels.info, definition, context);
+    },
+    showHistory: function (lines) {
+      if (typeof lines === "undefined") lines = history.length;
+      if (typeof lines !== "number" || !isFinite(lines) ||
+        lines < 0 || lines !== Math.floor(lines)) {
+        throw new RangeError("diagnostics.showHistory(lines) requires a non-negative integer.");
+      }
+      var entries = history.slice(Math.max(0, history.length - lines));
+      if (typeof console !== "undefined" && typeof console.log === "function") {
+        for (var i = 0; i < entries.length; i++) {
+          var entry = entries[i];
+          var message = "[" + entry.timestamp + "] [aellux.js " +
+            entry.code + "] " + entry.message;
+          if (entry.context) console.log(message, entry.context);
+          else console.log(message);
+        }
+      }
+      return entries;
     }
   };
 
@@ -52,6 +71,13 @@ export function buildDiagnostics(catalog) {
 
   function emit(level, definition, context) {
     var diagnostic = diagnostics.create(definition, context);
+    history.push({
+      timestamp: new Date().toISOString(),
+      level: level,
+      code: definition.code,
+      message: definition.message,
+      context: context
+    });
     var verboseLevel = getVerboseLevel();
     var consoleMethod = consoleMethods[level];
     if ((level === levels.error || level <= verboseLevel) &&

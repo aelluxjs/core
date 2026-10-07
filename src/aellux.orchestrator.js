@@ -79,7 +79,7 @@ import utilsNameCase from "./internal/utils-name-case.js";
         try {
           await AelluxJs.unmount(document, extensionNames);
         } catch (error) {
-          AelluxJs.diagnostics.report(
+          AelluxJs.diagnostics.error(
             AelluxJs.diagnostics.ERROR_EXTENSION_UNMOUNT,
             { cause: error, extensions: extensionNames }
           );
@@ -95,7 +95,7 @@ import utilsNameCase from "./internal/utils-name-case.js";
               await extension.destroy();
             }
           } catch (error) {
-            AelluxJs.diagnostics.report(
+            AelluxJs.diagnostics.error(
               AelluxJs.diagnostics.ERROR_EXTENSION_DESTROY,
               { cause: error, extension: extensionName }
             );
@@ -132,7 +132,7 @@ import utilsNameCase from "./internal/utils-name-case.js";
 
     const data = AelluxJs.registry.ext[key];
     if (data && !hasCompatibleBuild(data)) {
-      AelluxJs.diagnostics.report(
+      AelluxJs.diagnostics.error(
         AelluxJs.diagnostics.ERROR_EXTENSION_INCOMPATIBLE,
         {
           extension: extensionName,
@@ -150,7 +150,7 @@ import utilsNameCase from "./internal/utils-name-case.js";
         try {
           extensionInitialize(extensionName);
         } catch (error) {
-          AelluxJs.diagnostics.report(
+          AelluxJs.diagnostics.error(
             AelluxJs.diagnostics.ERROR_EXTENSION_INITIALIZE,
             { cause: error, extension: extensionName }
           );
@@ -175,7 +175,7 @@ import utilsNameCase from "./internal/utils-name-case.js";
         : appendExtensionAssets(extensionName))
         .then(() => extensionInitialize(extensionName))
         .catch((error) => {
-          AelluxJs.diagnostics.report(
+          AelluxJs.diagnostics.error(
             AelluxJs.diagnostics.ERROR_EXTENSION_INITIALIZE,
             { cause: error, extension: extensionName }
           );

@@ -27,8 +27,9 @@
   // src/internal/build-diagnostics.js
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   function buildDiagnostics(catalog) {
-    var levels = { error: 0, warn: 1, announce: 2 };
+    var levels = { error: 0, warn: 1, info: 2 };
     var consoleMethods = ["error", "warn", "info"];
+    var history = [];
     var diagnostics = {
       legacy: false,
       supported: false,
@@ -40,7 +41,7 @@
         if (typeof requestedLevel === "string" && Object.prototype.hasOwnProperty.call(levels, requestedLevel)) {
           requestedLevel = levels[requestedLevel];
         }
-        if (requestedLevel !== levels.error && requestedLevel !== levels.warn && requestedLevel !== levels.announce) {
+        if (requestedLevel !== levels.error && requestedLevel !== levels.warn && requestedLevel !== levels.info) {
           throw diagnostics.create(diagnostics.ERROR_INVALID_VERBOSE_LEVEL);
         }
         diagnostics.verboseLevel = requestedLevel;
@@ -53,14 +54,30 @@
         if (context) error.context = context;
         return error;
       },
-      report: function(definition, context) {
+      error: function(definition, context) {
         return emit(levels.error, definition, context);
       },
       warn: function(definition, context) {
         return emit(levels.warn, definition, context);
       },
-      announce: function(definition, context) {
-        return emit(levels.announce, definition, context);
+      info: function(definition, context) {
+        return emit(levels.info, definition, context);
+      },
+      showHistory: function(lines) {
+        if (typeof lines === "undefined") lines = history.length;
+        if (typeof lines !== "number" || !isFinite(lines) || lines < 0 || lines !== Math.floor(lines)) {
+          throw new RangeError("diagnostics.showHistory(lines) requires a non-negative integer.");
+        }
+        var entries = history.slice(Math.max(0, history.length - lines));
+        if (typeof console !== "undefined" && typeof console.log === "function") {
+          for (var i = 0; i < entries.length; i++) {
+            var entry = entries[i];
+            var message = "[" + entry.timestamp + "] [aellux.js " + entry.code + "] " + entry.message;
+            if (entry.context) console.log(message, entry.context);
+            else console.log(message);
+          }
+        }
+        return entries;
       }
     };
     function getVerboseLevel() {
@@ -68,6 +85,13 @@
     }
     function emit(level, definition, context) {
       var diagnostic = diagnostics.create(definition, context);
+      history.push({
+        timestamp: (/* @__PURE__ */ new Date()).toISOString(),
+        level: level,
+        code: definition.code,
+        message: definition.message,
+        context: context
+      });
       var verboseLevel = getVerboseLevel();
       var consoleMethod = consoleMethods[level];
       if ((level === levels.error || level <= verboseLevel) && typeof console !== "undefined" && typeof console[consoleMethod] === "function") {
@@ -384,7 +408,7 @@
         var key = toCamelCase2(name);
         var url = nameOrUrl;
         if (key in api.registry.ext) {
-          diagnostics.report(diagnostics.ERROR_EXTENSION_DUPLICATE, { extension: name });
+          diagnostics.error(diagnostics.ERROR_EXTENSION_DUPLICATE, { extension: name });
           return;
         }
         if (url === api.extName(nameOrUrl)) url = "./" + api.extFilename(name);
@@ -417,7 +441,9 @@
       },
       dispatchFrom: function(from, event, options2) {
         var obj = document2.createEvent("Event");
-        obj.initEvent(api.eventName(event), false, false);
+        var bubbles = options2 && "bubbles" in options2 ? options2.bubbles : false;
+        var cancelable = options2 && "cancelable" in options2 ? options2.cancelable : false;
+        obj.initEvent(api.eventName(event), bubbles, cancelable);
         return from.dispatchEvent(obj);
       },
       wait: function() {
@@ -473,7 +499,7 @@
         ERROR_BOOTSTRAP_NOT_FOUND: { code: 1e3, message: "aellux.js boot script could not be located." },
         ERROR_NOT_INITIALIZED: { code: 1001, message: "aellux.js has not been initialized." },
         ERROR_INVALID_MODE: { code: 1002, message: "aellux.js mode must be basic or full." },
-        ERROR_INVALID_VERBOSE_LEVEL: { code: 1003, message: "aellux.js verboseLevel must be 0, 1, 2, or the matching error, warn, announce key." },
+        ERROR_INVALID_VERBOSE_LEVEL: { code: 1003, message: "aellux.js verboseLevel must be 0, 1, 2, or the matching error, warn, info key." },
         ERROR_EXTENSION_DUPLICATE: { code: 1101, message: "aellux.js Extension is already registered." },
         ERROR_EXTENSION_INITIALIZE: { code: 1102, message: "aellux.js Extension failed to initialize." },
         ERROR_EXTENSION_MOUNT: { code: 1103, message: "aellux.js Extension failed to mount or unmount an element." },
@@ -487,7 +513,7 @@
         ERROR_MODERN_RUNTIME_LOAD: { code: 1204, message: "aellux.js Modern runtime could not be loaded; trying Legacy runtime." },
         WARN_BROWSER_UNSUPPORTED: { code: 2e3, message: "Browser environment is not available." },
         WARN_BROWSER_CAPABILITIES: { code: 2001, message: "Some browser capabilities are unavailable; trying Legacy runtime." },
-        ANNOUNCE_LEGACY_FALLBACK: { code: 3e3, message: "aellux.js is starting the Legacy runtime." }
+        INFO_LEGACY_FALLBACK: { code: 3e3, message: "aellux.js is starting the Legacy runtime." }
       },
       AELLUXJS_DEFAULT_INITIALIZATION_OPTIONS: {
         mode: "full",
@@ -592,13 +618,13 @@
             AelluxJs.diagnostics.supported = true;
           }).catch(function(error) {
             script.parentNode.removeChild(script);
-            diagnostics.report(diagnostics.ERROR_MODERN_RUNTIME_START, { cause: error });
+            diagnostics.error(diagnostics.ERROR_MODERN_RUNTIME_START, { cause: error });
             loadLegacyOrchestratorFallback();
           });
         },
         errorCallback: function() {
           script.parentNode.removeChild(script);
-          diagnostics.report(diagnostics.ERROR_MODERN_RUNTIME_LOAD, { url: script.src });
+          diagnostics.error(diagnostics.ERROR_MODERN_RUNTIME_LOAD, { url: script.src });
           loadLegacyOrchestratorFallback();
         }
       });
@@ -611,7 +637,7 @@
         diagnostics.warn(diagnostics.WARN_BROWSER_CAPABILITIES, {
           notAvailable: AelluxJs.diagnostics.notAvailable
         });
-      diagnostics.announce(diagnostics.ANNOUNCE_LEGACY_FALLBACK);
+      diagnostics.info(diagnostics.INFO_LEGACY_FALLBACK);
       AelluxJs.diagnostics.legacy = true;
       AelluxJs.diagnostics.supported = false;
       var script = document.createElement("script");
@@ -622,14 +648,14 @@
         loadCallback: function() {
           AelluxJs.dispatch("Legacy");
           AelluxJs.startAelluxJs().catch(function(error) {
-            AelluxJs.diagnostics.report(
+            AelluxJs.diagnostics.error(
               AelluxJs.diagnostics.ERROR_LEGACY_RUNTIME_START,
               { cause: error }
             );
           });
         },
         errorCallback: function() {
-          AelluxJs.diagnostics.report(
+          AelluxJs.diagnostics.error(
             AelluxJs.diagnostics.ERROR_LEGACY_RUNTIME_LOAD,
             { url: script.src }
           );

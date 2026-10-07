@@ -87,22 +87,23 @@ var diagnosticNames = [
   "ERROR_MODERN_RUNTIME_LOAD",
   "WARN_BROWSER_UNSUPPORTED",
   "WARN_BROWSER_CAPABILITIES",
-  "ANNOUNCE_LEGACY_FALLBACK"
+  "INFO_LEGACY_FALLBACK"
 ];
 
 var diagnosticProperties = {
   create: method,
   update: method,
-  report: method,
+  error: method,
   warn: method,
-  announce: method,
+  info: method,
+  showHistory: method,
   verboseLevel: Object.freeze({ type: "integer", "enum": Object.freeze([0, 1, 2]) }),
   levels: Object.freeze({
     type: "object",
     properties: Object.freeze({
       error: Object.freeze({ type: "integer", "const": 0 }),
       warn: Object.freeze({ type: "integer", "const": 1 }),
-      announce: Object.freeze({ type: "integer", "const": 2 })
+      info: Object.freeze({ type: "integer", "const": 2 })
     })
   })
 };
@@ -125,7 +126,7 @@ var bootstrapProperties = Object.freeze({
       mode: text,
       verboseLevel: Object.freeze({
         type: ["integer", "string"],
-        "enum": Object.freeze([0, 1, 2, "error", "warn", "announce"])
+        "enum": Object.freeze([0, 1, 2, "error", "warn", "info"])
       }),
       forceLegacy: flag,
       basePath: Object.freeze({ type: ["string", "null"] }),

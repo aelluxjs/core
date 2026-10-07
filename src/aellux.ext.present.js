@@ -39,6 +39,7 @@
     ARIA_EXPANDED = "aria-expanded",
     ARIA_CONTROLS = "aria-controls";
   const presentElements = new Map();
+  const triggerElementsSet = new Set();
   const triggerTargets = new Map();
   const attrMemoryUsers = new WeakMap();
   const initialAttributes = [
@@ -123,6 +124,9 @@
       presentController.classList.add(className.pop);
     }
     presentElements.set(element, presentController);
+    for (const triggerElement of triggerElementsSet) {
+      refreshTriggerTargets(triggerElement);
+    }
     for (const [triggerElement, targets] of triggerTargets) {
       if (targets.has(element)) {
         presentController.triggers.add(triggerElement);
@@ -144,21 +148,39 @@
   }
 
   function mountTriggerElement(triggerElement) {
-    if (triggerTargets.has(triggerElement)) return;
+    if (triggerElementsSet.has(triggerElement)) return;
+    rememberAttributes(triggerElement);
+    triggerElementsSet.add(triggerElement);
+    refreshTriggerTargets(triggerElement);
+  }
 
+  function unmountTriggerElement(triggerElement) {
+    const targets = triggerTargets.get(triggerElement);
+    if (!targets) return;
+    for (const target of targets) {
+      presentElements.get(target)?.triggers.delete(triggerElement);
+    }
+    triggerTargets.delete(triggerElement);
+    restoreAttributes(triggerElement);
+  }
+
+  function refreshTriggerTargets(triggerElement) {
     const targetIds = new Set();
     const targets = new Set();
     const targetSelector = triggerElement.getAttribute(attr.target);
     const dismiss = triggerElement.getAttribute(attr.dismiss);
     const container = triggerElement.closest(`[${attr.present}]`);
     if (dismiss || targetSelector) {
-      iterateSelector(document, dismiss || targetSelector, (present) => {
-        if (!present.id) { return; }
-        targetIds.add(present.id);
-        targets.add(present);
-        const controller = presentElements.get(present);
-        if (controller) { controller.triggers.add(triggerElement); }
-      });
+      iterateSelector(
+        document, dismiss || targetSelector,
+        (present) => {
+          if (!present.id) { return; }
+          targetIds.add(present.id);
+          targets.add(present);
+          const controller = presentElements.get(present);
+          if (controller) { controller.triggers.add(triggerElement); }
+        }
+      );
     } else if (container && container.id) {
       targetIds.add(container.id);
       targets.add(container);
@@ -167,22 +189,11 @@
     }
 
     if (targets.size === 0) return;
-    rememberAttributes(triggerElement);
     triggerTargets.set(triggerElement, targets);
     const initial = triggerElement.getAttribute(ARIA_CONTROLS);
     if (initial) { initial.trim().split(/\s+/).forEach(x => targetIds.add(x)); }
     updateTriggerAriaExpanded(triggerElement);
     triggerElement.setAttribute(ARIA_CONTROLS, [...targetIds].join(" "));
-  }
-
-  function unmountTriggerElement(element) {
-    const targets = triggerTargets.get(element);
-    if (!targets) return;
-    for (const target of targets) {
-      presentElements.get(target)?.triggers.delete(element);
-    }
-    triggerTargets.delete(element);
-    restoreAttributes(element);
   }
 
   function updateTriggerAriaExpanded(triggerElement) {
@@ -366,7 +377,7 @@
           }
         });
     } catch (error) {
-      AelluxJs.diagnostics.report(
+      AelluxJs.diagnostics.error(
         AelluxJs.diagnostics.ERROR_EXTENSION_SELECTOR,
         { cause: error, extension: extensionName, selector }
       );

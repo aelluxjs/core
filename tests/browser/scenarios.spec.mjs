@@ -55,9 +55,9 @@ test("diagnostic verbosity normalizes a named level", async ({ page }) => {
     console.info = () => calls.push("info");
     try {
       const definition = { code: 9999, message: "Probe" };
-      AelluxJs.diagnostics.report(definition);
+      AelluxJs.diagnostics.error(definition);
       AelluxJs.diagnostics.warn(definition);
-      AelluxJs.diagnostics.announce(definition);
+      AelluxJs.diagnostics.info(definition);
     } finally {
       console.error = original.error;
       console.warn = original.warn;
@@ -71,7 +71,7 @@ test("diagnostic verbosity normalizes a named level", async ({ page }) => {
     };
   });
   expect(result).toEqual({
-    levels: { error: 0, warn: 1, announce: 2 },
+    levels: { error: 0, warn: 1, info: 2 },
     configured: 1,
     diagnosticLevel: 1,
     calls: ["error", "warn"]
@@ -84,7 +84,7 @@ test("diagnostic verbosity can change after init without other options", async (
   const result = await page.evaluate(() => {
     AelluxJs.init();
     const initial = AelluxJs.diagnostics.verboseLevel;
-    AelluxJs.init({ verboseLevel: "announce" });
+    AelluxJs.init({ verboseLevel: "info" });
     return {
       initial,
       configured: AelluxJs.options.verboseLevel,
@@ -92,6 +92,51 @@ test("diagnostic verbosity can change after init without other options", async (
     };
   });
   expect(result).toEqual({ initial: 0, configured: 2, active: 2 });
+});
+
+test("diagnostic history includes filtered logs and shows the last requested lines", async ({ page }) => {
+  await page.goto("/tests/index.htm");
+  await page.addScriptTag({ url: "/dist/aellux.js" });
+  const result = await page.evaluate(() => {
+    const diagnostics = AelluxJs.diagnostics;
+    const definition = { code: 9999, message: "History probe" };
+    const calls = [];
+    const original = {
+      error: console.error,
+      warn: console.warn,
+      info: console.info,
+      log: console.log
+    };
+    console.error = () => calls.push("error");
+    console.warn = () => calls.push("warn");
+    console.info = () => calls.push("info");
+    console.log = (...args) => calls.push(args);
+    try {
+      diagnostics.error(definition);
+      diagnostics.warn(definition, { source: "filtered warning" });
+      diagnostics.info(definition);
+      const beforeReplay = calls.slice();
+      const lastTwo = diagnostics.showHistory(2);
+      const all = diagnostics.showHistory();
+      const noLines = diagnostics.showHistory(0);
+      return { beforeReplay, calls, lastTwo, all, noLines };
+    } finally {
+      console.error = original.error;
+      console.warn = original.warn;
+      console.info = original.info;
+      console.log = original.log;
+    }
+  });
+  expect(result.beforeReplay).toEqual(["error"]);
+  expect(result.all).toHaveLength(3);
+  expect(result.all.map(entry => entry.level)).toEqual([0, 1, 2]);
+  expect(result.lastTwo).toEqual(result.all.slice(1));
+  expect(result.noLines).toEqual([]);
+  expect(result.all[1].context).toEqual({ source: "filtered warning" });
+  expect(result.all[0].timestamp).toMatch(/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d{3}Z$/);
+  expect(result.calls).toHaveLength(6);
+  expect(result.calls[1][0]).toContain(result.all[1].timestamp);
+  expect(result.calls[1][0]).toContain("History probe");
 });
 
 test("renamed global and event prefix are available", async ({ page }) => {

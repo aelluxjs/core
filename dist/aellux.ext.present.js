@@ -352,7 +352,7 @@
           }
         });
       } catch (error) {
-        AelluxJs.diagnostics.report(
+        AelluxJs.diagnostics.error(
           AelluxJs.diagnostics.ERROR_EXTENSION_SELECTOR,
           { cause: error, extension: extensionName, selector }
         );

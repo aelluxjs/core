@@ -77,7 +77,7 @@ export function createAelluxApi(root, constants) {
       var key = toCamelCase(name);
       var url = nameOrUrl;
       if (key in api.registry.ext) {
-        diagnostics.report(diagnostics.ERROR_EXTENSION_DUPLICATE, { extension: name });
+        diagnostics.error(diagnostics.ERROR_EXTENSION_DUPLICATE, { extension: name });
         return;
       }
       if (url === api.extName(nameOrUrl)) url = "./" + api.extFilename(name);
@@ -108,8 +108,8 @@ export function createAelluxApi(root, constants) {
     dispatch: function (event, options) { return api.dispatchFrom(document, event, options); },
     dispatchFrom: function (from, event, options) {
       var obj = document.createEvent("Event");
-      var bubbles = options ? options.bubbles : false;
-      var cancelable = options ? options.cancelable : false;
+      var bubbles = options && "bubbles" in options ? options.bubbles : false;
+      var cancelable = options && "cancelable" in options ? options.cancelable : false;
       obj.initEvent(api.eventName(event), bubbles, cancelable);
       return from.dispatchEvent(obj);
     },

@@ -116,7 +116,7 @@ export function createMountHelper(root, extensionPromises) {
               setMounted(mountable, mountId, mounting);
             }
           } catch (error) {
-            AelluxJs.diagnostics.report(
+            AelluxJs.diagnostics.error(
               AelluxJs.diagnostics.ERROR_EXTENSION_MOUNT,
               {
                 cause: error,

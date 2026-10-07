@@ -76,4 +76,4 @@ Persistence uses Web Storage when available and falls back to in-memory storage 
 
 ## Diagnostics
 
-Structured errors are available through `$ae.diagnostics`. See [Diagnostics](diagnostics.md) for numeric codes, default messages, contextual data, and reporting behavior.
+Structured errors, warnings, and informational messages are available through `$ae.diagnostics`. See [Diagnostics](diagnostics.md) for severity guidelines, verbosity, history, codes, and contextual data.

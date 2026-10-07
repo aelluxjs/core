@@ -188,7 +188,7 @@ test("present reports invalid selectors without throwing from click", async ({ p
       attrMem: { save() {}, restore() {} },
       diagnostics: {
         ERROR_EXTENSION_SELECTOR: { code: 1107 },
-        report: (definition, context) => reports.push({ code: definition.code, selector: context.selector })
+        error: (definition, context) => reports.push({ code: definition.code, selector: context.selector })
       },
       extAttach: (_name, extension) => { window.presentExtension = extension; },
       dispatchFrom: () => true

@@ -121,13 +121,13 @@ import createWeakCss from "./internal/create-weak-css.js";
             AelluxJs.diagnostics.supported = true;
           }).catch(function (error) {
             script.parentNode.removeChild(script);
-            diagnostics.report(diagnostics.ERROR_MODERN_RUNTIME_START, { cause: error });
+            diagnostics.error(diagnostics.ERROR_MODERN_RUNTIME_START, { cause: error });
             loadLegacyOrchestratorFallback();
           });
       },
       errorCallback: function () {
         script.parentNode.removeChild(script);
-        diagnostics.report(diagnostics.ERROR_MODERN_RUNTIME_LOAD, { url: script.src });
+        diagnostics.error(diagnostics.ERROR_MODERN_RUNTIME_LOAD, { url: script.src });
         loadLegacyOrchestratorFallback();
       }
     });
@@ -143,7 +143,7 @@ import createWeakCss from "./internal/create-weak-css.js";
       diagnostics.warn(diagnostics.WARN_BROWSER_CAPABILITIES, {
         notAvailable: AelluxJs.diagnostics.notAvailable
       });
-    diagnostics.announce(diagnostics.ANNOUNCE_LEGACY_FALLBACK);
+    diagnostics.info(diagnostics.INFO_LEGACY_FALLBACK);
 
     AelluxJs.diagnostics.legacy = true;
     AelluxJs.diagnostics.supported = false;
@@ -160,14 +160,14 @@ import createWeakCss from "./internal/create-weak-css.js";
         AelluxJs.dispatch("Legacy");
         AelluxJs.startAelluxJs()
           .catch(function (error) {
-            AelluxJs.diagnostics.report(
+            AelluxJs.diagnostics.error(
               AelluxJs.diagnostics.ERROR_LEGACY_RUNTIME_START,
               { cause: error }
             );
           });
       },
       errorCallback: function () {
-        AelluxJs.diagnostics.report(
+        AelluxJs.diagnostics.error(
           AelluxJs.diagnostics.ERROR_LEGACY_RUNTIME_LOAD,
           { url: script.src }
         );

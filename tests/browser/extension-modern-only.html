@@ -7,10 +7,10 @@
   <script src="../../dist/aellux.js"></script>
   <script>
     var diagnosticCodes = [];
-    var originalReport = AelluxJs.diagnostics.report;
-    AelluxJs.diagnostics.report = function (definition, details) {
+    var originalError = AelluxJs.diagnostics.error;
+    AelluxJs.diagnostics.error = function (definition, details) {
       diagnosticCodes.push(definition.code);
-      return originalReport.call(AelluxJs.diagnostics, definition, details);
+      return originalError.call(AelluxJs.diagnostics, definition, details);
     };
 
     AelluxJsValidation.run(async function (assert) {

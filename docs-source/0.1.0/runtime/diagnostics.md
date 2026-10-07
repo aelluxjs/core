@@ -4,23 +4,42 @@ The aellux.js boot script exposes structured diagnostics through `AelluxJs.diagn
 
 Runtime status is also available there: `diagnostics.legacy` identifies the selected Legacy runtime, `diagnostics.supported` indicates that the Modern runtime started successfully, and `diagnostics.notAvailable` lists missing Modern browser capabilities.
 
-Each catalog entry contains a numeric aellux.js error code and its default message:
+Each catalog entry contains a numeric aellux.js diagnostic code and its default message:
 
 ```js
 $ae.diagnostics.ERROR_NOT_INITIALIZED;
 // { code: 1001, message: "aellux.js has not been initialized." }
 ```
 
-Use `report()` to create a diagnostic error and emit it through `console.error`:
+## Choosing a severity
+
+Choose the method from the outcome of the event, not from the current `verboseLevel`:
+
+| Method | Use when | Example |
+| --- | --- | --- |
+| `error()` | An operation failed or could not complete as intended. | An Extension failed to initialize. |
+| `warn()` | The system can continue, but a limitation or unexpected condition needs attention. | A browser capability is missing and the Legacy runtime will be used. |
+| `info()` | An expected state change is useful to observe. | The Legacy runtime is starting. |
+
+All three methods accept a catalog definition and an optional context object, return an `AelluxJsDiagnosticError`, and record the event in the diagnostic history. `error()` writes to `console.error`, `warn()` to `console.warn`, and `info()` to `console.info` when their level is visible.
+
+For example:
 
 ```js
-const diagnostic = $ae.diagnostics.report(
+const diagnostic = $ae.diagnostics.error(
   $ae.diagnostics.ERROR_EXTENSION_INITIALIZE,
   { extension: "example", cause: error }
 );
+
+$ae.diagnostics.warn(
+  $ae.diagnostics.WARN_BROWSER_CAPABILITIES,
+  { notAvailable: ["CustomEvent"] }
+);
+
+$ae.diagnostics.info($ae.diagnostics.INFO_LEGACY_FALLBACK);
 ```
 
-Use `create()` when the caller must throw or otherwise handle the error without logging it immediately:
+Use `create()` when the caller must throw or otherwise handle the error without logging or recording it immediately:
 
 ```js
 throw $ae.diagnostics.create(
@@ -31,11 +50,29 @@ throw $ae.diagnostics.create(
 
 Errors created by the helper use the name `AelluxJsDiagnosticError`, expose the numeric `code`, and preserve optional details in `context`.
 
+## Verbosity and history
+
+Set `verboseLevel` in `init()` to control console output. The default is `"error"` (or `0`). You can pass a name or its integer value:
+
+| `verboseLevel` | Console output |
+| --- | --- |
+| `"error"` or `0` | Errors only. |
+| `"warn"` or `1` | Errors and warnings. |
+| `"info"` or `2` | Errors, warnings, and informational messages. |
+
+```js
+$ae.init({ verboseLevel: "warn" });
+```
+
+`error()`, `warn()`, and `info()` are always recorded, even when the selected level hides them from the console. Call `$ae.diagnostics.showHistory(10)` to print the last 10 entries with timestamps; omit the argument to print all entries. The method also returns the selected entries, including their timestamp, level, code, message, and context. Passing `0` prints and returns no entries. Replaying history does not record new diagnostics.
+
 ## Code Ranges
 
 - `1000-1099`: boot and Core usage errors.
 - `1100-1199`: Extension lifecycle errors.
-- `1200-1299`: Legacy runtime errors.
+- `1200-1299`: runtime errors.
+- `2000-2099`: warnings.
+- `3000-3099`: informational messages.
 
 Applications should compare numeric codes or catalog entries instead of parsing console messages.
 
