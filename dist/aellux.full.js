@@ -441,7 +441,14 @@
         const attr = {
           adaptive: AelluxJs2.attr(extensionName)
         };
+        const modifier = {
+          shapeHorizontal: AelluxJs2.className("shape-horizontal"),
+          shapeVertical: AelluxJs2.className("shape-vertical"),
+          shapeSquare: AelluxJs2.className("shape-square")
+        };
         const mountMap = /* @__PURE__ */ new Map();
+        const adaptiveElements = /* @__PURE__ */ new Set();
+        const initialClasses = /* @__PURE__ */ new WeakMap();
         const adaptiveParams = {
           experienceScale: {
             near: 1,
@@ -461,18 +468,80 @@
             horizontal: 1.25
           }
         };
+        let managedClasses = getManagedClasses();
+        const resizeObserver = typeof root2.ResizeObserver === "function" ? new root2.ResizeObserver(onResize) : null;
         AelluxJs2.extAttach(extensionName, { init, destroy, mountMap, adaptiveParams });
-        function init() {
+        function init(options = {}) {
+          const overrides = options.adaptiveParams || {};
+          for (const group of Object.keys(adaptiveParams)) {
+            if (overrides[group] && typeof overrides[group] === "object") {
+              Object.assign(adaptiveParams[group], overrides[group]);
+            }
+          }
+          managedClasses = getManagedClasses();
           mountMap.set(`[${attr.adaptive}]`, {
             mount: mountAdaptive,
             unmount: unmountAdaptive
           });
         }
+        function getManagedClasses() {
+          return [
+            modifier.shapeHorizontal,
+            modifier.shapeVertical,
+            modifier.shapeSquare,
+            ...Object.keys(adaptiveParams.minSizes).map((size) => AelluxJs2.className("fits-" + size))
+          ];
+        }
         function destroy() {
+          for (const element of adaptiveElements) unmountAdaptive(element);
+          if (resizeObserver) resizeObserver.disconnect();
+          mountMap.clear();
         }
-        function mountAdaptive() {
+        function mountAdaptive(element) {
+          if (adaptiveElements.has(element)) return;
+          initialClasses.set(element, managedClasses.filter((name) => element.classList.contains(name)));
+          adaptiveElements.add(element);
+          const bounds = element.getBoundingClientRect();
+          updateAdaptive(element, bounds.width, bounds.height);
+          if (resizeObserver) resizeObserver.observe(element);
+          else if (adaptiveElements.size === 1) root2.addEventListener("resize", onWindowResize);
         }
-        function unmountAdaptive() {
+        function unmountAdaptive(element) {
+          if (!adaptiveElements.delete(element)) return;
+          if (resizeObserver) resizeObserver.unobserve(element);
+          else if (adaptiveElements.size === 0) root2.removeEventListener("resize", onWindowResize);
+          const initial = initialClasses.get(element) || [];
+          for (const name of managedClasses) {
+            element.classList.toggle(name, initial.includes(name));
+          }
+          initialClasses.delete(element);
+        }
+        function onResize(entries) {
+          for (const entry of entries) {
+            if (adaptiveElements.has(entry.target)) {
+              updateAdaptive(entry.target, entry.contentRect.width, entry.contentRect.height);
+            }
+          }
+        }
+        function onWindowResize() {
+          for (const element of adaptiveElements) {
+            const bounds = element.getBoundingClientRect();
+            updateAdaptive(element, bounds.width, bounds.height);
+          }
+        }
+        function updateAdaptive(element, width, height) {
+          const ratio = height > 0 ? width / height : 0;
+          element.classList.toggle(modifier.shapeVertical, ratio < adaptiveParams.ratioShapes.vertical);
+          element.classList.toggle(modifier.shapeHorizontal, ratio > adaptiveParams.ratioShapes.horizontal);
+          element.classList.toggle(
+            modifier.shapeSquare,
+            ratio >= adaptiveParams.ratioShapes.vertical && ratio <= adaptiveParams.ratioShapes.horizontal
+          );
+          const space = Math.sqrt(width * height);
+          for (const [size, minimum] of Object.entries(adaptiveParams.minSizes)) {
+            element.classList.toggle(AelluxJs2.className("fits-" + size), space >= minimum);
+          }
+          AelluxJs2.dispatchFrom(element, "AdaptiveUpdate", { detail: null });
         }
         function inferOrientation(flexBox, selector = "*") {
           return AelluxJs2.waitLayout.read(() => {
