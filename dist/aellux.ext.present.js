@@ -37,7 +37,9 @@
     });
     const POP = "Pop", UNPOP = "Unpop", BEFORE = "Before", PING = "ping", MILLISECOND = "ms", SECOND = "s", ARIA_EXPANDED = "aria-expanded", ARIA_CONTROLS = "aria-controls";
     const presentElements = /* @__PURE__ */ new Map();
+    const triggerElementsSet = /* @__PURE__ */ new Set();
     const triggerTargets = /* @__PURE__ */ new Map();
+    const initialTriggerControls = /* @__PURE__ */ new WeakMap();
     const attrMemoryUsers = /* @__PURE__ */ new WeakMap();
     const initialAttributes = [
       "hidden",
@@ -66,10 +68,12 @@
     function destroy() {
       mountMap.clear();
       document.removeEventListener("click", OnClick);
-      for (const controller of presentElements.values()) {
-        controller.stop();
+      for (const triggerElement of triggerElementsSet) {
+        unmountTriggerElement(triggerElement);
       }
-      presentElements.clear();
+      for (const element of presentElements.keys()) {
+        unmountPresentContainer(element);
+      }
       triggerTargets.clear();
     }
     function mountPresentContainer(element) {
@@ -100,7 +104,12 @@
         stop: function() {
           this.classList.remove(...Object.values(className));
           if (this.interruptTransition !== null && typeof this.interruptTransition === "function") {
-            this.interruptTransition();
+            this.interruptTransition(
+              AelluxJs.diagnostics.create(
+                AelluxJs.diagnostics.WARN_INTERRUPTION,
+                { extensionName }
+              )
+            );
             this.interruptTransition = null;
           }
           if (this.timeout !== null) {
@@ -116,6 +125,9 @@
         presentController.classList.add(className.pop);
       }
       presentElements.set(element, presentController);
+      for (const triggerElement of triggerElementsSet) {
+        refreshTriggerTargets(triggerElement);
+      }
       for (const [triggerElement, targets] of triggerTargets) {
         if (targets.has(element)) {
           presentController.triggers.add(triggerElement);
@@ -135,24 +147,55 @@
       restoreAttributes(element);
     }
     function mountTriggerElement(triggerElement) {
-      if (triggerTargets.has(triggerElement)) return;
+      if (triggerElementsSet.has(triggerElement)) return;
+      initialTriggerControls.set(triggerElement, triggerElement.getAttribute(ARIA_CONTROLS));
+      rememberAttributes(triggerElement);
+      triggerElementsSet.add(triggerElement);
+      refreshTriggerTargets(triggerElement);
+    }
+    function unmountTriggerElement(triggerElement) {
+      var _a;
+      if (!triggerElementsSet.has(triggerElement)) return;
+      const targets = triggerTargets.get(triggerElement);
+      if (targets) {
+        for (const target of targets) {
+          (_a = presentElements.get(target)) == null ? void 0 : _a.triggers.delete(triggerElement);
+        }
+        triggerTargets.delete(triggerElement);
+      }
+      triggerElementsSet.delete(triggerElement);
+      restoreAttributes(triggerElement);
+      initialTriggerControls.delete(triggerElement);
+    }
+    function refreshTriggerTargets(triggerElement) {
+      var _a;
       const targetIds = /* @__PURE__ */ new Set();
+      const previousTargets = triggerTargets.get(triggerElement);
       const targets = /* @__PURE__ */ new Set();
       const targetSelector = triggerElement.getAttribute(attr.target);
       const dismiss = triggerElement.getAttribute(attr.dismiss);
       const container = triggerElement.closest(`[${attr.present}]`);
+      if (previousTargets) {
+        for (const target of previousTargets) {
+          (_a = presentElements.get(target)) == null ? void 0 : _a.triggers.delete(triggerElement);
+        }
+      }
       if (dismiss || targetSelector) {
-        iterateSelector(document, dismiss || targetSelector, (present) => {
-          if (!present.id) {
-            return;
+        iterateSelector(
+          document,
+          dismiss || targetSelector,
+          (present) => {
+            if (!present.id) {
+              return;
+            }
+            targetIds.add(present.id);
+            targets.add(present);
+            const controller = presentElements.get(present);
+            if (controller) {
+              controller.triggers.add(triggerElement);
+            }
           }
-          targetIds.add(present.id);
-          targets.add(present);
-          const controller = presentElements.get(present);
-          if (controller) {
-            controller.triggers.add(triggerElement);
-          }
-        });
+        );
       } else if (container && container.id) {
         targetIds.add(container.id);
         targets.add(container);
@@ -161,25 +204,17 @@
           controller.triggers.add(triggerElement);
         }
       }
-      if (targets.size === 0) return;
-      rememberAttributes(triggerElement);
+      if (targets.size === 0) {
+        triggerTargets.delete(triggerElement);
+        return;
+      }
       triggerTargets.set(triggerElement, targets);
-      const initial = triggerElement.getAttribute(ARIA_CONTROLS);
+      const initial = initialTriggerControls.get(triggerElement);
       if (initial) {
         initial.trim().split(/\s+/).forEach((x) => targetIds.add(x));
       }
       updateTriggerAriaExpanded(triggerElement);
       triggerElement.setAttribute(ARIA_CONTROLS, [...targetIds].join(" "));
-    }
-    function unmountTriggerElement(element) {
-      var _a;
-      const targets = triggerTargets.get(element);
-      if (!targets) return;
-      for (const target of targets) {
-        (_a = presentElements.get(target)) == null ? void 0 : _a.triggers.delete(element);
-      }
-      triggerTargets.delete(element);
-      restoreAttributes(element);
     }
     function updateTriggerAriaExpanded(triggerElement) {
       const targets = triggerTargets.get(triggerElement);
@@ -264,7 +299,21 @@
           controller.setAriaExpanded("false");
           AelluxJs.dispatchFrom(element, UNPOP, { bubbles: true });
         }
-      }).catch((interrupt) => {
+      }).catch((error) => {
+        switch (error && error.code) {
+          case AelluxJs.diagnostics.WARN_INTERRUPTION.code:
+            AelluxJs.diagnostics.warn(
+              AelluxJs.diagnostics.WARN_INTERRUPTION,
+              { cause: error, extension: extensionName, element }
+            );
+            break;
+          default:
+            AelluxJs.diagnostics.error(
+              AelluxJs.diagnostics.ERROR_EXTENSION_TRANSITION,
+              { cause: error, extension: extensionName, element }
+            );
+            break;
+        }
       });
     }
     function finishTransition(element, controller, c, gotoVisible, completeTransition) {
@@ -349,6 +398,10 @@
           try {
             callback(element2);
           } catch (error) {
+            AelluxJs.diagnostics.error(
+              AelluxJs.diagnostics.ERROR_CALLBACK,
+              { cause: error, extension: extensionName, selector }
+            );
           }
         });
       } catch (error) {

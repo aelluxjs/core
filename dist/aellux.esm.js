@@ -481,12 +481,15 @@ function createAelluxConstants() {
       ERROR_EXTENSION_DESTROY: { code: 1105, message: "aellux.js Extension failed to destroy." },
       ERROR_EXTENSION_INCOMPATIBLE: { code: 1106, message: "aellux.js Extension has no compatible build for the selected runtime." },
       ERROR_EXTENSION_SELECTOR: { code: 1107, message: "aellux.js Extension failed to iterate a selector." },
+      ERROR_CALLBACK: { code: 1108, message: "aellux.js Extension selector callback failed." },
+      ERROR_EXTENSION_TRANSITION: { code: 1109, message: "aellux.js Extension transition failed." },
       ERROR_LEGACY_RUNTIME_START: { code: 1201, message: "aellux.js Legacy runtime failed to start." },
       ERROR_LEGACY_RUNTIME_LOAD: { code: 1202, message: "aellux.js Legacy runtime could not be loaded." },
       ERROR_MODERN_RUNTIME_START: { code: 1203, message: "aellux.js Modern runtime failed to start; trying Legacy runtime." },
       ERROR_MODERN_RUNTIME_LOAD: { code: 1204, message: "aellux.js Modern runtime could not be loaded; trying Legacy runtime." },
       WARN_BROWSER_UNSUPPORTED: { code: 2e3, message: "Browser environment is not available." },
       WARN_BROWSER_CAPABILITIES: { code: 2001, message: "Some browser capabilities are unavailable; trying Legacy runtime." },
+      WARN_INTERRUPTION: { code: 2002, message: "aellux.js Extension transition was interrupted." },
       INFO_LEGACY_FALLBACK: { code: 3e3, message: "aellux.js is starting the Legacy runtime." }
     },
     AELLUXJS_DEFAULT_INITIALIZATION_OPTIONS: {

@@ -209,3 +209,161 @@ test("present reports invalid selectors without throwing from click", async ({ p
   ]);
   expect(pageErrors).toEqual([]);
 });
+
+test("present restores a trigger without targets and can mount it again", async ({ page }) => {
+  await page.goto("/tests/index.htm");
+  const result = await page.evaluate(async () => {
+    const { saveAttr, restoreAttr } = await import("/src/internal/create-initial-attr-memory.js");
+    document.body.innerHTML = '<button id="control" data-ae-trigger="toggle" data-ae-target="#later"></button>';
+    window.AelluxJs = {
+      attr: name => `data-ae-${name}`,
+      className: name => `ae-${name}`,
+      attrMem: { save: saveAttr, restore: restoreAttr },
+      extAttach: (_name, extension) => { window.presentExtension = extension; },
+      dispatchFrom: () => true
+    };
+    return true;
+  });
+  expect(result).toBe(true);
+  await page.addScriptTag({ url: "/src/aellux.ext.present.js" });
+  const state = await page.evaluate(() => {
+    const extension = window.presentExtension;
+    extension.init();
+    const [panels, controls] = extension.mountMap.values();
+    const control = document.querySelector("#control");
+    controls.mount(control);
+    controls.unmount(control);
+    const afterUnmount = {
+      expanded: control.getAttribute("aria-expanded"),
+      controls: control.getAttribute("aria-controls")
+    };
+    document.body.insertAdjacentHTML("beforeend", '<div id="later" data-ae-present hidden></div>');
+    const panel = document.querySelector("#later");
+    panels.mount(panel);
+    controls.mount(control);
+    const afterRemount = {
+      expanded: control.getAttribute("aria-expanded"),
+      controls: control.getAttribute("aria-controls")
+    };
+    controls.unmount(control);
+    panels.unmount(panel);
+    extension.destroy();
+    return { afterUnmount, afterRemount };
+  });
+  expect(state.afterUnmount).toEqual({ expanded: null, controls: null });
+  expect(state.afterRemount).toEqual({ expanded: "false", controls: "later" });
+});
+
+test("present records interrupted transitions as warnings and failures as errors", async ({ page }) => {
+  await page.goto("/tests/index.htm");
+  await page.evaluate(async () => {
+    const [{ buildDiagnostics }, { createAelluxConstants }, { saveAttr, restoreAttr }] = await Promise.all([
+      import("/src/internal/build-diagnostics.js"),
+      import("/src/internal/create-aellux-constants.js"),
+      import("/src/internal/create-initial-attr-memory.js")
+    ]);
+    document.body.innerHTML = '<div id="panel" data-ae-present hidden style="--ae-pop-duration: 100ms; --ae-unpop-duration: 0ms"></div>';
+    window.AelluxJs = {
+      attr: name => `data-ae-${name}`,
+      className: name => `ae-${name}`,
+      attrMem: { save: saveAttr, restore: restoreAttr },
+      diagnostics: buildDiagnostics(createAelluxConstants().AELLUXJS_DIAGNOSTICS),
+      extAttach: (_name, extension) => { window.presentExtension = extension; },
+      dispatchFrom: (_element, event) => {
+        if (window.failPopping && event === "Popping") throw new Error("transition probe");
+        return true;
+      }
+    };
+  });
+  await page.addScriptTag({ url: "/src/aellux.ext.present.js" });
+  const entries = await page.evaluate(async () => {
+    const extension = window.presentExtension;
+    extension.init();
+    const [panels] = extension.mountMap.values();
+    const panel = document.querySelector("#panel");
+    panels.mount(panel);
+    extension.pop(panel);
+    extension.unpop(panel);
+    await new Promise(resolve => setTimeout(resolve, 30));
+    window.failPopping = true;
+    extension.pop(panel);
+    await new Promise(resolve => setTimeout(resolve, 0));
+    return AelluxJs.diagnostics.showHistory().map(entry => ({ code: entry.code, level: entry.level }));
+  });
+  expect(entries).toEqual([
+    { code: 2002, level: 1 },
+    { code: 1109, level: 0 }
+  ]);
+});
+
+test("present reports a selector callback failure with its own diagnostic", async ({ page }) => {
+  await page.goto("/tests/index.htm");
+  await page.evaluate(async () => {
+    const [{ buildDiagnostics }, { createAelluxConstants }, { saveAttr, restoreAttr }] = await Promise.all([
+      import("/src/internal/build-diagnostics.js"),
+      import("/src/internal/create-aellux-constants.js"),
+      import("/src/internal/create-initial-attr-memory.js")
+    ]);
+    document.body.innerHTML = `
+      <button id="control" data-ae-trigger="pop" data-ae-target="#panel"></button>
+      <div id="panel" data-ae-present hidden></div>
+    `;
+    window.AelluxJs = {
+      attr: name => `data-ae-${name}`,
+      className: name => `ae-${name}`,
+      attrMem: { save: saveAttr, restore: restoreAttr },
+      diagnostics: buildDiagnostics(createAelluxConstants().AELLUXJS_DIAGNOSTICS),
+      extAttach: (_name, extension) => { window.presentExtension = extension; },
+      dispatchFrom: () => { throw new Error("callback probe"); }
+    };
+  });
+  await page.addScriptTag({ url: "/src/aellux.ext.present.js" });
+  const codes = await page.evaluate(() => {
+    const extension = window.presentExtension;
+    extension.init();
+    const [panels] = extension.mountMap.values();
+    panels.mount(document.querySelector("#panel"));
+    document.querySelector("#control").click();
+    return AelluxJs.diagnostics.showHistory().map(entry => entry.code);
+  });
+  expect(codes).toEqual([1108]);
+});
+
+test("present refreshes trigger controls from its initial value", async ({ page }) => {
+  await page.goto("/tests/index.htm");
+  await page.evaluate(async () => {
+    const { saveAttr, restoreAttr } = await import("/src/internal/create-initial-attr-memory.js");
+    document.body.innerHTML = `
+      <button id="control" data-ae-trigger="toggle" data-ae-target="#first" aria-controls="external"></button>
+      <div id="first" data-ae-present hidden></div>
+    `;
+    window.AelluxJs = {
+      attr: name => `data-ae-${name}`,
+      className: name => `ae-${name}`,
+      attrMem: { save: saveAttr, restore: restoreAttr },
+      extAttach: (_name, extension) => { window.presentExtension = extension; },
+      dispatchFrom: () => true
+    };
+  });
+  await page.addScriptTag({ url: "/src/aellux.ext.present.js" });
+  const controls = await page.evaluate(() => {
+    const extension = window.presentExtension;
+    extension.init();
+    const [panels, triggers] = extension.mountMap.values();
+    const control = document.querySelector("#control");
+    panels.mount(document.querySelector("#first"));
+    triggers.mount(control);
+    const before = control.getAttribute("aria-controls");
+    control.setAttribute("data-ae-target", "#second");
+    document.body.insertAdjacentHTML("beforeend", '<div id="second" data-ae-present hidden></div>');
+    panels.mount(document.querySelector("#second"));
+    const after = control.getAttribute("aria-controls");
+    triggers.unmount(control);
+    return { before, after, restored: control.getAttribute("aria-controls") };
+  });
+  expect(controls).toEqual({
+    before: "first external",
+    after: "second external",
+    restored: "external"
+  });
+});

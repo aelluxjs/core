@@ -41,6 +41,7 @@
   const presentElements = new Map();
   const triggerElementsSet = new Set();
   const triggerTargets = new Map();
+  const initialTriggerControls = new WeakMap();
   const attrMemoryUsers = new WeakMap();
   const initialAttributes = [
     "hidden", ARIA_EXPANDED, ARIA_CONTROLS, attr.presentMotion
@@ -69,10 +70,12 @@
     mountMap.clear();
     document.removeEventListener("click", OnClick);
 
-    for (const controller of presentElements.values()) {
-      controller.stop();
+    for (const triggerElement of triggerElementsSet) {
+      unmountTriggerElement(triggerElement);
     }
-    presentElements.clear();
+    for (const element of presentElements.keys()) {
+      unmountPresentContainer(element);
+    }
     triggerTargets.clear();
   }
 
@@ -108,7 +111,12 @@
         this.classList.remove(...Object.values(className));
         if (this.interruptTransition !== null
           && typeof this.interruptTransition === "function") {
-          this.interruptTransition();
+          this.interruptTransition(
+            AelluxJs.diagnostics.create(
+              AelluxJs.diagnostics.WARN_INTERRUPTION,
+              { extensionName }
+            )
+          );
           this.interruptTransition = null;
         }
         if (this.timeout !== null) {
@@ -149,27 +157,40 @@
 
   function mountTriggerElement(triggerElement) {
     if (triggerElementsSet.has(triggerElement)) return;
+    initialTriggerControls.set(triggerElement, triggerElement.getAttribute(ARIA_CONTROLS));
     rememberAttributes(triggerElement);
     triggerElementsSet.add(triggerElement);
     refreshTriggerTargets(triggerElement);
   }
 
   function unmountTriggerElement(triggerElement) {
+    if (!triggerElementsSet.has(triggerElement)) return;
     const targets = triggerTargets.get(triggerElement);
-    if (!targets) return;
-    for (const target of targets) {
-      presentElements.get(target)?.triggers.delete(triggerElement);
+    if (targets) {
+      for (const target of targets) {
+        presentElements.get(target)?.triggers.delete(triggerElement);
+      }
+      triggerTargets.delete(triggerElement);
     }
-    triggerTargets.delete(triggerElement);
+    triggerElementsSet.delete(triggerElement);
     restoreAttributes(triggerElement);
+    initialTriggerControls.delete(triggerElement);
   }
 
   function refreshTriggerTargets(triggerElement) {
     const targetIds = new Set();
+    const previousTargets = triggerTargets.get(triggerElement);
     const targets = new Set();
     const targetSelector = triggerElement.getAttribute(attr.target);
     const dismiss = triggerElement.getAttribute(attr.dismiss);
     const container = triggerElement.closest(`[${attr.present}]`);
+
+    if (previousTargets) {
+      for (const target of previousTargets) {
+        presentElements.get(target)?.triggers.delete(triggerElement);
+      }
+    }
+
     if (dismiss || targetSelector) {
       iterateSelector(
         document, dismiss || targetSelector,
@@ -188,9 +209,12 @@
       if (controller) { controller.triggers.add(triggerElement); }
     }
 
-    if (targets.size === 0) return;
+    if (targets.size === 0) {
+      triggerTargets.delete(triggerElement);
+      return;
+    }
     triggerTargets.set(triggerElement, targets);
-    const initial = triggerElement.getAttribute(ARIA_CONTROLS);
+    const initial = initialTriggerControls.get(triggerElement);
     if (initial) { initial.trim().split(/\s+/).forEach(x => targetIds.add(x)); }
     updateTriggerAriaExpanded(triggerElement);
     triggerElement.setAttribute(ARIA_CONTROLS, [...targetIds].join(" "));
@@ -275,8 +299,21 @@
         controller.setAriaExpanded("false");
         AelluxJs.dispatchFrom(element, UNPOP, { bubbles: true });
       }
-    }).catch((interrupt) => {
-      //Diagnostic WARN transition interrupt
+    }).catch((error) => {
+      switch (error && error.code) {
+        case AelluxJs.diagnostics.WARN_INTERRUPTION.code:
+          AelluxJs.diagnostics.warn(
+            AelluxJs.diagnostics.WARN_INTERRUPTION,
+            { cause: error, extension: extensionName, element }
+          );
+          break;
+        default:
+          AelluxJs.diagnostics.error(
+            AelluxJs.diagnostics.ERROR_EXTENSION_TRANSITION,
+            { cause: error, extension: extensionName, element }
+          );
+          break;
+      }
     });
   }
 
@@ -373,7 +410,10 @@
         .forEach((element) => {
           try { callback(element); }
           catch (error) {
-
+            AelluxJs.diagnostics.error(
+              AelluxJs.diagnostics.ERROR_CALLBACK,
+              { cause: error, extension: extensionName, selector }
+            );
           }
         });
     } catch (error) {
