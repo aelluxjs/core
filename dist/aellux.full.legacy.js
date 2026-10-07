@@ -21086,7 +21086,7 @@
       return this;
     }), _regeneratorDefine2(u, "toString", function() {
       return "[object Generator]";
-    }), (_regenerator = function _regenerator6() {
+    }), (_regenerator = function _regenerator5() {
       return { w: i, m: f };
     })();
   }
@@ -21685,7 +21685,7 @@
       return this;
     }), _regeneratorDefine22(u, "toString", function() {
       return "[object Generator]";
-    }), (_regenerator2 = function _regenerator6() {
+    }), (_regenerator2 = function _regenerator5() {
       return { w: i, m: f };
     })();
   }
@@ -21749,7 +21749,7 @@
                   case 0:
                     if (root2.AelluxJs.bundledExtensions) {
                       Object.keys(root2.AelluxJs.bundledExtensions).forEach(function(key) {
-                        return AelluxJs.ext(key);
+                        if (!(key in AelluxJs.registry.ext)) AelluxJs.ext(key);
                       });
                     }
                     _context.n = 1;
@@ -21949,9 +21949,7 @@
             return Promise.reject();
           }
           var bundledLoader = AelluxJs.bundledExtensions ? AelluxJs.bundledExtensions[key] : null;
-          extensionPromises[key] = (bundledLoader ? Promise.resolve().then(function() {
-            return bundledLoader();
-          }) : appendExtensionAssets(extensionName)).then(function() {
+          extensionPromises[key] = appendExtensionAssets(extensionName, bundledLoader).then(function() {
             return extensionInitialize(extensionName);
           }).catch(function(error) {
             AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_EXTENSION_INITIALIZE, {
@@ -21980,10 +21978,11 @@
         }
         function _appendExtensionAssets() {
           _appendExtensionAssets = _asyncToGenerator2(/* @__PURE__ */ _regenerator2().m(function _callee6(extensionName) {
-            var key, data, url, useLegacyBuild, scriptURL, loadPromises;
+            var bundledLoader, key, data, url, useLegacyBuild, scriptURL, loadPromises, _args6 = arguments;
             return _regenerator2().w(function(_context6) {
               while (1) switch (_context6.n) {
                 case 0:
+                  bundledLoader = _args6.length > 1 && _args6[1] !== void 0 ? _args6[1] : null;
                   extensionName = fromCamelCase2(extensionName);
                   key = toCamelCase2(extensionName);
                   data = AelluxJs.registry.ext[key];
@@ -21991,16 +21990,22 @@
                   useLegacyBuild = AelluxJs.diagnostics.legacy || data.builds.indexOf("modern") === -1;
                   scriptURL = useLegacyBuild ? toLegacyScriptURL(url) : url;
                   loadPromises = [];
-                  loadPromises.push(new Promise(function(resolve, reject) {
-                    var attr = AelluxJs.attr("ext");
-                    var script = document.createElement("script");
-                    script.src = scriptURL;
-                    script.setAttribute(attr, extensionName);
-                    assetLoadHelper(script, {
-                      loadCallback: resolve,
-                      errorCallback: reject
-                    });
-                  }));
+                  if (bundledLoader) {
+                    loadPromises.push(Promise.resolve().then(function() {
+                      return bundledLoader();
+                    }));
+                  } else {
+                    loadPromises.push(new Promise(function(resolve, reject) {
+                      var attr = AelluxJs.attr("ext");
+                      var script = document.createElement("script");
+                      script.src = scriptURL;
+                      script.setAttribute(attr, extensionName);
+                      assetLoadHelper(script, {
+                        loadCallback: resolve,
+                        errorCallback: reject
+                      });
+                    }));
+                  }
                   if (data.loadStyle && data.loadStyle !== "false") {
                     loadPromises.push(new Promise(function(resolve) {
                       var styleDefaultURL = data.loadStyle === true || data.loadStyle === "true" || data.loadStyle === "";
@@ -22331,7 +22336,7 @@
       return this;
     }), _regeneratorDefine23(u, "toString", function() {
       return "[object Generator]";
-    }), (_regenerator3 = function _regenerator6() {
+    }), (_regenerator3 = function _regenerator5() {
       return { w: i, m: f };
     })();
   }
@@ -22389,7 +22394,7 @@
           init: init,
           destroy: destroy,
           tabOpen: tabOpen,
-          ajaxHref: ajaxHref2,
+          ajaxHref: ajaxHref,
           flowStep: flowStep,
           formFocus: formFocus,
           updateBaseTitle: updateBaseTitle,
@@ -22437,7 +22442,7 @@
         function tabOpen(tabGroupId, tabId, title) {
           return change(tabGroupId, tabId, title);
         }
-        function ajaxHref2(url, selectors) {
+        function ajaxHref(url, selectors) {
           history.replaceState({
             aelluxJsState: true,
             snapshot: globalSnapshot,
@@ -22626,7 +22631,7 @@
       return this;
     }), _regeneratorDefine24(u, "toString", function() {
       return "[object Generator]";
-    }), (_regenerator4 = function _regenerator6() {
+    }), (_regenerator4 = function _regenerator5() {
       return { w: i, m: f };
     })();
   }
@@ -22804,85 +22809,124 @@
     }
   });
 
-  // src/aellux.ext.ajax-href.js
-  var aellux_ext_ajax_href_exports = {};
-  function _regenerator5() {
-    /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/babel/babel/blob/main/packages/babel-helpers/LICENSE */
-    var e, t, r = "function" == typeof Symbol ? Symbol : {}, n = r.iterator || "@@iterator", o = r.toStringTag || "@@toStringTag";
-    function i(r2, n2, o2, i2) {
-      var c2 = n2 && n2.prototype instanceof Generator ? n2 : Generator, u2 = Object.create(c2.prototype);
-      return _regeneratorDefine25(u2, "_invoke", (function(r3, n3, o3) {
-        var i3, c3, u3, f2 = 0, p = o3 || [], y = false, G = { p: 0, n: 0, v: e, a: d, f: d.bind(e, 4), d: function d2(t2, r4) {
-          return i3 = t2, c3 = 0, u3 = e, G.n = r4, a;
-        } };
-        function d(r4, n4) {
-          for (c3 = r4, u3 = n4, t = 0; !y && f2 && !o4 && t < p.length; t++) {
-            var o4, i4 = p[t], d2 = G.p, l = i4[2];
-            r4 > 3 ? (o4 = l === n4) && (u3 = i4[(c3 = i4[4]) ? 5 : (c3 = 3, 3)], i4[4] = i4[5] = e) : i4[0] <= d2 && ((o4 = r4 < 2 && d2 < i4[1]) ? (c3 = 0, G.v = n4, G.n = i4[1]) : d2 < l && (o4 = r4 < 3 || i4[0] > n4 || n4 > l) && (i4[4] = r4, i4[5] = n4, G.n = l, c3 = 0));
-          }
-          if (o4 || r4 > 1) return a;
-          throw y = true, n4;
+  // src/aellux.ext.adaptive.js
+  var aellux_ext_adaptive_exports = {};
+  var init_aellux_ext_adaptive = __esm({
+    "src/aellux.ext.adaptive.js": function() {
+      /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+      (function(root2) {
+        "use strict";
+        var AelluxJs2 = root2.AelluxJs;
+        var extensionName = "adaptive";
+        if (!AelluxJs2) {
+          throw new Error('[aellux.js] Cannot attach the "'.concat(extensionName, '" extension: root.AelluxJs is not defined. Load the aellux.js boot script before this extension.'));
         }
-        return function(o4, p2, l) {
-          if (f2 > 1) throw TypeError("Generator is already running");
-          for (y && 1 === p2 && d(p2, l), c3 = p2, u3 = l; (t = c3 < 2 ? e : u3) || !y; ) {
-            i3 || (c3 ? c3 < 3 ? (c3 > 1 && (G.n = -1), d(c3, u3)) : G.n = u3 : G.v = u3);
-            try {
-              if (f2 = 2, i3) {
-                if (c3 || (o4 = "next"), t = i3[o4]) {
-                  if (!(t = t.call(i3, u3))) throw TypeError("iterator result is not an object");
-                  if (!t.done) return t;
-                  u3 = t.value, c3 < 2 && (c3 = 0);
-                } else 1 === c3 && (t = i3.return) && t.call(i3), c3 < 2 && (u3 = TypeError("The iterator does not provide a '" + o4 + "' method"), c3 = 1);
-                i3 = e;
-              } else if ((t = (y = G.n < 0) ? u3 : r3.call(n3, G)) !== a) break;
-            } catch (t2) {
-              i3 = e, c3 = 1, u3 = t2;
-            } finally {
-              f2 = 1;
-            }
-          }
-          return { value: t, done: y };
+        var attr = {
+          adaptive: AelluxJs2.attr(extensionName)
         };
-      })(r2, o2, i2), true), u2;
-    }
-    var a = {};
-    function Generator() {
-    }
-    function GeneratorFunction() {
-    }
-    function GeneratorFunctionPrototype() {
-    }
-    t = Object.getPrototypeOf;
-    var c = [][n] ? t(t([][n]())) : (_regeneratorDefine25(t = {}, n, function() {
-      return this;
-    }), t), u = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(c);
-    function f(e2) {
-      return Object.setPrototypeOf ? Object.setPrototypeOf(e2, GeneratorFunctionPrototype) : (e2.__proto__ = GeneratorFunctionPrototype, _regeneratorDefine25(e2, o, "GeneratorFunction")), e2.prototype = Object.create(u), e2;
-    }
-    return GeneratorFunction.prototype = GeneratorFunctionPrototype, _regeneratorDefine25(u, "constructor", GeneratorFunctionPrototype), _regeneratorDefine25(GeneratorFunctionPrototype, "constructor", GeneratorFunction), GeneratorFunction.displayName = "GeneratorFunction", _regeneratorDefine25(GeneratorFunctionPrototype, o, "GeneratorFunction"), _regeneratorDefine25(u), _regeneratorDefine25(u, o, "Generator"), _regeneratorDefine25(u, n, function() {
-      return this;
-    }), _regeneratorDefine25(u, "toString", function() {
-      return "[object Generator]";
-    }), (_regenerator5 = function _regenerator6() {
-      return { w: i, m: f };
-    })();
-  }
-  function _regeneratorDefine25(e, r, n, t) {
-    var i = Object.defineProperty;
-    try {
-      i({}, "", {});
-    } catch (e2) {
-      i = 0;
-    }
-    _regeneratorDefine25 = function _regeneratorDefine(e2, r2, n2, t2) {
-      function o(r3, n3) {
-        _regeneratorDefine25(e2, r3, function(e3) {
-          return this._invoke(r3, n3, e3);
+        var mountMap = /* @__PURE__ */ new Map();
+        var adaptiveParams = {
+          experienceScale: {
+            near: 1,
+            far: 1.5
+          },
+          minSizes: {
+            compact: 0,
+            small: 480,
+            medium: 768,
+            large: 1024,
+            xl: 1280,
+            xxl: 1600
+          },
+          ratioShapes: {
+            vertical: 0.8,
+            //>square<
+            horizontal: 1.25
+          }
+        };
+        AelluxJs2.extAttach(extensionName, {
+          init: init,
+          destroy: destroy,
+          mountMap: mountMap,
+          adaptiveParams: adaptiveParams
         });
+        function init() {
+          mountMap.set("[".concat(attr.adaptive, "]"), {
+            mount: mountAdaptive,
+            unmount: unmountAdaptive
+          });
+        }
+        function destroy() {
+        }
+        function mountAdaptive() {
+        }
+        function unmountAdaptive() {
+        }
+        function inferOrientation(flexBox) {
+          var selector = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : "*";
+          return AelluxJs2.waitLayout.read(function() {
+            var fallback = "horizontal";
+            var style = getComputedStyle(flexBox);
+            if (style.display === "flex" || style.display === "inline-flex") {
+              return style.flexDirection.indexOf("column") === 0 ? "vertical" : "horizontal";
+            }
+            if (!selector || selector.length === 0) return fallback;
+            var children = flexBox.querySelectorAll(selector);
+            if (children.length < 2) return fallback;
+            var first = children[0].getBoundingClientRect();
+            var second = children[1].getBoundingClientRect();
+            var deltaX = Math.abs(second.left + second.width / 2 - (first.left + first.width / 2));
+            var deltaY = Math.abs(second.top + second.height / 2 - (first.top + first.height / 2));
+            return deltaY > deltaX ? "vertical" : "horizontal";
+          });
+        }
+      })(typeof globalThis !== "undefined" ? globalThis : window);
+    }
+  });
+
+  // src/aellux.ext.present.js
+  var aellux_ext_present_exports = {};
+  function _slicedToArray3(r, e) {
+    return _arrayWithHoles3(r) || _iterableToArrayLimit3(r, e) || _unsupportedIterableToArray4(r, e) || _nonIterableRest3();
+  }
+  function _nonIterableRest3() {
+    throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+  }
+  function _iterableToArrayLimit3(r, l) {
+    var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
+    if (null != t) {
+      var e, n, i, u, a = [], f = true, o = false;
+      try {
+        if (i = (t = t.call(r)).next, 0 === l) {
+          if (Object(t) !== t) return;
+          f = false;
+        } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = true) ;
+      } catch (r2) {
+        o = true, n = r2;
+      } finally {
+        try {
+          if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return;
+        } finally {
+          if (o) throw n;
+        }
       }
-      r2 ? i ? i(e2, r2, { value: n2, enumerable: !t2, configurable: !t2, writable: !t2 }) : e2[r2] = n2 : (o("next", 0), o("throw", 1), o("return", 2));
-    }, _regeneratorDefine25(e, r, n, t);
+      return a;
+    }
+  }
+  function _arrayWithHoles3(r) {
+    if (Array.isArray(r)) return r;
+  }
+  function _toConsumableArray(r) {
+    return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray4(r) || _nonIterableSpread();
+  }
+  function _nonIterableSpread() {
+    throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+  }
+  function _iterableToArray(r) {
+    if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
+  }
+  function _arrayWithoutHoles(r) {
+    if (Array.isArray(r)) return _arrayLikeToArray4(r);
   }
   function _createForOfIteratorHelper3(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
@@ -22923,319 +22967,6 @@
     }
   }
   function _arrayLikeToArray4(r, a) {
-    (null == a || a > r.length) && (a = r.length);
-    for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
-    return n;
-  }
-  function asyncGeneratorStep5(n, t, e, r, o, a, c) {
-    try {
-      var i = n[a](c), u = i.value;
-    } catch (n2) {
-      return void e(n2);
-    }
-    i.done ? t(u) : Promise.resolve(u).then(r, o);
-  }
-  function _asyncToGenerator5(n) {
-    return function() {
-      var t = this, e = arguments;
-      return new Promise(function(r, o) {
-        var a = n.apply(t, e);
-        function _next(n2) {
-          asyncGeneratorStep5(a, r, o, _next, _throw, "next", n2);
-        }
-        function _throw(n2) {
-          asyncGeneratorStep5(a, r, o, _next, _throw, "throw", n2);
-        }
-        _next(void 0);
-      });
-    };
-  }
-  var init_aellux_ext_ajax_href = __esm({
-    "src/aellux.ext.ajax-href.js": function() {
-      /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
-      (function(root2) {
-        "use strict";
-        var AelluxJs2 = root2.AelluxJs;
-        var extensionName = "ajax-href";
-        if (!AelluxJs2) {
-          throw new Error('[aellux.js] Cannot attach the "'.concat(extensionName, '" extension: root.AelluxJs is not defined. Load the aellux.js boot script before this extension.'));
-        }
-        AelluxJs2.extAttach(extensionName, {
-          init: init,
-          destroy: destroy,
-          load: load
-        });
-        var attr = {
-          ajaxHref: AelluxJs2.attr(extensionName)
-        };
-        function init(options) {
-          document.addEventListener("click", onClick);
-        }
-        function destroy() {
-          document.removeEventListener("click", onClick);
-          if (previousController) {
-            previousController.abort();
-          }
-        }
-        var previousController = null;
-        function load(_x, _x2) {
-          return _load.apply(this, arguments);
-        }
-        function _load() {
-          _load = _asyncToGenerator5(/* @__PURE__ */ _regenerator5().m(function _callee(url, selectors) {
-            var options, controller, selectorList, elements, response, html, loadedDocument, _iterator, _step, selector, currentElement, loadedElement, replacement, _args = arguments, _t, _t2;
-            return _regenerator5().w(function(_context) {
-              while (1) switch (_context.p = _context.n) {
-                case 0:
-                  options = _args.length > 2 && _args[2] !== void 0 ? _args[2] : {};
-                  options = options || {};
-                  if (previousController) {
-                    previousController.abort();
-                  }
-                  controller = "AbortController" in window ? new AbortController() : {
-                    signal: null,
-                    abort: function abort() {
-                      return null;
-                    }
-                  };
-                  previousController = controller;
-                  selectorList = (Array.isArray(selectors) ? selectors : selectors.split(",")).map(function(selector2) {
-                    return selector2.trim();
-                  }).filter(Boolean);
-                  elements = /* @__PURE__ */ new Map();
-                  selectorList.forEach(function(selector2) {
-                    var currentElement2 = document.querySelector(selector2);
-                    if (!currentElement2) return;
-                    elements.set(selector2, currentElement2);
-                    if (AelluxJs2.ext.feedback) {
-                      AelluxJs2.ext.feedback.busy(currentElement2, "Ajax loading", true);
-                      AelluxJs2.ext.feedback.progress(currentElement2, "Ajax loading", 0);
-                    }
-                  });
-                  if (!options.ignoreHistory && AelluxJs2.ext.stateNavigation) {
-                    AelluxJs2.ext.stateNavigation.ajaxHref(url, selectors);
-                  }
-                  AelluxJs2.dispatch("AjaxHrefStart");
-                  _context.p = 1;
-                  _context.n = 2;
-                  return AelluxJs2.request(url, {
-                    signal: controller.signal
-                  });
-                case 2:
-                  response = _context.v;
-                  _context.n = 3;
-                  return response.text();
-                case 3:
-                  html = _context.v;
-                  loadedDocument = new DOMParser().parseFromString(html, "text/html");
-                  _iterator = _createForOfIteratorHelper3(selectorList);
-                  _context.p = 4;
-                  _iterator.s();
-                case 5:
-                  if ((_step = _iterator.n()).done) {
-                    _context.n = 11;
-                    break;
-                  }
-                  selector = _step.value;
-                  currentElement = elements.get(selector);
-                  if (currentElement) {
-                    _context.n = 6;
-                    break;
-                  }
-                  return _context.a(3, 10);
-                case 6:
-                  loadedElement = loadedDocument.querySelector(selector);
-                  if (loadedElement) {
-                    _context.n = 7;
-                    break;
-                  }
-                  return _context.a(3, 10);
-                case 7:
-                  _context.n = 8;
-                  return AelluxJs2.unmount(currentElement);
-                case 8:
-                  replacement = document.importNode(loadedElement, true);
-                  currentElement.replaceWith(replacement);
-                  if (selector === "title" && AelluxJs2.ext.stateNavigation) AelluxJs2.ext.stateNavigation.updateBaseTitle(replacement.innerText);
-                  _context.n = 9;
-                  return AelluxJs2.update(replacement);
-                case 9:
-                  if (AelluxJs2.ext.feedback) {
-                    AelluxJs2.ext.feedback.busy(replacement, "Ajax loaded", false);
-                    AelluxJs2.ext.feedback.progress(replacement, "Ajax loaded", 1);
-                  }
-                case 10:
-                  _context.n = 5;
-                  break;
-                case 11:
-                  _context.n = 13;
-                  break;
-                case 12:
-                  _context.p = 12;
-                  _t = _context.v;
-                  _iterator.e(_t);
-                case 13:
-                  _context.p = 13;
-                  _iterator.f();
-                  return _context.f(13);
-                case 14:
-                  AelluxJs2.dispatch("AjaxHrefLoaded");
-                  _context.n = 17;
-                  break;
-                case 15:
-                  _context.p = 15;
-                  _t2 = _context.v;
-                  selectorList.forEach(function(selector2) {
-                    var currentElement2 = elements.get(selector2);
-                    if (!currentElement2) return;
-                    if (AelluxJs2.ext.feedback) {
-                      AelluxJs2.ext.feedback.busy(currentElement2, "Ajax loading", false);
-                      AelluxJs2.ext.feedback.progress(currentElement2, "Ajax loading", 1);
-                    }
-                  });
-                  AelluxJs2.dispatch("AjaxHrefError");
-                  if (!(_t2.name === "AbortError")) {
-                    _context.n = 16;
-                    break;
-                  }
-                  return _context.a(2, null);
-                case 16:
-                  throw _t2;
-                case 17:
-                  _context.p = 17;
-                  if (previousController === controller) previousController = null;
-                  AelluxJs2.dispatch("AjaxHrefComplete");
-                  return _context.f(17);
-                case 18:
-                  return _context.a(2);
-              }
-            }, _callee, null, [[4, 12, 13, 14], [1, 15, 17, 18]]);
-          }));
-          return _load.apply(this, arguments);
-        }
-        function onClick(event) {
-          if (event.button !== 0) return;
-          if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
-          var link = event.target.closest("[".concat(attr.ajaxHref, "]"));
-          if (!link || !link.href || link.tagName !== "A") return;
-          var rawHref = link.getAttribute("href");
-          if (link.target && link.target !== "_self") return;
-          if (rawHref && rawHref.startsWith("#")) return;
-          if (link.hasAttribute("download") || link.hasAttribute("data-no-ajax")) return;
-          var selectors = link.getAttribute(attr.ajaxHref);
-          if (!selectors) return;
-          var destinyUrl = comparableUrl(link.href);
-          var currentUrl = comparableUrl(window.location.href);
-          if (destinyUrl.origin !== currentUrl.origin) {
-            AelluxJs2.dispatch("AjaxHrefDropOrigin");
-            return;
-          }
-          if (destinyUrl.href === currentUrl.href) {
-            if (destinyUrl.hash && destinyUrl.hash !== currentUrl.hash) return;
-            event.preventDefault();
-            AelluxJs2.dispatch("AjaxHrefStart");
-            AelluxJs2.dispatch("AjaxHrefLoaded");
-            AelluxJs2.dispatch("AjaxHrefComplete");
-            return;
-          }
-          event.preventDefault();
-          AelluxJs2.ext.ajaxHref.load(link.href, selectors);
-        }
-        function comparableUrl(value) {
-          var url = new URL(value, window.location.href);
-          return {
-            origin: url.origin,
-            href: "".concat(url.origin).concat(url.pathname).concat(url.search),
-            hash: url.hash
-          };
-        }
-      })(typeof globalThis !== "undefined" ? globalThis : window);
-    }
-  });
-
-  // src/aellux.ext.present.js
-  var aellux_ext_present_exports = {};
-  function _slicedToArray3(r, e) {
-    return _arrayWithHoles3(r) || _iterableToArrayLimit3(r, e) || _unsupportedIterableToArray5(r, e) || _nonIterableRest3();
-  }
-  function _nonIterableRest3() {
-    throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
-  }
-  function _iterableToArrayLimit3(r, l) {
-    var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
-    if (null != t) {
-      var e, n, i, u, a = [], f = true, o = false;
-      try {
-        if (i = (t = t.call(r)).next, 0 === l) {
-          if (Object(t) !== t) return;
-          f = false;
-        } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = true) ;
-      } catch (r2) {
-        o = true, n = r2;
-      } finally {
-        try {
-          if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return;
-        } finally {
-          if (o) throw n;
-        }
-      }
-      return a;
-    }
-  }
-  function _arrayWithHoles3(r) {
-    if (Array.isArray(r)) return r;
-  }
-  function _toConsumableArray(r) {
-    return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray5(r) || _nonIterableSpread();
-  }
-  function _nonIterableSpread() {
-    throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
-  }
-  function _iterableToArray(r) {
-    if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
-  }
-  function _arrayWithoutHoles(r) {
-    if (Array.isArray(r)) return _arrayLikeToArray5(r);
-  }
-  function _createForOfIteratorHelper4(r, e) {
-    var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
-    if (!t) {
-      if (Array.isArray(r) || (t = _unsupportedIterableToArray5(r)) || e && r && "number" == typeof r.length) {
-        t && (r = t);
-        var _n = 0, F = function F2() {
-        };
-        return { s: F, n: function n() {
-          return _n >= r.length ? { done: true } : { done: false, value: r[_n++] };
-        }, e: function e2(r2) {
-          throw r2;
-        }, f: F };
-      }
-      throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
-    }
-    var o, a = true, u = false;
-    return { s: function s() {
-      t = t.call(r);
-    }, n: function n() {
-      var r2 = t.next();
-      return a = r2.done, r2;
-    }, e: function e2(r2) {
-      u = true, o = r2;
-    }, f: function f() {
-      try {
-        a || null == t.return || t.return();
-      } finally {
-        if (u) throw o;
-      }
-    } };
-  }
-  function _unsupportedIterableToArray5(r, a) {
-    if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray5(r, a);
-      var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray5(r, a) : void 0;
-    }
-  }
-  function _arrayLikeToArray5(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
@@ -23298,7 +23029,7 @@
         function destroy() {
           mountMap.clear();
           document.removeEventListener("click", OnClick);
-          var _iterator = _createForOfIteratorHelper4(triggerElementsSet), _step;
+          var _iterator = _createForOfIteratorHelper3(triggerElementsSet), _step;
           try {
             for (_iterator.s(); !(_step = _iterator.n()).done; ) {
               var triggerElement = _step.value;
@@ -23309,7 +23040,7 @@
           } finally {
             _iterator.f();
           }
-          var _iterator2 = _createForOfIteratorHelper4(presentElements.keys()), _step2;
+          var _iterator2 = _createForOfIteratorHelper3(presentElements.keys()), _step2;
           try {
             for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
               var element = _step2.value;
@@ -23366,7 +23097,7 @@
             presentController.classList.add(className.pop);
           }
           presentElements.set(element, presentController);
-          var _iterator3 = _createForOfIteratorHelper4(triggerElementsSet), _step3;
+          var _iterator3 = _createForOfIteratorHelper3(triggerElementsSet), _step3;
           try {
             for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
               var triggerElement = _step3.value;
@@ -23377,7 +23108,7 @@
           } finally {
             _iterator3.f();
           }
-          var _iterator4 = _createForOfIteratorHelper4(triggerTargets), _step4;
+          var _iterator4 = _createForOfIteratorHelper3(triggerTargets), _step4;
           try {
             for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
               var _step4$value = _slicedToArray3(_step4.value, 2), _triggerElement = _step4$value[0], targets = _step4$value[1];
@@ -23413,7 +23144,7 @@
           if (!triggerElementsSet.has(triggerElement)) return;
           var targets = triggerTargets.get(triggerElement);
           if (targets) {
-            var _iterator5 = _createForOfIteratorHelper4(targets), _step5;
+            var _iterator5 = _createForOfIteratorHelper3(targets), _step5;
             try {
               for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
                 var _presentElements$get;
@@ -23439,7 +23170,7 @@
           var dismiss = triggerElement.getAttribute(attr.dismiss);
           var container = triggerElement.closest("[".concat(attr.present, "]"));
           if (previousTargets) {
-            var _iterator6 = _createForOfIteratorHelper4(previousTargets), _step6;
+            var _iterator6 = _createForOfIteratorHelper3(previousTargets), _step6;
             try {
               for (_iterator6.s(); !(_step6 = _iterator6.n()).done; ) {
                 var _presentElements$get2;
@@ -23602,7 +23333,7 @@
           unpop(element);
         }
         function outsideClickAutoUnpop(currentExceptions) {
-          var _iterator7 = _createForOfIteratorHelper4(presentElements.keys()), _step7;
+          var _iterator7 = _createForOfIteratorHelper3(presentElements.keys()), _step7;
           try {
             var _loop = function _loop2() {
               var pContainer = _step7.value;
@@ -23729,9 +23460,9 @@
             return init_aellux_ext_feedback(), aellux_ext_feedback_exports;
           });
         },
-        "ajaxHref": function ajaxHref() {
+        "adaptive": function adaptive() {
           return Promise.resolve().then(function() {
-            return init_aellux_ext_ajax_href(), aellux_ext_ajax_href_exports;
+            return init_aellux_ext_adaptive(), aellux_ext_adaptive_exports;
           });
         },
         "present": function present() {
@@ -23739,6 +23470,9 @@
             return init_aellux_ext_present(), aellux_ext_present_exports;
           });
         }
+      });
+      root.AelluxJs.ext("adaptive", {
+        loadStyle: true
       });
     }
   });

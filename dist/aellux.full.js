@@ -426,128 +426,74 @@
     }
   });
 
-  // src/aellux.ext.ajax-href.js
-  var aellux_ext_ajax_href_exports = {};
-  var init_aellux_ext_ajax_href = __esm({
-    "src/aellux.ext.ajax-href.js"() {
+  // src/aellux.ext.adaptive.js
+  var aellux_ext_adaptive_exports = {};
+  var init_aellux_ext_adaptive = __esm({
+    "src/aellux.ext.adaptive.js"() {
       /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
       (function(root2) {
         "use strict";
         const AelluxJs2 = root2.AelluxJs;
-        const extensionName = "ajax-href";
+        const extensionName = "adaptive";
         if (!AelluxJs2) {
           throw new Error(`[aellux.js] Cannot attach the "${extensionName}" extension: root.AelluxJs is not defined. Load the aellux.js boot script before this extension.`);
         }
-        AelluxJs2.extAttach(extensionName, { init, destroy, load });
         const attr = {
-          ajaxHref: AelluxJs2.attr(extensionName)
+          adaptive: AelluxJs2.attr(extensionName)
         };
-        function init(options) {
-          document.addEventListener("click", onClick);
+        const mountMap = /* @__PURE__ */ new Map();
+        const adaptiveParams = {
+          experienceScale: {
+            near: 1,
+            far: 1.5
+          },
+          minSizes: {
+            compact: 0,
+            small: 480,
+            medium: 768,
+            large: 1024,
+            xl: 1280,
+            xxl: 1600
+          },
+          ratioShapes: {
+            vertical: 0.8,
+            //>square<
+            horizontal: 1.25
+          }
+        };
+        AelluxJs2.extAttach(extensionName, { init, destroy, mountMap, adaptiveParams });
+        function init() {
+          mountMap.set(`[${attr.adaptive}]`, {
+            mount: mountAdaptive,
+            unmount: unmountAdaptive
+          });
         }
         function destroy() {
-          document.removeEventListener("click", onClick);
-          if (previousController) {
-            previousController.abort();
-          }
         }
-        let previousController = null;
-        async function load(url, selectors, options = {}) {
-          options = options || {};
-          if (previousController) {
-            previousController.abort();
-          }
-          const controller = "AbortController" in window ? new AbortController() : { signal: null, abort: () => null };
-          previousController = controller;
-          const selectorList = (Array.isArray(selectors) ? selectors : selectors.split(",")).map((selector) => selector.trim()).filter(Boolean);
-          const elements = /* @__PURE__ */ new Map();
-          selectorList.forEach(function(selector) {
-            const currentElement = document.querySelector(selector);
-            if (!currentElement) return;
-            elements.set(selector, currentElement);
-            if (AelluxJs2.ext.feedback) {
-              AelluxJs2.ext.feedback.busy(currentElement, "Ajax loading", true);
-              AelluxJs2.ext.feedback.progress(currentElement, "Ajax loading", 0);
+        function mountAdaptive() {
+        }
+        function unmountAdaptive() {
+        }
+        function inferOrientation(flexBox, selector = "*") {
+          return AelluxJs2.waitLayout.read(() => {
+            const fallback = "horizontal";
+            var style = getComputedStyle(flexBox);
+            if (style.display === "flex" || style.display === "inline-flex") {
+              return style.flexDirection.indexOf("column") === 0 ? "vertical" : "horizontal";
             }
+            if (!selector || selector.length === 0) return fallback;
+            var children = flexBox.querySelectorAll(selector);
+            if (children.length < 2) return fallback;
+            var first = children[0].getBoundingClientRect();
+            var second = children[1].getBoundingClientRect();
+            var deltaX = Math.abs(
+              second.left + second.width / 2 - (first.left + first.width / 2)
+            );
+            var deltaY = Math.abs(
+              second.top + second.height / 2 - (first.top + first.height / 2)
+            );
+            return deltaY > deltaX ? "vertical" : "horizontal";
           });
-          if (!options.ignoreHistory && AelluxJs2.ext.stateNavigation) {
-            AelluxJs2.ext.stateNavigation.ajaxHref(url, selectors);
-          }
-          AelluxJs2.dispatch("AjaxHrefStart");
-          try {
-            const response = await AelluxJs2.request(url, { signal: controller.signal });
-            const html = await response.text();
-            const loadedDocument = new DOMParser().parseFromString(html, "text/html");
-            for (const selector of selectorList) {
-              const currentElement = elements.get(selector);
-              if (!currentElement) continue;
-              const loadedElement = loadedDocument.querySelector(selector);
-              if (!loadedElement) continue;
-              await AelluxJs2.unmount(currentElement);
-              const replacement = document.importNode(loadedElement, true);
-              currentElement.replaceWith(replacement);
-              if (selector === "title" && AelluxJs2.ext.stateNavigation)
-                AelluxJs2.ext.stateNavigation.updateBaseTitle(replacement.innerText);
-              await AelluxJs2.update(replacement);
-              if (AelluxJs2.ext.feedback) {
-                AelluxJs2.ext.feedback.busy(replacement, "Ajax loaded", false);
-                AelluxJs2.ext.feedback.progress(replacement, "Ajax loaded", 1);
-              }
-            }
-            AelluxJs2.dispatch("AjaxHrefLoaded");
-          } catch (error) {
-            selectorList.forEach(function(selector) {
-              const currentElement = elements.get(selector);
-              if (!currentElement) return;
-              if (AelluxJs2.ext.feedback) {
-                AelluxJs2.ext.feedback.busy(currentElement, "Ajax loading", false);
-                AelluxJs2.ext.feedback.progress(currentElement, "Ajax loading", 1);
-              }
-            });
-            AelluxJs2.dispatch("AjaxHrefError");
-            if (error.name === "AbortError") return null;
-            throw error;
-          } finally {
-            if (previousController === controller)
-              previousController = null;
-            AelluxJs2.dispatch("AjaxHrefComplete");
-          }
-        }
-        function onClick(event) {
-          if (event.button !== 0) return;
-          if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
-          const link = event.target.closest(`[${attr.ajaxHref}]`);
-          if (!link || !link.href || link.tagName !== "A") return;
-          const rawHref = link.getAttribute("href");
-          if (link.target && link.target !== "_self") return;
-          if (rawHref && rawHref.startsWith("#")) return;
-          if (link.hasAttribute("download") || link.hasAttribute("data-no-ajax")) return;
-          const selectors = link.getAttribute(attr.ajaxHref);
-          if (!selectors) return;
-          const destinyUrl = comparableUrl(link.href);
-          const currentUrl = comparableUrl(window.location.href);
-          if (destinyUrl.origin !== currentUrl.origin) {
-            AelluxJs2.dispatch("AjaxHrefDropOrigin");
-            return;
-          }
-          if (destinyUrl.href === currentUrl.href) {
-            if (destinyUrl.hash && destinyUrl.hash !== currentUrl.hash) return;
-            event.preventDefault();
-            AelluxJs2.dispatch("AjaxHrefStart");
-            AelluxJs2.dispatch("AjaxHrefLoaded");
-            AelluxJs2.dispatch("AjaxHrefComplete");
-            return;
-          }
-          event.preventDefault();
-          AelluxJs2.ext.ajaxHref.load(link.href, selectors);
-        }
-        function comparableUrl(value) {
-          const url = new URL(value, window.location.href);
-          return {
-            origin: url.origin,
-            href: `${url.origin}${url.pathname}${url.search}`,
-            hash: url.hash
-          };
         }
       })(typeof globalThis !== "undefined" ? globalThis : window);
     }
@@ -1264,7 +1210,9 @@
       {
         async startAelluxJs() {
           if (root2.AelluxJs.bundledExtensions) {
-            Object.keys(root2.AelluxJs.bundledExtensions).forEach((key) => AelluxJs.ext(key));
+            Object.keys(root2.AelluxJs.bundledExtensions).forEach((key) => {
+              if (!(key in AelluxJs.registry.ext)) AelluxJs.ext(key);
+            });
           }
           await new Promise((resolve) => {
             const startUpdateCallback = function() {
@@ -1386,7 +1334,7 @@
         return Promise.reject();
       }
       const bundledLoader = AelluxJs.bundledExtensions ? AelluxJs.bundledExtensions[key] : null;
-      extensionPromises[key] = (bundledLoader ? Promise.resolve().then(() => bundledLoader()) : appendExtensionAssets(extensionName)).then(() => extensionInitialize(extensionName)).catch((error) => {
+      extensionPromises[key] = appendExtensionAssets(extensionName, bundledLoader).then(() => extensionInitialize(extensionName)).catch((error) => {
         AelluxJs.diagnostics.error(
           AelluxJs.diagnostics.ERROR_EXTENSION_INITIALIZE,
           { cause: error, extension: extensionName }
@@ -1408,7 +1356,7 @@
       delete AelluxJs.registry.lazyExtSelectors[key];
       return AelluxJs.ext[key];
     }
-    async function appendExtensionAssets(extensionName) {
+    async function appendExtensionAssets(extensionName, bundledLoader = null) {
       extensionName = fromCamelCase2(extensionName);
       const key = toCamelCase2(extensionName);
       const data = AelluxJs.registry.ext[key];
@@ -1416,18 +1364,22 @@
       const useLegacyBuild = AelluxJs.diagnostics.legacy || data.builds.indexOf("modern") === -1;
       const scriptURL = useLegacyBuild ? toLegacyScriptURL(url) : url;
       const loadPromises = [];
-      loadPromises.push(new Promise(
-        (resolve, reject) => {
-          const attr = AelluxJs.attr("ext");
-          const script = document.createElement("script");
-          script.src = scriptURL;
-          script.setAttribute(attr, extensionName);
-          assetLoadHelper(script, {
-            loadCallback: resolve,
-            errorCallback: reject
-          });
-        }
-      ));
+      if (bundledLoader) {
+        loadPromises.push(Promise.resolve().then(() => bundledLoader()));
+      } else {
+        loadPromises.push(new Promise(
+          (resolve, reject) => {
+            const attr = AelluxJs.attr("ext");
+            const script = document.createElement("script");
+            script.src = scriptURL;
+            script.setAttribute(attr, extensionName);
+            assetLoadHelper(script, {
+              loadCallback: resolve,
+              errorCallback: reject
+            });
+          }
+        ));
+      }
       if (data.loadStyle && data.loadStyle !== "false") {
         loadPromises.push(new Promise(
           (resolve) => {
@@ -1487,8 +1439,9 @@
     "preference": () => Promise.resolve().then(() => (init_aellux_ext_preference(), aellux_ext_preference_exports)),
     "stateNavigation": () => Promise.resolve().then(() => (init_aellux_ext_state_navigation(), aellux_ext_state_navigation_exports)),
     "feedback": () => Promise.resolve().then(() => (init_aellux_ext_feedback(), aellux_ext_feedback_exports)),
-    "ajaxHref": () => Promise.resolve().then(() => (init_aellux_ext_ajax_href(), aellux_ext_ajax_href_exports)),
+    "adaptive": () => Promise.resolve().then(() => (init_aellux_ext_adaptive(), aellux_ext_adaptive_exports)),
     "present": () => Promise.resolve().then(() => (init_aellux_ext_present(), aellux_ext_present_exports))
   });
+  root.AelluxJs.ext("adaptive", { loadStyle: true });
 })();
 //# sourceMappingURL=aellux.full.js.map

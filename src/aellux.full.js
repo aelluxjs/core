@@ -8,6 +8,8 @@ root.AelluxJs.bundledExtensions = Object.freeze({
   "preference": () => import("./aellux.ext.preference.js"),
   "stateNavigation": () => import("./aellux.ext.state-navigation.js"),
   "feedback": () => import("./aellux.ext.feedback.js"),
-  "ajaxHref": () => import("./aellux.ext.ajax-href.js"),
+  "adaptive": () => import("./aellux.ext.adaptive.js"),
   "present": () => import("./aellux.ext.present.js")
 });
+
+root.AelluxJs.ext("adaptive", { loadStyle: true });

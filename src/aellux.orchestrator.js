@@ -31,7 +31,9 @@ import utilsNameCase from "./internal/utils-name-case.js";
       async startAelluxJs() {
         if (root.AelluxJs.bundledExtensions) {
           Object.keys(root.AelluxJs.bundledExtensions)
-            .forEach(key => AelluxJs.ext(key));
+            .forEach(key => {
+              if (!(key in AelluxJs.registry.ext)) AelluxJs.ext(key);
+            });
         }
 
         await new Promise((resolve) => {
@@ -170,9 +172,7 @@ import utilsNameCase from "./internal/utils-name-case.js";
         null;
 
     extensionPromises[key] =
-      (bundledLoader
-        ? Promise.resolve().then(() => bundledLoader())
-        : appendExtensionAssets(extensionName))
+      appendExtensionAssets(extensionName, bundledLoader)
         .then(() => extensionInitialize(extensionName))
         .catch((error) => {
           AelluxJs.diagnostics.error(
@@ -203,7 +203,7 @@ import utilsNameCase from "./internal/utils-name-case.js";
     return AelluxJs.ext[key];
   }
 
-  async function appendExtensionAssets(extensionName) {
+  async function appendExtensionAssets(extensionName, bundledLoader = null) {
     extensionName = fromCamelCase(extensionName);
     const key = toCamelCase(extensionName);
     const data = AelluxJs.registry.ext[key];
@@ -212,19 +212,23 @@ import utilsNameCase from "./internal/utils-name-case.js";
     const scriptURL = useLegacyBuild ? toLegacyScriptURL(url) : url;
     const loadPromises = [];
 
-    loadPromises.push(new Promise(
-      (resolve, reject) => {
-        const attr = AelluxJs.attr("ext");
-        const script = document.createElement("script");
-        script.src = scriptURL;
-        script.setAttribute(attr, extensionName);
+    if (bundledLoader) {
+      loadPromises.push(Promise.resolve().then(() => bundledLoader()));
+    } else {
+      loadPromises.push(new Promise(
+        (resolve, reject) => {
+          const attr = AelluxJs.attr("ext");
+          const script = document.createElement("script");
+          script.src = scriptURL;
+          script.setAttribute(attr, extensionName);
 
-        assetLoadHelper(script, {
-          loadCallback: resolve,
-          errorCallback: reject
-        });
-      }
-    ));
+          assetLoadHelper(script, {
+            loadCallback: resolve,
+            errorCallback: reject
+          });
+        }
+      ));
+    }
 
     if (data.loadStyle && data.loadStyle !== "false") {
       loadPromises.push(new Promise(

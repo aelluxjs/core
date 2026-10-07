@@ -328,10 +328,12 @@ test("full runtime writes the renamed history state marker", async ({ page }) =>
     oldBundled: Object.hasOwn(AelluxJs.bundledExtensions, "state-navigation")
   }))).toEqual({ registered: true, bundled: true, oldRegistered: false, oldBundled: false });
   expect(await page.evaluate(() => ({
-    adaptive: AelluxJs.adaptive,
+    initialized: AelluxJs.ext.adaptive?.initialized,
     registered: Object.hasOwn(AelluxJs.registry.ext, "adaptive"),
-    bundled: Object.hasOwn(AelluxJs.bundledExtensions, "adaptive")
-  }))).toEqual({ adaptive: undefined, registered: false, bundled: false });
+    bundled: Object.hasOwn(AelluxJs.bundledExtensions, "adaptive"),
+    style: AelluxJs.registry.ext.adaptive?.loadStyle,
+    ajaxHrefBundled: Object.hasOwn(AelluxJs.bundledExtensions, "ajaxHref")
+  }))).toEqual({ initialized: true, registered: true, bundled: true, style: true, ajaxHrefBundled: false });
   expect(await page.evaluate(() => history.state?.aelluxJsState)).toBe(true);
   expect(await page.evaluate(() => history.state?.aelluxState)).toBeUndefined();
 });
@@ -341,8 +343,22 @@ test("minified distribution exposes the renamed global", async ({ page }) => {
   await page.addScriptTag({ url: "/dist/aellux.min.js" });
   await page.evaluate(() => AelluxJs.init({ mode: "full" }));
   await expect.poll(() => page.evaluate(() => window.AelluxJs.diagnostics.supported)).toBe(true);
+  await expect.poll(() => page.evaluate(() => AelluxJs.ext.adaptive?.initialized)).toBe(true);
+  await expect(page.locator('link[data-ae-ext-style="adaptive"]')).toHaveAttribute(
+    "href", /aellux\.ext\.adaptive\.min\.css$/
+  );
   expect(await page.evaluate(() => window.AelluxJs === window.$ae)).toBe(true);
   expect(await page.evaluate(() => typeof window.Aellux)).toBe("undefined");
+});
+
+test("legacy full runtime loads adaptive and its stylesheet", async ({ page }) => {
+  await page.goto("/tests/index.htm");
+  await page.addScriptTag({ url: "/dist/aellux.js" });
+  await page.evaluate(() => AelluxJs.init({ mode: "full", forceLegacy: true }));
+  await expect.poll(() => page.evaluate(() => AelluxJs.ext.adaptive?.initialized)).toBe(true);
+  await expect(page.locator('link[data-ae-ext-style="adaptive"]')).toHaveAttribute(
+    "href", /aellux\.ext\.adaptive\.css$/
+  );
 });
 
 test("preference labels update associated inputs safely", async ({ page }) => {
@@ -396,39 +412,20 @@ test("color scheme preference updates theme color metadata", async ({ page }) =>
   await expect(page.locator("meta[data-ae-theme-color]")).toHaveCount(0);
 });
 
-test("AJAX links preserve native navigation when appropriate", async ({ page }) => {
+test("full runtime loads generated adaptive styles", async ({ page }) => {
   await page.goto("/tests/index.htm");
-  await page.addScriptTag({ url: "/dist/aellux.js" });
   await page.evaluate(() => {
-    AelluxJs.ext("ajax-href");
-    AelluxJs.init({ mode: "basic" });
+    document.body.innerHTML = '<div class="ae--fits-small"><div id="adaptive-probe" class="p-ux-sm-2"></div></div>';
   });
-  await expect.poll(() => page.evaluate(() => AelluxJs.ext.ajaxHref?.initialized)).toBe(true);
-
-  const results = await page.evaluate(() => {
-    const results = [];
-    const listener = event => {
-      results.push(event.defaultPrevented);
-      event.preventDefault();
-    };
-    document.addEventListener("click", listener);
-    for (const [href, target] of [
-      [location.href, "_blank"],
-      ["#probe", ""],
-      [location.href, ""]
-    ]) {
-      const link = document.createElement("a");
-      link.href = href;
-      link.target = target;
-      link.setAttribute("data-ae-ajax-href", "main");
-      document.body.append(link);
-      link.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true, button: 0 }));
-      link.remove();
-    }
-    document.removeEventListener("click", listener);
-    return results;
-  });
-  expect(results).toEqual([false, false, true]);
+  await page.addScriptTag({ url: "/dist/aellux.js" });
+  await page.evaluate(() => AelluxJs.init({ mode: "full" }));
+  await expect.poll(() => page.evaluate(() => AelluxJs.ext.adaptive?.initialized)).toBe(true);
+  await expect(page.locator('link[data-ae-ext-style="adaptive"]')).toHaveAttribute(
+    "href", /aellux\.ext\.adaptive\.css$/
+  );
+  await expect.poll(() => page.locator("#adaptive-probe").evaluate(
+    element => getComputedStyle(element).paddingTop
+  )).toBe("8px");
 });
 
 test("dynamic elements can be mounted and unmounted after initialization", async ({ page }) => {

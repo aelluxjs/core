@@ -289,7 +289,9 @@
       {
         async startAelluxJs() {
           if (root.AelluxJs.bundledExtensions) {
-            Object.keys(root.AelluxJs.bundledExtensions).forEach((key) => AelluxJs.ext(key));
+            Object.keys(root.AelluxJs.bundledExtensions).forEach((key) => {
+              if (!(key in AelluxJs.registry.ext)) AelluxJs.ext(key);
+            });
           }
           await new Promise((resolve) => {
             const startUpdateCallback = function() {
@@ -411,7 +413,7 @@
         return Promise.reject();
       }
       const bundledLoader = AelluxJs.bundledExtensions ? AelluxJs.bundledExtensions[key] : null;
-      extensionPromises[key] = (bundledLoader ? Promise.resolve().then(() => bundledLoader()) : appendExtensionAssets(extensionName)).then(() => extensionInitialize(extensionName)).catch((error) => {
+      extensionPromises[key] = appendExtensionAssets(extensionName, bundledLoader).then(() => extensionInitialize(extensionName)).catch((error) => {
         AelluxJs.diagnostics.error(
           AelluxJs.diagnostics.ERROR_EXTENSION_INITIALIZE,
           { cause: error, extension: extensionName }
@@ -433,7 +435,7 @@
       delete AelluxJs.registry.lazyExtSelectors[key];
       return AelluxJs.ext[key];
     }
-    async function appendExtensionAssets(extensionName) {
+    async function appendExtensionAssets(extensionName, bundledLoader = null) {
       extensionName = fromCamelCase2(extensionName);
       const key = toCamelCase2(extensionName);
       const data = AelluxJs.registry.ext[key];
@@ -441,18 +443,22 @@
       const useLegacyBuild = AelluxJs.diagnostics.legacy || data.builds.indexOf("modern") === -1;
       const scriptURL = useLegacyBuild ? toLegacyScriptURL(url) : url;
       const loadPromises = [];
-      loadPromises.push(new Promise(
-        (resolve, reject) => {
-          const attr = AelluxJs.attr("ext");
-          const script = document.createElement("script");
-          script.src = scriptURL;
-          script.setAttribute(attr, extensionName);
-          assetLoadHelper(script, {
-            loadCallback: resolve,
-            errorCallback: reject
-          });
-        }
-      ));
+      if (bundledLoader) {
+        loadPromises.push(Promise.resolve().then(() => bundledLoader()));
+      } else {
+        loadPromises.push(new Promise(
+          (resolve, reject) => {
+            const attr = AelluxJs.attr("ext");
+            const script = document.createElement("script");
+            script.src = scriptURL;
+            script.setAttribute(attr, extensionName);
+            assetLoadHelper(script, {
+              loadCallback: resolve,
+              errorCallback: reject
+            });
+          }
+        ));
+      }
       if (data.loadStyle && data.loadStyle !== "false") {
         loadPromises.push(new Promise(
           (resolve) => {

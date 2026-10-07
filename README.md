@@ -64,7 +64,7 @@ See [Getting Started](docs/getting-started.md) for build instructions, runtime m
 - Selective eager or lazy Extension loading.
 - Optional styles associated with individual Extensions.
 - Idempotent DOM mounting through `$ae.update(root)`.
-- Browser history, preferences, feedback, persistence, and asynchronous content behaviors.
+- Browser history, preferences, feedback, persistence, and adaptive layout utilities.
 - ES5-compatible boot script with an [ES2017+ Modern browser baseline](docs/runtime/browser-support.md).
 
 ## Build

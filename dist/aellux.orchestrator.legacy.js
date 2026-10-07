@@ -21750,7 +21750,7 @@
                   case 0:
                     if (root.AelluxJs.bundledExtensions) {
                       Object.keys(root.AelluxJs.bundledExtensions).forEach(function(key) {
-                        return AelluxJs.ext(key);
+                        if (!(key in AelluxJs.registry.ext)) AelluxJs.ext(key);
                       });
                     }
                     _context.n = 1;
@@ -21950,9 +21950,7 @@
             return Promise.reject();
           }
           var bundledLoader = AelluxJs.bundledExtensions ? AelluxJs.bundledExtensions[key] : null;
-          extensionPromises[key] = (bundledLoader ? Promise.resolve().then(function() {
-            return bundledLoader();
-          }) : appendExtensionAssets(extensionName)).then(function() {
+          extensionPromises[key] = appendExtensionAssets(extensionName, bundledLoader).then(function() {
             return extensionInitialize(extensionName);
           }).catch(function(error) {
             AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_EXTENSION_INITIALIZE, {
@@ -21981,10 +21979,11 @@
         }
         function _appendExtensionAssets() {
           _appendExtensionAssets = _asyncToGenerator2(/* @__PURE__ */ _regenerator2().m(function _callee6(extensionName) {
-            var key, data, url, useLegacyBuild, scriptURL, loadPromises;
+            var bundledLoader, key, data, url, useLegacyBuild, scriptURL, loadPromises, _args6 = arguments;
             return _regenerator2().w(function(_context6) {
               while (1) switch (_context6.n) {
                 case 0:
+                  bundledLoader = _args6.length > 1 && _args6[1] !== void 0 ? _args6[1] : null;
                   extensionName = fromCamelCase2(extensionName);
                   key = toCamelCase2(extensionName);
                   data = AelluxJs.registry.ext[key];
@@ -21992,16 +21991,22 @@
                   useLegacyBuild = AelluxJs.diagnostics.legacy || data.builds.indexOf("modern") === -1;
                   scriptURL = useLegacyBuild ? toLegacyScriptURL(url) : url;
                   loadPromises = [];
-                  loadPromises.push(new Promise(function(resolve, reject) {
-                    var attr = AelluxJs.attr("ext");
-                    var script = document.createElement("script");
-                    script.src = scriptURL;
-                    script.setAttribute(attr, extensionName);
-                    assetLoadHelper(script, {
-                      loadCallback: resolve,
-                      errorCallback: reject
-                    });
-                  }));
+                  if (bundledLoader) {
+                    loadPromises.push(Promise.resolve().then(function() {
+                      return bundledLoader();
+                    }));
+                  } else {
+                    loadPromises.push(new Promise(function(resolve, reject) {
+                      var attr = AelluxJs.attr("ext");
+                      var script = document.createElement("script");
+                      script.src = scriptURL;
+                      script.setAttribute(attr, extensionName);
+                      assetLoadHelper(script, {
+                        loadCallback: resolve,
+                        errorCallback: reject
+                      });
+                    }));
+                  }
                   if (data.loadStyle && data.loadStyle !== "false") {
                     loadPromises.push(new Promise(function(resolve) {
                       var styleDefaultURL = data.loadStyle === true || data.loadStyle === "true" || data.loadStyle === "";

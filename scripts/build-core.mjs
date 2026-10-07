@@ -5,7 +5,9 @@ import { transformAsync } from "@babel/core";
 import presetEnv from "@babel/preset-env";
 import { copyFile, mkdir, readFile, readdir, unlink, writeFile } from "node:fs/promises";
 import { basename, dirname, isAbsolute, join, relative } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
+import { createContext, runInContext } from "node:vm";
+import { generateAdaptiveCSS } from "../src/aellux.ext.adaptive.css.js";
 
 const projectRoot = fileURLToPath(new URL("../", import.meta.url));
 const sourceDirectory = join(projectRoot, "src");
@@ -49,6 +51,44 @@ require("./src/aellux.full.js");
 `;
 
 await mkdir(outputDirectory, { recursive: true });
+
+const bootstrapPath = join(sourceDirectory, "aellux.js");
+const adaptiveExtensionPath = join(sourceDirectory, "aellux.ext.adaptive.js");
+const bootstrapContext = createContext({
+  document: {
+    currentScript: { src: pathToFileURL(bootstrapPath).href },
+    querySelector() { return null; }
+  }
+});
+bootstrapContext.window = bootstrapContext;
+bootstrapContext.globalThis = bootstrapContext;
+const bootstrapEvaluationBuild = await build({
+  absWorkingDir: projectRoot,
+  entryPoints: [bootstrapPath],
+  bundle: true,
+  platform: "browser",
+  format: "iife",
+  target: "es2017",
+  write: false,
+  legalComments: "none"
+});
+runInContext(bootstrapEvaluationBuild.outputFiles[0].text, bootstrapContext);
+runInContext(await readFile(adaptiveExtensionPath, "utf8"), bootstrapContext);
+await writeFile(
+  join(outputDirectory, "aellux.ext.adaptive.css"),
+  generateAdaptiveCSS(bootstrapContext.AelluxJs),
+  "utf8"
+);
+generatedFiles.add("aellux.ext.adaptive.css");
+
+await build({
+  absWorkingDir: projectRoot,
+  entryPoints: [join(outputDirectory, "aellux.ext.adaptive.css")],
+  outfile: join(outputDirectory, "aellux.ext.adaptive.min.css"),
+  minify: true,
+  legalComments: "inline"
+});
+generatedFiles.add("aellux.ext.adaptive.min.css");
 
 for (const sourceFile of sourceFiles) {
   const filename = basename(sourceFile);
