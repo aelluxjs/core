@@ -1113,17 +1113,79 @@
 
   // src/internal/create-mount-helper.js
   init_utils_name_case();
+
+  // src/internal/create-controller-helper.js
+  init_utils_name_case();
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
-  function createMountHelper(root2, extensionPromises, mountMaps) {
+  function createControllerHelper(root2, element) {
+    const { toCamelCase: toCamelCase2, fromCamelCase: fromCamelCase2 } = utils_name_case_default;
+    const mounts = /* @__PURE__ */ new Map();
+    const controller = { spawn, despawn, hasMounts };
+    function spawn(extensionName, mountId, methodNames) {
+      const key = toCamelCase2(fromCamelCase2(extensionName));
+      mounts.set(mountId, {
+        extension: key,
+        methods: Array.isArray(methodNames) ? methodNames : []
+      });
+      refresh(key);
+      return controller[key] || null;
+    }
+    function despawn(mountId) {
+      const registration = mounts.get(mountId);
+      if (!registration) return false;
+      mounts.delete(mountId);
+      refresh(registration.extension);
+      return true;
+    }
+    function hasMounts() {
+      return mounts.size > 0;
+    }
+    function refresh(key) {
+      const extension = root2.AelluxJs.ext[key];
+      const names = /* @__PURE__ */ new Set();
+      for (const registration of mounts.values()) {
+        if (registration.extension !== key) continue;
+        for (const name of registration.methods) {
+          if (typeof name === "string" && extension && typeof extension[name] === "function") {
+            names.add(name);
+          }
+        }
+      }
+      if (names.size === 0) {
+        const namespace2 = controller[key];
+        if (namespace2) {
+          for (const name of Object.keys(namespace2)) delete namespace2[name];
+        }
+        delete controller[key];
+        return;
+      }
+      const namespace = controller[key] || /* @__PURE__ */ Object.create(null);
+      for (const name of Object.keys(namespace)) {
+        if (!names.has(name)) delete namespace[name];
+      }
+      for (const name of names) {
+        namespace[name] = (...args) => {
+          const current = root2.AelluxJs.ext[key];
+          return current[name](element, ...args);
+        };
+      }
+      controller[key] = namespace;
+    }
+    return controller;
+  }
+
+  // src/internal/create-mount-helper.js
+  /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+  function createMountHelper(root2, extensionPromises, mountMaps, mountedElements, elementControllers) {
     const { toCapitalized: toCapitalized2, toCamelCase: toCamelCase2, fromCamelCase: fromCamelCase2 } = utils_name_case_default;
-    const mountedElements = /* @__PURE__ */ new WeakMap();
-    async function AelluxJsForceUnmount(rootOrSelector, extensionNames = null) {
+    return { mount, unmount };
+    async function unmount(rootOrSelector, extensionNames = null) {
       for (const rootElement of resolveRoots(rootOrSelector)) {
         await AelluxJsForce(rootElement, "unmount", extensionNames);
       }
       return true;
     }
-    async function AelluxJsForceUpdate(rootOrSelector, extensionNames = null) {
+    async function mount(rootOrSelector, extensionNames = null) {
       const AelluxJs2 = root2.AelluxJs;
       for (const rootElement of resolveRoots(rootOrSelector)) {
         const allWaiters = findElements(rootElement, AelluxJs2.attr("wait-mounted"));
@@ -1210,6 +1272,20 @@
                 await controller[method](mountable);
                 elementsAffected.add(mountable);
                 setMounted(mountable, mountId, mounting);
+                if (mounting) {
+                  let elementController = elementControllers.get(mountable);
+                  if (!elementController) {
+                    elementController = createControllerHelper(root2, mountable);
+                    elementControllers.set(mountable, elementController);
+                  }
+                  elementController.spawn(extensionName, mountId, controller.controllers);
+                } else {
+                  const elementController = elementControllers.get(mountable);
+                  if (elementController) {
+                    elementController.despawn(mountId);
+                    if (!elementController.hasMounts()) elementControllers.delete(mountable);
+                  }
+                }
               }
             } catch (error) {
               AelluxJs2.diagnostics.error(
@@ -1274,10 +1350,6 @@
       mounts[mounted ? "add" : "delete"](mountId);
       if (mounts.size === 0) mountedElements.delete(element);
     }
-    return {
-      AelluxJsForceUpdate,
-      AelluxJsForceUnmount
-    };
   }
 
   // src/internal/build-mount-map-manager.js
@@ -1285,12 +1357,42 @@
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   function buildMountMapManager(root2, extensionPromises) {
     const { toCamelCase: toCamelCase2, fromCamelCase: fromCamelCase2 } = utils_name_case_default;
+    const mountedElements = /* @__PURE__ */ new WeakMap();
+    const elementControllers = /* @__PURE__ */ new WeakMap();
     const maps = /* @__PURE__ */ new Map();
-    const helper = createMountHelper(root2, extensionPromises, maps);
+    const helper = createMountHelper(
+      root2,
+      extensionPromises,
+      maps,
+      mountedElements,
+      elementControllers
+    );
+    const manager = {
+      add,
+      remove,
+      controller,
+      mount: helper.mount,
+      unmount: helper.unmount
+    };
+    return manager;
+    function controller(elementOrId) {
+      const requested = elementOrId;
+      if (typeof elementOrId === "string")
+        elementOrId = root2.document.getElementById(elementOrId.replace(/^#/, ""));
+      const diagnostics = root2.AelluxJs.diagnostics;
+      if (!elementOrId || elementOrId.nodeType !== 1) {
+        diagnostics.warn(diagnostics.WARN_INVALID_CONTROLLER_ELEMENT, { elementOrId: requested });
+        return null;
+      }
+      const found = elementControllers.get(elementOrId);
+      if (found) return found;
+      diagnostics.error(diagnostics.ERROR_CONTROLLER_NOT_FOUND, { element: elementOrId });
+      return null;
+    }
     function keyFor(extensionName) {
       return toCamelCase2(fromCamelCase2(extensionName));
     }
-    function add(extensionName, selector, mount2, unmount2, update, controllers) {
+    function add(extensionName, selector, mount, unmount, update, controllers) {
       if (typeof extensionName !== "string" || !extensionName || typeof selector !== "string" || !selector.trim()) {
         throw new TypeError("mountManager.add requires an extension name and selector");
       }
@@ -1300,7 +1402,7 @@
         map = /* @__PURE__ */ new Map();
         maps.set(key, map);
       }
-      map.set(selector, { mount: mount2, unmount: unmount2, update, controllers });
+      map.set(selector, { mount, unmount, update, controllers });
       root2.AelluxJs.registry.extMounters[key] = [...map.keys()].join(",");
       return manager;
     }
@@ -1318,14 +1420,6 @@
       }
       return removed;
     }
-    function mount(rootOrSelector, extensionNames = null) {
-      return helper.AelluxJsForceUpdate(rootOrSelector, extensionNames);
-    }
-    function unmount(rootOrSelector, extensionNames = null) {
-      return helper.AelluxJsForceUnmount(rootOrSelector, extensionNames);
-    }
-    const manager = { add, remove, mount, unmount };
-    return manager;
   }
 
   // src/aellux.orchestrator.js

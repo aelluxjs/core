@@ -38,6 +38,16 @@ for (const scenario of scenarios) {
   });
 }
 
+test("callable API returns null before the mount manager starts", async ({ page }) => {
+  await page.goto("/tests/index.htm");
+  await page.addScriptTag({ url: "/dist/aellux.js" });
+  expect(await page.evaluate(() => ({
+    sameAlias: AelluxJs === $ae,
+    callable: typeof AelluxJs === "function",
+    result: $ae("missing")
+  }))).toEqual({ sameAlias: true, callable: true, result: null });
+});
+
 test("diagnostic verbosity normalizes a named level", async ({ page }) => {
   await page.goto("/tests/index.htm");
   await page.addScriptTag({ url: "/dist/aellux.js" });
@@ -243,14 +253,14 @@ test("Extension names do not replace core API methods", async ({ page }) => {
       coreRequestPreserved: AelluxJs.request === coreRequest,
       extension: AelluxJs.ext.request === extension,
       initialized: extension.initialized,
-      apiIsObject: typeof AelluxJs === "object"
+      apiIsFunction: typeof AelluxJs === "function"
     };
   });
   expect(result).toEqual({
     coreRequestPreserved: true,
     extension: true,
     initialized: true,
-    apiIsObject: true
+    apiIsFunction: true
   });
 });
 

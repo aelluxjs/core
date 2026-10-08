@@ -8,7 +8,7 @@ import utilsNameCase from "./utils-name-case.js";
 import { createPreferenceHtmlHelper } from "./utils-preference-html.js";
 
 // Build-time imports aside, keep this factory ES5-compatible for the boot bundle.
-// The caller publishes the returned object and replaces init with the boot loader.
+// The caller publishes the returned function and replaces init with the boot loader.
 export function createAelluxApi(root, constants) {
   var toCapitalized = utilsNameCase.toCapitalized;
   var toCamelCase = utilsNameCase.toCamelCase;
@@ -20,7 +20,10 @@ export function createAelluxApi(root, constants) {
   var document = root.document;
   var preferenceHtml = createPreferenceHtmlHelper(root, function () { return api; });
 
-  var api = {
+  var api = function (elementOrId) {
+    return api.mountManager ? api.mountManager.controller(elementOrId) : null;
+  };
+  var apiProperties = {
     shortJSName: constants.AELLUXJS_SHORT_JS_NAME,
     diagnostics: diagnostics,
     options: options,
@@ -122,6 +125,12 @@ export function createAelluxApi(root, constants) {
     destroyExtensions: function () { throw diagnostics.create(diagnostics.ERROR_NOT_INITIALIZED); },
     destroy: function () { throw diagnostics.create(diagnostics.ERROR_NOT_INITIALIZED); }
   };
+
+  for (var property in apiProperties) {
+    if (Object.prototype.hasOwnProperty.call(apiProperties, property)) {
+      api[property] = apiProperties[property];
+    }
+  }
 
   return api;
 

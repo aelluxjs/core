@@ -74,6 +74,7 @@ var diagnosticNames = [
   "ERROR_NOT_INITIALIZED",
   "ERROR_INVALID_MODE",
   "ERROR_INVALID_VERBOSE_LEVEL",
+  "ERROR_CONTROLLER_NOT_FOUND",
   "ERROR_EXTENSION_DUPLICATE",
   "ERROR_EXTENSION_INITIALIZE",
   "ERROR_EXTENSION_MOUNT",
@@ -90,6 +91,7 @@ var diagnosticNames = [
   "WARN_BROWSER_UNSUPPORTED",
   "WARN_BROWSER_CAPABILITIES",
   "WARN_INTERRUPTION",
+  "WARN_INVALID_CONTROLLER_ELEMENT",
   "INFO_LEGACY_FALLBACK"
 ];
 
@@ -194,19 +196,21 @@ for (var property in bootstrapProperties) {
 runtimeProperties.waitLayout = layoutScheduler;
 runtimeProperties.mountManager = Object.freeze({
   type: "object",
-  properties: Object.freeze({ add: method, remove: method, mount: method, unmount: method })
+  properties: Object.freeze({
+    add: method, remove: method, mount: method, unmount: method, controller: method
+  })
 });
 
 var aelluxApiContract = Object.freeze({
   // Both browser globals must reference the same object.
   globals: Object.freeze(["AelluxJs", "$ae"]),
   bootstrap: Object.freeze({
-    type: "object",
+    type: "function",
     properties: bootstrapProperties,
     optionalProperties: Object.freeze({ aelluxBasePath: text })
   }),
   runtime: Object.freeze({
-    type: "object",
+    type: "function",
     properties: Object.freeze(runtimeProperties),
     optionalProperties: Object.freeze({
       aelluxBasePath: text,

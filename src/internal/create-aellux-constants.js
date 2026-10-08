@@ -15,6 +15,7 @@ export function createAelluxConstants() {
       ERROR_NOT_INITIALIZED: { code: 1001, message: "aellux.js has not been initialized." },
       ERROR_INVALID_MODE: { code: 1002, message: "aellux.js mode must be basic or full." },
       ERROR_INVALID_VERBOSE_LEVEL: { code: 1003, message: "aellux.js verboseLevel must be 0, 1, 2, or the matching error, warn, info key." },
+      ERROR_CONTROLLER_NOT_FOUND: { code: 1004, message: "No controller was found for this element. It may not be mounted." },
       ERROR_EXTENSION_DUPLICATE: { code: 1101, message: "aellux.js Extension is already registered." },
       ERROR_EXTENSION_INITIALIZE: { code: 1102, message: "aellux.js Extension failed to initialize." },
       ERROR_EXTENSION_MOUNT: { code: 1103, message: "aellux.js Extension failed to mount or unmount an element." },
@@ -31,6 +32,7 @@ export function createAelluxConstants() {
       WARN_BROWSER_UNSUPPORTED: { code: 2000, message: "Browser environment is not available." },
       WARN_BROWSER_CAPABILITIES: { code: 2001, message: "Some browser capabilities are unavailable; trying Legacy runtime." },
       WARN_INTERRUPTION: { code: 2002, message: "aellux.js Extension transition was interrupted." },
+      WARN_INVALID_CONTROLLER_ELEMENT: { code: 2003, message: "Controller lookup requires a DOM Element or an existing element ID, optionally prefixed with #." },
       INFO_LEGACY_FALLBACK: { code: 3000, message: "aellux.js is starting the Legacy runtime." }
     },
 

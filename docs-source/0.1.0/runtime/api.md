@@ -30,6 +30,15 @@ await $ae.unmount(root);
 
 Extensions register element handlers with `$ae.mountManager.add(extensionName, selector, mount, unmount, update, controllers)` during `init()` and call `$ae.mountManager.remove(extensionName, selector)` during `destroy()`. Omitting `selector` removes all registrations for the Extension. `$ae.mountManager.mount(root, extensionNames)` and `$ae.mountManager.unmount(root, extensionNames)` use the same lifecycle execution as `$ae.mount()` and `$ae.unmount()`.
 
+After an element mounts, use `$ae(elementOrId).{extensionName}.{mountedExtensionMethod}(...args)` to call its public Extension methods. `AelluxJs(elementOrId)` works the same way. Both calls resolve through `mountManager.controller(elementOrId)`. `elementOrId` can be a DOM element, an ID, or an ID prefixed with `#`. Invalid values and IDs that do not resolve emit a warning and return `null`. An element without a mounted controller emits an error explaining that it may not be mounted, then returns `null`. Before runtime initialization, the shortcut returns `null`. The `controllers` names registered by an Extension become methods under its camelCase namespace. Each method receives the element as its first argument, followed by `...args`:
+
+```js
+$ae("#panel").present.pop();
+$ae("#panel").present.toggle(false);
+```
+
+Unmounting removes the corresponding methods from the element controller.
+
 ## Destruction
 
 ```js

@@ -24,7 +24,7 @@ import utilsNameCase from "./internal/utils-name-case.js";
   const mountManager = buildMountMapManager(root, extensionPromises);
   const layoutScheduler = createLayoutScheduler();
 
-  // Keep the boot API object: its methods close over the same instance.
+  // Keep the boot API function: its methods close over the same instance.
   root.AelluxJs = Object.assign(
     root.AelluxJs,
     {

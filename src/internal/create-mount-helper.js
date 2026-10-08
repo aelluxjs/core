@@ -1,20 +1,21 @@
 /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
 
 import utilsNameCase from "./utils-name-case.js";
+import { createControllerHelper } from "./create-controller-helper.js";
 
-export function createMountHelper(root, extensionPromises, mountMaps) {
+export function createMountHelper(root, extensionPromises, mountMaps, mountedElements, elementControllers) {
   const { toCapitalized, toCamelCase, fromCamelCase } = utilsNameCase;
 
-  const mountedElements = new WeakMap(); //DOM, string Set
+  return { mount, unmount };
 
-  async function AelluxJsForceUnmount(rootOrSelector, extensionNames = null) {
+  async function unmount(rootOrSelector, extensionNames = null) {
     for (const rootElement of resolveRoots(rootOrSelector)) {
       await AelluxJsForce(rootElement, "unmount", extensionNames);
     }
     return true;
   }
 
-  async function AelluxJsForceUpdate(rootOrSelector, extensionNames = null) {
+  async function mount(rootOrSelector, extensionNames = null) {
     const AelluxJs = root.AelluxJs;
     for (const rootElement of resolveRoots(rootOrSelector)) {
       const allWaiters = findElements(rootElement, AelluxJs.attr("wait-mounted"));
@@ -115,6 +116,20 @@ export function createMountHelper(root, extensionPromises, mountMaps) {
               await controller[method](mountable);
               elementsAffected.add(mountable);
               setMounted(mountable, mountId, mounting);
+              if (mounting) {
+                let elementController = elementControllers.get(mountable);
+                if (!elementController) {
+                  elementController = createControllerHelper(root, mountable);
+                  elementControllers.set(mountable, elementController);
+                }
+                elementController.spawn(extensionName, mountId, controller.controllers);
+              } else {
+                const elementController = elementControllers.get(mountable);
+                if (elementController) {
+                  elementController.despawn(mountId);
+                  if (!elementController.hasMounts()) elementControllers.delete(mountable);
+                }
+              }
             }
           } catch (error) {
             AelluxJs.diagnostics.error(
@@ -183,9 +198,4 @@ export function createMountHelper(root, extensionPromises, mountMaps) {
     mounts[mounted ? "add" : "delete"](mountId);
     if (mounts.size === 0) mountedElements.delete(element);
   }
-
-  return {
-    AelluxJsForceUpdate,
-    AelluxJsForceUnmount
-  };
 }

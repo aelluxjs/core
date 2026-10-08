@@ -5,8 +5,44 @@ import utilsNameCase from "./utils-name-case.js";
 
 export function buildMountMapManager(root, extensionPromises) {
   const { toCamelCase, fromCamelCase } = utilsNameCase;
+  const mountedElements = new WeakMap(); //DOM, string Set
+  const elementControllers = new WeakMap(); //DOM, object
   const maps = new Map();
-  const helper = createMountHelper(root, extensionPromises, maps);
+
+  const helper = createMountHelper(
+    root,
+    extensionPromises,
+    maps,
+    mountedElements,
+    elementControllers
+  );
+
+  const manager = {
+    add,
+    remove,
+    controller,
+    mount: helper.mount,
+    unmount: helper.unmount
+  };
+  return manager;
+
+  function controller(elementOrId) {
+    const requested = elementOrId;
+    if (typeof elementOrId === "string")
+      elementOrId = root.document.getElementById(elementOrId.replace(/^#/, ""));
+
+    const diagnostics = root.AelluxJs.diagnostics;
+    if (!elementOrId || elementOrId.nodeType !== 1) {
+      diagnostics.warn(diagnostics.WARN_INVALID_CONTROLLER_ELEMENT, { elementOrId: requested });
+      return null;
+    }
+
+    const found = elementControllers.get(elementOrId);
+    if (found) return found;
+
+    diagnostics.error(diagnostics.ERROR_CONTROLLER_NOT_FOUND, { element: elementOrId });
+    return null;
+  }
 
   function keyFor(extensionName) {
     return toCamelCase(fromCamelCase(extensionName));
@@ -43,15 +79,4 @@ export function buildMountMapManager(root, extensionPromises) {
     }
     return removed;
   }
-
-  function mount(rootOrSelector, extensionNames = null) {
-    return helper.AelluxJsForceUpdate(rootOrSelector, extensionNames);
-  }
-
-  function unmount(rootOrSelector, extensionNames = null) {
-    return helper.AelluxJsForceUnmount(rootOrSelector, extensionNames);
-  }
-
-  const manager = { add, remove, mount, unmount };
-  return manager;
 }

@@ -1,5 +1,78 @@
 import { expect, test } from "@playwright/test";
 
+test("mounted present controller binds public methods to its element", async ({ page }) => {
+  await page.goto("/tests/index.htm");
+  await page.evaluate(() => {
+    document.body.innerHTML = `
+      <div id="panel" data-ae-present hidden
+        style="--ae-pop-duration: 0ms; --ae-unpop-duration: 0ms"></div>
+    `;
+  });
+  await page.addScriptTag({ url: "/dist/aellux.js" });
+  await page.evaluate(() => AelluxJs.init({ mode: "full" }));
+  await expect.poll(() => page.evaluate(() =>
+    typeof AelluxJs.mountManager?.controller("panel")?.present?.pop === "function"
+  )).toBe(true);
+
+  const result = await page.evaluate(() => {
+    const panel = document.getElementById("panel");
+    const byElement = AelluxJs.mountManager.controller(panel);
+    const byId = AelluxJs.mountManager.controller("panel");
+    const byPrefixedId = AelluxJs.mountManager.controller("#panel");
+    const byCall = AelluxJs(panel);
+    const byAlias = $ae("#panel");
+    byElement.present.pop();
+    return {
+      sameController: byElement === byId && byId === byPrefixedId &&
+        byPrefixedId === byCall && byCall === byAlias,
+      methods: Object.keys(byElement.present).sort(),
+      missing: AelluxJs("#missing")
+    };
+  });
+  expect(result).toEqual({
+    sameController: true,
+    methods: ["pop", "toggle", "trigger", "unpop"],
+    missing: null
+  });
+  await expect(page.locator("#panel")).toHaveJSProperty("hidden", false);
+
+  await page.evaluate(() => $ae("#panel").present.toggle(false));
+  await expect(page.locator("#panel")).toHaveJSProperty("hidden", true);
+
+  await page.evaluate(() => AelluxJs.unmount(document.getElementById("panel")));
+  expect(await page.evaluate(() => $ae("panel"))).toBe(null);
+});
+
+test("controller lookup diagnoses invalid inputs and unmounted elements", async ({ page }) => {
+  await page.goto("/tests/index.htm");
+  await page.addScriptTag({ url: "/dist/aellux.js" });
+  await page.evaluate(() => AelluxJs.init({ mode: "full" }));
+  await expect.poll(() => page.evaluate(() => !!AelluxJs.mountManager)).toBe(true);
+
+  const result = await page.evaluate(() => {
+    const invalidValue = $ae(42);
+    const missingId = $ae("#missing");
+    const unmounted = $ae(document.createElement("div"));
+    const originalLog = console.log;
+    console.log = () => {};
+    try {
+      const entries = AelluxJs.diagnostics.showHistory(3);
+      return {
+        results: [invalidValue, missingId, unmounted],
+        diagnostics: entries.map(({ code, level, message }) => ({ code, level, message }))
+      };
+    } finally {
+      console.log = originalLog;
+    }
+  });
+  expect(result.results).toEqual([null, null, null]);
+  expect(result.diagnostics).toEqual([
+    { code: 2003, level: 1, message: expect.stringContaining("DOM Element") },
+    { code: 2003, level: 1, message: expect.stringContaining("element ID") },
+    { code: 1004, level: 0, message: expect.stringContaining("may not be mounted") }
+  ]);
+});
+
 test("present trigger stays expanded while any target is expanded", async ({ page }) => {
   await page.goto("/tests/index.htm");
   await page.evaluate(() => {
