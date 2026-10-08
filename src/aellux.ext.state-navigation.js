@@ -1,5 +1,9 @@
 /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
 
+// TODO: Test state-navigation when the same extension runs in an iframe and
+// its parent page. Iframe history, hash, and state synchronization are not
+// covered by the current tests; iframe compatibility is not yet verified.
+
 (function (root) {
   "use strict";
 

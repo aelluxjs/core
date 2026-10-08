@@ -50,7 +50,8 @@
   function init(options) {
     mountMap.set(`[${attr.present}]`, {
       mount: mountPresentContainer,
-      unmount: unmountPresentContainer
+      unmount: unmountPresentContainer,
+      controllers: ["pop", "unpop", "trigger", "toggle"]
     });
 
     mountMap.set(
@@ -60,7 +61,8 @@
         attr.target
       ].join('],[')}]`, {
       mount: mountTriggerElement,
-      unmount: unmountTriggerElement
+      unmount: unmountTriggerElement,
+      controllers: null
     });
 
     document.addEventListener("click", OnClick);

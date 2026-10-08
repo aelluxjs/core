@@ -38,6 +38,13 @@ Add aellux.js to a page and enable the Extensions it needs. The library coordina
 
 ## aellux.js Extensions
 
+- [Adaptive](extensions/adaptive.md)
+- [Feedback](extensions/feedback.md)
+- [Focus](extensions/focus.md)
+- [Pointer](extensions/pointer.md)
+- [Preference](extensions/preference.md)
+- [Present](extensions/present.md)
+- [State navigation](extensions/state-navigation.md)
 - [Authoring third-party Extensions](extensions/authoring.md)
 - [Registering Extensions with `$ae.ext(...)`](extensions/registration.md)
 - [Declarative loading with `link[rel="aelluxjs-ext"]`](extensions/declarative-loading.md)
@@ -48,7 +55,7 @@ Add aellux.js to a page and enable the Extensions it needs. The library coordina
 ## Project Documents
 
 - [Browser validation scenarios](validation-scenarios.md)
-- [Milestone: aellux.js 0.1.0 Beta 2](https://github.com/aelluxjs/core/blob/main/milestones/0.1.0-beta.2.md)
+- [Milestone: aellux.js 0.1.0](https://github.com/aelluxjs/core/blob/main/milestones/0.1.0.md)
 - [Milestone: aellux.js 0.1.0 Beta 1](https://github.com/aelluxjs/core/blob/main/milestones/0.1.0-beta.1.md)
 - [Extension scaffold](https://github.com/aelluxjs/core/blob/main/templates/README.md)
 - [Changelog](https://github.com/aelluxjs/core/blob/main/CHANGELOG.md)
