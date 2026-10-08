@@ -90,8 +90,13 @@
       if (!presentMotion.hasAttribute(attr.presentMotion))
         presentMotion.setAttribute(attr.presentMotion, "auto");
     } else {
+      if (presentMotion.hidden) {
+        AelluxJs.diagnostics.warn(
+          AelluxJs.diagnostics.WARN_PRESENT_MOTION_HIDDEN,
+          { extension: extensionName, element, presentMotion }
+        );
+      }
       if (!element.hidden) {
-        //Diagnostic present should be hidden not motion
         element.hidden = presentMotion.hidden;
       }
       presentMotion.hidden = false;
@@ -378,7 +383,10 @@
         exceptions.push(container);
         trigger(container, triggerAttr);
       } else {
-        //ERROR INVALID TARGET NOT PRESENT ELEMENT
+        AelluxJs.diagnostics.error(
+          AelluxJs.diagnostics.ERROR_PRESENT_CONTROL_TARGET_MISSING,
+          { extension: extensionName, element: button, action: "trigger" }
+        );
       }
     }
     button = event.target.closest(`[${attr.dismiss}]`);
@@ -397,7 +405,10 @@
         exceptions.push(container);
         unpop(container);
       } else {
-        //ERROR INVALID TARGET NOT PRESENT ELEMENT
+        AelluxJs.diagnostics.error(
+          AelluxJs.diagnostics.ERROR_PRESENT_CONTROL_TARGET_MISSING,
+          { extension: extensionName, element: button, action: "dismiss" }
+        );
       }
     }
 

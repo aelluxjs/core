@@ -48,6 +48,261 @@ test("callable API returns null before the mount manager starts", async ({ page 
   }))).toEqual({ sameAlias: true, callable: true, result: null });
 });
 
+test("invalid mount root selectors are recorded for mount and unmount", async ({ page }) => {
+  await page.goto("/tests/index.htm");
+  await page.addScriptTag({ url: "/dist/aellux.js" });
+  await page.evaluate(() => AelluxJs.init({ mode: "basic" }));
+  await expect.poll(() => page.evaluate(() => AelluxJs.diagnostics.supported)).toBe(true);
+
+  const result = await page.evaluate(async () => {
+    const mounted = await AelluxJs.mount("[");
+    const unmounted = await AelluxJs.unmount("[");
+    const entries = AelluxJs.diagnostics.showHistory().filter(entry => entry.code === 1005);
+    return {
+      mounted, unmounted,
+      entries: entries.map(entry => ({
+        level: entry.level,
+        selector: entry.context.selector,
+        method: entry.context.method,
+        hasCause: entry.context.cause instanceof Error
+      }))
+    };
+  });
+  expect(result).toEqual({
+    mounted: true,
+    unmounted: true,
+    entries: [
+      { level: 0, selector: "[", method: "mount", hasCause: true },
+      { level: 0, selector: "[", method: "unmount", hasCause: true }
+    ]
+  });
+});
+
+test("wait awaits async Extension init and diagnoses rejection", async ({ page }) => {
+  await page.goto("/tests/index.htm");
+  await page.addScriptTag({ url: "/dist/aellux.js" });
+  await page.evaluate(() => AelluxJs.init({ mode: "basic" }));
+  await expect.poll(() => page.evaluate(() => AelluxJs.diagnostics.supported)).toBe(true);
+
+  const result = await page.evaluate(async () => {
+    AelluxJs.ext("async-success");
+    let finishInit;
+    AelluxJs.extAttach("async-success", {
+      init() { return new Promise(resolve => { finishInit = resolve; }); }
+    });
+    const pending = AelluxJs.wait("async-success");
+    await Promise.resolve();
+    const initializedBeforeResolution = AelluxJs.ext.asyncSuccess.initialized;
+    finishInit();
+    const success = await pending;
+
+    AelluxJs.ext("async-failure");
+    AelluxJs.extAttach("async-failure", {
+      async init() { throw new Error("init probe failed"); }
+    });
+    const failure = await AelluxJs.wait("async-failure");
+    const diagnostic = AelluxJs.diagnostics.showHistory()
+      .find(entry => entry.code === 1102 && entry.context.extension === "async-failure");
+    return {
+      initializedBeforeResolution,
+      initializedAfterResolution: success.initialized,
+      failure,
+      failureInitialized: AelluxJs.ext.asyncFailure.initialized,
+      diagnostic: diagnostic && {
+        level: diagnostic.level,
+        cause: diagnostic.context.cause.message
+      }
+    };
+  });
+  expect(result).toEqual({
+    initializedBeforeResolution: false,
+    initializedAfterResolution: true,
+    failure: null,
+    failureInitialized: false,
+    diagnostic: { level: 0, cause: "init probe failed" }
+  });
+});
+
+test("failed Extension stylesheet records a warning without blocking init", async ({ page }) => {
+  await page.goto("/tests/index.htm");
+  await page.addScriptTag({ url: "/dist/aellux.js" });
+  await page.evaluate(() => AelluxJs.init({ mode: "basic" }));
+  await expect.poll(() => page.evaluate(() => AelluxJs.diagnostics.supported)).toBe(true);
+
+  const result = await page.evaluate(async () => {
+    AelluxJs.ext("/dist/aellux.ext.feedback.js", {
+      loadStyle: "/tests/browser/missing-extension-style.css"
+    });
+    const extension = await AelluxJs.wait("feedback");
+    const diagnostic = AelluxJs.diagnostics.showHistory()
+      .find(entry => entry.code === 2004);
+    return {
+      initialized: extension.initialized,
+      diagnostic: diagnostic && {
+        level: diagnostic.level,
+        extension: diagnostic.context.extension,
+        url: diagnostic.context.url
+      }
+    };
+  });
+  expect(result.initialized).toBe(true);
+  expect(result.diagnostic).toEqual({
+    level: 1,
+    extension: "feedback",
+    url: expect.stringContaining("/tests/browser/missing-extension-style.css")
+  });
+});
+
+test("waiting for an unregistered Extension records an error", async ({ page }) => {
+  await page.goto("/tests/index.htm");
+  await page.addScriptTag({ url: "/dist/aellux.js" });
+  await page.evaluate(() => AelluxJs.init({ mode: "basic" }));
+  await expect.poll(() => page.evaluate(() => AelluxJs.diagnostics.supported)).toBe(true);
+
+  const result = await page.evaluate(async () => {
+    const rejection = await AelluxJs.wait("never-registered-probe").catch(error => error);
+    const entry = AelluxJs.diagnostics.showHistory()
+      .find(item => item.code === 1110);
+    return {
+      rejectionCode: rejection.code,
+      level: entry.level,
+      extension: entry.context.extension
+    };
+  });
+  expect(result).toEqual({
+    rejectionCode: 1110, level: 0, extension: "never-registered-probe"
+  });
+});
+
+test("missing mounted controller method records a warning", async ({ page }) => {
+  await page.goto("/tests/index.htm");
+  await page.addScriptTag({ url: "/dist/aellux.js" });
+  await page.evaluate(() => AelluxJs.init({ mode: "basic" }));
+  await expect.poll(() => page.evaluate(() => AelluxJs.diagnostics.supported)).toBe(true);
+
+  const result = await page.evaluate(async () => {
+    document.body.innerHTML = '<div id="method-target" data-method-probe></div>';
+    AelluxJs.ext("method-probe");
+    AelluxJs.extAttach("method-probe", {
+      init() {
+        AelluxJs.mountManager.add("method-probe", "[data-method-probe]",
+          () => {}, () => {}, null, ["missingMethod"]);
+      }
+    });
+    await AelluxJs.wait("method-probe");
+    const target = document.getElementById("method-target");
+    await AelluxJs.mount(target, "method-probe");
+    const controller = AelluxJs.mountManager.controller(target);
+    const entry = AelluxJs.diagnostics.showHistory()
+      .find(item => item.code === 2005);
+    return {
+      controllerExists: !!controller,
+      hasMissingMethod: typeof controller.methodProbe?.missingMethod === "function",
+      diagnostic: entry && {
+        level: entry.level,
+        extension: entry.context.extension,
+        method: entry.context.method,
+        sameElement: entry.context.element === target
+      }
+    };
+  });
+  expect(result).toEqual({
+    controllerExists: true,
+    hasMissingMethod: false,
+    diagnostic: {
+      level: 1, extension: "methodProbe", method: "missingMethod", sameElement: true
+    }
+  });
+});
+
+test("unavailable browser storage records the memory fallback", async ({ page }) => {
+  await page.goto("/tests/index.htm");
+  const result = await page.evaluate(async () => {
+    const [{ buildPersistMemory }, { buildDiagnostics }, { createAelluxConstants }] =
+      await Promise.all([
+        import("/src/internal/build-persist-memory.js"),
+        import("/src/internal/build-diagnostics.js"),
+        import("/src/internal/create-aellux-constants.js")
+      ]);
+    const diagnostics = buildDiagnostics(createAelluxConstants().AELLUXJS_DIAGNOSTICS);
+    const storageRoot = {
+      URLSearchParams,
+      get localStorage() { throw new Error("storage denied"); }
+    };
+    const memory = buildPersistMemory(storageRoot, "localStorage", "Probe", diagnostics);
+    memory.set("item", "value");
+    const entry = diagnostics.showHistory(1)[0];
+    return {
+      value: memory.get("item"),
+      code: entry.code,
+      level: entry.level,
+      storage: entry.context.storage,
+      identifier: entry.context.identifier,
+      cause: entry.context.cause.message
+    };
+  });
+  expect(result).toEqual({
+    value: "value", code: 2006, level: 1,
+    storage: "localStorage", identifier: "Probe", cause: "storage denied"
+  });
+});
+
+test("navigation warns when ajax-href cannot restore a history entry", async ({ page }) => {
+  await page.goto("/tests/index.htm");
+  await page.addScriptTag({ url: "/dist/aellux.js" });
+  await page.evaluate(() => AelluxJs.init({ mode: "full" }));
+  await expect.poll(() => page.evaluate(() => AelluxJs.ext.stateNavigation?.initialized)).toBe(true);
+
+  const result = await page.evaluate(() => {
+    window.dispatchEvent(new PopStateEvent("popstate", {
+      state: { aelluxJsState: true, ajaxHref: ["#content"] }
+    }));
+    const entry = AelluxJs.diagnostics.showHistory()
+      .find(item => item.code === 2007);
+    return {
+      level: entry.level,
+      selectors: entry.context.selectors,
+      url: entry.context.url
+    };
+  });
+  expect(result).toEqual({
+    level: 1, selectors: ["#content"], url: expect.stringContaining("/tests/index.htm")
+  });
+});
+
+test("feedback reports callback failures and continues notifying subscribers", async ({ page }) => {
+  await page.goto("/tests/index.htm");
+  await page.addScriptTag({ url: "/dist/aellux.js" });
+  await page.evaluate(() => AelluxJs.init({ mode: "full" }));
+  await expect.poll(() => page.evaluate(() => AelluxJs.ext.feedback?.initialized)).toBe(true);
+
+  const result = await page.evaluate(async () => {
+    let calls = 0;
+    AelluxJs.ext.feedback.on("warning", () => { throw new Error("sync subscriber failed"); });
+    AelluxJs.ext.feedback.on("warning", async () => { throw new Error("async subscriber failed"); });
+    AelluxJs.ext.feedback.on("warning", () => { calls++; });
+    AelluxJs.ext.feedback.warning("probe");
+    await Promise.resolve();
+    const entries = AelluxJs.diagnostics.showHistory()
+      .filter(item => item.code === 1108 && item.context.extension === "feedback");
+    return {
+      calls,
+      entries: entries.map(entry => ({
+        level: entry.level,
+        type: entry.context.type,
+        cause: entry.context.cause.message
+      }))
+    };
+  });
+  expect(result).toEqual({
+    calls: 1,
+    entries: [
+      { level: 0, type: "warning", cause: "sync subscriber failed" },
+      { level: 0, type: "warning", cause: "async subscriber failed" }
+    ]
+  });
+});
+
 test("diagnostic verbosity normalizes a named level", async ({ page }) => {
   await page.goto("/tests/index.htm");
   await page.addScriptTag({ url: "/dist/aellux.js" });

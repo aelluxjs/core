@@ -79,3 +79,11 @@ Applications should compare numeric codes or catalog entries instead of parsing 
 ## Extension Compatibility
 
 `ERROR_EXTENSION_INCOMPATIBLE` uses code `1106`. It is reported before requesting an Extension script when its declared `builds` do not provide an artifact compatible with the selected runtime. Its context contains the Extension name, selected runtime, and declared builds.
+
+## Mounting and Extension Assets
+
+An invalid root selector passed to `mount()` or `unmount()` records `ERROR_MOUNT_ROOT_SELECTOR` (`1005`) with the selector, operation, and cause. An Extension whose `init()` rejects records `ERROR_EXTENSION_INITIALIZE` (`1102`); the Extension remains uninitialized. A stylesheet load failure records `WARN_EXTENSION_STYLE_LOAD` (`2004`) with the Extension name and URL. The Extension can still initialize after that warning.
+
+Waiting for an unregistered Extension records `ERROR_EXTENSION_NOT_REGISTERED` (`1110`) and rejects with that diagnostic. A mounted controller name without a matching public Extension method records `WARN_CONTROLLER_METHOD_MISSING` (`2005`). If browser storage is unavailable, `WARN_STORAGE_FALLBACK` (`2006`) identifies the storage area and key prefix; values are then held in memory for the current page only.
+
+State navigation records `WARN_NAVIGATION_AJAX_HREF_UNAVAILABLE` (`2007`) when a history entry requires `ajax-href` restoration but that Extension is unavailable. Feedback subscriber exceptions and rejected promises record `ERROR_CALLBACK` (`1108`); other subscribers continue to receive the feedback.

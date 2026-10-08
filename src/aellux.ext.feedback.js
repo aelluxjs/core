@@ -45,8 +45,28 @@
     target = target || document;
     const feedback = { type, message, value, target };
     AelluxJs.dispatchFrom(target, "Feedback", { detail: feedback });
-    if (handlers.has(type)) handlers.get(type).forEach(call => call(feedback));
-    if (handlers.has("*")) handlers.get("*").forEach(call => call(feedback));
+    notifyHandlers(type, feedback);
+    notifyHandlers("*", feedback);
+  }
+
+  function notifyHandlers(type, feedback) {
+    if (!handlers.has(type)) return;
+    handlers.get(type).forEach(call => {
+      try {
+        const result = call(feedback);
+        if (result && typeof result.then === "function") {
+          Promise.resolve(result).catch(error => reportCallbackError(error, type));
+        }
+      } catch (error) {
+        reportCallbackError(error, type);
+      }
+    });
+  }
+
+  function reportCallbackError(error, type) {
+    AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_CALLBACK, {
+      cause: error, extension: extensionName, type
+    });
   }
 
   function removeHandler(type, handler) {

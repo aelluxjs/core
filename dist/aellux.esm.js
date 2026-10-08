@@ -86,7 +86,7 @@ function buildDiagnostics(catalog) {
 
 // src/internal/build-persist-memory.js
 /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
-function buildPersistMemory(root2, name, identifier) {
+function buildPersistMemory(root2, name, identifier, diagnostics) {
   var defaultIdentifier = identifier ? identifier : "AelluxJsPersist";
   var target;
   try {
@@ -95,6 +95,13 @@ function buildPersistMemory(root2, name, identifier) {
       throw new Error("Storage unavailable");
     }
   } catch (error) {
+    if (diagnostics) {
+      diagnostics.warn(diagnostics.WARN_STORAGE_FALLBACK, {
+        storage: name,
+        identifier: defaultIdentifier,
+        cause: error
+      });
+    }
     target = {
       data: {},
       setItem: function(key, value) {
@@ -337,9 +344,9 @@ function createAelluxApi(root2, constants) {
       throw diagnostics.create(diagnostics.ERROR_NOT_INITIALIZED);
     },
     persist: {
-      local: buildPersistMemory(root2, "localStorage"),
-      session: buildPersistMemory(root2, "sessionStorage"),
-      preferences: buildPersistMemory(root2, "localStorage", "AelluxJsPreferences")
+      local: buildPersistMemory(root2, "localStorage", null, diagnostics),
+      session: buildPersistMemory(root2, "sessionStorage", null, diagnostics),
+      preferences: buildPersistMemory(root2, "localStorage", "AelluxJsPreferences", diagnostics)
     },
     updatePreferenceAttributesHTML: preferenceHtml.updatePreferenceAttributesHTML,
     on: function(event, handler, options2) {
@@ -484,6 +491,7 @@ function createAelluxConstants() {
       ERROR_INVALID_MODE: { code: 1002, message: "aellux.js mode must be basic or full." },
       ERROR_INVALID_VERBOSE_LEVEL: { code: 1003, message: "aellux.js verboseLevel must be 0, 1, 2, or the matching error, warn, info key." },
       ERROR_CONTROLLER_NOT_FOUND: { code: 1004, message: "No controller was found for this element. It may not be mounted." },
+      ERROR_MOUNT_ROOT_SELECTOR: { code: 1005, message: "Invalid root selector for mounting or unmounting." },
       ERROR_EXTENSION_DUPLICATE: { code: 1101, message: "aellux.js Extension is already registered." },
       ERROR_EXTENSION_INITIALIZE: { code: 1102, message: "aellux.js Extension failed to initialize." },
       ERROR_EXTENSION_MOUNT: { code: 1103, message: "aellux.js Extension failed to mount or unmount an element." },
@@ -493,6 +501,8 @@ function createAelluxConstants() {
       ERROR_EXTENSION_SELECTOR: { code: 1107, message: "aellux.js Extension failed to iterate a selector." },
       ERROR_CALLBACK: { code: 1108, message: "aellux.js Extension selector callback failed." },
       ERROR_EXTENSION_TRANSITION: { code: 1109, message: "aellux.js Extension transition failed." },
+      ERROR_EXTENSION_NOT_REGISTERED: { code: 1110, message: "aellux.js Extension is not registered." },
+      ERROR_PRESENT_CONTROL_TARGET_MISSING: { code: 1111, message: "A present control has no target selector and is not inside a present container." },
       ERROR_LEGACY_RUNTIME_START: { code: 1201, message: "aellux.js Legacy runtime failed to start." },
       ERROR_LEGACY_RUNTIME_LOAD: { code: 1202, message: "aellux.js Legacy runtime could not be loaded." },
       ERROR_MODERN_RUNTIME_START: { code: 1203, message: "aellux.js Modern runtime failed to start; trying Legacy runtime." },
@@ -501,6 +511,11 @@ function createAelluxConstants() {
       WARN_BROWSER_CAPABILITIES: { code: 2001, message: "Some browser capabilities are unavailable; trying Legacy runtime." },
       WARN_INTERRUPTION: { code: 2002, message: "aellux.js Extension transition was interrupted." },
       WARN_INVALID_CONTROLLER_ELEMENT: { code: 2003, message: "Controller lookup requires a DOM Element or an existing element ID, optionally prefixed with #." },
+      WARN_EXTENSION_STYLE_LOAD: { code: 2004, message: "aellux.js Extension stylesheet could not be loaded." },
+      WARN_CONTROLLER_METHOD_MISSING: { code: 2005, message: "A mounted controller method is not available on its Extension." },
+      WARN_STORAGE_FALLBACK: { code: 2006, message: "Browser storage is unavailable; values will be kept in memory only." },
+      WARN_NAVIGATION_AJAX_HREF_UNAVAILABLE: { code: 2007, message: "Navigation state requests ajax-href restoration, but the Extension is unavailable." },
+      WARN_PRESENT_MOTION_HIDDEN: { code: 2008, message: "A present-motion child should not be hidden; hidden belongs on its present container." },
       INFO_LEGACY_FALLBACK: { code: 3e3, message: "aellux.js is starting the Legacy runtime." }
     },
     AELLUXJS_DEFAULT_INITIALIZATION_OPTIONS: {

@@ -73,6 +73,40 @@ test("controller lookup diagnoses invalid inputs and unmounted elements", async 
   ]);
 });
 
+test("present diagnoses hidden motion and controls without a target", async ({ page }) => {
+  await page.goto("/tests/index.htm");
+  await page.evaluate(() => {
+    document.body.innerHTML = `
+      <button id="orphan-trigger" data-ae-trigger="pop"></button>
+      <button id="orphan-dismiss" data-ae-dismiss></button>
+      <div id="panel" data-ae-present>
+        <div id="motion" data-ae-present-motion hidden></div>
+      </div>
+    `;
+  });
+  await page.addScriptTag({ url: "/dist/aellux.js" });
+  await page.evaluate(() => AelluxJs.init({ mode: "full" }));
+  await expect(page.locator("#panel")).toHaveAttribute("aria-expanded", "false");
+  await expect(page.locator("#motion")).toHaveJSProperty("hidden", false);
+
+  await page.locator("#orphan-trigger").click();
+  await page.locator("#orphan-dismiss").click();
+  const entries = await page.evaluate(() => AelluxJs.diagnostics.showHistory()
+    .filter(entry => entry.code === 2008 || entry.code === 1111)
+    .map(entry => ({
+      code: entry.code,
+      level: entry.level,
+      element: entry.context.element.id,
+      action: entry.context.action || null,
+      motion: entry.context.presentMotion?.id || null
+    })));
+  expect(entries).toEqual([
+    { code: 2008, level: 1, element: "panel", action: null, motion: "motion" },
+    { code: 1111, level: 0, element: "orphan-trigger", action: "trigger", motion: null },
+    { code: 1111, level: 0, element: "orphan-dismiss", action: "dismiss", motion: null }
+  ]);
+});
+
 test("present trigger stays expanded while any target is expanded", async ({ page }) => {
   await page.goto("/tests/index.htm");
   await page.evaluate(() => {
@@ -169,6 +203,10 @@ test("present restores initial attributes and resets memory after unmount", asyn
       attr: name => `data-ae-${name}`,
       className: name => `ae-${name}`,
       attrMem: { save: saveAttr, restore: restoreAttr },
+      diagnostics: {
+        WARN_PRESENT_MOTION_HIDDEN: { code: 2008 },
+        warn() {}
+      },
       mountManager: {
         add: (_name, selector, mount, unmount, update, controllers) => {
           (window.mountEntries ||= new Map()).set(selector, { mount, unmount, update, controllers });

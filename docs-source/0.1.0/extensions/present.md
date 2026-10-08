@@ -12,6 +12,8 @@
 
 `data-ae-trigger` accepts `pop`, `unpop`, or `toggle`; an unrecognized value also toggles. `data-ae-target` and `data-ae-dismiss` can select targets with CSS selectors. Without a selector, a trigger or dismiss control acts on its closest `data-ae-present` container. Invalid selectors are reported through diagnostics.
 
+A trigger or dismiss control with neither a selector nor a containing `data-ae-present` reports `ERROR_PRESENT_CONTROL_TARGET_MISSING` (`1111`). When a direct `data-ae-present-motion` child starts hidden, the Extension moves that state to the container and reports `WARN_PRESENT_MOTION_HIDDEN` (`2008`).
+
 ## Motion and state
 
 The Extension exposes `pop(element)`, `unpop(element)`, `toggle(element, goto)`, and `trigger(element, action)` through `$ae.ext.present`. It manages `hidden` and `aria-expanded` on the container and updates `aria-expanded` and `aria-controls` on its triggers. A direct child marked `data-ae-present-motion` can carry the transition classes; otherwise the container itself is used.

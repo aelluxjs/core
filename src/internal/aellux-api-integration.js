@@ -32,9 +32,9 @@ export function createAelluxApi(root, constants) {
     mountManager: null,
     init: function () { throw diagnostics.create(diagnostics.ERROR_NOT_INITIALIZED); },
     persist: {
-      local: buildPersistMemory(root, "localStorage"),
-      session: buildPersistMemory(root, "sessionStorage"),
-      preferences: buildPersistMemory(root, "localStorage", "AelluxJsPreferences")
+      local: buildPersistMemory(root, "localStorage", null, diagnostics),
+      session: buildPersistMemory(root, "sessionStorage", null, diagnostics),
+      preferences: buildPersistMemory(root, "localStorage", "AelluxJsPreferences", diagnostics)
     },
     updatePreferenceAttributesHTML: preferenceHtml.updatePreferenceAttributesHTML,
     on: function (event, handler, options) {

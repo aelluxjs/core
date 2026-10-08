@@ -119,12 +119,19 @@
     function onPopState(event) {
       const browserState = event.state;
       if (!browserState || !browserState.aelluxJsState) return;
-      if (browserState.ajaxHref && AelluxJs.ext.ajaxHref) {
-        AelluxJs.ext.ajaxHref.load(
-          window.location.href,
-          browserState.ajaxHref,
-          { ignoreHistory: true }
-        );
+      if (browserState.ajaxHref) {
+        if (AelluxJs.ext.ajaxHref && typeof AelluxJs.ext.ajaxHref.load === "function") {
+          AelluxJs.ext.ajaxHref.load(
+            window.location.href,
+            browserState.ajaxHref,
+            { ignoreHistory: true }
+          );
+        } else {
+          AelluxJs.diagnostics.warn(
+            AelluxJs.diagnostics.WARN_NAVIGATION_AJAX_HREF_UNAVAILABLE,
+            { url: window.location.href, selectors: browserState.ajaxHref }
+          );
+        }
       }
       if (browserState.snapshot) {
         updateSnapshotData(snapshotToString(browserState.snapshot));

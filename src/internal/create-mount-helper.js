@@ -9,7 +9,7 @@ export function createMountHelper(root, extensionPromises, mountMaps, mountedEle
   return { mount, unmount };
 
   async function unmount(rootOrSelector, extensionNames = null) {
-    for (const rootElement of resolveRoots(rootOrSelector)) {
+    for (const rootElement of resolveRoots(rootOrSelector, "unmount")) {
       await AelluxJsForce(rootElement, "unmount", extensionNames);
     }
     return true;
@@ -17,7 +17,7 @@ export function createMountHelper(root, extensionPromises, mountMaps, mountedEle
 
   async function mount(rootOrSelector, extensionNames = null) {
     const AelluxJs = root.AelluxJs;
-    for (const rootElement of resolveRoots(rootOrSelector)) {
+    for (const rootElement of resolveRoots(rootOrSelector, "mount")) {
       const allWaiters = findElements(rootElement, AelluxJs.attr("wait-mounted"));
       allWaiters.forEach(waiter => waiter.setAttribute("aria-busy", "true"));
 
@@ -155,17 +155,23 @@ export function createMountHelper(root, extensionPromises, mountMaps, mountedEle
     AelluxJs.dispatch(toCapitalized(method));
   }
 
-  function resolveRoots(root) {
-    if (!root) { return [document]; }
-    if (typeof root === "string") {
-      try { return Array.from(document.querySelectorAll(root)); }
-      catch (error) { return []; }
+  function resolveRoots(rootOrSelector, method) {
+    if (!rootOrSelector) { return [document]; }
+    if (typeof rootOrSelector === "string") {
+      try { return Array.from(document.querySelectorAll(rootOrSelector)); }
+      catch (error) {
+        const diagnostics = root.AelluxJs.diagnostics;
+        diagnostics.error(diagnostics.ERROR_MOUNT_ROOT_SELECTOR, {
+          cause: error, selector: rootOrSelector, method
+        });
+        return [];
+      }
     }
     if (
-      root instanceof Element ||
-      root instanceof Document ||
-      root instanceof DocumentFragment
-    ) { return [root]; }
+      rootOrSelector instanceof Element ||
+      rootOrSelector instanceof Document ||
+      rootOrSelector instanceof DocumentFragment
+    ) { return [rootOrSelector]; }
     return [];
   }
 

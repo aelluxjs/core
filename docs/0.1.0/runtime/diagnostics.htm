@@ -590,6 +590,10 @@ $ae.diagnostics.info($ae.diagnostics.INFO_LEGACY_FALLBACK);
 <p>Applications should compare numeric codes or catalog entries instead of parsing console messages.</p>
 <h2>Extension Compatibility</h2>
 <p><code>ERROR_EXTENSION_INCOMPATIBLE</code> uses code <code>1106</code>. It is reported before requesting an Extension script when its declared <code>builds</code> do not provide an artifact compatible with the selected runtime. Its context contains the Extension name, selected runtime, and declared builds.</p>
+<h2>Mounting and Extension Assets</h2>
+<p>An invalid root selector passed to <code>mount()</code> or <code>unmount()</code> records <code>ERROR_MOUNT_ROOT_SELECTOR</code> (<code>1005</code>) with the selector, operation, and cause. An Extension whose <code>init()</code> rejects records <code>ERROR_EXTENSION_INITIALIZE</code> (<code>1102</code>); the Extension remains uninitialized. A stylesheet load failure records <code>WARN_EXTENSION_STYLE_LOAD</code> (<code>2004</code>) with the Extension name and URL. The Extension can still initialize after that warning.</p>
+<p>Waiting for an unregistered Extension records <code>ERROR_EXTENSION_NOT_REGISTERED</code> (<code>1110</code>) and rejects with that diagnostic. A mounted controller name without a matching public Extension method records <code>WARN_CONTROLLER_METHOD_MISSING</code> (<code>2005</code>). If browser storage is unavailable, <code>WARN_STORAGE_FALLBACK</code> (<code>2006</code>) identifies the storage area and key prefix; values are then held in memory for the current page only.</p>
+<p>State navigation records <code>WARN_NAVIGATION_AJAX_HREF_UNAVAILABLE</code> (<code>2007</code>) when a history entry requires <code>ajax-href</code> restoration but that Extension is unavailable. Feedback subscriber exceptions and rejected promises record <code>ERROR_CALLBACK</code> (<code>1108</code>); other subscribers continue to receive the feedback.</p>
         </div>
 
         <div id="doc-navlinks2" ajax-load="doc-navlinks2">

@@ -150,22 +150,27 @@ import utilsNameCase from "./internal/utils-name-case.js";
 
     if (AelluxJs.ext[key]) {
       if (!AelluxJs.ext[key].initialized) {
-        try {
-          extensionInitialize(extensionName);
-        } catch (error) {
-          AelluxJs.diagnostics.error(
-            AelluxJs.diagnostics.ERROR_EXTENSION_INITIALIZE,
-            { cause: error, extension: extensionName }
-          );
-          extensionPromises[key] = Promise.resolve(null);
-          return extensionPromises[key];
-        }
+        extensionPromises[key] = Promise.resolve()
+          .then(() => extensionInitialize(extensionName))
+          .catch((error) => {
+            AelluxJs.diagnostics.error(
+              AelluxJs.diagnostics.ERROR_EXTENSION_INITIALIZE,
+              { cause: error, extension: extensionName }
+            );
+            return null;
+          });
+        return extensionPromises[key];
       }
       extensionPromises[key] = Promise.resolve(AelluxJs.ext[key]);
       return extensionPromises[key];
     }
 
-    if (!(key in AelluxJs.registry.ext)) { return Promise.reject(); }
+    if (!(key in AelluxJs.registry.ext)) {
+      return Promise.reject(AelluxJs.diagnostics.error(
+        AelluxJs.diagnostics.ERROR_EXTENSION_NOT_REGISTERED,
+        { extension: extensionName }
+      ));
+    }
 
     const bundledLoader =
       AelluxJs.bundledExtensions ?
@@ -186,11 +191,11 @@ import utilsNameCase from "./internal/utils-name-case.js";
     return extensionPromises[key];
   }
 
-  function extensionInitialize(extensionName) {
+  async function extensionInitialize(extensionName) {
     extensionName = fromCamelCase(extensionName);
     const key = toCamelCase(extensionName);
     const options = AelluxJs.options.extensions[key] || {};
-    AelluxJs.ext[key].init(options);
+    await AelluxJs.ext[key].init(options);
     AelluxJs.ext[key].initialized = true;
 
     //Clean lazy registry
@@ -240,7 +245,13 @@ import utilsNameCase from "./internal/utils-name-case.js";
 
           assetLoadHelper(link, {
             loadCallback: resolve,
-            errorCallback: resolve
+            errorCallback: () => {
+              AelluxJs.diagnostics.warn(
+                AelluxJs.diagnostics.WARN_EXTENSION_STYLE_LOAD,
+                { extension: extensionName, url: link.href }
+              );
+              resolve();
+            }
           });
         }
       ));

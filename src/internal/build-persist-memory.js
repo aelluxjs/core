@@ -3,7 +3,7 @@
 // Required compatibility: ES5. This helper is bundled into the aellux.js boot script and must not
 // introduce runtime syntax or APIs that prevent the Legacy fallback path from being reached.
 
-export function buildPersistMemory(root, name, identifier) {
+export function buildPersistMemory(root, name, identifier, diagnostics) {
   var defaultIdentifier = identifier ? identifier : "AelluxJsPersist";
   var target;
 
@@ -15,6 +15,11 @@ export function buildPersistMemory(root, name, identifier) {
       throw new Error("Storage unavailable");
     }
   } catch (error) {
+    if (diagnostics) {
+      diagnostics.warn(diagnostics.WARN_STORAGE_FALLBACK, {
+        storage: name, identifier: defaultIdentifier, cause: error
+      });
+    }
     target = {
       data: {},
       setItem: function (key, value) { this.data[key] = value; },

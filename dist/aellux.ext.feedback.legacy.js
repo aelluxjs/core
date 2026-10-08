@@ -216,11 +216,29 @@
       AelluxJs.dispatchFrom(target, "Feedback", {
         detail: feedback
       });
-      if (handlers.has(type)) handlers.get(type).forEach(function(call) {
-        return call(feedback);
+      notifyHandlers(type, feedback);
+      notifyHandlers("*", feedback);
+    }
+    function notifyHandlers(type, feedback) {
+      if (!handlers.has(type)) return;
+      handlers.get(type).forEach(function(call) {
+        try {
+          var result = call(feedback);
+          if (result && typeof result.then === "function") {
+            Promise.resolve(result).catch(function(error2) {
+              return reportCallbackError(error2, type);
+            });
+          }
+        } catch (error2) {
+          reportCallbackError(error2, type);
+        }
       });
-      if (handlers.has("*")) handlers.get("*").forEach(function(call) {
-        return call(feedback);
+    }
+    function reportCallbackError(error2, type) {
+      AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_CALLBACK, {
+        cause: error2,
+        extension: extensionName,
+        type: type
       });
     }
     function removeHandler(type, handler) {

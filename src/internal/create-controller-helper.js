@@ -9,9 +9,18 @@ export function createControllerHelper(root, element) {
 
   function spawn(extensionName, mountId, methodNames) {
     const key = toCamelCase(fromCamelCase(extensionName));
+    const extension = root.AelluxJs.ext[key];
+    const methods = Array.isArray(methodNames) ? methodNames : [];
+    for (const name of methods) {
+      if (typeof name === "string" && extension && typeof extension[name] === "function") continue;
+      const diagnostics = root.AelluxJs.diagnostics;
+      diagnostics.warn(diagnostics.WARN_CONTROLLER_METHOD_MISSING, {
+        extension: key, method: name, mountId, element
+      });
+    }
     mounts.set(mountId, {
       extension: key,
-      methods: Array.isArray(methodNames) ? methodNames : []
+      methods
     });
     refresh(key);
     return controller[key] || null;
