@@ -157,7 +157,7 @@ test("present trigger stays expanded while any target is expanded", async ({ pag
 test("present restores initial attributes and resets memory after unmount", async ({ page }) => {
   await page.goto("/tests/index.htm");
   await page.evaluate(async () => {
-    const { saveAttr, restoreAttr } = await import("/src/internal/create-initial-attr-memory.js");
+    const { saveAttr, restoreAttr } = await import("/src/internal/build-initial-attr-memory.js");
     document.body.innerHTML = `
       <button id="control" data-ae-trigger="toggle" data-ae-target="#panel"
         aria-expanded="" aria-controls=""></button>
@@ -304,7 +304,7 @@ test("present reports invalid selectors without throwing from click", async ({ p
 test("present restores a trigger without targets and can mount it again", async ({ page }) => {
   await page.goto("/tests/index.htm");
   const result = await page.evaluate(async () => {
-    const { saveAttr, restoreAttr } = await import("/src/internal/create-initial-attr-memory.js");
+    const { saveAttr, restoreAttr } = await import("/src/internal/build-initial-attr-memory.js");
     document.body.innerHTML = '<button id="control" data-ae-trigger="toggle" data-ae-target="#later"></button>';
     window.AelluxJs = {
       attr: name => `data-ae-${name}`,
@@ -357,7 +357,7 @@ test("present records interrupted transitions as warnings and failures as errors
     const [{ buildDiagnostics }, { createAelluxConstants }, { saveAttr, restoreAttr }] = await Promise.all([
       import("/src/internal/build-diagnostics.js"),
       import("/src/internal/create-aellux-constants.js"),
-      import("/src/internal/create-initial-attr-memory.js")
+      import("/src/internal/build-initial-attr-memory.js")
     ]);
     document.body.innerHTML = '<div id="panel" data-ae-present hidden style="--ae-pop-duration: 100ms; --ae-unpop-duration: 0ms"></div>';
     window.AelluxJs = {
@@ -405,7 +405,7 @@ test("present reports a selector callback failure with its own diagnostic", asyn
     const [{ buildDiagnostics }, { createAelluxConstants }, { saveAttr, restoreAttr }] = await Promise.all([
       import("/src/internal/build-diagnostics.js"),
       import("/src/internal/create-aellux-constants.js"),
-      import("/src/internal/create-initial-attr-memory.js")
+      import("/src/internal/build-initial-attr-memory.js")
     ]);
     document.body.innerHTML = `
       <button id="control" data-ae-trigger="pop" data-ae-target="#panel"></button>
@@ -441,7 +441,7 @@ test("present reports a selector callback failure with its own diagnostic", asyn
 test("present refreshes trigger controls from its initial value", async ({ page }) => {
   await page.goto("/tests/index.htm");
   await page.evaluate(async () => {
-    const { saveAttr, restoreAttr } = await import("/src/internal/create-initial-attr-memory.js");
+    const { saveAttr, restoreAttr } = await import("/src/internal/build-initial-attr-memory.js");
     document.body.innerHTML = `
       <button id="control" data-ae-trigger="toggle" data-ae-target="#first" aria-controls="external"></button>
       <div id="first" data-ae-present hidden></div>

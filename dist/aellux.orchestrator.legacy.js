@@ -20899,8 +20899,8 @@
     }
   });
 
-  // src/internal/create-layout-scheduler.js
-  function createLayoutScheduler() {
+  // src/internal/build-layout-scheduler.js
+  function buildLayoutScheduler() {
     var readQueue = [];
     var updateQueue = [];
     var frameRequest = null;
@@ -20965,8 +20965,8 @@
       clear: clear
     });
   }
-  var init_create_layout_scheduler = __esm({
-    "src/internal/create-layout-scheduler.js": function() {
+  var init_build_layout_scheduler = __esm({
+    "src/internal/build-layout-scheduler.js": function() {
       /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
     }
   });
@@ -21998,7 +21998,7 @@
   var init_aellux_orchestrator = __esm({
     "src/aellux.orchestrator.js": function() {
       init_asset_load_helper();
-      init_create_layout_scheduler();
+      init_build_layout_scheduler();
       init_build_mount_map_manager();
       init_utils_name_case();
       /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
@@ -22007,7 +22007,7 @@
         var toCamelCase2 = utils_name_case_default.toCamelCase, fromCamelCase2 = utils_name_case_default.fromCamelCase;
         var extensionPromises = {};
         var mountManager = buildMountMapManager(root, extensionPromises);
-        var layoutScheduler = createLayoutScheduler();
+        var layoutScheduler = buildLayoutScheduler();
         root.AelluxJs = Object.assign(root.AelluxJs, {
           startAelluxJs: function startAelluxJs() {
             return _asyncToGenerator2(/* @__PURE__ */ _regenerator2().m(function _callee() {

@@ -1045,9 +1045,9 @@
     return { clear };
   }
 
-  // src/internal/create-layout-scheduler.js
+  // src/internal/build-layout-scheduler.js
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
-  function createLayoutScheduler() {
+  function buildLayoutScheduler() {
     var readQueue = [];
     var updateQueue = [];
     var frameRequest = null;
@@ -1430,7 +1430,7 @@
     const { toCamelCase: toCamelCase2, fromCamelCase: fromCamelCase2 } = utils_name_case_default;
     const extensionPromises = {};
     const mountManager = buildMountMapManager(root2, extensionPromises);
-    const layoutScheduler = createLayoutScheduler();
+    const layoutScheduler = buildLayoutScheduler();
     root2.AelluxJs = Object.assign(
       root2.AelluxJs,
       {

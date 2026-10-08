@@ -3,9 +3,9 @@
 import { buildDiagnostics } from "./build-diagnostics.js";
 import { buildPersistMemory } from "./build-persist-memory.js";
 import { buildPreferenceMediaQueries } from "./build-preference-media-queries.js";
-import { saveAttr, restoreAttr } from "./create-initial-attr-memory.js";
+import { saveAttr, restoreAttr } from "./build-initial-attr-memory.js";
 import utilsNameCase from "./utils-name-case.js";
-import { createPreferenceHtmlHelper } from "./utils-preference-html.js";
+import { createPreferenceHtmlHelper } from "./create-preference-html-helper.js";
 
 // Build-time imports aside, keep this factory ES5-compatible for the boot bundle.
 // The caller publishes the returned function and replaces init with the boot loader.

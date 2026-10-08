@@ -11,7 +11,7 @@
 // selection belongs to the bootstrap, while feature-specific behavior belongs to aellux.js Extensions.
 
 import { assetLoadHelper } from "./internal/asset-load-helper.js";
-import { createLayoutScheduler } from "./internal/create-layout-scheduler.js";
+import { buildLayoutScheduler } from "./internal/build-layout-scheduler.js";
 import { buildMountMapManager } from "./internal/build-mount-map-manager.js";
 import utilsNameCase from "./internal/utils-name-case.js";
 
@@ -22,7 +22,7 @@ import utilsNameCase from "./internal/utils-name-case.js";
 
   const extensionPromises = {};
   const mountManager = buildMountMapManager(root, extensionPromises);
-  const layoutScheduler = createLayoutScheduler();
+  const layoutScheduler = buildLayoutScheduler();
 
   // Keep the boot API function: its methods close over the same instance.
   root.AelluxJs = Object.assign(

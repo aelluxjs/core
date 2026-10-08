@@ -227,7 +227,7 @@
     };
   }
 
-  // src/internal/create-initial-attr-memory.js
+  // src/internal/build-initial-attr-memory.js
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   var savedAttributes;
   function saveAttr(target, attributes) {
@@ -273,7 +273,7 @@
     fromCamelCase: fromCamelCase
   };
 
-  // src/internal/utils-preference-html.js
+  // src/internal/create-preference-html-helper.js
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   function createPreferenceHtmlHelper(root, getApi) {
     var document2 = root.document;

@@ -1,6 +1,6 @@
 /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
 
-export function createLayoutScheduler() {
+export function buildLayoutScheduler() {
   var readQueue = [];
   var updateQueue = [];
 
