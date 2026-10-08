@@ -329,6 +329,7 @@ function createAelluxApi(root2, constants) {
     options,
     minified: false,
     waitLayout: null,
+    mountManager: null,
     init: function() {
       throw diagnostics.create(diagnostics.ERROR_NOT_INITIALIZED);
     },
@@ -423,7 +424,7 @@ function createAelluxApi(root2, constants) {
     wait: function() {
       throw diagnostics.create(diagnostics.ERROR_NOT_INITIALIZED);
     },
-    update: function() {
+    mount: function() {
       throw diagnostics.create(diagnostics.ERROR_NOT_INITIALIZED);
     },
     unmount: function() {

@@ -8,11 +8,11 @@ Set `extensionName` to the extension's kebab-case name before calling `AelluxJs.
 
 - `init(options)` is synchronous: it receives the Extension's object from `AelluxJs.options.extensions` (or `{}`), registers DOM handlers, and sets up extension-wide services without returning a Promise. Load asynchronous dependencies separately; DOM mounting and content loading may remain asynchronous.
 - `destroy` releases extension-wide listeners, observers, and other resources.
-- `mountMap` maps selectors to `mount` and `unmount` handlers consumed by the orchestrator.
+- `AelluxJs.mountManager.add()` registers selectors and handlers during `init`; `remove()` clears them during `destroy`.
 - `mountElement` sets up matching elements; repeated calls must not duplicate listeners or resources.
 - `unmountElement` releases resources associated with an element.
 
-For extensions without element behavior, remove `attr`, `mountMap`, the DOM handlers, and their DOM registration. Keep `extensionName`, `AelluxJs.extAttach`, `init`, `destroy`, the IIFE, and the Apache 2.0 license identifier. Use ES2017-compatible syntax and attach public APIs through `AelluxJs.extAttach`, without ESM exports.
+For extensions without element behavior, remove `attr`, the DOM handlers, and their DOM registration. Keep `extensionName`, `AelluxJs.extAttach`, `init`, `destroy`, the IIFE, and the Apache 2.0 license identifier. Use ES2017-compatible syntax and attach public APIs through `AelluxJs.extAttach`, without ESM exports.
 
 ## Compatibility Builds
 

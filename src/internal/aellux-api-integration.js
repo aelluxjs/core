@@ -26,6 +26,7 @@ export function createAelluxApi(root, constants) {
     options: options,
     minified: false,
     waitLayout: null,
+    mountManager: null,
     init: function () { throw diagnostics.create(diagnostics.ERROR_NOT_INITIALIZED); },
     persist: {
       local: buildPersistMemory(root, "localStorage"),
@@ -114,7 +115,7 @@ export function createAelluxApi(root, constants) {
       return from.dispatchEvent(obj);
     },
     wait: function () { throw diagnostics.create(diagnostics.ERROR_NOT_INITIALIZED); },
-    update: function () { throw diagnostics.create(diagnostics.ERROR_NOT_INITIALIZED); },
+    mount: function () { throw diagnostics.create(diagnostics.ERROR_NOT_INITIALIZED); },
     unmount: function () { throw diagnostics.create(diagnostics.ERROR_NOT_INITIALIZED); },
     request: function () { throw diagnostics.create(diagnostics.ERROR_NOT_INITIALIZED); },
     startAelluxJs: function () { throw diagnostics.create(diagnostics.ERROR_NOT_INITIALIZED); },

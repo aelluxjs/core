@@ -113,7 +113,7 @@
 
   // src/internal/create-mount-helper.js
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
-  function createMountHelper(root, extensionPromises) {
+  function createMountHelper(root, extensionPromises, mountMaps) {
     const { toCapitalized: toCapitalized2, toCamelCase: toCamelCase2, fromCamelCase: fromCamelCase2 } = utils_name_case_default;
     const mountedElements = /* @__PURE__ */ new WeakMap();
     async function AelluxJsForceUnmount(rootOrSelector, extensionNames = null) {
@@ -189,10 +189,13 @@
             continue;
           }
           const extension = await extensionPromise;
-          if (!extension || !extension.mountMap) {
+          if (!extension) {
             continue;
           }
-          const mounter = extension.mountMap;
+          const mounter = mountMaps.get(toCamelCase2(extensionName));
+          if (!mounter) {
+            continue;
+          }
           for (const [selector, controller] of mounter) {
             try {
               if (!controller[method]) {
@@ -276,13 +279,60 @@
     };
   }
 
+  // src/internal/build-mount-map-manager.js
+  /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+  function buildMountMapManager(root, extensionPromises) {
+    const { toCamelCase: toCamelCase2, fromCamelCase: fromCamelCase2 } = utils_name_case_default;
+    const maps = /* @__PURE__ */ new Map();
+    const helper = createMountHelper(root, extensionPromises, maps);
+    function keyFor(extensionName) {
+      return toCamelCase2(fromCamelCase2(extensionName));
+    }
+    function add(extensionName, selector, mount2, unmount2, update, controllers) {
+      if (typeof extensionName !== "string" || !extensionName || typeof selector !== "string" || !selector.trim()) {
+        throw new TypeError("mountManager.add requires an extension name and selector");
+      }
+      const key = keyFor(extensionName);
+      let map = maps.get(key);
+      if (!map) {
+        map = /* @__PURE__ */ new Map();
+        maps.set(key, map);
+      }
+      map.set(selector, { mount: mount2, unmount: unmount2, update, controllers });
+      root.AelluxJs.registry.extMounters[key] = [...map.keys()].join(",");
+      return manager;
+    }
+    function remove(extensionName, selector) {
+      if (typeof extensionName !== "string" || !extensionName) return false;
+      const key = keyFor(extensionName);
+      const map = maps.get(key);
+      if (!map) return false;
+      const removed = selector === void 0 ? true : map.delete(selector);
+      if (selector === void 0 || map.size === 0) {
+        maps.delete(key);
+        delete root.AelluxJs.registry.extMounters[key];
+      } else if (removed) {
+        root.AelluxJs.registry.extMounters[key] = [...map.keys()].join(",");
+      }
+      return removed;
+    }
+    function mount(rootOrSelector, extensionNames = null) {
+      return helper.AelluxJsForceUpdate(rootOrSelector, extensionNames);
+    }
+    function unmount(rootOrSelector, extensionNames = null) {
+      return helper.AelluxJsForceUnmount(rootOrSelector, extensionNames);
+    }
+    const manager = { add, remove, mount, unmount };
+    return manager;
+  }
+
   // src/aellux.orchestrator.js
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   (function(root) {
     "use strict";
     const { toCamelCase: toCamelCase2, fromCamelCase: fromCamelCase2 } = utils_name_case_default;
     const extensionPromises = {};
-    const mountHelper = createMountHelper(root, extensionPromises);
+    const mountManager = buildMountMapManager(root, extensionPromises);
     const layoutScheduler = createLayoutScheduler();
     root.AelluxJs = Object.assign(
       root.AelluxJs,
@@ -294,11 +344,11 @@
             });
           }
           await new Promise((resolve) => {
-            const startUpdateCallback = function() {
-              AelluxJs.update().then(function() {
+            const startMountCallback = function() {
+              AelluxJs.mount().then(function() {
                 document.removeEventListener(
                   "DOMContentLoaded",
-                  startUpdateCallback
+                  startMountCallback
                 );
                 resolve();
               });
@@ -306,20 +356,20 @@
             if (document.readyState === "loading")
               document.addEventListener(
                 "DOMContentLoaded",
-                startUpdateCallback,
+                startMountCallback,
                 { once: true }
               );
             else
-              startUpdateCallback();
+              startMountCallback();
           });
           AelluxJs.dispatch("Ready");
           return true;
         },
-        async update(rootOrSelector, extensionNames = null) {
-          return mountHelper.AelluxJsForceUpdate(rootOrSelector, extensionNames);
+        async mount(rootOrSelector, extensionNames = null) {
+          return mountManager.mount(rootOrSelector, extensionNames);
         },
         async unmount(rootOrSelector, extensionNames = null) {
-          return mountHelper.AelluxJsForceUnmount(rootOrSelector, extensionNames);
+          return mountManager.unmount(rootOrSelector, extensionNames);
         },
         async destroy() {
           AelluxJs.waitLayout.clear();
@@ -357,7 +407,7 @@
               delete AelluxJs.ext[key];
               delete extensionPromises[key];
               delete AelluxJs.registry.ext[key];
-              delete AelluxJs.registry.extMounters[key];
+              mountManager.remove(extensionName);
               delete AelluxJs.registry.lazyExtSelectors[key];
               if (extension) extension.initialized = false;
             }
@@ -370,7 +420,8 @@
           return getExtension(extensionName);
         },
         request: defaultRequest,
-        waitLayout: layoutScheduler
+        waitLayout: layoutScheduler,
+        mountManager
       }
     );
     root[root.AelluxJs.shortJSName] = root.AelluxJs;
@@ -428,10 +479,6 @@
       const options = AelluxJs.options.extensions[key] || {};
       AelluxJs.ext[key].init(options);
       AelluxJs.ext[key].initialized = true;
-      if (AelluxJs.ext[key].mountMap) {
-        const selectors = Array.from(AelluxJs.ext[key].mountMap.keys()).join(",");
-        if (selectors) AelluxJs.registry.extMounters[key] = selectors;
-      }
       delete AelluxJs.registry.lazyExtSelectors[key];
       return AelluxJs.ext[key];
     }

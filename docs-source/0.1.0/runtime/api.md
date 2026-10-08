@@ -22,11 +22,13 @@ Pass Extension-specific configuration through `extensions` in `init()` options. 
 ## DOM Lifecycle
 
 ```js
-await $ae.update(root);
+await $ae.mount(root);
 await $ae.unmount(root);
 ```
 
-`update(root)` discovers matching declarations, loads required Extensions, and requests idempotent `mount` operations. `unmount(root)` requests the corresponding cleanup operations. When `root` is omitted, the document is used.
+`mount(root)` discovers matching declarations, loads required Extensions, and requests idempotent `mount` operations. `unmount(root)` requests the corresponding cleanup operations. When `root` is omitted, the document is used.
+
+Extensions register element handlers with `$ae.mountManager.add(extensionName, selector, mount, unmount, update, controllers)` during `init()` and call `$ae.mountManager.remove(extensionName, selector)` during `destroy()`. Omitting `selector` removes all registrations for the Extension. `$ae.mountManager.mount(root, extensionNames)` and `$ae.mountManager.unmount(root, extensionNames)` use the same lifecycle execution as `$ae.mount()` and `$ae.unmount()`.
 
 ## Destruction
 

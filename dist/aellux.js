@@ -355,6 +355,7 @@
       options: options,
       minified: false,
       waitLayout: null,
+      mountManager: null,
       init: function() {
         throw diagnostics.create(diagnostics.ERROR_NOT_INITIALIZED);
       },
@@ -449,7 +450,7 @@
       wait: function() {
         throw diagnostics.create(diagnostics.ERROR_NOT_INITIALIZED);
       },
-      update: function() {
+      mount: function() {
         throw diagnostics.create(diagnostics.ERROR_NOT_INITIALIZED);
       },
       unmount: function() {

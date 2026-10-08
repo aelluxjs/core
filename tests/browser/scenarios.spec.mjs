@@ -435,7 +435,7 @@ test("dynamic elements can be mounted and unmounted after initialization", async
     element.id = "playwright-dynamic-target";
     element.setAttribute("data-ae-preference", "color-scheme");
     document.querySelector("#dynamic-root").append(element);
-    await $ae.update(element);
+    await $ae.mount(element);
   });
   await expect(page.locator("#playwright-dynamic-target")).toHaveClass(/ae--mounted/);
   await page.evaluate(() => $ae.unmount(document.querySelector("#playwright-dynamic-target")));

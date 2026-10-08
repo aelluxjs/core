@@ -19,7 +19,7 @@ npm run test:browser
 | --- | --- |
 | Native HTML and Web Platform | [`html-web-platform.html`](https://github.com/aelluxjs/core/blob/main/tests/browser/html-web-platform.html) |
 | Bootstrap coexistence | [`bootstrap-integration.html`](https://github.com/aelluxjs/core/blob/main/tests/browser/bootstrap-integration.html) |
-| Dynamic DOM followed by `$ae.update(root)` | [`dynamic-update.html`](https://github.com/aelluxjs/core/blob/main/tests/browser/dynamic-update.html) |
+| Dynamic DOM followed by `$ae.mount(root)` | [`dynamic-update.html`](https://github.com/aelluxjs/core/blob/main/tests/browser/dynamic-update.html) |
 | Eager Extension loading | [`extension-eager.html`](https://github.com/aelluxjs/core/blob/main/tests/browser/extension-eager.html) |
 | Lazy Extension loading | [`extension-lazy.html`](https://github.com/aelluxjs/core/blob/main/tests/browser/extension-lazy.html) |
 | Extension with associated CSS | [`extension-with-css.html`](https://github.com/aelluxjs/core/blob/main/tests/browser/extension-with-css.html) |

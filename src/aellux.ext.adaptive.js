@@ -16,7 +16,6 @@
     shapeVertical: AelluxJs.className("shape-vertical"),
     shapeSquare: AelluxJs.className("shape-square")
   };
-  const mountMap = new Map();
   const adaptiveElements = new Set();
   const initialClasses = new WeakMap();
 
@@ -44,7 +43,7 @@
     ? new root.ResizeObserver(onResize)
     : null;
 
-  AelluxJs.extAttach(extensionName, { init, destroy, mountMap, adaptiveParams });
+  AelluxJs.extAttach(extensionName, { init, destroy, adaptiveParams });
 
   function init(options = {}) {
     const overrides = options.adaptiveParams || {};
@@ -54,10 +53,9 @@
       }
     }
     managedClasses = getManagedClasses();
-    mountMap.set(`[${attr.adaptive}]`, {
-      mount: mountAdaptive,
-      unmount: unmountAdaptive,
-    });
+    AelluxJs.mountManager.add(
+      extensionName, `[${attr.adaptive}]`, mountAdaptive, unmountAdaptive
+    );
   }
 
   function getManagedClasses() {
@@ -72,7 +70,7 @@
   function destroy() {
     for (const element of adaptiveElements) unmountAdaptive(element);
     if (resizeObserver) resizeObserver.disconnect();
-    mountMap.clear();
+    AelluxJs.mountManager.remove(extensionName);
   }
 
   function mountAdaptive(element) {

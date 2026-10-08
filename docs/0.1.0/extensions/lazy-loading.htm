@@ -501,7 +501,7 @@
 
         <div id="doc-content" style="min-height: calc(100vh - 200px);" class="js-toc-content" ajax-load="doc-content">
           <h1>Lazy Extension Loading</h1>
-<p>Lazy loading delays an Extension until a matching element is found during <code>$ae.update(root)</code>.</p>
+<p>Lazy loading delays an Extension until a matching element is found during <code>$ae.mount(root)</code>.</p>
 <pre><code class="language-js">$ae.ext(&quot;preference&quot;, {
   loadWhen: &quot;[data-ae-preference]&quot;
 });

@@ -29,7 +29,7 @@ Extensions should avoid unnecessary `preventDefault()` and `stopPropagation()`, 
 After inserting or revealing dynamic markup, update only the affected root when possible:
 
 ```js
-await $ae.update(changedElement);
+await $ae.mount(changedElement);
 ```
 
 The browser validation suite includes a Bootstrap CSS coexistence scenario. Repeatable testing with Bootstrap JavaScript components remains a release requirement.

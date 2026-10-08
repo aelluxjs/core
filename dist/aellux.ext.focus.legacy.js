@@ -11,20 +11,15 @@
     var attr = {
       extensionName: AelluxJs.attr(extensionName)
     };
-    var mountMap = /* @__PURE__ */ new Map();
     AelluxJs.extAttach(extensionName, {
       init: init,
-      destroy: destroy,
-      mountMap: mountMap
+      destroy: destroy
     });
     function init(options) {
-      mountMap.set("[".concat(attr.extensionName, "]"), {
-        mount: mountElement,
-        unmount: unmountElement
-      });
+      AelluxJs.mountManager.add(extensionName, "[".concat(attr.extensionName, "]"), mountElement, unmountElement);
     }
     function destroy() {
-      mountMap.clear();
+      AelluxJs.mountManager.remove(extensionName);
     }
     function mountElement(element) {
     }

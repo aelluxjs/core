@@ -109,7 +109,6 @@
       shapeVertical: AelluxJs.className("shape-vertical"),
       shapeSquare: AelluxJs.className("shape-square")
     };
-    var mountMap = /* @__PURE__ */ new Map();
     var adaptiveElements = /* @__PURE__ */ new Set();
     var initialClasses = /* @__PURE__ */ new WeakMap();
     var adaptiveParams = {
@@ -136,7 +135,6 @@
     AelluxJs.extAttach(extensionName, {
       init: init,
       destroy: destroy,
-      mountMap: mountMap,
       adaptiveParams: adaptiveParams
     });
     function init() {
@@ -149,10 +147,7 @@
         }
       }
       managedClasses = getManagedClasses();
-      mountMap.set("[".concat(attr.adaptive, "]"), {
-        mount: mountAdaptive,
-        unmount: unmountAdaptive
-      });
+      AelluxJs.mountManager.add(extensionName, "[".concat(attr.adaptive, "]"), mountAdaptive, unmountAdaptive);
     }
     function getManagedClasses() {
       return [modifier.shapeHorizontal, modifier.shapeVertical, modifier.shapeSquare].concat(_toConsumableArray(Object.keys(adaptiveParams.minSizes).map(function(size) {
@@ -172,7 +167,7 @@
         _iterator.f();
       }
       if (resizeObserver) resizeObserver.disconnect();
-      mountMap.clear();
+      AelluxJs.mountManager.remove(extensionName);
     }
     function mountAdaptive(element) {
       if (adaptiveElements.has(element)) return;

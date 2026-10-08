@@ -28,19 +28,17 @@
   const attr = {
     extensionName: AelluxJs.attr(extensionName)
   };
-  const mountMap = new Map();
 
-  AelluxJs.extAttach(extensionName, { init, destroy, mountMap });
+  AelluxJs.extAttach(extensionName, { init, destroy });
 
   function init(options) {
-    mountMap.set(`[${attr.extensionName}]`, {
-      mount: mountElement,
-      unmount: unmountElement
-    });
+    AelluxJs.mountManager.add(
+      extensionName, `[${attr.extensionName}]`, mountElement, unmountElement
+    );
   }
 
   function destroy() {
-    mountMap.clear();
+    AelluxJs.mountManager.remove(extensionName);
   }
 
   function mountElement(element) {

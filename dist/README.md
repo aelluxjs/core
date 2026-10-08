@@ -63,7 +63,7 @@ See [Getting Started](../docs/getting-started.md) for build instructions, runtim
 - Declarative activation through `data-ae-*` attributes.
 - Selective eager or lazy Extension loading.
 - Optional styles associated with individual Extensions.
-- Idempotent DOM mounting through `$ae.update(root)`.
+- Idempotent DOM mounting through `$ae.mount(root)`.
 - Browser history, preferences, feedback, persistence, and adaptive layout utilities.
 - ES5-compatible boot script with an [ES2017+ Modern browser baseline](../docs/runtime/browser-support.md).
 
@@ -84,9 +84,9 @@ Generated browser files are written to `dist/`. The distribution uses classic sc
 
 ## Project Status
 
-aellux.js `0.1.0-beta.6` is the current prerelease. Beta 1 established the initial runtime, Extension contract, Modern/Legacy distributions, and repeatable browser validation scenarios. The Beta 2 cycle focused on CI, multi-browser coverage, real Legacy validation, security, accessibility, and commercial distribution readiness.
+aellux.js `0.1.0-beta.6` is the current prerelease. Beta 1 established the initial runtime, Extension contract, Modern/Legacy distributions, and repeatable browser validation scenarios. The remaining work for the stable `0.1.0` release is tracked in the milestone below.
 
-Review the [0.1.0 Beta 2 milestone](../docs/milestones/0.1.0-beta.2.md), the [Beta 1 milestone](../docs/milestones/0.1.0-beta.1.md), and delivered changes in the [changelog](../CHANGELOG.md).
+Review the [0.1.0 milestone](milestones/0.1.0.md), the [Beta 1 milestone](milestones/0.1.0-beta.1.md), and delivered changes in the [changelog](../CHANGELOG.md).
 
 ## License
 

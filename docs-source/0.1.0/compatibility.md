@@ -43,6 +43,6 @@ See [Bootstrap integration](integrations/bootstrap.md) and the browser validatio
 
 - The published browser versions are a raw ES2017 syntax baseline; a final multi-browser validation matrix is not yet available.
 - Legacy support depends on the host providing fundamental DOM capabilities.
-- Applications must call `$ae.update(root)` after relevant dynamic DOM insertion and `$ae.unmount(root)` before removing mounted content when cleanup is required.
+- Applications must call `$ae.mount(root)` after relevant dynamic DOM insertion and `$ae.unmount(root)` before removing mounted content when cleanup is required.
 
 See [Browser support](runtime/browser-support.md), [Modern and Legacy runtimes](runtime/modern-legacy.md), [ES5 support level](runtime/es5-support.md), and [Modern and Legacy Extension variants](extensions/legacy-variants.md) for details.

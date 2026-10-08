@@ -75,14 +75,12 @@
     var userPreferences = /* @__PURE__ */ Object.create(null);
     var defaultPreferences = /* @__PURE__ */ Object.create(null);
     var computedPreferences = /* @__PURE__ */ Object.create(null);
-    var mountMap = /* @__PURE__ */ new Map();
     AelluxJs.extAttach(extensionName, {
       init: init,
       destroy: destroy,
       update: update,
       get: get,
-      set: set,
-      mountMap: mountMap
+      set: set
     });
     var attr = {
       preference: AelluxJs.attr("preference"),
@@ -109,10 +107,7 @@
       sound: ["off", "on", "low"]
     };
     function init(options) {
-      mountMap.set("[".concat(attr.preference, "]"), {
-        mount: mountPreferenceContainer,
-        unmount: unmountPreferenceContainer
-      });
+      AelluxJs.mountManager.add(extensionName, "[".concat(attr.preference, "]"), mountPreferenceContainer, unmountPreferenceContainer);
       window.addEventListener("storage", storageEvent);
       var allQueries = AelluxJs.registry.preferenceMediaQueries;
       Object.values(allQueries).forEach(function(queries) {
@@ -133,6 +128,7 @@
       update();
     }
     function destroy() {
+      AelluxJs.mountManager.remove(extensionName);
       window.removeEventListener("storage", storageEvent);
       document.removeEventListener("DOMContentLoaded", update);
       var allQueries = AelluxJs.registry.preferenceMediaQueries;

@@ -25,11 +25,9 @@
       popping: AelluxJs.className("popping"),
       unpopping: AelluxJs.className("unpopping")
     };
-    const mountMap = /* @__PURE__ */ new Map();
     AelluxJs.extAttach(extensionName, {
       init,
       destroy,
-      mountMap,
       pop,
       unpop,
       toggle,
@@ -48,25 +46,30 @@
       attr.presentMotion
     ];
     function init(options) {
-      mountMap.set(`[${attr.present}]`, {
-        mount: mountPresentContainer,
-        unmount: unmountPresentContainer
-      });
-      mountMap.set(
+      AelluxJs.mountManager.add(
+        extensionName,
+        `[${attr.present}]`,
+        mountPresentContainer,
+        unmountPresentContainer,
+        null,
+        ["pop", "unpop", "trigger", "toggle"]
+      );
+      AelluxJs.mountManager.add(
+        extensionName,
         `[${[
           attr.trigger,
           attr.dismiss,
           attr.target
         ].join("],[")}]`,
-        {
-          mount: mountTriggerElement,
-          unmount: unmountTriggerElement
-        }
+        mountTriggerElement,
+        unmountTriggerElement,
+        null,
+        null
       );
       document.addEventListener("click", OnClick);
     }
     function destroy() {
-      mountMap.clear();
+      AelluxJs.mountManager.remove(extensionName);
       document.removeEventListener("click", OnClick);
       for (const triggerElement of triggerElementsSet) {
         unmountTriggerElement(triggerElement);

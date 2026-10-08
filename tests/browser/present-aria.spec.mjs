@@ -24,6 +24,12 @@ test("present trigger stays expanded while any target is expanded", async ({ pag
           attributes.delete(element);
         }
       },
+      mountManager: {
+        add: (_name, selector, mount, unmount, update, controllers) => {
+          (window.mountEntries ||= new Map()).set(selector, { mount, unmount, update, controllers });
+        },
+        remove: () => window.mountEntries?.clear()
+      },
       extAttach: (_name, extension) => { window.presentExtension = extension; },
       dispatchFrom: () => true
     };
@@ -32,7 +38,7 @@ test("present trigger stays expanded while any target is expanded", async ({ pag
   await page.evaluate(() => {
     const extension = window.presentExtension;
     extension.init();
-    const [panels, controls] = extension.mountMap.values();
+    const [panels, controls] = window.mountEntries.values();
     panels.mount(document.querySelector("#first"));
     panels.mount(document.querySelector("#second"));
     controls.mount(document.querySelector("#control"));
@@ -57,19 +63,19 @@ test("present trigger stays expanded while any target is expanded", async ({ pag
   await expect(page.locator("#second")).toHaveJSProperty("hidden", false);
   await expect(page.locator("#second")).toHaveAttribute("aria-expanded", "true");
   await page.evaluate(() => {
-    const [panels] = window.presentExtension.mountMap.values();
+    const [panels] = window.mountEntries.values();
     panels.unmount(document.querySelector("#first"));
   });
   await expect(control).toHaveAttribute("aria-expanded", "true");
 
   await page.evaluate(() => {
-    const [panels] = window.presentExtension.mountMap.values();
+    const [panels] = window.mountEntries.values();
     panels.unmount(document.querySelector("#second"));
   });
   await expect(control).toHaveAttribute("aria-expanded", "false");
 
   await page.evaluate(() => {
-    const [panels] = window.presentExtension.mountMap.values();
+    const [panels] = window.mountEntries.values();
     panels.mount(document.querySelector("#first"));
   });
   await expect(control).toHaveAttribute("aria-expanded", "true");
@@ -90,6 +96,12 @@ test("present restores initial attributes and resets memory after unmount", asyn
       attr: name => `data-ae-${name}`,
       className: name => `ae-${name}`,
       attrMem: { save: saveAttr, restore: restoreAttr },
+      mountManager: {
+        add: (_name, selector, mount, unmount, update, controllers) => {
+          (window.mountEntries ||= new Map()).set(selector, { mount, unmount, update, controllers });
+        },
+        remove: () => window.mountEntries?.clear()
+      },
       extAttach: (_name, extension) => { window.presentExtension = extension; },
       dispatchFrom: () => true
     };
@@ -99,7 +111,7 @@ test("present restores initial attributes and resets memory after unmount", asyn
   const state = await page.evaluate(() => {
     const extension = window.presentExtension;
     extension.init();
-    const [panels, controls] = extension.mountMap.values();
+    const [panels, controls] = window.mountEntries.values();
     const panel = document.querySelector("#panel");
     const motion = document.querySelector("#motion");
     const control = document.querySelector("#control");
@@ -190,6 +202,12 @@ test("present reports invalid selectors without throwing from click", async ({ p
         ERROR_EXTENSION_SELECTOR: { code: 1107 },
         error: (definition, context) => reports.push({ code: definition.code, selector: context.selector })
       },
+      mountManager: {
+        add: (_name, selector, mount, unmount, update, controllers) => {
+          (window.mountEntries ||= new Map()).set(selector, { mount, unmount, update, controllers });
+        },
+        remove: () => window.mountEntries?.clear()
+      },
       extAttach: (_name, extension) => { window.presentExtension = extension; },
       dispatchFrom: () => true
     };
@@ -198,7 +216,7 @@ test("present reports invalid selectors without throwing from click", async ({ p
   const reports = await page.evaluate(() => {
     const extension = window.presentExtension;
     extension.init();
-    const [, controls] = extension.mountMap.values();
+    const [, controls] = window.mountEntries.values();
     controls.mount(document.querySelector("#dismiss"));
     document.querySelector("#dismiss").click();
     return window.selectorReports;
@@ -219,6 +237,12 @@ test("present restores a trigger without targets and can mount it again", async 
       attr: name => `data-ae-${name}`,
       className: name => `ae-${name}`,
       attrMem: { save: saveAttr, restore: restoreAttr },
+      mountManager: {
+        add: (_name, selector, mount, unmount, update, controllers) => {
+          (window.mountEntries ||= new Map()).set(selector, { mount, unmount, update, controllers });
+        },
+        remove: () => window.mountEntries?.clear()
+      },
       extAttach: (_name, extension) => { window.presentExtension = extension; },
       dispatchFrom: () => true
     };
@@ -229,7 +253,7 @@ test("present restores a trigger without targets and can mount it again", async 
   const state = await page.evaluate(() => {
     const extension = window.presentExtension;
     extension.init();
-    const [panels, controls] = extension.mountMap.values();
+    const [panels, controls] = window.mountEntries.values();
     const control = document.querySelector("#control");
     controls.mount(control);
     controls.unmount(control);
@@ -268,6 +292,12 @@ test("present records interrupted transitions as warnings and failures as errors
       className: name => `ae-${name}`,
       attrMem: { save: saveAttr, restore: restoreAttr },
       diagnostics: buildDiagnostics(createAelluxConstants().AELLUXJS_DIAGNOSTICS),
+      mountManager: {
+        add: (_name, selector, mount, unmount, update, controllers) => {
+          (window.mountEntries ||= new Map()).set(selector, { mount, unmount, update, controllers });
+        },
+        remove: () => window.mountEntries?.clear()
+      },
       extAttach: (_name, extension) => { window.presentExtension = extension; },
       dispatchFrom: (_element, event) => {
         if (window.failPopping && event === "Popping") throw new Error("transition probe");
@@ -279,7 +309,7 @@ test("present records interrupted transitions as warnings and failures as errors
   const entries = await page.evaluate(async () => {
     const extension = window.presentExtension;
     extension.init();
-    const [panels] = extension.mountMap.values();
+    const [panels] = window.mountEntries.values();
     const panel = document.querySelector("#panel");
     panels.mount(panel);
     extension.pop(panel);
@@ -313,6 +343,12 @@ test("present reports a selector callback failure with its own diagnostic", asyn
       className: name => `ae-${name}`,
       attrMem: { save: saveAttr, restore: restoreAttr },
       diagnostics: buildDiagnostics(createAelluxConstants().AELLUXJS_DIAGNOSTICS),
+      mountManager: {
+        add: (_name, selector, mount, unmount, update, controllers) => {
+          (window.mountEntries ||= new Map()).set(selector, { mount, unmount, update, controllers });
+        },
+        remove: () => window.mountEntries?.clear()
+      },
       extAttach: (_name, extension) => { window.presentExtension = extension; },
       dispatchFrom: () => { throw new Error("callback probe"); }
     };
@@ -321,7 +357,7 @@ test("present reports a selector callback failure with its own diagnostic", asyn
   const codes = await page.evaluate(() => {
     const extension = window.presentExtension;
     extension.init();
-    const [panels] = extension.mountMap.values();
+    const [panels] = window.mountEntries.values();
     panels.mount(document.querySelector("#panel"));
     document.querySelector("#control").click();
     return AelluxJs.diagnostics.showHistory().map(entry => entry.code);
@@ -341,6 +377,12 @@ test("present refreshes trigger controls from its initial value", async ({ page 
       attr: name => `data-ae-${name}`,
       className: name => `ae-${name}`,
       attrMem: { save: saveAttr, restore: restoreAttr },
+      mountManager: {
+        add: (_name, selector, mount, unmount, update, controllers) => {
+          (window.mountEntries ||= new Map()).set(selector, { mount, unmount, update, controllers });
+        },
+        remove: () => window.mountEntries?.clear()
+      },
       extAttach: (_name, extension) => { window.presentExtension = extension; },
       dispatchFrom: () => true
     };
@@ -349,7 +391,7 @@ test("present refreshes trigger controls from its initial value", async ({ page 
   const controls = await page.evaluate(() => {
     const extension = window.presentExtension;
     extension.init();
-    const [panels, triggers] = extension.mountMap.values();
+    const [panels, triggers] = window.mountEntries.values();
     const control = document.querySelector("#control");
     panels.mount(document.querySelector("#first"));
     triggers.mount(control);

@@ -516,17 +516,20 @@
 <p>The runtime exposes a kebab-case name as camelCase under <code>AelluxJs.ext</code>: <code>tab-group</code> becomes <code>AelluxJs.ext.tabGroup</code>.
 An Extension receives its configuration as the <code>options</code> argument to <code>init(options)</code>. Supply it through <code>$ae.init({ extensions: { &quot;tab-group&quot;: { initialTab: &quot;overview&quot; } } })</code>; the boot script normalizes <code>tab-group</code> to <code>tabGroup</code> in <code>$ae.options.extensions</code>. Extensions without a matching entry receive <code>{}</code>.</p>
 <h2>DOM Mount Contract</h2>
-<p>Extensions with element behavior expose a <code>mountMap</code>. Each key is a CSS selector and each value provides the matching <code>mount</code> and <code>unmount</code> handlers:</p>
-<pre><code class="language-js">const mountMap = new Map();
+<p>Extensions with element behavior register their selectors and handlers with <code>AelluxJs.mountManager</code> during <code>init()</code>:</p>
+<pre><code class="language-js">AelluxJs.extAttach(extensionName, { init, destroy });
 
-mountMap.set(&quot;[data-ae-example]&quot;, {
-  mount: mountElement,
-  unmount: unmountElement
-});
+function init() {
+  AelluxJs.mountManager.add(
+    extensionName, &quot;[data-ae-example]&quot;, mountElement, unmountElement
+  );
+}
 
-AelluxJs.extAttach(extensionName, { init, destroy, mountMap });
+function destroy() {
+  AelluxJs.mountManager.remove(extensionName);
+}
 </code></pre>
-<p>The orchestrator consumes this map during <code>$ae.update(root)</code> and <code>$ae.unmount(root)</code>. <code>mount</code> must be safe against repeated updates, and <code>unmount</code> must reverse the element-level resources created by <code>mount</code>.</p>
+<p>The manager runs matching handlers through the mount helper during <code>$ae.mount(root)</code> and <code>$ae.unmount(root)</code>. Register before mounting and remove only after unmounting. <code>mount</code> must be safe against repeated calls, and <code>unmount</code> must reverse the element-level resources created by <code>mount</code>.</p>
 <h2>Declaring Available Builds</h2>
 <p>The <code>builds</code> option describes the artifacts published by the Extension:</p>
 <pre><code class="language-js">$ae.ext(&quot;example&quot;, { builds: [&quot;modern&quot;, &quot;legacy&quot;] });

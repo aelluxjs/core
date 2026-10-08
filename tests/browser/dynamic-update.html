@@ -13,7 +13,7 @@
       target.textContent = "Inserted after AelluxJsReady";
       document.getElementById("dynamic-root").appendChild(target);
 
-      await $ae.update(target);
+      await $ae.mount(target);
 
       assert(target.classList.contains("ae--mounted"), "Dynamically inserted element was not mounted");
     });

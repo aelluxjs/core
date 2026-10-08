@@ -110,11 +110,9 @@
       popping: AelluxJs.className("popping"),
       unpopping: AelluxJs.className("unpopping")
     };
-    var mountMap = /* @__PURE__ */ new Map();
     AelluxJs.extAttach(extensionName, {
       init: init,
       destroy: destroy,
-      mountMap: mountMap,
       pop: pop,
       unpop: unpop,
       toggle: toggle,
@@ -128,18 +126,12 @@
     var attrMemoryUsers = /* @__PURE__ */ new WeakMap();
     var initialAttributes = ["hidden", ARIA_EXPANDED, ARIA_CONTROLS, attr.presentMotion];
     function init(options) {
-      mountMap.set("[".concat(attr.present, "]"), {
-        mount: mountPresentContainer,
-        unmount: unmountPresentContainer
-      });
-      mountMap.set("[".concat([attr.trigger, attr.dismiss, attr.target].join("],["), "]"), {
-        mount: mountTriggerElement,
-        unmount: unmountTriggerElement
-      });
+      AelluxJs.mountManager.add(extensionName, "[".concat(attr.present, "]"), mountPresentContainer, unmountPresentContainer, null, ["pop", "unpop", "trigger", "toggle"]);
+      AelluxJs.mountManager.add(extensionName, "[".concat([attr.trigger, attr.dismiss, attr.target].join("],["), "]"), mountTriggerElement, unmountTriggerElement, null, null);
       document.addEventListener("click", OnClick);
     }
     function destroy() {
-      mountMap.clear();
+      AelluxJs.mountManager.remove(extensionName);
       document.removeEventListener("click", OnClick);
       var _iterator = _createForOfIteratorHelper(triggerElementsSet), _step;
       try {

@@ -519,7 +519,7 @@
 <h2>JavaScript Coexistence</h2>
 <p>Extensions should avoid unnecessary <code>preventDefault()</code> and <code>stopPropagation()</code>, should not remove third-party listeners, and must keep mounting idempotent when Bootstrap reveals or modifies content dynamically.</p>
 <p>After inserting or revealing dynamic markup, update only the affected root when possible:</p>
-<pre><code class="language-js">await $ae.update(changedElement);
+<pre><code class="language-js">await $ae.mount(changedElement);
 </code></pre>
 <p>The browser validation suite includes a Bootstrap CSS coexistence scenario. Repeatable testing with Bootstrap JavaScript components remains a release requirement.</p>
 <h2>Validation Scope</h2>

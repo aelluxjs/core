@@ -138,6 +138,7 @@ var bootstrapProperties = Object.freeze({
   }),
   minified: flag,
   waitLayout: Object.freeze({ type: "null" }),
+  mountManager: Object.freeze({ type: "null" }),
   init: method,
   persist: Object.freeze({
     type: "object",
@@ -174,7 +175,7 @@ var bootstrapProperties = Object.freeze({
   dispatchFrom: method,
   dispatch: method,
   wait: method,
-  update: method,
+  mount: method,
   unmount: method,
   request: method
 });
@@ -191,6 +192,10 @@ for (var property in bootstrapProperties) {
   }
 }
 runtimeProperties.waitLayout = layoutScheduler;
+runtimeProperties.mountManager = Object.freeze({
+  type: "object",
+  properties: Object.freeze({ add: method, remove: method, mount: method, unmount: method })
+});
 
 var aelluxApiContract = Object.freeze({
   // Both browser globals must reference the same object.

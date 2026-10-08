@@ -5,14 +5,14 @@
 // Ready signals that the orchestrator is initialized and available; it does not guarantee
 // successful aellux.js Extension initialization or completed DOM mounting. Component-specific events
 // such as Extension-specific events report their own readiness or updates.
-// Routes explicit DOM update/unmount requests through extension mount/unmount declarations
+// Routes explicit DOM mount/unmount requests through extension mount/unmount declarations
 // and provides layout scheduling and fetch helpers.
 // Uses ES2017 syntax, Promises, and modern browser APIs; legacy fallback
 // selection belongs to the bootstrap, while feature-specific behavior belongs to aellux.js Extensions.
 
 import { assetLoadHelper } from "./internal/asset-load-helper.js";
 import { createLayoutScheduler } from "./internal/create-layout-scheduler.js";
-import { createMountHelper } from "./internal/create-mount-helper.js";
+import { buildMountMapManager } from "./internal/build-mount-map-manager.js";
 import utilsNameCase from "./internal/utils-name-case.js";
 
 (function (root) {
@@ -21,7 +21,7 @@ import utilsNameCase from "./internal/utils-name-case.js";
   const { toCamelCase, fromCamelCase } = utilsNameCase;
 
   const extensionPromises = {};
-  const mountHelper = createMountHelper(root, extensionPromises);
+  const mountManager = buildMountMapManager(root, extensionPromises);
   const layoutScheduler = createLayoutScheduler();
 
   // Keep the boot API object: its methods close over the same instance.
@@ -37,10 +37,10 @@ import utilsNameCase from "./internal/utils-name-case.js";
         }
 
         await new Promise((resolve) => {
-          const startUpdateCallback = function () {
-            AelluxJs.update().then(function () {
+          const startMountCallback = function () {
+            AelluxJs.mount().then(function () {
               document.removeEventListener(
-                "DOMContentLoaded", startUpdateCallback
+                "DOMContentLoaded", startMountCallback
               );
               resolve();
             });
@@ -48,22 +48,22 @@ import utilsNameCase from "./internal/utils-name-case.js";
 
           if (document.readyState === "loading")
             document.addEventListener(
-              "DOMContentLoaded", startUpdateCallback,
+              "DOMContentLoaded", startMountCallback,
               { once: true }
             );
           else
-            startUpdateCallback();
+            startMountCallback();
         });
 
         AelluxJs.dispatch("Ready");
 
         return true;
       },
-      async update(rootOrSelector, extensionNames = null) {
-        return mountHelper.AelluxJsForceUpdate(rootOrSelector, extensionNames);
+      async mount(rootOrSelector, extensionNames = null) {
+        return mountManager.mount(rootOrSelector, extensionNames);
       },
       async unmount(rootOrSelector, extensionNames = null) {
-        return mountHelper.AelluxJsForceUnmount(rootOrSelector, extensionNames);
+        return mountManager.unmount(rootOrSelector, extensionNames);
       },
       async destroy() {
         AelluxJs.waitLayout.clear();
@@ -105,7 +105,7 @@ import utilsNameCase from "./internal/utils-name-case.js";
             delete AelluxJs.ext[key];
             delete extensionPromises[key];
             delete AelluxJs.registry.ext[key];
-            delete AelluxJs.registry.extMounters[key];
+            mountManager.remove(extensionName);
             delete AelluxJs.registry.lazyExtSelectors[key];
             if (extension) extension.initialized = false;
           }
@@ -121,6 +121,7 @@ import utilsNameCase from "./internal/utils-name-case.js";
       request: defaultRequest,
 
       waitLayout: layoutScheduler,
+      mountManager,
     });
 
   root[root.AelluxJs.shortJSName] = root.AelluxJs;
@@ -191,11 +192,6 @@ import utilsNameCase from "./internal/utils-name-case.js";
     const options = AelluxJs.options.extensions[key] || {};
     AelluxJs.ext[key].init(options);
     AelluxJs.ext[key].initialized = true;
-
-    if (AelluxJs.ext[key].mountMap) {
-      const selectors = Array.from(AelluxJs.ext[key].mountMap.keys()).join(",");
-      if (selectors) AelluxJs.registry.extMounters[key] = selectors;
-    }
 
     //Clean lazy registry
     delete AelluxJs.registry.lazyExtSelectors[key];

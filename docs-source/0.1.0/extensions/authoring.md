@@ -19,20 +19,23 @@ An Extension receives its configuration as the `options` argument to `init(optio
 
 ## DOM Mount Contract
 
-Extensions with element behavior expose a `mountMap`. Each key is a CSS selector and each value provides the matching `mount` and `unmount` handlers:
+Extensions with element behavior register their selectors and handlers with `AelluxJs.mountManager` during `init()`:
 
 ```js
-const mountMap = new Map();
+AelluxJs.extAttach(extensionName, { init, destroy });
 
-mountMap.set("[data-ae-example]", {
-  mount: mountElement,
-  unmount: unmountElement
-});
+function init() {
+  AelluxJs.mountManager.add(
+    extensionName, "[data-ae-example]", mountElement, unmountElement
+  );
+}
 
-AelluxJs.extAttach(extensionName, { init, destroy, mountMap });
+function destroy() {
+  AelluxJs.mountManager.remove(extensionName);
+}
 ```
 
-The orchestrator consumes this map during `$ae.update(root)` and `$ae.unmount(root)`. `mount` must be safe against repeated updates, and `unmount` must reverse the element-level resources created by `mount`.
+The manager runs matching handlers through the mount helper during `$ae.mount(root)` and `$ae.unmount(root)`. Register before mounting and remove only after unmounting. `mount` must be safe against repeated calls, and `unmount` must reverse the element-level resources created by `mount`.
 
 ## Declaring Available Builds
 

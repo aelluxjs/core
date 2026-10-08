@@ -30,7 +30,7 @@ test("adaptive updates shape and size classes as its dimensions change", async (
   await expect(element).not.toHaveClass(/ae--shape-vertical/);
   await expect(element).not.toHaveClass(/ae--fits-small/);
 
-  await page.evaluate(() => AelluxJs.update(document.querySelector("#adaptive")));
+  await page.evaluate(() => AelluxJs.mount(document.querySelector("#adaptive")));
   await expect(element).toHaveClass(/ae--shape-vertical/);
   await expect(element).not.toHaveClass(/ae--fits-xl/);
 });

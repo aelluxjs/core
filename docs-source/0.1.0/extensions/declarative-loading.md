@@ -17,6 +17,6 @@ Pages can register Extensions through link declarations discovered by the orches
 
 After processing a declaration, the orchestrator changes its relation to `aelluxjs-ext-registered` so subsequent updates do not register it again.
 
-Declarations may be present in the initial document or inside a root later passed to `$ae.update(root)`.
+Declarations may be present in the initial document or inside a root later passed to `$ae.mount(root)`.
 
 See [registering Extensions](registration.md), [authoring Extensions](authoring.md), [lazy loading](lazy-loading.md), and [optional styles](styles.md).

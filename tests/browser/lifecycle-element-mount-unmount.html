@@ -7,26 +7,24 @@
   <script src="../../dist/aellux.js"></script>
   <script>
     var lifecycleCounts = { mount: 0, unmount: 0, events: 0 };
-    var mountMap = new Map();
 
     function onProbeEvent() { lifecycleCounts.events++; }
 
     $ae.ext("lifecycle-element-probe");
     $ae.extAttach("lifecycle-element-probe", {
       init: function () {
-        mountMap.set("[data-lifecycle-element]", {
-          mount: function (element) {
+        $ae.mountManager.add("lifecycle-element-probe", "[data-lifecycle-element]",
+          function (element) {
             lifecycleCounts.mount++;
             element.addEventListener("lifecycle-probe", onProbeEvent);
           },
-          unmount: function (element) {
+          function (element) {
             lifecycleCounts.unmount++;
             element.removeEventListener("lifecycle-probe", onProbeEvent);
           }
-        });
+        );
       },
-      destroy: function () {},
-      mountMap: mountMap
+      destroy: function () { $ae.mountManager.remove("lifecycle-element-probe"); }
     });
 
     AelluxJsValidation.run(async function (assert) {
@@ -34,22 +32,29 @@
 
       assert(lifecycleCounts.mount === 1, "Element was not mounted during start");
       assert(target.classList.contains("ae--mounted"), "Mounted class was not added");
+      assert(typeof $ae.mountManager.add === "function" &&
+        typeof $ae.mountManager.remove === "function" &&
+        typeof $ae.mountManager.mount === "function" &&
+        typeof $ae.mountManager.unmount === "function", "Mount manager API is incomplete");
+      assert(typeof $ae.mount === "function" &&
+        typeof $ae.update === "undefined", "Public mounting method was not renamed");
+      assert(!("mountMap" in $ae.ext.lifecycleElementProbe), "Extension still exposes a mount map");
 
-      await $ae.update(target, "lifecycle-element-probe");
-      await $ae.update(target, "lifecycle-element-probe");
+      await $ae.mountManager.mount(target, "lifecycle-element-probe");
+      await $ae.mount(target, "lifecycle-element-probe");
       target.dispatchEvent(new Event("lifecycle-probe"));
 
       assert(lifecycleCounts.mount === 1, "Repeated updates duplicated the mount");
       assert(lifecycleCounts.events === 1, "Repeated updates duplicated an event listener");
 
-      await $ae.unmount(target, "lifecycle-element-probe");
+      await $ae.mountManager.unmount(target, "lifecycle-element-probe");
       target.dispatchEvent(new Event("lifecycle-probe"));
 
       assert(lifecycleCounts.unmount === 1, "Element unmount did not run exactly once");
       assert(lifecycleCounts.events === 1, "Element listener remained after unmount");
       assert(!target.classList.contains("ae--mounted"), "Mounted class remained after unmount");
 
-      await $ae.update(target, "lifecycle-element-probe");
+      await $ae.mount(target, "lifecycle-element-probe");
       target.dispatchEvent(new Event("lifecycle-probe"));
 
       assert(lifecycleCounts.mount === 2, "Element could not be mounted again");

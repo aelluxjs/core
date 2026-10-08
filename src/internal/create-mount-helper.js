@@ -2,7 +2,7 @@
 
 import utilsNameCase from "./utils-name-case.js";
 
-export function createMountHelper(root, extensionPromises) {
+export function createMountHelper(root, extensionPromises, mountMaps) {
   const { toCapitalized, toCamelCase, fromCamelCase } = utilsNameCase;
 
   const mountedElements = new WeakMap(); //DOM, string Set
@@ -101,8 +101,9 @@ export function createMountHelper(root, extensionPromises) {
           extensionPromises[toCamelCase(extensionName)];
         if (!extensionPromise) { continue; }
         const extension = await extensionPromise;
-        if (!extension || !extension.mountMap) { continue; }
-        const mounter = extension.mountMap;
+        if (!extension) { continue; }
+        const mounter = mountMaps.get(toCamelCase(extensionName));
+        if (!mounter) { continue; }
         for (const [selector, controller] of mounter) {
           try {
             if (!controller[method]) { continue; }

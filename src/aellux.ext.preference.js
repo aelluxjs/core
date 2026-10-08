@@ -16,9 +16,8 @@ import utilsNameCase from "./internal/utils-name-case.js";
   const userPreferences = Object.create(null);
   const defaultPreferences = Object.create(null);
   const computedPreferences = Object.create(null);
-  const mountMap = new Map();
 
-  AelluxJs.extAttach(extensionName, { init, destroy, update, get, set, mountMap });
+  AelluxJs.extAttach(extensionName, { init, destroy, update, get, set });
 
   const attr = {
     preference: AelluxJs.attr("preference"),
@@ -48,10 +47,10 @@ import utilsNameCase from "./internal/utils-name-case.js";
   };
 
   function init(options) {
-    mountMap.set(`[${attr.preference}]`, {
-      mount: mountPreferenceContainer,
-      unmount: unmountPreferenceContainer,
-    });
+    AelluxJs.mountManager.add(
+      extensionName, `[${attr.preference}]`,
+      mountPreferenceContainer, unmountPreferenceContainer
+    );
 
     window.addEventListener("storage", storageEvent);
 
@@ -78,6 +77,7 @@ import utilsNameCase from "./internal/utils-name-case.js";
   }
 
   function destroy() {
+    AelluxJs.mountManager.remove(extensionName);
     window.removeEventListener("storage", storageEvent);
     document.removeEventListener('DOMContentLoaded', update);
 

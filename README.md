@@ -63,7 +63,7 @@ See [Getting Started](docs/getting-started.md) for build instructions, runtime m
 - Declarative activation through `data-ae-*` attributes.
 - Selective eager or lazy Extension loading.
 - Optional styles associated with individual Extensions.
-- Idempotent DOM mounting through `$ae.update(root)`.
+- Idempotent DOM mounting through `$ae.mount(root)`.
 - Browser history, preferences, feedback, persistence, and adaptive layout utilities.
 - ES5-compatible boot script with an [ES2017+ Modern browser baseline](docs/runtime/browser-support.md).
 

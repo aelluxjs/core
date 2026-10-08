@@ -16,7 +16,6 @@
       shapeVertical: AelluxJs.className("shape-vertical"),
       shapeSquare: AelluxJs.className("shape-square")
     };
-    const mountMap = /* @__PURE__ */ new Map();
     const adaptiveElements = /* @__PURE__ */ new Set();
     const initialClasses = /* @__PURE__ */ new WeakMap();
     const adaptiveParams = {
@@ -40,7 +39,7 @@
     };
     let managedClasses = getManagedClasses();
     const resizeObserver = typeof root.ResizeObserver === "function" ? new root.ResizeObserver(onResize) : null;
-    AelluxJs.extAttach(extensionName, { init, destroy, mountMap, adaptiveParams });
+    AelluxJs.extAttach(extensionName, { init, destroy, adaptiveParams });
     function init(options = {}) {
       const overrides = options.adaptiveParams || {};
       for (const group of Object.keys(adaptiveParams)) {
@@ -49,10 +48,12 @@
         }
       }
       managedClasses = getManagedClasses();
-      mountMap.set(`[${attr.adaptive}]`, {
-        mount: mountAdaptive,
-        unmount: unmountAdaptive
-      });
+      AelluxJs.mountManager.add(
+        extensionName,
+        `[${attr.adaptive}]`,
+        mountAdaptive,
+        unmountAdaptive
+      );
     }
     function getManagedClasses() {
       return [
@@ -65,7 +66,7 @@
     function destroy() {
       for (const element of adaptiveElements) unmountAdaptive(element);
       if (resizeObserver) resizeObserver.disconnect();
-      mountMap.clear();
+      AelluxJs.mountManager.remove(extensionName);
     }
     function mountAdaptive(element) {
       if (adaptiveElements.has(element)) return;
@@ -101,8 +102,14 @@
     }
     function updateAdaptive(element, width, height) {
       const ratio = height > 0 ? width / height : 0;
-      element.classList.toggle(modifier.shapeVertical, ratio < adaptiveParams.ratioShapes.vertical);
-      element.classList.toggle(modifier.shapeHorizontal, ratio > adaptiveParams.ratioShapes.horizontal);
+      element.classList.toggle(
+        modifier.shapeVertical,
+        ratio < adaptiveParams.ratioShapes.vertical
+      );
+      element.classList.toggle(
+        modifier.shapeHorizontal,
+        ratio > adaptiveParams.ratioShapes.horizontal
+      );
       element.classList.toggle(
         modifier.shapeSquare,
         ratio >= adaptiveParams.ratioShapes.vertical && ratio <= adaptiveParams.ratioShapes.horizontal

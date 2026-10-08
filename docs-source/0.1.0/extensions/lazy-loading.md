@@ -1,6 +1,6 @@
 # Lazy Extension Loading
 
-Lazy loading delays an Extension until a matching element is found during `$ae.update(root)`.
+Lazy loading delays an Extension until a matching element is found during `$ae.mount(root)`.
 
 ```js
 $ae.ext("preference", {

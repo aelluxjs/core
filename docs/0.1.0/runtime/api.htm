@@ -512,10 +512,11 @@
 <p>Supported runtime modes are <code>full</code> and <code>basic</code>. See <a href="../getting-started.htm">Getting Started</a> for their loading behavior.
 Pass Extension-specific configuration through <code>extensions</code> in <code>init()</code> options. Keys such as <code>&quot;tab-group&quot;</code> are normalized to <code>tabGroup</code> in <code>$ae.options.extensions</code>, and each Extension receives its matching object in <code>init(options)</code>. An Extension with no matching configuration receives <code>{}</code>.</p>
 <h2>DOM Lifecycle</h2>
-<pre><code class="language-js">await $ae.update(root);
+<pre><code class="language-js">await $ae.mount(root);
 await $ae.unmount(root);
 </code></pre>
-<p><code>update(root)</code> discovers matching declarations, loads required Extensions, and requests idempotent <code>mount</code> operations. <code>unmount(root)</code> requests the corresponding cleanup operations. When <code>root</code> is omitted, the document is used.</p>
+<p><code>mount(root)</code> discovers matching declarations, loads required Extensions, and requests idempotent <code>mount</code> operations. <code>unmount(root)</code> requests the corresponding cleanup operations. When <code>root</code> is omitted, the document is used.</p>
+<p>Extensions register element handlers with <code>$ae.mountManager.add(extensionName, selector, mount, unmount, update, controllers)</code> during <code>init()</code> and call <code>$ae.mountManager.remove(extensionName, selector)</code> during <code>destroy()</code>. Omitting <code>selector</code> removes all registrations for the Extension. <code>$ae.mountManager.mount(root, extensionNames)</code> and <code>$ae.mountManager.unmount(root, extensionNames)</code> use the same lifecycle execution as <code>$ae.mount()</code> and <code>$ae.unmount()</code>.</p>
 <h2>Destruction</h2>
 <pre><code class="language-js">await $ae.destroyExtensions(&quot;preference&quot;);
 await $ae.destroy();
