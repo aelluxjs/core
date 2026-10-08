@@ -43,7 +43,10 @@
   const initialTriggerControls = new WeakMap();
   const attrMemoryUsers = new WeakMap();
   const initialAttributes = [
-    "hidden", ARIA_EXPANDED, ARIA_CONTROLS, attr.presentMotion
+    "hidden",
+    ARIA_EXPANDED,
+    ARIA_CONTROLS,
+    attr.presentMotion
   ];
 
   function init(options) {

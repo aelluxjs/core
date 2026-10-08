@@ -70,7 +70,9 @@ import utilsNameCase from "./internal/utils-name-case.js";
 
     //Default values
     Object.entries(prefOptions)
-      .forEach(([param, options]) => defaultPreferences[param] = options[0]);
+      .forEach(([param, options]) => {
+        defaultPreferences[param] = options[0];
+      });
 
     loadUserPreferences();
     update();

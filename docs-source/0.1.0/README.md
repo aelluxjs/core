@@ -36,21 +36,24 @@ Add aellux.js to a page and enable the Extensions it needs. The library coordina
 - [Diagnostics](runtime/diagnostics.md)
 - [Bootstrap integration](integrations/bootstrap.md)
 
-## aellux.js Extensions
+## Extensions
 
-- [Adaptive](extensions/adaptive.md)
-- [Feedback](extensions/feedback.md)
-- [Focus](extensions/focus.md)
-- [Pointer](extensions/pointer.md)
-- [Preference](extensions/preference.md)
-- [Present](extensions/present.md)
-- [State navigation](extensions/state-navigation.md)
 - [Authoring third-party Extensions](extensions/authoring.md)
 - [Registering Extensions with `$ae.ext(...)`](extensions/registration.md)
 - [Declarative loading with `link[rel="aelluxjs-ext"]`](extensions/declarative-loading.md)
 - [Lazy loading](extensions/lazy-loading.md)
 - [Optional Extension styles](extensions/styles.md)
 - [Modern and Legacy Extension variants](extensions/legacy-variants.md)
+
+## Core Extensions
+
+- [Adaptive](core-extensions/adaptive.md)
+- [Feedback](core-extensions/feedback.md)
+- [Focus](core-extensions/focus.md)
+- [Pointer](core-extensions/pointer.md)
+- [Preference](core-extensions/preference.md)
+- [Present](core-extensions/present.md)
+- [State navigation](core-extensions/state-navigation.md)
 
 ## Project Documents
 
