@@ -79,7 +79,9 @@
           }
         )
       );
-      Object.entries(prefOptions).forEach(([param, options2]) => defaultPreferences[param] = options2[0]);
+      Object.entries(prefOptions).forEach(([param, options2]) => {
+        defaultPreferences[param] = options2[0];
+      });
       loadUserPreferences();
       update();
     }

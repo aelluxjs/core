@@ -13,7 +13,7 @@
       init,
       destroy,
       tabOpen,
-      ajaxHref,
+      ajaxReplace,
       flowStep,
       formFocus,
       updateBaseTitle,
@@ -28,6 +28,7 @@
     function init(options) {
       window.addEventListener("popstate", onPopState);
       window.addEventListener("hashchange", onHashChange);
+      AelluxJs.on("SnapshotRestore", OnSnapshotRestoreAjax);
       if ("useHash" in AelluxJs.options) {
         useHash = AelluxJs.options.useHash;
       }
@@ -41,6 +42,7 @@
     async function destroy() {
       window.removeEventListener("popstate", onPopState);
       window.removeEventListener("hashchange", onHashChange);
+      AelluxJs.off("SnapshotRestore", OnSnapshotRestoreAjax);
     }
     function updateBaseTitle(title) {
       baseTitle = title;
@@ -48,16 +50,25 @@
     function tabOpen(tabGroupId, tabId, title) {
       return change(tabGroupId, tabId, title);
     }
-    function ajaxHref(url, selectors) {
-      history.replaceState({ aelluxJsState: true, snapshot: globalSnapshot, ajaxHref: selectors }, "", window.location.href);
-      updateSnapshotData();
-      history.pushState({ aelluxJsState: true, snapshot: null, ajaxHref: selectors }, "", url);
-    }
     function flowStep(flowId, stepId, title) {
       return change(flowId, stepId, title);
     }
     function formFocus(formId, focusId, title) {
       return change(formId, focusId, title);
+    }
+    function ajaxReplace(url, selectors) {
+      const currentState = {
+        aelluxJsState: true,
+        snapshot: globalSnapshot,
+        ajaxReplace: { url: window.location.href, selectors }
+      }, targetState = {
+        aelluxJsState: true,
+        snapshot: null,
+        ajaxReplace: { url, selectors }
+      };
+      history.replaceState(currentState, "", window.location.href);
+      updateSnapshotData();
+      history.pushState(targetState, "", url);
     }
     function setState(key, value, title = void 0, silent = false) {
       return change(key, value, title, silent);
@@ -93,19 +104,17 @@
     function snapshotToString(snapshot) {
       return new URLSearchParams(snapshot || {}).toString();
     }
-    function dispatchSnapshotEvent(name) {
+    function dispatchSnapshotEvent(name, browserState = void 0) {
       document.title = globalSnapshot.title || false ? `${globalSnapshot.title} - ${baseTitle}` : baseTitle;
       const options = {
         detail: {
           snapshot: globalSnapshot,
-          removeSnapshot: globalRemoveSnapshot
+          removeSnapshot: globalRemoveSnapshot,
+          browserState
         },
         bubbles: true
       };
       AelluxJs.dispatch(name, options);
-    }
-    function dispatchEventRestore() {
-      return dispatchSnapshotEvent("SnapshotRestore");
     }
     function onHashChange() {
       if (!useHash) return;
@@ -114,38 +123,41 @@
         return;
       }
       updateSnapshotData(window.location.hash.substring(1));
-      dispatchEventRestore();
+      dispatchSnapshotEvent("SnapshotRestore");
     }
     function onPopState(event) {
       const browserState = event.state;
       if (!browserState || !browserState.aelluxJsState) return;
-      if (browserState.ajaxHref) {
-        if (AelluxJs.ext.ajaxHref && typeof AelluxJs.ext.ajaxHref.load === "function") {
-          AelluxJs.ext.ajaxHref.load(
-            window.location.href,
-            browserState.ajaxHref,
-            { ignoreHistory: true }
-          );
-        } else {
-          AelluxJs.diagnostics.warn(
-            AelluxJs.diagnostics.WARN_NAVIGATION_AJAX_HREF_UNAVAILABLE,
-            { url: window.location.href, selectors: browserState.ajaxHref }
-          );
-        }
-      }
-      if (browserState.snapshot) {
+      if (browserState.snapshot)
         updateSnapshotData(snapshotToString(browserState.snapshot));
-        dispatchEventRestore();
-      } else if (useHash) {
+      else if (useHash)
         updateSnapshotData(window.location.hash.substring(1));
-        dispatchEventRestore();
-      }
+      else
+        updateSnapshotData("");
+      dispatchSnapshotEvent("SnapshotRestore", browserState);
       if (!useHash) return;
       skipHashChange = window.location.hash;
       setTimeout(function() {
         if (skipHashChange === window.location.hash)
           skipHashChange = null;
       }, 0);
+    }
+    function OnSnapshotRestoreAjax(event) {
+      if (!event.detail || !event.detail.browserState) return;
+      const state = event.detail.browserState;
+      if (state.ajaxReplace) {
+        const url = state.ajaxReplace.url;
+        const selectors = state.ajaxReplace.selectors;
+        const extAjaxHref = AelluxJs.ext.ajaxHref;
+        if (extAjaxHref && typeof extAjaxHref.load === "function") {
+          extAjaxHref.load(url, selectors, { ignoreHistory: true });
+        } else {
+          AelluxJs.diagnostics.warn(
+            AelluxJs.diagnostics.WARN_NAVIGATION_AJAX_HREF_UNAVAILABLE,
+            { url, selectors }
+          );
+        }
+      }
     }
   })(typeof globalThis !== "undefined" ? globalThis : window);
 })();

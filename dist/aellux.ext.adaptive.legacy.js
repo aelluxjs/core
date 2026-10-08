@@ -116,6 +116,10 @@
         near: 1,
         far: 1.5
       },
+      ratioShapes: {
+        vertical: 0.8,
+        horizontal: 1.25
+      },
       minSizes: {
         compact: 0,
         small: 480,
@@ -123,14 +127,9 @@
         large: 1024,
         xl: 1280,
         xxl: 1600
-      },
-      ratioShapes: {
-        vertical: 0.8,
-        //>square<
-        horizontal: 1.25
       }
     };
-    var managedClasses = getManagedClasses();
+    var managedClasses;
     var resizeObserver = typeof root.ResizeObserver === "function" ? new root.ResizeObserver(onResize) : null;
     AelluxJs.extAttach(extensionName, {
       init: init,

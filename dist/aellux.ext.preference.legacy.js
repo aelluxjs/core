@@ -122,7 +122,7 @@
       });
       Object.entries(prefOptions).forEach(function(_ref) {
         var _ref2 = _slicedToArray(_ref, 2), param = _ref2[0], options2 = _ref2[1];
-        return defaultPreferences[param] = options2[0];
+        defaultPreferences[param] = options2[0];
       });
       loadUserPreferences();
       update();

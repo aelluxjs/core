@@ -254,8 +254,13 @@ test("navigation warns when ajax-href cannot restore a history entry", async ({ 
   await expect.poll(() => page.evaluate(() => AelluxJs.ext.stateNavigation?.initialized)).toBe(true);
 
   const result = await page.evaluate(() => {
+    const url = window.location.href;
     window.dispatchEvent(new PopStateEvent("popstate", {
-      state: { aelluxJsState: true, ajaxHref: ["#content"] }
+      state: {
+        aelluxJsState: true,
+        snapshot: null,
+        ajaxReplace: { url, selectors: ["#content"] }
+      }
     }));
     const entry = AelluxJs.diagnostics.showHistory()
       .find(item => item.code === 2007);
@@ -267,6 +272,72 @@ test("navigation warns when ajax-href cannot restore a history entry", async ({ 
   });
   expect(result).toEqual({
     level: 1, selectors: ["#content"], url: expect.stringContaining("/tests/index.htm")
+  });
+});
+
+test("navigation restores snapshots before dispatch with hash disabled", async ({ page }) => {
+  await page.goto("/tests/index.htm");
+  await page.addScriptTag({ url: "/dist/aellux.js" });
+  await page.evaluate(() => AelluxJs.init({ mode: "full", useHash: false }));
+  await expect.poll(() => page.evaluate(() => AelluxJs.ext.stateNavigation?.initialized)).toBe(true);
+
+  const result = await page.evaluate(async () => {
+    const navigation = AelluxJs.ext.stateNavigation;
+    const baseTitle = document.title;
+    await navigation.setState("tab", "before", "Before");
+    const events = [];
+    document.addEventListener("AelluxJsSnapshotRestore", event => {
+      events.push({
+        snapshot: { ...event.detail.snapshot },
+        removedTab: event.detail.removeSnapshot.tab || null,
+        browserSnapshot: event.detail.browserState.snapshot,
+        title: document.title
+      });
+    });
+    window.dispatchEvent(new PopStateEvent("popstate", {
+      state: { aelluxJsState: true, snapshot: null }
+    }));
+    window.dispatchEvent(new PopStateEvent("popstate", {
+      state: { aelluxJsState: true, snapshot: { tab: "after", title: "After" } }
+    }));
+    return { events, baseTitle, finalSnapshot: { ...navigation.globalSnapshot } };
+  });
+  expect(result.events).toEqual([
+    { snapshot: {}, removedTab: "before", browserSnapshot: null, title: result.baseTitle },
+    {
+      snapshot: { tab: "after", title: "After" },
+      removedTab: null,
+      browserSnapshot: { tab: "after", title: "After" },
+      title: `After - ${result.baseTitle}`
+    }
+  ]);
+  expect(result.finalSnapshot).toEqual({ tab: "after", title: "After" });
+});
+
+test("navigation ajaxReplace records URL and selectors in the target history state", async ({ page }) => {
+  await page.goto("/tests/index.htm");
+  await page.addScriptTag({ url: "/dist/aellux.js" });
+  await page.evaluate(() => AelluxJs.init({ mode: "full", useHash: false }));
+  await expect.poll(() => page.evaluate(() => AelluxJs.ext.stateNavigation?.initialized)).toBe(true);
+
+  const result = await page.evaluate(async () => {
+    const navigation = AelluxJs.ext.stateNavigation;
+    await navigation.setState("tab", "before");
+    navigation.ajaxReplace("/tests/ajax-next.htm", ["#content"]);
+    return {
+      state: history.state,
+      pathname: location.pathname,
+      snapshot: { ...navigation.globalSnapshot }
+    };
+  });
+  expect(result).toEqual({
+    state: {
+      aelluxJsState: true,
+      snapshot: null,
+      ajaxReplace: { url: "/tests/ajax-next.htm", selectors: ["#content"] }
+    },
+    pathname: "/tests/ajax-next.htm",
+    snapshot: {}
   });
 });
 
