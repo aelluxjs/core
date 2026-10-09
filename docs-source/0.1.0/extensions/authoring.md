@@ -25,13 +25,14 @@ Extensions with element behavior register their selectors and handlers with `Ael
 AelluxJs.extAttach(extensionName, { init, destroy });
 
 function init() {
-  AelluxJs.mountManager.add(
-    extensionName, "[data-ae-example]", mountElement, unmountElement
-  );
+  AelluxJs.mountManager.add({
+    extensionName, selector: "[data-ae-example]",
+    mount: mountElement, unmount: unmountElement
+  });
 }
 
 function destroy() {
-  AelluxJs.mountManager.remove(extensionName);
+  AelluxJs.mountManager.remove({ extensionName });
 }
 ```
 

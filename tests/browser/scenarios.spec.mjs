@@ -185,8 +185,10 @@ test("missing mounted controller method records a warning", async ({ page }) => 
     AelluxJs.ext("method-probe");
     AelluxJs.extAttach("method-probe", {
       init() {
-        AelluxJs.mountManager.add("method-probe", "[data-method-probe]",
-          () => {}, () => {}, null, ["missingMethod"]);
+        AelluxJs.mountManager.add({
+          extensionName: "method-probe", selector: "[data-method-probe]",
+          mount: () => {}, unmount: () => {}, controllers: ["missingMethod"]
+        });
       }
     });
     await AelluxJs.wait("method-probe");
@@ -212,6 +214,63 @@ test("missing mounted controller method records a warning", async ({ page }) => 
     diagnostic: {
       level: 1, extension: "methodProbe", method: "missingMethod", sameElement: true
     }
+  });
+});
+
+test("mounted element controller runs mount, update, and unmount lifecycle methods", async ({ page }) => {
+  await page.goto("/tests/index.htm");
+  await page.addScriptTag({ url: "/dist/aellux.js" });
+  await page.evaluate(() => AelluxJs.init({ mode: "basic" }));
+  await expect.poll(() => page.evaluate(() => AelluxJs.diagnostics.supported)).toBe(true);
+
+  const result = await page.evaluate(async () => {
+    document.body.innerHTML = '<div id="root" data-lifecycle-probe><div id="child" data-lifecycle-probe></div></div>';
+    const counts = { mount: [], update: [], unmount: [] };
+    AelluxJs.ext("lifecycle-probe");
+    AelluxJs.extAttach("lifecycle-probe", {
+      init() {
+        AelluxJs.mountManager.add({
+          extensionName: "lifecycle-probe", selector: "[data-lifecycle-probe]",
+          mount: element => counts.mount.push(element.id),
+          update: element => counts.update.push(element.id),
+          unmount: element => counts.unmount.push(element.id)
+        });
+      }
+    });
+    await AelluxJs.wait("lifecycle-probe");
+    const root = document.getElementById("root");
+    await AelluxJs.mount(root, "lifecycle-probe");
+    const controller = AelluxJs.mountManager.controller(root);
+    const methods = ["mount", "update", "unmount"].map(name => typeof controller[name]);
+    const extensionUpdate = typeof controller.lifecycleProbe.update;
+    await controller.lifecycleProbe.update();
+    await controller.update("lifecycle-probe");
+    await controller.mount("lifecycle-probe");
+    await controller.unmount("lifecycle-probe");
+    const updateAfterUnmount = typeof controller.update;
+    await controller.update("lifecycle-probe");
+    const removed = !root.classList.contains(AelluxJs.className("mounted"));
+    await controller.mount("lifecycle-probe");
+    return {
+      counts,
+      removed,
+      updateAfterUnmount,
+      extensionUpdate,
+      newController: AelluxJs.mountManager.controller(root) !== controller,
+      methods
+    };
+  });
+  expect(result).toEqual({
+    counts: {
+      mount: ["root", "child", "root", "child"],
+      update: ["root", "child", "root", "child"],
+      unmount: ["root", "child"]
+    },
+    removed: true,
+    updateAfterUnmount: "function",
+    extensionUpdate: "function",
+    newController: true,
+    methods: ["function", "function", "function"]
   });
 });
 
@@ -247,7 +306,7 @@ test("unavailable browser storage records the memory fallback", async ({ page })
   });
 });
 
-test("navigation warns when ajax-href cannot restore a history entry", async ({ page }) => {
+test("navigation exposes ajaxReplace metadata on snapshot restoration", async ({ page }) => {
   await page.goto("/tests/index.htm");
   await page.addScriptTag({ url: "/dist/aellux.js" });
   await page.evaluate(() => AelluxJs.init({ mode: "full" }));
@@ -255,6 +314,10 @@ test("navigation warns when ajax-href cannot restore a history entry", async ({ 
 
   const result = await page.evaluate(() => {
     const url = window.location.href;
+    let restoredState;
+    document.addEventListener("AelluxJsSnapshotRestore", event => {
+      restoredState = event.detail.popState;
+    }, { once: true });
     window.dispatchEvent(new PopStateEvent("popstate", {
       state: {
         aelluxJsState: true,
@@ -262,16 +325,12 @@ test("navigation warns when ajax-href cannot restore a history entry", async ({ 
         ajaxReplace: { url, selectors: ["#content"] }
       }
     }));
-    const entry = AelluxJs.diagnostics.showHistory()
-      .find(item => item.code === 2007);
-    return {
-      level: entry.level,
-      selectors: entry.context.selectors,
-      url: entry.context.url
-    };
+    return { restoredState, url };
   });
-  expect(result).toEqual({
-    level: 1, selectors: ["#content"], url: expect.stringContaining("/tests/index.htm")
+  expect(result.restoredState).toEqual({
+    aelluxJsState: true,
+    snapshot: null,
+    ajaxReplace: { url: result.url, selectors: ["#content"] }
   });
 });
 
@@ -290,7 +349,7 @@ test("navigation restores snapshots before dispatch with hash disabled", async (
       events.push({
         snapshot: { ...event.detail.snapshot },
         removedTab: event.detail.removeSnapshot.tab || null,
-        browserSnapshot: event.detail.browserState.snapshot,
+        browserSnapshot: event.detail.popState.snapshot,
         title: document.title
       });
     });
@@ -323,7 +382,9 @@ test("navigation ajaxReplace records URL and selectors in the target history sta
   const result = await page.evaluate(async () => {
     const navigation = AelluxJs.ext.stateNavigation;
     await navigation.setState("tab", "before");
-    navigation.ajaxReplace("/tests/ajax-next.htm", ["#content"]);
+    AelluxJs.dispatch("PushAjaxReplace", {
+      detail: { url: "/tests/ajax-next.htm", selectors: ["#content"] }
+    });
     return {
       state: history.state,
       pathname: location.pathname,
@@ -338,6 +399,31 @@ test("navigation ajaxReplace records URL and selectors in the target history sta
     },
     pathname: "/tests/ajax-next.htm",
     snapshot: {}
+  });
+});
+
+test("navigation warns for malformed command events without changing history or title", async ({ page }) => {
+  await page.goto("/tests/index.htm");
+  await page.addScriptTag({ url: "/dist/aellux.js" });
+  await page.evaluate(() => AelluxJs.init({ mode: "full", useHash: false }));
+  await expect.poll(() => page.evaluate(() => AelluxJs.ext.stateNavigation?.initialized)).toBe(true);
+
+  const result = await page.evaluate(() => {
+    const title = document.title;
+    const state = history.state;
+    AelluxJs.dispatch("PushAjaxReplace");
+    AelluxJs.dispatch("PushAjaxReplace", { detail: { selectors: ["#content"] } });
+    AelluxJs.dispatch("UpdateBaseTitle");
+    AelluxJs.dispatch("UpdateBaseTitle", { detail: { title: null } });
+    const warnings = AelluxJs.diagnostics.showHistory()
+      .filter(item => item.code === 2009)
+      .map(item => item.context.event);
+    return { warnings, titleUnchanged: document.title === title, stateUnchanged: history.state === state };
+  });
+  expect(result).toEqual({
+    warnings: ["PushAjaxReplace", "PushAjaxReplace", "UpdateBaseTitle", "UpdateBaseTitle"],
+    titleUnchanged: true,
+    stateUnchanged: true
   });
 });
 

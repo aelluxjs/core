@@ -11,14 +11,16 @@
     $ae.ext("lifecycle-extension-probe");
     $ae.extAttach("lifecycle-extension-probe", {
       init: function () {
-        $ae.mountManager.add("lifecycle-extension-probe", "[data-lifecycle-extension]",
-          function () { lifecycleCounts.mount++; },
-          function () { lifecycleCounts.unmount++; }
-        );
+        $ae.mountManager.add({
+          extensionName: "lifecycle-extension-probe",
+          selector: "[data-lifecycle-extension]",
+          mount: function () { lifecycleCounts.mount++; },
+          unmount: function () { lifecycleCounts.unmount++; }
+        });
       },
       destroy: function () {
         lifecycleCounts.destroy++;
-        $ae.mountManager.remove("lifecycle-extension-probe");
+        $ae.mountManager.remove({ extensionName: "lifecycle-extension-probe" });
       }
     });
 

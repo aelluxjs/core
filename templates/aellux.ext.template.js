@@ -32,13 +32,14 @@
   AelluxJs.extAttach(extensionName, { init, destroy });
 
   function init(options) {
-    AelluxJs.mountManager.add(
-      extensionName, `[${attr.extensionName}]`, mountElement, unmountElement
-    );
+    AelluxJs.mountManager.add({
+      extensionName, selector: `[${attr.extensionName}]`,
+      mount: mountElement, unmount: unmountElement
+    });
   }
 
   function destroy() {
-    AelluxJs.mountManager.remove(extensionName);
+    AelluxJs.mountManager.remove({ extensionName });
   }
 
   function mountElement(element) {

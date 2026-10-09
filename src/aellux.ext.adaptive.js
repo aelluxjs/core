@@ -46,9 +46,10 @@
       }
     }
     managedClasses = getManagedClasses();
-    AelluxJs.mountManager.add(
-      extensionName, `[${attr.adaptive}]`, mountAdaptive, unmountAdaptive
-    );
+    AelluxJs.mountManager.add({
+      extensionName, selector: `[${attr.adaptive}]`,
+      mount: mountAdaptive, unmount: unmountAdaptive
+    });
   }
 
   function getManagedClasses() {
@@ -63,7 +64,7 @@
   function destroy() {
     for (const element of adaptiveElements) unmountAdaptive(element);
     if (resizeObserver) resizeObserver.disconnect();
-    AelluxJs.mountManager.remove(extensionName);
+    AelluxJs.mountManager.remove({ extensionName });
   }
 
   function mountAdaptive(element) {

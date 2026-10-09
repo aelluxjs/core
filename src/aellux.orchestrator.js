@@ -105,7 +105,7 @@ import utilsNameCase from "./internal/utils-name-case.js";
             delete AelluxJs.ext[key];
             delete extensionPromises[key];
             delete AelluxJs.registry.ext[key];
-            mountManager.remove(extensionName);
+            mountManager.remove({ extensionName });
             delete AelluxJs.registry.lazyExtSelectors[key];
             if (extension) extension.initialized = false;
           }

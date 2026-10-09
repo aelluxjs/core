@@ -100,6 +100,7 @@ var diagnosticNames = [
   "WARN_STORAGE_FALLBACK",
   "WARN_NAVIGATION_AJAX_HREF_UNAVAILABLE",
   "WARN_PRESENT_MOTION_HIDDEN",
+  "WARN_NAVIGATION_EVENT_INVALID",
   "INFO_LEGACY_FALLBACK"
 ];
 
@@ -205,7 +206,8 @@ runtimeProperties.waitLayout = layoutScheduler;
 runtimeProperties.mountManager = Object.freeze({
   type: "object",
   properties: Object.freeze({
-    add: method, remove: method, mount: method, unmount: method, controller: method
+    add: method, remove: method, mount: method, unmount: method, update: method,
+    controller: method
   })
 });
 

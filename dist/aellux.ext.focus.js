@@ -13,15 +13,15 @@
     };
     AelluxJs.extAttach(extensionName, { init, destroy });
     function init(options) {
-      AelluxJs.mountManager.add(
+      AelluxJs.mountManager.add({
         extensionName,
-        `[${attr.extensionName}]`,
-        mountElement,
-        unmountElement
-      );
+        selector: `[${attr.extensionName}]`,
+        mount: mountElement,
+        unmount: unmountElement
+      });
     }
     function destroy() {
-      AelluxJs.mountManager.remove(extensionName);
+      AelluxJs.mountManager.remove({ extensionName });
     }
     function mountElement(element) {
     }

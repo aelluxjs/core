@@ -146,7 +146,12 @@
         }
       }
       managedClasses = getManagedClasses();
-      AelluxJs.mountManager.add(extensionName, "[".concat(attr.adaptive, "]"), mountAdaptive, unmountAdaptive);
+      AelluxJs.mountManager.add({
+        extensionName: extensionName,
+        selector: "[".concat(attr.adaptive, "]"),
+        mount: mountAdaptive,
+        unmount: unmountAdaptive
+      });
     }
     function getManagedClasses() {
       return [modifier.shapeHorizontal, modifier.shapeVertical, modifier.shapeSquare].concat(_toConsumableArray(Object.keys(adaptiveParams.minSizes).map(function(size) {
@@ -166,7 +171,9 @@
         _iterator.f();
       }
       if (resizeObserver) resizeObserver.disconnect();
-      AelluxJs.mountManager.remove(extensionName);
+      AelluxJs.mountManager.remove({
+        extensionName: extensionName
+      });
     }
     function mountAdaptive(element) {
       if (adaptiveElements.has(element)) return;

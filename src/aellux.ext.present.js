@@ -50,27 +50,27 @@
   ];
 
   function init(options) {
-    AelluxJs.mountManager.add(
-      extensionName, `[${attr.present}]`,
-      mountPresentContainer, unmountPresentContainer, null,
-      ["pop", "unpop", "trigger", "toggle"]
-    );
+    AelluxJs.mountManager.add({
+      extensionName, selector: `[${attr.present}]`,
+      mount: mountPresentContainer, unmount: unmountPresentContainer,
+      controllers: ["pop", "unpop", "trigger", "toggle"]
+    });
 
-    AelluxJs.mountManager.add(
+    AelluxJs.mountManager.add({
       extensionName,
-      `[${[
+      selector: `[${[
         attr.trigger,
         attr.dismiss,
         attr.target
       ].join('],[')}]`,
-      mountTriggerElement, unmountTriggerElement, null, null
-    );
+      mount: mountTriggerElement, unmount: unmountTriggerElement
+    });
 
     document.addEventListener("click", OnClick);
   }
 
   function destroy() {
-    AelluxJs.mountManager.remove(extensionName);
+    AelluxJs.mountManager.remove({ extensionName });
     document.removeEventListener("click", OnClick);
 
     for (const triggerElement of triggerElementsSet) {

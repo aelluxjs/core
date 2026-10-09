@@ -86,4 +86,4 @@ An invalid root selector passed to `mount()` or `unmount()` records `ERROR_MOUNT
 
 Waiting for an unregistered Extension records `ERROR_EXTENSION_NOT_REGISTERED` (`1110`) and rejects with that diagnostic. A mounted controller name without a matching public Extension method records `WARN_CONTROLLER_METHOD_MISSING` (`2005`). If browser storage is unavailable, `WARN_STORAGE_FALLBACK` (`2006`) identifies the storage area and key prefix; values are then held in memory for the current page only.
 
-State navigation records `WARN_NAVIGATION_AJAX_HREF_UNAVAILABLE` (`2007`) when a history entry requires `ajax-href` restoration but that Extension is unavailable. Feedback subscriber exceptions and rejected promises record `ERROR_CALLBACK` (`1108`); other subscribers continue to receive the feedback.
+State navigation records `WARN_NAVIGATION_EVENT_INVALID` (`2009`) when `PushAjaxReplace` or `UpdateBaseTitle` receives malformed event details. Exceptions while handling those events record `ERROR_CALLBACK` (`1108`). Feedback subscriber exceptions and rejected promises also record `ERROR_CALLBACK`; other subscribers continue to receive the feedback.

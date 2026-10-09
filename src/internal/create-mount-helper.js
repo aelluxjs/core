@@ -6,7 +6,14 @@ import { createControllerHelper } from "./create-controller-helper.js";
 export function createMountHelper(root, extensionPromises, mountMaps, mountedElements, elementControllers) {
   const { toCapitalized, toCamelCase, fromCamelCase } = utilsNameCase;
 
-  return { mount, unmount };
+  return { mount, unmount, update };
+
+  async function update(rootOrSelector, extensionNames = null) {
+    for (const rootElement of resolveRoots(rootOrSelector, "update")) {
+      await AelluxJsForce(rootElement, "update", extensionNames);
+    }
+    return true;
+  }
 
   async function unmount(rootOrSelector, extensionNames = null) {
     for (const rootElement of resolveRoots(rootOrSelector, "unmount")) {
@@ -75,6 +82,7 @@ export function createMountHelper(root, extensionPromises, mountMaps, mountedEle
     if (filter.length === 0) return;
 
     const allElements = findElements(rootElement, filter.join(","));
+    const updatedMounts = method === "update" ? new WeakMap() : null;
     for (const element of allElements) {
       const elementsAffected = new Set();
       var localExtensionNames;
@@ -111,6 +119,18 @@ export function createMountHelper(root, extensionPromises, mountMaps, mountedEle
             const mountableElements = findElements(element, selector);
             for (const mountable of mountableElements) {
               const mountId = `${extensionName}@${selector}`;
+              if (method === "update") {
+                if (!isMounted(mountable, mountId)) continue;
+                let seen = updatedMounts.get(mountable);
+                if (!seen) {
+                  seen = new Set();
+                  updatedMounts.set(mountable, seen);
+                }
+                if (seen.has(mountId)) continue;
+                seen.add(mountId);
+                await controller.update(mountable);
+                continue;
+              }
               const mounting = (method === "mount");
               if (mounting === isMounted(mountable, mountId)) continue;
               await controller[method](mountable);
@@ -122,7 +142,10 @@ export function createMountHelper(root, extensionPromises, mountMaps, mountedEle
                   elementController = createControllerHelper(root, mountable);
                   elementControllers.set(mountable, elementController);
                 }
-                elementController.spawn(extensionName, mountId, controller.controllers);
+                elementController.spawn(
+                  extensionName, mountId, controller.controllers,
+                  typeof controller.update === "function"
+                );
               } else {
                 const elementController = elementControllers.get(mountable);
                 if (elementController) {

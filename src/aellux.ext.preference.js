@@ -47,10 +47,10 @@ import utilsNameCase from "./internal/utils-name-case.js";
   };
 
   function init(options) {
-    AelluxJs.mountManager.add(
-      extensionName, `[${attr.preference}]`,
-      mountPreferenceContainer, unmountPreferenceContainer
-    );
+    AelluxJs.mountManager.add({
+      extensionName, selector: `[${attr.preference}]`,
+      mount: mountPreferenceContainer, unmount: unmountPreferenceContainer
+    });
 
     window.addEventListener("storage", storageEvent);
 
@@ -79,7 +79,7 @@ import utilsNameCase from "./internal/utils-name-case.js";
   }
 
   function destroy() {
-    AelluxJs.mountManager.remove(extensionName);
+    AelluxJs.mountManager.remove({ extensionName });
     window.removeEventListener("storage", storageEvent);
     document.removeEventListener('DOMContentLoaded', update);
 

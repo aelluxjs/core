@@ -13,18 +13,20 @@
     $ae.ext("lifecycle-element-probe");
     $ae.extAttach("lifecycle-element-probe", {
       init: function () {
-        $ae.mountManager.add("lifecycle-element-probe", "[data-lifecycle-element]",
-          function (element) {
+        $ae.mountManager.add({
+          extensionName: "lifecycle-element-probe",
+          selector: "[data-lifecycle-element]",
+          mount: function (element) {
             lifecycleCounts.mount++;
             element.addEventListener("lifecycle-probe", onProbeEvent);
           },
-          function (element) {
+          unmount: function (element) {
             lifecycleCounts.unmount++;
             element.removeEventListener("lifecycle-probe", onProbeEvent);
           }
-        );
+        });
       },
-      destroy: function () { $ae.mountManager.remove("lifecycle-element-probe"); }
+      destroy: function () { $ae.mountManager.remove({ extensionName: "lifecycle-element-probe" }); }
     });
 
     AelluxJsValidation.run(async function (assert) {

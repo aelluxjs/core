@@ -22,7 +22,8 @@ export function buildMountMapManager(root, extensionPromises) {
     remove,
     controller,
     mount: helper.mount,
-    unmount: helper.unmount
+    unmount: helper.unmount,
+    update: helper.update
   };
   return manager;
 
@@ -48,7 +49,7 @@ export function buildMountMapManager(root, extensionPromises) {
     return toCamelCase(fromCamelCase(extensionName));
   }
 
-  function add(extensionName, selector, mount, unmount, update, controllers) {
+  function add({ extensionName, selector, mount, unmount, update, controllers } = {}) {
     if (typeof extensionName !== "string" || !extensionName ||
       typeof selector !== "string" || !selector.trim()) {
       throw new TypeError("mountManager.add requires an extension name and selector");
@@ -64,7 +65,7 @@ export function buildMountMapManager(root, extensionPromises) {
     return manager;
   }
 
-  function remove(extensionName, selector) {
+  function remove({ extensionName, selector } = {}) {
     if (typeof extensionName !== "string" || !extensionName) return false;
     const key = keyFor(extensionName);
     const map = maps.get(key);

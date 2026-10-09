@@ -569,13 +569,14 @@ An Extension receives its configuration as the <code>options</code> argument to 
 <pre><code class="language-js">AelluxJs.extAttach(extensionName, { init, destroy });
 
 function init() {
-  AelluxJs.mountManager.add(
-    extensionName, &quot;[data-ae-example]&quot;, mountElement, unmountElement
-  );
+  AelluxJs.mountManager.add({
+    extensionName, selector: &quot;[data-ae-example]&quot;,
+    mount: mountElement, unmount: unmountElement
+  });
 }
 
 function destroy() {
-  AelluxJs.mountManager.remove(extensionName);
+  AelluxJs.mountManager.remove({ extensionName });
 }
 </code></pre>
 <p>The manager runs matching handlers through the mount helper during <code>$ae.mount(root)</code> and <code>$ae.unmount(root)</code>. Register before mounting and remove only after unmounting. <code>mount</code> must be safe against repeated calls, and <code>unmount</code> must reverse the element-level resources created by <code>mount</code>.</p>

@@ -28,7 +28,7 @@ await $ae.unmount(root);
 
 `mount(root)` discovers matching declarations, loads required Extensions, and requests idempotent `mount` operations. `unmount(root)` requests the corresponding cleanup operations. When `root` is omitted, the document is used.
 
-Extensions register element handlers with `$ae.mountManager.add(extensionName, selector, mount, unmount, update, controllers)` during `init()` and call `$ae.mountManager.remove(extensionName, selector)` during `destroy()`. Omitting `selector` removes all registrations for the Extension. `$ae.mountManager.mount(root, extensionNames)` and `$ae.mountManager.unmount(root, extensionNames)` use the same lifecycle execution as `$ae.mount()` and `$ae.unmount()`.
+Extensions register element handlers with `$ae.mountManager.add({ extensionName, selector, mount, unmount, update, controllers })` during `init()` and call `$ae.mountManager.remove({ extensionName, selector })` during `destroy()`. Omitting `selector` removes all registrations for the Extension. `$ae.mountManager.mount(root, extensionNames)` and `$ae.mountManager.unmount(root, extensionNames)` use the same lifecycle execution as `$ae.mount()` and `$ae.unmount()`. `$ae.mountManager.update(root, extensionNames)` runs `update` handlers only for elements already mounted; registrations without an `update` handler are skipped.
 
 After an element mounts, use `$ae(elementOrId).{extensionName}.{mountedExtensionMethod}(...args)` to call its public Extension methods. `AelluxJs(elementOrId)` works the same way. Both calls resolve through `mountManager.controller(elementOrId)`. `elementOrId` can be a DOM element, an ID, or an ID prefixed with `#`. Invalid values and IDs that do not resolve emit a warning and return `null`. An element without a mounted controller emits an error explaining that it may not be mounted, then returns `null`. Before runtime initialization, the shortcut returns `null`. The `controllers` names registered by an Extension become methods under its camelCase namespace. Each method receives the element as its first argument, followed by `...args`:
 
@@ -38,6 +38,14 @@ $ae("#panel").present.toggle(false);
 ```
 
 Unmounting removes the corresponding methods from the element controller.
+
+Every mounted element controller offers `mount(extensionNames)`, `unmount(extensionNames)`, and `update(extensionNames)`. These methods use that element as the root, including matching descendants, and return promises. `mount` is idempotent; `update` tries every declared `update` callback for mounted elements and leaves mount registrations intact. A mounted Extension namespace also has an `update` property: `$ae(element).present.update` is `null` when no mounted `present` map declares an `update` callback; otherwise it is a function that updates that Extension's mounted elements under the root. After `unmount` removes every registration, a new controller is created on a later mount.
+
+```js
+await $ae("panel").update();
+await $ae("panel").unmount();
+await $ae.mount(document.getElementById("panel"));
+```
 
 ## Destruction
 

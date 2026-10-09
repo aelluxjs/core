@@ -107,7 +107,12 @@
       sound: ["off", "on", "low"]
     };
     function init(options) {
-      AelluxJs.mountManager.add(extensionName, "[".concat(attr.preference, "]"), mountPreferenceContainer, unmountPreferenceContainer);
+      AelluxJs.mountManager.add({
+        extensionName: extensionName,
+        selector: "[".concat(attr.preference, "]"),
+        mount: mountPreferenceContainer,
+        unmount: unmountPreferenceContainer
+      });
       window.addEventListener("storage", storageEvent);
       var allQueries = AelluxJs.registry.preferenceMediaQueries;
       Object.values(allQueries).forEach(function(queries) {
@@ -128,7 +133,9 @@
       update();
     }
     function destroy() {
-      AelluxJs.mountManager.remove(extensionName);
+      AelluxJs.mountManager.remove({
+        extensionName: extensionName
+      });
       window.removeEventListener("storage", storageEvent);
       document.removeEventListener("DOMContentLoaded", update);
       var allQueries = AelluxJs.registry.preferenceMediaQueries;

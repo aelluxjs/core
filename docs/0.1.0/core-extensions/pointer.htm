@@ -550,8 +550,18 @@
 
         <div id="doc-content" style="min-height: calc(100vh - 200px);" class="js-toc-content" ajax-load="doc-content">
           <h1>Pointer Extension</h1>
-<p><code>pointer</code> is currently an empty source file. It does not attach an Extension API, register mount handlers, or provide pointer behavior. It is not included in the <code>full</code> runtime&#39;s bundled Extension list.</p>
-<p>This file is a placeholder, not an available feature. Do not depend on <code>$ae.wait(&quot;pointer&quot;)</code> for pointer interactions until an implementation is added.</p>
+<p><code>pointer</code> tracks the pointers currently pressed or hovering over the document and relates them to mounted elements with <code>data-ae-pointable</code>. It is a standalone core Extension and is not included in the <code>full</code> runtime bundle. Register it before initialization:</p>
+<pre><code class="language-html">&lt;div id=&quot;canvas&quot; data-ae-pointable=&quot;2&quot;&gt;&lt;/div&gt;
+</code></pre>
+<pre><code class="language-js">$ae.ext(&quot;pointer&quot;);
+await $ae.init({ mode: &quot;basic&quot; });
+
+const pointers = $ae(&quot;canvas&quot;).pointer.pointers();
+console.log(pointers);
+</code></pre>
+<p>An empty <code>data-ae-pointable</code> allows one pointer by default. A non-negative integer sets the maximum number of pointers associated with that element; <code>0</code> disables association and invalid values use the default of one. Nested pointables have their own limits. The mounted controller method <code>$ae(elementOrId).pointer.pointers()</code> returns the pointers currently associated with that element.</p>
+<p>Each pointer record has <code>pointerId</code>, <code>pointerType</code>, <code>initial</code>, <code>current</code>, <code>delta</code>, <code>buttons</code>, <code>pressed</code>, <code>hover</code>, and <code>pointables</code>. Positions use viewport <code>clientX</code> and <code>clientY</code> coordinates as <code>{ x, y }</code>; <code>delta</code> is <code>current - initial</code>. <code>pointables</code> lists the associated mounted elements from nearest to outermost. The returned array is a snapshot; its pointer records update in place.</p>
+<p>The Extension listens to <code>pointerdown</code>, <code>pointermove</code>, <code>pointerup</code>, <code>pointercancel</code>, <code>pointerover</code>, and <code>pointerout</code> in the capture phase. It dispatches <code>AelluxJsPointerDown</code>, <code>AelluxJsPointerMove</code>, <code>AelluxJsPointerUp</code>, <code>AelluxJsPointerCancel</code>, and <code>AelluxJsPointerHover</code> directly on each associated pointable, from nearest to outermost. These events use <code>bubbles: false</code>, so a pointable excluded by its limit does not receive a child&#39;s event. <code>detail</code> contains <code>pointer</code>, <code>pointables</code>, and <code>originalEvent</code>; <code>detail.pointables</code> is a snapshot of the nearest-to-outermost chain when the event was dispatched. Hover events also set <code>detail.hover</code> to <code>true</code> or <code>false</code> and are sent only to pointables being entered or left. The initial position is set on the first observed hover or press and resets on each press. Mouse and pen pointers remain tracked while hovering after release. Touch pointers leave after their <code>PointerUp</code> event; canceled pointers leave after <code>PointerCancel</code>. Destroying the Extension removes its listeners, mount map, and tracked pointers.</p>
         </div>
 
         <div id="doc-navlinks2" ajax-load="doc-navlinks2">

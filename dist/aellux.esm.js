@@ -426,7 +426,7 @@ function createAelluxApi(root2, constants) {
     },
     dispatchFrom: function(from, event, options2) {
       var obj = document.createEvent("Event");
-      var bubbles = options2 && "bubbles" in options2 ? options2.bubbles : false;
+      var bubbles = options2 && "bubbles" in options2 ? options2.bubbles : true;
       var cancelable = options2 && "cancelable" in options2 ? options2.cancelable : false;
       obj.initEvent(api.eventName(event), bubbles, cancelable);
       return from.dispatchEvent(obj);
@@ -516,6 +516,7 @@ function createAelluxConstants() {
       WARN_STORAGE_FALLBACK: { code: 2006, message: "Browser storage is unavailable; values will be kept in memory only." },
       WARN_NAVIGATION_AJAX_HREF_UNAVAILABLE: { code: 2007, message: "Navigation state requests ajax-href restoration, but the Extension is unavailable." },
       WARN_PRESENT_MOTION_HIDDEN: { code: 2008, message: "A present-motion child should not be hidden; hidden belongs on its present container." },
+      WARN_NAVIGATION_EVENT_INVALID: { code: 2009, message: "A state-navigation event has missing or invalid detail properties." },
       INFO_LEGACY_FALLBACK: { code: 3e3, message: "aellux.js is starting the Legacy runtime." }
     },
     AELLUXJS_DEFAULT_INITIALIZATION_OPTIONS: {

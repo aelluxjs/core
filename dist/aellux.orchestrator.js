@@ -116,12 +116,26 @@
   function createControllerHelper(root, element) {
     const { toCamelCase: toCamelCase2, fromCamelCase: fromCamelCase2 } = utils_name_case_default;
     const mounts = /* @__PURE__ */ new Map();
-    const controller = { spawn, despawn, hasMounts };
-    function spawn(extensionName, mountId, methodNames) {
+    const controller = {
+      spawn,
+      despawn,
+      hasMounts,
+      mount(extensionNames = null) {
+        return root.AelluxJs.mountManager.mount(element, extensionNames);
+      },
+      unmount(extensionNames = null) {
+        return root.AelluxJs.mountManager.unmount(element, extensionNames);
+      },
+      update(extensionNames = null) {
+        return root.AelluxJs.mountManager.update(element, extensionNames);
+      }
+    };
+    function spawn(extensionName, mountId, methodNames, updatable = false) {
       const key = toCamelCase2(fromCamelCase2(extensionName));
       const extension = root.AelluxJs.ext[key];
       const methods = Array.isArray(methodNames) ? methodNames : [];
       for (const name of methods) {
+        if (name === "update" && updatable) continue;
         if (typeof name === "string" && extension && typeof extension[name] === "function") continue;
         const diagnostics = root.AelluxJs.diagnostics;
         diagnostics.warn(diagnostics.WARN_CONTROLLER_METHOD_MISSING, {
@@ -133,7 +147,8 @@
       }
       mounts.set(mountId, {
         extension: key,
-        methods
+        methods,
+        updatable
       });
       refresh(key);
       return controller[key] || null;
@@ -150,16 +165,16 @@
     }
     function refresh(key) {
       const extension = root.AelluxJs.ext[key];
+      const registrations = Array.from(mounts.values()).filter((registration) => registration.extension === key);
       const names = /* @__PURE__ */ new Set();
-      for (const registration of mounts.values()) {
-        if (registration.extension !== key) continue;
+      for (const registration of registrations) {
         for (const name of registration.methods) {
-          if (typeof name === "string" && extension && typeof extension[name] === "function") {
+          if (name !== "update" && typeof name === "string" && extension && typeof extension[name] === "function") {
             names.add(name);
           }
         }
       }
-      if (names.size === 0) {
+      if (registrations.length === 0) {
         const namespace2 = controller[key];
         if (namespace2) {
           for (const name of Object.keys(namespace2)) delete namespace2[name];
@@ -169,7 +184,7 @@
       }
       const namespace = controller[key] || /* @__PURE__ */ Object.create(null);
       for (const name of Object.keys(namespace)) {
-        if (!names.has(name)) delete namespace[name];
+        if (name !== "update" && !names.has(name)) delete namespace[name];
       }
       for (const name of names) {
         namespace[name] = (...args) => {
@@ -177,6 +192,7 @@
           return current[name](element, ...args);
         };
       }
+      namespace.update = registrations.some((registration) => registration.updatable) ? () => root.AelluxJs.mountManager.update(element, key) : null;
       controller[key] = namespace;
     }
     return controller;
@@ -186,7 +202,13 @@
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   function createMountHelper(root, extensionPromises, mountMaps, mountedElements, elementControllers) {
     const { toCapitalized: toCapitalized2, toCamelCase: toCamelCase2, fromCamelCase: fromCamelCase2 } = utils_name_case_default;
-    return { mount, unmount };
+    return { mount, unmount, update };
+    async function update(rootOrSelector, extensionNames = null) {
+      for (const rootElement of resolveRoots(rootOrSelector, "update")) {
+        await AelluxJsForce(rootElement, "update", extensionNames);
+      }
+      return true;
+    }
     async function unmount(rootOrSelector, extensionNames = null) {
       for (const rootElement of resolveRoots(rootOrSelector, "unmount")) {
         await AelluxJsForce(rootElement, "unmount", extensionNames);
@@ -240,6 +262,7 @@
       }
       if (filter.length === 0) return;
       const allElements = findElements(rootElement, filter.join(","));
+      const updatedMounts = method === "update" ? /* @__PURE__ */ new WeakMap() : null;
       for (const element of allElements) {
         const elementsAffected = /* @__PURE__ */ new Set();
         var localExtensionNames;
@@ -275,6 +298,18 @@
               const mountableElements = findElements(element, selector);
               for (const mountable of mountableElements) {
                 const mountId = `${extensionName}@${selector}`;
+                if (method === "update") {
+                  if (!isMounted(mountable, mountId)) continue;
+                  let seen = updatedMounts.get(mountable);
+                  if (!seen) {
+                    seen = /* @__PURE__ */ new Set();
+                    updatedMounts.set(mountable, seen);
+                  }
+                  if (seen.has(mountId)) continue;
+                  seen.add(mountId);
+                  await controller.update(mountable);
+                  continue;
+                }
                 const mounting = method === "mount";
                 if (mounting === isMounted(mountable, mountId)) continue;
                 await controller[method](mountable);
@@ -286,7 +321,12 @@
                     elementController = createControllerHelper(root, mountable);
                     elementControllers.set(mountable, elementController);
                   }
-                  elementController.spawn(extensionName, mountId, controller.controllers);
+                  elementController.spawn(
+                    extensionName,
+                    mountId,
+                    controller.controllers,
+                    typeof controller.update === "function"
+                  );
                 } else {
                   const elementController = elementControllers.get(mountable);
                   if (elementController) {
@@ -385,7 +425,8 @@
       remove,
       controller,
       mount: helper.mount,
-      unmount: helper.unmount
+      unmount: helper.unmount,
+      update: helper.update
     };
     return manager;
     function controller(elementOrId) {
@@ -405,7 +446,7 @@
     function keyFor(extensionName) {
       return toCamelCase2(fromCamelCase2(extensionName));
     }
-    function add(extensionName, selector, mount, unmount, update, controllers) {
+    function add({ extensionName, selector, mount, unmount, update, controllers } = {}) {
       if (typeof extensionName !== "string" || !extensionName || typeof selector !== "string" || !selector.trim()) {
         throw new TypeError("mountManager.add requires an extension name and selector");
       }
@@ -419,7 +460,7 @@
       root.AelluxJs.registry.extMounters[key] = [...map.keys()].join(",");
       return manager;
     }
-    function remove(extensionName, selector) {
+    function remove({ extensionName, selector } = {}) {
       if (typeof extensionName !== "string" || !extensionName) return false;
       const key = keyFor(extensionName);
       const map = maps.get(key);
@@ -516,14 +557,26 @@
               delete AelluxJs.ext[key];
               delete extensionPromises[key];
               delete AelluxJs.registry.ext[key];
-              mountManager.remove(extensionName);
+              mountManager.remove({ extensionName });
               delete AelluxJs.registry.lazyExtSelectors[key];
               if (extension) extension.initialized = false;
             }
           }
         },
         dispatchFrom(from, event, options) {
-          return from.dispatchEvent(new CustomEvent(AelluxJs.eventName(event), options));
+          options = options || {};
+          if (!("bubbles" in options)) {
+            options.bubbles = true;
+          }
+          if (!("cancelable" in options)) {
+            options.cancelable = false;
+          }
+          return from.dispatchEvent(
+            new CustomEvent(
+              AelluxJs.eventName(event),
+              options
+            )
+          );
         },
         wait(extensionName) {
           return getExtension(extensionName);

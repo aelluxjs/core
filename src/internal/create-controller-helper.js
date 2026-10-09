@@ -5,13 +5,25 @@ import utilsNameCase from "./utils-name-case.js";
 export function createControllerHelper(root, element) {
   const { toCamelCase, fromCamelCase } = utilsNameCase;
   const mounts = new Map();
-  const controller = { spawn, despawn, hasMounts };
+  const controller = {
+    spawn, despawn, hasMounts,
+    mount(extensionNames = null) {
+      return root.AelluxJs.mountManager.mount(element, extensionNames);
+    },
+    unmount(extensionNames = null) {
+      return root.AelluxJs.mountManager.unmount(element, extensionNames);
+    },
+    update(extensionNames = null) {
+      return root.AelluxJs.mountManager.update(element, extensionNames);
+    }
+  };
 
-  function spawn(extensionName, mountId, methodNames) {
+  function spawn(extensionName, mountId, methodNames, updatable = false) {
     const key = toCamelCase(fromCamelCase(extensionName));
     const extension = root.AelluxJs.ext[key];
     const methods = Array.isArray(methodNames) ? methodNames : [];
     for (const name of methods) {
+      if (name === "update" && updatable) continue;
       if (typeof name === "string" && extension && typeof extension[name] === "function") continue;
       const diagnostics = root.AelluxJs.diagnostics;
       diagnostics.warn(diagnostics.WARN_CONTROLLER_METHOD_MISSING, {
@@ -20,7 +32,8 @@ export function createControllerHelper(root, element) {
     }
     mounts.set(mountId, {
       extension: key,
-      methods
+      methods,
+      updatable
     });
     refresh(key);
     return controller[key] || null;
@@ -40,17 +53,19 @@ export function createControllerHelper(root, element) {
 
   function refresh(key) {
     const extension = root.AelluxJs.ext[key];
+    const registrations = Array.from(mounts.values())
+      .filter(registration => registration.extension === key);
     const names = new Set();
-    for (const registration of mounts.values()) {
-      if (registration.extension !== key) continue;
+    for (const registration of registrations) {
       for (const name of registration.methods) {
-        if (typeof name === "string" && extension && typeof extension[name] === "function") {
+        if (name !== "update" && typeof name === "string" &&
+          extension && typeof extension[name] === "function") {
           names.add(name);
         }
       }
     }
 
-    if (names.size === 0) {
+    if (registrations.length === 0) {
       const namespace = controller[key];
       if (namespace) {
         for (const name of Object.keys(namespace)) delete namespace[name];
@@ -61,7 +76,7 @@ export function createControllerHelper(root, element) {
 
     const namespace = controller[key] || Object.create(null);
     for (const name of Object.keys(namespace)) {
-      if (!names.has(name)) delete namespace[name];
+      if (name !== "update" && !names.has(name)) delete namespace[name];
     }
     for (const name of names) {
       namespace[name] = (...args) => {
@@ -69,6 +84,9 @@ export function createControllerHelper(root, element) {
         return current[name](element, ...args);
       };
     }
+    namespace.update = registrations.some(registration => registration.updatable)
+      ? () => root.AelluxJs.mountManager.update(element, key)
+      : null;
     controller[key] = namespace;
   }
 

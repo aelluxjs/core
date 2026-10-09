@@ -126,12 +126,25 @@
     var attrMemoryUsers = /* @__PURE__ */ new WeakMap();
     var initialAttributes = ["hidden", ARIA_EXPANDED, ARIA_CONTROLS, attr.presentMotion];
     function init(options) {
-      AelluxJs.mountManager.add(extensionName, "[".concat(attr.present, "]"), mountPresentContainer, unmountPresentContainer, null, ["pop", "unpop", "trigger", "toggle"]);
-      AelluxJs.mountManager.add(extensionName, "[".concat([attr.trigger, attr.dismiss, attr.target].join("],["), "]"), mountTriggerElement, unmountTriggerElement, null, null);
+      AelluxJs.mountManager.add({
+        extensionName: extensionName,
+        selector: "[".concat(attr.present, "]"),
+        mount: mountPresentContainer,
+        unmount: unmountPresentContainer,
+        controllers: ["pop", "unpop", "trigger", "toggle"]
+      });
+      AelluxJs.mountManager.add({
+        extensionName: extensionName,
+        selector: "[".concat([attr.trigger, attr.dismiss, attr.target].join("],["), "]"),
+        mount: mountTriggerElement,
+        unmount: unmountTriggerElement
+      });
       document.addEventListener("click", OnClick);
     }
     function destroy() {
-      AelluxJs.mountManager.remove(extensionName);
+      AelluxJs.mountManager.remove({
+        extensionName: extensionName
+      });
       document.removeEventListener("click", OnClick);
       var _iterator = _createForOfIteratorHelper(triggerElementsSet), _step;
       try {

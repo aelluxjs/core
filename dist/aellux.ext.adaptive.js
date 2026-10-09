@@ -41,12 +41,12 @@
         }
       }
       managedClasses = getManagedClasses();
-      AelluxJs.mountManager.add(
+      AelluxJs.mountManager.add({
         extensionName,
-        `[${attr.adaptive}]`,
-        mountAdaptive,
-        unmountAdaptive
-      );
+        selector: `[${attr.adaptive}]`,
+        mount: mountAdaptive,
+        unmount: unmountAdaptive
+      });
     }
     function getManagedClasses() {
       return [
@@ -59,7 +59,7 @@
     function destroy() {
       for (const element of adaptiveElements) unmountAdaptive(element);
       if (resizeObserver) resizeObserver.disconnect();
-      AelluxJs.mountManager.remove(extensionName);
+      AelluxJs.mountManager.remove({ extensionName });
     }
     function mountAdaptive(element) {
       if (adaptiveElements.has(element)) return;

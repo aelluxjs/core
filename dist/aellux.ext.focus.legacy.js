@@ -16,10 +16,17 @@
       destroy: destroy
     });
     function init(options) {
-      AelluxJs.mountManager.add(extensionName, "[".concat(attr.extensionName, "]"), mountElement, unmountElement);
+      AelluxJs.mountManager.add({
+        extensionName: extensionName,
+        selector: "[".concat(attr.extensionName, "]"),
+        mount: mountElement,
+        unmount: unmountElement
+      });
     }
     function destroy() {
-      AelluxJs.mountManager.remove(extensionName);
+      AelluxJs.mountManager.remove({
+        extensionName: extensionName
+      });
     }
     function mountElement(element) {
     }

@@ -26,12 +26,16 @@ test("mounted present controller binds public methods to its element", async ({ 
       sameController: byElement === byId && byId === byPrefixedId &&
         byPrefixedId === byCall && byCall === byAlias,
       methods: Object.keys(byElement.present).sort(),
+      update: typeof byElement.update,
+      presentUpdate: byElement.present.update,
       missing: AelluxJs("#missing")
     };
   });
   expect(result).toEqual({
     sameController: true,
-    methods: ["pop", "toggle", "trigger", "unpop"],
+    methods: ["pop", "toggle", "trigger", "unpop", "update"],
+    update: "function",
+    presentUpdate: null,
     missing: null
   });
   await expect(page.locator("#panel")).toHaveJSProperty("hidden", false);
@@ -132,7 +136,7 @@ test("present trigger stays expanded while any target is expanded", async ({ pag
         }
       },
       mountManager: {
-        add: (_name, selector, mount, unmount, update, controllers) => {
+        add: ({ selector, mount, unmount, update, controllers }) => {
           (window.mountEntries ||= new Map()).set(selector, { mount, unmount, update, controllers });
         },
         remove: () => window.mountEntries?.clear()
@@ -208,7 +212,7 @@ test("present restores initial attributes and resets memory after unmount", asyn
         warn() {}
       },
       mountManager: {
-        add: (_name, selector, mount, unmount, update, controllers) => {
+        add: ({ selector, mount, unmount, update, controllers }) => {
           (window.mountEntries ||= new Map()).set(selector, { mount, unmount, update, controllers });
         },
         remove: () => window.mountEntries?.clear()
@@ -314,7 +318,7 @@ test("present reports invalid selectors without throwing from click", async ({ p
         error: (definition, context) => reports.push({ code: definition.code, selector: context.selector })
       },
       mountManager: {
-        add: (_name, selector, mount, unmount, update, controllers) => {
+        add: ({ selector, mount, unmount, update, controllers }) => {
           (window.mountEntries ||= new Map()).set(selector, { mount, unmount, update, controllers });
         },
         remove: () => window.mountEntries?.clear()
@@ -349,7 +353,7 @@ test("present restores a trigger without targets and can mount it again", async 
       className: name => `ae-${name}`,
       attrMem: { save: saveAttr, restore: restoreAttr },
       mountManager: {
-        add: (_name, selector, mount, unmount, update, controllers) => {
+        add: ({ selector, mount, unmount, update, controllers }) => {
           (window.mountEntries ||= new Map()).set(selector, { mount, unmount, update, controllers });
         },
         remove: () => window.mountEntries?.clear()
@@ -404,7 +408,7 @@ test("present records interrupted transitions as warnings and failures as errors
       attrMem: { save: saveAttr, restore: restoreAttr },
       diagnostics: buildDiagnostics(createAelluxConstants().AELLUXJS_DIAGNOSTICS),
       mountManager: {
-        add: (_name, selector, mount, unmount, update, controllers) => {
+        add: ({ selector, mount, unmount, update, controllers }) => {
           (window.mountEntries ||= new Map()).set(selector, { mount, unmount, update, controllers });
         },
         remove: () => window.mountEntries?.clear()
@@ -455,7 +459,7 @@ test("present reports a selector callback failure with its own diagnostic", asyn
       attrMem: { save: saveAttr, restore: restoreAttr },
       diagnostics: buildDiagnostics(createAelluxConstants().AELLUXJS_DIAGNOSTICS),
       mountManager: {
-        add: (_name, selector, mount, unmount, update, controllers) => {
+        add: ({ selector, mount, unmount, update, controllers }) => {
           (window.mountEntries ||= new Map()).set(selector, { mount, unmount, update, controllers });
         },
         remove: () => window.mountEntries?.clear()
@@ -489,7 +493,7 @@ test("present refreshes trigger controls from its initial value", async ({ page 
       className: name => `ae-${name}`,
       attrMem: { save: saveAttr, restore: restoreAttr },
       mountManager: {
-        add: (_name, selector, mount, unmount, update, controllers) => {
+        add: ({ selector, mount, unmount, update, controllers }) => {
           (window.mountEntries ||= new Map()).set(selector, { mount, unmount, update, controllers });
         },
         remove: () => window.mountEntries?.clear()

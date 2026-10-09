@@ -32,7 +32,8 @@
     AelluxJs.on("PushAjaxReplace", OnPushAjaxReplace);
     AelluxJs.on("UpdateBaseTitle", OnUpdateBaseTitle);
 
-    if ("useHash" in AelluxJs.options) { useHash = AelluxJs.options.useHash; }
+    if ("useHash" in AelluxJs.options)
+      useHash = AelluxJs.options.useHash;
 
     baseTitle = document.title;
     onHashChange();
@@ -156,12 +157,43 @@
   }
 
   function OnPushAjaxReplace(event) {
-    const { selectors, url } = event.detail;
-    ajaxReplace(url, selectors);
+    try {
+      const detail = event && event.detail;
+      if (!detail || typeof detail !== "object" ||
+        typeof detail.url !== "string" || !detail.url.trim() ||
+        !Object.prototype.hasOwnProperty.call(detail, "selectors") ||
+        detail.selectors == null) {
+        AelluxJs.diagnostics.warn(AelluxJs.diagnostics.WARN_NAVIGATION_EVENT_INVALID, {
+          extension: extensionName, event: "PushAjaxReplace",
+          expected: "detail: { url: non-empty string, selectors: value }"
+        });
+        return;
+      }
+      ajaxReplace(detail.url, detail.selectors);
+    } catch (cause) {
+      AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_CALLBACK, {
+        extension: extensionName, event: "PushAjaxReplace", cause
+      });
+    }
   }
 
   function OnUpdateBaseTitle(event) {
-    const { title } = event.detail;
-    updateBaseTitle(title);
+    try {
+      const detail = event && event.detail;
+      if (!detail || typeof detail !== "object" ||
+        !Object.prototype.hasOwnProperty.call(detail, "title") ||
+        typeof detail.title !== "string") {
+        AelluxJs.diagnostics.warn(AelluxJs.diagnostics.WARN_NAVIGATION_EVENT_INVALID, {
+          extension: extensionName, event: "UpdateBaseTitle",
+          expected: "detail: { title: string }"
+        });
+        return;
+      }
+      updateBaseTitle(detail.title);
+    } catch (cause) {
+      AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_CALLBACK, {
+        extension: extensionName, event: "UpdateBaseTitle", cause
+      });
+    }
   }
 })(typeof globalThis !== "undefined" ? globalThis : window);
