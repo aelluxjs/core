@@ -21376,7 +21376,7 @@
     var initialAttributeValues = /* @__PURE__ */ new WeakMap();
     var mountAttributeRecords = /* @__PURE__ */ new WeakMap();
     var pendingUnmounts = /* @__PURE__ */ new WeakMap();
-    var classPrefix = AelluxJs.className("");
+    var classPrefix = root2.AelluxJs.className("");
     return {
       mount: mount,
       unmount: unmount,
@@ -21502,12 +21502,13 @@
     }
     function _mount() {
       _mount = _asyncToGenerator(/* @__PURE__ */ _regenerator().m(function _callee4(rootOrSelector) {
-        var extensionNames, AelluxJs2, success, _iterator5, _step5, rootElement, waitMountedAttr, allWaiters, allLinks, _iterator6, _step6, link, href, loadWhen, builds, loadStyleValue, loadStyle, waitExtensions, _i3, _Object$entries, _Object$entries$_i, key, options, _args4 = arguments, _t3, _t4;
+        var extensionNames, AelluxJs2, newlyMounted, _iterator5, _step5, rootElement, waitMountedAttr, allWaiters, allLinks, _iterator6, _step6, link, href, loadWhen, builds, loadStyleValue, loadStyle, waitExtensions, _i3, _Object$entries, _Object$entries$_i, key, options, _args4 = arguments, _t3, _t4;
         return _regenerator().w(function(_context4) {
           while (1) switch (_context4.p = _context4.n) {
             case 0:
               extensionNames = _args4.length > 1 && _args4[1] !== void 0 ? _args4[1] : null;
               AelluxJs2 = root2.AelluxJs;
+              newlyMounted = /* @__PURE__ */ new Set();
               _iterator5 = _createForOfIteratorHelper2(resolveRoots(rootOrSelector, "mount"));
               _context4.p = 1;
               _iterator5.s();
@@ -21569,9 +21570,8 @@
               return Promise.all(waitExtensions);
             case 8:
               _context4.n = 9;
-              return AelluxJsMount(rootElement, extensionNames);
+              return AelluxJsMount(rootElement, extensionNames, newlyMounted);
             case 9:
-              success = true;
               _context4.n = 11;
               break;
             case 10:
@@ -21582,7 +21582,6 @@
                 root: rootElement,
                 extensions: extensionNames
               });
-              success = false;
             case 11:
               _context4.p = 11;
               allWaiters.forEach(function(waiter) {
@@ -21604,22 +21603,21 @@
               _iterator5.f();
               return _context4.f(15);
             case 16:
-              return _context4.a(2, success);
+              return _context4.a(2, Array.from(newlyMounted));
           }
         }, _callee4, null, [[3, 10, 11, 12], [1, 14, 15, 16]]);
       }));
       return _mount.apply(this, arguments);
     }
-    function AelluxJsMount(_x4) {
+    function AelluxJsMount(_x4, _x5, _x6) {
       return _AelluxJsMount.apply(this, arguments);
     }
     function _AelluxJsMount() {
-      _AelluxJsMount = _asyncToGenerator(/* @__PURE__ */ _regenerator().m(function _callee5(rootElement) {
-        var extensionNames, AelluxJs2, filter, mounterSelectors, lazySelectors, _i4, _Object$entries2, _Object$entries2$_i, key, selectorString, _i5, _Object$entries3, _Object$entries3$_i, _key, _selectorString, allElements, _iterator7, _step7, element, elementsAffected, localExtensionNames, _i6, _Object$entries4, _Object$entries4$_i, _key2, selector, _i7, _Object$entries5, _Object$entries5$_i, _key3, _selector, _iterator8, _step8, extensionName, extensionPromise, extension, mounter, _iterator0, _step0, _step0$value, _selector2, controller, mountableElements, _iterator1, _step1, mountable, mountId, _i8, _Array$from2, name, elementController, _iterator9, _step9, affected, _args5 = arguments, _t5, _t6, _t7, _t8, _t9, _t0;
+      _AelluxJsMount = _asyncToGenerator(/* @__PURE__ */ _regenerator().m(function _callee5(rootElement, extensionNames, newlyMounted) {
+        var AelluxJs2, filter, mounterSelectors, lazySelectors, _i4, _Object$entries2, _Object$entries2$_i, key, selectorString, _i5, _Object$entries3, _Object$entries3$_i, _key, _selectorString, allElements, _iterator7, _step7, element, elementsAffected, localExtensionNames, _i6, _Object$entries4, _Object$entries4$_i, _key2, selector, _i7, _Object$entries5, _Object$entries5$_i, _key3, _selector, _iterator8, _step8, extensionName, extensionPromise, extension, mounter, _iterator0, _step0, _step0$value, _selector2, controller, mountableElements, _iterator1, _step1, mountable, mountId, _i8, _Array$from2, name, elementController, _iterator9, _step9, affected, _t5, _t6, _t7, _t8, _t9, _t0;
         return _regenerator().w(function(_context5) {
           while (1) switch (_context5.p = _context5.n) {
             case 0:
-              extensionNames = _args5.length > 1 && _args5[1] !== void 0 ? _args5[1] : null;
               AelluxJs2 = root2.AelluxJs;
               if (typeof extensionNames === "string") extensionNames = [extensionNames];
               if (!extensionNames) {
@@ -21763,6 +21761,7 @@
                 elementControllers.set(mountable, elementController);
               }
               elementController.spawn(extensionName, mountId, controller.controllers, typeof controller.update === "function");
+              newlyMounted.add(mountable);
             case 21:
               _context5.n = 15;
               break;
@@ -21852,7 +21851,7 @@
       }));
       return _AelluxJsMount.apply(this, arguments);
     }
-    function AelluxJsMounted(_x5, _x6) {
+    function AelluxJsMounted(_x7, _x8) {
       return _AelluxJsMounted.apply(this, arguments);
     }
     function _AelluxJsMounted() {
@@ -21946,7 +21945,7 @@
       }));
       return _AelluxJsMounted.apply(this, arguments);
     }
-    function unmountRegistration(_x7, _x8, _x9, _x0, _x1) {
+    function unmountRegistration(_x9, _x0, _x1, _x10, _x11) {
       return _unmountRegistration.apply(this, arguments);
     }
     function _unmountRegistration() {

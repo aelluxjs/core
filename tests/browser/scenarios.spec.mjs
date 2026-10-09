@@ -69,7 +69,7 @@ test("invalid mount root selectors are recorded for mount and unmount", async ({
     };
   });
   expect(result).toEqual({
-    mounted: true,
+    mounted: [],
     unmounted: true,
     entries: [
       { level: 0, selector: "[", method: "mount", hasCause: true },
@@ -110,7 +110,7 @@ test("mount failure records a diagnostic and clears aria-busy", async ({ page })
   });
 
   expect(result).toEqual({
-    mounted: true,
+    mounted: [],
     busy: "false",
     diagnostic: {
       level: 0,
@@ -119,6 +119,34 @@ test("mount failure records a diagnostic and clears aria-busy", async ({ page })
       cause: "mount preparation failed"
     }
   });
+});
+
+test("mount returns unique newly mounted elements across matching roots", async ({ page }) => {
+  await page.goto("/tests/index.htm");
+  await page.addScriptTag({ url: "/dist/aellux.js" });
+  await page.evaluate(() => AelluxJs.init({ mode: "basic" }));
+  await expect.poll(() => page.evaluate(() => AelluxJs.diagnostics.supported)).toBe(true);
+
+  const result = await page.evaluate(async () => {
+    document.body.innerHTML = `
+      <section data-result-root><div id="first" data-result-mount></div></section>
+      <section data-result-root><div id="second" data-result-mount></div></section>
+    `;
+    AelluxJs.ext("result-probe");
+    AelluxJs.extAttach("result-probe", { init() {} });
+    await AelluxJs.wait("result-probe");
+    const manager = AelluxJs.mountManager;
+    for (const selector of ["[data-result-mount]", "div[data-result-mount]"]) {
+      manager.add({ extensionName: "result-probe", selector, mount() {} });
+    }
+
+    const first = await AelluxJs.mount("[data-result-root]", "result-probe");
+    const second = await AelluxJs.mount("[data-result-root]", "result-probe");
+    const missing = await AelluxJs.mount("[data-missing-root]", "result-probe");
+    return { first: first.map(element => element.id), second, missing };
+  });
+
+  expect(result).toEqual({ first: ["first", "second"], second: [], missing: [] });
 });
 
 test("wait awaits async Extension init and diagnoses rejection", async ({ page }) => {

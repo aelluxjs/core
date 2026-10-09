@@ -38,7 +38,7 @@ export function createMountHelper(root, mountMaps, mountedElements, elementContr
 
   async function mount(rootOrSelector, extensionNames = null) {
     const AelluxJs = root.AelluxJs;
-    var success;
+    const newlyMounted = new Set();
     for (const rootElement of resolveRoots(rootOrSelector, "mount")) {
       const waitMountedAttr = AelluxJs.attr("wait-mounted");
       const allWaiters = findElements(rootElement, `[${waitMountedAttr}]`);
@@ -65,22 +65,20 @@ export function createMountHelper(root, mountMaps, mountedElements, elementContr
         }
         await Promise.all(waitExtensions);
 
-        await AelluxJsMount(rootElement, extensionNames);
+        await AelluxJsMount(rootElement, extensionNames, newlyMounted);
 
-        success = true;
       } catch (error) {
         AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_MOUNT, {
           cause: error, root: rootElement, extensions: extensionNames
         });
-        success = false;
       } finally {
         allWaiters.forEach(waiter => waiter.setAttribute("aria-busy", "false"));
       }
     }
-    return success;
+    return Array.from(newlyMounted);
   }
 
-  async function AelluxJsMount(rootElement, extensionNames = null) {
+  async function AelluxJsMount(rootElement, extensionNames, newlyMounted) {
     const AelluxJs = root.AelluxJs;
     if (typeof extensionNames === "string")
       extensionNames = [extensionNames];
@@ -164,6 +162,7 @@ export function createMountHelper(root, mountMaps, mountedElements, elementContr
                 extensionName, mountId, controller.controllers,
                 typeof controller.update === "function"
               );
+              newlyMounted.add(mountable);
             }
           } catch (error) {
             AelluxJs.diagnostics.error(

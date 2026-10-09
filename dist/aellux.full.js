@@ -1237,7 +1237,7 @@
     const initialAttributeValues = /* @__PURE__ */ new WeakMap();
     const mountAttributeRecords = /* @__PURE__ */ new WeakMap();
     const pendingUnmounts = /* @__PURE__ */ new WeakMap();
-    const classPrefix = AelluxJs.className("");
+    const classPrefix = root2.AelluxJs.className("");
     return { mount, unmount, unmountDetached, update, initialAttribute };
     function initialAttribute(element, name) {
       var _a, _b;
@@ -1262,7 +1262,7 @@
     }
     async function mount(rootOrSelector, extensionNames = null) {
       const AelluxJs2 = root2.AelluxJs;
-      var success;
+      const newlyMounted = /* @__PURE__ */ new Set();
       for (const rootElement of resolveRoots(rootOrSelector, "mount")) {
         const waitMountedAttr = AelluxJs2.attr("wait-mounted");
         const allWaiters = findElements(rootElement, `[${waitMountedAttr}]`);
@@ -1284,22 +1284,20 @@
             waitExtensions.push(AelluxJs2.wait(key));
           }
           await Promise.all(waitExtensions);
-          await AelluxJsMount(rootElement, extensionNames);
-          success = true;
+          await AelluxJsMount(rootElement, extensionNames, newlyMounted);
         } catch (error) {
           AelluxJs2.diagnostics.error(AelluxJs2.diagnostics.ERROR_MOUNT, {
             cause: error,
             root: rootElement,
             extensions: extensionNames
           });
-          success = false;
         } finally {
           allWaiters.forEach((waiter) => waiter.setAttribute("aria-busy", "false"));
         }
       }
-      return success;
+      return Array.from(newlyMounted);
     }
-    async function AelluxJsMount(rootElement, extensionNames = null) {
+    async function AelluxJsMount(rootElement, extensionNames, newlyMounted) {
       const AelluxJs2 = root2.AelluxJs;
       if (typeof extensionNames === "string")
         extensionNames = [extensionNames];
@@ -1381,6 +1379,7 @@
                   controller.controllers,
                   typeof controller.update === "function"
                 );
+                newlyMounted.add(mountable);
               }
             } catch (error) {
               AelluxJs2.diagnostics.error(
