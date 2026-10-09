@@ -86,6 +86,23 @@ export function createAelluxApi(root, constants) {
       }
       if (url === api.extName(nameOrUrl)) url = "./" + api.extFilename(name);
       if (!options) options = {};
+      var selector = options.loadWhen;
+      if (selector !== null && typeof selector !== "undefined") {
+        if (typeof selector !== "string" || !selector.trim()) {
+          diagnostics.error(diagnostics.ERROR_EXTENSION_LOAD_WHEN, {
+            extension: name, selector: selector, expected: "a valid nonempty CSS selector"
+          });
+          return;
+        }
+        try {
+          document.querySelector(selector);
+        } catch (cause) {
+          diagnostics.error(diagnostics.ERROR_EXTENSION_LOAD_WHEN, {
+            extension: name, selector: selector, cause: cause
+          });
+          return;
+        }
+      }
       if (typeof options.loadStyle === "undefined") options.loadStyle = false;
       if (!options.loadWhen) options.loadWhen = null;
       options.builds = normalizeExtensionBuilds(options.builds);
@@ -96,14 +113,59 @@ export function createAelluxApi(root, constants) {
       api.registry.ext[key] = options;
     },
     extAttach: function (name, object) {
+      if (typeof name !== "string" ||
+        !/^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$|^[a-z][a-zA-Z0-9]*$/.test(name)) {
+        diagnostics.error(diagnostics.ERROR_EXTENSION_ATTACH, {
+          extension: name, argument: "name", expected: "a nonempty kebab-case or camelCase extension name"
+        });
+        return;
+      }
       name = fromCamelCase(name);
       var key = toCamelCase(name);
-      if (!(key in api.registry.ext)) {
-        api.registry.ext[key] = {
-          loadWhen: null,
-          state: null,
-          loadStyle: false
-        };
+      if (key in Object.prototype || key === "prototype") {
+        diagnostics.error(diagnostics.ERROR_EXTENSION_ATTACH, {
+          extension: name, argument: "name", expected: "a name that does not conflict with object properties"
+        });
+        return;
+      }
+      if (!Object.prototype.hasOwnProperty.call(api.registry.ext, key)) {
+        diagnostics.error(diagnostics.ERROR_EXTENSION_NOT_REGISTERED, {
+          extension: name, method: "extAttach"
+        });
+        return;
+      }
+      if (Object.prototype.hasOwnProperty.call(api.ext, key)) {
+        diagnostics.error(diagnostics.ERROR_EXTENSION_DUPLICATE, {
+          extension: name, method: "extAttach"
+        });
+        return;
+      }
+      if (!object || typeof object !== "object" || Array.isArray(object) ||
+        typeof object.init !== "function" ||
+        (typeof object.destroy !== "undefined" && typeof object.destroy !== "function")) {
+        diagnostics.error(diagnostics.ERROR_EXTENSION_ATTACH, {
+          extension: name, argument: "api", expected: "an object with init() and an optional destroy()"
+        });
+        return;
+      }
+      var registration = api.registry.ext[key];
+      var selector = registration && registration.loadWhen;
+      if (selector !== null && typeof selector !== "undefined") {
+        if (typeof selector !== "string" || !selector.trim()) {
+          diagnostics.error(diagnostics.ERROR_EXTENSION_ATTACH, {
+            extension: name, argument: "loadWhen", selector: selector,
+            expected: "a valid nonempty CSS selector"
+          });
+          return;
+        }
+        try {
+          document.querySelector(selector);
+        } catch (cause) {
+          diagnostics.error(diagnostics.ERROR_EXTENSION_ATTACH, {
+            extension: name, argument: "loadWhen", selector: selector, cause: cause
+          });
+          return;
+        }
       }
       api.registry.ext[key].state = "register";
       object.initialized = false;

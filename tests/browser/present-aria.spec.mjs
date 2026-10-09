@@ -192,10 +192,9 @@ test("present trigger stays expanded while any target is expanded", async ({ pag
   await expect(control).toHaveAttribute("aria-expanded", "true");
 });
 
-test("present restores initial attributes and resets memory after unmount", async ({ page }) => {
+test("present restores initial attributes and captures fresh values on remount", async ({ page }) => {
   await page.goto("/tests/index.htm");
-  await page.evaluate(async () => {
-    const { saveAttr, restoreAttr } = await import("/src/internal/build-initial-attr-memory.js");
+  await page.evaluate(() => {
     document.body.innerHTML = `
       <button id="control" data-ae-trigger="toggle" data-ae-target="#panel"
         aria-expanded="" aria-controls=""></button>
@@ -203,38 +202,20 @@ test("present restores initial attributes and resets memory after unmount", asyn
         <div id="motion" data-ae-present-motion hidden></div>
       </div>
     `;
-    window.AelluxJs = {
-      attr: name => `data-ae-${name}`,
-      className: name => `ae-${name}`,
-      attrMem: { save: saveAttr, restore: restoreAttr },
-      diagnostics: {
-        WARN_PRESENT_MOTION_HIDDEN: { code: 2008 },
-        warn() {}
-      },
-      mountManager: {
-        add: ({ selector, mount, unmount, update, controllers }) => {
-          (window.mountEntries ||= new Map()).set(selector, { mount, unmount, update, controllers });
-        },
-        remove: () => window.mountEntries?.clear()
-      },
-      extAttach: (_name, extension) => { window.presentExtension = extension; },
-      dispatchFrom: () => true
-    };
   });
-  await page.addScriptTag({ url: "/src/aellux.ext.present.js" });
+  await page.addScriptTag({ url: "/dist/aellux.js" });
+  await page.evaluate(() => AelluxJs.init({ mode: "full" }));
+  await expect.poll(() => page.evaluate(() =>
+    document.getElementById("panel").classList.contains(AelluxJs.className("mounted"))
+  )).toBe(true);
 
-  const state = await page.evaluate(() => {
-    const extension = window.presentExtension;
-    extension.init();
-    const [panels, controls] = window.mountEntries.values();
+  const state = await page.evaluate(async () => {
     const panel = document.querySelector("#panel");
     const motion = document.querySelector("#motion");
     const control = document.querySelector("#control");
 
-    panels.mount(panel);
-    controls.mount(control);
-    controls.unmount(control);
-    panels.unmount(panel);
+    await AelluxJs.unmount(control, "present");
+    await AelluxJs.unmount(panel, "present");
     const first = {
       panelHidden: panel.hasAttribute("hidden"),
       panelExpanded: panel.getAttribute("aria-expanded"),
@@ -244,16 +225,14 @@ test("present restores initial attributes and resets memory after unmount", asyn
     };
 
     panel.setAttribute("aria-expanded", "after-reset");
-    window.AelluxJs.attrMem.restore(panel);
-    const memoryWasReset = panel.getAttribute("aria-expanded") === "after-reset";
     panel.removeAttribute("hidden");
     panel.setAttribute("aria-expanded", "changed");
     control.setAttribute("aria-expanded", "before-remount");
     control.setAttribute("aria-controls", "original");
-    panels.mount(panel);
-    controls.mount(control);
-    controls.unmount(control);
-    panels.unmount(panel);
+    await AelluxJs.mount(panel, "present");
+    await AelluxJs.mount(control, "present");
+    await AelluxJs.unmount(control, "present");
+    await AelluxJs.unmount(panel, "present");
     const second = {
       panelHidden: panel.hasAttribute("hidden"),
       panelExpanded: panel.getAttribute("aria-expanded"),
@@ -264,21 +243,17 @@ test("present restores initial attributes and resets memory after unmount", asyn
 
     panel.setAttribute("data-ae-trigger", "toggle");
     panel.setAttribute("data-ae-target", "#panel");
-    panels.mount(panel);
-    controls.mount(panel);
-    panels.unmount(panel);
-    controls.unmount(panel);
+    await AelluxJs.mount(panel, "present");
+    await AelluxJs.unmount(panel, "present");
     const sharedElement = {
       hidden: panel.hasAttribute("hidden"),
       expanded: panel.getAttribute("aria-expanded"),
       controls: panel.getAttribute("aria-controls"),
       presentMotion: panel.getAttribute("data-ae-present-motion")
     };
-    extension.destroy();
-    return { first, second, sharedElement, memoryWasReset };
+    return { first, second, sharedElement };
   });
 
-  expect(state.memoryWasReset).toBe(true);
   expect(state.first).toEqual({
     panelHidden: true,
     panelExpanded: "custom",
@@ -482,40 +457,26 @@ test("present reports a selector callback failure with its own diagnostic", asyn
 
 test("present refreshes trigger controls from its initial value", async ({ page }) => {
   await page.goto("/tests/index.htm");
-  await page.evaluate(async () => {
-    const { saveAttr, restoreAttr } = await import("/src/internal/build-initial-attr-memory.js");
+  await page.evaluate(() => {
     document.body.innerHTML = `
       <button id="control" data-ae-trigger="toggle" data-ae-target="#first" aria-controls="external"></button>
       <div id="first" data-ae-present hidden></div>
     `;
-    window.AelluxJs = {
-      attr: name => `data-ae-${name}`,
-      className: name => `ae-${name}`,
-      attrMem: { save: saveAttr, restore: restoreAttr },
-      mountManager: {
-        add: ({ selector, mount, unmount, update, controllers }) => {
-          (window.mountEntries ||= new Map()).set(selector, { mount, unmount, update, controllers });
-        },
-        remove: () => window.mountEntries?.clear()
-      },
-      extAttach: (_name, extension) => { window.presentExtension = extension; },
-      dispatchFrom: () => true
-    };
   });
-  await page.addScriptTag({ url: "/src/aellux.ext.present.js" });
-  const controls = await page.evaluate(() => {
-    const extension = window.presentExtension;
-    extension.init();
-    const [panels, triggers] = window.mountEntries.values();
+  await page.addScriptTag({ url: "/dist/aellux.js" });
+  await page.evaluate(() => AelluxJs.init({ mode: "full" }));
+  await expect.poll(() => page.evaluate(() =>
+    typeof AelluxJs.mountManager?.mount === "function"
+  )).toBe(true);
+  const controls = await page.evaluate(async () => {
     const control = document.querySelector("#control");
-    panels.mount(document.querySelector("#first"));
-    triggers.mount(control);
+    await AelluxJs.mount(document, "present");
     const before = control.getAttribute("aria-controls");
     control.setAttribute("data-ae-target", "#second");
     document.body.insertAdjacentHTML("beforeend", '<div id="second" data-ae-present hidden></div>');
-    panels.mount(document.querySelector("#second"));
+    await AelluxJs.mount(document.querySelector("#second"), "present");
     const after = control.getAttribute("aria-controls");
-    triggers.unmount(control);
+    await AelluxJs.unmount(control, "present");
     return { before, after, restored: control.getAttribute("aria-controls") };
   });
   expect(controls).toEqual({

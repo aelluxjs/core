@@ -21185,36 +21185,6 @@
   });
 
   // src/internal/create-mount-helper.js
-  function _slicedToArray(r, e) {
-    return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray2(r, e) || _nonIterableRest();
-  }
-  function _nonIterableRest() {
-    throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
-  }
-  function _iterableToArrayLimit(r, l) {
-    var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
-    if (null != t) {
-      var e, n, i, u, a = [], f = true, o = false;
-      try {
-        if (i = (t = t.call(r)).next, 0 === l) {
-          if (Object(t) !== t) return;
-          f = false;
-        } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = true) ;
-      } catch (r2) {
-        o = true, n = r2;
-      } finally {
-        try {
-          if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return;
-        } finally {
-          if (o) throw n;
-        }
-      }
-      return a;
-    }
-  }
-  function _arrayWithHoles(r) {
-    if (Array.isArray(r)) return r;
-  }
   function _regenerator() {
     /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/babel/babel/blob/main/packages/babel-helpers/LICENSE */
     var e, t, r = "function" == typeof Symbol ? Symbol : {}, n = r.iterator || "@@iterator", o = r.toStringTag || "@@toStringTag";
@@ -21293,6 +21263,36 @@
       r2 ? i ? i(e2, r2, { value: n2, enumerable: !t2, configurable: !t2, writable: !t2 }) : e2[r2] = n2 : (o("next", 0), o("throw", 1), o("return", 2));
     }, _regeneratorDefine2(e, r, n, t);
   }
+  function _slicedToArray(r, e) {
+    return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray2(r, e) || _nonIterableRest();
+  }
+  function _nonIterableRest() {
+    throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+  }
+  function _iterableToArrayLimit(r, l) {
+    var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
+    if (null != t) {
+      var e, n, i, u, a = [], f = true, o = false;
+      try {
+        if (i = (t = t.call(r)).next, 0 === l) {
+          if (Object(t) !== t) return;
+          f = false;
+        } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = true) ;
+      } catch (r2) {
+        o = true, n = r2;
+      } finally {
+        try {
+          if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return;
+        } finally {
+          if (o) throw n;
+        }
+      }
+      return a;
+    }
+  }
+  function _arrayWithHoles(r) {
+    if (Array.isArray(r)) return r;
+  }
   function _createForOfIteratorHelper2(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
@@ -21324,12 +21324,24 @@
       }
     } };
   }
+  function _toConsumableArray(r) {
+    return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray2(r) || _nonIterableSpread();
+  }
+  function _nonIterableSpread() {
+    throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+  }
   function _unsupportedIterableToArray2(r, a) {
     if (r) {
       if ("string" == typeof r) return _arrayLikeToArray2(r, a);
       var t = {}.toString.call(r).slice(8, -1);
       return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray2(r, a) : void 0;
     }
+  }
+  function _iterableToArray(r) {
+    if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
+  }
+  function _arrayWithoutHoles(r) {
+    if (Array.isArray(r)) return _arrayLikeToArray2(r);
   }
   function _arrayLikeToArray2(r, a) {
     (null == a || a > r.length) && (a = r.length);
@@ -21359,34 +21371,41 @@
       });
     };
   }
-  function createMountHelper(root2, extensionPromises, mountMaps, mountedElements, elementControllers) {
+  function createMountHelper(root2, mountMaps, mountedElements, elementControllers) {
     var toCapitalized2 = utils_name_case_default.toCapitalized, toCamelCase2 = utils_name_case_default.toCamelCase, fromCamelCase2 = utils_name_case_default.fromCamelCase;
+    var initialAttributeValues = /* @__PURE__ */ new WeakMap();
+    var mountAttributeRecords = /* @__PURE__ */ new WeakMap();
     return {
       mount: mount,
       unmount: unmount,
-      update: update
+      update: update,
+      initialAttribute: initialAttribute
     };
+    function initialAttribute(element, name) {
+      var _initialAttributeValu, _initialAttributeValu2;
+      return (_initialAttributeValu = (_initialAttributeValu2 = initialAttributeValues.get(element)) === null || _initialAttributeValu2 === void 0 ? void 0 : _initialAttributeValu2.initial.get(name)) !== null && _initialAttributeValu !== void 0 ? _initialAttributeValu : null;
+    }
     function update(_x) {
       return _update.apply(this, arguments);
     }
     function _update() {
       _update = _asyncToGenerator(/* @__PURE__ */ _regenerator().m(function _callee(rootOrSelector) {
-        var extensionNames, _iterator, _step, rootElement, _args = arguments, _t;
+        var extensionNames, _iterator4, _step4, rootElement, _args = arguments, _t;
         return _regenerator().w(function(_context) {
           while (1) switch (_context.p = _context.n) {
             case 0:
               extensionNames = _args.length > 1 && _args[1] !== void 0 ? _args[1] : null;
-              _iterator = _createForOfIteratorHelper2(resolveRoots(rootOrSelector, "update"));
+              _iterator4 = _createForOfIteratorHelper2(resolveRoots(rootOrSelector, "update"));
               _context.p = 1;
-              _iterator.s();
+              _iterator4.s();
             case 2:
-              if ((_step = _iterator.n()).done) {
+              if ((_step4 = _iterator4.n()).done) {
                 _context.n = 4;
                 break;
               }
-              rootElement = _step.value;
+              rootElement = _step4.value;
               _context.n = 3;
-              return AelluxJsForce(rootElement, "update", extensionNames);
+              return AelluxJsMounted(rootElement, "update", extensionNames);
             case 3:
               _context.n = 2;
               break;
@@ -21396,10 +21415,10 @@
             case 5:
               _context.p = 5;
               _t = _context.v;
-              _iterator.e(_t);
+              _iterator4.e(_t);
             case 6:
               _context.p = 6;
-              _iterator.f();
+              _iterator4.f();
               return _context.f(6);
             case 7:
               return _context.a(2, true);
@@ -21413,22 +21432,22 @@
     }
     function _unmount() {
       _unmount = _asyncToGenerator(/* @__PURE__ */ _regenerator().m(function _callee2(rootOrSelector) {
-        var extensionNames, _iterator2, _step2, rootElement, _args2 = arguments, _t2;
+        var extensionNames, _iterator5, _step5, rootElement, _args2 = arguments, _t2;
         return _regenerator().w(function(_context2) {
           while (1) switch (_context2.p = _context2.n) {
             case 0:
               extensionNames = _args2.length > 1 && _args2[1] !== void 0 ? _args2[1] : null;
-              _iterator2 = _createForOfIteratorHelper2(resolveRoots(rootOrSelector, "unmount"));
+              _iterator5 = _createForOfIteratorHelper2(resolveRoots(rootOrSelector, "unmount"));
               _context2.p = 1;
-              _iterator2.s();
+              _iterator5.s();
             case 2:
-              if ((_step2 = _iterator2.n()).done) {
+              if ((_step5 = _iterator5.n()).done) {
                 _context2.n = 4;
                 break;
               }
-              rootElement = _step2.value;
+              rootElement = _step5.value;
               _context2.n = 3;
-              return AelluxJsForce(rootElement, "unmount", extensionNames);
+              return AelluxJsMounted(rootElement, "unmount", extensionNames);
             case 3:
               _context2.n = 2;
               break;
@@ -21438,10 +21457,10 @@
             case 5:
               _context2.p = 5;
               _t2 = _context2.v;
-              _iterator2.e(_t2);
+              _iterator5.e(_t2);
             case 6:
               _context2.p = 6;
-              _iterator2.f();
+              _iterator5.f();
               return _context2.f(6);
             case 7:
               return _context2.a(2, true);
@@ -21455,30 +21474,31 @@
     }
     function _mount() {
       _mount = _asyncToGenerator(/* @__PURE__ */ _regenerator().m(function _callee3(rootOrSelector) {
-        var extensionNames, AelluxJs2, _iterator3, _step3, rootElement, allWaiters, allLinks, _iterator4, _step4, link, href, loadWhen, builds, loadStyleValue, loadStyle, waitExtensions, _i, _Object$entries, _Object$entries$_i, key, options, _args3 = arguments, _t3;
+        var extensionNames, AelluxJs2, _iterator6, _step6, rootElement, waitMountedAttr, allWaiters, allLinks, _iterator7, _step7, link, href, loadWhen, builds, loadStyleValue, loadStyle, waitExtensions, _i2, _Object$entries, _Object$entries$_i, key, options, _args3 = arguments, _t3;
         return _regenerator().w(function(_context3) {
           while (1) switch (_context3.p = _context3.n) {
             case 0:
               extensionNames = _args3.length > 1 && _args3[1] !== void 0 ? _args3[1] : null;
               AelluxJs2 = root2.AelluxJs;
-              _iterator3 = _createForOfIteratorHelper2(resolveRoots(rootOrSelector, "mount"));
+              _iterator6 = _createForOfIteratorHelper2(resolveRoots(rootOrSelector, "mount"));
               _context3.p = 1;
-              _iterator3.s();
+              _iterator6.s();
             case 2:
-              if ((_step3 = _iterator3.n()).done) {
+              if ((_step6 = _iterator6.n()).done) {
                 _context3.n = 10;
                 break;
               }
-              rootElement = _step3.value;
-              allWaiters = findElements(rootElement, AelluxJs2.attr("wait-mounted"));
+              rootElement = _step6.value;
+              waitMountedAttr = AelluxJs2.attr("wait-mounted");
+              allWaiters = findElements(rootElement, "[".concat(waitMountedAttr, "]"));
               allWaiters.forEach(function(waiter) {
                 return waiter.setAttribute("aria-busy", "true");
               });
               allLinks = findElements(rootElement, "link[rel='aelluxjs-ext']");
-              _iterator4 = _createForOfIteratorHelper2(allLinks);
+              _iterator7 = _createForOfIteratorHelper2(allLinks);
               try {
-                for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
-                  link = _step4.value;
+                for (_iterator7.s(); !(_step7 = _iterator7.n()).done; ) {
+                  link = _step7.value;
                   href = link.getAttribute("href");
                   loadWhen = link.getAttribute(AelluxJs2.attr("load-when")) || void 0;
                   builds = link.getAttribute(AelluxJs2.attr("builds")) || void 0;
@@ -21492,18 +21512,18 @@
                   });
                 }
               } catch (err) {
-                _iterator4.e(err);
+                _iterator7.e(err);
               } finally {
-                _iterator4.f();
+                _iterator7.f();
               }
               waitExtensions = [];
-              _i = 0, _Object$entries = Object.entries(root2.AelluxJs.registry.ext);
+              _i2 = 0, _Object$entries = Object.entries(root2.AelluxJs.registry.ext);
             case 3:
-              if (!(_i < _Object$entries.length)) {
+              if (!(_i2 < _Object$entries.length)) {
                 _context3.n = 6;
                 break;
               }
-              _Object$entries$_i = _slicedToArray(_Object$entries[_i], 2), key = _Object$entries$_i[0], options = _Object$entries$_i[1];
+              _Object$entries$_i = _slicedToArray(_Object$entries[_i2], 2), key = _Object$entries$_i[0], options = _Object$entries$_i[1];
               if (!options.loadWhen) {
                 _context3.n = 4;
                 break;
@@ -21512,7 +21532,7 @@
             case 4:
               waitExtensions.push(AelluxJs2.wait(key));
             case 5:
-              _i++;
+              _i2++;
               _context3.n = 3;
               break;
             case 6:
@@ -21520,7 +21540,7 @@
               return Promise.all(waitExtensions);
             case 7:
               _context3.n = 8;
-              return AelluxJsForce(rootElement, "mount", extensionNames);
+              return AelluxJsMount(rootElement, extensionNames);
             case 8:
               allWaiters.forEach(function(waiter) {
                 return waiter.setAttribute("aria-busy", "false");
@@ -21534,10 +21554,10 @@
             case 11:
               _context3.p = 11;
               _t3 = _context3.v;
-              _iterator3.e(_t3);
+              _iterator6.e(_t3);
             case 12:
               _context3.p = 12;
-              _iterator3.f();
+              _iterator6.f();
               return _context3.f(12);
             case 13:
               return _context3.a(2, true);
@@ -21546,16 +21566,16 @@
       }));
       return _mount.apply(this, arguments);
     }
-    function AelluxJsForce(_x4, _x5) {
-      return _AelluxJsForce.apply(this, arguments);
+    function AelluxJsMount(_x4) {
+      return _AelluxJsMount.apply(this, arguments);
     }
-    function _AelluxJsForce() {
-      _AelluxJsForce = _asyncToGenerator(/* @__PURE__ */ _regenerator().m(function _callee4(rootElement, method) {
-        var extensionNames, AelluxJs2, filter, mounterSelectors, lazySelectors, _i2, _Object$entries2, _Object$entries2$_i, key, selectorString, _i3, _Object$entries3, _Object$entries3$_i, _key, _selectorString, allElements, updatedMounts, _iterator5, _step5, element, elementsAffected, localExtensionNames, _i4, _Object$entries4, _Object$entries4$_i, _key2, selector, _i5, _Object$entries5, _Object$entries5$_i, _key3, _selector, _iterator6, _step6, extensionName, extensionPromise, extension, mounter, _iterator8, _step8, _step8$value, _selector2, controller, mountableElements, _iterator9, _step9, mountable, mountId, seen, mounting, elementController, _elementController, _iterator7, _step7, affected, _args4 = arguments, _t4, _t5, _t6, _t7, _t8;
+    function _AelluxJsMount() {
+      _AelluxJsMount = _asyncToGenerator(/* @__PURE__ */ _regenerator().m(function _callee4(rootElement) {
+        var extensionNames, AelluxJs2, filter, mounterSelectors, lazySelectors, _i3, _Object$entries2, _Object$entries2$_i, key, selectorString, _i4, _Object$entries3, _Object$entries3$_i, _key, _selectorString, allElements, _iterator8, _step8, element, elementsAffected, localExtensionNames, _i5, _Object$entries4, _Object$entries4$_i, _key2, selector, _i6, _Object$entries5, _Object$entries5$_i, _key3, _selector, _iterator9, _step9, extensionName, extensionPromise, extension, mounter, _iterator1, _step1, _step1$value, _selector2, controller, mountableElements, _iterator10, _step10, mountable, mountId, elementController, _iterator0, _step0, affected, _args4 = arguments, _t4, _t5, _t6, _t7, _t8, _t9;
         return _regenerator().w(function(_context4) {
           while (1) switch (_context4.p = _context4.n) {
             case 0:
-              extensionNames = _args4.length > 2 && _args4[2] !== void 0 ? _args4[2] : null;
+              extensionNames = _args4.length > 1 && _args4[1] !== void 0 ? _args4[1] : null;
               AelluxJs2 = root2.AelluxJs;
               if (typeof extensionNames === "string") extensionNames = [extensionNames];
               if (!extensionNames) {
@@ -21567,12 +21587,12 @@
                 extensionNames = extensionNames.map(function(_) {
                   return fromCamelCase2(_);
                 });
-                for (_i2 = 0, _Object$entries2 = Object.entries(AelluxJs2.registry.extMounters); _i2 < _Object$entries2.length; _i2++) {
-                  _Object$entries2$_i = _slicedToArray(_Object$entries2[_i2], 2), key = _Object$entries2$_i[0], selectorString = _Object$entries2$_i[1];
+                for (_i3 = 0, _Object$entries2 = Object.entries(AelluxJs2.registry.extMounters); _i3 < _Object$entries2.length; _i3++) {
+                  _Object$entries2$_i = _slicedToArray(_Object$entries2[_i3], 2), key = _Object$entries2$_i[0], selectorString = _Object$entries2$_i[1];
                   if (extensionNames.indexOf(fromCamelCase2(key)) !== -1) filter.push(selectorString);
                 }
-                for (_i3 = 0, _Object$entries3 = Object.entries(AelluxJs2.registry.lazyExtSelectors); _i3 < _Object$entries3.length; _i3++) {
-                  _Object$entries3$_i = _slicedToArray(_Object$entries3[_i3], 2), _key = _Object$entries3$_i[0], _selectorString = _Object$entries3$_i[1];
+                for (_i4 = 0, _Object$entries3 = Object.entries(AelluxJs2.registry.lazyExtSelectors); _i4 < _Object$entries3.length; _i4++) {
+                  _Object$entries3$_i = _slicedToArray(_Object$entries3[_i4], 2), _key = _Object$entries3$_i[0], _selectorString = _Object$entries3$_i[1];
                   if (extensionNames.indexOf(fromCamelCase2(_key)) !== -1) filter.push(_selectorString);
                 }
               }
@@ -21583,45 +21603,44 @@
               return _context4.a(2);
             case 1:
               allElements = findElements(rootElement, filter.join(","));
-              updatedMounts = method === "update" ? /* @__PURE__ */ new WeakMap() : null;
-              _iterator5 = _createForOfIteratorHelper2(allElements);
+              _iterator8 = _createForOfIteratorHelper2(allElements);
               _context4.p = 2;
-              _iterator5.s();
+              _iterator8.s();
             case 3:
-              if ((_step5 = _iterator5.n()).done) {
-                _context4.n = 38;
+              if ((_step8 = _iterator8.n()).done) {
+                _context4.n = 37;
                 break;
               }
-              element = _step5.value;
+              element = _step8.value;
               elementsAffected = /* @__PURE__ */ new Set();
               if (extensionNames) {
                 localExtensionNames = new Set(extensionNames);
               } else {
                 localExtensionNames = /* @__PURE__ */ new Set();
-                for (_i4 = 0, _Object$entries4 = Object.entries(AelluxJs2.registry.lazyExtSelectors); _i4 < _Object$entries4.length; _i4++) {
-                  _Object$entries4$_i = _slicedToArray(_Object$entries4[_i4], 2), _key2 = _Object$entries4$_i[0], selector = _Object$entries4$_i[1];
+                for (_i5 = 0, _Object$entries4 = Object.entries(AelluxJs2.registry.lazyExtSelectors); _i5 < _Object$entries4.length; _i5++) {
+                  _Object$entries4$_i = _slicedToArray(_Object$entries4[_i5], 2), _key2 = _Object$entries4$_i[0], selector = _Object$entries4$_i[1];
                   if (element.matches(selector) && filter.indexOf(selector) !== -1) localExtensionNames.add(fromCamelCase2(_key2));
                 }
-                for (_i5 = 0, _Object$entries5 = Object.entries(AelluxJs2.registry.extMounters); _i5 < _Object$entries5.length; _i5++) {
-                  _Object$entries5$_i = _slicedToArray(_Object$entries5[_i5], 2), _key3 = _Object$entries5$_i[0], _selector = _Object$entries5$_i[1];
+                for (_i6 = 0, _Object$entries5 = Object.entries(AelluxJs2.registry.extMounters); _i6 < _Object$entries5.length; _i6++) {
+                  _Object$entries5$_i = _slicedToArray(_Object$entries5[_i6], 2), _key3 = _Object$entries5$_i[0], _selector = _Object$entries5$_i[1];
                   if (element.matches(_selector) && filter.indexOf(_selector) !== -1) localExtensionNames.add(fromCamelCase2(_key3));
                 }
               }
-              _iterator6 = _createForOfIteratorHelper2(localExtensionNames);
+              _iterator9 = _createForOfIteratorHelper2(localExtensionNames);
               _context4.p = 4;
-              _iterator6.s();
+              _iterator9.s();
             case 5:
-              if ((_step6 = _iterator6.n()).done) {
-                _context4.n = 33;
+              if ((_step9 = _iterator9.n()).done) {
+                _context4.n = 32;
                 break;
               }
-              extensionName = _step6.value;
-              extensionPromise = method === "mount" ? AelluxJs2.wait(extensionName) : extensionPromises[toCamelCase2(extensionName)];
+              extensionName = _step9.value;
+              extensionPromise = AelluxJs2.wait(extensionName);
               if (extensionPromise) {
                 _context4.n = 6;
                 break;
               }
-              return _context4.a(3, 32);
+              return _context4.a(3, 31);
             case 6:
               _context4.n = 7;
               return extensionPromise;
@@ -21631,183 +21650,266 @@
                 _context4.n = 8;
                 break;
               }
-              return _context4.a(3, 32);
+              return _context4.a(3, 31);
             case 8:
               mounter = mountMaps.get(toCamelCase2(extensionName));
               if (mounter) {
                 _context4.n = 9;
                 break;
               }
-              return _context4.a(3, 32);
+              return _context4.a(3, 31);
             case 9:
-              _iterator8 = _createForOfIteratorHelper2(mounter);
+              _iterator1 = _createForOfIteratorHelper2(mounter);
               _context4.p = 10;
-              _iterator8.s();
+              _iterator1.s();
             case 11:
-              if ((_step8 = _iterator8.n()).done) {
-                _context4.n = 29;
+              if ((_step1 = _iterator1.n()).done) {
+                _context4.n = 28;
                 break;
               }
-              _step8$value = _slicedToArray(_step8.value, 2), _selector2 = _step8$value[0], controller = _step8$value[1];
+              _step1$value = _slicedToArray(_step1.value, 2), _selector2 = _step1$value[0], controller = _step1$value[1];
               _context4.p = 12;
-              if (controller[method]) {
+              if (controller.mount) {
                 _context4.n = 13;
                 break;
               }
-              return _context4.a(3, 28);
+              return _context4.a(3, 27);
             case 13:
               mountableElements = findElements(element, _selector2);
-              _iterator9 = _createForOfIteratorHelper2(mountableElements);
+              _iterator10 = _createForOfIteratorHelper2(mountableElements);
               _context4.p = 14;
-              _iterator9.s();
+              _iterator10.s();
             case 15:
-              if ((_step9 = _iterator9.n()).done) {
-                _context4.n = 23;
+              if ((_step10 = _iterator10.n()).done) {
+                _context4.n = 22;
                 break;
               }
-              mountable = _step9.value;
+              mountable = _step10.value;
               mountId = "".concat(extensionName, "@").concat(_selector2);
-              if (!(method === "update")) {
-                _context4.n = 19;
-                break;
-              }
-              if (isMounted(mountable, mountId)) {
+              if (!isMounted(mountable, mountId)) {
                 _context4.n = 16;
                 break;
               }
-              return _context4.a(3, 22);
+              return _context4.a(3, 21);
             case 16:
-              seen = updatedMounts.get(mountable);
-              if (!seen) {
-                seen = /* @__PURE__ */ new Set();
-                updatedMounts.set(mountable, seen);
-              }
-              if (!seen.has(mountId)) {
-                _context4.n = 17;
-                break;
-              }
-              return _context4.a(3, 22);
-            case 17:
-              seen.add(mountId);
+              rememberInitialAttributes(mountable, mountId);
+              _context4.p = 17;
               _context4.n = 18;
-              return controller.update(mountable);
+              return controller.mount(mountable);
             case 18:
-              return _context4.a(3, 22);
+              _context4.n = 20;
+              break;
             case 19:
-              mounting = method === "mount";
-              if (!(mounting === isMounted(mountable, mountId))) {
-                _context4.n = 20;
-                break;
-              }
-              return _context4.a(3, 22);
+              _context4.p = 19;
+              _t4 = _context4.v;
+              restoreInitialAttributes(mountable, mountId);
+              throw _t4;
             case 20:
-              _context4.n = 21;
-              return controller[method](mountable);
-            case 21:
               elementsAffected.add(mountable);
-              setMounted(mountable, mountId, mounting);
-              if (mounting) {
-                elementController = elementControllers.get(mountable);
-                if (!elementController) {
-                  elementController = createControllerHelper(root2, mountable);
-                  elementControllers.set(mountable, elementController);
-                }
-                elementController.spawn(extensionName, mountId, controller.controllers, typeof controller.update === "function");
-              } else {
-                _elementController = elementControllers.get(mountable);
-                if (_elementController) {
-                  _elementController.despawn(mountId);
-                  if (!_elementController.hasMounts()) elementControllers.delete(mountable);
-                }
+              setMounted(mountable, mountId);
+              elementController = elementControllers.get(mountable);
+              if (!elementController) {
+                elementController = createControllerHelper(root2, mountable);
+                elementControllers.set(mountable, elementController);
               }
-            case 22:
+              elementController.spawn(extensionName, mountId, controller.controllers, typeof controller.update === "function");
+            case 21:
               _context4.n = 15;
               break;
-            case 23:
-              _context4.n = 25;
+            case 22:
+              _context4.n = 24;
               break;
+            case 23:
+              _context4.p = 23;
+              _t5 = _context4.v;
+              _iterator10.e(_t5);
             case 24:
               _context4.p = 24;
-              _t4 = _context4.v;
-              _iterator9.e(_t4);
+              _iterator10.f();
+              return _context4.f(24);
             case 25:
-              _context4.p = 25;
-              _iterator9.f();
-              return _context4.f(25);
-            case 26:
-              _context4.n = 28;
+              _context4.n = 27;
               break;
-            case 27:
-              _context4.p = 27;
-              _t5 = _context4.v;
+            case 26:
+              _context4.p = 26;
+              _t6 = _context4.v;
               AelluxJs2.diagnostics.error(AelluxJs2.diagnostics.ERROR_EXTENSION_MOUNT, {
-                cause: _t5,
+                cause: _t6,
                 extension: extensionName,
-                method: method,
+                method: "mount",
                 selector: _selector2
               });
-            case 28:
+            case 27:
               _context4.n = 11;
               break;
-            case 29:
-              _context4.n = 31;
+            case 28:
+              _context4.n = 30;
               break;
+            case 29:
+              _context4.p = 29;
+              _t7 = _context4.v;
+              _iterator1.e(_t7);
             case 30:
               _context4.p = 30;
-              _t6 = _context4.v;
-              _iterator8.e(_t6);
+              _iterator1.f();
+              return _context4.f(30);
             case 31:
-              _context4.p = 31;
-              _iterator8.f();
-              return _context4.f(31);
-            case 32:
               _context4.n = 5;
               break;
-            case 33:
-              _context4.n = 35;
+            case 32:
+              _context4.n = 34;
               break;
+            case 33:
+              _context4.p = 33;
+              _t8 = _context4.v;
+              _iterator9.e(_t8);
             case 34:
               _context4.p = 34;
-              _t7 = _context4.v;
-              _iterator6.e(_t7);
+              _iterator9.f();
+              return _context4.f(34);
             case 35:
-              _context4.p = 35;
-              _iterator6.f();
-              return _context4.f(35);
-            case 36:
-              _iterator7 = _createForOfIteratorHelper2(elementsAffected);
+              _iterator0 = _createForOfIteratorHelper2(elementsAffected);
               try {
-                for (_iterator7.s(); !(_step7 = _iterator7.n()).done; ) {
-                  affected = _step7.value;
+                for (_iterator0.s(); !(_step0 = _iterator0.n()).done; ) {
+                  affected = _step0.value;
                   affected.classList.toggle(AelluxJs2.className("mounted"), isMounted(affected));
                 }
               } catch (err) {
-                _iterator7.e(err);
+                _iterator0.e(err);
               } finally {
-                _iterator7.f();
+                _iterator0.f();
               }
-            case 37:
+            case 36:
               _context4.n = 3;
               break;
-            case 38:
-              _context4.n = 40;
+            case 37:
+              _context4.n = 39;
               break;
+            case 38:
+              _context4.p = 38;
+              _t9 = _context4.v;
+              _iterator8.e(_t9);
             case 39:
               _context4.p = 39;
-              _t8 = _context4.v;
-              _iterator5.e(_t8);
+              _iterator8.f();
+              return _context4.f(39);
             case 40:
-              _context4.p = 40;
-              _iterator5.f();
-              return _context4.f(40);
+              AelluxJs2.dispatch("Mount");
             case 41:
-              AelluxJs2.dispatch(toCapitalized2(method));
-            case 42:
               return _context4.a(2);
           }
-        }, _callee4, null, [[14, 24, 25, 26], [12, 27], [10, 30, 31, 32], [4, 34, 35, 36], [2, 39, 40, 41]]);
+        }, _callee4, null, [[17, 19], [14, 23, 24, 25], [12, 26], [10, 29, 30, 31], [4, 33, 34, 35], [2, 38, 39, 40]]);
       }));
-      return _AelluxJsForce.apply(this, arguments);
+      return _AelluxJsMount.apply(this, arguments);
+    }
+    function AelluxJsMounted(_x5, _x6) {
+      return _AelluxJsMounted.apply(this, arguments);
+    }
+    function _AelluxJsMounted() {
+      _AelluxJsMounted = _asyncToGenerator(/* @__PURE__ */ _regenerator().m(function _callee5(rootElement, method) {
+        var extensionNames, AelluxJs2, selectedNames, _i7, _Array$from2, _Array$from2$_i, element, mountIds, _i8, _Array$from3, mountId, separator, extensionName, selector, extensionKey, mounter, controller, elementController, _args5 = arguments, _t0;
+        return _regenerator().w(function(_context5) {
+          while (1) switch (_context5.p = _context5.n) {
+            case 0:
+              extensionNames = _args5.length > 2 && _args5[2] !== void 0 ? _args5[2] : null;
+              AelluxJs2 = root2.AelluxJs;
+              selectedNames = extensionNames === null ? null : new Set((typeof extensionNames === "string" ? [extensionNames] : extensionNames).map(function(name) {
+                return fromCamelCase2(name);
+              }));
+              _i7 = 0, _Array$from2 = Array.from(mountedElements);
+            case 1:
+              if (!(_i7 < _Array$from2.length)) {
+                _context5.n = 12;
+                break;
+              }
+              _Array$from2$_i = _slicedToArray(_Array$from2[_i7], 2), element = _Array$from2$_i[0], mountIds = _Array$from2$_i[1];
+              if (element.isConnected) {
+                _context5.n = 2;
+                break;
+              }
+              unmount(element);
+              return _context5.a(3, 11);
+            case 2:
+              if (!(element !== rootElement && !rootElement.contains(element))) {
+                _context5.n = 3;
+                break;
+              }
+              return _context5.a(3, 11);
+            case 3:
+              _i8 = 0, _Array$from3 = Array.from(mountIds);
+            case 4:
+              if (!(_i8 < _Array$from3.length)) {
+                _context5.n = 11;
+                break;
+              }
+              mountId = _Array$from3[_i8];
+              separator = mountId.indexOf("@");
+              extensionName = mountId.slice(0, separator);
+              selector = mountId.slice(separator + 1);
+              if (!(selectedNames && !selectedNames.has(extensionName))) {
+                _context5.n = 5;
+                break;
+              }
+              return _context5.a(3, 10);
+            case 5:
+              extensionKey = toCamelCase2(extensionName);
+              mounter = mountMaps.get(extensionKey);
+              controller = mounter && mounter.get(selector);
+              _context5.p = 6;
+              if (!(controller && controller[method])) {
+                _context5.n = 7;
+                break;
+              }
+              _context5.n = 7;
+              return controller[method](element);
+            case 7:
+              _context5.n = 9;
+              break;
+            case 8:
+              _context5.p = 8;
+              _t0 = _context5.v;
+              AelluxJs2.diagnostics.error(AelluxJs2.diagnostics.ERROR_EXTENSION_MOUNT, {
+                cause: _t0,
+                extension: extensionName,
+                method: method,
+                selector: selector
+              });
+            case 9:
+              try {
+                if (method === "unmount") {
+                  setMounted(element, mountId, false);
+                  elementController = elementControllers.get(element);
+                  if (elementController) {
+                    elementController.despawn(mountId);
+                    if (!elementController.hasMounts()) elementControllers.delete(element);
+                  }
+                  element.classList.toggle(AelluxJs2.className("mounted"), isMounted(element));
+                  restoreInitialAttributes(element, mountId);
+                }
+              } catch (error) {
+                AelluxJs2.diagnostics.error(AelluxJs2.diagnostics.ERROR_EXTENSION_MOUNT, {
+                  cause: error,
+                  extension: extensionName,
+                  method: method,
+                  selector: selector
+                });
+              }
+            case 10:
+              _i8++;
+              _context5.n = 4;
+              break;
+            case 11:
+              _i7++;
+              _context5.n = 1;
+              break;
+            case 12:
+              AelluxJs2.dispatch(toCapitalized2(method));
+            case 13:
+              return _context5.a(2);
+          }
+        }, _callee5, null, [[6, 8]]);
+      }));
+      return _AelluxJsMounted.apply(this, arguments);
     }
     function resolveRoots(rootOrSelector, method) {
       if (!rootOrSelector) {
@@ -21858,6 +21960,80 @@
       mounts[mounted ? "add" : "delete"](mountId);
       if (mounts.size === 0) mountedElements.delete(element);
     }
+    function rememberInitialAttributes(element, mountId) {
+      var targets = [element].concat(_toConsumableArray(element.querySelectorAll("*")));
+      var retained = [];
+      try {
+        var _iterator = _createForOfIteratorHelper2(targets), _step;
+        try {
+          for (_iterator.s(); !(_step = _iterator.n()).done; ) {
+            var target = _step.value;
+            var record = initialAttributeValues.get(target);
+            if (!record) {
+              record = {
+                initial: new Map(Array.from(target.attributes, function(attribute) {
+                  return [attribute.name, attribute.value];
+                })),
+                users: 0
+              };
+              initialAttributeValues.set(target, record);
+            }
+            record.users++;
+            retained.push(target);
+          }
+        } catch (err) {
+          _iterator.e(err);
+        } finally {
+          _iterator.f();
+        }
+      } catch (error) {
+        releaseInitialAttributes(retained);
+        throw error;
+      }
+      var mounts = mountAttributeRecords.get(element);
+      if (!mounts) {
+        mounts = /* @__PURE__ */ new Map();
+        mountAttributeRecords.set(element, mounts);
+      }
+      mounts.set(mountId, targets);
+    }
+    function restoreInitialAttributes(element, mountId) {
+      var mounts = mountAttributeRecords.get(element);
+      if (!mounts || !mounts.has(mountId)) return;
+      releaseInitialAttributes(mounts.get(mountId));
+      mounts.delete(mountId);
+      if (!mounts.size) mountAttributeRecords.delete(element);
+    }
+    function releaseInitialAttributes(targets) {
+      var _iterator2 = _createForOfIteratorHelper2(targets), _step2;
+      try {
+        for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
+          var target = _step2.value;
+          var record = initialAttributeValues.get(target);
+          if (--record.users) continue;
+          for (var _i = 0, _Array$from = Array.from(target.attributes); _i < _Array$from.length; _i++) {
+            var attribute = _Array$from[_i];
+            if (!record.initial.has(attribute.name)) target.removeAttribute(attribute.name);
+          }
+          var _iterator3 = _createForOfIteratorHelper2(record.initial), _step3;
+          try {
+            for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
+              var _step3$value = _slicedToArray(_step3.value, 2), name = _step3$value[0], value = _step3$value[1];
+              if (target.getAttribute(name) !== value) target.setAttribute(name, value);
+            }
+          } catch (err) {
+            _iterator3.e(err);
+          } finally {
+            _iterator3.f();
+          }
+          initialAttributeValues.delete(target);
+        }
+      } catch (err) {
+        _iterator2.e(err);
+      } finally {
+        _iterator2.f();
+      }
+    }
   }
   var init_create_mount_helper = __esm({
     "src/internal/create-mount-helper.js": function() {
@@ -21868,10 +22044,10 @@
   });
 
   // src/internal/build-mount-map-manager.js
-  function _toConsumableArray(r) {
-    return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray3(r) || _nonIterableSpread();
+  function _toConsumableArray2(r) {
+    return _arrayWithoutHoles2(r) || _iterableToArray2(r) || _unsupportedIterableToArray3(r) || _nonIterableSpread2();
   }
-  function _nonIterableSpread() {
+  function _nonIterableSpread2() {
     throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
   function _unsupportedIterableToArray3(r, a) {
@@ -21881,10 +22057,10 @@
       return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray3(r, a) : void 0;
     }
   }
-  function _iterableToArray(r) {
+  function _iterableToArray2(r) {
     if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
   }
-  function _arrayWithoutHoles(r) {
+  function _arrayWithoutHoles2(r) {
     if (Array.isArray(r)) return _arrayLikeToArray3(r);
   }
   function _arrayLikeToArray3(r, a) {
@@ -21892,19 +22068,28 @@
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
   }
-  function buildMountMapManager(root2, extensionPromises) {
+  function _typeof(o) {
+    "@babel/helpers - typeof";
+    return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
+      return typeof o2;
+    } : function(o2) {
+      return o2 && "function" == typeof Symbol && o2.constructor === Symbol && o2 !== Symbol.prototype ? "symbol" : typeof o2;
+    }, _typeof(o);
+  }
+  function buildMountMapManager(root2) {
     var toCamelCase2 = utils_name_case_default.toCamelCase, fromCamelCase2 = utils_name_case_default.fromCamelCase;
-    var mountedElements = /* @__PURE__ */ new WeakMap();
+    var mountedElements = /* @__PURE__ */ new Map();
     var elementControllers = /* @__PURE__ */ new WeakMap();
     var maps = /* @__PURE__ */ new Map();
-    var helper = createMountHelper(root2, extensionPromises, maps, mountedElements, elementControllers);
+    var helper = createMountHelper(root2, maps, mountedElements, elementControllers);
     var manager = {
       add: add,
       remove: remove,
       controller: controller,
       mount: helper.mount,
       unmount: helper.unmount,
-      update: helper.update
+      update: helper.update,
+      initialAttribute: helper.initialAttribute
     };
     return manager;
     function controller(elementOrId) {
@@ -21927,12 +22112,40 @@
     function keyFor(extensionName) {
       return toCamelCase2(fromCamelCase2(extensionName));
     }
-    function add() {
-      var _ref = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : {}, extensionName = _ref.extensionName, selector = _ref.selector, mount = _ref.mount, unmount = _ref.unmount, update = _ref.update, controllers = _ref.controllers;
-      if (typeof extensionName !== "string" || !extensionName || typeof selector !== "string" || !selector.trim()) {
-        throw new TypeError("mountManager.add requires an extension name and selector");
+    function add(options) {
+      var diagnostics = root2.AelluxJs.diagnostics;
+      function reject(argument, cause) {
+        diagnostics.error(diagnostics.ERROR_MOUNT_REGISTRATION, {
+          extension: options && options.extensionName,
+          selector: options && options.selector,
+          argument: argument,
+          cause: cause
+        });
+        return false;
       }
+      if (!options || _typeof(options) !== "object" || Array.isArray(options)) return reject("options");
+      var extensionName = options.extensionName, selector = options.selector, mount = options.mount, unmount = options.unmount, update = options.update, controllers = options.controllers;
+      if (typeof extensionName !== "string" || !/^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$|^[a-z][a-zA-Z0-9]*$/.test(extensionName)) return reject("extensionName");
       var key = keyFor(extensionName);
+      if (key in Object.prototype || key === "prototype") return reject("extensionName");
+      if (!Object.prototype.hasOwnProperty.call(root2.AelluxJs.registry.ext, key)) return reject("extensionName");
+      if (typeof selector !== "string" || !selector.trim()) return reject("selector");
+      try {
+        root2.document.querySelector(selector);
+      } catch (cause) {
+        return reject("selector", cause);
+      }
+      if (typeof mount !== "function") return reject("mount");
+      if (unmount !== void 0 && typeof unmount !== "function") return reject("unmount");
+      if (update !== void 0 && typeof update !== "function") return reject("update");
+      if (controllers !== void 0 && (!Array.isArray(controllers) || controllers.some(function(name) {
+        return typeof name !== "string" || !name.trim();
+      }))) return reject("controllers");
+      var allowed = ["extensionName", "selector", "mount", "unmount", "update", "controllers"];
+      var unknown = Object.keys(options).find(function(name) {
+        return !allowed.includes(name);
+      });
+      if (unknown) return reject(unknown);
       var map = maps.get(key);
       if (!map) {
         map = /* @__PURE__ */ new Map();
@@ -21944,11 +22157,11 @@
         update: update,
         controllers: controllers
       });
-      root2.AelluxJs.registry.extMounters[key] = _toConsumableArray(map.keys()).join(",");
+      root2.AelluxJs.registry.extMounters[key] = _toConsumableArray2(map.keys()).join(",");
       return manager;
     }
     function remove() {
-      var _ref2 = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : {}, extensionName = _ref2.extensionName, selector = _ref2.selector;
+      var _ref = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : {}, extensionName = _ref.extensionName, selector = _ref.selector;
       if (typeof extensionName !== "string" || !extensionName) return false;
       var key = keyFor(extensionName);
       var map = maps.get(key);
@@ -21958,7 +22171,7 @@
         maps.delete(key);
         delete root2.AelluxJs.registry.extMounters[key];
       } else if (removed) {
-        root2.AelluxJs.registry.extMounters[key] = _toConsumableArray(map.keys()).join(",");
+        root2.AelluxJs.registry.extMounters[key] = _toConsumableArray2(map.keys()).join(",");
       }
       return removed;
     }
@@ -22127,7 +22340,7 @@
         "use strict";
         var toCamelCase2 = utils_name_case_default.toCamelCase, fromCamelCase2 = utils_name_case_default.fromCamelCase;
         var extensionPromises = {};
-        var mountManager = buildMountMapManager(root2, extensionPromises);
+        var mountManager = buildMountMapManager(root2);
         var layoutScheduler = buildLayoutScheduler();
         root2.AelluxJs = Object.assign(root2.AelluxJs, {
           startAelluxJs: function startAelluxJs() {
@@ -22775,13 +22988,13 @@
       r2 ? i ? i(e2, r2, { value: n2, enumerable: !t2, configurable: !t2, writable: !t2 }) : e2[r2] = n2 : (o("next", 0), o("throw", 1), o("return", 2));
     }, _regeneratorDefine23(e, r, n, t);
   }
-  function _typeof(o) {
+  function _typeof2(o) {
     "@babel/helpers - typeof";
-    return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
+    return _typeof2 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
       return typeof o2;
     } : function(o2) {
       return o2 && "function" == typeof Symbol && o2.constructor === Symbol && o2 !== Symbol.prototype ? "symbol" : typeof o2;
-    }, _typeof(o);
+    }, _typeof2(o);
   }
   function asyncGeneratorStep3(n, t, e, r, o, a, c) {
     try {
@@ -22987,7 +23200,7 @@
         function OnPushAjaxReplace(event) {
           try {
             var detail = event && event.detail;
-            if (!detail || _typeof(detail) !== "object" || typeof detail.url !== "string" || !detail.url.trim() || !Object.prototype.hasOwnProperty.call(detail, "selectors") || detail.selectors == null) {
+            if (!detail || _typeof2(detail) !== "object" || typeof detail.url !== "string" || !detail.url.trim() || !Object.prototype.hasOwnProperty.call(detail, "selectors") || detail.selectors == null) {
               AelluxJs2.diagnostics.warn(AelluxJs2.diagnostics.WARN_NAVIGATION_EVENT_INVALID, {
                 extension: extensionName,
                 event: "PushAjaxReplace",
@@ -23007,7 +23220,7 @@
         function OnUpdateBaseTitle(event) {
           try {
             var detail = event && event.detail;
-            if (!detail || _typeof(detail) !== "object" || !Object.prototype.hasOwnProperty.call(detail, "title") || typeof detail.title !== "string") {
+            if (!detail || _typeof2(detail) !== "object" || !Object.prototype.hasOwnProperty.call(detail, "title") || typeof detail.title !== "string") {
               AelluxJs2.diagnostics.warn(AelluxJs2.diagnostics.WARN_NAVIGATION_EVENT_INVALID, {
                 extension: extensionName,
                 event: "UpdateBaseTitle",
@@ -23347,10 +23560,10 @@
       }
     } };
   }
-  function _toConsumableArray2(r) {
-    return _arrayWithoutHoles2(r) || _iterableToArray2(r) || _unsupportedIterableToArray6(r) || _nonIterableSpread2();
+  function _toConsumableArray3(r) {
+    return _arrayWithoutHoles3(r) || _iterableToArray3(r) || _unsupportedIterableToArray6(r) || _nonIterableSpread3();
   }
-  function _nonIterableSpread2() {
+  function _nonIterableSpread3() {
     throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
   function _unsupportedIterableToArray6(r, a) {
@@ -23360,10 +23573,10 @@
       return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray6(r, a) : void 0;
     }
   }
-  function _iterableToArray2(r) {
+  function _iterableToArray3(r) {
     if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
   }
-  function _arrayWithoutHoles2(r) {
+  function _arrayWithoutHoles3(r) {
     if (Array.isArray(r)) return _arrayLikeToArray6(r);
   }
   function _arrayLikeToArray6(r, a) {
@@ -23371,13 +23584,13 @@
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
   }
-  function _typeof2(o) {
+  function _typeof3(o) {
     "@babel/helpers - typeof";
-    return _typeof2 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
+    return _typeof3 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
       return typeof o2;
     } : function(o2) {
       return o2 && "function" == typeof Symbol && o2.constructor === Symbol && o2 !== Symbol.prototype ? "symbol" : typeof o2;
-    }, _typeof2(o);
+    }, _typeof3(o);
   }
   var init_aellux_ext_adaptive = __esm({
     "src/aellux.ext.adaptive.js": function() {
@@ -23429,7 +23642,7 @@
           var overrides = options.adaptiveParams || {};
           for (var _i = 0, _Object$keys = Object.keys(adaptiveParams); _i < _Object$keys.length; _i++) {
             var group = _Object$keys[_i];
-            if (overrides[group] && _typeof2(overrides[group]) === "object") {
+            if (overrides[group] && _typeof3(overrides[group]) === "object") {
               Object.assign(adaptiveParams[group], overrides[group]);
             }
           }
@@ -23442,7 +23655,7 @@
           });
         }
         function getManagedClasses() {
-          return [modifier.shapeHorizontal, modifier.shapeVertical, modifier.shapeSquare].concat(_toConsumableArray2(Object.keys(adaptiveParams.minSizes).map(function(size) {
+          return [modifier.shapeHorizontal, modifier.shapeVertical, modifier.shapeSquare].concat(_toConsumableArray3(Object.keys(adaptiveParams.minSizes).map(function(size) {
             return AelluxJs2.className("fits-" + size);
           })));
         }
@@ -23589,16 +23802,16 @@
   function _arrayWithHoles4(r) {
     if (Array.isArray(r)) return r;
   }
-  function _toConsumableArray3(r) {
-    return _arrayWithoutHoles3(r) || _iterableToArray3(r) || _unsupportedIterableToArray7(r) || _nonIterableSpread3();
+  function _toConsumableArray4(r) {
+    return _arrayWithoutHoles4(r) || _iterableToArray4(r) || _unsupportedIterableToArray7(r) || _nonIterableSpread4();
   }
-  function _nonIterableSpread3() {
+  function _nonIterableSpread4() {
     throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
-  function _iterableToArray3(r) {
+  function _iterableToArray4(r) {
     if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
   }
-  function _arrayWithoutHoles3(r) {
+  function _arrayWithoutHoles4(r) {
     if (Array.isArray(r)) return _arrayLikeToArray7(r);
   }
   function _createForOfIteratorHelper5(r, e) {
@@ -23683,9 +23896,6 @@
         var presentElements = /* @__PURE__ */ new Map();
         var triggerElementsSet = /* @__PURE__ */ new Set();
         var triggerTargets = /* @__PURE__ */ new Map();
-        var initialTriggerControls = /* @__PURE__ */ new WeakMap();
-        var attrMemoryUsers = /* @__PURE__ */ new WeakMap();
-        var initialAttributes = ["hidden", ARIA_EXPANDED, ARIA_CONTROLS, attr.presentMotion];
         function init(options) {
           AelluxJs2.mountManager.add({
             extensionName: extensionName,
@@ -23734,8 +23944,6 @@
         function mountPresentContainer(element) {
           if (presentElements.has(element)) return;
           var presentMotion = element.querySelector(":scope>[".concat(attr.presentMotion, "]")) || element;
-          rememberAttributes(element);
-          if (presentMotion !== element) rememberAttributes(presentMotion);
           if (presentMotion === element) {
             if (!presentMotion.hasAttribute(attr.presentMotion)) presentMotion.setAttribute(attr.presentMotion, "auto");
           } else {
@@ -23764,7 +23972,7 @@
             },
             stop: function stop() {
               var _this$classList;
-              (_this$classList = this.classList).remove.apply(_this$classList, _toConsumableArray3(Object.values(className)));
+              (_this$classList = this.classList).remove.apply(_this$classList, _toConsumableArray4(Object.values(className)));
               if (this.interruptTransition !== null && typeof this.interruptTransition === "function") {
                 this.interruptTransition(AelluxJs2.diagnostics.create(AelluxJs2.diagnostics.WARN_INTERRUPTION, {
                   extensionName: extensionName
@@ -23815,13 +24023,9 @@
           controller.stop();
           presentElements.delete(element);
           controller.triggers.forEach(updateTriggerAriaExpanded);
-          if (controller.presentMotion !== element) restoreAttributes(controller.presentMotion);
-          restoreAttributes(element);
         }
         function mountTriggerElement(triggerElement) {
           if (triggerElementsSet.has(triggerElement)) return;
-          initialTriggerControls.set(triggerElement, triggerElement.getAttribute(ARIA_CONTROLS));
-          rememberAttributes(triggerElement);
           triggerElementsSet.add(triggerElement);
           refreshTriggerTargets(triggerElement);
         }
@@ -23844,10 +24048,9 @@
             triggerTargets.delete(triggerElement);
           }
           triggerElementsSet.delete(triggerElement);
-          restoreAttributes(triggerElement);
-          initialTriggerControls.delete(triggerElement);
         }
         function refreshTriggerTargets(triggerElement) {
+          var _AelluxJs$mountManage, _AelluxJs$mountManage2;
           var targetIds = /* @__PURE__ */ new Set();
           var previousTargets = triggerTargets.get(triggerElement);
           var targets = /* @__PURE__ */ new Set();
@@ -23893,19 +24096,19 @@
             return;
           }
           triggerTargets.set(triggerElement, targets);
-          var initial = initialTriggerControls.get(triggerElement);
+          var initial = (_AelluxJs$mountManage = (_AelluxJs$mountManage2 = AelluxJs2.mountManager).initialAttribute) === null || _AelluxJs$mountManage === void 0 ? void 0 : _AelluxJs$mountManage.call(_AelluxJs$mountManage2, triggerElement, ARIA_CONTROLS);
           if (initial) {
             initial.trim().split(/\s+/).forEach(function(x) {
               return targetIds.add(x);
             });
           }
           updateTriggerAriaExpanded(triggerElement);
-          triggerElement.setAttribute(ARIA_CONTROLS, _toConsumableArray3(targetIds).join(" "));
+          triggerElement.setAttribute(ARIA_CONTROLS, _toConsumableArray4(targetIds).join(" "));
         }
         function updateTriggerAriaExpanded(triggerElement) {
           var targets = triggerTargets.get(triggerElement);
           if (!targets) return;
-          var expanded = _toConsumableArray3(targets).some(function(target) {
+          var expanded = _toConsumableArray4(targets).some(function(target) {
             var controller = presentElements.get(target);
             return controller && target.getAttribute(ARIA_EXPANDED) === "true";
           });
@@ -24105,21 +24308,6 @@
               selector: selector
             });
           }
-        }
-        function rememberAttributes(element) {
-          var users = attrMemoryUsers.get(element) || 0;
-          if (users === 0) AelluxJs2.attrMem.save(element, initialAttributes);
-          attrMemoryUsers.set(element, users + 1);
-        }
-        function restoreAttributes(element) {
-          var users = attrMemoryUsers.get(element);
-          if (!users) return;
-          if (users > 1) {
-            attrMemoryUsers.set(element, users - 1);
-            return;
-          }
-          attrMemoryUsers.delete(element);
-          AelluxJs2.attrMem.restore(element);
         }
         function getString2Time(string) {
           return string ? parseFloat(string) * getMillisecondsMulti(string) : 0;

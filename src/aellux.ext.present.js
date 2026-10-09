@@ -40,14 +40,6 @@
   const presentElements = new Map();
   const triggerElementsSet = new Set();
   const triggerTargets = new Map();
-  const initialTriggerControls = new WeakMap();
-  const attrMemoryUsers = new WeakMap();
-  const initialAttributes = [
-    "hidden",
-    ARIA_EXPANDED,
-    ARIA_CONTROLS,
-    attr.presentMotion
-  ];
 
   function init(options) {
     AelluxJs.mountManager.add({
@@ -87,8 +79,6 @@
     const presentMotion =
       element.querySelector(`:scope>[${attr.presentMotion}]`)
       || element;
-    rememberAttributes(element);
-    if (presentMotion !== element) rememberAttributes(presentMotion);
     if (presentMotion === element) {
       if (!presentMotion.hasAttribute(attr.presentMotion))
         presentMotion.setAttribute(attr.presentMotion, "auto");
@@ -158,15 +148,10 @@
     controller.stop();
     presentElements.delete(element);
     controller.triggers.forEach(updateTriggerAriaExpanded);
-    if (controller.presentMotion !== element)
-      restoreAttributes(controller.presentMotion);
-    restoreAttributes(element);
   }
 
   function mountTriggerElement(triggerElement) {
     if (triggerElementsSet.has(triggerElement)) return;
-    initialTriggerControls.set(triggerElement, triggerElement.getAttribute(ARIA_CONTROLS));
-    rememberAttributes(triggerElement);
     triggerElementsSet.add(triggerElement);
     refreshTriggerTargets(triggerElement);
   }
@@ -181,8 +166,6 @@
       triggerTargets.delete(triggerElement);
     }
     triggerElementsSet.delete(triggerElement);
-    restoreAttributes(triggerElement);
-    initialTriggerControls.delete(triggerElement);
   }
 
   function refreshTriggerTargets(triggerElement) {
@@ -222,7 +205,7 @@
       return;
     }
     triggerTargets.set(triggerElement, targets);
-    const initial = initialTriggerControls.get(triggerElement);
+    const initial = AelluxJs.mountManager.initialAttribute?.(triggerElement, ARIA_CONTROLS);
     if (initial) { initial.trim().split(/\s+/).forEach(x => targetIds.add(x)); }
     updateTriggerAriaExpanded(triggerElement);
     triggerElement.setAttribute(ARIA_CONTROLS, [...targetIds].join(" "));
@@ -436,23 +419,6 @@
         { cause: error, extension: extensionName, selector }
       );
     }
-  }
-
-  function rememberAttributes(element) {
-    const users = attrMemoryUsers.get(element) || 0;
-    if (users === 0) AelluxJs.attrMem.save(element, initialAttributes);
-    attrMemoryUsers.set(element, users + 1);
-  }
-
-  function restoreAttributes(element) {
-    const users = attrMemoryUsers.get(element);
-    if (!users) return;
-    if (users > 1) {
-      attrMemoryUsers.set(element, users - 1);
-      return;
-    }
-    attrMemoryUsers.delete(element);
-    AelluxJs.attrMem.restore(element);
   }
 
   function getString2Time(string) {

@@ -424,6 +424,27 @@
         }
         if (url === api.extName(nameOrUrl)) url = "./" + api.extFilename(name);
         if (!options2) options2 = {};
+        var selector = options2.loadWhen;
+        if (selector !== null && typeof selector !== "undefined") {
+          if (typeof selector !== "string" || !selector.trim()) {
+            diagnostics.error(diagnostics.ERROR_EXTENSION_LOAD_WHEN, {
+              extension: name,
+              selector: selector,
+              expected: "a valid nonempty CSS selector"
+            });
+            return;
+          }
+          try {
+            document2.querySelector(selector);
+          } catch (cause) {
+            diagnostics.error(diagnostics.ERROR_EXTENSION_LOAD_WHEN, {
+              extension: name,
+              selector: selector,
+              cause: cause
+            });
+            return;
+          }
+        }
         if (typeof options2.loadStyle === "undefined") options2.loadStyle = false;
         if (!options2.loadWhen) options2.loadWhen = null;
         options2.builds = normalizeExtensionBuilds(options2.builds);
@@ -434,14 +455,69 @@
         api.registry.ext[key] = options2;
       },
       extAttach: function(name, object) {
+        if (typeof name !== "string" || !/^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$|^[a-z][a-zA-Z0-9]*$/.test(name)) {
+          diagnostics.error(diagnostics.ERROR_EXTENSION_ATTACH, {
+            extension: name,
+            argument: "name",
+            expected: "a nonempty kebab-case or camelCase extension name"
+          });
+          return;
+        }
         name = fromCamelCase2(name);
         var key = toCamelCase2(name);
-        if (!(key in api.registry.ext)) {
-          api.registry.ext[key] = {
-            loadWhen: null,
-            state: null,
-            loadStyle: false
-          };
+        if (key in Object.prototype || key === "prototype") {
+          diagnostics.error(diagnostics.ERROR_EXTENSION_ATTACH, {
+            extension: name,
+            argument: "name",
+            expected: "a name that does not conflict with object properties"
+          });
+          return;
+        }
+        if (!Object.prototype.hasOwnProperty.call(api.registry.ext, key)) {
+          diagnostics.error(diagnostics.ERROR_EXTENSION_NOT_REGISTERED, {
+            extension: name,
+            method: "extAttach"
+          });
+          return;
+        }
+        if (Object.prototype.hasOwnProperty.call(api.ext, key)) {
+          diagnostics.error(diagnostics.ERROR_EXTENSION_DUPLICATE, {
+            extension: name,
+            method: "extAttach"
+          });
+          return;
+        }
+        if (!object || typeof object !== "object" || Array.isArray(object) || typeof object.init !== "function" || typeof object.destroy !== "undefined" && typeof object.destroy !== "function") {
+          diagnostics.error(diagnostics.ERROR_EXTENSION_ATTACH, {
+            extension: name,
+            argument: "api",
+            expected: "an object with init() and an optional destroy()"
+          });
+          return;
+        }
+        var registration = api.registry.ext[key];
+        var selector = registration && registration.loadWhen;
+        if (selector !== null && typeof selector !== "undefined") {
+          if (typeof selector !== "string" || !selector.trim()) {
+            diagnostics.error(diagnostics.ERROR_EXTENSION_ATTACH, {
+              extension: name,
+              argument: "loadWhen",
+              selector: selector,
+              expected: "a valid nonempty CSS selector"
+            });
+            return;
+          }
+          try {
+            document2.querySelector(selector);
+          } catch (cause) {
+            diagnostics.error(diagnostics.ERROR_EXTENSION_ATTACH, {
+              extension: name,
+              argument: "loadWhen",
+              selector: selector,
+              cause: cause
+            });
+            return;
+          }
         }
         api.registry.ext[key].state = "register";
         object.initialized = false;
@@ -529,6 +605,9 @@
         ERROR_EXTENSION_TRANSITION: { code: 1109, message: "aellux.js Extension transition failed." },
         ERROR_EXTENSION_NOT_REGISTERED: { code: 1110, message: "aellux.js Extension is not registered." },
         ERROR_PRESENT_CONTROL_TARGET_MISSING: { code: 1111, message: "A present control has no target selector and is not inside a present container." },
+        ERROR_EXTENSION_ATTACH: { code: 1112, message: "aellux.js Extension attachment has invalid arguments." },
+        ERROR_MOUNT_REGISTRATION: { code: 1113, message: "aellux.js Mount registration has invalid arguments." },
+        ERROR_EXTENSION_LOAD_WHEN: { code: 1114, message: "aellux.js Extension loadWhen selector is invalid." },
         ERROR_LEGACY_RUNTIME_START: { code: 1201, message: "aellux.js Legacy runtime failed to start." },
         ERROR_LEGACY_RUNTIME_LOAD: { code: 1202, message: "aellux.js Legacy runtime could not be loaded." },
         ERROR_MODERN_RUNTIME_START: { code: 1203, message: "aellux.js Modern runtime failed to start; trying Legacy runtime." },

@@ -6,7 +6,7 @@
 <div data-ae-adaptive>Responsive content</div>
 ```
 
-The Extension measures each marked element with `ResizeObserver`, or uses the window resize event when that API is unavailable. It applies one shape class (`ae--shape-vertical`, `ae--shape-square`, or `ae--shape-horizontal`) according to width divided by height. It also toggles `ae--fits-<size>` classes when `sqrt(width * height)` reaches each configured minimum. After an update it dispatches `AelluxJsAdaptiveUpdate` from the element. Unmounting restores the managed classes that were initially present.
+The Extension measures each marked element with `ResizeObserver`, or uses the window resize event when that API is unavailable. It applies one shape class (`ae--shape-vertical`, `ae--shape-square`, or `ae--shape-horizontal`) according to width divided by height. It also toggles `ae--fits-<size>` classes when `sqrt(width * height)` reaches each configured minimum. After an update it dispatches `AelluxJsAdaptiveUpdate` from the element. Unmounting restores the element's initial attributes, including its classes and inline style.
 
 ## Configuration
 

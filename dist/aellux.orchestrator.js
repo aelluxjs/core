@@ -200,25 +200,32 @@
 
   // src/internal/create-mount-helper.js
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
-  function createMountHelper(root, extensionPromises, mountMaps, mountedElements, elementControllers) {
+  function createMountHelper(root, mountMaps, mountedElements, elementControllers) {
     const { toCapitalized: toCapitalized2, toCamelCase: toCamelCase2, fromCamelCase: fromCamelCase2 } = utils_name_case_default;
-    return { mount, unmount, update };
+    const initialAttributeValues = /* @__PURE__ */ new WeakMap();
+    const mountAttributeRecords = /* @__PURE__ */ new WeakMap();
+    return { mount, unmount, update, initialAttribute };
+    function initialAttribute(element, name) {
+      var _a, _b;
+      return (_b = (_a = initialAttributeValues.get(element)) == null ? void 0 : _a.initial.get(name)) != null ? _b : null;
+    }
     async function update(rootOrSelector, extensionNames = null) {
       for (const rootElement of resolveRoots(rootOrSelector, "update")) {
-        await AelluxJsForce(rootElement, "update", extensionNames);
+        await AelluxJsMounted(rootElement, "update", extensionNames);
       }
       return true;
     }
     async function unmount(rootOrSelector, extensionNames = null) {
       for (const rootElement of resolveRoots(rootOrSelector, "unmount")) {
-        await AelluxJsForce(rootElement, "unmount", extensionNames);
+        await AelluxJsMounted(rootElement, "unmount", extensionNames);
       }
       return true;
     }
     async function mount(rootOrSelector, extensionNames = null) {
       const AelluxJs2 = root.AelluxJs;
       for (const rootElement of resolveRoots(rootOrSelector, "mount")) {
-        const allWaiters = findElements(rootElement, AelluxJs2.attr("wait-mounted"));
+        const waitMountedAttr = AelluxJs2.attr("wait-mounted");
+        const allWaiters = findElements(rootElement, `[${waitMountedAttr}]`);
         allWaiters.forEach((waiter) => waiter.setAttribute("aria-busy", "true"));
         const allLinks = findElements(rootElement, "link[rel='aelluxjs-ext']");
         for (const link of allLinks) {
@@ -236,12 +243,12 @@
           waitExtensions.push(AelluxJs2.wait(key));
         }
         await Promise.all(waitExtensions);
-        await AelluxJsForce(rootElement, "mount", extensionNames);
+        await AelluxJsMount(rootElement, extensionNames);
         allWaiters.forEach((waiter) => waiter.setAttribute("aria-busy", "false"));
       }
       return true;
     }
-    async function AelluxJsForce(rootElement, method, extensionNames = null) {
+    async function AelluxJsMount(rootElement, extensionNames = null) {
       const AelluxJs2 = root.AelluxJs;
       if (typeof extensionNames === "string")
         extensionNames = [extensionNames];
@@ -262,7 +269,6 @@
       }
       if (filter.length === 0) return;
       const allElements = findElements(rootElement, filter.join(","));
-      const updatedMounts = method === "update" ? /* @__PURE__ */ new WeakMap() : null;
       for (const element of allElements) {
         const elementsAffected = /* @__PURE__ */ new Set();
         var localExtensionNames;
@@ -278,7 +284,7 @@
               localExtensionNames.add(fromCamelCase2(key));
         }
         for (const extensionName of localExtensionNames) {
-          const extensionPromise = method === "mount" ? AelluxJs2.wait(extensionName) : extensionPromises[toCamelCase2(extensionName)];
+          const extensionPromise = AelluxJs2.wait(extensionName);
           if (!extensionPromise) {
             continue;
           }
@@ -292,48 +298,33 @@
           }
           for (const [selector, controller] of mounter) {
             try {
-              if (!controller[method]) {
+              if (!controller.mount) {
                 continue;
               }
               const mountableElements = findElements(element, selector);
               for (const mountable of mountableElements) {
                 const mountId = `${extensionName}@${selector}`;
-                if (method === "update") {
-                  if (!isMounted(mountable, mountId)) continue;
-                  let seen = updatedMounts.get(mountable);
-                  if (!seen) {
-                    seen = /* @__PURE__ */ new Set();
-                    updatedMounts.set(mountable, seen);
-                  }
-                  if (seen.has(mountId)) continue;
-                  seen.add(mountId);
-                  await controller.update(mountable);
-                  continue;
+                if (isMounted(mountable, mountId)) continue;
+                rememberInitialAttributes(mountable, mountId);
+                try {
+                  await controller.mount(mountable);
+                } catch (error) {
+                  restoreInitialAttributes(mountable, mountId);
+                  throw error;
                 }
-                const mounting = method === "mount";
-                if (mounting === isMounted(mountable, mountId)) continue;
-                await controller[method](mountable);
                 elementsAffected.add(mountable);
-                setMounted(mountable, mountId, mounting);
-                if (mounting) {
-                  let elementController = elementControllers.get(mountable);
-                  if (!elementController) {
-                    elementController = createControllerHelper(root, mountable);
-                    elementControllers.set(mountable, elementController);
-                  }
-                  elementController.spawn(
-                    extensionName,
-                    mountId,
-                    controller.controllers,
-                    typeof controller.update === "function"
-                  );
-                } else {
-                  const elementController = elementControllers.get(mountable);
-                  if (elementController) {
-                    elementController.despawn(mountId);
-                    if (!elementController.hasMounts()) elementControllers.delete(mountable);
-                  }
+                setMounted(mountable, mountId);
+                let elementController = elementControllers.get(mountable);
+                if (!elementController) {
+                  elementController = createControllerHelper(root, mountable);
+                  elementControllers.set(mountable, elementController);
                 }
+                elementController.spawn(
+                  extensionName,
+                  mountId,
+                  controller.controllers,
+                  typeof controller.update === "function"
+                );
               }
             } catch (error) {
               AelluxJs2.diagnostics.error(
@@ -341,7 +332,7 @@
                 {
                   cause: error,
                   extension: extensionName,
-                  method,
+                  method: "mount",
                   selector
                 }
               );
@@ -353,6 +344,58 @@
             AelluxJs2.className("mounted"),
             isMounted(affected)
           );
+        }
+      }
+      AelluxJs2.dispatch("Mount");
+    }
+    async function AelluxJsMounted(rootElement, method, extensionNames = null) {
+      const AelluxJs2 = root.AelluxJs;
+      const selectedNames = extensionNames === null ? null : new Set((typeof extensionNames === "string" ? [extensionNames] : extensionNames).map((name) => fromCamelCase2(name)));
+      for (const [element, mountIds] of Array.from(mountedElements)) {
+        if (!element.isConnected) {
+          unmount(element);
+          continue;
+        }
+        if (element !== rootElement && !rootElement.contains(element)) continue;
+        for (const mountId of Array.from(mountIds)) {
+          const separator = mountId.indexOf("@");
+          const extensionName = mountId.slice(0, separator);
+          const selector = mountId.slice(separator + 1);
+          if (selectedNames && !selectedNames.has(extensionName)) continue;
+          const extensionKey = toCamelCase2(extensionName);
+          const mounter = mountMaps.get(extensionKey);
+          const controller = mounter && mounter.get(selector);
+          try {
+            if (controller && controller[method]) {
+              await controller[method](element);
+            }
+          } catch (error) {
+            AelluxJs2.diagnostics.error(AelluxJs2.diagnostics.ERROR_EXTENSION_MOUNT, {
+              cause: error,
+              extension: extensionName,
+              method,
+              selector
+            });
+          }
+          try {
+            if (method === "unmount") {
+              setMounted(element, mountId, false);
+              const elementController = elementControllers.get(element);
+              if (elementController) {
+                elementController.despawn(mountId);
+                if (!elementController.hasMounts()) elementControllers.delete(element);
+              }
+              element.classList.toggle(AelluxJs2.className("mounted"), isMounted(element));
+              restoreInitialAttributes(element, mountId);
+            }
+          } catch (error) {
+            AelluxJs2.diagnostics.error(AelluxJs2.diagnostics.ERROR_EXTENSION_MOUNT, {
+              cause: error,
+              extension: extensionName,
+              method,
+              selector
+            });
+          }
         }
       }
       AelluxJs2.dispatch(toCapitalized2(method));
@@ -404,18 +447,64 @@
       mounts[mounted ? "add" : "delete"](mountId);
       if (mounts.size === 0) mountedElements.delete(element);
     }
+    function rememberInitialAttributes(element, mountId) {
+      const targets = [element, ...element.querySelectorAll("*")];
+      const retained = [];
+      try {
+        for (const target of targets) {
+          let record = initialAttributeValues.get(target);
+          if (!record) {
+            record = {
+              initial: new Map(Array.from(target.attributes, (attribute) => [attribute.name, attribute.value])),
+              users: 0
+            };
+            initialAttributeValues.set(target, record);
+          }
+          record.users++;
+          retained.push(target);
+        }
+      } catch (error) {
+        releaseInitialAttributes(retained);
+        throw error;
+      }
+      let mounts = mountAttributeRecords.get(element);
+      if (!mounts) {
+        mounts = /* @__PURE__ */ new Map();
+        mountAttributeRecords.set(element, mounts);
+      }
+      mounts.set(mountId, targets);
+    }
+    function restoreInitialAttributes(element, mountId) {
+      const mounts = mountAttributeRecords.get(element);
+      if (!mounts || !mounts.has(mountId)) return;
+      releaseInitialAttributes(mounts.get(mountId));
+      mounts.delete(mountId);
+      if (!mounts.size) mountAttributeRecords.delete(element);
+    }
+    function releaseInitialAttributes(targets) {
+      for (const target of targets) {
+        const record = initialAttributeValues.get(target);
+        if (--record.users) continue;
+        for (const attribute of Array.from(target.attributes)) {
+          if (!record.initial.has(attribute.name)) target.removeAttribute(attribute.name);
+        }
+        for (const [name, value] of record.initial) {
+          if (target.getAttribute(name) !== value) target.setAttribute(name, value);
+        }
+        initialAttributeValues.delete(target);
+      }
+    }
   }
 
   // src/internal/build-mount-map-manager.js
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
-  function buildMountMapManager(root, extensionPromises) {
+  function buildMountMapManager(root) {
     const { toCamelCase: toCamelCase2, fromCamelCase: fromCamelCase2 } = utils_name_case_default;
-    const mountedElements = /* @__PURE__ */ new WeakMap();
+    const mountedElements = /* @__PURE__ */ new Map();
     const elementControllers = /* @__PURE__ */ new WeakMap();
     const maps = /* @__PURE__ */ new Map();
     const helper = createMountHelper(
       root,
-      extensionPromises,
       maps,
       mountedElements,
       elementControllers
@@ -426,7 +515,8 @@
       controller,
       mount: helper.mount,
       unmount: helper.unmount,
-      update: helper.update
+      update: helper.update,
+      initialAttribute: helper.initialAttribute
     };
     return manager;
     function controller(elementOrId) {
@@ -446,11 +536,42 @@
     function keyFor(extensionName) {
       return toCamelCase2(fromCamelCase2(extensionName));
     }
-    function add({ extensionName, selector, mount, unmount, update, controllers } = {}) {
-      if (typeof extensionName !== "string" || !extensionName || typeof selector !== "string" || !selector.trim()) {
-        throw new TypeError("mountManager.add requires an extension name and selector");
+    function add(options) {
+      const diagnostics = root.AelluxJs.diagnostics;
+      function reject(argument, cause) {
+        diagnostics.error(diagnostics.ERROR_MOUNT_REGISTRATION, {
+          extension: options && options.extensionName,
+          selector: options && options.selector,
+          argument,
+          cause
+        });
+        return false;
       }
+      if (!options || typeof options !== "object" || Array.isArray(options))
+        return reject("options");
+      const { extensionName, selector, mount, unmount, update, controllers } = options;
+      if (typeof extensionName !== "string" || !/^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$|^[a-z][a-zA-Z0-9]*$/.test(extensionName))
+        return reject("extensionName");
       const key = keyFor(extensionName);
+      if (key in Object.prototype || key === "prototype")
+        return reject("extensionName");
+      if (!Object.prototype.hasOwnProperty.call(root.AelluxJs.registry.ext, key))
+        return reject("extensionName");
+      if (typeof selector !== "string" || !selector.trim())
+        return reject("selector");
+      try {
+        root.document.querySelector(selector);
+      } catch (cause) {
+        return reject("selector", cause);
+      }
+      if (typeof mount !== "function") return reject("mount");
+      if (unmount !== void 0 && typeof unmount !== "function") return reject("unmount");
+      if (update !== void 0 && typeof update !== "function") return reject("update");
+      if (controllers !== void 0 && (!Array.isArray(controllers) || controllers.some((name) => typeof name !== "string" || !name.trim())))
+        return reject("controllers");
+      const allowed = ["extensionName", "selector", "mount", "unmount", "update", "controllers"];
+      const unknown = Object.keys(options).find((name) => !allowed.includes(name));
+      if (unknown) return reject(unknown);
       let map = maps.get(key);
       if (!map) {
         map = /* @__PURE__ */ new Map();
@@ -482,7 +603,7 @@
     "use strict";
     const { toCamelCase: toCamelCase2, fromCamelCase: fromCamelCase2 } = utils_name_case_default;
     const extensionPromises = {};
-    const mountManager = buildMountMapManager(root, extensionPromises);
+    const mountManager = buildMountMapManager(root);
     const layoutScheduler = buildLayoutScheduler();
     root.AelluxJs = Object.assign(
       root.AelluxJs,

@@ -20,4 +20,4 @@ The Extension exposes `pop(element)`, `unpop(element)`, `toggle(element, goto)`,
 
 The transition classes are `ae--popping`, `ae--unpopping`, and `ae--pop`. CSS custom properties `--ae-pop-duration` and `--ae-unpop-duration` on the motion element set the corresponding duration. The Extension emits cancelable `AelluxJsBeforePop` and `AelluxJsBeforeUnpop` events, followed by `AelluxJsPopping`/`AelluxJsUnpopping` and `AelluxJsPop`/`AelluxJsUnpop` as transitions progress.
 
-`data-ae-auto-unpop` specifies a delay before closing an open container. Outside clicks also close open containers unless `data-ae-unpop-on-outside="false"` is set. On unmount, the Extension restores the initial `hidden`, `aria-expanded`, `aria-controls`, and `data-ae-present-motion` attributes it memorized.
+`data-ae-auto-unpop` specifies a delay before closing an open container. Outside clicks also close open containers unless `data-ae-unpop-on-outside="false"` is set. On unmount, the mount helper restores the initial attributes on the container, its existing descendants, and the trigger controls it mounted.

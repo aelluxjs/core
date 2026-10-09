@@ -8,10 +8,11 @@
 
 ```js
 $ae.ext("pointer");
-await $ae.init({ mode: "basic" });
-
-const pointers = $ae("canvas").pointer.pointers();
-console.log(pointers);
+$ae.init({ mode: "basic" });
+$ae.on("Ready", function (event) {
+  const pointers = $ae("canvas").pointer.pointers();
+  console.log(pointers);
+})
 ```
 
 An empty `data-ae-pointable` allows one pointer by default. A non-negative integer sets the maximum number of pointers associated with that element; `0` disables association and invalid values use the default of one. Nested pointables have their own limits. The mounted controller method `$ae(elementOrId).pointer.pointers()` returns the pointers currently associated with that element.

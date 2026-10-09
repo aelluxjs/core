@@ -122,9 +122,6 @@
     var presentElements = /* @__PURE__ */ new Map();
     var triggerElementsSet = /* @__PURE__ */ new Set();
     var triggerTargets = /* @__PURE__ */ new Map();
-    var initialTriggerControls = /* @__PURE__ */ new WeakMap();
-    var attrMemoryUsers = /* @__PURE__ */ new WeakMap();
-    var initialAttributes = ["hidden", ARIA_EXPANDED, ARIA_CONTROLS, attr.presentMotion];
     function init(options) {
       AelluxJs.mountManager.add({
         extensionName: extensionName,
@@ -173,8 +170,6 @@
     function mountPresentContainer(element) {
       if (presentElements.has(element)) return;
       var presentMotion = element.querySelector(":scope>[".concat(attr.presentMotion, "]")) || element;
-      rememberAttributes(element);
-      if (presentMotion !== element) rememberAttributes(presentMotion);
       if (presentMotion === element) {
         if (!presentMotion.hasAttribute(attr.presentMotion)) presentMotion.setAttribute(attr.presentMotion, "auto");
       } else {
@@ -254,13 +249,9 @@
       controller.stop();
       presentElements.delete(element);
       controller.triggers.forEach(updateTriggerAriaExpanded);
-      if (controller.presentMotion !== element) restoreAttributes(controller.presentMotion);
-      restoreAttributes(element);
     }
     function mountTriggerElement(triggerElement) {
       if (triggerElementsSet.has(triggerElement)) return;
-      initialTriggerControls.set(triggerElement, triggerElement.getAttribute(ARIA_CONTROLS));
-      rememberAttributes(triggerElement);
       triggerElementsSet.add(triggerElement);
       refreshTriggerTargets(triggerElement);
     }
@@ -283,10 +274,9 @@
         triggerTargets.delete(triggerElement);
       }
       triggerElementsSet.delete(triggerElement);
-      restoreAttributes(triggerElement);
-      initialTriggerControls.delete(triggerElement);
     }
     function refreshTriggerTargets(triggerElement) {
+      var _AelluxJs$mountManage, _AelluxJs$mountManage2;
       var targetIds = /* @__PURE__ */ new Set();
       var previousTargets = triggerTargets.get(triggerElement);
       var targets = /* @__PURE__ */ new Set();
@@ -332,7 +322,7 @@
         return;
       }
       triggerTargets.set(triggerElement, targets);
-      var initial = initialTriggerControls.get(triggerElement);
+      var initial = (_AelluxJs$mountManage = (_AelluxJs$mountManage2 = AelluxJs.mountManager).initialAttribute) === null || _AelluxJs$mountManage === void 0 ? void 0 : _AelluxJs$mountManage.call(_AelluxJs$mountManage2, triggerElement, ARIA_CONTROLS);
       if (initial) {
         initial.trim().split(/\s+/).forEach(function(x) {
           return targetIds.add(x);
@@ -544,21 +534,6 @@
           selector: selector
         });
       }
-    }
-    function rememberAttributes(element) {
-      var users = attrMemoryUsers.get(element) || 0;
-      if (users === 0) AelluxJs.attrMem.save(element, initialAttributes);
-      attrMemoryUsers.set(element, users + 1);
-    }
-    function restoreAttributes(element) {
-      var users = attrMemoryUsers.get(element);
-      if (!users) return;
-      if (users > 1) {
-        attrMemoryUsers.set(element, users - 1);
-        return;
-      }
-      attrMemoryUsers.delete(element);
-      AelluxJs.attrMem.restore(element);
     }
     function getString2Time(string) {
       return string ? parseFloat(string) * getMillisecondsMulti(string) : 0;

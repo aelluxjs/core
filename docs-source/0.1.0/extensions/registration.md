@@ -29,6 +29,7 @@ $ae.ext("preference", {
 
 - `builds` declares published JavaScript variants: `modern`, `legacy`, or both. Omitting it promises both variants.
 - `loadWhen` delays loading until a matching element is discovered.
+- An invalid `loadWhen` selector reports `ERROR_EXTENSION_LOAD_WHEN` (`1114`), and `ext()` leaves the Extension undeclared.
 - `loadStyle: true` requests the stylesheet derived from the Extension script URL; a URL string requests that specific stylesheet.
 
 Register each name once. Duplicate declarations currently report an error and do not replace the existing registration.
@@ -59,6 +60,8 @@ An Extension script exposes its API through `AelluxJs.extAttach()`:
   function destroy() {}
 })(typeof globalThis !== "undefined" ? globalThis : window);
 ```
+
+Declare the Extension with `ext()` before calling `extAttach()`. The attachment supplies its definitive API object. `extAttach()` requires a valid kebab-case or camelCase Extension name and an API object with an `init()` function. `destroy()`, when provided, must also be a function. Invalid arguments report `ERROR_EXTENSION_ATTACH` (`1112`) and leave the Extension unattached. A missing declaration reports `ERROR_EXTENSION_NOT_REGISTERED` (`1110`); a second attachment reports `ERROR_EXTENSION_DUPLICATE` (`1101`).
 
 Use the [aellux.js Extension scaffold](https://github.com/aelluxjs/core/blob/main/templates/README.md) for the complete lifecycle structure.
 Third-party authors should also follow the [Extension authoring and compatibility contract](authoring.md).

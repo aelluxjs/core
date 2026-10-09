@@ -21,7 +21,7 @@ import utilsNameCase from "./internal/utils-name-case.js";
   const { toCamelCase, fromCamelCase } = utilsNameCase;
 
   const extensionPromises = {};
-  const mountManager = buildMountMapManager(root, extensionPromises);
+  const mountManager = buildMountMapManager(root);
   const layoutScheduler = buildLayoutScheduler();
 
   // Keep the boot API function: its methods close over the same instance.

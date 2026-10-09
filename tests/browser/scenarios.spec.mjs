@@ -174,6 +174,94 @@ test("waiting for an unregistered Extension records an error", async ({ page }) 
   });
 });
 
+test("extAttach diagnoses invalid arguments without attaching the Extension", async ({ page }) => {
+  await page.goto("/tests/index.htm");
+
+  const result = await page.evaluate(async () => {
+    const [{ createAelluxApi }, { createAelluxConstants }] = await Promise.all([
+      import("/src/internal/aellux-api-integration.js"),
+      import("/src/internal/create-aellux-constants.js")
+    ]);
+    const AelluxJs = createAelluxApi(window, createAelluxConstants());
+    const api = { init() {} };
+    AelluxJs.extAttach(null, api);
+    AelluxJs.extAttach("bad name", api);
+    AelluxJs.extAttach("constructor", api);
+    AelluxJs.ext("bad-api");
+    AelluxJs.extAttach("bad-api", null);
+    AelluxJs.extAttach("bad-api", { init: true });
+    AelluxJs.extAttach("bad-api", { init() {}, destroy: false });
+    AelluxJs.ext("bad-selector", { loadWhen: "[" });
+    AelluxJs.extAttach("bad-selector", api);
+    AelluxJs.ext("bad-selector-type", { loadWhen: 123 });
+    AelluxJs.extAttach("bad-selector-type", api);
+    AelluxJs.ext("bad-selector-empty", { loadWhen: " " });
+    AelluxJs.ext("bad-selector-false", { loadWhen: false });
+    AelluxJs.ext("retry-probe", { loadWhen: "[" });
+    AelluxJs.ext("retry-probe", { loadWhen: "[data-retry]" });
+    AelluxJs.extAttach("retry-probe", { init() {} });
+    AelluxJs.extAttach("undeclared-probe", api);
+    AelluxJs.ext("valid-probe");
+    AelluxJs.extAttach("valid-probe", api);
+    AelluxJs.extAttach("valid-probe", { init() {} });
+    AelluxJs.ext("valid-lazy", { loadWhen: "[data-valid]" });
+    AelluxJs.extAttach("valid-lazy", { init() {}, metadata: { ok: true } });
+
+    const entries = AelluxJs.diagnostics.showHistory().filter(entry => entry.code === 1112);
+    const registrationEntries = AelluxJs.diagnostics.showHistory()
+      .filter(entry => entry.code === 1110 || entry.code === 1101);
+    const loadWhenEntries = AelluxJs.diagnostics.showHistory()
+      .filter(entry => entry.code === 1114);
+    return {
+      arguments: entries.map(entry => entry.context.argument),
+      registrationCodes: registrationEntries.map(entry => entry.code),
+      unregisteredAttachMethod: registrationEntries
+        .find(entry => entry.code === 1110 && entry.context.extension === "undeclared-probe")
+        .context.method,
+      invalidSelectors: loadWhenEntries.map(entry => entry.context.selector),
+      malformedSelectorHasCause: loadWhenEntries[0].context.cause instanceof Error,
+      undeclaredRegistered: Object.hasOwn(AelluxJs.registry.ext, "undeclaredProbe"),
+      undeclaredAttached: Object.hasOwn(AelluxJs.ext, "undeclaredProbe"),
+      invalidNameRegistered: Object.hasOwn(AelluxJs.registry.ext, "bad name"),
+      badApiState: AelluxJs.registry.ext.badApi.state,
+      badApiAttached: Object.hasOwn(AelluxJs.ext, "badApi"),
+      badSelectorRegistered: Object.hasOwn(AelluxJs.registry.ext, "badSelector"),
+      badSelectorAttached: Object.hasOwn(AelluxJs.ext, "badSelector"),
+      badSelectorTypeRegistered: Object.hasOwn(AelluxJs.registry.ext, "badSelectorType"),
+      badSelectorTypeAttached: Object.hasOwn(AelluxJs.ext, "badSelectorType"),
+      badSelectorEmptyRegistered: Object.hasOwn(AelluxJs.registry.ext, "badSelectorEmpty"),
+      badSelectorFalseRegistered: Object.hasOwn(AelluxJs.registry.ext, "badSelectorFalse"),
+      badSelectorIndexed: Object.hasOwn(AelluxJs.registry.lazyExtSelectors, "badSelector"),
+      retryAttached: !!AelluxJs.ext.retryProbe,
+      validAttached: AelluxJs.ext.validProbe === api,
+      validLazyAttached: AelluxJs.ext.validLazy.metadata.ok
+    };
+  });
+
+  expect(result).toEqual({
+    arguments: ["name", "name", "name", "api", "api", "api"],
+    registrationCodes: [1110, 1110, 1110, 1101],
+    unregisteredAttachMethod: "extAttach",
+    invalidSelectors: ["[", 123, " ", false, "["],
+    malformedSelectorHasCause: true,
+    undeclaredRegistered: false,
+    undeclaredAttached: false,
+    invalidNameRegistered: false,
+    badApiState: "wait",
+    badApiAttached: false,
+    badSelectorRegistered: false,
+    badSelectorAttached: false,
+    badSelectorTypeRegistered: false,
+    badSelectorTypeAttached: false,
+    badSelectorEmptyRegistered: false,
+    badSelectorFalseRegistered: false,
+    badSelectorIndexed: false,
+    retryAttached: true,
+    validAttached: true,
+    validLazyAttached: true
+  });
+});
+
 test("missing mounted controller method records a warning", async ({ page }) => {
   await page.goto("/tests/index.htm");
   await page.addScriptTag({ url: "/dist/aellux.js" });
@@ -214,6 +302,139 @@ test("missing mounted controller method records a warning", async ({ page }) => 
     diagnostic: {
       level: 1, extension: "methodProbe", method: "missingMethod", sameElement: true
     }
+  });
+});
+
+test("mountManager.add diagnoses invalid registrations without changing the mount map", async ({ page }) => {
+  await page.goto("/tests/index.htm");
+  await page.addScriptTag({ url: "/dist/aellux.js" });
+  await page.evaluate(() => AelluxJs.init({ mode: "basic" }));
+  await expect.poll(() => page.evaluate(() => AelluxJs.diagnostics.supported)).toBe(true);
+
+  const result = await page.evaluate(async () => {
+    document.body.innerHTML = '<div id="mount-probe" data-mount-probe></div>';
+    let mountCalls = 0;
+    AelluxJs.ext("mount-probe");
+    AelluxJs.extAttach("mount-probe", { init() {} });
+    await AelluxJs.wait("mount-probe");
+    const manager = AelluxJs.mountManager;
+    const valid = {
+      extensionName: "mount-probe", selector: "[data-mount-probe]",
+      mount() { mountCalls++; }
+    };
+    const accepted = manager.add(valid) === manager;
+    const invalid = [
+      null,
+      { ...valid, extensionName: 2 },
+      { ...valid, extensionName: "constructor" },
+      { ...valid, extensionName: "undeclared-mount" },
+      { ...valid, selector: "[" },
+      { ...valid, selector: 42 },
+      { ...valid, mount: null },
+      { ...valid, unmount: false },
+      { ...valid, update: "update" },
+      { ...valid, controllers: ["ok", 3] },
+      { ...valid, controllers: "method" },
+      { ...valid, initialAttributes: "data-state" },
+      { ...valid, mout: () => {} }
+    ];
+    const rejected = invalid.map(options => manager.add(options));
+    await manager.mount(document.getElementById("mount-probe"), "mount-probe");
+    const entries = AelluxJs.diagnostics.showHistory().filter(entry => entry.code === 1113);
+    return {
+      accepted,
+      allRejected: rejected.every(value => value === false),
+      arguments: entries.map(entry => entry.context.argument),
+      mountCalls,
+      selectorIndex: AelluxJs.registry.extMounters.mountProbe
+    };
+  });
+
+  expect(result).toEqual({
+    accepted: true,
+    allRejected: true,
+    arguments: ["options", "extensionName", "extensionName", "extensionName", "selector", "selector",
+      "mount", "unmount", "update", "controllers", "controllers",
+      "initialAttributes", "mout"],
+    mountCalls: 1,
+    selectorIndex: "[data-mount-probe]"
+  });
+});
+
+test("mount helper restores all attributes after overlapping mounts and failed mounts", async ({ page }) => {
+  await page.goto("/tests/index.htm");
+  await page.addScriptTag({ url: "/dist/aellux.js" });
+  await page.evaluate(() => AelluxJs.init({ mode: "basic" }));
+  const result = await page.evaluate(async () => {
+    document.body.innerHTML = `
+      <div id="target" data-track data-secondary data-state="initial">
+        <span id="child" data-child-state="child-initial"></span>
+      </div>
+      <div id="failure" data-fail data-state="failure-initial"></div>
+    `;
+    const target = document.getElementById("target");
+    const child = document.getElementById("child");
+    const failure = document.getElementById("failure");
+    const duringUnmount = [];
+    const initialSeen = [];
+    AelluxJs.ext("attribute-probe");
+    AelluxJs.extAttach("attribute-probe", {
+      init() {
+        AelluxJs.mountManager.add({
+          extensionName: "attribute-probe", selector: "[data-track]",
+          mount(element) {
+            initialSeen.push(AelluxJs.mountManager.initialAttribute(element, "data-state"));
+            element.setAttribute("data-state", "first");
+            element.setAttribute("data-added", "new");
+            child.setAttribute("data-child-state", "changed");
+          },
+          unmount() { duringUnmount.push(target.getAttribute("data-state")); }
+        });
+        AelluxJs.mountManager.add({
+          extensionName: "attribute-probe", selector: "[data-secondary]",
+          mount(element) {
+            initialSeen.push(AelluxJs.mountManager.initialAttribute(element, "data-state"));
+            element.setAttribute("data-state", "second");
+          },
+          unmount() { duringUnmount.push(target.getAttribute("data-state")); }
+        });
+        AelluxJs.mountManager.add({
+          extensionName: "attribute-probe", selector: "[data-fail]",
+          mount(element) {
+            element.setAttribute("data-state", "failed");
+            element.setAttribute("data-added", "failed");
+            throw new Error("mount failure");
+          }
+        });
+      }
+    });
+    await AelluxJs.wait("attribute-probe");
+    await AelluxJs.mount(target, "attribute-probe");
+    const mounted = target.getAttribute("data-state");
+    await AelluxJs.unmount(target, "attribute-probe");
+    await AelluxJs.mount(failure, "attribute-probe");
+    return {
+      mounted,
+      initialSeen,
+      duringUnmount,
+      restored: target.getAttribute("data-state"),
+      addedRestored: target.hasAttribute("data-added"),
+      childRestored: child.getAttribute("data-child-state"),
+      failureRestored: failure.getAttribute("data-state"),
+      failureAddedRestored: failure.hasAttribute("data-added"),
+      failureMounted: !!AelluxJs.mountManager.controller(failure)
+    };
+  });
+  expect(result).toEqual({
+    mounted: "second",
+    initialSeen: ["initial", "initial"],
+    duringUnmount: ["second", "second"],
+    restored: "initial",
+    addedRestored: false,
+    childRestored: "child-initial",
+    failureRestored: "failure-initial",
+    failureAddedRestored: false,
+    failureMounted: false
   });
 });
 
@@ -271,6 +492,48 @@ test("mounted element controller runs mount, update, and unmount lifecycle metho
     extensionUpdate: "function",
     newController: true,
     methods: ["function", "function", "function"]
+  });
+});
+
+test("update and unmount use mounted registrations after attributes are removed", async ({ page }) => {
+  await page.goto("/tests/index.htm");
+  await page.addScriptTag({ url: "/dist/aellux.js" });
+  await page.evaluate(() => AelluxJs.init({ mode: "basic" }));
+  await expect.poll(() => page.evaluate(() => AelluxJs.diagnostics.supported)).toBe(true);
+
+  const result = await page.evaluate(async () => {
+    document.body.innerHTML = '<div id="scope"><div id="target" data-mounted-probe></div></div><div id="outside" data-mounted-probe></div>';
+    const calls = { update: [], unmount: [] };
+    AelluxJs.ext("mounted-probe");
+    AelluxJs.extAttach("mounted-probe", {
+      init() {
+        AelluxJs.mountManager.add({
+          extensionName: "mounted-probe",
+          selector: "[data-mounted-probe]",
+          mount() {},
+          update: element => calls.update.push(element.id),
+          unmount: element => calls.unmount.push(element.id)
+        });
+      }
+    });
+    await AelluxJs.wait("mounted-probe");
+    await AelluxJs.mount(document, "mounted-probe");
+    const target = document.getElementById("target");
+    const outside = document.getElementById("outside");
+    target.removeAttribute("data-mounted-probe");
+    outside.removeAttribute("data-mounted-probe");
+    await AelluxJs.mountManager.update(document.getElementById("scope"), "mounted-probe");
+    await AelluxJs.unmount(document.getElementById("scope"), "mounted-probe");
+    return {
+      calls,
+      targetMounted: target.classList.contains(AelluxJs.className("mounted")),
+      outsideMounted: outside.classList.contains(AelluxJs.className("mounted"))
+    };
+  });
+  expect(result).toEqual({
+    calls: { update: ["target"], unmount: ["target"] },
+    targetMounted: false,
+    outsideMounted: true
   });
 });
 

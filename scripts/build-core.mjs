@@ -73,6 +73,7 @@ const bootstrapEvaluationBuild = await build({
   legalComments: "none"
 });
 runInContext(bootstrapEvaluationBuild.outputFiles[0].text, bootstrapContext);
+runInContext('AelluxJs.ext("adaptive")', bootstrapContext);
 runInContext(await readFile(adaptiveExtensionPath, "utf8"), bootstrapContext);
 await writeFile(
   join(outputDirectory, "aellux.ext.adaptive.css"),

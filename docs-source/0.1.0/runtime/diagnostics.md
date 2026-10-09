@@ -86,4 +86,8 @@ An invalid root selector passed to `mount()` or `unmount()` records `ERROR_MOUNT
 
 Waiting for an unregistered Extension records `ERROR_EXTENSION_NOT_REGISTERED` (`1110`) and rejects with that diagnostic. A mounted controller name without a matching public Extension method records `WARN_CONTROLLER_METHOD_MISSING` (`2005`). If browser storage is unavailable, `WARN_STORAGE_FALLBACK` (`2006`) identifies the storage area and key prefix; values are then held in memory for the current page only.
 
+`ext()` records `ERROR_EXTENSION_LOAD_WHEN` (`1114`) when a supplied `loadWhen` selector is invalid and does not register the Extension. `extAttach()` records `ERROR_EXTENSION_ATTACH` (`1112`) when its name, API object, lifecycle methods, or a changed declared `loadWhen` selector is invalid. Its context identifies the rejected argument, and the API is not attached. It records `ERROR_EXTENSION_NOT_REGISTERED` (`1110`) when no preceding `ext()` declaration exists and `ERROR_EXTENSION_DUPLICATE` (`1101`) for a second attachment.
+
+`mountManager.add()` records `ERROR_MOUNT_REGISTRATION` (`1113`) when a registration argument or CSS selector is invalid. Its context identifies the rejected argument; no mount registration is added or replaced.
+
 State navigation records `WARN_NAVIGATION_EVENT_INVALID` (`2009`) when `PushAjaxReplace` or `UpdateBaseTitle` receives malformed event details. Exceptions while handling those events record `ERROR_CALLBACK` (`1108`). Feedback subscriber exceptions and rejected promises also record `ERROR_CALLBACK`; other subscribers continue to receive the feedback.
