@@ -78,6 +78,49 @@ test("invalid mount root selectors are recorded for mount and unmount", async ({
   });
 });
 
+test("mount failure records a diagnostic and clears aria-busy", async ({ page }) => {
+  await page.goto("/tests/index.htm");
+  await page.addScriptTag({ url: "/dist/aellux.js" });
+  await page.evaluate(() => AelluxJs.init({ mode: "basic" }));
+  await expect.poll(() => page.evaluate(() => AelluxJs.diagnostics.supported)).toBe(true);
+
+  const result = await page.evaluate(async () => {
+    const target = document.createElement("div");
+    target.setAttribute(AelluxJs.attr("wait-mounted"), "");
+    document.body.append(target);
+    AelluxJs.ext("failure-probe");
+    const originalWait = AelluxJs.wait;
+    AelluxJs.wait = () => Promise.reject(new Error("mount preparation failed"));
+    try {
+      const mounted = await AelluxJs.mount(target, "failure-probe");
+      const entry = AelluxJs.diagnostics.showHistory().find(item => item.code === 1006);
+      return {
+        mounted,
+        busy: target.getAttribute("aria-busy"),
+        diagnostic: entry && {
+          level: entry.level,
+          sameRoot: entry.context.root === target,
+          extensions: entry.context.extensions,
+          cause: entry.context.cause.message
+        }
+      };
+    } finally {
+      AelluxJs.wait = originalWait;
+    }
+  });
+
+  expect(result).toEqual({
+    mounted: true,
+    busy: "false",
+    diagnostic: {
+      level: 0,
+      sameRoot: true,
+      extensions: "failure-probe",
+      cause: "mount preparation failed"
+    }
+  });
+});
+
 test("wait awaits async Extension init and diagnoses rejection", async ({ page }) => {
   await page.goto("/tests/index.htm");
   await page.addScriptTag({ url: "/dist/aellux.js" });
@@ -361,48 +404,60 @@ test("mountManager.add diagnoses invalid registrations without changing the moun
   });
 });
 
-test("mount helper restores all attributes after overlapping mounts and failed mounts", async ({ page }) => {
+test("mount helper restores selected attributes only on mounted elements", async ({ page }) => {
   await page.goto("/tests/index.htm");
   await page.addScriptTag({ url: "/dist/aellux.js" });
   await page.evaluate(() => AelluxJs.init({ mode: "basic" }));
   const result = await page.evaluate(async () => {
     document.body.innerHTML = `
-      <div id="target" data-track data-secondary data-state="initial">
-        <span id="child" data-child-state="child-initial"></span>
+      <div id="target" data-track data-secondary data-ae-state="initial" aria-label="initial label" hidden class="original ae--stale" style="color: red">
+        <span id="child" data-ae-child-state="child-initial"></span>
       </div>
-      <div id="failure" data-fail data-state="failure-initial"></div>
+      <div id="failure" data-fail data-ae-state="failure-initial"></div>
     `;
     const target = document.getElementById("target");
     const child = document.getElementById("child");
     const failure = document.getElementById("failure");
     const duringUnmount = [];
     const initialSeen = [];
+    const initialClassSeen = [];
     AelluxJs.ext("attribute-probe");
     AelluxJs.extAttach("attribute-probe", {
       init() {
         AelluxJs.mountManager.add({
           extensionName: "attribute-probe", selector: "[data-track]",
           mount(element) {
-            initialSeen.push(AelluxJs.mountManager.initialAttribute(element, "data-state"));
-            element.setAttribute("data-state", "first");
-            element.setAttribute("data-added", "new");
-            child.setAttribute("data-child-state", "changed");
+            initialSeen.push(AelluxJs.mountManager.initialAttribute(element, "data-ae-state"));
+            initialClassSeen.push(element.classList.contains("ae--stale"));
+            element.classList.add("ae--active");
+            element.setAttribute("data-ae-state", "first");
+            element.setAttribute("data-ae-added", "new");
+            element.setAttribute("data-unrelated", "keep");
+            element.setAttribute("aria-label", "changed label");
+            element.removeAttribute("hidden");
+            element.classList.add("changed");
+            element.style.color = "blue";
+            child.setAttribute("data-ae-child-state", "changed");
           },
-          unmount() { duringUnmount.push(target.getAttribute("data-state")); }
+          unmount() {
+            duringUnmount.push(target.getAttribute("data-ae-state"));
+            target.classList.remove("ae--active");
+          }
         });
         AelluxJs.mountManager.add({
           extensionName: "attribute-probe", selector: "[data-secondary]",
           mount(element) {
-            initialSeen.push(AelluxJs.mountManager.initialAttribute(element, "data-state"));
-            element.setAttribute("data-state", "second");
+            initialSeen.push(AelluxJs.mountManager.initialAttribute(element, "data-ae-state"));
+            initialClassSeen.push(element.classList.contains("ae--active"));
+            element.setAttribute("data-ae-state", "second");
           },
-          unmount() { duringUnmount.push(target.getAttribute("data-state")); }
+          unmount() { duringUnmount.push(target.getAttribute("data-ae-state")); }
         });
         AelluxJs.mountManager.add({
           extensionName: "attribute-probe", selector: "[data-fail]",
           mount(element) {
-            element.setAttribute("data-state", "failed");
-            element.setAttribute("data-added", "failed");
+            element.setAttribute("data-ae-state", "failed");
+            element.setAttribute("data-ae-added", "failed");
             throw new Error("mount failure");
           }
         });
@@ -410,28 +465,42 @@ test("mount helper restores all attributes after overlapping mounts and failed m
     });
     await AelluxJs.wait("attribute-probe");
     await AelluxJs.mount(target, "attribute-probe");
-    const mounted = target.getAttribute("data-state");
+    const mounted = target.getAttribute("data-ae-state");
     await AelluxJs.unmount(target, "attribute-probe");
     await AelluxJs.mount(failure, "attribute-probe");
     return {
       mounted,
       initialSeen,
+      initialClassSeen,
       duringUnmount,
-      restored: target.getAttribute("data-state"),
-      addedRestored: target.hasAttribute("data-added"),
-      childRestored: child.getAttribute("data-child-state"),
-      failureRestored: failure.getAttribute("data-state"),
-      failureAddedRestored: failure.hasAttribute("data-added"),
+      restored: target.getAttribute("data-ae-state"),
+      addedRestored: target.hasAttribute("data-ae-added"),
+      ariaRestored: target.getAttribute("aria-label"),
+      hiddenRestored: target.hasAttribute("hidden"),
+      unrelatedRetained: target.getAttribute("data-unrelated"),
+      classRetained: target.classList.contains("changed"),
+      staleClassRetained: target.classList.contains("ae--stale"),
+      styleRetained: target.style.color,
+      childRetained: child.getAttribute("data-ae-child-state"),
+      failureRestored: failure.getAttribute("data-ae-state"),
+      failureAddedRestored: failure.hasAttribute("data-ae-added"),
       failureMounted: !!AelluxJs.mountManager.controller(failure)
     };
   });
   expect(result).toEqual({
     mounted: "second",
     initialSeen: ["initial", "initial"],
+    initialClassSeen: [false, true],
     duringUnmount: ["second", "second"],
     restored: "initial",
     addedRestored: false,
-    childRestored: "child-initial",
+    ariaRestored: "initial label",
+    hiddenRestored: true,
+    unrelatedRetained: "keep",
+    classRetained: true,
+    staleClassRetained: false,
+    styleRetained: "blue",
+    childRetained: "changed",
     failureRestored: "failure-initial",
     failureAddedRestored: false,
     failureMounted: false
@@ -535,6 +604,161 @@ test("update and unmount use mounted registrations after attributes are removed"
     targetMounted: false,
     outsideMounted: true
   });
+});
+
+test("global unmount cleans detached elements without crossing scoped roots or Extensions", async ({ page }) => {
+  await page.goto("/tests/index.htm");
+  await page.evaluate(() => {
+    Object.defineProperty(window, "MutationObserver", { configurable: true, value: undefined });
+  });
+  await page.addScriptTag({ url: "/dist/aellux.js" });
+  await page.evaluate(() => AelluxJs.init({ mode: "basic" }));
+  await expect.poll(() => page.evaluate(() => AelluxJs.diagnostics.supported)).toBe(true);
+
+  const result = await page.evaluate(async () => {
+    document.body.innerHTML = '<div id="scope"></div><div id="alpha" data-detached-alpha></div><div id="beta" data-detached-beta></div>';
+    const calls = [];
+    for (const name of ["detached-alpha", "detached-beta"]) {
+      AelluxJs.ext(name);
+      AelluxJs.extAttach(name, {
+        init() {
+          AelluxJs.mountManager.add({
+            extensionName: name,
+            selector: `[data-${name}]`,
+            mount() {},
+            async unmount(element) {
+              await Promise.resolve();
+              calls.push(element.id);
+            },
+            update(element) { calls.push(`update:${element.id}`); }
+          });
+        }
+      });
+    }
+    await AelluxJs.mount(document);
+    const alpha = document.getElementById("alpha");
+    const beta = document.getElementById("beta");
+    const alphaController = AelluxJs.mountManager.controller(alpha);
+    const betaController = AelluxJs.mountManager.controller(beta);
+    alpha.remove();
+    beta.remove();
+
+    const scope = document.getElementById("scope");
+    await AelluxJs.mountManager.update(scope, "detached-alpha");
+    await AelluxJs.unmount(scope, "detached-alpha");
+    const afterScoped = {
+      calls: [...calls],
+      alphaMounted: alphaController.hasMounts(),
+      betaMounted: betaController.hasMounts()
+    };
+
+    await AelluxJs.destroyExtensions("detached-alpha");
+    const afterDestroy = {
+      calls: [...calls],
+      alphaMounted: alphaController.hasMounts(),
+      betaMounted: betaController.hasMounts()
+    };
+    await AelluxJs.unmount(document);
+    return {
+      afterScoped,
+      afterDestroy,
+      finalCalls: calls,
+      betaMounted: betaController.hasMounts()
+    };
+  });
+
+  expect(result).toEqual({
+    afterScoped: { calls: [], alphaMounted: true, betaMounted: true },
+    afterDestroy: { calls: ["alpha"], alphaMounted: false, betaMounted: true },
+    finalCalls: ["alpha", "beta"],
+    betaMounted: false
+  });
+});
+
+test("MutationObserver unmounts removed elements but preserves moved elements", async ({ page }) => {
+  await page.goto("/tests/index.htm");
+  await page.addScriptTag({ url: "/dist/aellux.js" });
+  await page.evaluate(() => AelluxJs.init({ mode: "basic" }));
+  await expect.poll(() => page.evaluate(() => AelluxJs.diagnostics.supported)).toBe(true);
+
+  const afterMove = await page.evaluate(async () => {
+    document.body.innerHTML = '<div id="observed" data-observed-detach aria-expanded="original"></div>';
+    window.observedCalls = [];
+    AelluxJs.ext("observed-detach");
+    AelluxJs.extAttach("observed-detach", {
+      init() {
+        AelluxJs.mountManager.add({
+          extensionName: "observed-detach", selector: "[data-observed-detach]",
+          mount(element) { element.setAttribute("aria-expanded", "true"); },
+          async unmount(element) {
+            await Promise.resolve();
+            window.observedCalls.push(element.id);
+          }
+        });
+      }
+    });
+    await AelluxJs.wait("observed-detach");
+    await AelluxJs.mount(document, "observed-detach");
+    window.observedElement = document.getElementById("observed");
+    window.observedController = AelluxJs.mountManager.controller(window.observedElement);
+    window.observedElement.remove();
+    document.body.append(window.observedElement);
+    await new Promise(resolve => setTimeout(resolve, 0));
+    return {
+      mounted: window.observedController.hasMounts(),
+      calls: [...window.observedCalls]
+    };
+  });
+  expect(afterMove).toEqual({ mounted: true, calls: [] });
+
+  await page.evaluate(() => window.observedElement.remove());
+  await expect.poll(() => page.evaluate(() => ({
+    mounted: window.observedController.hasMounts(),
+    calls: window.observedCalls,
+    aria: window.observedElement.getAttribute("aria-expanded")
+  }))).toEqual({ mounted: false, calls: ["observed"], aria: "original" });
+});
+
+test("observed cleanup and explicit unmount share each registration once", async ({ page }) => {
+  await page.goto("/tests/index.htm");
+  await page.addScriptTag({ url: "/dist/aellux.js" });
+  await page.evaluate(() => AelluxJs.init({ mode: "basic" }));
+  await expect.poll(() => page.evaluate(() => AelluxJs.diagnostics.supported)).toBe(true);
+
+  const result = await page.evaluate(async () => {
+    document.body.innerHTML = '<div id="parent" data-nested-detach><div id="child" data-nested-detach></div></div>';
+    const calls = [];
+    AelluxJs.ext("nested-detach");
+    AelluxJs.extAttach("nested-detach", {
+      init() {
+        AelluxJs.mountManager.add({
+          extensionName: "nested-detach", selector: "[data-nested-detach]",
+          mount() {},
+          async unmount(element) {
+            calls.push(element.id);
+            if (element.id === "parent") {
+              await AelluxJs.unmount(element.querySelector("#child"), "nested-detach");
+            }
+          }
+        });
+      }
+    });
+    await AelluxJs.wait("nested-detach");
+    await AelluxJs.mount(document, "nested-detach");
+    const parent = document.getElementById("parent");
+    const child = document.getElementById("child");
+    const parentController = AelluxJs.mountManager.controller(parent);
+    const childController = AelluxJs.mountManager.controller(child);
+    parent.remove();
+    await AelluxJs.unmount(document, "nested-detach");
+    await new Promise(resolve => setTimeout(resolve, 0));
+    return {
+      calls,
+      parentMounted: parentController.hasMounts(),
+      childMounted: childController.hasMounts()
+    };
+  });
+  expect(result).toEqual({ calls: ["parent", "child"], parentMounted: false, childMounted: false });
 });
 
 test("unavailable browser storage records the memory fallback", async ({ page }) => {

@@ -1,5 +1,17 @@
 (function() {
-  // src/src/aellux.ext.pointer.js
+  // src/src/aellux.ext.point.js
+  function _toConsumableArray(r) {
+    return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread();
+  }
+  function _nonIterableSpread() {
+    throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+  }
+  function _iterableToArray(r) {
+    if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
+  }
+  function _arrayWithoutHoles(r) {
+    if (Array.isArray(r)) return _arrayLikeToArray(r);
+  }
   function _createForOfIteratorHelper(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
@@ -47,13 +59,13 @@
   (function(root) {
     "use strict";
     var AelluxJs = root.AelluxJs;
-    var extensionName = "pointer";
+    var extensionName = "point";
     if (!AelluxJs) {
       throw new Error('[aellux.js] Cannot attach the "'.concat(extensionName, '" extension: root.AelluxJs is not defined. Load the aellux.js boot script before this extension.'));
     }
     var trackedPointers = /* @__PURE__ */ new Map();
     var pointableElements = /* @__PURE__ */ new Set();
-    var pointableAttribute = AelluxJs.attr("pointable");
+    var pointableAttribute = AelluxJs.attr("point");
     var pointableSelector = "[".concat(pointableAttribute, "]");
     AelluxJs.extAttach(extensionName, {
       init: init,
@@ -100,6 +112,9 @@
           pointer.pointables = pointer.pointables.filter(function(pointable) {
             return pointable !== element;
           });
+          if (pointer.pressStart) pointer.pressStart = pointer.pressStart.filter(function(pointable) {
+            return pointable !== element;
+          });
         }
       } catch (err) {
         _iterator.e(err);
@@ -143,19 +158,23 @@
       return result;
     }
     function dispatchPointer(name, pointer, originalEvent) {
+      var _pointer$pressStart$s, _pointer$pressStart;
       var targets = arguments.length > 3 && arguments[3] !== void 0 ? arguments[3] : pointer.pointables;
       var hover = arguments.length > 4 ? arguments[4] : void 0;
       var pointables = arguments.length > 5 && arguments[5] !== void 0 ? arguments[5] : pointer.pointables;
       var chain = pointables.slice();
+      var pressStart = (_pointer$pressStart$s = (_pointer$pressStart = pointer.pressStart) === null || _pointer$pressStart === void 0 ? void 0 : _pointer$pressStart.slice()) !== null && _pointer$pressStart$s !== void 0 ? _pointer$pressStart$s : null;
       var _iterator3 = _createForOfIteratorHelper(targets.slice()), _step3;
       try {
         for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
+          var _pressStart$slice;
           var element = _step3.value;
           AelluxJs.dispatchFrom(element, name, {
             bubbles: false,
             detail: {
               pointer: pointer,
               pointables: chain.slice(),
+              pressStart: (_pressStart$slice = pressStart === null || pressStart === void 0 ? void 0 : pressStart.slice()) !== null && _pressStart$slice !== void 0 ? _pressStart$slice : null,
               originalEvent: originalEvent,
               hover: hover
             }
@@ -166,6 +185,10 @@
       } finally {
         _iterator3.f();
       }
+    }
+    function releaseTargets(pointer) {
+      if (!pointer.pointables.length) return pointer.pressStart || [];
+      return _toConsumableArray(new Set([].concat(_toConsumableArray(pointer.pointables), _toConsumableArray(pointer.pressStart || []))));
     }
     function canHover(event) {
       return event.pointerType === "mouse" || event.pointerType === "pen";
@@ -191,7 +214,8 @@
         buttons: event.buttons,
         pressed: pressed,
         hover: hover,
-        pointables: []
+        pointables: [],
+        pressStart: null
       };
       trackedPointers.set(event.pointerId, pointer);
       return pointer;
@@ -212,6 +236,7 @@
       pointer.hover = canHover(event);
       updatePointer(pointer, event);
       pointer.pointables = pointablesFor(event.target, pointer);
+      pointer.pressStart = pointer.pointables.slice();
       dispatchPointer("PointerDown", pointer, event);
     }
     function onPointerMove(event) {
@@ -230,7 +255,7 @@
       updatePointer(pointer, event);
       pointer.pressed = false;
       pointer.pointables = pointablesFor(event.target, pointer);
-      dispatchPointer("PointerUp", pointer, event);
+      dispatchPointer("PointerUp", pointer, event, releaseTargets(pointer));
       if (!pointer.hover) trackedPointers.delete(event.pointerId);
     }
     function onPointerCancel(event) {
@@ -239,7 +264,7 @@
         updatePointer(pointer, event);
         pointer.pressed = false;
         pointer.pointables = pointablesFor(event.target, pointer);
-        dispatchPointer("PointerCancel", pointer, event);
+        dispatchPointer("PointerCancel", pointer, event, releaseTargets(pointer));
       }
       trackedPointers.delete(event.pointerId);
     }
@@ -277,4 +302,4 @@
     }
   })(typeof globalThis !== "undefined" ? globalThis : window);
 })();
-//# sourceMappingURL=aellux.ext.pointer.legacy.js.map
+//# sourceMappingURL=aellux.ext.point.legacy.js.map

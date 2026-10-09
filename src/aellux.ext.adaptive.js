@@ -17,7 +17,6 @@
     shapeSquare: AelluxJs.className("shape-square")
   };
   const adaptiveElements = new Set();
-  const initialClasses = new WeakMap();
 
   const adaptiveParams = {
     experienceScale: { near: 1, far: 1.5 },
@@ -69,7 +68,6 @@
 
   function mountAdaptive(element) {
     if (adaptiveElements.has(element)) return;
-    initialClasses.set(element, managedClasses.filter(name => element.classList.contains(name)));
     adaptiveElements.add(element);
     const bounds = element.getBoundingClientRect();
     updateAdaptive(element, bounds.width, bounds.height);
@@ -81,11 +79,9 @@
     if (!adaptiveElements.delete(element)) return;
     if (resizeObserver) resizeObserver.unobserve(element);
     else if (adaptiveElements.size === 0) root.removeEventListener("resize", onWindowResize);
-    const initial = initialClasses.get(element) || [];
     for (const name of managedClasses) {
-      element.classList.toggle(name, initial.includes(name));
+      element.classList.remove(name);
     }
-    initialClasses.delete(element);
   }
 
   function onResize(entries) {

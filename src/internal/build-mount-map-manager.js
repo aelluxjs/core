@@ -8,6 +8,7 @@ export function buildMountMapManager(root) {
   const mountedElements = new Map(); //DOM, string Set
   const elementControllers = new WeakMap(); //DOM, object
   const maps = new Map();
+  let unmountQueue = Promise.resolve();
 
   const helper = createMountHelper(
     root,
@@ -25,7 +26,25 @@ export function buildMountMapManager(root) {
     update: helper.update,
     initialAttribute: helper.initialAttribute
   };
+
+  if (typeof root.MutationObserver === "function") {
+    const observer = new root.MutationObserver(records => {
+      if (!records.some(record => record.removedNodes.length)) return;
+      scheduleUnmount(() => helper.unmountDetached()).catch(error => {
+        const diagnostics = root.AelluxJs.diagnostics;
+        diagnostics.error(diagnostics.ERROR_EXTENSION_UNMOUNT, { cause: error });
+      });
+    });
+    observer.observe(root.document, { childList: true, subtree: true });
+  }
+
   return manager;
+
+  function scheduleUnmount(operation) {
+    const task = unmountQueue.then(operation);
+    unmountQueue = task.catch(() => {});
+    return task;
+  }
 
   function controller(elementOrId) {
     const requested = elementOrId;

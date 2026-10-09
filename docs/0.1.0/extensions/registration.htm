@@ -434,8 +434,8 @@
                           </li>
                                                                                                       <li class="nav-item small-md rounded-1 ps-md-1"
                             style="flex:0">
-                            <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/core-extensions/pointer.htm">
-                              Pointer                            </a>
+                            <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/core-extensions/point.htm">
+                              Point                            </a>
                           </li>
                                                                                                       <li class="nav-item small-md rounded-1 ps-md-1"
                             style="flex:0">
@@ -568,6 +568,7 @@
 <ul>
 <li><code>builds</code> declares published JavaScript variants: <code>modern</code>, <code>legacy</code>, or both. Omitting it promises both variants.</li>
 <li><code>loadWhen</code> delays loading until a matching element is discovered.</li>
+<li>An invalid <code>loadWhen</code> selector reports <code>ERROR_EXTENSION_LOAD_WHEN</code> (<code>1114</code>), and <code>ext()</code> leaves the Extension undeclared.</li>
 <li><code>loadStyle: true</code> requests the stylesheet derived from the Extension script URL; a URL string requests that specific stylesheet.</li>
 </ul>
 <p>Register each name once. Duplicate declarations currently report an error and do not replace the existing registration.</p>
@@ -591,6 +592,7 @@ $ae.init({ mode: &quot;basic&quot; });
   function destroy() {}
 })(typeof globalThis !== &quot;undefined&quot; ? globalThis : window);
 </code></pre>
+<p>Declare the Extension with <code>ext()</code> before calling <code>extAttach()</code>. The attachment supplies its definitive API object. <code>extAttach()</code> requires a valid kebab-case or camelCase Extension name and an API object with an <code>init()</code> function. <code>destroy()</code>, when provided, must also be a function. Invalid arguments report <code>ERROR_EXTENSION_ATTACH</code> (<code>1112</code>) and leave the Extension unattached. A missing declaration reports <code>ERROR_EXTENSION_NOT_REGISTERED</code> (<code>1110</code>); a second attachment reports <code>ERROR_EXTENSION_DUPLICATE</code> (<code>1101</code>).</p>
 <p>Use the <a href="https://github.com/aelluxjs/core/blob/main/templates/README.md">aellux.js Extension scaffold</a> for the complete lifecycle structure.
 Third-party authors should also follow the <a href="authoring.htm">Extension authoring and compatibility contract</a>.</p>
         </div>

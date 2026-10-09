@@ -149,7 +149,8 @@ test("present trigger stays expanded while any target is expanded", async ({ pag
   await page.evaluate(() => {
     const extension = window.presentExtension;
     extension.init();
-    const [panels, controls] = window.mountEntries.values();
+    const panels = window.mountEntries.get("[data-ae-present]");
+    const controls = window.mountEntries.get("[data-ae-trigger],[data-ae-dismiss],[data-ae-target]");
     panels.mount(document.querySelector("#first"));
     panels.mount(document.querySelector("#second"));
     controls.mount(document.querySelector("#control"));
@@ -174,19 +175,19 @@ test("present trigger stays expanded while any target is expanded", async ({ pag
   await expect(page.locator("#second")).toHaveJSProperty("hidden", false);
   await expect(page.locator("#second")).toHaveAttribute("aria-expanded", "true");
   await page.evaluate(() => {
-    const [panels] = window.mountEntries.values();
+    const panels = window.mountEntries.get("[data-ae-present]");
     panels.unmount(document.querySelector("#first"));
   });
   await expect(control).toHaveAttribute("aria-expanded", "true");
 
   await page.evaluate(() => {
-    const [panels] = window.mountEntries.values();
+    const panels = window.mountEntries.get("[data-ae-present]");
     panels.unmount(document.querySelector("#second"));
   });
   await expect(control).toHaveAttribute("aria-expanded", "false");
 
   await page.evaluate(() => {
-    const [panels] = window.mountEntries.values();
+    const panels = window.mountEntries.get("[data-ae-present]");
     panels.mount(document.querySelector("#first"));
   });
   await expect(control).toHaveAttribute("aria-expanded", "true");
@@ -276,6 +277,42 @@ test("present restores initial attributes and captures fresh values on remount",
   });
 });
 
+test("present mounts motion on the container and on a separate child", async ({ page }) => {
+  await page.goto("/tests/index.htm");
+  await page.evaluate(() => {
+    document.body.innerHTML = `
+      <div id="same" data-ae-present data-ae-present-motion hidden></div>
+      <div id="separate" data-ae-present hidden>
+        <div id="motion" data-ae-present-motion hidden></div>
+      </div>
+    `;
+  });
+  await page.addScriptTag({ url: "/dist/aellux.js" });
+  await page.evaluate(() => AelluxJs.init({ mode: "full" }));
+  await expect(page.locator("#motion")).toHaveClass(/ae--mounted/);
+
+  const result = await page.evaluate(async () => {
+    const same = document.getElementById("same");
+    const motion = document.getElementById("motion");
+    const hiddenWhileMounted = motion.hidden;
+    await AelluxJs.unmount(document, "present");
+    return {
+      hiddenWhileMounted,
+      sameHidden: same.hidden,
+      sameMarker: same.getAttribute("data-ae-present-motion"),
+      motionHidden: motion.hidden,
+      motionMounted: motion.classList.contains(AelluxJs.className("mounted"))
+    };
+  });
+  expect(result).toEqual({
+    hiddenWhileMounted: false,
+    sameHidden: true,
+    sameMarker: "",
+    motionHidden: true,
+    motionMounted: false
+  });
+});
+
 test("present reports invalid selectors without throwing from click", async ({ page }) => {
   await page.goto("/tests/index.htm");
   const pageErrors = [];
@@ -306,7 +343,7 @@ test("present reports invalid selectors without throwing from click", async ({ p
   const reports = await page.evaluate(() => {
     const extension = window.presentExtension;
     extension.init();
-    const [, controls] = window.mountEntries.values();
+    const controls = window.mountEntries.get("[data-ae-trigger],[data-ae-dismiss],[data-ae-target]");
     controls.mount(document.querySelector("#dismiss"));
     document.querySelector("#dismiss").click();
     return window.selectorReports;
@@ -343,7 +380,8 @@ test("present restores a trigger without targets and can mount it again", async 
   const state = await page.evaluate(() => {
     const extension = window.presentExtension;
     extension.init();
-    const [panels, controls] = window.mountEntries.values();
+    const panels = window.mountEntries.get("[data-ae-present]");
+    const controls = window.mountEntries.get("[data-ae-trigger],[data-ae-dismiss],[data-ae-target]");
     const control = document.querySelector("#control");
     controls.mount(control);
     controls.unmount(control);
@@ -399,7 +437,7 @@ test("present records interrupted transitions as warnings and failures as errors
   const entries = await page.evaluate(async () => {
     const extension = window.presentExtension;
     extension.init();
-    const [panels] = window.mountEntries.values();
+    const panels = window.mountEntries.get("[data-ae-present]");
     const panel = document.querySelector("#panel");
     panels.mount(panel);
     extension.pop(panel);
@@ -447,7 +485,7 @@ test("present reports a selector callback failure with its own diagnostic", asyn
   const codes = await page.evaluate(() => {
     const extension = window.presentExtension;
     extension.init();
-    const [panels] = window.mountEntries.values();
+    const panels = window.mountEntries.get("[data-ae-present]");
     panels.mount(document.querySelector("#panel"));
     document.querySelector("#control").click();
     return AelluxJs.diagnostics.showHistory().map(entry => entry.code);

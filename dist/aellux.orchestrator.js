@@ -204,7 +204,9 @@
     const { toCapitalized: toCapitalized2, toCamelCase: toCamelCase2, fromCamelCase: fromCamelCase2 } = utils_name_case_default;
     const initialAttributeValues = /* @__PURE__ */ new WeakMap();
     const mountAttributeRecords = /* @__PURE__ */ new WeakMap();
-    return { mount, unmount, update, initialAttribute };
+    const pendingUnmounts = /* @__PURE__ */ new WeakMap();
+    const classPrefix = AelluxJs.className("");
+    return { mount, unmount, unmountDetached, update, initialAttribute };
     function initialAttribute(element, name) {
       var _a, _b;
       return (_b = (_a = initialAttributeValues.get(element)) == null ? void 0 : _a.initial.get(name)) != null ? _b : null;
@@ -221,32 +223,49 @@
       }
       return true;
     }
+    async function unmountDetached() {
+      if (![...mountedElements.keys()].some((element) => !element.isConnected)) return false;
+      await AelluxJsMounted(root.document, "unmount", null, true);
+      return true;
+    }
     async function mount(rootOrSelector, extensionNames = null) {
       const AelluxJs2 = root.AelluxJs;
+      var success;
       for (const rootElement of resolveRoots(rootOrSelector, "mount")) {
         const waitMountedAttr = AelluxJs2.attr("wait-mounted");
         const allWaiters = findElements(rootElement, `[${waitMountedAttr}]`);
         allWaiters.forEach((waiter) => waiter.setAttribute("aria-busy", "true"));
-        const allLinks = findElements(rootElement, "link[rel='aelluxjs-ext']");
-        for (const link of allLinks) {
-          const href = link.getAttribute("href");
-          const loadWhen = link.getAttribute(AelluxJs2.attr("load-when")) || void 0;
-          const builds = link.getAttribute(AelluxJs2.attr("builds")) || void 0;
-          const loadStyleValue = link.getAttribute(AelluxJs2.attr("load-style"));
-          const loadStyle = loadStyleValue === null || loadStyleValue === "false" ? false : loadStyleValue || true;
-          link.setAttribute("rel", "aelluxjs-ext-registered");
-          AelluxJs2.ext(href, { builds, loadWhen, loadStyle });
+        try {
+          const allLinks = findElements(rootElement, "link[rel='aelluxjs-ext']");
+          for (const link of allLinks) {
+            const href = link.getAttribute("href");
+            const loadWhen = link.getAttribute(AelluxJs2.attr("load-when")) || void 0;
+            const builds = link.getAttribute(AelluxJs2.attr("builds")) || void 0;
+            const loadStyleValue = link.getAttribute(AelluxJs2.attr("load-style"));
+            const loadStyle = loadStyleValue === null || loadStyleValue === "false" ? false : loadStyleValue || true;
+            link.setAttribute("rel", "aelluxjs-ext-registered");
+            AelluxJs2.ext(href, { builds, loadWhen, loadStyle });
+          }
+          const waitExtensions = [];
+          for (const [key, options] of Object.entries(root.AelluxJs.registry.ext)) {
+            if (options.loadWhen) continue;
+            waitExtensions.push(AelluxJs2.wait(key));
+          }
+          await Promise.all(waitExtensions);
+          await AelluxJsMount(rootElement, extensionNames);
+          success = true;
+        } catch (error) {
+          AelluxJs2.diagnostics.error(AelluxJs2.diagnostics.ERROR_MOUNT, {
+            cause: error,
+            root: rootElement,
+            extensions: extensionNames
+          });
+          success = false;
+        } finally {
+          allWaiters.forEach((waiter) => waiter.setAttribute("aria-busy", "false"));
         }
-        const waitExtensions = [];
-        for (const [key, options] of Object.entries(root.AelluxJs.registry.ext)) {
-          if (options.loadWhen) continue;
-          waitExtensions.push(AelluxJs2.wait(key));
-        }
-        await Promise.all(waitExtensions);
-        await AelluxJsMount(rootElement, extensionNames);
-        allWaiters.forEach((waiter) => waiter.setAttribute("aria-busy", "false"));
       }
-      return true;
+      return success;
     }
     async function AelluxJsMount(rootElement, extensionNames = null) {
       const AelluxJs2 = root.AelluxJs;
@@ -305,6 +324,11 @@
               for (const mountable of mountableElements) {
                 const mountId = `${extensionName}@${selector}`;
                 if (isMounted(mountable, mountId)) continue;
+                if (!isMounted(mountable)) {
+                  for (const name of Array.from(mountable.classList)) {
+                    if (name.startsWith(classPrefix)) mountable.classList.remove(name);
+                  }
+                }
                 rememberInitialAttributes(mountable, mountId);
                 try {
                   await controller.mount(mountable);
@@ -348,15 +372,13 @@
       }
       AelluxJs2.dispatch("Mount");
     }
-    async function AelluxJsMounted(rootElement, method, extensionNames = null) {
+    async function AelluxJsMounted(rootElement, method, extensionNames = null, detachedOnly = false) {
       const AelluxJs2 = root.AelluxJs;
       const selectedNames = extensionNames === null ? null : new Set((typeof extensionNames === "string" ? [extensionNames] : extensionNames).map((name) => fromCamelCase2(name)));
       for (const [element, mountIds] of Array.from(mountedElements)) {
-        if (!element.isConnected) {
-          unmount(element);
-          continue;
-        }
-        if (element !== rootElement && !rootElement.contains(element)) continue;
+        const inRoot = element === rootElement || rootElement.contains(element);
+        const detachedInGlobalUnmount = method === "unmount" && rootElement === root.document && !element.isConnected;
+        if (detachedOnly ? element.isConnected : !inRoot && !detachedInGlobalUnmount) continue;
         for (const mountId of Array.from(mountIds)) {
           const separator = mountId.indexOf("@");
           const extensionName = mountId.slice(0, separator);
@@ -365,6 +387,10 @@
           const extensionKey = toCamelCase2(extensionName);
           const mounter = mountMaps.get(extensionKey);
           const controller = mounter && mounter.get(selector);
+          if (method === "unmount") {
+            await unmountRegistration(element, mountId, controller, extensionName, selector);
+            continue;
+          }
           try {
             if (controller && controller[method]) {
               await controller[method](element);
@@ -377,28 +403,60 @@
               selector
             });
           }
-          try {
-            if (method === "unmount") {
-              setMounted(element, mountId, false);
-              const elementController = elementControllers.get(element);
-              if (elementController) {
-                elementController.despawn(mountId);
-                if (!elementController.hasMounts()) elementControllers.delete(element);
-              }
-              element.classList.toggle(AelluxJs2.className("mounted"), isMounted(element));
-              restoreInitialAttributes(element, mountId);
-            }
-          } catch (error) {
-            AelluxJs2.diagnostics.error(AelluxJs2.diagnostics.ERROR_EXTENSION_MOUNT, {
-              cause: error,
-              extension: extensionName,
-              method,
-              selector
-            });
-          }
         }
       }
       AelluxJs2.dispatch(toCapitalized2(method));
+    }
+    async function unmountRegistration(element, mountId, controller, extensionName, selector) {
+      if (!isMounted(element, mountId)) return;
+      let tasks = pendingUnmounts.get(element);
+      if (!tasks) {
+        tasks = /* @__PURE__ */ new Map();
+        pendingUnmounts.set(element, tasks);
+      }
+      if (tasks.has(mountId)) {
+        await tasks.get(mountId);
+        return;
+      }
+      let finish;
+      tasks.set(mountId, new Promise((resolve) => {
+        finish = resolve;
+      }));
+      const AelluxJs2 = root.AelluxJs;
+      const diagnostics = AelluxJs2.diagnostics;
+      try {
+        try {
+          if (controller && controller.unmount) await controller.unmount(element);
+        } catch (cause) {
+          diagnostics.error(diagnostics.ERROR_EXTENSION_MOUNT, {
+            cause,
+            extension: extensionName,
+            method: "unmount",
+            selector
+          });
+        }
+        try {
+          setMounted(element, mountId, false);
+          const elementController = elementControllers.get(element);
+          if (elementController) {
+            elementController.despawn(mountId);
+            if (!elementController.hasMounts()) elementControllers.delete(element);
+          }
+          element.classList.toggle(AelluxJs2.className("mounted"), isMounted(element));
+          restoreInitialAttributes(element, mountId);
+        } catch (cause) {
+          diagnostics.error(diagnostics.ERROR_EXTENSION_MOUNT, {
+            cause,
+            extension: extensionName,
+            method: "unmount",
+            selector
+          });
+        }
+      } finally {
+        tasks.delete(mountId);
+        if (!tasks.size) pendingUnmounts.delete(element);
+        finish();
+      }
     }
     function resolveRoots(rootOrSelector, method) {
       if (!rootOrSelector) {
@@ -448,14 +506,14 @@
       if (mounts.size === 0) mountedElements.delete(element);
     }
     function rememberInitialAttributes(element, mountId) {
-      const targets = [element, ...element.querySelectorAll("*")];
+      const targets = [element];
       const retained = [];
       try {
         for (const target of targets) {
           let record = initialAttributeValues.get(target);
           if (!record) {
             record = {
-              initial: new Map(Array.from(target.attributes, (attribute) => [attribute.name, attribute.value])),
+              initial: new Map(Array.from(target.attributes).filter((attribute) => isRestoredAttribute(attribute.name)).map((attribute) => [attribute.name, attribute.value])),
               users: 0
             };
             initialAttributeValues.set(target, record);
@@ -486,13 +544,18 @@
         const record = initialAttributeValues.get(target);
         if (--record.users) continue;
         for (const attribute of Array.from(target.attributes)) {
-          if (!record.initial.has(attribute.name)) target.removeAttribute(attribute.name);
+          if (isRestoredAttribute(attribute.name) && !record.initial.has(attribute.name)) {
+            target.removeAttribute(attribute.name);
+          }
         }
         for (const [name, value] of record.initial) {
           if (target.getAttribute(name) !== value) target.setAttribute(name, value);
         }
         initialAttributeValues.delete(target);
       }
+    }
+    function isRestoredAttribute(name) {
+      return name === "hidden" || name.startsWith("data-ae-") || name.startsWith("aria-");
     }
   }
 
@@ -503,6 +566,7 @@
     const mountedElements = /* @__PURE__ */ new Map();
     const elementControllers = /* @__PURE__ */ new WeakMap();
     const maps = /* @__PURE__ */ new Map();
+    let unmountQueue = Promise.resolve();
     const helper = createMountHelper(
       root,
       maps,
@@ -518,7 +582,23 @@
       update: helper.update,
       initialAttribute: helper.initialAttribute
     };
+    if (typeof root.MutationObserver === "function") {
+      const observer = new root.MutationObserver((records) => {
+        if (!records.some((record) => record.removedNodes.length)) return;
+        scheduleUnmount(() => helper.unmountDetached()).catch((error) => {
+          const diagnostics = root.AelluxJs.diagnostics;
+          diagnostics.error(diagnostics.ERROR_EXTENSION_UNMOUNT, { cause: error });
+        });
+      });
+      observer.observe(root.document, { childList: true, subtree: true });
+    }
     return manager;
+    function scheduleUnmount(operation) {
+      const task = unmountQueue.then(operation);
+      unmountQueue = task.catch(() => {
+      });
+      return task;
+    }
     function controller(elementOrId) {
       const requested = elementOrId;
       if (typeof elementOrId === "string")

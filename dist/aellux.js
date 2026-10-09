@@ -594,6 +594,7 @@
         ERROR_INVALID_VERBOSE_LEVEL: { code: 1003, message: "aellux.js verboseLevel must be 0, 1, 2, or the matching error, warn, info key." },
         ERROR_CONTROLLER_NOT_FOUND: { code: 1004, message: "No controller was found for this element. It may not be mounted." },
         ERROR_MOUNT_ROOT_SELECTOR: { code: 1005, message: "Invalid root selector for mounting or unmounting." },
+        ERROR_MOUNT: { code: 1006, message: "aellux.js failed to mount a root." },
         ERROR_EXTENSION_DUPLICATE: { code: 1101, message: "aellux.js Extension is already registered." },
         ERROR_EXTENSION_INITIALIZE: { code: 1102, message: "aellux.js Extension failed to initialize." },
         ERROR_EXTENSION_MOUNT: { code: 1103, message: "aellux.js Extension failed to mount or unmount an element." },

@@ -434,8 +434,8 @@
                           </li>
                                                                                                       <li class="nav-item small-md rounded-1 ps-md-1"
                             style="flex:0">
-                            <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/core-extensions/pointer.htm">
-                              Pointer                            </a>
+                            <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/core-extensions/point.htm">
+                              Point                            </a>
                           </li>
                                                                                                       <li class="nav-item small-md rounded-1 ps-md-1"
                             style="flex:0">
@@ -562,7 +562,7 @@
 <h2>Motion and state</h2>
 <p>The Extension exposes <code>pop(element)</code>, <code>unpop(element)</code>, <code>toggle(element, goto)</code>, and <code>trigger(element, action)</code> through <code>$ae.ext.present</code>. It manages <code>hidden</code> and <code>aria-expanded</code> on the container and updates <code>aria-expanded</code> and <code>aria-controls</code> on its triggers. A direct child marked <code>data-ae-present-motion</code> can carry the transition classes; otherwise the container itself is used.</p>
 <p>The transition classes are <code>ae--popping</code>, <code>ae--unpopping</code>, and <code>ae--pop</code>. CSS custom properties <code>--ae-pop-duration</code> and <code>--ae-unpop-duration</code> on the motion element set the corresponding duration. The Extension emits cancelable <code>AelluxJsBeforePop</code> and <code>AelluxJsBeforeUnpop</code> events, followed by <code>AelluxJsPopping</code>/<code>AelluxJsUnpopping</code> and <code>AelluxJsPop</code>/<code>AelluxJsUnpop</code> as transitions progress.</p>
-<p><code>data-ae-auto-unpop</code> specifies a delay before closing an open container. Outside clicks also close open containers unless <code>data-ae-unpop-on-outside=&quot;false&quot;</code> is set. On unmount, the Extension restores the initial <code>hidden</code>, <code>aria-expanded</code>, <code>aria-controls</code>, and <code>data-ae-present-motion</code> attributes it memorized.</p>
+<p><code>data-ae-auto-unpop</code> specifies a delay before closing an open container. Outside clicks also close open containers unless <code>data-ae-unpop-on-outside=&quot;false&quot;</code> is set. <code>present</code> mounts motion elements before containers, whether the motion is the container itself or a separate child. On unmount, the mount helper restores the initial <code>data-ae-*</code>, <code>aria-*</code>, and <code>hidden</code> attributes on each mounted container, motion element, and trigger control.</p>
         </div>
 
         <div id="doc-navlinks2" ajax-load="doc-navlinks2">

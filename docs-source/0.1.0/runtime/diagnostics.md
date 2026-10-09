@@ -84,6 +84,8 @@ Applications should compare numeric codes or catalog entries instead of parsing 
 
 An invalid root selector passed to `mount()` or `unmount()` records `ERROR_MOUNT_ROOT_SELECTOR` (`1005`) with the selector, operation, and cause. An Extension whose `init()` rejects records `ERROR_EXTENSION_INITIALIZE` (`1102`); the Extension remains uninitialized. A stylesheet load failure records `WARN_EXTENSION_STYLE_LOAD` (`2004`) with the Extension name and URL. The Extension can still initialize after that warning.
 
+If mounting a root fails while registering assets, waiting for Extensions, or discovering mountable elements, `ERROR_MOUNT` (`1006`) records the cause, root, and selected Extension names. Waiting elements have `aria-busy` reset to `false` after the attempt.
+
 Waiting for an unregistered Extension records `ERROR_EXTENSION_NOT_REGISTERED` (`1110`) and rejects with that diagnostic. A mounted controller name without a matching public Extension method records `WARN_CONTROLLER_METHOD_MISSING` (`2005`). If browser storage is unavailable, `WARN_STORAGE_FALLBACK` (`2006`) identifies the storage area and key prefix; values are then held in memory for the current page only.
 
 `ext()` records `ERROR_EXTENSION_LOAD_WHEN` (`1114`) when a supplied `loadWhen` selector is invalid and does not register the Extension. `extAttach()` records `ERROR_EXTENSION_ATTACH` (`1112`) when its name, API object, lifecycle methods, or a changed declared `loadWhen` selector is invalid. Its context identifies the rejected argument, and the API is not attached. It records `ERROR_EXTENSION_NOT_REGISTERED` (`1110`) when no preceding `ext()` declaration exists and `ERROR_EXTENSION_DUPLICATE` (`1101`) for a second attachment.

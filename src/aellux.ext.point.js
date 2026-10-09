@@ -4,14 +4,14 @@
   "use strict";
 
   const AelluxJs = root.AelluxJs;
-  const extensionName = "pointer";
+  const extensionName = "point";
   if (!AelluxJs) {
     throw new Error(`[aellux.js] Cannot attach the "${extensionName}" extension: root.AelluxJs is not defined. Load the aellux.js boot script before this extension.`);
   }
 
   const trackedPointers = new Map();
   const pointableElements = new Set();
-  const pointableAttribute = AelluxJs.attr("pointable");
+  const pointableAttribute = AelluxJs.attr("point");
   const pointableSelector = `[${pointableAttribute}]`;
 
   AelluxJs.extAttach(extensionName, {
@@ -52,6 +52,8 @@
     pointableElements.delete(element);
     for (const pointer of trackedPointers.values()) {
       pointer.pointables = pointer.pointables.filter(pointable => pointable !== element);
+      if (pointer.pressStart)
+        pointer.pressStart = pointer.pressStart.filter(pointable => pointable !== element);
     }
   }
 
@@ -87,12 +89,22 @@
   function dispatchPointer(name, pointer, originalEvent, targets = pointer.pointables,
     hover, pointables = pointer.pointables) {
     const chain = pointables.slice();
+    const pressStart = pointer.pressStart?.slice() ?? null;
     for (const element of targets.slice()) {
       AelluxJs.dispatchFrom(element, name, {
         bubbles: false,
-        detail: { pointer, pointables: chain.slice(), originalEvent, hover }
+        detail: {
+          pointer, pointables: chain.slice(),
+          pressStart: pressStart?.slice() ?? null,
+          originalEvent, hover
+        }
       });
     }
+  }
+
+  function releaseTargets(pointer) {
+    if (!pointer.pointables.length) return pointer.pressStart || [];
+    return [...new Set([...pointer.pointables, ...(pointer.pressStart || [])])];
   }
 
   function canHover(event) {
@@ -111,7 +123,8 @@
       buttons: event.buttons,
       pressed,
       hover,
-      pointables: []
+      pointables: [],
+      pressStart: null
     };
     trackedPointers.set(event.pointerId, pointer);
     return pointer;
@@ -135,6 +148,7 @@
     pointer.hover = canHover(event);
     updatePointer(pointer, event);
     pointer.pointables = pointablesFor(event.target, pointer);
+    pointer.pressStart = pointer.pointables.slice();
     dispatchPointer("PointerDown", pointer, event);
   }
 
@@ -155,7 +169,7 @@
     updatePointer(pointer, event);
     pointer.pressed = false;
     pointer.pointables = pointablesFor(event.target, pointer);
-    dispatchPointer("PointerUp", pointer, event);
+    dispatchPointer("PointerUp", pointer, event, releaseTargets(pointer));
     if (!pointer.hover) trackedPointers.delete(event.pointerId);
   }
 
@@ -165,7 +179,7 @@
       updatePointer(pointer, event);
       pointer.pressed = false;
       pointer.pointables = pointablesFor(event.target, pointer);
-      dispatchPointer("PointerCancel", pointer, event);
+      dispatchPointer("PointerCancel", pointer, event, releaseTargets(pointer));
     }
     trackedPointers.delete(event.pointerId);
   }

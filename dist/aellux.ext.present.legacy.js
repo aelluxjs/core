@@ -125,6 +125,13 @@
     function init(options) {
       AelluxJs.mountManager.add({
         extensionName: extensionName,
+        selector: "[".concat(attr.presentMotion, "],[").concat(attr.present, "]"),
+        // Register the motion before the container changes its hidden state.
+        mount: function mount() {
+        }
+      });
+      AelluxJs.mountManager.add({
+        extensionName: extensionName,
         selector: "[".concat(attr.present, "]"),
         mount: mountPresentContainer,
         unmount: unmountPresentContainer,

@@ -434,8 +434,8 @@
                           </li>
                                                                                                       <li class="nav-item small-md rounded-1 ps-md-1"
                             style="flex:0">
-                            <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/core-extensions/pointer.htm">
-                              Pointer                            </a>
+                            <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/core-extensions/point.htm">
+                              Point                            </a>
                           </li>
                                                                                                       <li class="nav-item small-md rounded-1 ps-md-1"
                             style="flex:0">
@@ -553,7 +553,7 @@
 <p><code>adaptive</code> adds size and shape classes to elements marked with <code>data-ae-adaptive</code>. It is included in the <code>full</code> runtime and automatically requests its stylesheet there. In <code>basic</code> mode, register it with <code>$ae.ext(&quot;adaptive&quot;, { loadStyle: true })</code> before initialization.</p>
 <pre><code class="language-html">&lt;div data-ae-adaptive&gt;Responsive content&lt;/div&gt;
 </code></pre>
-<p>The Extension measures each marked element with <code>ResizeObserver</code>, or uses the window resize event when that API is unavailable. It applies one shape class (<code>ae--shape-vertical</code>, <code>ae--shape-square</code>, or <code>ae--shape-horizontal</code>) according to width divided by height. It also toggles <code>ae--fits-&lt;size&gt;</code> classes when <code>sqrt(width * height)</code> reaches each configured minimum. After an update it dispatches <code>AelluxJsAdaptiveUpdate</code> from the element. Unmounting restores the managed classes that were initially present.</p>
+<p>The Extension measures each marked element with <code>ResizeObserver</code>, or uses the window resize event when that API is unavailable. It applies one shape class (<code>ae--shape-vertical</code>, <code>ae--shape-square</code>, or <code>ae--shape-horizontal</code>) according to width divided by height. It also toggles <code>ae--fits-&lt;size&gt;</code> classes when <code>sqrt(width * height)</code> reaches each configured minimum. After an update it dispatches <code>AelluxJsAdaptiveUpdate</code> from the element. Initial <code>ae--*</code> classes are discarded before mounting. Unmounting removes the managed classes; unrelated classes and inline styles are left as they are.</p>
 <h2>Configuration</h2>
 <p>Pass <code>adaptiveParams</code> through the Extension options. Each supplied group is merged with its defaults:</p>
 <pre><code class="language-js">$ae.init({

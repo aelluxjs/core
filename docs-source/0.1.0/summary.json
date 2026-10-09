@@ -42,7 +42,7 @@
         { "label": "Adaptive", "href": "core-extensions/adaptive.md" },
         { "label": "Feedback", "href": "core-extensions/feedback.md" },
         { "label": "Focus", "href": "core-extensions/focus.md" },
-        { "label": "Pointer", "href": "core-extensions/pointer.md" },
+        { "label": "Point", "href": "core-extensions/point.md" },
         { "label": "Preference", "href": "core-extensions/preference.md" },
         { "label": "Present", "href": "core-extensions/present.md" },
         { "label": "State Navigation", "href": "core-extensions/state-navigation.md" }

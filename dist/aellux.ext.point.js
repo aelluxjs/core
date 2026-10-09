@@ -1,16 +1,16 @@
 (() => {
-  // src/aellux.ext.pointer.js
+  // src/aellux.ext.point.js
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   (function(root) {
     "use strict";
     const AelluxJs = root.AelluxJs;
-    const extensionName = "pointer";
+    const extensionName = "point";
     if (!AelluxJs) {
       throw new Error(`[aellux.js] Cannot attach the "${extensionName}" extension: root.AelluxJs is not defined. Load the aellux.js boot script before this extension.`);
     }
     const trackedPointers = /* @__PURE__ */ new Map();
     const pointableElements = /* @__PURE__ */ new Set();
-    const pointableAttribute = AelluxJs.attr("pointable");
+    const pointableAttribute = AelluxJs.attr("point");
     const pointableSelector = `[${pointableAttribute}]`;
     AelluxJs.extAttach(extensionName, {
       init,
@@ -50,6 +50,8 @@
       pointableElements.delete(element);
       for (const pointer of trackedPointers.values()) {
         pointer.pointables = pointer.pointables.filter((pointable) => pointable !== element);
+        if (pointer.pressStart)
+          pointer.pressStart = pointer.pressStart.filter((pointable) => pointable !== element);
       }
     }
     function pointers(element) {
@@ -78,13 +80,25 @@
       return result;
     }
     function dispatchPointer(name, pointer, originalEvent, targets = pointer.pointables, hover, pointables = pointer.pointables) {
+      var _a, _b, _c;
       const chain = pointables.slice();
+      const pressStart = (_b = (_a = pointer.pressStart) == null ? void 0 : _a.slice()) != null ? _b : null;
       for (const element of targets.slice()) {
         AelluxJs.dispatchFrom(element, name, {
           bubbles: false,
-          detail: { pointer, pointables: chain.slice(), originalEvent, hover }
+          detail: {
+            pointer,
+            pointables: chain.slice(),
+            pressStart: (_c = pressStart == null ? void 0 : pressStart.slice()) != null ? _c : null,
+            originalEvent,
+            hover
+          }
         });
       }
+    }
+    function releaseTargets(pointer) {
+      if (!pointer.pointables.length) return pointer.pressStart || [];
+      return [.../* @__PURE__ */ new Set([...pointer.pointables, ...pointer.pressStart || []])];
     }
     function canHover(event) {
       return event.pointerType === "mouse" || event.pointerType === "pen";
@@ -101,7 +115,8 @@
         buttons: event.buttons,
         pressed,
         hover,
-        pointables: []
+        pointables: [],
+        pressStart: null
       };
       trackedPointers.set(event.pointerId, pointer);
       return pointer;
@@ -122,6 +137,7 @@
       pointer.hover = canHover(event);
       updatePointer(pointer, event);
       pointer.pointables = pointablesFor(event.target, pointer);
+      pointer.pressStart = pointer.pointables.slice();
       dispatchPointer("PointerDown", pointer, event);
     }
     function onPointerMove(event) {
@@ -140,7 +156,7 @@
       updatePointer(pointer, event);
       pointer.pressed = false;
       pointer.pointables = pointablesFor(event.target, pointer);
-      dispatchPointer("PointerUp", pointer, event);
+      dispatchPointer("PointerUp", pointer, event, releaseTargets(pointer));
       if (!pointer.hover) trackedPointers.delete(event.pointerId);
     }
     function onPointerCancel(event) {
@@ -149,7 +165,7 @@
         updatePointer(pointer, event);
         pointer.pressed = false;
         pointer.pointables = pointablesFor(event.target, pointer);
-        dispatchPointer("PointerCancel", pointer, event);
+        dispatchPointer("PointerCancel", pointer, event, releaseTargets(pointer));
       }
       trackedPointers.delete(event.pointerId);
     }
@@ -181,4 +197,4 @@
     }
   })(typeof globalThis !== "undefined" ? globalThis : window);
 })();
-//# sourceMappingURL=aellux.ext.pointer.js.map
+//# sourceMappingURL=aellux.ext.point.js.map

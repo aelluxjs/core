@@ -10,22 +10,22 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
   <title>
-  Pointer | 0.1.0 | aellux.js Docs</title>
+  Point | 0.1.0 | aellux.js Docs</title>
 
 <meta name="description" content="aellux.js Docs">
-  <link rel="canonical" href="https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/pointer.htm">
+  <link rel="canonical" href="https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/point.htm">
   
-    <meta property="og:title" content="Pointer | 0.1.0 | aellux.js Docs" />
+    <meta property="og:title" content="Point | 0.1.0 | aellux.js Docs" />
     <meta property="og:type" content="website" />
-          <meta property="og:url" content="https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/pointer.htm" />
+          <meta property="og:url" content="https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/point.htm" />
               <meta property="og:description" content="aellux.js Docs" />
         <meta property="og:site_name" content="aellux.js Docs" />
 
         <meta name="twitter:card" content="summary_large_image">
-        <meta name="twitter:title" content="Pointer | 0.1.0 | aellux.js Docs">
+        <meta name="twitter:title" content="Point | 0.1.0 | aellux.js Docs">
         <meta name="twitter:description" content="aellux.js Docs">
 
-                  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Pointer | 0.1.0 | aellux.js Docs","description":"aellux.js Docs","url":"https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/pointer.htm"}</script>
+                  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Point | 0.1.0 | aellux.js Docs","description":"aellux.js Docs","url":"https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/point.htm"}</script>
           
     
         <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -434,8 +434,8 @@
                           </li>
                                                                                                       <li class="nav-item small-md rounded-1 ps-md-1 active"
                             style="flex:0">
-                            <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/core-extensions/pointer.htm">
-                              Pointer                            </a>
+                            <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/core-extensions/point.htm">
+                              Point                            </a>
                           </li>
                                                                                                       <li class="nav-item small-md rounded-1 ps-md-1"
                             style="flex:0">
@@ -528,7 +528,7 @@
                     Core Extensions                  </a>
                 </li>
                                                                     <li class="breadcrumb-item text-capitalize text-nowrap flex-shrink-0">
-                    Pointer                  </li>
+                    Point                  </li>
                                       
           </ol>
         </nav>
@@ -549,19 +549,20 @@
         </div>
 
         <div id="doc-content" style="min-height: calc(100vh - 200px);" class="js-toc-content" ajax-load="doc-content">
-          <h1>Pointer Extension</h1>
-<p><code>pointer</code> tracks the pointers currently pressed or hovering over the document and relates them to mounted elements with <code>data-ae-pointable</code>. It is a standalone core Extension and is not included in the <code>full</code> runtime bundle. Register it before initialization:</p>
-<pre><code class="language-html">&lt;div id=&quot;canvas&quot; data-ae-pointable=&quot;2&quot;&gt;&lt;/div&gt;
+          <h1>Point Extension</h1>
+<p><code>point</code> tracks the pointers currently pressed or hovering over the document and relates them to mounted elements with <code>data-ae-point</code>. It is a standalone core Extension and is not included in the <code>full</code> runtime bundle. Register it before initialization:</p>
+<pre><code class="language-html">&lt;div id=&quot;canvas&quot; data-ae-point=&quot;2&quot;&gt;&lt;/div&gt;
 </code></pre>
-<pre><code class="language-js">$ae.ext(&quot;pointer&quot;);
-await $ae.init({ mode: &quot;basic&quot; });
-
-const pointers = $ae(&quot;canvas&quot;).pointer.pointers();
-console.log(pointers);
+<pre><code class="language-js">$ae.ext(&quot;point&quot;);
+$ae.init({ mode: &quot;basic&quot; });
+$ae.on(&quot;Ready&quot;, function (event) {
+  const pointers = $ae(&quot;canvas&quot;).point.pointers();
+  console.log(pointers);
+})
 </code></pre>
-<p>An empty <code>data-ae-pointable</code> allows one pointer by default. A non-negative integer sets the maximum number of pointers associated with that element; <code>0</code> disables association and invalid values use the default of one. Nested pointables have their own limits. The mounted controller method <code>$ae(elementOrId).pointer.pointers()</code> returns the pointers currently associated with that element.</p>
-<p>Each pointer record has <code>pointerId</code>, <code>pointerType</code>, <code>initial</code>, <code>current</code>, <code>delta</code>, <code>buttons</code>, <code>pressed</code>, <code>hover</code>, and <code>pointables</code>. Positions use viewport <code>clientX</code> and <code>clientY</code> coordinates as <code>{ x, y }</code>; <code>delta</code> is <code>current - initial</code>. <code>pointables</code> lists the associated mounted elements from nearest to outermost. The returned array is a snapshot; its pointer records update in place.</p>
-<p>The Extension listens to <code>pointerdown</code>, <code>pointermove</code>, <code>pointerup</code>, <code>pointercancel</code>, <code>pointerover</code>, and <code>pointerout</code> in the capture phase. It dispatches <code>AelluxJsPointerDown</code>, <code>AelluxJsPointerMove</code>, <code>AelluxJsPointerUp</code>, <code>AelluxJsPointerCancel</code>, and <code>AelluxJsPointerHover</code> directly on each associated pointable, from nearest to outermost. These events use <code>bubbles: false</code>, so a pointable excluded by its limit does not receive a child&#39;s event. <code>detail</code> contains <code>pointer</code>, <code>pointables</code>, and <code>originalEvent</code>; <code>detail.pointables</code> is a snapshot of the nearest-to-outermost chain when the event was dispatched. Hover events also set <code>detail.hover</code> to <code>true</code> or <code>false</code> and are sent only to pointables being entered or left. The initial position is set on the first observed hover or press and resets on each press. Mouse and pen pointers remain tracked while hovering after release. Touch pointers leave after their <code>PointerUp</code> event; canceled pointers leave after <code>PointerCancel</code>. Destroying the Extension removes its listeners, mount map, and tracked pointers.</p>
+<p>An empty <code>data-ae-point</code> allows one pointer by default. A non-negative integer sets the maximum number of pointers associated with that element; <code>0</code> disables association and invalid values use the default of one. Nested pointables have their own limits. The mounted controller method <code>$ae(elementOrId).point.pointers()</code> returns the pointers currently associated with that element.</p>
+<p>Each pointer record has <code>pointerId</code>, <code>pointerType</code>, <code>initial</code>, <code>current</code>, <code>delta</code>, <code>buttons</code>, <code>pressed</code>, <code>hover</code>, <code>pointables</code>, and <code>pressStart</code>. Positions use viewport <code>clientX</code> and <code>clientY</code> coordinates as <code>{ x, y }</code>; <code>delta</code> is <code>current - initial</code>. <code>pointables</code> lists the currently associated mounted elements from nearest to outermost. <code>pressStart</code> captures that chain on each <code>pointerdown</code> and is <code>null</code> before the first press. The returned array is a snapshot; its pointer records update in place.</p>
+<p>The Extension listens to <code>pointerdown</code>, <code>pointermove</code>, <code>pointerup</code>, <code>pointercancel</code>, <code>pointerover</code>, and <code>pointerout</code> in the capture phase. It dispatches <code>AelluxJsPointerDown</code>, <code>AelluxJsPointerMove</code>, <code>AelluxJsPointerUp</code>, <code>AelluxJsPointerCancel</code>, and <code>AelluxJsPointerHover</code> directly on each associated pointable, from nearest to outermost. These events use <code>bubbles: false</code>, so a pointable excluded by its limit does not receive a child&#39;s event. <code>detail</code> contains <code>pointer</code>, <code>pointables</code>, <code>pressStart</code>, and <code>originalEvent</code>; the two chains in <code>detail</code> are snapshots when the event was dispatched. <code>PointerUp</code> and <code>PointerCancel</code> are sent to the current pointables and to those from <code>pressStart</code>, once per element. When <code>PointerUp</code> occurs outside every pointable, it still reaches the elements in <code>pressStart</code>, with <code>detail.pointables</code> set to an empty array. Unmounting a pointable removes it from the stored chains. Hover events also set <code>detail.hover</code> to <code>true</code> or <code>false</code> and are sent only to pointables being entered or left. The initial position is set on the first observed hover or press and resets on each press. Mouse and pen pointers remain tracked while hovering after release. Touch pointers leave after their <code>PointerUp</code> event; canceled pointers leave after <code>PointerCancel</code>. Destroying the Extension removes its listeners, mount map, and tracked pointers.</p>
         </div>
 
         <div id="doc-navlinks2" ajax-load="doc-navlinks2">
