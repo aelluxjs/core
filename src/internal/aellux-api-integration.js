@@ -112,7 +112,7 @@ export function createAelluxApi(root, constants) {
     dispatch: function (event, options) { return api.dispatchFrom(document, event, options); },
     dispatchFrom: function (from, event, options) {
       var obj = document.createEvent("Event");
-      var bubbles = options && "bubbles" in options ? options.bubbles : false;
+      var bubbles = options && "bubbles" in options ? options.bubbles : true;
       var cancelable = options && "cancelable" in options ? options.cancelable : false;
       obj.initEvent(api.eventName(event), bubbles, cancelable);
       return from.dispatchEvent(obj);

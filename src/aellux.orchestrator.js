@@ -113,7 +113,15 @@ import utilsNameCase from "./internal/utils-name-case.js";
       },
 
       dispatchFrom(from, event, options) {
-        return from.dispatchEvent(new CustomEvent(AelluxJs.eventName(event), options));
+        options = options || {};
+        if (!("bubbles" in options)) { options.bubbles = true; }
+        if (!("cancelable" in options)) { options.cancelable = false; }
+        return from.dispatchEvent(
+          new CustomEvent(
+            AelluxJs.eventName(event),
+            options
+          )
+        );
       },
 
       wait(extensionName) { return getExtension(extensionName); },

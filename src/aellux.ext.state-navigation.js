@@ -16,8 +16,7 @@
 
   AelluxJs.extAttach(extensionName, {
     init, destroy,
-    tabOpen, ajaxReplace, flowStep, formFocus, updateBaseTitle,
-    setState,
+    updateBaseTitle, setState,
     globalSnapshot
   });
 
@@ -30,7 +29,8 @@
   function init(options) {
     window.addEventListener("popstate", onPopState);
     window.addEventListener("hashchange", onHashChange);
-    AelluxJs.on("SnapshotRestore", OnSnapshotRestoreAjax);
+    AelluxJs.on("PushAjaxReplace", OnPushAjaxReplace);
+    AelluxJs.on("UpdateBaseTitle", OnUpdateBaseTitle);
 
     if ("useHash" in AelluxJs.options) { useHash = AelluxJs.options.useHash; }
 
@@ -45,39 +45,15 @@
   async function destroy() {
     window.removeEventListener("popstate", onPopState);
     window.removeEventListener("hashchange", onHashChange);
-    AelluxJs.off("SnapshotRestore", OnSnapshotRestoreAjax);
+    AelluxJs.off("PushAjaxReplace", OnPushAjaxReplace);
+    AelluxJs.off("UpdateBaseTitle", OnUpdateBaseTitle);
   }
 
-  function updateBaseTitle(title) {
-    baseTitle = title;
-  }
-
-  function tabOpen(tabGroupId, tabId, title) {
-    return change(tabGroupId, tabId, title);
-  }
-
-  function flowStep(flowId, stepId, title) {
-    return change(flowId, stepId, title);
-  }
-
-  function formFocus(formId, focusId, title) {
-    return change(formId, focusId, title);
-  }
-
-  function ajaxReplace(url, selectors) {
-    const currentState = {
-      aelluxJsState: true,
-      snapshot: globalSnapshot,
-      ajaxReplace: { url: window.location.href, selectors }
-    }, targetState = {
-      aelluxJsState: true,
-      snapshot: null,
-      ajaxReplace: { url, selectors }
-    };
-
-    history.replaceState(currentState, "", window.location.href);
-    updateSnapshotData();
-    history.pushState(targetState, "", url);
+  function updateBaseTitle(title = null) {
+    baseTitle = title ?? baseTitle;
+    document.title = (globalSnapshot.title || false) ?
+      `${globalSnapshot.title} - ${baseTitle}` :
+      baseTitle;
   }
 
   function setState(key, value, title = undefined, silent = false) {
@@ -103,7 +79,7 @@
     dispatchSnapshotEvent("SnapshotChange");
   }
 
-  function updateSnapshotData(string) {
+  function updateSnapshotData(string = "") {
     globalSnapshotString = string;
 
     for (const key in globalRemoveSnapshot) { delete globalRemoveSnapshot[key]; } //CLEAR
@@ -121,16 +97,14 @@
     return (new URLSearchParams(snapshot || {})).toString();
   }
 
-  function dispatchSnapshotEvent(name, browserState = undefined) {
-    document.title = (globalSnapshot.title || false) ?
-      `${globalSnapshot.title} - ${baseTitle}` :
-      baseTitle;
+  function dispatchSnapshotEvent(name, popState = undefined) {
+    updateBaseTitle();
 
     const options = {
       detail: {
         snapshot: globalSnapshot,
         removeSnapshot: globalRemoveSnapshot,
-        browserState
+        popState
       },
       bubbles: true
     };
@@ -145,17 +119,17 @@
   }
 
   function onPopState(event) {
-    const browserState = event.state;
-    if (!browserState || !browserState.aelluxJsState) return;
+    const popState = event.state;
+    if (!popState || !popState.aelluxJsState) return;
 
-    if (browserState.snapshot)
-      updateSnapshotData(snapshotToString(browserState.snapshot));
+    if (popState.snapshot)
+      updateSnapshotData(snapshotToString(popState.snapshot));
     else if (useHash)
       updateSnapshotData(window.location.hash.substring(1));
     else
-      updateSnapshotData("");
+      updateSnapshotData();
 
-    dispatchSnapshotEvent("SnapshotRestore", browserState);
+    dispatchSnapshotEvent("SnapshotRestore", popState);
 
     if (!useHash) return;
     skipHashChange = window.location.hash;
@@ -165,22 +139,29 @@
     }, 0);
   }
 
-  function OnSnapshotRestoreAjax(event) {
-    if (!event.detail || !event.detail.browserState) return;
+  function ajaxReplace(url, selectors) {
+    const currentState = {
+      aelluxJsState: true,
+      snapshot: globalSnapshot,
+      ajaxReplace: { url: window.location.href, selectors }
+    }, targetState = {
+      aelluxJsState: true,
+      snapshot: null,
+      ajaxReplace: { url, selectors }
+    };
 
-    const state = event.detail.browserState;
-    if (state.ajaxReplace) {
-      const url = state.ajaxReplace.url;
-      const selectors = state.ajaxReplace.selectors;
-      const extAjaxHref = AelluxJs.ext.ajaxHref;
-      if (extAjaxHref && typeof extAjaxHref.load === "function") {
-        extAjaxHref.load(url, selectors, { ignoreHistory: true });
-      } else {
-        AelluxJs.diagnostics.warn(
-          AelluxJs.diagnostics.WARN_NAVIGATION_AJAX_HREF_UNAVAILABLE,
-          { url, selectors }
-        );
-      }
-    }
+    history.replaceState(currentState, "", window.location.href);
+    updateSnapshotData();
+    history.pushState(targetState, "", url);
+  }
+
+  function OnPushAjaxReplace(event) {
+    const { selectors, url } = event.detail;
+    ajaxReplace(url, selectors);
+  }
+
+  function OnUpdateBaseTitle(event) {
+    const { title } = event.detail;
+    updateBaseTitle(title);
   }
 })(typeof globalThis !== "undefined" ? globalThis : window);
