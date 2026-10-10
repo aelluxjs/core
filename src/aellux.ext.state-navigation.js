@@ -37,10 +37,10 @@
 
     baseTitle = document.title;
     onHashChange();
-    history.replaceState({
+    history.replaceState(mergeHistoryState({
       aelluxJsState: true,
       snapshot: Object.assign({}, globalSnapshot)
-    }, "");
+    }), "");
   }
 
   async function destroy() {
@@ -74,7 +74,7 @@
     const state = { aelluxJsState: true, snapshot: Object.assign({}, globalSnapshot) };
     const url = useHash ? `#${globalSnapshotString}` : undefined;
 
-    if (silent) history.replaceState(state, "", url);
+    if (silent) history.replaceState(mergeHistoryState(state), "", url);
     else history.pushState(state, "", url);
 
     dispatchSnapshotEvent("SnapshotChange");
@@ -151,9 +151,16 @@
       ajaxReplace: { url, selectors }
     };
 
-    history.replaceState(currentState, "", window.location.href);
+    history.replaceState(mergeHistoryState(currentState), "", window.location.href);
     updateSnapshotData();
     history.pushState(targetState, "", url);
+  }
+
+  function mergeHistoryState(state) {
+    const currentState = history.state;
+    if (!currentState || typeof currentState !== "object" || Array.isArray(currentState))
+      return state;
+    return Object.assign({}, currentState, state);
   }
 
   function OnPushAjaxReplace(event) {

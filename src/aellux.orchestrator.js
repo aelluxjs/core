@@ -68,13 +68,14 @@ import utilsNameCase from "./internal/utils-name-case.js";
       async destroy() {
         AelluxJs.waitLayout.clear();
         await AelluxJs.destroyExtensions();
+        mountManager.destroy();
       },
       async destroyExtensions(extensionNames) {
         if (typeof extensionNames === "string")
           extensionNames = [extensionNames];
 
         if (!extensionNames)
-          extensionNames = Object.keys(extensionPromises)
+          extensionNames = Object.keys(AelluxJs.registry.ext)
 
         extensionNames = extensionNames.map(_ => fromCamelCase(_));
 
@@ -107,6 +108,7 @@ import utilsNameCase from "./internal/utils-name-case.js";
             delete AelluxJs.registry.ext[key];
             mountManager.remove({ extensionName });
             delete AelluxJs.registry.lazyExtSelectors[key];
+            removeExtensionAssets(extensionName);
             if (extension) extension.initialized = false;
           }
         }
@@ -165,6 +167,7 @@ import utilsNameCase from "./internal/utils-name-case.js";
               AelluxJs.diagnostics.ERROR_EXTENSION_INITIALIZE,
               { cause: error, extension: extensionName }
             );
+            delete extensionPromises[key];
             return null;
           });
         return extensionPromises[key];
@@ -193,6 +196,7 @@ import utilsNameCase from "./internal/utils-name-case.js";
             AelluxJs.diagnostics.ERROR_EXTENSION_INITIALIZE,
             { cause: error, extension: extensionName }
           );
+          delete extensionPromises[key];
           return null;
         });
 
@@ -273,6 +277,18 @@ import utilsNameCase from "./internal/utils-name-case.js";
       /(?:\.legacy)?(?:\.min)?\.js(?=[?#]|$)/,
       ".legacy" + (AelluxJs.minified ? ".min" : "") + ".js"
     );
+  }
+
+  function removeExtensionAssets(extensionName) {
+    const scriptAttribute = AelluxJs.attr("ext");
+    const styleAttribute = AelluxJs.attr("ext-style");
+    document.querySelectorAll(`script[${scriptAttribute}], link[${styleAttribute}]`)
+      .forEach(asset => {
+        if (asset.getAttribute(scriptAttribute) === extensionName ||
+          asset.getAttribute(styleAttribute) === extensionName) {
+          asset.remove();
+        }
+      });
   }
 
   function hasCompatibleBuild(data) {

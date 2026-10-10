@@ -192,7 +192,17 @@
             update();
           } else if (buttonNext || buttonPrev) {
             const preference = container.getAttribute(attr.preference);
+            const key = toCamelCase2(preference);
+            const options = prefOptions[key];
+            if (!options || options.length === 0) return;
             const change = buttonNext ? 1 : -1;
+            const currentValue = get(key);
+            const currentIndex = options.findIndex(
+              (option) => String(option) === String(currentValue)
+            );
+            const nextIndex = currentIndex < 0 ? buttonNext ? 0 : options.length - 1 : (currentIndex + change + options.length) % options.length;
+            set(preference, options[nextIndex]);
+            update();
           }
         }
       })(typeof globalThis !== "undefined" ? globalThis : window);
@@ -233,10 +243,10 @@
             useHash = AelluxJs2.options.useHash;
           baseTitle = document.title;
           onHashChange();
-          history.replaceState({
+          history.replaceState(mergeHistoryState({
             aelluxJsState: true,
             snapshot: Object.assign({}, globalSnapshot)
-          }, "");
+          }), "");
         }
         async function destroy() {
           window.removeEventListener("popstate", onPopState);
@@ -259,7 +269,7 @@
           updateSnapshotData(snapshotToString(globalSnapshot));
           const state = { aelluxJsState: true, snapshot: Object.assign({}, globalSnapshot) };
           const url = useHash ? `#${globalSnapshotString}` : void 0;
-          if (silent) history.replaceState(state, "", url);
+          if (silent) history.replaceState(mergeHistoryState(state), "", url);
           else history.pushState(state, "", url);
           dispatchSnapshotEvent("SnapshotChange");
         }
@@ -330,9 +340,15 @@
             snapshot: null,
             ajaxReplace: { url, selectors }
           };
-          history.replaceState(currentState, "", window.location.href);
+          history.replaceState(mergeHistoryState(currentState), "", window.location.href);
           updateSnapshotData();
           history.pushState(targetState, "", url);
+        }
+        function mergeHistoryState(state) {
+          const currentState = history.state;
+          if (!currentState || typeof currentState !== "object" || Array.isArray(currentState))
+            return state;
+          return Object.assign({}, currentState, state);
         }
         function OnPushAjaxReplace(event) {
           try {
@@ -1236,6 +1252,7 @@
     const { toCapitalized: toCapitalized2, toCamelCase: toCamelCase2, fromCamelCase: fromCamelCase2 } = utils_name_case_default;
     const initialAttributeValues = /* @__PURE__ */ new WeakMap();
     const mountAttributeRecords = /* @__PURE__ */ new WeakMap();
+    const pendingMounts = /* @__PURE__ */ new WeakMap();
     const pendingUnmounts = /* @__PURE__ */ new WeakMap();
     const classPrefix = root2.AelluxJs.className("");
     return { mount, unmount, unmountDetached, update, initialAttribute };
@@ -1353,33 +1370,55 @@
               const mountableElements = findElements(element, selector);
               for (const mountable of mountableElements) {
                 const mountId = `${extensionName}@${selector}`;
-                if (isMounted(mountable, mountId)) continue;
+                if (isMounted(mountable, mountId)) {
+                  const pendingMount = getPendingMount(mountable, mountId);
+                  if (pendingMount) await pendingMount;
+                  continue;
+                }
                 if (!isMounted(mountable)) {
                   for (const name of Array.from(mountable.classList)) {
                     if (name.startsWith(classPrefix)) mountable.classList.remove(name);
                   }
                 }
                 rememberInitialAttributes(mountable, mountId);
+                setMounted(mountable, mountId);
+                const finishPendingMount = beginPendingMount(mountable, mountId);
                 try {
                   await controller.mount(mountable);
+                  let elementController = elementControllers.get(mountable);
+                  if (!elementController) {
+                    elementController = createControllerHelper(root2, mountable);
+                    elementControllers.set(mountable, elementController);
+                  }
+                  elementController.spawn(
+                    extensionName,
+                    mountId,
+                    controller.controllers,
+                    typeof controller.update === "function"
+                  );
+                  elementsAffected.add(mountable);
+                  newlyMounted.add(mountable);
                 } catch (error) {
+                  setMounted(mountable, mountId, false);
+                  const elementController = elementControllers.get(mountable);
+                  if (elementController) {
+                    elementController.despawn(mountId);
+                    if (!elementController.hasMounts()) elementControllers.delete(mountable);
+                  }
                   restoreInitialAttributes(mountable, mountId);
-                  throw error;
+                  AelluxJs2.diagnostics.error(
+                    AelluxJs2.diagnostics.ERROR_EXTENSION_MOUNT,
+                    {
+                      cause: error,
+                      extension: extensionName,
+                      method: "mount",
+                      selector,
+                      element: mountable
+                    }
+                  );
+                } finally {
+                  finishPendingMount();
                 }
-                elementsAffected.add(mountable);
-                setMounted(mountable, mountId);
-                let elementController = elementControllers.get(mountable);
-                if (!elementController) {
-                  elementController = createControllerHelper(root2, mountable);
-                  elementControllers.set(mountable, elementController);
-                }
-                elementController.spawn(
-                  extensionName,
-                  mountId,
-                  controller.controllers,
-                  typeof controller.update === "function"
-                );
-                newlyMounted.add(mountable);
               }
             } catch (error) {
               AelluxJs2.diagnostics.error(
@@ -1395,6 +1434,11 @@
           }
         }
         for (const affected of elementsAffected) {
+          if (!affected.isConnected || !isMounted(affected)) {
+            if (!affected.isConnected) await unmountElementRegistrations(affected);
+            newlyMounted.delete(affected);
+            continue;
+          }
           affected.classList.toggle(
             AelluxJs2.className("mounted"),
             isMounted(affected)
@@ -1409,7 +1453,7 @@
       for (const [element, mountIds] of Array.from(mountedElements)) {
         const inRoot = element === rootElement || rootElement.contains(element);
         const detachedInGlobalUnmount = method === "unmount" && rootElement === root2.document && !element.isConnected;
-        if (detachedOnly ? element.isConnected : !inRoot && !detachedInGlobalUnmount) continue;
+        if (detachedOnly ? element.isConnected || hasPendingMounts(element) : !inRoot && !detachedInGlobalUnmount) continue;
         for (const mountId of Array.from(mountIds)) {
           const separator = mountId.indexOf("@");
           const extensionName = mountId.slice(0, separator);
@@ -1439,6 +1483,8 @@
       AelluxJs2.dispatch(toCapitalized2(method));
     }
     async function unmountRegistration(element, mountId, controller, extensionName, selector) {
+      const pendingMount = getPendingMount(element, mountId);
+      if (pendingMount) await pendingMount;
       if (!isMounted(element, mountId)) return;
       let tasks = pendingUnmounts.get(element);
       if (!tasks) {
@@ -1488,6 +1534,41 @@
         if (!tasks.size) pendingUnmounts.delete(element);
         finish();
       }
+    }
+    async function unmountElementRegistrations(element) {
+      const mountIds = Array.from(mountedElements.get(element) || []);
+      for (const mountId of mountIds) {
+        const separator = mountId.indexOf("@");
+        const extensionName = mountId.slice(0, separator);
+        const selector = mountId.slice(separator + 1);
+        const mounter = mountMaps.get(toCamelCase2(extensionName));
+        const controller = mounter && mounter.get(selector);
+        await unmountRegistration(element, mountId, controller, extensionName, selector);
+      }
+    }
+    function beginPendingMount(element, mountId) {
+      let mounts = pendingMounts.get(element);
+      if (!mounts) {
+        mounts = /* @__PURE__ */ new Map();
+        pendingMounts.set(element, mounts);
+      }
+      let finish;
+      mounts.set(mountId, new Promise((resolve) => {
+        finish = resolve;
+      }));
+      return function() {
+        mounts.delete(mountId);
+        if (!mounts.size) pendingMounts.delete(element);
+        finish();
+      };
+    }
+    function getPendingMount(element, mountId) {
+      var _a;
+      return ((_a = pendingMounts.get(element)) == null ? void 0 : _a.get(mountId)) || null;
+    }
+    function hasPendingMounts(element) {
+      var _a;
+      return Boolean((_a = pendingMounts.get(element)) == null ? void 0 : _a.size);
     }
     function resolveRoots(rootOrSelector, method) {
       if (!rootOrSelector) {
@@ -1612,10 +1693,12 @@
       mount: helper.mount,
       unmount: helper.unmount,
       update: helper.update,
-      initialAttribute: helper.initialAttribute
+      initialAttribute: helper.initialAttribute,
+      destroy
     };
+    let observer = null;
     if (typeof root2.MutationObserver === "function") {
-      const observer = new root2.MutationObserver((records) => {
+      observer = new root2.MutationObserver((records) => {
         if (!records.some((record) => record.removedNodes.length)) return;
         scheduleUnmount(() => helper.unmountDetached()).catch((error) => {
           const diagnostics = root2.AelluxJs.diagnostics;
@@ -1623,6 +1706,12 @@
         });
       });
       observer.observe(root2.document, { childList: true, subtree: true });
+    }
+    function destroy() {
+      if (!observer) return false;
+      observer.disconnect();
+      observer = null;
+      return true;
     }
     return manager;
     function scheduleUnmount(operation) {
@@ -1689,6 +1778,7 @@
         map = /* @__PURE__ */ new Map();
         maps.set(key, map);
       }
+      if (map.has(selector)) return reject("selector");
       map.set(selector, { mount, unmount, update, controllers });
       root2.AelluxJs.registry.extMounters[key] = [...map.keys()].join(",");
       return manager;
@@ -1698,6 +1788,14 @@
       const key = keyFor(extensionName);
       const map = maps.get(key);
       if (!map) return false;
+      if (hasMountedRegistration(extensionName, selector)) {
+        const diagnostics = root2.AelluxJs.diagnostics;
+        diagnostics.error(diagnostics.ERROR_MOUNT_MAP_IN_USE, {
+          extension: fromCamelCase2(extensionName),
+          selector
+        });
+        return false;
+      }
       const removed = selector === void 0 ? true : map.delete(selector);
       if (selector === void 0 || map.size === 0) {
         maps.delete(key);
@@ -1706,6 +1804,20 @@
         root2.AelluxJs.registry.extMounters[key] = [...map.keys()].join(",");
       }
       return removed;
+    }
+    function hasMountedRegistration(extensionName, selector) {
+      const prefix = `${fromCamelCase2(extensionName)}@`;
+      const mountId = selector === void 0 ? null : `${prefix}${selector}`;
+      for (const registrations of mountedElements.values()) {
+        if (mountId) {
+          if (registrations.has(mountId)) return true;
+          continue;
+        }
+        for (const id of registrations) {
+          if (id.startsWith(prefix)) return true;
+        }
+      }
+      return false;
     }
   }
 
@@ -1758,12 +1870,13 @@
         async destroy() {
           AelluxJs.waitLayout.clear();
           await AelluxJs.destroyExtensions();
+          mountManager.destroy();
         },
         async destroyExtensions(extensionNames) {
           if (typeof extensionNames === "string")
             extensionNames = [extensionNames];
           if (!extensionNames)
-            extensionNames = Object.keys(extensionPromises);
+            extensionNames = Object.keys(AelluxJs.registry.ext);
           extensionNames = extensionNames.map((_) => fromCamelCase2(_));
           try {
             await AelluxJs.unmount(document, extensionNames);
@@ -1793,6 +1906,7 @@
               delete AelluxJs.registry.ext[key];
               mountManager.remove({ extensionName });
               delete AelluxJs.registry.lazyExtSelectors[key];
+              removeExtensionAssets(extensionName);
               if (extension) extension.initialized = false;
             }
           }
@@ -1847,6 +1961,7 @@
               AelluxJs.diagnostics.ERROR_EXTENSION_INITIALIZE,
               { cause: error, extension: extensionName }
             );
+            delete extensionPromises[key];
             return null;
           });
           return extensionPromises[key];
@@ -1866,6 +1981,7 @@
           AelluxJs.diagnostics.ERROR_EXTENSION_INITIALIZE,
           { cause: error, extension: extensionName }
         );
+        delete extensionPromises[key];
         return null;
       });
       return extensionPromises[key];
@@ -1933,6 +2049,15 @@
         /(?:\.legacy)?(?:\.min)?\.js(?=[?#]|$)/,
         ".legacy" + (AelluxJs.minified ? ".min" : "") + ".js"
       );
+    }
+    function removeExtensionAssets(extensionName) {
+      const scriptAttribute = AelluxJs.attr("ext");
+      const styleAttribute = AelluxJs.attr("ext-style");
+      document.querySelectorAll(`script[${scriptAttribute}], link[${styleAttribute}]`).forEach((asset) => {
+        if (asset.getAttribute(scriptAttribute) === extensionName || asset.getAttribute(styleAttribute) === extensionName) {
+          asset.remove();
+        }
+      });
     }
     function hasCompatibleBuild(data) {
       if (!data || !Array.isArray(data.builds) || data.builds.length === 0) return false;

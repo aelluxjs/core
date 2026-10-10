@@ -229,7 +229,17 @@
         update();
       } else if (buttonNext || buttonPrev) {
         var _preference = container.getAttribute(attr.preference);
+        var key = toCamelCase2(_preference);
+        var options = prefOptions[key];
+        if (!options || options.length === 0) return;
         var change = buttonNext ? 1 : -1;
+        var currentValue = get(key);
+        var currentIndex = options.findIndex(function(option) {
+          return String(option) === String(currentValue);
+        });
+        var nextIndex = currentIndex < 0 ? buttonNext ? 0 : options.length - 1 : (currentIndex + change + options.length) % options.length;
+        set(_preference, options[nextIndex]);
+        update();
       }
     }
   })(typeof globalThis !== "undefined" ? globalThis : window);

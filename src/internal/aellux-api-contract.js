@@ -102,7 +102,6 @@ var diagnosticNames = [
   "WARN_EXTENSION_STYLE_LOAD",
   "WARN_CONTROLLER_METHOD_MISSING",
   "WARN_STORAGE_FALLBACK",
-  "WARN_NAVIGATION_AJAX_HREF_UNAVAILABLE",
   "WARN_PRESENT_MOTION_HIDDEN",
   "WARN_NAVIGATION_EVENT_INVALID",
   "INFO_LEGACY_FALLBACK"
@@ -211,7 +210,7 @@ runtimeProperties.mountManager = Object.freeze({
   type: "object",
   properties: Object.freeze({
     add: method, remove: method, mount: method, unmount: method, update: method,
-    controller: method
+    controller: method, initialAttribute: method, destroy: method
   })
 });
 

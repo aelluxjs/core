@@ -380,6 +380,11 @@
                           </li>
                                                                                                       <li class="nav-item small-md rounded-1 ps-md-1"
                             style="flex:0">
+                            <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/extensions/accessibility.htm">
+                              Accessibility Requirements                            </a>
+                          </li>
+                                                                                                      <li class="nav-item small-md rounded-1 ps-md-1"
+                            style="flex:0">
                             <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/extensions/registration.htm">
                               Registration                            </a>
                           </li>
@@ -540,10 +545,10 @@
       style="max-width:200px">Diagnostics</span>
   </a>
   
-    <a href="/core/docs/0.1.0/extensions/registration.htm" class="text-decoration-none d-inline-flex flex-row justify-content-end gap-2"
+    <a href="/core/docs/0.1.0/extensions/accessibility.htm" class="text-decoration-none d-inline-flex flex-row justify-content-end gap-2"
     style="width: 40%;">
     <span class="text-truncate overflow-hidden d-inline-block align-middle flex-fill text-end"
-      style="max-width:200px">Registration</span> →
+      style="max-width:200px">Accessibility Requirements</span> →
   </a>
   </div>
         </div>
@@ -564,6 +569,7 @@
 </ol>
 <p>The runtime exposes a kebab-case name as camelCase under <code>AelluxJs.ext</code>: <code>tab-group</code> becomes <code>AelluxJs.ext.tabGroup</code>.
 An Extension receives its configuration as the <code>options</code> argument to <code>init(options)</code>. Supply it through <code>$ae.init({ extensions: { &quot;tab-group&quot;: { initialTab: &quot;overview&quot; } } })</code>; the boot script normalizes <code>tab-group</code> to <code>tabGroup</code> in <code>$ae.options.extensions</code>. Extensions without a matching entry receive <code>{}</code>.</p>
+<p>Interactive Extensions must also follow the <a href="accessibility.htm">accessibility requirements</a>. Document their interaction, semantics, accessible names, state ownership, relationships, focus behavior, motion and timing, announcements, lifecycle cleanup, and unvalidated limitations.</p>
 <h2>DOM Mount Contract</h2>
 <p>Extensions with element behavior register their selectors and handlers with <code>AelluxJs.mountManager</code> during <code>init()</code>:</p>
 <pre><code class="language-js">AelluxJs.extAttach(extensionName, { init, destroy });
@@ -632,6 +638,7 @@ node build-extension.mjs ./src/aellux.ext.example.js ./dist
 <li>Extra APIs are feature-detected and polyfilled by the Extension when required.</li>
 <li><code>init</code>, <code>mount</code>, <code>unmount</code>, and <code>destroy</code> obey the lifecycle contract.</li>
 <li>Repeated mount and destroy operations do not duplicate or retain resources.</li>
+<li>Accessibility parameters are documented and the minimum behavior is validated.</li>
 <li>Both runtime selections are covered by browser tests.</li>
 </ul>
         </div>
@@ -643,10 +650,10 @@ node build-extension.mjs ./src/aellux.ext.example.js ./dist
       style="max-width:200px">Diagnostics</span>
   </a>
   
-    <a href="/core/docs/0.1.0/extensions/registration.htm" class="text-decoration-none d-inline-flex flex-row justify-content-end gap-2"
+    <a href="/core/docs/0.1.0/extensions/accessibility.htm" class="text-decoration-none d-inline-flex flex-row justify-content-end gap-2"
     style="width: 40%;">
     <span class="text-truncate overflow-hidden d-inline-block align-middle flex-fill text-end"
-      style="max-width:200px">Registration</span> →
+      style="max-width:200px">Accessibility Requirements</span> →
   </a>
   </div>
         </div>

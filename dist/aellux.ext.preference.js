@@ -178,7 +178,17 @@
         update();
       } else if (buttonNext || buttonPrev) {
         const preference = container.getAttribute(attr.preference);
+        const key = toCamelCase2(preference);
+        const options = prefOptions[key];
+        if (!options || options.length === 0) return;
         const change = buttonNext ? 1 : -1;
+        const currentValue = get(key);
+        const currentIndex = options.findIndex(
+          (option) => String(option) === String(currentValue)
+        );
+        const nextIndex = currentIndex < 0 ? buttonNext ? 0 : options.length - 1 : (currentIndex + change + options.length) % options.length;
+        set(preference, options[nextIndex]);
+        update();
       }
     }
   })(typeof globalThis !== "undefined" ? globalThis : window);

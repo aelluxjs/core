@@ -179,8 +179,21 @@ import utilsNameCase from "./internal/utils-name-case.js";
       update();
     } else if (buttonNext || buttonPrev) {
       const preference = container.getAttribute(attr.preference);
+      const key = toCamelCase(preference);
+      const options = prefOptions[key];
+      if (!options || options.length === 0) return;
+
       const change = buttonNext ? 1 : -1;
-      //TODO LIST OPTIONS
+      const currentValue = get(key);
+      const currentIndex = options.findIndex(option =>
+        String(option) === String(currentValue)
+      );
+      const nextIndex = currentIndex < 0
+        ? (buttonNext ? 0 : options.length - 1)
+        : (currentIndex + change + options.length) % options.length;
+
+      set(preference, options[nextIndex]);
+      update();
     }
   }
 

@@ -36,26 +36,28 @@ AelluxJs.attr("preference");
 
 The module creates the core API if needed. The browser boot script still starts the runtime through `$ae.init()`.
 
-See [Getting Started](../docs/getting-started.md) for build instructions, runtime modes, and distribution details.
+See [Getting Started](docs-source/0.1.0/getting-started.md) for build instructions, runtime modes, and distribution details.
 
 ## Documentation
 
-- [Documentation index](../docs/README.md)
-- [Beta compatibility](../docs/compatibility.md)
-- [Runtime API](../docs/runtime/api.md)
-- [Diagnostics](../docs/runtime/diagnostics.md)
-- [Modern and Legacy runtimes](../docs/runtime/modern-legacy.md)
-- [Browser support baseline](../docs/runtime/browser-support.md)
-- [ES5 support level](../docs/runtime/es5-support.md)
-- [Visual mounting states](../docs/runtime/visual-mounting.md)
-- [Bootstrap integration](../docs/integrations/bootstrap.md)
-- [Registering aellux.js Extensions](../docs/extensions/registration.md)
-- [Authoring third-party Extensions](../docs/extensions/authoring.md)
-- [Declarative Extension loading](../docs/extensions/declarative-loading.md)
-- [Lazy loading](../docs/extensions/lazy-loading.md)
-- [Optional Extension styles](../docs/extensions/styles.md)
-- [Modern and Legacy Extension variants](../docs/extensions/legacy-variants.md)
-- [Browser validation scenarios](../docs/validation-scenarios.md)
+- [Published documentation](https://aelluxjs.github.io/core/docs/0.1.0/)
+- [Documentation source index](docs-source/0.1.0/README.md)
+- [Beta compatibility](docs-source/0.1.0/compatibility.md)
+- [Runtime API](docs-source/0.1.0/runtime/api.md)
+- [Diagnostics](docs-source/0.1.0/runtime/diagnostics.md)
+- [Modern and Legacy runtimes](docs-source/0.1.0/runtime/modern-legacy.md)
+- [Browser support baseline](docs-source/0.1.0/runtime/browser-support.md)
+- [ES5 support level](docs-source/0.1.0/runtime/es5-support.md)
+- [Visual mounting states](docs-source/0.1.0/runtime/visual-mounting.md)
+- [Bootstrap integration](docs-source/0.1.0/integrations/bootstrap.md)
+- [Registering aellux.js Extensions](docs-source/0.1.0/extensions/registration.md)
+- [Authoring third-party Extensions](docs-source/0.1.0/extensions/authoring.md)
+- [Accessibility requirements](docs-source/0.1.0/extensions/accessibility.md)
+- [Declarative Extension loading](docs-source/0.1.0/extensions/declarative-loading.md)
+- [Lazy loading](docs-source/0.1.0/extensions/lazy-loading.md)
+- [Optional Extension styles](docs-source/0.1.0/extensions/styles.md)
+- [Modern and Legacy Extension variants](docs-source/0.1.0/extensions/legacy-variants.md)
+- [Browser validation scenarios](docs-source/0.1.0/validation-scenarios.md)
 - [Extension scaffold](../templates/README.md)
 
 ## Core Capabilities
@@ -65,7 +67,7 @@ See [Getting Started](../docs/getting-started.md) for build instructions, runtim
 - Optional styles associated with individual Extensions.
 - Idempotent DOM mounting through `$ae.mount(root)`.
 - Browser history, preferences, feedback, persistence, and adaptive layout utilities.
-- ES5-compatible boot script with an [ES2017+ Modern browser baseline](../docs/runtime/browser-support.md).
+- ES5-compatible boot script with an [ES2017+ Modern browser baseline](docs-source/0.1.0/runtime/browser-support.md).
 
 ## Build
 

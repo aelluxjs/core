@@ -36,3 +36,20 @@ npm run test:browser
 | Isolated Extension failure | [`extension-failure-isolation.html`](https://github.com/aelluxjs/core/blob/main/tests/browser/extension-failure-isolation.html) |
 
 The shared [`harness.js`](https://github.com/aelluxjs/core/blob/main/tests/browser/harness.js) waits for `AelluxJsReady`, applies a timeout, records assertion failures, and exposes the final status through `data-test-status` for Playwright.
+
+## Core Contract Regression Matrix
+
+The browser suite covers the release contract in Chromium, Firefox, and WebKit:
+
+| Contract area | Covered behavior |
+| --- | --- |
+| API normalization and builds | Global and ESM identity, camelCase Extension keys and options, compound filenames, Modern and Legacy selection, minified files, optional styles, and incompatible builds. |
+| Diagnostics | Severity, verbosity updates, retained history, invalid selectors and registrations, unavailable storage, callback failures, transitions, and lifecycle failures. |
+| Loading | Eager and lazy loading, shared concurrent Promises, failed `init()` retry, failed script retry, optional stylesheet failure, and lazy-index cleanup after success or destruction. |
+| Lifecycle failure isolation | Rejected initialization, partial element mounting, failed update and unmount callbacks, failed destroy callbacks, and continued work for unaffected elements, registrations, and Extensions. |
+| Controllers and mount maps | Controller lookup, bound public methods, forced mount/update/unmount, missing methods, duplicate maps, active-map removal protection, and cleanup after the last registration. |
+| Mount results and attributes | Unique return values, partial success results, concurrent mounts, failed-mount rollback, overlapping registrations, and restoration of `data-ae-*`, `aria-*`, and `hidden`. |
+| Resource cleanup | Element and global listeners, Extension scripts and styles, mount maps, controllers, layout queues, failed and dormant lazy registrations, and the mount manager observer. |
+| Detached elements | Removal during async mount, observer cleanup, moves within the document, explicit unmount races, and global cleanup when `MutationObserver` is unavailable. |
+
+The contract suite does not replace the separate release tasks for publishing an exact browser version matrix, validating additional Legacy environments, mobile testing, accessibility review, or iframe support.

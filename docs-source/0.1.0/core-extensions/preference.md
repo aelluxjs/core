@@ -22,6 +22,16 @@ An element marked with `data-ae-preference` is a clickable preference container.
 </div>
 ```
 
-The Extension also recognizes `data-ae-label`, `data-ae-next`, and `data-ae-prev`. The next and previous controls are not implemented yet, so do not rely on them to cycle values.
+The Extension also recognizes `data-ae-label`, `data-ae-next`, and `data-ae-prev`. `data-ae-next` and `data-ae-prev` cycle through the built-in values for the container preference and wrap at either end. Preference names may use camelCase or kebab-case. If the current value is not recognized, next selects the first built-in value and previous selects the last.
+
+```html
+<div data-ae-preference="color-scheme">
+  <button type="button" data-ae-prev>Previous</button>
+  <span data-ae-label></span>
+  <button type="button" data-ae-next>Next</button>
+</div>
+```
+
+The cycling order is the order listed in the defaults below. Values loaded from persistence are matched by their string representation, so numeric preferences such as text scale continue from the persisted value.
 
 Defaults currently cover color scheme, contrast, reduced motion, reduced transparency, forced colors, text scale, interface scale, extended timing, large targets, haptics, and sound. User values are loaded from persistence when the Extension initializes.

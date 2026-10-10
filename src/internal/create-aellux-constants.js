@@ -32,6 +32,7 @@ export function createAelluxConstants() {
       ERROR_EXTENSION_ATTACH: { code: 1112, message: "aellux.js Extension attachment has invalid arguments." },
       ERROR_MOUNT_REGISTRATION: { code: 1113, message: "aellux.js Mount registration has invalid arguments." },
       ERROR_EXTENSION_LOAD_WHEN: { code: 1114, message: "aellux.js Extension loadWhen selector is invalid." },
+      ERROR_MOUNT_MAP_IN_USE: { code: 1115, message: "A mount map cannot be removed while elements are still mounted." },
       ERROR_LEGACY_RUNTIME_START: { code: 1201, message: "aellux.js Legacy runtime failed to start." },
       ERROR_LEGACY_RUNTIME_LOAD: { code: 1202, message: "aellux.js Legacy runtime could not be loaded." },
       ERROR_MODERN_RUNTIME_START: { code: 1203, message: "aellux.js Modern runtime failed to start; trying Legacy runtime." },
@@ -43,7 +44,6 @@ export function createAelluxConstants() {
       WARN_EXTENSION_STYLE_LOAD: { code: 2004, message: "aellux.js Extension stylesheet could not be loaded." },
       WARN_CONTROLLER_METHOD_MISSING: { code: 2005, message: "A mounted controller method is not available on its Extension." },
       WARN_STORAGE_FALLBACK: { code: 2006, message: "Browser storage is unavailable; values will be kept in memory only." },
-      WARN_NAVIGATION_AJAX_HREF_UNAVAILABLE: { code: 2007, message: "Navigation state requests ajax-href restoration, but the Extension is unavailable." },
       WARN_PRESENT_MOTION_HIDDEN: { code: 2008, message: "A present-motion child should not be hidden; hidden belongs on its present container." },
       WARN_NAVIGATION_EVENT_INVALID: { code: 2009, message: "A state-navigation event has missing or invalid detail properties." },
       INFO_LEGACY_FALLBACK: { code: 3000, message: "aellux.js is starting the Legacy runtime." }

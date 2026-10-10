@@ -380,6 +380,11 @@
                           </li>
                                                                                                       <li class="nav-item small-md rounded-1 ps-md-1"
                             style="flex:0">
+                            <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/extensions/accessibility.htm">
+                              Accessibility Requirements                            </a>
+                          </li>
+                                                                                                      <li class="nav-item small-md rounded-1 ps-md-1"
+                            style="flex:0">
                             <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/extensions/registration.htm">
                               Registration                            </a>
                           </li>
@@ -644,7 +649,7 @@ $ae.diagnostics.info($ae.diagnostics.INFO_LEGACY_FALLBACK);
 <p>If mounting a root fails while registering assets, waiting for Extensions, or discovering mountable elements, <code>ERROR_MOUNT</code> (<code>1006</code>) records the cause, root, and selected Extension names. Waiting elements have <code>aria-busy</code> reset to <code>false</code> after the attempt.</p>
 <p>Waiting for an unregistered Extension records <code>ERROR_EXTENSION_NOT_REGISTERED</code> (<code>1110</code>) and rejects with that diagnostic. A mounted controller name without a matching public Extension method records <code>WARN_CONTROLLER_METHOD_MISSING</code> (<code>2005</code>). If browser storage is unavailable, <code>WARN_STORAGE_FALLBACK</code> (<code>2006</code>) identifies the storage area and key prefix; values are then held in memory for the current page only.</p>
 <p><code>ext()</code> records <code>ERROR_EXTENSION_LOAD_WHEN</code> (<code>1114</code>) when a supplied <code>loadWhen</code> selector is invalid and does not register the Extension. <code>extAttach()</code> records <code>ERROR_EXTENSION_ATTACH</code> (<code>1112</code>) when its name, API object, lifecycle methods, or a changed declared <code>loadWhen</code> selector is invalid. Its context identifies the rejected argument, and the API is not attached. It records <code>ERROR_EXTENSION_NOT_REGISTERED</code> (<code>1110</code>) when no preceding <code>ext()</code> declaration exists and <code>ERROR_EXTENSION_DUPLICATE</code> (<code>1101</code>) for a second attachment.</p>
-<p><code>mountManager.add()</code> records <code>ERROR_MOUNT_REGISTRATION</code> (<code>1113</code>) when a registration argument or CSS selector is invalid. Its context identifies the rejected argument; no mount registration is added or replaced.</p>
+<p><code>mountManager.add()</code> records <code>ERROR_MOUNT_REGISTRATION</code> (<code>1113</code>) when a registration argument or CSS selector is invalid, or when the same Extension and selector are already registered. Its context identifies the rejected argument; no mount registration is added or replaced. <code>mountManager.remove()</code> records <code>ERROR_MOUNT_MAP_IN_USE</code> (<code>1115</code>) and leaves the map registered when a matching element is still mounted or mounting.</p>
 <p>State navigation records <code>WARN_NAVIGATION_EVENT_INVALID</code> (<code>2009</code>) when <code>PushAjaxReplace</code> or <code>UpdateBaseTitle</code> receives malformed event details. Exceptions while handling those events record <code>ERROR_CALLBACK</code> (<code>1108</code>). Feedback subscriber exceptions and rejected promises also record <code>ERROR_CALLBACK</code>; other subscribers continue to receive the feedback.</p>
         </div>
 

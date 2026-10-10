@@ -17,6 +17,8 @@ Start from [`templates/aellux.ext.template.js`](https://github.com/aelluxjs/core
 The runtime exposes a kebab-case name as camelCase under `AelluxJs.ext`: `tab-group` becomes `AelluxJs.ext.tabGroup`.
 An Extension receives its configuration as the `options` argument to `init(options)`. Supply it through `$ae.init({ extensions: { "tab-group": { initialTab: "overview" } } })`; the boot script normalizes `tab-group` to `tabGroup` in `$ae.options.extensions`. Extensions without a matching entry receive `{}`.
 
+Interactive Extensions must also follow the [accessibility requirements](accessibility.md). Document their interaction, semantics, accessible names, state ownership, relationships, focus behavior, motion and timing, announcements, lifecycle cleanup, and unvalidated limitations.
+
 ## DOM Mount Contract
 
 Extensions with element behavior register their selectors and handlers with `AelluxJs.mountManager` during `init()`:
@@ -112,4 +114,5 @@ Do not leave the Extension partially initialized when an optional resource fails
 - Extra APIs are feature-detected and polyfilled by the Extension when required.
 - `init`, `mount`, `unmount`, and `destroy` obey the lifecycle contract.
 - Repeated mount and destroy operations do not duplicate or retain resources.
+- Accessibility parameters are documented and the minimum behavior is validated.
 - Both runtime selections are covered by browser tests.

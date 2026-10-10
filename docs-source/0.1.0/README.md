@@ -39,6 +39,7 @@ Add aellux.js to a page and enable the Extensions it needs. The library coordina
 ## Extensions
 
 - [Authoring third-party Extensions](extensions/authoring.md)
+- [Accessibility requirements for Extensions](extensions/accessibility.md)
 - [Registering Extensions with `$ae.ext(...)`](extensions/registration.md)
 - [Declarative loading with `link[rel="aelluxjs-ext"]`](extensions/declarative-loading.md)
 - [Lazy loading](extensions/lazy-loading.md)

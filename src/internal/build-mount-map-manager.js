@@ -24,11 +24,13 @@ export function buildMountMapManager(root) {
     mount: helper.mount,
     unmount: helper.unmount,
     update: helper.update,
-    initialAttribute: helper.initialAttribute
+    initialAttribute: helper.initialAttribute,
+    destroy
   };
 
+  let observer = null;
   if (typeof root.MutationObserver === "function") {
-    const observer = new root.MutationObserver(records => {
+    observer = new root.MutationObserver(records => {
       if (!records.some(record => record.removedNodes.length)) return;
       scheduleUnmount(() => helper.unmountDetached()).catch(error => {
         const diagnostics = root.AelluxJs.diagnostics;
@@ -36,6 +38,12 @@ export function buildMountMapManager(root) {
       });
     });
     observer.observe(root.document, { childList: true, subtree: true });
+  }
+  function destroy() {
+    if (!observer) return false;
+    observer.disconnect();
+    observer = null;
+    return true;
   }
 
   return manager;
@@ -112,6 +120,7 @@ export function buildMountMapManager(root) {
       map = new Map();
       maps.set(key, map);
     }
+    if (map.has(selector)) return reject("selector");
     map.set(selector, { mount, unmount, update, controllers });
     root.AelluxJs.registry.extMounters[key] = [...map.keys()].join(",");
     return manager;
@@ -122,6 +131,13 @@ export function buildMountMapManager(root) {
     const key = keyFor(extensionName);
     const map = maps.get(key);
     if (!map) return false;
+    if (hasMountedRegistration(extensionName, selector)) {
+      const diagnostics = root.AelluxJs.diagnostics;
+      diagnostics.error(diagnostics.ERROR_MOUNT_MAP_IN_USE, {
+        extension: fromCamelCase(extensionName), selector
+      });
+      return false;
+    }
 
     const removed = selector === undefined ? true : map.delete(selector);
     if (selector === undefined || map.size === 0) {
@@ -131,5 +147,20 @@ export function buildMountMapManager(root) {
       root.AelluxJs.registry.extMounters[key] = [...map.keys()].join(",");
     }
     return removed;
+  }
+
+  function hasMountedRegistration(extensionName, selector) {
+    const prefix = `${fromCamelCase(extensionName)}@`;
+    const mountId = selector === undefined ? null : `${prefix}${selector}`;
+    for (const registrations of mountedElements.values()) {
+      if (mountId) {
+        if (registrations.has(mountId)) return true;
+        continue;
+      }
+      for (const id of registrations) {
+        if (id.startsWith(prefix)) return true;
+      }
+    }
+    return false;
   }
 }

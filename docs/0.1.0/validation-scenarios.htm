@@ -380,6 +380,11 @@
                           </li>
                                                                                                       <li class="nav-item small-md rounded-1 ps-md-1"
                             style="flex:0">
+                            <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/extensions/accessibility.htm">
+                              Accessibility Requirements                            </a>
+                          </li>
+                                                                                                      <li class="nav-item small-md rounded-1 ps-md-1"
+                            style="flex:0">
                             <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/extensions/registration.htm">
                               Registration                            </a>
                           </li>
@@ -631,6 +636,49 @@ npm run test:browser
 </tr>
 </tbody></table>
 <p>The shared <a href="https://github.com/aelluxjs/core/blob/main/tests/browser/harness.js"><code>harness.js</code></a> waits for <code>AelluxJsReady</code>, applies a timeout, records assertion failures, and exposes the final status through <code>data-test-status</code> for Playwright.</p>
+<h2>Core Contract Regression Matrix</h2>
+<p>The browser suite covers the release contract in Chromium, Firefox, and WebKit:</p>
+<table>
+<thead>
+<tr>
+<th>Contract area</th>
+<th>Covered behavior</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>API normalization and builds</td>
+<td>Global and ESM identity, camelCase Extension keys and options, compound filenames, Modern and Legacy selection, minified files, optional styles, and incompatible builds.</td>
+</tr>
+<tr>
+<td>Diagnostics</td>
+<td>Severity, verbosity updates, retained history, invalid selectors and registrations, unavailable storage, callback failures, transitions, and lifecycle failures.</td>
+</tr>
+<tr>
+<td>Loading</td>
+<td>Eager and lazy loading, shared concurrent Promises, failed <code>init()</code> retry, failed script retry, optional stylesheet failure, and lazy-index cleanup after success or destruction.</td>
+</tr>
+<tr>
+<td>Lifecycle failure isolation</td>
+<td>Rejected initialization, partial element mounting, failed update and unmount callbacks, failed destroy callbacks, and continued work for unaffected elements, registrations, and Extensions.</td>
+</tr>
+<tr>
+<td>Controllers and mount maps</td>
+<td>Controller lookup, bound public methods, forced mount/update/unmount, missing methods, duplicate maps, active-map removal protection, and cleanup after the last registration.</td>
+</tr>
+<tr>
+<td>Mount results and attributes</td>
+<td>Unique return values, partial success results, concurrent mounts, failed-mount rollback, overlapping registrations, and restoration of <code>data-ae-*</code>, <code>aria-*</code>, and <code>hidden</code>.</td>
+</tr>
+<tr>
+<td>Resource cleanup</td>
+<td>Element and global listeners, Extension scripts and styles, mount maps, controllers, layout queues, failed and dormant lazy registrations, and the mount manager observer.</td>
+</tr>
+<tr>
+<td>Detached elements</td>
+<td>Removal during async mount, observer cleanup, moves within the document, explicit unmount races, and global cleanup when <code>MutationObserver</code> is unavailable.</td>
+</tr>
+</tbody></table>
+<p>The contract suite does not replace the separate release tasks for publishing an exact browser version matrix, validating additional Legacy environments, mobile testing, accessibility review, or iframe support.</p>
         </div>
 
         <div id="doc-navlinks2" ajax-load="doc-navlinks2">
