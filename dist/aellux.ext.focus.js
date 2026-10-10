@@ -5,23 +5,32 @@
     "use strict";
     const AelluxJs = root.AelluxJs;
     const extensionName = "focus";
-    if (!AelluxJs) throw new Error(`[aellux.js] Cannot attach the "${extensionName}" extension: root.AelluxJs is not defined. Load the aellux.js boot script before this extension.`);
+    if (!AelluxJs) {
+      throw new Error(`[aellux.js] Cannot attach the "${extensionName}" extension: root.AelluxJs is not defined. Load the aellux.js boot script before this extension.`);
+    }
+    AelluxJs.extAttach(extensionName, {
+      init,
+      destroy,
+      restoreLastFocus
+    });
     const attribute = AelluxJs.attr(extensionName);
     const snapshotKey = "ae-focus";
     const entries = [];
-    let sequence = 0;
-    let current = null;
-    let restoring = false;
-    AelluxJs.extAttach(extensionName, { init, destroy, restoreLastFocus });
+    let sequence = 0, current = null, restoring = false;
     function init() {
-      AelluxJs.mountManager.add({ extensionName, selector: `[${attribute}]`, mount: mountElement, unmount: unmountElement });
+      AelluxJs.mountManager.add({
+        extensionName,
+        selector: `[${attribute}]`,
+        mount: mountFocusElement,
+        unmount: unmountFocusElement
+      });
       document.addEventListener("focusin", onFocusIn, true);
       document.addEventListener("focus", onFocusChange, true);
       document.addEventListener("blur", onBlur, true);
       root.addEventListener("focus", onWindowFocus);
       root.addEventListener("blur", onWindowBlur);
-      document.addEventListener(AelluxJs.eventName("SnapshotRestore"), onSnapshotRestore);
-      if (isValid(document.activeElement)) remember(document.activeElement, false);
+      AelluxJs.on("SnapshotRestore", onSnapshotRestore);
+      remember(document.activeElement, false);
     }
     function destroy() {
       document.removeEventListener("focusin", onFocusIn, true);
@@ -29,17 +38,21 @@
       document.removeEventListener("blur", onBlur, true);
       root.removeEventListener("focus", onWindowFocus);
       root.removeEventListener("blur", onWindowBlur);
-      document.removeEventListener(AelluxJs.eventName("SnapshotRestore"), onSnapshotRestore);
+      AelluxJs.off("SnapshotRestore", onSnapshotRestore);
       AelluxJs.mountManager.remove({ extensionName });
       entries.length = 0;
       current = null;
     }
-    function mountElement(element) {
-      if (element.getAttribute(attribute) !== "next" || element.hasAttribute("enterkeyhint")) return;
-      if (element.matches("input:not([type]), input[type=text], input[type=search], input[type=email], input[type=url], input[type=tel], input[type=password], input[type=number], textarea, [contenteditable]:not([contenteditable=false])"))
-        element.setAttribute("enterkeyhint", "next");
+    function mountFocusElement(element) {
+      const type = element.getAttribute(attribute);
+      switch (type) {
+        case "next":
+          if (!element.hasAttribute("enterkeyhint") && element.matches("input:not([type]), input[type=text], input[type=search], input[type=email], input[type=url], input[type=tel], input[type=password], input[type=number], textarea, [contenteditable]:not([contenteditable=false])"))
+            element.setAttribute("enterkeyhint", "next");
+          break;
+      }
     }
-    function unmountElement() {
+    function unmountFocusElement() {
     }
     function isValid(element) {
       if (!element || element === document.body || element === document.documentElement || !element.isConnected || typeof element.focus !== "function" || element.matches(":disabled, [hidden], [inert]")) return false;
