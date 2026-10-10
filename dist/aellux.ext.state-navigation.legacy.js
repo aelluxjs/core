@@ -133,6 +133,7 @@
     function init(options) {
       window.addEventListener("popstate", onPopState);
       window.addEventListener("hashchange", onHashChange);
+      AelluxJs.on("PushState", OnPushState);
       AelluxJs.on("PushAjaxReplace", OnPushAjaxReplace);
       AelluxJs.on("UpdateBaseTitle", OnUpdateBaseTitle);
       if ("useHash" in AelluxJs.options) useHash = AelluxJs.options.useHash;
@@ -153,6 +154,7 @@
             case 0:
               window.removeEventListener("popstate", onPopState);
               window.removeEventListener("hashchange", onHashChange);
+              AelluxJs.off("PushState", OnPushState);
               AelluxJs.off("PushAjaxReplace", OnPushAjaxReplace);
               AelluxJs.off("UpdateBaseTitle", OnUpdateBaseTitle);
             case 1:
@@ -289,6 +291,26 @@
       var currentState = history.state;
       if (!currentState || _typeof(currentState) !== "object" || Array.isArray(currentState)) return state;
       return Object.assign({}, currentState, state);
+    }
+    function OnPushState(event) {
+      try {
+        var detail = event && event.detail;
+        if (!detail || _typeof(detail) !== "object" || typeof detail.key !== "string" || !detail.key.trim() || typeof detail.value !== "string" || !detail.value.trim() || detail.title !== void 0 && typeof detail.title !== "string") {
+          AelluxJs.diagnostics.warn(AelluxJs.diagnostics.WARN_NAVIGATION_EVENT_INVALID, {
+            extension: extensionName,
+            event: "PushState",
+            expected: "detail: { key: non-empty string, value: non-empty string, title?: string }"
+          });
+          return;
+        }
+        setState(detail.key, detail.value, detail.title);
+      } catch (cause) {
+        AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_CALLBACK, {
+          extension: extensionName,
+          event: "PushState",
+          cause: cause
+        });
+      }
     }
     function OnPushAjaxReplace(event) {
       try {

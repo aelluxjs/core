@@ -336,6 +336,11 @@ Browser Support                            </a>
                           </li>
                           <li class="nav-item small-md rounded-1 ps-md-1"
                             style="flex:0">
+                            <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/runtime/performance.htm">
+Performance and Bundle Budget                            </a>
+                          </li>
+                          <li class="nav-item small-md rounded-1 ps-md-1"
+                            style="flex:0">
                             <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/runtime/es5-support.htm">
 ES5 Support                            </a>
                           </li>
@@ -745,7 +750,7 @@ Accessibility Requirements                  </li>
 <li><code>adaptive</code> declares visual and adaptive presentation. Its output must not be used to remove essential content solely because of viewport dimensions or input assumptions.</li>
 <li><code>state-navigation</code> declares structure and state plus integration. Restored state must remain coherent with the document title, URL, history entry, and any consuming interface.</li>
 <li>Waiting interfaces using <code>data-ae-wait-mounted</code> must clear <code>aria-busy</code> after successful and failed mount attempts.</li>
-<li>Extensions without implemented behavior, including the current <code>focus</code> scaffold, must not be presented as providing an accessibility feature.</li>
+<li><code>focus</code> declares focus management and state integration. It must skip targets that are hidden, inert, disabled, detached or no longer visible, avoid restoration loops, preserve authored hints and remove generated hints during unmount.</li>
 </ul>
 <h2>Minimum Validation</h2>
 <p>Validate the universal requirements and each declared capability. Tests or documented manual checks should cover only the applicable rows:</p>
@@ -783,6 +788,10 @@ Accessibility Requirements                  </li>
 </tbody></table>
 <p>Also validate failed initialization or mounting, repeated lifecycle execution, and the Modern or Legacy environments claimed by the Extension when those lifecycle paths exist.</p>
 <p>Record excluded browser, iframe, mobile, input, network, or assistive-technology scenarios as limitations.</p>
+<h2>0.1.0 Validation Record</h2>
+<p>The automated release suite runs in Playwright Chromium, Firefox, and WebKit. It verifies native <code>button</code> activation by keyboard for Preference controls; Focus history, restoration, and generated <code>enterkeyhint</code> cleanup; Present synchronization of <code>hidden</code>, <code>aria-expanded</code>, and <code>aria-controls</code>, including focus release when a region is hidden; and <code>aria-busy</code> cleanup after failed mounting.</p>
+<p>It also verifies that Preference publishes and clears explicit <code>reduced-motion</code>, <code>contrast</code>, and <code>forced-colors</code> values on the document root. The suite validates the Extension contracts that expose those values; consumer CSS and application markup remain responsible for reflow, zoom, color contrast, forced-color rendering, readable labels, and an equivalent keyboard path for application-specific pointer actions.</p>
+<p>This record does not claim manual assistive-technology testing, mobile-browser coverage, or certification of a consuming page against WCAG. Those scenarios remain outside the <code>0.1.0</code> validated matrix.</p>
 <h2>Review Checklist</h2>
 <ul>
 <li>The capability profile matches the behavior implemented.</li>

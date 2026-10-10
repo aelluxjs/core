@@ -12,8 +12,6 @@ The Modern distribution targets ES2017+ syntax. The following versions are a pre
 | Firefox | 52+ |
 | Safari | 11+ |
 | Edge | 15+ |
-| iOS Safari | 11+ |
-| Samsung Internet | 6.2+ |
 
 This table is a raw syntax baseline, not a complete browser-support guarantee. A browser may parse ES2017 while lacking a Web Platform API required by the runtime or by an Extension.
 

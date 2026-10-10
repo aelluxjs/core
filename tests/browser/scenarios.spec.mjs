@@ -1490,6 +1490,9 @@ test("navigation warns for malformed command events without changing history or 
   const result = await page.evaluate(() => {
     const title = document.title;
     const state = history.state;
+    AelluxJs.dispatch("PushState");
+    AelluxJs.dispatch("PushState", { detail: { key: "", value: "value" } });
+    AelluxJs.dispatch("PushState", { detail: { key: "tab", value: null } });
     AelluxJs.dispatch("PushAjaxReplace");
     AelluxJs.dispatch("PushAjaxReplace", { detail: { selectors: ["#content"] } });
     AelluxJs.dispatch("UpdateBaseTitle");
@@ -1500,7 +1503,11 @@ test("navigation warns for malformed command events without changing history or 
     return { warnings, titleUnchanged: document.title === title, stateUnchanged: history.state === state };
   });
   expect(result).toEqual({
-    warnings: ["PushAjaxReplace", "PushAjaxReplace", "UpdateBaseTitle", "UpdateBaseTitle"],
+    warnings: [
+      "PushState", "PushState", "PushState",
+      "PushAjaxReplace", "PushAjaxReplace",
+      "UpdateBaseTitle", "UpdateBaseTitle"
+    ],
     titleUnchanged: true,
     stateUnchanged: true
   });
@@ -1906,10 +1913,11 @@ test("preference next and previous controls cycle built-in values", async ({ pag
     && !!AelluxJs.mountManager.controller(document.getElementById("scale-next").parentElement)
   )).toBe(true);
 
+  await page.locator("#color-next").press("Enter");
+
   const result = await page.evaluate(() => {
     const preference = AelluxJs.ext.preference;
     const values = {};
-    document.getElementById("color-next").click();
     values.colorNext = preference.get("colorScheme");
     preference.set("colorScheme", "unknown");
     preference.update();
@@ -1961,6 +1969,49 @@ test("color scheme preference updates theme color metadata", async ({ page }) =>
     AelluxJs.ext.preference.update();
   });
   await expect(page.locator("meta[data-ae-theme-color]")).toHaveCount(0);
+});
+
+test("preference reflects and clears motion, contrast, and forced-color values", async ({ page }) => {
+  await page.goto("/tests/index.htm");
+  await page.addScriptTag({ url: "/dist/aellux.js" });
+  await page.evaluate(() => {
+    for (const queries of Object.values(AelluxJs.registry.preferenceMediaQueries)) {
+      for (const key of Object.keys(queries)) queries[key] = null;
+    }
+    AelluxJs.init({ mode: "full" });
+  });
+  await expect.poll(() => page.evaluate(() => AelluxJs.ext.preference?.initialized)).toBe(true);
+
+  const attributes = ["data-ae-reduced-motion", "data-ae-contrast", "data-ae-forced-colors"];
+  const readAttributes = () => page.evaluate((names) => Object.fromEntries(
+    names.map(name => [name, document.documentElement.getAttribute(name)])
+  ), attributes);
+
+  await page.evaluate(() => {
+    const preference = AelluxJs.ext.preference;
+    preference.set("reduced-motion", "reduced");
+    preference.set("contrast", "more");
+    preference.set("forced-colors", "active");
+    preference.update();
+  });
+  expect(await readAttributes()).toEqual({
+    "data-ae-reduced-motion": "reduced",
+    "data-ae-contrast": "more",
+    "data-ae-forced-colors": "active"
+  });
+
+  await page.evaluate(() => {
+    const preference = AelluxJs.ext.preference;
+    preference.set("reduced-motion", "auto");
+    preference.set("contrast", "auto");
+    preference.set("forced-colors", "auto");
+    preference.update();
+  });
+  expect(await readAttributes()).toEqual({
+    "data-ae-reduced-motion": null,
+    "data-ae-contrast": null,
+    "data-ae-forced-colors": null
+  });
 });
 
 test("full runtime loads generated adaptive styles", async ({ page }) => {

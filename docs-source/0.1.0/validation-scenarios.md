@@ -31,7 +31,7 @@ The complete matrix was run on October 10, 2026 with:
 npm run test:browser -- --workers=1
 ```
 
-Result: **276 passed** across the three projects. A single worker is used for the recorded release run to keep the local HTTP fixture available for the entire matrix.
+Result: **306 passed** across the three projects. A single worker is used for the recorded release run to keep the local HTTP fixture available for the entire matrix.
 
 ## Scenario Pages
 
@@ -71,5 +71,6 @@ The browser suite covers the release contract in Chromium, Firefox, and WebKit:
 | Mount results and attributes | Unique return values, partial success results, concurrent mounts, failed-mount rollback, overlapping registrations, and restoration of `data-ae-*`, `aria-*`, and `hidden`. |
 | Resource cleanup | Element and global listeners, Extension scripts and styles, mount maps, controllers, layout queues, failed and dormant lazy registrations, and the mount manager observer. |
 | Detached elements | Removal during async mount, observer cleanup, moves within the document, explicit unmount races, and global cleanup when `MutationObserver` is unavailable. |
+| Accessibility contracts | Native keyboard activation for Preference controls, Focus restoration and hint cleanup, Present focus release plus ARIA state synchronization, failed-mount `aria-busy` cleanup, and root attributes for reduced motion, contrast, and forced colors. |
 
 The contract suite does not establish support for historical or mobile browsers and does not replace the separate accessibility review or additional iframe scenarios.

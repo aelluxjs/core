@@ -1,5 +1,46 @@
 import { expect, test } from "@playwright/test";
 
+test("unpop restores previous focus only when hiding the active element", async ({ page }) => {
+  await page.goto("/tests/index.htm");
+  await page.evaluate(() => {
+    document.body.innerHTML = `
+      <button id="previous">Previous</button>
+      <div id="panel" data-ae-present style="--ae-unpop-duration: 0ms">
+        <button id="inside">Inside</button>
+      </div>
+      <button id="outside">Outside</button>
+    `;
+  });
+  await page.addScriptTag({ url: "/dist/aellux.js" });
+  await page.evaluate(() => {
+    AelluxJs.ext("focus");
+    AelluxJs.init({ mode: "full" });
+  });
+  await expect.poll(() => page.evaluate(() => AelluxJs.ext.focus?.initialized)).toBe(true);
+  await expect.poll(() => page.evaluate(() =>
+    typeof AelluxJs.mountManager?.controller("panel")?.present?.unpop === "function"
+  )).toBe(true);
+
+  await page.locator("#previous").focus();
+  await page.locator("#inside").focus();
+  await page.evaluate(() => {
+    window.focusLostCount = 0;
+    AelluxJs.on("UnpopFocusLost", () => window.focusLostCount++);
+    AelluxJs.mountManager.controller("panel").present.unpop();
+  });
+  await expect(page.locator("#panel")).toHaveJSProperty("hidden", true);
+  await expect.poll(() => page.evaluate(() => document.activeElement.id)).toBe("previous");
+  expect(await page.evaluate(() => window.focusLostCount)).toBe(1);
+
+  await page.evaluate(() => AelluxJs.mountManager.controller("panel").present.pop());
+  await expect(page.locator("#panel")).toHaveJSProperty("hidden", false);
+  await page.locator("#outside").focus();
+  await page.evaluate(() => AelluxJs.mountManager.controller("panel").present.unpop());
+  await expect(page.locator("#panel")).toHaveJSProperty("hidden", true);
+  expect(await page.evaluate(() => ({ active: document.activeElement.id, count: window.focusLostCount })))
+    .toEqual({ active: "outside", count: 1 });
+});
+
 test("mounted present controller binds public methods to its element", async ({ page }) => {
   await page.goto("/tests/index.htm");
   await page.evaluate(() => {

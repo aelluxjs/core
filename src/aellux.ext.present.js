@@ -16,6 +16,8 @@
  * Outputs and owned state: owns presentation classes plus its changes to
  * `hidden`, `aria-expanded` and `aria-controls`. It exposes controller methods
  * for presenting, dismissing and toggling and dispatches lifecycle events.
+ * When hiding a region containing the active element, it dispatches
+ * `UnpopFocusLost` after that element loses focus.
  *
  * Lifecycle: cancels timers, removes listeners and restores managed initial
  * attributes on unmount. Motion participants use a separate mount entry so they
@@ -23,8 +25,8 @@
  *
  * Accessibility: trigger and dismiss markup must be natively keyboard operable
  * and named. Consuming styles must respect reduced motion. The implementation
- * does not move focus before hiding content or restore it afterward, so patterns
- * that require focus management must provide it in the consuming application.
+ * releases focus from content it hides. The focus extension can restore a
+ * previous target; other focus behavior belongs to the consuming application.
  */
 
 (function (root) {
@@ -344,7 +346,13 @@
 
   function finishTransition(element, controller, c, gotoVisible, completeTransition) {
     controller.classList.remove(c);
+    const focused = !gotoVisible && element.contains(document.activeElement)
+      ? document.activeElement : null;
     element.hidden = gotoVisible ? false : true;
+    if (focused) {
+      if (document.activeElement === focused) focused.blur();
+      if (document.activeElement !== focused) AelluxJs.dispatch("UnpopFocusLost");
+    }
     controller.interruptTransition = null;
     controller.timeout = null;
     completeTransition();
