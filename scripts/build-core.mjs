@@ -220,6 +220,24 @@ for (const minify of [false, true]) {
   generatedFiles.add(outputFilename + ".map");
 }
 
+// Source maps embed the original source text. Normalize its line endings so
+// builds from Windows and Linux produce the same committed artifacts.
+for (const filename of generatedFiles) {
+  if (!filename.endsWith(".map")) continue;
+  const mapPath = join(outputDirectory, filename);
+  const mapText = await readFile(mapPath, "utf8");
+  const map = JSON.parse(mapText);
+  if (!Array.isArray(map.sourcesContent) || !/^  "sourcesContent": .*,$/m.test(mapText)) {
+    throw new Error(`Unexpected source map format: ${filename}`);
+  }
+  const sourcesContent = map.sourcesContent.map(source => source.replace(/\r\n?/g, "\n"));
+  const normalizedText = mapText.replace(
+    /^  "sourcesContent": .*,$/m,
+    `  "sourcesContent": ${JSON.stringify(sourcesContent)},`
+  );
+  if (normalizedText !== mapText) await writeFile(mapPath, normalizedText, "utf8");
+}
+
 async function transpileLegacySource(sourceFile, sourceFileName) {
   const transformed = await transformAsync(
     await readFile(sourceFile, "utf8"),
