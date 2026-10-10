@@ -72,9 +72,7 @@
       if (!adaptiveElements.delete(element)) return;
       if (resizeObserver) resizeObserver.unobserve(element);
       else if (adaptiveElements.size === 0) root.removeEventListener("resize", onWindowResize);
-      for (const name of managedClasses) {
-        element.classList.remove(name);
-      }
+      element.classList.remove(...managedClasses);
     }
     function onResize(entries) {
       for (const entry of entries) {

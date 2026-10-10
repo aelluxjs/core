@@ -556,6 +556,13 @@
         <div id="doc-content" style="min-height: calc(100vh - 200px);" class="js-toc-content" ajax-load="doc-content">
           <h1>Present Extension</h1>
 <p><code>present</code> controls the visibility of elements marked with <code>data-ae-present</code>. It is included in the <code>full</code> runtime. In <code>basic</code> mode, register it with <code>$ae.ext(&quot;present&quot;)</code>.</p>
+<h2>Accessibility profile</h2>
+<ul>
+<li><strong>Capabilities:</strong> interaction and input; structure and state; motion and timing.</li>
+<li><strong>Owned state:</strong> presentation classes and its changes to <code>hidden</code>, <code>aria-expanded</code> and <code>aria-controls</code>.</li>
+<li><strong>Consumer responsibility:</strong> use native, named trigger and dismiss controls; ensure configured motion respects reduced-motion preferences; manage focus for dialog, disclosure and similar patterns.</li>
+<li><strong>Limitation:</strong> the Extension currently does not move focus before hiding a region or restore focus after it closes. Consumers must prevent focus from remaining inside content that becomes hidden.</li>
+</ul>
 <pre><code class="language-html">&lt;button type=&quot;button&quot; data-ae-trigger=&quot;toggle&quot; data-ae-target=&quot;#details&quot;&gt;Details&lt;/button&gt;
 &lt;section id=&quot;details&quot; data-ae-present hidden&gt;
   &lt;button type=&quot;button&quot; data-ae-dismiss&gt;Close&lt;/button&gt;

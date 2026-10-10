@@ -556,6 +556,13 @@
         <div id="doc-content" style="min-height: calc(100vh - 200px);" class="js-toc-content" ajax-load="doc-content">
           <h1>State Navigation Extension</h1>
 <p><code>state-navigation</code> manages snapshots through the current window&#39;s browser history and, by default, its URL hash. It is included in the <code>full</code> runtime. In <code>basic</code> mode, register it with <code>$ae.ext(&quot;state-navigation&quot;)</code>.</p>
+<h2>Accessibility profile</h2>
+<ul>
+<li><strong>Capabilities:</strong> structure and state; browser-history and application integration.</li>
+<li><strong>Owned state:</strong> the Aellux namespace in <code>history.state</code>, the snapshot registry, title updates and navigation events.</li>
+<li><strong>Consumer responsibility:</strong> code replacing page content must manage focus, preserve document structure and announce navigation results when needed.</li>
+<li><strong>Limitation:</strong> parent-page and iframe coordination is outside the validated 0.1.0 scope.</li>
+</ul>
 <pre><code class="language-js">const navigation = await $ae.wait(&quot;state-navigation&quot;);
 navigation.setState(&quot;tab&quot;, &quot;details&quot;, &quot;Details&quot;);
 </code></pre>

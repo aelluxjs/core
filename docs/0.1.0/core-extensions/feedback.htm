@@ -567,6 +567,13 @@ subscription.off();
 <p>The convenience methods are <code>warning(message)</code>, <code>error(message)</code>, <code>success(message)</code>, and <code>announce(message)</code>. For a target element, use <code>busy(target, message, value)</code>, <code>validate(target, message, value)</code>, or <code>progress(target, message, value)</code>. <code>send({ type, message, value, target })</code> handles custom types; <code>target</code> defaults to <code>document</code>.</p>
 <p>Each call dispatches an <code>AelluxJsFeedback</code> event from the target. Its <code>detail</code> contains <code>{ type, message, value, target }</code>. <code>on(type, handler)</code> subscribes to one type; <code>on(&quot;*&quot;, handler)</code> receives every type. Use <code>off(type, handler)</code> or the object returned by <code>on()</code> to unsubscribe. The Extension clears subscriptions when destroyed.</p>
 <p>The Extension emits feedback; it does not render a toast, alert, or progress indicator by itself.</p>
+<h2>Accessibility profile</h2>
+<ul>
+<li><strong>Capabilities:</strong> infrastructure and policy; external integration through consumer renderers.</li>
+<li><strong>Owned state:</strong> subscriptions and <code>AelluxJsFeedback</code> event payloads.</li>
+<li><strong>Consumer responsibility:</strong> render feedback with suitable semantics, announcement priority and focus behavior. <code>announce()</code> emits an event and does not create a live region.</li>
+<li><strong>Not applicable:</strong> the Extension renders no interface and directly manages no focus, keyboard input, contrast or motion.</li>
+</ul>
         </div>
 
         <div id="doc-navlinks2" ajax-load="doc-navlinks2">

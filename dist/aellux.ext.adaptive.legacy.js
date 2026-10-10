@@ -183,14 +183,20 @@
       else if (adaptiveElements.size === 1) root.addEventListener("resize", onWindowResize);
     }
     function unmountAdaptive(element) {
+      var _element$classList;
       if (!adaptiveElements.delete(element)) return;
       if (resizeObserver) resizeObserver.unobserve(element);
       else if (adaptiveElements.size === 0) root.removeEventListener("resize", onWindowResize);
-      var _iterator2 = _createForOfIteratorHelper(managedClasses), _step2;
+      (_element$classList = element.classList).remove.apply(_element$classList, _toConsumableArray(managedClasses));
+    }
+    function onResize(entries) {
+      var _iterator2 = _createForOfIteratorHelper(entries), _step2;
       try {
         for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
-          var name = _step2.value;
-          element.classList.remove(name);
+          var entry = _step2.value;
+          if (adaptiveElements.has(entry.target)) {
+            updateAdaptive(entry.target, entry.contentRect.width, entry.contentRect.height);
+          }
         }
       } catch (err) {
         _iterator2.e(err);
@@ -198,33 +204,18 @@
         _iterator2.f();
       }
     }
-    function onResize(entries) {
-      var _iterator3 = _createForOfIteratorHelper(entries), _step3;
+    function onWindowResize() {
+      var _iterator3 = _createForOfIteratorHelper(adaptiveElements), _step3;
       try {
         for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
-          var entry = _step3.value;
-          if (adaptiveElements.has(entry.target)) {
-            updateAdaptive(entry.target, entry.contentRect.width, entry.contentRect.height);
-          }
+          var element = _step3.value;
+          var bounds = element.getBoundingClientRect();
+          updateAdaptive(element, bounds.width, bounds.height);
         }
       } catch (err) {
         _iterator3.e(err);
       } finally {
         _iterator3.f();
-      }
-    }
-    function onWindowResize() {
-      var _iterator4 = _createForOfIteratorHelper(adaptiveElements), _step4;
-      try {
-        for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
-          var element = _step4.value;
-          var bounds = element.getBoundingClientRect();
-          updateAdaptive(element, bounds.width, bounds.height);
-        }
-      } catch (err) {
-        _iterator4.e(err);
-      } finally {
-        _iterator4.f();
       }
     }
     function updateAdaptive(element, width, height) {

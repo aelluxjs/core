@@ -2,6 +2,13 @@
 
 `state-navigation` manages snapshots through the current window's browser history and, by default, its URL hash. It is included in the `full` runtime. In `basic` mode, register it with `$ae.ext("state-navigation")`.
 
+## Accessibility profile
+
+- **Capabilities:** structure and state; browser-history and application integration.
+- **Owned state:** the Aellux namespace in `history.state`, the snapshot registry, title updates and navigation events.
+- **Consumer responsibility:** code replacing page content must manage focus, preserve document structure and announce navigation results when needed.
+- **Limitation:** parent-page and iframe coordination is outside the validated 0.1.0 scope.
+
 ```js
 const navigation = await $ae.wait("state-navigation");
 navigation.setState("tab", "details", "Details");

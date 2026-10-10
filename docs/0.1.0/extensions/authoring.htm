@@ -569,7 +569,7 @@
 </ol>
 <p>The runtime exposes a kebab-case name as camelCase under <code>AelluxJs.ext</code>: <code>tab-group</code> becomes <code>AelluxJs.ext.tabGroup</code>.
 An Extension receives its configuration as the <code>options</code> argument to <code>init(options)</code>. Supply it through <code>$ae.init({ extensions: { &quot;tab-group&quot;: { initialTab: &quot;overview&quot; } } })</code>; the boot script normalizes <code>tab-group</code> to <code>tabGroup</code> in <code>$ae.options.extensions</code>. Extensions without a matching entry receive <code>{}</code>.</p>
-<p>Interactive Extensions must also follow the <a href="accessibility.htm">accessibility requirements</a>. Document their interaction, semantics, accessible names, state ownership, relationships, focus behavior, motion and timing, announcements, lifecycle cleanup, and unvalidated limitations.</p>
+<p>Every Extension must follow the applicable <a href="accessibility.htm">accessibility requirements</a>. Declare its capability profile and document only the relevant interaction, structure, presentation, motion, integration, infrastructure, lifecycle, and limitation fields. Requirements outside the declared behavior may be marked not applicable with a short reason.</p>
 <h2>DOM Mount Contract</h2>
 <p>Extensions with element behavior register their selectors and handlers with <code>AelluxJs.mountManager</code> during <code>init()</code>:</p>
 <pre><code class="language-js">AelluxJs.extAttach(extensionName, { init, destroy });
@@ -638,7 +638,7 @@ node build-extension.mjs ./src/aellux.ext.example.js ./dist
 <li>Extra APIs are feature-detected and polyfilled by the Extension when required.</li>
 <li><code>init</code>, <code>mount</code>, <code>unmount</code>, and <code>destroy</code> obey the lifecycle contract.</li>
 <li>Repeated mount and destroy operations do not duplicate or retain resources.</li>
-<li>Accessibility parameters are documented and the minimum behavior is validated.</li>
+<li>The accessibility capability profile is documented and its applicable minimum behavior is validated.</li>
 <li>Both runtime selections are covered by browser tests.</li>
 </ul>
         </div>

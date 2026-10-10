@@ -1,5 +1,28 @@
 /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
 
+/**
+ * Feedback Extension
+ *
+ * Purpose: provides a common event channel for application feedback such as
+ * errors, warnings, success messages, progress, busy state and validation.
+ *
+ * Capability profile: infrastructure and policy, with an integration boundary
+ * for user-facing feedback renderers.
+ *
+ * Inputs and activation: public methods publish typed payloads. Consumers can
+ * subscribe to all feedback or one type and may dispatch the feedback event.
+ *
+ * Outputs and owned state: dispatches `AelluxJsFeedback` and owns only its
+ * subscription registry. It creates no messages, dialogs or live regions.
+ *
+ * Lifecycle: removes the document listener and clears all subscriptions when
+ * the extension is destroyed.
+ *
+ * Accessibility: a renderer must choose suitable semantics, focus behavior and
+ * announcement priority. `announce()` publishes an event; it does not itself
+ * announce content to assistive technology.
+ */
+
 (function (root) {
   "use strict";
 

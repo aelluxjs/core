@@ -559,6 +559,13 @@
 <pre><code class="language-html">&lt;div data-ae-adaptive&gt;Responsive content&lt;/div&gt;
 </code></pre>
 <p>The Extension measures each marked element with <code>ResizeObserver</code>, or uses the window resize event when that API is unavailable. It applies one shape class (<code>ae--shape-vertical</code>, <code>ae--shape-square</code>, or <code>ae--shape-horizontal</code>) according to width divided by height. It also toggles <code>ae--fits-&lt;size&gt;</code> classes when <code>sqrt(width * height)</code> reaches each configured minimum. After an update it dispatches <code>AelluxJsAdaptiveUpdate</code> from the element. Initial <code>ae--*</code> classes are discarded before mounting. Unmounting removes the managed classes; unrelated classes and inline styles are left as they are.</p>
+<h2>Accessibility profile</h2>
+<ul>
+<li><strong>Capabilities:</strong> visual and adaptive; infrastructure.</li>
+<li><strong>Owned state:</strong> the <code>ae--shape-*</code> and <code>ae--fits-*</code> classes.</li>
+<li><strong>Consumer responsibility:</strong> CSS using those classes must preserve content, readable reflow, zoom support and sufficient contrast.</li>
+<li><strong>Not applicable:</strong> the Extension creates no controls, changes no semantic attributes and manages no focus or motion.</li>
+</ul>
 <h2>Configuration</h2>
 <p>Pass <code>adaptiveParams</code> through the Extension options. Each supplied group is merged with its defaults:</p>
 <pre><code class="language-js">$ae.init({

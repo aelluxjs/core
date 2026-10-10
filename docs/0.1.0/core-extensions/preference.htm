@@ -556,6 +556,13 @@
         <div id="doc-content" style="min-height: calc(100vh - 200px);" class="js-toc-content" ajax-load="doc-content">
           <h1>Preference Extension</h1>
 <p><code>preference</code> stores user choices, combines them with defaults, and reflects the result in document attributes. It is included in the <code>full</code> runtime. In <code>basic</code> mode, register it with <code>$ae.ext(&quot;preference&quot;)</code>.</p>
+<h2>Accessibility profile</h2>
+<ul>
+<li><strong>Capabilities:</strong> interaction and input; structure and state; visual preference policy; storage and media-query integration.</li>
+<li><strong>Owned state:</strong> computed preference values, root preference attributes, option active classes and associated input values or checked state.</li>
+<li><strong>Consumer responsibility:</strong> use native keyboard-operable controls with accessible names and preserve meaningful labels when mirroring selected content.</li>
+<li><strong>Limitation:</strong> generic elements marked as options, next or previous controls do not receive button semantics or keyboard behavior automatically.</li>
+</ul>
 <pre><code class="language-js">const preference = await $ae.wait(&quot;preference&quot;);
 preference.set(&quot;colorScheme&quot;, &quot;dark&quot;);
 preference.update();

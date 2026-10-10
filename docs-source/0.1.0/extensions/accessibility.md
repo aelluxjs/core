@@ -1,108 +1,159 @@
 # Accessibility Requirements for Extensions
 
-Every distributed Extension must preserve the accessibility of the HTML it enhances. These requirements define the minimum contract for Core and third-party Extensions. They are an implementation and review baseline; meeting them does not by itself certify a page against WCAG or guarantee compatibility with every assistive technology.
+An Extension can create interaction, change presentation, manage state, enforce rules, connect to an external service, or provide infrastructure without producing user interface. Accessibility requirements therefore apply according to the capabilities an Extension declares. They are not a fixed checklist that every Extension must satisfy in full.
 
-## Author Responsibilities
+Every distributed Extension must preserve the accessibility of the page features it affects. This document defines an implementation and review baseline; meeting it does not by itself certify a page against WCAG or guarantee compatibility with every assistive technology.
 
-An Extension author must define and test the following parameters for every interactive behavior:
+## Capability Profile
 
-| Parameter | Required definition |
+Describe an Extension with one or more capabilities. These categories may overlap and are documentation tags rather than runtime types.
+
+| Capability | Typical responsibility | Requirements that apply |
+| --- | --- | --- |
+| Interaction and input | Click, keyboard, pointer, drag, selection, or custom controls. | Semantics, keyboard access, accessible names, focus, input alternatives, and state communication. |
+| Structure and state | Show, hide, insert, remove, reorder, label, select, expand, or relate content. | DOM order, semantic structure, ARIA or native state, relationships, focus safety, and announcements when needed. |
+| Visual and adaptive presentation | Layout, theme, scale, contrast, color, viewport, or input-mode adaptation. | Reflow, zoom, contrast, forced colors, reduced transparency, text and interface scale, and alternatives to color-only meaning. |
+| Motion and timing | Animation, transition, automatic progression, delay, or dismissal. | Reduced motion, interruption, timing controls, understandable state without animation, and timer cleanup. |
+| External data and integration | Fetch, persistence, synchronization, embedded services, or third-party APIs. | Pending and failure states when user-facing, recovery, stable focus, meaningful status communication, and asynchronous cleanup. |
+| Infrastructure and policy | Diagnostics, scheduling, event routing, rules, registries, or services without direct UI. | Preservation of existing semantics and state, predictable failure behavior, cleanup, and documentation of indirect UI effects. |
+
+Do not force an Extension into a single category. For example, a dialog behavior can declare interaction, structure and state, and motion. A background registry may declare only infrastructure and policy. A network synchronization Extension may declare external data and integration without declaring interaction.
+
+For every capability not declared, the corresponding requirements are not applicable unless the implementation still produces that effect indirectly.
+
+## Requirements for Every Extension
+
+Regardless of category, an Extension must:
+
+- document its capability profile and the page state it reads or owns;
+- avoid removing or invalidating existing semantics, accessible names, focusability, relationships, or user preferences outside its documented responsibility;
+- leave affected page state coherent when initialization, mounting, updating, or an external operation fails;
+- release the listeners, observers, timers, pending work, generated nodes, and references it owns during the applicable lifecycle cleanup; and
+- identify unvalidated browser, mobile, iframe, input, or assistive-technology scenarios instead of implying support.
+
+An Extension with no user-facing output may mark visual, keyboard, focus, naming, ARIA, announcement, motion, and timing requirements as not applicable. It must still document any indirect effect that consumers can expose to users.
+
+## Author Documentation
+
+Define the applicable fields on the Extension's page. State `Not applicable` with a short reason when omission could be ambiguous.
+
+| Field | Required definition |
 | --- | --- |
-| Interaction | Which pointer, keyboard, and programmatic actions activate the behavior. |
-| Semantic host | Which native HTML elements are expected, and whether non-native hosts are supported. |
-| Accessible name | Where each control obtains its visible label and accessible name. |
-| State | Which `aria-*`, `hidden`, disabled, selected, checked, expanded, or busy states the Extension owns. |
-| Relationships | Which IDs and ARIA relationships, such as `aria-controls`, are created or updated. |
-| Focus | Where focus starts, whether it moves, where it returns, and what happens when content is hidden or removed. |
-| Motion and timing | Which transitions, delays, or automatic actions occur and how user preferences affect them. |
-| Announcements | Whether a state change needs a live region or another notification for assistive technology. |
-| Lifecycle cleanup | Which attributes, listeners, timers, observers, generated IDs, and focus changes are reversed during `unmount` and `destroy`. |
-| Limitations | Any interaction mode, browser, iframe, or assistive technology scenario that has not been validated. |
+| Capabilities | Every applicable category from the capability profile. |
+| Affected output | Elements, attributes, content, styles, events, stored values, or external results produced or changed. |
+| Inputs and activation | Pointer, keyboard, programmatic, lifecycle, media-query, network, storage, or other triggers. |
+| Semantic host | Expected native elements and any supported non-native host. Required when DOM semantics are affected. |
+| Accessible name | Source of the visible label or accessible name for controls the Extension creates or owns. |
+| State and relationships | Owned `aria-*`, `hidden`, disabled, selected, checked, expanded, busy, IDs, and references. |
+| Focus | Whether focus can move, become hidden, require restoration, or remain unchanged. |
+| Presentation | Effects on color, contrast, layout, zoom, text scale, interface scale, or forced colors. |
+| Motion and timing | Transitions, delays, automatic actions, dismissal, and relevant user preferences. |
+| Pending, success, and failure | User-visible behavior while asynchronous or external work is pending, succeeds, or fails. |
+| Announcements | Changes that require notification beyond native semantics, focus, or control state. |
+| Lifecycle cleanup | Attributes, listeners, timers, requests, observers, generated content, relationships, and references released during cleanup. |
+| Limitations | Any relevant scenario that has not been validated. |
 
-Document these parameters on the Extension's page. If a parameter does not apply, state that explicitly where its absence could otherwise be ambiguous.
+## Capability-Specific Behavior
 
-## Minimum Behavior
+### Interaction and input
 
-### Semantic controls and keyboard access
-
-- Use native interactive elements such as `button`, `a`, `input`, and `select` whenever their semantics match the action.
-- Do not make pointer-only interaction the sole way to perform an action. An action available through click, hover, drag, or a custom pointer event must have an appropriate keyboard or native-control path when the action is essential.
-- Do not add keyboard behavior to a non-interactive element without also supplying the necessary role, focusability, accessible name, state, and expected key handling.
+- Use native interactive elements such as `button`, `a`, `input`, and `select` when their semantics match the action.
+- An essential action exposed through click, hover, drag, pointer events, or a custom gesture must have an appropriate keyboard or native-control path.
+- Do not add keyboard behavior to a non-interactive element without supplying the necessary role, focusability, accessible name, state, and expected key handling.
 - Preserve normal Tab order unless the Extension documents and implements a composite-widget keyboard model.
 - Do not intercept keys unrelated to the active control.
+- Do not assume hover support, a fine pointer, or a single active pointer when the Extension owns the action.
 
-### Focus management
+### Structure, state, and focus
 
-- Never leave focus inside content that becomes `hidden`, inert, detached, or otherwise unavailable.
-- Move focus only when the interaction requires it and the destination is predictable from the initiating action.
-- When a temporary surface closes, return focus to its invoking control when that control still exists and remains usable.
-- Removing or unmounting an element must not leave a retained reference that later receives focus.
-- Visible focus indication remains the responsibility of the page or Extension stylesheet and must not be removed without an equivalent replacement.
-
-### Names, states, and relationships
-
-- Every interactive control must have an accessible name. Icon-only controls require text through visible content, `aria-label`, or `aria-labelledby`.
 - Keep DOM visibility and accessibility state synchronized. For example, a trigger's `aria-expanded` must agree with the controlled element's expanded or hidden state.
 - ARIA references such as `aria-controls`, `aria-labelledby`, and `aria-describedby` must point to existing IDs while active.
-- Prefer native state attributes and elements before adding an ARIA role or property.
-- Set `aria-busy="true"` only while the related operation is pending and restore it when the operation succeeds or fails.
+- Prefer native elements and state attributes before adding ARIA roles or properties.
+- Every interactive control created or owned by the Extension must have an accessible name.
+- Do not leave focus inside content that the Extension makes hidden, inert, detached, or otherwise unavailable.
+- Move focus only when the interaction requires it and the destination is predictable from the initiating action.
+- When a temporary surface closes, return focus to its invoking control when that control still exists and remains usable.
 - Use live announcements only for meaningful changes that are not already conveyed through focus, native semantics, or control state.
 
-### Motion, timing, color, and input
+### Visual and adaptive presentation
 
-- Respect the applicable AelluxJs preferences for reduced motion, contrast, transparency, forced colors, text scale, and interface scale when the Extension produces related visual behavior.
-- Essential state changes must remain understandable when transitions or animation are disabled.
-- Automatic dismissal or progression must not make essential content inaccessible. Document timing controls and provide a way to stop or extend time when required by the interaction.
+- Respect the applicable AelluxJs preferences when the Extension produces behavior related to motion, contrast, transparency, forced colors, text scale, or interface scale.
 - Do not communicate state through color alone.
-- Do not assume hover support, a fine pointer, or a single active pointer.
-- Enlarged text and interface scaling must not remove controls or make the active state unreachable in the supported layouts.
+- Enlarged text, zoom, and interface scaling must not remove essential content or make an owned control unreachable in supported layouts.
+- Adaptation based on viewport or input characteristics must not remove the only available path to essential content or actions.
+- An Extension that only supplies neutral data or rules for another component must document that the consuming component owns the final visual accessibility.
+
+### Motion and timing
+
+- Essential state changes must remain understandable when transitions or animation are disabled.
+- Respect reduced-motion preferences for motion the Extension owns.
+- Automatic dismissal or progression must not make essential content inaccessible.
+- Provide a way to stop or extend timing when required by the announced interaction.
+- Cancel owned timers, animation work, and pending transitions during cleanup.
+
+### External data and asynchronous integration
+
+- Expose pending, success, and failure states only when they are meaningful to the user-facing feature.
+- If an owned control becomes busy or disabled, restore it after success, failure, cancellation, and unmount.
+- Set `aria-busy="true"` only on the region whose availability changed and clear it when the operation ends.
+- Preserve focus and existing content unless replacement or movement is part of the documented behavior.
+- Communicate an error accessibly when the Extension owns the user-visible operation; background-only failures may remain diagnostics without a live announcement.
+- Cancel or disregard stale asynchronous results so they cannot update content after unmount or supersede newer state.
+
+### Infrastructure and policy
+
+- Infrastructure without direct UI does not need to create keyboard behavior, ARIA, focus movement, visual styles, or announcements.
+- Events, rules, and services must expose enough state for a consuming user-interface Extension to represent pending, success, failure, and disabled conditions when applicable.
+- A policy or routing Extension must not silently invalidate semantic state owned by another Extension.
+- Diagnostics intended only for developers must not be announced to users unless a consuming interface explicitly chooses to present them.
 
 ## Lifecycle Requirements
 
 `mount` may add temporary ARIA and AelluxJs data attributes to its mounted element. The mount manager records and restores the element's initial `aria-*`, `data-ae-*`, and `hidden` attributes when its last registration is unmounted. An Extension remains responsible for descendant elements it changes unless those descendants have their own mount registration.
 
-An accessible lifecycle must therefore:
+For every resource or user-facing state it owns, an Extension must:
 
-1. Read the initial DOM before overwriting state that affects behavior.
-2. Keep visual, interaction, and accessibility states synchronized during every update.
-3. Cancel pending timers, transitions, and asynchronous focus work during `unmount`.
-4. Remove listeners, observers, generated nodes, generated IDs, and relationships owned by the Extension.
+1. Read the initial state before overwriting it.
+2. Keep the applicable visual, interaction, semantic, and asynchronous states synchronized during update.
+3. Cancel or detach owned pending work during `unmount` and `destroy`.
+4. Remove owned listeners, observers, generated nodes, IDs, and relationships.
 5. Restore changed descendant state explicitly or mount those descendants separately so the mount manager can restore them.
-6. Handle failed and partial mounting without leaving `aria-busy`, hidden content, focus, or control state inconsistent.
+6. Handle failed and partial mounting without leaving busy, hidden, focus, control, or external-operation state inconsistent.
+
+An Extension that does not mount DOM elements applies these rules to its actual lifecycle and resources rather than implementing an artificial mount contract.
 
 ## Core Extension Expectations
 
-- `present` must keep `hidden`, `aria-expanded`, and `aria-controls` synchronized for mounted containers and triggers. Closing content must not leave focus in the hidden region.
-- `preference` controls must use appropriate native controls and expose the selected value through visible text or an accessible name. Preference changes must remain usable without pointer input.
-- `point` events are an enhancement layer. Essential actions using them require a keyboard or native-control equivalent supplied by the consuming component.
-- `adaptive` output must not be used to remove essential content solely because of viewport dimensions or input assumptions.
-- Waiting interfaces using `data-ae-wait-mounted` must clear `aria-busy` after both successful and failed mount attempts.
+- `present` declares interaction, structure and state, and motion when transitions are configured. It must synchronize `hidden`, `aria-expanded`, and `aria-controls`; closing content must not leave focus in the hidden region.
+- `preference` declares interaction and state. Its controls must use appropriate native semantics, expose the selected value, and remain usable without pointer input.
+- `point` declares input routing and infrastructure. Its events are an enhancement layer; the consuming component owns a keyboard or native-control equivalent for any essential action.
+- `adaptive` declares visual and adaptive presentation. Its output must not be used to remove essential content solely because of viewport dimensions or input assumptions.
+- `state-navigation` declares structure and state plus integration. Restored state must remain coherent with the document title, URL, history entry, and any consuming interface.
+- Waiting interfaces using `data-ae-wait-mounted` must clear `aria-busy` after successful and failed mount attempts.
 - Extensions without implemented behavior, including the current `focus` scaffold, must not be presented as providing an accessibility feature.
 
 ## Minimum Validation
 
-Before an Extension is described as supported, cover its announced behavior with tests or a documented manual check for:
+Validate the universal requirements and each declared capability. Tests or documented manual checks should cover only the applicable rows:
 
-- keyboard activation and expected Tab order;
-- focus destination and restoration when content opens, closes, unmounts, or is removed;
-- accessible names and synchronized ARIA or native states;
-- operation without hover and without a fine pointer;
-- reduced-motion behavior when motion is present;
-- zoom, text scale, or interface scale relevant to the supported layout;
-- successful cleanup after `unmount`, failed mounting, and repeated mounting; and
-- the Modern and Legacy environments claimed by the Extension.
+| Capability | Minimum validation |
+| --- | --- |
+| Interaction and input | Keyboard activation, Tab order, input alternatives, accessible names, and owned control state. |
+| Structure and state | DOM and reading order, focus safety, synchronized native or ARIA state, valid relationships, and necessary announcements. |
+| Visual and adaptive presentation | Zoom, text and interface scale, contrast, forced colors, reflow, and absence of color-only meaning where affected. |
+| Motion and timing | Reduced motion, disabled animation, interruption, timing control, and cleanup. |
+| External data and integration | Pending, success, failure, cancellation, stale responses, focus stability, and cleanup. |
+| Infrastructure and policy | Stable contracts, failure isolation, indirect state effects, cleanup, and diagnostics behavior. |
 
-Record any excluded browser, iframe, mobile, or assistive technology scenario as a limitation rather than implying support.
+Also validate failed initialization or mounting, repeated lifecycle execution, and the Modern or Legacy environments claimed by the Extension when those lifecycle paths exist.
+
+Record excluded browser, iframe, mobile, input, network, or assistive-technology scenarios as limitations.
 
 ## Review Checklist
 
-- Native semantics are used where applicable.
-- Every action has the required keyboard path.
-- Controls have accessible names.
-- Focus never remains in hidden or removed content.
-- ARIA state matches visible and interactive state.
-- Relationships reference valid elements.
-- Motion and timing respect applicable preferences.
-- State is not communicated through color alone.
-- Mount failure and unmount restore a coherent state.
-- Tests cover the behavior and documented limitations match the validated scope.
+- The capability profile matches the behavior implemented.
+- Universal preservation, failure, cleanup, and limitation requirements are satisfied.
+- Every declared capability has its applicable documentation and validation.
+- Requirements marked not applicable include a clear reason when ambiguity is possible.
+- The Extension does not claim accessibility behavior owned by a consuming component.
+- Tests cover the announced behavior and documented limitations match the validated scope.

@@ -1,5 +1,32 @@
 /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
 
+/**
+ * Present Extension
+ *
+ * Purpose: controls the presented or hidden state of mounted regions and
+ * coordinates triggers, dismiss controls, outside interaction and CSS motion.
+ *
+ * Capability profile: interaction and input, structure and state, and motion
+ * and timing.
+ *
+ * Inputs and activation: mounts `[data-ae-present]` regions and
+ * `[data-ae-present-motion]` participants. Trigger and dismiss relationships use
+ * extension data attributes and may target a region by selector or identifier.
+ *
+ * Outputs and owned state: owns presentation classes plus its changes to
+ * `hidden`, `aria-expanded` and `aria-controls`. It exposes controller methods
+ * for presenting, dismissing and toggling and dispatches lifecycle events.
+ *
+ * Lifecycle: cancels timers, removes listeners and restores managed initial
+ * attributes on unmount. Motion participants use a separate mount entry so they
+ * can be restored when shared with a region or mounted separately.
+ *
+ * Accessibility: trigger and dismiss markup must be natively keyboard operable
+ * and named. Consuming styles must respect reduced motion. The implementation
+ * does not move focus before hiding content or restore it afterward, so patterns
+ * that require focus management must provide it in the consuming application.
+ */
+
 (function (root) {
   "use strict";
 

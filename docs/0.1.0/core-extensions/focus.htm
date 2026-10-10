@@ -557,6 +557,13 @@
           <h1>Focus Extension</h1>
 <p><code>focus</code> currently contains a lifecycle scaffold. It registers <code>data-ae-focus</code> for mounting, but its mount and unmount handlers are empty. Marking an element with this attribute does not currently change focus or keyboard behavior.</p>
 <p>The source file is built as an individual Extension, but <code>focus</code> is not included in the <code>full</code> runtime&#39;s bundled Extension list. Registering it separately provides only the scaffold described above. Treat focus behavior as pending implementation.</p>
+<h2>Accessibility profile</h2>
+<ul>
+<li><strong>Capabilities:</strong> infrastructure scaffold only.</li>
+<li><strong>Owned state:</strong> none.</li>
+<li><strong>Limitation:</strong> this Extension is not an accessibility feature in its current form. It does not move, trap, restore or expose focus.</li>
+<li><strong>Consumer responsibility:</strong> provide focus order, visible focus, restoration and keyboard behavior independently.</li>
+</ul>
         </div>
 
         <div id="doc-navlinks2" ajax-load="doc-navlinks2">
