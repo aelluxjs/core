@@ -41,6 +41,7 @@
   const handlers = new Map();
 
   function init(options) { }
+
   async function destroy() {
     handlers.clear();
   }

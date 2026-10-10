@@ -1,12 +1,11 @@
 # Focus Extension
 
-`focus` currently contains a lifecycle scaffold. It registers `data-ae-focus` for mounting, but its mount and unmount handlers are empty. Marking an element with this attribute does not currently change focus or keyboard behavior.
+Register `focus` separately with `AelluxJs.ext("focus")`. It is not included in the `full` bundle.
 
-The source file is built as an individual Extension, but `focus` is not included in the `full` runtime's bundled Extension list. Registering it separately provides only the scaffold described above. Treat focus behavior as pending implementation.
+`data-ae-focus="next"` adds `enterkeyhint="next"` to text-entry inputs, textareas and editable elements when `enterkeyhint` is absent. An explicit hint is preserved. It changes the mobile keyboard's Enter key label, not the focus order or Enter key behavior.
 
-## Accessibility profile
+The Extension observes `focusin`, capture-phase `focus` and `blur` on the document, and `focus` and `blur` on the window. A blur preserves the last valid element target; repeated notifications for the same element do not create duplicate history entries. Focus changes are recorded in a bounded, in-memory history. Call `AelluxJs.ext.focus.restoreLastFocus()` to focus the previous connected, visible target. It returns `true` if focus moved and `false` when no valid target remains. Hidden, inert, disabled and detached targets are skipped.
 
-- **Capabilities:** infrastructure scaffold only.
-- **Owned state:** none.
-- **Limitation:** this Extension is not an accessibility feature in its current form. It does not move, trap, restore or expose focus.
-- **Consumer responsibility:** provide focus order, visible focus, restoration and keyboard behavior independently.
+When `state-navigation` is initialized, each focus change also pushes its token into the `ae-focus` snapshot field. A `SnapshotRestore` event restores that target if it remains valid. This works within the current document lifetime; focus tokens do not survive a page reload. With the default hash navigation setting, focus changes also change the hash. Set `useHash: false` in the Core options if that URL behavior is unwanted.
+
+The Extension does not trap focus or announce navigation changes. Applications remain responsible for suitable focus order and accessible controls.
