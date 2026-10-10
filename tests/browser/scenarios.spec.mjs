@@ -1890,6 +1890,10 @@ test("preference next and previous controls cycle built-in values", async ({ pag
     AelluxJs.init({ mode: "full" });
   });
   await expect.poll(() => page.evaluate(() => AelluxJs.ext.preference?.initialized)).toBe(true);
+  await expect.poll(() => page.evaluate(() =>
+    !!AelluxJs.mountManager.controller(document.getElementById("color-next").parentElement)
+    && !!AelluxJs.mountManager.controller(document.getElementById("scale-next").parentElement)
+  )).toBe(true);
 
   const result = await page.evaluate(() => {
     const preference = AelluxJs.ext.preference;
