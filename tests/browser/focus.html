@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><script src="../../dist/aellux.js"></script></head>
+<body>
+  <input id="first" data-ae-focus="next">
+  <input id="second" data-ae-focus="next" enterkeyhint="done">
+  <input id="third" data-ae-focus="next">
+  <script>
+    AelluxJs.ext("state-navigation");
+    AelluxJs.ext("focus");
+    AelluxJs.init({ useHash: false });
+    window.fixtureReady = Promise.all([AelluxJs.wait("state-navigation"), AelluxJs.wait("focus")]);
+  </script>
+</body>
+</html>

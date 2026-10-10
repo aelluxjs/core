@@ -555,15 +555,11 @@ Focus                  </li>
 
         <div id="doc-content" style="min-height: calc(100vh - 200px);" class="js-toc-content" ajax-load="doc-content">
 <h1>Focus Extension</h1>
-<p><code>focus</code> currently contains a lifecycle scaffold. It registers <code>data-ae-focus</code> for mounting, but its mount and unmount handlers are empty. Marking an element with this attribute does not currently change focus or keyboard behavior.</p>
-<p>The source file is built as an individual Extension, but <code>focus</code> is not included in the <code>full</code> runtime&#39;s bundled Extension list. Registering it separately provides only the scaffold described above. Treat focus behavior as pending implementation.</p>
-<h2>Accessibility profile</h2>
-<ul>
-<li><strong>Capabilities:</strong> infrastructure scaffold only.</li>
-<li><strong>Owned state:</strong> none.</li>
-<li><strong>Limitation:</strong> this Extension is not an accessibility feature in its current form. It does not move, trap, restore or expose focus.</li>
-<li><strong>Consumer responsibility:</strong> provide focus order, visible focus, restoration and keyboard behavior independently.</li>
-</ul>
+<p>Register <code>focus</code> separately with <code>AelluxJs.ext(&quot;focus&quot;)</code>. It is not included in the <code>full</code> bundle.</p>
+<p><code>data-ae-focus=&quot;next&quot;</code> adds <code>enterkeyhint=&quot;next&quot;</code> to text-entry inputs, textareas and editable elements when <code>enterkeyhint</code> is absent. An explicit hint is preserved. It changes the mobile keyboard&#39;s Enter key label, not the focus order or Enter key behavior.</p>
+<p>The Extension observes <code>focusin</code>, capture-phase <code>focus</code> and <code>blur</code> on the document, and <code>focus</code> and <code>blur</code> on the window. A blur preserves the last valid element target; repeated notifications for the same element do not create duplicate history entries. Focus changes are recorded in a bounded, in-memory history. Call <code>AelluxJs.ext.focus.restoreLastFocus()</code> to focus the previous connected, visible target. It returns <code>true</code> if focus moved and <code>false</code> when no valid target remains. Hidden, inert, disabled and detached targets are skipped.</p>
+<p>When <code>state-navigation</code> is initialized, each focus change also pushes its token into the <code>ae-focus</code> snapshot field. A <code>SnapshotRestore</code> event restores that target if it remains valid. This works within the current document lifetime; focus tokens do not survive a page reload. With the default hash navigation setting, focus changes also change the hash. Set <code>useHash: false</code> in the Core options if that URL behavior is unwanted.</p>
+<p>The Extension does not trap focus or announce navigation changes. Applications remain responsible for suitable focus order and accessible controls.</p>
         </div>
 
         <div id="doc-navlinks2" ajax-load="doc-navlinks2">
