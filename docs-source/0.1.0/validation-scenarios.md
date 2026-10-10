@@ -13,6 +13,26 @@ npm run test:browser
 
 `test:browser` builds `dist/` before testing. Use `npm run test:browser -- --project=chromium` to run only Chromium. To use an installed Chrome or Edge instead of Playwright's Chromium, set `AELLUXJS_TEST_BROWSER_CHANNEL` to `chrome` or `msedge` and select the Chromium project. The Bootstrap scenario loads Bootstrap from jsDelivr and therefore requires network access.
 
+## Recorded Desktop Environment
+
+The release-candidate run uses Playwright 1.63.0 on Windows 11 Pro (`10.0.26200.0`):
+
+| Project | Engine version | Playwright revision |
+| --- | --- | ---: |
+| `chromium` | 153.0.8010.12 | 1243 |
+| `firefox` | 155.0 | 1543 |
+| `webkit` | 26.6 | 2359 |
+
+The suite covers both normal Modern selection and forced Legacy execution. Forced Legacy validates the ES5 distribution path in these current engines; it does not establish support for historical versions of those browsers.
+
+The complete matrix was run on October 10, 2026 with:
+
+```sh
+npm run test:browser -- --workers=1
+```
+
+Result: **276 passed** across the three projects. A single worker is used for the recorded release run to keep the local HTTP fixture available for the entire matrix.
+
 ## Scenario Pages
 
 | Scenario | Example |
@@ -52,4 +72,4 @@ The browser suite covers the release contract in Chromium, Firefox, and WebKit:
 | Resource cleanup | Element and global listeners, Extension scripts and styles, mount maps, controllers, layout queues, failed and dormant lazy registrations, and the mount manager observer. |
 | Detached elements | Removal during async mount, observer cleanup, moves within the document, explicit unmount races, and global cleanup when `MutationObserver` is unavailable. |
 
-The contract suite does not replace the separate release tasks for publishing an exact browser version matrix, validating additional Legacy environments, mobile testing, accessibility review, or iframe support.
+The contract suite does not establish support for historical or mobile browsers and does not replace the separate accessibility review or iframe testing tasks.

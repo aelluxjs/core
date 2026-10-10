@@ -2,7 +2,7 @@
 
 aellux.js `0.1.0-beta.6` is intended for progressive enhancement in existing browser interfaces. It provides an ES5-compatible boot distribution that selects an ES2017+ Modern runtime or an ES5-syntax Legacy runtime with bundled polyfills.
 
-This beta validates the runtime contract and integration strategy. It publishes a preliminary ES2017 syntax baseline, but does not yet claim a final tested browser support matrix or unrestricted compatibility with every browser capable of parsing ES5.
+This beta validates the runtime contract and integration strategy. Its tested desktop-engine matrix is published in [Browser support](runtime/browser-support.md). The older versions listed there remain syntax references, and the release does not claim unrestricted compatibility with browsers capable of parsing ES5.
 
 ## Runtime Profiles
 
@@ -41,8 +41,10 @@ See [Bootstrap integration](integrations/bootstrap.md) and the browser validatio
 
 ## Current Limits
 
-- The published browser versions are a raw ES2017 syntax baseline; a final multi-browser validation matrix is not yet available.
-- Legacy support depends on the host providing fundamental DOM capabilities.
+- The historical browser versions in the syntax table are references rather than tested support claims.
+- The Legacy profile is validated through forced execution in the current tested desktop engines. No historical browser version is included in the `0.1.0` support matrix.
+- Legacy execution still depends on the host providing fundamental DOM capabilities.
+- Mobile browsers are not included in the validated matrix.
 - Applications must call `$ae.mount(root)` after relevant dynamic DOM insertion and `$ae.unmount(root)` before removing mounted content when cleanup is required.
 
 See [Browser support](runtime/browser-support.md), [Modern and Legacy runtimes](runtime/modern-legacy.md), [ES5 support level](runtime/es5-support.md), and [Modern and Legacy Extension variants](extensions/legacy-variants.md) for details.

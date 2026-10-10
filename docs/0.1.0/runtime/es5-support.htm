@@ -570,7 +570,7 @@
 </ul>
 <p>The generated Legacy Extensions do not embed these dependencies again. They are loaded after, and share the environment prepared by, the Legacy orchestrator.</p>
 <p>Third-party Extensions may rely on this list only while running under the aellux.js Legacy runtime. Any additional API must be feature-detected and included by the Extension&#39;s own build or loaded as an explicit dependency. Babel or another transpiler can produce ES5 syntax, but does not automatically provide missing browser APIs.</p>
-<p>Browser primitives such as the DOM, <code>XMLHttpRequest</code> and <code>DOMParser</code> are still expected from the host environment. The final supported browser matrix remains part of the <code>0.1.0-beta</code> milestone, so ES5 syntax must not be interpreted as unrestricted support for every old browser.</p>
+<p>Browser primitives such as the DOM, <code>XMLHttpRequest</code> and <code>DOMParser</code> are still expected from the host environment. For <code>0.1.0</code>, the Legacy contract covers the ES5 output, runtime selection and fallback, shared polyfill installation, and generated Extension variants when exercised in the current tested browser engines. It does not declare compatibility with any historical browser version. ES5 syntax must therefore not be interpreted as unrestricted support for old browsers.</p>
 <p>See <a href="../extensions/authoring.htm">Authoring Third-Party aellux.js Extensions</a> for the publication contract and reference build.</p>
 <h2>Build Tooling</h2>
 <p>Node.js 20 or newer is required to build aellux.js. This tooling requirement is independent of the browser syntax baseline.</p>
