@@ -50,6 +50,7 @@
   function init(options) {
     window.addEventListener("popstate", onPopState);
     window.addEventListener("hashchange", onHashChange);
+    AelluxJs.on("PushState", OnPushState);
     AelluxJs.on("PushAjaxReplace", OnPushAjaxReplace);
     AelluxJs.on("UpdateBaseTitle", OnUpdateBaseTitle);
 
@@ -67,6 +68,7 @@
   async function destroy() {
     window.removeEventListener("popstate", onPopState);
     window.removeEventListener("hashchange", onHashChange);
+    AelluxJs.off("PushState", OnPushState);
     AelluxJs.off("PushAjaxReplace", OnPushAjaxReplace);
     AelluxJs.off("UpdateBaseTitle", OnUpdateBaseTitle);
   }
@@ -182,6 +184,27 @@
     if (!currentState || typeof currentState !== "object" || Array.isArray(currentState))
       return state;
     return Object.assign({}, currentState, state);
+  }
+
+  function OnPushState(event) {
+    try {
+      const detail = event && event.detail;
+      if (!detail || typeof detail !== "object" ||
+        typeof detail.key !== "string" || !detail.key.trim() ||
+        typeof detail.value !== "string" || !detail.value.trim() ||
+        (detail.title !== undefined && typeof detail.title !== "string")) {
+        AelluxJs.diagnostics.warn(AelluxJs.diagnostics.WARN_NAVIGATION_EVENT_INVALID, {
+          extension: extensionName, event: "PushState",
+          expected: "detail: { key: non-empty string, value: non-empty string, title?: string }"
+        });
+        return;
+      }
+      setState(detail.key, detail.value, detail.title);
+    } catch (cause) {
+      AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_CALLBACK, {
+        extension: extensionName, event: "PushState", cause
+      });
+    }
   }
 
   function OnPushAjaxReplace(event) {

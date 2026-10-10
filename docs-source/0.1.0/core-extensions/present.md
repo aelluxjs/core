@@ -7,7 +7,7 @@
 - **Capabilities:** interaction and input; structure and state; motion and timing.
 - **Owned state:** presentation classes and its changes to `hidden`, `aria-expanded` and `aria-controls`.
 - **Consumer responsibility:** use native, named trigger and dismiss controls; ensure configured motion respects reduced-motion preferences; manage focus for dialog, disclosure and similar patterns.
-- **Limitation:** the Extension currently does not move focus before hiding a region or restore focus after it closes. Consumers must prevent focus from remaining inside content that becomes hidden.
+- **Focus on close:** if the active element is inside the region when it becomes hidden, Present releases its focus and emits `AelluxJsUnpopFocusLost`. Focus restoration is handled by the optional Focus Extension.
 
 ```html
 <button type="button" data-ae-trigger="toggle" data-ae-target="#details">Details</button>
@@ -26,5 +26,7 @@ A trigger or dismiss control with neither a selector nor a containing `data-ae-p
 The Extension exposes `pop(element)`, `unpop(element)`, `toggle(element, goto)`, and `trigger(element, action)` through `$ae.ext.present`. It manages `hidden` and `aria-expanded` on the container and updates `aria-expanded` and `aria-controls` on its triggers. A direct child marked `data-ae-present-motion` can carry the transition classes; otherwise the container itself is used.
 
 The transition classes are `ae--popping`, `ae--unpopping`, and `ae--pop`. CSS custom properties `--ae-pop-duration` and `--ae-unpop-duration` on the motion element set the corresponding duration. The Extension emits cancelable `AelluxJsBeforePop` and `AelluxJsBeforeUnpop` events, followed by `AelluxJsPopping`/`AelluxJsUnpopping` and `AelluxJsPop`/`AelluxJsUnpop` as transitions progress.
+
+When an `unpop` hides a region containing the active element, Present releases focus if the browser has not already done so, then dispatches `UnpopFocusLost` through `AelluxJs.dispatch`. If the active element is outside the region at the time it becomes hidden, no focus event is dispatched.
 
 `data-ae-auto-unpop` specifies a delay before closing an open container. Outside clicks also close open containers unless `data-ae-unpop-on-outside="false"` is set. `present` mounts motion elements before containers, whether the motion is the container itself or a separate child. On unmount, the mount helper restores the initial `data-ae-*`, `aria-*`, and `hidden` attributes on each mounted container, motion element, and trigger control.

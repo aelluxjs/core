@@ -21,6 +21,7 @@ jobs:
       - run: npm ci
       - run: npx playwright install --with-deps
       - run: npm run build
+      - run: npm run test:budget
       - run: npm run test:browser -- --workers=1
       - run: npm pack --dry-run
       - name: Check generated files

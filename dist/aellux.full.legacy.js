@@ -23432,6 +23432,7 @@
         function init(options) {
           window.addEventListener("popstate", onPopState);
           window.addEventListener("hashchange", onHashChange);
+          AelluxJs2.on("PushState", OnPushState);
           AelluxJs2.on("PushAjaxReplace", OnPushAjaxReplace);
           AelluxJs2.on("UpdateBaseTitle", OnUpdateBaseTitle);
           if ("useHash" in AelluxJs2.options) useHash = AelluxJs2.options.useHash;
@@ -23452,6 +23453,7 @@
                 case 0:
                   window.removeEventListener("popstate", onPopState);
                   window.removeEventListener("hashchange", onHashChange);
+                  AelluxJs2.off("PushState", OnPushState);
                   AelluxJs2.off("PushAjaxReplace", OnPushAjaxReplace);
                   AelluxJs2.off("UpdateBaseTitle", OnUpdateBaseTitle);
                 case 1:
@@ -23588,6 +23590,26 @@
           var currentState = history.state;
           if (!currentState || _typeof2(currentState) !== "object" || Array.isArray(currentState)) return state;
           return Object.assign({}, currentState, state);
+        }
+        function OnPushState(event) {
+          try {
+            var detail = event && event.detail;
+            if (!detail || _typeof2(detail) !== "object" || typeof detail.key !== "string" || !detail.key.trim() || typeof detail.value !== "string" || !detail.value.trim() || detail.title !== void 0 && typeof detail.title !== "string") {
+              AelluxJs2.diagnostics.warn(AelluxJs2.diagnostics.WARN_NAVIGATION_EVENT_INVALID, {
+                extension: extensionName,
+                event: "PushState",
+                expected: "detail: { key: non-empty string, value: non-empty string, title?: string }"
+              });
+              return;
+            }
+            setState(detail.key, detail.value, detail.title);
+          } catch (cause) {
+            AelluxJs2.diagnostics.error(AelluxJs2.diagnostics.ERROR_CALLBACK, {
+              extension: extensionName,
+              event: "PushState",
+              cause: cause
+            });
+          }
         }
         function OnPushAjaxReplace(event) {
           try {
@@ -24597,7 +24619,12 @@
         }
         function finishTransition(element, controller, c, gotoVisible, completeTransition) {
           controller.classList.remove(c);
+          var focused = !gotoVisible && element.contains(document.activeElement) ? document.activeElement : null;
           element.hidden = gotoVisible ? false : true;
+          if (focused) {
+            if (document.activeElement === focused) focused.blur();
+            if (document.activeElement !== focused) AelluxJs2.dispatch("UnpopFocusLost");
+          }
           controller.interruptTransition = null;
           controller.timeout = null;
           completeTransition();

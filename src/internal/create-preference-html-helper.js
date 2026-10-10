@@ -18,6 +18,7 @@ export function createPreferenceHtmlHelper(root, getApi) {
     preferences = preferences ? preferences : api.persist.preferences.getObject();
     for (var param in allQueries) {
       if (!Object.prototype.hasOwnProperty.call(allQueries, param)) continue;
+      document.documentElement.removeAttribute(api.attr(fromCamelCase(param)));
       var queries = allQueries[param];
       for (var value in queries) {
         if (!Object.prototype.hasOwnProperty.call(queries, value)) continue;

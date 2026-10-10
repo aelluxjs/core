@@ -437,7 +437,12 @@
     }
     function finishTransition(element, controller, c, gotoVisible, completeTransition) {
       controller.classList.remove(c);
+      var focused = !gotoVisible && element.contains(document.activeElement) ? document.activeElement : null;
       element.hidden = gotoVisible ? false : true;
+      if (focused) {
+        if (document.activeElement === focused) focused.blur();
+        if (document.activeElement !== focused) AelluxJs.dispatch("UnpopFocusLost");
+      }
       controller.interruptTransition = null;
       controller.timeout = null;
       completeTransition();

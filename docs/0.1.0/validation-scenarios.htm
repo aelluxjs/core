@@ -336,6 +336,11 @@ Browser Support                            </a>
                           </li>
                           <li class="nav-item small-md rounded-1 ps-md-1"
                             style="flex:0">
+                            <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/runtime/performance.htm">
+Performance and Bundle Budget                            </a>
+                          </li>
+                          <li class="nav-item small-md rounded-1 ps-md-1"
+                            style="flex:0">
                             <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/runtime/es5-support.htm">
 ES5 Support                            </a>
                           </li>
@@ -588,7 +593,7 @@ npm run test:browser
 <p>The complete matrix was run on October 10, 2026 with:</p>
 <pre><code class="language-sh">npm run test:browser -- --workers=1
 </code></pre>
-<p>Result: <strong>276 passed</strong> across the three projects. A single worker is used for the recorded release run to keep the local HTTP fixture available for the entire matrix.</p>
+<p>Result: <strong>306 passed</strong> across the three projects. A single worker is used for the recorded release run to keep the local HTTP fixture available for the entire matrix.</p>
 <h2>Scenario Pages</h2>
 <table>
 <thead>
@@ -707,6 +712,10 @@ npm run test:browser
 <tr>
 <td>Detached elements</td>
 <td>Removal during async mount, observer cleanup, moves within the document, explicit unmount races, and global cleanup when <code>MutationObserver</code> is unavailable.</td>
+</tr>
+<tr>
+<td>Accessibility contracts</td>
+<td>Native keyboard activation for Preference controls, Focus restoration and hint cleanup, Present focus release plus ARIA state synchronization, failed-mount <code>aria-busy</code> cleanup, and root attributes for reduced motion, contrast, and forced colors.</td>
 </tr>
 </tbody></table>
 <p>The contract suite does not establish support for historical or mobile browsers and does not replace the separate accessibility review or additional iframe scenarios.</p>

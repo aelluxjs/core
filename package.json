@@ -47,6 +47,7 @@
     "build": "npm run build:core && npm run build:docs",
     "build:core": "node scripts/build-core.mjs",
     "build:docs": "node scripts/build-docs.mjs",
+    "test:budget": "node scripts/check-bundle-budget.mjs",
     "pretest:browser": "npm run build:core",
     "test:browser": "playwright test",
     "prepack": "npm run build"

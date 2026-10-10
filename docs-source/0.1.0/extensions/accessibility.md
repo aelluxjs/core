@@ -130,7 +130,7 @@ An Extension that does not mount DOM elements applies these rules to its actual 
 - `adaptive` declares visual and adaptive presentation. Its output must not be used to remove essential content solely because of viewport dimensions or input assumptions.
 - `state-navigation` declares structure and state plus integration. Restored state must remain coherent with the document title, URL, history entry, and any consuming interface.
 - Waiting interfaces using `data-ae-wait-mounted` must clear `aria-busy` after successful and failed mount attempts.
-- Extensions without implemented behavior, including the current `focus` scaffold, must not be presented as providing an accessibility feature.
+- `focus` declares focus management and state integration. It must skip targets that are hidden, inert, disabled, detached or no longer visible, avoid restoration loops, preserve authored hints and remove generated hints during unmount.
 
 ## Minimum Validation
 
@@ -148,6 +148,14 @@ Validate the universal requirements and each declared capability. Tests or docum
 Also validate failed initialization or mounting, repeated lifecycle execution, and the Modern or Legacy environments claimed by the Extension when those lifecycle paths exist.
 
 Record excluded browser, iframe, mobile, input, network, or assistive-technology scenarios as limitations.
+
+## 0.1.0 Validation Record
+
+The automated release suite runs in Playwright Chromium, Firefox, and WebKit. It verifies native `button` activation by keyboard for Preference controls; Focus history, restoration, and generated `enterkeyhint` cleanup; Present synchronization of `hidden`, `aria-expanded`, and `aria-controls`, including focus release when a region is hidden; and `aria-busy` cleanup after failed mounting.
+
+It also verifies that Preference publishes and clears explicit `reduced-motion`, `contrast`, and `forced-colors` values on the document root. The suite validates the Extension contracts that expose those values; consumer CSS and application markup remain responsible for reflow, zoom, color contrast, forced-color rendering, readable labels, and an equivalent keyboard path for application-specific pointer actions.
+
+This record does not claim manual assistive-technology testing, mobile-browser coverage, or certification of a consuming page against WCAG. Those scenarios remain outside the `0.1.0` validated matrix.
 
 ## Review Checklist
 
