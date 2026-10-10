@@ -240,7 +240,7 @@ for (const filename of generatedFiles) {
 
 async function transpileLegacySource(sourceFile, sourceFileName) {
   const transformed = await transformAsync(
-    await readFile(sourceFile, "utf8"),
+    (await readFile(sourceFile, "utf8")).replace(/\r\n?/g, "\n"),
     {
       filename: sourceFile,
       sourceFileName,
