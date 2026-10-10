@@ -31,6 +31,7 @@ $ae.ext("preference", {
 - `loadWhen` delays loading until a matching element is discovered.
 - An invalid `loadWhen` selector reports `ERROR_EXTENSION_LOAD_WHEN` (`1114`), and `ext()` leaves the Extension undeclared.
 - `loadStyle: true` requests the stylesheet derived from the Extension script URL; a URL string requests that specific stylesheet.
+- `integrity` supplies SRI hashes for third-party Extension files; `crossOrigin` controls the associated `crossorigin` attribute. See [CSP and Extension trust](csp-and-trust.md#subresource-integrity).
 
 Register each name once. Duplicate declarations currently report an error and do not replace the existing registration.
 
@@ -65,3 +66,4 @@ Declare the Extension with `ext()` before calling `extAttach()`. The attachment 
 
 Use the [aellux.js Extension scaffold](https://github.com/aelluxjs/core/blob/main/templates/README.md) for the complete lifecycle structure.
 Third-party authors should also follow the [Extension authoring and compatibility contract](authoring.md).
+Review [CSP requirements and Extension trust](csp-and-trust.md) before registering assets from another origin.

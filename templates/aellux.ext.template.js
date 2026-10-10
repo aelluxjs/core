@@ -34,7 +34,8 @@
   function init(options) {
     AelluxJs.mountManager.add({
       extensionName, selector: `[${attr.extensionName}]`,
-      mount: mountElement, unmount: unmountElement
+      mount: mountElement, unmount: unmountElement,
+      controller: ["controllerMethod"]
     });
   }
 
@@ -46,5 +47,8 @@
   }
 
   function unmountElement(element) {
+  }
+
+  function controllerMethod(element) {
   }
 })(typeof globalThis !== "undefined" ? globalThis : window);

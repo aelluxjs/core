@@ -35,7 +35,7 @@ See [Authoring Third-Party aellux.js Extensions](extensions/authoring.md) for li
 
 ## Bootstrap
 
-aellux.js does not require or bundle Bootstrap. Its attributes, classes, and events use aellux.js-specific namespaces. Optional Extension stylesheets can be loaded after Bootstrap when an application needs them to take precedence.
+aellux.js does not require or bundle Bootstrap. Its attributes, classes, and events use aellux.js-specific namespaces. Optional Extension stylesheets can be loaded after Bootstrap when an application needs them to take precedence. The automated suite validates basic CSS and namespace coexistence with the local Bootstrap 5.3.8 fixture; it does not claim compatibility with Bootstrap JavaScript components or plugins.
 
 See [Bootstrap integration](integrations/bootstrap.md) and the browser validation scenario in `tests/browser/bootstrap-integration.html`.
 

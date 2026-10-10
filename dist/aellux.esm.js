@@ -604,6 +604,7 @@ function createAelluxConstants() {
       verboseLevel: 0,
       forceLegacy: false,
       basePath: null,
+      crossOrigin: null,
       extensions: {}
     },
     AELLUXJS_MODERN_API_DEPENDENCIES: [

@@ -11,7 +11,7 @@ npx playwright install
 npm run test:browser
 ```
 
-`test:browser` builds `dist/` before testing. Use `npm run test:browser -- --project=chromium` to run only Chromium. To use an installed Chrome or Edge instead of Playwright's Chromium, set `AELLUXJS_TEST_BROWSER_CHANNEL` to `chrome` or `msedge` and select the Chromium project. The Bootstrap scenario loads Bootstrap from jsDelivr and therefore requires network access.
+`test:browser` builds `dist/` before testing. Use `npm run test:browser -- --project=chromium` to run only Chromium. To use an installed Chrome or Edge instead of Playwright's Chromium, set `AELLUXJS_TEST_BROWSER_CHANNEL` to `chrome` or `msedge` and select the Chromium project. The Bootstrap scenario uses the versioned local fixture `tests/fixtures/bootstrap-5.3.8.min.css` and requires no CDN or network access.
 
 ## Recorded Desktop Environment
 
@@ -72,4 +72,4 @@ The browser suite covers the release contract in Chromium, Firefox, and WebKit:
 | Resource cleanup | Element and global listeners, Extension scripts and styles, mount maps, controllers, layout queues, failed and dormant lazy registrations, and the mount manager observer. |
 | Detached elements | Removal during async mount, observer cleanup, moves within the document, explicit unmount races, and global cleanup when `MutationObserver` is unavailable. |
 
-The contract suite does not establish support for historical or mobile browsers and does not replace the separate accessibility review or iframe testing tasks.
+The contract suite does not establish support for historical or mobile browsers and does not replace the separate accessibility review or additional iframe scenarios.

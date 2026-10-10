@@ -39,7 +39,9 @@
     "dist",
     "CHANGELOG.md",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "THIRD_PARTY_LICENSES.md",
+    "third-party/licenses"
   ],
   "scripts": {
     "build": "npm run build:core && npm run build:docs",

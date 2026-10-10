@@ -21,13 +21,9 @@
  * snapshot registry when destroyed.
  *
  * Accessibility and scope: consumers replacing content must manage focus,
- * document structure and status announcements after navigation. Coordination
- * across parent documents and iframes is outside the validated 0.1.0 scope.
+ * document structure and status announcements after navigation. Parent pages
+ * and iframes keep their own history state and restoration events.
  */
-
-// TODO: Test state-navigation when the same extension runs in an iframe and
-// its parent page. Iframe history, hash, and state synchronization are not
-// covered by the current tests; iframe compatibility is not yet verified.
 
 (function (root) {
   "use strict";

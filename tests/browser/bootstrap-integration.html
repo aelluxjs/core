@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <title>aellux.js validation: Bootstrap integration</title>
-  <link id="bootstrap-css" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
-    integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+  <link id="bootstrap-css" href="../fixtures/bootstrap-5.3.8.min.css" rel="stylesheet"
+    integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB">
   <script src="./harness.js"></script>
   <script src="../../dist/aellux.js"></script>
   <link rel="aelluxjs-ext" href="preference" data-ae-load-when="[data-ae-preference]">
@@ -14,6 +14,10 @@
       var button = document.getElementById("bootstrap-button");
       var bootstrapStyle = document.getElementById("bootstrap-css");
       assert(bootstrapStyle.sheet, "Bootstrap stylesheet did not load");
+      assert(bootstrapStyle.href.indexOf(location.origin + "/tests/fixtures/") === 0,
+        "Bootstrap stylesheet was not loaded from the local fixture");
+      assert(getComputedStyle(button).getPropertyValue("--bs-btn-bg").trim(),
+        "Bootstrap button styles were not applied");
       assert(AelluxJs.ext.preference, "Preference extension was not initialized with Bootstrap present");
       assert(target.classList.contains("ae--mounted"), "Bootstrap component was not mounted");
       assert(target.classList.contains("card"), "aellux.js removed a Bootstrap class");

@@ -588,7 +588,7 @@
 <p>Third-party Extensions declare their published artifacts through <code>builds: [&quot;modern&quot;]</code>, <code>builds: [&quot;legacy&quot;]</code>, or <code>builds: [&quot;modern&quot;, &quot;legacy&quot;]</code>. The declarative equivalent is <code>data-ae-builds</code>. aellux.js selects the available compatible artifact and reports diagnostic <code>1106</code> before requesting a Modern-only Extension from a Legacy runtime.</p>
 <p>See <a href="extensions/authoring.htm">Authoring Third-Party aellux.js Extensions</a> for lifecycle rules, filename conventions, the reference Legacy build, and the exact polyfill boundary.</p>
 <h2>Bootstrap</h2>
-<p>aellux.js does not require or bundle Bootstrap. Its attributes, classes, and events use aellux.js-specific namespaces. Optional Extension stylesheets can be loaded after Bootstrap when an application needs them to take precedence.</p>
+<p>aellux.js does not require or bundle Bootstrap. Its attributes, classes, and events use aellux.js-specific namespaces. Optional Extension stylesheets can be loaded after Bootstrap when an application needs them to take precedence. The automated suite validates basic CSS and namespace coexistence with the local Bootstrap 5.3.8 fixture; it does not claim compatibility with Bootstrap JavaScript components or plugins.</p>
 <p>See <a href="integrations/bootstrap.htm">Bootstrap integration</a> and the browser validation scenario in <code>tests/browser/bootstrap-integration.html</code>.</p>
 <h2>Current Limits</h2>
 <ul>

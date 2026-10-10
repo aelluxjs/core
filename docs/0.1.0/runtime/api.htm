@@ -564,6 +564,7 @@
 <pre><code class="language-js">$ae.init({ mode: &quot;full&quot; });
 </code></pre>
 <p>Supported runtime modes are <code>full</code> and <code>basic</code>. See <a href="../getting-started.htm">Getting Started</a> for their loading behavior.
+The optional <code>crossOrigin</code> initialization setting controls the <code>crossorigin</code> attribute on runtime and Extension assets; integrity-protected assets use <code>anonymous</code> by default. See <a href="../extensions/csp-and-trust.htm#subresource-integrity">CSP and Extension trust</a>.
 Pass Extension-specific configuration through <code>extensions</code> in <code>init()</code> options. Keys such as <code>&quot;tab-group&quot;</code> are normalized to <code>tabGroup</code> in <code>$ae.options.extensions</code>, and each Extension receives its matching object in <code>init(options)</code>. An Extension with no matching configuration receives <code>{}</code>.</p>
 <h2>DOM Lifecycle</h2>
 <pre><code class="language-js">await $ae.mount(root);

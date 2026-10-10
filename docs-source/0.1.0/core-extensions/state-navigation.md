@@ -7,7 +7,7 @@
 - **Capabilities:** structure and state; browser-history and application integration.
 - **Owned state:** the Aellux namespace in `history.state`, the snapshot registry, title updates and navigation events.
 - **Consumer responsibility:** code replacing page content must manage focus, preserve document structure and announce navigation results when needed.
-- **Limitation:** parent-page and iframe coordination is outside the validated 0.1.0 scope.
+- **Iframe:** each window keeps its own snapshot, history state and restoration events, including when the parent page also uses `state-navigation`.
 
 ```js
 const navigation = await $ae.wait("state-navigation");
@@ -20,6 +20,8 @@ The Extension dispatches `AelluxJsSnapshotChange` after writing a new state and 
 
 Dispatch `AelluxJsPushAjaxReplace` with `detail: { url, selectors }` to record the current and target URLs in browser history. Each entry stores `ajaxReplace: { url, selectors }`; the target entry has `snapshot: null`. The optional `ajaxHref` Extension can use this history metadata when available. It is not part of the `full` runtime's bundled Extension list. Dispatch `AelluxJsUpdateBaseTitle` with `detail: { title }` to update the base document title. Malformed event details produce a navigation warning.
 
-## Iframe compatibility pending
+## Parent page and iframe
 
-The scenario where this Extension runs inside an iframe while the parent page also uses it has not been tested. The current test coverage does not verify iframe history traversal, hash behavior, or synchronization of state between the iframe and parent page. Iframe compatibility remains unverified until those scenarios are tested and any required parent-frame communication is implemented.
+A browser fixture now runs this Extension in both a parent page and an iframe. Its test confirms that after a parent state followed by an iframe `ajaxReplace` state, the first Back fires `popstate` and `AelluxJsSnapshotRestore` only in the iframe; the next Back fires them only in the parent. The test passes in Chromium, Firefox and WebKit. Run `npx playwright test tests/browser/state-navigation-iframe.spec.mjs` to repeat it, or start `node tests/browser/server.mjs` and open `/tests/browser/state-navigation-iframe-parent.html` to use the buttons manually.
+
+The parent and iframe do not need an owner marker to route `popstate`: each instance reads the history state of its own window. Applications that need to share data between the two documents can implement that exchange separately.

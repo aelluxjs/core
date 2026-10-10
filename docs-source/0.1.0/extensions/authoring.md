@@ -19,6 +19,8 @@ An Extension receives its configuration as the `options` argument to `init(optio
 
 Every Extension must follow the applicable [accessibility requirements](accessibility.md). Declare its capability profile and document only the relevant interaction, structure, presentation, motion, integration, infrastructure, lifecycle, and limitation fields. Requirements outside the declared behavior may be marked not applicable with a short reason.
 
+Document any additional resource origins your Extension requires and see [CSP requirements and Extension trust](csp-and-trust.md) for the host application's loading constraints.
+
 ## DOM Mount Contract
 
 Extensions with element behavior register their selectors and handlers with `AelluxJs.mountManager` during `init()`:

@@ -44,6 +44,7 @@ Add aellux.js to a page and enable the Extensions it needs. The library coordina
 - [Declarative loading with `link[rel="aelluxjs-ext"]`](extensions/declarative-loading.md)
 - [Lazy loading](extensions/lazy-loading.md)
 - [Optional Extension styles](extensions/styles.md)
+- [CSP and Extension trust](extensions/csp-and-trust.md)
 - [Modern and Legacy Extension variants](extensions/legacy-variants.md)
 
 ## Core Extensions

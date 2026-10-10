@@ -1,4 +1,5 @@
 import path from "node:path";
+import { copyFile, writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { buildDocs } from "@wolimp/docweaver";
 
@@ -16,3 +17,16 @@ await buildDocs({
   publicPath,
   title: "aellux.js Docs"
 });
+
+const docweaverAssetPath = path.join(outputPath, "assets", "docweaver");
+await copyFile(
+  path.join(projectRoot, "node_modules", "@wolimp", "docweaver", "LICENSE"),
+  path.join(docweaverAssetPath, "LICENSE")
+);
+await writeFile(
+  path.join(docweaverAssetPath, "THIRD_PARTY_LICENSES.txt"),
+  "Docweaver theme assets and generated page template\n" +
+    "@wolimp/docweaver 0.1.0-beta.8 (Apache-2.0)\n" +
+    "License text: LICENSE in this directory.\n",
+  "utf8"
+);

@@ -1,3 +1,4 @@
+/*! Includes Babel helpers, core-js, custom-event-polyfill, raf, performance-now and whatwg-fetch (MIT). Copyright and license texts: third-party/licenses/ in this distribution. */
 (function() {
   var __defProp = Object.defineProperty;
   var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
@@ -22948,7 +22949,7 @@
         }
         function _appendExtensionAssets() {
           _appendExtensionAssets = _asyncToGenerator2(/* @__PURE__ */ _regenerator2().m(function _callee7(extensionName) {
-            var bundledLoader, key, data, url, useLegacyBuild, scriptURL, loadPromises, _args7 = arguments;
+            var bundledLoader, key, data, url, useLegacyBuild, scriptURL, minifiedScript, scriptVariant, loadPromises, _args7 = arguments;
             return _regenerator2().w(function(_context7) {
               while (1) switch (_context7.n) {
                 case 0:
@@ -22959,6 +22960,8 @@
                   url = data.url.replace(/^\.\//, AelluxJs.aelluxBasePath);
                   useLegacyBuild = AelluxJs.diagnostics.legacy || data.builds.indexOf("modern") === -1;
                   scriptURL = useLegacyBuild ? toLegacyScriptURL(url) : url;
+                  minifiedScript = /\.min\.js(?=[?#]|$)/.test(scriptURL);
+                  scriptVariant = useLegacyBuild ? minifiedScript ? "legacyMin" : "legacy" : minifiedScript ? "modernMin" : "modern";
                   loadPromises = [];
                   if (bundledLoader) {
                     loadPromises.push(Promise.resolve().then(function() {
@@ -22970,6 +22973,7 @@
                       var script = document.createElement("script");
                       script.src = scriptURL;
                       script.setAttribute(attr, extensionName);
+                      applyAssetIntegrity(script, getExtensionIntegrity(data, scriptVariant, scriptURL), data.crossOrigin);
                       assetLoadHelper(script, {
                         loadCallback: resolve,
                         errorCallback: reject
@@ -22985,6 +22989,7 @@
                       link.href = href;
                       link.rel = "stylesheet";
                       link.setAttribute(attrStyle, extensionName);
+                      applyAssetIntegrity(link, getExtensionIntegrity(data, "style", href), data.crossOrigin);
                       assetLoadHelper(link, {
                         loadCallback: resolve,
                         errorCallback: function errorCallback() {
@@ -23002,6 +23007,22 @@
             }, _callee7);
           }));
           return _appendExtensionAssets.apply(this, arguments);
+        }
+        function getExtensionIntegrity(data, variant, url) {
+          var declared = data.integrity;
+          var explicit = typeof declared === "string" ? variant === "style" ? null : declared : declared && declared[variant];
+          if (explicit) return explicit;
+          var basePath = AelluxJs.aelluxBasePath;
+          if (!url.startsWith(basePath)) return null;
+          var filename = url.slice(basePath.length);
+          var builtin = AelluxJs.coreAssetIntegrity;
+          return builtin && Object.prototype.hasOwnProperty.call(builtin, filename) ? builtin[filename] : null;
+        }
+        function applyAssetIntegrity(asset, integrity, crossOrigin) {
+          if (integrity) asset.setAttribute("integrity", integrity);
+          if (integrity || crossOrigin || AelluxJs.options.crossOrigin) {
+            asset.setAttribute("crossorigin", crossOrigin || AelluxJs.options.crossOrigin || "anonymous");
+          }
         }
         function toLegacyScriptURL(url) {
           return url.replace(/(?:\.legacy)?(?:\.min)?\.js(?=[?#]|$)/, ".legacy" + (AelluxJs.minified ? ".min" : "") + ".js");
@@ -24055,20 +24076,14 @@
           else if (adaptiveElements.size === 1) root2.addEventListener("resize", onWindowResize);
         }
         function unmountAdaptive(element) {
-          var _element$classList;
           if (!adaptiveElements.delete(element)) return;
           if (resizeObserver) resizeObserver.unobserve(element);
           else if (adaptiveElements.size === 0) root2.removeEventListener("resize", onWindowResize);
-          (_element$classList = element.classList).remove.apply(_element$classList, _toConsumableArray3(managedClasses));
-        }
-        function onResize(entries) {
-          var _iterator2 = _createForOfIteratorHelper5(entries), _step2;
+          var _iterator2 = _createForOfIteratorHelper5(managedClasses), _step2;
           try {
             for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
-              var entry = _step2.value;
-              if (adaptiveElements.has(entry.target)) {
-                updateAdaptive(entry.target, entry.contentRect.width, entry.contentRect.height);
-              }
+              var name = _step2.value;
+              element.classList.remove(name);
             }
           } catch (err) {
             _iterator2.e(err);
@@ -24076,18 +24091,33 @@
             _iterator2.f();
           }
         }
-        function onWindowResize() {
-          var _iterator3 = _createForOfIteratorHelper5(adaptiveElements), _step3;
+        function onResize(entries) {
+          var _iterator3 = _createForOfIteratorHelper5(entries), _step3;
           try {
             for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
-              var element = _step3.value;
-              var bounds = element.getBoundingClientRect();
-              updateAdaptive(element, bounds.width, bounds.height);
+              var entry = _step3.value;
+              if (adaptiveElements.has(entry.target)) {
+                updateAdaptive(entry.target, entry.contentRect.width, entry.contentRect.height);
+              }
             }
           } catch (err) {
             _iterator3.e(err);
           } finally {
             _iterator3.f();
+          }
+        }
+        function onWindowResize() {
+          var _iterator4 = _createForOfIteratorHelper5(adaptiveElements), _step4;
+          try {
+            for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
+              var element = _step4.value;
+              var bounds = element.getBoundingClientRect();
+              updateAdaptive(element, bounds.width, bounds.height);
+            }
+          } catch (err) {
+            _iterator4.e(err);
+          } finally {
+            _iterator4.f();
           }
         }
         function updateAdaptive(element, width, height) {

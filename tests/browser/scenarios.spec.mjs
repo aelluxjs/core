@@ -34,7 +34,18 @@ async function openScenario(page, name) {
 
 for (const scenario of scenarios) {
   test(`${scenario} completes`, async ({ page }) => {
+    const externalRequests = [];
+    if (scenario === "bootstrap-integration") {
+      page.on("request", request => {
+        if (new URL(request.url()).origin !== "http://127.0.0.1:4173") {
+          externalRequests.push(request.url());
+        }
+      });
+    }
     await openScenario(page, scenario);
+    if (scenario === "bootstrap-integration") {
+      expect(externalRequests).toEqual([]);
+    }
   });
 }
 

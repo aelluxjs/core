@@ -570,6 +570,7 @@
 <p>The runtime exposes a kebab-case name as camelCase under <code>AelluxJs.ext</code>: <code>tab-group</code> becomes <code>AelluxJs.ext.tabGroup</code>.
 An Extension receives its configuration as the <code>options</code> argument to <code>init(options)</code>. Supply it through <code>$ae.init({ extensions: { &quot;tab-group&quot;: { initialTab: &quot;overview&quot; } } })</code>; the boot script normalizes <code>tab-group</code> to <code>tabGroup</code> in <code>$ae.options.extensions</code>. Extensions without a matching entry receive <code>{}</code>.</p>
 <p>Every Extension must follow the applicable <a href="accessibility.htm">accessibility requirements</a>. Declare its capability profile and document only the relevant interaction, structure, presentation, motion, integration, infrastructure, lifecycle, and limitation fields. Requirements outside the declared behavior may be marked not applicable with a short reason.</p>
+<p>Document any additional resource origins your Extension requires and see <a href="csp-and-trust.htm">CSP requirements and Extension trust</a> for the host application&#39;s loading constraints.</p>
 <h2>DOM Mount Contract</h2>
 <p>Extensions with element behavior register their selectors and handlers with <code>AelluxJs.mountManager</code> during <code>init()</code>:</p>
 <pre><code class="language-js">AelluxJs.extAttach(extensionName, { init, destroy });
