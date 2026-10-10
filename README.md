@@ -60,6 +60,7 @@ See [Getting Started](docs-source/0.1.0/getting-started.md) for build instructio
 - [Declarative Extension loading](docs-source/0.1.0/extensions/declarative-loading.md)
 - [Lazy loading](docs-source/0.1.0/extensions/lazy-loading.md)
 - [Optional Extension styles](docs-source/0.1.0/extensions/styles.md)
+- [CSP and Extension trust](docs-source/0.1.0/extensions/csp-and-trust.md)
 - [Modern and Legacy Extension variants](docs-source/0.1.0/extensions/legacy-variants.md)
 - [Browser validation scenarios](docs-source/0.1.0/validation-scenarios.md)
 - [Extension scaffold](templates/README.md)
@@ -96,7 +97,7 @@ Review the [0.1.0 milestone](milestones/0.1.0.md), the [Beta 1 milestone](milest
 
 ## License
 
-aellux.js is licensed under the [Apache License 2.0](LICENSE). Third-party dependencies remain subject to their own licenses.
+aellux.js is licensed under the [Apache License 2.0](LICENSE). Incorporated third-party material and its license texts are listed in [Third-party licenses](THIRD_PARTY_LICENSES.md).
 
 ## Author
 

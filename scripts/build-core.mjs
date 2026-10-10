@@ -1,9 +1,10 @@
 /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
 
 import { build } from "esbuild";
+import { createHash } from "node:crypto";
 import { transformAsync } from "@babel/core";
 import presetEnv from "@babel/preset-env";
-import { copyFile, mkdir, readFile, readdir, unlink, writeFile } from "node:fs/promises";
+import { copyFile, cp, mkdir, readFile, readdir, unlink, writeFile } from "node:fs/promises";
 import { basename, dirname, isAbsolute, join, relative } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { createContext, runInContext } from "node:vm";
@@ -21,6 +22,9 @@ for (const entry of await readdir(sourceDirectory, { withFileTypes: true })) {
 }
 
 const generatedFiles = new Set();
+const legacyThirdPartyBanner =
+  "/*! Includes Babel helpers, core-js, custom-event-polyfill, raf, performance-now and whatwg-fetch (MIT). " +
+  "Copyright and license texts: third-party/licenses/ in this distribution. */";
 const legacySourceFiles = sourceFiles.filter(sourceFile => {
   const filename = basename(sourceFile);
   return filename === "aellux.orchestrator.js" ||
@@ -70,7 +74,8 @@ const bootstrapEvaluationBuild = await build({
   format: "iife",
   target: "es2017",
   write: false,
-  legalComments: "none"
+  legalComments: "none",
+  define: { __AELLUX_CORE_ASSET_INTEGRITY__: "{}" }
 });
 runInContext(bootstrapEvaluationBuild.outputFiles[0].text, bootstrapContext);
 runInContext('AelluxJs.ext("adaptive")', bootstrapContext);
@@ -94,6 +99,7 @@ generatedFiles.add("aellux.ext.adaptive.min.css");
 for (const sourceFile of sourceFiles) {
   const filename = basename(sourceFile);
   const classic = filename === "aellux.js";
+  if (classic) continue;
   const moduleEntry = filename === "aellux.esm.js";
   const full = filename === "aellux.full.js";
   const distributionFilename = full ? "aellux.full.js" : filename;
@@ -148,6 +154,7 @@ for (const sourceFile of legacySourceFiles) {
       minify,
       sourcemap: true,
       legalComments: "inline",
+      ...(isOrchestrator ? { banner: { js: legacyThirdPartyBanner } } : {}),
       plugins: [legacyBundlePlugin()]
     });
     generatedFiles.add(outputFilename);
@@ -175,15 +182,65 @@ for (const minify of [false, true]) {
     minify,
     sourcemap: true,
     legalComments: "inline",
+    banner: { js: legacyThirdPartyBanner },
     plugins: [legacyBundlePlugin()]
   });
   generatedFiles.add(outputFilename);
   generatedFiles.add(outputFilename + ".map");
 }
 
+// Hash the final bytes, then embed the map in the boot script that loads them.
+// The boot script cannot contain its own hash.
+const coreAssetIntegrity = {};
+for (const filename of generatedFiles) {
+  if (!/\.(?:js|css)$/.test(filename)) continue;
+  const content = await readFile(join(outputDirectory, filename));
+  coreAssetIntegrity[filename] = "sha384-" +
+    createHash("sha384").update(content).digest("base64");
+}
+
+for (const minify of [false, true]) {
+  const outputFilename = minify ? "aellux.min.js" : "aellux.js";
+  await build({
+    absWorkingDir: projectRoot,
+    entryPoints: [bootstrapPath],
+    outfile: join(outputDirectory, outputFilename),
+    bundle: true,
+    platform: "browser",
+    format: "iife",
+    target: "es5",
+    minify,
+    sourcemap: true,
+    legalComments: "inline",
+    define: {
+      __AELLUX_CORE_ASSET_INTEGRITY__: JSON.stringify(coreAssetIntegrity)
+    }
+  });
+  generatedFiles.add(outputFilename);
+  generatedFiles.add(outputFilename + ".map");
+}
+
+// Source maps embed the original source text. Normalize its line endings so
+// builds from Windows and Linux produce the same committed artifacts.
+for (const filename of generatedFiles) {
+  if (!filename.endsWith(".map")) continue;
+  const mapPath = join(outputDirectory, filename);
+  const mapText = await readFile(mapPath, "utf8");
+  const map = JSON.parse(mapText);
+  if (!Array.isArray(map.sourcesContent) || !/^  "sourcesContent": .*,$/m.test(mapText)) {
+    throw new Error(`Unexpected source map format: ${filename}`);
+  }
+  const sourcesContent = map.sourcesContent.map(source => source.replace(/\r\n?/g, "\n"));
+  const normalizedText = mapText.replace(
+    /^  "sourcesContent": .*,$/m,
+    `  "sourcesContent": ${JSON.stringify(sourcesContent)},`
+  );
+  if (normalizedText !== mapText) await writeFile(mapPath, normalizedText, "utf8");
+}
+
 async function transpileLegacySource(sourceFile, sourceFileName) {
   const transformed = await transformAsync(
-    await readFile(sourceFile, "utf8"),
+    (await readFile(sourceFile, "utf8")).replace(/\r\n?/g, "\n"),
     {
       filename: sourceFile,
       sourceFileName,
@@ -240,6 +297,8 @@ const distributionReadme = readme.replace(
 );
 await writeFile(join(outputDirectory, "README.md"), distributionReadme, "utf8");
 await copyFile(join(projectRoot, "LICENSE"), join(outputDirectory, "LICENSE"));
+await copyFile(join(projectRoot, "THIRD_PARTY_LICENSES.md"), join(outputDirectory, "THIRD_PARTY_LICENSES.md"));
+await cp(join(projectRoot, "third-party", "licenses"), join(outputDirectory, "third-party", "licenses"), { recursive: true });
 const generatedJavaScriptFiles = Array.from(generatedFiles)
   .filter(filename => filename.endsWith(".js")).length;
 console.log(`Build complete: ${generatedJavaScriptFiles} JavaScript files and source maps in dist/.`);

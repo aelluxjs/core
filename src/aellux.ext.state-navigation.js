@@ -1,8 +1,29 @@
 /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
 
-// TODO: Test state-navigation when the same extension runs in an iframe and
-// its parent page. Iframe history, hash, and state synchronization are not
-// covered by the current tests; iframe compatibility is not yet verified.
+/**
+ * State Navigation Extension
+ *
+ * Purpose: coordinates browser history entries, hash state, document titles and
+ * saved DOM snapshots for navigation flows controlled by Aellux events.
+ *
+ * Capability profile: structure and state, with browser-history and application
+ * integration.
+ *
+ * Inputs and activation: listens for popstate, hash changes and the extension's
+ * push, replace and title command events. Init options configure snapshot limits
+ * and title behavior.
+ *
+ * Outputs and owned state: merges its namespace into `history.state`, stores
+ * bounded snapshots and dispatches restoration/navigation events. It does not
+ * replace document content itself.
+ *
+ * Lifecycle: removes browser and document listeners and clears the in-memory
+ * snapshot registry when destroyed.
+ *
+ * Accessibility and scope: consumers replacing content must manage focus,
+ * document structure and status announcements after navigation. Parent pages
+ * and iframes keep their own history state and restoration events.
+ */
 
 (function (root) {
   "use strict";

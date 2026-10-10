@@ -2002,6 +2002,8 @@
       const url = data.url.replace(/^\.\//, AelluxJs.aelluxBasePath);
       const useLegacyBuild = AelluxJs.diagnostics.legacy || data.builds.indexOf("modern") === -1;
       const scriptURL = useLegacyBuild ? toLegacyScriptURL(url) : url;
+      const minifiedScript = /\.min\.js(?=[?#]|$)/.test(scriptURL);
+      const scriptVariant = useLegacyBuild ? minifiedScript ? "legacyMin" : "legacy" : minifiedScript ? "modernMin" : "modern";
       const loadPromises = [];
       if (bundledLoader) {
         loadPromises.push(Promise.resolve().then(() => bundledLoader()));
@@ -2012,6 +2014,7 @@
             const script = document.createElement("script");
             script.src = scriptURL;
             script.setAttribute(attr, extensionName);
+            applyAssetIntegrity(script, getExtensionIntegrity(data, scriptVariant, scriptURL), data.crossOrigin);
             assetLoadHelper(script, {
               loadCallback: resolve,
               errorCallback: reject
@@ -2029,6 +2032,7 @@
             link.href = href;
             link.rel = "stylesheet";
             link.setAttribute(attrStyle, extensionName);
+            applyAssetIntegrity(link, getExtensionIntegrity(data, "style", href), data.crossOrigin);
             assetLoadHelper(link, {
               loadCallback: resolve,
               errorCallback: () => {
@@ -2043,6 +2047,22 @@
         ));
       }
       return Promise.all(loadPromises);
+    }
+    function getExtensionIntegrity(data, variant, url) {
+      const declared = data.integrity;
+      const explicit = typeof declared === "string" ? variant === "style" ? null : declared : declared && declared[variant];
+      if (explicit) return explicit;
+      const basePath = AelluxJs.aelluxBasePath;
+      if (!url.startsWith(basePath)) return null;
+      const filename = url.slice(basePath.length);
+      const builtin = AelluxJs.coreAssetIntegrity;
+      return builtin && Object.prototype.hasOwnProperty.call(builtin, filename) ? builtin[filename] : null;
+    }
+    function applyAssetIntegrity(asset, integrity, crossOrigin) {
+      if (integrity) asset.setAttribute("integrity", integrity);
+      if (integrity || crossOrigin || AelluxJs.options.crossOrigin) {
+        asset.setAttribute("crossorigin", crossOrigin || AelluxJs.options.crossOrigin || "anonymous");
+      }
     }
     function toLegacyScriptURL(url) {
       return url.replace(

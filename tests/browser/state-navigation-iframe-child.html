@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <title>State navigation: iframe</title>
+  <script src="../../dist/aellux.js"></script>
+</head>
+<body>
+  <h1>Iframe state-navigation</h1>
+  <button id="child-ajax-replace" type="button">Add iframe ajaxReplace state</button>
+  <pre id="event-log"></pre>
+  <script>
+    window.fixtureEvents = [];
+    function record(type, state) {
+      window.fixtureEvents.push({ type: type, state: state });
+      document.getElementById("event-log").textContent = JSON.stringify(window.fixtureEvents, null, 2);
+    }
+    window.addEventListener("popstate", function (event) {
+      record("popstate", event.state);
+    });
+    document.addEventListener("AelluxJsSnapshotRestore", function (event) {
+      record("SnapshotRestore", event.detail.popState);
+    });
+    document.getElementById("child-ajax-replace").addEventListener("click", function () {
+      AelluxJs.dispatch("PushAjaxReplace", {
+        detail: {
+          url: "./state-navigation-iframe-child.html?ajax=next",
+          selectors: ["#content"]
+        }
+      });
+    });
+    AelluxJs.init({ mode: "full", useHash: false });
+    window.fixtureReady = AelluxJs.wait("state-navigation");
+  </script>
+</body>
+</html>

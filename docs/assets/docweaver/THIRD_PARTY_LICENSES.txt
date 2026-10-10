@@ -1,0 +1,3 @@
+Docweaver theme assets and generated page template
+@wolimp/docweaver 0.1.0-beta.8 (Apache-2.0)
+License text: LICENSE in this directory.

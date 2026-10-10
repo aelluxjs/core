@@ -1,5 +1,30 @@
 /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
 
+/**
+ * Preference Extension
+ *
+ * Purpose: resolves user preferences from explicit controls, persisted values
+ * and system media queries, then reflects selected values on the document.
+ *
+ * Capability profile: interaction and input, structure and state, visual
+ * preference policy, and integration with storage and `matchMedia`.
+ *
+ * Inputs and activation: mounts `[data-ae-preference]`; option, next and previous
+ * controls use their matching data attributes. Init options define values,
+ * defaults and storage behavior.
+ *
+ * Outputs and owned state: updates preference attributes on the root HTML
+ * element, synchronizes options and associated inputs, persists eligible values
+ * and dispatches `AelluxJsPreferencesChange`.
+ *
+ * Lifecycle: removes container handlers, storage and media-query listeners, and
+ * releases its internal registries when destroyed.
+ *
+ * Accessibility: control markup must provide native keyboard behavior,
+ * accessible names and semantic state. The extension synchronizes values and
+ * checked state but does not turn a generic element into an accessible control.
+ */
+
 import utilsNameCase from "./internal/utils-name-case.js";
 
 (function (root) {

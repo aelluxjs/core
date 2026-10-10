@@ -1,3 +1,4 @@
+/*! Includes Babel helpers, core-js, custom-event-polyfill, raf, performance-now and whatwg-fetch (MIT). Copyright and license texts: third-party/licenses/ in this distribution. */
 (function() {
   var __defProp = Object.defineProperty;
   var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
@@ -22949,7 +22950,7 @@
         }
         function _appendExtensionAssets() {
           _appendExtensionAssets = _asyncToGenerator2(/* @__PURE__ */ _regenerator2().m(function _callee7(extensionName) {
-            var bundledLoader, key, data, url, useLegacyBuild, scriptURL, loadPromises, _args7 = arguments;
+            var bundledLoader, key, data, url, useLegacyBuild, scriptURL, minifiedScript, scriptVariant, loadPromises, _args7 = arguments;
             return _regenerator2().w(function(_context7) {
               while (1) switch (_context7.n) {
                 case 0:
@@ -22960,6 +22961,8 @@
                   url = data.url.replace(/^\.\//, AelluxJs.aelluxBasePath);
                   useLegacyBuild = AelluxJs.diagnostics.legacy || data.builds.indexOf("modern") === -1;
                   scriptURL = useLegacyBuild ? toLegacyScriptURL(url) : url;
+                  minifiedScript = /\.min\.js(?=[?#]|$)/.test(scriptURL);
+                  scriptVariant = useLegacyBuild ? minifiedScript ? "legacyMin" : "legacy" : minifiedScript ? "modernMin" : "modern";
                   loadPromises = [];
                   if (bundledLoader) {
                     loadPromises.push(Promise.resolve().then(function() {
@@ -22971,6 +22974,7 @@
                       var script = document.createElement("script");
                       script.src = scriptURL;
                       script.setAttribute(attr, extensionName);
+                      applyAssetIntegrity(script, getExtensionIntegrity(data, scriptVariant, scriptURL), data.crossOrigin);
                       assetLoadHelper(script, {
                         loadCallback: resolve,
                         errorCallback: reject
@@ -22986,6 +22990,7 @@
                       link.href = href;
                       link.rel = "stylesheet";
                       link.setAttribute(attrStyle, extensionName);
+                      applyAssetIntegrity(link, getExtensionIntegrity(data, "style", href), data.crossOrigin);
                       assetLoadHelper(link, {
                         loadCallback: resolve,
                         errorCallback: function errorCallback() {
@@ -23003,6 +23008,22 @@
             }, _callee7);
           }));
           return _appendExtensionAssets.apply(this, arguments);
+        }
+        function getExtensionIntegrity(data, variant, url) {
+          var declared = data.integrity;
+          var explicit = typeof declared === "string" ? variant === "style" ? null : declared : declared && declared[variant];
+          if (explicit) return explicit;
+          var basePath = AelluxJs.aelluxBasePath;
+          if (!url.startsWith(basePath)) return null;
+          var filename = url.slice(basePath.length);
+          var builtin = AelluxJs.coreAssetIntegrity;
+          return builtin && Object.prototype.hasOwnProperty.call(builtin, filename) ? builtin[filename] : null;
+        }
+        function applyAssetIntegrity(asset, integrity, crossOrigin) {
+          if (integrity) asset.setAttribute("integrity", integrity);
+          if (integrity || crossOrigin || AelluxJs.options.crossOrigin) {
+            asset.setAttribute("crossorigin", crossOrigin || AelluxJs.options.crossOrigin || "anonymous");
+          }
         }
         function toLegacyScriptURL(url) {
           return url.replace(/(?:\.legacy)?(?:\.min)?\.js(?=[?#]|$)/, ".legacy" + (AelluxJs.minified ? ".min" : "") + ".js");

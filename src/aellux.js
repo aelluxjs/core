@@ -19,6 +19,7 @@ import createWeakCss from "./internal/create-weak-css.js";
 
 (function (root) {
   var toCamelCase = utilsNameCase.toCamelCase;
+  var coreAssetIntegrity = __AELLUX_CORE_ASSET_INTEGRITY__;
 
   var CONSTANTS = createAelluxConstants();
 
@@ -49,6 +50,7 @@ import createWeakCss from "./internal/create-weak-css.js";
     aelluxBootstrapSrc.lastIndexOf("/") + 1);
 
   api.minified = aelluxBootstrapSrc.indexOf(".min.js") !== -1;
+  api.coreAssetIntegrity = coreAssetIntegrity;
   root.AelluxJs = api;
   root[api.shortJSName] = api;
   api.init = function (options) {
@@ -111,6 +113,9 @@ import createWeakCss from "./internal/create-weak-css.js";
       script.src = AelluxJs.aelluxBasePath + "aellux.full" + scriptExtension;
     }
     script.setAttribute(attr, "true");
+    applyCoreIntegrity(script, AelluxJs.options.mode === "basic"
+      ? "aellux.orchestrator" + scriptExtension
+      : "aellux.full" + scriptExtension);
 
     assetLoadHelper(script, {
       loadCallback: function () {
@@ -154,6 +159,7 @@ import createWeakCss from "./internal/create-weak-css.js";
       : "aellux.full.legacy";
     script.src = AelluxJs.aelluxBasePath + runtime + scriptExtension;
     script.setAttribute(attr, "true");
+    applyCoreIntegrity(script, runtime + scriptExtension);
 
     assetLoadHelper(script, {
       loadCallback: function () {
@@ -196,6 +202,13 @@ import createWeakCss from "./internal/create-weak-css.js";
       meta.content = "width=device-width, initial-scale=1";
       document.head.appendChild(meta);
     }
+  }
+
+  function applyCoreIntegrity(asset, filename) {
+    var integrity = coreAssetIntegrity[filename];
+    if (!integrity) return;
+    asset.setAttribute("integrity", integrity);
+    asset.setAttribute("crossorigin", AelluxJs.options.crossOrigin || "anonymous");
   }
 
   function mergeOptions(target, source) {

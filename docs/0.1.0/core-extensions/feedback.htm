@@ -9,7 +9,7 @@
   <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000000">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
-  <title>
+<title>
   Feedback | 0.1.0 | aellux.js Docs</title>
 
 <meta name="description" content="aellux.js Docs">
@@ -27,12 +27,12 @@
 
                   <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Feedback | 0.1.0 | aellux.js Docs","description":"aellux.js Docs","url":"https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/feedback.htm"}</script>
           
-    
+
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Geist:wght@500&display=swap" rel="stylesheet">
 
-        <link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tocbot@4.36/dist/tocbot.min.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3/dist/css/bootstrap.min.css">
@@ -52,7 +52,7 @@
 
 <script src="/core/docs/assets/docweaver/js/toc-init.js?t=1"></script>
 
-<script src="https://cdn.jsdelivr.net/gh/aelluxjs/core@main/dist/aellux.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@aelluxjs/core@0.1.0-beta.6/dist/aellux.min.js"></script>
 <script>
   AelluxJs.init({ mode: "full" });
 
@@ -71,13 +71,13 @@
         `nav [href]:not([${ajaxAttr}])`
       ];
       document.querySelectorAll(linksToUpdate.join(","))
-        .forEach((link) => {
-          if (link.getAttribute("href")?.startsWith("#")) return;
-          link.setAttribute(
-            ajaxAttr,
-            "title,#doc-content,#doc-navlinks,#doc-navlinks2,#doc-breadcrumb"
+      .forEach((link)=>{
+        if(link.getAttribute("href")?.startsWith("#")) return;
+        link.setAttribute(
+          ajaxAttr,
+          "#doc-content,#doc-navlinks,#doc-navlinks2,#doc-breadcrumb"
           );
-        });
+      });
       document.querySelectorAll("table").forEach((table) => {
         if (table.parentElement &&
           table.parentElement.classList.contains("table-scroll-wrapper")) {
@@ -162,51 +162,52 @@
   }
 
   document.addEventListener("DOMContentLoaded",
-    function () {
-      let currentRequest = null;
+  function(){
+    let currentRequest = null;
 
-      const progressBar = document.querySelector("#page-progress");
-      let progressTimer = null, progressTimer1 = null, progressTimer2 = null;
+    const progressBar = document.querySelector("#page-progress");
+    let progressTimer = null, progressTimer1 = null, progressTimer2 = null;
 
-      document.addEventListener("AelluxJsAjaxHrefStart", startProgress)
-      document.addEventListener("AelluxJsAjaxHrefComplete", finishProgress)
+  document.addEventListener("AelluxJsAjaxHrefStart",startProgress)
+  document.addEventListener("AelluxJsAjaxHrefComplete",finishProgress)
 
-      function startProgress() {
-        if (!progressBar) return;
+    function startProgress() {
+      if (!progressBar) return;
 
-        clearInterval(progressTimer);
-        clearInterval(progressTimer1);
-        clearInterval(progressTimer2);
-        progressBar.style.transition = "none";
-        progressBar.style.opacity = "1";
-        progressBar.style.width = "10%";
+      clearInterval(progressTimer);
+      clearInterval(progressTimer1);
+      clearInterval(progressTimer2);
+      progressBar.style.transition = "none";
+      progressBar.style.opacity = "1";
+      progressBar.style.width = "10%";
 
-        let progress = 10;
-        progressTimer = setInterval(() => {
-          progress += Math.random() * 12;
-          if (progress > 85) progress = 85;
-          progressBar.style.transition = null;
-          progressBar.style.width = `${progress}%`;
-        }, 200);
-      }
+      let progress = 10;
+      progressTimer = setInterval(() => {
+        progress += Math.random() * 12;
+        if (progress > 85) progress = 85;
+        progressBar.style.transition = null;
+        progressBar.style.width = `${progress}%`;
+      }, 200);
+    }
 
-      function finishProgress() {
-        if (!progressBar) return;
+    function finishProgress() {
+      if (!progressBar) return;
 
-        clearInterval(progressTimer);
-        clearInterval(progressTimer1);
-        clearInterval(progressTimer2);
-        progressBar.style.width = "100%";
-        progressTimer1 = setTimeout(() => progressBar.style.opacity = "0", 200);
-        progressTimer2 = setTimeout(() => progressBar.style.width = "0%", 450);
-      }
-    });
+      clearInterval(progressTimer);
+      clearInterval(progressTimer1);
+      clearInterval(progressTimer2);
+      progressBar.style.width = "100%";
+      progressTimer1 = setTimeout(() => progressBar.style.opacity = "0", 200);
+      progressTimer2 = setTimeout(() => progressBar.style.width = "0%", 450);
+    }
+  });
 </script>
+
 </head>
 
 <body>
 
-  <div class="section d-flex border-bottom position-sticky" data-view-frame=0 style="top:0px;z-index:5;height: 64px;">
+  <div class="section d-flex border-bottom" data-view-frame=0 style="position:sticky;top:0px;z-index:5;height: 64px;">
     <nav class="animation_header_test navbar navbar-expand-md d-flex flex-fill p-0 m-0 user-select-none bg-white"
       style=" --bar-color:#55606F; --bar-color2:var(--bs-link-color); --bar-bg:#F0F5F5;">
       <div class="container-fluid gap-2" style='z-index: 1;'>
@@ -215,19 +216,9 @@
 
           <a class="navbar-brand m-0 me-auto p-0 lh-1 fw-medium d-flex align-items-center" href="/core/docs/0.1.0/index.htm"
             style="font-size:1.5em;letter-spacing:-0.03em;word-spacing: -.2em; color:inherit;">
-            aellux.js Docs          </a>
+aellux.js Docs          </a>
 
         </div>
-
-        <button class="ms-auto navbar-toggler" type="button" data-bs-autohide="true" data-bs-toggle="collapse"
-          data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
-          aria-label="Toggle navigation">
-          <div class="hamburger">
-            <span></span>
-            <span></span>
-            <span></span>
-          </div>
-        </button>
 
         <div class="collapse navbar-collapse bg-white border-end" id="navbarSupportedContent">
           <ul class="navbar-nav w-100 h-100 gap-1 my-0 p-2 ps-md-3 pe-3 pe-md-2 flex-column align-self-start text-white"
@@ -235,7 +226,7 @@
 
             <div class="d-flex flex-row gap-2 justify-content-between pb-2 pt-0 pt-md-2">
 
-              <div class="dropdown">
+<div class="dropdown">
   <button class="btn btn-outline-adaptive ps-3 dropdown-toggle rounded-1" type="button"
     data-bs-toggle="dropdown" aria-expanded="false">
 0.1.0  </button>
@@ -250,32 +241,31 @@
   </ul>
 </div>
 
-                <div data-ae-preference="color-scheme" class="btn-group border rounded-1 rounded overflow-hidden" style="gap:1px;"
-  role="group" aria-label="Basic example">
+<div data-ae-preference="color-scheme" class="btn-group border rounded-1 rounded overflow-hidden" style="gap:1px;" role="group" aria-label="Basic example">
 
-  <input type="radio" class="btn-check" name="color-mode-selected" id="radio-color-mode-light" autocomplete="off"
-    aria-label="Light Mode">
-  <label class="btn  btn-outline-adaptive py-1 border-0 d-inline-flex justify-content-center align-items-center"
-    style="--bs-btn-border-radius: var(--bs-btn-border-radius);" for="radio-color-mode-light" data-ae-option="light"
-    onclick aria-label="Light Mode">
+  <input type="radio" class="btn-check" name="color-mode-selected" id="radio-color-mode-light"
+    autocomplete="off" aria-label="Light Mode">
+  <label
+    class="btn  btn-outline-adaptive py-1 border-0 d-inline-flex justify-content-center align-items-center"
+    for="radio-color-mode-light" data-ae-option="light" onclick aria-label="Light Mode">
     <i class="bi bi-sun"></i>
     <span class="visually-hidden">Light Mode</span>
   </label>
 
-  <input type="radio" class="btn-check" name="color-mode-selected" id="radio-color-mode-dark" autocomplete="off"
-    aria-label="Dark Mode">
-  <label class="btn  btn-outline-adaptive py-1 border-0  d-inline-flex justify-content-center align-items-center"
-    style="--bs-btn-border-radius: var(--bs-btn-border-radius);" for="radio-color-mode-dark" data-ae-option="dark"
-    onclick aria-label="Dark Mode">
+  <input type="radio" class="btn-check" name="color-mode-selected" id="radio-color-mode-dark"
+    autocomplete="off" aria-label="Dark Mode">
+  <label
+    class="btn  btn-outline-adaptive py-1 border-0  d-inline-flex justify-content-center align-items-center"
+    for="radio-color-mode-dark" data-ae-option="dark" onclick aria-label="Dark Mode">
     <i class="bi bi-moon-fill"></i>
     <span class="visually-hidden">Dark Mode</span>
   </label>
 
-  <input type="radio" class="btn-check" name="color-mode-selected" id="radio-color-mode-auto" autocomplete="off"
-    aria-label="Auto Mode">
-  <label class="btn  btn-outline-adaptive py-1 border-0 d-inline-flex justify-content-center align-items-center"
-    style="--bs-btn-border-radius: var(--bs-btn-border-radius);" for="radio-color-mode-auto" data-ae-option="auto"
-    onclick aria-label="Auto Mode">
+  <input type="radio" class="btn-check" name="color-mode-selected" id="radio-color-mode-auto"
+    autocomplete="off" aria-label="Auto Mode">
+  <label
+    class="btn  btn-outline-adaptive py-1 border-0 d-inline-flex justify-content-center align-items-center"
+    for="radio-color-mode-auto" data-ae-option="auto" onclick aria-label="Auto Mode">
     <i class="bi bi-circle-half"></i>
     <span class="visually-hidden">Auto Mode</span>
   </label>
@@ -283,202 +273,202 @@
 </div>
             </div>
 
-                          <li class="nav-item small-md fw-bold rounded-1 ps-md-1 bg-light-adaptive" style="flex:0">
+              <li class="nav-item small-md fw-bold rounded-1 ps-md-1 bg-light-adaptive" style="flex:0">
                 <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" data-bs-continue=true
                   data-bs-toggle="collapse" data-bs-target="#children-overview">
-                  Overview                    <span class="chevron"><i
+Overview<span class="chevron"><i
                           class="bi bi-chevron-right small"></i></span>
-                                      </a>
+                </a>
               </li>
 
-                              <div id="children-overview"
+                <div id="children-overview"
                   class="collapse border-start ms-2"
                   data-bs-parent="#navbarSupportedContent">
                   <div class="ps-2 gap-1 d-flex flex-column ">
-                                                                    <li class="nav-item small-md rounded-1 ps-md-1"
+                          <li class="nav-item small-md rounded-1 ps-md-1"
                             style="flex:0">
                             <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/index.htm">
-                              aellux.js Docs                            </a>
+aellux.js Docs                            </a>
                           </li>
-                                                                                                      <li class="nav-item small-md rounded-1 ps-md-1"
+                          <li class="nav-item small-md rounded-1 ps-md-1"
                             style="flex:0">
                             <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/getting-started.htm">
-                              Getting Started                            </a>
+Getting Started                            </a>
                           </li>
-                                                                                                      <li class="nav-item small-md rounded-1 ps-md-1"
+                          <li class="nav-item small-md rounded-1 ps-md-1"
                             style="flex:0">
                             <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/compatibility.htm">
-                              Compatibility                            </a>
+Compatibility                            </a>
                           </li>
-                                                                                                      <li class="nav-item small-md rounded-1 ps-md-1"
+                          <li class="nav-item small-md rounded-1 ps-md-1"
                             style="flex:0">
                             <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/validation-scenarios.htm">
-                              Validation Scenarios                            </a>
+Validation Scenarios                            </a>
                           </li>
-                                                                        </div>
+                  </div>
                 </div>
-                                                <li class="nav-item small-md fw-bold rounded-1 ps-md-1 bg-light-adaptive" style="flex:0">
+              <li class="nav-item small-md fw-bold rounded-1 ps-md-1 bg-light-adaptive" style="flex:0">
                 <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" data-bs-continue=true
                   data-bs-toggle="collapse" data-bs-target="#children-runtime">
-                  Runtime                    <span class="chevron"><i
+Runtime<span class="chevron"><i
                           class="bi bi-chevron-right small"></i></span>
-                                      </a>
+                </a>
               </li>
 
-                              <div id="children-runtime"
+                <div id="children-runtime"
                   class="collapse border-start ms-2"
                   data-bs-parent="#navbarSupportedContent">
                   <div class="ps-2 gap-1 d-flex flex-column ">
-                                                                    <li class="nav-item small-md rounded-1 ps-md-1"
+                          <li class="nav-item small-md rounded-1 ps-md-1"
                             style="flex:0">
                             <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/runtime/api.htm">
-                              Runtime API                            </a>
+Runtime API                            </a>
                           </li>
-                                                                                                      <li class="nav-item small-md rounded-1 ps-md-1"
+                          <li class="nav-item small-md rounded-1 ps-md-1"
                             style="flex:0">
                             <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/runtime/modern-legacy.htm">
-                              Modern &amp; Legacy                            </a>
+Modern &amp; Legacy                            </a>
                           </li>
-                                                                                                      <li class="nav-item small-md rounded-1 ps-md-1"
+                          <li class="nav-item small-md rounded-1 ps-md-1"
                             style="flex:0">
                             <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/runtime/browser-support.htm">
-                              Browser Support                            </a>
+Browser Support                            </a>
                           </li>
-                                                                                                      <li class="nav-item small-md rounded-1 ps-md-1"
+                          <li class="nav-item small-md rounded-1 ps-md-1"
                             style="flex:0">
                             <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/runtime/es5-support.htm">
-                              ES5 Support                            </a>
+ES5 Support                            </a>
                           </li>
-                                                                                                      <li class="nav-item small-md rounded-1 ps-md-1"
+                          <li class="nav-item small-md rounded-1 ps-md-1"
                             style="flex:0">
                             <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/runtime/visual-mounting.htm">
-                              Visual Mounting                            </a>
+Visual Mounting                            </a>
                           </li>
-                                                                                                      <li class="nav-item small-md rounded-1 ps-md-1"
+                          <li class="nav-item small-md rounded-1 ps-md-1"
                             style="flex:0">
                             <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/runtime/diagnostics.htm">
-                              Diagnostics                            </a>
+Diagnostics                            </a>
                           </li>
-                                                                        </div>
+                  </div>
                 </div>
-                                                <li class="nav-item small-md fw-bold rounded-1 ps-md-1 bg-light-adaptive" style="flex:0">
+              <li class="nav-item small-md fw-bold rounded-1 ps-md-1 bg-light-adaptive" style="flex:0">
                 <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" data-bs-continue=true
                   data-bs-toggle="collapse" data-bs-target="#children-extensions">
-                  Extensions                    <span class="chevron"><i
+Extensions<span class="chevron"><i
                           class="bi bi-chevron-right small"></i></span>
-                                      </a>
+                </a>
               </li>
 
-                              <div id="children-extensions"
+                <div id="children-extensions"
                   class="collapse border-start ms-2"
                   data-bs-parent="#navbarSupportedContent">
                   <div class="ps-2 gap-1 d-flex flex-column ">
-                                                                    <li class="nav-item small-md rounded-1 ps-md-1"
+                          <li class="nav-item small-md rounded-1 ps-md-1"
                             style="flex:0">
                             <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/extensions/authoring.htm">
-                              Extension Authoring                            </a>
+Extension Authoring                            </a>
                           </li>
-                                                                                                      <li class="nav-item small-md rounded-1 ps-md-1"
+                          <li class="nav-item small-md rounded-1 ps-md-1"
                             style="flex:0">
                             <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/extensions/accessibility.htm">
-                              Accessibility Requirements                            </a>
+Accessibility Requirements                            </a>
                           </li>
-                                                                                                      <li class="nav-item small-md rounded-1 ps-md-1"
+                          <li class="nav-item small-md rounded-1 ps-md-1"
                             style="flex:0">
                             <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/extensions/registration.htm">
-                              Registration                            </a>
+Registration                            </a>
                           </li>
-                                                                                                      <li class="nav-item small-md rounded-1 ps-md-1"
+                          <li class="nav-item small-md rounded-1 ps-md-1"
                             style="flex:0">
                             <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/extensions/declarative-loading.htm">
-                              Declarative Loading                            </a>
+Declarative Loading                            </a>
                           </li>
-                                                                                                      <li class="nav-item small-md rounded-1 ps-md-1"
+                          <li class="nav-item small-md rounded-1 ps-md-1"
                             style="flex:0">
                             <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/extensions/lazy-loading.htm">
-                              Lazy Loading                            </a>
+Lazy Loading                            </a>
                           </li>
-                                                                                                      <li class="nav-item small-md rounded-1 ps-md-1"
+                          <li class="nav-item small-md rounded-1 ps-md-1"
                             style="flex:0">
                             <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/extensions/styles.htm">
-                              Extension Styles                            </a>
+Extension Styles                            </a>
                           </li>
-                                                                                                      <li class="nav-item small-md rounded-1 ps-md-1"
+                          <li class="nav-item small-md rounded-1 ps-md-1"
                             style="flex:0">
                             <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/extensions/legacy-variants.htm">
-                              Modern &amp; Legacy Variants                            </a>
+Modern &amp; Legacy Variants                            </a>
                           </li>
-                                                                        </div>
+                  </div>
                 </div>
-                                                <li class="nav-item small-md fw-bold rounded-1 ps-md-1 bg-light-adaptive" style="flex:0">
+              <li class="nav-item small-md fw-bold rounded-1 ps-md-1 bg-light-adaptive" style="flex:0">
                 <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" data-bs-continue=true
                   data-bs-toggle="collapse" data-bs-target="#children-core-extensions">
-                  Core Extensions                    <span class="chevron"><i
+Core Extensions<span class="chevron"><i
                           class="bi bi-chevron-right small"></i></span>
-                                      </a>
+                </a>
               </li>
 
-                              <div id="children-core-extensions"
+                <div id="children-core-extensions"
                   class="collapse border-start ms-2 show"
                   data-bs-parent="#navbarSupportedContent">
                   <div class="ps-2 gap-1 d-flex flex-column ">
-                                                                    <li class="nav-item small-md rounded-1 ps-md-1"
+                          <li class="nav-item small-md rounded-1 ps-md-1"
                             style="flex:0">
                             <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/core-extensions/adaptive.htm">
-                              Adaptive                            </a>
+Adaptive                            </a>
                           </li>
-                                                                                                      <li class="nav-item small-md rounded-1 ps-md-1 active"
+                          <li class="nav-item small-md rounded-1 ps-md-1 active"
                             style="flex:0">
                             <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/core-extensions/feedback.htm">
-                              Feedback                            </a>
+Feedback                            </a>
                           </li>
-                                                                                                      <li class="nav-item small-md rounded-1 ps-md-1"
+                          <li class="nav-item small-md rounded-1 ps-md-1"
                             style="flex:0">
                             <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/core-extensions/focus.htm">
-                              Focus                            </a>
+Focus                            </a>
                           </li>
-                                                                                                      <li class="nav-item small-md rounded-1 ps-md-1"
+                          <li class="nav-item small-md rounded-1 ps-md-1"
                             style="flex:0">
                             <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/core-extensions/point.htm">
-                              Point                            </a>
+Point                            </a>
                           </li>
-                                                                                                      <li class="nav-item small-md rounded-1 ps-md-1"
+                          <li class="nav-item small-md rounded-1 ps-md-1"
                             style="flex:0">
                             <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/core-extensions/preference.htm">
-                              Preference                            </a>
+Preference                            </a>
                           </li>
-                                                                                                      <li class="nav-item small-md rounded-1 ps-md-1"
+                          <li class="nav-item small-md rounded-1 ps-md-1"
                             style="flex:0">
                             <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/core-extensions/present.htm">
-                              Present                            </a>
+Present                            </a>
                           </li>
-                                                                                                      <li class="nav-item small-md rounded-1 ps-md-1"
+                          <li class="nav-item small-md rounded-1 ps-md-1"
                             style="flex:0">
                             <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/core-extensions/state-navigation.htm">
-                              State Navigation                            </a>
+State Navigation                            </a>
                           </li>
-                                                                        </div>
+                  </div>
                 </div>
-                                                <li class="nav-item small-md fw-bold rounded-1 ps-md-1 bg-light-adaptive" style="flex:0">
+              <li class="nav-item small-md fw-bold rounded-1 ps-md-1 bg-light-adaptive" style="flex:0">
                 <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" data-bs-continue=true
                   data-bs-toggle="collapse" data-bs-target="#children-integrations">
-                  Integrations                    <span class="chevron"><i
+Integrations<span class="chevron"><i
                           class="bi bi-chevron-right small"></i></span>
-                                      </a>
+                </a>
               </li>
 
-                              <div id="children-integrations"
+                <div id="children-integrations"
                   class="collapse border-start ms-2"
                   data-bs-parent="#navbarSupportedContent">
                   <div class="ps-2 gap-1 d-flex flex-column ">
-                                                                    <li class="nav-item small-md rounded-1 ps-md-1"
+                          <li class="nav-item small-md rounded-1 ps-md-1"
                             style="flex:0">
                             <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/integrations/bootstrap.htm">
-                              Bootstrap Integration                            </a>
+Bootstrap Integration                            </a>
                           </li>
-                                                                        </div>
+                  </div>
                 </div>
-                                  
+
           </ul>
         </div>
 
@@ -496,8 +486,9 @@
         style="top:64px;z-index:1;">
 
         <div class="menu-toggle d-flex flex-row gap-2 small">
-          <button id="button-toc-menu" class="btn btn-outline-adaptive rounded-1 text-nowrap" data-bs-autohide="true"
-            data-bs-toggle="collapse" data-bs-target="#toc-collapse" aria-expanded="false" aria-controls="toc-collapse">
+          <button id="button-toc-menu" class="btn btn-outline-adaptive rounded-1 text-nowrap"
+            data-bs-autohide="true" data-bs-toggle="collapse" data-bs-target="#toc-collapse" aria-expanded="false"
+            aria-controls="toc-collapse">
             <i class="bi bi-layout-text-sidebar"></i>
           </button>
           <div class="p-2  text-nowrap overflow-hidden text-truncate fw-bold" id="tocbot-current-label" onclick="
@@ -505,6 +496,15 @@
               " style="cursor:pointer">
             -
           </div>
+          <button class="navbar-toggler" type="button" data-bs-autohide="true" data-bs-toggle="collapse"
+            data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
+            aria-label="Toggle navigation">
+            <div class="hamburger">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+          </button>
         </div>
 
         <div class="collapse toc-collapse bg-white overflow-hidden pt-1 pt-lg-2 p-4 p-lg-0" id="toc-collapse"
@@ -524,22 +524,22 @@
           aria-label="breadcrumb" ajax-load="doc-breadcrumb">
           <ol class="breadcrumb flex-nowrap">
 
-                                          <li class="breadcrumb-item text-capitalize text-nowrap flex-shrink-0">
+                <li class="breadcrumb-item text-capitalize text-nowrap flex-shrink-0">
                   <a href="/core/docs/0.1.0/index.htm">
-                    Home                  </a>
+Home                  </a>
                 </li>
-                                                                  <li class="breadcrumb-item text-capitalize text-nowrap flex-shrink-0">
+                <li class="breadcrumb-item text-capitalize text-nowrap flex-shrink-0">
                   <a href="/core/docs/0.1.0/core-extensions/adaptive.htm">
-                    Core Extensions                  </a>
+Core Extensions                  </a>
                 </li>
-                                                                    <li class="breadcrumb-item text-capitalize text-nowrap flex-shrink-0">
-                    Feedback                  </li>
-                                      
+                  <li class="breadcrumb-item text-capitalize text-nowrap flex-shrink-0">
+Feedback                  </li>
+
           </ol>
         </nav>
 
         <div id="doc-navlinks" ajax-load="doc-navlinks">
-          <div class="d-flex justify-content-between flex-row gap-2 p-2 pb-4 px-0">
+<div class="d-flex justify-content-between flex-row gap-2 p-2 pb-4 px-0">
     <a href="/core/docs/0.1.0/core-extensions/adaptive.htm" class="text-decoration-none d-inline-flex flex-row gap-2" style="max-width: 45%;">
     ← <span class="text-truncate overflow-hidden d-inline-block align-middle flex-fill"
       style="max-width:200px">Adaptive</span>
@@ -554,7 +554,7 @@
         </div>
 
         <div id="doc-content" style="min-height: calc(100vh - 200px);" class="js-toc-content" ajax-load="doc-content">
-          <h1>Feedback Extension</h1>
+<h1>Feedback Extension</h1>
 <p><code>feedback</code> sends structured feedback events and lets application code subscribe to feedback types. It is included in the <code>full</code> runtime. In <code>basic</code> mode, register it with <code>$ae.ext(&quot;feedback&quot;)</code>.</p>
 <pre><code class="language-js">const feedback = await $ae.wait(&quot;feedback&quot;);
 const subscription = feedback.on(&quot;warning&quot;, ({ message }) =&gt; {
@@ -567,10 +567,17 @@ subscription.off();
 <p>The convenience methods are <code>warning(message)</code>, <code>error(message)</code>, <code>success(message)</code>, and <code>announce(message)</code>. For a target element, use <code>busy(target, message, value)</code>, <code>validate(target, message, value)</code>, or <code>progress(target, message, value)</code>. <code>send({ type, message, value, target })</code> handles custom types; <code>target</code> defaults to <code>document</code>.</p>
 <p>Each call dispatches an <code>AelluxJsFeedback</code> event from the target. Its <code>detail</code> contains <code>{ type, message, value, target }</code>. <code>on(type, handler)</code> subscribes to one type; <code>on(&quot;*&quot;, handler)</code> receives every type. Use <code>off(type, handler)</code> or the object returned by <code>on()</code> to unsubscribe. The Extension clears subscriptions when destroyed.</p>
 <p>The Extension emits feedback; it does not render a toast, alert, or progress indicator by itself.</p>
+<h2>Accessibility profile</h2>
+<ul>
+<li><strong>Capabilities:</strong> infrastructure and policy; external integration through consumer renderers.</li>
+<li><strong>Owned state:</strong> subscriptions and <code>AelluxJsFeedback</code> event payloads.</li>
+<li><strong>Consumer responsibility:</strong> render feedback with suitable semantics, announcement priority and focus behavior. <code>announce()</code> emits an event and does not create a live region.</li>
+<li><strong>Not applicable:</strong> the Extension renders no interface and directly manages no focus, keyboard input, contrast or motion.</li>
+</ul>
         </div>
 
         <div id="doc-navlinks2" ajax-load="doc-navlinks2">
-          <div class="d-flex justify-content-between flex-row gap-2 p-2 pb-4 px-0">
+<div class="d-flex justify-content-between flex-row gap-2 p-2 pb-4 px-0">
     <a href="/core/docs/0.1.0/core-extensions/adaptive.htm" class="text-decoration-none d-inline-flex flex-row gap-2" style="max-width: 45%;">
     ← <span class="text-truncate overflow-hidden d-inline-block align-middle flex-fill"
       style="max-width:200px">Adaptive</span>
@@ -587,7 +594,7 @@ subscription.off();
         <div class="section bg-transparent" style="margin: 50vh 0;">
           <div class="text-center small text-body opacity-50">
             <div>
-              2026 &copy;aellux.js Docs            </div>
+2026 &copy;aellux.js Docs            </div>
             <div class="small mb-0 text-body">
               Special thanks to
               <a style="color:inherit!important;" href="https://getbootstrap.com/" target="_blank"

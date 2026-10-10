@@ -147,6 +147,7 @@ var bootstrapProperties = Object.freeze({
       }),
       forceLegacy: flag,
       basePath: Object.freeze({ type: ["string", "null"] }),
+      crossOrigin: Object.freeze({ type: ["string", "null"] }),
       extensions: record
     })
   }),

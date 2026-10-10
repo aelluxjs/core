@@ -17,3 +17,10 @@ The convenience methods are `warning(message)`, `error(message)`, `success(messa
 Each call dispatches an `AelluxJsFeedback` event from the target. Its `detail` contains `{ type, message, value, target }`. `on(type, handler)` subscribes to one type; `on("*", handler)` receives every type. Use `off(type, handler)` or the object returned by `on()` to unsubscribe. The Extension clears subscriptions when destroyed.
 
 The Extension emits feedback; it does not render a toast, alert, or progress indicator by itself.
+
+## Accessibility profile
+
+- **Capabilities:** infrastructure and policy; external integration through consumer renderers.
+- **Owned state:** subscriptions and `AelluxJsFeedback` event payloads.
+- **Consumer responsibility:** render feedback with suitable semantics, announcement priority and focus behavior. `announce()` emits an event and does not create a live region.
+- **Not applicable:** the Extension renders no interface and directly manages no focus, keyboard input, contrast or motion.

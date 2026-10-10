@@ -1,5 +1,29 @@
 /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
 
+/**
+ * Adaptive Extension
+ *
+ * Purpose: observes elements marked with `data-ae-adaptive` and exposes their
+ * current shape and fit ranges through Aellux Adaptive CSS classes.
+ *
+ * Capability profile: visual and adaptive behavior, with infrastructure for
+ * resize observation.
+ *
+ * Inputs and activation: mounts `[data-ae-adaptive]`. Thresholds come from
+ * `options.adaptiveParams`. `ResizeObserver` is preferred and window resize is
+ * the fallback when that API is unavailable.
+ *
+ * Outputs and owned state: owns the `ae--shape-*` and `ae--fits-*` classes it
+ * writes and dispatches `AelluxJsAdaptiveUpdate` after classification changes.
+ *
+ * Lifecycle: removes fallback listeners, stops observing unmounted elements
+ * and removes every class it manages.
+ *
+ * Accessibility: does not change semantics, focus, reading order or visibility
+ * by itself. Styles consuming its classes remain responsible for readable
+ * reflow, zoom support, contrast and preservation of meaningful content.
+ */
+
 (function (root) {
   "use strict";
 
@@ -79,9 +103,8 @@
     if (!adaptiveElements.delete(element)) return;
     if (resizeObserver) resizeObserver.unobserve(element);
     else if (adaptiveElements.size === 0) root.removeEventListener("resize", onWindowResize);
-    for (const name of managedClasses) {
-      element.classList.remove(name);
-    }
+
+    for (const name of managedClasses) { element.classList.remove(name); }
   }
 
   function onResize(entries) {

@@ -54,6 +54,7 @@ export function createAelluxConstants() {
       verboseLevel: 0,
       forceLegacy: false,
       basePath: null,
+      crossOrigin: null,
       extensions: {}
     },
 

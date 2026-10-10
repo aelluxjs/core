@@ -2,6 +2,13 @@
 
 `preference` stores user choices, combines them with defaults, and reflects the result in document attributes. It is included in the `full` runtime. In `basic` mode, register it with `$ae.ext("preference")`.
 
+## Accessibility profile
+
+- **Capabilities:** interaction and input; structure and state; visual preference policy; storage and media-query integration.
+- **Owned state:** computed preference values, root preference attributes, option active classes and associated input values or checked state.
+- **Consumer responsibility:** use native keyboard-operable controls with accessible names and preserve meaningful labels when mirroring selected content.
+- **Limitation:** generic elements marked as options, next or previous controls do not receive button semantics or keyboard behavior automatically.
+
 ```js
 const preference = await $ae.wait("preference");
 preference.set("colorScheme", "dark");

@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <title>State navigation: parent</title>
+  <script src="../../dist/aellux.js"></script>
+</head>
+<body>
+  <h1>Parent state-navigation</h1>
+  <button id="parent-push" type="button">Add parent state</button>
+  <button id="back" type="button">Back</button>
+  <iframe id="child" name="child" title="Child state-navigation" src="./state-navigation-iframe-child.html"></iframe>
+  <pre id="event-log"></pre>
+  <script>
+    window.fixtureEvents = [];
+    function record(type, state) {
+      window.fixtureEvents.push({ type: type, state: state });
+      document.getElementById("event-log").textContent = JSON.stringify(window.fixtureEvents, null, 2);
+    }
+    window.addEventListener("popstate", function (event) {
+      record("popstate", event.state);
+    });
+    document.addEventListener("AelluxJsSnapshotRestore", function (event) {
+      record("SnapshotRestore", event.detail.popState);
+    });
+    document.getElementById("parent-push").addEventListener("click", function () {
+      AelluxJs.ext.stateNavigation.setState("page", "parent-entry");
+    });
+    document.getElementById("back").addEventListener("click", function () {
+      history.back();
+    });
+    AelluxJs.init({ mode: "full", useHash: false });
+    window.fixtureReady = AelluxJs.wait("state-navigation");
+  </script>
+</body>
+</html>

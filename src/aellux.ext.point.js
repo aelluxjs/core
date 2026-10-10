@@ -1,5 +1,31 @@
 /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
 
+/**
+ * Point Extension
+ *
+ * Purpose: normalizes active Pointer Events and routes point lifecycle events
+ * directly to mounted `data-ae-point` elements from the nearest target outward.
+ *
+ * Capability profile: interaction and input routing, with infrastructure for
+ * multi-pointer state.
+ *
+ * Inputs and activation: tracks pointer down, move, up, cancel, over and out at
+ * document level. The integer value of `data-ae-point` limits simultaneous
+ * pointers for an element. Empty or invalid values default to one; zero disables
+ * association.
+ *
+ * Outputs and owned state: keeps initial/current positions, delta, press-start
+ * and current point chains. It dispatches non-bubbling `AelluxJsPoint*` events
+ * to applicable elements and exposes `point.pointers()` on their controllers.
+ *
+ * Lifecycle: removes global listeners, clears tracked pointers and releases
+ * per-element pointer relations on unmount or destruction.
+ *
+ * Accessibility: pointer gestures are an enhancement channel. Every essential
+ * action must also have a native keyboard-operable UI or equivalent input path
+ * supplied by the consumer.
+ */
+
 (function (root) {
   "use strict";
 

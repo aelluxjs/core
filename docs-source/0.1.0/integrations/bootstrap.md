@@ -32,10 +32,10 @@ After inserting or revealing dynamic markup, update only the affected root when 
 await $ae.mount(changedElement);
 ```
 
-The browser validation suite includes a Bootstrap CSS coexistence scenario. Repeatable testing with Bootstrap JavaScript components remains a release requirement.
+The browser validation suite includes a repeatable Bootstrap CSS coexistence scenario. Bootstrap JavaScript components remain outside the validated scope.
 
 ## Validation Scope
 
-The `tests/browser/bootstrap-integration.html` scenario loads Bootstrap CSS before aellux.js, exercises declarative lazy Extension loading, and checks that Preference mounts without removing Bootstrap classes.
+The `tests/browser/bootstrap-integration.html` scenario loads the versioned local fixture `tests/fixtures/bootstrap-5.3.8.min.css` before aellux.js. It verifies the fixture integrity, confirms Bootstrap button styles are applied, exercises declarative lazy Extension loading, and checks that Preference mounts without removing Bootstrap classes. The test rejects external requests, so it runs without CDN or network access.
 
-The scenario validates namespace and CSS coexistence. Testing with Bootstrap JavaScript components, dynamically revealed content, and listener coexistence remains part of the beta acceptance work rather than a completed compatibility guarantee.
+The proven scope is CSS and namespace coexistence with Bootstrap 5.3.8 for the markup exercised by that scenario. Bootstrap JavaScript components, dynamically revealed Bootstrap content, plugin events and listener coexistence are not covered by this result.

@@ -2,6 +2,13 @@
 
 `present` controls the visibility of elements marked with `data-ae-present`. It is included in the `full` runtime. In `basic` mode, register it with `$ae.ext("present")`.
 
+## Accessibility profile
+
+- **Capabilities:** interaction and input; structure and state; motion and timing.
+- **Owned state:** presentation classes and its changes to `hidden`, `aria-expanded` and `aria-controls`.
+- **Consumer responsibility:** use native, named trigger and dismiss controls; ensure configured motion respects reduced-motion preferences; manage focus for dialog, disclosure and similar patterns.
+- **Limitation:** the Extension currently does not move focus before hiding a region or restore focus after it closes. Consumers must prevent focus from remaining inside content that becomes hidden.
+
 ```html
 <button type="button" data-ae-trigger="toggle" data-ae-target="#details">Details</button>
 <section id="details" data-ae-present hidden>

@@ -1,4 +1,7 @@
 (function() {
+  // <define:__AELLUX_CORE_ASSET_INTEGRITY__>
+  var define_AELLUX_CORE_ASSET_INTEGRITY_default = { "aellux.ext.adaptive.css": "sha384-HfIjX9Zk0VFRimzPvUaTS5AtwuHJHjXKoM/xbNJXj5vE7bSdBGEzbrBHfbNmYah0", "aellux.ext.adaptive.min.css": "sha384-8yUP1PStfDqBCyCskP3k9WLIKgv/yl1nyDhmPz7hsX5NZ4z3ZT3ajolA+RhYlUiG", "aellux.esm.js": "sha384-2cZ6r7/5nmWSrM/hMMA/8XCfmMUvAp7ZwpjIAfE7sXM6ktuErlhz5dgquBIopnVl", "aellux.esm.min.js": "sha384-mo3mFOX4yYeZ/2GL1F05s9BwpaIHgTY1a/8G3rmvAYom1ZZgPMrn2Gd9rfAp51Wd", "aellux.ext.adaptive.js": "sha384-Uvhmoaa81H6dhDBoy5BLg59l7NOHlzJ8lSJ1t7oi6oZC5d0iRuTPE7NmzEj57jPO", "aellux.ext.adaptive.min.js": "sha384-K96iK0AFcDwPomA4/BdgC7LrXSRn04WPkR+s99k2+o5UkhitCgyG0gQGSI3St22F", "aellux.ext.feedback.js": "sha384-sUr2lKsTasJ3yf1tg1IhDk5slfwTjAOCX2t5jQV/Ls4WAPRh2r/k36/8OXjJJaBv", "aellux.ext.feedback.min.js": "sha384-dHsisS4smcj355Pnq/l4R4J1PKFx62zNDFaF1TqlIahZzOb2k2p0AR9IYIPKaKxB", "aellux.ext.focus.js": "sha384-WTsL1BQGaM1iQqwXWHOXDDaW39tLPpnxd54yaEkdrZQlnLbTvw9ySzdChbfVulbf", "aellux.ext.focus.min.js": "sha384-sbFd1zltickW318Na5h1iVa0YHhc6jaOMy9MqW5eulSwOkxo1Ct+rdJIDk8vNkWF", "aellux.ext.point.js": "sha384-ziQG2c3m3XHMXok4TAP0ugwVy5biA6JUAXaPDvxzIK21mMfXWxoFIOtJ68BTN3Ed", "aellux.ext.point.min.js": "sha384-ELIDV+JZXNXr84Of9IuRh+66xgvru0FUM0ut+jnouWiLBXIzP5lQi0tmto9VQRC+", "aellux.ext.preference.js": "sha384-xLIaND5711NR1OEmuCOAoJpZRBLc2mVe8kYRNrbUhjcO7X2QvSropdaDM4ZB6PHi", "aellux.ext.preference.min.js": "sha384-FflRf30pUDRNfAWHmB20bVsFJAkZCLbI7sbjBgoLf3rlle7X6shw5iWp5Tgw0BlV", "aellux.ext.present.js": "sha384-pT7QFZmmHIme5skRwPej3Dss1oswSMXvhg1CGenCKHJrJYZOkwXf08Esipxr/WY8", "aellux.ext.present.min.js": "sha384-s7o0seU22Vx86n6ew1dPsK30S1EqGfO86rX/AaDki9mba/Wtyfdb+M5QfzHraWwJ", "aellux.ext.state-navigation.js": "sha384-7ylJ4yGy/0xHBe7upwdVpQh4iBTwf5pIKI1UGCQgfpjSp1fIYW5w6lJc6alNtwEA", "aellux.ext.state-navigation.min.js": "sha384-ph+H/sGAl8yiyP5+sXaFSt76uvV4xbcgejkHIQnvEz43RtX+TGhlWbfLi1/YHjQc", "aellux.full.js": "sha384-ne7xfkx+u3kVHtjMT89O9kR6tXeBrsQUyeFMEn7ok6uGHHC6Gct/HRdR5MZ8d44+", "aellux.full.min.js": "sha384-vyIkI1VIzrggiwikVRSPgPliwUXfXw5IZ699kk/87sW61qAmm1Fku/xscs4BvayT", "aellux.orchestrator.js": "sha384-GQATMVdJl5vkAylGI20BGnokC64sBYdYSLU39X4fhE0qFVh01pV5mR/vS/Wbhg2h", "aellux.orchestrator.min.js": "sha384-0qQpvhOPtQo/LO1j+pgDgrnyYtduU9NFP1ynb4N2eF7J1t8kPUxGZRNcDkktUrZu", "aellux.ext.adaptive.legacy.js": "sha384-OcZbsMOO9AjR/M6K9C7VUAKtt5ruHyP5ZFgfM3OsShVROaOTptx/PhZu/o2mLyh+", "aellux.ext.adaptive.legacy.min.js": "sha384-nrYF9Je+gCjnnCa4z9T5wtBNWTicA46o0qvDINd2naexrdRGTQy89A5IdLBxm7AX", "aellux.ext.feedback.legacy.js": "sha384-jyvYvbzuSua5FWZsAWeXWqmab/DjA1LVg2oOHb6Ey6wH4W2bB9qwt+QhGwIkk1gL", "aellux.ext.feedback.legacy.min.js": "sha384-y4s7SxXMb4y56JPQIrxH9z9NZSrpb112UlT0VSLPhWAyyq4DazOuvNKIoTUEmfk+", "aellux.ext.focus.legacy.js": "sha384-R5OEzEdpyIFYxxul/wXlQ8L1P7xEXvWoW0lhHgBQxlO0vAV4AQnU7Z3YgfuX5cQo", "aellux.ext.focus.legacy.min.js": "sha384-NkXPQMDJE4JCzl1N6AY1KuPCjgQAYkXjl2dztS7V8hZhiLqIjxO8/gj44ypM8V1Y", "aellux.ext.point.legacy.js": "sha384-Vcy1y1DAkJp7CjrVMrCmP9clnbkPIh8KFft0GriPDwQYIU+blsdz8eeCvzy/aSxz", "aellux.ext.point.legacy.min.js": "sha384-eZgG/yhELNeCXn5sj9OcaZWNXjRSUp9LrTsPpJ+5vWhahQFDFBQ1bwn28TSZ2exY", "aellux.ext.preference.legacy.js": "sha384-3H9dWEGUl//8nFXi2VlWdB8O0whCuGAM39r7LiXZqULvC9ptNoje2uPFCjrWM62L", "aellux.ext.preference.legacy.min.js": "sha384-CYWtBwQtpNXrFVxxh5x/xkJyfAgNyA22KIOVxUiQRb/kIUQ3o+ulygCKEZRuSl9E", "aellux.ext.present.legacy.js": "sha384-+1BWt8c7wmp6quzGLqm+t4EL6e/GNFPwP2JBu/U3DraeET1+CZQH3yRmCuaoZ+Fi", "aellux.ext.present.legacy.min.js": "sha384-w1QLefSLsd2Y/v4lIhgTaiUTeEzk1eO0KNieTODtpVUxiL+T9dhIW0AyIceyRk97", "aellux.ext.state-navigation.legacy.js": "sha384-6NzuXDu5cBf1B3EyIxNeus5AZEcqberHWPX52q8/IfF/FhxvZqnOk1SrnLTBuDqM", "aellux.ext.state-navigation.legacy.min.js": "sha384-I76+wEGyfRPy01brR/I720RFttkxxHtTHByk5uBn+IYCftEyxLZYL/pwCczNJTn9", "aellux.orchestrator.legacy.js": "sha384-hBNQg6t6YrVRyHK603zdTLn51oOmMt3kv7nGpm9O85QGZwkOajdf6jKm/9PC+Ru4", "aellux.orchestrator.legacy.min.js": "sha384-nTX5zKsoA5mhgL4PVo5fjSUhmsErBt1szVo7sxNF/07dG/xc2v5zZj7eIBFZvYru", "aellux.full.legacy.js": "sha384-aqLSn8qvrommWj8HyBGzjq6hjp+bAKuFS3/TX/gWYu8Qbgr+wm2fh/hQj+jPI2r1", "aellux.full.legacy.min.js": "sha384-Wa3g5Kegq9dMzjDtIZV9N0tWGL5rxYt2+WAX4Gwln3D8zatREBDXvqG60x+1yVKj" };
+
   // src/internal/asset-load-helper.js
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   function assetLoadHelper(asset, options) {
@@ -630,6 +633,7 @@
         verboseLevel: 0,
         forceLegacy: false,
         basePath: null,
+        crossOrigin: null,
         extensions: {}
       },
       AELLUXJS_MODERN_API_DEPENDENCIES: [
@@ -655,6 +659,7 @@
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   (function(root) {
     var toCamelCase2 = utils_name_case_default.toCamelCase;
+    var coreAssetIntegrity = define_AELLUX_CORE_ASSET_INTEGRITY_default;
     var CONSTANTS = createAelluxConstants();
     var scriptExtension = ".js";
     var existingApi = root.AelluxJs;
@@ -670,6 +675,7 @@
       aelluxBootstrapSrc.lastIndexOf("/") + 1
     );
     api.minified = aelluxBootstrapSrc.indexOf(".min.js") !== -1;
+    api.coreAssetIntegrity = coreAssetIntegrity;
     root.AelluxJs = api;
     root[api.shortJSName] = api;
     api.init = function(options) {
@@ -720,6 +726,7 @@
         script.src = AelluxJs.aelluxBasePath + "aellux.full" + scriptExtension;
       }
       script.setAttribute(attr, "true");
+      applyCoreIntegrity(script, AelluxJs.options.mode === "basic" ? "aellux.orchestrator" + scriptExtension : "aellux.full" + scriptExtension);
       assetLoadHelper(script, {
         loadCallback: function() {
           AelluxJs.dispatch("Awake");
@@ -754,6 +761,7 @@
       var runtime = AelluxJs.options.mode === "basic" ? "aellux.orchestrator.legacy" : "aellux.full.legacy";
       script.src = AelluxJs.aelluxBasePath + runtime + scriptExtension;
       script.setAttribute(attr, "true");
+      applyCoreIntegrity(script, runtime + scriptExtension);
       assetLoadHelper(script, {
         loadCallback: function() {
           AelluxJs.dispatch("Legacy");
@@ -788,6 +796,12 @@
         meta.content = "width=device-width, initial-scale=1";
         document.head.appendChild(meta);
       }
+    }
+    function applyCoreIntegrity(asset, filename) {
+      var integrity = coreAssetIntegrity[filename];
+      if (!integrity) return;
+      asset.setAttribute("integrity", integrity);
+      asset.setAttribute("crossorigin", AelluxJs.options.crossOrigin || "anonymous");
     }
     function mergeOptions(target, source) {
       if (!source)
