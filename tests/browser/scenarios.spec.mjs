@@ -811,6 +811,7 @@ test("mount helper restores selected attributes only on mounted elements", async
   await page.goto("/tests/index.htm");
   await page.addScriptTag({ url: "/dist/aellux.js" });
   await page.evaluate(() => AelluxJs.init({ mode: "basic" }));
+  await expect.poll(() => page.evaluate(() => AelluxJs.diagnostics.supported)).toBe(true);
   const result = await page.evaluate(async () => {
     document.body.innerHTML = `
       <div id="target" data-track data-secondary data-ae-state="initial" aria-label="initial label" hidden class="original ae--stale" style="color: red">
