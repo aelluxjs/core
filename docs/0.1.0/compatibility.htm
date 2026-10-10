@@ -552,7 +552,7 @@
         <div id="doc-content" style="min-height: calc(100vh - 200px);" class="js-toc-content" ajax-load="doc-content">
           <h1>Compatibility for aellux.js 0.1.0 Beta</h1>
 <p>aellux.js <code>0.1.0-beta.6</code> is intended for progressive enhancement in existing browser interfaces. It provides an ES5-compatible boot distribution that selects an ES2017+ Modern runtime or an ES5-syntax Legacy runtime with bundled polyfills.</p>
-<p>This beta validates the runtime contract and integration strategy. It publishes a preliminary ES2017 syntax baseline, but does not yet claim a final tested browser support matrix or unrestricted compatibility with every browser capable of parsing ES5.</p>
+<p>This beta validates the runtime contract and integration strategy. Its tested desktop-engine matrix is published in <a href="runtime/browser-support.htm">Browser support</a>. The older versions listed there remain syntax references, and the release does not claim unrestricted compatibility with browsers capable of parsing ES5.</p>
 <h2>Runtime Profiles</h2>
 <table>
 <thead>
@@ -592,8 +592,10 @@
 <p>See <a href="integrations/bootstrap.htm">Bootstrap integration</a> and the browser validation scenario in <code>tests/browser/bootstrap-integration.html</code>.</p>
 <h2>Current Limits</h2>
 <ul>
-<li>The published browser versions are a raw ES2017 syntax baseline; a final multi-browser validation matrix is not yet available.</li>
-<li>Legacy support depends on the host providing fundamental DOM capabilities.</li>
+<li>The historical browser versions in the syntax table are references rather than tested support claims.</li>
+<li>The Legacy profile is validated through forced execution in the current tested desktop engines. No historical browser version is included in the <code>0.1.0</code> support matrix.</li>
+<li>Legacy execution still depends on the host providing fundamental DOM capabilities.</li>
+<li>Mobile browsers are not included in the validated matrix.</li>
 <li>Applications must call <code>$ae.mount(root)</code> after relevant dynamic DOM insertion and <code>$ae.unmount(root)</code> before removing mounted content when cleanup is required.</li>
 </ul>
 <p>See <a href="runtime/browser-support.htm">Browser support</a>, <a href="runtime/modern-legacy.htm">Modern and Legacy runtimes</a>, <a href="runtime/es5-support.htm">ES5 support level</a>, and <a href="extensions/legacy-variants.htm">Modern and Legacy Extension variants</a> for details.</p>

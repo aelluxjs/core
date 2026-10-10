@@ -558,6 +558,37 @@
 npm run test:browser
 </code></pre>
 <p><code>test:browser</code> builds <code>dist/</code> before testing. Use <code>npm run test:browser -- --project=chromium</code> to run only Chromium. To use an installed Chrome or Edge instead of Playwright&#39;s Chromium, set <code>AELLUXJS_TEST_BROWSER_CHANNEL</code> to <code>chrome</code> or <code>msedge</code> and select the Chromium project. The Bootstrap scenario loads Bootstrap from jsDelivr and therefore requires network access.</p>
+<h2>Recorded Desktop Environment</h2>
+<p>The release-candidate run uses Playwright 1.63.0 on Windows 11 Pro (<code>10.0.26200.0</code>):</p>
+<table>
+<thead>
+<tr>
+<th>Project</th>
+<th>Engine version</th>
+<th align="right">Playwright revision</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>chromium</code></td>
+<td>153.0.8010.12</td>
+<td align="right">1243</td>
+</tr>
+<tr>
+<td><code>firefox</code></td>
+<td>155.0</td>
+<td align="right">1543</td>
+</tr>
+<tr>
+<td><code>webkit</code></td>
+<td>26.6</td>
+<td align="right">2359</td>
+</tr>
+</tbody></table>
+<p>The suite covers both normal Modern selection and forced Legacy execution. Forced Legacy validates the ES5 distribution path in these current engines; it does not establish support for historical versions of those browsers.</p>
+<p>The complete matrix was run on October 10, 2026 with:</p>
+<pre><code class="language-sh">npm run test:browser -- --workers=1
+</code></pre>
+<p>Result: <strong>276 passed</strong> across the three projects. A single worker is used for the recorded release run to keep the local HTTP fixture available for the entire matrix.</p>
 <h2>Scenario Pages</h2>
 <table>
 <thead>
@@ -678,7 +709,7 @@ npm run test:browser
 <td>Removal during async mount, observer cleanup, moves within the document, explicit unmount races, and global cleanup when <code>MutationObserver</code> is unavailable.</td>
 </tr>
 </tbody></table>
-<p>The contract suite does not replace the separate release tasks for publishing an exact browser version matrix, validating additional Legacy environments, mobile testing, accessibility review, or iframe support.</p>
+<p>The contract suite does not establish support for historical or mobile browsers and does not replace the separate accessibility review or iframe testing tasks.</p>
         </div>
 
         <div id="doc-navlinks2" ajax-load="doc-navlinks2">

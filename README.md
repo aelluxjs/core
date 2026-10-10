@@ -1,5 +1,9 @@
 # aellux.js
 
+[![npm version](https://img.shields.io/npm/v/%40aelluxjs%2Fcore)](https://www.npmjs.com/package/@aelluxjs/core)
+[![npm downloads](https://img.shields.io/npm/dm/%40aelluxjs%2Fcore)](https://www.npmjs.com/package/@aelluxjs/core)
+[![npm license](https://img.shields.io/npm/l/%40aelluxjs%2Fcore)](https://www.npmjs.com/package/@aelluxjs/core)
+
 aellux.js is a lightweight extension-management library for modular UX behaviors in browser interfaces. It complements Bootstrap and other visual systems with declarative HTML attributes and independently loadable JavaScript Extensions.
 
 An **EXT (aellux.js Extension)** owns one focused UX responsibility and exposes its API under `AelluxJs.ext` and its `$ae.ext` alias. The aellux.js boot script selects the runtime, while the orchestrator loads Extensions and coordinates `init`, `mount`, `unmount`, and `destroy`.
