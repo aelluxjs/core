@@ -28,9 +28,9 @@
                   <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Modern & Legacy | 0.1.0 | aellux.js Docs","description":"aellux.js Docs","url":"https://aelluxjs.github.io/core/docs/0.1.0/runtime/modern-legacy.htm"}</script>
           
 
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Geist:wght@500&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@500&display=swap" rel="stylesheet">
 
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
 
@@ -52,11 +52,12 @@
 
 <script src="/core/docs/assets/docweaver/js/toc-init.js?t=1"></script>
 
-<script src="https://cdn.jsdelivr.net/npm/@aelluxjs/core@0.1.0-beta.6/dist/aellux.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@aelluxjs/core@0.1.0-beta.7/dist/aellux.min.js"></script>
 <script>
+  AelluxJs.ext("/core/docs/assets/docweaver/js/aellux.ext.ajax-href.js");
   AelluxJs.init({ mode: "full" });
 
-  document.addEventListener("AelluxJsMount",
+  AelluxJs.on("Mount",
     (event) => {
       initOrRefreshToc();
 
@@ -75,7 +76,7 @@
         if(link.getAttribute("href")?.startsWith("#")) return;
         link.setAttribute(
           ajaxAttr,
-          "#doc-content,#doc-navlinks,#doc-navlinks2,#doc-breadcrumb"
+          "title,#doc-content,#doc-navlinks,#doc-navlinks2,#doc-breadcrumb"
           );
       });
       document.querySelectorAll("table").forEach((table) => {
@@ -91,7 +92,7 @@
     }
   );
 
-  document.addEventListener("AelluxJsAjaxHrefStart",
+  AelluxJs.on("AjaxHrefStart",
     (e) => {
       const container = document.querySelector("#doc-content");
       container.style.transition = null;
@@ -100,7 +101,7 @@
     }
   );
 
-  document.addEventListener("AelluxJsAjaxHrefLoaded",
+  AelluxJs.on("AjaxHrefLoaded",
     (e) => {
       const container = document.querySelector("#doc-content");
       container.style.transition = "opacity .25s linear";
@@ -168,8 +169,8 @@
     const progressBar = document.querySelector("#page-progress");
     let progressTimer = null, progressTimer1 = null, progressTimer2 = null;
 
-  document.addEventListener("AelluxJsAjaxHrefStart",startProgress)
-  document.addEventListener("AelluxJsAjaxHrefComplete",finishProgress)
+    AelluxJs.on("AjaxHrefStart",startProgress);
+    AelluxJs.on("AjaxHrefComplete",finishProgress);
 
     function startProgress() {
       if (!progressBar) return;
