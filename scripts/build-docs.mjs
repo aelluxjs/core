@@ -1,5 +1,5 @@
 import path from "node:path";
-import { copyFile, readFile, writeFile } from "node:fs/promises";
+import { copyFile, writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { buildDocs } from "@wolimp/docweaver";
 
@@ -19,15 +19,6 @@ await buildDocs({
 });
 
 const docweaverAssetPath = path.join(outputPath, "assets", "docweaver");
-const ajaxAssetPath = path.join(docweaverAssetPath, "js", "aellux.ext.ajax-href.js");
-const ajaxAsset = await readFile(ajaxAssetPath, "utf8");
-const oldMountCall = "await AelluxJs.update(replacement);";
-const newMountCall = "await AelluxJs.mount(replacement);";
-if (ajaxAsset.includes(oldMountCall)) {
-  await writeFile(ajaxAssetPath, ajaxAsset.replace(oldMountCall, newMountCall), "utf8");
-} else if (!ajaxAsset.includes(newMountCall)) {
-  throw new Error("DocWeaver AJAX asset has no recognized replacement mount call.");
-}
 await copyFile(
   path.join(projectRoot, "node_modules", "@wolimp", "docweaver", "LICENSE"),
   path.join(docweaverAssetPath, "LICENSE")

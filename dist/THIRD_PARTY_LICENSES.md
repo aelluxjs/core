@@ -1,6 +1,6 @@
 # Third-party material in aellux.js
 
-This file describes material shipped with `@aelluxjs/core` and material kept only in this repository. The project code is Apache-2.0; see `LICENSE`. Versions below reflect `package-lock.json` for `0.1.0-beta.6`. Recheck this list when the lockfile or build inputs change.
+This file describes material shipped with `@aelluxjs/core` and material kept only in this repository. The project code is Apache-2.0; see `LICENSE`. Versions below reflect `package-lock.json` for `0.1.0-beta.7`. Recheck this list when the lockfile or build inputs change.
 
 ## Published npm package
 
