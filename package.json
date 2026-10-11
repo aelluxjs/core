@@ -1,6 +1,6 @@
 {
   "name": "@aelluxjs/core",
-  "version": "0.1.0-beta.6",
+  "version": "0.1.0-beta.7",
   "license": "Apache-2.0",
   "description": "Modular UX behavior management for browser interfaces with an ES5-compatible aellux.js boot script and an ES2017+ runtime",
   "keywords": [
@@ -62,7 +62,7 @@
     "@babel/core": "^7.29.7",
     "@babel/preset-env": "^7.29.7",
     "@playwright/test": "^1.63.0",
-    "@wolimp/docweaver": "github:wolimp-inc/docweaver#fcad3db8b8195a0c61852ce71b3129a502a79354",
+    "@wolimp/docweaver": "github:wolimp-inc/docweaver#61d697d8863accba4ce56fe5baeeaff8c3ebd0b3",
     "core-js": "^3.50.0",
     "custom-event-polyfill": "^1.0.7",
     "esbuild": "^0.25.0",
