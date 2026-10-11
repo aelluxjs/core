@@ -81,6 +81,8 @@
     }
     function dispatchPointer(name, pointer, originalEvent, targets = pointer.pointables, hover, pointables = pointer.pointables) {
       var _a, _b, _c;
+      if (!targets.length) return;
+      pointer.beforeDispatch();
       const chain = pointables.slice();
       const pressStart = (_b = (_a = pointer.pressStart) == null ? void 0 : _a.slice()) != null ? _b : null;
       for (const element of targets.slice()) {
@@ -104,29 +106,9 @@
       return event.pointerType === "mouse" || event.pointerType === "pen";
     }
     function addPointer(event, pressed, hover) {
-      const x = event.clientX;
-      const y = event.clientY;
-      const pointer = {
-        pointerId: event.pointerId,
-        pointerType: event.pointerType,
-        initial: { x, y },
-        current: { x, y },
-        delta: { x: 0, y: 0 },
-        buttons: event.buttons,
-        pressed,
-        hover,
-        pointables: [],
-        pressStart: null
-      };
+      const pointer = new AePointer(event, pressed, hover);
       trackedPointers.set(event.pointerId, pointer);
       return pointer;
-    }
-    function updatePointer(pointer, event) {
-      pointer.current.x = event.clientX;
-      pointer.current.y = event.clientY;
-      pointer.delta.x = pointer.current.x - pointer.initial.x;
-      pointer.delta.y = pointer.current.y - pointer.initial.y;
-      pointer.buttons = event.buttons;
     }
     function onPointerDown(event) {
       const pointer = trackedPointers.get(event.pointerId) || addPointer(event, true, canHover(event));
@@ -134,8 +116,9 @@
       pointer.initial.y = event.clientY;
       pointer.pointerType = event.pointerType;
       pointer.pressed = true;
+      pointer.startPress();
       pointer.hover = canHover(event);
-      updatePointer(pointer, event);
+      pointer.update(event);
       pointer.pointables = pointablesFor(event.target, pointer);
       pointer.pressStart = pointer.pointables.slice();
       dispatchPointer("PointerDown", pointer, event);
@@ -146,15 +129,16 @@
         if (!canHover(event)) return;
         pointer = addPointer(event, false, true);
       }
-      updatePointer(pointer, event);
+      pointer.update(event);
       pointer.pointables = pointablesFor(event.target, pointer);
       dispatchPointer("PointerMove", pointer, event);
     }
     function onPointerUp(event) {
       const pointer = trackedPointers.get(event.pointerId);
       if (!pointer) return;
-      updatePointer(pointer, event);
+      pointer.update(event);
       pointer.pressed = false;
+      pointer.endPress();
       pointer.pointables = pointablesFor(event.target, pointer);
       dispatchPointer("PointerUp", pointer, event, releaseTargets(pointer));
       if (!pointer.hover) trackedPointers.delete(event.pointerId);
@@ -162,8 +146,9 @@
     function onPointerCancel(event) {
       const pointer = trackedPointers.get(event.pointerId);
       if (pointer) {
-        updatePointer(pointer, event);
+        pointer.update(event);
         pointer.pressed = false;
+        pointer.endPress();
         pointer.pointables = pointablesFor(event.target, pointer);
         dispatchPointer("PointerCancel", pointer, event, releaseTargets(pointer));
       }
@@ -173,7 +158,7 @@
       if (!canHover(event)) return;
       const pointer = trackedPointers.get(event.pointerId) || addPointer(event, false, true);
       const previous = pointer.pointables;
-      updatePointer(pointer, event);
+      pointer.update(event);
       pointer.hover = true;
       pointer.pointables = pointablesFor(event.target, pointer);
       const entered = pointer.pointables.filter((element) => !previous.includes(element));
@@ -183,7 +168,7 @@
       const pointer = trackedPointers.get(event.pointerId);
       if (!pointer) return;
       const relatedTarget = event.relatedTarget;
-      updatePointer(pointer, event);
+      pointer.update(event);
       const previous = pointer.pointables;
       const nextPointables = pointablesFor(relatedTarget, pointer);
       const left = previous.filter((element) => !nextPointables.includes(element));
@@ -194,6 +179,51 @@
         pointer.pointables = [];
       }
       if (!pointer.pressed && !pointer.hover) trackedPointers.delete(event.pointerId);
+    }
+    class AePointer {
+      constructor(event, pressed, hover) {
+        const x = event.clientX;
+        const y = event.clientY;
+        this.pointerId = event.pointerId;
+        this.pointerType = event.pointerType;
+        this.initial = { x, y };
+        this.current = { x, y };
+        this.delta = { x: 0, y: 0 };
+        this.movement = { x: 0, y: 0 };
+        this.lastDispatched = { x, y };
+        this.time = { pressStart: null, pressEnd: null };
+        this.buttons = event.buttons;
+        this.pressed = pressed;
+        this.hover = hover;
+        this.pointables = [];
+        this.pressStart = null;
+      }
+      get deltaTime() {
+        var _a;
+        if (this.time.pressStart === null) return 0;
+        return ((_a = this.time.pressEnd) != null ? _a : root.performance.now()) - this.time.pressStart;
+      }
+      startPress() {
+        this.time.pressStart = root.performance.now();
+        this.time.pressEnd = null;
+      }
+      endPress() {
+        if (this.time.pressStart !== null && this.time.pressEnd === null)
+          this.time.pressEnd = root.performance.now();
+      }
+      update(event) {
+        this.current.x = event.clientX;
+        this.current.y = event.clientY;
+        this.delta.x = this.current.x - this.initial.x;
+        this.delta.y = this.current.y - this.initial.y;
+        this.buttons = event.buttons;
+      }
+      beforeDispatch() {
+        this.movement.x = this.current.x - this.lastDispatched.x;
+        this.movement.y = this.current.y - this.lastDispatched.y;
+        this.lastDispatched.x = this.current.x;
+        this.lastDispatched.y = this.current.y;
+      }
     }
   })(typeof globalThis !== "undefined" ? globalThis : window);
 })();

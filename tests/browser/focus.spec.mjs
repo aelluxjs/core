@@ -41,3 +41,27 @@ test("focus hint, history restoration and navigation back", async ({ page }) => 
   expect(await page.evaluate(() => AelluxJs.ext.focus.restoreLastFocus())).toBe(true);
   await expect(page.locator("#first")).toBeFocused();
 });
+
+test("Enter advances focus and respects unmount and unavailable controls", async ({ page }) => {
+  await page.goto("/tests/browser/focus.html");
+  await page.evaluate(() => window.fixtureReady);
+
+  await page.locator("#first").focus();
+  await page.keyboard.press("Enter");
+  await expect(page.locator("#second")).toBeFocused();
+
+  await page.keyboard.press("Enter");
+  await expect(page.locator("#third")).toBeFocused();
+
+  await page.keyboard.press("Enter");
+  await expect(page.locator("#last")).toBeFocused();
+
+  await page.locator("#editable span").click();
+  await page.keyboard.press("Enter");
+  await expect(page.locator("#after-editable")).toBeFocused();
+
+  await page.evaluate(() => AelluxJs.unmount(document.querySelector("#first")));
+  await page.locator("#first").focus();
+  await page.keyboard.press("Enter");
+  await expect(page.locator("#first")).toBeFocused();
+});

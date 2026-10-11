@@ -17,6 +17,9 @@
     const snapshotKey = "ae-focus";
     const entries = [];
     const generatedHints = /* @__PURE__ */ new WeakSet();
+    const nextElements = /* @__PURE__ */ new WeakSet();
+    const textEntrySelector = "input:not([type]), input[type=text], input[type=search], input[type=email], input[type=url], input[type=tel], input[type=password], input[type=number], textarea, [contenteditable]:not([contenteditable=false])";
+    const focusableSelector = "a[href], area[href], button, input, select, textarea, [tabindex], [contenteditable]:not([contenteditable=false])";
     let sequence = 0, current = null, restoring = false;
     function init() {
       AelluxJs.mountManager.add({
@@ -50,7 +53,9 @@
       const type = element.getAttribute(attribute);
       switch (type) {
         case "next":
-          if (!element.hasAttribute("enterkeyhint") && element.matches("input:not([type]), input[type=text], input[type=search], input[type=email], input[type=url], input[type=tel], input[type=password], input[type=number], textarea, [contenteditable]:not([contenteditable=false])")) {
+          element.addEventListener("keydown", onNextKeyDown);
+          nextElements.add(element);
+          if (!element.hasAttribute("enterkeyhint") && element.matches(textEntrySelector)) {
             element.setAttribute("enterkeyhint", "next");
             generatedHints.add(element);
           }
@@ -58,8 +63,22 @@
       }
     }
     function unmountFocusElement(element) {
-      if (!generatedHints.delete(element)) return;
-      element.removeAttribute("enterkeyhint");
+      if (nextElements.delete(element)) element.removeEventListener("keydown", onNextKeyDown);
+      if (generatedHints.delete(element)) element.removeAttribute("enterkeyhint");
+    }
+    function onNextKeyDown(event) {
+      if (event.key !== "Enter" || event.isComposing || event.repeat || event.defaultPrevented || event.target !== event.currentTarget && event.target.closest(focusableSelector) !== event.currentTarget) return;
+      const elements = document.querySelectorAll(focusableSelector);
+      let foundCurrent = false;
+      for (const element of elements) {
+        if (element === event.currentTarget) {
+          foundCurrent = true;
+        } else if (foundCurrent && element.tabIndex >= 0 && isValid(element)) {
+          event.preventDefault();
+          element.focus();
+          return;
+        }
+      }
     }
     function isValid(element) {
       if (!element || element === document.body || element === document.documentElement || !element.isConnected || typeof element.focus !== "function" || element.matches(":disabled, [hidden], [inert]")) return false;
@@ -76,7 +95,8 @@
       entries.push(entry);
       if (entries.length > 100) entries.shift();
       current = entry;
-      if (push) AelluxJs.dispatch("PushState", {
+      if (!push) return;
+      AelluxJs.dispatch("PushState", {
         detail: { key: snapshotKey, value: entry.token }
       });
     }
@@ -109,7 +129,8 @@
     }
     function restoreLastFocus() {
       const index = entries.indexOf(current);
-      for (let i = (index < 0 ? entries.length : index) - 1; i >= 0; i--) {
+      const start = (index < 0 ? entries.length : index) - 1;
+      for (let i = start; i >= 0; i--) {
         if (restore(entries[i])) return true;
       }
       return false;

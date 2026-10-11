@@ -9,7 +9,8 @@
  *
  * Inputs and activation: observes focus and blur on the document and window.
  * Mounted `data-ae-focus="next"` text-entry elements receive
- * `enterkeyhint="next"` when no hint is already declared.
+ * `enterkeyhint="next"` when no hint is already declared and move focus
+ * to the next available control when Enter is pressed.
  *
  * Outputs and owned state: keeps up to 100 in-memory focus entries and exposes
  * `restoreLastFocus()`. Each new focus target emits `AelluxJsPushState`; when
@@ -19,8 +20,8 @@
  * Lifecycle: removes listeners and mounted behavior, then clears focus history
  * on destruction. Focus history does not survive a page reload.
  *
- * Accessibility: does not change focus order, implement keyboard navigation or
- * announce state changes. Consumers remain responsible for those behaviors.
+ * Accessibility: follows document order for Enter navigation and does not
+ * announce focus changes. Consumers remain responsible for suitable focus order.
  */
 
 (function (root) {
@@ -40,6 +41,9 @@
   const snapshotKey = "ae-focus";
   const entries = [];
   const generatedHints = new WeakSet();
+  const nextElements = new WeakSet();
+  const textEntrySelector = "input:not([type]), input[type=text], input[type=search], input[type=email], input[type=url], input[type=tel], input[type=password], input[type=number], textarea, [contenteditable]:not([contenteditable=false])";
+  const focusableSelector = "a[href], area[href], button, input, select, textarea, [tabindex], [contenteditable]:not([contenteditable=false])";
 
   let sequence = 0, current = null, restoring = false;
 
@@ -76,8 +80,9 @@
     const type = element.getAttribute(attribute);
     switch (type) {
       case "next":
-        if (!element.hasAttribute("enterkeyhint") &&
-          element.matches("input:not([type]), input[type=text], input[type=search], input[type=email], input[type=url], input[type=tel], input[type=password], input[type=number], textarea, [contenteditable]:not([contenteditable=false])")) {
+        element.addEventListener("keydown", onNextKeyDown);
+        nextElements.add(element);
+        if (!element.hasAttribute("enterkeyhint") && element.matches(textEntrySelector)) {
           element.setAttribute("enterkeyhint", "next");
           generatedHints.add(element);
         }
@@ -86,8 +91,24 @@
   }
 
   function unmountFocusElement(element) {
-    if (!generatedHints.delete(element)) return;
-    element.removeAttribute("enterkeyhint");
+    if (nextElements.delete(element)) element.removeEventListener("keydown", onNextKeyDown);
+    if (generatedHints.delete(element)) element.removeAttribute("enterkeyhint");
+  }
+
+  function onNextKeyDown(event) {
+    if (event.key !== "Enter" || event.isComposing || event.repeat || event.defaultPrevented ||
+      (event.target !== event.currentTarget && event.target.closest(focusableSelector) !== event.currentTarget)) return;
+    const elements = document.querySelectorAll(focusableSelector);
+    let foundCurrent = false;
+    for (const element of elements) {
+      if (element === event.currentTarget) {
+        foundCurrent = true;
+      } else if (foundCurrent && element.tabIndex >= 0 && isValid(element)) {
+        event.preventDefault();
+        element.focus();
+        return;
+      }
+    }
   }
 
   function isValid(element) {
@@ -108,7 +129,8 @@
     entries.push(entry);
     if (entries.length > 100) entries.shift();
     current = entry;
-    if (push) AelluxJs.dispatch("PushState", {
+    if (!push) return;
+    AelluxJs.dispatch("PushState", {
       detail: { key: snapshotKey, value: entry.token }
     });
   }
@@ -144,7 +166,8 @@
 
   function restoreLastFocus() {
     const index = entries.indexOf(current);
-    for (let i = (index < 0 ? entries.length : index) - 1; i >= 0; i--) {
+    const start = (index < 0 ? entries.length : index) - 1;
+    for (let i = start; i >= 0; i--) {
       if (restore(entries[i])) return true;
     }
     return false;

@@ -54,6 +54,76 @@ test("pointer tracks independent presses, cumulative deltas, and release", async
   });
 });
 
+test("AePointer movement uses the previous dispatched position", async ({ page }) => {
+  await openPoint(page);
+
+  const result = await page.evaluate(() => {
+    const received = [];
+    document.body.addEventListener("AelluxJsPointerMove", event => {
+      const pointer = event.detail.pointer;
+      received.push({
+        className: pointer.constructor.name,
+        current: { ...pointer.current },
+        delta: { ...pointer.delta },
+        movement: { ...pointer.movement }
+      });
+    });
+    const emit = (target, type, x, y) => target.dispatchEvent(new PointerEvent(type, {
+      bubbles: true, pointerId: 61, pointerType: "touch", clientX: x, clientY: y, buttons: 1
+    }));
+    emit(document.body, "pointerdown", 10, 20);
+    emit(document.body, "pointermove", 13, 25);
+    emit(document.documentElement, "pointermove", 16, 28);
+    emit(document.body, "pointermove", 20, 30);
+    return received;
+  });
+
+  expect(result).toEqual([
+    { className: "AePointer", current: { x: 13, y: 25 }, delta: { x: 3, y: 5 }, movement: { x: 3, y: 5 } },
+    { className: "AePointer", current: { x: 20, y: 30 }, delta: { x: 10, y: 10 }, movement: { x: 7, y: 5 } }
+  ]);
+});
+
+test("AePointer times an active press and freezes its duration on release", async ({ page }) => {
+  await openPoint(page);
+
+  const result = await page.evaluate(async () => {
+    const target = document.body;
+    const emit = type => target.dispatchEvent(new PointerEvent(type, {
+      bubbles: true, pointerId: 62, pointerType: "mouse"
+    }));
+    emit("pointerover");
+    const pointer = AelluxJs.ext.point.pointers(target)[0];
+    const before = { time: { ...pointer.time }, deltaTime: pointer.deltaTime };
+    emit("pointerdown");
+    const firstStart = pointer.time.pressStart;
+    await new Promise(resolve => setTimeout(resolve, 25));
+    const active = { pressEnd: pointer.time.pressEnd, deltaTime: pointer.deltaTime };
+    emit("pointerup");
+    const released = { time: { ...pointer.time }, deltaTime: pointer.deltaTime };
+    await new Promise(resolve => setTimeout(resolve, 25));
+    const frozen = pointer.deltaTime;
+    emit("pointerdown");
+    const restarted = { time: { ...pointer.time }, deltaTime: pointer.deltaTime };
+    emit("pointercancel");
+    const canceled = { time: { ...pointer.time }, deltaTime: pointer.deltaTime };
+    return { before, firstStart, active, released, frozen, restarted, canceled };
+  });
+
+  expect(result.before).toEqual({ time: { pressStart: null, pressEnd: null }, deltaTime: 0 });
+  expect(result.active.pressEnd).toBeNull();
+  expect(result.active.deltaTime).toBeGreaterThan(0);
+  expect(result.released.time.pressStart).toBe(result.firstStart);
+  expect(result.released.time.pressEnd).toBeGreaterThanOrEqual(result.firstStart);
+  expect(result.released.deltaTime).toBe(result.released.time.pressEnd - result.firstStart);
+  expect(result.frozen).toBe(result.released.deltaTime);
+  expect(result.restarted.time.pressStart).toBeGreaterThan(result.firstStart);
+  expect(result.restarted.time.pressEnd).toBeNull();
+  expect(result.restarted.deltaTime).toBeGreaterThanOrEqual(0);
+  expect(result.canceled.time.pressEnd).toBeGreaterThanOrEqual(result.restarted.time.pressStart);
+  expect(result.canceled.deltaTime).toBe(result.canceled.time.pressEnd - result.restarted.time.pressStart);
+});
+
 test("release reaches press origin and resets it on the next press", async ({ page }) => {
   await openPoint(page);
 

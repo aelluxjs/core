@@ -4,7 +4,12 @@
 <body>
   <input id="first" data-ae-focus="next">
   <input id="second" data-ae-focus="next" enterkeyhint="done">
+  <button id="disabled-next" disabled>Unavailable</button>
+  <input id="hidden-next" hidden>
   <input id="third" data-ae-focus="next">
+  <button id="last">Last control</button>
+  <div id="editable" data-ae-focus="next" contenteditable="true"><span>Editable text</span></div>
+  <button id="after-editable">After editable</button>
   <script>
     AelluxJs.ext("state-navigation");
     AelluxJs.ext("focus");
