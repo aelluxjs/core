@@ -88,7 +88,7 @@
           });
         }
 
-        await AelluxJs.update(replacement);
+        await AelluxJs.mount(replacement);
 
         //feedback busy/progress
         if (AelluxJs.ext.feedback) {

@@ -1,5 +1,39 @@
 (function() {
   // src/src/aellux.ext.point.js
+  function _typeof(o) {
+    "@babel/helpers - typeof";
+    return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
+      return typeof o2;
+    } : function(o2) {
+      return o2 && "function" == typeof Symbol && o2.constructor === Symbol && o2 !== Symbol.prototype ? "symbol" : typeof o2;
+    }, _typeof(o);
+  }
+  function _classCallCheck(a, n) {
+    if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function");
+  }
+  function _defineProperties(e, r) {
+    for (var t = 0; t < r.length; t++) {
+      var o = r[t];
+      o.enumerable = o.enumerable || false, o.configurable = true, "value" in o && (o.writable = true), Object.defineProperty(e, _toPropertyKey(o.key), o);
+    }
+  }
+  function _createClass(e, r, t) {
+    return r && _defineProperties(e.prototype, r), t && _defineProperties(e, t), Object.defineProperty(e, "prototype", { writable: false }), e;
+  }
+  function _toPropertyKey(t) {
+    var i = _toPrimitive(t, "string");
+    return "symbol" == _typeof(i) ? i : i + "";
+  }
+  function _toPrimitive(t, r) {
+    if ("object" != _typeof(t) || !t) return t;
+    var e = t[Symbol.toPrimitive];
+    if (void 0 !== e) {
+      var i = e.call(t, r || "default");
+      if ("object" != _typeof(i)) return i;
+      throw new TypeError("@@toPrimitive must return a primitive value.");
+    }
+    return ("string" === r ? String : Number)(t);
+  }
   function _toConsumableArray(r) {
     return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread();
   }
@@ -162,6 +196,8 @@
       var targets = arguments.length > 3 && arguments[3] !== void 0 ? arguments[3] : pointer.pointables;
       var hover = arguments.length > 4 ? arguments[4] : void 0;
       var pointables = arguments.length > 5 && arguments[5] !== void 0 ? arguments[5] : pointer.pointables;
+      if (!targets.length) return;
+      pointer.beforeDispatch();
       var chain = pointables.slice();
       var pressStart = (_pointer$pressStart$s = (_pointer$pressStart = pointer.pressStart) === null || _pointer$pressStart === void 0 ? void 0 : _pointer$pressStart.slice()) !== null && _pointer$pressStart$s !== void 0 ? _pointer$pressStart$s : null;
       var _iterator3 = _createForOfIteratorHelper(targets.slice()), _step3;
@@ -194,38 +230,9 @@
       return event.pointerType === "mouse" || event.pointerType === "pen";
     }
     function addPointer(event, pressed, hover) {
-      var x = event.clientX;
-      var y = event.clientY;
-      var pointer = {
-        pointerId: event.pointerId,
-        pointerType: event.pointerType,
-        initial: {
-          x: x,
-          y: y
-        },
-        current: {
-          x: x,
-          y: y
-        },
-        delta: {
-          x: 0,
-          y: 0
-        },
-        buttons: event.buttons,
-        pressed: pressed,
-        hover: hover,
-        pointables: [],
-        pressStart: null
-      };
+      var pointer = new AePointer(event, pressed, hover);
       trackedPointers.set(event.pointerId, pointer);
       return pointer;
-    }
-    function updatePointer(pointer, event) {
-      pointer.current.x = event.clientX;
-      pointer.current.y = event.clientY;
-      pointer.delta.x = pointer.current.x - pointer.initial.x;
-      pointer.delta.y = pointer.current.y - pointer.initial.y;
-      pointer.buttons = event.buttons;
     }
     function onPointerDown(event) {
       var pointer = trackedPointers.get(event.pointerId) || addPointer(event, true, canHover(event));
@@ -233,8 +240,9 @@
       pointer.initial.y = event.clientY;
       pointer.pointerType = event.pointerType;
       pointer.pressed = true;
+      pointer.startPress();
       pointer.hover = canHover(event);
-      updatePointer(pointer, event);
+      pointer.update(event);
       pointer.pointables = pointablesFor(event.target, pointer);
       pointer.pressStart = pointer.pointables.slice();
       dispatchPointer("PointerDown", pointer, event);
@@ -245,15 +253,16 @@
         if (!canHover(event)) return;
         pointer = addPointer(event, false, true);
       }
-      updatePointer(pointer, event);
+      pointer.update(event);
       pointer.pointables = pointablesFor(event.target, pointer);
       dispatchPointer("PointerMove", pointer, event);
     }
     function onPointerUp(event) {
       var pointer = trackedPointers.get(event.pointerId);
       if (!pointer) return;
-      updatePointer(pointer, event);
+      pointer.update(event);
       pointer.pressed = false;
+      pointer.endPress();
       pointer.pointables = pointablesFor(event.target, pointer);
       dispatchPointer("PointerUp", pointer, event, releaseTargets(pointer));
       if (!pointer.hover) trackedPointers.delete(event.pointerId);
@@ -261,8 +270,9 @@
     function onPointerCancel(event) {
       var pointer = trackedPointers.get(event.pointerId);
       if (pointer) {
-        updatePointer(pointer, event);
+        pointer.update(event);
         pointer.pressed = false;
+        pointer.endPress();
         pointer.pointables = pointablesFor(event.target, pointer);
         dispatchPointer("PointerCancel", pointer, event, releaseTargets(pointer));
       }
@@ -272,7 +282,7 @@
       if (!canHover(event)) return;
       var pointer = trackedPointers.get(event.pointerId) || addPointer(event, false, true);
       var previous = pointer.pointables;
-      updatePointer(pointer, event);
+      pointer.update(event);
       pointer.hover = true;
       pointer.pointables = pointablesFor(event.target, pointer);
       var entered = pointer.pointables.filter(function(element) {
@@ -284,7 +294,7 @@
       var pointer = trackedPointers.get(event.pointerId);
       if (!pointer) return;
       var relatedTarget = event.relatedTarget;
-      updatePointer(pointer, event);
+      pointer.update(event);
       var previous = pointer.pointables;
       var nextPointables = pointablesFor(relatedTarget, pointer);
       var left = previous.filter(function(element) {
@@ -300,6 +310,80 @@
       }
       if (!pointer.pressed && !pointer.hover) trackedPointers.delete(event.pointerId);
     }
+    var AePointer = /* @__PURE__ */ (function() {
+      function AePointer2(event, pressed, hover) {
+        _classCallCheck(this, AePointer2);
+        var x = event.clientX;
+        var y = event.clientY;
+        this.pointerId = event.pointerId;
+        this.pointerType = event.pointerType;
+        this.initial = {
+          x: x,
+          y: y
+        };
+        this.current = {
+          x: x,
+          y: y
+        };
+        this.delta = {
+          x: 0,
+          y: 0
+        };
+        this.movement = {
+          x: 0,
+          y: 0
+        };
+        this.lastDispatched = {
+          x: x,
+          y: y
+        };
+        this.time = {
+          pressStart: null,
+          pressEnd: null
+        };
+        this.buttons = event.buttons;
+        this.pressed = pressed;
+        this.hover = hover;
+        this.pointables = [];
+        this.pressStart = null;
+      }
+      return _createClass(AePointer2, [{
+        key: "deltaTime",
+        get: function get() {
+          var _this$time$pressEnd;
+          if (this.time.pressStart === null) return 0;
+          return ((_this$time$pressEnd = this.time.pressEnd) !== null && _this$time$pressEnd !== void 0 ? _this$time$pressEnd : root.performance.now()) - this.time.pressStart;
+        }
+      }, {
+        key: "startPress",
+        value: function startPress() {
+          this.time.pressStart = root.performance.now();
+          this.time.pressEnd = null;
+        }
+      }, {
+        key: "endPress",
+        value: function endPress() {
+          if (this.time.pressStart !== null && this.time.pressEnd === null) this.time.pressEnd = root.performance.now();
+        }
+      }, {
+        key: "update",
+        value: function update(event) {
+          this.current.x = event.clientX;
+          this.current.y = event.clientY;
+          this.delta.x = this.current.x - this.initial.x;
+          this.delta.y = this.current.y - this.initial.y;
+          this.buttons = event.buttons;
+        }
+      }, {
+        key: "beforeDispatch",
+        value: function beforeDispatch() {
+          this.movement.x = this.current.x - this.lastDispatched.x;
+          this.movement.y = this.current.y - this.lastDispatched.y;
+          this.lastDispatched.x = this.current.x;
+          this.lastDispatched.y = this.current.y;
+        }
+      }]);
+    })();
   })(typeof globalThis !== "undefined" ? globalThis : window);
 })();
 //# sourceMappingURL=aellux.ext.point.legacy.js.map
