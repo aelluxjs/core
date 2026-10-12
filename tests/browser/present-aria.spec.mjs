@@ -150,6 +150,47 @@ test("present prepares will-change before starting a transition", async ({ page 
   })).toEqual({ willChange: false, popped: true, willChangeStyle: "auto" });
 });
 
+test("present disables transitions when reduced motion is active", async ({ page }) => {
+  await page.goto("/tests/index.htm");
+  await page.evaluate(() => {
+    document.body.innerHTML = '<div id="panel" data-ae-present hidden></div>';
+  });
+  await page.addScriptTag({ url: "/dist/aellux.js" });
+  await page.evaluate(() => AelluxJs.init({ mode: "full" }));
+  await expect(page.locator('link[data-ae-ext-style="present"]')).toHaveAttribute(
+    "href", /aellux\.ext\.present\.css$/
+  );
+  await page.evaluate(() => {
+    document.documentElement.setAttribute("data-ae-reduced-motion", "reduced");
+  });
+  await expect.poll(() => page.evaluate(() =>
+    getComputedStyle(document.getElementById("panel")).transitionDuration
+  )).toBe("0s");
+});
+
+test("present derives stepped easing from duration on low hardware", async ({ page }) => {
+  await page.goto("/tests/index.htm");
+  await page.evaluate(() => {
+    document.documentElement.setAttribute("data-ae-low-hardware", "");
+    document.body.innerHTML = `
+      <div id="panel" data-ae-present hidden
+        style="--ae-pop-duration: 250ms"></div>`;
+  });
+  await page.addScriptTag({ url: "/dist/aellux.js" });
+  await page.evaluate(() => AelluxJs.init({ mode: "full" }));
+  await expect.poll(() => page.evaluate(() =>
+    typeof AelluxJs.mountManager?.controller("panel")?.present?.pop === "function"
+  )).toBe(true);
+  await page.evaluate(() => AelluxJs.mountManager.controller("panel").present.pop());
+  await expect.poll(() => page.evaluate(() => {
+    const style = getComputedStyle(document.getElementById("panel"));
+    return {
+      steps: style.getPropertyValue("--ae-pop-low-steps").trim(),
+      easing: style.getPropertyValue("--ae-pop-ease").trim()
+    };
+  })).toEqual({ steps: "4", easing: "steps(4)" });
+});
+
 test("controller lookup diagnoses invalid inputs and unmounted elements", async ({ page }) => {
   await page.goto("/tests/index.htm");
   await page.addScriptTag({ url: "/dist/aellux.js" });

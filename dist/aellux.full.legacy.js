@@ -24384,8 +24384,9 @@
           //toggle,pop,unpop
           dismiss: AelluxJs2.attr("dismiss"),
           //selector
-          target: AelluxJs2.attr("target")
-          //selector
+          target: AelluxJs2.attr("target"),
+          //selector,
+          lowHardware: AelluxJs2.attr("low-hardware")
         };
         var className = {
           pop: AelluxJs2.className("pop"),
@@ -24660,7 +24661,7 @@
         }
         function _presentTransition() {
           _presentTransition = _asyncToGenerator5(/* @__PURE__ */ _regenerator5().m(function _callee(element, gotoVisible) {
-            var controller, newDirection, transitionClass, transitionStarted, allowEvent, interrupted, prepared, duration, time, completed, _t, _t2;
+            var controller, newDirection, transitionClass, transitionStarted, allowEvent, interrupted, prepared, duration, timeMs, completed, _t, _t2;
             return _regenerator5().w(function(_context) {
               while (1) switch (_context.p = _context.n) {
                 case 0:
@@ -24712,10 +24713,13 @@
                 case 5:
                   transitionClass = className["".concat(newDirection).concat(PING).toLowerCase()];
                   duration = root2.getComputedStyle(controller.presentMotion).getPropertyValue("--ae-".concat(newDirection, "-duration").toLowerCase()).trim();
-                  time = getString2Time(duration);
+                  timeMs = getString2Time(duration);
+                  if (root2.document && root2.document.documentElement.hasAttribute(attr.lowHardware)) {
+                    controller.presentMotion.style.setProperty("--ae-".concat(newDirection, "-low-steps"), Math.max(1, parseInt(timeMs / 62.5)));
+                  }
                   controller.classList.add(transitionClass);
                   completed = new Promise(function(completeTransition) {
-                    controller.timeout = setTimeout(finishTransition, time, element, controller, transitionClass, gotoVisible, completeTransition);
+                    controller.timeout = setTimeout(finishTransition, timeMs, element, controller, transitionClass, gotoVisible, completeTransition);
                   });
                   AelluxJs2.dispatchFrom(element, "".concat(newDirection).concat(PING), {
                     bubbles: true

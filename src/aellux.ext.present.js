@@ -45,7 +45,8 @@
     unpopOnOutside: AelluxJs.attr("unpop-on-outside"),
     trigger: AelluxJs.attr("trigger"), //toggle,pop,unpop
     dismiss: AelluxJs.attr("dismiss"), //selector
-    target: AelluxJs.attr("target") //selector
+    target: AelluxJs.attr("target"), //selector,
+    lowHardware: AelluxJs.attr("low-hardware"),
   };
   const className = {
     pop: AelluxJs.className("pop"),
@@ -319,13 +320,21 @@
       transitionClass = className[`${newDirection}${PING}`.toLowerCase()];
       const duration = root.getComputedStyle(controller.presentMotion)
         .getPropertyValue(`--ae-${newDirection}-duration`.toLowerCase()).trim();
-      const time = getString2Time(duration);
+      const timeMs = getString2Time(duration);
+
+      if (root.document &&
+        root.document.documentElement.hasAttribute(attr.lowHardware)) {
+        controller.presentMotion.style.setProperty(
+          `--ae-${newDirection}-low-steps`,
+          Math.max(1, parseInt(timeMs / 62.5))
+        );
+      }
 
       controller.classList.add(transitionClass);
       const completed = new Promise(completeTransition => {
         controller.timeout = setTimeout(
           finishTransition,
-          time,
+          timeMs,
           element,
           controller,
           transitionClass,

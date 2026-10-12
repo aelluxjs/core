@@ -18,6 +18,8 @@ $ae.init({ mode: "full" });
 
 Supported runtime modes are `full` and `basic`. See [Getting Started](../getting-started.md) for their loading behavior.
 The optional `crossOrigin` initialization setting controls the `crossorigin` attribute on runtime and Extension assets; integrity-protected assets use `anonymous` by default. See [CSP and Extension trust](../extensions/csp-and-trust.md#subresource-integrity).
+The `autoViewportMeta` option defaults to `true`. During initialization, the boot checks for `<meta name="viewport">` and adds `<meta name="viewport" content="width=device-width, initial-scale=1">` when it is absent. Set `autoViewportMeta: false` to leave the document head unchanged.
+During initialization, the boot script adds `data-ae-low-hardware` to the document root when `navigator.hardwareConcurrency` or `navigator.deviceMemory` reports a value of 4 or less. Missing navigator properties do not activate the attribute.
 Pass Extension-specific configuration through `extensions` in `init()` options. Keys such as `"tab-group"` are normalized to `tabGroup` in `$ae.options.extensions`, and each Extension receives its matching object in `init(options)`. An Extension with no matching configuration receives `{}`.
 An Extension's `init(options)` may return a Promise. The runtime awaits it before setting the Extension's `initialized` flag and resolving `wait(extensionName)`; rejection is diagnosed as `ERROR_EXTENSION_INITIALIZE` (`1102`) and leaves the Extension available for a later retry.
 

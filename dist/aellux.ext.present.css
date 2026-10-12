@@ -11,6 +11,8 @@
   --ae-unpop-ease: ease-in;
   --ae-pop-duration: 250ms;
   --ae-unpop-duration: 250ms;
+  --ae-pop-low-steps: 4;
+  --ae-unpop-low-steps: 4;
   --ae-transition-property: opacity, transform, grid-template-columns, grid-template-rows;
   --ae-pop-transition-duration: var(--ae-pop-duration), var(--ae-pop-duration), var(--ae-pop-duration), var(--ae-pop-duration);
   --ae-pop-transition-timing-function: linear, var(--ae-pop-ease, linear), var(--ae-pop-ease, linear), var(--ae-pop-ease, linear);
@@ -18,7 +20,15 @@
   --ae-unpop-transition-timing-function: linear, var(--ae-unpop-ease, linear), var(--ae-unpop-ease, linear), var(--ae-unpop-ease, linear);
   transition-property: var(--ae-transition-property);
 }
+html[data-ae-reduced-motion="reduced"] [data-ae-present-motion] {
+  transition: none !important;
+}
+html[data-ae-low-hardware] [data-ae-present-motion] {
+  --ae-pop-ease: steps(var(--ae-pop-low-steps));
+  --ae-unpop-ease: steps(var(--ae-unpop-low-steps));
+}
 [data-ae-present-motion].ae--will-change {
+  contain: layout paint;
   will-change: var(--ae-transition-property);
   transform: translateZ(0);
 }

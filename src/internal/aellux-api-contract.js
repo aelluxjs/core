@@ -146,6 +146,7 @@ var bootstrapProperties = Object.freeze({
         "enum": Object.freeze([0, 1, 2, "error", "warn", "info"])
       }),
       forceLegacy: flag,
+      autoViewportMeta: flag,
       basePath: Object.freeze({ type: ["string", "null"] }),
       crossOrigin: Object.freeze({ type: ["string", "null"] }),
       extensions: record

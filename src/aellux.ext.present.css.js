@@ -1,12 +1,14 @@
 /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
 
-export function generatePresentCSS(aellux) {
-  const motionAttribute = aellux.attr("present-motion");
+export function generatePresentCSS(AelluxJs) {
+  const motionAttribute = AelluxJs.attr("present-motion");
+  const reducedMotionAttribute = AelluxJs.attr("reduced-motion");
+  const lowHardwareAttribute = AelluxJs.attr("low-hardware");
   const motion = `[${motionAttribute}]`;
-  const pop = aellux.className("pop");
-  const popping = aellux.className("popping");
-  const unpopping = aellux.className("unpopping");
-  const willChange = aellux.className("will-change");
+  const pop = AelluxJs.className("pop");
+  const popping = AelluxJs.className("popping");
+  const unpopping = AelluxJs.className("unpopping");
+  const willChange = AelluxJs.className("will-change");
 
   return `/*! aellux.js Present Extension | SPDX-License-Identifier: Apache-2.0 */
 
@@ -21,6 +23,8 @@ ${motion} {
   --ae-unpop-ease: ease-in;
   --ae-pop-duration: 250ms;
   --ae-unpop-duration: 250ms;
+  --ae-pop-low-steps: 4;
+  --ae-unpop-low-steps: 4;
   --ae-transition-property: opacity, transform, grid-template-columns, grid-template-rows;
   --ae-pop-transition-duration: var(--ae-pop-duration), var(--ae-pop-duration), var(--ae-pop-duration), var(--ae-pop-duration);
   --ae-pop-transition-timing-function: linear, var(--ae-pop-ease, linear), var(--ae-pop-ease, linear), var(--ae-pop-ease, linear);
@@ -28,7 +32,15 @@ ${motion} {
   --ae-unpop-transition-timing-function: linear, var(--ae-unpop-ease, linear), var(--ae-unpop-ease, linear), var(--ae-unpop-ease, linear);
   transition-property: var(--ae-transition-property);
 }
+html[${reducedMotionAttribute}="reduced"] ${motion} {
+  transition: none !important;
+}
+html[${lowHardwareAttribute}] ${motion} {
+  --ae-pop-ease: steps(var(--ae-pop-low-steps));
+  --ae-unpop-ease: steps(var(--ae-unpop-low-steps));
+}
 ${motion}.${willChange} {
+  contain: layout paint;
   will-change: var(--ae-transition-property);
   transform: translateZ(0);
 }

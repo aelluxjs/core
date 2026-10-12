@@ -59,6 +59,63 @@ test("callable API returns null before the mount manager starts", async ({ page 
   }))).toEqual({ sameAlias: true, callable: true, result: null });
 });
 
+test("boot marks the document when the browser reports low hardware", async ({ page }) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, "hardwareConcurrency", {
+      configurable: true,
+      value: 8
+    });
+    Object.defineProperty(navigator, "deviceMemory", {
+      configurable: true,
+      value: 4
+    });
+  });
+  await page.goto("/tests/index.htm");
+  await page.addScriptTag({ url: "/dist/aellux.js" });
+  await page.evaluate(() => AelluxJs.init({ mode: "basic" }));
+  await expect(page.locator("html")).toHaveAttribute("data-ae-low-hardware", "");
+});
+
+test("boot leaves the low-hardware attribute unset for stronger hardware", async ({ page }) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, "hardwareConcurrency", {
+      configurable: true,
+      value: 8
+    });
+    Object.defineProperty(navigator, "deviceMemory", {
+      configurable: true,
+      value: 8
+    });
+  });
+  await page.goto("/tests/index.htm");
+  await page.addScriptTag({ url: "/dist/aellux.js" });
+  await page.evaluate(() => AelluxJs.init({ mode: "basic" }));
+  await expect(page.locator("html")).not.toHaveAttribute("data-ae-low-hardware", "");
+});
+
+test("boot adds a missing viewport meta tag by default", async ({ page }) => {
+  await page.goto("/tests/index.htm");
+  await page.locator('meta[name="viewport"]').evaluate(element => element.remove());
+  await page.evaluate(() => {
+    const style = document.createElement("style");
+    style.setAttribute("data-ae-weak-style", "true");
+    document.head.append(style);
+  });
+  await page.addScriptTag({ url: "/dist/aellux.js" });
+  await page.evaluate(() => AelluxJs.init({ mode: "basic" }));
+  await expect(page.locator('meta[name="viewport"]')).toHaveAttribute(
+    "content", "width=device-width, initial-scale=1"
+  );
+});
+
+test("autoViewportMeta false leaves a missing viewport meta tag absent", async ({ page }) => {
+  await page.goto("/tests/index.htm");
+  await page.locator('meta[name="viewport"]').evaluate(element => element.remove());
+  await page.addScriptTag({ url: "/dist/aellux.js" });
+  await page.evaluate(() => AelluxJs.init({ mode: "basic", autoViewportMeta: false }));
+  await expect(page.locator('meta[name="viewport"]')).toHaveCount(0);
+});
+
 test("invalid mount root selectors are recorded for mount and unmount", async ({ page }) => {
   await page.goto("/tests/index.htm");
   await page.addScriptTag({ url: "/dist/aellux.js" });
