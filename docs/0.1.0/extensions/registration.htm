@@ -52,7 +52,7 @@
 
 <script src="/core/docs/assets/docweaver/js/toc-init.js?t=1"></script>
 
-<script src="https://cdn.jsdelivr.net/npm/@aelluxjs/core@0.1.0-beta.7/dist/aellux.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@aelluxjs/core@0.1.0-beta.8/dist/aellux.min.js"></script>
 <script>
   AelluxJs.ext("/core/docs/assets/docweaver/js/aellux.ext.ajax-href.js");
   AelluxJs.init({ mode: "full" });
@@ -606,6 +606,7 @@ $ae.init({ mode: &quot;basic&quot; });
 })(typeof globalThis !== &quot;undefined&quot; ? globalThis : window);
 </code></pre>
 <p>Declare the Extension with <code>ext()</code> before calling <code>extAttach()</code>. The attachment supplies its definitive API object. <code>extAttach()</code> requires a valid kebab-case or camelCase Extension name and an API object with an <code>init()</code> function. <code>destroy()</code>, when provided, must also be a function. Invalid arguments report <code>ERROR_EXTENSION_ATTACH</code> (<code>1112</code>) and leave the Extension unattached. A missing declaration reports <code>ERROR_EXTENSION_NOT_REGISTERED</code> (<code>1110</code>); a second attachment reports <code>ERROR_EXTENSION_DUPLICATE</code> (<code>1101</code>).</p>
+<p><code>init(options)</code> may complete synchronously or return a Promise. The runtime awaits it before marking the Extension as initialized and resolving <code>$ae.wait(extensionName)</code>. A thrown error or rejected Promise reports <code>ERROR_EXTENSION_INITIALIZE</code> (<code>1102</code>), leaves the Extension uninitialized, and permits a later initialization attempt.</p>
 <p>Use the <a href="https://github.com/aelluxjs/core/blob/main/templates/README.md">aellux.js Extension scaffold</a> for the complete lifecycle structure.
 Third-party authors should also follow the <a href="authoring.htm">Extension authoring and compatibility contract</a>.
 Review <a href="csp-and-trust.htm">CSP requirements and Extension trust</a> before registering assets from another origin.</p>

@@ -14,8 +14,8 @@
  * defaults and storage behavior.
  *
  * Outputs and owned state: updates preference attributes on the root HTML
- * element, synchronizes options and associated inputs, persists eligible values
- * and dispatches `AelluxJsPreferencesChange`.
+ * element, synchronizes options, value labels and associated inputs, persists
+ * eligible values and dispatches `AelluxJsPreferencesChange`.
  *
  * Lifecycle: removes container handlers, storage and media-query listeners, and
  * releases its internal registries when destroyed.
@@ -155,10 +155,16 @@ import utilsNameCase from "./internal/utils-name-case.js";
   function updateContainer(container) {
     const preference = container.getAttribute(attr.preference);
     const elements = container.querySelectorAll(`[${attr.option}]`);
-    const selectedLabel = container.querySelector(`[${attr.label}]`);
+    const labels = container.querySelectorAll(`[${attr.label}]`);
+    const currentValue = get(preference);
+    labels.forEach(label => {
+      const value = label.getAttribute(attr.label);
+      const selected = String(value) === String(currentValue);
+      label.hidden = !selected;
+    });
     elements.forEach(element => {
       const value = element.getAttribute(attr.option);
-      const selected = value === get(preference);
+      const selected = value === currentValue;
       element.classList.toggle(className.active, selected);
       const labelFor = element.getAttribute("for");
       if (labelFor) {
@@ -167,10 +173,6 @@ import utilsNameCase from "./internal/utils-name-case.js";
           if ("value" in forTarget) forTarget.value = value;
           if ("checked" in forTarget) forTarget.checked = selected;
         }
-      }
-      if (selectedLabel && selected) {
-        if (selectedLabel.value) { selectedLabel.value = element.innerText; }
-        else { selectedLabel.innerHTML = element.innerHTML; }
       }
     });
   }

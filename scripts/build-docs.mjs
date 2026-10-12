@@ -1,5 +1,5 @@
 import path from "node:path";
-import { copyFile, writeFile } from "node:fs/promises";
+import { copyFile, readFile, readdir, writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { buildDocs } from "@wolimp/docweaver";
 
@@ -17,6 +17,24 @@ await buildDocs({
   publicPath,
   title: "aellux.js Docs"
 });
+
+const { version } = JSON.parse(await readFile(path.join(projectRoot, "package.json"), "utf8"));
+async function updateCoreCdnVersion(directory) {
+  for (const entry of await readdir(directory, { withFileTypes: true })) {
+    const entryPath = path.join(directory, entry.name);
+    if (entry.isDirectory()) {
+      await updateCoreCdnVersion(entryPath);
+    } else if (entry.name.endsWith(".htm")) {
+      const html = await readFile(entryPath, "utf8");
+      const updated = html.replace(
+        /(@aelluxjs\/core@)0\.1\.0-beta\.\d+(\/dist\/aellux\.min\.js)/g,
+        (_match, prefix, suffix) => `${prefix}${version}${suffix}`
+      );
+      if (updated !== html) await writeFile(entryPath, updated, "utf8");
+    }
+  }
+}
+await updateCoreCdnVersion(outputPath);
 
 const docweaverAssetPath = path.join(outputPath, "assets", "docweaver");
 await copyFile(

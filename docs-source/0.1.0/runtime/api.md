@@ -18,7 +18,10 @@ $ae.init({ mode: "full" });
 
 Supported runtime modes are `full` and `basic`. See [Getting Started](../getting-started.md) for their loading behavior.
 The optional `crossOrigin` initialization setting controls the `crossorigin` attribute on runtime and Extension assets; integrity-protected assets use `anonymous` by default. See [CSP and Extension trust](../extensions/csp-and-trust.md#subresource-integrity).
+The `autoViewportMeta` option defaults to `true`. During initialization, the boot checks for `<meta name="viewport">` and adds `<meta name="viewport" content="width=device-width, initial-scale=1">` when it is absent. Set `autoViewportMeta: false` to leave the document head unchanged.
+During initialization, the boot script adds `data-ae-low-hardware` to the document root when `navigator.hardwareConcurrency` or `navigator.deviceMemory` reports a value of 4 or less. Missing navigator properties do not activate the attribute.
 Pass Extension-specific configuration through `extensions` in `init()` options. Keys such as `"tab-group"` are normalized to `tabGroup` in `$ae.options.extensions`, and each Extension receives its matching object in `init(options)`. An Extension with no matching configuration receives `{}`.
+An Extension's `init(options)` may return a Promise. The runtime awaits it before setting the Extension's `initialized` flag and resolving `wait(extensionName)`; rejection is diagnosed as `ERROR_EXTENSION_INITIALIZE` (`1102`) and leaves the Extension available for a later retry.
 
 ## DOM Lifecycle
 
@@ -38,8 +41,8 @@ The mount helper removes existing `ae--*` classes from an element before its fir
 After an element mounts, use `$ae(elementOrId).{extensionName}.{mountedExtensionMethod}(...args)` to call its public Extension methods. `AelluxJs(elementOrId)` works the same way. Both calls resolve through `mountManager.controller(elementOrId)`. `elementOrId` can be a DOM element, an ID, or an ID prefixed with `#`. Invalid values and IDs that do not resolve emit a warning and return `null`. An element without a mounted controller emits an error explaining that it may not be mounted, then returns `null`. Before runtime initialization, the shortcut returns `null`. The `controllers` names registered by an Extension become methods under its camelCase namespace. Each method receives the element as its first argument, followed by `...args`:
 
 ```js
-$ae("#panel").present.pop();
-$ae("#panel").present.toggle(false);
+await $ae("#panel").present.pop();
+await $ae("#panel").present.toggle(false);
 ```
 
 Unmounting removes the corresponding methods from the element controller.

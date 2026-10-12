@@ -145,10 +145,16 @@
         function updateContainer(container) {
           const preference = container.getAttribute(attr.preference);
           const elements = container.querySelectorAll(`[${attr.option}]`);
-          const selectedLabel = container.querySelector(`[${attr.label}]`);
+          const labels = container.querySelectorAll(`[${attr.label}]`);
+          const currentValue = get(preference);
+          labels.forEach((label) => {
+            const value = label.getAttribute(attr.label);
+            const selected = String(value) === String(currentValue);
+            label.hidden = !selected;
+          });
           elements.forEach((element) => {
             const value = element.getAttribute(attr.option);
-            const selected = value === get(preference);
+            const selected = value === currentValue;
             element.classList.toggle(className.active, selected);
             const labelFor = element.getAttribute("for");
             if (labelFor) {
@@ -156,13 +162,6 @@
               if (forTarget) {
                 if ("value" in forTarget) forTarget.value = value;
                 if ("checked" in forTarget) forTarget.checked = selected;
-              }
-            }
-            if (selectedLabel && selected) {
-              if (selectedLabel.value) {
-                selectedLabel.value = element.innerText;
-              } else {
-                selectedLabel.innerHTML = element.innerHTML;
               }
             }
           });
@@ -678,13 +677,15 @@
           //toggle,pop,unpop
           dismiss: AelluxJs2.attr("dismiss"),
           //selector
-          target: AelluxJs2.attr("target")
-          //selector
+          target: AelluxJs2.attr("target"),
+          //selector,
+          lowHardware: AelluxJs2.attr("low-hardware")
         };
         const className = {
           pop: AelluxJs2.className("pop"),
           popping: AelluxJs2.className("popping"),
-          unpopping: AelluxJs2.className("unpopping")
+          unpopping: AelluxJs2.className("unpopping"),
+          willChange: AelluxJs2.className("will-change")
         };
         AelluxJs2.extAttach(extensionName, {
           init,
@@ -694,18 +695,11 @@
           toggle,
           trigger
         });
-        const POP = "Pop", UNPOP = "Unpop", BEFORE = "Before", PING = "ping", MILLISECOND = "ms", SECOND = "s", ARIA_EXPANDED = "aria-expanded", ARIA_CONTROLS = "aria-controls";
+        const POP = "Pop", UNPOP = "Unpop", BEFORE = "Before", PING = "ping", MILLISECOND = "ms", SECOND = "s", TRANSITION_PREPARE_TIME = 100, ARIA_EXPANDED = "aria-expanded", ARIA_CONTROLS = "aria-controls";
         const presentElements = /* @__PURE__ */ new Map();
         const triggerElementsSet = /* @__PURE__ */ new Set();
         const triggerTargets = /* @__PURE__ */ new Map();
         function init(options) {
-          AelluxJs2.mountManager.add({
-            extensionName,
-            selector: `[${attr.presentMotion}],[${attr.present}]`,
-            // Register the motion before the container changes its hidden state.
-            mount() {
-            }
-          });
           AelluxJs2.mountManager.add({
             extensionName,
             selector: `[${attr.present}]`,
@@ -738,28 +732,24 @@
         }
         function mountPresentContainer(element) {
           if (presentElements.has(element)) return;
-          const presentMotion = element.querySelector(`:scope>[${attr.presentMotion}]`) || element;
-          if (presentMotion === element) {
-            if (!presentMotion.hasAttribute(attr.presentMotion))
-              presentMotion.setAttribute(attr.presentMotion, "auto");
-          } else {
-            if (presentMotion.hidden) {
-              AelluxJs2.diagnostics.warn(
-                AelluxJs2.diagnostics.WARN_PRESENT_MOTION_HIDDEN,
-                { extension: extensionName, element, presentMotion }
-              );
-            }
-            if (!element.hidden) {
-              element.hidden = presentMotion.hidden;
-            }
-            presentMotion.hidden = false;
+          if (element.hasAttribute(attr.presentMotion)) {
+            element.removeAttribute(attr.presentMotion);
+          }
+          let presentMotion = element.querySelector(`:scope>[${attr.presentMotion}]`);
+          const generatedMotion = !presentMotion;
+          if (generatedMotion) {
+            presentMotion = document.createElement("div");
+            presentMotion.setAttribute(attr.presentMotion, "auto");
+            while (element.firstChild) presentMotion.appendChild(element.firstChild);
+            element.appendChild(presentMotion);
           }
           const presentController = {
             interruptTransition: null,
             direction: null,
             timeout: null,
+            generatedMotion,
             presentMotion,
-            classList: presentMotion.classList,
+            classList: element.classList,
             triggers: /* @__PURE__ */ new Set(),
             setAriaExpanded: function(value) {
               element.setAttribute(ARIA_EXPANDED, value);
@@ -806,6 +796,12 @@
           controller.stop();
           presentElements.delete(element);
           controller.triggers.forEach(updateTriggerAriaExpanded);
+          if (controller.generatedMotion && controller.presentMotion.parentNode === element) {
+            while (controller.presentMotion.firstChild) {
+              element.insertBefore(controller.presentMotion.firstChild, controller.presentMotion);
+            }
+            controller.presentMotion.remove();
+          }
         }
         function mountTriggerElement(triggerElement) {
           if (triggerElementsSet.has(triggerElement)) return;
@@ -907,7 +903,7 @@
               break;
           }
         }
-        function presentTransition(element, gotoVisible) {
+        async function presentTransition(element, gotoVisible) {
           const controller = presentElements.get(element);
           if (!controller) return;
           if (controller.direction === null)
@@ -918,34 +914,55 @@
           if (element.hidden && !gotoVisible || newDirection === controller.direction) {
             return;
           }
-          const allowEvent = AelluxJs2.dispatchFrom(
-            element,
-            `${BEFORE}${newDirection}`,
-            { bubbles: true, cancelable: true }
-          );
-          if (!allowEvent) {
-            return;
-          }
-          controller.stop();
-          controller.direction = newDirection;
-          new Promise((completeTransition, interruptTransition) => {
-            controller.interruptTransition = interruptTransition;
-            const c = className[`${newDirection}${PING}`.toLowerCase()];
-            const duration = root2.getComputedStyle(controller.presentMotion).getPropertyValue(`--ae-${newDirection}-duration`.toLowerCase()).trim();
-            const time = getString2Time(duration);
-            controller.classList.add(c);
-            element.hidden = false;
-            controller.timeout = setTimeout(
-              finishTransition,
-              time,
+          let transitionClass = null;
+          let transitionStarted = false;
+          try {
+            const allowEvent = AelluxJs2.dispatchFrom(
               element,
-              controller,
-              c,
-              gotoVisible,
-              completeTransition
+              `${BEFORE}${newDirection}`,
+              { bubbles: true, cancelable: true }
             );
+            if (!allowEvent) {
+              return;
+            }
+            controller.stop();
+            controller.direction = newDirection;
+            transitionStarted = true;
+            const interrupted = new Promise((_, interruptTransition) => {
+              controller.interruptTransition = interruptTransition;
+            });
+            element.hidden = false;
+            controller.classList.add(className.willChange);
+            const prepared = new Promise((resolve) => {
+              controller.timeout = setTimeout(() => {
+                controller.timeout = null;
+                resolve();
+              }, TRANSITION_PREPARE_TIME);
+            });
+            await Promise.race([prepared, interrupted]);
+            transitionClass = className[`${newDirection}${PING}`.toLowerCase()];
+            const duration = root2.getComputedStyle(element).getPropertyValue(`--ae-${newDirection}-duration`.toLowerCase()).trim();
+            const timeMs = getString2Time(duration);
+            if (root2.document && root2.document.documentElement.hasAttribute(attr.lowHardware)) {
+              element.style.setProperty(
+                `--ae-${newDirection}-low-steps`.toLowerCase(),
+                Math.max(1, parseInt(timeMs / 62.5))
+              );
+            }
+            controller.classList.add(transitionClass);
+            const completed = new Promise((completeTransition) => {
+              controller.timeout = setTimeout(
+                finishTransition,
+                timeMs,
+                element,
+                controller,
+                transitionClass,
+                gotoVisible,
+                completeTransition
+              );
+            });
             AelluxJs2.dispatchFrom(element, `${newDirection}${PING}`, { bubbles: true });
-          }).then(() => {
+            await Promise.race([completed, interrupted]);
             if (gotoVisible && !element.hidden) {
               autoUnpopSchedule(element, controller);
               controller.classList.add(className.pop);
@@ -956,7 +973,15 @@
               controller.setAriaExpanded("false");
               AelluxJs2.dispatchFrom(element, UNPOP, { bubbles: true });
             }
-          }).catch((error) => {
+          } catch (error) {
+            if (transitionStarted && controller.timeout !== null) {
+              clearTimeout(controller.timeout);
+              controller.timeout = null;
+            }
+            if (transitionStarted) {
+              controller.interruptTransition = null;
+              if (transitionClass) controller.classList.remove(transitionClass);
+            }
             switch (error && error.code) {
               case AelluxJs2.diagnostics.WARN_INTERRUPTION.code:
                 AelluxJs2.diagnostics.warn(
@@ -971,7 +996,9 @@
                 );
                 break;
             }
-          });
+          } finally {
+            if (transitionStarted) controller.classList.remove(className.willChange);
+          }
         }
         function finishTransition(element, controller, c, gotoVisible, completeTransition) {
           controller.classList.remove(c);
@@ -2144,5 +2171,6 @@
     "present": () => Promise.resolve().then(() => (init_aellux_ext_present(), aellux_ext_present_exports))
   });
   root.AelluxJs.ext("adaptive", { loadStyle: true });
+  root.AelluxJs.ext("present", { loadStyle: true });
 })();
 //# sourceMappingURL=aellux.full.js.map

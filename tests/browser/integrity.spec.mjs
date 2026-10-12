@@ -16,11 +16,13 @@ test("generated integrity covers the orchestrator and built-in Extension assets"
   await page.evaluate(() => {
     AelluxJs.ext("feedback");
     AelluxJs.ext("adaptive", { loadStyle: true });
+    AelluxJs.ext("present", { loadStyle: true });
     AelluxJs.init({ mode: "basic" });
   });
   await expect.poll(() => page.evaluate(() => AelluxJs.diagnostics.supported)).toBe(true);
   await expect.poll(() => page.evaluate(() =>
-    AelluxJs.ext.feedback?.initialized && AelluxJs.ext.adaptive?.initialized
+    AelluxJs.ext.feedback?.initialized && AelluxJs.ext.adaptive?.initialized &&
+      AelluxJs.ext.present?.initialized
   )).toBe(true);
 
   const assets = await page.evaluate(() => Object.fromEntries(
@@ -36,7 +38,9 @@ test("generated integrity covers the orchestrator and built-in Extension assets"
     "aellux.orchestrator.js",
     "aellux.ext.feedback.js",
     "aellux.ext.adaptive.js",
-    "aellux.ext.adaptive.css"
+    "aellux.ext.adaptive.css",
+    "aellux.ext.present.js",
+    "aellux.ext.present.css"
   ]) {
     expect(assets[filename]).toEqual({
       integrity: await expectedIntegrity(filename),

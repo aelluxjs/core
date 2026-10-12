@@ -53,6 +53,7 @@ export function createAelluxConstants() {
       mode: "full",
       verboseLevel: 0,
       forceLegacy: false,
+      autoViewportMeta: true,
       basePath: null,
       crossOrigin: null,
       extensions: {}

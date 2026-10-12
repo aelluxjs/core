@@ -31,24 +31,27 @@
 
   AelluxJs.extAttach(extensionName, { init, destroy });
 
-  function init(options) {
+  async function init(options) {
     AelluxJs.mountManager.add({
       extensionName, selector: `[${attr.extensionName}]`,
-      mount: mountElement, unmount: unmountElement,
-      controller: ["controllerMethod"]
+      mount: mountElement, unmount: unmountElement, update: updateElement,
+      controllers: ["controllerMethod"]
     });
   }
 
-  function destroy() {
+  async function destroy() {
     AelluxJs.mountManager.remove({ extensionName });
   }
 
-  function mountElement(element) {
+  async function mountElement(element) {
   }
 
-  function unmountElement(element) {
+  async function unmountElement(element) {
   }
 
-  function controllerMethod(element) {
+  async function updateElement(element) {
+  }
+
+  async function controllerMethod(element) {
   }
 })(typeof globalThis !== "undefined" ? globalThis : window);

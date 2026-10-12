@@ -75,7 +75,9 @@ import createWeakCss from "./internal/create-weak-css.js";
     api.diagnostics.notAvailable = [];
 
     api.updatePreferenceAttributesHTML(); // Set HTML to persisted preferences.
+    updateHardwareAttribute();
     addWeakStyles();
+    updateViewportMeta();
     loadOrchestrator();
   };
   if (api.minified) scriptExtension = ".min.js";
@@ -196,11 +198,23 @@ import createWeakCss from "./internal/create-weak-css.js";
       .replace(/\%([a-z][0-9a-z\-]*)/gi, c);
     document.head.appendChild(style);
 
-    if (!document.head.querySelector('meta[name="viewport"]')) {
-      var meta = document.createElement("meta");
-      meta.name = "viewport";
-      meta.content = "width=device-width, initial-scale=1";
-      document.head.appendChild(meta);
+  }
+
+  function updateViewportMeta() {
+    if (AelluxJs.options.autoViewportMeta === false ||
+      document.head.querySelector('meta[name="viewport"]')) return;
+    var meta = document.createElement("meta");
+    meta.name = "viewport";
+    meta.content = "width=device-width, initial-scale=1";
+    document.head.appendChild(meta);
+  }
+
+  function updateHardwareAttribute() {
+    var browserNavigator = root.navigator || {};
+    var lowHardware = browserNavigator.hardwareConcurrency <= 4 ||
+      browserNavigator.deviceMemory <= 4;
+    if (lowHardware) {
+      document.documentElement.setAttribute(api.attr("low-hardware"), "");
     }
   }
 

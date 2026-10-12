@@ -1,6 +1,6 @@
 # Performance and Bundle Budget
 
-The release build checks the byte size of each shipped minified runtime, Core Extension, and generated Adaptive stylesheet. The check measures raw bytes and gzip bytes at compression level 9. It excludes source maps because browsers do not request them as part of a normal production load.
+The release build checks the byte size of each shipped minified runtime, Core Extension, and generated Extension stylesheet. The check measures raw bytes and gzip bytes at compression level 9. It excludes source maps because browsers do not request them as part of a normal production load.
 
 Run the check after a build:
 
@@ -17,12 +17,13 @@ The table records the release-candidate baseline measured on October 10, 2026. L
 
 | Artifact | Baseline raw | Baseline gzip | Raw limit | Gzip limit |
 | --- | ---: | ---: | ---: | ---: |
-| `aellux.min.js` | 25.6 KiB | 9.3 KiB | 28 KiB | 11 KiB |
-| `aellux.esm.min.js` | 14.6 KiB | 5.0 KiB | 16 KiB | 6 KiB |
-| `aellux.orchestrator.min.js` | 16.8 KiB | 6.0 KiB | 20 KiB | 7 KiB |
-| `aellux.full.min.js` | 34.4 KiB | 11.1 KiB | 40 KiB | 13 KiB |
-| `aellux.full.legacy.min.js` | 316.8 KiB | 109.4 KiB | 350 KiB | 125 KiB |
-| `aellux.ext.adaptive.min.css` | 104.1 KiB | 8.2 KiB | 120 KiB | 10 KiB |
+| `aellux.min.js` | 25.6 KiB | 9.3 KiB | 29 KiB | 12 KiB |
+| `aellux.esm.min.js` | 14.6 KiB | 5.0 KiB | 17 KiB | 7 KiB |
+| `aellux.orchestrator.min.js` | 16.8 KiB | 6.0 KiB | 21 KiB | 8 KiB |
+| `aellux.full.min.js` | 34.4 KiB | 11.1 KiB | 41 KiB | 14 KiB |
+| `aellux.full.legacy.min.js` | 316.8 KiB | 109.4 KiB | 351 KiB | 126 KiB |
+| `aellux.ext.adaptive.min.css` | 104.1 KiB | 8.2 KiB | 121 KiB | 11 KiB |
+| `aellux.ext.present.min.css` | 2.3 KiB | 0.5 KiB | 4 KiB | 2 KiB |
 
 Each separately distributed minified Core Extension is also checked. Their individual limits are held in the executable configuration so the documentation does not duplicate a second table of values.
 

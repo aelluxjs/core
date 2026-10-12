@@ -5,8 +5,8 @@
 ## Accessibility profile
 
 - **Capabilities:** interaction and input; structure and state; visual preference policy; storage and media-query integration.
-- **Owned state:** computed preference values, root preference attributes, option active classes and associated input values or checked state.
-- **Consumer responsibility:** use native keyboard-operable controls with accessible names and preserve meaningful labels when mirroring selected content.
+- **Owned state:** computed preference values, root preference attributes, option active classes, value-label visibility and associated input values or checked state.
+- **Consumer responsibility:** use native keyboard-operable controls with accessible names and provide meaningful text for every value label.
 - **Limitation:** generic elements marked as options, next or previous controls do not receive button semantics or keyboard behavior automatically.
 
 ```js
@@ -29,12 +29,16 @@ An element marked with `data-ae-preference` is a clickable preference container.
 </div>
 ```
 
-The Extension also recognizes `data-ae-label`, `data-ae-next`, and `data-ae-prev`. `data-ae-next` and `data-ae-prev` cycle through the built-in values for the container preference and wrap at either end. Preference names may use camelCase or kebab-case. If the current value is not recognized, next selects the first built-in value and previous selects the last.
+The Extension also recognizes `data-ae-label`, `data-ae-next`, and `data-ae-prev`. A descendant marked with `data-ae-label="<value>"` is visible when its value matches the container's current computed preference and receives `hidden` while another value is selected. This allows each option to have its own markup instead of copying content into a shared label. More than one label may declare the same value, and numeric values are matched by their string representation.
+
+`data-ae-next` and `data-ae-prev` cycle through the built-in values for the container preference and wrap at either end. Preference names may use camelCase or kebab-case. If the current value is not recognized, next selects the first built-in value and previous selects the last.
 
 ```html
 <div data-ae-preference="color-scheme">
   <button type="button" data-ae-prev>Previous</button>
-  <span data-ae-label></span>
+  <span data-ae-label="auto">Use system setting</span>
+  <span data-ae-label="light" hidden>Light theme</span>
+  <span data-ae-label="dark" hidden>Dark theme</span>
   <button type="button" data-ae-next>Next</button>
 </div>
 ```
