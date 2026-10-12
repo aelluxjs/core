@@ -23,6 +23,8 @@
 [data-ae-present]>[data-ae-present-motion] {
   min-width: 0;
   min-height: 0;
+  place-self: stretch;
+  contain: layout paint;
 }
 html[data-ae-reduced-motion="reduced"] [data-ae-present] {
   transition: none !important;

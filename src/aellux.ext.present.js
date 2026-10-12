@@ -141,7 +141,9 @@
         this.triggers.forEach(updateTriggerAriaExpanded);
       },
       stop: function () {
-        this.classList.remove(...Object.values(className));
+        for (const c of Object.values(className)) {
+          if (c !== className.pop) { this.classList.remove(c); }
+        }
         if (this.interruptTransition !== null
           && typeof this.interruptTransition === "function") {
           this.interruptTransition(

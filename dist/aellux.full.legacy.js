@@ -24280,6 +24280,18 @@
       });
     };
   }
+  function _toConsumableArray4(r) {
+    return _arrayWithoutHoles4(r) || _iterableToArray4(r) || _unsupportedIterableToArray7(r) || _nonIterableSpread4();
+  }
+  function _nonIterableSpread4() {
+    throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+  }
+  function _iterableToArray4(r) {
+    if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
+  }
+  function _arrayWithoutHoles4(r) {
+    if (Array.isArray(r)) return _arrayLikeToArray7(r);
+  }
   function _slicedToArray4(r, e) {
     return _arrayWithHoles4(r) || _iterableToArrayLimit4(r, e) || _unsupportedIterableToArray7(r, e) || _nonIterableRest4();
   }
@@ -24309,18 +24321,6 @@
   }
   function _arrayWithHoles4(r) {
     if (Array.isArray(r)) return r;
-  }
-  function _toConsumableArray4(r) {
-    return _arrayWithoutHoles4(r) || _iterableToArray4(r) || _unsupportedIterableToArray7(r) || _nonIterableSpread4();
-  }
-  function _nonIterableSpread4() {
-    throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
-  }
-  function _iterableToArray4(r) {
-    if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
-  }
-  function _arrayWithoutHoles4(r) {
-    if (Array.isArray(r)) return _arrayLikeToArray7(r);
   }
   function _createForOfIteratorHelper6(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
@@ -24484,8 +24484,12 @@
               this.triggers.forEach(updateTriggerAriaExpanded);
             },
             stop: function stop() {
-              var _this$classList;
-              (_this$classList = this.classList).remove.apply(_this$classList, _toConsumableArray4(Object.values(className)));
+              for (var _i = 0, _Object$values = Object.values(className); _i < _Object$values.length; _i++) {
+                var c = _Object$values[_i];
+                if (c !== className.pop) {
+                  this.classList.remove(c);
+                }
+              }
               if (this.interruptTransition !== null && typeof this.interruptTransition === "function") {
                 this.interruptTransition(AelluxJs2.diagnostics.create(AelluxJs2.diagnostics.WARN_INTERRUPTION, {
                   extensionName: extensionName

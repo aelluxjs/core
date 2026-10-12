@@ -101,6 +101,18 @@
       });
     };
   }
+  function _toConsumableArray(r) {
+    return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread();
+  }
+  function _nonIterableSpread() {
+    throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+  }
+  function _iterableToArray(r) {
+    if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
+  }
+  function _arrayWithoutHoles(r) {
+    if (Array.isArray(r)) return _arrayLikeToArray(r);
+  }
   function _slicedToArray(r, e) {
     return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest();
   }
@@ -130,18 +142,6 @@
   }
   function _arrayWithHoles(r) {
     if (Array.isArray(r)) return r;
-  }
-  function _toConsumableArray(r) {
-    return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread();
-  }
-  function _nonIterableSpread() {
-    throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
-  }
-  function _iterableToArray(r) {
-    if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
-  }
-  function _arrayWithoutHoles(r) {
-    if (Array.isArray(r)) return _arrayLikeToArray(r);
   }
   function _createForOfIteratorHelper(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
@@ -303,8 +303,12 @@
           this.triggers.forEach(updateTriggerAriaExpanded);
         },
         stop: function stop() {
-          var _this$classList;
-          (_this$classList = this.classList).remove.apply(_this$classList, _toConsumableArray(Object.values(className)));
+          for (var _i = 0, _Object$values = Object.values(className); _i < _Object$values.length; _i++) {
+            var c = _Object$values[_i];
+            if (c !== className.pop) {
+              this.classList.remove(c);
+            }
+          }
           if (this.interruptTransition !== null && typeof this.interruptTransition === "function") {
             this.interruptTransition(AelluxJs.diagnostics.create(AelluxJs.diagnostics.WARN_INTERRUPTION, {
               extensionName: extensionName

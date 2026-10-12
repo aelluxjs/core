@@ -39,6 +39,8 @@ ${present} {
 ${present}>${motion} {
   min-width: 0;
   min-height: 0;
+  place-self: stretch;
+  contain: layout paint;
 }
 html[${reducedMotionAttribute}="reduced"] ${present} {
   transition: none !important;
