@@ -13,9 +13,10 @@
  * `[data-ae-present-motion]` participants. Trigger and dismiss relationships use
  * extension data attributes and may target a region by selector or identifier.
  *
- * Outputs and owned state: owns presentation classes plus its changes to
- * `hidden`, `aria-expanded` and `aria-controls`. It exposes controller methods
- * for presenting, dismissing and toggling and dispatches lifecycle events.
+ * Outputs and owned state: owns presentation and will-change classes plus its
+ * changes to `hidden`, `aria-expanded` and `aria-controls`. It exposes
+ * controller methods for presenting, dismissing and toggling and dispatches
+ * lifecycle events.
  * When hiding a region containing the active element, it dispatches
  * `UnpopFocusLost` after that element loses focus.
  *
@@ -44,12 +45,13 @@
     unpopOnOutside: AelluxJs.attr("unpop-on-outside"),
     trigger: AelluxJs.attr("trigger"), //toggle,pop,unpop
     dismiss: AelluxJs.attr("dismiss"), //selector
-    target: AelluxJs.attr("target"), //selector
+    target: AelluxJs.attr("target") //selector
   };
   const className = {
     pop: AelluxJs.className("pop"),
     popping: AelluxJs.className("popping"),
     unpopping: AelluxJs.className("unpopping"),
+    willChange: AelluxJs.className("will-change")
   };
 
   AelluxJs.extAttach(extensionName, {
@@ -64,6 +66,7 @@
     PING = "ping",
     MILLISECOND = "ms",
     SECOND = "s",
+    TRANSITION_PREPARE_TIME = 100,
     ARIA_EXPANDED = "aria-expanded",
     ARIA_CONTROLS = "aria-controls";
   const presentElements = new Map();
@@ -75,7 +78,7 @@
       extensionName,
       selector: `[${attr.presentMotion}],[${attr.present}]`,
       // Register the motion before the container changes its hidden state.
-      mount() {}
+      mount() { }
     });
 
     AelluxJs.mountManager.add({
@@ -270,7 +273,7 @@
     }
   }
 
-  function presentTransition(element, gotoVisible) {
+  async function presentTransition(element, gotoVisible) {
     const controller = presentElements.get(element);
     if (!controller) return;
 
@@ -284,38 +287,56 @@
     if ((element.hidden && !gotoVisible)
       || newDirection === controller.direction) { return; }
 
-    const allowEvent = AelluxJs.dispatchFrom(
-      element, `${BEFORE}${newDirection}`,
-      { bubbles: true, cancelable: true }
-    );
-    if (!allowEvent) { return; }
+    let transitionClass = null;
+    let transitionStarted = false;
 
-    controller.stop();
-    controller.direction = newDirection;
+    try {
+      const allowEvent = AelluxJs.dispatchFrom(
+        element, `${BEFORE}${newDirection}`,
+        { bubbles: true, cancelable: true }
+      );
+      if (!allowEvent) { return; }
 
-    new Promise((completeTransition, interruptTransition) => {
-      controller.interruptTransition = interruptTransition;
+      controller.stop();
+      controller.direction = newDirection;
+      transitionStarted = true;
 
-      const c = className[`${newDirection}${PING}`.toLowerCase()];
+      const interrupted = new Promise((_, interruptTransition) => {
+        controller.interruptTransition = interruptTransition;
+      });
+
+      element.hidden = false;
+      controller.classList.add(className.willChange);
+
+      const prepared = new Promise(resolve => {
+        controller.timeout = setTimeout(() => {
+          controller.timeout = null;
+          resolve();
+        }, TRANSITION_PREPARE_TIME);
+      });
+      await Promise.race([prepared, interrupted]);
+
+      transitionClass = className[`${newDirection}${PING}`.toLowerCase()];
       const duration = root.getComputedStyle(controller.presentMotion)
         .getPropertyValue(`--ae-${newDirection}-duration`.toLowerCase()).trim();
       const time = getString2Time(duration);
 
-      controller.classList.add(c);
-      element.hidden = false;
-
-      controller.timeout = setTimeout(
-        finishTransition,
-        time,
-        element,
-        controller,
-        c,
-        gotoVisible,
-        completeTransition
-      );
+      controller.classList.add(transitionClass);
+      const completed = new Promise(completeTransition => {
+        controller.timeout = setTimeout(
+          finishTransition,
+          time,
+          element,
+          controller,
+          transitionClass,
+          gotoVisible,
+          completeTransition
+        );
+      });
 
       AelluxJs.dispatchFrom(element, `${newDirection}${PING}`, { bubbles: true });
-    }).then(() => {
+      await Promise.race([completed, interrupted]);
+
       if (gotoVisible && !element.hidden) {
         autoUnpopSchedule(element, controller);
         controller.classList.add(className.pop);
@@ -326,7 +347,15 @@
         controller.setAriaExpanded("false");
         AelluxJs.dispatchFrom(element, UNPOP, { bubbles: true });
       }
-    }).catch((error) => {
+    } catch (error) {
+      if (transitionStarted && controller.timeout !== null) {
+        clearTimeout(controller.timeout);
+        controller.timeout = null;
+      }
+      if (transitionStarted) {
+        controller.interruptTransition = null;
+        if (transitionClass) controller.classList.remove(transitionClass);
+      }
       switch (error && error.code) {
         case AelluxJs.diagnostics.WARN_INTERRUPTION.code:
           AelluxJs.diagnostics.warn(
@@ -341,7 +370,9 @@
           );
           break;
       }
-    });
+    } finally {
+      if (transitionStarted) controller.classList.remove(className.willChange);
+    }
   }
 
   function finishTransition(element, controller, c, gotoVisible, completeTransition) {

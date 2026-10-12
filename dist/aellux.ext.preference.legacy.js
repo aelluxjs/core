@@ -182,10 +182,16 @@
     function updateContainer(container) {
       var preference = container.getAttribute(attr.preference);
       var elements = container.querySelectorAll("[".concat(attr.option, "]"));
-      var selectedLabel = container.querySelector("[".concat(attr.label, "]"));
+      var labels = container.querySelectorAll("[".concat(attr.label, "]"));
+      var currentValue = get(preference);
+      labels.forEach(function(label) {
+        var value = label.getAttribute(attr.label);
+        var selected = String(value) === String(currentValue);
+        label.hidden = !selected;
+      });
       elements.forEach(function(element) {
         var value = element.getAttribute(attr.option);
-        var selected = value === get(preference);
+        var selected = value === currentValue;
         element.classList.toggle(className.active, selected);
         var labelFor = element.getAttribute("for");
         if (labelFor) {
@@ -193,13 +199,6 @@
           if (forTarget) {
             if ("value" in forTarget) forTarget.value = value;
             if ("checked" in forTarget) forTarget.checked = selected;
-          }
-        }
-        if (selectedLabel && selected) {
-          if (selectedLabel.value) {
-            selectedLabel.value = element.innerText;
-          } else {
-            selectedLabel.innerHTML = element.innerHTML;
           }
         }
       });

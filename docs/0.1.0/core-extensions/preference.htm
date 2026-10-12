@@ -566,8 +566,8 @@ Preference                  </li>
 <h2>Accessibility profile</h2>
 <ul>
 <li><strong>Capabilities:</strong> interaction and input; structure and state; visual preference policy; storage and media-query integration.</li>
-<li><strong>Owned state:</strong> computed preference values, root preference attributes, option active classes and associated input values or checked state.</li>
-<li><strong>Consumer responsibility:</strong> use native keyboard-operable controls with accessible names and preserve meaningful labels when mirroring selected content.</li>
+<li><strong>Owned state:</strong> computed preference values, root preference attributes, option active classes, value-label visibility and associated input values or checked state.</li>
+<li><strong>Consumer responsibility:</strong> use native keyboard-operable controls with accessible names and provide meaningful text for every value label.</li>
 <li><strong>Limitation:</strong> generic elements marked as options, next or previous controls do not receive button semantics or keyboard behavior automatically.</li>
 </ul>
 <pre><code class="language-js">const preference = await $ae.wait(&quot;preference&quot;);
@@ -583,10 +583,13 @@ console.log(preference.get(&quot;colorScheme&quot;));
   &lt;button type=&quot;button&quot; data-ae-option=&quot;dark&quot;&gt;Dark&lt;/button&gt;
 &lt;/div&gt;
 </code></pre>
-<p>The Extension also recognizes <code>data-ae-label</code>, <code>data-ae-next</code>, and <code>data-ae-prev</code>. <code>data-ae-next</code> and <code>data-ae-prev</code> cycle through the built-in values for the container preference and wrap at either end. Preference names may use camelCase or kebab-case. If the current value is not recognized, next selects the first built-in value and previous selects the last.</p>
+<p>The Extension also recognizes <code>data-ae-label</code>, <code>data-ae-next</code>, and <code>data-ae-prev</code>. A descendant marked with <code>data-ae-label=&quot;&lt;value&gt;&quot;</code> is visible when its value matches the container&#39;s current computed preference and receives <code>hidden</code> while another value is selected. This allows each option to have its own markup instead of copying content into a shared label. More than one label may declare the same value, and numeric values are matched by their string representation.</p>
+<p><code>data-ae-next</code> and <code>data-ae-prev</code> cycle through the built-in values for the container preference and wrap at either end. Preference names may use camelCase or kebab-case. If the current value is not recognized, next selects the first built-in value and previous selects the last.</p>
 <pre><code class="language-html">&lt;div data-ae-preference=&quot;color-scheme&quot;&gt;
   &lt;button type=&quot;button&quot; data-ae-prev&gt;Previous&lt;/button&gt;
-  &lt;span data-ae-label&gt;&lt;/span&gt;
+  &lt;span data-ae-label=&quot;auto&quot;&gt;Use system setting&lt;/span&gt;
+  &lt;span data-ae-label=&quot;light&quot; hidden&gt;Light theme&lt;/span&gt;
+  &lt;span data-ae-label=&quot;dark&quot; hidden&gt;Dark theme&lt;/span&gt;
   &lt;button type=&quot;button&quot; data-ae-next&gt;Next&lt;/button&gt;
 &lt;/div&gt;
 </code></pre>

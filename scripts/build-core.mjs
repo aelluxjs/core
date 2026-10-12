@@ -9,6 +9,7 @@ import { basename, dirname, isAbsolute, join, relative } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { createContext, runInContext } from "node:vm";
 import { generateAdaptiveCSS } from "../src/aellux.ext.adaptive.css.js";
+import { generatePresentCSS } from "../src/aellux.ext.present.css.js";
 
 const projectRoot = fileURLToPath(new URL("../", import.meta.url));
 const sourceDirectory = join(projectRoot, "src");
@@ -80,21 +81,29 @@ const bootstrapEvaluationBuild = await build({
 runInContext(bootstrapEvaluationBuild.outputFiles[0].text, bootstrapContext);
 runInContext('AelluxJs.ext("adaptive")', bootstrapContext);
 runInContext(await readFile(adaptiveExtensionPath, "utf8"), bootstrapContext);
-await writeFile(
-  join(outputDirectory, "aellux.ext.adaptive.css"),
-  generateAdaptiveCSS(bootstrapContext.AelluxJs),
-  "utf8"
+await buildGeneratedStylesheet(
+  "aellux.ext.adaptive.css",
+  generateAdaptiveCSS(bootstrapContext.AelluxJs)
 );
-generatedFiles.add("aellux.ext.adaptive.css");
+await buildGeneratedStylesheet(
+  "aellux.ext.present.css",
+  generatePresentCSS(bootstrapContext.AelluxJs)
+);
 
-await build({
-  absWorkingDir: projectRoot,
-  entryPoints: [join(outputDirectory, "aellux.ext.adaptive.css")],
-  outfile: join(outputDirectory, "aellux.ext.adaptive.min.css"),
-  minify: true,
-  legalComments: "inline"
-});
-generatedFiles.add("aellux.ext.adaptive.min.css");
+async function buildGeneratedStylesheet(filename, contents) {
+  const outputPath = join(outputDirectory, filename);
+  const minifiedFilename = filename.replace(/\.css$/, ".min.css");
+  await writeFile(outputPath, contents, "utf8");
+  generatedFiles.add(filename);
+  await build({
+    absWorkingDir: projectRoot,
+    entryPoints: [outputPath],
+    outfile: join(outputDirectory, minifiedFilename),
+    minify: true,
+    legalComments: "inline"
+  });
+  generatedFiles.add(minifiedFilename);
+}
 
 for (const sourceFile of sourceFiles) {
   const filename = basename(sourceFile);

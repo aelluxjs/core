@@ -55,19 +55,22 @@ test("mounted present controller binds public methods to its element", async ({ 
     typeof AelluxJs.mountManager?.controller("panel")?.present?.pop === "function"
   )).toBe(true);
 
-  const result = await page.evaluate(() => {
+  const result = await page.evaluate(async () => {
     const panel = document.getElementById("panel");
     const byElement = AelluxJs.mountManager.controller(panel);
     const byId = AelluxJs.mountManager.controller("panel");
     const byPrefixedId = AelluxJs.mountManager.controller("#panel");
     const byCall = AelluxJs(panel);
     const byAlias = $ae("#panel");
-    byElement.present.pop();
+    const transition = byElement.present.pop();
+    const returnsPromise = transition instanceof Promise;
+    await transition;
     return {
       sameController: byElement === byId && byId === byPrefixedId &&
         byPrefixedId === byCall && byCall === byAlias,
       methods: Object.keys(byElement.present).sort(),
       update: typeof byElement.update,
+      returnsPromise,
       presentUpdate: byElement.present.update,
       missing: AelluxJs("#missing")
     };
@@ -76,6 +79,7 @@ test("mounted present controller binds public methods to its element", async ({ 
     sameController: true,
     methods: ["pop", "toggle", "trigger", "unpop", "update"],
     update: "function",
+    returnsPromise: true,
     presentUpdate: null,
     missing: null
   });
@@ -86,6 +90,64 @@ test("mounted present controller binds public methods to its element", async ({ 
 
   await page.evaluate(() => AelluxJs.unmount(document.getElementById("panel")));
   expect(await page.evaluate(() => $ae("panel"))).toBe(null);
+});
+
+test("present prepares will-change before starting a transition", async ({ page }) => {
+  await page.goto("/tests/index.htm");
+  await page.evaluate(() => {
+    document.body.innerHTML = `
+      <div id="panel" data-ae-present hidden
+        style="--ae-pop-duration: 0ms; --ae-unpop-duration: 0ms"></div>`;
+  });
+  await page.addScriptTag({ url: "/dist/aellux.js" });
+  await page.evaluate(() => AelluxJs.init({ mode: "full" }));
+  await expect(page.locator('link[data-ae-ext-style="present"]')).toHaveAttribute(
+    "href", /aellux\.ext\.present\.css$/
+  );
+  await expect.poll(() => page.evaluate(() =>
+    typeof AelluxJs.mountManager?.controller("panel")?.present?.pop === "function"
+  )).toBe(true);
+
+  const initial = await page.evaluate(() => {
+    const panel = document.getElementById("panel");
+    const willChange = AelluxJs.className("will-change");
+    const popping = AelluxJs.className("popping");
+    window.presentTransitionStartedAt = performance.now();
+    window.presentPoppingAt = null;
+    panel.addEventListener(AelluxJs.eventName("Popping"), () => {
+      window.presentPoppingAt = performance.now();
+    }, { once: true });
+    window.presentTransitionPromise = AelluxJs.mountManager.controller(panel).present.pop();
+    return {
+      hidden: panel.hidden,
+      willChange: panel.classList.contains(willChange),
+      popping: panel.classList.contains(popping),
+      returnsPromise: window.presentTransitionPromise instanceof Promise,
+      willChangeStyle: getComputedStyle(panel).willChange
+    };
+  });
+  expect(initial).toEqual({
+    hidden: false,
+    willChange: true,
+    popping: false,
+    returnsPromise: true,
+    willChangeStyle: "opacity, transform, grid-template-columns, grid-template-rows"
+  });
+
+  await expect.poll(() => page.evaluate(() => window.presentPoppingAt)).not.toBeNull();
+  const preparationTime = await page.evaluate(() =>
+    window.presentPoppingAt - window.presentTransitionStartedAt
+  );
+  expect(preparationTime).toBeGreaterThanOrEqual(90);
+  await page.evaluate(() => window.presentTransitionPromise);
+  await expect.poll(() => page.evaluate(() => {
+    const panel = document.getElementById("panel");
+    return {
+      willChange: panel.classList.contains(AelluxJs.className("will-change")),
+      popped: panel.classList.contains(AelluxJs.className("pop")),
+      willChangeStyle: getComputedStyle(panel).willChange
+    };
+  })).toEqual({ willChange: false, popped: true, willChangeStyle: "auto" });
 });
 
 test("controller lookup diagnoses invalid inputs and unmounted elements", async ({ page }) => {
@@ -483,10 +545,10 @@ test("present records interrupted transitions as warnings and failures as errors
     panels.mount(panel);
     extension.pop(panel);
     extension.unpop(panel);
-    await new Promise(resolve => setTimeout(resolve, 30));
+    await new Promise(resolve => setTimeout(resolve, 130));
     window.failPopping = true;
     extension.pop(panel);
-    await new Promise(resolve => setTimeout(resolve, 0));
+    await new Promise(resolve => setTimeout(resolve, 130));
     return AelluxJs.diagnostics.showHistory().map(entry => ({ code: entry.code, level: entry.level }));
   });
   expect(entries).toEqual([
@@ -495,7 +557,7 @@ test("present records interrupted transitions as warnings and failures as errors
   ]);
 });
 
-test("present reports a selector callback failure with its own diagnostic", async ({ page }) => {
+test("present reports a transition callback failure with its own diagnostic", async ({ page }) => {
   await page.goto("/tests/index.htm");
   await page.evaluate(async () => {
     const [{ buildDiagnostics }, { createAelluxConstants }, { saveAttr, restoreAttr }] = await Promise.all([
@@ -531,7 +593,7 @@ test("present reports a selector callback failure with its own diagnostic", asyn
     document.querySelector("#control").click();
     return AelluxJs.diagnostics.showHistory().map(entry => entry.code);
   });
-  expect(codes).toEqual([1108]);
+  expect(codes).toEqual([1109]);
 });
 
 test("present refreshes trigger controls from its initial value", async ({ page }) => {

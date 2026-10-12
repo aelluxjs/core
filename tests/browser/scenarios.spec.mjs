@@ -1840,8 +1840,18 @@ test("full runtime writes the renamed history state marker", async ({ page }) =>
     registered: Object.hasOwn(AelluxJs.registry.ext, "adaptive"),
     bundled: Object.hasOwn(AelluxJs.bundledExtensions, "adaptive"),
     style: AelluxJs.registry.ext.adaptive?.loadStyle,
+    presentInitialized: AelluxJs.ext.present?.initialized,
+    presentStyle: AelluxJs.registry.ext.present?.loadStyle,
     ajaxHrefBundled: Object.hasOwn(AelluxJs.bundledExtensions, "ajaxHref")
-  }))).toEqual({ initialized: true, registered: true, bundled: true, style: true, ajaxHrefBundled: false });
+  }))).toEqual({
+    initialized: true,
+    registered: true,
+    bundled: true,
+    style: true,
+    presentInitialized: true,
+    presentStyle: true,
+    ajaxHrefBundled: false
+  });
   expect(await page.evaluate(() => history.state?.aelluxJsState)).toBe(true);
   expect(await page.evaluate(() => history.state?.aelluxState)).toBeUndefined();
 });
@@ -1855,11 +1865,14 @@ test("minified distribution exposes the renamed global", async ({ page }) => {
   await expect(page.locator('link[data-ae-ext-style="adaptive"]')).toHaveAttribute(
     "href", /aellux\.ext\.adaptive\.min\.css$/
   );
+  await expect(page.locator('link[data-ae-ext-style="present"]')).toHaveAttribute(
+    "href", /aellux\.ext\.present\.min\.css$/
+  );
   expect(await page.evaluate(() => window.AelluxJs === window.$ae)).toBe(true);
   expect(await page.evaluate(() => typeof window.Aellux)).toBe("undefined");
 });
 
-test("legacy full runtime loads adaptive and its stylesheet", async ({ page }) => {
+test("legacy full runtime loads generated Extension stylesheets", async ({ page }) => {
   await page.goto("/tests/index.htm");
   await page.addScriptTag({ url: "/dist/aellux.js" });
   await page.evaluate(() => AelluxJs.init({ mode: "full", forceLegacy: true }));
@@ -1867,9 +1880,12 @@ test("legacy full runtime loads adaptive and its stylesheet", async ({ page }) =
   await expect(page.locator('link[data-ae-ext-style="adaptive"]')).toHaveAttribute(
     "href", /aellux\.ext\.adaptive\.css$/
   );
+  await expect(page.locator('link[data-ae-ext-style="present"]')).toHaveAttribute(
+    "href", /aellux\.ext\.present\.css$/
+  );
 });
 
-test("preference labels update associated inputs safely", async ({ page }) => {
+test("preference options update inputs and value-label visibility", async ({ page }) => {
   await page.goto("/tests/index.htm");
   await page.evaluate(() => {
     document.body.innerHTML = `
@@ -1877,17 +1893,30 @@ test("preference labels update associated inputs safely", async ({ page }) => {
         <input id="scheme:light" type="radio" name="scheme">
         <label data-ae-option="light" for="scheme:light">Light</label>
         <label data-ae-option="dark" for="missing-input">Dark</label>
+        <span id="label-auto" data-ae-label="auto">Automatic</span>
+        <span id="label-light" data-ae-label="light">Light selected</span>
+        <span id="label-dark" data-ae-label="dark">Dark selected</span>
       </div>`;
   });
   await page.addScriptTag({ url: "/dist/aellux.js" });
   await page.evaluate(() => AelluxJs.init({ mode: "full" }));
   await expect.poll(() => page.evaluate(() => AelluxJs.ext.preference?.initialized)).toBe(true);
+  await expect(page.locator("#label-auto")).toBeVisible();
+  await expect(page.locator("#label-light")).toBeHidden();
+  await expect(page.locator("#label-dark")).toBeHidden();
   await page.evaluate(() => {
     AelluxJs.ext.preference.set("color-scheme", "light");
     AelluxJs.ext.preference.update();
   });
   await expect(page.locator('[id="scheme:light"]')).toBeChecked();
   await expect(page.locator('[id="scheme:light"]')).toHaveValue("light");
+  await expect(page.locator("#label-auto")).toBeHidden();
+  await expect(page.locator("#label-light")).toBeVisible();
+  await expect(page.locator("#label-dark")).toBeHidden();
+
+  await page.getByText("Dark", { exact: true }).click();
+  await expect(page.locator("#label-light")).toBeHidden();
+  await expect(page.locator("#label-dark")).toBeVisible();
 });
 
 test("preference next and previous controls cycle built-in values", async ({ page }) => {
@@ -1902,6 +1931,7 @@ test("preference next and previous controls cycle built-in values", async ({ pag
       <div data-ae-preference="text-scale">
         <button id="scale-prev" data-ae-prev></button>
         <button id="scale-next" data-ae-next></button>
+        <span id="scale-label" data-ae-label="1.5">150%</span>
       </div>
     `;
     AelluxJs.persist.preferences.set("textScale", "1.5");
@@ -1912,6 +1942,7 @@ test("preference next and previous controls cycle built-in values", async ({ pag
     !!AelluxJs.mountManager.controller(document.getElementById("color-next").parentElement)
     && !!AelluxJs.mountManager.controller(document.getElementById("scale-next").parentElement)
   )).toBe(true);
+  await expect(page.locator("#scale-label")).toBeVisible();
 
   await page.locator("#color-next").press("Enter");
 

@@ -39,8 +39,8 @@ The mount helper removes existing `ae--*` classes from an element before its fir
 After an element mounts, use `$ae(elementOrId).{extensionName}.{mountedExtensionMethod}(...args)` to call its public Extension methods. `AelluxJs(elementOrId)` works the same way. Both calls resolve through `mountManager.controller(elementOrId)`. `elementOrId` can be a DOM element, an ID, or an ID prefixed with `#`. Invalid values and IDs that do not resolve emit a warning and return `null`. An element without a mounted controller emits an error explaining that it may not be mounted, then returns `null`. Before runtime initialization, the shortcut returns `null`. The `controllers` names registered by an Extension become methods under its camelCase namespace. Each method receives the element as its first argument, followed by `...args`:
 
 ```js
-$ae("#panel").present.pop();
-$ae("#panel").present.toggle(false);
+await $ae("#panel").present.pop();
+await $ae("#panel").present.toggle(false);
 ```
 
 Unmounting removes the corresponding methods from the element controller.

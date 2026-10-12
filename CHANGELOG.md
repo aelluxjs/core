@@ -8,6 +8,8 @@ All notable changes to aellux.js will be documented in this file.
 
 - Updated the package and current documentation references to `0.1.0-beta.8`.
 - Corrected the Extension authoring contract to document the awaited asynchronous lifecycle and updated the scaffold callbacks accordingly.
+- Updated Preference value labels so `data-ae-label="<value>"` elements reflect the currently selected option through their visibility.
+- Present now applies temporary `will-change` preparation, waits 100 ms before starting pop and unpop transitions, and ships its transition rules in generated standalone CSS instead of the boot weak CSS.
 
 ## [0.1.0-beta.7] - 2026-10-10
 

@@ -1,11 +1,11 @@
 # Present Extension
 
-`present` controls the visibility of elements marked with `data-ae-present`. It is included in the `full` runtime. In `basic` mode, register it with `$ae.ext("present")`.
+`present` controls the visibility of elements marked with `data-ae-present`. It is included in the `full` runtime, which automatically requests its generated stylesheet. In `basic` mode, register the script and stylesheet with `$ae.ext("present", { loadStyle: true })`.
 
 ## Accessibility profile
 
 - **Capabilities:** interaction and input; structure and state; motion and timing.
-- **Owned state:** presentation classes and its changes to `hidden`, `aria-expanded` and `aria-controls`.
+- **Owned state:** presentation and `will-change` classes and its changes to `hidden`, `aria-expanded` and `aria-controls`.
 - **Consumer responsibility:** use native, named trigger and dismiss controls; ensure configured motion respects reduced-motion preferences; manage focus for dialog, disclosure and similar patterns.
 - **Focus on close:** if the active element is inside the region when it becomes hidden, Present releases its focus and emits `AelluxJsUnpopFocusLost`. Focus restoration is handled by the optional Focus Extension.
 
@@ -23,9 +23,11 @@ A trigger or dismiss control with neither a selector nor a containing `data-ae-p
 
 ## Motion and state
 
-The Extension exposes `pop(element)`, `unpop(element)`, `toggle(element, goto)`, and `trigger(element, action)` through `$ae.ext.present`. It manages `hidden` and `aria-expanded` on the container and updates `aria-expanded` and `aria-controls` on its triggers. A direct child marked `data-ae-present-motion` can carry the transition classes; otherwise the container itself is used.
+The Extension exposes `pop(element)`, `unpop(element)`, `toggle(element, goto)`, and `trigger(element, action)` through `$ae.ext.present`. Each method returns a Promise that resolves after preparation and transition cleanup, including the final visibility, classes, ARIA state and events. It manages `hidden` and `aria-expanded` on the container and updates `aria-expanded` and `aria-controls` on its triggers. A direct child marked `data-ae-present-motion` can carry the transition classes; otherwise the container itself is used.
 
-The transition classes are `ae--popping`, `ae--unpopping`, and `ae--pop`. CSS custom properties `--ae-pop-duration` and `--ae-unpop-duration` on the motion element set the corresponding duration. The Extension emits cancelable `AelluxJsBeforePop` and `AelluxJsBeforeUnpop` events, followed by `AelluxJsPopping`/`AelluxJsUnpopping` and `AelluxJsPop`/`AelluxJsUnpop` as transitions progress.
+Before starting either transition, Present makes the container available for layout, adds `ae--will-change` to the motion element and waits 100 ms so the browser can prepare the declared properties. It then adds `ae--popping` or `ae--unpopping`. The temporary `ae--will-change` class is removed when the transition finishes or is interrupted; the stable open state uses `ae--pop`.
+
+The generated `aellux.ext.present.css` stylesheet supplies the default transition rules and applies `will-change` while `ae--will-change` is present. Its minified counterpart is `aellux.ext.present.min.css`; the boot runtime selects the variant that matches the loaded Aellux script. `--ae-transition-property` controls the prepared and transitioned property list and defaults to `opacity, transform, grid-template-columns, grid-template-rows`. CSS custom properties `--ae-pop-duration` and `--ae-unpop-duration` on the motion element set the corresponding duration. The Extension emits cancelable `AelluxJsBeforePop` and `AelluxJsBeforeUnpop` events immediately, waits through the preparation period, then emits `AelluxJsPopping`/`AelluxJsUnpopping` and finally `AelluxJsPop`/`AelluxJsUnpop` as transitions progress.
 
 When an `unpop` hides a region containing the active element, Present releases focus if the browser has not already done so, then dispatches `UnpopFocusLost` through `AelluxJs.dispatch`. If the active element is outside the region at the time it becomes hidden, no focus event is dispatched.
 

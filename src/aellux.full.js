@@ -13,3 +13,4 @@ root.AelluxJs.bundledExtensions = Object.freeze({
 });
 
 root.AelluxJs.ext("adaptive", { loadStyle: true });
+root.AelluxJs.ext("present", { loadStyle: true });

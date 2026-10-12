@@ -131,10 +131,16 @@
     function updateContainer(container) {
       const preference = container.getAttribute(attr.preference);
       const elements = container.querySelectorAll(`[${attr.option}]`);
-      const selectedLabel = container.querySelector(`[${attr.label}]`);
+      const labels = container.querySelectorAll(`[${attr.label}]`);
+      const currentValue = get(preference);
+      labels.forEach((label) => {
+        const value = label.getAttribute(attr.label);
+        const selected = String(value) === String(currentValue);
+        label.hidden = !selected;
+      });
       elements.forEach((element) => {
         const value = element.getAttribute(attr.option);
-        const selected = value === get(preference);
+        const selected = value === currentValue;
         element.classList.toggle(className.active, selected);
         const labelFor = element.getAttribute("for");
         if (labelFor) {
@@ -142,13 +148,6 @@
           if (forTarget) {
             if ("value" in forTarget) forTarget.value = value;
             if ("checked" in forTarget) forTarget.checked = selected;
-          }
-        }
-        if (selectedLabel && selected) {
-          if (selectedLabel.value) {
-            selectedLabel.value = element.innerText;
-          } else {
-            selectedLabel.innerHTML = element.innerHTML;
           }
         }
       });
