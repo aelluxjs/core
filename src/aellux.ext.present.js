@@ -9,9 +9,10 @@
  * Capability profile: interaction and input, structure and state, and motion
  * and timing.
  *
- * Inputs and activation: mounts `[data-ae-present]` regions and
- * `[data-ae-present-motion]` participants. Trigger and dismiss relationships use
- * extension data attributes and may target a region by selector or identifier.
+ * Inputs and activation: mounts `[data-ae-present]` regions. Each region uses a
+ * direct `[data-ae-present-motion]` child; one is generated to wrap the region's
+ * content when absent. Trigger and dismiss relationships use extension data
+ * attributes and may target a region by selector or identifier.
  *
  * Outputs and owned state: owns presentation and will-change classes plus its
  * changes to `hidden`, `aria-expanded` and `aria-controls`. It exposes
@@ -21,8 +22,8 @@
  * `UnpopFocusLost` after that element loses focus.
  *
  * Lifecycle: cancels timers, removes listeners and restores managed initial
- * attributes on unmount. Motion participants use a separate mount entry so they
- * can be restored when shared with a region or mounted separately.
+ * attributes on unmount. Generated motion wrappers are removed and their
+ * children are returned to the region.
  *
  * Accessibility: trigger and dismiss markup must be natively keyboard operable
  * and named. Consuming styles must respect reduced motion. The implementation
@@ -76,13 +77,6 @@
 
   function init(options) {
     AelluxJs.mountManager.add({
-      extensionName,
-      selector: `[${attr.presentMotion}],[${attr.present}]`,
-      // Register the motion before the container changes its hidden state.
-      mount() { }
-    });
-
-    AelluxJs.mountManager.add({
       extensionName, selector: `[${attr.present}]`,
       mount: mountPresentContainer, unmount: unmountPresentContainer,
       controllers: ["pop", "unpop", "trigger", "toggle"]
@@ -116,30 +110,24 @@
 
   function mountPresentContainer(element) {
     if (presentElements.has(element)) return;
-    const presentMotion =
-      element.querySelector(`:scope>[${attr.presentMotion}]`)
-      || element;
-    if (presentMotion === element) {
-      if (!presentMotion.hasAttribute(attr.presentMotion))
-        presentMotion.setAttribute(attr.presentMotion, "auto");
-    } else {
-      if (presentMotion.hidden) {
-        AelluxJs.diagnostics.warn(
-          AelluxJs.diagnostics.WARN_PRESENT_MOTION_HIDDEN,
-          { extension: extensionName, element, presentMotion }
-        );
-      }
-      if (!element.hidden) {
-        element.hidden = presentMotion.hidden;
-      }
-      presentMotion.hidden = false;
+    if (element.hasAttribute(attr.presentMotion)) {
+      element.removeAttribute(attr.presentMotion);
+    }
+    let presentMotion = element.querySelector(`:scope>[${attr.presentMotion}]`);
+    const generatedMotion = !presentMotion;
+    if (generatedMotion) {
+      presentMotion = document.createElement("div");
+      presentMotion.setAttribute(attr.presentMotion, "auto");
+      while (element.firstChild) presentMotion.appendChild(element.firstChild);
+      element.appendChild(presentMotion);
     }
     const presentController = {
       interruptTransition: null,
       direction: null,
       timeout: null,
+      generatedMotion,
       presentMotion,
-      classList: presentMotion.classList,
+      classList: element.classList,
       triggers: new Set(),
       setAriaExpanded: function (value) {
         element.setAttribute(ARIA_EXPANDED, value);
@@ -188,6 +176,12 @@
     controller.stop();
     presentElements.delete(element);
     controller.triggers.forEach(updateTriggerAriaExpanded);
+    if (controller.generatedMotion && controller.presentMotion.parentNode === element) {
+      while (controller.presentMotion.firstChild) {
+        element.insertBefore(controller.presentMotion.firstChild, controller.presentMotion);
+      }
+      controller.presentMotion.remove();
+    }
   }
 
   function mountTriggerElement(triggerElement) {
@@ -318,14 +312,14 @@
       await Promise.race([prepared, interrupted]);
 
       transitionClass = className[`${newDirection}${PING}`.toLowerCase()];
-      const duration = root.getComputedStyle(controller.presentMotion)
+      const duration = root.getComputedStyle(element)
         .getPropertyValue(`--ae-${newDirection}-duration`.toLowerCase()).trim();
       const timeMs = getString2Time(duration);
 
       if (root.document &&
         root.document.documentElement.hasAttribute(attr.lowHardware)) {
-        controller.presentMotion.style.setProperty(
-          `--ae-${newDirection}-low-steps`,
+        element.style.setProperty(
+          `--ae-${newDirection}-low-steps`.toLowerCase(),
           Math.max(1, parseInt(timeMs / 62.5))
         );
       }

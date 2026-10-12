@@ -24409,13 +24409,6 @@
         function init(options) {
           AelluxJs2.mountManager.add({
             extensionName: extensionName,
-            selector: "[".concat(attr.presentMotion, "],[").concat(attr.present, "]"),
-            // Register the motion before the container changes its hidden state.
-            mount: function mount() {
-            }
-          });
-          AelluxJs2.mountManager.add({
-            extensionName: extensionName,
             selector: "[".concat(attr.present, "]"),
             mount: mountPresentContainer,
             unmount: unmountPresentContainer,
@@ -24460,28 +24453,24 @@
         }
         function mountPresentContainer(element) {
           if (presentElements.has(element)) return;
-          var presentMotion = element.querySelector(":scope>[".concat(attr.presentMotion, "]")) || element;
-          if (presentMotion === element) {
-            if (!presentMotion.hasAttribute(attr.presentMotion)) presentMotion.setAttribute(attr.presentMotion, "auto");
-          } else {
-            if (presentMotion.hidden) {
-              AelluxJs2.diagnostics.warn(AelluxJs2.diagnostics.WARN_PRESENT_MOTION_HIDDEN, {
-                extension: extensionName,
-                element: element,
-                presentMotion: presentMotion
-              });
-            }
-            if (!element.hidden) {
-              element.hidden = presentMotion.hidden;
-            }
-            presentMotion.hidden = false;
+          if (element.hasAttribute(attr.presentMotion)) {
+            element.removeAttribute(attr.presentMotion);
+          }
+          var presentMotion = element.querySelector(":scope>[".concat(attr.presentMotion, "]"));
+          var generatedMotion = !presentMotion;
+          if (generatedMotion) {
+            presentMotion = document.createElement("div");
+            presentMotion.setAttribute(attr.presentMotion, "auto");
+            while (element.firstChild) presentMotion.appendChild(element.firstChild);
+            element.appendChild(presentMotion);
           }
           var presentController = {
             interruptTransition: null,
             direction: null,
             timeout: null,
+            generatedMotion: generatedMotion,
             presentMotion: presentMotion,
-            classList: presentMotion.classList,
+            classList: element.classList,
             triggers: /* @__PURE__ */ new Set(),
             setAriaExpanded: function setAriaExpanded(value) {
               element.setAttribute(ARIA_EXPANDED, value);
@@ -24540,6 +24529,12 @@
           controller.stop();
           presentElements.delete(element);
           controller.triggers.forEach(updateTriggerAriaExpanded);
+          if (controller.generatedMotion && controller.presentMotion.parentNode === element) {
+            while (controller.presentMotion.firstChild) {
+              element.insertBefore(controller.presentMotion.firstChild, controller.presentMotion);
+            }
+            controller.presentMotion.remove();
+          }
         }
         function mountTriggerElement(triggerElement) {
           if (triggerElementsSet.has(triggerElement)) return;
@@ -24712,10 +24707,10 @@
                   return Promise.race([prepared, interrupted]);
                 case 5:
                   transitionClass = className["".concat(newDirection).concat(PING).toLowerCase()];
-                  duration = root2.getComputedStyle(controller.presentMotion).getPropertyValue("--ae-".concat(newDirection, "-duration").toLowerCase()).trim();
+                  duration = root2.getComputedStyle(element).getPropertyValue("--ae-".concat(newDirection, "-duration").toLowerCase()).trim();
                   timeMs = getString2Time(duration);
                   if (root2.document && root2.document.documentElement.hasAttribute(attr.lowHardware)) {
-                    controller.presentMotion.style.setProperty("--ae-".concat(newDirection, "-low-steps"), Math.max(1, parseInt(timeMs / 62.5)));
+                    element.style.setProperty("--ae-".concat(newDirection, "-low-steps").toLowerCase(), Math.max(1, parseInt(timeMs / 62.5)));
                   }
                   controller.classList.add(transitionClass);
                   completed = new Promise(function(completeTransition) {
