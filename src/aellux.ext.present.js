@@ -140,9 +140,9 @@
         element.setAttribute(ARIA_EXPANDED, value);
         this.triggers.forEach(updateTriggerAriaExpanded);
       },
-      stop: function () {
+      stop: function (pop = true) {
         for (const c of Object.values(className)) {
-          if (c !== className.pop) { this.classList.remove(c); }
+          if (pop || c !== className.pop) { this.classList.remove(c); }
         }
         if (this.interruptTransition !== null
           && typeof this.interruptTransition === "function") {
@@ -301,7 +301,7 @@
       );
       if (!allowEvent) { return; }
 
-      controller.stop();
+      controller.stop(gotoVisible);
       controller.direction = newDirection;
       transitionStarted = true;
 

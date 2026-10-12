@@ -303,9 +303,10 @@
           this.triggers.forEach(updateTriggerAriaExpanded);
         },
         stop: function stop() {
+          var pop2 = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : true;
           for (var _i = 0, _Object$values = Object.values(className); _i < _Object$values.length; _i++) {
             var c = _Object$values[_i];
-            if (c !== className.pop) {
+            if (pop2 || c !== className.pop) {
               this.classList.remove(c);
             }
           }
@@ -519,7 +520,7 @@
               }
               return _context.a(2);
             case 4:
-              controller.stop();
+              controller.stop(gotoVisible);
               controller.direction = newDirection;
               transitionStarted = true;
               interrupted = new Promise(function(_, interruptTransition) {
