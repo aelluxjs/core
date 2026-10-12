@@ -24457,19 +24457,26 @@
             element.removeAttribute(attr.presentMotion);
           }
           var presentMotion = element.querySelector(":scope>[".concat(attr.presentMotion, "]"));
-          var generatedMotion = !presentMotion;
-          if (generatedMotion) {
+          var generatedMotion = false;
+          if (!presentMotion) {
+            AelluxJs2.diagnostics.warn(AelluxJs2.diagnostics.WARN_PRESENT_MOTION_MISSING, {
+              extension: extensionName,
+              element: element
+            });
             presentMotion = document.createElement("div");
-            presentMotion.setAttribute(attr.presentMotion, "auto");
-            while (element.firstChild) presentMotion.appendChild(element.firstChild);
+            presentMotion.setAttribute(attr.presentMotion, "");
+            while (element.firstChild) {
+              presentMotion.appendChild(element.firstChild);
+            }
             element.appendChild(presentMotion);
+            generatedMotion = true;
           }
           var presentController = {
+            generatedMotion: generatedMotion,
+            presentMotion: presentMotion,
             interruptTransition: null,
             direction: null,
             timeout: null,
-            generatedMotion: generatedMotion,
-            presentMotion: presentMotion,
             classList: element.classList,
             triggers: /* @__PURE__ */ new Set(),
             setAriaExpanded: function setAriaExpanded(value) {
@@ -24529,7 +24536,7 @@
           controller.stop();
           presentElements.delete(element);
           controller.triggers.forEach(updateTriggerAriaExpanded);
-          if (controller.generatedMotion && controller.presentMotion.parentNode === element) {
+          if (controller.generatedMotion && controller.presentMotion.parentElement === element) {
             while (controller.presentMotion.firstChild) {
               element.insertBefore(controller.presentMotion.firstChild, controller.presentMotion);
             }

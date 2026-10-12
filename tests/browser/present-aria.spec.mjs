@@ -6,7 +6,7 @@ test("unpop restores previous focus only when hiding the active element", async 
     document.body.innerHTML = `
       <button id="previous">Previous</button>
       <div id="panel" data-ae-present style="--ae-unpop-duration: 0ms">
-        <button id="inside">Inside</button>
+        <div data-ae-present-motion><button id="inside">Inside</button></div>
       </div>
       <button id="outside">Outside</button>
     `;
@@ -46,7 +46,9 @@ test("mounted present controller binds public methods to its element", async ({ 
   await page.evaluate(() => {
     document.body.innerHTML = `
       <div id="panel" data-ae-present hidden
-        style="--ae-pop-duration: 0ms; --ae-unpop-duration: 0ms"></div>
+        style="--ae-pop-duration: 0ms; --ae-unpop-duration: 0ms">
+        <div data-ae-present-motion></div>
+      </div>
     `;
   });
   await page.addScriptTag({ url: "/dist/aellux.js" });
@@ -97,7 +99,9 @@ test("present prepares will-change before starting a transition", async ({ page 
   await page.evaluate(() => {
     document.body.innerHTML = `
       <div id="panel" data-ae-present hidden
-        style="--ae-pop-duration: 0ms; --ae-unpop-duration: 0ms"></div>`;
+        style="--ae-pop-duration: 0ms; --ae-unpop-duration: 0ms">
+        <div data-ae-present-motion></div>
+      </div>`;
   });
   await page.addScriptTag({ url: "/dist/aellux.js" });
   await page.evaluate(() => AelluxJs.init({ mode: "full" }));
@@ -134,9 +138,9 @@ test("present prepares will-change before starting a transition", async ({ page 
     willChange: true,
     popping: false,
     returnsPromise: true,
-    willChangeStyle: "auto",
+    willChangeStyle: "opacity, transform",
     motionWillChange: false,
-    motionWillChangeStyle: "opacity, transform"
+    motionWillChangeStyle: "auto"
   });
 
   await expect.poll(() => page.evaluate(() => window.presentPoppingAt)).not.toBeNull();
@@ -167,7 +171,7 @@ test("present prepares will-change before starting a transition", async ({ page 
 test("present disables transitions when reduced motion is active", async ({ page }) => {
   await page.goto("/tests/index.htm");
   await page.evaluate(() => {
-    document.body.innerHTML = '<div id="panel" data-ae-present hidden></div>';
+    document.body.innerHTML = '<div id="panel" data-ae-present hidden><div data-ae-present-motion></div></div>';
   });
   await page.addScriptTag({ url: "/dist/aellux.js" });
   await page.evaluate(() => AelluxJs.init({ mode: "full" }));
@@ -187,14 +191,14 @@ test("present applies independent height and width animation keyframes", async (
   await page.evaluate(() => {
     document.body.innerHTML = `
       <style>[data-ae-present] { --ae-pop-duration: 0ms; --ae-unpop-duration: 0ms; }</style>
-      <div id="empty" data-ae-present>empty</div>
+      <div id="empty" data-ae-present><div data-ae-present-motion>empty</div></div>
       <div id="height" data-ae-present="height"
-        style="width: 200px; --ae-from-height: 11px; --ae-pop-height: 41px; --ae-unpop-height: 7px">height</div>
+        style="width: 200px; --ae-from-height: 11px; --ae-pop-height: 41px; --ae-unpop-height: 7px"><div data-ae-present-motion>height</div></div>
       <div id="width" data-ae-present="width"
-        style="height: 50px; --ae-from-width: 13px; --ae-pop-width: 83px; --ae-unpop-width: 5px">width</div>
+        style="height: 50px; --ae-from-width: 13px; --ae-pop-width: 83px; --ae-unpop-width: 5px"><div data-ae-present-motion>width</div></div>
       <div id="both" data-ae-present="width height"
         style="--ae-from-width: 17px; --ae-pop-width: 97px; --ae-unpop-width: 3px;
-          --ae-from-height: 19px; --ae-pop-height: 43px; --ae-unpop-height: 2px">both</div>
+          --ae-from-height: 19px; --ae-pop-height: 43px; --ae-unpop-height: 2px"><div data-ae-present-motion>both</div></div>
     `;
   });
   await page.addScriptTag({ url: "/dist/aellux.js" });
@@ -223,7 +227,10 @@ test("present applies independent height and width animation keyframes", async (
         rows: style.gridTemplateRows,
         transitionProperty: style.transitionProperty,
         willChange: style.willChange,
-        motionWillChange: motionStyle.willChange
+        motionWillChange: motionStyle.willChange,
+        motionMinWidth: motionStyle.minWidth,
+        motionMinHeight: motionStyle.minHeight,
+        motionTransitionProperty: motionStyle.transitionProperty
       }];
     }));
 
@@ -242,19 +249,19 @@ test("present applies independent height and width animation keyframes", async (
   });
 
   expect(states.opened.empty).toMatchObject({
-    display: "block", columns: "none", rows: "none", transitionProperty: "all"
+    display: "inline-grid", transitionProperty: "opacity, transform"
   });
   expect(states.opened.height).toMatchObject({
-    display: "grid", columns: "200px", rows: "41px",
-    transitionProperty: "grid-template-rows"
+    display: "inline-grid", columns: "200px", rows: "41px",
+    transitionProperty: "opacity, transform, grid-template-rows"
   });
   expect(states.opened.width).toMatchObject({
-    display: "grid", columns: "83px", rows: "50px",
-    transitionProperty: "grid-template-columns"
+    display: "inline-grid", columns: "83px", rows: "50px",
+    transitionProperty: "opacity, transform, grid-template-columns"
   });
   expect(states.opened.both).toMatchObject({
-    display: "grid", columns: "97px", rows: "43px",
-    transitionProperty: "grid-template-columns, grid-template-rows"
+    display: "inline-grid", columns: "97px", rows: "43px",
+    transitionProperty: "opacity, transform, grid-template-columns, grid-template-rows"
   });
   expect(states.from.height.rows).toBe("11px");
   expect(states.from.width.columns).toBe("13px");
@@ -263,11 +270,16 @@ test("present applies independent height and width animation keyframes", async (
   expect(states.unpopping.width.columns).toBe("5px");
   expect(states.unpopping.both).toMatchObject({ columns: "3px", rows: "2px" });
   expect(states.prepared.empty).toMatchObject({
-    willChange: "auto", motionWillChange: "opacity, transform"
+    willChange: "opacity, transform",
+    motionWillChange: "auto",
+    motionMinWidth: "0px",
+    motionMinHeight: "0px",
+    motionTransitionProperty: "all"
   });
-  expect(states.prepared.height.willChange).toBe("grid-template-rows");
-  expect(states.prepared.width.willChange).toBe("grid-template-columns");
-  expect(states.prepared.both.willChange).toBe("grid-template-columns, grid-template-rows");
+  expect(states.prepared.height.willChange).toBe("opacity, transform, grid-template-rows");
+  expect(states.prepared.width.willChange).toBe("opacity, transform, grid-template-columns");
+  expect(states.prepared.both.willChange)
+    .toBe("opacity, transform, grid-template-columns, grid-template-rows");
 });
 
 test("present derives stepped easing from duration on low hardware", async ({ page }) => {
@@ -276,7 +288,7 @@ test("present derives stepped easing from duration on low hardware", async ({ pa
     document.documentElement.setAttribute("data-ae-low-hardware", "");
     document.body.innerHTML = `
       <div id="panel" data-ae-present hidden
-        style="--ae-pop-duration: 500ms"></div>`;
+        style="--ae-pop-duration: 500ms"><div data-ae-present-motion></div></div>`;
   });
   await page.addScriptTag({ url: "/dist/aellux.js" });
   await page.evaluate(() => AelluxJs.init({ mode: "full" }));
@@ -285,9 +297,8 @@ test("present derives stepped easing from duration on low hardware", async ({ pa
   )).toBe(true);
   await page.evaluate(() => AelluxJs.mountManager.controller("panel").present.pop());
   await expect.poll(() => page.evaluate(() => {
-    const motion = document.querySelector("#panel > [data-ae-present-motion]");
     const panel = document.getElementById("panel");
-    const style = getComputedStyle(motion);
+    const style = getComputedStyle(panel);
     return {
       steps: style.getPropertyValue("--ae-pop-low-steps").trim(),
       easing: style.getPropertyValue("--ae-pop-ease").trim(),
@@ -364,8 +375,8 @@ test("present trigger stays expanded while any target is expanded", async ({ pag
   await page.evaluate(() => {
     document.body.innerHTML = `
       <button id="control" data-ae-trigger="toggle" data-ae-target=".panel"></button>
-      <div id="first" class="panel" data-ae-present></div>
-      <div id="second" class="panel" data-ae-present></div>
+      <div id="first" class="panel" data-ae-present><div data-ae-present-motion></div></div>
+      <div id="second" class="panel" data-ae-present><div data-ae-present-motion></div></div>
     `;
     const attributes = new WeakMap();
     window.AelluxJs = {
@@ -525,14 +536,14 @@ test("present restores initial attributes and captures fresh values on remount",
   });
 });
 
-test("present creates a child motion wrapper and restores generated structure", async ({ page }) => {
+test("present warns and generates a missing direct motion child", async ({ page }) => {
   await page.goto("/tests/index.htm");
   await page.evaluate(() => {
     document.body.innerHTML = `
-      <div id="generated" data-ae-present data-ae-present-motion hidden>
-        text before <button id="generated-control">Control</button> text after
+      <div id="missing" data-ae-present data-ae-present-motion hidden>
+        <button id="missing-control">Control</button>
       </div>
-      <div id="separate" data-ae-present hidden>
+      <div id="valid" data-ae-present hidden>
         <div id="motion" data-ae-present-motion><span id="existing-content"></span></div>
       </div>
     `;
@@ -540,45 +551,44 @@ test("present creates a child motion wrapper and restores generated structure", 
   await page.addScriptTag({ url: "/dist/aellux.js" });
   await page.evaluate(() => AelluxJs.init({ mode: "full" }));
   await expect.poll(() => page.evaluate(() =>
-    typeof AelluxJs.mountManager?.controller("generated")?.present?.pop === "function"
+    typeof AelluxJs.mountManager?.controller("missing")?.present?.pop === "function"
   )).toBe(true);
 
   const result = await page.evaluate(async () => {
-    const generated = document.getElementById("generated");
-    const generatedMotion = generated.querySelector(":scope > [data-ae-present-motion]");
+    const missing = document.getElementById("missing");
     const motion = document.getElementById("motion");
     const mounted = {
-      generatedMarker: generated.getAttribute("data-ae-present-motion"),
-      wrapperValue: generatedMotion?.getAttribute("data-ae-present-motion"),
-      wrapperContainsControl: generatedMotion?.contains(document.getElementById("generated-control")),
-      directChildren: generated.children.length,
-      existingMotionReused: document.querySelector("#separate > [data-ae-present-motion]") === motion,
-      generatedHidden: generated.hidden,
-      motionHidden: motion.hidden
+      missingMarker: missing.getAttribute("data-ae-present-motion"),
+      generatedWrapper: missing.querySelector(":scope > [data-ae-present-motion]")?.tagName,
+      controlParentHasMotion: document.getElementById("missing-control").parentElement.hasAttribute("data-ae-present-motion"),
+      existingMotionPreserved: document.querySelector("#valid > [data-ae-present-motion]") === motion,
+      missingHidden: missing.hidden
     };
+    const diagnostics = AelluxJs.diagnostics.showHistory()
+      .filter(entry => entry.code === 2010)
+      .map(entry => ({ code: entry.code, level: entry.level, element: entry.context.element.id }));
     await AelluxJs.unmount(document, "present");
     const restored = {
-      generatedMarker: generated.getAttribute("data-ae-present-motion"),
-      generatedWrapper: generated.querySelector(":scope > [data-ae-present-motion]"),
-      controlParent: document.getElementById("generated-control").parentElement.id,
-      existingMotionPreserved: document.querySelector("#separate > [data-ae-present-motion]") === motion
+      missingMarker: missing.getAttribute("data-ae-present-motion"),
+      generatedWrapper: missing.querySelector(":scope > [data-ae-present-motion]"),
+      controlParent: document.getElementById("missing-control").parentElement.id,
+      existingMotionPreserved: document.querySelector("#valid > [data-ae-present-motion]") === motion
     };
-    return { mounted, restored };
+    return { mounted, diagnostics, restored };
   });
   expect(result).toEqual({
     mounted: {
-      generatedMarker: null,
-      wrapperValue: "auto",
-      wrapperContainsControl: true,
-      directChildren: 1,
-      existingMotionReused: true,
-      generatedHidden: true,
-      motionHidden: false
+      missingMarker: null,
+      generatedWrapper: "DIV",
+      controlParentHasMotion: true,
+      existingMotionPreserved: true,
+      missingHidden: true
     },
+    diagnostics: [{ code: 2010, level: 1, element: "missing" }],
     restored: {
-      generatedMarker: "",
+      missingMarker: "",
       generatedWrapper: null,
-      controlParent: "generated",
+      controlParent: "missing",
       existingMotionPreserved: true
     }
   });
@@ -660,7 +670,7 @@ test("present restores a trigger without targets and can mount it again", async 
       expanded: control.getAttribute("aria-expanded"),
       controls: control.getAttribute("aria-controls")
     };
-    document.body.insertAdjacentHTML("beforeend", '<div id="later" data-ae-present hidden></div>');
+    document.body.insertAdjacentHTML("beforeend", '<div id="later" data-ae-present hidden><div data-ae-present-motion></div></div>');
     const panel = document.querySelector("#later");
     panels.mount(panel);
     controls.mount(control);
@@ -685,7 +695,7 @@ test("present records interrupted transitions as warnings and failures as errors
       import("/src/internal/create-aellux-constants.js"),
       import("/src/internal/build-initial-attr-memory.js")
     ]);
-    document.body.innerHTML = '<div id="panel" data-ae-present hidden style="--ae-pop-duration: 100ms; --ae-unpop-duration: 0ms"></div>';
+    document.body.innerHTML = '<div id="panel" data-ae-present hidden style="--ae-pop-duration: 100ms; --ae-unpop-duration: 0ms"><div data-ae-present-motion></div></div>';
     window.AelluxJs = {
       attr: name => `data-ae-${name}`,
       className: name => `ae-${name}`,
@@ -735,7 +745,7 @@ test("present reports a transition callback failure with its own diagnostic", as
     ]);
     document.body.innerHTML = `
       <button id="control" data-ae-trigger="pop" data-ae-target="#panel"></button>
-      <div id="panel" data-ae-present hidden></div>
+      <div id="panel" data-ae-present hidden><div data-ae-present-motion></div></div>
     `;
     window.AelluxJs = {
       attr: name => `data-ae-${name}`,
@@ -769,7 +779,7 @@ test("present refreshes trigger controls from its initial value", async ({ page 
   await page.evaluate(() => {
     document.body.innerHTML = `
       <button id="control" data-ae-trigger="toggle" data-ae-target="#first" aria-controls="external"></button>
-      <div id="first" data-ae-present hidden></div>
+      <div id="first" data-ae-present hidden><div data-ae-present-motion></div></div>
     `;
   });
   await page.addScriptTag({ url: "/dist/aellux.js" });
@@ -782,7 +792,7 @@ test("present refreshes trigger controls from its initial value", async ({ page 
     await AelluxJs.mount(document, "present");
     const before = control.getAttribute("aria-controls");
     control.setAttribute("data-ae-target", "#second");
-    document.body.insertAdjacentHTML("beforeend", '<div id="second" data-ae-present hidden></div>');
+    document.body.insertAdjacentHTML("beforeend", '<div id="second" data-ae-present hidden><div data-ae-present-motion></div></div>');
     await AelluxJs.mount(document.querySelector("#second"), "present");
     const after = control.getAttribute("aria-controls");
     await AelluxJs.unmount(control, "present");
