@@ -2,6 +2,13 @@
 
 All notable changes to aellux.js will be documented in this file.
 
+## [0.1.0-beta.8] - 2026-10-11
+
+### Changed
+
+- Updated the package and current documentation references to `0.1.0-beta.8`.
+- Corrected the Extension authoring contract to document the awaited asynchronous lifecycle and updated the scaffold callbacks accordingly.
+
 ## [0.1.0-beta.7] - 2026-10-10
 
 ### Added

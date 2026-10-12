@@ -19,6 +19,7 @@ $ae.init({ mode: "full" });
 Supported runtime modes are `full` and `basic`. See [Getting Started](../getting-started.md) for their loading behavior.
 The optional `crossOrigin` initialization setting controls the `crossorigin` attribute on runtime and Extension assets; integrity-protected assets use `anonymous` by default. See [CSP and Extension trust](../extensions/csp-and-trust.md#subresource-integrity).
 Pass Extension-specific configuration through `extensions` in `init()` options. Keys such as `"tab-group"` are normalized to `tabGroup` in `$ae.options.extensions`, and each Extension receives its matching object in `init(options)`. An Extension with no matching configuration receives `{}`.
+An Extension's `init(options)` may return a Promise. The runtime awaits it before setting the Extension's `initialized` flag and resolving `wait(extensionName)`; rejection is diagnosed as `ERROR_EXTENSION_INITIALIZE` (`1102`) and leaves the Extension available for a later retry.
 
 ## DOM Lifecycle
 

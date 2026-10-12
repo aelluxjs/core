@@ -9,13 +9,15 @@ Start from [`templates/aellux.ext.template.js`](https://github.com/aelluxjs/core
 1. Name the source and Modern artifact `aellux.ext.<name>.js`.
 2. Use the same kebab-case `<name>` as `extensionName` in `AelluxJs.extAttach(extensionName, api)`.
 3. Publish a classic script contained by an IIFE. Distribution files must not require ESM imports or exports.
-4. Keep `init(options)` synchronous and idempotent.
+4. Keep `init(options)` idempotent. It may return a Promise when initialization requires asynchronous work.
 5. Make every `mount` idempotent and release its listeners, observers, timers, and references in the corresponding `unmount`.
 6. Release Extension-wide resources in `destroy()`.
 7. Keep the public API and lifecycle behavior equivalent across Modern and Legacy variants.
 
 The runtime exposes a kebab-case name as camelCase under `AelluxJs.ext`: `tab-group` becomes `AelluxJs.ext.tabGroup`.
 An Extension receives its configuration as the `options` argument to `init(options)`. Supply it through `$ae.init({ extensions: { "tab-group": { initialTab: "overview" } } })`; the boot script normalizes `tab-group` to `tabGroup` in `$ae.options.extensions`. Extensions without a matching entry receive `{}`.
+
+The runtime awaits the value returned by `init(options)`. The Extension receives `initialized: true` only after that value resolves, and `$ae.wait(extensionName)` resolves to its public API at that point. Concurrent calls share the pending initialization. If `init()` throws or its Promise rejects, the runtime reports `ERROR_EXTENSION_INITIALIZE` (`1102`), leaves `initialized` false, resolves that attempt to `null`, and allows a later call to retry initialization. Register mount maps and expose usable Extension-wide services before the Promise resolves.
 
 Every Extension must follow the applicable [accessibility requirements](accessibility.md). Declare its capability profile and document only the relevant interaction, structure, presentation, motion, integration, infrastructure, lifecycle, and limitation fields. Requirements outside the declared behavior may be marked not applicable with a short reason.
 

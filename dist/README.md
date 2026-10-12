@@ -1,8 +1,11 @@
 # aellux.js
 
+[![CI](https://github.com/aelluxjs/core/actions/workflows/ci.yml/badge.svg?branch=main&event=push)](https://github.com/aelluxjs/core/actions/workflows/ci.yml)
 [![npm version](https://img.shields.io/npm/v/%40aelluxjs%2Fcore)](https://www.npmjs.com/package/@aelluxjs/core)
 [![npm downloads](https://img.shields.io/npm/dm/%40aelluxjs%2Fcore)](https://www.npmjs.com/package/@aelluxjs/core)
-[![npm license](https://img.shields.io/npm/l/%40aelluxjs%2Fcore)](https://www.npmjs.com/package/@aelluxjs/core)
+[![Node.js](https://img.shields.io/node/v/%40aelluxjs%2Fcore)](https://www.npmjs.com/package/@aelluxjs/core)
+[![npm license](https://img.shields.io/npm/l/%40aelluxjs%2Fcore)](https://github.com/aelluxjs/core/blob/main/LICENSE)
+[![Documentation](https://img.shields.io/badge/docs-online-blue)](https://aelluxjs.github.io/core/docs/0.1.0/)
 
 aellux.js is a lightweight extension-management library for modular UX behaviors in browser interfaces. It complements Bootstrap and other visual systems with declarative HTML attributes and independently loadable JavaScript Extensions.
 
@@ -91,7 +94,7 @@ Generated browser files are written to `dist/`. The distribution uses classic sc
 
 ## Project Status
 
-aellux.js `0.1.0-beta.7` is the current prerelease. Beta 1 established the initial runtime, Extension contract, Modern/Legacy distributions, and repeatable browser validation scenarios. The remaining work for the stable `0.1.0` release is tracked in the milestone below.
+aellux.js `0.1.0-beta.8` is the current prerelease. Beta 1 established the initial runtime, Extension contract, Modern/Legacy distributions, and repeatable browser validation scenarios. The remaining work for the stable `0.1.0` release is tracked in the milestone below.
 
 Review the [0.1.0 milestone](milestones/0.1.0.md), the [Beta 1 milestone](milestones/0.1.0-beta.1.md), and delivered changes in the [changelog](../CHANGELOG.md).
 

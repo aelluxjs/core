@@ -64,6 +64,8 @@ An Extension script exposes its API through `AelluxJs.extAttach()`:
 
 Declare the Extension with `ext()` before calling `extAttach()`. The attachment supplies its definitive API object. `extAttach()` requires a valid kebab-case or camelCase Extension name and an API object with an `init()` function. `destroy()`, when provided, must also be a function. Invalid arguments report `ERROR_EXTENSION_ATTACH` (`1112`) and leave the Extension unattached. A missing declaration reports `ERROR_EXTENSION_NOT_REGISTERED` (`1110`); a second attachment reports `ERROR_EXTENSION_DUPLICATE` (`1101`).
 
+`init(options)` may complete synchronously or return a Promise. The runtime awaits it before marking the Extension as initialized and resolving `$ae.wait(extensionName)`. A thrown error or rejected Promise reports `ERROR_EXTENSION_INITIALIZE` (`1102`), leaves the Extension uninitialized, and permits a later initialization attempt.
+
 Use the [aellux.js Extension scaffold](https://github.com/aelluxjs/core/blob/main/templates/README.md) for the complete lifecycle structure.
 Third-party authors should also follow the [Extension authoring and compatibility contract](authoring.md).
 Review [CSP requirements and Extension trust](csp-and-trust.md) before registering assets from another origin.

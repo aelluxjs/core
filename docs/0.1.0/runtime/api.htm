@@ -52,7 +52,7 @@
 
 <script src="/core/docs/assets/docweaver/js/toc-init.js?t=1"></script>
 
-<script src="https://cdn.jsdelivr.net/npm/@aelluxjs/core@0.1.0-beta.7/dist/aellux.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@aelluxjs/core@0.1.0-beta.8/dist/aellux.min.js"></script>
 <script>
   AelluxJs.ext("/core/docs/assets/docweaver/js/aellux.ext.ajax-href.js");
   AelluxJs.init({ mode: "full" });
@@ -572,7 +572,8 @@ Runtime API                  </li>
 </code></pre>
 <p>Supported runtime modes are <code>full</code> and <code>basic</code>. See <a href="../getting-started.htm">Getting Started</a> for their loading behavior.
 The optional <code>crossOrigin</code> initialization setting controls the <code>crossorigin</code> attribute on runtime and Extension assets; integrity-protected assets use <code>anonymous</code> by default. See <a href="../extensions/csp-and-trust.htm#subresource-integrity">CSP and Extension trust</a>.
-Pass Extension-specific configuration through <code>extensions</code> in <code>init()</code> options. Keys such as <code>&quot;tab-group&quot;</code> are normalized to <code>tabGroup</code> in <code>$ae.options.extensions</code>, and each Extension receives its matching object in <code>init(options)</code>. An Extension with no matching configuration receives <code>{}</code>.</p>
+Pass Extension-specific configuration through <code>extensions</code> in <code>init()</code> options. Keys such as <code>&quot;tab-group&quot;</code> are normalized to <code>tabGroup</code> in <code>$ae.options.extensions</code>, and each Extension receives its matching object in <code>init(options)</code>. An Extension with no matching configuration receives <code>{}</code>.
+An Extension&#39;s <code>init(options)</code> may return a Promise. The runtime awaits it before setting the Extension&#39;s <code>initialized</code> flag and resolving <code>wait(extensionName)</code>; rejection is diagnosed as <code>ERROR_EXTENSION_INITIALIZE</code> (<code>1102</code>) and leaves the Extension available for a later retry.</p>
 <h2>DOM Lifecycle</h2>
 <pre><code class="language-js">await $ae.mount(root);
 await $ae.unmount(root);

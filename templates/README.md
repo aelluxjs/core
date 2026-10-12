@@ -6,11 +6,12 @@ For a third-party package, copy both `aellux.ext.template.js` and `build-extensi
 
 Set `extensionName` to the extension's kebab-case name before calling `AelluxJs.extAttach(extensionName, api)`. The bootstrap converts that name to the camelCase API key under `AelluxJs.ext`: `tab-group` registers `AelluxJs.ext.tabGroup`. Use `AelluxJs.attr(extensionName)` for the extension's primary attribute, when applicable. Initialize any constants exposed by the API before attaching it.
 
-- `init(options)` is synchronous: it receives the Extension's object from `AelluxJs.options.extensions` (or `{}`), registers DOM handlers, and sets up extension-wide services without returning a Promise. Load asynchronous dependencies separately; DOM mounting and content loading may remain asynchronous.
-- `destroy` releases extension-wide listeners, observers, and other resources.
+- `init(options)` receives the Extension's object from `AelluxJs.options.extensions` (or `{}`). It may return a Promise; the runtime awaits it before setting `initialized` and resolving `AelluxJs.wait(extensionName)`. Keep initialization idempotent and leave mount maps and Extension-wide services ready before the Promise resolves. A rejected initialization is diagnosed and may be retried later.
+- `destroy` may be asynchronous and releases extension-wide listeners, observers, and other resources before its Promise resolves.
 - `AelluxJs.mountManager.add()` registers selectors and handlers during `init`; `remove()` clears them during `destroy`.
-- `mountElement` sets up matching elements; repeated calls must not duplicate listeners or resources.
-- `unmountElement` releases resources associated with an element.
+- `mountElement`, `unmountElement`, and an optional `updateElement` may be asynchronous; the mount manager awaits them. Repeated mounts must not duplicate listeners or resources.
+- Public controller methods may also be asynchronous. Their Promise is returned to the caller.
+- `unmountElement` releases resources associated with an element before its Promise resolves.
 
 For extensions without element behavior, remove `attr`, the DOM handlers, and their DOM registration. Keep `extensionName`, `AelluxJs.extAttach`, `init`, `destroy`, the IIFE, and the Apache 2.0 license identifier. Use ES2017-compatible syntax and attach public APIs through `AelluxJs.extAttach`, without ESM exports.
 
