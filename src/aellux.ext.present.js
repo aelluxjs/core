@@ -10,9 +10,10 @@
  * and timing.
  *
  * Inputs and activation: mounts `[data-ae-present]` regions. Each region uses a
- * direct `[data-ae-present-motion]` child; one is generated to wrap the region's
- * content when absent. Trigger and dismiss relationships use extension data
- * attributes and may target a region by selector or identifier.
+ * direct `[data-ae-present-motion]` child as its content container; when absent,
+ * the Extension reports a warning and wraps the existing content automatically.
+ * Trigger and dismiss relationships use extension data attributes and may target
+ * a region by selector or identifier.
  *
  * Outputs and owned state: owns presentation and will-change classes plus its
  * changes to `hidden`, `aria-expanded` and `aria-controls`. It exposes
@@ -22,8 +23,7 @@
  * `UnpopFocusLost` after that element loses focus.
  *
  * Lifecycle: cancels timers, removes listeners and restores managed initial
- * attributes on unmount. Generated motion wrappers are removed and their
- * children are returned to the region.
+ * attributes on unmount.
  *
  * Accessibility: trigger and dismiss markup must be natively keyboard operable
  * and named. Consuming styles must respect reduced motion. The implementation
@@ -114,19 +114,26 @@
       element.removeAttribute(attr.presentMotion);
     }
     let presentMotion = element.querySelector(`:scope>[${attr.presentMotion}]`);
-    const generatedMotion = !presentMotion;
-    if (generatedMotion) {
+    let generatedMotion = false;
+    if (!presentMotion) {
+      AelluxJs.diagnostics.warn(
+        AelluxJs.diagnostics.WARN_PRESENT_MOTION_MISSING,
+        { extension: extensionName, element }
+      );
       presentMotion = document.createElement("div");
-      presentMotion.setAttribute(attr.presentMotion, "auto");
-      while (element.firstChild) presentMotion.appendChild(element.firstChild);
+      presentMotion.setAttribute(attr.presentMotion, "");
+      while (element.firstChild) {
+        presentMotion.appendChild(element.firstChild);
+      }
       element.appendChild(presentMotion);
+      generatedMotion = true;
     }
     const presentController = {
+      generatedMotion,
+      presentMotion,
       interruptTransition: null,
       direction: null,
       timeout: null,
-      generatedMotion,
-      presentMotion,
       classList: element.classList,
       triggers: new Set(),
       setAriaExpanded: function (value) {
@@ -176,7 +183,7 @@
     controller.stop();
     presentElements.delete(element);
     controller.triggers.forEach(updateTriggerAriaExpanded);
-    if (controller.generatedMotion && controller.presentMotion.parentNode === element) {
+    if (controller.generatedMotion && controller.presentMotion.parentElement === element) {
       while (controller.presentMotion.firstChild) {
         element.insertBefore(controller.presentMotion.firstChild, controller.presentMotion);
       }

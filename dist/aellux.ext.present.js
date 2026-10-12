@@ -76,19 +76,26 @@
         element.removeAttribute(attr.presentMotion);
       }
       let presentMotion = element.querySelector(`:scope>[${attr.presentMotion}]`);
-      const generatedMotion = !presentMotion;
-      if (generatedMotion) {
+      let generatedMotion = false;
+      if (!presentMotion) {
+        AelluxJs.diagnostics.warn(
+          AelluxJs.diagnostics.WARN_PRESENT_MOTION_MISSING,
+          { extension: extensionName, element }
+        );
         presentMotion = document.createElement("div");
-        presentMotion.setAttribute(attr.presentMotion, "auto");
-        while (element.firstChild) presentMotion.appendChild(element.firstChild);
+        presentMotion.setAttribute(attr.presentMotion, "");
+        while (element.firstChild) {
+          presentMotion.appendChild(element.firstChild);
+        }
         element.appendChild(presentMotion);
+        generatedMotion = true;
       }
       const presentController = {
+        generatedMotion,
+        presentMotion,
         interruptTransition: null,
         direction: null,
         timeout: null,
-        generatedMotion,
-        presentMotion,
         classList: element.classList,
         triggers: /* @__PURE__ */ new Set(),
         setAriaExpanded: function(value) {
@@ -136,7 +143,7 @@
       controller.stop();
       presentElements.delete(element);
       controller.triggers.forEach(updateTriggerAriaExpanded);
-      if (controller.generatedMotion && controller.presentMotion.parentNode === element) {
+      if (controller.generatedMotion && controller.presentMotion.parentElement === element) {
         while (controller.presentMotion.firstChild) {
           element.insertBefore(controller.presentMotion.firstChild, controller.presentMotion);
         }

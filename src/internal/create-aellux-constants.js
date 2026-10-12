@@ -46,6 +46,7 @@ export function createAelluxConstants() {
       WARN_STORAGE_FALLBACK: { code: 2006, message: "Browser storage is unavailable; values will be kept in memory only." },
       WARN_PRESENT_MOTION_HIDDEN: { code: 2008, message: "A present-motion child should not be hidden; hidden belongs on its present container." },
       WARN_NAVIGATION_EVENT_INVALID: { code: 2009, message: "A state-navigation event has missing or invalid detail properties." },
+      WARN_PRESENT_MOTION_MISSING: { code: 2010, message: "A present container has no direct present-motion child; one was generated automatically." },
       INFO_LEGACY_FALLBACK: { code: 3000, message: "aellux.js is starting the Legacy runtime." }
     },
 
