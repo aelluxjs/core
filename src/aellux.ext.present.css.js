@@ -45,9 +45,14 @@ ${present}>${motion} {
   place-self: stretch;
   contain: layout paint;
 }
-${present}.${willChange}>${motion} {
-  min-width: 0;
-  min-height: 0;
+${presentWidth}.${willChange}, ${presentWidth}.${willChange}>${motion}{
+  min-width: 0 !important;
+  width: auto !important;
+  overflow: hidden !important;
+}
+${presentHeight}.${willChange}, ${presentHeight}.${willChange}>${motion}{
+  min-height: 0 !important;
+  height: auto !important;
   overflow: hidden !important;
 }
 html[${reducedMotionAttribute}="reduced"] ${present} {
