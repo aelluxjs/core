@@ -4,8 +4,13 @@ All notable changes to aellux.js will be documented in this file.
 
 ## [0.1.0-beta.9] - 2026-10-13
 
+### Added
+
+- Added `$ae.dep(label, url)` to load shared script dependencies immediately, including before initialization. Calls with the same label share one Promise that resolves after the script loads; failed loads can be retried.
+
 ### Changed
 
+- Present trigger and dismiss targets now accept one element ID, with or without a leading `#`. Present indexes controls by target ID and tracks open containers directly.
 - Updated the package and current documentation references to `0.1.0-beta.9`.
 - Limited retained diagnostics to the latest 100 entries with a circular buffer.
 - Standardized element and ID resolution for mount, unmount, update, and controller lookup, with a shared invalid-input diagnostic.

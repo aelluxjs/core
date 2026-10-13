@@ -19,9 +19,9 @@
 </section>
 ```
 
-`data-ae-trigger` accepts `pop`, `unpop`, or `toggle`; an unrecognized value also toggles. `data-ae-target` and `data-ae-dismiss` can select targets with CSS selectors. Without a selector, a trigger or dismiss control acts on its closest `data-ae-present` container. Invalid selectors are reported through diagnostics.
+`data-ae-trigger` accepts `pop`, `unpop`, or `toggle`; an unrecognized value also toggles. `data-ae-target` and `data-ae-dismiss` each accept one element ID, with or without a leading `#` (for example, `details` or `#details`). Without an ID, a trigger or dismiss control acts on its closest `data-ae-present` container. Invalid IDs are reported through diagnostics.
 
-A trigger or dismiss control with neither a selector nor a containing `data-ae-present` reports `ERROR_PRESENT_CONTROL_TARGET_MISSING` (`1111`).
+A trigger or dismiss control with neither an ID nor a containing `data-ae-present` reports `ERROR_PRESENT_CONTROL_TARGET_MISSING` (`1111`).
 
 ## Motion and state
 

@@ -520,86 +520,52 @@ test("present keeps visibility on the container and diagnoses controls without a
   ]);
 });
 
-test("present trigger stays expanded while any target is expanded", async ({ page }) => {
+test("present trigger tracks one target ID with or without a hash", async ({ page }) => {
   await page.goto("/tests/index.htm");
   await page.evaluate(() => {
-    document.body.innerHTML = `
-      <button id="control" data-ae-trigger="toggle" data-ae-target=".panel"></button>
-      <div id="first" class="panel" data-ae-present><div data-ae-present-motion></div></div>
-      <div id="second" class="panel" data-ae-present><div data-ae-present-motion></div></div>
-    `;
-    const attributes = new WeakMap();
-    window.AelluxJs = {
-      attr: (name) => `data-ae-${name}`,
-      className: (name) => `ae-${name}`,
-      attrMem: {
-        save: (element, names) => attributes.set(
-          element, names.map(name => [name, element.getAttribute(name)])
-        ),
-        restore: (element) => {
-          for (const [name, value] of attributes.get(element) || []) {
-            if (value === null) element.removeAttribute(name);
-            else element.setAttribute(name, value);
-          }
-          attributes.delete(element);
-        }
-      },
-      mountManager: {
-        add: ({ selector, mount, unmount, update, controllers }) => {
-          (window.mountEntries ||= new Map()).set(selector, { mount, unmount, update, controllers });
-        },
-        remove: () => window.mountEntries?.clear()
-      },
-      extAttach: (_name, extension) => { window.presentExtension = extension; },
-      dispatchFrom: () => true
-    };
+    document.body.innerHTML = `<button id="control" data-ae-trigger="toggle" data-ae-target="first"></button>
+      <div id="first" data-ae-present hidden><div data-ae-present-motion></div></div>
+      <div id="second" data-ae-present hidden><div data-ae-present-motion></div></div>`;
   });
-  await page.addScriptTag({ url: "/src/aellux.ext.present.js" });
-  await page.evaluate(() => {
-    const extension = window.presentExtension;
-    extension.init();
-    const panels = window.mountEntries.get("[data-ae-present]");
-    const controls = window.mountEntries.get("[data-ae-trigger],[data-ae-dismiss],[data-ae-target]");
-    panels.mount(document.querySelector("#first"));
-    panels.mount(document.querySelector("#second"));
-    controls.mount(document.querySelector("#control"));
-  });
-
+  await page.addScriptTag({ url: "/dist/aellux.js" });
+  await page.evaluate(() => AelluxJs.init({ mode: "full" }));
+  await expect.poll(() => page.evaluate(() => typeof AelluxJs.mountManager?.mount === "function")).toBe(true);
+  await page.evaluate(() => AelluxJs.mount(document, "present"));
   const control = page.locator("#control");
-  await expect(control).toHaveAttribute("aria-expanded", "true");
-
-  await page.evaluate(() => window.presentExtension.unpop(document.querySelector("#first")));
-  await expect(page.locator("#first")).toHaveJSProperty("hidden", true);
-  await expect(control).toHaveAttribute("aria-expanded", "true");
-
-  await page.evaluate(() => window.presentExtension.unpop(document.querySelector("#second")));
-  await expect(page.locator("#second")).toHaveJSProperty("hidden", true);
-  await expect(control).toHaveAttribute("aria-expanded", "false");
-
-  await page.evaluate(() => window.presentExtension.pop(document.querySelector("#first")));
+  await expect(control).toHaveAttribute("aria-controls", "first");
+  await control.click();
   await expect(page.locator("#first")).toHaveJSProperty("hidden", false);
   await expect(control).toHaveAttribute("aria-expanded", "true");
-
-  await page.evaluate(() => window.presentExtension.pop(document.querySelector("#second")));
+  await page.evaluate(() => document.querySelector("#control").setAttribute("data-ae-target", "#second"));
+  await control.click();
   await expect(page.locator("#second")).toHaveJSProperty("hidden", false);
-  await expect(page.locator("#second")).toHaveAttribute("aria-expanded", "true");
-  await page.evaluate(() => {
-    const panels = window.mountEntries.get("[data-ae-present]");
-    panels.unmount(document.querySelector("#first"));
-  });
+  await expect(control).toHaveAttribute("aria-controls", "second");
   await expect(control).toHaveAttribute("aria-expanded", "true");
-
-  await page.evaluate(() => {
-    const panels = window.mountEntries.get("[data-ae-present]");
-    panels.unmount(document.querySelector("#second"));
-  });
+  await page.evaluate(() => AelluxJs.unmount(document.querySelector("#second"), "present"));
   await expect(control).toHaveAttribute("aria-expanded", "false");
-
-  await page.evaluate(() => {
-    const panels = window.mountEntries.get("[data-ae-present]");
-    panels.mount(document.querySelector("#first"));
-  });
+  await page.evaluate(() => AelluxJs.mount(document.querySelector("#second"), "present"));
+  await page.evaluate(() => AelluxJs.ext.present.pop(document.querySelector("#second")));
   await expect(control).toHaveAttribute("aria-expanded", "true");
+});
+
+test("present dismiss accepts target ID with or without a hash", async ({ page }) => {
+  await page.goto("/tests/index.htm");
+  await page.evaluate(() => {
+    document.body.innerHTML = `<button id="dismiss" data-ae-dismiss="panel"></button>
+      <div id="panel" data-ae-present><div data-ae-present-motion></div></div>`;
+  });
+  await page.addScriptTag({ url: "/dist/aellux.js" });
+  await page.evaluate(() => AelluxJs.init({ mode: "full" }));
+  await expect.poll(() => page.evaluate(() => typeof AelluxJs.mountManager?.mount === "function")).toBe(true);
+  await page.evaluate(() => AelluxJs.mount(document, "present"));
+  await page.locator("#dismiss").click();
+  await expect(page.locator("#panel")).toHaveJSProperty("hidden", true);
+  await page.evaluate(() => {
+    document.querySelector("#dismiss").setAttribute("data-ae-dismiss", "#panel");
+    return AelluxJs.ext.present.pop(document.querySelector("#panel"));
+  });
+  await page.locator("#dismiss").click();
+  await expect(page.locator("#panel")).toHaveJSProperty("hidden", true);
 });
 
 test("present restores initial attributes and captures fresh values on remount", async ({ page }) => {
@@ -748,12 +714,12 @@ test("present warns and generates a missing direct motion child", async ({ page 
   });
 });
 
-test("present reports invalid selectors without throwing from click", async ({ page }) => {
+test("present reports invalid target IDs without throwing from click", async ({ page }) => {
   await page.goto("/tests/index.htm");
   const pageErrors = [];
   page.on("pageerror", error => pageErrors.push(error.message));
   await page.evaluate(() => {
-    document.body.innerHTML = '<button id="dismiss" data-ae-dismiss="["></button>';
+    document.body.innerHTML = '<button id="dismiss" data-ae-dismiss="two ids"></button>';
     const reports = [];
     window.selectorReports = reports;
     window.AelluxJs = {
@@ -784,8 +750,8 @@ test("present reports invalid selectors without throwing from click", async ({ p
     return window.selectorReports;
   });
   expect(reports).toEqual([
-    { code: 1107, selector: "[" },
-    { code: 1107, selector: "[" }
+    { code: 1107, selector: "two ids" },
+    { code: 1107, selector: "two ids" }
   ]);
   expect(pageErrors).toEqual([]);
 });
@@ -946,6 +912,7 @@ test("present refreshes trigger controls from its initial value", async ({ page 
     await AelluxJs.mount(document, "present");
     const before = control.getAttribute("aria-controls");
     control.setAttribute("data-ae-target", "#second");
+    control.click();
     document.body.insertAdjacentHTML("beforeend", '<div id="second" data-ae-present hidden><div data-ae-present-motion></div></div>');
     await AelluxJs.mount(document.querySelector("#second"), "present");
     const after = control.getAttribute("aria-controls");

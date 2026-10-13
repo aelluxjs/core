@@ -6,6 +6,7 @@ import { buildPreferenceMediaQueries } from "./build-preference-media-queries.js
 import { saveAttr, restoreAttr } from "./build-initial-attr-memory.js";
 import utilsNameCase from "./utils-name-case.js";
 import { createPreferenceHtmlHelper } from "./create-preference-html-helper.js";
+import { assetLoadHelper } from "./asset-load-helper.js";
 
 // Build-time imports aside, keep this factory ES5-compatible for the boot bundle.
 // The caller publishes the returned function and replaces init with the boot loader.
@@ -71,7 +72,7 @@ export function createAelluxApi(root, constants) {
     noConflict: function () { return oldShortInstance; },
     registry: {
       ext: {},
-      dep: {},
+      dep: Object.create(null),
       lazyExtSelectors: {},
       extMounters: {},
       preferenceMediaQueries: buildPreferenceMediaQueries(root)
@@ -111,6 +112,66 @@ export function createAelluxApi(root, constants) {
       options.load = options.loadWhen ? false : true;
       options.state = "wait";
       api.registry.ext[key] = options;
+    },
+    dep: function (label, url, options) {
+      if (typeof label !== "string" || !label.trim() ||
+        typeof url !== "string" || !url.trim()) {
+        return root.Promise.reject(diagnostics.error(
+          diagnostics.ERROR_DEPENDENCY_ARGUMENT,
+          { label: label, url: url, expected: "a nonempty label and script URL" }
+        ));
+      }
+
+      var script = document.createElement("script");
+      script.src = url.replace(/^\.\//, api.aelluxBasePath);
+      var resolvedURL = script.src;
+      var registry = api.registry.dep;
+      var existing = Object.prototype.hasOwnProperty.call(registry, label)
+        ? registry[label] : null;
+      if (existing) {
+        if (existing.url !== resolvedURL) {
+          return root.Promise.reject(diagnostics.error(
+            diagnostics.ERROR_DEPENDENCY_CONFLICT,
+            { label: label, url: resolvedURL, registeredURL: existing.url }
+          ));
+        }
+        return existing.promise;
+      }
+
+      var registration = { url: resolvedURL, state: "loading", script: script, promise: null };
+      registry[label] = registration;
+      script.setAttribute(api.attr("dep"), label);
+      if (options && options.integrity) script.setAttribute("integrity", options.integrity);
+      if ((options && (options.integrity || options.crossOrigin)) || api.options.crossOrigin) {
+        script.setAttribute("crossorigin",
+          (options && options.crossOrigin) || api.options.crossOrigin || "anonymous");
+      }
+      registration.promise = new root.Promise(function (resolve, reject) {
+        try {
+          assetLoadHelper(script, {
+            loadCallback: function () {
+              registration.state = "loaded";
+              resolve(script);
+            },
+            errorCallback: function (cause) {
+              if (script.parentNode) script.parentNode.removeChild(script);
+              delete registry[label];
+              reject(diagnostics.error(
+                diagnostics.ERROR_DEPENDENCY_LOAD,
+                { label: label, url: resolvedURL, cause: cause }
+              ));
+            }
+          });
+        } catch (cause) {
+          if (script.parentNode) script.parentNode.removeChild(script);
+          delete registry[label];
+          reject(diagnostics.error(
+            diagnostics.ERROR_DEPENDENCY_LOAD,
+            { label: label, url: resolvedURL, cause: cause }
+          ));
+        }
+      });
+      return registration.promise;
     },
     extAttach: function (name, object) {
       if (typeof name !== "string" ||

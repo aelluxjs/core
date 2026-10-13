@@ -53,6 +53,7 @@ import createWeakCss from "./internal/create-weak-css.js";
   api.coreAssetIntegrity = coreAssetIntegrity;
   root.AelluxJs = api;
   root[api.shortJSName] = api;
+  api.aelluxBasePath = aelluxBasePath;
   api.init = function (options) {
     api.options.verboseLevel = diagnostics.update(options);
 

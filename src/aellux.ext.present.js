@@ -16,7 +16,7 @@
  * `[data-ae-present-motion]` child as its content container; when absent, the
  * Extension reports a warning and wraps the existing content automatically.
  * Trigger and dismiss relationships use extension data attributes and may
- * target a region by selector or identifier.
+ * target a region by ID, with or without a leading #.
  *
  * Outputs and owned state: owns presentation and will-change classes plus its
  * changes to `hidden`, `aria-expanded` and `aria-controls`. It exposes
@@ -48,8 +48,8 @@
     presentMotion: AelluxJs.attr("present-motion"),
     unpopOnOutside: AelluxJs.attr("unpop-on-outside"),
     trigger: AelluxJs.attr("trigger"), //toggle,pop,unpop
-    dismiss: AelluxJs.attr("dismiss"), //selector
-    target: AelluxJs.attr("target"), //selector,
+    dismiss: AelluxJs.attr("dismiss"), //target ID
+    target: AelluxJs.attr("target"), //target ID
     lowHardware: AelluxJs.attr("low-hardware"),
   };
   const className = {
@@ -76,8 +76,11 @@
     ARIA_CONTROLS = "aria-controls",
     DEFAULT_PRESENT = "opacity transform height width";
   const presentElements = new Map();
+  const openPresentElements = new Set();
   const triggerElementsSet = new Set();
   const triggerTargets = new Map();
+  const triggersByTargetId = new Map();
+  const indexedTriggerValues = new Map();
 
   function init(options) {
     AelluxJs.mountManager.add({
@@ -109,7 +112,7 @@
     for (const element of presentElements.keys()) {
       unmountPresentContainer(element);
     }
-    triggerTargets.clear();
+    openPresentElements.clear();
   }
 
   function mountPresentContainer(element) {
@@ -190,15 +193,21 @@
     );
     if (!element.hidden) {
       presentController.classList.add(className.pop);
+      openPresentElements.add(element);
     }
     presentElements.set(element, presentController);
-    for (const triggerElement of triggerElementsSet) {
-      refreshTriggerTargets(triggerElement);
-    }
-    for (const [triggerElement, targets] of triggerTargets) {
-      if (targets.has(element)) {
+    for (const triggerElement of element.querySelectorAll(
+      `[${attr.trigger}],[${attr.dismiss}],[${attr.target}]`
+    )) {
+      if (triggerTargets.get(triggerElement) === element) {
         presentController.triggers.add(triggerElement);
         updateTriggerAriaExpanded(triggerElement);
+      }
+    }
+    const idTriggers = triggersByTargetId.get(element.id);
+    if (idTriggers) {
+      for (const triggerElement of idTriggers) {
+        refreshTriggerTargets(triggerElement);
       }
     }
     autoUnpopSchedule(element, presentController);
@@ -209,6 +218,7 @@
     const controller = presentElements.get(element);
     controller.stop();
     presentElements.delete(element);
+    openPresentElements.delete(element);
     controller.triggers.forEach(updateTriggerAriaExpanded);
     if (controller.generatedMotion && controller.presentMotion.parentElement === element) {
       while (controller.presentMotion.firstChild) {
@@ -226,53 +236,85 @@
 
   function unmountTriggerElement(triggerElement) {
     if (!triggerElementsSet.has(triggerElement)) return;
-    const targets = triggerTargets.get(triggerElement);
-    if (targets) {
-      for (const target of targets) {
-        presentElements.get(target)?.triggers.delete(triggerElement);
-      }
+    const target = triggerTargets.get(triggerElement);
+    if (target) {
+      presentElements.get(target)?.triggers.delete(triggerElement);
       triggerTargets.delete(triggerElement);
     }
+    unindexTriggerTarget(triggerElement);
     triggerElementsSet.delete(triggerElement);
   }
 
+  function targetIdFor(value) {
+    if (!value) return null;
+    const id = value.charAt(0) === "#" ? value.slice(1) : value;
+    return id && !/[\s#]/.test(id) ? id : null;
+  }
+
+  function targetById(value) {
+    const id = targetIdFor(value);
+    if (!id) {
+      AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_EXTENSION_SELECTOR, {
+        cause: new SyntaxError(),
+        extension: extensionName,
+        selector: value
+      });
+      return null;
+    }
+    return document.getElementById(id);
+  }
+
+  function unindexTriggerTarget(triggerElement) {
+    const previous = indexedTriggerValues.get(triggerElement);
+    const id = targetIdFor(previous);
+    if (id) {
+      const triggers = triggersByTargetId.get(id);
+      triggers.delete(triggerElement);
+      if (!triggers.size) triggersByTargetId.delete(id);
+    }
+    indexedTriggerValues.delete(triggerElement);
+  }
+
+  function indexTriggerTarget(triggerElement, value) {
+    if (indexedTriggerValues.get(triggerElement) === value) return;
+    unindexTriggerTarget(triggerElement);
+    indexedTriggerValues.set(triggerElement, value);
+    const id = targetIdFor(value);
+    if (id) {
+      let triggers = triggersByTargetId.get(id);
+      if (!triggers) {
+        triggers = new Set();
+        triggersByTargetId.set(id, triggers);
+      }
+      triggers.add(triggerElement);
+    }
+  }
+
   function refreshTriggerTargets(triggerElement) {
-    const targetIds = new Set();
-    const previousTargets = triggerTargets.get(triggerElement);
-    const targets = new Set();
+    const previousTarget = triggerTargets.get(triggerElement);
     const targetSelector = triggerElement.getAttribute(attr.target);
     const dismiss = triggerElement.getAttribute(attr.dismiss);
+    indexTriggerTarget(triggerElement, dismiss || targetSelector);
     const container = triggerElement.closest(`[${attr.present}]`);
 
-    if (previousTargets) {
-      for (const target of previousTargets) {
-        presentElements.get(target)?.triggers.delete(triggerElement);
-      }
+    if (previousTarget) {
+      presentElements.get(previousTarget)?.triggers.delete(triggerElement);
     }
 
+    let target = null;
     if (dismiss || targetSelector) {
-      iterateSelector(
-        document, dismiss || targetSelector,
-        (present) => {
-          if (!present.id) { return; }
-          targetIds.add(present.id);
-          targets.add(present);
-          const controller = presentElements.get(present);
-          if (controller) { controller.triggers.add(triggerElement); }
-        }
-      );
+      target = targetById(dismiss || targetSelector);
     } else if (container && container.id) {
-      targetIds.add(container.id);
-      targets.add(container);
-      const controller = presentElements.get(container);
-      if (controller) { controller.triggers.add(triggerElement); }
+      target = container;
     }
 
-    if (targets.size === 0) {
+    if (!target || !target.id) {
       triggerTargets.delete(triggerElement);
       return;
     }
-    triggerTargets.set(triggerElement, targets);
+    triggerTargets.set(triggerElement, target);
+    presentElements.get(target)?.triggers.add(triggerElement);
+    const targetIds = new Set([target.id]);
     const initial = AelluxJs.mountManager.initialAttribute?.(triggerElement, ARIA_CONTROLS);
     if (initial) { initial.trim().split(/\s+/).forEach(x => targetIds.add(x)); }
     updateTriggerAriaExpanded(triggerElement);
@@ -280,13 +322,10 @@
   }
 
   function updateTriggerAriaExpanded(triggerElement) {
-    const targets = triggerTargets.get(triggerElement);
-    if (!targets) return;
-
-    const expanded = [...targets].some((target) => {
-      const controller = presentElements.get(target);
-      return controller && target.getAttribute(ARIA_EXPANDED) === "true";
-    });
+    const target = triggerTargets.get(triggerElement);
+    if (!target) return;
+    const expanded = presentElements.has(target) &&
+      target.getAttribute(ARIA_EXPANDED) === "true";
     triggerElement.setAttribute(ARIA_EXPANDED, String(expanded));
   }
 
@@ -342,6 +381,7 @@
       });
 
       element.hidden = false;
+      openPresentElements.add(element);
       if (controller.motionEnabled) {
         controller.classList.add(className.willChange);
       }
@@ -441,6 +481,8 @@
     const focused = !gotoVisible && element.contains(document.activeElement)
       ? document.activeElement : null;
     element.hidden = gotoVisible ? false : true;
+    if (element.hidden) openPresentElements.delete(element);
+    else openPresentElements.add(element);
     if (focused) {
       if (document.activeElement === focused) focused.blur();
       if (document.activeElement !== focused) AelluxJs.dispatch("UnpopFocusLost");
@@ -470,7 +512,7 @@
   function outsideClickAutoUnpop(currentExceptions) {
     //unpop all not parenting except
     //or with proprerty explicit to keep open when click outside
-    for (const pContainer of presentElements.keys()) {
+    for (const pContainer of openPresentElements) {
       if (pContainer.hidden === true
         || pContainer.getAttribute(attr.unpopOnOutside) === "false"
         || currentExceptions.some((e) => pContainer.contains(e))) {
@@ -478,6 +520,12 @@
       }
       unpop(pContainer);
     }
+  }
+
+  function refreshChangedTrigger(button) {
+    if (!triggerElementsSet.has(button)) return;
+    const value = button.getAttribute(attr.dismiss) || button.getAttribute(attr.target);
+    if (value !== indexedTriggerValues.get(button)) refreshTriggerTargets(button);
   }
 
   function OnClick(event) {
@@ -488,16 +536,15 @@
     var button;
     button = event.target.closest(`[${attr.trigger}]`);
     if (button) {
+      refreshChangedTrigger(button);
       const triggerAttr = button.getAttribute(attr.trigger);
       const targetSelector = button.getAttribute(attr.target);
       if (targetSelector) {
-        iterateSelector(
-          document, targetSelector,
-          (element) => {
-            exceptions.push(element);
-            trigger(element, triggerAttr);
-          }
-        );
+        const target = targetById(targetSelector);
+        if (target) {
+          exceptions.push(target);
+          trigger(target, triggerAttr);
+        }
       } else if (container) {
         exceptions.push(container);
         trigger(container, triggerAttr);
@@ -510,16 +557,15 @@
     }
     button = event.target.closest(`[${attr.dismiss}]`);
     if (button) {
+      refreshChangedTrigger(button);
       const dismiss = button.getAttribute(attr.dismiss);
       const targetSelector = button.getAttribute(attr.target);
       if (dismiss || targetSelector) {
-        iterateSelector(
-          document, dismiss || targetSelector,
-          (element) => {
-            exceptions.push(element);
-            unpop(element);
-          }
-        );
+        const target = targetById(dismiss || targetSelector);
+        if (target) {
+          exceptions.push(target);
+          unpop(target);
+        }
       } else if (container) {
         exceptions.push(container);
         unpop(container);
@@ -532,26 +578,6 @@
     }
 
     outsideClickAutoUnpop(exceptions);
-  }
-
-  function iterateSelector(element, selector, callback) {
-    try {
-      element.querySelectorAll(selector)
-        .forEach((element) => {
-          try { callback(element); }
-          catch (error) {
-            AelluxJs.diagnostics.error(
-              AelluxJs.diagnostics.ERROR_CALLBACK,
-              { cause: error, extension: extensionName, selector }
-            );
-          }
-        });
-    } catch (error) {
-      AelluxJs.diagnostics.error(
-        AelluxJs.diagnostics.ERROR_EXTENSION_SELECTOR,
-        { cause: error, extension: extensionName, selector }
-      );
-    }
   }
 
   function getString2Time(string) {

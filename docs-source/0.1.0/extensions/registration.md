@@ -42,6 +42,21 @@ $ae.ext("feedback");
 $ae.init({ mode: "basic" });
 ```
 
+## Shared script dependencies
+
+Call `$ae.dep(label, url)` before or after `$ae.init()`, including from an Extension's `init()`, to load a classic script immediately. It returns a Promise that resolves to the script element only after the browser's `load` event. Await it before using a global supplied by the dependency:
+
+```js
+async function init() {
+  await AelluxJs.dep("better-scroll@1.0", "/vendor/better-scroll.min.js");
+  // The dependency is ready here.
+}
+```
+
+The first call owns the label. Calls from other Extensions with the same label and URL return the same Promise, including while the script is still loading, so the script is inserted only once. A later call with the same label but a different URL rejects with `ERROR_DEPENDENCY_CONFLICT` (`1117`). A failed load rejects with `ERROR_DEPENDENCY_LOAD` (`1118`), removes its script and registry entry, and lets a later call retry. Empty labels or URLs reject with `ERROR_DEPENDENCY_ARGUMENT` (`1116`). Records are available at `$ae.registry.dep[label]` and remain cached when an Extension is destroyed.
+
+As with Extension assets, a URL beginning with `./` resolves relative to the aellux.js base path. Other relative URLs follow normal browser URL resolution. Optional third argument `{ integrity, crossOrigin }` applies SRI and CORS attributes to the dependency script.
+
 ## Extension Attachment
 
 An Extension script exposes its API through `AelluxJs.extAttach()`:

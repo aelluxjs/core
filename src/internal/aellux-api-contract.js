@@ -90,6 +90,9 @@ var diagnosticNames = [
   "ERROR_EXTENSION_ATTACH",
   "ERROR_MOUNT_REGISTRATION",
   "ERROR_EXTENSION_LOAD_WHEN",
+  "ERROR_DEPENDENCY_ARGUMENT",
+  "ERROR_DEPENDENCY_CONFLICT",
+  "ERROR_DEPENDENCY_LOAD",
   "ERROR_LEGACY_RUNTIME_START",
   "ERROR_LEGACY_RUNTIME_LOAD",
   "ERROR_MODERN_RUNTIME_START",
@@ -184,6 +187,7 @@ var bootstrapProperties = Object.freeze({
     })
   }),
   ext: extensionNamespace,
+  dep: method,
   extAttach: method,
   startAelluxJs: method,
   destroy: method,
