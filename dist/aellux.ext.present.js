@@ -35,7 +35,7 @@
       toggle,
       trigger
     });
-    const POP = "Pop", UNPOP = "Unpop", BEFORE = "Before", PING = "ping", MILLISECOND = "ms", SECOND = "s", TRANSITION_PREPARE_TIME = 100, ARIA_EXPANDED = "aria-expanded", ARIA_CONTROLS = "aria-controls";
+    const POP = "Pop", UNPOP = "Unpop", BEFORE = "Before", PING = "ping", MILLISECOND = "ms", SECOND = "s", TRANSITION_PREPARE_TIME = 100, ARIA_EXPANDED = "aria-expanded", ARIA_CONTROLS = "aria-controls", DEFAULT_PRESENT = "opacity transform height width";
     const presentElements = /* @__PURE__ */ new Map();
     const triggerElementsSet = /* @__PURE__ */ new Set();
     const triggerTargets = /* @__PURE__ */ new Map();
@@ -72,6 +72,9 @@
     }
     function mountPresentContainer(element) {
       if (presentElements.has(element)) return;
+      if (!(element.getAttribute(attr.present) || "").trim()) {
+        element.setAttribute(attr.present, DEFAULT_PRESENT);
+      }
       if (element.hasAttribute(attr.presentMotion)) {
         element.removeAttribute(attr.presentMotion);
       }

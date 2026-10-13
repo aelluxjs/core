@@ -210,9 +210,8 @@ import createWeakCss from "./internal/create-weak-css.js";
   }
 
   function updateHardwareAttribute() {
+    return;
     var browserNavigator = root.navigator || {};
-    var lowHardware = browserNavigator.hardwareConcurrency <= 4 ||
-      browserNavigator.deviceMemory <= 4;
     if (lowHardware) {
       document.documentElement.setAttribute(api.attr("low-hardware"), "");
     }

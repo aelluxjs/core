@@ -138,7 +138,7 @@ test("present prepares will-change before starting a transition", async ({ page 
     willChange: true,
     popping: false,
     returnsPromise: true,
-    willChangeStyle: "opacity, transform",
+    willChangeStyle: "opacity, transform, grid-template-columns, grid-template-rows",
     motionWillChange: false,
     motionWillChangeStyle: "auto"
   });
@@ -186,32 +186,34 @@ test("present disables transitions when reduced motion is active", async ({ page
   )).toBe("0s");
 });
 
-test("present applies independent height and width animation keyframes", async ({ page }) => {
+test("present attribute tokens independently select transition properties", async ({ page }) => {
   await page.goto("/tests/index.htm");
   await page.evaluate(() => {
     document.body.innerHTML = `
       <style>[data-ae-present] { --ae-pop-duration: 0ms; --ae-unpop-duration: 0ms; }</style>
       <div id="empty" data-ae-present><div data-ae-present-motion>empty</div></div>
+      <div id="opacity" data-ae-present="opacity"><div data-ae-present-motion>opacity</div></div>
+      <div id="transform" data-ae-present="transform"><div data-ae-present-motion>transform</div></div>
       <div id="height" data-ae-present="height"
         style="width: 200px; --ae-from-height: 11px; --ae-pop-height: 41px; --ae-unpop-height: 7px"><div data-ae-present-motion>height</div></div>
       <div id="width" data-ae-present="width"
         style="height: 50px; --ae-from-width: 13px; --ae-pop-width: 83px; --ae-unpop-width: 5px"><div data-ae-present-motion>width</div></div>
-      <div id="both" data-ae-present="width height"
-        style="--ae-from-width: 17px; --ae-pop-width: 97px; --ae-unpop-width: 3px;
-          --ae-from-height: 19px; --ae-pop-height: 43px; --ae-unpop-height: 2px"><div data-ae-present-motion>both</div></div>
+      <div id="combined" data-ae-present="opacity height"
+        style="width: 200px; --ae-from-height: 19px; --ae-pop-height: 43px;
+          --ae-unpop-height: 2px"><div data-ae-present-motion>combined</div></div>
     `;
   });
   await page.addScriptTag({ url: "/dist/aellux.js" });
   await page.evaluate(() => AelluxJs.init({ mode: "full" }));
   await expect.poll(() => page.evaluate(() => {
     const pop = AelluxJs.className("pop");
-    return ["empty", "height", "width", "both"].every(id =>
+    return ["empty", "opacity", "transform", "height", "width", "combined"].every(id =>
       document.getElementById(id).classList.contains(pop)
     );
   })).toBe(true);
 
   const states = await page.evaluate(() => {
-    const ids = ["empty", "height", "width", "both"];
+    const ids = ["empty", "opacity", "transform", "height", "width", "combined"];
     const pop = AelluxJs.className("pop");
     const unpopping = AelluxJs.className("unpopping");
     const willChange = AelluxJs.className("will-change");
@@ -222,7 +224,10 @@ test("present applies independent height and width animation keyframes", async (
         element.querySelector(":scope > [data-ae-present-motion]")
       );
       return [id, {
+        value: element.getAttribute("data-ae-present"),
         display: style.display,
+        opacity: style.opacity,
+        transform: style.transform,
         columns: style.gridTemplateColumns,
         rows: style.gridTemplateRows,
         transitionProperty: style.transitionProperty,
@@ -249,36 +254,47 @@ test("present applies independent height and width animation keyframes", async (
   });
 
   expect(states.opened.empty).toMatchObject({
-    display: "inline-grid", transitionProperty: "opacity, transform"
+    value: "opacity transform height width",
+    display: "inline-grid",
+    opacity: "1",
+    transform: "matrix(1, 0, 0, 1, 0, 0)",
+    transitionProperty: "opacity, transform, grid-template-rows, grid-template-columns"
+  });
+  expect(states.opened.opacity).toMatchObject({ opacity: "1", transform: "none" });
+  expect(states.opened.transform).toMatchObject({
+    opacity: "1", transform: "matrix(1, 0, 0, 1, 0, 0)"
   });
   expect(states.opened.height).toMatchObject({
-    display: "inline-grid", columns: "200px", rows: "41px",
-    transitionProperty: "opacity, transform, grid-template-rows"
+    opacity: "1", transform: "none", columns: "200px", rows: "41px"
   });
   expect(states.opened.width).toMatchObject({
-    display: "inline-grid", columns: "83px", rows: "50px",
-    transitionProperty: "opacity, transform, grid-template-columns"
+    opacity: "1", transform: "none", columns: "83px", rows: "50px"
   });
-  expect(states.opened.both).toMatchObject({
-    display: "inline-grid", columns: "97px", rows: "43px",
-    transitionProperty: "opacity, transform, grid-template-columns, grid-template-rows"
+  expect(states.opened.combined).toMatchObject({
+    opacity: "1", transform: "none", columns: "200px", rows: "43px"
+  });
+  expect(states.from.opacity).toMatchObject({ opacity: "0", transform: "none" });
+  expect(states.from.transform).toMatchObject({
+    opacity: "1", transform: "matrix(0.5, 0, 0, 0.5, 0, 0)"
   });
   expect(states.from.height.rows).toBe("11px");
   expect(states.from.width.columns).toBe("13px");
-  expect(states.from.both).toMatchObject({ columns: "17px", rows: "19px" });
+  expect(states.from.combined).toMatchObject({ opacity: "0", rows: "19px" });
+  expect(states.unpopping.opacity).toMatchObject({ opacity: "0", transform: "none" });
+  expect(states.unpopping.transform).toMatchObject({
+    opacity: "1", transform: "matrix(1.2, 0, 0, 1.2, 0, 0)"
+  });
   expect(states.unpopping.height.rows).toBe("7px");
   expect(states.unpopping.width.columns).toBe("5px");
-  expect(states.unpopping.both).toMatchObject({ columns: "3px", rows: "2px" });
+  expect(states.unpopping.combined).toMatchObject({ opacity: "0", rows: "2px" });
   expect(states.prepared.empty).toMatchObject({
-    willChange: "opacity, transform",
+    willChange: "opacity, transform, grid-template-columns, grid-template-rows",
     motionWillChange: "auto",
     motionMinWidth: "0px",
     motionMinHeight: "0px",
     motionTransitionProperty: "all"
   });
-  expect(states.prepared.height.willChange).toBe("opacity, transform, grid-template-rows");
-  expect(states.prepared.width.willChange).toBe("opacity, transform, grid-template-columns");
-  expect(states.prepared.both.willChange)
+  expect(states.prepared.height.willChange)
     .toBe("opacity, transform, grid-template-columns, grid-template-rows");
 });
 
@@ -477,6 +493,7 @@ test("present restores initial attributes and captures fresh values on remount",
     await AelluxJs.unmount(control, "present");
     await AelluxJs.unmount(panel, "present");
     const first = {
+      presentValue: panel.getAttribute("data-ae-present"),
       panelHidden: panel.hasAttribute("hidden"),
       panelExpanded: panel.getAttribute("aria-expanded"),
       motionHidden: motion.hasAttribute("hidden"),
@@ -494,6 +511,7 @@ test("present restores initial attributes and captures fresh values on remount",
     await AelluxJs.unmount(control, "present");
     await AelluxJs.unmount(panel, "present");
     const second = {
+      presentValue: panel.getAttribute("data-ae-present"),
       panelHidden: panel.hasAttribute("hidden"),
       panelExpanded: panel.getAttribute("aria-expanded"),
       motionHidden: motion.hasAttribute("hidden"),
@@ -515,6 +533,7 @@ test("present restores initial attributes and captures fresh values on remount",
   });
 
   expect(state.first).toEqual({
+    presentValue: "",
     panelHidden: true,
     panelExpanded: "custom",
     motionHidden: false,
@@ -522,6 +541,7 @@ test("present restores initial attributes and captures fresh values on remount",
     controlControls: ""
   });
   expect(state.second).toEqual({
+    presentValue: "",
     panelHidden: false,
     panelExpanded: "changed",
     motionHidden: false,

@@ -9,11 +9,13 @@
  * Capability profile: interaction and input, structure and state, and motion
  * and timing.
  *
- * Inputs and activation: mounts `[data-ae-present]` regions. Each region uses a
- * direct `[data-ae-present-motion]` child as its content container; when absent,
- * the Extension reports a warning and wraps the existing content automatically.
- * Trigger and dismiss relationships use extension data attributes and may target
- * a region by selector or identifier.
+ * Inputs and activation: mounts `[data-ae-present]` regions. Its whitespace-
+ * separated opacity, transform, height and width values select the animated
+ * properties; an empty value enables all four. Each region uses a direct
+ * `[data-ae-present-motion]` child as its content container; when absent, the
+ * Extension reports a warning and wraps the existing content automatically.
+ * Trigger and dismiss relationships use extension data attributes and may
+ * target a region by selector or identifier.
  *
  * Outputs and owned state: owns presentation and will-change classes plus its
  * changes to `hidden`, `aria-expanded` and `aria-controls`. It exposes
@@ -70,7 +72,8 @@
     SECOND = "s",
     TRANSITION_PREPARE_TIME = 100,
     ARIA_EXPANDED = "aria-expanded",
-    ARIA_CONTROLS = "aria-controls";
+    ARIA_CONTROLS = "aria-controls",
+    DEFAULT_PRESENT = "opacity transform height width";
   const presentElements = new Map();
   const triggerElementsSet = new Set();
   const triggerTargets = new Map();
@@ -110,6 +113,9 @@
 
   function mountPresentContainer(element) {
     if (presentElements.has(element)) return;
+    if (!(element.getAttribute(attr.present) || "").trim()) {
+      element.setAttribute(attr.present, DEFAULT_PRESENT);
+    }
     if (element.hasAttribute(attr.presentMotion)) {
       element.removeAttribute(attr.presentMotion);
     }
@@ -333,6 +339,7 @@
         );
       }
 
+      controller.classList.remove(className.pop);
       controller.classList.add(transitionClass);
       const completed = new Promise(completeTransition => {
         controller.timeout = setTimeout(
