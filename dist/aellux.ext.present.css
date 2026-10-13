@@ -27,6 +27,12 @@
   place-self: stretch;
   contain: layout paint;
 }
+[data-ae-present=""] {
+  transition: none !important;
+  will-change: auto !important;
+  --ae-pop-duration: 0s !important;
+  --ae-unpop-duration: 0s !important;
+}
 [data-ae-present~="width"].ae--will-change, [data-ae-present~="width"].ae--will-change>[data-ae-present-motion]{
   min-width: 0 !important;
   width: auto !important;

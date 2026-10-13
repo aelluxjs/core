@@ -101,6 +101,18 @@
       });
     };
   }
+  function _toConsumableArray(r) {
+    return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread();
+  }
+  function _nonIterableSpread() {
+    throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+  }
+  function _iterableToArray(r) {
+    if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
+  }
+  function _arrayWithoutHoles(r) {
+    if (Array.isArray(r)) return _arrayLikeToArray(r);
+  }
   function _slicedToArray(r, e) {
     return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest();
   }
@@ -130,18 +142,6 @@
   }
   function _arrayWithHoles(r) {
     if (Array.isArray(r)) return r;
-  }
-  function _toConsumableArray(r) {
-    return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread();
-  }
-  function _nonIterableSpread() {
-    throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
-  }
-  function _iterableToArray(r) {
-    if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
-  }
-  function _arrayWithoutHoles(r) {
-    if (Array.isArray(r)) return _arrayLikeToArray(r);
   }
   function _createForOfIteratorHelper(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
@@ -272,7 +272,7 @@
     }
     function mountPresentContainer(element) {
       if (presentElements.has(element)) return;
-      if (!(element.getAttribute(attr.present) || "").trim()) {
+      if ((element.getAttribute(attr.present) || "").trim().toLowerCase() === "all") {
         element.setAttribute(attr.present, DEFAULT_PRESENT);
       }
       if (element.hasAttribute(attr.presentMotion)) {
@@ -296,6 +296,7 @@
       var presentController = {
         generatedMotion: generatedMotion,
         presentMotion: presentMotion,
+        motionEnabled: (element.getAttribute(attr.present) || "").trim() !== "",
         transition: null,
         autoUnpopTimeout: null,
         direction: null,
@@ -332,8 +333,7 @@
           if (transitionStart) {
             this.classList.remove(className.unpopping);
           } else {
-            var _this$classList;
-            (_this$classList = this.classList).remove.apply(_this$classList, _toConsumableArray(Object.values(className)));
+            this.classList.remove(className.pop, className.popping, className.unpopping, className.willChange);
           }
         }
       };
@@ -534,7 +534,7 @@
               }
               return _context.a(2);
             case 4:
-              reusePreparation = controller.transition !== null && controller.classList.contains(className.willChange);
+              reusePreparation = controller.motionEnabled && controller.transition !== null && controller.classList.contains(className.willChange);
               controller.stop({
                 replacement: reusePreparation,
                 transitionStart: true
@@ -550,8 +550,10 @@
                 controller.transition = transition;
               });
               element.hidden = false;
-              controller.classList.add(className.willChange);
-              if (reusePreparation) {
+              if (controller.motionEnabled) {
+                controller.classList.add(className.willChange);
+              }
+              if (!(controller.motionEnabled && !reusePreparation)) {
                 _context.n = 5;
                 break;
               }

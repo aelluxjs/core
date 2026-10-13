@@ -6,18 +6,18 @@
 <div data-ae-adaptive>Responsive content</div>
 ```
 
-The Extension measures each marked element with `ResizeObserver`, or uses the window resize event when that API is unavailable. It applies one shape class (`ae--shape-vertical`, `ae--shape-square`, or `ae--shape-horizontal`) according to width divided by height. It also toggles `ae--fits-<size>` classes when `sqrt(width * height)` reaches each configured minimum. After an update it dispatches `AelluxJsAdaptiveUpdate` from the element. Initial `ae--*` classes are discarded before mounting. Unmounting removes the managed classes; unrelated classes and inline styles are left as they are.
+The Extension measures each marked element with `ResizeObserver`, or uses the window resize event when that API is unavailable. It applies one shape class (`ae--shape-vertical`, `ae--shape-square`, or `ae--shape-horizontal`) according to width divided by height. It also sets `aria-orientation` to `vertical` when height exceeds width and to `horizontal` otherwise, including square elements. It toggles `ae--fits-<size>` classes when `sqrt(width * height)` reaches each configured minimum. After an update it dispatches `AelluxJsAdaptiveUpdate` from the element. Initial `ae--*` classes are discarded before mounting. Unmounting removes the managed classes and restores the initial `aria-orientation`; unrelated classes and inline styles are left as they are.
 
 ## Accessibility profile
 
 - **Capabilities:** visual and adaptive; infrastructure.
-- **Owned state:** the `ae--shape-*` and `ae--fits-*` classes.
+- **Owned state:** the `ae--shape-*` and `ae--fits-*` classes and `aria-orientation`.
 - **Consumer responsibility:** CSS using those classes must preserve content, readable reflow, zoom support and sufficient contrast.
-- **Not applicable:** the Extension creates no controls, changes no semantic attributes and manages no focus or motion.
+- **Not applicable:** the Extension creates no controls and manages no focus or motion.
 
 ## Configuration
 
-Pass `adaptiveParams` through the Extension options. Each supplied group is merged with its defaults:
+Pass `adaptiveParams` through the Extension options. Each supplied group is merged with its defaults during initialization. The resulting parameters are read-only after initialization:
 
 ```js
 $ae.init({

@@ -52,7 +52,7 @@
 
 <script src="/core/docs/assets/docweaver/js/toc-init.js?t=1"></script>
 
-<script src="https://cdn.jsdelivr.net/npm/@aelluxjs/core@0.1.0-beta.8/dist/aellux.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@aelluxjs/core@0.1.0-beta.9/dist/aellux.min.js"></script>
 <script>
   AelluxJs.ext("/core/docs/assets/docweaver/js/aellux.ext.ajax-href.js");
   AelluxJs.init({ mode: "full" });
@@ -639,7 +639,7 @@ $ae.diagnostics.info($ae.diagnostics.INFO_LEGACY_FALLBACK);
 </tbody></table>
 <pre><code class="language-js">$ae.init({ verboseLevel: &quot;warn&quot; });
 </code></pre>
-<p><code>error()</code>, <code>warn()</code>, and <code>info()</code> are always recorded, even when the selected level hides them from the console. Call <code>$ae.diagnostics.showHistory(10)</code> to print the last 10 entries with timestamps; omit the argument to print all entries. The method also returns the selected entries, including their timestamp, level, code, message, and context. Passing <code>0</code> prints and returns no entries. Replaying history does not record new diagnostics.</p>
+<p><code>error()</code>, <code>warn()</code>, and <code>info()</code> are recorded even when the selected level hides them from the console. The history retains the 100 most recent entries; older entries and their context references are released as new diagnostics arrive. Call <code>$ae.diagnostics.showHistory(10)</code> to print the last 10 retained entries with timestamps; omit the argument to print all retained entries. The method also returns the selected entries, including their timestamp, level, code, message, and context. Passing <code>0</code> prints and returns no entries. Replaying history does not record new diagnostics.</p>
 <h2>Code Ranges</h2>
 <ul>
 <li><code>1000-1099</code>: boot and Core usage errors.</li>
@@ -652,7 +652,7 @@ $ae.diagnostics.info($ae.diagnostics.INFO_LEGACY_FALLBACK);
 <h2>Extension Compatibility</h2>
 <p><code>ERROR_EXTENSION_INCOMPATIBLE</code> uses code <code>1106</code>. It is reported before requesting an Extension script when its declared <code>builds</code> do not provide an artifact compatible with the selected runtime. Its context contains the Extension name, selected runtime, and declared builds.</p>
 <h2>Mounting and Extension Assets</h2>
-<p>An invalid root selector passed to <code>mount()</code> or <code>unmount()</code> records <code>ERROR_MOUNT_ROOT_SELECTOR</code> (<code>1005</code>) with the selector, operation, and cause. An Extension whose <code>init()</code> rejects records <code>ERROR_EXTENSION_INITIALIZE</code> (<code>1102</code>); the Extension remains uninitialized. A stylesheet load failure records <code>WARN_EXTENSION_STYLE_LOAD</code> (<code>2004</code>) with the Extension name and URL. The Extension can still initialize after that warning.</p>
+<p>An invalid element, invalid ID, or missing ID passed to <code>mount()</code>, <code>unmount()</code>, <code>update()</code>, or controller lookup records <code>WARN_INVALID_ELEMENT_OR_ID</code> (<code>2011</code>) with the received value and operation. IDs can be passed with or without a leading <code>#</code>. An Extension whose <code>init()</code> rejects records <code>ERROR_EXTENSION_INITIALIZE</code> (<code>1102</code>); the Extension remains uninitialized. A stylesheet load failure records <code>WARN_EXTENSION_STYLE_LOAD</code> (<code>2004</code>) with the Extension name and URL. The Extension can still initialize after that warning.</p>
 <p>If mounting a root fails while registering assets, waiting for Extensions, or discovering mountable elements, <code>ERROR_MOUNT</code> (<code>1006</code>) records the cause, root, and selected Extension names. Waiting elements have <code>aria-busy</code> reset to <code>false</code> after the attempt.</p>
 <p>Waiting for an unregistered Extension records <code>ERROR_EXTENSION_NOT_REGISTERED</code> (<code>1110</code>) and rejects with that diagnostic. A mounted controller name without a matching public Extension method records <code>WARN_CONTROLLER_METHOD_MISSING</code> (<code>2005</code>). If browser storage is unavailable, <code>WARN_STORAGE_FALLBACK</code> (<code>2006</code>) identifies the storage area and key prefix; values are then held in memory for the current page only.</p>
 <p><code>ext()</code> records <code>ERROR_EXTENSION_LOAD_WHEN</code> (<code>1114</code>) when a supplied <code>loadWhen</code> selector is invalid and does not register the Extension. <code>extAttach()</code> records <code>ERROR_EXTENSION_ATTACH</code> (<code>1112</code>) when its name, API object, lifecycle methods, or a changed declared <code>loadWhen</code> selector is invalid. Its context identifies the rejected argument, and the API is not attached. It records <code>ERROR_EXTENSION_NOT_REGISTERED</code> (<code>1110</code>) when no preceding <code>ext()</code> declaration exists and <code>ERROR_EXTENSION_DUPLICATE</code> (<code>1101</code>) for a second attachment.</p>

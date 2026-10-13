@@ -72,7 +72,7 @@
     }
     function mountPresentContainer(element) {
       if (presentElements.has(element)) return;
-      if (!(element.getAttribute(attr.present) || "").trim()) {
+      if ((element.getAttribute(attr.present) || "").trim().toLowerCase() === "all") {
         element.setAttribute(attr.present, DEFAULT_PRESENT);
       }
       if (element.hasAttribute(attr.presentMotion)) {
@@ -96,6 +96,7 @@
       const presentController = {
         generatedMotion,
         presentMotion,
+        motionEnabled: (element.getAttribute(attr.present) || "").trim() !== "",
         transition: null,
         autoUnpopTimeout: null,
         direction: null,
@@ -133,7 +134,12 @@
           if (transitionStart) {
             this.classList.remove(className.unpopping);
           } else {
-            this.classList.remove(...Object.values(className));
+            this.classList.remove(
+              className.pop,
+              className.popping,
+              className.unpopping,
+              className.willChange
+            );
           }
         }
       };
@@ -289,7 +295,7 @@
         if (!allowEvent) {
           return;
         }
-        const reusePreparation = controller.transition !== null && controller.classList.contains(className.willChange);
+        const reusePreparation = controller.motionEnabled && controller.transition !== null && controller.classList.contains(className.willChange);
         controller.stop({ replacement: reusePreparation, transitionStart: true });
         controller.direction = newDirection;
         const interrupted = new Promise((_, interruptTransition) => {
@@ -302,8 +308,10 @@
           controller.transition = transition;
         });
         element.hidden = false;
-        controller.classList.add(className.willChange);
-        if (!reusePreparation) {
+        if (controller.motionEnabled) {
+          controller.classList.add(className.willChange);
+        }
+        if (controller.motionEnabled && !reusePreparation) {
           const prepared = new Promise((resolve) => {
             transition.timeout = setTimeout(() => {
               transition.timeout = null;

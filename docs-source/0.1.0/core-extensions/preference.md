@@ -16,7 +16,7 @@ preference.update();
 console.log(preference.get("colorScheme"));
 ```
 
-`set(name, value)` saves the user value in the `AelluxJsPreferences` persistence store. Call `update()` to recompute and publish the current values; `set()` does not call `update()` automatically. Changes from the browser `storage` event are updated automatically. `update()` also dispatches `AelluxJsPreferencesChange`.
+`set(name, value)` saves the user value in the `AelluxJsPreferences` persistence store. Call `update()` to recompute and publish the current values; `set()` does not call `update()` automatically. Changes from the browser `storage` event are updated automatically. `update()` synchronizes mounted controls for preferences whose computed values changed and always dispatches `AelluxJsPreferencesChange`, including when the values stay the same. Newly mounted controls are synchronized immediately.
 
 ## Preference controls
 

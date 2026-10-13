@@ -2,6 +2,26 @@
 
 All notable changes to aellux.js will be documented in this file.
 
+## [0.1.0-beta.9] - 2026-10-13
+
+### Changed
+
+- Updated the package and current documentation references to `0.1.0-beta.9`.
+- Limited retained diagnostics to the latest 100 entries with a circular buffer.
+- Standardized element and ID resolution for mount, unmount, update, and controller lookup, with a shared invalid-input diagnostic.
+- Reduced temporary allocations during mounted-element traversal and layout scheduling. Detached-element cleanup now runs only after relevant DOM removals and coalesces repeated observer notifications.
+- Reduced per-element mount state to one initial-attribute snapshot with a user count, preserving restoration across multiple registrations and failed mounts.
+- Mount now waits for every matching Extension to load before searching for mountable elements, and avoids repeated searches within nested activation scopes.
+- Adaptive now batches resize updates, precomputes size thresholds, freezes initialized parameters, and synchronizes `aria-orientation`.
+- Point now selects a single nearest eligible `target` instead of retaining pointable chains. It keeps one `pressStart` reference so release and cancellation still reach the press origin.
+- Preference now indexes mounted controls by preference and refreshes only controls whose computed value changes; `PreferencesChange` remains dispatched on every `update()` call.
+- An empty `data-ae-present` value now disables motion; use `all` to enable every Present transition. Present also avoids an array allocation when clearing transition classes.
+
+### Fixed
+
+- Restored low-hardware detection in the boot script for browsers reporting no more than four logical processors or 4 GiB of device memory.
+- Stabilized Present ARIA and transition coverage, and added browser coverage for shared attribute restoration, selective Preference updates, Point routing, and Adaptive updates.
+
 ## [0.1.0-beta.8] - 2026-10-11
 
 ### Changed

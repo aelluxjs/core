@@ -7,6 +7,7 @@ export function generatePresentCSS(AelluxJs) {
   const lowHardwareAttribute = AelluxJs.attr("low-hardware");
   const motion = `[${motionAttribute}]`;
   const present = `[${presentAttribute}]`;
+  const presentWithoutMotion = `[${presentAttribute}=""]`;
   const presentOpacity = `[${presentAttribute}~="opacity"]`;
   const presentTransform = `[${presentAttribute}~="transform"]`;
   const presentHeight = `[${presentAttribute}~="height"]`;
@@ -44,6 +45,12 @@ ${present} {
 ${present}>${motion} {
   place-self: stretch;
   contain: layout paint;
+}
+${presentWithoutMotion} {
+  transition: none !important;
+  will-change: auto !important;
+  --ae-pop-duration: 0s !important;
+  --ae-unpop-duration: 0s !important;
 }
 ${presentWidth}.${willChange}, ${presentWidth}.${willChange}>${motion}{
   min-width: 0 !important;

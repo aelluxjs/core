@@ -3,7 +3,9 @@
 function buildDiagnostics(catalog) {
   var levels = { error: 0, warn: 1, info: 2 };
   var consoleMethods = ["error", "warn", "info"];
+  var historyLimit = 100;
   var history = [];
+  var historyStart = 0;
   var diagnostics = {
     legacy: false,
     supported: false,
@@ -42,10 +44,14 @@ function buildDiagnostics(catalog) {
       if (typeof lines !== "number" || !isFinite(lines) || lines < 0 || lines !== Math.floor(lines)) {
         throw new RangeError("diagnostics.showHistory(lines) requires a non-negative integer.");
       }
-      var entries = history.slice(Math.max(0, history.length - lines));
+      var count = Math.min(lines, history.length);
+      var entries = [];
+      for (var i = 0; i < count; i++) {
+        entries.push(history[(historyStart + history.length - count + i) % history.length]);
+      }
       if (typeof console !== "undefined" && typeof console.log === "function") {
-        for (var i = 0; i < entries.length; i++) {
-          var entry = entries[i];
+        for (var j = 0; j < entries.length; j++) {
+          var entry = entries[j];
           var message = "[" + entry.timestamp + "] [aellux.js " + entry.code + "] " + entry.message;
           if (entry.context) console.log(message, entry.context);
           else console.log(message);
@@ -59,13 +65,19 @@ function buildDiagnostics(catalog) {
   }
   function emit(level, definition, context) {
     var diagnostic = diagnostics.create(definition, context);
-    history.push({
+    var entry = {
       timestamp: (/* @__PURE__ */ new Date()).toISOString(),
       level,
       code: definition.code,
       message: definition.message,
       context
-    });
+    };
+    if (history.length < historyLimit) {
+      history.push(entry);
+    } else {
+      history[historyStart] = entry;
+      historyStart = (historyStart + 1) % historyLimit;
+    }
     var verboseLevel = getVerboseLevel();
     var consoleMethod = consoleMethods[level];
     if ((level === levels.error || level <= verboseLevel) && typeof console !== "undefined" && typeof console[consoleMethod] === "function") {
@@ -568,7 +580,6 @@ function createAelluxConstants() {
       ERROR_INVALID_MODE: { code: 1002, message: "aellux.js mode must be basic or full." },
       ERROR_INVALID_VERBOSE_LEVEL: { code: 1003, message: "aellux.js verboseLevel must be 0, 1, 2, or the matching error, warn, info key." },
       ERROR_CONTROLLER_NOT_FOUND: { code: 1004, message: "No controller was found for this element. It may not be mounted." },
-      ERROR_MOUNT_ROOT_SELECTOR: { code: 1005, message: "Invalid root selector for mounting or unmounting." },
       ERROR_MOUNT: { code: 1006, message: "aellux.js failed to mount a root." },
       ERROR_EXTENSION_DUPLICATE: { code: 1101, message: "aellux.js Extension is already registered." },
       ERROR_EXTENSION_INITIALIZE: { code: 1102, message: "aellux.js Extension failed to initialize." },
@@ -592,13 +603,13 @@ function createAelluxConstants() {
       WARN_BROWSER_UNSUPPORTED: { code: 2e3, message: "Browser environment is not available." },
       WARN_BROWSER_CAPABILITIES: { code: 2001, message: "Some browser capabilities are unavailable; trying Legacy runtime." },
       WARN_INTERRUPTION: { code: 2002, message: "aellux.js Extension transition was interrupted." },
-      WARN_INVALID_CONTROLLER_ELEMENT: { code: 2003, message: "Controller lookup requires a DOM Element or an existing element ID, optionally prefixed with #." },
       WARN_EXTENSION_STYLE_LOAD: { code: 2004, message: "aellux.js Extension stylesheet could not be loaded." },
       WARN_CONTROLLER_METHOD_MISSING: { code: 2005, message: "A mounted controller method is not available on its Extension." },
       WARN_STORAGE_FALLBACK: { code: 2006, message: "Browser storage is unavailable; values will be kept in memory only." },
       WARN_PRESENT_MOTION_HIDDEN: { code: 2008, message: "A present-motion child should not be hidden; hidden belongs on its present container." },
       WARN_NAVIGATION_EVENT_INVALID: { code: 2009, message: "A state-navigation event has missing or invalid detail properties." },
       WARN_PRESENT_MOTION_MISSING: { code: 2010, message: "A present container has no direct present-motion child; one was generated automatically." },
+      WARN_INVALID_ELEMENT_OR_ID: { code: 2011, message: "Expected a DOM Element or an existing element ID, optionally prefixed with #." },
       INFO_LEGACY_FALLBACK: { code: 3e3, message: "aellux.js is starting the Legacy runtime." }
     },
     AELLUXJS_DEFAULT_INITIALIZATION_OPTIONS: {

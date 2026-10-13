@@ -59,11 +59,11 @@ import utilsNameCase from "./internal/utils-name-case.js";
 
         return true;
       },
-      async mount(rootOrSelector, extensionNames = null) {
-        return mountManager.mount(rootOrSelector, extensionNames);
+      async mount(elementOrId, extensionNames = null) {
+        return mountManager.mount(elementOrId, extensionNames);
       },
-      async unmount(rootOrSelector, extensionNames = null) {
-        return mountManager.unmount(rootOrSelector, extensionNames);
+      async unmount(elementOrId, extensionNames = null) {
+        return mountManager.unmount(elementOrId, extensionNames);
       },
       async destroy() {
         AelluxJs.waitLayout.clear();

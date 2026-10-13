@@ -6,7 +6,9 @@
 export function buildDiagnostics(catalog) {
   var levels = { error: 0, warn: 1, info: 2 };
   var consoleMethods = ["error", "warn", "info"];
+  var historyLimit = 100;
   var history = [];
+  var historyStart = 0;
   var diagnostics = {
     legacy: false,
     supported: false,
@@ -51,10 +53,14 @@ export function buildDiagnostics(catalog) {
         lines < 0 || lines !== Math.floor(lines)) {
         throw new RangeError("diagnostics.showHistory(lines) requires a non-negative integer.");
       }
-      var entries = history.slice(Math.max(0, history.length - lines));
+      var count = Math.min(lines, history.length);
+      var entries = [];
+      for (var i = 0; i < count; i++) {
+        entries.push(history[(historyStart + history.length - count + i) % history.length]);
+      }
       if (typeof console !== "undefined" && typeof console.log === "function") {
-        for (var i = 0; i < entries.length; i++) {
-          var entry = entries[i];
+        for (var j = 0; j < entries.length; j++) {
+          var entry = entries[j];
           var message = "[" + entry.timestamp + "] [aellux.js " +
             entry.code + "] " + entry.message;
           if (entry.context) console.log(message, entry.context);
@@ -71,13 +77,19 @@ export function buildDiagnostics(catalog) {
 
   function emit(level, definition, context) {
     var diagnostic = diagnostics.create(definition, context);
-    history.push({
+    var entry = {
       timestamp: new Date().toISOString(),
       level: level,
       code: definition.code,
       message: definition.message,
       context: context
-    });
+    };
+    if (history.length < historyLimit) {
+      history.push(entry);
+    } else {
+      history[historyStart] = entry;
+      historyStart = (historyStart + 1) % historyLimit;
+    }
     var verboseLevel = getVerboseLevel();
     var consoleMethod = consoleMethods[level];
     if ((level === levels.error || level <= verboseLevel) &&

@@ -1,6 +1,6 @@
 (function() {
   // <define:__AELLUX_CORE_ASSET_INTEGRITY__>
-  var define_AELLUX_CORE_ASSET_INTEGRITY_default = { "aellux.ext.adaptive.css": "sha384-HfIjX9Zk0VFRimzPvUaTS5AtwuHJHjXKoM/xbNJXj5vE7bSdBGEzbrBHfbNmYah0", "aellux.ext.adaptive.min.css": "sha384-8yUP1PStfDqBCyCskP3k9WLIKgv/yl1nyDhmPz7hsX5NZ4z3ZT3ajolA+RhYlUiG", "aellux.ext.present.css": "sha384-HswsWNGZAuCnk5vuSKYG/9upTt3eTMN+nJuauimiQCQYx1IAyCcw8MYHGexLnKZi", "aellux.ext.present.min.css": "sha384-dTekuB5Tll2qMe8Qu7IASeRpzJVev32YaLSYdgSYQm064slvXTXdgLwlj00tInGt", "aellux.esm.js": "sha384-ApaiiM6qQ7SL9qea9ezrKmk+CpsU5HnnURf2fvPwkeeb+L3NHq9PT/lDfsRNkEXs", "aellux.esm.min.js": "sha384-bgJEIFohaXo/EMl+74CzGz57tLkbHrW9Y97jyCjNHjym5SMqJrzW9fEr3fdfaMda", "aellux.ext.adaptive.js": "sha384-Uvhmoaa81H6dhDBoy5BLg59l7NOHlzJ8lSJ1t7oi6oZC5d0iRuTPE7NmzEj57jPO", "aellux.ext.adaptive.min.js": "sha384-K96iK0AFcDwPomA4/BdgC7LrXSRn04WPkR+s99k2+o5UkhitCgyG0gQGSI3St22F", "aellux.ext.feedback.js": "sha384-sUr2lKsTasJ3yf1tg1IhDk5slfwTjAOCX2t5jQV/Ls4WAPRh2r/k36/8OXjJJaBv", "aellux.ext.feedback.min.js": "sha384-dHsisS4smcj355Pnq/l4R4J1PKFx62zNDFaF1TqlIahZzOb2k2p0AR9IYIPKaKxB", "aellux.ext.focus.js": "sha384-anEEvo/ORlaACIX0X89LtHpJjPgW5JuxdhdiyFjHwWOSCuTEc1/sQWfIG+lLsXeH", "aellux.ext.focus.min.js": "sha384-gES+QtECljb8NOd4tIimBP4xVkf2WU1qI1Kl3vBnkNl+ib6Qa3NKGbBb5s1vJntp", "aellux.ext.point.js": "sha384-c6NImzkbC5k4EflTIRpOUjtU0iMPECebz2y0pnkqCB1hwENKU94Z6vRVaB16ayhh", "aellux.ext.point.min.js": "sha384-46SgGwg7F/jXaQLcbwVLFgo6thxhXswRsllKVXmPDlHEYGTOnNiWpVHbGNdGJPRG", "aellux.ext.preference.js": "sha384-JAiIfOt3IfcTcoqzyElD9gSyXWhDyJI3F9VFf5m2O4HJUvMkDqiDAgSy222TWJTw", "aellux.ext.preference.min.js": "sha384-CP303LvKoQDgT2FHnkjYEX2gjCZOnaqcPANq/xG8Ep2AGrKiOydHnpdF15KtvJSI", "aellux.ext.present.js": "sha384-vR4Bf4Ti1FXjTliZEKsi+usAOXGvxSRBCnK8YdXKuzLMyfN/JrlVAPafTIwocFVb", "aellux.ext.present.min.js": "sha384-UZ41NTTAkibACq2bhE+bns2CD0QshTfTZPAPCozMvmmtCEAFXqn67liRGNKhAx+2", "aellux.ext.state-navigation.js": "sha384-LFT3Gy16qKjnomzrkx/f/umVDQbsiU+rQ5m05Kl9EbvnQIV5e2IuLEkEqNeFzMsB", "aellux.ext.state-navigation.min.js": "sha384-hhAKBKsLoM20KeJwrtuUINucyNe3DxW6/o8e7NrwT48Y+rQpmZCYSz13g1cdcXQg", "aellux.full.js": "sha384-gptZy+Cie/z6D3Tgo2E0iXhyZW2DWDM8B4rw0yzu3qOxBRgkRtKAst57Kb+eA8P2", "aellux.full.min.js": "sha384-8hIkIieQ+hh0SWJ3JAY+k+fPseAAjw9m0/7Vfeaji4dB0EthQ4bQ8CDNIeZ72Hyk", "aellux.orchestrator.js": "sha384-GQATMVdJl5vkAylGI20BGnokC64sBYdYSLU39X4fhE0qFVh01pV5mR/vS/Wbhg2h", "aellux.orchestrator.min.js": "sha384-0qQpvhOPtQo/LO1j+pgDgrnyYtduU9NFP1ynb4N2eF7J1t8kPUxGZRNcDkktUrZu", "aellux.ext.adaptive.legacy.js": "sha384-OcZbsMOO9AjR/M6K9C7VUAKtt5ruHyP5ZFgfM3OsShVROaOTptx/PhZu/o2mLyh+", "aellux.ext.adaptive.legacy.min.js": "sha384-nrYF9Je+gCjnnCa4z9T5wtBNWTicA46o0qvDINd2naexrdRGTQy89A5IdLBxm7AX", "aellux.ext.feedback.legacy.js": "sha384-jyvYvbzuSua5FWZsAWeXWqmab/DjA1LVg2oOHb6Ey6wH4W2bB9qwt+QhGwIkk1gL", "aellux.ext.feedback.legacy.min.js": "sha384-y4s7SxXMb4y56JPQIrxH9z9NZSrpb112UlT0VSLPhWAyyq4DazOuvNKIoTUEmfk+", "aellux.ext.focus.legacy.js": "sha384-SfEgZ39a6eBYQggY/mFsW4PanFtChQG1eCnVRmDOsx49ylNsV6fh7sh6oDDu34sv", "aellux.ext.focus.legacy.min.js": "sha384-ZbLn0Gi6Hspit81ugQ0II0XHdnYhn/7uKifuvyS6ztMKathrMwO2vy+ziWd0KvDU", "aellux.ext.point.legacy.js": "sha384-699Q2RQl6RvkzeY31zGwCgDYqm0y0a8a88PYzqcskUPI+N7qaLOjUksyj/tz91xa", "aellux.ext.point.legacy.min.js": "sha384-Kh1wcXRWN22dv4Kuz8PAsIoO6so6cLBneWZ2j7nvfcknnbfv83B/vDLjHQdO8w1y", "aellux.ext.preference.legacy.js": "sha384-AVYmTkrmJCFC/JQmvKjWWIyeaoa2Ift4+RL3CkevPgi7n31VO2WnOMj+qWyCwvmP", "aellux.ext.preference.legacy.min.js": "sha384-TppYbcOBDWl4/chugdKu+YIOW/pHUdwDvU4rotyRnlVLk6WoS937vTYxt0gU5WWf", "aellux.ext.present.legacy.js": "sha384-4wieuHhZ3olAeNEXaT2jAPG9Pd5RqVDVHribuLOwrzJoRVTTzwheYeN8jMFXrkg9", "aellux.ext.present.legacy.min.js": "sha384-gEIU5K5dp9Xe3cdxJCJNewx9vEKOmHwRkPgoDc1hb+Fu8r1vfoA0dto7nQBwEd8l", "aellux.ext.state-navigation.legacy.js": "sha384-oscUHkkxCKSiAYJdSaOYv3a1ONSbXV/py3lq7T7sO/YoG6kHN2zCzCoRXWmS1qc1", "aellux.ext.state-navigation.legacy.min.js": "sha384-e6XxU4BX6tFfC3FQI76sMdHZyy1Y3ta+WxtT8duNWx093M/VcYg3BYE/ZTEY5h2g", "aellux.orchestrator.legacy.js": "sha384-hBNQg6t6YrVRyHK603zdTLn51oOmMt3kv7nGpm9O85QGZwkOajdf6jKm/9PC+Ru4", "aellux.orchestrator.legacy.min.js": "sha384-nTX5zKsoA5mhgL4PVo5fjSUhmsErBt1szVo7sxNF/07dG/xc2v5zZj7eIBFZvYru", "aellux.full.legacy.js": "sha384-MBDVhEXWe8YSXFoYruCe3z2z7jz7vo12J6uBISsZW7VYn2mnA4VlF/wfqV7O42ju", "aellux.full.legacy.min.js": "sha384-txqNv3Zf5AUuRCT6p6Oo+nqBS5zg7bPn5GmlZSuGf0h2v241M38/EOjVANWaEXHC" };
+  var define_AELLUX_CORE_ASSET_INTEGRITY_default = { "aellux.ext.adaptive.css": "sha384-HfIjX9Zk0VFRimzPvUaTS5AtwuHJHjXKoM/xbNJXj5vE7bSdBGEzbrBHfbNmYah0", "aellux.ext.adaptive.min.css": "sha384-8yUP1PStfDqBCyCskP3k9WLIKgv/yl1nyDhmPz7hsX5NZ4z3ZT3ajolA+RhYlUiG", "aellux.ext.present.css": "sha384-v8wPzYiY8oDtW0rsBd/mrvay2D2n1geOkDsC1jNHYnG5Ma/XqjzfpJx9YbrqInCh", "aellux.ext.present.min.css": "sha384-LDKCxAjoPTE0CmT4mkGs76QcrAJGKk5h+ODgVCIet4BnRvLB6FPkiKOYG/h2a/PU", "aellux.esm.js": "sha384-rvPqGAE0TF3cXK9CZ8sEZKPzIP8wabrEvGpDHDnbTN9FneleQc5ctAuPpeDX2AKz", "aellux.esm.min.js": "sha384-3epab+n8mTRlPOhw1p25VPOUzK6V16ZRjA6l6jA3AwQZnBVielV5DWo4htVWm01X", "aellux.ext.adaptive.js": "sha384-wrdlJQkscfydVmBC4CpvjxmKiL6EHSC8FYlVBjHVuTAnD/YPazDBqNjr3boXUNHF", "aellux.ext.adaptive.min.js": "sha384-Mzebl9/HhXvVpT1CfDZzES4/346gkRN3izYEcrf3GrlZl2UHImRH6JicK9yiRFaP", "aellux.ext.feedback.js": "sha384-sUr2lKsTasJ3yf1tg1IhDk5slfwTjAOCX2t5jQV/Ls4WAPRh2r/k36/8OXjJJaBv", "aellux.ext.feedback.min.js": "sha384-dHsisS4smcj355Pnq/l4R4J1PKFx62zNDFaF1TqlIahZzOb2k2p0AR9IYIPKaKxB", "aellux.ext.focus.js": "sha384-anEEvo/ORlaACIX0X89LtHpJjPgW5JuxdhdiyFjHwWOSCuTEc1/sQWfIG+lLsXeH", "aellux.ext.focus.min.js": "sha384-gES+QtECljb8NOd4tIimBP4xVkf2WU1qI1Kl3vBnkNl+ib6Qa3NKGbBb5s1vJntp", "aellux.ext.point.js": "sha384-wFVSTCY7KG2AWYXvrw9w60FqNGn4xWmnjVzHKJzT1739aI2dv4oiSVOCXBQqlXf+", "aellux.ext.point.min.js": "sha384-NY0UDzKAa5F25KwmXs6AidvtyLK3VHeSKTYWw/fj9bc6IDLyJTW23gEl208t8Ic7", "aellux.ext.preference.js": "sha384-gQMBfBvnipftalCd3O/E2zToYbvR6vgWIY0RxvrY4aIX9C/fkGue5nGRfFctvq5z", "aellux.ext.preference.min.js": "sha384-846PZv3FCFbHlklLWb6fWcjFN6hXSehQ+NrjYmdUHd3nsDc4NtwLibNFANDKMjCy", "aellux.ext.present.js": "sha384-6ZxS+J+s3cvWy8o65DcAJ/yy24p0vLIlwbUebgP0Bl+puy/K9Y5dD7bOaTpvUk7d", "aellux.ext.present.min.js": "sha384-EqTYN3dWs6fKh43TTQaOWNoZBV/1AFCNckKWj/wM6gn5iKOljd4cVWRm5gqSLWS0", "aellux.ext.state-navigation.js": "sha384-LFT3Gy16qKjnomzrkx/f/umVDQbsiU+rQ5m05Kl9EbvnQIV5e2IuLEkEqNeFzMsB", "aellux.ext.state-navigation.min.js": "sha384-hhAKBKsLoM20KeJwrtuUINucyNe3DxW6/o8e7NrwT48Y+rQpmZCYSz13g1cdcXQg", "aellux.full.js": "sha384-EEH49BbHQxqTw6NyVveYSuZa6yKbgcgKo81I6qb24g3EvOx6Lf5Y0zg9dQG845Y7", "aellux.full.min.js": "sha384-3jIngL5CX70Hgv9NiZwYKBVyvYMCr5j7PAXjoxzg/3bYBiNqh1QpdyAxp+XSrzvB", "aellux.orchestrator.js": "sha384-Lm5msaaOOapWCnBIDnlHs/rHGyGXjTuYYsySEAMDTnMCTDWBJB9KqTDOJYO8zxt6", "aellux.orchestrator.min.js": "sha384-tNIlkPaHLJn4iPwhBmPh9b+0g6VKhnsxtu0b9GOvdOGRa/yTi1GNtjzMUo5b/VPX", "aellux.ext.adaptive.legacy.js": "sha384-gQLk3M25cBb3KCV6Y7Crx6pq5xEhMt7hW1zjUOVzXOS0W/xBHD8hoDefsHK2g2bO", "aellux.ext.adaptive.legacy.min.js": "sha384-l0i67WXYO8+nMrEWR+exfpH6orl2fLiwg7Gyug7UOflVtDBGoieDs7vrj0PrJSCQ", "aellux.ext.feedback.legacy.js": "sha384-jyvYvbzuSua5FWZsAWeXWqmab/DjA1LVg2oOHb6Ey6wH4W2bB9qwt+QhGwIkk1gL", "aellux.ext.feedback.legacy.min.js": "sha384-y4s7SxXMb4y56JPQIrxH9z9NZSrpb112UlT0VSLPhWAyyq4DazOuvNKIoTUEmfk+", "aellux.ext.focus.legacy.js": "sha384-SfEgZ39a6eBYQggY/mFsW4PanFtChQG1eCnVRmDOsx49ylNsV6fh7sh6oDDu34sv", "aellux.ext.focus.legacy.min.js": "sha384-ZbLn0Gi6Hspit81ugQ0II0XHdnYhn/7uKifuvyS6ztMKathrMwO2vy+ziWd0KvDU", "aellux.ext.point.legacy.js": "sha384-HvHZ1FcETFKo3sAAbPwQoQEKUjLcdWzg/2EmyDozbIJ7rBL1y7DJbGsN/cf9Z243", "aellux.ext.point.legacy.min.js": "sha384-NAtX/PKVuzk2jvVEQDSuXM9Kco4y86/TSEO4S0P0JcMUO8pdPsv8gs1pj2SEhgKA", "aellux.ext.preference.legacy.js": "sha384-BnmiZDjvg4nirECXQeDP+VRdYMkAaswfP6CQ8GvINCQp+XvuXo0XwuEPkJqP0J/L", "aellux.ext.preference.legacy.min.js": "sha384-zGx/g9Qnp8ON/IouwwgyI2rU28iy59p1AodkbUgXxAR+9EFHYehq6uM+TZ/ipL5t", "aellux.ext.present.legacy.js": "sha384-b4Dw4Ic30BrZaTZEfM12u+lPs1zkRjXS1khe64xuxARJ2r9xseXflM5mOpqQ1GGZ", "aellux.ext.present.legacy.min.js": "sha384-VhbeJJC8C7ppYHLY73J0MQrU2bOImrmluCBh42Ks2Eny7Whc9VAE2IR0jLWEoTlP", "aellux.ext.state-navigation.legacy.js": "sha384-oscUHkkxCKSiAYJdSaOYv3a1ONSbXV/py3lq7T7sO/YoG6kHN2zCzCoRXWmS1qc1", "aellux.ext.state-navigation.legacy.min.js": "sha384-e6XxU4BX6tFfC3FQI76sMdHZyy1Y3ta+WxtT8duNWx093M/VcYg3BYE/ZTEY5h2g", "aellux.orchestrator.legacy.js": "sha384-k6Utfs8YtmZHHCjLJAcpKcMos7vkGRZL/cLOAhNcKLJqu7VfmNFi7oC59BqDSH6C", "aellux.orchestrator.legacy.min.js": "sha384-80BgzJPrG2PAusORWQ0k2N4eJgPBABQJ/wIKaoyqX1ffU1LoE3/XpftKgOKiWDJo", "aellux.full.legacy.js": "sha384-60fDBh0shWhlpFtkhz5MHwj8xBFzDX78oJT00lkhlis4mLYlcS7L7vQ5GKrkW5uc", "aellux.full.legacy.min.js": "sha384-7n5U1e3ePwauBgNMUtqQAY1Ipu+qS/A9WgNFQxzJ4IH7hwm8HOrrDjLnyTnLTJ+V" };
 
   // src/internal/asset-load-helper.js
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
@@ -32,7 +32,9 @@
   function buildDiagnostics(catalog) {
     var levels = { error: 0, warn: 1, info: 2 };
     var consoleMethods = ["error", "warn", "info"];
+    var historyLimit = 100;
     var history = [];
+    var historyStart = 0;
     var diagnostics = {
       legacy: false,
       supported: false,
@@ -71,10 +73,14 @@
         if (typeof lines !== "number" || !isFinite(lines) || lines < 0 || lines !== Math.floor(lines)) {
           throw new RangeError("diagnostics.showHistory(lines) requires a non-negative integer.");
         }
-        var entries = history.slice(Math.max(0, history.length - lines));
+        var count = Math.min(lines, history.length);
+        var entries = [];
+        for (var i = 0; i < count; i++) {
+          entries.push(history[(historyStart + history.length - count + i) % history.length]);
+        }
         if (typeof console !== "undefined" && typeof console.log === "function") {
-          for (var i = 0; i < entries.length; i++) {
-            var entry = entries[i];
+          for (var j = 0; j < entries.length; j++) {
+            var entry = entries[j];
             var message = "[" + entry.timestamp + "] [aellux.js " + entry.code + "] " + entry.message;
             if (entry.context) console.log(message, entry.context);
             else console.log(message);
@@ -88,13 +94,19 @@
     }
     function emit(level, definition, context) {
       var diagnostic = diagnostics.create(definition, context);
-      history.push({
+      var entry = {
         timestamp: (/* @__PURE__ */ new Date()).toISOString(),
         level: level,
         code: definition.code,
         message: definition.message,
         context: context
-      });
+      };
+      if (history.length < historyLimit) {
+        history.push(entry);
+      } else {
+        history[historyStart] = entry;
+        historyStart = (historyStart + 1) % historyLimit;
+      }
       var verboseLevel = getVerboseLevel();
       var consoleMethod = consoleMethods[level];
       if ((level === levels.error || level <= verboseLevel) && typeof console !== "undefined" && typeof console[consoleMethod] === "function") {
@@ -597,7 +609,6 @@
         ERROR_INVALID_MODE: { code: 1002, message: "aellux.js mode must be basic or full." },
         ERROR_INVALID_VERBOSE_LEVEL: { code: 1003, message: "aellux.js verboseLevel must be 0, 1, 2, or the matching error, warn, info key." },
         ERROR_CONTROLLER_NOT_FOUND: { code: 1004, message: "No controller was found for this element. It may not be mounted." },
-        ERROR_MOUNT_ROOT_SELECTOR: { code: 1005, message: "Invalid root selector for mounting or unmounting." },
         ERROR_MOUNT: { code: 1006, message: "aellux.js failed to mount a root." },
         ERROR_EXTENSION_DUPLICATE: { code: 1101, message: "aellux.js Extension is already registered." },
         ERROR_EXTENSION_INITIALIZE: { code: 1102, message: "aellux.js Extension failed to initialize." },
@@ -621,13 +632,13 @@
         WARN_BROWSER_UNSUPPORTED: { code: 2e3, message: "Browser environment is not available." },
         WARN_BROWSER_CAPABILITIES: { code: 2001, message: "Some browser capabilities are unavailable; trying Legacy runtime." },
         WARN_INTERRUPTION: { code: 2002, message: "aellux.js Extension transition was interrupted." },
-        WARN_INVALID_CONTROLLER_ELEMENT: { code: 2003, message: "Controller lookup requires a DOM Element or an existing element ID, optionally prefixed with #." },
         WARN_EXTENSION_STYLE_LOAD: { code: 2004, message: "aellux.js Extension stylesheet could not be loaded." },
         WARN_CONTROLLER_METHOD_MISSING: { code: 2005, message: "A mounted controller method is not available on its Extension." },
         WARN_STORAGE_FALLBACK: { code: 2006, message: "Browser storage is unavailable; values will be kept in memory only." },
         WARN_PRESENT_MOTION_HIDDEN: { code: 2008, message: "A present-motion child should not be hidden; hidden belongs on its present container." },
         WARN_NAVIGATION_EVENT_INVALID: { code: 2009, message: "A state-navigation event has missing or invalid detail properties." },
         WARN_PRESENT_MOTION_MISSING: { code: 2010, message: "A present container has no direct present-motion child; one was generated automatically." },
+        WARN_INVALID_ELEMENT_OR_ID: { code: 2011, message: "Expected a DOM Element or an existing element ID, optionally prefixed with #." },
         INFO_LEGACY_FALLBACK: { code: 3e3, message: "aellux.js is starting the Legacy runtime." }
       },
       AELLUXJS_DEFAULT_INITIALIZATION_OPTIONS: {
@@ -804,8 +815,8 @@
       document.head.appendChild(meta);
     }
     function updateHardwareAttribute() {
-      return;
       var browserNavigator = root.navigator || {};
+      var lowHardware = typeof browserNavigator.hardwareConcurrency === "number" && browserNavigator.hardwareConcurrency > 0 && browserNavigator.hardwareConcurrency <= 4 || typeof browserNavigator.deviceMemory === "number" && browserNavigator.deviceMemory > 0 && browserNavigator.deviceMemory <= 4;
       if (lowHardware) {
         document.documentElement.setAttribute(api.attr("low-hardware"), "");
       }

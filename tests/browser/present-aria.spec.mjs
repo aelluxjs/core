@@ -98,7 +98,7 @@ test("present prepares will-change before starting a transition", async ({ page 
   await page.goto("/tests/index.htm");
   await page.evaluate(() => {
     document.body.innerHTML = `
-      <div id="panel" data-ae-present hidden
+      <div id="panel" data-ae-present="all" hidden
         style="--ae-pop-duration: 0ms; --ae-unpop-duration: 0ms">
         <div data-ae-present-motion></div>
       </div>`;
@@ -190,7 +190,7 @@ test("replacement transitions reuse preparation and final interruptions clean it
   await page.goto("/tests/index.htm");
   await page.evaluate(() => {
     document.body.innerHTML = `
-      <div id="panel" data-ae-present hidden
+      <div id="panel" data-ae-present="all" hidden
         style="--ae-pop-duration: 500ms; --ae-unpop-duration: 120ms">
         <div data-ae-present-motion></div>
       </div>`;
@@ -209,7 +209,7 @@ test("replacement transitions reuse preparation and final interruptions clean it
     document.getElementById("panel").classList.contains(AelluxJs.className("popping"))
   )).toBe(true);
 
-  const replacement = await page.evaluate(() => {
+  const replacement = await page.evaluate(async () => {
     const panel = document.getElementById("panel");
     const startedAt = performance.now();
     let unpoppingAt = null;
@@ -217,19 +217,22 @@ test("replacement transitions reuse preparation and final interruptions clean it
       unpoppingAt = performance.now();
     }, { once: true });
     window.replacementTransition = AelluxJs.mountManager.controller(panel).present.unpop();
-    return {
+    const result = {
       delay: unpoppingAt - startedAt,
       willChange: panel.classList.contains(AelluxJs.className("will-change")),
       popping: panel.classList.contains(AelluxJs.className("popping")),
       unpopping: panel.classList.contains(AelluxJs.className("unpopping"))
     };
+    await new Promise(resolve => setTimeout(resolve, 30));
+    result.willChangeAfterDelay = panel.classList.contains(AelluxJs.className("will-change"));
+    return result;
   });
-  expect(replacement).toMatchObject({ willChange: true, popping: false, unpopping: true });
+  expect(replacement).toMatchObject({
+    willChange: true, willChangeAfterDelay: true, popping: false, unpopping: true
+  });
   expect(replacement.delay).toBeGreaterThanOrEqual(0);
   expect(replacement.delay).toBeLessThan(50);
 
-  await page.waitForTimeout(30);
-  await expect(page.locator("#panel")).toHaveClass(/ae--will-change/);
   await page.evaluate(() => Promise.all([window.firstTransition, window.replacementTransition]));
   await expect(page.locator("#panel")).toHaveJSProperty("hidden", true);
   await expect(page.locator("#panel")).not.toHaveClass(/ae--will-change/);
@@ -309,6 +312,7 @@ test("present attribute tokens independently select transition properties", asyn
     document.body.innerHTML = `
       <style>[data-ae-present] { --ae-pop-duration: 0ms; --ae-unpop-duration: 0ms; }</style>
       <div id="empty" data-ae-present><div data-ae-present-motion>empty</div></div>
+      <div id="all" data-ae-present="all"><div data-ae-present-motion>all</div></div>
       <div id="opacity" data-ae-present="opacity"><div data-ae-present-motion>opacity</div></div>
       <div id="transform" data-ae-present="transform"><div data-ae-present-motion>transform</div></div>
       <div id="height" data-ae-present="height"
@@ -324,13 +328,13 @@ test("present attribute tokens independently select transition properties", asyn
   await page.evaluate(() => AelluxJs.init({ mode: "full" }));
   await expect.poll(() => page.evaluate(() => {
     const pop = AelluxJs.className("pop");
-    return ["empty", "opacity", "transform", "height", "width", "combined"].every(id =>
+    return ["empty", "all", "opacity", "transform", "height", "width", "combined"].every(id =>
       document.getElementById(id).classList.contains(pop)
     );
   })).toBe(true);
 
   const states = await page.evaluate(() => {
-    const ids = ["empty", "opacity", "transform", "height", "width", "combined"];
+    const ids = ["empty", "all", "opacity", "transform", "height", "width", "combined"];
     const pop = AelluxJs.className("pop");
     const unpopping = AelluxJs.className("unpopping");
     const willChange = AelluxJs.className("will-change");
@@ -348,6 +352,7 @@ test("present attribute tokens independently select transition properties", asyn
         columns: style.gridTemplateColumns,
         rows: style.gridTemplateRows,
         transitionProperty: style.transitionProperty,
+        transitionDuration: style.transitionDuration,
         willChange: style.willChange,
         motionWillChange: motionStyle.willChange,
         motionMinWidth: motionStyle.minWidth,
@@ -371,8 +376,15 @@ test("present attribute tokens independently select transition properties", asyn
   });
 
   expect(states.opened.empty).toMatchObject({
-    value: "opacity transform height width",
+    value: "",
     display: "inline-grid",
+    opacity: "1",
+    transform: "none",
+    transitionProperty: "none",
+    transitionDuration: "0s"
+  });
+  expect(states.opened.all).toMatchObject({
+    value: "opacity transform height width",
     opacity: "1",
     transform: "matrix(1, 0, 0, 1, 0, 0)",
     transitionProperty: "opacity, transform, grid-template-rows, grid-template-columns"
@@ -405,6 +417,11 @@ test("present attribute tokens independently select transition properties", asyn
   expect(states.unpopping.width.columns).toBe("5px");
   expect(states.unpopping.combined).toMatchObject({ opacity: "0", rows: "2px" });
   expect(states.prepared.empty).toMatchObject({
+    willChange: "auto",
+    motionWillChange: "auto",
+    motionTransitionProperty: "all"
+  });
+  expect(states.prepared.all).toMatchObject({
     willChange: "opacity, transform, grid-template-columns, grid-template-rows",
     motionWillChange: "auto",
     motionMinWidth: "0px",
@@ -420,7 +437,7 @@ test("present derives stepped easing from duration on low hardware", async ({ pa
   await page.evaluate(() => {
     document.documentElement.setAttribute("data-ae-low-hardware", "");
     document.body.innerHTML = `
-      <div id="panel" data-ae-present hidden
+      <div id="panel" data-ae-present="all" hidden
         style="--ae-pop-duration: 500ms"><div data-ae-present-motion></div></div>`;
   });
   await page.addScriptTag({ url: "/dist/aellux.js" });
@@ -464,8 +481,8 @@ test("controller lookup diagnoses invalid inputs and unmounted elements", async 
   });
   expect(result.results).toEqual([null, null, null]);
   expect(result.diagnostics).toEqual([
-    { code: 2003, level: 1, message: expect.stringContaining("DOM Element") },
-    { code: 2003, level: 1, message: expect.stringContaining("element ID") },
+    { code: 2011, level: 1, message: expect.stringContaining("DOM Element") },
+    { code: 2011, level: 1, message: expect.stringContaining("element ID") },
     { code: 1004, level: 0, message: expect.stringContaining("may not be mounted") }
   ]);
 });

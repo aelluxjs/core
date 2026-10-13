@@ -64,7 +64,7 @@ Set `verboseLevel` in `init()` to control console output. The default is `"error
 $ae.init({ verboseLevel: "warn" });
 ```
 
-`error()`, `warn()`, and `info()` are always recorded, even when the selected level hides them from the console. Call `$ae.diagnostics.showHistory(10)` to print the last 10 entries with timestamps; omit the argument to print all entries. The method also returns the selected entries, including their timestamp, level, code, message, and context. Passing `0` prints and returns no entries. Replaying history does not record new diagnostics.
+`error()`, `warn()`, and `info()` are recorded even when the selected level hides them from the console. The history retains the 100 most recent entries; older entries and their context references are released as new diagnostics arrive. Call `$ae.diagnostics.showHistory(10)` to print the last 10 retained entries with timestamps; omit the argument to print all retained entries. The method also returns the selected entries, including their timestamp, level, code, message, and context. Passing `0` prints and returns no entries. Replaying history does not record new diagnostics.
 
 ## Code Ranges
 
@@ -82,7 +82,7 @@ Applications should compare numeric codes or catalog entries instead of parsing 
 
 ## Mounting and Extension Assets
 
-An invalid root selector passed to `mount()` or `unmount()` records `ERROR_MOUNT_ROOT_SELECTOR` (`1005`) with the selector, operation, and cause. An Extension whose `init()` rejects records `ERROR_EXTENSION_INITIALIZE` (`1102`); the Extension remains uninitialized. A stylesheet load failure records `WARN_EXTENSION_STYLE_LOAD` (`2004`) with the Extension name and URL. The Extension can still initialize after that warning.
+An invalid element, invalid ID, or missing ID passed to `mount()`, `unmount()`, `update()`, or controller lookup records `WARN_INVALID_ELEMENT_OR_ID` (`2011`) with the received value and operation. IDs can be passed with or without a leading `#`. An Extension whose `init()` rejects records `ERROR_EXTENSION_INITIALIZE` (`1102`); the Extension remains uninitialized. A stylesheet load failure records `WARN_EXTENSION_STYLE_LOAD` (`2004`) with the Extension name and URL. The Extension can still initialize after that warning.
 
 If mounting a root fails while registering assets, waiting for Extensions, or discovering mountable elements, `ERROR_MOUNT` (`1006`) records the cause, root, and selected Extension names. Waiting elements have `aria-busy` reset to `false` after the attempt.
 

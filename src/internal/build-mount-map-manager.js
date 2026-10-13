@@ -1,6 +1,7 @@
 /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
 
 import { createMountHelper } from "./create-mount-helper.js";
+import { resolveElementOrId } from "./resolve-element-or-id.js";
 import utilsNameCase from "./utils-name-case.js";
 
 export function buildMountMapManager(root) {
@@ -9,6 +10,8 @@ export function buildMountMapManager(root) {
   const elementControllers = new WeakMap(); //DOM, object
   const maps = new Map();
   let unmountQueue = Promise.resolve();
+  let unmountScheduled = false;
+  let rescanAfterUnmount = false;
 
   const helper = createMountHelper(
     root,
@@ -31,11 +34,8 @@ export function buildMountMapManager(root) {
   let observer = null;
   if (typeof root.MutationObserver === "function") {
     observer = new root.MutationObserver(records => {
-      if (!records.some(record => record.removedNodes.length)) return;
-      scheduleUnmount(() => helper.unmountDetached()).catch(error => {
-        const diagnostics = root.AelluxJs.diagnostics;
-        diagnostics.error(diagnostics.ERROR_EXTENSION_UNMOUNT, { cause: error });
-      });
+      if (!hasRemovedNodes(records) || !hasDetachedMountedElement()) return;
+      scheduleDetachedUnmount();
     });
     observer.observe(root.document, { childList: true, subtree: true });
   }
@@ -54,16 +54,47 @@ export function buildMountMapManager(root) {
     return task;
   }
 
-  function controller(elementOrId) {
-    const requested = elementOrId;
-    if (typeof elementOrId === "string")
-      elementOrId = root.document.getElementById(elementOrId.replace(/^#/, ""));
-
-    const diagnostics = root.AelluxJs.diagnostics;
-    if (!elementOrId || elementOrId.nodeType !== 1) {
-      diagnostics.warn(diagnostics.WARN_INVALID_CONTROLLER_ELEMENT, { elementOrId: requested });
-      return null;
+  function hasRemovedNodes(records) {
+    for (const record of records) {
+      if (record.removedNodes.length) return true;
     }
+    return false;
+  }
+
+  function hasDetachedMountedElement() {
+    for (const element of mountedElements.keys()) {
+      if (!element.isConnected) return true;
+    }
+    return false;
+  }
+
+  function scheduleDetachedUnmount() {
+    if (unmountScheduled) {
+      rescanAfterUnmount = true;
+      return;
+    }
+    unmountScheduled = true;
+    scheduleUnmount(() => helper.unmountDetached()).then(
+      finishDetachedUnmount,
+      error => {
+        const diagnostics = root.AelluxJs.diagnostics;
+        diagnostics.error(diagnostics.ERROR_EXTENSION_UNMOUNT, { cause: error });
+        finishDetachedUnmount();
+      }
+    );
+  }
+
+  function finishDetachedUnmount() {
+    unmountScheduled = false;
+    if (!rescanAfterUnmount || !observer) return;
+    rescanAfterUnmount = false;
+    if (hasDetachedMountedElement()) scheduleDetachedUnmount();
+  }
+
+  function controller(elementOrId) {
+    const diagnostics = root.AelluxJs.diagnostics;
+    elementOrId = resolveElementOrId(root, elementOrId, { method: "controller" });
+    if (!elementOrId) return null;
 
     const found = elementControllers.get(elementOrId);
     if (found) return found;

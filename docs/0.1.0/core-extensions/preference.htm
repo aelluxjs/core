@@ -52,7 +52,7 @@
 
 <script src="/core/docs/assets/docweaver/js/toc-init.js?t=1"></script>
 
-<script src="https://cdn.jsdelivr.net/npm/@aelluxjs/core@0.1.0-beta.8/dist/aellux.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@aelluxjs/core@0.1.0-beta.9/dist/aellux.min.js"></script>
 <script>
   AelluxJs.ext("/core/docs/assets/docweaver/js/aellux.ext.ajax-href.js");
   AelluxJs.init({ mode: "full" });
@@ -575,7 +575,7 @@ preference.set(&quot;colorScheme&quot;, &quot;dark&quot;);
 preference.update();
 console.log(preference.get(&quot;colorScheme&quot;));
 </code></pre>
-<p><code>set(name, value)</code> saves the user value in the <code>AelluxJsPreferences</code> persistence store. Call <code>update()</code> to recompute and publish the current values; <code>set()</code> does not call <code>update()</code> automatically. Changes from the browser <code>storage</code> event are updated automatically. <code>update()</code> also dispatches <code>AelluxJsPreferencesChange</code>.</p>
+<p><code>set(name, value)</code> saves the user value in the <code>AelluxJsPreferences</code> persistence store. Call <code>update()</code> to recompute and publish the current values; <code>set()</code> does not call <code>update()</code> automatically. Changes from the browser <code>storage</code> event are updated automatically. <code>update()</code> synchronizes mounted controls for preferences whose computed values changed and always dispatches <code>AelluxJsPreferencesChange</code>, including when the values stay the same. Newly mounted controls are synchronized immediately.</p>
 <h2>Preference controls</h2>
 <p>An element marked with <code>data-ae-preference</code> is a clickable preference container. Descendants with <code>data-ae-option</code> set a value for that preference and receive the <code>ae--active</code> class when selected.</p>
 <pre><code class="language-html">&lt;div data-ae-preference=&quot;colorScheme&quot;&gt;
