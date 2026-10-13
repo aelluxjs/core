@@ -16,6 +16,9 @@ export function generatePresentCSS(AelluxJs) {
   const popping = AelluxJs.className("popping");
   const unpopping = AelluxJs.className("unpopping");
   const willChange = AelluxJs.className("will-change");
+  const grid = AelluxJs.className("present-grid");
+  const gridPresent = `${present}.${grid}`;
+  const measuredPresent = `${present}:not(.${grid})`;
 
   return `/*! aellux.js Present Extension | SPDX-License-Identifier: Apache-2.0 */
 
@@ -39,8 +42,14 @@ ${present} {
   --ae-pop-low-steps: 4;
   --ae-unpop-low-steps: 4;
 
+  transition-property: opacity, transform;
+}
+${gridPresent} {
   display: inline-grid;
   transition-property: opacity, transform, grid-template-rows, grid-template-columns;
+}
+${measuredPresent} {
+  transition-property: opacity, transform, max-height, max-width;
 }
 ${present}>${motion} {
   place-self: stretch;
@@ -52,12 +61,12 @@ ${presentWithoutMotion} {
   --ae-pop-duration: 0s !important;
   --ae-unpop-duration: 0s !important;
 }
-${presentWidth}.${willChange}, ${presentWidth}.${willChange}>${motion}{
+${gridPresent}${presentWidth}.${willChange}, ${gridPresent}${presentWidth}.${willChange}>${motion}{
   min-width: 0 !important;
   width: auto !important;
   overflow: hidden !important;
 }
-${presentHeight}.${willChange}, ${presentHeight}.${willChange}>${motion}{
+${gridPresent}${presentHeight}.${willChange}, ${gridPresent}${presentHeight}.${willChange}>${motion}{
   min-height: 0 !important;
   height: auto !important;
   overflow: hidden !important;
@@ -72,7 +81,17 @@ html[${lowHardwareAttribute}] ${present} {
   --ae-unpop-ease: steps(var(--ae-unpop-low-steps));
 }
 ${present}.${willChange} {
+  will-change: opacity, transform;
+}
+${gridPresent}.${willChange} {
   will-change: opacity, transform, grid-template-columns, grid-template-rows;
+}
+${measuredPresent}.${willChange} {
+  will-change: opacity, transform, max-height, max-width;
+}
+${measuredPresent}${presentHeight}.${willChange},
+${measuredPresent}${presentWidth}.${willChange} {
+  overflow: hidden;
 }
 ${presentOpacity} {
   opacity: var(--ae-from-opacity, 0);
@@ -102,20 +121,20 @@ ${present}.${unpopping} {
   transition-duration: var(--ae-unpop-duration);
   transition-timing-function: var(--ae-unpop-ease);
 }
-${presentHeight} {
+${gridPresent}${presentHeight} {
   grid-template-rows: var(--ae-from-height);
 }
-${presentWidth} {
+${gridPresent}${presentWidth} {
   grid-template-columns: var(--ae-from-width);
 }
-${presentWidth}.${popping}, ${presentWidth}.${pop} {
+${gridPresent}${presentWidth}.${popping}, ${gridPresent}${presentWidth}.${pop} {
   grid-template-columns: var(--ae-pop-width);
 }
-${presentHeight}.${popping}, ${presentHeight}.${pop} {
+${gridPresent}${presentHeight}.${popping}, ${gridPresent}${presentHeight}.${pop} {
   grid-template-rows: var(--ae-pop-height);
 }
-${presentWidth}.${unpopping} { grid-template-columns: var(--ae-unpop-width); }
-${presentHeight}.${unpopping} { grid-template-rows: var(--ae-unpop-height); }
+${gridPresent}${presentWidth}.${unpopping} { grid-template-columns: var(--ae-unpop-width); }
+${gridPresent}${presentHeight}.${unpopping} { grid-template-rows: var(--ae-unpop-height); }
 ${present}[hidden] { display: none; }
 `;
 }

@@ -59,38 +59,29 @@ test("callable API returns null before the mount manager starts", async ({ page 
   }))).toEqual({ sameAlias: true, callable: true, result: null });
 });
 
-test("boot marks the document when the browser reports low hardware", async ({ page }) => {
+test("boot does not mark the document when the browser reports low hardware", async ({ page }) => {
   await page.addInitScript(() => {
     Object.defineProperty(navigator, "hardwareConcurrency", {
       configurable: true,
-      value: 8
+      value: 2
     });
     Object.defineProperty(navigator, "deviceMemory", {
       configurable: true,
-      value: 4
-    });
-  });
-  await page.goto("/tests/index.htm");
-  await page.addScriptTag({ url: "/dist/aellux.js" });
-  await page.evaluate(() => AelluxJs.init({ mode: "basic" }));
-  await expect(page.locator("html")).toHaveAttribute("data-ae-low-hardware", "");
-});
-
-test("boot leaves the low-hardware attribute unset for stronger hardware", async ({ page }) => {
-  await page.addInitScript(() => {
-    Object.defineProperty(navigator, "hardwareConcurrency", {
-      configurable: true,
-      value: 8
-    });
-    Object.defineProperty(navigator, "deviceMemory", {
-      configurable: true,
-      value: 8
+      value: 2
     });
   });
   await page.goto("/tests/index.htm");
   await page.addScriptTag({ url: "/dist/aellux.js" });
   await page.evaluate(() => AelluxJs.init({ mode: "basic" }));
   await expect(page.locator("html")).not.toHaveAttribute("data-ae-low-hardware", "");
+});
+
+test("boot preserves an explicitly set low-hardware attribute", async ({ page }) => {
+  await page.goto("/tests/index.htm");
+  await page.locator("html").evaluate(element => element.setAttribute("data-ae-low-hardware", ""));
+  await page.addScriptTag({ url: "/dist/aellux.js" });
+  await page.evaluate(() => AelluxJs.init({ mode: "basic" }));
+  await expect(page.locator("html")).toHaveAttribute("data-ae-low-hardware", "");
 });
 
 test("boot adds a missing viewport meta tag by default", async ({ page }) => {

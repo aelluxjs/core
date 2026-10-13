@@ -24502,6 +24502,36 @@
       });
     };
   }
+  function _slicedToArray4(r, e) {
+    return _arrayWithHoles4(r) || _iterableToArrayLimit4(r, e) || _unsupportedIterableToArray7(r, e) || _nonIterableRest4();
+  }
+  function _nonIterableRest4() {
+    throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+  }
+  function _iterableToArrayLimit4(r, l) {
+    var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
+    if (null != t) {
+      var e, n, i, u, a = [], f = true, o = false;
+      try {
+        if (i = (t = t.call(r)).next, 0 === l) {
+          if (Object(t) !== t) return;
+          f = false;
+        } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = true) ;
+      } catch (r2) {
+        o = true, n = r2;
+      } finally {
+        try {
+          if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return;
+        } finally {
+          if (o) throw n;
+        }
+      }
+      return a;
+    }
+  }
+  function _arrayWithHoles4(r) {
+    if (Array.isArray(r)) return r;
+  }
   function _toConsumableArray2(r) {
     return _arrayWithoutHoles2(r) || _iterableToArray2(r) || _unsupportedIterableToArray7(r) || _nonIterableSpread2();
   }
@@ -24584,7 +24614,8 @@
           pop: AelluxJs2.className("pop"),
           popping: AelluxJs2.className("popping"),
           unpopping: AelluxJs2.className("unpopping"),
-          willChange: AelluxJs2.className("will-change")
+          willChange: AelluxJs2.className("will-change"),
+          grid: AelluxJs2.className("present-grid")
         };
         AelluxJs2.extAttach(extensionName, {
           init: init,
@@ -24655,23 +24686,21 @@
             element.removeAttribute(attr.presentMotion);
           }
           var presentMotion = element.querySelector(":scope>[".concat(attr.presentMotion, "]"));
-          var generatedMotion = false;
-          if (!presentMotion) {
-            AelluxJs2.diagnostics.warn(AelluxJs2.diagnostics.WARN_PRESENT_MOTION_MISSING, {
+          var tokens = (element.getAttribute(attr.present) || "").split(/\s+/);
+          var measuredHeight = !presentMotion && tokens.includes("height");
+          var measuredWidth = !presentMotion && tokens.includes("width");
+          if (presentMotion) element.classList.add(className.grid);
+          else if (measuredHeight || measuredWidth) {
+            AelluxJs2.diagnostics.info(AelluxJs2.diagnostics.INFO_PRESENT_MEASURED_LAYOUT, {
               extension: extensionName,
               element: element
             });
-            presentMotion = document.createElement("div");
-            presentMotion.setAttribute(attr.presentMotion, "");
-            while (element.firstChild) {
-              presentMotion.appendChild(element.firstChild);
-            }
-            element.appendChild(presentMotion);
-            generatedMotion = true;
           }
           var presentController = {
-            generatedMotion: generatedMotion,
             presentMotion: presentMotion,
+            measuredHeight: measuredHeight,
+            measuredWidth: measuredWidth,
+            measuredStyles: null,
             motionEnabled: (element.getAttribute(attr.present) || "").trim() !== "",
             transition: null,
             autoUnpopTimeout: null,
@@ -24711,6 +24740,7 @@
               } else {
                 this.classList.remove(className.pop, className.popping, className.unpopping, className.willChange);
               }
+              if (!replacement) restoreMeasuredStyles(element, this);
             }
           };
           presentController.setAriaExpanded(element.hidden ? "false" : "true");
@@ -24753,15 +24783,10 @@
           if (!presentElements.has(element)) return;
           var controller = presentElements.get(element);
           controller.stop();
+          element.classList.remove(className.grid);
           presentElements.delete(element);
           openPresentElements.delete(element);
           controller.triggers.forEach(updateTriggerAriaExpanded);
-          if (controller.generatedMotion && controller.presentMotion.parentElement === element) {
-            while (controller.presentMotion.firstChild) {
-              element.insertBefore(controller.presentMotion.firstChild, controller.presentMotion);
-            }
-            controller.presentMotion.remove();
-          }
         }
         function mountTriggerElement(triggerElement) {
           if (triggerElementsSet.has(triggerElement)) return;
@@ -24884,12 +24909,68 @@
               break;
           }
         }
+        function restoreMeasuredStyles(element, controller) {
+          var saved = controller.measuredStyles;
+          if (!saved) return;
+          var _iterator5 = _createForOfIteratorHelper7(saved), _step5;
+          try {
+            for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
+              var _step5$value = _slicedToArray4(_step5.value, 3), name = _step5$value[0], value = _step5$value[1], priority = _step5$value[2];
+              if (value) element.style.setProperty(name, value, priority);
+              else element.style.removeProperty(name);
+            }
+          } catch (err) {
+            _iterator5.e(err);
+          } finally {
+            _iterator5.f();
+          }
+          controller.measuredStyles = null;
+        }
+        function prepareMeasuredSize(element, controller, gotoVisible, previousSize) {
+          if (!controller.measuredHeight && !controller.measuredWidth) return null;
+          if (!controller.measuredStyles) {
+            controller.measuredStyles = ["max-height", "max-width"].map(function(name2) {
+              return [name2, element.style.getPropertyValue(name2), element.style.getPropertyPriority(name2)];
+            });
+          }
+          var _iterator6 = _createForOfIteratorHelper7(controller.measuredStyles), _step6;
+          try {
+            for (_iterator6.s(); !(_step6 = _iterator6.n()).done; ) {
+              var _step6$value = _slicedToArray4(_step6.value, 3), name = _step6$value[0], value = _step6$value[1], priority = _step6$value[2];
+              if (value) element.style.setProperty(name, value, priority);
+              else element.style.removeProperty(name);
+            }
+          } catch (err) {
+            _iterator6.e(err);
+          } finally {
+            _iterator6.f();
+          }
+          var computed = root2.getComputedStyle(element);
+          var height = parseFloat(computed.height);
+          var width = parseFloat(computed.width);
+          var finalSize = {
+            height: Number.isFinite(height) ? height : element.scrollHeight,
+            width: Number.isFinite(width) ? width : element.scrollWidth
+          };
+          var start = previousSize || (gotoVisible ? {
+            height: 0,
+            width: 0
+          } : finalSize);
+          if (controller.measuredHeight) {
+            element.style.setProperty("max-height", "".concat(Math.max(0, start.height), "px"), "important");
+          }
+          if (controller.measuredWidth) {
+            element.style.setProperty("max-width", "".concat(Math.max(0, start.width), "px"), "important");
+          }
+          element.getBoundingClientRect();
+          return finalSize;
+        }
         function presentTransition(_x, _x2) {
           return _presentTransition.apply(this, arguments);
         }
         function _presentTransition() {
           _presentTransition = _asyncToGenerator5(/* @__PURE__ */ _regenerator5().m(function _callee(element, gotoVisible) {
-            var controller, newDirection, transition, allowEvent, reusePreparation, interrupted, prepared, duration, timeMs, completed, ownsTransition, _t, _t2;
+            var controller, newDirection, transition, allowEvent, reusePreparation, previousSize, computed, interrupted, finalSize, prepared, duration, timeMs, completed, ownsTransition, _t, _t2;
             return _regenerator5().w(function(_context) {
               while (1) switch (_context.p = _context.n) {
                 case 0:
@@ -24922,6 +25003,14 @@
                   return _context.a(2);
                 case 4:
                   reusePreparation = controller.motionEnabled && controller.transition !== null && controller.classList.contains(className.willChange);
+                  previousSize = null;
+                  if (reusePreparation && (controller.measuredHeight || controller.measuredWidth)) {
+                    computed = root2.getComputedStyle(element);
+                    previousSize = {
+                      height: parseFloat(computed.maxHeight),
+                      width: parseFloat(computed.maxWidth)
+                    };
+                  }
                   controller.stop({
                     replacement: reusePreparation,
                     transitionStart: true
@@ -24938,6 +25027,7 @@
                   });
                   element.hidden = false;
                   openPresentElements.add(element);
+                  finalSize = prepareMeasuredSize(element, controller, gotoVisible, previousSize);
                   if (controller.motionEnabled) {
                     controller.classList.add(className.willChange);
                   }
@@ -24957,11 +25047,17 @@
                   transition.className = className["".concat(newDirection).concat(PING).toLowerCase()];
                   duration = root2.getComputedStyle(element).getPropertyValue("--ae-".concat(newDirection, "-duration").toLowerCase()).trim();
                   timeMs = getString2Time(duration);
-                  if (root2.document && root2.document.documentElement.hasAttribute(attr.lowHardware)) {
-                    element.style.setProperty("--ae-".concat(newDirection, "-low-steps").toLowerCase(), Math.max(1, parseInt(timeMs / 62.5)));
-                  }
+                  element.style.setProperty("--ae-".concat(newDirection, "-low-steps").toLowerCase(), Math.max(1, parseInt(timeMs / 62.5)));
                   controller.classList.remove(className.pop, className.popping, className.unpopping);
                   controller.classList.add(transition.className);
+                  if (finalSize) {
+                    if (controller.measuredHeight) {
+                      element.style.setProperty("max-height", "".concat(gotoVisible ? finalSize.height : 0, "px"), "important");
+                    }
+                    if (controller.measuredWidth) {
+                      element.style.setProperty("max-width", "".concat(gotoVisible ? finalSize.width : 0, "px"), "important");
+                    }
+                  }
                   completed = new Promise(function(completeTransition) {
                     transition.timeout = setTimeout(finishTransition, timeMs, element, controller, transition, gotoVisible, completeTransition);
                   });
@@ -24998,6 +25094,7 @@
                   if (ownsTransition && transition.className) {
                     controller.classList.remove(transition.className);
                   }
+                  if (ownsTransition) restoreMeasuredStyles(element, controller);
                   _t2 = _t && _t.code;
                   _context.n = _t2 === AelluxJs2.diagnostics.WARN_INTERRUPTION.code ? 8 : 9;
                   break;
@@ -25032,6 +25129,7 @@
         }
         function finishTransition(element, controller, transition, gotoVisible, completeTransition) {
           controller.classList.remove(transition.className);
+          restoreMeasuredStyles(element, controller);
           var focused = !gotoVisible && element.contains(document.activeElement) ? document.activeElement : null;
           element.hidden = gotoVisible ? false : true;
           if (element.hidden) openPresentElements.delete(element);
@@ -25055,10 +25153,10 @@
           unpop(element);
         }
         function outsideClickAutoUnpop(currentExceptions) {
-          var _iterator5 = _createForOfIteratorHelper7(openPresentElements), _step5;
+          var _iterator7 = _createForOfIteratorHelper7(openPresentElements), _step7;
           try {
             var _loop = function _loop2() {
-              var pContainer = _step5.value;
+              var pContainer = _step7.value;
               if (pContainer.hidden === true || pContainer.getAttribute(attr.unpopOnOutside) === "false" || currentExceptions.some(function(e) {
                 return pContainer.contains(e);
               })) {
@@ -25066,13 +25164,13 @@
               }
               unpop(pContainer);
             };
-            for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
+            for (_iterator7.s(); !(_step7 = _iterator7.n()).done; ) {
               if (_loop()) continue;
             }
           } catch (err) {
-            _iterator5.e(err);
+            _iterator7.e(err);
           } finally {
-            _iterator5.f();
+            _iterator7.f();
           }
         }
         function refreshChangedTrigger(button) {

@@ -2,6 +2,14 @@
 
 All notable changes to aellux.js will be documented in this file.
 
+## Unreleased
+
+### Changed
+
+- Removed automatic `data-ae-low-hardware` detection from the boot; applications can set the attribute explicitly.
+- Made `data-ae-present-motion` optional. Present keeps grid transitions when it exists and measures `max-height`/`max-width` transitions without it, preserving the original content structure and reporting an informational diagnostic.
+- Raised Present's minified JavaScript raw budget from 8 KiB to 10 KiB for the measured transition path; the 4 KiB gzip limit is unchanged.
+
 ## [0.1.0-beta.9] - 2026-10-13
 
 ### Added

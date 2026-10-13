@@ -25,7 +25,8 @@
       pop: AelluxJs.className("pop"),
       popping: AelluxJs.className("popping"),
       unpopping: AelluxJs.className("unpopping"),
-      willChange: AelluxJs.className("will-change")
+      willChange: AelluxJs.className("will-change"),
+      grid: AelluxJs.className("present-grid")
     };
     AelluxJs.extAttach(extensionName, {
       init,
@@ -81,24 +82,22 @@
       if (element.hasAttribute(attr.presentMotion)) {
         element.removeAttribute(attr.presentMotion);
       }
-      let presentMotion = element.querySelector(`:scope>[${attr.presentMotion}]`);
-      let generatedMotion = false;
-      if (!presentMotion) {
-        AelluxJs.diagnostics.warn(
-          AelluxJs.diagnostics.WARN_PRESENT_MOTION_MISSING,
+      const presentMotion = element.querySelector(`:scope>[${attr.presentMotion}]`);
+      const tokens = (element.getAttribute(attr.present) || "").split(/\s+/);
+      const measuredHeight = !presentMotion && tokens.includes("height");
+      const measuredWidth = !presentMotion && tokens.includes("width");
+      if (presentMotion) element.classList.add(className.grid);
+      else if (measuredHeight || measuredWidth) {
+        AelluxJs.diagnostics.info(
+          AelluxJs.diagnostics.INFO_PRESENT_MEASURED_LAYOUT,
           { extension: extensionName, element }
         );
-        presentMotion = document.createElement("div");
-        presentMotion.setAttribute(attr.presentMotion, "");
-        while (element.firstChild) {
-          presentMotion.appendChild(element.firstChild);
-        }
-        element.appendChild(presentMotion);
-        generatedMotion = true;
       }
       const presentController = {
-        generatedMotion,
         presentMotion,
+        measuredHeight,
+        measuredWidth,
+        measuredStyles: null,
         motionEnabled: (element.getAttribute(attr.present) || "").trim() !== "",
         transition: null,
         autoUnpopTimeout: null,
@@ -144,6 +143,7 @@
               className.willChange
             );
           }
+          if (!replacement) restoreMeasuredStyles(element, this);
         }
       };
       presentController.setAriaExpanded(
@@ -174,15 +174,10 @@
       if (!presentElements.has(element)) return;
       const controller = presentElements.get(element);
       controller.stop();
+      element.classList.remove(className.grid);
       presentElements.delete(element);
       openPresentElements.delete(element);
       controller.triggers.forEach(updateTriggerAriaExpanded);
-      if (controller.generatedMotion && controller.presentMotion.parentElement === element) {
-        while (controller.presentMotion.firstChild) {
-          element.insertBefore(controller.presentMotion.firstChild, controller.presentMotion);
-        }
-        controller.presentMotion.remove();
-      }
     }
     function mountTriggerElement(triggerElement) {
       if (triggerElementsSet.has(triggerElement)) return;
@@ -302,6 +297,45 @@
           break;
       }
     }
+    function restoreMeasuredStyles(element, controller) {
+      const saved = controller.measuredStyles;
+      if (!saved) return;
+      for (const [name, value, priority] of saved) {
+        if (value) element.style.setProperty(name, value, priority);
+        else element.style.removeProperty(name);
+      }
+      controller.measuredStyles = null;
+    }
+    function prepareMeasuredSize(element, controller, gotoVisible, previousSize) {
+      if (!controller.measuredHeight && !controller.measuredWidth) return null;
+      if (!controller.measuredStyles) {
+        controller.measuredStyles = ["max-height", "max-width"].map((name) => [
+          name,
+          element.style.getPropertyValue(name),
+          element.style.getPropertyPriority(name)
+        ]);
+      }
+      for (const [name, value, priority] of controller.measuredStyles) {
+        if (value) element.style.setProperty(name, value, priority);
+        else element.style.removeProperty(name);
+      }
+      const computed = root.getComputedStyle(element);
+      const height = parseFloat(computed.height);
+      const width = parseFloat(computed.width);
+      const finalSize = {
+        height: Number.isFinite(height) ? height : element.scrollHeight,
+        width: Number.isFinite(width) ? width : element.scrollWidth
+      };
+      const start = previousSize || (gotoVisible ? { height: 0, width: 0 } : finalSize);
+      if (controller.measuredHeight) {
+        element.style.setProperty("max-height", `${Math.max(0, start.height)}px`, "important");
+      }
+      if (controller.measuredWidth) {
+        element.style.setProperty("max-width", `${Math.max(0, start.width)}px`, "important");
+      }
+      element.getBoundingClientRect();
+      return finalSize;
+    }
     async function presentTransition(element, gotoVisible) {
       const controller = presentElements.get(element);
       if (!controller) return;
@@ -324,6 +358,14 @@
           return;
         }
         const reusePreparation = controller.motionEnabled && controller.transition !== null && controller.classList.contains(className.willChange);
+        let previousSize = null;
+        if (reusePreparation && (controller.measuredHeight || controller.measuredWidth)) {
+          const computed = root.getComputedStyle(element);
+          previousSize = {
+            height: parseFloat(computed.maxHeight),
+            width: parseFloat(computed.maxWidth)
+          };
+        }
         controller.stop({ replacement: reusePreparation, transitionStart: true });
         controller.direction = newDirection;
         const interrupted = new Promise((_, interruptTransition) => {
@@ -337,6 +379,7 @@
         });
         element.hidden = false;
         openPresentElements.add(element);
+        const finalSize = prepareMeasuredSize(element, controller, gotoVisible, previousSize);
         if (controller.motionEnabled) {
           controller.classList.add(className.willChange);
         }
@@ -352,18 +395,24 @@
         transition.className = className[`${newDirection}${PING}`.toLowerCase()];
         const duration = root.getComputedStyle(element).getPropertyValue(`--ae-${newDirection}-duration`.toLowerCase()).trim();
         const timeMs = getString2Time(duration);
-        if (root.document && root.document.documentElement.hasAttribute(attr.lowHardware)) {
-          element.style.setProperty(
-            `--ae-${newDirection}-low-steps`.toLowerCase(),
-            Math.max(1, parseInt(timeMs / 62.5))
-          );
-        }
+        element.style.setProperty(
+          `--ae-${newDirection}-low-steps`.toLowerCase(),
+          Math.max(1, parseInt(timeMs / 62.5))
+        );
         controller.classList.remove(
           className.pop,
           className.popping,
           className.unpopping
         );
         controller.classList.add(transition.className);
+        if (finalSize) {
+          if (controller.measuredHeight) {
+            element.style.setProperty("max-height", `${gotoVisible ? finalSize.height : 0}px`, "important");
+          }
+          if (controller.measuredWidth) {
+            element.style.setProperty("max-width", `${gotoVisible ? finalSize.width : 0}px`, "important");
+          }
+        }
         const completed = new Promise((completeTransition) => {
           transition.timeout = setTimeout(
             finishTransition,
@@ -396,6 +445,7 @@
         if (ownsTransition && transition.className) {
           controller.classList.remove(transition.className);
         }
+        if (ownsTransition) restoreMeasuredStyles(element, controller);
         switch (error && error.code) {
           case AelluxJs.diagnostics.WARN_INTERRUPTION.code:
             AelluxJs.diagnostics.warn(
@@ -424,6 +474,7 @@
     }
     function finishTransition(element, controller, transition, gotoVisible, completeTransition) {
       controller.classList.remove(transition.className);
+      restoreMeasuredStyles(element, controller);
       const focused = !gotoVisible && element.contains(document.activeElement) ? document.activeElement : null;
       element.hidden = gotoVisible ? false : true;
       if (element.hidden) openPresentElements.delete(element);

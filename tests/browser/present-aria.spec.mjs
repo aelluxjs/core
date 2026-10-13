@@ -656,11 +656,11 @@ test("present restores initial attributes and captures fresh values on remount",
   });
 });
 
-test("present warns and generates a missing direct motion child", async ({ page }) => {
+test("present keeps content in place and reports measured layout without a motion child", async ({ page }) => {
   await page.goto("/tests/index.htm");
   await page.evaluate(() => {
     document.body.innerHTML = `
-      <div id="missing" data-ae-present data-ae-present-motion hidden>
+      <div id="missing" data-ae-present="height width" data-ae-present-motion hidden>
         <button id="missing-control">Control</button>
       </div>
       <div id="valid" data-ae-present hidden>
@@ -679,13 +679,13 @@ test("present warns and generates a missing direct motion child", async ({ page 
     const motion = document.getElementById("motion");
     const mounted = {
       missingMarker: missing.getAttribute("data-ae-present-motion"),
-      generatedWrapper: missing.querySelector(":scope > [data-ae-present-motion]")?.tagName,
+      generatedWrapper: missing.querySelector(":scope > [data-ae-present-motion]")?.tagName || null,
       controlParentHasMotion: document.getElementById("missing-control").parentElement.hasAttribute("data-ae-present-motion"),
       existingMotionPreserved: document.querySelector("#valid > [data-ae-present-motion]") === motion,
       missingHidden: missing.hidden
     };
     const diagnostics = AelluxJs.diagnostics.showHistory()
-      .filter(entry => entry.code === 2010)
+      .filter(entry => entry.code === 3001)
       .map(entry => ({ code: entry.code, level: entry.level, element: entry.context.element.id }));
     await AelluxJs.unmount(document, "present");
     const restored = {
@@ -699,18 +699,134 @@ test("present warns and generates a missing direct motion child", async ({ page 
   expect(result).toEqual({
     mounted: {
       missingMarker: null,
-      generatedWrapper: "DIV",
-      controlParentHasMotion: true,
+      generatedWrapper: null,
+      controlParentHasMotion: false,
       existingMotionPreserved: true,
       missingHidden: true
     },
-    diagnostics: [{ code: 2010, level: 1, element: "missing" }],
+    diagnostics: [{ code: 3001, level: 2, element: "missing" }],
     restored: {
       missingMarker: "",
       generatedWrapper: null,
       controlParent: "missing",
       existingMotionPreserved: true
     }
+  });
+});
+
+test("present measures natural and explicit sizes without a motion child and restores inline maximums", async ({ page }) => {
+  await page.goto("/tests/index.htm");
+  await page.evaluate(() => {
+    document.body.innerHTML = `
+      <style>#fixed { width: 140px; height: 90px; }</style>
+      <div id="natural" data-ae-present="height width" hidden
+        style="display: inline-block; --ae-pop-duration: 40ms; --ae-unpop-duration: 40ms">
+        <div id="natural-content" style="width: 120px; height: 48px">Content</div>
+      </div>
+      <div id="fixed" data-ae-present="height width" hidden
+        style="max-height: 300px; max-width: 250px;
+          --ae-pop-duration: 40ms; --ae-unpop-duration: 40ms">Content</div>`;
+  });
+  await page.addScriptTag({ url: "/dist/aellux.js" });
+  await page.evaluate(() => AelluxJs.init({ mode: "full" }));
+  await expect.poll(() => page.evaluate(() =>
+    typeof AelluxJs.mountManager?.controller("fixed")?.present?.pop === "function"
+  )).toBe(true);
+
+  const result = await page.evaluate(async () => {
+    const natural = document.getElementById("natural");
+    const fixed = document.getElementById("fixed");
+    const states = {};
+    for (const element of [natural, fixed]) {
+      states[element.id] = {};
+      element.addEventListener("AelluxJsPopping", () => {
+        states[element.id].opening = [element.style.maxHeight, element.style.maxWidth];
+      });
+      element.addEventListener("AelluxJsUnpopping", () => {
+        states[element.id].closing = [element.style.maxHeight, element.style.maxWidth];
+      });
+    }
+    await Promise.all([AelluxJs.ext.present.pop(natural), AelluxJs.ext.present.pop(fixed)]);
+    const opened = {
+      naturalHidden: natural.hidden,
+      naturalWrapper: natural.querySelector(":scope > [data-ae-present-motion]"),
+      naturalContentParent: document.getElementById("natural-content").parentElement.id,
+      naturalMaximums: [natural.style.maxHeight, natural.style.maxWidth],
+      fixedMaximums: [fixed.style.maxHeight, fixed.style.maxWidth],
+      measuredProperties: getComputedStyle(natural).transitionProperty
+    };
+    await Promise.all([AelluxJs.ext.present.unpop(natural), AelluxJs.ext.present.unpop(fixed)]);
+    return {
+      states,
+      opened,
+      closed: {
+        naturalHidden: natural.hidden,
+        fixedHidden: fixed.hidden,
+        naturalMaximums: [natural.style.maxHeight, natural.style.maxWidth],
+        fixedMaximums: [fixed.style.maxHeight, fixed.style.maxWidth]
+      }
+    };
+  });
+
+  expect(result.states.natural.opening.map(parseFloat)).toEqual([48, 120]);
+  expect(result.states.fixed.opening.map(parseFloat)).toEqual([90, 140]);
+  expect(result.states.natural.closing).toEqual(["0px", "0px"]);
+  expect(result.states.fixed.closing).toEqual(["0px", "0px"]);
+  expect(result.opened).toEqual({
+    naturalHidden: false,
+    naturalWrapper: null,
+    naturalContentParent: "natural",
+    naturalMaximums: ["", ""],
+    fixedMaximums: ["300px", "250px"],
+    measuredProperties: "opacity, transform, max-height, max-width"
+  });
+  expect(result.closed).toEqual({
+    naturalHidden: true,
+    fixedHidden: true,
+    naturalMaximums: ["", ""],
+    fixedMaximums: ["300px", "250px"]
+  });
+});
+
+test("present restores measured styles after a reversed transition", async ({ page }) => {
+  await page.goto("/tests/index.htm");
+  await page.evaluate(() => {
+    document.body.innerHTML = `<div id="panel" data-ae-present="height width" hidden
+      style="width: 140px; height: 90px; max-height: 300px; max-width: 250px;
+        --ae-pop-duration: 200ms; --ae-unpop-duration: 40ms">Content</div>`;
+  });
+  await page.addScriptTag({ url: "/dist/aellux.js" });
+  await page.evaluate(() => AelluxJs.init({ mode: "full" }));
+  await expect.poll(() => page.evaluate(() =>
+    typeof AelluxJs.mountManager?.controller("panel")?.present?.pop === "function"
+  )).toBe(true);
+
+  const result = await page.evaluate(async () => {
+    const panel = document.getElementById("panel");
+    let started;
+    const popping = new Promise(resolve => { started = resolve; });
+    panel.addEventListener("AelluxJsPopping", started, { once: true });
+    const first = AelluxJs.ext.present.pop(panel);
+    await popping;
+    await new Promise(resolve => setTimeout(resolve, 25));
+    const second = AelluxJs.ext.present.unpop(panel);
+    await Promise.all([first, second]);
+    const afterReverse = {
+      hidden: panel.hidden,
+      maximums: [panel.style.maxHeight, panel.style.maxWidth]
+    };
+    await AelluxJs.ext.present.pop(panel);
+    return {
+      afterReverse,
+      reopened: !panel.hidden,
+      maximums: [panel.style.maxHeight, panel.style.maxWidth]
+    };
+  });
+
+  expect(result).toEqual({
+    afterReverse: { hidden: true, maximums: ["300px", "250px"] },
+    reopened: true,
+    maximums: ["300px", "250px"]
   });
 });
 
