@@ -168,6 +168,105 @@ test("present prepares will-change before starting a transition", async ({ page 
   });
 });
 
+test("replacement transitions reuse preparation and final interruptions clean it", async ({ page }) => {
+  await page.goto("/tests/index.htm");
+  await page.evaluate(() => {
+    document.body.innerHTML = `
+      <div id="panel" data-ae-present hidden
+        style="--ae-pop-duration: 500ms; --ae-unpop-duration: 120ms">
+        <div data-ae-present-motion></div>
+      </div>`;
+  });
+  await page.addScriptTag({ url: "/dist/aellux.js" });
+  await page.evaluate(() => AelluxJs.init({ mode: "full" }));
+  await expect.poll(() => page.evaluate(() =>
+    typeof AelluxJs.mountManager?.controller("panel")?.present?.pop === "function"
+  )).toBe(true);
+
+  await page.evaluate(() => {
+    const panel = document.getElementById("panel");
+    window.firstTransition = AelluxJs.mountManager.controller(panel).present.pop();
+  });
+  await expect.poll(() => page.evaluate(() =>
+    document.getElementById("panel").classList.contains(AelluxJs.className("popping"))
+  )).toBe(true);
+
+  const replacement = await page.evaluate(() => {
+    const panel = document.getElementById("panel");
+    const startedAt = performance.now();
+    let unpoppingAt = null;
+    panel.addEventListener(AelluxJs.eventName("Unpopping"), () => {
+      unpoppingAt = performance.now();
+    }, { once: true });
+    window.replacementTransition = AelluxJs.mountManager.controller(panel).present.unpop();
+    return {
+      delay: unpoppingAt - startedAt,
+      willChange: panel.classList.contains(AelluxJs.className("will-change")),
+      popping: panel.classList.contains(AelluxJs.className("popping")),
+      unpopping: panel.classList.contains(AelluxJs.className("unpopping"))
+    };
+  });
+  expect(replacement).toMatchObject({ willChange: true, popping: false, unpopping: true });
+  expect(replacement.delay).toBeGreaterThanOrEqual(0);
+  expect(replacement.delay).toBeLessThan(50);
+
+  await page.waitForTimeout(30);
+  await expect(page.locator("#panel")).toHaveClass(/ae--will-change/);
+  await page.evaluate(() => Promise.all([window.firstTransition, window.replacementTransition]));
+  await expect(page.locator("#panel")).toHaveJSProperty("hidden", true);
+  await expect(page.locator("#panel")).not.toHaveClass(/ae--will-change/);
+
+  await page.evaluate(() => {
+    const panel = document.getElementById("panel");
+    window.finalTransition = AelluxJs.mountManager.controller(panel).present.pop();
+  });
+  await expect.poll(() => page.evaluate(() =>
+    document.getElementById("panel").classList.contains(AelluxJs.className("popping"))
+  )).toBe(true);
+  const rapidReplacement = await page.evaluate(async () => {
+    const panel = document.getElementById("panel");
+    const controller = AelluxJs.mountManager.controller(panel).present;
+    window.rapidReverseTransition = controller.unpop();
+    window.rapidResumeTransition = controller.pop();
+    await Promise.resolve();
+    return {
+      willChange: panel.classList.contains(AelluxJs.className("will-change")),
+      popping: panel.classList.contains(AelluxJs.className("popping")),
+      unpopping: panel.classList.contains(AelluxJs.className("unpopping"))
+    };
+  });
+  expect(rapidReplacement).toEqual({
+    willChange: true,
+    popping: true,
+    unpopping: false
+  });
+  await page.evaluate(async () => {
+    const panel = document.getElementById("panel");
+    await AelluxJs.unmount(panel, "present");
+    await Promise.all([
+      window.finalTransition,
+      window.rapidReverseTransition,
+      window.rapidResumeTransition
+    ]);
+  });
+  expect(await page.evaluate(() => {
+    const panel = document.getElementById("panel");
+    return {
+      controller: AelluxJs.mountManager.controller(panel),
+      pop: panel.classList.contains(AelluxJs.className("pop")),
+      popping: panel.classList.contains(AelluxJs.className("popping")),
+      unpopping: panel.classList.contains(AelluxJs.className("unpopping")),
+      willChange: panel.classList.contains(AelluxJs.className("will-change"))
+    };
+  })).toEqual({
+    controller: null,
+    pop: false,
+    popping: false,
+    unpopping: false,
+    willChange: false
+  });
+});
+
 test("present disables transitions when reduced motion is active", async ({ page }) => {
   await page.goto("/tests/index.htm");
   await page.evaluate(() => {

@@ -96,34 +96,43 @@
       const presentController = {
         generatedMotion,
         presentMotion,
-        interruptTransition: null,
+        transition: null,
+        autoUnpopTimeout: null,
         direction: null,
-        timeout: null,
         classList: element.classList,
         triggers: /* @__PURE__ */ new Set(),
         setAriaExpanded: function(value) {
           element.setAttribute(ARIA_EXPANDED, value);
           this.triggers.forEach(updateTriggerAriaExpanded);
         },
-        stop: function(pop2 = true) {
-          for (const c of Object.values(className)) {
-            if (pop2 || c !== className.pop) {
-              this.classList.remove(c);
+        stop: function(options = {}) {
+          const replacement = options.replacement === true;
+          const preservePop = options.preservePop === true;
+          const transition = this.transition;
+          if (transition) {
+            transition.replacement = replacement;
+            if (transition.timeout !== null) {
+              clearTimeout(transition.timeout);
+              transition.timeout = null;
             }
-          }
-          if (this.interruptTransition !== null && typeof this.interruptTransition === "function") {
-            this.interruptTransition(
+            if (transition.className) {
+              this.classList.remove(transition.className);
+            }
+            this.transition = null;
+            transition.interrupt(
               AelluxJs.diagnostics.create(
                 AelluxJs.diagnostics.WARN_INTERRUPTION,
-                { extensionName }
+                { extensionName, replacement }
               )
             );
-            this.interruptTransition = null;
           }
-          if (this.timeout !== null) {
-            clearTimeout(this.timeout);
-            this.timeout = null;
+          if (this.autoUnpopTimeout !== null) {
+            clearTimeout(this.autoUnpopTimeout);
+            this.autoUnpopTimeout = null;
           }
+          this.classList.remove(className.popping, className.unpopping);
+          if (!preservePop) this.classList.remove(className.pop);
+          if (!replacement) this.classList.remove(className.willChange);
         }
       };
       presentController.setAriaExpanded(
@@ -268,8 +277,7 @@
       if (element.hidden && !gotoVisible || newDirection === controller.direction) {
         return;
       }
-      let transitionClass = null;
-      let transitionStarted = false;
+      let transition = null;
       try {
         const allowEvent = AelluxJs.dispatchFrom(
           element,
@@ -279,22 +287,30 @@
         if (!allowEvent) {
           return;
         }
-        controller.stop(gotoVisible);
+        const reusePreparation = controller.transition !== null && controller.classList.contains(className.willChange);
+        controller.stop({ replacement: reusePreparation, preservePop: !gotoVisible });
         controller.direction = newDirection;
-        transitionStarted = true;
         const interrupted = new Promise((_, interruptTransition) => {
-          controller.interruptTransition = interruptTransition;
+          transition = {
+            className: null,
+            timeout: null,
+            interrupt: interruptTransition,
+            replacement: false
+          };
+          controller.transition = transition;
         });
         element.hidden = false;
         controller.classList.add(className.willChange);
-        const prepared = new Promise((resolve) => {
-          controller.timeout = setTimeout(() => {
-            controller.timeout = null;
-            resolve();
-          }, TRANSITION_PREPARE_TIME);
-        });
-        await Promise.race([prepared, interrupted]);
-        transitionClass = className[`${newDirection}${PING}`.toLowerCase()];
+        if (!reusePreparation) {
+          const prepared = new Promise((resolve) => {
+            transition.timeout = setTimeout(() => {
+              transition.timeout = null;
+              resolve();
+            }, TRANSITION_PREPARE_TIME);
+          });
+          await Promise.race([prepared, interrupted]);
+        }
+        transition.className = className[`${newDirection}${PING}`.toLowerCase()];
         const duration = root.getComputedStyle(element).getPropertyValue(`--ae-${newDirection}-duration`.toLowerCase()).trim();
         const timeMs = getString2Time(duration);
         if (root.document && root.document.documentElement.hasAttribute(attr.lowHardware)) {
@@ -303,14 +319,15 @@
             Math.max(1, parseInt(timeMs / 62.5))
           );
         }
-        controller.classList.add(transitionClass);
+        controller.classList.remove(className.pop);
+        controller.classList.add(transition.className);
         const completed = new Promise((completeTransition) => {
-          controller.timeout = setTimeout(
+          transition.timeout = setTimeout(
             finishTransition,
             timeMs,
             element,
             controller,
-            transitionClass,
+            transition,
             gotoVisible,
             completeTransition
           );
@@ -328,19 +345,24 @@
           AelluxJs.dispatchFrom(element, UNPOP, { bubbles: true });
         }
       } catch (error) {
-        if (transitionStarted && controller.timeout !== null) {
-          clearTimeout(controller.timeout);
-          controller.timeout = null;
+        const ownsTransition = transition && controller.transition === transition;
+        if (ownsTransition && transition.timeout !== null) {
+          clearTimeout(transition.timeout);
+          transition.timeout = null;
         }
-        if (transitionStarted) {
-          controller.interruptTransition = null;
-          if (transitionClass) controller.classList.remove(transitionClass);
+        if (ownsTransition && transition.className) {
+          controller.classList.remove(transition.className);
         }
         switch (error && error.code) {
           case AelluxJs.diagnostics.WARN_INTERRUPTION.code:
             AelluxJs.diagnostics.warn(
               AelluxJs.diagnostics.WARN_INTERRUPTION,
-              { cause: error, extension: extensionName, element }
+              {
+                cause: error,
+                extension: extensionName,
+                element,
+                replacement: transition && transition.replacement === true
+              }
             );
             break;
           default:
@@ -351,26 +373,28 @@
             break;
         }
       } finally {
-        if (transitionStarted) controller.classList.remove(className.willChange);
+        if (transition && controller.transition === transition) {
+          controller.transition = null;
+          controller.classList.remove(className.willChange);
+        }
       }
     }
-    function finishTransition(element, controller, c, gotoVisible, completeTransition) {
-      controller.classList.remove(c);
+    function finishTransition(element, controller, transition, gotoVisible, completeTransition) {
+      controller.classList.remove(transition.className);
       const focused = !gotoVisible && element.contains(document.activeElement) ? document.activeElement : null;
       element.hidden = gotoVisible ? false : true;
       if (focused) {
         if (document.activeElement === focused) focused.blur();
         if (document.activeElement !== focused) AelluxJs.dispatch("UnpopFocusLost");
       }
-      controller.interruptTransition = null;
-      controller.timeout = null;
+      transition.timeout = null;
       completeTransition();
     }
     function autoUnpopSchedule(element, controller) {
       const autoUnpopValue = element.getAttribute(attr.autoUnpop);
       if (!element.hidden && autoUnpopValue) {
         const autoTime = getString2Time(autoUnpopValue);
-        controller.timeout = setTimeout(
+        controller.autoUnpopTimeout = setTimeout(
           autoUnpop,
           autoTime,
           element,
@@ -379,7 +403,7 @@
       }
     }
     function autoUnpop(element, controller) {
-      controller.timeout = null;
+      controller.autoUnpopTimeout = null;
       unpop(element);
     }
     function outsideClickAutoUnpop(currentExceptions) {

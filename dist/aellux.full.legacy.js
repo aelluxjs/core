@@ -24477,9 +24477,9 @@
           var presentController = {
             generatedMotion: generatedMotion,
             presentMotion: presentMotion,
-            interruptTransition: null,
+            transition: null,
+            autoUnpopTimeout: null,
             direction: null,
-            timeout: null,
             classList: element.classList,
             triggers: /* @__PURE__ */ new Set(),
             setAriaExpanded: function setAriaExpanded(value) {
@@ -24487,23 +24487,32 @@
               this.triggers.forEach(updateTriggerAriaExpanded);
             },
             stop: function stop() {
-              var pop2 = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : true;
-              for (var _i = 0, _Object$values = Object.values(className); _i < _Object$values.length; _i++) {
-                var c = _Object$values[_i];
-                if (pop2 || c !== className.pop) {
-                  this.classList.remove(c);
+              var options = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : {};
+              var replacement = options.replacement === true;
+              var preservePop = options.preservePop === true;
+              var transition = this.transition;
+              if (transition) {
+                transition.replacement = replacement;
+                if (transition.timeout !== null) {
+                  clearTimeout(transition.timeout);
+                  transition.timeout = null;
                 }
-              }
-              if (this.interruptTransition !== null && typeof this.interruptTransition === "function") {
-                this.interruptTransition(AelluxJs2.diagnostics.create(AelluxJs2.diagnostics.WARN_INTERRUPTION, {
-                  extensionName: extensionName
+                if (transition.className) {
+                  this.classList.remove(transition.className);
+                }
+                this.transition = null;
+                transition.interrupt(AelluxJs2.diagnostics.create(AelluxJs2.diagnostics.WARN_INTERRUPTION, {
+                  extensionName: extensionName,
+                  replacement: replacement
                 }));
-                this.interruptTransition = null;
               }
-              if (this.timeout !== null) {
-                clearTimeout(this.timeout);
-                this.timeout = null;
+              if (this.autoUnpopTimeout !== null) {
+                clearTimeout(this.autoUnpopTimeout);
+                this.autoUnpopTimeout = null;
               }
+              this.classList.remove(className.popping, className.unpopping);
+              if (!preservePop) this.classList.remove(className.pop);
+              if (!replacement) this.classList.remove(className.willChange);
             }
           };
           presentController.setAriaExpanded(element.hidden ? "false" : "true");
@@ -24671,7 +24680,7 @@
         }
         function _presentTransition() {
           _presentTransition = _asyncToGenerator5(/* @__PURE__ */ _regenerator5().m(function _callee(element, gotoVisible) {
-            var controller, newDirection, transitionClass, transitionStarted, allowEvent, interrupted, prepared, duration, timeMs, completed, _t, _t2;
+            var controller, newDirection, transition, allowEvent, reusePreparation, interrupted, prepared, duration, timeMs, completed, ownsTransition, _t, _t2;
             return _regenerator5().w(function(_context) {
               while (1) switch (_context.p = _context.n) {
                 case 0:
@@ -24691,8 +24700,7 @@
                   }
                   return _context.a(2);
                 case 2:
-                  transitionClass = null;
-                  transitionStarted = false;
+                  transition = null;
                   _context.p = 3;
                   allowEvent = AelluxJs2.dispatchFrom(element, "".concat(BEFORE).concat(newDirection), {
                     bubbles: true,
@@ -24704,32 +24712,46 @@
                   }
                   return _context.a(2);
                 case 4:
-                  controller.stop(gotoVisible);
+                  reusePreparation = controller.transition !== null && controller.classList.contains(className.willChange);
+                  controller.stop({
+                    replacement: reusePreparation,
+                    preservePop: !gotoVisible
+                  });
                   controller.direction = newDirection;
-                  transitionStarted = true;
                   interrupted = new Promise(function(_, interruptTransition) {
-                    controller.interruptTransition = interruptTransition;
+                    transition = {
+                      className: null,
+                      timeout: null,
+                      interrupt: interruptTransition,
+                      replacement: false
+                    };
+                    controller.transition = transition;
                   });
                   element.hidden = false;
                   controller.classList.add(className.willChange);
+                  if (reusePreparation) {
+                    _context.n = 5;
+                    break;
+                  }
                   prepared = new Promise(function(resolve) {
-                    controller.timeout = setTimeout(function() {
-                      controller.timeout = null;
+                    transition.timeout = setTimeout(function() {
+                      transition.timeout = null;
                       resolve();
                     }, TRANSITION_PREPARE_TIME);
                   });
                   _context.n = 5;
                   return Promise.race([prepared, interrupted]);
                 case 5:
-                  transitionClass = className["".concat(newDirection).concat(PING).toLowerCase()];
+                  transition.className = className["".concat(newDirection).concat(PING).toLowerCase()];
                   duration = root2.getComputedStyle(element).getPropertyValue("--ae-".concat(newDirection, "-duration").toLowerCase()).trim();
                   timeMs = getString2Time(duration);
                   if (root2.document && root2.document.documentElement.hasAttribute(attr.lowHardware)) {
                     element.style.setProperty("--ae-".concat(newDirection, "-low-steps").toLowerCase(), Math.max(1, parseInt(timeMs / 62.5)));
                   }
-                  controller.classList.add(transitionClass);
+                  controller.classList.remove(className.pop);
+                  controller.classList.add(transition.className);
                   completed = new Promise(function(completeTransition) {
-                    controller.timeout = setTimeout(finishTransition, timeMs, element, controller, transitionClass, gotoVisible, completeTransition);
+                    transition.timeout = setTimeout(finishTransition, timeMs, element, controller, transition, gotoVisible, completeTransition);
                   });
                   AelluxJs2.dispatchFrom(element, "".concat(newDirection).concat(PING), {
                     bubbles: true
@@ -24756,13 +24778,13 @@
                 case 7:
                   _context.p = 7;
                   _t = _context.v;
-                  if (transitionStarted && controller.timeout !== null) {
-                    clearTimeout(controller.timeout);
-                    controller.timeout = null;
+                  ownsTransition = transition && controller.transition === transition;
+                  if (ownsTransition && transition.timeout !== null) {
+                    clearTimeout(transition.timeout);
+                    transition.timeout = null;
                   }
-                  if (transitionStarted) {
-                    controller.interruptTransition = null;
-                    if (transitionClass) controller.classList.remove(transitionClass);
+                  if (ownsTransition && transition.className) {
+                    controller.classList.remove(transition.className);
                   }
                   _t2 = _t && _t.code;
                   _context.n = _t2 === AelluxJs2.diagnostics.WARN_INTERRUPTION.code ? 8 : 9;
@@ -24771,7 +24793,8 @@
                   AelluxJs2.diagnostics.warn(AelluxJs2.diagnostics.WARN_INTERRUPTION, {
                     cause: _t,
                     extension: extensionName,
-                    element: element
+                    element: element,
+                    replacement: transition && transition.replacement === true
                   });
                   return _context.a(3, 10);
                 case 9:
@@ -24783,7 +24806,10 @@
                   return _context.a(3, 10);
                 case 10:
                   _context.p = 10;
-                  if (transitionStarted) controller.classList.remove(className.willChange);
+                  if (transition && controller.transition === transition) {
+                    controller.transition = null;
+                    controller.classList.remove(className.willChange);
+                  }
                   return _context.f(10);
                 case 11:
                   return _context.a(2);
@@ -24792,27 +24818,26 @@
           }));
           return _presentTransition.apply(this, arguments);
         }
-        function finishTransition(element, controller, c, gotoVisible, completeTransition) {
-          controller.classList.remove(c);
+        function finishTransition(element, controller, transition, gotoVisible, completeTransition) {
+          controller.classList.remove(transition.className);
           var focused = !gotoVisible && element.contains(document.activeElement) ? document.activeElement : null;
           element.hidden = gotoVisible ? false : true;
           if (focused) {
             if (document.activeElement === focused) focused.blur();
             if (document.activeElement !== focused) AelluxJs2.dispatch("UnpopFocusLost");
           }
-          controller.interruptTransition = null;
-          controller.timeout = null;
+          transition.timeout = null;
           completeTransition();
         }
         function autoUnpopSchedule(element, controller) {
           var autoUnpopValue = element.getAttribute(attr.autoUnpop);
           if (!element.hidden && autoUnpopValue) {
             var autoTime = getString2Time(autoUnpopValue);
-            controller.timeout = setTimeout(autoUnpop, autoTime, element, controller);
+            controller.autoUnpopTimeout = setTimeout(autoUnpop, autoTime, element, controller);
           }
         }
         function autoUnpop(element, controller) {
-          controller.timeout = null;
+          controller.autoUnpopTimeout = null;
           unpop(element);
         }
         function outsideClickAutoUnpop(currentExceptions) {

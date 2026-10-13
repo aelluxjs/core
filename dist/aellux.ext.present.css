@@ -44,10 +44,10 @@ html[data-ae-low-hardware] [data-ae-present] {
 [data-ae-present].ae--will-change {
   will-change: opacity, transform, grid-template-columns, grid-template-rows;
 }
-[data-ae-present~="opacity"]:not([hidden]) {
+[data-ae-present~="opacity"] {
   opacity: var(--ae-from-opacity, 0);
 }
-[data-ae-present~="transform"]:not([hidden]) {
+[data-ae-present~="transform"] {
   transform: var(--ae-from-transform);
 }
 [data-ae-present~="opacity"].ae--popping,
