@@ -41,6 +41,8 @@ import utilsNameCase from "./internal/utils-name-case.js";
   const userPreferences = Object.create(null);
   const defaultPreferences = Object.create(null);
   const computedPreferences = Object.create(null);
+  const containersByPreference = new Map();
+  const containerPreferences = new Map();
 
   AelluxJs.extAttach(extensionName, { init, destroy, update, get, set });
 
@@ -105,6 +107,8 @@ import utilsNameCase from "./internal/utils-name-case.js";
 
   function destroy() {
     AelluxJs.mountManager.remove({ extensionName });
+    containersByPreference.clear();
+    containerPreferences.clear();
     window.removeEventListener("storage", storageEvent);
     document.removeEventListener('DOMContentLoaded', update);
 
@@ -145,18 +149,53 @@ import utilsNameCase from "./internal/utils-name-case.js";
   }
 
   function update() {
-    Object.assign(computedPreferences, defaultPreferences, userPreferences);
+    const nextPreferences = Object.assign(Object.create(null), defaultPreferences, userPreferences);
+    const changed = new Set();
+    for (const key in computedPreferences) {
+      if (!(key in nextPreferences)) {
+        delete computedPreferences[key];
+        changed.add(key);
+      }
+    }
+    for (const key in nextPreferences) {
+      if (computedPreferences[key] !== nextPreferences[key]) changed.add(key);
+      computedPreferences[key] = nextPreferences[key];
+    }
     AelluxJs.updatePreferenceAttributesHTML(computedPreferences);
-    document.querySelectorAll(`[${attr.preference}]`)
-      .forEach(container => updateContainer(container));
+    for (const container of containerPreferences.keys()) {
+      if (indexContainer(container)) updateContainer(container);
+    }
+    for (const key of changed) {
+      const containers = containersByPreference.get(key);
+      if (containers) for (const container of containers) updateContainer(container);
+    }
     AelluxJs.dispatch("PreferencesChange");
+  }
+
+  function indexContainer(container) {
+    const key = toCamelCase(container.getAttribute(attr.preference) || "");
+    const previous = containerPreferences.get(container);
+    if (previous === key) return false;
+    if (previous !== undefined) {
+      const containers = containersByPreference.get(previous);
+      containers.delete(container);
+      if (!containers.size) containersByPreference.delete(previous);
+    }
+    let containers = containersByPreference.get(key);
+    if (!containers) {
+      containers = new Set();
+      containersByPreference.set(key, containers);
+    }
+    containers.add(container);
+    containerPreferences.set(container, key);
+    return true;
   }
 
   function updateContainer(container) {
     const preference = container.getAttribute(attr.preference);
     const elements = container.querySelectorAll(`[${attr.option}]`);
     const labels = container.querySelectorAll(`[${attr.label}]`);
-    const currentValue = get(preference);
+    const currentValue = get(preference || "");
     labels.forEach(label => {
       const value = label.getAttribute(attr.label);
       const selected = String(value) === String(currentValue);
@@ -186,11 +225,19 @@ import utilsNameCase from "./internal/utils-name-case.js";
   }
 
   function mountPreferenceContainer(container) {
+    indexContainer(container);
+    updateContainer(container);
     container.addEventListener("click", onContainerClick);
   }
 
   function unmountPreferenceContainer(container) {
     container.removeEventListener("click", onContainerClick);
+    const key = containerPreferences.get(container);
+    if (key === undefined) return;
+    const containers = containersByPreference.get(key);
+    containers.delete(container);
+    if (!containers.size) containersByPreference.delete(key);
+    containerPreferences.delete(container);
   }
 
   function onContainerClick(event) {

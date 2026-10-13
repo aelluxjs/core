@@ -33,16 +33,19 @@ export function buildLayoutScheduler() {
 
   function runTask(task) {
     try {
-      task.resolve(task.callback());
+      task.resolve(task.parameters
+        ? task.callback.apply(undefined, task.parameters)
+        : task.callback());
     } catch (error) {
       task.reject(error);
     }
   }
 
-  function queueTask(queue, callback) {
+  function queueTask(queue, callback, parameters) {
     var promise = new Promise(function (resolve, reject) {
       queue.push({
         callback: callback,
+        parameters: parameters,
         resolve: resolve,
         reject: reject
       });
@@ -71,8 +74,8 @@ export function buildLayoutScheduler() {
   }
 
   return Object.freeze({
-    read: (callback) => queueTask(readQueue, callback),
-    update: (callback) => queueTask(updateQueue, callback),
+    read: (callback, parameters) => queueTask(readQueue, callback, parameters),
+    update: (callback, parameters) => queueTask(updateQueue, callback, parameters),
     clear
   });
 }

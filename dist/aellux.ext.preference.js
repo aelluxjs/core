@@ -33,6 +33,8 @@
     const userPreferences = /* @__PURE__ */ Object.create(null);
     const defaultPreferences = /* @__PURE__ */ Object.create(null);
     const computedPreferences = /* @__PURE__ */ Object.create(null);
+    const containersByPreference = /* @__PURE__ */ new Map();
+    const containerPreferences = /* @__PURE__ */ new Map();
     AelluxJs.extAttach(extensionName, { init, destroy, update, get, set });
     const attr = {
       preference: AelluxJs.attr("preference"),
@@ -87,6 +89,8 @@
     }
     function destroy() {
       AelluxJs.mountManager.remove({ extensionName });
+      containersByPreference.clear();
+      containerPreferences.clear();
       window.removeEventListener("storage", storageEvent);
       document.removeEventListener("DOMContentLoaded", update);
       const allQueries = AelluxJs.registry.preferenceMediaQueries;
@@ -123,16 +127,51 @@
       update();
     }
     function update() {
-      Object.assign(computedPreferences, defaultPreferences, userPreferences);
+      const nextPreferences = Object.assign(/* @__PURE__ */ Object.create(null), defaultPreferences, userPreferences);
+      const changed = /* @__PURE__ */ new Set();
+      for (const key in computedPreferences) {
+        if (!(key in nextPreferences)) {
+          delete computedPreferences[key];
+          changed.add(key);
+        }
+      }
+      for (const key in nextPreferences) {
+        if (computedPreferences[key] !== nextPreferences[key]) changed.add(key);
+        computedPreferences[key] = nextPreferences[key];
+      }
       AelluxJs.updatePreferenceAttributesHTML(computedPreferences);
-      document.querySelectorAll(`[${attr.preference}]`).forEach((container) => updateContainer(container));
+      for (const container of containerPreferences.keys()) {
+        if (indexContainer(container)) updateContainer(container);
+      }
+      for (const key of changed) {
+        const containers = containersByPreference.get(key);
+        if (containers) for (const container of containers) updateContainer(container);
+      }
       AelluxJs.dispatch("PreferencesChange");
+    }
+    function indexContainer(container) {
+      const key = toCamelCase2(container.getAttribute(attr.preference) || "");
+      const previous = containerPreferences.get(container);
+      if (previous === key) return false;
+      if (previous !== void 0) {
+        const containers2 = containersByPreference.get(previous);
+        containers2.delete(container);
+        if (!containers2.size) containersByPreference.delete(previous);
+      }
+      let containers = containersByPreference.get(key);
+      if (!containers) {
+        containers = /* @__PURE__ */ new Set();
+        containersByPreference.set(key, containers);
+      }
+      containers.add(container);
+      containerPreferences.set(container, key);
+      return true;
     }
     function updateContainer(container) {
       const preference = container.getAttribute(attr.preference);
       const elements = container.querySelectorAll(`[${attr.option}]`);
       const labels = container.querySelectorAll(`[${attr.label}]`);
-      const currentValue = get(preference);
+      const currentValue = get(preference || "");
       labels.forEach((label) => {
         const value = label.getAttribute(attr.label);
         const selected = String(value) === String(currentValue);
@@ -159,10 +198,18 @@
       Object.assign(userPreferences, AelluxJs.persist.preferences.getObject());
     }
     function mountPreferenceContainer(container) {
+      indexContainer(container);
+      updateContainer(container);
       container.addEventListener("click", onContainerClick);
     }
     function unmountPreferenceContainer(container) {
       container.removeEventListener("click", onContainerClick);
+      const key = containerPreferences.get(container);
+      if (key === void 0) return;
+      const containers = containersByPreference.get(key);
+      containers.delete(container);
+      if (!containers.size) containersByPreference.delete(key);
+      containerPreferences.delete(container);
     }
     function onContainerClick(event) {
       const container = event.currentTarget;

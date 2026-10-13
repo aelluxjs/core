@@ -3,7 +3,9 @@
 function buildDiagnostics(catalog) {
   var levels = { error: 0, warn: 1, info: 2 };
   var consoleMethods = ["error", "warn", "info"];
+  var historyLimit = 100;
   var history = [];
+  var historyStart = 0;
   var diagnostics = {
     legacy: false,
     supported: false,
@@ -42,10 +44,14 @@ function buildDiagnostics(catalog) {
       if (typeof lines !== "number" || !isFinite(lines) || lines < 0 || lines !== Math.floor(lines)) {
         throw new RangeError("diagnostics.showHistory(lines) requires a non-negative integer.");
       }
-      var entries = history.slice(Math.max(0, history.length - lines));
+      var count = Math.min(lines, history.length);
+      var entries = [];
+      for (var i = 0; i < count; i++) {
+        entries.push(history[(historyStart + history.length - count + i) % history.length]);
+      }
       if (typeof console !== "undefined" && typeof console.log === "function") {
-        for (var i = 0; i < entries.length; i++) {
-          var entry = entries[i];
+        for (var j = 0; j < entries.length; j++) {
+          var entry = entries[j];
           var message = "[" + entry.timestamp + "] [aellux.js " + entry.code + "] " + entry.message;
           if (entry.context) console.log(message, entry.context);
           else console.log(message);
@@ -59,13 +65,19 @@ function buildDiagnostics(catalog) {
   }
   function emit(level, definition, context) {
     var diagnostic = diagnostics.create(definition, context);
-    history.push({
+    var entry = {
       timestamp: (/* @__PURE__ */ new Date()).toISOString(),
       level,
       code: definition.code,
       message: definition.message,
       context
-    });
+    };
+    if (history.length < historyLimit) {
+      history.push(entry);
+    } else {
+      history[historyStart] = entry;
+      historyStart = (historyStart + 1) % historyLimit;
+    }
     var verboseLevel = getVerboseLevel();
     var consoleMethod = consoleMethods[level];
     if ((level === levels.error || level <= verboseLevel) && typeof console !== "undefined" && typeof console[consoleMethod] === "function") {
@@ -257,7 +269,7 @@ var utils_name_case_default = {
 // src/internal/create-preference-html-helper.js
 /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
 function createPreferenceHtmlHelper(root2, getApi) {
-  var document = root2.document;
+  var document2 = root2.document;
   var fromCamelCase2 = utils_name_case_default.fromCamelCase;
   return {
     updatePreferenceAttributesHTML
@@ -268,7 +280,7 @@ function createPreferenceHtmlHelper(root2, getApi) {
     preferences = preferences ? preferences : api.persist.preferences.getObject();
     for (var param in allQueries) {
       if (!Object.prototype.hasOwnProperty.call(allQueries, param)) continue;
-      document.documentElement.removeAttribute(api.attr(fromCamelCase2(param)));
+      document2.documentElement.removeAttribute(api.attr(fromCamelCase2(param)));
       var queries = allQueries[param];
       for (var value in queries) {
         if (!Object.prototype.hasOwnProperty.call(queries, value)) continue;
@@ -278,7 +290,7 @@ function createPreferenceHtmlHelper(root2, getApi) {
         } else if (preferences[param] !== value) {
           continue;
         }
-        document.documentElement.setAttribute(api.attr(fromCamelCase2(param)), value);
+        document2.documentElement.setAttribute(api.attr(fromCamelCase2(param)), value);
       }
     }
     if (preferences && "colorScheme" in preferences) {
@@ -288,12 +300,12 @@ function createPreferenceHtmlHelper(root2, getApi) {
   function updateColorSchemeMeta(preferenceColorScheme) {
     var api = getApi();
     var attr = api.attr("theme-color");
-    var aeMetaTag = document.head.querySelector("meta[" + attr + "]") || document.createElement("meta");
+    var aeMetaTag = document2.head.querySelector("meta[" + attr + "]") || document2.createElement("meta");
     if (preferenceColorScheme === "auto") {
       if (aeMetaTag.parentNode) aeMetaTag.parentNode.removeChild(aeMetaTag);
       return;
     }
-    var themeColorTags = document.head.querySelectorAll("meta[name='theme-color']");
+    var themeColorTags = document2.head.querySelectorAll("meta[name='theme-color']");
     if (themeColorTags.length < 2) return;
     var color = null;
     for (var i = 0; i < themeColorTags.length; i++) {
@@ -314,8 +326,33 @@ function createPreferenceHtmlHelper(root2, getApi) {
     aeMetaTag.name = "theme-color";
     aeMetaTag.content = color;
     aeMetaTag.setAttribute(attr, "");
-    document.head.insertBefore(aeMetaTag, document.head.firstChild);
+    document2.head.insertBefore(aeMetaTag, document2.head.firstChild);
   }
+}
+
+// src/internal/asset-load-helper.js
+/*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+function assetLoadHelper(asset, options) {
+  var loadCallback = options.loadCallback;
+  var errorCallback = options.errorCallback;
+  function clear() {
+    asset.onload = null;
+    asset.onerror = null;
+  }
+  asset.onload = function(event) {
+    clear();
+    if (typeof loadCallback === "function") {
+      return loadCallback(event);
+    }
+  };
+  asset.onerror = function(event) {
+    clear();
+    if (typeof errorCallback === "function") {
+      return errorCallback(event);
+    }
+  };
+  document.head.appendChild(asset);
+  return { clear };
 }
 
 // src/internal/aellux-api-integration.js
@@ -327,7 +364,7 @@ function createAelluxApi(root2, constants) {
   var options = constants.AELLUXJS_DEFAULT_INITIALIZATION_OPTIONS;
   var diagnostics = buildDiagnostics(constants.AELLUXJS_DIAGNOSTICS);
   var oldShortInstance = root2[constants.AELLUXJS_SHORT_JS_NAME];
-  var document = root2.document;
+  var document2 = root2.document;
   var preferenceHtml = createPreferenceHtmlHelper(root2, function() {
     return api;
   });
@@ -351,10 +388,10 @@ function createAelluxApi(root2, constants) {
     },
     updatePreferenceAttributesHTML: preferenceHtml.updatePreferenceAttributesHTML,
     on: function(event, handler, options2) {
-      document.addEventListener(api.eventName(event), handler, options2);
+      document2.addEventListener(api.eventName(event), handler, options2);
     },
     off: function(event, handler, options2) {
-      document.removeEventListener(api.eventName(event), handler, options2);
+      document2.removeEventListener(api.eventName(event), handler, options2);
     },
     attr: function(name) {
       name = fromCamelCase2(name);
@@ -384,7 +421,7 @@ function createAelluxApi(root2, constants) {
     },
     registry: {
       ext: {},
-      dep: {},
+      dep: /* @__PURE__ */ Object.create(null),
       lazyExtSelectors: {},
       extMounters: {},
       preferenceMediaQueries: buildPreferenceMediaQueries(root2)
@@ -410,7 +447,7 @@ function createAelluxApi(root2, constants) {
           return;
         }
         try {
-          document.querySelector(selector);
+          document2.querySelector(selector);
         } catch (cause) {
           diagnostics.error(diagnostics.ERROR_EXTENSION_LOAD_WHEN, {
             extension: name,
@@ -428,6 +465,64 @@ function createAelluxApi(root2, constants) {
       options2.load = options2.loadWhen ? false : true;
       options2.state = "wait";
       api.registry.ext[key] = options2;
+    },
+    dep: function(label, url, options2) {
+      if (typeof label !== "string" || !label.trim() || typeof url !== "string" || !url.trim()) {
+        return root2.Promise.reject(diagnostics.error(
+          diagnostics.ERROR_DEPENDENCY_ARGUMENT,
+          { label, url, expected: "a nonempty label and script URL" }
+        ));
+      }
+      var script = document2.createElement("script");
+      script.src = url.replace(/^\.\//, api.aelluxBasePath);
+      var resolvedURL = script.src;
+      var registry = api.registry.dep;
+      var existing = Object.prototype.hasOwnProperty.call(registry, label) ? registry[label] : null;
+      if (existing) {
+        if (existing.url !== resolvedURL) {
+          return root2.Promise.reject(diagnostics.error(
+            diagnostics.ERROR_DEPENDENCY_CONFLICT,
+            { label, url: resolvedURL, registeredURL: existing.url }
+          ));
+        }
+        return existing.promise;
+      }
+      var registration = { url: resolvedURL, state: "loading", script, promise: null };
+      registry[label] = registration;
+      script.setAttribute(api.attr("dep"), label);
+      if (options2 && options2.integrity) script.setAttribute("integrity", options2.integrity);
+      if (options2 && (options2.integrity || options2.crossOrigin) || api.options.crossOrigin) {
+        script.setAttribute(
+          "crossorigin",
+          options2 && options2.crossOrigin || api.options.crossOrigin || "anonymous"
+        );
+      }
+      registration.promise = new root2.Promise(function(resolve, reject) {
+        try {
+          assetLoadHelper(script, {
+            loadCallback: function() {
+              registration.state = "loaded";
+              resolve(script);
+            },
+            errorCallback: function(cause) {
+              if (script.parentNode) script.parentNode.removeChild(script);
+              delete registry[label];
+              reject(diagnostics.error(
+                diagnostics.ERROR_DEPENDENCY_LOAD,
+                { label, url: resolvedURL, cause }
+              ));
+            }
+          });
+        } catch (cause) {
+          if (script.parentNode) script.parentNode.removeChild(script);
+          delete registry[label];
+          reject(diagnostics.error(
+            diagnostics.ERROR_DEPENDENCY_LOAD,
+            { label, url: resolvedURL, cause }
+          ));
+        }
+      });
+      return registration.promise;
     },
     extAttach: function(name, object) {
       if (typeof name !== "string" || !/^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$|^[a-z][a-zA-Z0-9]*$/.test(name)) {
@@ -483,7 +578,7 @@ function createAelluxApi(root2, constants) {
           return;
         }
         try {
-          document.querySelector(selector);
+          document2.querySelector(selector);
         } catch (cause) {
           diagnostics.error(diagnostics.ERROR_EXTENSION_ATTACH, {
             extension: name,
@@ -499,10 +594,10 @@ function createAelluxApi(root2, constants) {
       api.ext[key] = object;
     },
     dispatch: function(event, options2) {
-      return api.dispatchFrom(document, event, options2);
+      return api.dispatchFrom(document2, event, options2);
     },
     dispatchFrom: function(from, event, options2) {
-      var obj = document.createEvent("Event");
+      var obj = document2.createEvent("Event");
       var bubbles = options2 && "bubbles" in options2 ? options2.bubbles : true;
       var cancelable = options2 && "cancelable" in options2 ? options2.cancelable : false;
       obj.initEvent(api.eventName(event), bubbles, cancelable);
@@ -568,7 +663,6 @@ function createAelluxConstants() {
       ERROR_INVALID_MODE: { code: 1002, message: "aellux.js mode must be basic or full." },
       ERROR_INVALID_VERBOSE_LEVEL: { code: 1003, message: "aellux.js verboseLevel must be 0, 1, 2, or the matching error, warn, info key." },
       ERROR_CONTROLLER_NOT_FOUND: { code: 1004, message: "No controller was found for this element. It may not be mounted." },
-      ERROR_MOUNT_ROOT_SELECTOR: { code: 1005, message: "Invalid root selector for mounting or unmounting." },
       ERROR_MOUNT: { code: 1006, message: "aellux.js failed to mount a root." },
       ERROR_EXTENSION_DUPLICATE: { code: 1101, message: "aellux.js Extension is already registered." },
       ERROR_EXTENSION_INITIALIZE: { code: 1102, message: "aellux.js Extension failed to initialize." },
@@ -585,6 +679,9 @@ function createAelluxConstants() {
       ERROR_MOUNT_REGISTRATION: { code: 1113, message: "aellux.js Mount registration has invalid arguments." },
       ERROR_EXTENSION_LOAD_WHEN: { code: 1114, message: "aellux.js Extension loadWhen selector is invalid." },
       ERROR_MOUNT_MAP_IN_USE: { code: 1115, message: "A mount map cannot be removed while elements are still mounted." },
+      ERROR_DEPENDENCY_ARGUMENT: { code: 1116, message: "aellux.js Dependency registration has invalid arguments." },
+      ERROR_DEPENDENCY_CONFLICT: { code: 1117, message: "aellux.js Dependency label is already registered with a different URL." },
+      ERROR_DEPENDENCY_LOAD: { code: 1118, message: "aellux.js Dependency script could not be loaded." },
       ERROR_LEGACY_RUNTIME_START: { code: 1201, message: "aellux.js Legacy runtime failed to start." },
       ERROR_LEGACY_RUNTIME_LOAD: { code: 1202, message: "aellux.js Legacy runtime could not be loaded." },
       ERROR_MODERN_RUNTIME_START: { code: 1203, message: "aellux.js Modern runtime failed to start; trying Legacy runtime." },
@@ -592,13 +689,13 @@ function createAelluxConstants() {
       WARN_BROWSER_UNSUPPORTED: { code: 2e3, message: "Browser environment is not available." },
       WARN_BROWSER_CAPABILITIES: { code: 2001, message: "Some browser capabilities are unavailable; trying Legacy runtime." },
       WARN_INTERRUPTION: { code: 2002, message: "aellux.js Extension transition was interrupted." },
-      WARN_INVALID_CONTROLLER_ELEMENT: { code: 2003, message: "Controller lookup requires a DOM Element or an existing element ID, optionally prefixed with #." },
       WARN_EXTENSION_STYLE_LOAD: { code: 2004, message: "aellux.js Extension stylesheet could not be loaded." },
       WARN_CONTROLLER_METHOD_MISSING: { code: 2005, message: "A mounted controller method is not available on its Extension." },
       WARN_STORAGE_FALLBACK: { code: 2006, message: "Browser storage is unavailable; values will be kept in memory only." },
       WARN_PRESENT_MOTION_HIDDEN: { code: 2008, message: "A present-motion child should not be hidden; hidden belongs on its present container." },
       WARN_NAVIGATION_EVENT_INVALID: { code: 2009, message: "A state-navigation event has missing or invalid detail properties." },
       WARN_PRESENT_MOTION_MISSING: { code: 2010, message: "A present container has no direct present-motion child; one was generated automatically." },
+      WARN_INVALID_ELEMENT_OR_ID: { code: 2011, message: "Expected a DOM Element or an existing element ID, optionally prefixed with #." },
       INFO_LEGACY_FALLBACK: { code: 3e3, message: "aellux.js is starting the Legacy runtime." }
     },
     AELLUXJS_DEFAULT_INITIALIZATION_OPTIONS: {

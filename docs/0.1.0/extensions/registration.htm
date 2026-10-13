@@ -52,7 +52,7 @@
 
 <script src="/core/docs/assets/docweaver/js/toc-init.js?t=1"></script>
 
-<script src="https://cdn.jsdelivr.net/npm/@aelluxjs/core@0.1.0-beta.8/dist/aellux.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@aelluxjs/core@0.1.0-beta.9/dist/aellux.min.js"></script>
 <script>
   AelluxJs.ext("/core/docs/assets/docweaver/js/aellux.ext.ajax-href.js");
   AelluxJs.init({ mode: "full" });
@@ -589,6 +589,15 @@ Registration                  </li>
 <pre><code class="language-js">$ae.ext(&quot;feedback&quot;);
 $ae.init({ mode: &quot;basic&quot; });
 </code></pre>
+<h2>Shared script dependencies</h2>
+<p>Call <code>$ae.dep(label, url)</code> before or after <code>$ae.init()</code>, including from an Extension&#39;s <code>init()</code>, to load a classic script immediately. It returns a Promise that resolves to the script element only after the browser&#39;s <code>load</code> event. Await it before using a global supplied by the dependency:</p>
+<pre><code class="language-js">async function init() {
+  await AelluxJs.dep(&quot;better-scroll@1.0&quot;, &quot;/vendor/better-scroll.min.js&quot;);
+  // The dependency is ready here.
+}
+</code></pre>
+<p>The first call owns the label. Calls from other Extensions with the same label and URL return the same Promise, including while the script is still loading, so the script is inserted only once. A later call with the same label but a different URL rejects with <code>ERROR_DEPENDENCY_CONFLICT</code> (<code>1117</code>). A failed load rejects with <code>ERROR_DEPENDENCY_LOAD</code> (<code>1118</code>), removes its script and registry entry, and lets a later call retry. Empty labels or URLs reject with <code>ERROR_DEPENDENCY_ARGUMENT</code> (<code>1116</code>). Records are available at <code>$ae.registry.dep[label]</code> and remain cached when an Extension is destroyed.</p>
+<p>As with Extension assets, a URL beginning with <code>./</code> resolves relative to the aellux.js base path. Other relative URLs follow normal browser URL resolution. Optional third argument <code>{ integrity, crossOrigin }</code> applies SRI and CORS attributes to the dependency script.</p>
 <h2>Extension Attachment</h2>
 <p>An Extension script exposes its API through <code>AelluxJs.extAttach()</code>:</p>
 <pre><code class="language-js">(function (root) {

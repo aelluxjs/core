@@ -1,6 +1,6 @@
 (function() {
   // <define:__AELLUX_CORE_ASSET_INTEGRITY__>
-  var define_AELLUX_CORE_ASSET_INTEGRITY_default = { "aellux.ext.adaptive.css": "sha384-HfIjX9Zk0VFRimzPvUaTS5AtwuHJHjXKoM/xbNJXj5vE7bSdBGEzbrBHfbNmYah0", "aellux.ext.adaptive.min.css": "sha384-8yUP1PStfDqBCyCskP3k9WLIKgv/yl1nyDhmPz7hsX5NZ4z3ZT3ajolA+RhYlUiG", "aellux.ext.present.css": "sha384-Gwl97JzEZx0LJKV/0jqUXIYJbFA4eOUNOor8Lg9AYO0fopfoemlRNSAzx8IpKv0I", "aellux.ext.present.min.css": "sha384-GAMgTcniiqv3ho1DrBef6wvCqPoyd2o+GoUeCBANvkfT47/fzGuL2QeRJxf0l5Jt", "aellux.esm.js": "sha384-ApaiiM6qQ7SL9qea9ezrKmk+CpsU5HnnURf2fvPwkeeb+L3NHq9PT/lDfsRNkEXs", "aellux.esm.min.js": "sha384-bgJEIFohaXo/EMl+74CzGz57tLkbHrW9Y97jyCjNHjym5SMqJrzW9fEr3fdfaMda", "aellux.ext.adaptive.js": "sha384-Uvhmoaa81H6dhDBoy5BLg59l7NOHlzJ8lSJ1t7oi6oZC5d0iRuTPE7NmzEj57jPO", "aellux.ext.adaptive.min.js": "sha384-K96iK0AFcDwPomA4/BdgC7LrXSRn04WPkR+s99k2+o5UkhitCgyG0gQGSI3St22F", "aellux.ext.feedback.js": "sha384-sUr2lKsTasJ3yf1tg1IhDk5slfwTjAOCX2t5jQV/Ls4WAPRh2r/k36/8OXjJJaBv", "aellux.ext.feedback.min.js": "sha384-dHsisS4smcj355Pnq/l4R4J1PKFx62zNDFaF1TqlIahZzOb2k2p0AR9IYIPKaKxB", "aellux.ext.focus.js": "sha384-anEEvo/ORlaACIX0X89LtHpJjPgW5JuxdhdiyFjHwWOSCuTEc1/sQWfIG+lLsXeH", "aellux.ext.focus.min.js": "sha384-gES+QtECljb8NOd4tIimBP4xVkf2WU1qI1Kl3vBnkNl+ib6Qa3NKGbBb5s1vJntp", "aellux.ext.point.js": "sha384-c6NImzkbC5k4EflTIRpOUjtU0iMPECebz2y0pnkqCB1hwENKU94Z6vRVaB16ayhh", "aellux.ext.point.min.js": "sha384-46SgGwg7F/jXaQLcbwVLFgo6thxhXswRsllKVXmPDlHEYGTOnNiWpVHbGNdGJPRG", "aellux.ext.preference.js": "sha384-JAiIfOt3IfcTcoqzyElD9gSyXWhDyJI3F9VFf5m2O4HJUvMkDqiDAgSy222TWJTw", "aellux.ext.preference.min.js": "sha384-CP303LvKoQDgT2FHnkjYEX2gjCZOnaqcPANq/xG8Ep2AGrKiOydHnpdF15KtvJSI", "aellux.ext.present.js": "sha384-f4OO9VAo4gXSMgYxShs2Zsptln81wTHI+yL6/XOvY/zBDePqBMPz4MX1Lv58hwj6", "aellux.ext.present.min.js": "sha384-oh/b3cXTTKO1at9KjMwo758KgU3mCJWyMhORqH29RT5ltvVLhz1NXcrDLUd5VNxj", "aellux.ext.state-navigation.js": "sha384-LFT3Gy16qKjnomzrkx/f/umVDQbsiU+rQ5m05Kl9EbvnQIV5e2IuLEkEqNeFzMsB", "aellux.ext.state-navigation.min.js": "sha384-hhAKBKsLoM20KeJwrtuUINucyNe3DxW6/o8e7NrwT48Y+rQpmZCYSz13g1cdcXQg", "aellux.full.js": "sha384-dOEGe7GqMQB4IaDVvvKUhsogXs/3V9PYaaGQQwpYq+qJhFJz3TMZQ7J0TI9xGgZg", "aellux.full.min.js": "sha384-aRHFtav4JtD9CJZZvjpse4lTsNwd7yZ2MkBXGMs0xoxpNBvMU6sS0djl6lhkt7bL", "aellux.orchestrator.js": "sha384-GQATMVdJl5vkAylGI20BGnokC64sBYdYSLU39X4fhE0qFVh01pV5mR/vS/Wbhg2h", "aellux.orchestrator.min.js": "sha384-0qQpvhOPtQo/LO1j+pgDgrnyYtduU9NFP1ynb4N2eF7J1t8kPUxGZRNcDkktUrZu", "aellux.ext.adaptive.legacy.js": "sha384-OcZbsMOO9AjR/M6K9C7VUAKtt5ruHyP5ZFgfM3OsShVROaOTptx/PhZu/o2mLyh+", "aellux.ext.adaptive.legacy.min.js": "sha384-nrYF9Je+gCjnnCa4z9T5wtBNWTicA46o0qvDINd2naexrdRGTQy89A5IdLBxm7AX", "aellux.ext.feedback.legacy.js": "sha384-jyvYvbzuSua5FWZsAWeXWqmab/DjA1LVg2oOHb6Ey6wH4W2bB9qwt+QhGwIkk1gL", "aellux.ext.feedback.legacy.min.js": "sha384-y4s7SxXMb4y56JPQIrxH9z9NZSrpb112UlT0VSLPhWAyyq4DazOuvNKIoTUEmfk+", "aellux.ext.focus.legacy.js": "sha384-SfEgZ39a6eBYQggY/mFsW4PanFtChQG1eCnVRmDOsx49ylNsV6fh7sh6oDDu34sv", "aellux.ext.focus.legacy.min.js": "sha384-ZbLn0Gi6Hspit81ugQ0II0XHdnYhn/7uKifuvyS6ztMKathrMwO2vy+ziWd0KvDU", "aellux.ext.point.legacy.js": "sha384-699Q2RQl6RvkzeY31zGwCgDYqm0y0a8a88PYzqcskUPI+N7qaLOjUksyj/tz91xa", "aellux.ext.point.legacy.min.js": "sha384-Kh1wcXRWN22dv4Kuz8PAsIoO6so6cLBneWZ2j7nvfcknnbfv83B/vDLjHQdO8w1y", "aellux.ext.preference.legacy.js": "sha384-AVYmTkrmJCFC/JQmvKjWWIyeaoa2Ift4+RL3CkevPgi7n31VO2WnOMj+qWyCwvmP", "aellux.ext.preference.legacy.min.js": "sha384-TppYbcOBDWl4/chugdKu+YIOW/pHUdwDvU4rotyRnlVLk6WoS937vTYxt0gU5WWf", "aellux.ext.present.legacy.js": "sha384-uj+5f9NneMNMV55QaE1vPfPjQ+3Qe5PcrY9XDMUxZUboITTjvAWsHESpIxrhoPSv", "aellux.ext.present.legacy.min.js": "sha384-4Xq4O8SSIK/pD2cm927m0n3CGNBZoohpExy6HCy+srYnpa0sq1wSazqmOzn4B3Sw", "aellux.ext.state-navigation.legacy.js": "sha384-oscUHkkxCKSiAYJdSaOYv3a1ONSbXV/py3lq7T7sO/YoG6kHN2zCzCoRXWmS1qc1", "aellux.ext.state-navigation.legacy.min.js": "sha384-e6XxU4BX6tFfC3FQI76sMdHZyy1Y3ta+WxtT8duNWx093M/VcYg3BYE/ZTEY5h2g", "aellux.orchestrator.legacy.js": "sha384-hBNQg6t6YrVRyHK603zdTLn51oOmMt3kv7nGpm9O85QGZwkOajdf6jKm/9PC+Ru4", "aellux.orchestrator.legacy.min.js": "sha384-nTX5zKsoA5mhgL4PVo5fjSUhmsErBt1szVo7sxNF/07dG/xc2v5zZj7eIBFZvYru", "aellux.full.legacy.js": "sha384-OS7PVKjtFPDCNRQSH8Ww9krTHbLdymCybMQd2ZJcUrsXjo/qhS4rlL7OLKj987Jy", "aellux.full.legacy.min.js": "sha384-gLHzNYn2ONV39YMUvzKjLZFpMeS9rnuzWXcKZbvtuj8d1C/Lop+ZPsOG+zlYJHjS" };
+  var define_AELLUX_CORE_ASSET_INTEGRITY_default = { "aellux.ext.adaptive.css": "sha384-HfIjX9Zk0VFRimzPvUaTS5AtwuHJHjXKoM/xbNJXj5vE7bSdBGEzbrBHfbNmYah0", "aellux.ext.adaptive.min.css": "sha384-8yUP1PStfDqBCyCskP3k9WLIKgv/yl1nyDhmPz7hsX5NZ4z3ZT3ajolA+RhYlUiG", "aellux.ext.present.css": "sha384-v8wPzYiY8oDtW0rsBd/mrvay2D2n1geOkDsC1jNHYnG5Ma/XqjzfpJx9YbrqInCh", "aellux.ext.present.min.css": "sha384-LDKCxAjoPTE0CmT4mkGs76QcrAJGKk5h+ODgVCIet4BnRvLB6FPkiKOYG/h2a/PU", "aellux.esm.js": "sha384-MpfktBBE4H5AcIPL5FiIDLyYywQr3Q9RPlKRpWKbfijM8owuOQd+2OzYXcj4SN0G", "aellux.esm.min.js": "sha384-dsS2pzP+63OgtMXGDt0cWOQJOv3lmDEUdkzHweD1qT1i1Zf30082zpuGiLqqPOBd", "aellux.ext.adaptive.js": "sha384-wrdlJQkscfydVmBC4CpvjxmKiL6EHSC8FYlVBjHVuTAnD/YPazDBqNjr3boXUNHF", "aellux.ext.adaptive.min.js": "sha384-Mzebl9/HhXvVpT1CfDZzES4/346gkRN3izYEcrf3GrlZl2UHImRH6JicK9yiRFaP", "aellux.ext.feedback.js": "sha384-sUr2lKsTasJ3yf1tg1IhDk5slfwTjAOCX2t5jQV/Ls4WAPRh2r/k36/8OXjJJaBv", "aellux.ext.feedback.min.js": "sha384-dHsisS4smcj355Pnq/l4R4J1PKFx62zNDFaF1TqlIahZzOb2k2p0AR9IYIPKaKxB", "aellux.ext.focus.js": "sha384-anEEvo/ORlaACIX0X89LtHpJjPgW5JuxdhdiyFjHwWOSCuTEc1/sQWfIG+lLsXeH", "aellux.ext.focus.min.js": "sha384-gES+QtECljb8NOd4tIimBP4xVkf2WU1qI1Kl3vBnkNl+ib6Qa3NKGbBb5s1vJntp", "aellux.ext.point.js": "sha384-wFVSTCY7KG2AWYXvrw9w60FqNGn4xWmnjVzHKJzT1739aI2dv4oiSVOCXBQqlXf+", "aellux.ext.point.min.js": "sha384-NY0UDzKAa5F25KwmXs6AidvtyLK3VHeSKTYWw/fj9bc6IDLyJTW23gEl208t8Ic7", "aellux.ext.preference.js": "sha384-gQMBfBvnipftalCd3O/E2zToYbvR6vgWIY0RxvrY4aIX9C/fkGue5nGRfFctvq5z", "aellux.ext.preference.min.js": "sha384-846PZv3FCFbHlklLWb6fWcjFN6hXSehQ+NrjYmdUHd3nsDc4NtwLibNFANDKMjCy", "aellux.ext.present.js": "sha384-mDAIQVR83mxQX1HADbCf3ZmgKf4q6kXIcXgBSWiDITBinisqm/o5B4uBL98NmZD/", "aellux.ext.present.min.js": "sha384-5L3QxSiVBA/PK1B5PU5zKciv3B/iatNElFIyiGlP6c0IASKnWq09tzXtvCS4vK80", "aellux.ext.state-navigation.js": "sha384-LFT3Gy16qKjnomzrkx/f/umVDQbsiU+rQ5m05Kl9EbvnQIV5e2IuLEkEqNeFzMsB", "aellux.ext.state-navigation.min.js": "sha384-hhAKBKsLoM20KeJwrtuUINucyNe3DxW6/o8e7NrwT48Y+rQpmZCYSz13g1cdcXQg", "aellux.full.js": "sha384-UC6OHoPZPK/YHgsdSDy2yoXuGTqDGUGVgbM0/zUGdppA4rb42s5PQN/idUrgC9Ok", "aellux.full.min.js": "sha384-aDJPMHBaEn3CC+jtv+rTQramTle9To3biZYkSp2AXKEaJI/Bs4QeTuyv9SvRp566", "aellux.orchestrator.js": "sha384-Lm5msaaOOapWCnBIDnlHs/rHGyGXjTuYYsySEAMDTnMCTDWBJB9KqTDOJYO8zxt6", "aellux.orchestrator.min.js": "sha384-tNIlkPaHLJn4iPwhBmPh9b+0g6VKhnsxtu0b9GOvdOGRa/yTi1GNtjzMUo5b/VPX", "aellux.ext.adaptive.legacy.js": "sha384-gQLk3M25cBb3KCV6Y7Crx6pq5xEhMt7hW1zjUOVzXOS0W/xBHD8hoDefsHK2g2bO", "aellux.ext.adaptive.legacy.min.js": "sha384-l0i67WXYO8+nMrEWR+exfpH6orl2fLiwg7Gyug7UOflVtDBGoieDs7vrj0PrJSCQ", "aellux.ext.feedback.legacy.js": "sha384-jyvYvbzuSua5FWZsAWeXWqmab/DjA1LVg2oOHb6Ey6wH4W2bB9qwt+QhGwIkk1gL", "aellux.ext.feedback.legacy.min.js": "sha384-y4s7SxXMb4y56JPQIrxH9z9NZSrpb112UlT0VSLPhWAyyq4DazOuvNKIoTUEmfk+", "aellux.ext.focus.legacy.js": "sha384-SfEgZ39a6eBYQggY/mFsW4PanFtChQG1eCnVRmDOsx49ylNsV6fh7sh6oDDu34sv", "aellux.ext.focus.legacy.min.js": "sha384-ZbLn0Gi6Hspit81ugQ0II0XHdnYhn/7uKifuvyS6ztMKathrMwO2vy+ziWd0KvDU", "aellux.ext.point.legacy.js": "sha384-HvHZ1FcETFKo3sAAbPwQoQEKUjLcdWzg/2EmyDozbIJ7rBL1y7DJbGsN/cf9Z243", "aellux.ext.point.legacy.min.js": "sha384-NAtX/PKVuzk2jvVEQDSuXM9Kco4y86/TSEO4S0P0JcMUO8pdPsv8gs1pj2SEhgKA", "aellux.ext.preference.legacy.js": "sha384-BnmiZDjvg4nirECXQeDP+VRdYMkAaswfP6CQ8GvINCQp+XvuXo0XwuEPkJqP0J/L", "aellux.ext.preference.legacy.min.js": "sha384-zGx/g9Qnp8ON/IouwwgyI2rU28iy59p1AodkbUgXxAR+9EFHYehq6uM+TZ/ipL5t", "aellux.ext.present.legacy.js": "sha384-hCM/0b0UXup4PonWlwhjLwVfwU4l1et6b7EBadEG5sPl5hQdLGd3XXJDp88RQmWB", "aellux.ext.present.legacy.min.js": "sha384-wzS+kO26NLL5MLePvc2Q9SGmeRv+H4eyHI/0eIE3q84LtMhy3DycWUPf9JPnz7aS", "aellux.ext.state-navigation.legacy.js": "sha384-oscUHkkxCKSiAYJdSaOYv3a1ONSbXV/py3lq7T7sO/YoG6kHN2zCzCoRXWmS1qc1", "aellux.ext.state-navigation.legacy.min.js": "sha384-e6XxU4BX6tFfC3FQI76sMdHZyy1Y3ta+WxtT8duNWx093M/VcYg3BYE/ZTEY5h2g", "aellux.orchestrator.legacy.js": "sha384-k6Utfs8YtmZHHCjLJAcpKcMos7vkGRZL/cLOAhNcKLJqu7VfmNFi7oC59BqDSH6C", "aellux.orchestrator.legacy.min.js": "sha384-80BgzJPrG2PAusORWQ0k2N4eJgPBABQJ/wIKaoyqX1ffU1LoE3/XpftKgOKiWDJo", "aellux.full.legacy.js": "sha384-yJC5orE0hOGLiVYuORdnGv4j4UeoErWmr9SrU7uYteRWZOgCY3VE2Qq1osr/GiTt", "aellux.full.legacy.min.js": "sha384-GfvoMyB1UO5o1YAUDer1SK6pxn2vD04uL2yFc9Js/Iu6lumTlSVnSDsffQGn4DPk" };
 
   // src/internal/asset-load-helper.js
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
@@ -32,7 +32,9 @@
   function buildDiagnostics(catalog) {
     var levels = { error: 0, warn: 1, info: 2 };
     var consoleMethods = ["error", "warn", "info"];
+    var historyLimit = 100;
     var history = [];
+    var historyStart = 0;
     var diagnostics = {
       legacy: false,
       supported: false,
@@ -71,10 +73,14 @@
         if (typeof lines !== "number" || !isFinite(lines) || lines < 0 || lines !== Math.floor(lines)) {
           throw new RangeError("diagnostics.showHistory(lines) requires a non-negative integer.");
         }
-        var entries = history.slice(Math.max(0, history.length - lines));
+        var count = Math.min(lines, history.length);
+        var entries = [];
+        for (var i = 0; i < count; i++) {
+          entries.push(history[(historyStart + history.length - count + i) % history.length]);
+        }
         if (typeof console !== "undefined" && typeof console.log === "function") {
-          for (var i = 0; i < entries.length; i++) {
-            var entry = entries[i];
+          for (var j = 0; j < entries.length; j++) {
+            var entry = entries[j];
             var message = "[" + entry.timestamp + "] [aellux.js " + entry.code + "] " + entry.message;
             if (entry.context) console.log(message, entry.context);
             else console.log(message);
@@ -88,13 +94,19 @@
     }
     function emit(level, definition, context) {
       var diagnostic = diagnostics.create(definition, context);
-      history.push({
+      var entry = {
         timestamp: (/* @__PURE__ */ new Date()).toISOString(),
         level: level,
         code: definition.code,
         message: definition.message,
         context: context
-      });
+      };
+      if (history.length < historyLimit) {
+        history.push(entry);
+      } else {
+        history[historyStart] = entry;
+        historyStart = (historyStart + 1) % historyLimit;
+      }
       var verboseLevel = getVerboseLevel();
       var consoleMethod = consoleMethods[level];
       if ((level === levels.error || level <= verboseLevel) && typeof console !== "undefined" && typeof console[consoleMethod] === "function") {
@@ -413,7 +425,7 @@
       },
       registry: {
         ext: {},
-        dep: {},
+        dep: /* @__PURE__ */ Object.create(null),
         lazyExtSelectors: {},
         extMounters: {},
         preferenceMediaQueries: buildPreferenceMediaQueries(root)
@@ -457,6 +469,64 @@
         options2.load = options2.loadWhen ? false : true;
         options2.state = "wait";
         api.registry.ext[key] = options2;
+      },
+      dep: function(label, url, options2) {
+        if (typeof label !== "string" || !label.trim() || typeof url !== "string" || !url.trim()) {
+          return root.Promise.reject(diagnostics.error(
+            diagnostics.ERROR_DEPENDENCY_ARGUMENT,
+            { label: label, url: url, expected: "a nonempty label and script URL" }
+          ));
+        }
+        var script = document2.createElement("script");
+        script.src = url.replace(/^\.\//, api.aelluxBasePath);
+        var resolvedURL = script.src;
+        var registry = api.registry.dep;
+        var existing = Object.prototype.hasOwnProperty.call(registry, label) ? registry[label] : null;
+        if (existing) {
+          if (existing.url !== resolvedURL) {
+            return root.Promise.reject(diagnostics.error(
+              diagnostics.ERROR_DEPENDENCY_CONFLICT,
+              { label: label, url: resolvedURL, registeredURL: existing.url }
+            ));
+          }
+          return existing.promise;
+        }
+        var registration = { url: resolvedURL, state: "loading", script: script, promise: null };
+        registry[label] = registration;
+        script.setAttribute(api.attr("dep"), label);
+        if (options2 && options2.integrity) script.setAttribute("integrity", options2.integrity);
+        if (options2 && (options2.integrity || options2.crossOrigin) || api.options.crossOrigin) {
+          script.setAttribute(
+            "crossorigin",
+            options2 && options2.crossOrigin || api.options.crossOrigin || "anonymous"
+          );
+        }
+        registration.promise = new root.Promise(function(resolve, reject) {
+          try {
+            assetLoadHelper(script, {
+              loadCallback: function() {
+                registration.state = "loaded";
+                resolve(script);
+              },
+              errorCallback: function(cause) {
+                if (script.parentNode) script.parentNode.removeChild(script);
+                delete registry[label];
+                reject(diagnostics.error(
+                  diagnostics.ERROR_DEPENDENCY_LOAD,
+                  { label: label, url: resolvedURL, cause: cause }
+                ));
+              }
+            });
+          } catch (cause) {
+            if (script.parentNode) script.parentNode.removeChild(script);
+            delete registry[label];
+            reject(diagnostics.error(
+              diagnostics.ERROR_DEPENDENCY_LOAD,
+              { label: label, url: resolvedURL, cause: cause }
+            ));
+          }
+        });
+        return registration.promise;
       },
       extAttach: function(name, object) {
         if (typeof name !== "string" || !/^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$|^[a-z][a-zA-Z0-9]*$/.test(name)) {
@@ -597,7 +667,6 @@
         ERROR_INVALID_MODE: { code: 1002, message: "aellux.js mode must be basic or full." },
         ERROR_INVALID_VERBOSE_LEVEL: { code: 1003, message: "aellux.js verboseLevel must be 0, 1, 2, or the matching error, warn, info key." },
         ERROR_CONTROLLER_NOT_FOUND: { code: 1004, message: "No controller was found for this element. It may not be mounted." },
-        ERROR_MOUNT_ROOT_SELECTOR: { code: 1005, message: "Invalid root selector for mounting or unmounting." },
         ERROR_MOUNT: { code: 1006, message: "aellux.js failed to mount a root." },
         ERROR_EXTENSION_DUPLICATE: { code: 1101, message: "aellux.js Extension is already registered." },
         ERROR_EXTENSION_INITIALIZE: { code: 1102, message: "aellux.js Extension failed to initialize." },
@@ -614,6 +683,9 @@
         ERROR_MOUNT_REGISTRATION: { code: 1113, message: "aellux.js Mount registration has invalid arguments." },
         ERROR_EXTENSION_LOAD_WHEN: { code: 1114, message: "aellux.js Extension loadWhen selector is invalid." },
         ERROR_MOUNT_MAP_IN_USE: { code: 1115, message: "A mount map cannot be removed while elements are still mounted." },
+        ERROR_DEPENDENCY_ARGUMENT: { code: 1116, message: "aellux.js Dependency registration has invalid arguments." },
+        ERROR_DEPENDENCY_CONFLICT: { code: 1117, message: "aellux.js Dependency label is already registered with a different URL." },
+        ERROR_DEPENDENCY_LOAD: { code: 1118, message: "aellux.js Dependency script could not be loaded." },
         ERROR_LEGACY_RUNTIME_START: { code: 1201, message: "aellux.js Legacy runtime failed to start." },
         ERROR_LEGACY_RUNTIME_LOAD: { code: 1202, message: "aellux.js Legacy runtime could not be loaded." },
         ERROR_MODERN_RUNTIME_START: { code: 1203, message: "aellux.js Modern runtime failed to start; trying Legacy runtime." },
@@ -621,13 +693,13 @@
         WARN_BROWSER_UNSUPPORTED: { code: 2e3, message: "Browser environment is not available." },
         WARN_BROWSER_CAPABILITIES: { code: 2001, message: "Some browser capabilities are unavailable; trying Legacy runtime." },
         WARN_INTERRUPTION: { code: 2002, message: "aellux.js Extension transition was interrupted." },
-        WARN_INVALID_CONTROLLER_ELEMENT: { code: 2003, message: "Controller lookup requires a DOM Element or an existing element ID, optionally prefixed with #." },
         WARN_EXTENSION_STYLE_LOAD: { code: 2004, message: "aellux.js Extension stylesheet could not be loaded." },
         WARN_CONTROLLER_METHOD_MISSING: { code: 2005, message: "A mounted controller method is not available on its Extension." },
         WARN_STORAGE_FALLBACK: { code: 2006, message: "Browser storage is unavailable; values will be kept in memory only." },
         WARN_PRESENT_MOTION_HIDDEN: { code: 2008, message: "A present-motion child should not be hidden; hidden belongs on its present container." },
         WARN_NAVIGATION_EVENT_INVALID: { code: 2009, message: "A state-navigation event has missing or invalid detail properties." },
         WARN_PRESENT_MOTION_MISSING: { code: 2010, message: "A present container has no direct present-motion child; one was generated automatically." },
+        WARN_INVALID_ELEMENT_OR_ID: { code: 2011, message: "Expected a DOM Element or an existing element ID, optionally prefixed with #." },
         INFO_LEGACY_FALLBACK: { code: 3e3, message: "aellux.js is starting the Legacy runtime." }
       },
       AELLUXJS_DEFAULT_INITIALIZATION_OPTIONS: {
@@ -681,6 +753,7 @@
     api.coreAssetIntegrity = coreAssetIntegrity;
     root.AelluxJs = api;
     root[api.shortJSName] = api;
+    api.aelluxBasePath = aelluxBasePath;
     api.init = function(options) {
       api.options.verboseLevel = diagnostics.update(options);
       if (typeof document === "undefined") {
@@ -805,7 +878,7 @@
     }
     function updateHardwareAttribute() {
       var browserNavigator = root.navigator || {};
-      var lowHardware = browserNavigator.hardwareConcurrency <= 4 || browserNavigator.deviceMemory <= 4;
+      var lowHardware = typeof browserNavigator.hardwareConcurrency === "number" && browserNavigator.hardwareConcurrency > 0 && browserNavigator.hardwareConcurrency <= 4 || typeof browserNavigator.deviceMemory === "number" && browserNavigator.deviceMemory > 0 && browserNavigator.deviceMemory <= 4;
       if (lowHardware) {
         document.documentElement.setAttribute(api.attr("low-hardware"), "");
       }

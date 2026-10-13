@@ -98,7 +98,7 @@ test("present prepares will-change before starting a transition", async ({ page 
   await page.goto("/tests/index.htm");
   await page.evaluate(() => {
     document.body.innerHTML = `
-      <div id="panel" data-ae-present hidden
+      <div id="panel" data-ae-present="all" hidden
         style="--ae-pop-duration: 0ms; --ae-unpop-duration: 0ms">
         <div data-ae-present-motion></div>
       </div>`;
@@ -138,7 +138,7 @@ test("present prepares will-change before starting a transition", async ({ page 
     willChange: true,
     popping: false,
     returnsPromise: true,
-    willChangeStyle: "opacity, transform",
+    willChangeStyle: "opacity, transform, grid-template-columns, grid-template-rows",
     motionWillChange: false,
     motionWillChangeStyle: "auto"
   });
@@ -166,6 +166,126 @@ test("present prepares will-change before starting a transition", async ({ page 
     motionWillChange: false,
     motionWillChangeStyle: "auto"
   });
+
+  const unpopPreparation = await page.evaluate(() => {
+    const panel = document.getElementById("panel");
+    window.presentUnpopPromise = AelluxJs.mountManager.controller(panel).present.unpop();
+    return {
+      pop: panel.classList.contains(AelluxJs.className("pop")),
+      popping: panel.classList.contains(AelluxJs.className("popping")),
+      unpopping: panel.classList.contains(AelluxJs.className("unpopping")),
+      willChange: panel.classList.contains(AelluxJs.className("will-change"))
+    };
+  });
+  expect(unpopPreparation).toEqual({
+    pop: true,
+    popping: false,
+    unpopping: false,
+    willChange: true
+  });
+  await page.evaluate(() => window.presentUnpopPromise);
+});
+
+test("replacement transitions reuse preparation and final interruptions clean it", async ({ page }) => {
+  await page.goto("/tests/index.htm");
+  await page.evaluate(() => {
+    document.body.innerHTML = `
+      <div id="panel" data-ae-present="all" hidden
+        style="--ae-pop-duration: 500ms; --ae-unpop-duration: 120ms">
+        <div data-ae-present-motion></div>
+      </div>`;
+  });
+  await page.addScriptTag({ url: "/dist/aellux.js" });
+  await page.evaluate(() => AelluxJs.init({ mode: "full" }));
+  await expect.poll(() => page.evaluate(() =>
+    typeof AelluxJs.mountManager?.controller("panel")?.present?.pop === "function"
+  )).toBe(true);
+
+  await page.evaluate(() => {
+    const panel = document.getElementById("panel");
+    window.firstTransition = AelluxJs.mountManager.controller(panel).present.pop();
+  });
+  await expect.poll(() => page.evaluate(() =>
+    document.getElementById("panel").classList.contains(AelluxJs.className("popping"))
+  )).toBe(true);
+
+  const replacement = await page.evaluate(async () => {
+    const panel = document.getElementById("panel");
+    const startedAt = performance.now();
+    let unpoppingAt = null;
+    panel.addEventListener(AelluxJs.eventName("Unpopping"), () => {
+      unpoppingAt = performance.now();
+    }, { once: true });
+    window.replacementTransition = AelluxJs.mountManager.controller(panel).present.unpop();
+    const result = {
+      delay: unpoppingAt - startedAt,
+      willChange: panel.classList.contains(AelluxJs.className("will-change")),
+      popping: panel.classList.contains(AelluxJs.className("popping")),
+      unpopping: panel.classList.contains(AelluxJs.className("unpopping"))
+    };
+    await new Promise(resolve => setTimeout(resolve, 30));
+    result.willChangeAfterDelay = panel.classList.contains(AelluxJs.className("will-change"));
+    return result;
+  });
+  expect(replacement).toMatchObject({
+    willChange: true, willChangeAfterDelay: true, popping: false, unpopping: true
+  });
+  expect(replacement.delay).toBeGreaterThanOrEqual(0);
+  expect(replacement.delay).toBeLessThan(50);
+
+  await page.evaluate(() => Promise.all([window.firstTransition, window.replacementTransition]));
+  await expect(page.locator("#panel")).toHaveJSProperty("hidden", true);
+  await expect(page.locator("#panel")).not.toHaveClass(/ae--will-change/);
+
+  await page.evaluate(() => {
+    const panel = document.getElementById("panel");
+    window.finalTransition = AelluxJs.mountManager.controller(panel).present.pop();
+  });
+  await expect.poll(() => page.evaluate(() =>
+    document.getElementById("panel").classList.contains(AelluxJs.className("popping"))
+  )).toBe(true);
+  const rapidReplacement = await page.evaluate(async () => {
+    const panel = document.getElementById("panel");
+    const controller = AelluxJs.mountManager.controller(panel).present;
+    window.rapidReverseTransition = controller.unpop();
+    window.rapidResumeTransition = controller.pop();
+    await Promise.resolve();
+    return {
+      willChange: panel.classList.contains(AelluxJs.className("will-change")),
+      popping: panel.classList.contains(AelluxJs.className("popping")),
+      unpopping: panel.classList.contains(AelluxJs.className("unpopping"))
+    };
+  });
+  expect(rapidReplacement).toEqual({
+    willChange: true,
+    popping: true,
+    unpopping: false
+  });
+  await page.evaluate(async () => {
+    const panel = document.getElementById("panel");
+    await AelluxJs.unmount(panel, "present");
+    await Promise.all([
+      window.finalTransition,
+      window.rapidReverseTransition,
+      window.rapidResumeTransition
+    ]);
+  });
+  expect(await page.evaluate(() => {
+    const panel = document.getElementById("panel");
+    return {
+      controller: AelluxJs.mountManager.controller(panel),
+      pop: panel.classList.contains(AelluxJs.className("pop")),
+      popping: panel.classList.contains(AelluxJs.className("popping")),
+      unpopping: panel.classList.contains(AelluxJs.className("unpopping")),
+      willChange: panel.classList.contains(AelluxJs.className("will-change"))
+    };
+  })).toEqual({
+    controller: null,
+    pop: false,
+    popping: false,
+    unpopping: false,
+    willChange: false
+  });
 });
 
 test("present disables transitions when reduced motion is active", async ({ page }) => {
@@ -186,32 +306,35 @@ test("present disables transitions when reduced motion is active", async ({ page
   )).toBe("0s");
 });
 
-test("present applies independent height and width animation keyframes", async ({ page }) => {
+test("present attribute tokens independently select transition properties", async ({ page }) => {
   await page.goto("/tests/index.htm");
   await page.evaluate(() => {
     document.body.innerHTML = `
       <style>[data-ae-present] { --ae-pop-duration: 0ms; --ae-unpop-duration: 0ms; }</style>
       <div id="empty" data-ae-present><div data-ae-present-motion>empty</div></div>
+      <div id="all" data-ae-present="all"><div data-ae-present-motion>all</div></div>
+      <div id="opacity" data-ae-present="opacity"><div data-ae-present-motion>opacity</div></div>
+      <div id="transform" data-ae-present="transform"><div data-ae-present-motion>transform</div></div>
       <div id="height" data-ae-present="height"
         style="width: 200px; --ae-from-height: 11px; --ae-pop-height: 41px; --ae-unpop-height: 7px"><div data-ae-present-motion>height</div></div>
       <div id="width" data-ae-present="width"
         style="height: 50px; --ae-from-width: 13px; --ae-pop-width: 83px; --ae-unpop-width: 5px"><div data-ae-present-motion>width</div></div>
-      <div id="both" data-ae-present="width height"
-        style="--ae-from-width: 17px; --ae-pop-width: 97px; --ae-unpop-width: 3px;
-          --ae-from-height: 19px; --ae-pop-height: 43px; --ae-unpop-height: 2px"><div data-ae-present-motion>both</div></div>
+      <div id="combined" data-ae-present="opacity height"
+        style="width: 200px; --ae-from-height: 19px; --ae-pop-height: 43px;
+          --ae-unpop-height: 2px"><div data-ae-present-motion>combined</div></div>
     `;
   });
   await page.addScriptTag({ url: "/dist/aellux.js" });
   await page.evaluate(() => AelluxJs.init({ mode: "full" }));
   await expect.poll(() => page.evaluate(() => {
     const pop = AelluxJs.className("pop");
-    return ["empty", "height", "width", "both"].every(id =>
+    return ["empty", "all", "opacity", "transform", "height", "width", "combined"].every(id =>
       document.getElementById(id).classList.contains(pop)
     );
   })).toBe(true);
 
   const states = await page.evaluate(() => {
-    const ids = ["empty", "height", "width", "both"];
+    const ids = ["empty", "all", "opacity", "transform", "height", "width", "combined"];
     const pop = AelluxJs.className("pop");
     const unpopping = AelluxJs.className("unpopping");
     const willChange = AelluxJs.className("will-change");
@@ -222,10 +345,14 @@ test("present applies independent height and width animation keyframes", async (
         element.querySelector(":scope > [data-ae-present-motion]")
       );
       return [id, {
+        value: element.getAttribute("data-ae-present"),
         display: style.display,
+        opacity: style.opacity,
+        transform: style.transform,
         columns: style.gridTemplateColumns,
         rows: style.gridTemplateRows,
         transitionProperty: style.transitionProperty,
+        transitionDuration: style.transitionDuration,
         willChange: style.willChange,
         motionWillChange: motionStyle.willChange,
         motionMinWidth: motionStyle.minWidth,
@@ -249,36 +376,59 @@ test("present applies independent height and width animation keyframes", async (
   });
 
   expect(states.opened.empty).toMatchObject({
-    display: "inline-grid", transitionProperty: "opacity, transform"
+    value: "",
+    display: "inline-grid",
+    opacity: "1",
+    transform: "none",
+    transitionProperty: "none",
+    transitionDuration: "0s"
+  });
+  expect(states.opened.all).toMatchObject({
+    value: "opacity transform height width",
+    opacity: "1",
+    transform: "matrix(1, 0, 0, 1, 0, 0)",
+    transitionProperty: "opacity, transform, grid-template-rows, grid-template-columns"
+  });
+  expect(states.opened.opacity).toMatchObject({ opacity: "1", transform: "none" });
+  expect(states.opened.transform).toMatchObject({
+    opacity: "1", transform: "matrix(1, 0, 0, 1, 0, 0)"
   });
   expect(states.opened.height).toMatchObject({
-    display: "inline-grid", columns: "200px", rows: "41px",
-    transitionProperty: "opacity, transform, grid-template-rows"
+    opacity: "1", transform: "none", columns: "200px", rows: "41px"
   });
   expect(states.opened.width).toMatchObject({
-    display: "inline-grid", columns: "83px", rows: "50px",
-    transitionProperty: "opacity, transform, grid-template-columns"
+    opacity: "1", transform: "none", columns: "83px", rows: "50px"
   });
-  expect(states.opened.both).toMatchObject({
-    display: "inline-grid", columns: "97px", rows: "43px",
-    transitionProperty: "opacity, transform, grid-template-columns, grid-template-rows"
+  expect(states.opened.combined).toMatchObject({
+    opacity: "1", transform: "none", columns: "200px", rows: "43px"
+  });
+  expect(states.from.opacity).toMatchObject({ opacity: "0", transform: "none" });
+  expect(states.from.transform).toMatchObject({
+    opacity: "1", transform: "matrix(0.5, 0, 0, 0.5, 0, 0)"
   });
   expect(states.from.height.rows).toBe("11px");
   expect(states.from.width.columns).toBe("13px");
-  expect(states.from.both).toMatchObject({ columns: "17px", rows: "19px" });
+  expect(states.from.combined).toMatchObject({ opacity: "0", rows: "19px" });
+  expect(states.unpopping.opacity).toMatchObject({ opacity: "0", transform: "none" });
+  expect(states.unpopping.transform).toMatchObject({
+    opacity: "1", transform: "matrix(1.2, 0, 0, 1.2, 0, 0)"
+  });
   expect(states.unpopping.height.rows).toBe("7px");
   expect(states.unpopping.width.columns).toBe("5px");
-  expect(states.unpopping.both).toMatchObject({ columns: "3px", rows: "2px" });
+  expect(states.unpopping.combined).toMatchObject({ opacity: "0", rows: "2px" });
   expect(states.prepared.empty).toMatchObject({
-    willChange: "opacity, transform",
+    willChange: "auto",
+    motionWillChange: "auto",
+    motionTransitionProperty: "all"
+  });
+  expect(states.prepared.all).toMatchObject({
+    willChange: "opacity, transform, grid-template-columns, grid-template-rows",
     motionWillChange: "auto",
     motionMinWidth: "0px",
     motionMinHeight: "0px",
     motionTransitionProperty: "all"
   });
-  expect(states.prepared.height.willChange).toBe("opacity, transform, grid-template-rows");
-  expect(states.prepared.width.willChange).toBe("opacity, transform, grid-template-columns");
-  expect(states.prepared.both.willChange)
+  expect(states.prepared.height.willChange)
     .toBe("opacity, transform, grid-template-columns, grid-template-rows");
 });
 
@@ -287,7 +437,7 @@ test("present derives stepped easing from duration on low hardware", async ({ pa
   await page.evaluate(() => {
     document.documentElement.setAttribute("data-ae-low-hardware", "");
     document.body.innerHTML = `
-      <div id="panel" data-ae-present hidden
+      <div id="panel" data-ae-present="all" hidden
         style="--ae-pop-duration: 500ms"><div data-ae-present-motion></div></div>`;
   });
   await page.addScriptTag({ url: "/dist/aellux.js" });
@@ -331,8 +481,8 @@ test("controller lookup diagnoses invalid inputs and unmounted elements", async 
   });
   expect(result.results).toEqual([null, null, null]);
   expect(result.diagnostics).toEqual([
-    { code: 2003, level: 1, message: expect.stringContaining("DOM Element") },
-    { code: 2003, level: 1, message: expect.stringContaining("element ID") },
+    { code: 2011, level: 1, message: expect.stringContaining("DOM Element") },
+    { code: 2011, level: 1, message: expect.stringContaining("element ID") },
     { code: 1004, level: 0, message: expect.stringContaining("may not be mounted") }
   ]);
 });
@@ -370,86 +520,52 @@ test("present keeps visibility on the container and diagnoses controls without a
   ]);
 });
 
-test("present trigger stays expanded while any target is expanded", async ({ page }) => {
+test("present trigger tracks one target ID with or without a hash", async ({ page }) => {
   await page.goto("/tests/index.htm");
   await page.evaluate(() => {
-    document.body.innerHTML = `
-      <button id="control" data-ae-trigger="toggle" data-ae-target=".panel"></button>
-      <div id="first" class="panel" data-ae-present><div data-ae-present-motion></div></div>
-      <div id="second" class="panel" data-ae-present><div data-ae-present-motion></div></div>
-    `;
-    const attributes = new WeakMap();
-    window.AelluxJs = {
-      attr: (name) => `data-ae-${name}`,
-      className: (name) => `ae-${name}`,
-      attrMem: {
-        save: (element, names) => attributes.set(
-          element, names.map(name => [name, element.getAttribute(name)])
-        ),
-        restore: (element) => {
-          for (const [name, value] of attributes.get(element) || []) {
-            if (value === null) element.removeAttribute(name);
-            else element.setAttribute(name, value);
-          }
-          attributes.delete(element);
-        }
-      },
-      mountManager: {
-        add: ({ selector, mount, unmount, update, controllers }) => {
-          (window.mountEntries ||= new Map()).set(selector, { mount, unmount, update, controllers });
-        },
-        remove: () => window.mountEntries?.clear()
-      },
-      extAttach: (_name, extension) => { window.presentExtension = extension; },
-      dispatchFrom: () => true
-    };
+    document.body.innerHTML = `<button id="control" data-ae-trigger="toggle" data-ae-target="first"></button>
+      <div id="first" data-ae-present hidden><div data-ae-present-motion></div></div>
+      <div id="second" data-ae-present hidden><div data-ae-present-motion></div></div>`;
   });
-  await page.addScriptTag({ url: "/src/aellux.ext.present.js" });
-  await page.evaluate(() => {
-    const extension = window.presentExtension;
-    extension.init();
-    const panels = window.mountEntries.get("[data-ae-present]");
-    const controls = window.mountEntries.get("[data-ae-trigger],[data-ae-dismiss],[data-ae-target]");
-    panels.mount(document.querySelector("#first"));
-    panels.mount(document.querySelector("#second"));
-    controls.mount(document.querySelector("#control"));
-  });
-
+  await page.addScriptTag({ url: "/dist/aellux.js" });
+  await page.evaluate(() => AelluxJs.init({ mode: "full" }));
+  await expect.poll(() => page.evaluate(() => typeof AelluxJs.mountManager?.mount === "function")).toBe(true);
+  await page.evaluate(() => AelluxJs.mount(document, "present"));
   const control = page.locator("#control");
-  await expect(control).toHaveAttribute("aria-expanded", "true");
-
-  await page.evaluate(() => window.presentExtension.unpop(document.querySelector("#first")));
-  await expect(page.locator("#first")).toHaveJSProperty("hidden", true);
-  await expect(control).toHaveAttribute("aria-expanded", "true");
-
-  await page.evaluate(() => window.presentExtension.unpop(document.querySelector("#second")));
-  await expect(page.locator("#second")).toHaveJSProperty("hidden", true);
-  await expect(control).toHaveAttribute("aria-expanded", "false");
-
-  await page.evaluate(() => window.presentExtension.pop(document.querySelector("#first")));
+  await expect(control).toHaveAttribute("aria-controls", "first");
+  await control.click();
   await expect(page.locator("#first")).toHaveJSProperty("hidden", false);
   await expect(control).toHaveAttribute("aria-expanded", "true");
-
-  await page.evaluate(() => window.presentExtension.pop(document.querySelector("#second")));
+  await page.evaluate(() => document.querySelector("#control").setAttribute("data-ae-target", "#second"));
+  await control.click();
   await expect(page.locator("#second")).toHaveJSProperty("hidden", false);
-  await expect(page.locator("#second")).toHaveAttribute("aria-expanded", "true");
-  await page.evaluate(() => {
-    const panels = window.mountEntries.get("[data-ae-present]");
-    panels.unmount(document.querySelector("#first"));
-  });
+  await expect(control).toHaveAttribute("aria-controls", "second");
   await expect(control).toHaveAttribute("aria-expanded", "true");
-
-  await page.evaluate(() => {
-    const panels = window.mountEntries.get("[data-ae-present]");
-    panels.unmount(document.querySelector("#second"));
-  });
+  await page.evaluate(() => AelluxJs.unmount(document.querySelector("#second"), "present"));
   await expect(control).toHaveAttribute("aria-expanded", "false");
-
-  await page.evaluate(() => {
-    const panels = window.mountEntries.get("[data-ae-present]");
-    panels.mount(document.querySelector("#first"));
-  });
+  await page.evaluate(() => AelluxJs.mount(document.querySelector("#second"), "present"));
+  await page.evaluate(() => AelluxJs.ext.present.pop(document.querySelector("#second")));
   await expect(control).toHaveAttribute("aria-expanded", "true");
+});
+
+test("present dismiss accepts target ID with or without a hash", async ({ page }) => {
+  await page.goto("/tests/index.htm");
+  await page.evaluate(() => {
+    document.body.innerHTML = `<button id="dismiss" data-ae-dismiss="panel"></button>
+      <div id="panel" data-ae-present><div data-ae-present-motion></div></div>`;
+  });
+  await page.addScriptTag({ url: "/dist/aellux.js" });
+  await page.evaluate(() => AelluxJs.init({ mode: "full" }));
+  await expect.poll(() => page.evaluate(() => typeof AelluxJs.mountManager?.mount === "function")).toBe(true);
+  await page.evaluate(() => AelluxJs.mount(document, "present"));
+  await page.locator("#dismiss").click();
+  await expect(page.locator("#panel")).toHaveJSProperty("hidden", true);
+  await page.evaluate(() => {
+    document.querySelector("#dismiss").setAttribute("data-ae-dismiss", "#panel");
+    return AelluxJs.ext.present.pop(document.querySelector("#panel"));
+  });
+  await page.locator("#dismiss").click();
+  await expect(page.locator("#panel")).toHaveJSProperty("hidden", true);
 });
 
 test("present restores initial attributes and captures fresh values on remount", async ({ page }) => {
@@ -477,6 +593,7 @@ test("present restores initial attributes and captures fresh values on remount",
     await AelluxJs.unmount(control, "present");
     await AelluxJs.unmount(panel, "present");
     const first = {
+      presentValue: panel.getAttribute("data-ae-present"),
       panelHidden: panel.hasAttribute("hidden"),
       panelExpanded: panel.getAttribute("aria-expanded"),
       motionHidden: motion.hasAttribute("hidden"),
@@ -494,6 +611,7 @@ test("present restores initial attributes and captures fresh values on remount",
     await AelluxJs.unmount(control, "present");
     await AelluxJs.unmount(panel, "present");
     const second = {
+      presentValue: panel.getAttribute("data-ae-present"),
       panelHidden: panel.hasAttribute("hidden"),
       panelExpanded: panel.getAttribute("aria-expanded"),
       motionHidden: motion.hasAttribute("hidden"),
@@ -515,6 +633,7 @@ test("present restores initial attributes and captures fresh values on remount",
   });
 
   expect(state.first).toEqual({
+    presentValue: "",
     panelHidden: true,
     panelExpanded: "custom",
     motionHidden: false,
@@ -522,6 +641,7 @@ test("present restores initial attributes and captures fresh values on remount",
     controlControls: ""
   });
   expect(state.second).toEqual({
+    presentValue: "",
     panelHidden: false,
     panelExpanded: "changed",
     motionHidden: false,
@@ -594,12 +714,12 @@ test("present warns and generates a missing direct motion child", async ({ page 
   });
 });
 
-test("present reports invalid selectors without throwing from click", async ({ page }) => {
+test("present reports invalid target IDs without throwing from click", async ({ page }) => {
   await page.goto("/tests/index.htm");
   const pageErrors = [];
   page.on("pageerror", error => pageErrors.push(error.message));
   await page.evaluate(() => {
-    document.body.innerHTML = '<button id="dismiss" data-ae-dismiss="["></button>';
+    document.body.innerHTML = '<button id="dismiss" data-ae-dismiss="two ids"></button>';
     const reports = [];
     window.selectorReports = reports;
     window.AelluxJs = {
@@ -630,8 +750,8 @@ test("present reports invalid selectors without throwing from click", async ({ p
     return window.selectorReports;
   });
   expect(reports).toEqual([
-    { code: 1107, selector: "[" },
-    { code: 1107, selector: "[" }
+    { code: 1107, selector: "two ids" },
+    { code: 1107, selector: "two ids" }
   ]);
   expect(pageErrors).toEqual([]);
 });
@@ -792,6 +912,7 @@ test("present refreshes trigger controls from its initial value", async ({ page 
     await AelluxJs.mount(document, "present");
     const before = control.getAttribute("aria-controls");
     control.setAttribute("data-ae-target", "#second");
+    control.click();
     document.body.insertAdjacentHTML("beforeend", '<div id="second" data-ae-present hidden><div data-ae-present-motion></div></div>');
     await AelluxJs.mount(document.querySelector("#second"), "present");
     const after = control.getAttribute("aria-controls");

@@ -64,7 +64,7 @@ Set `verboseLevel` in `init()` to control console output. The default is `"error
 $ae.init({ verboseLevel: "warn" });
 ```
 
-`error()`, `warn()`, and `info()` are always recorded, even when the selected level hides them from the console. Call `$ae.diagnostics.showHistory(10)` to print the last 10 entries with timestamps; omit the argument to print all entries. The method also returns the selected entries, including their timestamp, level, code, message, and context. Passing `0` prints and returns no entries. Replaying history does not record new diagnostics.
+`error()`, `warn()`, and `info()` are recorded even when the selected level hides them from the console. The history retains the 100 most recent entries; older entries and their context references are released as new diagnostics arrive. Call `$ae.diagnostics.showHistory(10)` to print the last 10 retained entries with timestamps; omit the argument to print all retained entries. The method also returns the selected entries, including their timestamp, level, code, message, and context. Passing `0` prints and returns no entries. Replaying history does not record new diagnostics.
 
 ## Code Ranges
 
@@ -82,13 +82,15 @@ Applications should compare numeric codes or catalog entries instead of parsing 
 
 ## Mounting and Extension Assets
 
-An invalid root selector passed to `mount()` or `unmount()` records `ERROR_MOUNT_ROOT_SELECTOR` (`1005`) with the selector, operation, and cause. An Extension whose `init()` rejects records `ERROR_EXTENSION_INITIALIZE` (`1102`); the Extension remains uninitialized. A stylesheet load failure records `WARN_EXTENSION_STYLE_LOAD` (`2004`) with the Extension name and URL. The Extension can still initialize after that warning.
+An invalid element, invalid ID, or missing ID passed to `mount()`, `unmount()`, `update()`, or controller lookup records `WARN_INVALID_ELEMENT_OR_ID` (`2011`) with the received value and operation. IDs can be passed with or without a leading `#`. An Extension whose `init()` rejects records `ERROR_EXTENSION_INITIALIZE` (`1102`); the Extension remains uninitialized. A stylesheet load failure records `WARN_EXTENSION_STYLE_LOAD` (`2004`) with the Extension name and URL. The Extension can still initialize after that warning.
 
 If mounting a root fails while registering assets, waiting for Extensions, or discovering mountable elements, `ERROR_MOUNT` (`1006`) records the cause, root, and selected Extension names. Waiting elements have `aria-busy` reset to `false` after the attempt.
 
 Waiting for an unregistered Extension records `ERROR_EXTENSION_NOT_REGISTERED` (`1110`) and rejects with that diagnostic. A mounted controller name without a matching public Extension method records `WARN_CONTROLLER_METHOD_MISSING` (`2005`). If browser storage is unavailable, `WARN_STORAGE_FALLBACK` (`2006`) identifies the storage area and key prefix; values are then held in memory for the current page only.
 
 `ext()` records `ERROR_EXTENSION_LOAD_WHEN` (`1114`) when a supplied `loadWhen` selector is invalid and does not register the Extension. `extAttach()` records `ERROR_EXTENSION_ATTACH` (`1112`) when its name, API object, lifecycle methods, or a changed declared `loadWhen` selector is invalid. Its context identifies the rejected argument, and the API is not attached. It records `ERROR_EXTENSION_NOT_REGISTERED` (`1110`) when no preceding `ext()` declaration exists and `ERROR_EXTENSION_DUPLICATE` (`1101`) for a second attachment.
+
+`dep()` rejects and records `ERROR_DEPENDENCY_ARGUMENT` (`1116`) for an empty label or URL, `ERROR_DEPENDENCY_CONFLICT` (`1117`) when a label already names a different URL, and `ERROR_DEPENDENCY_LOAD` (`1118`) when the script fails to load. A load failure clears that label so the dependency can be retried.
 
 `mountManager.add()` records `ERROR_MOUNT_REGISTRATION` (`1113`) when a registration argument or CSS selector is invalid, or when the same Extension and selector are already registered. Its context identifies the rejected argument; no mount registration is added or replaced. `mountManager.remove()` records `ERROR_MOUNT_MAP_IN_USE` (`1115`) and leaves the map registered when a matching element is still mounted or mounting.
 

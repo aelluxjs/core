@@ -2,11 +2,11 @@
 
 import utilsNameCase from "./utils-name-case.js";
 import { createControllerHelper } from "./create-controller-helper.js";
+import { resolveElementOrId } from "./resolve-element-or-id.js";
 
 export function createMountHelper(root, mountMaps, mountedElements, elementControllers) {
   const { toCapitalized, toCamelCase, fromCamelCase } = utilsNameCase;
   const initialAttributeValues = new WeakMap();
-  const mountAttributeRecords = new WeakMap();
   const pendingMounts = new WeakMap();
   const pendingUnmounts = new WeakMap();
   const classPrefix = root.AelluxJs.className("");
@@ -17,64 +17,71 @@ export function createMountHelper(root, mountMaps, mountedElements, elementContr
     return initialAttributeValues.get(element)?.initial.get(name) ?? null;
   }
 
-  async function update(rootOrSelector, extensionNames = null) {
-    for (const rootElement of resolveRoots(rootOrSelector, "update")) {
-      await AelluxJsMounted(rootElement, "update", extensionNames);
-    }
+  async function update(elementOrId, extensionNames = null) {
+    const rootElement = resolveMountElement(elementOrId, "update");
+    if (!rootElement) return false;
+    await AelluxJsMounted(rootElement, "update", extensionNames);
     return true;
   }
 
-  async function unmount(rootOrSelector, extensionNames = null) {
-    for (const rootElement of resolveRoots(rootOrSelector, "unmount")) {
-      await AelluxJsMounted(rootElement, "unmount", extensionNames);
-    }
+  async function unmount(elementOrId, extensionNames = null) {
+    const rootElement = resolveMountElement(elementOrId, "unmount");
+    if (!rootElement) return false;
+    await AelluxJsMounted(rootElement, "unmount", extensionNames);
     return true;
   }
 
   async function unmountDetached() {
-    if (![...mountedElements.keys()].some(element => !element.isConnected)) return false;
+    let hasDetachedElement = false;
+    for (const element of mountedElements.keys()) {
+      if (!element.isConnected) {
+        hasDetachedElement = true;
+        break;
+      }
+    }
+    if (!hasDetachedElement) return false;
     await AelluxJsMounted(root.document, "unmount", null, true);
     return true;
   }
 
-  async function mount(rootOrSelector, extensionNames = null) {
+  async function mount(elementOrId, extensionNames = null) {
     const AelluxJs = root.AelluxJs;
     const newlyMounted = new Set();
-    for (const rootElement of resolveRoots(rootOrSelector, "mount")) {
-      const waitMountedAttr = AelluxJs.attr("wait-mounted");
-      const allWaiters = findElements(rootElement, `[${waitMountedAttr}]`);
-      allWaiters.forEach(waiter => waiter.setAttribute("aria-busy", "true"));
-      try {
-        const allLinks = findElements(rootElement, "link[rel='aelluxjs-ext']");
-        for (const link of allLinks) {
-          const href = link.getAttribute("href");
-          const loadWhen = link.getAttribute(AelluxJs.attr("load-when")) || undefined;
-          const builds = link.getAttribute(AelluxJs.attr("builds")) || undefined;
-          const loadStyleValue = link.getAttribute(AelluxJs.attr("load-style"));
-          const loadStyle = loadStyleValue === null || loadStyleValue === "false"
-            ? false
-            : loadStyleValue || true;
-          link.setAttribute("rel", "aelluxjs-ext-registered");
-          AelluxJs.ext(href, { builds, loadWhen, loadStyle });
-        }
-
-        const waitExtensions = [];
-        for (const [key, options] of
-          Object.entries(root.AelluxJs.registry.ext)) {
-          if (options.loadWhen) continue;
-          waitExtensions.push(AelluxJs.wait(key));
-        }
-        await Promise.all(waitExtensions);
-
-        await AelluxJsMount(rootElement, extensionNames, newlyMounted);
-
-      } catch (error) {
-        AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_MOUNT, {
-          cause: error, root: rootElement, extensions: extensionNames
-        });
-      } finally {
-        allWaiters.forEach(waiter => waiter.setAttribute("aria-busy", "false"));
+    const rootElement = resolveMountElement(elementOrId, "mount");
+    if (!rootElement) return [];
+    const waitMountedAttr = AelluxJs.attr("wait-mounted");
+    const allWaiters = findElements(rootElement, `[${waitMountedAttr}]`);
+    allWaiters.forEach(waiter => waiter.setAttribute("aria-busy", "true"));
+    try {
+      const allLinks = findElements(rootElement, "link[rel='aelluxjs-ext']");
+      for (const link of allLinks) {
+        const href = link.getAttribute("href");
+        const loadWhen = link.getAttribute(AelluxJs.attr("load-when")) || undefined;
+        const builds = link.getAttribute(AelluxJs.attr("builds")) || undefined;
+        const loadStyleValue = link.getAttribute(AelluxJs.attr("load-style"));
+        const loadStyle = loadStyleValue === null || loadStyleValue === "false"
+          ? false
+          : loadStyleValue || true;
+        link.setAttribute("rel", "aelluxjs-ext-registered");
+        AelluxJs.ext(href, { builds, loadWhen, loadStyle });
       }
+
+      const waitExtensions = [];
+      for (const [key, options] of
+        Object.entries(root.AelluxJs.registry.ext)) {
+        if (options.loadWhen) continue;
+        waitExtensions.push(AelluxJs.wait(key));
+      }
+      await Promise.all(waitExtensions);
+
+      await AelluxJsMount(rootElement, extensionNames, newlyMounted);
+
+    } catch (error) {
+      AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_MOUNT, {
+        cause: error, root: rootElement, extensions: extensionNames
+      });
+    } finally {
+      allWaiters.forEach(waiter => waiter.setAttribute("aria-busy", "false"));
     }
     return Array.from(newlyMounted);
   }
@@ -104,13 +111,12 @@ export function createMountHelper(root, mountMaps, mountedElements, elementContr
 
     if (filter.length === 0) return;
 
+    const candidatesByExtension = new Map();
     const allElements = findElements(rootElement, filter.join(","));
     for (const element of allElements) {
-      const elementsAffected = new Set();
-      var localExtensionNames;
-
+      let localExtensionNames;
       if (extensionNames) {
-        localExtensionNames = new Set(extensionNames);
+        localExtensionNames = extensionNames;
       } else {
         localExtensionNames = new Set();
         //Load needed lazies
@@ -127,16 +133,43 @@ export function createMountHelper(root, mountMaps, mountedElements, elementContr
       }
 
       for (const extensionName of localExtensionNames) {
-        const extensionPromise = AelluxJs.wait(extensionName);
-        if (!extensionPromise) { continue; }
-        const extension = await extensionPromise;
-        if (!extension) { continue; }
-        const mounter = mountMaps.get(toCamelCase(extensionName));
-        if (!mounter) { continue; }
-        for (const [selector, controller] of mounter) {
-          try {
-            if (!controller.mount) { continue; }
-            const mountableElements = findElements(element, selector);
+        let candidates = candidatesByExtension.get(extensionName);
+        if (!candidates) {
+          candidates = new Set();
+          candidatesByExtension.set(extensionName, candidates);
+        }
+        candidates.add(element);
+      }
+    }
+
+    const extensions = Array.from(candidatesByExtension);
+    const loaded = await Promise.all(
+      extensions.map(([extensionName]) => AelluxJs.wait(extensionName).then(
+        value => ({ value }),
+        error => ({ error })
+      ))
+    );
+    for (const result of loaded) {
+      if (Object.prototype.hasOwnProperty.call(result, "error")) throw result.error;
+    }
+
+    const elementsAffected = new Set();
+    for (let index = 0; index < extensions.length; index++) {
+      if (!loaded[index].value) continue;
+      const [extensionName, candidates] = extensions[index];
+      const mounter = mountMaps.get(toCamelCase(extensionName));
+      if (!mounter) { continue; }
+      const searchRoots = [];
+      for (const candidate of candidates) {
+        let ancestor = candidate.parentNode;
+        while (ancestor && !candidates.has(ancestor)) ancestor = ancestor.parentNode;
+        if (!ancestor) searchRoots.push(candidate);
+      }
+      for (const [selector, controller] of mounter) {
+        try {
+          if (!controller.mount) { continue; }
+          for (const searchRoot of searchRoots) {
+            const mountableElements = findElements(searchRoot, selector);
             for (const mountable of mountableElements) {
               const mountId = `${extensionName}@${selector}`;
               if (isMounted(mountable, mountId)) {
@@ -149,7 +182,7 @@ export function createMountHelper(root, mountMaps, mountedElements, elementContr
                   if (name.startsWith(classPrefix)) mountable.classList.remove(name);
                 }
               }
-              rememberInitialAttributes(mountable, mountId);
+              rememberInitialAttributes(mountable);
               setMounted(mountable, mountId);
               const finishPendingMount = beginPendingMount(mountable, mountId);
               try {
@@ -172,7 +205,7 @@ export function createMountHelper(root, mountMaps, mountedElements, elementContr
                   elementController.despawn(mountId);
                   if (!elementController.hasMounts()) elementControllers.delete(mountable);
                 }
-                restoreInitialAttributes(mountable, mountId);
+                restoreInitialAttributes(mountable);
                 AelluxJs.diagnostics.error(
                   AelluxJs.diagnostics.ERROR_EXTENSION_MOUNT,
                   {
@@ -187,31 +220,28 @@ export function createMountHelper(root, mountMaps, mountedElements, elementContr
                 finishPendingMount();
               }
             }
-          } catch (error) {
-            AelluxJs.diagnostics.error(
-              AelluxJs.diagnostics.ERROR_EXTENSION_MOUNT,
-              {
-                cause: error,
-                extension: extensionName,
-                method: "mount",
-                selector
-              }
-            );
           }
+        } catch (error) {
+          AelluxJs.diagnostics.error(
+            AelluxJs.diagnostics.ERROR_EXTENSION_MOUNT,
+            {
+              cause: error,
+              extension: extensionName,
+              method: "mount",
+              selector
+            }
+          );
         }
       }
+    }
 
-      for (const affected of elementsAffected) {
-        if (!affected.isConnected || !isMounted(affected)) {
-          if (!affected.isConnected) await unmountElementRegistrations(affected);
-          newlyMounted.delete(affected);
-          continue;
-        }
-        affected.classList.toggle(
-          AelluxJs.className("mounted"),
-          isMounted(affected)
-        );
+    for (const affected of elementsAffected) {
+      if (!affected.isConnected || !isMounted(affected)) {
+        if (!affected.isConnected) await unmountElementRegistrations(affected);
+        newlyMounted.delete(affected);
+        continue;
       }
+      affected.classList.toggle(AelluxJs.className("mounted"), true);
     }
     AelluxJs.dispatch("Mount");
   }
@@ -293,7 +323,7 @@ export function createMountHelper(root, mountMaps, mountedElements, elementContr
           if (!elementController.hasMounts()) elementControllers.delete(element);
         }
         element.classList.toggle(AelluxJs.className("mounted"), isMounted(element));
-        restoreInitialAttributes(element, mountId);
+        restoreInitialAttributes(element);
       } catch (cause) {
         diagnostics.error(diagnostics.ERROR_EXTENSION_MOUNT, {
           cause, extension: extensionName, method: "unmount", selector
@@ -341,24 +371,16 @@ export function createMountHelper(root, mountMaps, mountedElements, elementContr
     return Boolean(pendingMounts.get(element)?.size);
   }
 
-  function resolveRoots(rootOrSelector, method) {
-    if (!rootOrSelector) { return [document]; }
-    if (typeof rootOrSelector === "string") {
-      try { return Array.from(document.querySelectorAll(rootOrSelector)); }
-      catch (error) {
-        const diagnostics = root.AelluxJs.diagnostics;
-        diagnostics.error(diagnostics.ERROR_MOUNT_ROOT_SELECTOR, {
-          cause: error, selector: rootOrSelector, method
-        });
-        return [];
-      }
-    }
-    if (
-      rootOrSelector instanceof Element ||
-      rootOrSelector instanceof Document ||
-      rootOrSelector instanceof DocumentFragment
-    ) { return [rootOrSelector]; }
-    return [];
+  function resolveMountElement(elementOrId, method) {
+    return resolveElementOrId(root, elementOrId, {
+      defaultElement: root.document,
+      allowedNodeTypes: [
+        root.Node.ELEMENT_NODE,
+        root.Node.DOCUMENT_NODE,
+        root.Node.DOCUMENT_FRAGMENT_NODE
+      ],
+      method
+    });
   }
 
   function findElements(root, selector) {
@@ -391,55 +413,32 @@ export function createMountHelper(root, mountMaps, mountedElements, elementContr
     if (mounts.size === 0) mountedElements.delete(element);
   }
 
-  function rememberInitialAttributes(element, mountId) {
-    const targets = [element];
-    const retained = [];
-    try {
-      for (const target of targets) {
-        let record = initialAttributeValues.get(target);
-        if (!record) {
-          record = {
-            initial: new Map(Array.from(target.attributes)
-              .filter(attribute => isRestoredAttribute(attribute.name))
-              .map(attribute => [attribute.name, attribute.value])),
-            users: 0
-          };
-          initialAttributeValues.set(target, record);
-        }
-        record.users++;
-        retained.push(target);
-      }
-    } catch (error) {
-      releaseInitialAttributes(retained);
-      throw error;
+  function rememberInitialAttributes(element) {
+    const record = initialAttributeValues.get(element);
+    if (record) {
+      record.users++;
+      return;
     }
-    let mounts = mountAttributeRecords.get(element);
-    if (!mounts) { mounts = new Map(); mountAttributeRecords.set(element, mounts); }
-    mounts.set(mountId, targets);
+    const initial = new Map();
+    for (const attribute of element.attributes) {
+      if (isRestoredAttribute(attribute.name))
+        initial.set(attribute.name, attribute.value);
+    }
+    initialAttributeValues.set(element, { initial, users: 1 });
   }
 
-  function restoreInitialAttributes(element, mountId) {
-    const mounts = mountAttributeRecords.get(element);
-    if (!mounts || !mounts.has(mountId)) return;
-    releaseInitialAttributes(mounts.get(mountId));
-    mounts.delete(mountId);
-    if (!mounts.size) mountAttributeRecords.delete(element);
-  }
-
-  function releaseInitialAttributes(targets) {
-    for (const target of targets) {
-      const record = initialAttributeValues.get(target);
-      if (--record.users) continue;
-      for (const attribute of Array.from(target.attributes)) {
-        if (isRestoredAttribute(attribute.name) && !record.initial.has(attribute.name)) {
-          target.removeAttribute(attribute.name);
-        }
-      }
-      for (const [name, value] of record.initial) {
-        if (target.getAttribute(name) !== value) target.setAttribute(name, value);
-      }
-      initialAttributeValues.delete(target);
+  function restoreInitialAttributes(element) {
+    const record = initialAttributeValues.get(element);
+    if (!record || --record.users) return;
+    for (let index = element.attributes.length - 1; index >= 0; index--) {
+      const name = element.attributes[index].name;
+      if (isRestoredAttribute(name) && !record.initial.has(name))
+        element.removeAttribute(name);
     }
+    for (const [name, value] of record.initial) {
+      if (element.getAttribute(name) !== value) element.setAttribute(name, value);
+    }
+    initialAttributeValues.delete(element);
   }
 
   function isRestoredAttribute(name) {

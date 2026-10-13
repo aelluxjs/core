@@ -12,6 +12,7 @@ test("adaptive updates shape and size classes as its dimensions change", async (
   await page.evaluate(() => AelluxJs.init({ mode: "full" }));
   const element = page.locator("#adaptive");
   await expect(element).toHaveClass(/ae--shape-horizontal/);
+  await expect(element).toHaveAttribute("aria-orientation", "horizontal");
   await expect(element).toHaveClass(/ae--fits-small/);
   await expect(element).not.toHaveClass(/ae--fits-medium/);
   await expect(element).not.toHaveClass(/ae--fits-xl/);
@@ -22,6 +23,7 @@ test("adaptive updates shape and size classes as its dimensions change", async (
     element.style.height = "500px";
   });
   await expect(element).toHaveClass(/ae--shape-vertical/);
+  await expect(element).toHaveAttribute("aria-orientation", "vertical");
   await expect(element).not.toHaveClass(/ae--shape-horizontal/);
   await expect(element).not.toHaveClass(/ae--fits-small/);
 
@@ -29,11 +31,13 @@ test("adaptive updates shape and size classes as its dimensions change", async (
   await expect(element).not.toHaveClass(/ae--fits-xl/);
   await expect(element).not.toHaveClass(/ae--shape-vertical/);
   await expect(element).not.toHaveClass(/ae--fits-small/);
+  await expect(element).not.toHaveAttribute("aria-orientation");
   await expect(element).toHaveCSS("width", "200px");
   await expect(element).toHaveCSS("height", "500px");
 
   await page.evaluate(() => AelluxJs.mount(document.querySelector("#adaptive")));
   await expect(element).toHaveClass(/ae--shape-vertical/);
+  await expect(element).toHaveAttribute("aria-orientation", "vertical");
   await expect(element).not.toHaveClass(/ae--fits-xl/);
 });
 
@@ -55,6 +59,7 @@ test("adaptive uses window resize when ResizeObserver is unavailable", async ({ 
     window.dispatchEvent(new Event("resize"));
   });
   await expect(element).toHaveClass(/ae--shape-square/);
+  await expect(element).toHaveAttribute("aria-orientation", "horizontal");
   await expect(element).not.toHaveClass(/ae--shape-horizontal/);
 });
 
@@ -86,6 +91,17 @@ test("adaptive merges extension options with its default parameters", async ({ p
     minSizes: { compact: 0, small: 600, medium: 768, large: 1024, xl: 1280, xxl: 1600, tiny: 300 },
     ratioShapes: { vertical: 0.8, horizontal: 2 }
   });
+  const immutable = await page.evaluate(() => {
+    const config = AelluxJs.ext.adaptive.adaptiveParams;
+    try { config.minSizes.small = 100; } catch (_) { }
+    try { config.minSizes.extra = 100; } catch (_) { }
+    return {
+      groupsFrozen: Object.isFrozen(config) && Object.values(config).every(Object.isFrozen),
+      small: config.minSizes.small,
+      hasExtra: Object.prototype.hasOwnProperty.call(config.minSizes, "extra")
+    };
+  });
+  expect(immutable).toEqual({ groupsFrozen: true, small: 600, hasExtra: false });
   await page.evaluate(() => AelluxJs.unmount(document.querySelector("#adaptive")));
   await expect(element).not.toHaveClass(/ae--fits-tiny/);
 });

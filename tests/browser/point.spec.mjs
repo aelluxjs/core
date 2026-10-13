@@ -124,7 +124,7 @@ test("AePointer times an active press and freezes its duration on release", asyn
   expect(result.canceled.deltaTime).toBe(result.canceled.time.pressEnd - result.restarted.time.pressStart);
 });
 
-test("release reaches press origin and resets it on the next press", async ({ page }) => {
+test("release reaches the current target and press origin once each", async ({ page }) => {
   await openPoint(page);
 
   const result = await page.evaluate(async () => {
@@ -145,8 +145,8 @@ test("release reaches press origin and resets it on the next press", async ({ pa
         element.addEventListener(`AelluxJs${name}`, event => events.push({
           name,
           receiver: element.id,
-          pointables: event.detail.pointables.map(pointable => pointable.id),
-          pressStart: event.detail.pressStart?.map(pointable => pointable.id) ?? null
+          target: event.detail.target?.id ?? null,
+          pressStart: event.detail.pressStart?.id ?? null
         }));
       }
     }
@@ -162,24 +162,22 @@ test("release reaches press origin and resets it on the next press", async ({ pa
   });
 
   expect(result.filter(event => event.name === "PointerUp")).toEqual([
-    { name: "PointerUp", receiver: "second", pointables: ["second", "outer"], pressStart: ["first", "outer"] },
-    { name: "PointerUp", receiver: "outer", pointables: ["second", "outer"], pressStart: ["first", "outer"] },
-    { name: "PointerUp", receiver: "first", pointables: ["second", "outer"], pressStart: ["first", "outer"] }
+    { name: "PointerUp", receiver: "second", target: "second", pressStart: "first" },
+    { name: "PointerUp", receiver: "first", target: "second", pressStart: "first" }
   ]);
   expect(result.filter(event => event.name === "PointerCancel")).toEqual([
-    { name: "PointerCancel", receiver: "first", pointables: ["first", "outer"], pressStart: ["second", "outer"] },
-    { name: "PointerCancel", receiver: "outer", pointables: ["first", "outer"], pressStart: ["second", "outer"] },
-    { name: "PointerCancel", receiver: "second", pointables: ["first", "outer"], pressStart: ["second", "outer"] }
+    { name: "PointerCancel", receiver: "first", target: "first", pressStart: "second" },
+    { name: "PointerCancel", receiver: "second", target: "first", pressStart: "second" }
   ]);
   expect(result.filter(event => event.name === "PointerDown" && event.receiver === "second")[0]).toMatchObject({
-    pressStart: ["second", "outer"]
+    pressStart: "second"
   });
   expect(result.filter(event => event.name === "PointerMove" && event.receiver === "second")[0]).toMatchObject({
-    pressStart: ["first", "outer"]
+    pressStart: "first"
   });
 });
 
-test("pointerup outside pointables reaches pressStart with an empty current chain", async ({ page }) => {
+test("pointerup outside marked elements reaches the press origin", async ({ page }) => {
   await openPoint(page);
 
   const result = await page.evaluate(async () => {
@@ -192,8 +190,8 @@ test("pointerup outside pointables reaches pressStart with an empty current chai
     const outside = document.getElementById("outside");
     const received = [];
     origin.addEventListener("AelluxJsPointerUp", event => received.push({
-      pointables: event.detail.pointables.map(element => element.id),
-      pressStart: event.detail.pressStart.map(element => element.id),
+      target: event.detail.target?.id ?? null,
+      pressStart: event.detail.pressStart?.id ?? null,
       pressed: event.detail.pointer.pressed
     }));
 
@@ -207,7 +205,7 @@ test("pointerup outside pointables reaches pressStart with an empty current chai
   });
 
   expect(result).toEqual({
-    received: [{ pointables: [], pressStart: ["origin"], pressed: false }],
+    received: [{ target: null, pressStart: "origin", pressed: false }],
     remaining: 0
   });
 });
@@ -228,7 +226,7 @@ test("unmounted press origin does not receive release", async ({ page }) => {
     first.addEventListener("AelluxJsPointerUp", () => received.push("first"));
     second.addEventListener("AelluxJsPointerUp", event => received.push({
       receiver: "second",
-      pressStart: event.detail.pressStart.map(element => element.id)
+      pressStart: event.detail.pressStart?.id ?? null
     }));
     first.dispatchEvent(new PointerEvent("pointerdown", {
       bubbles: true, pointerId: 41, pointerType: "touch"
@@ -240,7 +238,7 @@ test("unmounted press origin does not receive release", async ({ page }) => {
     return received;
   });
 
-  expect(result).toEqual([{ receiver: "second", pressStart: [""] }]);
+  expect(result).toEqual([{ receiver: "second", pressStart: null }]);
 });
 
 test("pointer retains hover across child elements and clears it on document exit", async ({ page }) => {
@@ -255,7 +253,7 @@ test("pointer retains hover across child elements and clears it on document exit
     document.body.addEventListener("AelluxJsPointerHover", event => {
       hoverEvents.push({
         hover: event.detail.hover,
-        pointables: event.detail.pointables.map(element => element === document.body)
+        targetIsBody: event.detail.target === document.body
       });
     });
     const emit = (target, type, x, y, relatedTarget = null) =>
@@ -294,14 +292,14 @@ test("pointer retains hover across child elements and clears it on document exit
       pressed: false, hover: true
     },
     hoverEvents: [
-      { hover: true, pointables: [true] },
-      { hover: false, pointables: [true] }
+      { hover: true, targetIsBody: true },
+      { hover: false, targetIsBody: true }
     ],
     remaining: 0
   });
 });
 
-test("pointable limits route events and expose the nearest-to-outermost chain", async ({ page }) => {
+test("pointable limits select one nearest available target", async ({ page }) => {
   await openPoint(page);
 
   const result = await page.evaluate(async () => {
@@ -314,15 +312,15 @@ test("pointable limits route events and expose the nearest-to-outermost chain", 
     await AelluxJs.mount(inner, "point");
 
     const events = [];
-    let firstPointables;
+    let firstTarget;
     const onDown = event => {
-      if (!firstPointables) firstPointables = event.detail.pointables;
+      if (!firstTarget) firstTarget = event.detail.target;
       events.push({
         receiver: event.currentTarget.id,
         target: event.target.id,
         bubbles: event.bubbles,
-        chain: event.detail.pointables.map(element => element.id),
-        pointerChain: event.detail.pointer.pointables.map(element => element.id),
+        detailTarget: event.detail.target.id,
+        pointerTarget: event.detail.pointer.target.id,
         originalType: event.detail.originalEvent.type
       });
     };
@@ -339,9 +337,9 @@ test("pointable limits route events and expose the nearest-to-outermost chain", 
     const outerPointers = AelluxJs.mountManager.controller(outer).point.pointers()
       .map(pointer => pointer.pointerId);
     emit(outer, "pointermove", 21, 5);
-    const movedChain = AelluxJs.ext.point.pointers(outer)
-      .find(pointer => pointer.pointerId === 21).pointables.map(element => element.id);
-    const firstEventChainAfterMove = firstPointables.map(element => element.id);
+    const movedTarget = AelluxJs.ext.point.pointers(outer)
+      .find(pointer => pointer.pointerId === 21).target.id;
+    const firstEventTargetAfterMove = firstTarget.id;
     inner.setAttribute(AelluxJs.attr("point"), "0");
     emit(inner, "pointerup", 22, 2);
     emit(inner, "pointerdown", 23, 3);
@@ -351,20 +349,19 @@ test("pointable limits route events and expose the nearest-to-outermost chain", 
     };
     await AelluxJs.unmount(inner, "point");
     return {
-      events, innerPointers, outerPointers, movedChain, firstEventChainAfterMove, afterZeroLimit,
+      events, innerPointers, outerPointers, movedTarget, firstEventTargetAfterMove, afterZeroLimit,
       afterUnmount: AelluxJs.ext.point.pointers(inner).length
     };
   });
 
   expect(result).toEqual({
     events: [
-      { receiver: "inner", target: "inner", bubbles: false, chain: ["inner", "outer"], pointerChain: ["inner", "outer"], originalType: "pointerdown" },
-      { receiver: "outer", target: "outer", bubbles: false, chain: ["inner", "outer"], pointerChain: ["inner", "outer"], originalType: "pointerdown" },
-      { receiver: "outer", target: "outer", bubbles: false, chain: ["outer"], pointerChain: ["outer"], originalType: "pointerdown" },
-      { receiver: "outer", target: "outer", bubbles: false, chain: ["outer"], pointerChain: ["outer"], originalType: "pointerdown" }
+      { receiver: "inner", target: "inner", bubbles: false, detailTarget: "inner", pointerTarget: "inner", originalType: "pointerdown" },
+      { receiver: "outer", target: "outer", bubbles: false, detailTarget: "outer", pointerTarget: "outer", originalType: "pointerdown" },
+      { receiver: "outer", target: "outer", bubbles: false, detailTarget: "outer", pointerTarget: "outer", originalType: "pointerdown" }
     ],
-    innerPointers: [21], outerPointers: [21, 22], movedChain: ["outer"],
-    firstEventChainAfterMove: ["inner", "outer"],
+    innerPointers: [21], outerPointers: [22], movedTarget: "outer",
+    firstEventTargetAfterMove: "inner",
     afterZeroLimit: { inner: [], outer: [21, 23] }, afterUnmount: 0
   });
 });
@@ -381,7 +378,7 @@ test("an excluded ancestor does not receive a pointable event", async ({ page })
     await AelluxJs.mount(inner, "point");
     const received = [];
     inner.addEventListener("AelluxJsPointerDown", event => received.push({
-      receiver: "inner", chain: event.detail.pointables.map(element => element === inner),
+      receiver: "inner", targetIsInner: event.detail.target === inner,
       bubbles: event.bubbles
     }));
     outer.addEventListener("AelluxJsPointerDown", () => received.push({ receiver: "outer" }));
@@ -396,12 +393,12 @@ test("an excluded ancestor does not receive a pointable event", async ({ page })
   });
 
   expect(result).toEqual({
-    received: [{ receiver: "inner", chain: [true], bubbles: false }],
+    received: [{ receiver: "inner", targetIsInner: true, bubbles: false }],
     outerPointers: 0, innerPointers: 1
   });
 });
 
-test("hover enters and leaves each affected pointable once", async ({ page }) => {
+test("hover enters and leaves the selected target once", async ({ page }) => {
   await openPoint(page);
 
   const result = await page.evaluate(async () => {
@@ -422,7 +419,7 @@ test("hover enters and leaves each affected pointable once", async ({ page }) =>
           receiver: event.currentTarget.id,
           hover: event.detail.hover,
           bubbles: event.bubbles,
-          chain: event.detail.pointables.map(pointable => pointable.id)
+          target: event.detail.target?.id ?? null
         });
       });
     }
@@ -438,12 +435,10 @@ test("hover enters and leaves each affected pointable once", async ({ page }) =>
   });
 
   expect(result).toEqual([
-    { receiver: "first", hover: true, bubbles: false, chain: ["first", "outer"] },
-    { receiver: "outer", hover: true, bubbles: false, chain: ["first", "outer"] },
-    { receiver: "first", hover: false, bubbles: false, chain: ["first", "outer"] },
-    { receiver: "second", hover: true, bubbles: false, chain: ["second", "outer"] },
-    { receiver: "second", hover: false, bubbles: false, chain: ["second", "outer"] },
-    { receiver: "outer", hover: false, bubbles: false, chain: ["second", "outer"] }
+    { receiver: "first", hover: true, bubbles: false, target: "first" },
+    { receiver: "first", hover: false, bubbles: false, target: "first" },
+    { receiver: "second", hover: true, bubbles: false, target: "second" },
+    { receiver: "second", hover: false, bubbles: false, target: "second" }
   ]);
 });
 

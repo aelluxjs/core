@@ -21,6 +21,37 @@
   };
 
   // src/src/aellux.ext.preference.js
+  function _createForOfIteratorHelper(r, e) {
+    var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
+    if (!t) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray(r)) || e && r && "number" == typeof r.length) {
+        t && (r = t);
+        var _n = 0, F = function F2() {
+        };
+        return { s: F, n: function n() {
+          return _n >= r.length ? { done: true } : { done: false, value: r[_n++] };
+        }, e: function e2(r2) {
+          throw r2;
+        }, f: F };
+      }
+      throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+    }
+    var o, a = true, u = false;
+    return { s: function s() {
+      t = t.call(r);
+    }, n: function n() {
+      var r2 = t.next();
+      return a = r2.done, r2;
+    }, e: function e2(r2) {
+      u = true, o = r2;
+    }, f: function f() {
+      try {
+        a || null == t.return || t.return();
+      } finally {
+        if (u) throw o;
+      }
+    } };
+  }
   function _slicedToArray(r, e) {
     return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest();
   }
@@ -75,6 +106,8 @@
     var userPreferences = /* @__PURE__ */ Object.create(null);
     var defaultPreferences = /* @__PURE__ */ Object.create(null);
     var computedPreferences = /* @__PURE__ */ Object.create(null);
+    var containersByPreference = /* @__PURE__ */ new Map();
+    var containerPreferences = /* @__PURE__ */ new Map();
     AelluxJs.extAttach(extensionName, {
       init: init,
       destroy: destroy,
@@ -136,6 +169,8 @@
       AelluxJs.mountManager.remove({
         extensionName: extensionName
       });
+      containersByPreference.clear();
+      containerPreferences.clear();
       window.removeEventListener("storage", storageEvent);
       document.removeEventListener("DOMContentLoaded", update);
       var allQueries = AelluxJs.registry.preferenceMediaQueries;
@@ -172,18 +207,79 @@
       update();
     }
     function update() {
-      Object.assign(computedPreferences, defaultPreferences, userPreferences);
+      var nextPreferences = Object.assign(/* @__PURE__ */ Object.create(null), defaultPreferences, userPreferences);
+      var changed = /* @__PURE__ */ new Set();
+      for (var key in computedPreferences) {
+        if (!(key in nextPreferences)) {
+          delete computedPreferences[key];
+          changed.add(key);
+        }
+      }
+      for (var _key in nextPreferences) {
+        if (computedPreferences[_key] !== nextPreferences[_key]) changed.add(_key);
+        computedPreferences[_key] = nextPreferences[_key];
+      }
       AelluxJs.updatePreferenceAttributesHTML(computedPreferences);
-      document.querySelectorAll("[".concat(attr.preference, "]")).forEach(function(container) {
-        return updateContainer(container);
-      });
+      var _iterator = _createForOfIteratorHelper(containerPreferences.keys()), _step;
+      try {
+        for (_iterator.s(); !(_step = _iterator.n()).done; ) {
+          var container = _step.value;
+          if (indexContainer(container)) updateContainer(container);
+        }
+      } catch (err) {
+        _iterator.e(err);
+      } finally {
+        _iterator.f();
+      }
+      var _iterator2 = _createForOfIteratorHelper(changed), _step2;
+      try {
+        for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
+          var _key2 = _step2.value;
+          var containers = containersByPreference.get(_key2);
+          if (containers) {
+            var _iterator3 = _createForOfIteratorHelper(containers), _step3;
+            try {
+              for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
+                var _container = _step3.value;
+                updateContainer(_container);
+              }
+            } catch (err) {
+              _iterator3.e(err);
+            } finally {
+              _iterator3.f();
+            }
+          }
+        }
+      } catch (err) {
+        _iterator2.e(err);
+      } finally {
+        _iterator2.f();
+      }
       AelluxJs.dispatch("PreferencesChange");
+    }
+    function indexContainer(container) {
+      var key = toCamelCase2(container.getAttribute(attr.preference) || "");
+      var previous = containerPreferences.get(container);
+      if (previous === key) return false;
+      if (previous !== void 0) {
+        var _containers = containersByPreference.get(previous);
+        _containers.delete(container);
+        if (!_containers.size) containersByPreference.delete(previous);
+      }
+      var containers = containersByPreference.get(key);
+      if (!containers) {
+        containers = /* @__PURE__ */ new Set();
+        containersByPreference.set(key, containers);
+      }
+      containers.add(container);
+      containerPreferences.set(container, key);
+      return true;
     }
     function updateContainer(container) {
       var preference = container.getAttribute(attr.preference);
       var elements = container.querySelectorAll("[".concat(attr.option, "]"));
       var labels = container.querySelectorAll("[".concat(attr.label, "]"));
-      var currentValue = get(preference);
+      var currentValue = get(preference || "");
       labels.forEach(function(label) {
         var value = label.getAttribute(attr.label);
         var selected = String(value) === String(currentValue);
@@ -210,10 +306,18 @@
       Object.assign(userPreferences, AelluxJs.persist.preferences.getObject());
     }
     function mountPreferenceContainer(container) {
+      indexContainer(container);
+      updateContainer(container);
       container.addEventListener("click", onContainerClick);
     }
     function unmountPreferenceContainer(container) {
       container.removeEventListener("click", onContainerClick);
+      var key = containerPreferences.get(container);
+      if (key === void 0) return;
+      var containers = containersByPreference.get(key);
+      containers.delete(container);
+      if (!containers.size) containersByPreference.delete(key);
+      containerPreferences.delete(container);
     }
     function onContainerClick(event) {
       var container = event.currentTarget;

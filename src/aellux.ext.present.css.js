@@ -7,6 +7,9 @@ export function generatePresentCSS(AelluxJs) {
   const lowHardwareAttribute = AelluxJs.attr("low-hardware");
   const motion = `[${motionAttribute}]`;
   const present = `[${presentAttribute}]`;
+  const presentWithoutMotion = `[${presentAttribute}=""]`;
+  const presentOpacity = `[${presentAttribute}~="opacity"]`;
+  const presentTransform = `[${presentAttribute}~="transform"]`;
   const presentHeight = `[${presentAttribute}~="height"]`;
   const presentWidth = `[${presentAttribute}~="width"]`;
   const pop = AelluxJs.className("pop");
@@ -35,10 +38,29 @@ ${present} {
   --ae-unpop-duration: 250ms;
   --ae-pop-low-steps: 4;
   --ae-unpop-low-steps: 4;
+
+  display: inline-grid;
+  transition-property: opacity, transform, grid-template-rows, grid-template-columns;
 }
 ${present}>${motion} {
-  min-width: 0;
-  min-height: 0;
+  place-self: stretch;
+  contain: layout paint;
+}
+${presentWithoutMotion} {
+  transition: none !important;
+  will-change: auto !important;
+  --ae-pop-duration: 0s !important;
+  --ae-unpop-duration: 0s !important;
+}
+${presentWidth}.${willChange}, ${presentWidth}.${willChange}>${motion}{
+  min-width: 0 !important;
+  width: auto !important;
+  overflow: hidden !important;
+}
+${presentHeight}.${willChange}, ${presentHeight}.${willChange}>${motion}{
+  min-height: 0 !important;
+  height: auto !important;
+  overflow: hidden !important;
 }
 html[${reducedMotionAttribute}="reduced"] ${present} {
   transition: none !important;
@@ -50,28 +72,26 @@ html[${lowHardwareAttribute}] ${present} {
   --ae-unpop-ease: steps(var(--ae-unpop-low-steps));
 }
 ${present}.${willChange} {
-  will-change: opacity, transform;
-}
-${presentHeight}.${willChange} {
-  will-change: opacity, transform, grid-template-rows;
-}
-${presentWidth}.${willChange} {
-  will-change: opacity, transform, grid-template-columns;
-}
-${presentWidth}${presentHeight}.${willChange} {
   will-change: opacity, transform, grid-template-columns, grid-template-rows;
 }
-${present}:not([hidden]) {
+${presentOpacity} {
   opacity: var(--ae-from-opacity, 0);
+}
+${presentTransform} {
   transform: var(--ae-from-transform);
 }
-${present}.${popping},
-${present}.${pop} {
+${presentOpacity}.${popping},
+${presentOpacity}.${pop} {
   opacity: var(--ae-pop-opacity, 1);
+}
+${presentTransform}.${popping},
+${presentTransform}.${pop} {
   transform: var(--ae-pop-transform);
 }
-${present}.${unpopping} {
+${presentOpacity}.${unpopping} {
   opacity: var(--ae-unpop-opacity, 0);
+}
+${presentTransform}.${unpopping} {
   transform: var(--ae-unpop-transform);
 }
 ${present}.${pop}, ${present}.${popping} {
@@ -82,20 +102,11 @@ ${present}.${unpopping} {
   transition-duration: var(--ae-unpop-duration);
   transition-timing-function: var(--ae-unpop-ease);
 }
-${present} {
-  display: inline-grid;
-  transition-property: opacity, transform;
-}
 ${presentHeight} {
-  transition-property: opacity, transform, grid-template-rows;
   grid-template-rows: var(--ae-from-height);
 }
 ${presentWidth} {
-  transition-property: opacity, transform, grid-template-columns;
   grid-template-columns: var(--ae-from-width);
-}
-${presentWidth}${presentHeight} {
-  transition-property: opacity, transform, grid-template-columns, grid-template-rows;
 }
 ${presentWidth}.${popping}, ${presentWidth}.${pop} {
   grid-template-columns: var(--ae-pop-width);

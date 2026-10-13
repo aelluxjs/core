@@ -53,6 +53,7 @@ import createWeakCss from "./internal/create-weak-css.js";
   api.coreAssetIntegrity = coreAssetIntegrity;
   root.AelluxJs = api;
   root[api.shortJSName] = api;
+  api.aelluxBasePath = aelluxBasePath;
   api.init = function (options) {
     api.options.verboseLevel = diagnostics.update(options);
 
@@ -211,8 +212,13 @@ import createWeakCss from "./internal/create-weak-css.js";
 
   function updateHardwareAttribute() {
     var browserNavigator = root.navigator || {};
-    var lowHardware = browserNavigator.hardwareConcurrency <= 4 ||
-      browserNavigator.deviceMemory <= 4;
+    var lowHardware =
+      (typeof browserNavigator.hardwareConcurrency === "number" &&
+        browserNavigator.hardwareConcurrency > 0 &&
+        browserNavigator.hardwareConcurrency <= 4) ||
+      (typeof browserNavigator.deviceMemory === "number" &&
+        browserNavigator.deviceMemory > 0 &&
+        browserNavigator.deviceMemory <= 4);
     if (lowHardware) {
       document.documentElement.setAttribute(api.attr("low-hardware"), "");
     }

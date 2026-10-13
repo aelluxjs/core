@@ -34,18 +34,6 @@
     }
     return ("string" === r ? String : Number)(t);
   }
-  function _toConsumableArray(r) {
-    return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread();
-  }
-  function _nonIterableSpread() {
-    throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
-  }
-  function _iterableToArray(r) {
-    if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
-  }
-  function _arrayWithoutHoles(r) {
-    if (Array.isArray(r)) return _arrayLikeToArray(r);
-  }
   function _createForOfIteratorHelper(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
@@ -143,12 +131,8 @@
       try {
         for (_iterator.s(); !(_step = _iterator.n()).done; ) {
           var pointer = _step.value;
-          pointer.pointables = pointer.pointables.filter(function(pointable) {
-            return pointable !== element;
-          });
-          if (pointer.pressStart) pointer.pressStart = pointer.pressStart.filter(function(pointable) {
-            return pointable !== element;
-          });
+          if (pointer.target === element) pointer.target = null;
+          if (pointer.pressStart === element) pointer.pressStart = null;
         }
       } catch (err) {
         _iterator.e(err);
@@ -157,9 +141,19 @@
       }
     }
     function pointers(element) {
-      return Array.from(trackedPointers.values()).filter(function(pointer) {
-        return pointer.pointables.includes(element);
-      });
+      var result = [];
+      var _iterator2 = _createForOfIteratorHelper(trackedPointers.values()), _step2;
+      try {
+        for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
+          var pointer = _step2.value;
+          if (pointer.target === element) result.push(pointer);
+        }
+      } catch (err) {
+        _iterator2.e(err);
+      } finally {
+        _iterator2.f();
+      }
+      return result;
     }
     function limitFor(element) {
       var value = element.getAttribute(pointableAttribute);
@@ -168,63 +162,63 @@
       var limit = Number(trimmed);
       return /^\d+$/.test(trimmed) && Number.isSafeInteger(limit) ? limit : 1;
     }
-    function pointablesFor(target, pointer) {
-      var result = [];
+    function targetFor(target, pointer) {
       var element = target && target.nodeType === 1 ? target : target && target.parentElement;
       while (element) {
         if (pointableElements.has(element) && element.hasAttribute(pointableAttribute)) {
           var occupied = 0;
-          var _iterator2 = _createForOfIteratorHelper(trackedPointers.values()), _step2;
+          var _iterator3 = _createForOfIteratorHelper(trackedPointers.values()), _step3;
           try {
-            for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
-              var other = _step2.value;
-              if (other !== pointer && other.pointables.includes(element)) occupied++;
+            for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
+              var other = _step3.value;
+              if (other !== pointer && other.target === element) occupied++;
             }
           } catch (err) {
-            _iterator2.e(err);
+            _iterator3.e(err);
           } finally {
-            _iterator2.f();
+            _iterator3.f();
           }
-          if (occupied < limitFor(element)) result.push(element);
+          if (occupied < limitFor(element)) return element;
         }
         element = element.parentElement;
       }
-      return result;
+      return null;
     }
-    function dispatchPointer(name, pointer, originalEvent) {
-      var _pointer$pressStart$s, _pointer$pressStart;
-      var targets = arguments.length > 3 && arguments[3] !== void 0 ? arguments[3] : pointer.pointables;
-      var hover = arguments.length > 4 ? arguments[4] : void 0;
-      var pointables = arguments.length > 5 && arguments[5] !== void 0 ? arguments[5] : pointer.pointables;
-      if (!targets.length) return;
-      pointer.beforeDispatch();
-      var chain = pointables.slice();
-      var pressStart = (_pointer$pressStart$s = (_pointer$pressStart = pointer.pressStart) === null || _pointer$pressStart === void 0 ? void 0 : _pointer$pressStart.slice()) !== null && _pointer$pressStart$s !== void 0 ? _pointer$pressStart$s : null;
-      var _iterator3 = _createForOfIteratorHelper(targets.slice()), _step3;
-      try {
-        for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
-          var _pressStart$slice;
-          var element = _step3.value;
-          AelluxJs.dispatchFrom(element, name, {
-            bubbles: false,
-            detail: {
-              pointer: pointer,
-              pointables: chain.slice(),
-              pressStart: (_pressStart$slice = pressStart === null || pressStart === void 0 ? void 0 : pressStart.slice()) !== null && _pressStart$slice !== void 0 ? _pressStart$slice : null,
-              originalEvent: originalEvent,
-              hover: hover
-            }
-          });
+    function dispatchPointer(name, pointer, originalEvent, recipient, hover) {
+      var target = arguments.length > 5 && arguments[5] !== void 0 ? arguments[5] : pointer.target;
+      var pressStart = arguments.length > 6 && arguments[6] !== void 0 ? arguments[6] : pointer.pressStart;
+      if (!recipient) return;
+      AelluxJs.dispatchFrom(recipient, name, {
+        bubbles: false,
+        detail: {
+          pointer: pointer,
+          target: target,
+          pressStart: pressStart,
+          originalEvent: originalEvent,
+          hover: hover
         }
-      } catch (err) {
-        _iterator3.e(err);
-      } finally {
-        _iterator3.f();
-      }
+      });
     }
-    function releaseTargets(pointer) {
-      if (!pointer.pointables.length) return pointer.pressStart || [];
-      return _toConsumableArray(new Set([].concat(_toConsumableArray(pointer.pointables), _toConsumableArray(pointer.pressStart || []))));
+    function dispatchToTarget(name, pointer, originalEvent) {
+      if (!pointer.target) return;
+      pointer.beforeDispatch();
+      dispatchPointer(name, pointer, originalEvent, pointer.target);
+    }
+    function dispatchRelease(name, pointer, originalEvent) {
+      var target = pointer.target;
+      var pressStart = pointer.pressStart;
+      if (!target && !pressStart) return;
+      pointer.beforeDispatch();
+      dispatchPointer(name, pointer, originalEvent, target, void 0, target, pressStart);
+      if (pressStart !== target) dispatchPointer(name, pointer, originalEvent, pressStart, void 0, target, pressStart);
+    }
+    function updateHoverTarget(pointer, event, nextTarget) {
+      var previousTarget = pointer.target;
+      if (previousTarget === nextTarget) return;
+      if (previousTarget || nextTarget) pointer.beforeDispatch();
+      dispatchPointer("PointerHover", pointer, event, previousTarget, false);
+      pointer.target = nextTarget;
+      dispatchPointer("PointerHover", pointer, event, nextTarget, true);
     }
     function canHover(event) {
       return event.pointerType === "mouse" || event.pointerType === "pen";
@@ -243,9 +237,9 @@
       pointer.startPress();
       pointer.hover = canHover(event);
       pointer.update(event);
-      pointer.pointables = pointablesFor(event.target, pointer);
-      pointer.pressStart = pointer.pointables.slice();
-      dispatchPointer("PointerDown", pointer, event);
+      pointer.target = targetFor(event.target, pointer);
+      pointer.pressStart = pointer.target;
+      dispatchToTarget("PointerDown", pointer, event);
     }
     function onPointerMove(event) {
       var pointer = trackedPointers.get(event.pointerId);
@@ -254,8 +248,8 @@
         pointer = addPointer(event, false, true);
       }
       pointer.update(event);
-      pointer.pointables = pointablesFor(event.target, pointer);
-      dispatchPointer("PointerMove", pointer, event);
+      pointer.target = targetFor(event.target, pointer);
+      dispatchToTarget("PointerMove", pointer, event);
     }
     function onPointerUp(event) {
       var pointer = trackedPointers.get(event.pointerId);
@@ -263,8 +257,8 @@
       pointer.update(event);
       pointer.pressed = false;
       pointer.endPress();
-      pointer.pointables = pointablesFor(event.target, pointer);
-      dispatchPointer("PointerUp", pointer, event, releaseTargets(pointer));
+      pointer.target = targetFor(event.target, pointer);
+      dispatchRelease("PointerUp", pointer, event);
       if (!pointer.hover) trackedPointers.delete(event.pointerId);
     }
     function onPointerCancel(event) {
@@ -273,40 +267,27 @@
         pointer.update(event);
         pointer.pressed = false;
         pointer.endPress();
-        pointer.pointables = pointablesFor(event.target, pointer);
-        dispatchPointer("PointerCancel", pointer, event, releaseTargets(pointer));
+        pointer.target = targetFor(event.target, pointer);
+        dispatchRelease("PointerCancel", pointer, event);
       }
       trackedPointers.delete(event.pointerId);
     }
     function onPointerOver(event) {
       if (!canHover(event)) return;
       var pointer = trackedPointers.get(event.pointerId) || addPointer(event, false, true);
-      var previous = pointer.pointables;
       pointer.update(event);
       pointer.hover = true;
-      pointer.pointables = pointablesFor(event.target, pointer);
-      var entered = pointer.pointables.filter(function(element) {
-        return !previous.includes(element);
-      });
-      dispatchPointer("PointerHover", pointer, event, entered, true);
+      updateHoverTarget(pointer, event, targetFor(event.target, pointer));
     }
     function onPointerOut(event) {
       var pointer = trackedPointers.get(event.pointerId);
       if (!pointer) return;
       var relatedTarget = event.relatedTarget;
       pointer.update(event);
-      var previous = pointer.pointables;
-      var nextPointables = pointablesFor(relatedTarget, pointer);
-      var left = previous.filter(function(element) {
-        return !nextPointables.includes(element);
-      });
-      dispatchPointer("PointerHover", pointer, event, left, false, previous);
-      pointer.pointables = previous.filter(function(element) {
-        return nextPointables.includes(element);
-      });
+      updateHoverTarget(pointer, event, targetFor(relatedTarget, pointer));
       if (!relatedTarget || !relatedTarget.nodeType || !document.contains(relatedTarget)) {
         pointer.hover = false;
-        pointer.pointables = [];
+        pointer.target = null;
       }
       if (!pointer.pressed && !pointer.hover) trackedPointers.delete(event.pointerId);
     }
@@ -344,7 +325,7 @@
         this.buttons = event.buttons;
         this.pressed = pressed;
         this.hover = hover;
-        this.pointables = [];
+        this.target = null;
         this.pressStart = null;
       }
       return _createClass(AePointer2, [{
