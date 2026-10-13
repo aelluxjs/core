@@ -107,7 +107,7 @@
         },
         stop: function(options = {}) {
           const replacement = options.replacement === true;
-          const preservePop = options.preservePop === true;
+          const transitionStart = options.transitionStart === true;
           const transition = this.transition;
           if (transition) {
             transition.replacement = replacement;
@@ -115,7 +115,7 @@
               clearTimeout(transition.timeout);
               transition.timeout = null;
             }
-            if (transition.className) {
+            if (!transitionStart && transition.className) {
               this.classList.remove(transition.className);
             }
             this.transition = null;
@@ -130,9 +130,11 @@
             clearTimeout(this.autoUnpopTimeout);
             this.autoUnpopTimeout = null;
           }
-          this.classList.remove(className.popping, className.unpopping);
-          if (!preservePop) this.classList.remove(className.pop);
-          if (!replacement) this.classList.remove(className.willChange);
+          if (transitionStart) {
+            this.classList.remove(className.unpopping);
+          } else {
+            this.classList.remove(...Object.values(className));
+          }
         }
       };
       presentController.setAriaExpanded(
@@ -288,7 +290,7 @@
           return;
         }
         const reusePreparation = controller.transition !== null && controller.classList.contains(className.willChange);
-        controller.stop({ replacement: reusePreparation, preservePop: !gotoVisible });
+        controller.stop({ replacement: reusePreparation, transitionStart: true });
         controller.direction = newDirection;
         const interrupted = new Promise((_, interruptTransition) => {
           transition = {
@@ -319,7 +321,11 @@
             Math.max(1, parseInt(timeMs / 62.5))
           );
         }
-        controller.classList.remove(className.pop);
+        controller.classList.remove(
+          className.pop,
+          className.popping,
+          className.unpopping
+        );
         controller.classList.add(transition.className);
         const completed = new Promise((completeTransition) => {
           transition.timeout = setTimeout(

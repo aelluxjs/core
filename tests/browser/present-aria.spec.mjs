@@ -166,6 +166,24 @@ test("present prepares will-change before starting a transition", async ({ page 
     motionWillChange: false,
     motionWillChangeStyle: "auto"
   });
+
+  const unpopPreparation = await page.evaluate(() => {
+    const panel = document.getElementById("panel");
+    window.presentUnpopPromise = AelluxJs.mountManager.controller(panel).present.unpop();
+    return {
+      pop: panel.classList.contains(AelluxJs.className("pop")),
+      popping: panel.classList.contains(AelluxJs.className("popping")),
+      unpopping: panel.classList.contains(AelluxJs.className("unpopping")),
+      willChange: panel.classList.contains(AelluxJs.className("will-change"))
+    };
+  });
+  expect(unpopPreparation).toEqual({
+    pop: true,
+    popping: false,
+    unpopping: false,
+    willChange: true
+  });
+  await page.evaluate(() => window.presentUnpopPromise);
 });
 
 test("replacement transitions reuse preparation and final interruptions clean it", async ({ page }) => {

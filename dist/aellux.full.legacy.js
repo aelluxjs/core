@@ -24280,18 +24280,6 @@
       });
     };
   }
-  function _toConsumableArray4(r) {
-    return _arrayWithoutHoles4(r) || _iterableToArray4(r) || _unsupportedIterableToArray7(r) || _nonIterableSpread4();
-  }
-  function _nonIterableSpread4() {
-    throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
-  }
-  function _iterableToArray4(r) {
-    if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
-  }
-  function _arrayWithoutHoles4(r) {
-    if (Array.isArray(r)) return _arrayLikeToArray7(r);
-  }
   function _slicedToArray4(r, e) {
     return _arrayWithHoles4(r) || _iterableToArrayLimit4(r, e) || _unsupportedIterableToArray7(r, e) || _nonIterableRest4();
   }
@@ -24321,6 +24309,18 @@
   }
   function _arrayWithHoles4(r) {
     if (Array.isArray(r)) return r;
+  }
+  function _toConsumableArray4(r) {
+    return _arrayWithoutHoles4(r) || _iterableToArray4(r) || _unsupportedIterableToArray7(r) || _nonIterableSpread4();
+  }
+  function _nonIterableSpread4() {
+    throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+  }
+  function _iterableToArray4(r) {
+    if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
+  }
+  function _arrayWithoutHoles4(r) {
+    if (Array.isArray(r)) return _arrayLikeToArray7(r);
   }
   function _createForOfIteratorHelper6(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
@@ -24489,7 +24489,7 @@
             stop: function stop() {
               var options = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : {};
               var replacement = options.replacement === true;
-              var preservePop = options.preservePop === true;
+              var transitionStart = options.transitionStart === true;
               var transition = this.transition;
               if (transition) {
                 transition.replacement = replacement;
@@ -24497,7 +24497,7 @@
                   clearTimeout(transition.timeout);
                   transition.timeout = null;
                 }
-                if (transition.className) {
+                if (!transitionStart && transition.className) {
                   this.classList.remove(transition.className);
                 }
                 this.transition = null;
@@ -24510,9 +24510,12 @@
                 clearTimeout(this.autoUnpopTimeout);
                 this.autoUnpopTimeout = null;
               }
-              this.classList.remove(className.popping, className.unpopping);
-              if (!preservePop) this.classList.remove(className.pop);
-              if (!replacement) this.classList.remove(className.willChange);
+              if (transitionStart) {
+                this.classList.remove(className.unpopping);
+              } else {
+                var _this$classList;
+                (_this$classList = this.classList).remove.apply(_this$classList, _toConsumableArray4(Object.values(className)));
+              }
             }
           };
           presentController.setAriaExpanded(element.hidden ? "false" : "true");
@@ -24715,7 +24718,7 @@
                   reusePreparation = controller.transition !== null && controller.classList.contains(className.willChange);
                   controller.stop({
                     replacement: reusePreparation,
-                    preservePop: !gotoVisible
+                    transitionStart: true
                   });
                   controller.direction = newDirection;
                   interrupted = new Promise(function(_, interruptTransition) {
@@ -24748,7 +24751,7 @@
                   if (root2.document && root2.document.documentElement.hasAttribute(attr.lowHardware)) {
                     element.style.setProperty("--ae-".concat(newDirection, "-low-steps").toLowerCase(), Math.max(1, parseInt(timeMs / 62.5)));
                   }
-                  controller.classList.remove(className.pop);
+                  controller.classList.remove(className.pop, className.popping, className.unpopping);
                   controller.classList.add(transition.className);
                   completed = new Promise(function(completeTransition) {
                     transition.timeout = setTimeout(finishTransition, timeMs, element, controller, transition, gotoVisible, completeTransition);
