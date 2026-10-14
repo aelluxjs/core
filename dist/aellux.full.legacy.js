@@ -24998,7 +24998,7 @@
         }
         function _updateAnchor() {
           _updateAnchor = _asyncToGenerator5(/* @__PURE__ */ _regenerator5().m(function _callee3(element) {
-            var state, revision, current, target, candidates, placement;
+            var state, revision, current, targetValue, useReference, target, candidates, placement;
             return _regenerator5().w(function(_context3) {
               while (1) switch (_context3.n) {
                 case 0:
@@ -25013,9 +25013,11 @@
                   current = function current2() {
                     return anchors.get(element) === state && state.revision === revision;
                   };
-                  target = resolveElement(element.getAttribute(targetAttribute));
+                  targetValue = element.getAttribute(targetAttribute);
+                  useReference = !targetValue || !targetValue.trim();
+                  target = useReference ? null : resolveElement(targetValue);
                   candidates = parseCandidates(element.getAttribute(attribute));
-                  if (!(!target || !candidates.length)) {
+                  if (!(!target && !useReference || !candidates.length)) {
                     _context3.n = 3;
                     break;
                   }
@@ -25044,7 +25046,7 @@
                   }
                   _context3.n = 6;
                   return AelluxJs2.waitLayout.update(function() {
-                    if (current()) invalidContext(element, state, target);
+                    if (current()) invalidContext(element, state, placement.target);
                   });
                 case 6:
                   return _context3.a(2);
@@ -25068,7 +25070,7 @@
                 case 9:
                   _context3.n = 10;
                   return AelluxJs2.waitLayout.read(function() {
-                    return current() ? readPlacement(element, target, candidates, true) : null;
+                    return current() ? readPlacement(element, useReference ? null : target, candidates, true) : null;
                   });
                 case 10:
                   placement = _context3.v;
@@ -25084,7 +25086,7 @@
                   }
                   _context3.n = 12;
                   return AelluxJs2.waitLayout.update(function() {
-                    if (current()) invalidContext(element, state, target);
+                    if (current()) invalidContext(element, state, placement.target);
                   });
                 case 12:
                   return _context3.a(2);
@@ -25093,7 +25095,7 @@
                   return AelluxJs2.waitLayout.update(function() {
                     if (!current()) return;
                     state.invalidContext = false;
-                    observe(state, element, target, placement.reference);
+                    observe(state, element, placement.target, placement.reference);
                     var selected = placement.selected;
                     element.style.setProperty("--ae-anchor-x", "".concat(selected.x, "px"));
                     element.style.setProperty("--ae-anchor-y", "".concat(selected.y, "px"));
@@ -25121,11 +25123,16 @@
         }
         function readPlacement(element, target, candidates, measure) {
           var reference = element.offsetParent;
-          if (!reference || target.offsetParent !== reference) return {
-            valid: false
-          };
+          target = target || reference;
+          if (!reference || target !== reference && target.offsetParent !== reference) {
+            return {
+              valid: false,
+              target: target
+            };
+          }
           if (!measure) return {
-            valid: true
+            valid: true,
+            target: target
           };
           var referenceRect = reference.getBoundingClientRect();
           var scaleX = reference.offsetWidth ? referenceRect.width / reference.offsetWidth : 1;
@@ -25165,6 +25172,7 @@
           }
           return {
             valid: true,
+            target: target,
             reference: reference,
             selected: selected
           };

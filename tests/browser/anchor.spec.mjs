@@ -17,6 +17,28 @@ const properties = [
   "--ae-anchor-x", "--ae-anchor-y", "--ae-anchor-origin-x", "--ae-anchor-origin-y"
 ];
 
+test("empty or omitted target anchors to the positioning parent", async ({ page }) => {
+  await startAnchor(page, `
+    <div id="reference" style="position: relative; width: 300px; height: 200px">
+      <div id="omitted" data-ae-anchor="bottom-right:bottom-right"
+        style="width: 20px; height: 10px"></div>
+      <div id="empty" data-ae-anchor-target="" data-ae-anchor="bottom-right:bottom-right"
+        style="width: 20px; height: 10px"></div>
+      <div id="explicit" data-ae-anchor-target="reference"
+        data-ae-anchor="bottom-right:bottom-right" style="width: 20px; height: 10px"></div>
+    </div>`);
+  const read = () => page.evaluate(() => ["omitted", "empty", "explicit"].map(id => {
+    const element = document.getElementById(id);
+    return {
+      anchored: element.classList.contains("ae--anchored"),
+      x: element.style.getPropertyValue("--ae-anchor-x"),
+      y: element.style.getPropertyValue("--ae-anchor-y")
+    };
+  }));
+  await expect.poll(() => read().then(values => values.every(value => value.anchored))).toBe(true);
+  expect(await read()).toEqual(Array(3).fill({ anchored: true, x: "280px", y: "190px" }));
+});
+
 test("anchor positions against a shared containing block and updates without moving DOM nodes", async ({ page }) => {
   await page.setViewportSize({ width: 800, height: 600 });
   await startAnchor(page, `

@@ -17,6 +17,7 @@ All notable changes to aellux.js will be documented in this file.
 ### Fixed
 
 - Prevented Scrollbox from recreating BetterScroll when the library adds its own child elements.
+- Anchor now uses its positioning parent when no target is specified and accepts that parent as an explicit target.
 
 ## [0.1.0-beta.10] - 2026-10-14
 

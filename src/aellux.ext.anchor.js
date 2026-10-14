@@ -128,9 +128,11 @@
     if (!state) return;
     const revision = ++state.revision;
     const current = () => anchors.get(element) === state && state.revision === revision;
-    const target = resolveElement(element.getAttribute(targetAttribute));
+    const targetValue = element.getAttribute(targetAttribute);
+    const useReference = !targetValue || !targetValue.trim();
+    const target = useReference ? null : resolveElement(targetValue);
     const candidates = parseCandidates(element.getAttribute(attribute));
-    if (!target || !candidates.length) {
+    if ((!target && !useReference) || !candidates.length) {
       await AelluxJs.waitLayout.update(() => {
         if (current()) deactivate(element, state);
       });
@@ -143,7 +145,7 @@
     if (!current() || !placement) return;
     if (!placement.valid) {
       await AelluxJs.waitLayout.update(() => {
-        if (current()) invalidContext(element, state, target);
+        if (current()) invalidContext(element, state, placement.target);
       });
       return;
     }
@@ -155,12 +157,12 @@
       });
       if (!current()) return;
       placement = await AelluxJs.waitLayout.read(() =>
-        current() ? readPlacement(element, target, candidates, true) : null
+        current() ? readPlacement(element, useReference ? null : target, candidates, true) : null
       );
       if (!current() || !placement) return;
       if (!placement.valid) {
         await AelluxJs.waitLayout.update(() => {
-          if (current()) invalidContext(element, state, target);
+          if (current()) invalidContext(element, state, placement.target);
         });
         return;
       }
@@ -168,7 +170,7 @@
     await AelluxJs.waitLayout.update(() => {
       if (!current()) return;
       state.invalidContext = false;
-      observe(state, element, target, placement.reference);
+      observe(state, element, placement.target, placement.reference);
       const selected = placement.selected;
       element.style.setProperty("--ae-anchor-x", `${selected.x}px`);
       element.style.setProperty("--ae-anchor-y", `${selected.y}px`);
@@ -181,8 +183,11 @@
 
   function readPlacement(element, target, candidates, measure) {
     const reference = element.offsetParent;
-    if (!reference || target.offsetParent !== reference) return { valid: false };
-    if (!measure) return { valid: true };
+    target = target || reference;
+    if (!reference || (target !== reference && target.offsetParent !== reference)) {
+      return { valid: false, target };
+    }
+    if (!measure) return { valid: true, target };
 
     const referenceRect = reference.getBoundingClientRect();
     const scaleX = reference.offsetWidth ? referenceRect.width / reference.offsetWidth : 1;
@@ -210,7 +215,7 @@
         break;
       }
     }
-    return { valid: true, reference, selected };
+    return { valid: true, target, reference, selected };
   }
 
   function invalidContext(element, state, target) {

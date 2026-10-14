@@ -50,11 +50,13 @@ Add aellux.js to a page and enable the Extensions it needs. The library coordina
 ## Core Extensions
 
 - [Adaptive](core-extensions/adaptive.md)
+- [Anchor](core-extensions/anchor.md)
 - [Feedback](core-extensions/feedback.md)
 - [Focus](core-extensions/focus.md)
 - [Point](core-extensions/point.md)
 - [Preference](core-extensions/preference.md)
 - [Present](core-extensions/present.md)
+- [Scrollbox](core-extensions/scrollbox.md)
 - [State navigation](core-extensions/state-navigation.md)
 
 ## Project Documents

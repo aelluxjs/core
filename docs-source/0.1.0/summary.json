@@ -42,6 +42,7 @@
       "slug": "core-extensions",
       "children": [
         { "label": "Adaptive", "href": "core-extensions/adaptive.md" },
+        { "label": "Anchor", "href": "core-extensions/anchor.md" },
         { "label": "Feedback", "href": "core-extensions/feedback.md" },
         { "label": "Focus", "href": "core-extensions/focus.md" },
         { "label": "Point", "href": "core-extensions/point.md" },
