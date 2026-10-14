@@ -52,7 +52,7 @@
 
 <script src="/core/docs/assets/docweaver/js/toc-init.js?t=1"></script>
 
-<script src="https://cdn.jsdelivr.net/npm/@aelluxjs/core@0.1.0-beta.9/dist/aellux.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@aelluxjs/core@0.1.0-beta.10/dist/aellux.min.js"></script>
 <script>
   AelluxJs.ext("/core/docs/assets/docweaver/js/aellux.ext.ajax-href.js");
   AelluxJs.init({ mode: "full" });
@@ -569,7 +569,7 @@ npm run test:budget
 </code></pre>
 <p>The CI workflow runs the same command after <code>npm run build</code>. A pull request fails if an artifact exceeds either limit in <a href="https://github.com/aelluxjs/core/blob/main/scripts/bundle-budget.config.mjs"><code>scripts/bundle-budget.config.mjs</code></a>. Change a limit only with an intentional review of the generated artifact and its delivery cost.</p>
 <h2>0.1.0 Baseline and Limits</h2>
-<p>The table records the release-candidate baseline measured on October 10, 2026. Limits are rounded upward to allow small implementation changes while detecting material growth.</p>
+<p>The table records the beta.10 build measured on October 14, 2026. Limits are rounded upward to allow small implementation changes while detecting material growth. The full bundle includes all nine Core Extensions.</p>
 <table>
 <thead>
 <tr>
@@ -582,38 +582,38 @@ npm run test:budget
 </thead>
 <tbody><tr>
 <td><code>aellux.min.js</code></td>
-<td align="right">25.6 KiB</td>
-<td align="right">9.3 KiB</td>
+<td align="right">27.9 KiB</td>
+<td align="right">10.4 KiB</td>
 <td align="right">29 KiB</td>
 <td align="right">12 KiB</td>
 </tr>
 <tr>
 <td><code>aellux.esm.min.js</code></td>
-<td align="right">14.6 KiB</td>
-<td align="right">5.0 KiB</td>
-<td align="right">17 KiB</td>
+<td align="right">17.0 KiB</td>
+<td align="right">5.7 KiB</td>
+<td align="right">18 KiB</td>
 <td align="right">7 KiB</td>
 </tr>
 <tr>
 <td><code>aellux.orchestrator.min.js</code></td>
-<td align="right">16.8 KiB</td>
-<td align="right">6.0 KiB</td>
+<td align="right">17.4 KiB</td>
+<td align="right">6.3 KiB</td>
 <td align="right">21 KiB</td>
 <td align="right">8 KiB</td>
 </tr>
 <tr>
 <td><code>aellux.full.min.js</code></td>
-<td align="right">34.4 KiB</td>
-<td align="right">11.1 KiB</td>
-<td align="right">41 KiB</td>
-<td align="right">14 KiB</td>
+<td align="right">54.3 KiB</td>
+<td align="right">16.9 KiB</td>
+<td align="right">56 KiB</td>
+<td align="right">18 KiB</td>
 </tr>
 <tr>
 <td><code>aellux.full.legacy.min.js</code></td>
-<td align="right">316.8 KiB</td>
-<td align="right">109.4 KiB</td>
-<td align="right">351 KiB</td>
-<td align="right">126 KiB</td>
+<td align="right">350.2 KiB</td>
+<td align="right">117.0 KiB</td>
+<td align="right">360 KiB</td>
+<td align="right">130 KiB</td>
 </tr>
 <tr>
 <td><code>aellux.ext.adaptive.min.css</code></td>
@@ -624,13 +624,13 @@ npm run test:budget
 </tr>
 <tr>
 <td><code>aellux.ext.present.min.css</code></td>
-<td align="right">2.3 KiB</td>
-<td align="right">0.5 KiB</td>
+<td align="right">3.8 KiB</td>
+<td align="right">0.8 KiB</td>
 <td align="right">4 KiB</td>
 <td align="right">2 KiB</td>
 </tr>
 </tbody></table>
-<p>Each separately distributed minified Core Extension is also checked. Their individual limits are held in the executable configuration so the documentation does not duplicate a second table of values.</p>
+<p>Each separately distributed minified Core Extension, including Anchor and Scrollbox, is also checked. Their individual limits are held in the executable configuration so the documentation does not duplicate a second table of values.</p>
 <h2>Scope and Limitations</h2>
 <p>This budget detects distribution-size regressions. It does not measure page-specific network time, parsing time, boot time, layout, mount duration, memory use, or real-user performance. The Legacy full bundle is materially larger because it includes the shared polyfills required for its ES5 path. Runtime-performance budgets require representative application fixtures and remain post-release work.</p>
 <p>The Present JavaScript raw limit is 10 KiB after adding the optional measured size-transition path; its 4 KiB gzip limit remains unchanged.</p>

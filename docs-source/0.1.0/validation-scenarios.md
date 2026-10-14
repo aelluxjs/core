@@ -1,6 +1,6 @@
 # Validation Scenarios
 
-The pages in `tests/browser/` are focused browser scenarios for the `0.1.0-beta` release. Each page reports `PASSED` or `FAILED` in its document. Playwright runs them in Chromium, Firefox, and WebKit, and also checks dynamic mounting and extension CSS from outside the page.
+The HTML pages in `tests/browser/` are focused browser scenarios for the `0.1.0-beta` release. Each scenario page reports `PASSED` or `FAILED` in its document. Playwright also runs `.spec.mjs` tests for runtime APIs, Extension behavior, generated assets, and DOM state in Chromium, Firefox, and WebKit.
 
 ## Automated Run
 
@@ -13,25 +13,19 @@ npm run test:browser
 
 `test:browser` builds `dist/` before testing. Use `npm run test:browser -- --project=chromium` to run only Chromium. To use an installed Chrome or Edge instead of Playwright's Chromium, set `AELLUXJS_TEST_BROWSER_CHANNEL` to `chrome` or `msedge` and select the Chromium project. The Bootstrap scenario uses the versioned local fixture `tests/fixtures/bootstrap-5.3.8.min.css` and requires no CDN or network access.
 
-## Recorded Desktop Environment
+To run one spec after a build, use `npx playwright test tests/browser/full-bundle.spec.mjs --project=chromium`. Direct `npx playwright test` commands use the current `dist/` files; run `npm run build:core` first after changing runtime or Extension source. The full bundle spec compares bundled and initialized Extensions with every `src/aellux.ext.*.js` source file that calls `extAttach` in the normal and minified Modern and Legacy runtimes. Run `npm run test:budget` after a build to check raw and gzip artifact limits.
 
-The release-candidate run uses Playwright 1.63.0 on Windows 11 Pro (`10.0.26200.0`):
+## Browser Matrix
 
-| Project | Engine version | Playwright revision |
-| --- | --- | ---: |
-| `chromium` | 153.0.8010.12 | 1243 |
-| `firefox` | 155.0 | 1543 |
-| `webkit` | 26.6 | 2359 |
+The Playwright configuration runs Chromium, Firefox, and WebKit. The suite covers both normal Modern selection and forced Legacy execution. Forced Legacy validates the ES5 distribution path in these current engines; it does not establish support for historical versions of those browsers.
 
-The suite covers both normal Modern selection and forced Legacy execution. Forced Legacy validates the ES5 distribution path in these current engines; it does not establish support for historical versions of those browsers.
-
-The complete matrix was run on October 10, 2026 with:
+Run the complete matrix with one worker when recording a release result:
 
 ```sh
 npm run test:browser -- --workers=1
 ```
 
-Result: **306 passed** across the three projects. A single worker is used for the recorded release run to keep the local HTTP fixture available for the entire matrix.
+The test runner's summary gives the current count and result. A single worker keeps the local HTTP fixture available for the entire matrix.
 
 ## Scenario Pages
 
@@ -64,6 +58,7 @@ The browser suite covers the release contract in Chromium, Firefox, and WebKit:
 | Contract area | Covered behavior |
 | --- | --- |
 | API normalization and builds | Global and ESM identity, camelCase Extension keys and options, compound filenames, Modern and Legacy selection, minified files, optional styles, and incompatible builds. |
+| Full bundle completeness | Every Core Extension is bundled, registered, and initialized in Modern, Legacy, normal, and minified full runtimes, without a separate Extension script request. |
 | Diagnostics | Severity, verbosity updates, retained history, invalid selectors and registrations, unavailable storage, callback failures, transitions, and lifecycle failures. |
 | Loading | Eager and lazy loading, shared concurrent Promises, failed `init()` retry, failed script retry, optional stylesheet failure, and lazy-index cleanup after success or destruction. |
 | Lifecycle failure isolation | Rejected initialization, partial element mounting, failed update and unmount callbacks, failed destroy callbacks, and continued work for unaffected elements, registrations, and Extensions. |

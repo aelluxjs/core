@@ -53,6 +53,15 @@ export function createAelluxApi(root, constants) {
       name = fromCamelCase(name);
       return constants.AELLUXJS_CLASS_NAME_PREFFIX.replace(/\?/, name);
     },
+    registerCssProperty: function (descriptor) {
+      if (!root.CSS || typeof root.CSS.registerProperty !== "function") return false;
+      try {
+        root.CSS.registerProperty(descriptor);
+        return true;
+      } catch (error) {
+        return false;
+      }
+    },
     extFilename: function (extensionName) {
       extensionName = fromCamelCase(extensionName);
       return "aellux." + constants.AELLUXJS_EXT_SCRIPT_PREFIX + "." + extensionName +

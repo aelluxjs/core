@@ -24,6 +24,6 @@ Dispatch `AelluxJsPushAjaxReplace` with `detail: { url, selectors }` to record t
 
 ## Parent page and iframe
 
-A browser fixture now runs this Extension in both a parent page and an iframe. Its test confirms that after a parent state followed by an iframe `ajaxReplace` state, the first Back fires `popstate` and `AelluxJsSnapshotRestore` only in the iframe; the next Back fires them only in the parent. The test passes in Chromium, Firefox and WebKit. Run `npx playwright test tests/browser/state-navigation-iframe.spec.mjs` to repeat it, or start `node tests/browser/server.mjs` and open `/tests/browser/state-navigation-iframe-parent.html` to use the buttons manually.
+A browser fixture runs this Extension in `basic` mode in both a parent page and an iframe, keeping Focus out of this history-isolation test. Its test confirms that after a parent state followed by an iframe `ajaxReplace` state, the first Back fires `popstate` and `AelluxJsSnapshotRestore` only in the iframe; the next Back fires them only in the parent. The test passes in Chromium, Firefox and WebKit. Build `dist/` first, then run `npx playwright test tests/browser/state-navigation-iframe.spec.mjs` to repeat it, or start `node tests/browser/server.mjs` and open `/tests/browser/state-navigation-iframe-parent.html` to use the buttons manually.
 
 The parent and iframe do not need an owner marker to route `popstate`: each instance reads the history state of its own window. Applications that need to share data between the two documents can implement that exchange separately.

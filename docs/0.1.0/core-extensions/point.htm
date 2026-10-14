@@ -52,7 +52,7 @@
 
 <script src="/core/docs/assets/docweaver/js/toc-init.js?t=1"></script>
 
-<script src="https://cdn.jsdelivr.net/npm/@aelluxjs/core@0.1.0-beta.9/dist/aellux.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@aelluxjs/core@0.1.0-beta.10/dist/aellux.min.js"></script>
 <script>
   AelluxJs.ext("/core/docs/assets/docweaver/js/aellux.ext.ajax-href.js");
   AelluxJs.init({ mode: "full" });
@@ -562,7 +562,7 @@ Point                  </li>
 
         <div id="doc-content" style="min-height: calc(100vh - 200px);" class="js-toc-content" ajax-load="doc-content">
 <h1>Point Extension</h1>
-<p><code>point</code> tracks the pointers currently pressed or hovering over the document and relates them to mounted elements with <code>data-ae-point</code>. It is a standalone core Extension and is not included in the <code>full</code> runtime bundle. Register it before initialization:</p>
+<p><code>point</code> tracks the pointers currently pressed or hovering over the document and relates them to mounted elements with <code>data-ae-point</code>. It is included in the <code>full</code> runtime. In <code>basic</code> mode, register it before initialization:</p>
 <pre><code class="language-html">&lt;div id=&quot;canvas&quot; data-ae-point=&quot;2&quot;&gt;&lt;/div&gt;
 </code></pre>
 <pre><code class="language-js">$ae.ext(&quot;point&quot;);

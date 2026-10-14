@@ -13,11 +13,12 @@
  * `options.adaptiveParams`. `ResizeObserver` is preferred and window resize is
  * the fallback when that API is unavailable.
  *
- * Outputs and owned state: owns the `ae--shape-*` and `ae--fits-*` classes and
- * `aria-orientation` value it writes, then dispatches `AelluxJsAdaptiveUpdate`.
+ * Outputs and owned state: owns the `ae--shape-*` and `ae--fits-*` classes,
+ * `--ae-width`, `--ae-height` and the `aria-orientation` value it writes, then
+ * dispatches `AelluxJsAdaptiveUpdate`.
  *
  * Lifecycle: removes fallback listeners, stops observing unmounted elements
- * and removes every class it manages.
+ * and removes every class it manages. It restores prior inline dimension values.
  *
  * Accessibility: does not change semantics, focus, reading order or visibility
  * by itself. Styles consuming its classes remain responsible for readable
@@ -41,6 +42,8 @@
     shapeSquare: AelluxJs.className("shape-square")
   };
   const adaptiveElements = new Set();
+  const initialDimensions = new Map();
+  const dimensionProperties = ["--ae-width", "--ae-height"];
   const pendingResizeEntries = new Map();
   const pendingResizeElements = new Set();
 
@@ -113,6 +116,10 @@
 
   function mountAdaptive(element) {
     if (adaptiveElements.has(element)) return;
+    initialDimensions.set(element, dimensionProperties.map(name => ({
+      value: element.style.getPropertyValue(name),
+      priority: element.style.getPropertyPriority(name)
+    })));
     adaptiveElements.add(element);
     const bounds = element.getBoundingClientRect();
     updateAdaptive(element, bounds.width, bounds.height);
@@ -128,6 +135,13 @@
     else if (adaptiveElements.size === 0) root.removeEventListener("resize", onWindowResize);
 
     for (const name of managedClasses) { element.classList.remove(name); }
+    const initial = initialDimensions.get(element);
+    dimensionProperties.forEach((name, index) => {
+      const { value, priority } = initial[index];
+      if (value) element.style.setProperty(name, value, priority);
+      else element.style.removeProperty(name);
+    });
+    initialDimensions.delete(element);
   }
 
   function onResize(entries) {
@@ -213,8 +227,18 @@
     const space = Math.sqrt(width * height);
     for (let i = 0; i < sizeThresholds.length; i++) {
       const threshold = sizeThresholds[i];
-      element.classList.toggle(threshold.className, space >= threshold.minimum);
+      element.classList.toggle(
+        threshold.className,
+        space >= threshold.minimum
+      );
     }
+
+    for (const name of dimensionProperties) {
+      if (element.style.getPropertyPriority(name)) element.style.removeProperty(name);
+    }
+    element.style.setProperty("--ae-width", width);
+    element.style.setProperty("--ae-height", height);
+
     AelluxJs.dispatchFrom(element, "AdaptiveUpdate", { detail: null });
   }
 

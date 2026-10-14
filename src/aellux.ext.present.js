@@ -323,16 +323,17 @@
     triggerElement.setAttribute(ARIA_EXPANDED, String(expanded));
   }
 
-  function pop(element) { return presentTransition(element, true); }
+  function pop(element) { return presentTransition(element, true, true); }
   function unpop(element) { return presentTransition(element, false); }
   function toggle(element, goto) { return presentTransition(element, goto); }
   function trigger(element, trigger) {
-    switch (trigger) {
-      case "pop": return pop(element); break;
-      case "unpop": return unpop(element); break;
-      case "toggle": return toggle(element); break;
-      default: return toggle(element); break;
-    }
+    trigger = typeof trigger === "string" ?
+      (trigger || "toggle").toLowerCase() :
+      "toggle";
+    const method = AelluxJs.ext.present[trigger];
+    return method && typeof method === "function" ?
+      method(element) :
+      toggle(element);
   }
 
   function restoreMeasuredStyles(element, controller) {
@@ -345,7 +346,7 @@
     controller.measuredStyles = null;
   }
 
-  function prepareMeasuredSize(element, controller, gotoVisible, previousSize) {
+  function prepareMeasuredSize(element, controller, gotoVisible, previousSize, waitForPreparation) {
     if (!controller.measuredHeight && !controller.measuredWidth) return null;
     if (!controller.measuredStyles) {
       controller.measuredStyles = ["max-height", "max-width"].map(name => [
@@ -356,26 +357,29 @@
       if (value) element.style.setProperty(name, value, priority);
       else element.style.removeProperty(name);
     }
-    const computed = root.getComputedStyle(element);
-    const height = parseFloat(computed.height);
-    const width = parseFloat(computed.width);
-    const finalSize = {
-      height: Number.isFinite(height) ? height : element.scrollHeight,
-      width: Number.isFinite(width) ? width : element.scrollWidth
-    };
+    let size = previousSize;
+    if (gotoVisible || !size) {
+      const computed = root.getComputedStyle(element);
+      const height = parseFloat(computed.height);
+      const width = parseFloat(computed.width);
+      size = {
+        height: Number.isFinite(height) ? height : element.scrollHeight,
+        width: Number.isFinite(width) ? width : element.scrollWidth
+      };
+    }
     const start = previousSize || (gotoVisible
-      ? { height: 0, width: 0 } : finalSize);
+      ? { height: 0, width: 0 } : size);
     if (controller.measuredHeight) {
       element.style.setProperty("max-height", `${Math.max(0, start.height)}px`, "important");
     }
     if (controller.measuredWidth) {
       element.style.setProperty("max-width", `${Math.max(0, start.width)}px`, "important");
     }
-    element.getBoundingClientRect();
-    return finalSize;
+    if (!waitForPreparation) element.getBoundingClientRect();
+    return size;
   }
 
-  async function presentTransition(element, gotoVisible) {
+  async function presentTransition(element, gotoVisible, forceRepop = false) {
     const controller = presentElements.get(element);
     if (!controller) return;
 
@@ -387,7 +391,7 @@
     const newDirection = gotoVisible ? POP : UNPOP;
 
     if ((element.hidden && !gotoVisible)
-      || newDirection === controller.direction) { return; }
+      || (newDirection === controller.direction && !forceRepop)) { return; }
 
     let transition = null;
 
@@ -398,9 +402,18 @@
       );
       if (!allowEvent) { return; }
 
-      const reusePreparation = controller.motionEnabled &&
+      if (forceRepop && (!element.hidden || controller.transition)) {
+        controller.stop();
+        element.hidden = true;
+        openPresentElements.delete(element);
+        controller.setAriaExpanded("false");
+        element.getBoundingClientRect();
+      }
+
+      const reusePreparation = !forceRepop && controller.motionEnabled &&
         controller.transition !== null &&
         controller.classList.contains(className.willChange);
+      const waitForPreparation = controller.motionEnabled && !reusePreparation;
       let previousSize = null;
       if (reusePreparation && (controller.measuredHeight || controller.measuredWidth)) {
         const computed = root.getComputedStyle(element);
@@ -409,7 +422,9 @@
           width: parseFloat(computed.maxWidth)
         };
       }
-      controller.stop({ replacement: reusePreparation, transitionStart: true });
+      if (!forceRepop) {
+        controller.stop({ replacement: reusePreparation, transitionStart: true });
+      }
       controller.direction = newDirection;
 
       const interrupted = new Promise((_, interruptTransition) => {
@@ -424,12 +439,14 @@
 
       element.hidden = false;
       openPresentElements.add(element);
-      const finalSize = prepareMeasuredSize(element, controller, gotoVisible, previousSize);
+      const size = prepareMeasuredSize(
+        element, controller, gotoVisible, previousSize, waitForPreparation
+      );
       if (controller.motionEnabled) {
         controller.classList.add(className.willChange);
       }
 
-      if (controller.motionEnabled && !reusePreparation) {
+      if (waitForPreparation) {
         const prepared = new Promise(resolve => {
           transition.timeout = setTimeout(() => {
             transition.timeout = null;
@@ -455,12 +472,12 @@
         className.unpopping
       );
       controller.classList.add(transition.className);
-      if (finalSize) {
+      if (size) {
         if (controller.measuredHeight) {
-          element.style.setProperty("max-height", `${gotoVisible ? finalSize.height : 0}px`, "important");
+          element.style.setProperty("max-height", `${gotoVisible ? size.height : 0}px`, "important");
         }
         if (controller.measuredWidth) {
-          element.style.setProperty("max-width", `${gotoVisible ? finalSize.width : 0}px`, "important");
+          element.style.setProperty("max-width", `${gotoVisible ? size.width : 0}px`, "important");
         }
       }
       const completed = new Promise(completeTransition => {

@@ -482,7 +482,7 @@
       triggerElement.setAttribute(ARIA_EXPANDED, String(expanded));
     }
     function pop(element) {
-      return presentTransition(element, true);
+      return presentTransition(element, true, true);
     }
     function unpop(element) {
       return presentTransition(element, false);
@@ -491,20 +491,9 @@
       return presentTransition(element, goto);
     }
     function trigger(element, trigger2) {
-      switch (trigger2) {
-        case "pop":
-          return pop(element);
-          break;
-        case "unpop":
-          return unpop(element);
-          break;
-        case "toggle":
-          return toggle(element);
-          break;
-        default:
-          return toggle(element);
-          break;
-      }
+      trigger2 = typeof trigger2 === "string" ? (trigger2 || "toggle").toLowerCase() : "toggle";
+      var method = AelluxJs.ext.present[trigger2];
+      return method && typeof method === "function" ? method(element) : toggle(element);
     }
     function restoreMeasuredStyles(element, controller) {
       var saved = controller.measuredStyles;
@@ -523,7 +512,7 @@
       }
       controller.measuredStyles = null;
     }
-    function prepareMeasuredSize(element, controller, gotoVisible, previousSize) {
+    function prepareMeasuredSize(element, controller, gotoVisible, previousSize, waitForPreparation) {
       if (!controller.measuredHeight && !controller.measuredWidth) return null;
       if (!controller.measuredStyles) {
         controller.measuredStyles = ["max-height", "max-width"].map(function(name2) {
@@ -542,35 +531,39 @@
       } finally {
         _iterator6.f();
       }
-      var computed = root.getComputedStyle(element);
-      var height = parseFloat(computed.height);
-      var width = parseFloat(computed.width);
-      var finalSize = {
-        height: Number.isFinite(height) ? height : element.scrollHeight,
-        width: Number.isFinite(width) ? width : element.scrollWidth
-      };
+      var size = previousSize;
+      if (gotoVisible || !size) {
+        var computed = root.getComputedStyle(element);
+        var height = parseFloat(computed.height);
+        var width = parseFloat(computed.width);
+        size = {
+          height: Number.isFinite(height) ? height : element.scrollHeight,
+          width: Number.isFinite(width) ? width : element.scrollWidth
+        };
+      }
       var start = previousSize || (gotoVisible ? {
         height: 0,
         width: 0
-      } : finalSize);
+      } : size);
       if (controller.measuredHeight) {
         element.style.setProperty("max-height", "".concat(Math.max(0, start.height), "px"), "important");
       }
       if (controller.measuredWidth) {
         element.style.setProperty("max-width", "".concat(Math.max(0, start.width), "px"), "important");
       }
-      element.getBoundingClientRect();
-      return finalSize;
+      if (!waitForPreparation) element.getBoundingClientRect();
+      return size;
     }
     function presentTransition(_x, _x2) {
       return _presentTransition.apply(this, arguments);
     }
     function _presentTransition() {
       _presentTransition = _asyncToGenerator(/* @__PURE__ */ _regenerator().m(function _callee(element, gotoVisible) {
-        var controller, newDirection, transition, allowEvent, reusePreparation, previousSize, computed, interrupted, finalSize, prepared, duration, timeMs, completed, ownsTransition, _t, _t2;
+        var forceRepop, controller, newDirection, transition, allowEvent, reusePreparation, waitForPreparation, previousSize, computed, interrupted, size, prepared, duration, timeMs, completed, ownsTransition, _args = arguments, _t, _t2;
         return _regenerator().w(function(_context) {
           while (1) switch (_context.p = _context.n) {
             case 0:
+              forceRepop = _args.length > 2 && _args[2] !== void 0 ? _args[2] : false;
               controller = presentElements.get(element);
               if (controller) {
                 _context.n = 1;
@@ -581,7 +574,7 @@
               if (controller.direction === null) controller.direction = element.hidden ? UNPOP : POP;
               if (typeof gotoVisible === "undefined" || gotoVisible === null) gotoVisible = controller.direction === POP ? false : true;
               newDirection = gotoVisible ? POP : UNPOP;
-              if (!(element.hidden && !gotoVisible || newDirection === controller.direction)) {
+              if (!(element.hidden && !gotoVisible || newDirection === controller.direction && !forceRepop)) {
                 _context.n = 2;
                 break;
               }
@@ -599,7 +592,15 @@
               }
               return _context.a(2);
             case 4:
-              reusePreparation = controller.motionEnabled && controller.transition !== null && controller.classList.contains(className.willChange);
+              if (forceRepop && (!element.hidden || controller.transition)) {
+                controller.stop();
+                element.hidden = true;
+                openPresentElements.delete(element);
+                controller.setAriaExpanded("false");
+                element.getBoundingClientRect();
+              }
+              reusePreparation = !forceRepop && controller.motionEnabled && controller.transition !== null && controller.classList.contains(className.willChange);
+              waitForPreparation = controller.motionEnabled && !reusePreparation;
               previousSize = null;
               if (reusePreparation && (controller.measuredHeight || controller.measuredWidth)) {
                 computed = root.getComputedStyle(element);
@@ -608,10 +609,12 @@
                   width: parseFloat(computed.maxWidth)
                 };
               }
-              controller.stop({
-                replacement: reusePreparation,
-                transitionStart: true
-              });
+              if (!forceRepop) {
+                controller.stop({
+                  replacement: reusePreparation,
+                  transitionStart: true
+                });
+              }
               controller.direction = newDirection;
               interrupted = new Promise(function(_, interruptTransition) {
                 transition = {
@@ -624,11 +627,11 @@
               });
               element.hidden = false;
               openPresentElements.add(element);
-              finalSize = prepareMeasuredSize(element, controller, gotoVisible, previousSize);
+              size = prepareMeasuredSize(element, controller, gotoVisible, previousSize, waitForPreparation);
               if (controller.motionEnabled) {
                 controller.classList.add(className.willChange);
               }
-              if (!(controller.motionEnabled && !reusePreparation)) {
+              if (!waitForPreparation) {
                 _context.n = 5;
                 break;
               }
@@ -647,12 +650,12 @@
               element.style.setProperty("--ae-".concat(newDirection, "-low-steps").toLowerCase(), Math.max(1, parseInt(timeMs / 62.5)));
               controller.classList.remove(className.pop, className.popping, className.unpopping);
               controller.classList.add(transition.className);
-              if (finalSize) {
+              if (size) {
                 if (controller.measuredHeight) {
-                  element.style.setProperty("max-height", "".concat(gotoVisible ? finalSize.height : 0, "px"), "important");
+                  element.style.setProperty("max-height", "".concat(gotoVisible ? size.height : 0, "px"), "important");
                 }
                 if (controller.measuredWidth) {
-                  element.style.setProperty("max-width", "".concat(gotoVisible ? finalSize.width : 0, "px"), "important");
+                  element.style.setProperty("max-width", "".concat(gotoVisible ? size.width : 0, "px"), "important");
                 }
               }
               completed = new Promise(function(completeTransition) {

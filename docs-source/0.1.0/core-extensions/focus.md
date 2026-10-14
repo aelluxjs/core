@@ -1,6 +1,6 @@
 # Focus Extension
 
-Register `focus` separately with `AelluxJs.ext("focus")`. It is not included in the `full` bundle.
+`focus` is included in the `full` runtime. In `basic` mode, register it with `AelluxJs.ext("focus")` before initialization.
 
 `data-ae-focus="next"` adds `enterkeyhint="next"` to text-entry inputs, textareas and editable elements when `enterkeyhint` is absent. An explicit hint is preserved. Pressing Enter on a mounted element moves focus to the next connected, visible, enabled focusable control in document order. If there is no next control, Enter keeps its usual behavior. This also applies when a mobile keyboard sends Enter for its Next or confirmation key.
 

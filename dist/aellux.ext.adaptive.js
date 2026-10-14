@@ -17,6 +17,8 @@
       shapeSquare: AelluxJs.className("shape-square")
     };
     const adaptiveElements = /* @__PURE__ */ new Set();
+    const initialDimensions = /* @__PURE__ */ new Map();
+    const dimensionProperties = ["--ae-width", "--ae-height"];
     const pendingResizeEntries = /* @__PURE__ */ new Map();
     const pendingResizeElements = /* @__PURE__ */ new Set();
     const adaptiveParams = {
@@ -83,6 +85,10 @@
     }
     function mountAdaptive(element) {
       if (adaptiveElements.has(element)) return;
+      initialDimensions.set(element, dimensionProperties.map((name) => ({
+        value: element.style.getPropertyValue(name),
+        priority: element.style.getPropertyPriority(name)
+      })));
       adaptiveElements.add(element);
       const bounds = element.getBoundingClientRect();
       updateAdaptive(element, bounds.width, bounds.height);
@@ -98,6 +104,13 @@
       for (const name of managedClasses) {
         element.classList.remove(name);
       }
+      const initial = initialDimensions.get(element);
+      dimensionProperties.forEach((name, index) => {
+        const { value, priority } = initial[index];
+        if (value) element.style.setProperty(name, value, priority);
+        else element.style.removeProperty(name);
+      });
+      initialDimensions.delete(element);
     }
     function onResize(entries) {
       for (const entry of entries) {
@@ -176,8 +189,16 @@
       const space = Math.sqrt(width * height);
       for (let i = 0; i < sizeThresholds.length; i++) {
         const threshold = sizeThresholds[i];
-        element.classList.toggle(threshold.className, space >= threshold.minimum);
+        element.classList.toggle(
+          threshold.className,
+          space >= threshold.minimum
+        );
       }
+      for (const name of dimensionProperties) {
+        if (element.style.getPropertyPriority(name)) element.style.removeProperty(name);
+      }
+      element.style.setProperty("--ae-width", width);
+      element.style.setProperty("--ae-height", height);
       AelluxJs.dispatchFrom(element, "AdaptiveUpdate", { detail: null });
     }
     function inferOrientation(flexBox, selector = "*") {

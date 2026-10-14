@@ -4,11 +4,21 @@ All notable changes to aellux.js will be documented in this file.
 
 ## Unreleased
 
+## [0.1.0-beta.10] - 2026-10-14
+
+### Added
+
+- Added Anchor and Scrollbox Extensions to the full Modern and Legacy bundles. Anchor exposes pivot-based placement through weak CSS and CSS custom properties; Scrollbox exposes normalized scroll progress on both axes.
+- Added the public `$ae.registerCssProperty()` helper with feature detection and graceful handling of rejected registrations.
+
 ### Changed
 
 - Removed automatic `data-ae-low-hardware` detection from the boot; applications can set the attribute explicitly.
 - Made `data-ae-present-motion` optional. Present keeps grid transitions when it exists and measures `max-height`/`max-width` transitions without it, preserving the original content structure and reporting an informational diagnostic.
 - Raised Present's minified JavaScript raw budget from 8 KiB to 10 KiB for the measured transition path; the 4 KiB gzip limit is unchanged.
+- Raised full bundle budgets for the nine-Extension release and added individual Anchor and Scrollbox budgets.
+- Adaptive and Scrollbox restore their previous inline CSS custom properties when unmounted.
+- Updated package and documentation references to `0.1.0-beta.10`.
 
 ## [0.1.0-beta.9] - 2026-10-13
 

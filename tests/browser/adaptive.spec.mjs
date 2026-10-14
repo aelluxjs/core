@@ -1,5 +1,38 @@
 import { expect, test } from "@playwright/test";
 
+test("adaptive restores prior inline dimension variables on unmount", async ({ page }) => {
+  await page.goto("/tests/index.htm");
+  await page.addScriptTag({ url: "/dist/aellux.js" });
+  await page.evaluate(() => {
+    document.body.innerHTML = `
+      <div id="custom" data-ae-adaptive
+        style="width: 120px; height: 80px; --ae-width: 42 !important; --ae-height: 24px"></div>
+      <div id="unset" data-ae-adaptive style="width: 120px; height: 80px"></div>`;
+    AelluxJs.ext("adaptive");
+  });
+  await page.addScriptTag({ url: "/src/aellux.ext.adaptive.js" });
+  await page.evaluate(() => AelluxJs.init({ mode: "basic" }));
+  await expect.poll(() => page.evaluate(() => AelluxJs.ext.adaptive?.initialized)).toBe(true);
+
+  const values = () => page.evaluate(() => ["custom", "unset"].map(id => {
+    const style = document.getElementById(id).style;
+    return ["--ae-width", "--ae-height"].map(name => ({
+      value: style.getPropertyValue(name),
+      priority: style.getPropertyPriority(name)
+    }));
+  }));
+  await expect.poll(values).toEqual([
+    [{ value: "120", priority: "" }, { value: "80", priority: "" }],
+    [{ value: "120", priority: "" }, { value: "80", priority: "" }]
+  ]);
+
+  await page.evaluate(() => AelluxJs.unmount(document.body, "adaptive"));
+  expect(await values()).toEqual([
+    [{ value: "42", priority: "important" }, { value: "24px", priority: "" }],
+    [{ value: "", priority: "" }, { value: "", priority: "" }]
+  ]);
+});
+
 test("adaptive updates shape and size classes as its dimensions change", async ({ page }) => {
   await page.goto("/tests/index.htm");
   await page.evaluate(() => {

@@ -29,7 +29,8 @@
         }
       });
     });
-    AelluxJs.init({ mode: "full", useHash: false });
+    AelluxJs.ext("state-navigation");
+    AelluxJs.init({ mode: "basic", useHash: false });
     window.fixtureReady = AelluxJs.wait("state-navigation");
   </script>
 </body>

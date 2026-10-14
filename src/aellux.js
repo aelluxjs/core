@@ -31,7 +31,8 @@ import createWeakCss from "./internal/create-weak-css.js";
     existingApi.registry.dep &&
     existingApi.registry.lazyExtSelectors &&
     existingApi.registry.extMounters &&
-    existingApi.registry.preferenceMediaQueries && existingApi.diagnostics
+    existingApi.registry.preferenceMediaQueries && existingApi.diagnostics &&
+    typeof existingApi.registerCssProperty === "function"
     ? existingApi : createAelluxApi(root, CONSTANTS);
   var diagnostics = api.diagnostics;
 

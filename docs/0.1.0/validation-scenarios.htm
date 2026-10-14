@@ -52,7 +52,7 @@
 
 <script src="/core/docs/assets/docweaver/js/toc-init.js?t=1"></script>
 
-<script src="https://cdn.jsdelivr.net/npm/@aelluxjs/core@0.1.0-beta.9/dist/aellux.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@aelluxjs/core@0.1.0-beta.10/dist/aellux.min.js"></script>
 <script>
   AelluxJs.ext("/core/docs/assets/docweaver/js/aellux.ext.ajax-href.js");
   AelluxJs.init({ mode: "full" });
@@ -558,44 +558,20 @@ Validation Scenarios                  </li>
 
         <div id="doc-content" style="min-height: calc(100vh - 200px);" class="js-toc-content" ajax-load="doc-content">
 <h1>Validation Scenarios</h1>
-<p>The pages in <code>tests/browser/</code> are focused browser scenarios for the <code>0.1.0-beta</code> release. Each page reports <code>PASSED</code> or <code>FAILED</code> in its document. Playwright runs them in Chromium, Firefox, and WebKit, and also checks dynamic mounting and extension CSS from outside the page.</p>
+<p>The HTML pages in <code>tests/browser/</code> are focused browser scenarios for the <code>0.1.0-beta</code> release. Each scenario page reports <code>PASSED</code> or <code>FAILED</code> in its document. Playwright also runs <code>.spec.mjs</code> tests for runtime APIs, Extension behavior, generated assets, and DOM state in Chromium, Firefox, and WebKit.</p>
 <h2>Automated Run</h2>
 <p>Install the Playwright browsers and run the scenarios:</p>
 <pre><code class="language-sh">npx playwright install
 npm run test:browser
 </code></pre>
 <p><code>test:browser</code> builds <code>dist/</code> before testing. Use <code>npm run test:browser -- --project=chromium</code> to run only Chromium. To use an installed Chrome or Edge instead of Playwright&#39;s Chromium, set <code>AELLUXJS_TEST_BROWSER_CHANNEL</code> to <code>chrome</code> or <code>msedge</code> and select the Chromium project. The Bootstrap scenario uses the versioned local fixture <code>tests/fixtures/bootstrap-5.3.8.min.css</code> and requires no CDN or network access.</p>
-<h2>Recorded Desktop Environment</h2>
-<p>The release-candidate run uses Playwright 1.63.0 on Windows 11 Pro (<code>10.0.26200.0</code>):</p>
-<table>
-<thead>
-<tr>
-<th>Project</th>
-<th>Engine version</th>
-<th align="right">Playwright revision</th>
-</tr>
-</thead>
-<tbody><tr>
-<td><code>chromium</code></td>
-<td>153.0.8010.12</td>
-<td align="right">1243</td>
-</tr>
-<tr>
-<td><code>firefox</code></td>
-<td>155.0</td>
-<td align="right">1543</td>
-</tr>
-<tr>
-<td><code>webkit</code></td>
-<td>26.6</td>
-<td align="right">2359</td>
-</tr>
-</tbody></table>
-<p>The suite covers both normal Modern selection and forced Legacy execution. Forced Legacy validates the ES5 distribution path in these current engines; it does not establish support for historical versions of those browsers.</p>
-<p>The complete matrix was run on October 10, 2026 with:</p>
+<p>To run one spec after a build, use <code>npx playwright test tests/browser/full-bundle.spec.mjs --project=chromium</code>. Direct <code>npx playwright test</code> commands use the current <code>dist/</code> files; run <code>npm run build:core</code> first after changing runtime or Extension source. The full bundle spec compares bundled and initialized Extensions with every <code>src/aellux.ext.*.js</code> source file that calls <code>extAttach</code> in the normal and minified Modern and Legacy runtimes. Run <code>npm run test:budget</code> after a build to check raw and gzip artifact limits.</p>
+<h2>Browser Matrix</h2>
+<p>The Playwright configuration runs Chromium, Firefox, and WebKit. The suite covers both normal Modern selection and forced Legacy execution. Forced Legacy validates the ES5 distribution path in these current engines; it does not establish support for historical versions of those browsers.</p>
+<p>Run the complete matrix with one worker when recording a release result:</p>
 <pre><code class="language-sh">npm run test:browser -- --workers=1
 </code></pre>
-<p>Result: <strong>306 passed</strong> across the three projects. A single worker is used for the recorded release run to keep the local HTTP fixture available for the entire matrix.</p>
+<p>The test runner&#39;s summary gives the current count and result. A single worker keeps the local HTTP fixture available for the entire matrix.</p>
 <h2>Scenario Pages</h2>
 <table>
 <thead>
@@ -686,6 +662,10 @@ npm run test:browser
 <tbody><tr>
 <td>API normalization and builds</td>
 <td>Global and ESM identity, camelCase Extension keys and options, compound filenames, Modern and Legacy selection, minified files, optional styles, and incompatible builds.</td>
+</tr>
+<tr>
+<td>Full bundle completeness</td>
+<td>Every Core Extension is bundled, registered, and initialized in Modern, Legacy, normal, and minified full runtimes, without a separate Extension script request.</td>
 </tr>
 <tr>
 <td>Diagnostics</td>

@@ -98,6 +98,8 @@
       shapeSquare: AelluxJs.className("shape-square")
     };
     var adaptiveElements = /* @__PURE__ */ new Set();
+    var initialDimensions = /* @__PURE__ */ new Map();
+    var dimensionProperties = ["--ae-width", "--ae-height"];
     var pendingResizeEntries = /* @__PURE__ */ new Map();
     var pendingResizeElements = /* @__PURE__ */ new Set();
     var adaptiveParams = {
@@ -191,6 +193,12 @@
     }
     function mountAdaptive(element) {
       if (adaptiveElements.has(element)) return;
+      initialDimensions.set(element, dimensionProperties.map(function(name) {
+        return {
+          value: element.style.getPropertyValue(name),
+          priority: element.style.getPropertyPriority(name)
+        };
+      }));
       adaptiveElements.add(element);
       var bounds = element.getBoundingClientRect();
       updateAdaptive(element, bounds.width, bounds.height);
@@ -214,6 +222,13 @@
       } finally {
         _iterator2.f();
       }
+      var initial = initialDimensions.get(element);
+      dimensionProperties.forEach(function(name2, index) {
+        var _initial$index = initial[index], value = _initial$index.value, priority = _initial$index.priority;
+        if (value) element.style.setProperty(name2, value, priority);
+        else element.style.removeProperty(name2);
+      });
+      initialDimensions.delete(element);
     }
     function onResize(entries) {
       var _iterator3 = _createForOfIteratorHelper(entries), _step3;
@@ -294,6 +309,19 @@
         var threshold = sizeThresholds[i];
         element.classList.toggle(threshold.className, space >= threshold.minimum);
       }
+      var _iterator5 = _createForOfIteratorHelper(dimensionProperties), _step5;
+      try {
+        for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
+          var name = _step5.value;
+          if (element.style.getPropertyPriority(name)) element.style.removeProperty(name);
+        }
+      } catch (err) {
+        _iterator5.e(err);
+      } finally {
+        _iterator5.f();
+      }
+      element.style.setProperty("--ae-width", width);
+      element.style.setProperty("--ae-height", height);
       AelluxJs.dispatchFrom(element, "AdaptiveUpdate", {
         detail: null
       });

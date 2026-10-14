@@ -565,6 +565,761 @@
     }
   });
 
+  // src/aellux.ext.focus.js
+  var aellux_ext_focus_exports = {};
+  var init_aellux_ext_focus = __esm({
+    "src/aellux.ext.focus.js"() {
+      /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+      (function(root2) {
+        "use strict";
+        const AelluxJs2 = root2.AelluxJs;
+        const extensionName = "focus";
+        if (!AelluxJs2) {
+          throw new Error(`[aellux.js] Cannot attach the "${extensionName}" extension: root.AelluxJs is not defined. Load the aellux.js boot script before this extension.`);
+        }
+        AelluxJs2.extAttach(extensionName, {
+          init,
+          destroy,
+          restoreLastFocus
+        });
+        const attribute = AelluxJs2.attr(extensionName);
+        const snapshotKey = "ae-focus";
+        const entries = [];
+        const generatedHints = /* @__PURE__ */ new WeakSet();
+        const nextElements = /* @__PURE__ */ new WeakSet();
+        const textEntrySelector = "input:not([type]), input[type=text], input[type=search], input[type=email], input[type=url], input[type=tel], input[type=password], input[type=number], textarea, [contenteditable]:not([contenteditable=false])";
+        const focusableSelector = "a[href], area[href], button, input, select, textarea, [tabindex], [contenteditable]:not([contenteditable=false])";
+        let sequence = 0, current = null, restoring = false;
+        function init() {
+          AelluxJs2.mountManager.add({
+            extensionName,
+            selector: `[${attribute}]`,
+            mount: mountFocusElement,
+            unmount: unmountFocusElement
+          });
+          document.addEventListener("focusin", onFocusIn, true);
+          document.addEventListener("focus", onFocusChange, true);
+          document.addEventListener("blur", onBlur, true);
+          root2.addEventListener("focus", onWindowFocus);
+          root2.addEventListener("blur", onWindowBlur);
+          AelluxJs2.on("SnapshotRestore", onSnapshotRestore);
+          AelluxJs2.on("UnpopFocusLost", onUnpopFocusLost);
+          remember(document.activeElement, false);
+        }
+        function destroy() {
+          document.removeEventListener("focusin", onFocusIn, true);
+          document.removeEventListener("focus", onFocusChange, true);
+          document.removeEventListener("blur", onBlur, true);
+          root2.removeEventListener("focus", onWindowFocus);
+          root2.removeEventListener("blur", onWindowBlur);
+          AelluxJs2.off("SnapshotRestore", onSnapshotRestore);
+          AelluxJs2.off("UnpopFocusLost", onUnpopFocusLost);
+          AelluxJs2.mountManager.remove({ extensionName });
+          entries.length = 0;
+          current = null;
+        }
+        function mountFocusElement(element) {
+          const type = element.getAttribute(attribute);
+          switch (type) {
+            case "next":
+              element.addEventListener("keydown", onNextKeyDown);
+              nextElements.add(element);
+              if (!element.hasAttribute("enterkeyhint") && element.matches(textEntrySelector)) {
+                element.setAttribute("enterkeyhint", "next");
+                generatedHints.add(element);
+              }
+              break;
+          }
+        }
+        function unmountFocusElement(element) {
+          if (nextElements.delete(element)) element.removeEventListener("keydown", onNextKeyDown);
+          if (generatedHints.delete(element)) element.removeAttribute("enterkeyhint");
+        }
+        function onNextKeyDown(event) {
+          if (event.key !== "Enter" || event.isComposing || event.repeat || event.defaultPrevented || event.target !== event.currentTarget && event.target.closest(focusableSelector) !== event.currentTarget) return;
+          const elements = document.querySelectorAll(focusableSelector);
+          let foundCurrent = false;
+          for (const element of elements) {
+            if (element === event.currentTarget) {
+              foundCurrent = true;
+            } else if (foundCurrent && element.tabIndex >= 0 && isValid(element)) {
+              event.preventDefault();
+              element.focus();
+              return;
+            }
+          }
+        }
+        function isValid(element) {
+          if (!element || element === document.body || element === document.documentElement || !element.isConnected || typeof element.focus !== "function" || element.matches(":disabled, [hidden], [inert]")) return false;
+          for (let node = element; node && node.nodeType === 1; node = node.parentElement) {
+            if (node.hidden || node.hasAttribute("inert")) return false;
+            const style = root2.getComputedStyle(node);
+            if (style.display === "none" || style.visibility === "hidden" || style.visibility === "collapse") return false;
+          }
+          return element.getClientRects().length > 0;
+        }
+        function remember(element, push) {
+          if (!isValid(element) || current && current.element === element) return;
+          const entry = { token: String(++sequence), element };
+          entries.push(entry);
+          if (entries.length > 100) entries.shift();
+          current = entry;
+          if (!push) return;
+          AelluxJs2.dispatch("PushState", {
+            detail: { key: snapshotKey, value: entry.token }
+          });
+        }
+        function onFocusIn(event) {
+          if (!restoring) remember(event.target, true);
+        }
+        function onFocusChange(event) {
+          if (!restoring) remember(event.target, true);
+        }
+        function onBlur(event) {
+          if (!restoring) remember(event.target, false);
+        }
+        function onWindowFocus() {
+          if (!restoring) remember(document.activeElement, true);
+        }
+        function onWindowBlur() {
+          if (!restoring) remember(document.activeElement, false);
+        }
+        function restore(entry) {
+          if (!entry || !isValid(entry.element)) return false;
+          restoring = true;
+          try {
+            entry.element.focus();
+          } finally {
+            restoring = false;
+          }
+          if (document.activeElement !== entry.element) return false;
+          current = entry;
+          return true;
+        }
+        function restoreLastFocus() {
+          const index = entries.indexOf(current);
+          const start = (index < 0 ? entries.length : index) - 1;
+          for (let i = start; i >= 0; i--) {
+            if (restore(entries[i])) return true;
+          }
+          return false;
+        }
+        function onUnpopFocusLost() {
+          restoreLastFocus();
+        }
+        function onSnapshotRestore(event) {
+          const snapshot = event.detail && event.detail.snapshot;
+          if (!snapshot || !Object.prototype.hasOwnProperty.call(snapshot, snapshotKey)) return;
+          for (let i = entries.length - 1; i >= 0; i--) {
+            if (entries[i].token === snapshot[snapshotKey]) {
+              if (!restore(entries[i])) restoreLastFocus();
+              return;
+            }
+          }
+          restoreLastFocus();
+        }
+      })(typeof globalThis !== "undefined" ? globalThis : window);
+    }
+  });
+
+  // src/aellux.ext.point.js
+  var aellux_ext_point_exports = {};
+  var init_aellux_ext_point = __esm({
+    "src/aellux.ext.point.js"() {
+      /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+      (function(root2) {
+        "use strict";
+        const AelluxJs2 = root2.AelluxJs;
+        const extensionName = "point";
+        if (!AelluxJs2) {
+          throw new Error(`[aellux.js] Cannot attach the "${extensionName}" extension: root.AelluxJs is not defined. Load the aellux.js boot script before this extension.`);
+        }
+        const trackedPointers = /* @__PURE__ */ new Map();
+        const pointableElements = /* @__PURE__ */ new Set();
+        const pointableAttribute = AelluxJs2.attr("point");
+        const pointableSelector = `[${pointableAttribute}]`;
+        AelluxJs2.extAttach(extensionName, {
+          init,
+          destroy,
+          pointers
+        });
+        function init() {
+          AelluxJs2.mountManager.add({
+            extensionName,
+            selector: pointableSelector,
+            mount: mountPointable,
+            unmount: unmountPointable,
+            controllers: ["pointers"]
+          });
+          document.addEventListener("pointerdown", onPointerDown, true);
+          document.addEventListener("pointermove", onPointerMove, true);
+          document.addEventListener("pointerup", onPointerUp, true);
+          document.addEventListener("pointercancel", onPointerCancel, true);
+          document.addEventListener("pointerover", onPointerOver, true);
+          document.addEventListener("pointerout", onPointerOut, true);
+        }
+        function destroy() {
+          AelluxJs2.mountManager.remove({ extensionName });
+          document.removeEventListener("pointerdown", onPointerDown, true);
+          document.removeEventListener("pointermove", onPointerMove, true);
+          document.removeEventListener("pointerup", onPointerUp, true);
+          document.removeEventListener("pointercancel", onPointerCancel, true);
+          document.removeEventListener("pointerover", onPointerOver, true);
+          document.removeEventListener("pointerout", onPointerOut, true);
+          trackedPointers.clear();
+          pointableElements.clear();
+        }
+        function mountPointable(element) {
+          pointableElements.add(element);
+        }
+        function unmountPointable(element) {
+          pointableElements.delete(element);
+          for (const pointer of trackedPointers.values()) {
+            if (pointer.target === element) pointer.target = null;
+            if (pointer.pressStart === element) pointer.pressStart = null;
+          }
+        }
+        function pointers(element) {
+          const result = [];
+          for (const pointer of trackedPointers.values()) {
+            if (pointer.target === element) result.push(pointer);
+          }
+          return result;
+        }
+        function limitFor(element) {
+          const value = element.getAttribute(pointableAttribute);
+          if (value === null || !value.trim()) return 1;
+          const trimmed = value.trim();
+          const limit = Number(trimmed);
+          return /^\d+$/.test(trimmed) && Number.isSafeInteger(limit) ? limit : 1;
+        }
+        function targetFor(target, pointer) {
+          let element = target && target.nodeType === 1 ? target : target && target.parentElement;
+          while (element) {
+            if (pointableElements.has(element) && element.hasAttribute(pointableAttribute)) {
+              let occupied = 0;
+              for (const other of trackedPointers.values()) {
+                if (other !== pointer && other.target === element) occupied++;
+              }
+              if (occupied < limitFor(element)) return element;
+            }
+            element = element.parentElement;
+          }
+          return null;
+        }
+        function dispatchPointer(name, pointer, originalEvent, recipient, hover, target = pointer.target, pressStart = pointer.pressStart) {
+          if (!recipient) return;
+          AelluxJs2.dispatchFrom(recipient, name, {
+            bubbles: false,
+            detail: {
+              pointer,
+              target,
+              pressStart,
+              originalEvent,
+              hover
+            }
+          });
+        }
+        function dispatchToTarget(name, pointer, originalEvent) {
+          if (!pointer.target) return;
+          pointer.beforeDispatch();
+          dispatchPointer(name, pointer, originalEvent, pointer.target);
+        }
+        function dispatchRelease(name, pointer, originalEvent) {
+          const target = pointer.target;
+          const pressStart = pointer.pressStart;
+          if (!target && !pressStart) return;
+          pointer.beforeDispatch();
+          dispatchPointer(name, pointer, originalEvent, target, void 0, target, pressStart);
+          if (pressStart !== target)
+            dispatchPointer(name, pointer, originalEvent, pressStart, void 0, target, pressStart);
+        }
+        function updateHoverTarget(pointer, event, nextTarget) {
+          const previousTarget = pointer.target;
+          if (previousTarget === nextTarget) return;
+          if (previousTarget || nextTarget) pointer.beforeDispatch();
+          dispatchPointer("PointerHover", pointer, event, previousTarget, false);
+          pointer.target = nextTarget;
+          dispatchPointer("PointerHover", pointer, event, nextTarget, true);
+        }
+        function canHover(event) {
+          return event.pointerType === "mouse" || event.pointerType === "pen";
+        }
+        function addPointer(event, pressed, hover) {
+          const pointer = new AePointer(event, pressed, hover);
+          trackedPointers.set(event.pointerId, pointer);
+          return pointer;
+        }
+        function onPointerDown(event) {
+          const pointer = trackedPointers.get(event.pointerId) || addPointer(event, true, canHover(event));
+          pointer.initial.x = event.clientX;
+          pointer.initial.y = event.clientY;
+          pointer.pointerType = event.pointerType;
+          pointer.pressed = true;
+          pointer.startPress();
+          pointer.hover = canHover(event);
+          pointer.update(event);
+          pointer.target = targetFor(event.target, pointer);
+          pointer.pressStart = pointer.target;
+          dispatchToTarget("PointerDown", pointer, event);
+        }
+        function onPointerMove(event) {
+          let pointer = trackedPointers.get(event.pointerId);
+          if (!pointer) {
+            if (!canHover(event)) return;
+            pointer = addPointer(event, false, true);
+          }
+          pointer.update(event);
+          pointer.target = targetFor(event.target, pointer);
+          dispatchToTarget("PointerMove", pointer, event);
+        }
+        function onPointerUp(event) {
+          const pointer = trackedPointers.get(event.pointerId);
+          if (!pointer) return;
+          pointer.update(event);
+          pointer.pressed = false;
+          pointer.endPress();
+          pointer.target = targetFor(event.target, pointer);
+          dispatchRelease("PointerUp", pointer, event);
+          if (!pointer.hover) trackedPointers.delete(event.pointerId);
+        }
+        function onPointerCancel(event) {
+          const pointer = trackedPointers.get(event.pointerId);
+          if (pointer) {
+            pointer.update(event);
+            pointer.pressed = false;
+            pointer.endPress();
+            pointer.target = targetFor(event.target, pointer);
+            dispatchRelease("PointerCancel", pointer, event);
+          }
+          trackedPointers.delete(event.pointerId);
+        }
+        function onPointerOver(event) {
+          if (!canHover(event)) return;
+          const pointer = trackedPointers.get(event.pointerId) || addPointer(event, false, true);
+          pointer.update(event);
+          pointer.hover = true;
+          updateHoverTarget(pointer, event, targetFor(event.target, pointer));
+        }
+        function onPointerOut(event) {
+          const pointer = trackedPointers.get(event.pointerId);
+          if (!pointer) return;
+          const relatedTarget = event.relatedTarget;
+          pointer.update(event);
+          updateHoverTarget(pointer, event, targetFor(relatedTarget, pointer));
+          if (!relatedTarget || !relatedTarget.nodeType || !document.contains(relatedTarget)) {
+            pointer.hover = false;
+            pointer.target = null;
+          }
+          if (!pointer.pressed && !pointer.hover) trackedPointers.delete(event.pointerId);
+        }
+        class AePointer {
+          constructor(event, pressed, hover) {
+            const x = event.clientX;
+            const y = event.clientY;
+            this.pointerId = event.pointerId;
+            this.pointerType = event.pointerType;
+            this.initial = { x, y };
+            this.current = { x, y };
+            this.delta = { x: 0, y: 0 };
+            this.movement = { x: 0, y: 0 };
+            this.lastDispatched = { x, y };
+            this.time = { pressStart: null, pressEnd: null };
+            this.buttons = event.buttons;
+            this.pressed = pressed;
+            this.hover = hover;
+            this.target = null;
+            this.pressStart = null;
+          }
+          get deltaTime() {
+            var _a;
+            if (this.time.pressStart === null) return 0;
+            return ((_a = this.time.pressEnd) != null ? _a : root2.performance.now()) - this.time.pressStart;
+          }
+          startPress() {
+            this.time.pressStart = root2.performance.now();
+            this.time.pressEnd = null;
+          }
+          endPress() {
+            if (this.time.pressStart !== null && this.time.pressEnd === null)
+              this.time.pressEnd = root2.performance.now();
+          }
+          update(event) {
+            this.current.x = event.clientX;
+            this.current.y = event.clientY;
+            this.delta.x = this.current.x - this.initial.x;
+            this.delta.y = this.current.y - this.initial.y;
+            this.buttons = event.buttons;
+          }
+          beforeDispatch() {
+            this.movement.x = this.current.x - this.lastDispatched.x;
+            this.movement.y = this.current.y - this.lastDispatched.y;
+            this.lastDispatched.x = this.current.x;
+            this.lastDispatched.y = this.current.y;
+          }
+        }
+      })(typeof globalThis !== "undefined" ? globalThis : window);
+    }
+  });
+
+  // src/aellux.ext.anchor.js
+  var aellux_ext_anchor_exports = {};
+  var init_aellux_ext_anchor = __esm({
+    "src/aellux.ext.anchor.js"() {
+      /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+      (function(root2) {
+        "use strict";
+        const AelluxJs2 = root2.AelluxJs;
+        const extensionName = "anchor";
+        if (!AelluxJs2) {
+          throw new Error(`[aellux.js] Cannot attach the "${extensionName}" extension: root.AelluxJs is not defined. Load the aellux.js boot script before this extension.`);
+        }
+        const attribute = AelluxJs2.attr(extensionName);
+        const targetAttribute = AelluxJs2.attr("anchor-target");
+        const anchoredClass = AelluxJs2.className("anchored");
+        const baseProperties = ["position", "left", "top", "transform", "transform-origin"];
+        const ownedProperties = [
+          ...baseProperties,
+          "--ae-anchor-x",
+          "--ae-anchor-y",
+          "--ae-anchor-origin-x",
+          "--ae-anchor-origin-y"
+        ];
+        const pivots = {
+          "top-left": [0, 0],
+          "top-center": [0.5, 0],
+          "top-right": [1, 0],
+          "center-left": [0, 0.5],
+          center: [0.5, 0.5],
+          "center-right": [1, 0.5],
+          "bottom-left": [0, 1],
+          "bottom-center": [0.5, 1],
+          "bottom-right": [1, 1]
+        };
+        const UPDATE_INTERVAL_MS = 100;
+        const anchors = /* @__PURE__ */ new Map();
+        let updateTimeout = null;
+        let lastUpdateTime = -UPDATE_INTERVAL_MS;
+        AelluxJs2.extAttach(extensionName, { init, destroy });
+        function init() {
+          AelluxJs2.registerCssProperty({
+            name: "--ae-anchor-x",
+            syntax: "<length>",
+            inherits: false,
+            initialValue: "0px"
+          });
+          AelluxJs2.registerCssProperty({
+            name: "--ae-anchor-y",
+            syntax: "<length>",
+            inherits: false,
+            initialValue: "0px"
+          });
+          AelluxJs2.mountManager.add({
+            extensionName,
+            selector: `[${attribute}]`,
+            mount: mountAnchor,
+            unmount: unmountAnchor,
+            update: updateAnchor
+          });
+        }
+        async function destroy() {
+          if (updateTimeout !== null) clearTimeout(updateTimeout);
+          updateTimeout = null;
+          lastUpdateTime = -UPDATE_INTERVAL_MS;
+          await Promise.all(Array.from(anchors.keys(), unmountAnchor));
+          AelluxJs2.mountManager.remove({ extensionName });
+        }
+        function mountAnchor(element) {
+          if (anchors.has(element)) return;
+          const original = ownedProperties.map((name) => ({
+            value: element.style.getPropertyValue(name),
+            priority: element.style.getPropertyPriority(name)
+          }));
+          const state = {
+            original,
+            invalidContext: false,
+            active: false,
+            revision: 0,
+            target: null,
+            reference: null,
+            observer: null
+          };
+          anchors.set(element, state);
+          if (anchors.size === 1) {
+            root2.addEventListener("scroll", scheduleUpdate, { capture: true, passive: true });
+            root2.addEventListener("resize", scheduleUpdate);
+          }
+          if (typeof root2.ResizeObserver === "function") {
+            state.observer = new root2.ResizeObserver(scheduleUpdate);
+          }
+          return updateAnchor(element);
+        }
+        async function unmountAnchor(element) {
+          const state = anchors.get(element);
+          if (!state) return;
+          state.revision++;
+          if (state.observer) state.observer.disconnect();
+          anchors.delete(element);
+          if (!anchors.size) {
+            root2.removeEventListener("scroll", scheduleUpdate, true);
+            root2.removeEventListener("resize", scheduleUpdate);
+            if (updateTimeout !== null) clearTimeout(updateTimeout);
+            updateTimeout = null;
+            lastUpdateTime = -UPDATE_INTERVAL_MS;
+          }
+          await AelluxJs2.waitLayout.update(deactivate, [element, state]);
+        }
+        function scheduleUpdate() {
+          const elapsed = now() - lastUpdateTime;
+          if (elapsed >= UPDATE_INTERVAL_MS) {
+            if (updateTimeout !== null) clearTimeout(updateTimeout);
+            updateTimeout = null;
+            flushUpdate();
+            return;
+          }
+          if (updateTimeout !== null) return;
+          updateTimeout = setTimeout(flushUpdate, UPDATE_INTERVAL_MS - elapsed);
+        }
+        function flushUpdate() {
+          updateTimeout = null;
+          lastUpdateTime = now();
+          for (const element of anchors.keys()) {
+            updateAnchor(element).catch((cause) => {
+              AelluxJs2.diagnostics.error(
+                AelluxJs2.diagnostics.ERROR_EXTENSION_MOUNT,
+                { cause, extension: extensionName, element, method: "update" }
+              );
+            });
+          }
+        }
+        function now() {
+          return root2.performance && typeof root2.performance.now === "function" ? root2.performance.now() : Date.now();
+        }
+        async function updateAnchor(element) {
+          const state = anchors.get(element);
+          if (!state) return;
+          const revision = ++state.revision;
+          const current = () => anchors.get(element) === state && state.revision === revision;
+          const target = resolveElement(element.getAttribute(targetAttribute));
+          const candidates = parseCandidates(element.getAttribute(attribute));
+          if (!target || !candidates.length) {
+            await AelluxJs2.waitLayout.update(() => {
+              if (current()) deactivate(element, state);
+            });
+            return;
+          }
+          let placement = await AelluxJs2.waitLayout.read(
+            () => current() ? readPlacement(element, target, candidates, state.active) : null
+          );
+          if (!current() || !placement) return;
+          if (!placement.valid) {
+            await AelluxJs2.waitLayout.update(() => {
+              if (current()) invalidContext(element, state, target);
+            });
+            return;
+          }
+          if (!state.active) {
+            await AelluxJs2.waitLayout.update(() => {
+              if (!current()) return;
+              applyBaseStyles(element);
+              state.active = true;
+            });
+            if (!current()) return;
+            placement = await AelluxJs2.waitLayout.read(
+              () => current() ? readPlacement(element, target, candidates, true) : null
+            );
+            if (!current() || !placement) return;
+            if (!placement.valid) {
+              await AelluxJs2.waitLayout.update(() => {
+                if (current()) invalidContext(element, state, target);
+              });
+              return;
+            }
+          }
+          await AelluxJs2.waitLayout.update(() => {
+            if (!current()) return;
+            state.invalidContext = false;
+            observe(state, element, target, placement.reference);
+            const selected = placement.selected;
+            element.style.setProperty("--ae-anchor-x", `${selected.x}px`);
+            element.style.setProperty("--ae-anchor-y", `${selected.y}px`);
+            element.style.setProperty("--ae-anchor-origin-x", `${selected.self[0] * 100}%`);
+            element.style.setProperty("--ae-anchor-origin-y", `${selected.self[1] * 100}%`);
+            for (const name of baseProperties) element.style.removeProperty(name);
+            element.classList.add(anchoredClass);
+          });
+        }
+        function readPlacement(element, target, candidates, measure) {
+          const reference = element.offsetParent;
+          if (!reference || target.offsetParent !== reference) return { valid: false };
+          if (!measure) return { valid: true };
+          const referenceRect = reference.getBoundingClientRect();
+          const scaleX = reference.offsetWidth ? referenceRect.width / reference.offsetWidth : 1;
+          const scaleY = reference.offsetHeight ? referenceRect.height / reference.offsetHeight : 1;
+          const targetRect = toReference(target.getBoundingClientRect(), reference, referenceRect, scaleX, scaleY);
+          const selfRect = element.getBoundingClientRect();
+          const selfWidth = selfRect.width / scaleX;
+          const selfHeight = selfRect.height / scaleY;
+          const boundaryRect = toReference(
+            { left: 0, top: 0, width: root2.innerWidth, height: root2.innerHeight },
+            reference,
+            referenceRect,
+            scaleX,
+            scaleY
+          );
+          let selected = null;
+          for (const candidate of candidates) {
+            const x = targetRect.left + targetRect.width * candidate.target[0] - selfWidth * candidate.self[0];
+            const y = targetRect.top + targetRect.height * candidate.target[1] - selfHeight * candidate.self[1];
+            const result = { x, y, self: candidate.self };
+            if (!selected) selected = result;
+            if (x >= boundaryRect.left && y >= boundaryRect.top && x + selfWidth <= boundaryRect.left + boundaryRect.width && y + selfHeight <= boundaryRect.top + boundaryRect.height) {
+              selected = result;
+              break;
+            }
+          }
+          return { valid: true, reference, selected };
+        }
+        function invalidContext(element, state, target) {
+          deactivate(element, state);
+          if (state.invalidContext) return;
+          AelluxJs2.diagnostics.error(
+            AelluxJs2.diagnostics.ERROR_ANCHOR_REFERENCE_CONTEXT,
+            { extension: extensionName, element, target }
+          );
+          state.invalidContext = true;
+        }
+        function observe(state, element, target, reference) {
+          if (state.target === target && state.reference === reference) return;
+          state.target = target;
+          state.reference = reference;
+          if (!state.observer) return;
+          state.observer.disconnect();
+          for (const observed of /* @__PURE__ */ new Set([element, target, reference])) {
+            if (observed) state.observer.observe(observed);
+          }
+        }
+        function applyBaseStyles(element) {
+          element.style.setProperty("position", "absolute");
+          element.style.setProperty("left", "0px");
+          element.style.setProperty("top", "0px");
+          element.style.setProperty(
+            "transform",
+            "translate3d(var(--ae-anchor-x, 0px), var(--ae-anchor-y, 0px), 0)"
+          );
+          element.style.setProperty(
+            "transform-origin",
+            "var(--ae-anchor-origin-x, 50%) var(--ae-anchor-origin-y, 0%)"
+          );
+        }
+        function deactivate(element, state) {
+          if (state.observer) state.observer.disconnect();
+          state.target = state.reference = null;
+          element.classList.remove(anchoredClass);
+          if (state.active) restoreStyles(element, state.original);
+          state.active = false;
+        }
+        function restoreStyles(element, original) {
+          ownedProperties.forEach((name, index) => {
+            const { value, priority } = original[index];
+            if (value) element.style.setProperty(name, value, priority);
+            else element.style.removeProperty(name);
+          });
+        }
+        function resolveElement(value) {
+          if (!value || !value.trim()) return null;
+          const selector = value.trim();
+          const id = selector[0] === "#" ? selector.slice(1) : selector;
+          const byId = document.getElementById(id);
+          if (byId) return byId;
+          try {
+            return document.querySelector(selector);
+          } catch (_) {
+            return null;
+          }
+        }
+        function parseCandidates(value) {
+          const result = [];
+          for (const token of (value || "").split(",")) {
+            const pair = token.trim().toLowerCase().split(":");
+            if (pair.length !== 2 || !pivots[pair[0].trim()] || !pivots[pair[1].trim()]) continue;
+            result.push({ target: pivots[pair[0].trim()], self: pivots[pair[1].trim()] });
+          }
+          return result;
+        }
+        function toReference(rect, reference, referenceRect, scaleX, scaleY) {
+          return {
+            left: (rect.left - referenceRect.left) / scaleX - reference.clientLeft + reference.scrollLeft,
+            top: (rect.top - referenceRect.top) / scaleY - reference.clientTop + reference.scrollTop,
+            width: rect.width / scaleX,
+            height: rect.height / scaleY
+          };
+        }
+      })(typeof globalThis !== "undefined" ? globalThis : window);
+    }
+  });
+
+  // src/aellux.ext.scrollbox.js
+  var aellux_ext_scrollbox_exports = {};
+  var init_aellux_ext_scrollbox = __esm({
+    "src/aellux.ext.scrollbox.js"() {
+      /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+      (function(root2) {
+        "use strict";
+        const AelluxJs2 = root2.AelluxJs;
+        const extensionName = "scrollbox";
+        if (!AelluxJs2) {
+          throw new Error(`[aellux.js] Cannot attach the "${extensionName}" extension: root.AelluxJs is not defined. Load the aellux.js boot script before this extension.`);
+        }
+        const attribute = AelluxJs2.attr(extensionName);
+        const scrollboxes = /* @__PURE__ */ new Map();
+        const properties = ["--ae-scroll-y-progress", "--ae-scroll-x-progress"];
+        AelluxJs2.extAttach(extensionName, { init, destroy });
+        function init() {
+          AelluxJs2.mountManager.add({
+            extensionName,
+            selector: `[${attribute}]`,
+            mount: mountScrollbox,
+            unmount: unmountScrollbox
+          });
+        }
+        function destroy() {
+          for (const element of scrollboxes.keys()) unmountScrollbox(element);
+          AelluxJs2.mountManager.remove({ extensionName });
+        }
+        function mountScrollbox(element) {
+          if (scrollboxes.has(element)) return;
+          const previous = properties.map((name) => ({
+            value: element.style.getPropertyValue(name),
+            priority: element.style.getPropertyPriority(name)
+          }));
+          const onScroll = () => updateProgress(element);
+          scrollboxes.set(element, { onScroll, previous });
+          element.addEventListener("scroll", onScroll, { passive: true });
+          updateProgress(element);
+        }
+        function unmountScrollbox(element) {
+          const state = scrollboxes.get(element);
+          if (!state) return;
+          element.removeEventListener("scroll", state.onScroll);
+          properties.forEach((name, index) => {
+            const original = state.previous[index];
+            if (original.value) element.style.setProperty(name, original.value, original.priority);
+            else element.style.removeProperty(name);
+          });
+          scrollboxes.delete(element);
+        }
+        function updateProgress(element) {
+          element.style.setProperty(properties[0], progress(element.scrollTop, element.scrollHeight - element.clientHeight));
+          element.style.setProperty(properties[1], progress(element.scrollLeft, element.scrollWidth - element.clientWidth));
+        }
+        function progress(position, distance) {
+          return distance > 0 ? Math.min(1, Math.max(0, position / distance)) : 0;
+        }
+      })(typeof globalThis !== "undefined" ? globalThis : window);
+    }
+  });
+
   // src/aellux.ext.adaptive.js
   var aellux_ext_adaptive_exports = {};
   var init_aellux_ext_adaptive = __esm({
@@ -586,6 +1341,8 @@
           shapeSquare: AelluxJs2.className("shape-square")
         };
         const adaptiveElements = /* @__PURE__ */ new Set();
+        const initialDimensions = /* @__PURE__ */ new Map();
+        const dimensionProperties = ["--ae-width", "--ae-height"];
         const pendingResizeEntries = /* @__PURE__ */ new Map();
         const pendingResizeElements = /* @__PURE__ */ new Set();
         const adaptiveParams = {
@@ -652,6 +1409,10 @@
         }
         function mountAdaptive(element) {
           if (adaptiveElements.has(element)) return;
+          initialDimensions.set(element, dimensionProperties.map((name) => ({
+            value: element.style.getPropertyValue(name),
+            priority: element.style.getPropertyPriority(name)
+          })));
           adaptiveElements.add(element);
           const bounds = element.getBoundingClientRect();
           updateAdaptive(element, bounds.width, bounds.height);
@@ -667,6 +1428,13 @@
           for (const name of managedClasses) {
             element.classList.remove(name);
           }
+          const initial = initialDimensions.get(element);
+          dimensionProperties.forEach((name, index) => {
+            const { value, priority } = initial[index];
+            if (value) element.style.setProperty(name, value, priority);
+            else element.style.removeProperty(name);
+          });
+          initialDimensions.delete(element);
         }
         function onResize(entries) {
           for (const entry of entries) {
@@ -745,8 +1513,16 @@
           const space = Math.sqrt(width * height);
           for (let i = 0; i < sizeThresholds.length; i++) {
             const threshold = sizeThresholds[i];
-            element.classList.toggle(threshold.className, space >= threshold.minimum);
+            element.classList.toggle(
+              threshold.className,
+              space >= threshold.minimum
+            );
           }
+          for (const name of dimensionProperties) {
+            if (element.style.getPropertyPriority(name)) element.style.removeProperty(name);
+          }
+          element.style.setProperty("--ae-width", width);
+          element.style.setProperty("--ae-height", height);
           AelluxJs2.dispatchFrom(element, "AdaptiveUpdate", { detail: null });
         }
         function inferOrientation(flexBox, selector = "*") {
@@ -1051,7 +1827,7 @@
           triggerElement.setAttribute(ARIA_EXPANDED, String(expanded));
         }
         function pop(element) {
-          return presentTransition(element, true);
+          return presentTransition(element, true, true);
         }
         function unpop(element) {
           return presentTransition(element, false);
@@ -1060,20 +1836,9 @@
           return presentTransition(element, goto);
         }
         function trigger(element, trigger2) {
-          switch (trigger2) {
-            case "pop":
-              return pop(element);
-              break;
-            case "unpop":
-              return unpop(element);
-              break;
-            case "toggle":
-              return toggle(element);
-              break;
-            default:
-              return toggle(element);
-              break;
-          }
+          trigger2 = typeof trigger2 === "string" ? (trigger2 || "toggle").toLowerCase() : "toggle";
+          const method = AelluxJs2.ext.present[trigger2];
+          return method && typeof method === "function" ? method(element) : toggle(element);
         }
         function restoreMeasuredStyles(element, controller) {
           const saved = controller.measuredStyles;
@@ -1084,7 +1849,7 @@
           }
           controller.measuredStyles = null;
         }
-        function prepareMeasuredSize(element, controller, gotoVisible, previousSize) {
+        function prepareMeasuredSize(element, controller, gotoVisible, previousSize, waitForPreparation) {
           if (!controller.measuredHeight && !controller.measuredWidth) return null;
           if (!controller.measuredStyles) {
             controller.measuredStyles = ["max-height", "max-width"].map((name) => [
@@ -1097,24 +1862,27 @@
             if (value) element.style.setProperty(name, value, priority);
             else element.style.removeProperty(name);
           }
-          const computed = root2.getComputedStyle(element);
-          const height = parseFloat(computed.height);
-          const width = parseFloat(computed.width);
-          const finalSize = {
-            height: Number.isFinite(height) ? height : element.scrollHeight,
-            width: Number.isFinite(width) ? width : element.scrollWidth
-          };
-          const start = previousSize || (gotoVisible ? { height: 0, width: 0 } : finalSize);
+          let size = previousSize;
+          if (gotoVisible || !size) {
+            const computed = root2.getComputedStyle(element);
+            const height = parseFloat(computed.height);
+            const width = parseFloat(computed.width);
+            size = {
+              height: Number.isFinite(height) ? height : element.scrollHeight,
+              width: Number.isFinite(width) ? width : element.scrollWidth
+            };
+          }
+          const start = previousSize || (gotoVisible ? { height: 0, width: 0 } : size);
           if (controller.measuredHeight) {
             element.style.setProperty("max-height", `${Math.max(0, start.height)}px`, "important");
           }
           if (controller.measuredWidth) {
             element.style.setProperty("max-width", `${Math.max(0, start.width)}px`, "important");
           }
-          element.getBoundingClientRect();
-          return finalSize;
+          if (!waitForPreparation) element.getBoundingClientRect();
+          return size;
         }
-        async function presentTransition(element, gotoVisible) {
+        async function presentTransition(element, gotoVisible, forceRepop = false) {
           const controller = presentElements.get(element);
           if (!controller) return;
           if (controller.direction === null)
@@ -1122,7 +1890,7 @@
           if (typeof gotoVisible === "undefined" || gotoVisible === null)
             gotoVisible = controller.direction === POP ? false : true;
           const newDirection = gotoVisible ? POP : UNPOP;
-          if (element.hidden && !gotoVisible || newDirection === controller.direction) {
+          if (element.hidden && !gotoVisible || newDirection === controller.direction && !forceRepop) {
             return;
           }
           let transition = null;
@@ -1135,7 +1903,15 @@
             if (!allowEvent) {
               return;
             }
-            const reusePreparation = controller.motionEnabled && controller.transition !== null && controller.classList.contains(className.willChange);
+            if (forceRepop && (!element.hidden || controller.transition)) {
+              controller.stop();
+              element.hidden = true;
+              openPresentElements.delete(element);
+              controller.setAriaExpanded("false");
+              element.getBoundingClientRect();
+            }
+            const reusePreparation = !forceRepop && controller.motionEnabled && controller.transition !== null && controller.classList.contains(className.willChange);
+            const waitForPreparation = controller.motionEnabled && !reusePreparation;
             let previousSize = null;
             if (reusePreparation && (controller.measuredHeight || controller.measuredWidth)) {
               const computed = root2.getComputedStyle(element);
@@ -1144,7 +1920,9 @@
                 width: parseFloat(computed.maxWidth)
               };
             }
-            controller.stop({ replacement: reusePreparation, transitionStart: true });
+            if (!forceRepop) {
+              controller.stop({ replacement: reusePreparation, transitionStart: true });
+            }
             controller.direction = newDirection;
             const interrupted = new Promise((_, interruptTransition) => {
               transition = {
@@ -1157,11 +1935,17 @@
             });
             element.hidden = false;
             openPresentElements.add(element);
-            const finalSize = prepareMeasuredSize(element, controller, gotoVisible, previousSize);
+            const size = prepareMeasuredSize(
+              element,
+              controller,
+              gotoVisible,
+              previousSize,
+              waitForPreparation
+            );
             if (controller.motionEnabled) {
               controller.classList.add(className.willChange);
             }
-            if (controller.motionEnabled && !reusePreparation) {
+            if (waitForPreparation) {
               const prepared = new Promise((resolve) => {
                 transition.timeout = setTimeout(() => {
                   transition.timeout = null;
@@ -1183,12 +1967,12 @@
               className.unpopping
             );
             controller.classList.add(transition.className);
-            if (finalSize) {
+            if (size) {
               if (controller.measuredHeight) {
-                element.style.setProperty("max-height", `${gotoVisible ? finalSize.height : 0}px`, "important");
+                element.style.setProperty("max-height", `${gotoVisible ? size.height : 0}px`, "important");
               }
               if (controller.measuredWidth) {
-                element.style.setProperty("max-width", `${gotoVisible ? finalSize.width : 0}px`, "important");
+                element.style.setProperty("max-width", `${gotoVisible ? size.width : 0}px`, "important");
               }
             }
             const completed = new Promise((completeTransition) => {
@@ -2443,6 +3227,10 @@
     "preference": () => Promise.resolve().then(() => (init_aellux_ext_preference(), aellux_ext_preference_exports)),
     "stateNavigation": () => Promise.resolve().then(() => (init_aellux_ext_state_navigation(), aellux_ext_state_navigation_exports)),
     "feedback": () => Promise.resolve().then(() => (init_aellux_ext_feedback(), aellux_ext_feedback_exports)),
+    "focus": () => Promise.resolve().then(() => (init_aellux_ext_focus(), aellux_ext_focus_exports)),
+    "point": () => Promise.resolve().then(() => (init_aellux_ext_point(), aellux_ext_point_exports)),
+    "anchor": () => Promise.resolve().then(() => (init_aellux_ext_anchor(), aellux_ext_anchor_exports)),
+    "scrollbox": () => Promise.resolve().then(() => (init_aellux_ext_scrollbox(), aellux_ext_scrollbox_exports)),
     "adaptive": () => Promise.resolve().then(() => (init_aellux_ext_adaptive(), aellux_ext_adaptive_exports)),
     "present": () => Promise.resolve().then(() => (init_aellux_ext_present(), aellux_ext_present_exports))
   });

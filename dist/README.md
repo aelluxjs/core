@@ -22,7 +22,7 @@ aellux.js does not require or bundle Bootstrap. Its `data-ae-*` and `ae--*` name
 </script>
 ```
 
-Use `full` to load all core Extensions. Use `basic` to register only what the page needs:
+Use `full` to load Adaptive, Anchor, Feedback, Focus, Point, Preference, Present, Scrollbox, and State Navigation. Use `basic` to register only what the page needs:
 
 ```html
 <script src="./dist/aellux.js"></script>
@@ -85,16 +85,17 @@ Node.js 20 or newer is required for build tooling:
 npm install
 npx playwright install
 npm run build
+npm run test:budget
 npm run test:browser
 ```
 
-`test:browser` rebuilds the distribution and runs the browser scenarios with Playwright in Chromium, Firefox, and WebKit. Use `npm run test:browser -- --project=chromium` to run one browser.
+`test:budget` checks the built files against raw and gzip size limits. `test:browser` rebuilds the distribution and runs the browser scenarios with Playwright in Chromium, Firefox, and WebKit. Use `npm run test:browser -- --project=chromium` to run one browser. See [Browser validation scenarios](docs-source/0.1.0/validation-scenarios.md) for focused runs and coverage.
 
 Generated browser files are written to `dist/`. The distribution uses classic scripts isolated in IIFEs; it does not expose ESM named or default exports.
 
 ## Project Status
 
-aellux.js `0.1.0-beta.9` is the current prerelease. Beta 1 established the initial runtime, Extension contract, Modern/Legacy distributions, and repeatable browser validation scenarios. The remaining work for the stable `0.1.0` release is tracked in the milestone below.
+aellux.js `0.1.0-beta.10` is the current prerelease. Beta 1 established the initial runtime, Extension contract, Modern/Legacy distributions, and repeatable browser validation scenarios. The remaining work for the stable `0.1.0` release is tracked in the milestone below.
 
 Review the [0.1.0 milestone](milestones/0.1.0.md), the [Beta 1 milestone](milestones/0.1.0-beta.1.md), and delivered changes in the [changelog](../CHANGELOG.md).
 

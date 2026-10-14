@@ -191,7 +191,7 @@ test("replacement transitions reuse preparation and final interruptions clean it
   await page.evaluate(() => {
     document.body.innerHTML = `
       <div id="panel" data-ae-present="all" hidden
-        style="--ae-pop-duration: 500ms; --ae-unpop-duration: 120ms">
+        style="--ae-pop-duration: 1500ms; --ae-unpop-duration: 120ms">
         <div data-ae-present-motion></div>
       </div>`;
   });
@@ -258,7 +258,7 @@ test("replacement transitions reuse preparation and final interruptions clean it
   });
   expect(rapidReplacement).toEqual({
     willChange: true,
-    popping: true,
+    popping: false,
     unpopping: false
   });
   await page.evaluate(async () => {
@@ -286,6 +286,88 @@ test("replacement transitions reuse preparation and final interruptions clean it
     unpopping: false,
     willChange: false
   });
+});
+
+test("direct pop restarts from hidden during either transition and when already visible", async ({ page }) => {
+  await page.goto("/tests/index.htm");
+  const result = await page.evaluate(async () => {
+    document.body.innerHTML = `
+      <div id="panel" data-ae-present="opacity" hidden
+        style="--ae-pop-duration: 80ms; --ae-unpop-duration: 80ms"></div>`;
+    const events = [];
+    window.AelluxJs = {
+      attr: name => `data-ae-${name}`,
+      className: name => `ae-${name}`,
+      diagnostics: {
+        WARN_INTERRUPTION: { code: 2002 },
+        create: () => ({ code: 2002 }),
+        warn() {}, error() {}, info() {}
+      },
+      mountManager: {
+        add: ({ selector, mount }) => { (window.mountEntries ||= new Map()).set(selector, mount); },
+        remove() {}
+      },
+      extAttach: (_name, extension) => { window.presentExtension = extension; },
+      dispatchFrom: (_element, event) => { events.push(event); return true; }
+    };
+    await new Promise((resolve, reject) => {
+      const script = document.createElement("script");
+      script.src = "/src/aellux.ext.present.js";
+      script.onload = resolve;
+      script.onerror = reject;
+      document.head.append(script);
+    });
+    const extension = window.presentExtension;
+    extension.init();
+    const panel = document.querySelector("#panel");
+    window.mountEntries.get("[data-ae-present]")(panel);
+
+    const hiddenSnapshots = [];
+    const hiddenProperty = Object.getOwnPropertyDescriptor(HTMLElement.prototype, "hidden");
+    Object.defineProperty(panel, "hidden", {
+      configurable: true,
+      get() { return hiddenProperty.get.call(this); },
+      set(value) {
+        hiddenProperty.set.call(this, value);
+        if (value) hiddenSnapshots.push([...this.classList]);
+      }
+    });
+    const waitFor = async event => {
+      while (!events.includes(event)) await new Promise(resolve => setTimeout(resolve, 5));
+      events.splice(events.indexOf(event), 1);
+    };
+
+    const first = extension.pop(panel);
+    await waitFor("Popping");
+    const restarted = extension.pop(panel);
+    await Promise.all([first, restarted]);
+
+    const closing = extension.unpop(panel);
+    await waitFor("Unpopping");
+    const reversed = extension.pop(panel);
+    await Promise.all([closing, reversed]);
+
+    const visibleRestart = extension.pop(panel);
+    await visibleRestart;
+    const beforeToggle = hiddenSnapshots.length;
+    await extension.toggle(panel, true);
+
+    return {
+      hiddenSnapshots,
+      beforeToggle,
+      hidden: panel.hidden,
+      expanded: panel.getAttribute("aria-expanded"),
+      popEvents: events.filter(event => event === "Pop").length
+    };
+  });
+  expect(result.hiddenSnapshots).toHaveLength(3);
+  for (const classes of result.hiddenSnapshots) {
+    expect(classes).not.toContain("ae-pop");
+    expect(classes).not.toContain("ae-popping");
+    expect(classes).not.toContain("ae-unpopping");
+    expect(classes).not.toContain("ae-will-change");
+  }
+  expect(result).toMatchObject({ beforeToggle: 3, hidden: false, expanded: "true", popEvents: 3 });
 });
 
 test("present disables transitions when reduced motion is active", async ({ page }) => {
@@ -988,13 +1070,17 @@ test("present reports a transition callback failure with its own diagnostic", as
       className: name => `ae-${name}`,
       attrMem: { save: saveAttr, restore: restoreAttr },
       diagnostics: buildDiagnostics(createAelluxConstants().AELLUXJS_DIAGNOSTICS),
+      ext: {},
       mountManager: {
         add: ({ selector, mount, unmount, update, controllers }) => {
           (window.mountEntries ||= new Map()).set(selector, { mount, unmount, update, controllers });
         },
         remove: () => window.mountEntries?.clear()
       },
-      extAttach: (_name, extension) => { window.presentExtension = extension; },
+      extAttach: (name, extension) => {
+        window.presentExtension = extension;
+        window.AelluxJs.ext[name] = extension;
+      },
       dispatchFrom: () => { throw new Error("callback probe"); }
     };
   });

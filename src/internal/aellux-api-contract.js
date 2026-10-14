@@ -173,6 +173,7 @@ var bootstrapProperties = Object.freeze({
     properties: Object.freeze({ save: method, restore: method })
   }),
   className: method,
+  registerCssProperty: method,
   extFilename: method,
   extName: method,
   eventName: method,

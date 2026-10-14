@@ -402,6 +402,15 @@ function createAelluxApi(root2, constants) {
       name = fromCamelCase2(name);
       return constants.AELLUXJS_CLASS_NAME_PREFFIX.replace(/\?/, name);
     },
+    registerCssProperty: function(descriptor) {
+      if (!root2.CSS || typeof root2.CSS.registerProperty !== "function") return false;
+      try {
+        root2.CSS.registerProperty(descriptor);
+        return true;
+      } catch (error) {
+        return false;
+      }
+    },
     extFilename: function(extensionName) {
       extensionName = fromCamelCase2(extensionName);
       return "aellux." + constants.AELLUXJS_EXT_SCRIPT_PREFIX + "." + extensionName + (api.minified ? ".min.js" : ".js");
@@ -682,6 +691,7 @@ function createAelluxConstants() {
       ERROR_DEPENDENCY_ARGUMENT: { code: 1116, message: "aellux.js Dependency registration has invalid arguments." },
       ERROR_DEPENDENCY_CONFLICT: { code: 1117, message: "aellux.js Dependency label is already registered with a different URL." },
       ERROR_DEPENDENCY_LOAD: { code: 1118, message: "aellux.js Dependency script could not be loaded." },
+      ERROR_ANCHOR_REFERENCE_CONTEXT: { code: 1119, message: "Anchor target and anchored element must share the same containing block / absolute positioning reference." },
       ERROR_LEGACY_RUNTIME_START: { code: 1201, message: "aellux.js Legacy runtime failed to start." },
       ERROR_LEGACY_RUNTIME_LOAD: { code: 1202, message: "aellux.js Legacy runtime could not be loaded." },
       ERROR_MODERN_RUNTIME_START: { code: 1203, message: "aellux.js Modern runtime failed to start; trying Legacy runtime." },

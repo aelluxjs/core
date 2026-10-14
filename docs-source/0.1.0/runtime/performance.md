@@ -13,19 +13,19 @@ The CI workflow runs the same command after `npm run build`. A pull request fail
 
 ## 0.1.0 Baseline and Limits
 
-The table records the release-candidate baseline measured on October 10, 2026. Limits are rounded upward to allow small implementation changes while detecting material growth.
+The table records the beta.10 build measured on October 14, 2026. Limits are rounded upward to allow small implementation changes while detecting material growth. The full bundle includes all nine Core Extensions.
 
 | Artifact | Baseline raw | Baseline gzip | Raw limit | Gzip limit |
 | --- | ---: | ---: | ---: | ---: |
-| `aellux.min.js` | 25.6 KiB | 9.3 KiB | 29 KiB | 12 KiB |
-| `aellux.esm.min.js` | 14.6 KiB | 5.0 KiB | 17 KiB | 7 KiB |
-| `aellux.orchestrator.min.js` | 16.8 KiB | 6.0 KiB | 21 KiB | 8 KiB |
-| `aellux.full.min.js` | 34.4 KiB | 11.1 KiB | 41 KiB | 14 KiB |
-| `aellux.full.legacy.min.js` | 316.8 KiB | 109.4 KiB | 351 KiB | 126 KiB |
+| `aellux.min.js` | 27.9 KiB | 10.4 KiB | 29 KiB | 12 KiB |
+| `aellux.esm.min.js` | 17.0 KiB | 5.7 KiB | 18 KiB | 7 KiB |
+| `aellux.orchestrator.min.js` | 17.4 KiB | 6.3 KiB | 21 KiB | 8 KiB |
+| `aellux.full.min.js` | 54.3 KiB | 16.9 KiB | 56 KiB | 18 KiB |
+| `aellux.full.legacy.min.js` | 350.2 KiB | 117.0 KiB | 360 KiB | 130 KiB |
 | `aellux.ext.adaptive.min.css` | 104.1 KiB | 8.2 KiB | 121 KiB | 11 KiB |
-| `aellux.ext.present.min.css` | 2.3 KiB | 0.5 KiB | 4 KiB | 2 KiB |
+| `aellux.ext.present.min.css` | 3.8 KiB | 0.8 KiB | 4 KiB | 2 KiB |
 
-Each separately distributed minified Core Extension is also checked. Their individual limits are held in the executable configuration so the documentation does not duplicate a second table of values.
+Each separately distributed minified Core Extension, including Anchor and Scrollbox, is also checked. Their individual limits are held in the executable configuration so the documentation does not duplicate a second table of values.
 
 ## Scope and Limitations
 

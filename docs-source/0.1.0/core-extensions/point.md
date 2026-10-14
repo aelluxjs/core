@@ -1,6 +1,6 @@
 # Point Extension
 
-`point` tracks the pointers currently pressed or hovering over the document and relates them to mounted elements with `data-ae-point`. It is a standalone core Extension and is not included in the `full` runtime bundle. Register it before initialization:
+`point` tracks the pointers currently pressed or hovering over the document and relates them to mounted elements with `data-ae-point`. It is included in the `full` runtime. In `basic` mode, register it before initialization:
 
 ```html
 <div id="canvas" data-ae-point="2"></div>
