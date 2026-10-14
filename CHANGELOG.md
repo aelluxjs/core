@@ -8,6 +8,8 @@ All notable changes to aellux.js will be documented in this file.
 
 - Weak CSS now uses smooth scrolling by default and restores immediate scrolling for all elements when reduced motion is requested.
 - Scrollbox now supports native and desktop pointer-drag modes with horizontal wheel handoff at scroll boundaries.
+- Vertical-only pointer Scrollboxes now leave horizontal text-selection gestures to the browser.
+- Pointer momentum now advances by half the remaining distance per frame and stops at three-decimal precision.
 - Desktop pointer dragging in Scrollbox now has optional momentum, enabled by default and controlled by `data-ae-scrollbox-momentum`.
 - Shared dependencies now accept positional SRI and crossorigin arguments.
 

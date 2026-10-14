@@ -1279,11 +1279,11 @@
         const momentumAttribute = AelluxJs2.attr("scrollbox-momentum");
         const RESIZE_INTERVAL_MS = 100;
         const DRAG_THRESHOLD_PX = 3;
+        const SELECTION_HORIZONTAL_THRESHOLD_PX = 8;
+        const SELECTION_VERTICAL_TOLERANCE_PX = 6;
         const MOMENTUM_LIMIT_TIME_MS = 300;
         const MOMENTUM_LIMIT_DISTANCE_PX = 15;
         const MOMENTUM_DECELERATION = 15e-4;
-        const MOMENTUM_MAX_TIME_MS = 2500;
-        const MOMENTUM_BOUNDARY_TIME_MS = 500;
         const properties = ["--ae-scroll-y-progress", "--ae-scroll-x-progress"];
         const scrollboxes = /* @__PURE__ */ new Map();
         AelluxJs2.extAttach(extensionName, { init, destroy });
@@ -1415,13 +1415,18 @@
             scrollLeft: element.scrollLeft,
             scrollTop: element.scrollTop,
             moved: false,
+            selectionPending: metrics.maxX <= 1 && metrics.maxY > 1,
+            userSelectApplied: false,
             momentumStartX: element.scrollLeft,
             momentumStartY: element.scrollTop,
             momentumStartTime: now(),
             userSelect: element.style.getPropertyValue("user-select"),
             userSelectPriority: element.style.getPropertyPriority("user-select")
           };
-          element.style.setProperty("user-select", "none");
+          if (!state.drag.selectionPending) {
+            element.style.setProperty("user-select", "none");
+            state.drag.userSelectApplied = true;
+          }
           root2.addEventListener("pointermove", state.onPointerMove, { passive: false, capture: true });
           root2.addEventListener("pointerup", state.onPointerEnd, true);
           root2.addEventListener("pointercancel", state.onPointerEnd, true);
@@ -1436,6 +1441,16 @@
           }
           const dx = drag.startX - event.clientX;
           const dy = drag.startY - event.clientY;
+          if (drag.selectionPending) {
+            if (Math.abs(dx) >= SELECTION_HORIZONTAL_THRESHOLD_PX && Math.abs(dy) < SELECTION_VERTICAL_TOLERANCE_PX) {
+              endDrag(state);
+              return;
+            }
+            if (Math.abs(dy) < SELECTION_VERTICAL_TOLERANCE_PX) return;
+            drag.selectionPending = false;
+            state.element.style.setProperty("user-select", "none");
+            drag.userSelectApplied = true;
+          }
           if (!drag.moved && dx * dx + dy * dy < DRAG_THRESHOLD_PX * DRAG_THRESHOLD_PX) return;
           drag.moved = true;
           if (event.cancelable) event.preventDefault();
@@ -1461,12 +1476,14 @@
           root2.removeEventListener("pointerup", state.onPointerEnd, true);
           root2.removeEventListener("pointercancel", state.onPointerEnd, true);
           root2.removeEventListener("blur", state.onBlur);
-          if (drag.userSelect) state.element.style.setProperty(
-            "user-select",
-            drag.userSelect,
-            drag.userSelectPriority
-          );
-          else state.element.style.removeProperty("user-select");
+          if (drag.userSelectApplied) {
+            if (drag.userSelect) state.element.style.setProperty(
+              "user-select",
+              drag.userSelect,
+              drag.userSelectPriority
+            );
+            else state.element.style.removeProperty("user-select");
+          }
           if (event && event.type === "pointerup" && drag.moved && state.momentumEnabled && !state.disposed && now() - drag.momentumStartTime < MOMENTUM_LIMIT_TIME_MS) {
             startMomentum(state, drag);
           }
@@ -1486,15 +1503,12 @@
             elapsed,
             Math.max(0, element.scrollHeight - element.clientHeight)
           );
-          const duration = Math.max(x.duration, y.duration);
-          if (!duration) return;
+          if (x === element.scrollLeft && y === element.scrollTop) return;
           const momentum = {
-            fromX: element.scrollLeft,
-            fromY: element.scrollTop,
-            toX: x.destination,
-            toY: y.destination,
-            startTime: now(),
-            duration,
+            currentX: element.scrollLeft,
+            currentY: element.scrollTop,
+            toX: x,
+            toY: y,
             frame: null
           };
           state.momentum = momentum;
@@ -1502,31 +1516,24 @@
         }
         function momentumAxis(current, start, elapsed, maximum) {
           const distance = current - start;
-          if (Math.abs(distance) <= MOMENTUM_LIMIT_DISTANCE_PX) {
-            return { destination: current, duration: 0 };
-          }
+          if (Math.abs(distance) <= MOMENTUM_LIMIT_DISTANCE_PX) return current;
           const speed = Math.abs(distance) / elapsed;
           const projected = current + Math.sign(distance) * speed * speed / MOMENTUM_DECELERATION;
-          const destination = Math.max(0, Math.min(maximum, Math.round(projected)));
-          if (destination === current) return { destination, duration: 0 };
-          return {
-            destination,
-            duration: projected !== destination ? MOMENTUM_BOUNDARY_TIME_MS : Math.min(MOMENTUM_MAX_TIME_MS, 2 * speed / MOMENTUM_DECELERATION)
-          };
+          return Math.max(0, Math.min(maximum, Math.round(projected)));
         }
         function stepMomentum(state, momentum) {
           if (state.momentum !== momentum || state.disposed) return;
-          const fraction = Math.min(1, (now() - momentum.startTime) / momentum.duration);
-          const remaining = 1 - fraction;
-          const eased = 1 - remaining * remaining * remaining * remaining;
+          momentum.currentX += (momentum.toX - momentum.currentX) * 0.5;
+          momentum.currentY += (momentum.toY - momentum.currentY) * 0.5;
+          const done = momentum.currentX.toFixed(3) === momentum.toX.toFixed(3) && momentum.currentY.toFixed(3) === momentum.toY.toFixed(3);
           const element = state.element;
           element.scrollTo({
-            left: momentum.fromX + (momentum.toX - momentum.fromX) * eased,
-            top: momentum.fromY + (momentum.toY - momentum.fromY) * eased,
+            left: done ? momentum.toX : momentum.currentX,
+            top: done ? momentum.toY : momentum.currentY,
             behavior: "instant"
           });
           publish(state);
-          if (fraction >= 1) {
+          if (done) {
             state.momentum = null;
             return;
           }

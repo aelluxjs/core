@@ -54,11 +54,11 @@
     var momentumAttribute = AelluxJs.attr("scrollbox-momentum");
     var RESIZE_INTERVAL_MS = 100;
     var DRAG_THRESHOLD_PX = 3;
+    var SELECTION_HORIZONTAL_THRESHOLD_PX = 8;
+    var SELECTION_VERTICAL_TOLERANCE_PX = 6;
     var MOMENTUM_LIMIT_TIME_MS = 300;
     var MOMENTUM_LIMIT_DISTANCE_PX = 15;
     var MOMENTUM_DECELERATION = 15e-4;
-    var MOMENTUM_MAX_TIME_MS = 2500;
-    var MOMENTUM_BOUNDARY_TIME_MS = 500;
     var properties = ["--ae-scroll-y-progress", "--ae-scroll-x-progress"];
     var scrollboxes = /* @__PURE__ */ new Map();
     AelluxJs.extAttach(extensionName, {
@@ -222,13 +222,18 @@
         scrollLeft: element.scrollLeft,
         scrollTop: element.scrollTop,
         moved: false,
+        selectionPending: metrics.maxX <= 1 && metrics.maxY > 1,
+        userSelectApplied: false,
         momentumStartX: element.scrollLeft,
         momentumStartY: element.scrollTop,
         momentumStartTime: now(),
         userSelect: element.style.getPropertyValue("user-select"),
         userSelectPriority: element.style.getPropertyPriority("user-select")
       };
-      element.style.setProperty("user-select", "none");
+      if (!state.drag.selectionPending) {
+        element.style.setProperty("user-select", "none");
+        state.drag.userSelectApplied = true;
+      }
       root.addEventListener("pointermove", state.onPointerMove, {
         passive: false,
         capture: true
@@ -246,6 +251,16 @@
       }
       var dx = drag.startX - event.clientX;
       var dy = drag.startY - event.clientY;
+      if (drag.selectionPending) {
+        if (Math.abs(dx) >= SELECTION_HORIZONTAL_THRESHOLD_PX && Math.abs(dy) < SELECTION_VERTICAL_TOLERANCE_PX) {
+          endDrag(state);
+          return;
+        }
+        if (Math.abs(dy) < SELECTION_VERTICAL_TOLERANCE_PX) return;
+        drag.selectionPending = false;
+        state.element.style.setProperty("user-select", "none");
+        drag.userSelectApplied = true;
+      }
       if (!drag.moved && dx * dx + dy * dy < DRAG_THRESHOLD_PX * DRAG_THRESHOLD_PX) return;
       drag.moved = true;
       if (event.cancelable) event.preventDefault();
@@ -271,8 +286,10 @@
       root.removeEventListener("pointerup", state.onPointerEnd, true);
       root.removeEventListener("pointercancel", state.onPointerEnd, true);
       root.removeEventListener("blur", state.onBlur);
-      if (drag.userSelect) state.element.style.setProperty("user-select", drag.userSelect, drag.userSelectPriority);
-      else state.element.style.removeProperty("user-select");
+      if (drag.userSelectApplied) {
+        if (drag.userSelect) state.element.style.setProperty("user-select", drag.userSelect, drag.userSelectPriority);
+        else state.element.style.removeProperty("user-select");
+      }
       if (event && event.type === "pointerup" && drag.moved && state.momentumEnabled && !state.disposed && now() - drag.momentumStartTime < MOMENTUM_LIMIT_TIME_MS) {
         startMomentum(state, drag);
       }
@@ -282,15 +299,12 @@
       var elapsed = Math.max(1, now() - drag.momentumStartTime);
       var x = momentumAxis(element.scrollLeft, drag.momentumStartX, elapsed, Math.max(0, element.scrollWidth - element.clientWidth));
       var y = momentumAxis(element.scrollTop, drag.momentumStartY, elapsed, Math.max(0, element.scrollHeight - element.clientHeight));
-      var duration = Math.max(x.duration, y.duration);
-      if (!duration) return;
+      if (x === element.scrollLeft && y === element.scrollTop) return;
       var momentum = {
-        fromX: element.scrollLeft,
-        fromY: element.scrollTop,
-        toX: x.destination,
-        toY: y.destination,
-        startTime: now(),
-        duration: duration,
+        currentX: element.scrollLeft,
+        currentY: element.scrollTop,
+        toX: x,
+        toY: y,
         frame: null
       };
       state.momentum = momentum;
@@ -300,37 +314,24 @@
     }
     function momentumAxis(current, start, elapsed, maximum) {
       var distance = current - start;
-      if (Math.abs(distance) <= MOMENTUM_LIMIT_DISTANCE_PX) {
-        return {
-          destination: current,
-          duration: 0
-        };
-      }
+      if (Math.abs(distance) <= MOMENTUM_LIMIT_DISTANCE_PX) return current;
       var speed = Math.abs(distance) / elapsed;
       var projected = current + Math.sign(distance) * speed * speed / MOMENTUM_DECELERATION;
-      var destination = Math.max(0, Math.min(maximum, Math.round(projected)));
-      if (destination === current) return {
-        destination: destination,
-        duration: 0
-      };
-      return {
-        destination: destination,
-        duration: projected !== destination ? MOMENTUM_BOUNDARY_TIME_MS : Math.min(MOMENTUM_MAX_TIME_MS, 2 * speed / MOMENTUM_DECELERATION)
-      };
+      return Math.max(0, Math.min(maximum, Math.round(projected)));
     }
     function stepMomentum(state, momentum) {
       if (state.momentum !== momentum || state.disposed) return;
-      var fraction = Math.min(1, (now() - momentum.startTime) / momentum.duration);
-      var remaining = 1 - fraction;
-      var eased = 1 - remaining * remaining * remaining * remaining;
+      momentum.currentX += (momentum.toX - momentum.currentX) * 0.5;
+      momentum.currentY += (momentum.toY - momentum.currentY) * 0.5;
+      var done = momentum.currentX.toFixed(3) === momentum.toX.toFixed(3) && momentum.currentY.toFixed(3) === momentum.toY.toFixed(3);
       var element = state.element;
       element.scrollTo({
-        left: momentum.fromX + (momentum.toX - momentum.fromX) * eased,
-        top: momentum.fromY + (momentum.toY - momentum.fromY) * eased,
+        left: done ? momentum.toX : momentum.currentX,
+        top: done ? momentum.toY : momentum.currentY,
         behavior: "instant"
       });
       publish(state);
-      if (fraction >= 1) {
+      if (done) {
         state.momentum = null;
         return;
       }

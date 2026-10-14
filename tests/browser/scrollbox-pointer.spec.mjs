@@ -89,6 +89,42 @@ test("real mouse drag scrolls while the pointer leaves the box", async ({ page }
   })).toEqual([73, 73]);
 });
 
+test("horizontal pointer movement selects text in a vertical-only box", async ({ page }) => {
+  await setup(page, `<div id="box" data-ae-scrollbox="pointer" data-ae-scrollbox-momentum="false"
+    style="width:200px;height:100px;overflow:auto;font:16px monospace">
+    <div style="width:180px;height:300px;padding-top:60px;box-sizing:border-box"><span id="text">abcdefghijklmno</span></div>
+  </div>`);
+  const rect = await page.locator("#text").boundingBox();
+  await page.mouse.move(rect.x + 5, rect.y + rect.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(rect.x + 100, rect.y + rect.height / 2, { steps: 5 });
+  await page.mouse.up();
+  const result = await page.evaluate(() => ({
+    selection: getSelection().toString(),
+    scrollTop: document.getElementById("box").scrollTop,
+    userSelect: document.getElementById("box").style.getPropertyValue("user-select")
+  }));
+  expect(result.selection.length).toBeGreaterThan(0);
+  expect(result.scrollTop).toBe(0);
+  expect(result.userSelect).toBe("");
+});
+
+test("vertical pointer movement still drags a vertical-only box", async ({ page }) => {
+  await setup(page, `<div id="box" data-ae-scrollbox="pointer" data-ae-scrollbox-momentum="false"
+    style="width:200px;height:100px;overflow:auto;font:16px monospace">
+    <div style="width:180px;height:300px;padding-top:60px;box-sizing:border-box"><span id="text">abcdefghijklmno</span></div>
+  </div>`);
+  const rect = await page.locator("#text").boundingBox();
+  await page.mouse.move(rect.x + 5, rect.y + rect.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(rect.x + 5, rect.y - 40, { steps: 5 });
+  await page.mouse.up();
+  expect(await page.evaluate(() => document.getElementById("box").scrollTop))
+    .toBeGreaterThan(0);
+  expect(await page.evaluate(() => document.getElementById("box")
+    .style.getPropertyValue("user-select"))).toBe("");
+});
+
 test("touch and interactive controls do not start pointer dragging", async ({ page }) => {
   await setup(page, box("box", "pointer", "", "<button id='button'>Click</button>"));
   expect(await drag(page, "box", "touch")).toMatchObject({ x: 0, y: 0 });
@@ -206,6 +242,41 @@ test("pointer release keeps scrolling with momentum enabled by default", async (
     .toBeGreaterThan(40);
   await expect.poll(() => page.evaluate(() => document.getElementById("box").scrollTop))
     .toBeGreaterThan(40);
+});
+
+test("momentum halves the remaining distance each frame and terminates", async ({ page }) => {
+  await setup(page, box("box", "pointer", "", "", null)
+    .replace("width:300px;height:300px", "width:1000px;height:1000px"));
+  await page.evaluate(() => {
+    window.pendingMomentumFrames = [];
+    window.originalRequestAnimationFrame = window.requestAnimationFrame;
+    window.requestAnimationFrame = callback => {
+      window.pendingMomentumFrames.push(callback);
+      return window.pendingMomentumFrames.length;
+    };
+  });
+  expect(await drag(page, "box")).toMatchObject({ x: 50, y: 40 });
+  const result = await page.evaluate(() => {
+    const element = document.getElementById("box");
+    const positions = [];
+    try {
+      for (let step = 0; step < 30 && window.pendingMomentumFrames.length; step++) {
+        window.pendingMomentumFrames.shift()(performance.now());
+        positions.push([element.scrollLeft, element.scrollTop]);
+      }
+      return { positions, pending: window.pendingMomentumFrames.length };
+    } finally {
+      window.requestAnimationFrame = window.originalRequestAnimationFrame;
+      delete window.pendingMomentumFrames;
+      delete window.originalRequestAnimationFrame;
+    }
+  });
+  expect(result.positions[0]).toEqual([475, 470]);
+  expect(result.positions[1][0]).toBeGreaterThan(680);
+  expect(result.positions[1][0]).toBeLessThan(695);
+  expect(result.positions[1][1]).toBe(685);
+  expect(result.positions.at(-1)).toEqual([900, 900]);
+  expect(result.pending).toBe(0);
 });
 
 test("momentum false stops at release", async ({ page }) => {
