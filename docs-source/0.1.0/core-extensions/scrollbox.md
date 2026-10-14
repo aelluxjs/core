@@ -27,7 +27,7 @@ Drag with the primary mouse button or pen. The gesture starts after a small move
 
 In a vertical-only box, a mostly horizontal pointer movement selects text normally. Scrollbox waits for at least 6 px of vertical movement before taking over the gesture for dragging. Once horizontal movement reaches 8 px while vertical movement remains below 6 px, it leaves the gesture to native text selection.
 
-In `pointer` mode, a quick release continues scrolling with gradually decreasing speed. Momentum is enabled by default and applies only to desktop pointer dragging. It starts after more than 15 px within the latest 300 ms of dragging and uses a deceleration value of 0.0015 to calculate the destination. Each animation frame moves halfway from the current position to that destination; it ends when both axes match to three decimal places. It stops at the scroll boundary, on a new pointer or wheel interaction, when the mode changes, or when the box unmounts. Set `data-ae-scrollbox-momentum="false"` to disable it:
+In `pointer` mode, a quick release continues scrolling with gradually decreasing speed. Momentum is enabled by default and applies only to desktop pointer dragging. It starts after more than 15 px within the latest 300 ms of dragging and uses a deceleration value of 0.0015 to calculate the destination. Each animation frame moves 10% of the remaining distance to that destination; it ends when both axes match to three decimal places. It stops at the scroll boundary, on a new pointer or wheel interaction, when the mode changes, or when the box unmounts. Set `data-ae-scrollbox-momentum="false"` to disable it:
 
 ```html
 <div data-ae-scrollbox="pointer" data-ae-scrollbox-momentum="false">

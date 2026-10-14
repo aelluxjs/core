@@ -25595,8 +25595,8 @@
         }
         function stepMomentum(state, momentum) {
           if (state.momentum !== momentum || state.disposed) return;
-          momentum.currentX += (momentum.toX - momentum.currentX) * 0.5;
-          momentum.currentY += (momentum.toY - momentum.currentY) * 0.5;
+          momentum.currentX += (momentum.toX - momentum.currentX) * 0.1;
+          momentum.currentY += (momentum.toY - momentum.currentY) * 0.1;
           var done = momentum.currentX.toFixed(3) === momentum.toX.toFixed(3) && momentum.currentY.toFixed(3) === momentum.toY.toFixed(3);
           var element = state.element;
           element.scrollTo({

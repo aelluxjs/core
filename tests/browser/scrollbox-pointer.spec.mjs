@@ -244,7 +244,7 @@ test("pointer release keeps scrolling with momentum enabled by default", async (
     .toBeGreaterThan(40);
 });
 
-test("momentum halves the remaining distance each frame and terminates", async ({ page }) => {
+test("momentum advances ten percent of the remaining distance each frame and terminates", async ({ page }) => {
   await setup(page, box("box", "pointer", "", "", null)
     .replace("width:300px;height:300px", "width:1000px;height:1000px"));
   await page.evaluate(() => {
@@ -260,7 +260,7 @@ test("momentum halves the remaining distance each frame and terminates", async (
     const element = document.getElementById("box");
     const positions = [];
     try {
-      for (let step = 0; step < 30 && window.pendingMomentumFrames.length; step++) {
+      for (let step = 0; step < 180 && window.pendingMomentumFrames.length; step++) {
         window.pendingMomentumFrames.shift()(performance.now());
         positions.push([element.scrollLeft, element.scrollTop]);
       }
@@ -271,10 +271,10 @@ test("momentum halves the remaining distance each frame and terminates", async (
       delete window.originalRequestAnimationFrame;
     }
   });
-  expect(result.positions[0]).toEqual([475, 470]);
-  expect(result.positions[1][0]).toBeGreaterThan(680);
-  expect(result.positions[1][0]).toBeLessThan(695);
-  expect(result.positions[1][1]).toBe(685);
+  expect(result.positions[0]).toEqual([135, 126]);
+  expect(result.positions[1][0]).toBeGreaterThan(205);
+  expect(result.positions[1][0]).toBeLessThan(220);
+  expect(result.positions[1][1]).toBeCloseTo(203, 0);
   expect(result.positions.at(-1)).toEqual([900, 900]);
   expect(result.pending).toBe(0);
 });
