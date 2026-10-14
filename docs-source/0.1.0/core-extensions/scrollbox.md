@@ -2,6 +2,8 @@
 
 `data-ae-scrollbox` publishes `--ae-scroll-y-progress` and `--ae-scroll-x-progress` on the scroll container. Each value is a number from 0 at the start to 1 at the end of its axis; an axis without overflow reports 0. On unmount, Scrollbox restores the previous inline values and priorities. Scrollbox does not dispatch its own public scroll event.
 
+The boot's weak CSS applies `contain: layout paint` and defaults the container to `overflow: clip`. Set `overflow: auto` or `overflow: scroll` when using native scrolling, as in the example below.
+
 ```html
 <div data-ae-scrollbox="auto" style="overflow: auto; width: 20rem; height: 12rem">
   <div><!-- scrollable content --></div>

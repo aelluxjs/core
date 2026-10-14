@@ -15,12 +15,10 @@ export default function createWeakCss() {
   transform: translate3d(var(--ae-anchor-x, 0px), var(--ae-anchor-y, 0px), 0);
   transform-origin: var(--ae-anchor-origin-x, 50%) var(--ae-anchor-origin-y, 0%);
   visibility: visible;
-  transition: transform 0.1s linear;
 }
 [?wait-mounted]:not(.%mounted) > *:not([?loader]) { visibility: hidden !important; }
 [?wait-mounted].%mounted > [?loader] { display: none !important; }
-
-:where([?scrollbox]) { scrollbar-width: thin; scrollbar-color: #8886 transparent;}
+:where([?scrollbox]) { contain:layout paint; overflow:clip; scrollbar-width: thin; scrollbar-color: #8886 transparent;}
 :where([?scrollbox]::-webkit-scrollbar) { width: 8px; height: 8px;}
 :where([?scrollbox]::-webkit-scrollbar-track) { background: transparent;}
 :where([?scrollbox]::-webkit-scrollbar-thumb) { background: #8886; border-radius: 10px;}

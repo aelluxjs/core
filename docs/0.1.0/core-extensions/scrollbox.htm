@@ -573,6 +573,7 @@ Scrollbox                  </li>
         <div id="doc-content" style="min-height: calc(100vh - 200px);" class="js-toc-content" ajax-load="doc-content">
 <h1>Scrollbox Extension</h1>
 <p><code>data-ae-scrollbox</code> publishes <code>--ae-scroll-y-progress</code> and <code>--ae-scroll-x-progress</code> on the scroll container. Each value is a number from 0 at the start to 1 at the end of its axis; an axis without overflow reports 0. On unmount, Scrollbox restores the previous inline values and priorities. Scrollbox does not dispatch its own public scroll event.</p>
+<p>The boot&#39;s weak CSS applies <code>contain: layout paint</code> and defaults the container to <code>overflow: clip</code>. Set <code>overflow: auto</code> or <code>overflow: scroll</code> when using native scrolling, as in the example below.</p>
 <pre><code class="language-html">&lt;div data-ae-scrollbox=&quot;auto&quot; style=&quot;overflow: auto; width: 20rem; height: 12rem&quot;&gt;
   &lt;div&gt;&lt;!-- scrollable content --&gt;&lt;/div&gt;
 &lt;/div&gt;
