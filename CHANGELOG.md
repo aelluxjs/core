@@ -10,11 +10,13 @@ All notable changes to aellux.js will be documented in this file.
 - Scrollbox now supports native and desktop pointer-drag modes with horizontal wheel handoff at scroll boundaries.
 - Vertical-only pointer Scrollboxes now leave horizontal text-selection gestures to the browser.
 - Pointer momentum now advances by 10% of the remaining distance per frame and stops at three-decimal precision.
+- Scrollbox now supports opt-in elastic edges for native wheel, native touch, and desktop pointer gestures while preserving mounted padding.
 - Desktop pointer dragging in Scrollbox now has optional momentum, enabled by default and controlled by `data-ae-scrollbox-momentum`.
 - Shared dependencies now accept positional SRI and crossorigin arguments.
 
 ### Changed
 
+- Raised the raw Scrollbox and full-bundle size budgets for the elastic edge option.
 - Removed BetterScroll loading and its development dependency; Scrollbox uses native browser scrolling in both modes.
 - Raised the boot raw-size budget to 30 KiB for positional dependency arguments.
 

@@ -47,4 +47,15 @@ Set `data-ae-scrollbox-wheel-horizontal="false"` to disable the vertical-to-hori
 </div>
 ```
 
+## Elastic edges
+
+Add `data-ae-scrollbox-elastic` to opt into a padding-based edge response in either `native` or `pointer` mode. The weak CSS applies `box-sizing: border-box` to elastic boxes so extra padding remains visible at the trailing edges. When pointer dragging, touch dragging, or a wheel gesture pushes past a scroll limit, Scrollbox adds damped padding on that edge. The padding measured when the box mounts remains the base. The extra amount is one third of the force beyond the limit, capped at one quarter of the visible size of that axis. On release, the padding returns to its base with an 800 ms transition; reduced-motion users get an immediate return. Set the attribute to `false` or unmount the box to stop the effect and restore its original inline padding.
+
+```html
+<div data-ae-scrollbox="native" data-ae-scrollbox-elastic
+  style="width: 20rem; height: 12rem; padding: 1rem">
+  <div>Scrollable content</div>
+</div>
+```
+
 Scrollbox updates measurements after content mutations, box resize, or window resize. Resize updates use a 100 ms throttle.

@@ -52,6 +52,8 @@
     var attribute = AelluxJs.attr(extensionName);
     var wheelAttribute = AelluxJs.attr("scrollbox-wheel-horizontal");
     var momentumAttribute = AelluxJs.attr("scrollbox-momentum");
+    var elasticAttribute = AelluxJs.attr("scrollbox-elastic");
+    var elasticReleaseClass = AelluxJs.className("scrollbox-elastic-release");
     var RESIZE_INTERVAL_MS = 100;
     var DRAG_THRESHOLD_PX = 3;
     var SELECTION_HORIZONTAL_THRESHOLD_PX = 8;
@@ -59,7 +61,12 @@
     var MOMENTUM_LIMIT_TIME_MS = 300;
     var MOMENTUM_LIMIT_DISTANCE_PX = 15;
     var MOMENTUM_DECELERATION = 15e-4;
+    var ELASTIC_DAMPING = 1 / 3;
+    var ELASTIC_LIMIT_RATIO = 1 / 4;
+    var ELASTIC_RELEASE_MS = 800;
+    var ELASTIC_WHEEL_IDLE_MS = 80;
     var properties = ["--ae-scroll-y-progress", "--ae-scroll-x-progress"];
+    var paddingProperties = ["padding-top", "padding-right", "padding-bottom", "padding-left"];
     var scrollboxes = /* @__PURE__ */ new Map();
     AelluxJs.extAttach(extensionName, {
       init: init,
@@ -98,6 +105,24 @@
           priority: element.style.getPropertyPriority(name)
         };
       });
+      var computed = root.getComputedStyle(element);
+      var elastic = {
+        base: paddingProperties.map(function(name) {
+          return parseFloat(computed.getPropertyValue(name)) || 0;
+        }),
+        previous: paddingProperties.map(function(name) {
+          return {
+            value: element.style.getPropertyValue(name),
+            priority: element.style.getPropertyPriority(name)
+          };
+        }),
+        amounts: [0, 0, 0, 0],
+        active: false,
+        owned: false,
+        touch: null,
+        releaseTimeout: null,
+        wheelTimeout: null
+      };
       var state = {
         element: element,
         previous: previous,
@@ -106,10 +131,13 @@
         desktop: false,
         wheelEnabled: true,
         momentumEnabled: true,
+        elasticEnabled: false,
         wheelListening: false,
         pointerListening: false,
+        touchListening: false,
         drag: null,
         momentum: null,
+        elastic: elastic,
         resizeObserver: null,
         mutationObserver: null,
         lastResizeTime: -RESIZE_INTERVAL_MS,
@@ -134,6 +162,15 @@
       state.onBlur = function() {
         return endDrag(state);
       };
+      state.onTouchStart = function(event) {
+        return startTouch(state, event);
+      };
+      state.onTouchMove = function(event) {
+        return moveTouch(state, event);
+      };
+      state.onTouchEnd = function(event) {
+        return endTouch(state, event);
+      };
       scrollboxes.set(element, state);
       element.addEventListener("scroll", state.onScroll, {
         passive: true
@@ -151,9 +188,11 @@
       state.disposed = true;
       endDrag(state);
       cancelMomentum(state);
+      resetElastic(state);
       element.removeEventListener("scroll", state.onScroll);
       if (state.wheelListening) element.removeEventListener("wheel", state.onWheel, true);
       if (state.pointerListening) element.removeEventListener("pointerdown", state.onPointerDown);
+      if (state.touchListening) removeTouchListeners(state);
       if (state.resizeObserver) state.resizeObserver.disconnect();
       if (state.mutationObserver) state.mutationObserver.disconnect();
       if (state.resizeTimeout !== null) root.clearTimeout(state.resizeTimeout);
@@ -170,17 +209,21 @@
       state.mode = readMode(element);
       state.wheelEnabled = element.getAttribute(wheelAttribute) !== "false";
       state.momentumEnabled = element.getAttribute(momentumAttribute) !== "false";
+      state.elasticEnabled = element.hasAttribute(elasticAttribute) && element.getAttribute(elasticAttribute) !== "false";
       state.desktop = isDesktop();
-      if (state.desktop && !state.wheelListening) {
+      if ((state.desktop || state.elasticEnabled) && !state.wheelListening) {
         element.addEventListener("wheel", state.onWheel, {
           passive: false,
           capture: true
         });
         state.wheelListening = true;
-      } else if (!state.desktop && state.wheelListening) {
+      } else if (!state.desktop && !state.elasticEnabled && state.wheelListening) {
         element.removeEventListener("wheel", state.onWheel, true);
         state.wheelListening = false;
       }
+      if (state.elasticEnabled && !state.touchListening) addTouchListeners(state);
+      else if (!state.elasticEnabled && state.touchListening) removeTouchListeners(state);
+      if (!state.elasticEnabled) resetElastic(state);
       var pointerEnabled = state.desktop && state.mode === "pointer";
       if (!pointerEnabled || !state.momentumEnabled) cancelMomentum(state);
       if (pointerEnabled && !state.pointerListening) {
@@ -215,6 +258,11 @@
       if (metrics.maxX <= 0 && metrics.maxY <= 0) return;
       var rect = element.getBoundingClientRect();
       if (event.clientX >= rect.left + element.clientWidth || event.clientY >= rect.top + element.clientHeight) return;
+      if (state.elastic.owned) {
+        resetElastic(state);
+        refresh(state);
+        metrics = state.metrics;
+      }
       state.drag = {
         pointerId: event.pointerId,
         startX: event.clientX,
@@ -266,11 +314,10 @@
       if (event.cancelable) event.preventDefault();
       var time = now();
       var resetMomentum = time - drag.momentumStartTime > MOMENTUM_LIMIT_TIME_MS;
-      state.element.scrollTo({
-        left: drag.scrollLeft + dx,
-        top: drag.scrollTop + dy,
-        behavior: "instant"
-      });
+      var desiredX = drag.scrollLeft + dx;
+      var desiredY = drag.scrollTop + dy;
+      applyElasticFromDesired(state, desiredX, desiredY, false);
+      scrollWithinElasticBounds(state, desiredX, desiredY);
       if (resetMomentum) {
         drag.momentumStartX = state.element.scrollLeft;
         drag.momentumStartY = state.element.scrollTop;
@@ -290,7 +337,9 @@
         if (drag.userSelect) state.element.style.setProperty("user-select", drag.userSelect, drag.userSelectPriority);
         else state.element.style.removeProperty("user-select");
       }
-      if (event && event.type === "pointerup" && drag.moved && state.momentumEnabled && !state.disposed && now() - drag.momentumStartTime < MOMENTUM_LIMIT_TIME_MS) {
+      var hadElastic = state.elastic.active;
+      releaseElastic(state);
+      if (event && event.type === "pointerup" && drag.moved && state.momentumEnabled && !hadElastic && !state.disposed && now() - drag.momentumStartTime < MOMENTUM_LIMIT_TIME_MS) {
         startMomentum(state, drag);
       }
     }
@@ -344,6 +393,168 @@
       root.cancelAnimationFrame(state.momentum.frame);
       state.momentum = null;
     }
+    function addTouchListeners(state) {
+      var element = state.element;
+      element.addEventListener("touchstart", state.onTouchStart, {
+        passive: true
+      });
+      element.addEventListener("touchmove", state.onTouchMove, {
+        passive: false
+      });
+      element.addEventListener("touchend", state.onTouchEnd, {
+        passive: true
+      });
+      element.addEventListener("touchcancel", state.onTouchEnd, {
+        passive: true
+      });
+      state.touchListening = true;
+    }
+    function removeTouchListeners(state) {
+      var element = state.element;
+      element.removeEventListener("touchstart", state.onTouchStart);
+      element.removeEventListener("touchmove", state.onTouchMove);
+      element.removeEventListener("touchend", state.onTouchEnd);
+      element.removeEventListener("touchcancel", state.onTouchEnd);
+      state.touchListening = false;
+      state.elastic.touch = null;
+    }
+    function startTouch(state, event) {
+      if (event.touches.length !== 1) {
+        state.elastic.touch = null;
+        releaseElastic(state);
+        return;
+      }
+      if (event.target.closest("[".concat(attribute, "]")) !== state.element) return;
+      cancelMomentum(state);
+      var touch = event.touches[0];
+      if (state.elastic.owned) {
+        resetElastic(state);
+        refresh(state);
+      }
+      state.elastic.touch = {
+        identifier: touch.identifier,
+        x: touch.clientX,
+        y: touch.clientY,
+        scrollLeft: state.element.scrollLeft,
+        scrollTop: state.element.scrollTop
+      };
+    }
+    function moveTouch(state, event) {
+      var start = state.elastic.touch;
+      if (!start) return;
+      var touch = null;
+      var _iterator2 = _createForOfIteratorHelper(event.touches), _step2;
+      try {
+        for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
+          var item = _step2.value;
+          if (item.identifier === start.identifier) {
+            touch = item;
+            break;
+          }
+        }
+      } catch (err) {
+        _iterator2.e(err);
+      } finally {
+        _iterator2.f();
+      }
+      if (!touch) return;
+      var desiredX = start.scrollLeft + start.x - touch.clientX;
+      var desiredY = start.scrollTop + start.y - touch.clientY;
+      if (!applyElasticFromDesired(state, desiredX, desiredY, false)) return;
+      if (event.cancelable) event.preventDefault();
+      scrollWithinElasticBounds(state, desiredX, desiredY);
+      publish(state);
+    }
+    function endTouch(state, event) {
+      var touch = state.elastic.touch;
+      if (!touch) return;
+      var _iterator3 = _createForOfIteratorHelper(event.touches), _step3;
+      try {
+        for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
+          var item = _step3.value;
+          if (item.identifier === touch.identifier) return;
+        }
+      } catch (err) {
+        _iterator3.e(err);
+      } finally {
+        _iterator3.f();
+      }
+      state.elastic.touch = null;
+      releaseElastic(state);
+    }
+    function applyElasticFromDesired(state, desiredX, desiredY, additive) {
+      if (!state.elasticEnabled) return false;
+      var element = state.element;
+      var metrics = state.metrics || nativeMetrics(element);
+      var elastic = state.elastic;
+      var amounts = [0, 0, 0, 0];
+      if (metrics.maxY > 1) {
+        if (desiredY < 0) amounts[0] = Math.min(element.clientHeight * ELASTIC_LIMIT_RATIO, (additive ? elastic.amounts[0] : 0) - desiredY * ELASTIC_DAMPING);
+        else if (desiredY > metrics.maxY) amounts[2] = Math.min(element.clientHeight * ELASTIC_LIMIT_RATIO, (additive ? elastic.amounts[2] : 0) + (desiredY - metrics.maxY) * ELASTIC_DAMPING);
+      }
+      if (metrics.maxX > 1) {
+        if (desiredX > metrics.maxX) amounts[1] = Math.min(element.clientWidth * ELASTIC_LIMIT_RATIO, (additive ? elastic.amounts[1] : 0) + (desiredX - metrics.maxX) * ELASTIC_DAMPING);
+        else if (desiredX < 0) amounts[3] = Math.min(element.clientWidth * ELASTIC_LIMIT_RATIO, (additive ? elastic.amounts[3] : 0) - desiredX * ELASTIC_DAMPING);
+      }
+      var active = amounts.some(function(amount) {
+        return amount > 0;
+      });
+      if (!active && !elastic.owned) return false;
+      if (elastic.releaseTimeout !== null) root.clearTimeout(elastic.releaseTimeout);
+      elastic.releaseTimeout = null;
+      element.classList.remove(elasticReleaseClass);
+      elastic.amounts = amounts;
+      elastic.active = active;
+      elastic.owned = true;
+      paddingProperties.forEach(function(name, index) {
+        return element.style.setProperty(name, "".concat(elastic.base[index] + amounts[index], "px"));
+      });
+      return active;
+    }
+    function scrollWithinElasticBounds(state, desiredX, desiredY) {
+      var metrics = state.metrics || nativeMetrics(state.element);
+      state.element.scrollTo({
+        left: Math.max(0, Math.min(metrics.maxX, desiredX)) + state.elastic.amounts[1],
+        top: Math.max(0, Math.min(metrics.maxY, desiredY)) + state.elastic.amounts[2],
+        behavior: "instant"
+      });
+    }
+    function releaseElastic(state) {
+      var elastic = state.elastic;
+      if (!elastic.owned) return;
+      if (elastic.wheelTimeout !== null) root.clearTimeout(elastic.wheelTimeout);
+      elastic.wheelTimeout = null;
+      if (!elastic.active) {
+        resetElastic(state);
+        return;
+      }
+      state.element.classList.add(elasticReleaseClass);
+      elastic.amounts = [0, 0, 0, 0];
+      paddingProperties.forEach(function(name, index) {
+        return state.element.style.setProperty(name, "".concat(elastic.base[index], "px"));
+      });
+      if (elastic.releaseTimeout !== null) root.clearTimeout(elastic.releaseTimeout);
+      elastic.releaseTimeout = root.setTimeout(function() {
+        resetElastic(state);
+        refresh(state);
+      }, ELASTIC_RELEASE_MS);
+    }
+    function resetElastic(state) {
+      var elastic = state.elastic;
+      if (elastic.releaseTimeout !== null) root.clearTimeout(elastic.releaseTimeout);
+      if (elastic.wheelTimeout !== null) root.clearTimeout(elastic.wheelTimeout);
+      elastic.releaseTimeout = null;
+      elastic.wheelTimeout = null;
+      state.element.classList.remove(elasticReleaseClass);
+      if (elastic.owned) paddingProperties.forEach(function(name, index) {
+        var previous = elastic.previous[index];
+        if (previous.value) state.element.style.setProperty(name, previous.value, previous.priority);
+        else state.element.style.removeProperty(name);
+      });
+      elastic.amounts = [0, 0, 0, 0];
+      elastic.active = false;
+      elastic.owned = false;
+    }
     function observe(state) {
       state.onResize = function() {
         return scheduleResize(state);
@@ -356,16 +567,16 @@
           return scheduleResize(state);
         });
         state.resizeObserver.observe(state.element);
-        var _iterator2 = _createForOfIteratorHelper(state.element.children), _step2;
+        var _iterator4 = _createForOfIteratorHelper(state.element.children), _step4;
         try {
-          for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
-            var child = _step2.value;
+          for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
+            var child = _step4.value;
             state.resizeObserver.observe(child);
           }
         } catch (err) {
-          _iterator2.e(err);
+          _iterator4.e(err);
         } finally {
-          _iterator2.f();
+          _iterator4.f();
         }
       }
       if (root.MutationObserver) {
@@ -373,16 +584,16 @@
           if (state.resizeObserver) {
             state.resizeObserver.disconnect();
             state.resizeObserver.observe(state.element);
-            var _iterator3 = _createForOfIteratorHelper(state.element.children), _step3;
+            var _iterator5 = _createForOfIteratorHelper(state.element.children), _step5;
             try {
-              for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
-                var _child = _step3.value;
+              for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
+                var _child = _step5.value;
                 state.resizeObserver.observe(_child);
               }
             } catch (err) {
-              _iterator3.e(err);
+              _iterator5.e(err);
             } finally {
-              _iterator3.f();
+              _iterator5.f();
             }
           }
           refresh(state);
@@ -419,7 +630,7 @@
     }
     function refresh(state) {
       if (state.disposed) return;
-      state.metrics = nativeMetrics(state.element);
+      if (!state.elastic.active) state.metrics = nativeMetrics(state.element);
       publish(state);
     }
     function nativeMetrics(element) {
@@ -439,15 +650,35 @@
     }
     function handleWheel(state, event) {
       cancelMomentum(state);
-      if (!state.desktop || event.defaultPrevented) return;
+      if (event.defaultPrevented || event.ctrlKey) return;
+      if (event.target.closest("[".concat(attribute, "]")) !== state.element) return;
       var metrics = state.metrics;
-      if (!metrics || metrics.maxX <= 1 || metrics.maxY > 1 || !state.wheelEnabled) return;
-      if (Math.abs(event.deltaX) > Math.abs(event.deltaY)) return;
+      if (!metrics) return;
       var factor = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? metrics.page : 1;
-      var delta = event.deltaY * factor;
-      if (!delta) return;
+      var converted = state.desktop && state.wheelEnabled && metrics.maxX > 1 && metrics.maxY <= 1 && Math.abs(event.deltaX) <= Math.abs(event.deltaY);
+      var deltaX = (converted ? event.deltaY : event.deltaX) * factor;
+      var deltaY = (converted ? 0 : event.deltaY) * factor;
+      if (state.elasticEnabled) {
+        var desiredX = Math.max(0, Math.min(metrics.maxX, state.element.scrollLeft)) + deltaX;
+        var desiredY = Math.max(0, Math.min(metrics.maxY, state.element.scrollTop)) + deltaY;
+        if (applyElasticFromDesired(state, desiredX, desiredY, true)) {
+          event.preventDefault();
+          scrollWithinElasticBounds(state, desiredX, desiredY);
+          publish(state);
+          if (state.elastic.wheelTimeout !== null) root.clearTimeout(state.elastic.wheelTimeout);
+          state.elastic.wheelTimeout = root.setTimeout(function() {
+            return releaseElastic(state);
+          }, ELASTIC_WHEEL_IDLE_MS);
+          return;
+        }
+        if (state.elastic.owned) {
+          resetElastic(state);
+          refresh(state);
+        }
+      }
+      if (!converted || !deltaX) return;
       var current = state.element.scrollLeft;
-      var next = Math.max(0, Math.min(metrics.maxX, current + delta));
+      var next = Math.max(0, Math.min(metrics.maxX, current + deltaX));
       if (next === current) return;
       event.preventDefault();
       state.element.scrollTo({

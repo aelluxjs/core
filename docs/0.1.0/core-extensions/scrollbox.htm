@@ -613,6 +613,13 @@ Scrollbox                  </li>
   &lt;div&gt;Horizontal content&lt;/div&gt;
 &lt;/div&gt;
 </code></pre>
+<h2>Elastic edges</h2>
+<p>Add <code>data-ae-scrollbox-elastic</code> to opt into a padding-based edge response in either <code>native</code> or <code>pointer</code> mode. The weak CSS applies <code>box-sizing: border-box</code> to elastic boxes so extra padding remains visible at the trailing edges. When pointer dragging, touch dragging, or a wheel gesture pushes past a scroll limit, Scrollbox adds damped padding on that edge. The padding measured when the box mounts remains the base. The extra amount is one third of the force beyond the limit, capped at one quarter of the visible size of that axis. On release, the padding returns to its base with an 800 ms transition; reduced-motion users get an immediate return. Set the attribute to <code>false</code> or unmount the box to stop the effect and restore its original inline padding.</p>
+<pre><code class="language-html">&lt;div data-ae-scrollbox=&quot;native&quot; data-ae-scrollbox-elastic
+  style=&quot;width: 20rem; height: 12rem; padding: 1rem&quot;&gt;
+  &lt;div&gt;Scrollable content&lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
 <p>Scrollbox updates measurements after content mutations, box resize, or window resize. Resize updates use a 100 ms throttle.</p>
         </div>
 
