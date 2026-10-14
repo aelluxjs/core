@@ -19,9 +19,9 @@ The table records the beta.10 build measured on October 14, 2026. Limits are rou
 | --- | ---: | ---: | ---: | ---: |
 | `aellux.min.js` | 27.9 KiB | 10.4 KiB | 29 KiB | 12 KiB |
 | `aellux.esm.min.js` | 17.0 KiB | 5.7 KiB | 18 KiB | 7 KiB |
-| `aellux.orchestrator.min.js` | 17.4 KiB | 6.3 KiB | 21 KiB | 8 KiB |
-| `aellux.full.min.js` | 54.3 KiB | 16.9 KiB | 56 KiB | 18 KiB |
-| `aellux.full.legacy.min.js` | 350.2 KiB | 117.0 KiB | 360 KiB | 130 KiB |
+| `aellux.orchestrator.min.js` | 17.5 KiB | 6.3 KiB | 21 KiB | 8 KiB |
+| `aellux.full.min.js` | 54.4 KiB | 16.9 KiB | 56 KiB | 18 KiB |
+| `aellux.full.legacy.min.js` | 350.3 KiB | 117.1 KiB | 360 KiB | 130 KiB |
 | `aellux.ext.adaptive.min.css` | 104.1 KiB | 8.2 KiB | 121 KiB | 11 KiB |
 | `aellux.ext.present.min.css` | 3.8 KiB | 0.8 KiB | 4 KiB | 2 KiB |
 

@@ -288,6 +288,10 @@ import utilsNameCase from "./internal/utils-name-case.js";
     const basePath = AelluxJs.aelluxBasePath;
     if (!url.startsWith(basePath)) return null;
     const filename = url.slice(basePath.length);
+    // jsDelivr may regenerate minified stylesheets, changing their bytes.
+    // Keep explicit Extension hashes and the hashes of other core assets.
+    if (variant === "style" && /\.min\.css$/.test(filename) &&
+      /^https?:\/\/cdn\.jsdelivr\.net\/gh\//i.test(basePath)) return null;
     const builtin = AelluxJs.coreAssetIntegrity;
     return builtin && Object.prototype.hasOwnProperty.call(builtin, filename)
       ? builtin[filename]

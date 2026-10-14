@@ -49,6 +49,34 @@ test("generated integrity covers the orchestrator and built-in Extension assets"
   }
 });
 
+test("jsDelivr minified core styles load without a generated SRI hash", async ({ page }) => {
+  const base = "https://cdn.jsdelivr.net/gh/aelluxjs/core@fixture/dist/";
+  await page.route(`${base}**`, async route => {
+    const filename = new URL(route.request().url()).pathname.split("/").pop();
+    const bytes = await readFile(join(distribution, filename));
+    await route.fulfill({
+      body: filename.endsWith(".min.css")
+        ? Buffer.concat([bytes, Buffer.from("/* CDN changed the CSS bytes */")])
+        : bytes,
+      contentType: filename.endsWith(".css") ? "text/css" : "text/javascript",
+      headers: { "access-control-allow-origin": "*" }
+    });
+  });
+  await page.goto("/tests/index.htm");
+  await page.addScriptTag({ url: `${base}aellux.min.js` });
+  await page.evaluate(() => {
+    AelluxJs.ext("present", { loadStyle: true });
+    AelluxJs.init({ mode: "basic" });
+  });
+  await expect.poll(() => page.evaluate(() => AelluxJs.ext.present?.initialized)).toBe(true);
+  const style = page.locator('link[data-ae-ext-style="present"]');
+  await expect(style).toHaveAttribute("href", `${base}aellux.ext.present.min.css`);
+  expect(await style.getAttribute("integrity")).toBeNull();
+  expect(await style.evaluate(element => Boolean(element.sheet))).toBe(true);
+  expect(await page.locator('script[data-ae-ext="present"]').getAttribute("integrity"))
+    .toBe(await expectedIntegrity("aellux.ext.present.min.js"));
+});
+
 test("generated integrity matches each runtime variant", async ({ page }) => {
   for (const { boot, mode, forceLegacy, runtime } of [
     { boot: "aellux.js", mode: "basic", forceLegacy: true,
