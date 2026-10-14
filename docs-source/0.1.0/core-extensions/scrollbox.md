@@ -18,7 +18,7 @@
 
 BetterScroll 2.5.1 is loaded on demand through the shared `$ae.dep("better-scroll", …)` registry. Multiple boxes share one load. If loading or initialization fails, that box keeps native scrolling and the same progress properties. A later update can retry a failed dependency load. BetterScroll requires exactly one direct content element; other structures retain native scrolling.
 
-The BetterScroll defaults are `scrollX: false`, `scrollY: true`, `click: true`, `bounce: false`, `momentum: true`, `probeType: 3`, and `mouseWheel: true`. Scrollbox replaces the two axis values with the axes that actually overflow. It enables the wheel plugin on desktop except for horizontal-only boxes, whose wheel events are handled by Scrollbox. No snap or visual plugin is enabled.
+The BetterScroll script is pinned to version 2.5.1 and loaded with a SHA-384 integrity value and `crossorigin="anonymous"`. The BetterScroll defaults are `scrollX: false`, `scrollY: true`, `click: true`, `bounce: false`, `momentum: true`, `probeType: 3`, `mouseWheel: true`, `nestedScroll: true`, and a fading interactive scrollbar. Scrollbox replaces the two axis values with the axes that actually overflow. It enables the wheel plugin on desktop except for horizontal-only boxes, whose wheel events are handled by Scrollbox.
 
 Override defaults with a JSON object:
 

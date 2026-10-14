@@ -25466,6 +25466,7 @@
         var optionsAttribute = AelluxJs2.attr("scrollbox-options");
         var wheelAttribute = AelluxJs2.attr("scrollbox-wheel-horizontal");
         var dependencyURL = "https://unpkg.com/better-scroll@2.5.1/dist/better-scroll.min.js";
+        var dependencyIntegrity = "sha384-4mVyaBOPOLtUq+Cg7YRI7vesPIrJkaN/jQFWuTBl9acmb7D2yiAMXp0pxHVI3qM2";
         var RESIZE_INTERVAL_MS = 100;
         var properties = ["--ae-scroll-y-progress", "--ae-scroll-x-progress"];
         var betterScrollProperties = ["transform", "transform-origin", "transition", "transition-property", "transition-duration", "transition-timing-function", "transition-delay", "will-change", "overflow", "touch-action"];
@@ -25477,7 +25478,13 @@
           bounce: false,
           momentum: true,
           probeType: 3,
-          mouseWheel: true
+          mouseWheel: true,
+          nestedScroll: true,
+          scrollbar: {
+            fade: true,
+            interactive: true,
+            scrollbarTrackClickable: true
+          }
         });
         AelluxJs2.extAttach(extensionName, {
           init: init,
@@ -25671,7 +25678,7 @@
                   userOptions = state.parsedOptions;
                   _context3.p = 3;
                   _context3.n = 4;
-                  return AelluxJs2.dep("better-scroll", dependencyURL);
+                  return AelluxJs2.dep("better-scroll", dependencyURL, dependencyIntegrity, "anonymous");
                 case 4:
                   _context3.n = 6;
                   break;
@@ -25930,7 +25937,7 @@
         }
         function refresh(state) {
           if (state.disposed) return;
-          if (state.instance && (state.element.firstElementChild !== state.content || state.element.lastElementChild !== state.content)) {
+          if (state.instance && state.element.firstElementChild !== state.content) {
             stopEnhancement(state);
             state.metrics = nativeMetrics(state.element);
             publish(state);

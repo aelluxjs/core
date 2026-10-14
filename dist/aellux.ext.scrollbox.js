@@ -30,6 +30,7 @@
     const optionsAttribute = AelluxJs.attr("scrollbox-options");
     const wheelAttribute = AelluxJs.attr("scrollbox-wheel-horizontal");
     const dependencyURL = "https://unpkg.com/better-scroll@2.5.1/dist/better-scroll.min.js";
+    const dependencyIntegrity = "sha384-4mVyaBOPOLtUq+Cg7YRI7vesPIrJkaN/jQFWuTBl9acmb7D2yiAMXp0pxHVI3qM2";
     const RESIZE_INTERVAL_MS = 100;
     const properties = ["--ae-scroll-y-progress", "--ae-scroll-x-progress"];
     const betterScrollProperties = [
@@ -52,7 +53,13 @@
       bounce: false,
       momentum: true,
       probeType: 3,
-      mouseWheel: true
+      mouseWheel: true,
+      nestedScroll: true,
+      scrollbar: {
+        fade: true,
+        interactive: true,
+        scrollbarTrackClickable: true
+      }
     });
     AelluxJs.extAttach(extensionName, { init, destroy });
     function init() {
@@ -165,7 +172,7 @@
       }
       const userOptions = state.parsedOptions;
       try {
-        await AelluxJs.dep("better-scroll", dependencyURL);
+        await AelluxJs.dep("better-scroll", dependencyURL, dependencyIntegrity, "anonymous");
       } catch (cause) {
         if (!state.disposed && generation === state.generation) {
           AelluxJs.diagnostics.warn(
@@ -345,7 +352,7 @@
     }
     function refresh(state) {
       if (state.disposed) return;
-      if (state.instance && (state.element.firstElementChild !== state.content || state.element.lastElementChild !== state.content)) {
+      if (state.instance && state.element.firstElementChild !== state.content) {
         stopEnhancement(state);
         state.metrics = nativeMetrics(state.element);
         publish(state);

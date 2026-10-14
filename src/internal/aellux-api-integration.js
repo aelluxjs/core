@@ -122,12 +122,26 @@ export function createAelluxApi(root, constants) {
       options.state = "wait";
       api.registry.ext[key] = options;
     },
-    dep: function (label, url, options) {
+    dep: function (label, url, integrity, crossOrigin) {
       if (typeof label !== "string" || !label.trim() ||
         typeof url !== "string" || !url.trim()) {
         return root.Promise.reject(diagnostics.error(
           diagnostics.ERROR_DEPENDENCY_ARGUMENT,
           { label: label, url: url, expected: "a nonempty label and script URL" }
+        ));
+      }
+
+      // Keep the original options-object overload while also accepting
+      // dep(label, url, integrity, crossOrigin).
+      var options = integrity && typeof integrity === "object" && !Array.isArray(integrity)
+        ? integrity : { integrity: integrity, crossOrigin: crossOrigin };
+      if ((typeof options.integrity !== "undefined" && options.integrity !== null &&
+        typeof options.integrity !== "string") ||
+        (typeof options.crossOrigin !== "undefined" && options.crossOrigin !== null &&
+        typeof options.crossOrigin !== "string")) {
+        return root.Promise.reject(diagnostics.error(
+          diagnostics.ERROR_DEPENDENCY_ARGUMENT,
+          { label: label, url: url, expected: "integrity and crossOrigin strings" }
         ));
       }
 

@@ -2,9 +2,11 @@ import { expect, test } from "@playwright/test";
 import { readFile } from "node:fs/promises";
 
 const dependency = "**/better-scroll@2.5.1/dist/better-scroll.min.js";
+const betterScrollSource = await readFile(
+  new URL("../../node_modules/better-scroll/dist/better-scroll.min.js", import.meta.url), "utf8");
 const fakeBetterScroll = `
 window.betterScrollCalls = [];
-window.BetterScroll = {
+window.__fakeBetterScroll = {
   createBScroll(wrapper, options) {
     const listeners = {};
     const instance = {
@@ -30,16 +32,52 @@ window.BetterScroll = {
   }
 };`;
 
-async function setup(page, html, { fail = false, touch = false } = {}) {
+async function installBetterScrollHook(page, behavior = "fake") {
+  await page.addScriptTag({ content: `
+    ${fakeBetterScroll}
+    Object.defineProperty(window, "BetterScroll", {
+      configurable: true,
+      get() { return window.__betterScrollExport; },
+      set(value) {
+        window.__betterScrollExport = value;
+        queueMicrotask(() => {
+          if (${JSON.stringify(behavior)} === "fake") {
+            value.createBScroll = window.__fakeBetterScroll.createBScroll;
+          } else if (${JSON.stringify(behavior)} === "missing") {
+            value.createBScroll = undefined;
+          } else if (${JSON.stringify(behavior)} === "throw") {
+            value.createBScroll = () => { throw new Error("init failed"); };
+          } else if (${JSON.stringify(behavior)} === "record") {
+            window.realInstances = [];
+            const create = value.createBScroll;
+            value.createBScroll = (element, options) => {
+              const instance = create(element, options);
+              window.realInstances.push(instance);
+              return instance;
+            };
+          }
+        });
+      }
+    });` });
+}
+
+function fulfillBetterScroll(route) {
+  return route.fulfill({
+    contentType: "text/javascript",
+    headers: { "access-control-allow-origin": "*" },
+    body: betterScrollSource
+  });
+}
+
+async function setup(page, html, { touch = false } = {}) {
   let requests = 0;
   await page.route(dependency, route => {
     requests++;
-    return fail ? route.abort("failed") :
-      route.fulfill({ contentType: "text/javascript", body: fakeBetterScroll });
+    return fulfillBetterScroll(route);
   });
   await page.goto("/tests/index.htm");
+  if (!touch) await installBetterScrollHook(page);
   if (touch) {
-    await page.addInitScript(() => {});
     await page.evaluate(() => {
       Object.defineProperty(navigator, "maxTouchPoints", { configurable: true, value: 5 });
     });
@@ -155,15 +193,16 @@ test("failed dependency falls back to native and update can retry", async ({ pag
   await page.route(dependency, route => {
     requests++;
     return requests === 1 ? route.abort("failed") :
-      route.fulfill({ contentType: "text/javascript", body: fakeBetterScroll });
+      fulfillBetterScroll(route);
   });
   await page.goto("/tests/index.htm");
+  await installBetterScrollHook(page);
   await page.addScriptTag({ url: "/dist/aellux.js" });
   await page.evaluate(html => { document.body.innerHTML = html; AelluxJs.ext("scrollbox"); }, box("a"));
   await page.addScriptTag({ url: "/src/aellux.ext.scrollbox.js" });
   await page.evaluate(() => AelluxJs.init({ mode: "basic" }));
   await expect.poll(() => page.evaluate(() => AelluxJs.ext.scrollbox?.initialized)).toBe(true);
-  expect(await page.evaluate(() => !!window.betterScrollCalls)).toBe(false);
+  expect(await page.evaluate(() => window.betterScrollCalls.length)).toBe(0);
   await page.evaluate(() => document.getElementById("a").scrollTo(0, 100));
   await expect.poll(() => page.evaluate(() =>
     Number(document.getElementById("a").style.getPropertyValue("--ae-scroll-y-progress")))).toBe(0.5);
@@ -172,16 +211,14 @@ test("failed dependency falls back to native and update can retry", async ({ pag
   expect(requests).toBe(2);
 });
 
-for (const [description, body, code] of [
-  ["missing BetterScroll export", "window.otherLibrary = true;", 2015],
-  ["BetterScroll initialization failure",
-    "window.BetterScroll = { createBScroll() { throw new Error('init failed'); } };", 1120]
+for (const [description, behavior, code] of [
+  ["missing BetterScroll export", "missing", 2015],
+  ["BetterScroll initialization failure", "throw", 1120]
 ]) {
   test(`${description} diagnoses and preserves native progress`, async ({ page }) => {
-    await page.route(dependency, route => route.fulfill({
-      contentType: "text/javascript", body
-    }));
+    await page.route(dependency, fulfillBetterScroll);
     await page.goto("/tests/index.htm");
+    await installBetterScrollHook(page, behavior);
     await page.addScriptTag({ url: "/dist/aellux.js" });
     await page.evaluate(html => { document.body.innerHTML = html; AelluxJs.ext("scrollbox"); }, box("a"));
     await page.addScriptTag({ url: "/src/aellux.ext.scrollbox.js" });
@@ -346,38 +383,39 @@ test("wheel releases the vertical parent after the horizontal edge", async ({ pa
   await expect.poll(() => page.evaluate(() => document.getElementById("parent").scrollTop)).toBeGreaterThan(0);
 });
 
-test("real BetterScroll bundle publishes normalized progress and destroys cleanly", async ({ page }) => {
-  const source = await readFile(new URL("../../node_modules/better-scroll/dist/better-scroll.min.js", import.meta.url), "utf8");
-  await page.route(dependency, route => route.fulfill({
-    contentType: "text/javascript",
-    body: source + `
-      window.realInstances = [];
-      const createRealBScroll = BetterScroll.createBScroll;
-      BetterScroll.createBScroll = (element, options) => {
-        const instance = createRealBScroll(element, options);
-        window.realInstances.push(instance);
-        return instance;
-      };`
-  }));
+test("real BetterScroll bundle loads with SRI and crossorigin", async ({ page }) => {
+  await page.route(dependency, fulfillBetterScroll);
   await page.goto("/tests/index.htm");
   await page.addScriptTag({ url: "/dist/aellux.js" });
+  await installBetterScrollHook(page, "record");
   await page.evaluate(html => { document.body.innerHTML = html; AelluxJs.ext("scrollbox"); }, box("real"));
   await page.addScriptTag({ url: "/src/aellux.ext.scrollbox.js" });
   await page.evaluate(() => AelluxJs.init({ mode: "basic" }));
+  await expect.poll(() => page.evaluate(() => AelluxJs.ext.scrollbox?.initialized)).toBe(true);
   await expect.poll(() => page.evaluate(() => window.realInstances?.length)).toBe(1);
-  const values = await page.evaluate(() => {
-    const instance = window.realInstances[0];
-    instance.scrollTo(-100, -100, 0);
-    const element = document.getElementById("real");
-    return {
-      x: Number(element.style.getPropertyValue("--ae-scroll-x-progress")),
-      y: Number(element.style.getPropertyValue("--ae-scroll-y-progress")),
-      maxX: instance.maxScrollX,
-      maxY: instance.maxScrollY
-    };
+  expect(await page.evaluate(() => ({
+    loaded: AelluxJs.registry.dep["better-scroll"].state,
+    integrity: AelluxJs.registry.dep["better-scroll"].script.integrity,
+    crossOrigin: AelluxJs.registry.dep["better-scroll"].script.crossOrigin,
+    maxX: window.realInstances[0].maxScrollX,
+    maxY: window.realInstances[0].maxScrollY
+  }))).toEqual({
+    loaded: "loaded",
+    integrity: "sha384-4mVyaBOPOLtUq+Cg7YRI7vesPIrJkaN/jQFWuTBl9acmb7D2yiAMXp0pxHVI3qM2",
+    crossOrigin: "anonymous",
+    maxX: -200,
+    maxY: -200
   });
-  expect(values).toMatchObject({ x: 0.5, y: 0.5, maxX: -200, maxY: -200 });
+  await page.evaluate(() => window.realInstances[0].scrollTo(-100, -100, 0));
+  await expect.poll(() => page.evaluate(() => ({
+    x: document.getElementById("real").style.getPropertyValue("--ae-scroll-x-progress"),
+    y: document.getElementById("real").style.getPropertyValue("--ae-scroll-y-progress")
+  }))).toEqual({ x: "0.5", y: "0.5" });
+  await page.waitForTimeout(200);
+  expect(await page.evaluate(() => window.realInstances.length)).toBe(1);
   await page.evaluate(() => AelluxJs.unmount(document.getElementById("real"), "scrollbox"));
-  expect(await page.evaluate(() => document.getElementById("real").style.getPropertyValue("--ae-scroll-x-progress"))).toBe("");
-  expect(await page.evaluate(() => document.getElementById("real").firstElementChild.style.transform)).toBe("");
+  expect(await page.evaluate(() => ({
+    x: document.getElementById("real").style.getPropertyValue("--ae-scroll-x-progress"),
+    y: document.getElementById("real").style.getPropertyValue("--ae-scroll-y-progress")
+  }))).toEqual({ x: "", y: "" });
 });

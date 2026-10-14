@@ -12,6 +12,7 @@
   const optionsAttribute = AelluxJs.attr("scrollbox-options");
   const wheelAttribute = AelluxJs.attr("scrollbox-wheel-horizontal");
   const dependencyURL = "https://unpkg.com/better-scroll@2.5.1/dist/better-scroll.min.js";
+  const dependencyIntegrity = "sha384-4mVyaBOPOLtUq+Cg7YRI7vesPIrJkaN/jQFWuTBl9acmb7D2yiAMXp0pxHVI3qM2";
   const RESIZE_INTERVAL_MS = 100;
   const properties = ["--ae-scroll-y-progress", "--ae-scroll-x-progress"];
   const betterScrollProperties = ["transform", "transform-origin", "transition", "transition-property",
@@ -22,7 +23,13 @@
   // since the boundary handoff below handles those events.
   const defaultOptions = Object.freeze({
     scrollX: false, scrollY: true, click: true, bounce: false,
-    momentum: true, probeType: 3, mouseWheel: true
+    momentum: true, probeType: 3, mouseWheel: true,
+    nestedScroll: true,
+    scrollbar: {
+      fade: true,
+      interactive: true,
+      scrollbarTrackClickable: true
+    }
   });
 
   AelluxJs.extAttach(extensionName, { init, destroy });
@@ -123,7 +130,7 @@
     }
     const userOptions = state.parsedOptions;
     try {
-      await AelluxJs.dep("better-scroll", dependencyURL);
+      await AelluxJs.dep("better-scroll", dependencyURL, dependencyIntegrity, "anonymous");
     } catch (cause) {
       if (!state.disposed && generation === state.generation) {
         AelluxJs.diagnostics.warn(AelluxJs.diagnostics.WARN_SCROLLBOX_ENHANCEMENT_UNAVAILABLE,
@@ -297,8 +304,7 @@
 
   function refresh(state) {
     if (state.disposed) return;
-    if (state.instance && (state.element.firstElementChild !== state.content ||
-      state.element.lastElementChild !== state.content)) {
+    if (state.instance && state.element.firstElementChild !== state.content) {
       stopEnhancement(state);
       state.metrics = nativeMetrics(state.element);
       publish(state);
@@ -318,8 +324,10 @@
   }
 
   function contentMetrics(element, content) {
-    return { maxX: Math.max(0, content.offsetWidth - element.clientWidth),
-      maxY: Math.max(0, content.offsetHeight - element.clientHeight) };
+    return {
+      maxX: Math.max(0, content.offsetWidth - element.clientWidth),
+      maxY: Math.max(0, content.offsetHeight - element.clientHeight)
+    };
   }
 
   function axes(metrics) {
@@ -327,14 +335,18 @@
   }
 
   function nativeMetrics(element) {
-    return { maxX: Math.max(0, element.scrollWidth - element.clientWidth),
+    return {
+      maxX: Math.max(0, element.scrollWidth - element.clientWidth),
       maxY: Math.max(0, element.scrollHeight - element.clientHeight),
-      page: element.clientHeight || 1 };
+      page: element.clientHeight || 1
+    };
   }
 
   function enhancedMetrics(instance) {
-    return { maxX: Math.max(0, -instance.maxScrollX),
-      maxY: Math.max(0, -instance.maxScrollY), page: instance.wrapper.clientHeight || 1 };
+    return {
+      maxX: Math.max(0, -instance.maxScrollX),
+      maxY: Math.max(0, -instance.maxScrollY), page: instance.wrapper.clientHeight || 1
+    };
   }
 
   function publish(state) {

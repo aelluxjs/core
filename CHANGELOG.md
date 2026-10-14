@@ -7,10 +7,16 @@ All notable changes to aellux.js will be documented in this file.
 ### Added
 
 - Scrollbox now supports native, auto, and forced BetterScroll modes, JSON options, and desktop horizontal wheel handoff with boundary release.
+- Shared dependencies now accept positional SRI and crossorigin arguments; Scrollbox supplies them for its pinned BetterScroll script.
 
 ### Changed
 
 - Increased Scrollbox and full-bundle size budgets for the optional BetterScroll integration.
+- Raised the boot raw-size budget to 30 KiB for positional dependency arguments.
+
+### Fixed
+
+- Prevented Scrollbox from recreating BetterScroll when the library adds its own child elements.
 
 ## [0.1.0-beta.10] - 2026-10-14
 

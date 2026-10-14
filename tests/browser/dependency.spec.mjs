@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { createHash } from "node:crypto";
 
 async function startRuntime(page, forceLegacy = false) {
   await page.goto("/tests/index.htm");
@@ -39,6 +40,48 @@ test("dep loads immediately before init and retains the registration afterward",
     sharedPromise: true,
     ready: true,
     state: "loaded"
+  });
+});
+
+test("dep accepts positional SRI and crossorigin and keeps the options-object overload", async ({ page }) => {
+  const source = "window.secureDependencyReady = true;";
+  const integrity = "sha384-" + createHash("sha384").update(source).digest("base64");
+  let requests = 0;
+  await page.route("**/secure-dependency-*.js", route => {
+    requests++;
+    return route.fulfill({
+      contentType: "text/javascript",
+      headers: { "access-control-allow-origin": "*" },
+      body: source
+    });
+  });
+  await page.goto("/tests/index.htm");
+  await page.addScriptTag({ url: "/dist/aellux.js" });
+
+  const result = await page.evaluate(async integrity => {
+    const url = "/virtual/secure-dependency-positional.js";
+    const first = AelluxJs.dep("secure-positional", url, integrity, "anonymous");
+    const second = AelluxJs.dep("secure-positional", url);
+    const script = await first;
+    const objectScript = await AelluxJs.dep("secure-object",
+      "/virtual/secure-dependency-object.js", { integrity, crossOrigin: "anonymous" });
+    const invalid = await AelluxJs.dep("secure-invalid", url, 42, "anonymous")
+      .catch(error => error.code);
+    return {
+      shared: first === second,
+      ready: window.secureDependencyReady,
+      positional: [script.integrity, script.crossOrigin],
+      object: [objectScript.integrity, objectScript.crossOrigin],
+      invalid
+    };
+  }, integrity);
+
+  expect(requests).toBe(2);
+  expect(result).toEqual({
+    shared: true, ready: true,
+    positional: [integrity, "anonymous"],
+    object: [integrity, "anonymous"],
+    invalid: 1116
   });
 });
 

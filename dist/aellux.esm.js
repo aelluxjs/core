@@ -475,11 +475,18 @@ function createAelluxApi(root2, constants) {
       options2.state = "wait";
       api.registry.ext[key] = options2;
     },
-    dep: function(label, url, options2) {
+    dep: function(label, url, integrity, crossOrigin) {
       if (typeof label !== "string" || !label.trim() || typeof url !== "string" || !url.trim()) {
         return root2.Promise.reject(diagnostics.error(
           diagnostics.ERROR_DEPENDENCY_ARGUMENT,
           { label, url, expected: "a nonempty label and script URL" }
+        ));
+      }
+      var options2 = integrity && typeof integrity === "object" && !Array.isArray(integrity) ? integrity : { integrity, crossOrigin };
+      if (typeof options2.integrity !== "undefined" && options2.integrity !== null && typeof options2.integrity !== "string" || typeof options2.crossOrigin !== "undefined" && options2.crossOrigin !== null && typeof options2.crossOrigin !== "string") {
+        return root2.Promise.reject(diagnostics.error(
+          diagnostics.ERROR_DEPENDENCY_ARGUMENT,
+          { label, url, expected: "integrity and crossOrigin strings" }
         ));
       }
       var script = document2.createElement("script");
