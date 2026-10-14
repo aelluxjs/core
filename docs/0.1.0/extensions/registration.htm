@@ -602,7 +602,7 @@ $ae.init({ mode: &quot;basic&quot; });
 <h2>Shared script dependencies</h2>
 <p>Call <code>$ae.dep(label, url)</code> before or after <code>$ae.init()</code>, including from an Extension&#39;s <code>init()</code>, to load a classic script immediately. It returns a Promise that resolves to the script element only after the browser&#39;s <code>load</code> event. Await it before using a global supplied by the dependency:</p>
 <pre><code class="language-js">async function init() {
-  await AelluxJs.dep(&quot;better-scroll@1.0&quot;, &quot;/vendor/better-scroll.min.js&quot;);
+  await AelluxJs.dep(&quot;shared-widget@1.0&quot;, &quot;/vendor/shared-widget.min.js&quot;);
   // The dependency is ready here.
 }
 </code></pre>

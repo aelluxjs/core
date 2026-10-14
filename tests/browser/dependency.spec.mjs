@@ -100,17 +100,17 @@ for (const forceLegacy of [false, true]) {
 
     const result = await page.evaluate(async () => {
       const url = "/virtual/shared-dependency.js";
-      const first = AelluxJs.dep("better-scroll@1.0", url);
-      const second = AelluxJs.dep("better-scroll@1.0", url);
-      const immediate = document.querySelectorAll('script[data-ae-dep="better-scroll@1.0"]').length;
-      const pending = AelluxJs.registry.dep["better-scroll@1.0"].state;
+      const first = AelluxJs.dep("shared-widget@1.0", url);
+      const second = AelluxJs.dep("shared-widget@1.0", url);
+      const immediate = document.querySelectorAll('script[data-ae-dep="shared-widget@1.0"]').length;
+      const pending = AelluxJs.registry.dep["shared-widget@1.0"].state;
       const readyBeforeLoad = window.sharedDependencyReady === true;
 
       for (const name of ["first-dep", "second-dep"]) {
         AelluxJs.ext(name);
         AelluxJs.extAttach(name, {
           async init() {
-            await AelluxJs.dep("better-scroll@1.0", url);
+            await AelluxJs.dep("shared-widget@1.0", url);
             if (!window.sharedDependencyReady) throw new Error("Dependency is not ready");
           }
         });
@@ -118,16 +118,16 @@ for (const forceLegacy of [false, true]) {
       const [script, firstExtension, secondExtension] = await Promise.all([
         first, AelluxJs.wait("first-dep"), AelluxJs.wait("second-dep")
       ]);
-      const afterLoad = AelluxJs.dep("better-scroll@1.0", url);
+      const afterLoad = AelluxJs.dep("shared-widget@1.0", url);
       return {
         sharedPromise: first === second && first === afterLoad,
         immediate,
         pending,
         readyBeforeLoad,
-        loaded: AelluxJs.registry.dep["better-scroll@1.0"].state,
-        scriptMatches: script === AelluxJs.registry.dep["better-scroll@1.0"].script,
+        loaded: AelluxJs.registry.dep["shared-widget@1.0"].state,
+        scriptMatches: script === AelluxJs.registry.dep["shared-widget@1.0"].script,
         extensionsReady: firstExtension.initialized && secondExtension.initialized,
-        scriptCount: document.querySelectorAll('script[data-ae-dep="better-scroll@1.0"]').length
+        scriptCount: document.querySelectorAll('script[data-ae-dep="shared-widget@1.0"]').length
       };
     });
 

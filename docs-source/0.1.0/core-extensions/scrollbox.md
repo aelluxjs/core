@@ -1,11 +1,11 @@
 # Scrollbox Extension
 
-`data-ae-scrollbox` publishes `--ae-scroll-y-progress` and `--ae-scroll-x-progress` on the scroll container. Each value is a number from 0 at the start to 1 at the end of its axis; an axis without overflow reports 0. On unmount, Scrollbox restores the previous inline values and priorities. Scrollbox does not dispatch its own public scroll event.
+`data-ae-scrollbox` uses the browser's native scrolling and publishes `--ae-scroll-y-progress` and `--ae-scroll-x-progress` on the scroll container. Each value runs from 0 at the start to 1 at the end of its axis; an axis without overflow reports 0. Native `scroll` events continue to reach ordinary listeners, including Anchor's capture listener. On unmount, Scrollbox restores the previous inline progress values and priorities.
 
-The boot's weak CSS applies `contain: layout paint` and defaults the container to `overflow: clip`. Set `overflow: auto` or `overflow: scroll` when using native scrolling, as in the example below.
+The boot's weak CSS supplies `overflow: auto`, `contain: layout paint`, and thin scrollbars. An application can override these styles. Scrollbox works with any content structure; it does not require a single content child or load a scrolling library.
 
 ```html
-<div data-ae-scrollbox="auto" style="overflow: auto; width: 20rem; height: 12rem">
+<div data-ae-scrollbox style="width: 20rem; height: 12rem">
   <div><!-- scrollable content --></div>
 </div>
 ```
@@ -14,28 +14,22 @@ The boot's weak CSS applies `contain: layout paint` and defaults the container t
 
 | Value | Behavior |
 | --- | --- |
-| `native` | Web Platform scrolling only; BetterScroll is never loaded. |
-| `auto` | Default, including an empty attribute. Uses BetterScroll on a fine-pointer, hover-capable desktop without touch points; otherwise native. |
-| `enhance` | Attempts BetterScroll regardless of input capabilities. Mount waits for the dependency. |
-
-BetterScroll 2.5.1 is loaded on demand through the shared `$ae.dep("better-scroll", …)` registry. Multiple boxes share one load. If loading or initialization fails, that box keeps native scrolling and the same progress properties. A later update can retry a failed dependency load. BetterScroll requires exactly one direct content element; other structures retain native scrolling.
-
-The BetterScroll script is pinned to version 2.5.1 and loaded with a SHA-384 integrity value and `crossorigin="anonymous"`. The BetterScroll defaults are `scrollX: false`, `scrollY: true`, `click: true`, `bounce: false`, `momentum: true`, `probeType: 3`, `mouseWheel: true`, `nestedScroll: true`, and a fading interactive scrollbar. Scrollbox replaces the two axis values with the axes that actually overflow. It enables the wheel plugin on desktop except for horizontal-only boxes, whose wheel events are handled by Scrollbox.
-
-Override defaults with a JSON object:
+| `native` | Default, including an empty attribute. Uses browser scrolling and updates the progress properties. |
+| `pointer` | Adds mouse or pen drag-to-scroll on a hover-capable device with a fine pointer. Scrolling, wheel input, and progress remain native. On other devices it behaves like `native`. |
 
 ```html
-<div data-ae-scrollbox="enhance"
-     data-ae-scrollbox-options='{"bounce":true}'>
-  <div>Content</div>
+<div data-ae-scrollbox="pointer" style="width: 20rem; height: 12rem">
+  <div><!-- scrollable content --></div>
 </div>
 ```
 
-Options are shallow merged over the defaults without changing other boxes. An empty attribute uses the defaults. Invalid JSON or a non-object value emits a diagnostic and also uses the defaults. Call `$ae.mountManager.update(element, "scrollbox")` after changing the mode or options; Scrollbox switches source or recreates the BetterScroll instance as needed.
+Drag with the primary mouse button or pen. The gesture starts after a small movement and follows both scroll axes; it keeps working when the pointer moves outside the box. Touch input retains native behavior. Dragging does not start on links, buttons, form controls, editable content, or explicitly draggable elements. The temporary text-selection style is restored when the gesture ends. Change the mode with `$ae.mountManager.update(element, "scrollbox")` after editing the attribute.
 
 ## Horizontal wheel handoff
 
-On desktop, a predominantly vertical mouse wheel scrolls a horizontal-only box sideways while it has space in that direction. At either edge, the next wheel event passes to the vertical parent or document. This applies in native and enhanced modes. Predominantly horizontal gestures keep their horizontal intent. A box with meaningful vertical overflow does not convert vertical wheel motion.
+On a fine-pointer desktop, a predominantly vertical wheel gesture scrolls a horizontal-only box sideways while it has room in that direction. At either edge, the next wheel event passes to the parent or document. Native horizontal wheel gestures remain native. A box with meaningful vertical overflow does not convert vertical wheel motion. This behavior applies to both modes.
+
+Set `data-ae-scrollbox-wheel-horizontal="false"` to disable the vertical-to-horizontal conversion:
 
 ```html
 <div data-ae-scrollbox data-ae-scrollbox-wheel-horizontal="false">
@@ -43,4 +37,4 @@ On desktop, a predominantly vertical mouse wheel scrolls a horizontal-only box s
 </div>
 ```
 
-Set `data-ae-scrollbox-wheel-horizontal="false"` to disable the conversion.
+Scrollbox updates measurements after content mutations, box resize, or window resize. Resize updates use a 100 ms throttle.

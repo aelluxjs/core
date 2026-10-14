@@ -18,7 +18,7 @@ export default function createWeakCss() {
 }
 [?wait-mounted]:not(.%mounted) > *:not([?loader]) { visibility: hidden !important; }
 [?wait-mounted].%mounted > [?loader] { display: none !important; }
-:where([?scrollbox]) { contain:layout paint; overflow:clip; scrollbar-width: thin; scrollbar-color: #8886 transparent;}
+:where([?scrollbox]) { contain:layout paint; overflow:auto; scrollbar-width: thin; scrollbar-color: #8886 transparent;}
 :where([?scrollbox]::-webkit-scrollbar) { width: 8px; height: 8px;}
 :where([?scrollbox]::-webkit-scrollbar-track) { background: transparent;}
 :where([?scrollbox]::-webkit-scrollbar-thumb) { background: #8886; border-radius: 10px;}

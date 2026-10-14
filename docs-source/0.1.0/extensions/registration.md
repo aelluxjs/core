@@ -48,7 +48,7 @@ Call `$ae.dep(label, url)` before or after `$ae.init()`, including from an Exten
 
 ```js
 async function init() {
-  await AelluxJs.dep("better-scroll@1.0", "/vendor/better-scroll.min.js");
+  await AelluxJs.dep("shared-widget@1.0", "/vendor/shared-widget.min.js");
   // The dependency is ready here.
 }
 ```
