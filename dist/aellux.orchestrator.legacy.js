@@ -23077,7 +23077,6 @@
           var basePath = AelluxJs.aelluxBasePath;
           if (!url.startsWith(basePath)) return null;
           var filename = url.slice(basePath.length);
-          if (variant === "style" && /\.min\.css$/.test(filename) && /^https?:\/\/cdn\.jsdelivr\.net\/gh\//i.test(basePath)) return null;
           var builtin = AelluxJs.coreAssetIntegrity;
           return builtin && Object.prototype.hasOwnProperty.call(builtin, filename) ? builtin[filename] : null;
         }

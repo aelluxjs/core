@@ -20,10 +20,6 @@ All notable changes to aellux.js will be documented in this file.
 - Adaptive and Scrollbox restore their previous inline CSS custom properties when unmounted.
 - Updated package and documentation references to `0.1.0-beta.10`.
 
-### Fixed
-
-- Avoided generated SRI hashes for minified core stylesheets served through jsDelivr, which can return different bytes for these assets. Script hashes and explicit Extension hashes remain enforced.
-
 ## [0.1.0-beta.9] - 2026-10-13
 
 ### Added

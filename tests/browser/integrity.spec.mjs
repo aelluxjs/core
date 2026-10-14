@@ -49,7 +49,7 @@ test("generated integrity covers the orchestrator and built-in Extension assets"
   }
 });
 
-test("jsDelivr minified core styles load without a generated SRI hash", async ({ page }) => {
+test("minified core styles retain SRI when CDN bytes differ", async ({ page }) => {
   const base = "https://cdn.jsdelivr.net/gh/aelluxjs/core@fixture/dist/";
   await page.route(`${base}**`, async route => {
     const filename = new URL(route.request().url()).pathname.split("/").pop();
@@ -71,8 +71,8 @@ test("jsDelivr minified core styles load without a generated SRI hash", async ({
   await expect.poll(() => page.evaluate(() => AelluxJs.ext.present?.initialized)).toBe(true);
   const style = page.locator('link[data-ae-ext-style="present"]');
   await expect(style).toHaveAttribute("href", `${base}aellux.ext.present.min.css`);
-  expect(await style.getAttribute("integrity")).toBeNull();
-  expect(await style.evaluate(element => Boolean(element.sheet))).toBe(true);
+  expect(await style.getAttribute("integrity"))
+    .toBe(await expectedIntegrity("aellux.ext.present.min.css"));
   expect(await page.locator('script[data-ae-ext="present"]').getAttribute("integrity"))
     .toBe(await expectedIntegrity("aellux.ext.present.min.js"));
 });
