@@ -5,7 +5,7 @@ test("scrollbox exposes progress in both axes and restores styles on unmount", a
   await page.addScriptTag({ url: "/dist/aellux.js" });
   await page.evaluate(() => {
     document.body.innerHTML = `
-      <div id="scrollbox" data-ae-scrollbox
+      <div id="scrollbox" data-ae-scrollbox="native"
         style="width: 100px; height: 100px; overflow: auto;
           --ae-scroll-x-progress: .4; --ae-scroll-y-progress: .7">
         <div style="width: 300px; height: 400px"></div>

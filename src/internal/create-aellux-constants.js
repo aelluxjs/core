@@ -36,6 +36,7 @@ export function createAelluxConstants() {
       ERROR_DEPENDENCY_CONFLICT: { code: 1117, message: "aellux.js Dependency label is already registered with a different URL." },
       ERROR_DEPENDENCY_LOAD: { code: 1118, message: "aellux.js Dependency script could not be loaded." },
       ERROR_ANCHOR_REFERENCE_CONTEXT: { code: 1119, message: "Anchor target and anchored element must share the same containing block / absolute positioning reference." },
+      ERROR_SCROLLBOX_ENHANCEMENT_INIT: { code: 1120, message: "Scrollbox could not initialize BetterScroll; native scrolling remains active." },
       ERROR_LEGACY_RUNTIME_START: { code: 1201, message: "aellux.js Legacy runtime failed to start." },
       ERROR_LEGACY_RUNTIME_LOAD: { code: 1202, message: "aellux.js Legacy runtime could not be loaded." },
       ERROR_MODERN_RUNTIME_START: { code: 1203, message: "aellux.js Modern runtime failed to start; trying Legacy runtime." },
@@ -50,6 +51,10 @@ export function createAelluxConstants() {
       WARN_NAVIGATION_EVENT_INVALID: { code: 2009, message: "A state-navigation event has missing or invalid detail properties." },
       WARN_PRESENT_MOTION_MISSING: { code: 2010, message: "A present container has no direct present-motion child; one was generated automatically." },
       WARN_INVALID_ELEMENT_OR_ID: { code: 2011, message: "Expected a DOM Element or an existing element ID, optionally prefixed with #." },
+      WARN_SCROLLBOX_MODE_INVALID: { code: 2012, message: "Scrollbox mode must be native, auto, or enhance; using auto." },
+      WARN_SCROLLBOX_OPTIONS_JSON: { code: 2013, message: "Scrollbox options are not valid JSON; using defaults." },
+      WARN_SCROLLBOX_OPTIONS_OBJECT: { code: 2014, message: "Scrollbox options must be a JSON object; using defaults." },
+      WARN_SCROLLBOX_ENHANCEMENT_UNAVAILABLE: { code: 2015, message: "BetterScroll is unavailable for this Scrollbox; native scrolling remains active." },
       INFO_LEGACY_FALLBACK: { code: 3000, message: "aellux.js is starting the Legacy runtime." },
       INFO_PRESENT_MEASURED_LAYOUT: { code: 3001, message: "Present measures size transitions without a direct present-motion child; add one to use the grid layout strategy." }
     },

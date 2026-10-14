@@ -4,6 +4,14 @@ All notable changes to aellux.js will be documented in this file.
 
 ## Unreleased
 
+### Added
+
+- Scrollbox now supports native, auto, and forced BetterScroll modes, JSON options, and desktop horizontal wheel handoff with boundary release.
+
+### Changed
+
+- Increased Scrollbox and full-bundle size budgets for the optional BetterScroll integration.
+
 ## [0.1.0-beta.10] - 2026-10-14
 
 ### Added

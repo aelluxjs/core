@@ -47,6 +47,7 @@
         { "label": "Point", "href": "core-extensions/point.md" },
         { "label": "Preference", "href": "core-extensions/preference.md" },
         { "label": "Present", "href": "core-extensions/present.md" },
+        { "label": "Scrollbox", "href": "core-extensions/scrollbox.md" },
         { "label": "State Navigation", "href": "core-extensions/state-navigation.md" }
       ]
     },
