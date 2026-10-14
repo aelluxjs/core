@@ -1,7 +1,8 @@
 import { expect, test } from "@playwright/test";
 
-const box = (id, mode = "pointer", extra = "", content = "") =>
+const box = (id, mode = "pointer", extra = "", content = "", momentum = "false") =>
   `<div id="${id}" data-ae-scrollbox="${mode}" ${extra}
+    ${momentum === null ? "" : `data-ae-scrollbox-momentum="${momentum}"`}
     style="width:100px;height:100px;overflow:auto;--ae-scroll-x-progress:.2;--ae-scroll-y-progress:.3">
     <div style="width:300px;height:300px">${content}</div></div>`;
 
@@ -176,4 +177,101 @@ test("vertical wheel converts for horizontal-only native boxes and releases at a
   expect(await wheel(120)).toEqual({ prevented: true, x: 120 });
   expect(await wheel(120)).toEqual({ prevented: true, x: 200 });
   expect(await wheel(120)).toEqual({ prevented: false, x: 200 });
+});
+
+test("pointer release keeps scrolling with momentum enabled by default", async ({ page }) => {
+  await setup(page, box("box", "pointer", "", "", null)
+    .replace("width:300px;height:300px", "width:1000px;height:1000px"));
+  const released = await page.evaluate(async () => {
+    const element = document.getElementById("box");
+    const rect = element.getBoundingClientRect();
+    const x = rect.left + 70, y = rect.top + 70;
+    element.dispatchEvent(new PointerEvent("pointerdown", {
+      bubbles: true, isPrimary: true, pointerId: 17, pointerType: "mouse",
+      button: 0, buttons: 1, clientX: x, clientY: y
+    }));
+    await new Promise(resolve => setTimeout(resolve, 16));
+    window.dispatchEvent(new PointerEvent("pointermove", {
+      bubbles: true, cancelable: true, isPrimary: true, pointerId: 17,
+      pointerType: "mouse", buttons: 1, clientX: x - 40, clientY: y - 40
+    }));
+    window.dispatchEvent(new PointerEvent("pointerup", {
+      bubbles: true, isPrimary: true, pointerId: 17, pointerType: "mouse",
+      button: 0, buttons: 0, clientX: x - 40, clientY: y - 40
+    }));
+    return [element.scrollLeft, element.scrollTop];
+  });
+  expect(released).toEqual([40, 40]);
+  await expect.poll(() => page.evaluate(() => document.getElementById("box").scrollLeft))
+    .toBeGreaterThan(40);
+  await expect.poll(() => page.evaluate(() => document.getElementById("box").scrollTop))
+    .toBeGreaterThan(40);
+});
+
+test("momentum false stops at release", async ({ page }) => {
+  await setup(page, box("box"));
+  expect(await drag(page, "box")).toMatchObject({ x: 50, y: 40 });
+  await page.waitForTimeout(100);
+  expect(await page.evaluate(() => {
+    const element = document.getElementById("box");
+    return [element.scrollLeft, element.scrollTop];
+  })).toEqual([50, 40]);
+});
+
+test("disabling momentum while coasting stops the animation", async ({ page }) => {
+  await setup(page, box("box", "pointer", "", "", null)
+    .replace("width:300px;height:300px", "width:1000px;height:1000px"));
+  await drag(page, "box");
+  await expect.poll(() => page.evaluate(() => document.getElementById("box").scrollLeft))
+    .toBeGreaterThan(50);
+  const stopped = await page.evaluate(async () => {
+    const element = document.getElementById("box");
+    element.setAttribute("data-ae-scrollbox-momentum", "false");
+    await AelluxJs.mountManager.update(element, "scrollbox");
+    return [element.scrollLeft, element.scrollTop];
+  });
+  await page.waitForTimeout(100);
+  expect(await page.evaluate(() => {
+    const element = document.getElementById("box");
+    return [element.scrollLeft, element.scrollTop];
+  })).toEqual(stopped);
+});
+
+test("a pause before release does not start momentum", async ({ page }) => {
+  await setup(page, box("box", "pointer", "", "", null));
+  const released = await page.evaluate(async () => {
+    const element = document.getElementById("box");
+    const rect = element.getBoundingClientRect();
+    const x = rect.left + 70, y = rect.top + 70;
+    element.dispatchEvent(new PointerEvent("pointerdown", {
+      bubbles: true, isPrimary: true, pointerId: 17, pointerType: "mouse",
+      button: 0, buttons: 1, clientX: x, clientY: y
+    }));
+    window.dispatchEvent(new PointerEvent("pointermove", {
+      bubbles: true, cancelable: true, isPrimary: true, pointerId: 17,
+      pointerType: "mouse", buttons: 1, clientX: x - 40, clientY: y - 40
+    }));
+    await new Promise(resolve => setTimeout(resolve, 350));
+    window.dispatchEvent(new PointerEvent("pointerup", {
+      bubbles: true, isPrimary: true, pointerId: 17, pointerType: "mouse",
+      button: 0, buttons: 0, clientX: x - 40, clientY: y - 40
+    }));
+    return [element.scrollLeft, element.scrollTop];
+  });
+  expect(released).toEqual([40, 40]);
+  await page.waitForTimeout(100);
+  expect(await page.evaluate(() => {
+    const element = document.getElementById("box");
+    return [element.scrollLeft, element.scrollTop];
+  })).toEqual([40, 40]);
+});
+
+test("weak CSS makes scrolling smooth and honors reduced motion on every element", async ({ page }) => {
+  await setup(page, box("box", "native"));
+  const behaviors = () => page.evaluate(() => [
+    document.documentElement, document.body, document.getElementById("box")
+  ].map(element => getComputedStyle(element).scrollBehavior));
+  expect(await behaviors()).toEqual(["smooth", "smooth", "smooth"]);
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  expect(await behaviors()).toEqual(["auto", "auto", "auto"]);
 });

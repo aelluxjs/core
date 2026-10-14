@@ -6,6 +6,10 @@ export default function createWeakCss() {
 :where(html[?color-scheme='dark']) { color-scheme: dark; }
 :where(html[?color-scheme='light']) { color-scheme: light; }
 :where(body,html) { font-family: system-ui; background-color: Canvas; color: CanvasText; }
+:where(*) { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) {
+  :where(*) { scroll-behavior: initial !important; }
+}
 :where(button,a[href],[role='button'],[role='tab']) { touch-action: manipulation; }
 :where([?anchor]) { visibility: hidden; contain: layout paint; }
 :where([?anchor].%anchored) {
@@ -18,10 +22,10 @@ export default function createWeakCss() {
 }
 [?wait-mounted]:not(.%mounted) > *:not([?loader]) { visibility: hidden !important; }
 [?wait-mounted].%mounted > [?loader] { display: none !important; }
-:where([?scrollbox]) { contain:layout paint; overflow:auto; scrollbar-width: thin; scrollbar-color: #8886 transparent;}
+:where([?scrollbox]) { contain:layout paint; overflow:auto; scrollbar-width: thin; scrollbar-color: color-mix(in srgb, CanvasText 50%, transparent) transparent;}
 :where([?scrollbox]::-webkit-scrollbar) { width: 8px; height: 8px;}
 :where([?scrollbox]::-webkit-scrollbar-track) { background: transparent;}
-:where([?scrollbox]::-webkit-scrollbar-thumb) { background: #8886; border-radius: 10px;}
-:where([?scrollbox]::-webkit-scrollbar-thumb:hover) { background: #6666;}
+:where([?scrollbox]::-webkit-scrollbar-thumb) { background: color-mix(in srgb, CanvasText 50%, transparent); border-radius: 10px;}
+:where([?scrollbox]::-webkit-scrollbar-thumb:hover) { background: color-mix(in srgb, CanvasText 90%, transparent);}
 `;
 }

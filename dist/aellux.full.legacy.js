@@ -25325,8 +25325,14 @@
         if (!AelluxJs2) throw new Error("[aellux.js] Load the boot script before the scrollbox extension.");
         var attribute = AelluxJs2.attr(extensionName);
         var wheelAttribute = AelluxJs2.attr("scrollbox-wheel-horizontal");
+        var momentumAttribute = AelluxJs2.attr("scrollbox-momentum");
         var RESIZE_INTERVAL_MS = 100;
         var DRAG_THRESHOLD_PX = 3;
+        var MOMENTUM_LIMIT_TIME_MS = 300;
+        var MOMENTUM_LIMIT_DISTANCE_PX = 15;
+        var MOMENTUM_DECELERATION = 15e-4;
+        var MOMENTUM_MAX_TIME_MS = 2500;
+        var MOMENTUM_BOUNDARY_TIME_MS = 500;
         var properties = ["--ae-scroll-y-progress", "--ae-scroll-x-progress"];
         var scrollboxes = /* @__PURE__ */ new Map();
         AelluxJs2.extAttach(extensionName, {
@@ -25373,9 +25379,11 @@
             mode: null,
             desktop: false,
             wheelEnabled: true,
+            momentumEnabled: true,
             wheelListening: false,
             pointerListening: false,
             drag: null,
+            momentum: null,
             resizeObserver: null,
             mutationObserver: null,
             lastResizeTime: -RESIZE_INTERVAL_MS,
@@ -25416,6 +25424,7 @@
           if (!state) return;
           state.disposed = true;
           endDrag(state);
+          cancelMomentum(state);
           element.removeEventListener("scroll", state.onScroll);
           if (state.wheelListening) element.removeEventListener("wheel", state.onWheel, true);
           if (state.pointerListening) element.removeEventListener("pointerdown", state.onPointerDown);
@@ -25434,6 +25443,7 @@
           var element = state.element;
           state.mode = readMode(element);
           state.wheelEnabled = element.getAttribute(wheelAttribute) !== "false";
+          state.momentumEnabled = element.getAttribute(momentumAttribute) !== "false";
           state.desktop = isDesktop();
           if (state.desktop && !state.wheelListening) {
             element.addEventListener("wheel", state.onWheel, {
@@ -25446,6 +25456,7 @@
             state.wheelListening = false;
           }
           var pointerEnabled = state.desktop && state.mode === "pointer";
+          if (!pointerEnabled || !state.momentumEnabled) cancelMomentum(state);
           if (pointerEnabled && !state.pointerListening) {
             element.addEventListener("pointerdown", state.onPointerDown);
             state.pointerListening = true;
@@ -25469,6 +25480,7 @@
           return !!(root2.matchMedia && root2.matchMedia("(hover: hover) and (pointer: fine)").matches);
         }
         function startDrag(state, event) {
+          cancelMomentum(state);
           if (state.drag || event.defaultPrevented || event.button !== 0 || !event.isPrimary || event.pointerType === "touch" || (event.buttons & 1) === 0) return;
           var element = state.element;
           var nested = event.target.closest("[".concat(attribute, "]"));
@@ -25484,6 +25496,9 @@
             scrollLeft: element.scrollLeft,
             scrollTop: element.scrollTop,
             moved: false,
+            momentumStartX: element.scrollLeft,
+            momentumStartY: element.scrollTop,
+            momentumStartTime: now(),
             userSelect: element.style.getPropertyValue("user-select"),
             userSelectPriority: element.style.getPropertyPriority("user-select")
           };
@@ -25508,8 +25523,18 @@
           if (!drag.moved && dx * dx + dy * dy < DRAG_THRESHOLD_PX * DRAG_THRESHOLD_PX) return;
           drag.moved = true;
           if (event.cancelable) event.preventDefault();
-          state.element.scrollLeft = drag.scrollLeft + dx;
-          state.element.scrollTop = drag.scrollTop + dy;
+          var time = now();
+          var resetMomentum = time - drag.momentumStartTime > MOMENTUM_LIMIT_TIME_MS;
+          state.element.scrollTo({
+            left: drag.scrollLeft + dx,
+            top: drag.scrollTop + dy,
+            behavior: "instant"
+          });
+          if (resetMomentum) {
+            drag.momentumStartX = state.element.scrollLeft;
+            drag.momentumStartY = state.element.scrollTop;
+            drag.momentumStartTime = time;
+          }
           publish(state);
         }
         function endDrag(state, event) {
@@ -25522,6 +25547,75 @@
           root2.removeEventListener("blur", state.onBlur);
           if (drag.userSelect) state.element.style.setProperty("user-select", drag.userSelect, drag.userSelectPriority);
           else state.element.style.removeProperty("user-select");
+          if (event && event.type === "pointerup" && drag.moved && state.momentumEnabled && !state.disposed && now() - drag.momentumStartTime < MOMENTUM_LIMIT_TIME_MS) {
+            startMomentum(state, drag);
+          }
+        }
+        function startMomentum(state, drag) {
+          var element = state.element;
+          var elapsed = Math.max(1, now() - drag.momentumStartTime);
+          var x = momentumAxis(element.scrollLeft, drag.momentumStartX, elapsed, Math.max(0, element.scrollWidth - element.clientWidth));
+          var y = momentumAxis(element.scrollTop, drag.momentumStartY, elapsed, Math.max(0, element.scrollHeight - element.clientHeight));
+          var duration = Math.max(x.duration, y.duration);
+          if (!duration) return;
+          var momentum = {
+            fromX: element.scrollLeft,
+            fromY: element.scrollTop,
+            toX: x.destination,
+            toY: y.destination,
+            startTime: now(),
+            duration: duration,
+            frame: null
+          };
+          state.momentum = momentum;
+          momentum.frame = root2.requestAnimationFrame(function() {
+            return stepMomentum(state, momentum);
+          });
+        }
+        function momentumAxis(current, start, elapsed, maximum) {
+          var distance = current - start;
+          if (Math.abs(distance) <= MOMENTUM_LIMIT_DISTANCE_PX) {
+            return {
+              destination: current,
+              duration: 0
+            };
+          }
+          var speed = Math.abs(distance) / elapsed;
+          var projected = current + Math.sign(distance) * speed * speed / MOMENTUM_DECELERATION;
+          var destination = Math.max(0, Math.min(maximum, Math.round(projected)));
+          if (destination === current) return {
+            destination: destination,
+            duration: 0
+          };
+          return {
+            destination: destination,
+            duration: projected !== destination ? MOMENTUM_BOUNDARY_TIME_MS : Math.min(MOMENTUM_MAX_TIME_MS, 2 * speed / MOMENTUM_DECELERATION)
+          };
+        }
+        function stepMomentum(state, momentum) {
+          if (state.momentum !== momentum || state.disposed) return;
+          var fraction = Math.min(1, (now() - momentum.startTime) / momentum.duration);
+          var remaining = 1 - fraction;
+          var eased = 1 - remaining * remaining * remaining * remaining;
+          var element = state.element;
+          element.scrollTo({
+            left: momentum.fromX + (momentum.toX - momentum.fromX) * eased,
+            top: momentum.fromY + (momentum.toY - momentum.fromY) * eased,
+            behavior: "instant"
+          });
+          publish(state);
+          if (fraction >= 1) {
+            state.momentum = null;
+            return;
+          }
+          momentum.frame = root2.requestAnimationFrame(function() {
+            return stepMomentum(state, momentum);
+          });
+        }
+        function cancelMomentum(state) {
+          if (!state.momentum) return;
+          root2.cancelAnimationFrame(state.momentum.frame);
+          state.momentum = null;
         }
         function observe(state) {
           state.onResize = function() {
@@ -25617,6 +25711,7 @@
           return distance > 0 ? Math.min(1, Math.max(0, position / distance)) : 0;
         }
         function handleWheel(state, event) {
+          cancelMomentum(state);
           if (!state.desktop || event.defaultPrevented) return;
           var metrics = state.metrics;
           if (!metrics || metrics.maxX <= 1 || metrics.maxY > 1 || !state.wheelEnabled) return;
@@ -25628,7 +25723,10 @@
           var next = Math.max(0, Math.min(metrics.maxX, current + delta));
           if (next === current) return;
           event.preventDefault();
-          state.element.scrollLeft = next;
+          state.element.scrollTo({
+            left: next,
+            behavior: "instant"
+          });
           publish(state);
         }
       })(typeof globalThis !== "undefined" ? globalThis : window);
