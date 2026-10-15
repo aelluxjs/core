@@ -6,6 +6,7 @@ All notable changes to aellux.js will be documented in this file.
 
 ### Added
 
+- Elastic Scrollbox accepts one or two maximum displacement values as fractions or pixels through `data-ae-scrollbox-elastic`.
 - Weak CSS now uses smooth scrolling by default and restores immediate scrolling for all elements when reduced motion is requested.
 - Scrollbox now supports native and desktop pointer-drag modes with horizontal wheel handoff at scroll boundaries.
 - Vertical-only pointer Scrollboxes ignore mostly horizontal drag gestures.
@@ -17,8 +18,10 @@ All notable changes to aellux.js will be documented in this file.
 
 ### Changed
 
-- Elastic Scrollboxes now add a 1 px `::after` spacer so bottom padding stays visible at the scroll end.
-- Desktop pointer Scrollboxes now cancel every cancelable primary `mousedown` inside the box.
+- Elastic pressure now eases exponentially toward its limit and returns with a 15% per-frame interpolation.
+- Raised the Scrollbox and full-bundle size budgets for configurable elastic limits and frame-based snapback.
+- Elastic Scrollbox scale now grows its scrollable wrapper extent by the elastic displacement in pixels.
+- Removed the elastic Scrollbox `::after` spacer.
 - Elastic Scrollbox now uses `transform-origin` at the pressed edge and applies scale before translation in its wrapper transform, restoring both inline properties on unmount.
 - Raised the Scrollbox and full-bundle size budgets for the elastic edge option.
 - Removed BetterScroll loading and its development dependency; Scrollbox uses native browser scrolling in both modes.
@@ -26,6 +29,7 @@ All notable changes to aellux.js will be documented in this file.
 
 ### Fixed
 
+- Desktop pointer Scrollboxes now cancel `mousedown` only during an active drag and stop drag tracking on double and subsequent clicks so native selection works.
 - Scrollbox pointer mode no longer starts a drag when a second or later click is held and moved outside the box.
 - Elastic Scrollbox now keeps trailing scroll extent stable when content overflows the wrapper's own box, so bottom and right pressure remains visible.
 - Anchor now uses its positioning parent when no target is specified and accepts that parent as an explicit target.

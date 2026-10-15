@@ -53,7 +53,6 @@
     var wheelAttribute = AelluxJs.attr("scrollbox-wheel-horizontal");
     var momentumAttribute = AelluxJs.attr("scrollbox-momentum");
     var elasticAttribute = AelluxJs.attr("scrollbox-elastic");
-    var elasticClass = AelluxJs.className("scrollbox-elastic");
     var elasticReleaseClass = AelluxJs.className("scrollbox-elastic-release");
     var RESIZE_INTERVAL_MS = 100;
     var DRAG_THRESHOLD_PX = 3;
@@ -63,8 +62,12 @@
     var MOMENTUM_LIMIT_DISTANCE_PX = 15;
     var MOMENTUM_DECELERATION = 15e-4;
     var ELASTIC_DAMPING = 1 / 3;
-    var ELASTIC_LIMIT_RATIO = 1 / 4;
-    var ELASTIC_RELEASE_MS = 800;
+    var DEFAULT_ELASTIC_LIMIT = {
+      unit: "ratio",
+      value: 1 / 4
+    };
+    var ELASTIC_RETURN_LERP = 0.15;
+    var ELASTIC_RETURN_EPSILON = 0.01;
     var ELASTIC_WHEEL_IDLE_MS = 80;
     var properties = ["--ae-scroll-y-progress", "--ae-scroll-x-progress"];
     var scrollboxes = /* @__PURE__ */ new Map();
@@ -116,17 +119,18 @@
         extentX: false,
         extentY: false,
         invalidReported: false,
+        invalidLimit: null,
+        limits: [DEFAULT_ELASTIC_LIMIT, DEFAULT_ELASTIC_LIMIT],
         amounts: [0, 0, 0, 0],
         active: false,
         owned: false,
         touch: null,
-        releaseTimeout: null,
+        releaseFrame: null,
         wheelTimeout: null
       };
       var state = {
         element: element,
         previous: previous,
-        hadElasticClass: element.classList.contains(elasticClass),
         metrics: null,
         mode: null,
         desktop: false,
@@ -156,8 +160,11 @@
       };
       state.onMouseDown = function(event) {
         if (event.button !== 0) return;
-        if (event.cancelable) event.preventDefault();
-        if (event.detail > 1) endDrag(state);
+        if (event.detail > 1) {
+          endDrag(state);
+          return;
+        }
+        if (state.drag && state.drag.moved && event.cancelable) event.preventDefault();
       };
       state.onPointerMove = function(event) {
         return moveDrag(state, event);
@@ -195,7 +202,6 @@
       endDrag(state);
       cancelMomentum(state);
       resetElastic(state);
-      element.classList.toggle(elasticClass, state.hadElasticClass);
       element.removeEventListener("scroll", state.onScroll);
       if (state.wheelListening) element.removeEventListener("wheel", state.onWheel, true);
       if (state.pointerListening) {
@@ -256,7 +262,6 @@
         resetElastic(state);
         state.elasticEnabled = false;
         state.elastic.wrapper = null;
-        element.classList.remove(elasticClass);
         var requested = element.hasAttribute(elasticAttribute) || Array.from(element.children).some(function(item) {
           return item.hasAttribute(elasticAttribute) && item.getAttribute(elasticAttribute) !== "false";
         });
@@ -293,7 +298,45 @@
         };
       }
       state.elasticEnabled = true;
-      element.classList.add(elasticClass);
+      var value = wrapper.getAttribute(elasticAttribute).trim();
+      var tokens = value ? value.split(/\s+/) : [];
+      var limits = tokens.map(parseElasticLimit);
+      if (tokens.length > 2 || limits.some(function(limit) {
+        return !limit;
+      })) {
+        if (state.elastic.invalidLimit !== value) {
+          AelluxJs.diagnostics.warn(AelluxJs.diagnostics.WARN_SCROLLBOX_ELASTIC_LIMIT_INVALID, {
+            element: element,
+            value: value
+          });
+        }
+        state.elastic.invalidLimit = value;
+        state.elastic.limits = [DEFAULT_ELASTIC_LIMIT, DEFAULT_ELASTIC_LIMIT];
+      } else {
+        state.elastic.invalidLimit = null;
+        state.elastic.limits = tokens.length === 2 ? limits : [limits[0] || DEFAULT_ELASTIC_LIMIT, limits[0] || DEFAULT_ELASTIC_LIMIT];
+      }
+    }
+    function parseElasticLimit(token) {
+      var fraction = /^(\d+(?:\.\d+)?)\/(\d+(?:\.\d+)?)$/.exec(token);
+      if (fraction && Number(fraction[2]) > 0) {
+        return {
+          unit: "ratio",
+          value: Number(fraction[1]) / Number(fraction[2])
+        };
+      }
+      var pixels = /^(\d+(?:\.\d+)?)(?:px)?$/i.exec(token);
+      return pixels ? {
+        unit: "px",
+        value: Number(pixels[1])
+      } : null;
+    }
+    function elasticLimit(size, limit) {
+      return limit.unit === "px" ? limit.value : size * limit.value;
+    }
+    function elasticResistance(force, current, limit) {
+      if (limit <= 0) return 0;
+      return current + (limit - current) * (1 - Math.exp(-force * ELASTIC_DAMPING / limit));
     }
     function readMode(element) {
       var value = (element.getAttribute(attribute) || "").trim().toLowerCase() || "native";
@@ -308,6 +351,7 @@
       return !!(root.matchMedia && root.matchMedia("(hover: hover) and (pointer: fine)").matches);
     }
     function startDrag(state, event) {
+      if (event.detail > 1) return;
       cancelMomentum(state);
       if (state.drag || event.defaultPrevented || event.button !== 0 || !event.isPrimary || event.pointerType === "touch" || (event.buttons & 1) === 0) return;
       var element = state.element;
@@ -359,11 +403,13 @@
       var dx = drag.startX - event.clientX;
       var dy = drag.startY - event.clientY;
       if (drag.selectionPending) {
-        if (Math.abs(dx) >= SELECTION_HORIZONTAL_THRESHOLD_PX && Math.abs(dy) < SELECTION_VERTICAL_TOLERANCE_PX) {
+        var horizontal = Math.abs(dx);
+        var vertical = Math.abs(dy);
+        if (horizontal >= SELECTION_HORIZONTAL_THRESHOLD_PX && horizontal > vertical) {
           endDrag(state);
           return;
         }
-        if (Math.abs(dy) < SELECTION_VERTICAL_TOLERANCE_PX) return;
+        if (vertical < SELECTION_VERTICAL_TOLERANCE_PX || vertical < horizontal) return;
         drag.selectionPending = false;
         state.element.style.setProperty("user-select", "none");
         drag.userSelectApplied = true;
@@ -548,19 +594,21 @@
       var elastic = state.elastic;
       var amounts = [0, 0, 0, 0];
       if (metrics.maxY > 1) {
-        if (desiredY < 0) amounts[0] = Math.min(element.clientHeight * ELASTIC_LIMIT_RATIO, (additive ? elastic.amounts[0] : 0) - desiredY * ELASTIC_DAMPING);
-        else if (desiredY > metrics.maxY) amounts[2] = Math.min(element.clientHeight * ELASTIC_LIMIT_RATIO, (additive ? elastic.amounts[2] : 0) + (desiredY - metrics.maxY) * ELASTIC_DAMPING);
+        var limitY = elasticLimit(element.clientHeight, elastic.limits[0]);
+        if (desiredY < 0) amounts[0] = elasticResistance(-desiredY, additive ? elastic.amounts[0] : 0, limitY);
+        else if (desiredY > metrics.maxY) amounts[2] = elasticResistance(desiredY - metrics.maxY, additive ? elastic.amounts[2] : 0, limitY);
       }
       if (metrics.maxX > 1) {
-        if (desiredX > metrics.maxX) amounts[1] = Math.min(element.clientWidth * ELASTIC_LIMIT_RATIO, (additive ? elastic.amounts[1] : 0) + (desiredX - metrics.maxX) * ELASTIC_DAMPING);
-        else if (desiredX < 0) amounts[3] = Math.min(element.clientWidth * ELASTIC_LIMIT_RATIO, (additive ? elastic.amounts[3] : 0) - desiredX * ELASTIC_DAMPING);
+        var limitX = elasticLimit(element.clientWidth, elastic.limits[1]);
+        if (desiredX > metrics.maxX) amounts[1] = elasticResistance(desiredX - metrics.maxX, additive ? elastic.amounts[1] : 0, limitX);
+        else if (desiredX < 0) amounts[3] = elasticResistance(-desiredX, additive ? elastic.amounts[3] : 0, limitX);
       }
       var active = amounts.some(function(amount) {
         return amount > 0;
       });
       if (!active && !elastic.owned) return false;
-      if (elastic.releaseTimeout !== null) root.clearTimeout(elastic.releaseTimeout);
-      elastic.releaseTimeout = null;
+      if (elastic.releaseFrame !== null) root.cancelAnimationFrame(elastic.releaseFrame);
+      elastic.releaseFrame = null;
       elastic.wrapper.classList.remove(elasticReleaseClass);
       elastic.amounts = amounts;
       elastic.active = active;
@@ -582,10 +630,10 @@
       var x = elastic.amounts[3] - elastic.amounts[1];
       var y = elastic.amounts[0] - elastic.amounts[2];
       var translate = x || y ? "translate3d(".concat(x, "px, ").concat(y, "px, 0)") : "";
-      var limitX = state.element.clientWidth * ELASTIC_LIMIT_RATIO || 1;
-      var limitY = state.element.clientHeight * ELASTIC_LIMIT_RATIO || 1;
-      var scaleX = 1 + 0.1 * Math.max(elastic.amounts[1], elastic.amounts[3]) / limitX;
-      var scaleY = 1 + 0.1 * Math.max(elastic.amounts[0], elastic.amounts[2]) / limitY;
+      var width = Math.max(wrapper.offsetWidth, wrapper.scrollWidth, 1);
+      var height = Math.max(wrapper.offsetHeight, wrapper.scrollHeight, 1);
+      var scaleX = 1 + Math.max(elastic.amounts[1], elastic.amounts[3]) / width;
+      var scaleY = 1 + Math.max(elastic.amounts[0], elastic.amounts[2]) / height;
       var scale = scaleX > 1 || scaleY > 1 ? "scale(".concat(scaleX, ", ").concat(scaleY, ")") : "";
       if (scaleX > 1 || scaleY > 1) {
         var baseOrigin = elastic.baseOrigin.split(" ");
@@ -613,20 +661,41 @@
         resetElastic(state);
         return;
       }
-      elastic.wrapper.classList.add(elasticReleaseClass);
-      elastic.amounts = [0, 0, 0, 0];
-      setElasticTransform(state);
-      if (elastic.releaseTimeout !== null) root.clearTimeout(elastic.releaseTimeout);
-      elastic.releaseTimeout = root.setTimeout(function() {
+      if (root.matchMedia && root.matchMedia("(prefers-reduced-motion: reduce)").matches) {
         resetElastic(state);
         refresh(state);
-      }, ELASTIC_RELEASE_MS);
+        return;
+      }
+      elastic.wrapper.classList.add(elasticReleaseClass);
+      if (elastic.releaseFrame !== null) root.cancelAnimationFrame(elastic.releaseFrame);
+      elastic.releaseFrame = root.requestAnimationFrame(function() {
+        return stepElasticRelease(state);
+      });
+    }
+    function stepElasticRelease(state) {
+      var elastic = state.elastic;
+      elastic.releaseFrame = null;
+      if (state.disposed || !elastic.owned) return;
+      elastic.amounts = elastic.amounts.map(function(amount) {
+        return amount < ELASTIC_RETURN_EPSILON ? 0 : amount * (1 - ELASTIC_RETURN_LERP);
+      });
+      if (elastic.amounts.every(function(amount) {
+        return amount === 0;
+      })) {
+        resetElastic(state);
+        refresh(state);
+        return;
+      }
+      setElasticTransform(state);
+      elastic.releaseFrame = root.requestAnimationFrame(function() {
+        return stepElasticRelease(state);
+      });
     }
     function resetElastic(state) {
       var elastic = state.elastic;
-      if (elastic.releaseTimeout !== null) root.clearTimeout(elastic.releaseTimeout);
+      if (elastic.releaseFrame !== null) root.cancelAnimationFrame(elastic.releaseFrame);
       if (elastic.wheelTimeout !== null) root.clearTimeout(elastic.wheelTimeout);
-      elastic.releaseTimeout = null;
+      elastic.releaseFrame = null;
       elastic.wheelTimeout = null;
       if (elastic.wrapper) elastic.wrapper.classList.remove(elasticReleaseClass);
       if (elastic.owned && elastic.wrapper) {

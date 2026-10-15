@@ -1,5 +1,7 @@
 import { expect, test } from "@playwright/test";
 
+const elasticAmount = (force, limit) => limit * (1 - Math.exp(-force / (3 * limit)));
+
 const box = (id, mode = "pointer", extra = "", content = "", momentum = "false") =>
   `<div id="${id}" data-ae-scrollbox="${mode}" ${extra}
     ${momentum === null ? "" : `data-ae-scrollbox-momentum="${momentum}"`}
@@ -121,6 +123,37 @@ test("real mouse drag scrolls while the pointer leaves the box", async ({ page }
   })).toEqual([73, 73]);
 });
 
+test("mousedown is canceled only after a pointer drag has moved", async ({ page }) => {
+  await setup(page, box("box"));
+  const result = await page.evaluate(() => {
+    const element = document.getElementById("box");
+    const rect = element.getBoundingClientRect();
+    const x = rect.left + 50, y = rect.top + 50;
+    element.dispatchEvent(new PointerEvent("pointerdown", {
+      bubbles: true, isPrimary: true, pointerId: 93, pointerType: "mouse",
+      button: 0, buttons: 1, clientX: x, clientY: y
+    }));
+    const before = new MouseEvent("mousedown", {
+      bubbles: true, cancelable: true, button: 0, buttons: 1, detail: 1
+    });
+    element.dispatchEvent(before);
+    window.dispatchEvent(new PointerEvent("pointermove", {
+      bubbles: true, cancelable: true, isPrimary: true, pointerId: 93,
+      pointerType: "mouse", buttons: 1, clientX: x - 30, clientY: y - 30
+    }));
+    const during = new MouseEvent("mousedown", {
+      bubbles: true, cancelable: true, button: 0, buttons: 1, detail: 1
+    });
+    element.dispatchEvent(during);
+    window.dispatchEvent(new PointerEvent("pointerup", {
+      bubbles: true, isPrimary: true, pointerId: 93, pointerType: "mouse",
+      button: 0, buttons: 0, clientX: x - 30, clientY: y - 30
+    }));
+    return { before: before.defaultPrevented, during: during.defaultPrevented };
+  });
+  expect(result).toEqual({ before: false, during: true });
+});
+
 for (const elastic of [false, true]) {
   test(`second click dragged outside does not start pointer scrolling${elastic ? " with elastic" : ""}`,
     async ({ page }) => {
@@ -145,7 +178,42 @@ for (const elastic of [false, true]) {
     });
 }
 
-test("pointer mode cancels mousedown and native text selection", async ({ page }) => {
+for (const clickCount of [2, 3]) {
+  test(`${clickCount} mouse clicks allow native selection without pointer dragging`, async ({ page }) => {
+    await setup(page, `<div id="box" data-ae-scrollbox="pointer"
+      data-ae-scrollbox-momentum="false" style="width:200px;height:100px;overflow:auto;font:16px monospace">
+      <div style="width:180px;height:300px;padding-top:60px;box-sizing:border-box">
+        <span id="text">selectable words in the scrollbox</span>
+      </div></div>`);
+    await page.evaluate(() => {
+      window.mouseDownEvents = [];
+      document.addEventListener("mousedown", event => {
+        if (event.target.closest("#box")) window.mouseDownEvents.push({
+          detail: event.detail, prevented: event.defaultPrevented
+        });
+      });
+    });
+    const rect = await page.locator("#text").boundingBox();
+    const x = rect.x + 8, y = rect.y + rect.height / 2;
+    await page.mouse.move(x, y);
+    await page.mouse.click(x, y);
+    await page.mouse.down({ clickCount });
+    await page.mouse.move(x + 80, y, { steps: 4 });
+    const during = await page.evaluate(() => ({
+      selection: getSelection().toString(),
+      scrollTop: document.getElementById("box").scrollTop,
+      userSelect: document.getElementById("box").style.getPropertyValue("user-select"),
+      events: window.mouseDownEvents
+    }));
+    await page.mouse.up();
+    expect(during.events.at(-1)).toEqual({ detail: clickCount, prevented: false });
+    expect(during.selection.length).toBeGreaterThan(0);
+    expect(during.scrollTop).toBe(0);
+    expect(during.userSelect).toBe("");
+  });
+}
+
+test("pointer mode keeps mousedown and horizontal selection native in vertical-only boxes", async ({ page }) => {
   await setup(page, `<div id="box" data-ae-scrollbox="pointer" data-ae-scrollbox-momentum="false"
     style="width:200px;height:100px;overflow:auto;font:16px monospace">
     <div style="width:180px;height:300px;padding-top:60px;box-sizing:border-box"><span id="text">abcdefghijklmno</span></div>
@@ -166,10 +234,39 @@ test("pointer mode cancels mousedown and native text selection", async ({ page }
     userSelect: document.getElementById("box").style.getPropertyValue("user-select"),
     mouseDownPrevented: window.mouseDownPrevented
   }));
-  expect(result.selection).toBe("");
+  expect(result.selection.length).toBeGreaterThan(0);
   expect(result.scrollTop).toBe(0);
   expect(result.userSelect).toBe("");
-  expect(result.mouseDownPrevented).toBe(true);
+  expect(result.mouseDownPrevented).toBe(false);
+});
+
+test("horizontal-first motion keeps selection even if the pointer later moves vertically", async ({ page }) => {
+  await setup(page, `<div id="box" data-ae-scrollbox="pointer"
+    data-ae-scrollbox-momentum="false" style="width:200px;height:100px;overflow:auto;font:16px monospace">
+    <div style="width:180px;height:300px;padding-top:60px;box-sizing:border-box">
+      <span id="text">selectable words here</span>
+    </div></div>`);
+  await page.evaluate(() => {
+    window.pointerMovesPrevented = [];
+    window.addEventListener("pointermove", event => {
+      if (event.buttons & 1) window.pointerMovesPrevented.push(event.defaultPrevented);
+    });
+  });
+  const rect = await page.locator("#text").boundingBox();
+  const x = rect.x + 5, y = rect.y + rect.height / 2;
+  await page.mouse.move(x, y);
+  await page.mouse.down();
+  await page.mouse.move(x + 40, y + 8);
+  await page.mouse.move(x + 40, y - 35);
+  const result = await page.evaluate(() => ({
+    selection: getSelection().toString(),
+    userSelect: document.getElementById("box").style.getPropertyValue("user-select"),
+    movesPrevented: window.pointerMovesPrevented
+  }));
+  await page.mouse.up();
+  expect(result.selection.length).toBeGreaterThan(0);
+  expect(result.movesPrevented).toEqual([false, false]);
+  expect(result.userSelect).toBe("");
 });
 
 test("vertical pointer movement still drags a vertical-only box", async ({ page }) => {
@@ -201,7 +298,7 @@ test("touch and interactive controls do not start pointer dragging", async ({ pa
   await page.locator("#button").click();
   expect(await page.evaluate(() => ({
     prevented: window.buttonMouseDownPrevented, clicks: window.buttonClicks
-  }))).toEqual({ prevented: true, clicks: 1 });
+  }))).toEqual({ prevented: false, clicks: 1 });
   const result = await page.evaluate(() => {
     const element = document.getElementById("box");
     const button = document.getElementById("button");
@@ -421,58 +518,6 @@ test("weak CSS makes scrolling smooth and honors reduced motion on every element
   expect(await behaviors()).toEqual(["auto", "auto", "auto"]);
 });
 
-test("elastic child adds a one-pixel after spacer to the scrollbox", async ({ page }) => {
-  await setup(page, `<div id="box" data-ae-scrollbox="native"
-    style="width:100px;height:100px;overflow:auto">
-    <div data-ae-scrollbox-elastic style="height:100px"></div></div>`);
-  const result = await page.evaluate(async () => {
-    const element = document.getElementById("box");
-    const child = element.firstElementChild;
-    const snapshot = () => ({
-      active: element.classList.contains("ae--scrollbox-elastic"),
-      content: getComputedStyle(element, "::after").content,
-      height: getComputedStyle(element, "::after").height,
-      scrollHeight: element.scrollHeight,
-      childCount: element.children.length
-    });
-    const enabled = snapshot();
-    child.setAttribute("data-ae-scrollbox-elastic", "false");
-    await AelluxJs.mountManager.update(element, "scrollbox");
-    const disabled = snapshot();
-    child.removeAttribute("data-ae-scrollbox-elastic");
-    await AelluxJs.mountManager.update(element, "scrollbox");
-    await AelluxJs.unmount(element, "scrollbox");
-    const unmounted = snapshot();
-    return { enabled, disabled, unmounted };
-  });
-  expect(result.enabled).toEqual({ active: true, content: '""', height: "1px",
-    scrollHeight: 101, childCount: 1 });
-  expect(result.disabled.active).toBe(false);
-  expect(result.disabled.scrollHeight).toBe(100);
-  expect(result.unmounted.active).toBe(false);
-  expect(result.unmounted.scrollHeight).toBe(100);
-});
-
-test("elastic after spacer exposes the scrollbox bottom padding at the scroll end", async ({ page }) => {
-  await setup(page, `<div id="box" data-ae-scrollbox="native"
-    style="width:100px;height:100px;overflow:auto;padding-bottom:20px">
-    <div data-ae-scrollbox-elastic style="height:300px"></div></div>`);
-  const result = await page.evaluate(() => {
-    const element = document.getElementById("box");
-    const wrapper = element.firstElementChild;
-    element.scrollTo({ top: element.scrollHeight, behavior: "instant" });
-    return {
-      gap: element.getBoundingClientRect().bottom - wrapper.getBoundingClientRect().bottom,
-      scrollTop: element.scrollTop,
-      maxY: element.scrollHeight - element.clientHeight,
-      afterHeight: getComputedStyle(element, "::after").height
-    };
-  });
-  expect(result.scrollTop).toBe(result.maxY);
-  expect(result.afterHeight).toBe("1px");
-  expect(result.gap).toBeGreaterThanOrEqual(20);
-});
-
 test("elastic pointer drag transforms its marked wrapper and restores it on unmount", async ({ page }) => {
   await setup(page, `<div id="box" data-ae-scrollbox="pointer"
     data-ae-scrollbox-momentum="false"
@@ -493,17 +538,30 @@ test("elastic pointer drag transforms its marked wrapper and restores it on unmo
     window.dispatchEvent(pointer("pointermove", x + 30, y + 60, 1));
     const stretched = wrapper.style.transform;
     const activeOrigin = wrapper.style.transformOrigin;
-    window.dispatchEvent(pointer("pointerup", x + 30, y + 60, 0));
+    const partialRect = wrapper.getBoundingClientRect();
+    const partialGrowth = { x: partialRect.width - wrapper.offsetWidth,
+      y: partialRect.height - wrapper.offsetHeight };
+    window.dispatchEvent(pointer("pointermove", x + 120, y + 120, 1));
+    const maxRect = wrapper.getBoundingClientRect();
+    const maxGrowth = { x: maxRect.width - wrapper.offsetWidth,
+      y: maxRect.height - wrapper.offsetHeight };
+    const maxSpace = { x: element.clientWidth / 4, y: element.clientHeight / 4 };
+    window.dispatchEvent(pointer("pointerup", x + 120, y + 120, 0));
     const releasing = wrapper.classList.contains("ae--scrollbox-elastic-release");
     await AelluxJs.unmount(element, "scrollbox");
-    return { stretched, activeOrigin, releasing, transform: wrapper.style.transform,
+    return { stretched, activeOrigin, partialGrowth, maxGrowth, maxSpace,
+      releasing, transform: wrapper.style.transform,
       origin: wrapper.style.transformOrigin,
       padding: element.style.getPropertyValue("padding"),
       releaseClass: wrapper.classList.contains("ae--scrollbox-elastic-release") };
   });
-  expect(result.stretched).toContain("translate3d(10px, 20px, 0px)");
+  expect(result.stretched).toMatch(/translate3d\([\d.]+px, [\d.]+px, 0px\)/);
   expect(result.stretched).toMatch(/scale\(1\.\d+, 1\.\d+\)/);
   expect(result.stretched.startsWith("scale(")).toBe(true);
+  expect(result.partialGrowth.x).toBeCloseTo(elasticAmount(30, result.maxSpace.x), 1);
+  expect(result.partialGrowth.y).toBeCloseTo(elasticAmount(60, result.maxSpace.y), 1);
+  expect(result.maxGrowth.x).toBeCloseTo(elasticAmount(120, result.maxSpace.x), 1);
+  expect(result.maxGrowth.y).toBeCloseTo(elasticAmount(120, result.maxSpace.y), 1);
   expect(result.activeOrigin.startsWith("0% 0%")).toBe(true);
   expect(result.releasing).toBe(true);
   expect(result.transform).toBe("scale(1)");
@@ -523,12 +581,13 @@ test("elastic native wheel transforms its wrapper and settles", async ({ page })
     element.dispatchEvent(event);
     const transform = wrapper.style.transform;
     await new Promise(resolve => setTimeout(resolve, 160));
-    return { prevented: event.defaultPrevented,
+    return { prevented: event.defaultPrevented, limit: element.clientHeight / 4,
       transform, releasing: wrapper.classList.contains("ae--scrollbox-elastic-release"),
       settlingScale: new DOMMatrixReadOnly(getComputedStyle(wrapper).transform).m22 };
   });
   expect(stretched.prevented).toBe(true);
-  expect(stretched.transform).toContain("translate3d(0px, 20px, 0px)");
+  expect(Number.parseFloat(/translate3d\(0px, ([\d.]+)px/.exec(stretched.transform)[1]))
+    .toBeCloseTo(elasticAmount(60, stretched.limit), 1);
   expect(stretched.transform).toMatch(/scale\(1, 1\.\d+\)/);
   expect(stretched.releasing).toBe(true);
   expect(stretched.settlingScale).toBeGreaterThan(1);
@@ -559,11 +618,12 @@ test("elastic native touch stretches while pulling beyond an edge", async ({ pag
     element.dispatchEvent(move);
     const transform = element.firstElementChild.style.transform;
     element.dispatchEvent(touchEvent("touchend", 100, false));
-    return { prevented: move.defaultPrevented, transform,
+    return { prevented: move.defaultPrevented, limit: element.clientHeight / 4, transform,
       releasing: element.firstElementChild.classList.contains("ae--scrollbox-elastic-release") };
   });
   expect(result.prevented).toBe(true);
-  expect(result.transform).toContain("translate3d(0px, 20px, 0px)");
+  expect(Number.parseFloat(/translate3d\(0px, ([\d.]+)px/.exec(result.transform)[1]))
+    .toBeCloseTo(elasticAmount(60, result.limit), 1);
   expect(result.transform).toMatch(/scale\(1, 1\.\d+\)/);
   expect(result.releasing).toBe(true);
 });
@@ -599,15 +659,15 @@ test("elastic pointer drag moves its wrapper away from bottom and right edges", 
       gapY: rect.bottom - wrapper.getBoundingClientRect().bottom - beforeGapY
     };
   });
-  expect(result.transform).toContain("translate3d(-20px, -20px, 0px)");
+  expect(result.transform).toMatch(/translate3d\(-[\d.]+px, -[\d.]+px, 0px\)/);
   expect(result.transform).toMatch(/scale\(1\.\d+(?:, 1\.\d+)?\)/);
   expect(result.transform.startsWith("scale(")).toBe(true);
   expect(Number.parseFloat(result.origin.split(" ")[0])).toBeGreaterThanOrEqual(300);
   expect(Number.parseFloat(result.origin.split(" ")[1])).toBeGreaterThanOrEqual(300);
   expect(result.scrollLeft).toBe(result.maxX);
   expect(result.scrollTop).toBe(result.maxY);
-  expect(result.gapX).toBeGreaterThan(15);
-  expect(result.gapY).toBeGreaterThan(15);
+  expect(result.gapX).toBeGreaterThan(10);
+  expect(result.gapY).toBeGreaterThan(10);
 });
 
 test("elastic trailing pivot follows content overflowing its wrapper", async ({ page }) => {
@@ -652,8 +712,8 @@ test("elastic trailing pivot follows content overflowing its wrapper", async ({ 
   expect(result.originX).toBeGreaterThanOrEqual(result.contentWidth);
   expect(result.originY).toBeGreaterThanOrEqual(result.contentHeight);
   expect(result.afterScroll).toEqual(result.beforeScroll);
-  expect(result.gapX, JSON.stringify(result)).toBeGreaterThan(15);
-  expect(result.gapY).toBeGreaterThan(15);
+  expect(result.gapX, JSON.stringify(result)).toBeGreaterThan(10);
+  expect(result.gapY).toBeGreaterThan(10);
   expect(result.restoredMinWidth).toBe("");
   expect(result.restoredMinHeight).toBe("");
 });
@@ -722,10 +782,127 @@ test("elastic native wheel moves its wrapper at bottom and right limits", async 
     };
   });
   expect(result.prevented).toBe(true);
-  expect(result.transform).toContain("translate3d(-20px, -20px, 0px)");
+  expect(result.transform).toMatch(/translate3d\(-[\d.]+px, -[\d.]+px, 0px\)/);
   expect(result.transform).toMatch(/scale\(1\.\d+(?:, 1\.\d+)?\)/);
   expect(result.scrollLeft).toBe(result.maxX);
   expect(result.scrollTop).toBe(result.maxY);
+});
+
+test("elastic limits accept fractions and pixel values per axis", async ({ page }) => {
+  const cases = [
+    { value: "", y: 25, x: 25 },
+    { value: "1/4 1/2", y: 25, x: 50 },
+    { value: "30px 40px", y: 30, x: 40 },
+    { value: "35 45", y: 35, x: 45 },
+    { value: "30px", y: 30, x: 30 },
+    { value: "invalid", y: 25, x: 25 }
+  ];
+  await setup(page, cases.map(({ value }, index) =>
+    `<div id="box-${index}" data-ae-scrollbox="native"
+      style="width:100px;height:100px;overflow:auto">
+      <div data-ae-scrollbox-elastic="${value}" style="width:300px;height:300px"></div>
+    </div>`).join(""));
+  const result = await page.evaluate(count => Array.from({ length: count }, (_, index) => {
+    const element = document.getElementById(`box-${index}`);
+    const wrapper = element.firstElementChild;
+    element.dispatchEvent(new WheelEvent("wheel", {
+      deltaX: -600, deltaY: -600, bubbles: true, cancelable: true
+    }));
+    const transform = wrapper.style.transform;
+    const scale = /scale\(([^,()]+)(?:,\s*([^)]+))?\)/.exec(transform);
+    const translate = /translate3d\(([^p]+)px, ([^p]+)px, 0(?:px)?\)/.exec(transform);
+    return {
+      x: Number(translate[1]), y: Number(translate[2]),
+      grownX: (Number(scale[1]) - 1) * Math.max(wrapper.offsetWidth, wrapper.scrollWidth),
+      grownY: (Number(scale[2] || scale[1]) - 1) *
+        Math.max(wrapper.offsetHeight, wrapper.scrollHeight),
+      width: element.clientWidth, height: element.clientHeight, transform
+    };
+  }), cases.length);
+  for (const [index, item] of result.entries()) {
+    const expected = cases[index];
+    const limitY = expected.value === "" || expected.value === "invalid" ||
+      expected.value.startsWith("1/4") ? item.height / 4 : expected.y;
+    const limitX = expected.value === "" || expected.value === "invalid"
+      ? item.width / 4 : expected.value === "1/4 1/2" ? item.width / 2 : expected.x;
+    const y = limitY * (1 - Math.exp(-600 / (3 * limitY)));
+    const x = limitX * (1 - Math.exp(-600 / (3 * limitX)));
+    expect(item.y).toBeCloseTo(y, 4);
+    expect(item.x).toBeCloseTo(x, 4);
+    expect(item.grownY, JSON.stringify(item)).toBeCloseTo(y, 1);
+    expect(item.grownX).toBeCloseTo(x, 1);
+  }
+  expect(await page.evaluate(() => AelluxJs.diagnostics.showHistory(1)[0]?.code)).toBe(2015);
+});
+
+test("elastic pressure eases toward the limit and returns by 15 percent per frame", async ({ page }) => {
+  await setup(page, `<div id="box" data-ae-scrollbox="pointer"
+    data-ae-scrollbox-momentum="false" style="width:100px;height:100px;overflow:auto">
+    <div data-ae-scrollbox-elastic style="width:100px;height:300px"></div></div>`);
+  const result = await page.evaluate(() => {
+    const element = document.getElementById("box");
+    const wrapper = element.firstElementChild;
+    const rect = element.getBoundingClientRect();
+    const x = rect.left + 50, y = rect.top + 50;
+    const frameCallbacks = [];
+    window.requestAnimationFrame = callback => {
+      frameCallbacks.push(callback);
+      return frameCallbacks.length;
+    };
+    const amount = () => Number.parseFloat(/translate3d\(0px, ([\d.]+)px/.exec(
+      wrapper.style.transform)[1]);
+    const pointer = (type, clientY, buttons) => new PointerEvent(type, {
+      bubbles: true, cancelable: true, isPrimary: true, pointerId: 91,
+      pointerType: "mouse", button: type === "pointermove" ? -1 : 0,
+      buttons, clientX: x, clientY
+    });
+    element.dispatchEvent(pointer("pointerdown", y, 1));
+    const pressures = [];
+    for (const force of [30, 60, 90]) {
+      window.dispatchEvent(pointer("pointermove", y + force, 1));
+      pressures.push(amount());
+    }
+    window.dispatchEvent(pointer("pointerup", y + 90, 0));
+    const beforeFrame = amount();
+    frameCallbacks.shift()(performance.now());
+    const afterFrame = amount();
+    return { pressures, beforeFrame, afterFrame, limit: element.clientHeight / 4 };
+  });
+  for (const [index, force] of [30, 60, 90].entries()) {
+    expect(result.pressures[index]).toBeCloseTo(elasticAmount(force, result.limit), 2);
+  }
+  expect(result.pressures[1] - result.pressures[0])
+    .toBeLessThan(result.pressures[0]);
+  expect(result.pressures[2] - result.pressures[1])
+    .toBeLessThan(result.pressures[1] - result.pressures[0]);
+  expect(result.afterFrame).toBeCloseTo(result.beforeFrame * 0.85, 2);
+});
+
+test("elastic snapback is immediate with reduced motion", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await setup(page, `<div id="box" data-ae-scrollbox="pointer"
+    data-ae-scrollbox-momentum="false" style="width:100px;height:100px;overflow:auto">
+    <div data-ae-scrollbox-elastic style="width:100px;height:300px"></div></div>`);
+  const result = await page.evaluate(() => {
+    const element = document.getElementById("box");
+    const wrapper = element.firstElementChild;
+    const rect = element.getBoundingClientRect();
+    const x = rect.left + 50, y = rect.top + 50;
+    const pointer = (type, clientY, buttons) => new PointerEvent(type, {
+      bubbles: true, cancelable: true, isPrimary: true, pointerId: 92,
+      pointerType: "mouse", button: type === "pointermove" ? -1 : 0,
+      buttons, clientX: x, clientY
+    });
+    element.dispatchEvent(pointer("pointerdown", y, 1));
+    window.dispatchEvent(pointer("pointermove", y + 60, 1));
+    const during = wrapper.style.transform;
+    window.dispatchEvent(pointer("pointerup", y + 60, 0));
+    return { during, after: wrapper.style.transform,
+      releasing: wrapper.classList.contains("ae--scrollbox-elastic-release") };
+  });
+  expect(result.during).toContain("translate3d(");
+  expect(result.after).toBe("");
+  expect(result.releasing).toBe(false);
 });
 
 test("elastic false on the child leaves native wheel and transform unchanged", async ({ page }) => {

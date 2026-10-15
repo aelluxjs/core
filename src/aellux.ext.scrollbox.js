@@ -12,7 +12,6 @@
   const wheelAttribute = AelluxJs.attr("scrollbox-wheel-horizontal");
   const momentumAttribute = AelluxJs.attr("scrollbox-momentum");
   const elasticAttribute = AelluxJs.attr("scrollbox-elastic");
-  const elasticClass = AelluxJs.className("scrollbox-elastic");
   const elasticReleaseClass = AelluxJs.className("scrollbox-elastic-release");
   const RESIZE_INTERVAL_MS = 100;
   const DRAG_THRESHOLD_PX = 3;
@@ -22,8 +21,9 @@
   const MOMENTUM_LIMIT_DISTANCE_PX = 15;
   const MOMENTUM_DECELERATION = 0.0015;
   const ELASTIC_DAMPING = 1 / 3;
-  const ELASTIC_LIMIT_RATIO = 1 / 4;
-  const ELASTIC_RELEASE_MS = 800;
+  const DEFAULT_ELASTIC_LIMIT = { unit: "ratio", value: 1 / 4 };
+  const ELASTIC_RETURN_LERP = 0.15;
+  const ELASTIC_RETURN_EPSILON = 0.01;
   const ELASTIC_WHEEL_IDLE_MS = 80;
   const properties = ["--ae-scroll-y-progress", "--ae-scroll-x-progress"];
   const scrollboxes = new Map();
@@ -52,13 +52,13 @@
       wrapper: null, baseTransform: "", baseOrigin: "",
       previousTransform: null, previousOrigin: null,
       previousMinWidth: null, previousMinHeight: null, extentX: false, extentY: false,
-      invalidReported: false,
+      invalidReported: false, invalidLimit: null,
+      limits: [DEFAULT_ELASTIC_LIMIT, DEFAULT_ELASTIC_LIMIT],
       amounts: [0, 0, 0, 0], active: false, owned: false, touch: null,
-      releaseTimeout: null, wheelTimeout: null
+      releaseFrame: null, wheelTimeout: null
     };
     const state = {
-      element, previous, hadElasticClass: element.classList.contains(elasticClass),
-      metrics: null, mode: null, desktop: false,
+      element, previous, metrics: null, mode: null, desktop: false,
       wheelEnabled: true, momentumEnabled: true, elasticEnabled: false,
       wheelListening: false, pointerListening: false, touchListening: false,
       drag: null, momentum: null, elastic, resizeObserver: null, mutationObserver: null,
@@ -69,8 +69,11 @@
     state.onPointerDown = event => startDrag(state, event);
     state.onMouseDown = event => {
       if (event.button !== 0) return;
-      if (event.cancelable) event.preventDefault();
-      if (event.detail > 1) endDrag(state);
+      if (event.detail > 1) {
+        endDrag(state);
+        return;
+      }
+      if (state.drag && state.drag.moved && event.cancelable) event.preventDefault();
     };
     state.onPointerMove = event => moveDrag(state, event);
     state.onPointerEnd = event => endDrag(state, event);
@@ -96,7 +99,6 @@
     endDrag(state);
     cancelMomentum(state);
     resetElastic(state);
-    element.classList.toggle(elasticClass, state.hadElasticClass);
     element.removeEventListener("scroll", state.onScroll);
     if (state.wheelListening) element.removeEventListener("wheel", state.onWheel, true);
     if (state.pointerListening) {
@@ -157,7 +159,6 @@
       resetElastic(state);
       state.elasticEnabled = false;
       state.elastic.wrapper = null;
-      element.classList.remove(elasticClass);
       const requested = element.hasAttribute(elasticAttribute) ||
         Array.from(element.children).some(item => item.hasAttribute(elasticAttribute) &&
           item.getAttribute(elasticAttribute) !== "false");
@@ -193,7 +194,39 @@
       };
     }
     state.elasticEnabled = true;
-    element.classList.add(elasticClass);
+    const value = wrapper.getAttribute(elasticAttribute).trim();
+    const tokens = value ? value.split(/\s+/) : [];
+    const limits = tokens.map(parseElasticLimit);
+    if (tokens.length > 2 || limits.some(limit => !limit)) {
+      if (state.elastic.invalidLimit !== value) {
+        AelluxJs.diagnostics.warn(AelluxJs.diagnostics.WARN_SCROLLBOX_ELASTIC_LIMIT_INVALID,
+          { element, value });
+      }
+      state.elastic.invalidLimit = value;
+      state.elastic.limits = [DEFAULT_ELASTIC_LIMIT, DEFAULT_ELASTIC_LIMIT];
+    } else {
+      state.elastic.invalidLimit = null;
+      state.elastic.limits = tokens.length === 2 ? limits :
+        [limits[0] || DEFAULT_ELASTIC_LIMIT, limits[0] || DEFAULT_ELASTIC_LIMIT];
+    }
+  }
+
+  function parseElasticLimit(token) {
+    const fraction = /^(\d+(?:\.\d+)?)\/(\d+(?:\.\d+)?)$/.exec(token);
+    if (fraction && Number(fraction[2]) > 0) {
+      return { unit: "ratio", value: Number(fraction[1]) / Number(fraction[2]) };
+    }
+    const pixels = /^(\d+(?:\.\d+)?)(?:px)?$/i.exec(token);
+    return pixels ? { unit: "px", value: Number(pixels[1]) } : null;
+  }
+
+  function elasticLimit(size, limit) {
+    return limit.unit === "px" ? limit.value : size * limit.value;
+  }
+
+  function elasticResistance(force, current, limit) {
+    if (limit <= 0) return 0;
+    return current + (limit - current) * (1 - Math.exp(-force * ELASTIC_DAMPING / limit));
   }
 
   function readMode(element) {
@@ -209,6 +242,7 @@
   }
 
   function startDrag(state, event) {
+    if (event.detail > 1) return;
     cancelMomentum(state);
     if (state.drag || event.defaultPrevented || event.button !== 0 || !event.isPrimary ||
       event.pointerType === "touch" || (event.buttons & 1) === 0) return;
@@ -256,12 +290,13 @@
     const dx = drag.startX - event.clientX;
     const dy = drag.startY - event.clientY;
     if (drag.selectionPending) {
-      if (Math.abs(dx) >= SELECTION_HORIZONTAL_THRESHOLD_PX &&
-        Math.abs(dy) < SELECTION_VERTICAL_TOLERANCE_PX) {
+      const horizontal = Math.abs(dx);
+      const vertical = Math.abs(dy);
+      if (horizontal >= SELECTION_HORIZONTAL_THRESHOLD_PX && horizontal > vertical) {
         endDrag(state);
         return;
       }
-      if (Math.abs(dy) < SELECTION_VERTICAL_TOLERANCE_PX) return;
+      if (vertical < SELECTION_VERTICAL_TOLERANCE_PX || vertical < horizontal) return;
       drag.selectionPending = false;
       state.element.style.setProperty("user-select", "none");
       drag.userSelectApplied = true;
@@ -425,21 +460,23 @@
     const elastic = state.elastic;
     const amounts = [0, 0, 0, 0];
     if (metrics.maxY > 1) {
-      if (desiredY < 0) amounts[0] = Math.min(element.clientHeight * ELASTIC_LIMIT_RATIO,
-        (additive ? elastic.amounts[0] : 0) - desiredY * ELASTIC_DAMPING);
-      else if (desiredY > metrics.maxY) amounts[2] = Math.min(element.clientHeight * ELASTIC_LIMIT_RATIO,
-        (additive ? elastic.amounts[2] : 0) + (desiredY - metrics.maxY) * ELASTIC_DAMPING);
+      const limitY = elasticLimit(element.clientHeight, elastic.limits[0]);
+      if (desiredY < 0) amounts[0] = elasticResistance(-desiredY,
+        additive ? elastic.amounts[0] : 0, limitY);
+      else if (desiredY > metrics.maxY) amounts[2] = elasticResistance(desiredY - metrics.maxY,
+        additive ? elastic.amounts[2] : 0, limitY);
     }
     if (metrics.maxX > 1) {
-      if (desiredX > metrics.maxX) amounts[1] = Math.min(element.clientWidth * ELASTIC_LIMIT_RATIO,
-        (additive ? elastic.amounts[1] : 0) + (desiredX - metrics.maxX) * ELASTIC_DAMPING);
-      else if (desiredX < 0) amounts[3] = Math.min(element.clientWidth * ELASTIC_LIMIT_RATIO,
-        (additive ? elastic.amounts[3] : 0) - desiredX * ELASTIC_DAMPING);
+      const limitX = elasticLimit(element.clientWidth, elastic.limits[1]);
+      if (desiredX > metrics.maxX) amounts[1] = elasticResistance(desiredX - metrics.maxX,
+        additive ? elastic.amounts[1] : 0, limitX);
+      else if (desiredX < 0) amounts[3] = elasticResistance(-desiredX,
+        additive ? elastic.amounts[3] : 0, limitX);
     }
     const active = amounts.some(amount => amount > 0);
     if (!active && !elastic.owned) return false;
-    if (elastic.releaseTimeout !== null) root.clearTimeout(elastic.releaseTimeout);
-    elastic.releaseTimeout = null;
+    if (elastic.releaseFrame !== null) root.cancelAnimationFrame(elastic.releaseFrame);
+    elastic.releaseFrame = null;
     elastic.wrapper.classList.remove(elasticReleaseClass);
     elastic.amounts = amounts;
     elastic.active = active;
@@ -466,10 +503,10 @@
     const x = elastic.amounts[3] - elastic.amounts[1];
     const y = elastic.amounts[0] - elastic.amounts[2];
     const translate = x || y ? `translate3d(${x}px, ${y}px, 0)` : "";
-    const limitX = state.element.clientWidth * ELASTIC_LIMIT_RATIO || 1;
-    const limitY = state.element.clientHeight * ELASTIC_LIMIT_RATIO || 1;
-    const scaleX = 1 + 0.1 * Math.max(elastic.amounts[1], elastic.amounts[3]) / limitX;
-    const scaleY = 1 + 0.1 * Math.max(elastic.amounts[0], elastic.amounts[2]) / limitY;
+    const width = Math.max(wrapper.offsetWidth, wrapper.scrollWidth, 1);
+    const height = Math.max(wrapper.offsetHeight, wrapper.scrollHeight, 1);
+    const scaleX = 1 + Math.max(elastic.amounts[1], elastic.amounts[3]) / width;
+    const scaleY = 1 + Math.max(elastic.amounts[0], elastic.amounts[2]) / height;
     const scale = scaleX > 1 || scaleY > 1 ? `scale(${scaleX}, ${scaleY})` : "";
     if (scaleX > 1 || scaleY > 1) {
       const baseOrigin = elastic.baseOrigin.split(" ");
@@ -506,21 +543,36 @@
       resetElastic(state);
       return;
     }
-    elastic.wrapper.classList.add(elasticReleaseClass);
-    elastic.amounts = [0, 0, 0, 0];
-    setElasticTransform(state);
-    if (elastic.releaseTimeout !== null) root.clearTimeout(elastic.releaseTimeout);
-    elastic.releaseTimeout = root.setTimeout(() => {
+    if (root.matchMedia && root.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       resetElastic(state);
       refresh(state);
-    }, ELASTIC_RELEASE_MS);
+      return;
+    }
+    elastic.wrapper.classList.add(elasticReleaseClass);
+    if (elastic.releaseFrame !== null) root.cancelAnimationFrame(elastic.releaseFrame);
+    elastic.releaseFrame = root.requestAnimationFrame(() => stepElasticRelease(state));
+  }
+
+  function stepElasticRelease(state) {
+    const elastic = state.elastic;
+    elastic.releaseFrame = null;
+    if (state.disposed || !elastic.owned) return;
+    elastic.amounts = elastic.amounts.map(amount =>
+      amount < ELASTIC_RETURN_EPSILON ? 0 : amount * (1 - ELASTIC_RETURN_LERP));
+    if (elastic.amounts.every(amount => amount === 0)) {
+      resetElastic(state);
+      refresh(state);
+      return;
+    }
+    setElasticTransform(state);
+    elastic.releaseFrame = root.requestAnimationFrame(() => stepElasticRelease(state));
   }
 
   function resetElastic(state) {
     const elastic = state.elastic;
-    if (elastic.releaseTimeout !== null) root.clearTimeout(elastic.releaseTimeout);
+    if (elastic.releaseFrame !== null) root.cancelAnimationFrame(elastic.releaseFrame);
     if (elastic.wheelTimeout !== null) root.clearTimeout(elastic.wheelTimeout);
-    elastic.releaseTimeout = null;
+    elastic.releaseFrame = null;
     elastic.wheelTimeout = null;
     if (elastic.wrapper) elastic.wrapper.classList.remove(elasticReleaseClass);
     if (elastic.owned && elastic.wrapper) {
