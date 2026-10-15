@@ -602,6 +602,8 @@
     }
     function updateScrollbars(state, metrics) {
       var element = state.element;
+      if (!state.scrollbar.x && !state.scrollbar.y) return;
+      var axes = wheelAxes(state, metrics);
       for (var _i = 0, _arr = ["x", "y"]; _i < _arr.length; _i++) {
         var axis = _arr[_i];
         var record = state.scrollbar[axis];
@@ -615,7 +617,7 @@
         var thumbPosition = max > 0 ? (trackSize - thumbSize) * progress(position, max) : 0;
         var x = element.scrollLeft + (vertical ? element.clientWidth - SCROLLBAR_SIZE_PX : 0);
         var y = element.scrollTop + (vertical ? 0 : element.clientHeight - SCROLLBAR_SIZE_PX);
-        var display = max > 1 ? "block" : "none";
+        var display = axes[axis] ? "block" : "none";
         var style = record.element.style;
         if (record.x !== x) style.setProperty("--ae-scrollbar-x", "".concat(x, "px"));
         if (record.y !== y) style.setProperty("--ae-scrollbar-y", "".concat(y, "px"));
@@ -628,7 +630,7 @@
         record.trackSize = trackSize;
         record.thumbSize = thumbSize;
         record.thumbPosition = thumbPosition;
-        record.max = max;
+        record.max = axes[axis] ? max : 0;
         record.display = display;
       }
     }
@@ -644,13 +646,14 @@
       showScrollbars(state);
       var position = scrollbarPointerPosition(record, event);
       if (position < record.thumbPosition || position > record.thumbPosition + record.thumbSize) {
-        var direction = position < record.thumbPosition ? -1 : 1;
-        var distance = direction * record.trackSize;
-        if (record.axis === "y") state.element.scrollBy({
-          top: distance
+        var travel = record.trackSize - record.thumbSize;
+        var thumbStart = Math.max(0, Math.min(travel, position - record.thumbSize / 2));
+        var destination = travel > 0 ? thumbStart / travel * record.max : 0;
+        if (record.axis === "y") state.element.scrollTo({
+          top: destination
         });
-        else state.element.scrollBy({
-          left: distance
+        else state.element.scrollTo({
+          left: destination
         });
         return;
       }
@@ -825,7 +828,7 @@
       var dy = target.top + target.height / 2 - (box.top + element.clientTop + element.clientHeight / 2);
       var x = Math.max(0, Math.min(metrics.maxX, element.scrollLeft + dx));
       var y = Math.max(0, Math.min(metrics.maxY, element.scrollTop + dy));
-      return Math.abs(x - element.scrollLeft) > 0.5 || Math.abs(y - element.scrollTop) > 0.5;
+      return snapAxis(state) === "x" ? Math.abs(x - element.scrollLeft) > 0.5 : Math.abs(y - element.scrollTop) > 0.5;
     }
     function snapItemFullyVisible(state, item) {
       var element = state.element;
@@ -887,12 +890,17 @@
       if (!first) return;
       state.snap.initialized = true;
       state.snap.index = 0;
-      first.scrollIntoView({
-        block: "center",
-        inline: "center",
-        behavior: "instant"
-      });
+      first.scrollIntoView(snapScrollOptions(state, "instant"));
       refresh(state);
+    }
+    function snapScrollOptions(state, behavior) {
+      var horizontal = snapAxis(state) === "x";
+      var options = {
+        block: horizontal ? "nearest" : "center",
+        inline: horizontal ? "center" : "nearest"
+      };
+      if (behavior) options.behavior = behavior;
+      return options;
     }
     function scrollToSnap(state, index) {
       var items = snapItems(state);
@@ -904,10 +912,7 @@
       state.snap.index = index;
       state.snap.wheelTarget = items[index];
       if (state.elastic.owned) resetElastic(state);
-      items[index].scrollIntoView({
-        block: "center",
-        inline: "center"
-      });
+      items[index].scrollIntoView(snapScrollOptions(state));
       return true;
     }
     function goto(element, index) {

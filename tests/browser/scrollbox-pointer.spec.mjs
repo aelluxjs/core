@@ -106,6 +106,38 @@ test("snap initializes and controller navigates its direct children", async ({ p
     .toBe(false);
 });
 
+test("snap centers only its main scroll axis", async ({ page }) => {
+  await setup(page, `<div id="horizontal" data-ae-scrollbox
+    style="width:100px;height:100px;overflow:auto">
+    <div data-ae-scrollbox-snap style="display:flex;width:300px;height:200px">
+      <div style="flex:none;width:100px;height:40px"></div>
+      <div style="flex:none;width:100px;height:40px"></div>
+      <div style="flex:none;width:100px;height:40px"></div>
+    </div>
+  </div>
+  <div id="vertical" data-ae-scrollbox
+    style="width:100px;height:100px;overflow-x:hidden;overflow-y:auto">
+    <div data-ae-scrollbox-snap style="width:300px;height:300px">
+      <div style="width:40px;height:100px"></div>
+      <div style="width:40px;height:100px"></div>
+      <div style="width:40px;height:100px"></div>
+    </div>
+  </div>`);
+  const options = await page.evaluate(() => {
+    const result = {};
+    for (const id of ["horizontal", "vertical"]) {
+      const item = document.querySelector(`#${id} [data-ae-scrollbox-snap]`).children[1];
+      item.scrollIntoView = value => { result[id] = value; };
+      AelluxJs.mountManager.controller(id).scrollbox.goto(1);
+    }
+    return result;
+  });
+  expect(options).toEqual({
+    horizontal: { block: "nearest", inline: "center" },
+    vertical: { block: "center", inline: "nearest" }
+  });
+});
+
 test("a simple click centers a partially visible snap child but leaves a visible child alone", async ({ page }) => {
   await setup(page, `<div id="gallery" data-ae-scrollbox="native"
     style="width:180px;height:100px;overflow-x:auto;overflow-y:hidden">

@@ -6,7 +6,7 @@ All notable changes to aellux.js will be documented in this file.
 
 ### Added
 
-- Scrollbox now supports custom vertical and horizontal scrollbars through `data-ae-scrollbar`, including draggable thumbs, page clicks on tracks, and overlay positioning with transforms.
+- Scrollbox now supports custom vertical and horizontal scrollbars through `data-ae-scrollbar`, including draggable thumbs, track clicks that center the thumb on the click, and overlay positioning with transforms.
 - Raised boot, full-bundle, and Scrollbox size budgets for custom scrollbars.
 - Scrollbox snap centers its first point on mount, selects the nearest point or next swipe point on PDS release, supports elastic wrappers, and exposes `next`, `previous`, and `goto(index)` controller methods.
 - Snap now runs after native scrollbar scrolling through `scrollend`, with a short scroll-idle fallback for older browsers.
@@ -28,6 +28,8 @@ All notable changes to aellux.js will be documented in this file.
 
 ### Changed
 
+- Custom Scrollbox scrollbars now hide on axes with non-scrollable overflow, including `hidden` and `clip`.
+- Snap now centers only its main scroll axis and uses `nearest` alignment on the other axis.
 - Custom Scrollbox scrollbars remain visible for one second after PDS; active mouse or pointer hover takes precedence when the hide timer ends.
 - Custom Scrollbox scrollbars now keep separate mouse and pointer hover states, remaining visible until both end; adjusted full-bundle and Scrollbox raw-size budgets.
 - PDS no longer sets or restores `user-select` during a drag.

@@ -27,13 +27,19 @@ test("custom scrollbar stays over the viewport and supports track click and thum
     return Math.round(b.y - a.y);
   }).toBe(0);
   const start = await track.boundingBox();
-  await page.mouse.click(start.x + 4, start.y + 110);
+  await page.mouse.click(start.x + 4, start.y + 80);
   await expect.poll(() => box.evaluate(element => element.scrollTop)).toBeGreaterThan(80);
-  await page.evaluate(() => document.getElementById("box").scrollTop = 0);
+  await expect.poll(() => track.evaluate(element => {
+    const position = Number.parseFloat(element.style.getPropertyValue("--ae-scrollbar-thumb-position"));
+    const size = Number.parseFloat(element.style.getPropertyValue("--ae-scrollbar-thumb-size"));
+    return Math.abs(position + size / 2 - 80);
+  })).toBeLessThan(1.5);
   const thumb = await track.evaluate(element =>
     Number.parseFloat(element.style.getPropertyValue("--ae-scrollbar-thumb-size")));
+  const thumbPosition = await track.evaluate(element =>
+    Number.parseFloat(element.style.getPropertyValue("--ae-scrollbar-thumb-position")));
   const rect = await track.boundingBox();
-  await page.mouse.move(rect.x + 4, rect.y + thumb / 2);
+  await page.mouse.move(rect.x + 4, rect.y + thumbPosition + thumb / 2);
   await page.mouse.down();
   await page.mouse.move(rect.x + 4, rect.y + 95, { steps: 5 });
   await page.mouse.up();
@@ -189,10 +195,37 @@ test("the horizontal thumb maps its drag to horizontal scroll", async ({ page })
   const thumb = await track.evaluate(element =>
     Number.parseFloat(element.style.getPropertyValue("--ae-scrollbar-thumb-size")));
   const rect = await track.boundingBox();
-  await page.mouse.move(rect.x + thumb / 2, rect.y + 4);
+  await page.mouse.click(rect.x + 80, rect.y + 4);
+  await expect.poll(() => track.evaluate(element => {
+    const position = Number.parseFloat(element.style.getPropertyValue("--ae-scrollbar-thumb-position"));
+    const size = Number.parseFloat(element.style.getPropertyValue("--ae-scrollbar-thumb-size"));
+    return Math.abs(position + size / 2 - 80);
+  })).toBeLessThan(1.5);
+  const thumbPosition = await track.evaluate(element =>
+    Number.parseFloat(element.style.getPropertyValue("--ae-scrollbar-thumb-position")));
+  await page.mouse.move(rect.x + thumbPosition + thumb / 2, rect.y + 4);
   await page.mouse.down();
   await page.mouse.move(rect.x + 95, rect.y + 4, { steps: 5 });
   await page.mouse.up();
   await expect.poll(() => page.evaluate(() => document.getElementById("box").scrollLeft))
     .toBeGreaterThan(300);
+});
+
+test("hidden overflow hides only the scrollbar on that axis", async ({ page }) => {
+  await setup(page, `<div id="box" data-ae-scrollbox data-ae-scrollbar="x y"
+    style="width:120px;height:120px;overflow-x:auto;overflow-y:hidden">
+    <div style="width:400px;height:400px"></div>
+  </div>`);
+  const horizontal = page.locator("#box > [data-ae-scrollbar-horizontal]");
+  const vertical = page.locator("#box > [data-ae-scrollbar-vertical]");
+  await expect(horizontal).toHaveCSS("display", "block");
+  await expect(vertical).toHaveCSS("display", "none");
+  await page.evaluate(() => {
+    const element = document.getElementById("box");
+    element.style.setProperty("overflow-x", "hidden");
+    element.style.setProperty("overflow-y", "auto");
+    AelluxJs.mountManager.update(element, "scrollbox");
+  });
+  await expect(horizontal).toHaveCSS("display", "none");
+  await expect(vertical).toHaveCSS("display", "block");
 });
