@@ -188,9 +188,6 @@
       state.onPointerMove = function(event) {
         return movePointerScroll(state, event);
       };
-      state.onPointerScrollWheel = function(event) {
-        if (event.cancelable) event.preventDefault();
-      };
       state.onMouseEvent = function(event) {
         return cancelPointerScrollMouseEvent(state, event);
       };
@@ -544,13 +541,9 @@
       if (!pointerScroll.moved) {
         state.element.style.setProperty("user-select", "none");
         state.element.style.setProperty("scroll-behavior", "auto", "important");
-        setPointerScrollCursor(state, "grabbing");
+        restorePointerScrollCursor(state);
         state.pointerScrollingClassOwned = !state.element.classList.contains(pointerScrollingClass);
         state.element.classList.add(pointerScrollingClass);
-        root.addEventListener("wheel", state.onPointerScrollWheel, {
-          passive: false,
-          capture: true
-        });
         pointerScroll.userSelectApplied = true;
         var selection = root.getSelection();
         if (selection && selection.anchorNode && state.element.contains(selection.anchorNode)) selection.removeAllRanges();
@@ -576,7 +569,6 @@
       state.pointerScroll = null;
       if (state.pointerScrollingClassOwned) state.element.classList.remove(pointerScrollingClass);
       state.pointerScrollingClassOwned = false;
-      root.removeEventListener("wheel", state.onPointerScrollWheel, true);
       root.removeEventListener("pointermove", state.onPointerMove, true);
       root.removeEventListener("touchmove", state.onPointerScrollTouchMove, true);
       var _iterator6 = _createForOfIteratorHelper(pointerScrollDragEvents), _step6;

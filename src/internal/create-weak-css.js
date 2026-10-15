@@ -23,7 +23,9 @@ export default function createWeakCss() {
 [?wait-mounted]:not(.%mounted) > *:not([?loader]) { visibility: hidden !important; }
 [?wait-mounted].%mounted > [?loader] { display: none !important; }
 :where([?scrollbox]) { contain:layout paint; overflow:auto; scrollbar-width: thin; scrollbar-color: color-mix(in srgb, CanvasText 50%, transparent) transparent;}
-.%pointerscrolling, .%pointerscrolling * { pointer-events: none !important; }
+.%pointerscrolling, .%pointerscrolling * { cursor: grabbing !important; }
+.%pointerscrolling > [?scrollbox-elastic]:only-child:not([?scrollbox-elastic='false']),
+.%pointerscrolling > [?scrollbox-elastic]:only-child:not([?scrollbox-elastic='false']) * { pointer-events: none !important; }
 :where([?scrollbox]::-webkit-scrollbar) { width: 8px; height: 8px;}
 :where([?scrollbox]::-webkit-scrollbar-track) { background: transparent;}
 :where([?scrollbox]::-webkit-scrollbar-thumb) { background: color-mix(in srgb, CanvasText 50%, transparent); border-radius: 10px;}

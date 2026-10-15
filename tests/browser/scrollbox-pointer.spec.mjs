@@ -193,7 +193,11 @@ test("pointer scroll uses grab on open space and grabbing during text-origin scr
   await page.mouse.move(text.x + 5, text.y + text.height / 2);
   await page.mouse.down();
   await page.mouse.move(text.x + 5, text.y - 10, { steps: 4 });
-  expect(await page.locator("#box").evaluate(element => element.style.cursor)).toBe("grabbing");
+  expect(await page.locator("#box").evaluate(element => ({
+    active: element.classList.contains("ae--pointerscrolling"),
+    cursor: getComputedStyle(element).cursor,
+    textCursor: getComputedStyle(element.querySelector("#text")).cursor
+  }))).toEqual({ active: true, cursor: "grabbing", textCursor: "grabbing" });
   await page.mouse.up();
   await page.mouse.move(box.x - 20, box.y - 20);
   expect(await page.locator("#box").evaluate(element => element.style.cursor)).toBe("");

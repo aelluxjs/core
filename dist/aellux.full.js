@@ -1434,9 +1434,6 @@
             if (event.button === 0 && event.detail > 1) endPointerScroll(state);
           };
           state.onPointerMove = (event) => movePointerScroll(state, event);
-          state.onPointerScrollWheel = (event) => {
-            if (event.cancelable) event.preventDefault();
-          };
           state.onMouseEvent = (event) => cancelPointerScrollMouseEvent(state, event);
           state.onPointerScrollTouchMove = (event) => {
             if (state.pointerScroll && state.pointerScroll.moved && event.cancelable)
@@ -1731,14 +1728,9 @@
           if (!pointerScroll.moved) {
             state.element.style.setProperty("user-select", "none");
             state.element.style.setProperty("scroll-behavior", "auto", "important");
-            setPointerScrollCursor(state, "grabbing");
+            restorePointerScrollCursor(state);
             state.pointerScrollingClassOwned = !state.element.classList.contains(pointerScrollingClass);
             state.element.classList.add(pointerScrollingClass);
-            root2.addEventListener(
-              "wheel",
-              state.onPointerScrollWheel,
-              { passive: false, capture: true }
-            );
             pointerScroll.userSelectApplied = true;
             const selection = root2.getSelection();
             if (selection && selection.anchorNode && state.element.contains(selection.anchorNode))
@@ -1765,7 +1757,6 @@
           state.pointerScroll = null;
           if (state.pointerScrollingClassOwned) state.element.classList.remove(pointerScrollingClass);
           state.pointerScrollingClassOwned = false;
-          root2.removeEventListener("wheel", state.onPointerScrollWheel, true);
           root2.removeEventListener("pointermove", state.onPointerMove, true);
           root2.removeEventListener("touchmove", state.onPointerScrollTouchMove, true);
           for (const name of pointerScrollDragEvents) {
