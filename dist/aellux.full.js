@@ -1315,7 +1315,9 @@
           const elastic = {
             wrapper: null,
             baseTransform: "",
+            baseOrigin: "",
             previousTransform: null,
+            previousOrigin: null,
             invalidReported: false,
             amounts: [0, 0, 0, 0],
             active: false,
@@ -1438,9 +1440,14 @@
             const computed = root2.getComputedStyle(wrapper);
             state.elastic.wrapper = wrapper;
             state.elastic.baseTransform = computed.transform === "none" ? "" : computed.transform;
+            state.elastic.baseOrigin = computed.transformOrigin;
             state.elastic.previousTransform = {
               value: wrapper.style.getPropertyValue("transform"),
               priority: wrapper.style.getPropertyPriority("transform")
+            };
+            state.elastic.previousOrigin = {
+              value: wrapper.style.getPropertyValue("transform-origin"),
+              priority: wrapper.style.getPropertyPriority("transform-origin")
             };
           }
           state.elasticEnabled = true;
@@ -1723,18 +1730,20 @@
           const limitY = state.element.clientHeight * ELASTIC_LIMIT_RATIO || 1;
           const scaleX = 1 + 0.1 * Math.max(elastic.amounts[1], elastic.amounts[3]) / limitX;
           const scaleY = 1 + 0.1 * Math.max(elastic.amounts[0], elastic.amounts[2]) / limitY;
-          let scale = "";
+          const scale = scaleX > 1 || scaleY > 1 ? `scale(${scaleX}, ${scaleY})` : "";
           if (scaleX > 1 || scaleY > 1) {
-            const origin = root2.getComputedStyle(wrapper).transformOrigin.split(" ");
-            const originX = parseFloat(origin[0]) || 0;
-            const originY = parseFloat(origin[1]) || 0;
-            const pivotX = elastic.amounts[3] > 0 ? -originX : elastic.amounts[1] > 0 ? wrapper.offsetWidth - originX : 0;
-            const pivotY = elastic.amounts[0] > 0 ? -originY : elastic.amounts[2] > 0 ? wrapper.offsetHeight - originY : 0;
-            scale = `translate3d(${pivotX}px, ${pivotY}px, 0) scale(${scaleX}, ${scaleY}) translate3d(${-pivotX}px, ${-pivotY}px, 0)`;
+            const baseOrigin = elastic.baseOrigin.split(" ");
+            const originX = elastic.amounts[3] > 0 ? "0%" : elastic.amounts[1] > 0 ? "100%" : baseOrigin[0];
+            const originY = elastic.amounts[0] > 0 ? "0%" : elastic.amounts[2] > 0 ? "100%" : baseOrigin[1];
+            wrapper.style.setProperty(
+              "transform-origin",
+              `${originX} ${originY}`,
+              elastic.previousOrigin.priority
+            );
           }
           wrapper.style.setProperty(
             "transform",
-            [translate, scale, elastic.baseTransform].filter(Boolean).join(" ") || "none",
+            [scale, translate, elastic.baseTransform].filter(Boolean).join(" ") || "none",
             elastic.previousTransform.priority
           );
         }
@@ -1780,6 +1789,13 @@
               previous.priority
             );
             else elastic.wrapper.style.removeProperty("transform");
+            const previousOrigin = elastic.previousOrigin;
+            if (previousOrigin.value) elastic.wrapper.style.setProperty(
+              "transform-origin",
+              previousOrigin.value,
+              previousOrigin.priority
+            );
+            else elastic.wrapper.style.removeProperty("transform-origin");
           }
           elastic.amounts = [0, 0, 0, 0];
           elastic.active = false;

@@ -107,7 +107,9 @@
       var elastic = {
         wrapper: null,
         baseTransform: "",
+        baseOrigin: "",
         previousTransform: null,
+        previousOrigin: null,
         invalidReported: false,
         amounts: [0, 0, 0, 0],
         active: false,
@@ -254,9 +256,14 @@
         var computed = root.getComputedStyle(wrapper);
         state.elastic.wrapper = wrapper;
         state.elastic.baseTransform = computed.transform === "none" ? "" : computed.transform;
+        state.elastic.baseOrigin = computed.transformOrigin;
         state.elastic.previousTransform = {
           value: wrapper.style.getPropertyValue("transform"),
           priority: wrapper.style.getPropertyPriority("transform")
+        };
+        state.elastic.previousOrigin = {
+          value: wrapper.style.getPropertyValue("transform-origin"),
+          priority: wrapper.style.getPropertyPriority("transform-origin")
         };
       }
       state.elasticEnabled = true;
@@ -544,16 +551,14 @@
       var limitY = state.element.clientHeight * ELASTIC_LIMIT_RATIO || 1;
       var scaleX = 1 + 0.1 * Math.max(elastic.amounts[1], elastic.amounts[3]) / limitX;
       var scaleY = 1 + 0.1 * Math.max(elastic.amounts[0], elastic.amounts[2]) / limitY;
-      var scale = "";
+      var scale = scaleX > 1 || scaleY > 1 ? "scale(".concat(scaleX, ", ").concat(scaleY, ")") : "";
       if (scaleX > 1 || scaleY > 1) {
-        var origin = root.getComputedStyle(wrapper).transformOrigin.split(" ");
-        var originX = parseFloat(origin[0]) || 0;
-        var originY = parseFloat(origin[1]) || 0;
-        var pivotX = elastic.amounts[3] > 0 ? -originX : elastic.amounts[1] > 0 ? wrapper.offsetWidth - originX : 0;
-        var pivotY = elastic.amounts[0] > 0 ? -originY : elastic.amounts[2] > 0 ? wrapper.offsetHeight - originY : 0;
-        scale = "translate3d(".concat(pivotX, "px, ").concat(pivotY, "px, 0) scale(").concat(scaleX, ", ").concat(scaleY, ") ") + "translate3d(".concat(-pivotX, "px, ").concat(-pivotY, "px, 0)");
+        var baseOrigin = elastic.baseOrigin.split(" ");
+        var originX = elastic.amounts[3] > 0 ? "0%" : elastic.amounts[1] > 0 ? "100%" : baseOrigin[0];
+        var originY = elastic.amounts[0] > 0 ? "0%" : elastic.amounts[2] > 0 ? "100%" : baseOrigin[1];
+        wrapper.style.setProperty("transform-origin", "".concat(originX, " ").concat(originY), elastic.previousOrigin.priority);
       }
-      wrapper.style.setProperty("transform", [translate, scale, elastic.baseTransform].filter(Boolean).join(" ") || "none", elastic.previousTransform.priority);
+      wrapper.style.setProperty("transform", [scale, translate, elastic.baseTransform].filter(Boolean).join(" ") || "none", elastic.previousTransform.priority);
     }
     function scrollWithinElasticBounds(state, desiredX, desiredY) {
       var element = state.element;
@@ -593,6 +598,9 @@
         var previous = elastic.previousTransform;
         if (previous.value) elastic.wrapper.style.setProperty("transform", previous.value, previous.priority);
         else elastic.wrapper.style.removeProperty("transform");
+        var previousOrigin = elastic.previousOrigin;
+        if (previousOrigin.value) elastic.wrapper.style.setProperty("transform-origin", previousOrigin.value, previousOrigin.priority);
+        else elastic.wrapper.style.removeProperty("transform-origin");
       }
       elastic.amounts = [0, 0, 0, 0];
       elastic.active = false;

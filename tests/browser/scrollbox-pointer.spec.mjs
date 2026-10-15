@@ -383,7 +383,8 @@ test("elastic pointer drag transforms its marked wrapper and restores it on unmo
   await setup(page, `<div id="box" data-ae-scrollbox="pointer"
     data-ae-scrollbox-momentum="false"
     style="width:100px;height:100px;overflow:auto;padding:7px 9px 11px 13px">
-    <div data-ae-scrollbox-elastic style="width:300px;height:300px;transform:scale(1)"></div></div>`);
+    <div data-ae-scrollbox-elastic
+      style="width:300px;height:300px;transform:scale(1);transform-origin:25% 75%"></div></div>`);
   const result = await page.evaluate(async () => {
     const element = document.getElementById("box");
     const wrapper = element.firstElementChild;
@@ -397,17 +398,22 @@ test("elastic pointer drag transforms its marked wrapper and restores it on unmo
     element.dispatchEvent(pointer("pointerdown", x, y, 1));
     window.dispatchEvent(pointer("pointermove", x + 30, y + 60, 1));
     const stretched = wrapper.style.transform;
+    const activeOrigin = wrapper.style.transformOrigin;
     window.dispatchEvent(pointer("pointerup", x + 30, y + 60, 0));
     const releasing = wrapper.classList.contains("ae--scrollbox-elastic-release");
     await AelluxJs.unmount(element, "scrollbox");
-    return { stretched, releasing, transform: wrapper.style.transform,
+    return { stretched, activeOrigin, releasing, transform: wrapper.style.transform,
+      origin: wrapper.style.transformOrigin,
       padding: element.style.getPropertyValue("padding"),
       releaseClass: wrapper.classList.contains("ae--scrollbox-elastic-release") };
   });
   expect(result.stretched).toContain("translate3d(10px, 20px, 0px)");
   expect(result.stretched).toMatch(/scale\(1\.\d+, 1\.\d+\)/);
+  expect(result.stretched.startsWith("scale(")).toBe(true);
+  expect(result.activeOrigin.startsWith("0% 0%")).toBe(true);
   expect(result.releasing).toBe(true);
   expect(result.transform).toBe("scale(1)");
+  expect(result.origin.startsWith("25% 75%")).toBe(true);
   expect(result.padding).toBe("7px 9px 11px 13px");
   expect(result.releaseClass).toBe(false);
 });
@@ -416,25 +422,23 @@ test("elastic native wheel transforms its wrapper and settles", async ({ page })
   await setup(page, `<div id="box" data-ae-scrollbox="native"
     style="width:100px;height:100px;overflow:auto;padding:8px">
     <div data-ae-scrollbox-elastic style="width:100px;height:300px"></div></div>`);
-  const stretched = await page.evaluate(() => {
+  const stretched = await page.evaluate(async () => {
     const element = document.getElementById("box");
+    const wrapper = element.firstElementChild;
     const event = new WheelEvent("wheel", { deltaY: -60, bubbles: true, cancelable: true });
     element.dispatchEvent(event);
+    const transform = wrapper.style.transform;
+    await new Promise(resolve => setTimeout(resolve, 160));
     return { prevented: event.defaultPrevented,
-      transform: element.firstElementChild.style.transform };
+      transform, releasing: wrapper.classList.contains("ae--scrollbox-elastic-release"),
+      settlingScale: new DOMMatrixReadOnly(getComputedStyle(wrapper).transform).m22 };
   });
   expect(stretched.prevented).toBe(true);
   expect(stretched.transform).toContain("translate3d(0px, 20px, 0px)");
   expect(stretched.transform).toMatch(/scale\(1, 1\.\d+\)/);
-  await expect.poll(() => page.evaluate(() => document.getElementById("box")
-    .firstElementChild.classList.contains("ae--scrollbox-elastic-release"))).toBe(true);
-  const settlingScale = await page.evaluate(async () => {
-    await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-    const wrapper = document.getElementById("box").firstElementChild;
-    return new DOMMatrixReadOnly(getComputedStyle(wrapper).transform).m22;
-  });
-  expect(settlingScale).toBeGreaterThan(1);
-  expect(settlingScale).toBeLessThan(1.1);
+  expect(stretched.releasing).toBe(true);
+  expect(stretched.settlingScale).toBeGreaterThan(1);
+  expect(stretched.settlingScale).toBeLessThan(1.1);
   await expect.poll(() => page.evaluate(() => {
     const element = document.getElementById("box");
     const wrapper = element.firstElementChild;
@@ -495,6 +499,7 @@ test("elastic pointer drag moves its wrapper away from bottom and right edges", 
     }));
     return {
       transform: wrapper.style.transform,
+      origin: wrapper.style.transformOrigin,
       scrollLeft: element.scrollLeft, scrollTop: element.scrollTop, maxX, maxY,
       gapX: rect.right - wrapper.getBoundingClientRect().right - beforeGapX,
       gapY: rect.bottom - wrapper.getBoundingClientRect().bottom - beforeGapY
@@ -502,6 +507,8 @@ test("elastic pointer drag moves its wrapper away from bottom and right edges", 
   });
   expect(result.transform).toContain("translate3d(-20px, -20px, 0px)");
   expect(result.transform).toMatch(/scale\(1\.\d+(?:, 1\.\d+)?\)/);
+  expect(result.transform.startsWith("scale(")).toBe(true);
+  expect(result.origin.startsWith("100% 100%")).toBe(true);
   expect(result.scrollLeft).toBe(result.maxX);
   expect(result.scrollTop).toBe(result.maxY);
   expect(result.gapX).toBeGreaterThan(15);
@@ -537,7 +544,7 @@ test("elastic bottom and right transform animates during release", async ({ page
       bubbles: true, isPrimary: true, pointerId: 41, pointerType: "mouse",
       button: 0, buttons: 0, clientX: x - 60, clientY: y - 60
     }));
-    await new Promise(resolve => setTimeout(resolve, 120));
+    await new Promise(resolve => setTimeout(resolve, 250));
     const middle = gap();
     const matrix = new DOMMatrixReadOnly(getComputedStyle(wrapper).transform);
     return { before, during, middle, scaleX: matrix.m11, scaleY: matrix.m22 };

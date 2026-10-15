@@ -17,7 +17,7 @@ All notable changes to aellux.js will be documented in this file.
 
 ### Changed
 
-- Elastic Scrollbox now uses wrapper translation and up to 10% axis scaling around the pressed edge, and restores the wrapper's original inline transform on unmount.
+- Elastic Scrollbox now uses `transform-origin` at the pressed edge and applies scale before translation in its wrapper transform, restoring both inline properties on unmount.
 - Raised the Scrollbox and full-bundle size budgets for the elastic edge option.
 - Removed BetterScroll loading and its development dependency; Scrollbox uses native browser scrolling in both modes.
 - Raised the boot raw-size budget to 30 KiB for positional dependency arguments.
