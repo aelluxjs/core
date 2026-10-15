@@ -44,6 +44,7 @@
     const ELASTIC_WHEEL_IDLE_MS = 80;
     const SCROLLBAR_SIZE_PX = 8;
     const SCROLLBAR_MIN_THUMB_PX = 20;
+    const SCROLLBAR_PDS_HIDE_DELAY_MS = 1e3;
     const scrollbarProperties = [
       "--ae-scrollbar-x",
       "--ae-scrollbar-y",
@@ -157,7 +158,9 @@
         visibleOwned: false,
         listening: false,
         pointerHover: false,
-        mouseHover: false
+        mouseHover: false,
+        pdsVisible: false,
+        hideTimeout: null
       };
       const state = {
         element,
@@ -241,6 +244,8 @@
         if (!element.contains(event.target)) {
           scrollbar.pointerHover = false;
           scrollbar.mouseHover = false;
+          if (!element.classList.contains(pointerScrollingClass))
+            clearScrollbarPdsVisibility(state);
           syncScrollbarVisibility(state);
         }
       };
@@ -379,6 +384,7 @@
         if (scrollbar.hideOwned) element.classList.remove(nativeScrollbarHideClass);
         scrollbar.hideOwned = false;
         scrollbar.listening = false;
+        clearScrollbarPdsVisibility(state);
         scrollbar.pointerHover = false;
         scrollbar.mouseHover = false;
         syncScrollbarVisibility(state);
@@ -459,6 +465,7 @@
       }
       if (scrollbar.hideOwned) state.element.classList.remove(nativeScrollbarHideClass);
       scrollbar.hideOwned = false;
+      clearScrollbarPdsVisibility(state);
       scrollbar.pointerHover = false;
       scrollbar.mouseHover = false;
       syncScrollbarVisibility(state);
@@ -469,8 +476,31 @@
     }
     function syncScrollbarVisibility(state) {
       const scrollbar = state.scrollbar;
-      if (scrollbar.listening && (scrollbar.pointerHover || scrollbar.mouseHover || scrollbar.drag)) showScrollbars(state);
+      if (scrollbar.listening && (scrollbar.pointerHover || scrollbar.mouseHover || scrollbar.drag || scrollbar.pdsVisible)) showScrollbars(state);
       else hideScrollbars(state);
+    }
+    function clearScrollbarPdsVisibility(state) {
+      const scrollbar = state.scrollbar;
+      if (scrollbar.hideTimeout !== null) root.clearTimeout(scrollbar.hideTimeout);
+      scrollbar.hideTimeout = null;
+      scrollbar.pdsVisible = false;
+    }
+    function startScrollbarPdsVisibility(state) {
+      if (!state.scrollbar.listening) return;
+      clearScrollbarPdsVisibility(state);
+      state.scrollbar.pdsVisible = true;
+      syncScrollbarVisibility(state);
+    }
+    function scheduleScrollbarPdsHide(state) {
+      if (!state.scrollbar.listening || state.disposed) return;
+      clearScrollbarPdsVisibility(state);
+      state.scrollbar.pdsVisible = true;
+      syncScrollbarVisibility(state);
+      state.scrollbar.hideTimeout = root.setTimeout(() => {
+        state.scrollbar.hideTimeout = null;
+        state.scrollbar.pdsVisible = false;
+        syncScrollbarVisibility(state);
+      }, SCROLLBAR_PDS_HIDE_DELAY_MS);
     }
     function showScrollbars(state) {
       if (!state.scrollbar.listening) return;
@@ -1173,6 +1203,7 @@
         });
         element.style.setProperty("scroll-behavior", "auto", "important");
         element.classList.add(pointerScrollingClass);
+        startScrollbarPdsVisibility(member);
       }
     }
     function endPointerScroll(state, event) {
@@ -1218,6 +1249,8 @@
           saved.scrollBehaviorPriority
         );
         else saved.element.style.removeProperty("scroll-behavior");
+        const member = scrollboxes.get(saved.element);
+        if (member) scheduleScrollbarPdsHide(member);
       }
       if (event && event.type === "pointerup" && state.pointerListening) {
         updatePointerScrollCursor(

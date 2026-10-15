@@ -28,6 +28,7 @@ All notable changes to aellux.js will be documented in this file.
 
 ### Changed
 
+- Custom Scrollbox scrollbars remain visible for one second after PDS; active mouse or pointer hover takes precedence when the hide timer ends.
 - Custom Scrollbox scrollbars now keep separate mouse and pointer hover states, remaining visible until both end; adjusted full-bundle and Scrollbox raw-size budgets.
 - PDS no longer sets or restores `user-select` during a drag.
 - PDS now ignores axes whose computed overflow is not scrollable, even when their content exceeds the viewport, and hands nested gestures to an eligible ancestor.

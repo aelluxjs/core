@@ -90,6 +90,7 @@
     var ELASTIC_WHEEL_IDLE_MS = 80;
     var SCROLLBAR_SIZE_PX = 8;
     var SCROLLBAR_MIN_THUMB_PX = 20;
+    var SCROLLBAR_PDS_HIDE_DELAY_MS = 1e3;
     var scrollbarProperties = ["--ae-scrollbar-x", "--ae-scrollbar-y", "--ae-scrollbar-length", "--ae-scrollbar-thumb-size", "--ae-scrollbar-thumb-position", "--ae-scrollbar-display"];
     var pointerScrollMouseEvents = ["mousedown", "mousemove", "mouseup", "click", "dblclick", "auxclick", "contextmenu", "mouseover", "mouseout", "mouseenter", "mouseleave"];
     var pointerScrollDragEvents = ["dragstart", "drag", "dragenter", "dragover", "dragleave", "drop", "dragend"];
@@ -184,7 +185,9 @@
         visibleOwned: false,
         listening: false,
         pointerHover: false,
-        mouseHover: false
+        mouseHover: false,
+        pdsVisible: false,
+        hideTimeout: null
       };
       var state = {
         element: element,
@@ -288,6 +291,7 @@
         if (!element.contains(event.target)) {
           scrollbar.pointerHover = false;
           scrollbar.mouseHover = false;
+          if (!element.classList.contains(pointerScrollingClass)) clearScrollbarPdsVisibility(state);
           syncScrollbarVisibility(state);
         }
       };
@@ -450,6 +454,7 @@
         if (scrollbar.hideOwned) element.classList.remove(nativeScrollbarHideClass);
         scrollbar.hideOwned = false;
         scrollbar.listening = false;
+        clearScrollbarPdsVisibility(state);
         scrollbar.pointerHover = false;
         scrollbar.mouseHover = false;
         syncScrollbarVisibility(state);
@@ -546,6 +551,7 @@
       }
       if (scrollbar.hideOwned) state.element.classList.remove(nativeScrollbarHideClass);
       scrollbar.hideOwned = false;
+      clearScrollbarPdsVisibility(state);
       scrollbar.pointerHover = false;
       scrollbar.mouseHover = false;
       syncScrollbarVisibility(state);
@@ -556,8 +562,31 @@
     }
     function syncScrollbarVisibility(state) {
       var scrollbar = state.scrollbar;
-      if (scrollbar.listening && (scrollbar.pointerHover || scrollbar.mouseHover || scrollbar.drag)) showScrollbars(state);
+      if (scrollbar.listening && (scrollbar.pointerHover || scrollbar.mouseHover || scrollbar.drag || scrollbar.pdsVisible)) showScrollbars(state);
       else hideScrollbars(state);
+    }
+    function clearScrollbarPdsVisibility(state) {
+      var scrollbar = state.scrollbar;
+      if (scrollbar.hideTimeout !== null) root.clearTimeout(scrollbar.hideTimeout);
+      scrollbar.hideTimeout = null;
+      scrollbar.pdsVisible = false;
+    }
+    function startScrollbarPdsVisibility(state) {
+      if (!state.scrollbar.listening) return;
+      clearScrollbarPdsVisibility(state);
+      state.scrollbar.pdsVisible = true;
+      syncScrollbarVisibility(state);
+    }
+    function scheduleScrollbarPdsHide(state) {
+      if (!state.scrollbar.listening || state.disposed) return;
+      clearScrollbarPdsVisibility(state);
+      state.scrollbar.pdsVisible = true;
+      syncScrollbarVisibility(state);
+      state.scrollbar.hideTimeout = root.setTimeout(function() {
+        state.scrollbar.hideTimeout = null;
+        state.scrollbar.pdsVisible = false;
+        syncScrollbarVisibility(state);
+      }, SCROLLBAR_PDS_HIDE_DELAY_MS);
     }
     function showScrollbars(state) {
       if (!state.scrollbar.listening) return;
@@ -1335,6 +1364,7 @@
           });
           element.style.setProperty("scroll-behavior", "auto", "important");
           element.classList.add(pointerScrollingClass);
+          startScrollbarPdsVisibility(member);
         }
       } catch (err) {
         _iterator0.e(err);
@@ -1395,6 +1425,8 @@
           if (saved.classOwned) saved.element.classList.remove(pointerScrollingClass);
           if (saved.scrollBehavior) saved.element.style.setProperty("scroll-behavior", saved.scrollBehavior, saved.scrollBehaviorPriority);
           else saved.element.style.removeProperty("scroll-behavior");
+          var member = scrollboxes.get(saved.element);
+          if (member) scheduleScrollbarPdsHide(member);
         }
       } catch (err) {
         _iterator10.e(err);
@@ -1416,8 +1448,8 @@
       var _iterator11 = _createForOfIteratorHelper(pointerScroll.chain), _step11;
       try {
         for (_iterator11.s(); !(_step11 = _iterator11.n()).done; ) {
-          var member = _step11.value;
-          releaseElastic(member);
+          var _member3 = _step11.value;
+          releaseElastic(_member3);
         }
       } catch (err) {
         _iterator11.e(err);

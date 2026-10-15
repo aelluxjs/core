@@ -71,6 +71,70 @@ test("mouse and pointer hover keep scrollbars visible independently", async ({ p
   await expect(track).toHaveCSS("opacity", "0");
 });
 
+test("PDS hide timer keeps a scrollbar visible while mouse hover remains active", async ({ page }) => {
+  await setup(page, `<div id="box" data-ae-scrollbox="pointer" data-ae-scrollbar="v"
+    style="width:120px;height:120px;overflow-y:auto">
+    <div style="height:500px"></div>
+  </div>`);
+  const box = page.locator("#box");
+  const track = page.locator("#box > [data-ae-scrollbar-vertical]");
+  const result = await box.evaluate(element => {
+    element.dispatchEvent(new MouseEvent("mouseenter"));
+    const content = element.firstElementChild;
+    const rect = content.getBoundingClientRect();
+    const x = rect.left + 40, y = rect.top + 70;
+    content.dispatchEvent(new PointerEvent("pointerdown", {
+      bubbles: true, cancelable: true, isPrimary: true, pointerId: 901,
+      pointerType: "mouse", button: 0, buttons: 1, clientX: x, clientY: y
+    }));
+    window.dispatchEvent(new PointerEvent("pointermove", {
+      bubbles: true, cancelable: true, isPrimary: true, pointerId: 901,
+      pointerType: "mouse", buttons: 1, clientX: x, clientY: y - 40
+    }));
+    const active = element.classList.contains("ae--pointerscrolling");
+    window.dispatchEvent(new PointerEvent("pointerup", {
+      bubbles: true, isPrimary: true, pointerId: 901,
+      pointerType: "mouse", button: 0, buttons: 0, clientX: x, clientY: y - 40
+    }));
+    return { active, ended: !element.classList.contains("ae--pointerscrolling") };
+  });
+  expect(result).toEqual({ active: true, ended: true });
+  await expect(track).toHaveCSS("opacity", "1");
+  await page.waitForTimeout(1150);
+  await expect(track).toHaveCSS("opacity", "1");
+  await box.evaluate(element => element.dispatchEvent(new MouseEvent("mouseleave")));
+  await expect(track).toHaveCSS("opacity", "0");
+});
+
+test("PDS hide timer fades the scrollbar when no hover remains", async ({ page }) => {
+  await setup(page, `<div id="box" data-ae-scrollbox="pointer" data-ae-scrollbar="v"
+    style="width:120px;height:120px;overflow-y:auto">
+    <div style="height:500px"></div>
+  </div>`);
+  const track = page.locator("#box > [data-ae-scrollbar-vertical]");
+  await page.evaluate(() => {
+    const element = document.getElementById("box");
+    const content = element.firstElementChild;
+    const rect = content.getBoundingClientRect();
+    const x = rect.left + 40, y = rect.top + 70;
+    content.dispatchEvent(new PointerEvent("pointerdown", {
+      bubbles: true, cancelable: true, isPrimary: true, pointerId: 902,
+      pointerType: "mouse", button: 0, buttons: 1, clientX: x, clientY: y
+    }));
+    window.dispatchEvent(new PointerEvent("pointermove", {
+      bubbles: true, cancelable: true, isPrimary: true, pointerId: 902,
+      pointerType: "mouse", buttons: 1, clientX: x, clientY: y - 40
+    }));
+    window.dispatchEvent(new PointerEvent("pointerup", {
+      bubbles: true, isPrimary: true, pointerId: 902,
+      pointerType: "mouse", button: 0, buttons: 0, clientX: x, clientY: y - 40
+    }));
+  });
+  await expect(track).toHaveCSS("opacity", "1");
+  await page.waitForTimeout(1150);
+  await expect(track).toHaveCSS("opacity", "0");
+});
+
 test("scrollbars are siblings of the snap and elastic wrapper and are removed on unmount", async ({ page }) => {
   await setup(page, `<div id="box" data-ae-scrollbox data-ae-scrollbar="h v"
     style="width:120px;height:120px;overflow:auto">
