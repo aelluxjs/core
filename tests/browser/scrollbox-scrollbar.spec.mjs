@@ -43,6 +43,34 @@ test("custom scrollbar stays over the viewport and supports track click and thum
   await expect(track).toHaveCSS("opacity", "0");
 });
 
+test("mouse and pointer hover keep scrollbars visible independently", async ({ page }) => {
+  await setup(page, `<div id="box" data-ae-scrollbox data-ae-scrollbar="v"
+    style="width:120px;height:120px;overflow-y:auto">
+    <div style="height:500px"></div>
+  </div>`);
+  const box = page.locator("#box");
+  const track = page.locator("#box > [data-ae-scrollbar-vertical]");
+  const emit = (name, pointerType = "") => box.evaluate((element, { name, pointerType }) => {
+    const event = name.startsWith("pointer") ?
+      new PointerEvent(name, { pointerType }) : new MouseEvent(name);
+    element.dispatchEvent(event);
+  }, { name, pointerType });
+  await expect(track).toHaveCSS("opacity", "0");
+  await emit("pointerenter", "pen");
+  await expect(track).toHaveCSS("opacity", "1");
+  await emit("mouseenter");
+  await emit("pointerleave", "pen");
+  await expect(track).toHaveCSS("opacity", "1");
+  await emit("mouseleave");
+  await expect(track).toHaveCSS("opacity", "0");
+  await emit("mouseenter");
+  await emit("pointerenter", "mouse");
+  await emit("mouseleave");
+  await expect(track).toHaveCSS("opacity", "1");
+  await emit("pointerleave", "mouse");
+  await expect(track).toHaveCSS("opacity", "0");
+});
+
 test("scrollbars are siblings of the snap and elastic wrapper and are removed on unmount", async ({ page }) => {
   await setup(page, `<div id="box" data-ae-scrollbox data-ae-scrollbar="h v"
     style="width:120px;height:120px;overflow:auto">

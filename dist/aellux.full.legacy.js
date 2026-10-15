@@ -25549,7 +25549,9 @@
             drag: null,
             hideOwned: false,
             visibleOwned: false,
-            listening: false
+            listening: false,
+            pointerHover: false,
+            mouseHover: false
           };
           var state = {
             element: element,
@@ -25637,14 +25639,24 @@
           state.onTouchEnd = function(event) {
             return endTouch(state, event);
           };
-          state.onScrollbarEnter = function() {
-            return showScrollbars(state);
+          state.onScrollbarPointerEnter = function(event) {
+            if (event.pointerType !== "touch") setScrollbarHover(state, "pointerHover", true);
           };
-          state.onScrollbarLeave = function() {
-            return hideScrollbars(state);
+          state.onScrollbarPointerLeave = function(event) {
+            if (event.pointerType !== "touch") setScrollbarHover(state, "pointerHover", false);
+          };
+          state.onScrollbarMouseEnter = function() {
+            return setScrollbarHover(state, "mouseHover", true);
+          };
+          state.onScrollbarMouseLeave = function() {
+            return setScrollbarHover(state, "mouseHover", false);
           };
           state.onScrollbarOutsideDown = function(event) {
-            if (!element.contains(event.target)) hideScrollbars(state);
+            if (!element.contains(event.target)) {
+              scrollbar.pointerHover = false;
+              scrollbar.mouseHover = false;
+              syncScrollbarVisibility(state);
+            }
           };
           scrollboxes.set(element, state);
           element.addEventListener("scroll", state.onScroll, {
@@ -25788,18 +25800,26 @@
           if (enabled && !scrollbar.listening) {
             scrollbar.hideOwned = !element.classList.contains(nativeScrollbarHideClass);
             if (scrollbar.hideOwned) element.classList.add(nativeScrollbarHideClass);
-            element.addEventListener("pointerenter", state.onScrollbarEnter);
-            element.addEventListener("pointerleave", state.onScrollbarLeave);
+            scrollbar.mouseHover = element.matches(":hover") && !!(root2.matchMedia && root2.matchMedia("(any-hover: hover)").matches);
+            element.addEventListener("pointerenter", state.onScrollbarPointerEnter);
+            element.addEventListener("pointerleave", state.onScrollbarPointerLeave);
+            element.addEventListener("mouseenter", state.onScrollbarMouseEnter);
+            element.addEventListener("mouseleave", state.onScrollbarMouseLeave);
             root2.document.addEventListener("pointerdown", state.onScrollbarOutsideDown, true);
             scrollbar.listening = true;
+            syncScrollbarVisibility(state);
           } else if (!enabled && scrollbar.listening) {
-            element.removeEventListener("pointerenter", state.onScrollbarEnter);
-            element.removeEventListener("pointerleave", state.onScrollbarLeave);
+            element.removeEventListener("pointerenter", state.onScrollbarPointerEnter);
+            element.removeEventListener("pointerleave", state.onScrollbarPointerLeave);
+            element.removeEventListener("mouseenter", state.onScrollbarMouseEnter);
+            element.removeEventListener("mouseleave", state.onScrollbarMouseLeave);
             root2.document.removeEventListener("pointerdown", state.onScrollbarOutsideDown, true);
             if (scrollbar.hideOwned) element.classList.remove(nativeScrollbarHideClass);
             scrollbar.hideOwned = false;
             scrollbar.listening = false;
-            hideScrollbars(state);
+            scrollbar.pointerHover = false;
+            scrollbar.mouseHover = false;
+            syncScrollbarVisibility(state);
           }
         }
         function configureScrollbarAxis(state, axis, enabled, attributeName) {
@@ -25884,14 +25904,27 @@
           resetScrollbarAxis(state, "y");
           var scrollbar = state.scrollbar;
           if (scrollbar.listening) {
-            state.element.removeEventListener("pointerenter", state.onScrollbarEnter);
-            state.element.removeEventListener("pointerleave", state.onScrollbarLeave);
+            state.element.removeEventListener("pointerenter", state.onScrollbarPointerEnter);
+            state.element.removeEventListener("pointerleave", state.onScrollbarPointerLeave);
+            state.element.removeEventListener("mouseenter", state.onScrollbarMouseEnter);
+            state.element.removeEventListener("mouseleave", state.onScrollbarMouseLeave);
             root2.document.removeEventListener("pointerdown", state.onScrollbarOutsideDown, true);
             scrollbar.listening = false;
           }
           if (scrollbar.hideOwned) state.element.classList.remove(nativeScrollbarHideClass);
           scrollbar.hideOwned = false;
-          hideScrollbars(state);
+          scrollbar.pointerHover = false;
+          scrollbar.mouseHover = false;
+          syncScrollbarVisibility(state);
+        }
+        function setScrollbarHover(state, name, active) {
+          state.scrollbar[name] = active;
+          syncScrollbarVisibility(state);
+        }
+        function syncScrollbarVisibility(state) {
+          var scrollbar = state.scrollbar;
+          if (scrollbar.listening && (scrollbar.pointerHover || scrollbar.mouseHover || scrollbar.drag)) showScrollbars(state);
+          else hideScrollbars(state);
         }
         function showScrollbars(state) {
           if (!state.scrollbar.listening) return;
@@ -25945,6 +25978,7 @@
           if (state.disposed || event.button !== 0 || !record.max) return;
           if (event.cancelable) event.preventDefault();
           event.stopPropagation();
+          if (event.pointerType !== "touch") state.scrollbar.pointerHover = true;
           showScrollbars(state);
           var position = scrollbarPointerPosition(record, event);
           if (position < record.thumbPosition || position > record.thumbPosition + record.thumbSize) {
@@ -25993,7 +26027,7 @@
           }
           state.scrollbar.drag = null;
           if (record.element.hasPointerCapture && record.element.hasPointerCapture(drag.pointerId)) record.element.releasePointerCapture(drag.pointerId);
-          if (!state.element.matches(":hover")) hideScrollbars(state);
+          syncScrollbarVisibility(state);
           if (state.snapEnabled && !state.disposed) scheduleScrollEnd(state);
         }
         function configureSnap(state) {
