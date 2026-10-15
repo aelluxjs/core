@@ -34,11 +34,11 @@ async function drag(page, id, pointerType = "mouse") {
       bubbles: true, cancelable: true, isPrimary: true, pointerId: 17,
       pointerType, button: 0, buttons: 1, clientX: x, clientY: y
     }));
-    const during = element.style.getPropertyValue("user-select");
     window.dispatchEvent(new PointerEvent("pointermove", {
       bubbles: true, cancelable: true, isPrimary: true, pointerId: 17,
       pointerType, buttons: 1, clientX: x - 50, clientY: y - 40
     }));
+    const during = element.style.getPropertyValue("user-select");
     window.dispatchEvent(new PointerEvent("pointerup", {
       bubbles: true, isPrimary: true, pointerId: 17, pointerType,
       button: 0, buttons: 0, clientX: x - 50, clientY: y - 40
@@ -1512,6 +1512,34 @@ test("pointer mode keeps native behavior on a coarse-pointer device", async ({ p
     document.getElementById("box").style.getPropertyValue("--ae-scroll-x-progress"),
     document.getElementById("box").style.getPropertyValue("--ae-scroll-y-progress")
   ])).toEqual(["0.25", "0.2"]);
+});
+
+test("pointer dragging preserves an existing user-select declaration", async ({ page }) => {
+  await setup(page, box("box"));
+  const result = await page.evaluate(() => {
+    const element = document.getElementById("box");
+    const rect = element.getBoundingClientRect();
+    const x = rect.left + 70, y = rect.top + 70;
+    element.style.setProperty("user-select", "text", "important");
+    element.dispatchEvent(new PointerEvent("pointerdown", {
+      bubbles: true, cancelable: true, isPrimary: true, pointerId: 171,
+      pointerType: "mouse", button: 0, buttons: 1, clientX: x, clientY: y
+    }));
+    window.dispatchEvent(new PointerEvent("pointermove", {
+      bubbles: true, cancelable: true, isPrimary: true, pointerId: 171,
+      pointerType: "mouse", buttons: 1, clientX: x - 50, clientY: y - 40
+    }));
+    const read = () => [element.style.getPropertyValue("user-select"),
+      element.style.getPropertyPriority("user-select")];
+    const during = read();
+    window.dispatchEvent(new PointerEvent("pointerup", {
+      bubbles: true, isPrimary: true, pointerId: 171, pointerType: "mouse",
+      button: 0, buttons: 0, clientX: x - 50, clientY: y - 40
+    }));
+    return { during, after: read(), x: element.scrollLeft, y: element.scrollTop };
+  });
+  expect(result).toEqual({ during: ["text", "important"], after: ["text", "important"],
+    x: 50, y: 0 });
 });
 
 test("content resize refreshes native progress", async ({ page }) => {

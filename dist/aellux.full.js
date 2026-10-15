@@ -1340,9 +1340,14 @@
         const momentumAttribute = AelluxJs2.attr("scrollbox-momentum");
         const elasticAttribute = AelluxJs2.attr("scrollbox-elastic");
         const snapAttribute = AelluxJs2.attr("scrollbox-snap");
+        const scrollbarAttribute = AelluxJs2.attr("scrollbar");
+        const scrollbarVerticalAttribute = AelluxJs2.attr("scrollbar-vertical");
+        const scrollbarHorizontalAttribute = AelluxJs2.attr("scrollbar-horizontal");
         const elasticReleaseClass = AelluxJs2.className("scrollbox-elastic-release");
         const pointerScrollingClass = AelluxJs2.className("pointerscrolling");
-        const pointerScrollExceptionSelector = "a, button, input, select, textarea, [contenteditable], [draggable='true']";
+        const nativeScrollbarHideClass = AelluxJs2.className("native-sb-hide");
+        const scrollbarVisibleClass = AelluxJs2.className("scrollbar-visible");
+        const pointerScrollExceptionSelector = `a, button, input, select, textarea, [contenteditable], [draggable='true'], [${scrollbarVerticalAttribute}], [${scrollbarHorizontalAttribute}]`;
         const RESIZE_INTERVAL_MS = 100;
         const POINTER_SCROLL_THRESHOLD_PX = 3;
         const POINTER_SCROLL_MULTICLICK_MS = 500;
@@ -1366,6 +1371,16 @@
         const ELASTIC_RETURN_LERP = 0.15;
         const ELASTIC_RETURN_EPSILON = 0.01;
         const ELASTIC_WHEEL_IDLE_MS = 80;
+        const SCROLLBAR_SIZE_PX = 8;
+        const SCROLLBAR_MIN_THUMB_PX = 20;
+        const scrollbarProperties = [
+          "--ae-scrollbar-x",
+          "--ae-scrollbar-y",
+          "--ae-scrollbar-length",
+          "--ae-scrollbar-thumb-size",
+          "--ae-scrollbar-thumb-position",
+          "--ae-scrollbar-display"
+        ];
         const pointerScrollMouseEvents = [
           "mousedown",
           "mousemove",
@@ -1463,6 +1478,14 @@
             owned: false,
             reportedDisplay: null
           };
+          const scrollbar = {
+            x: null,
+            y: null,
+            drag: null,
+            hideOwned: false,
+            visibleOwned: false,
+            listening: false
+          };
           const state = {
             element,
             previous: previous2,
@@ -1489,6 +1512,7 @@
             elastic,
             snap,
             inlineWrapper,
+            scrollbar,
             resizeObserver: null,
             mutationObserver: null,
             lastResizeTime: -RESIZE_INTERVAL_MS,
@@ -1532,6 +1556,11 @@
           state.onTouchStart = (event) => startTouch(state, event);
           state.onTouchMove = (event) => moveTouch(state, event);
           state.onTouchEnd = (event) => endTouch(state, event);
+          state.onScrollbarEnter = () => showScrollbars(state);
+          state.onScrollbarLeave = () => hideScrollbars(state);
+          state.onScrollbarOutsideDown = (event) => {
+            if (!element.contains(event.target)) hideScrollbars(state);
+          };
           scrollboxes.set(element, state);
           element.addEventListener("scroll", state.onScroll, { passive: true });
           element.addEventListener("scrollend", state.onScrollEnd, { passive: true });
@@ -1558,6 +1587,7 @@
           clearSnapWheel(state);
           resetElastic(state);
           restoreInlineWrapper(state);
+          resetScrollbars(state);
           element.removeEventListener("scroll", state.onScroll);
           element.removeEventListener("scrollend", state.onScrollEnd);
           element.removeEventListener("click", state.onClick);
@@ -1585,6 +1615,7 @@
           state.mode = readMode(element);
           state.wheelEnabled = element.getAttribute(wheelAttribute) !== "false";
           state.momentumEnabled = element.getAttribute(momentumAttribute) !== "false";
+          configureScrollbars(state);
           configureElastic(state);
           configureSnap(state);
           configureInlineWrapper(state);
@@ -1622,9 +1653,227 @@
           refresh(state);
           if (state.snapEnabled && !state.snap.initialized) initializeSnap(state);
         }
+        function contentChildren(element) {
+          return Array.from(element.children).filter((child) => !child.hasAttribute(scrollbarVerticalAttribute) && !child.hasAttribute(scrollbarHorizontalAttribute));
+        }
+        function scrollbarAxes(value) {
+          if (value === null) return { x: false, y: false };
+          const tokens = value.toLowerCase().trim().split(/[\s,|/+]+/).filter(Boolean);
+          if (!tokens.length) return { x: true, y: true };
+          const axes = { x: false, y: false };
+          for (const token of tokens) {
+            const short = token.replace(/horizontal/g, "h").replace(/vertical/g, "v");
+            if (!/^[vhxy]+$/.test(short)) continue;
+            if (/[hx]/.test(short)) axes.x = true;
+            if (/[vy]/.test(short)) axes.y = true;
+          }
+          return axes;
+        }
+        function configureScrollbars(state) {
+          const element = state.element;
+          const axes = scrollbarAxes(element.getAttribute(scrollbarAttribute));
+          configureScrollbarAxis(state, "y", axes.y, scrollbarVerticalAttribute);
+          configureScrollbarAxis(state, "x", axes.x, scrollbarHorizontalAttribute);
+          const enabled = axes.x || axes.y;
+          const scrollbar = state.scrollbar;
+          if (enabled && !scrollbar.listening) {
+            scrollbar.hideOwned = !element.classList.contains(nativeScrollbarHideClass);
+            if (scrollbar.hideOwned) element.classList.add(nativeScrollbarHideClass);
+            element.addEventListener("pointerenter", state.onScrollbarEnter);
+            element.addEventListener("pointerleave", state.onScrollbarLeave);
+            root2.document.addEventListener("pointerdown", state.onScrollbarOutsideDown, true);
+            scrollbar.listening = true;
+          } else if (!enabled && scrollbar.listening) {
+            element.removeEventListener("pointerenter", state.onScrollbarEnter);
+            element.removeEventListener("pointerleave", state.onScrollbarLeave);
+            root2.document.removeEventListener("pointerdown", state.onScrollbarOutsideDown, true);
+            if (scrollbar.hideOwned) element.classList.remove(nativeScrollbarHideClass);
+            scrollbar.hideOwned = false;
+            scrollbar.listening = false;
+            hideScrollbars(state);
+          }
+        }
+        function configureScrollbarAxis(state, axis, enabled, attributeName) {
+          const scrollbar = state.scrollbar;
+          const current = scrollbar[axis];
+          let element = null;
+          if (enabled) element = Array.from(state.element.children).find((child) => child.hasAttribute(attributeName)) || null;
+          if (current && current.element === element && enabled) return;
+          if (current) resetScrollbarAxis(state, axis);
+          if (!enabled) return;
+          const owned = !element;
+          if (!element) {
+            element = root2.document.createElement("div");
+            element.setAttribute(attributeName, "");
+            state.element.appendChild(element);
+          }
+          const previous2 = scrollbarProperties.map((name) => ({
+            name,
+            value: element.style.getPropertyValue(name),
+            priority: element.style.getPropertyPriority(name)
+          }));
+          const record = {
+            element,
+            owned,
+            previous: previous2,
+            axis,
+            x: null,
+            y: null,
+            thumbPosition: null,
+            thumbSize: null,
+            trackSize: null,
+            max: null,
+            display: null
+          };
+          record.onPointerDown = (event) => startScrollbarDrag(state, record, event);
+          record.onPointerMove = (event) => moveScrollbarDrag(state, record, event);
+          record.onPointerEnd = (event) => endScrollbarDrag(state, record, event);
+          element.addEventListener("pointerdown", record.onPointerDown);
+          element.addEventListener("pointermove", record.onPointerMove);
+          element.addEventListener("pointerup", record.onPointerEnd);
+          element.addEventListener("pointercancel", record.onPointerEnd);
+          scrollbar[axis] = record;
+        }
+        function resetScrollbarAxis(state, axis) {
+          const record = state.scrollbar[axis];
+          if (!record) return;
+          endScrollbarDrag(state, record);
+          const element = record.element;
+          element.removeEventListener("pointerdown", record.onPointerDown);
+          element.removeEventListener("pointermove", record.onPointerMove);
+          element.removeEventListener("pointerup", record.onPointerEnd);
+          element.removeEventListener("pointercancel", record.onPointerEnd);
+          if (record.owned) element.remove();
+          else for (const original of record.previous) {
+            if (original.value) element.style.setProperty(
+              original.name,
+              original.value,
+              original.priority
+            );
+            else element.style.removeProperty(original.name);
+          }
+          state.scrollbar[axis] = null;
+        }
+        function resetScrollbars(state) {
+          resetScrollbarAxis(state, "x");
+          resetScrollbarAxis(state, "y");
+          const scrollbar = state.scrollbar;
+          if (scrollbar.listening) {
+            state.element.removeEventListener("pointerenter", state.onScrollbarEnter);
+            state.element.removeEventListener("pointerleave", state.onScrollbarLeave);
+            root2.document.removeEventListener("pointerdown", state.onScrollbarOutsideDown, true);
+            scrollbar.listening = false;
+          }
+          if (scrollbar.hideOwned) state.element.classList.remove(nativeScrollbarHideClass);
+          scrollbar.hideOwned = false;
+          hideScrollbars(state);
+        }
+        function showScrollbars(state) {
+          if (!state.scrollbar.listening) return;
+          if (!state.element.classList.contains(scrollbarVisibleClass)) {
+            state.element.classList.add(scrollbarVisibleClass);
+            state.scrollbar.visibleOwned = true;
+          }
+        }
+        function hideScrollbars(state) {
+          if (state.scrollbar.drag) return;
+          if (state.scrollbar.visibleOwned)
+            state.element.classList.remove(scrollbarVisibleClass);
+          state.scrollbar.visibleOwned = false;
+        }
+        function updateScrollbars(state, metrics) {
+          const element = state.element;
+          for (const axis of ["x", "y"]) {
+            const record = state.scrollbar[axis];
+            if (!record) continue;
+            const vertical = axis === "y";
+            const trackSize = vertical ? element.clientHeight : element.clientWidth;
+            const max = vertical ? metrics.maxY : metrics.maxX;
+            const scrollSize = trackSize + max;
+            const thumbSize = max > 1 ? Math.min(
+              trackSize,
+              Math.max(SCROLLBAR_MIN_THUMB_PX, trackSize * trackSize / scrollSize)
+            ) : 0;
+            const position = vertical ? element.scrollTop : element.scrollLeft;
+            const thumbPosition = max > 0 ? (trackSize - thumbSize) * progress(position, max) : 0;
+            const x = element.scrollLeft + (vertical ? element.clientWidth - SCROLLBAR_SIZE_PX : 0);
+            const y = element.scrollTop + (vertical ? 0 : element.clientHeight - SCROLLBAR_SIZE_PX);
+            const display = max > 1 ? "block" : "none";
+            const style = record.element.style;
+            if (record.x !== x) style.setProperty("--ae-scrollbar-x", `${x}px`);
+            if (record.y !== y) style.setProperty("--ae-scrollbar-y", `${y}px`);
+            if (record.trackSize !== trackSize)
+              style.setProperty("--ae-scrollbar-length", `${trackSize}px`);
+            if (record.thumbSize !== thumbSize)
+              style.setProperty("--ae-scrollbar-thumb-size", `${thumbSize}px`);
+            if (record.thumbPosition !== thumbPosition)
+              style.setProperty("--ae-scrollbar-thumb-position", `${thumbPosition}px`);
+            if (record.display !== display)
+              style.setProperty("--ae-scrollbar-display", display);
+            record.x = x;
+            record.y = y;
+            record.trackSize = trackSize;
+            record.thumbSize = thumbSize;
+            record.thumbPosition = thumbPosition;
+            record.max = max;
+            record.display = display;
+          }
+        }
+        function scrollbarPointerPosition(record, event) {
+          const rect = record.element.getBoundingClientRect();
+          return record.axis === "y" ? event.clientY - rect.top : event.clientX - rect.left;
+        }
+        function startScrollbarDrag(state, record, event) {
+          if (state.disposed || event.button !== 0 || !record.max) return;
+          if (event.cancelable) event.preventDefault();
+          event.stopPropagation();
+          showScrollbars(state);
+          const position = scrollbarPointerPosition(record, event);
+          if (position < record.thumbPosition || position > record.thumbPosition + record.thumbSize) {
+            const direction = position < record.thumbPosition ? -1 : 1;
+            const distance = direction * record.trackSize;
+            if (record.axis === "y") state.element.scrollBy({ top: distance });
+            else state.element.scrollBy({ left: distance });
+            return;
+          }
+          state.scrollbar.drag = {
+            record,
+            pointerId: event.pointerId,
+            offset: position - record.thumbPosition
+          };
+          if (record.element.setPointerCapture)
+            record.element.setPointerCapture(event.pointerId);
+        }
+        function moveScrollbarDrag(state, record, event) {
+          const drag = state.scrollbar.drag;
+          if (!drag || drag.record !== record || drag.pointerId !== event.pointerId) return;
+          if (event.cancelable) event.preventDefault();
+          event.stopPropagation();
+          const travel = record.trackSize - record.thumbSize;
+          if (travel <= 0) return;
+          const position = scrollbarPointerPosition(record, event) - drag.offset;
+          const destination = Math.max(0, Math.min(record.max, position / travel * record.max));
+          if (record.axis === "y") state.element.scrollTo({ top: destination, behavior: "instant" });
+          else state.element.scrollTo({ left: destination, behavior: "instant" });
+          publish(state);
+        }
+        function endScrollbarDrag(state, record, event) {
+          const drag = state.scrollbar.drag;
+          if (!drag || drag.record !== record || event && drag.pointerId !== event.pointerId) return;
+          if (event) {
+            if (event.cancelable) event.preventDefault();
+            event.stopPropagation();
+          }
+          state.scrollbar.drag = null;
+          if (record.element.hasPointerCapture && record.element.hasPointerCapture(drag.pointerId))
+            record.element.releasePointerCapture(drag.pointerId);
+          if (!state.element.matches(":hover")) hideScrollbars(state);
+          if (state.snapEnabled && !state.disposed) scheduleScrollEnd(state);
+        }
         function configureSnap(state) {
           const element = state.element;
-          const child = element.children.length === 1 ? element.children[0] : null;
+          const children = contentChildren(element);
+          const child = children.length === 1 ? children[0] : null;
           const wrapper = child && child.hasAttribute(snapAttribute) && child.getAttribute(snapAttribute) !== "false" ? child : null;
           if (!wrapper) {
             state.snapEnabled = false;
@@ -1635,7 +1884,7 @@
             state.snap.wheelTarget = null;
             clearScrollEnd(state);
             clearSnapWheel(state);
-            const requested = element.hasAttribute(snapAttribute) || Array.from(element.children).some((item) => item.hasAttribute(snapAttribute) && item.getAttribute(snapAttribute) !== "false");
+            const requested = element.hasAttribute(snapAttribute) || children.some((item) => item.hasAttribute(snapAttribute) && item.getAttribute(snapAttribute) !== "false");
             if (requested && !state.snap.invalidReported)
               AelluxJs2.diagnostics.error(
                 AelluxJs2.diagnostics.ERROR_SCROLLBOX_SNAP_WRAPPER,
@@ -1800,7 +2049,7 @@
           }, SNAP_WHEEL_IDLE_MS);
         }
         function finishNativeScroll(state) {
-          if (state.disposed || !state.snapEnabled || state.snap.pending || state.momentum || activePointerScrollState && activePointerScrollState.pointerScroll && activePointerScrollState.pointerScroll.chain.includes(state)) return;
+          if (state.disposed || !state.snapEnabled || state.snap.pending || state.momentum || state.scrollbar.drag || activePointerScrollState && activePointerScrollState.pointerScroll && activePointerScrollState.pointerScroll.chain.includes(state)) return;
           const items = snapItems(state);
           if (!items.length) return;
           if (state.snap.wheelTarget) {
@@ -1862,13 +2111,14 @@
         }
         function configureElastic(state) {
           const element = state.element;
-          const child = element.children.length === 1 ? element.children[0] : null;
+          const children = contentChildren(element);
+          const child = children.length === 1 ? children[0] : null;
           const wrapper = child && child.hasAttribute(elasticAttribute) && child.getAttribute(elasticAttribute) !== "false" ? child : null;
           if (!wrapper) {
             resetElastic(state);
             state.elasticEnabled = false;
             state.elastic.wrapper = null;
-            const requested = element.hasAttribute(elasticAttribute) || Array.from(element.children).some((item) => item.hasAttribute(elasticAttribute) && item.getAttribute(elasticAttribute) !== "false");
+            const requested = element.hasAttribute(elasticAttribute) || children.some((item) => item.hasAttribute(elasticAttribute) && item.getAttribute(elasticAttribute) !== "false");
             if (requested && !state.elastic.invalidReported) {
               AelluxJs2.diagnostics.error(
                 AelluxJs2.diagnostics.ERROR_SCROLLBOX_ELASTIC_WRAPPER,
@@ -2213,12 +2463,9 @@
             pointerScroll.styles.push({
               element,
               classOwned: !element.classList.contains(pointerScrollingClass),
-              userSelect: element.style.getPropertyValue("user-select"),
-              userSelectPriority: element.style.getPropertyPriority("user-select"),
               scrollBehavior: element.style.getPropertyValue("scroll-behavior"),
               scrollBehaviorPriority: element.style.getPropertyPriority("scroll-behavior")
             });
-            element.style.setProperty("user-select", "none");
             element.style.setProperty("scroll-behavior", "auto", "important");
             element.classList.add(pointerScrollingClass);
           }
@@ -2260,12 +2507,6 @@
           }
           for (const saved of pointerScroll.styles) {
             if (saved.classOwned) saved.element.classList.remove(pointerScrollingClass);
-            if (saved.userSelect) saved.element.style.setProperty(
-              "user-select",
-              saved.userSelect,
-              saved.userSelectPriority
-            );
-            else saved.element.style.removeProperty("user-select");
             if (saved.scrollBehavior) saved.element.style.setProperty(
               "scroll-behavior",
               saved.scrollBehavior,
@@ -2730,6 +2971,7 @@
             item.style.setProperty(snapProperties[0], viewport);
             item.style.setProperty(snapProperties[1], focus);
           }
+          updateScrollbars(state, metrics);
         }
         function measureSnapValues(state) {
           const element = state.element;

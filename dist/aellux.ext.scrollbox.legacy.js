@@ -54,9 +54,14 @@
     var momentumAttribute = AelluxJs.attr("scrollbox-momentum");
     var elasticAttribute = AelluxJs.attr("scrollbox-elastic");
     var snapAttribute = AelluxJs.attr("scrollbox-snap");
+    var scrollbarAttribute = AelluxJs.attr("scrollbar");
+    var scrollbarVerticalAttribute = AelluxJs.attr("scrollbar-vertical");
+    var scrollbarHorizontalAttribute = AelluxJs.attr("scrollbar-horizontal");
     var elasticReleaseClass = AelluxJs.className("scrollbox-elastic-release");
     var pointerScrollingClass = AelluxJs.className("pointerscrolling");
-    var pointerScrollExceptionSelector = "a, button, input, select, textarea, [contenteditable], [draggable='true']";
+    var nativeScrollbarHideClass = AelluxJs.className("native-sb-hide");
+    var scrollbarVisibleClass = AelluxJs.className("scrollbar-visible");
+    var pointerScrollExceptionSelector = "a, button, input, select, textarea, [contenteditable], [draggable='true'], " + "[".concat(scrollbarVerticalAttribute, "], [").concat(scrollbarHorizontalAttribute, "]");
     var RESIZE_INTERVAL_MS = 100;
     var POINTER_SCROLL_THRESHOLD_PX = 3;
     var POINTER_SCROLL_MULTICLICK_MS = 500;
@@ -83,6 +88,9 @@
     var ELASTIC_RETURN_LERP = 0.15;
     var ELASTIC_RETURN_EPSILON = 0.01;
     var ELASTIC_WHEEL_IDLE_MS = 80;
+    var SCROLLBAR_SIZE_PX = 8;
+    var SCROLLBAR_MIN_THUMB_PX = 20;
+    var scrollbarProperties = ["--ae-scrollbar-x", "--ae-scrollbar-y", "--ae-scrollbar-length", "--ae-scrollbar-thumb-size", "--ae-scrollbar-thumb-position", "--ae-scrollbar-display"];
     var pointerScrollMouseEvents = ["mousedown", "mousemove", "mouseup", "click", "dblclick", "auxclick", "contextmenu", "mouseover", "mouseout", "mouseenter", "mouseleave"];
     var pointerScrollDragEvents = ["dragstart", "drag", "dragenter", "dragover", "dragleave", "drop", "dragend"];
     var mouseHoldEvents = /* @__PURE__ */ new Set(["mousemove", "mouseover", "mouseout", "mouseenter", "mouseleave"]);
@@ -168,6 +176,14 @@
         owned: false,
         reportedDisplay: null
       };
+      var scrollbar = {
+        x: null,
+        y: null,
+        drag: null,
+        hideOwned: false,
+        visibleOwned: false,
+        listening: false
+      };
       var state = {
         element: element,
         previous: previous2,
@@ -194,6 +210,7 @@
         elastic: elastic,
         snap: snap,
         inlineWrapper: inlineWrapper,
+        scrollbar: scrollbar,
         resizeObserver: null,
         mutationObserver: null,
         lastResizeTime: -RESIZE_INTERVAL_MS,
@@ -253,6 +270,15 @@
       state.onTouchEnd = function(event) {
         return endTouch(state, event);
       };
+      state.onScrollbarEnter = function() {
+        return showScrollbars(state);
+      };
+      state.onScrollbarLeave = function() {
+        return hideScrollbars(state);
+      };
+      state.onScrollbarOutsideDown = function(event) {
+        if (!element.contains(event.target)) hideScrollbars(state);
+      };
       scrollboxes.set(element, state);
       element.addEventListener("scroll", state.onScroll, {
         passive: true
@@ -282,6 +308,7 @@
       clearSnapWheel(state);
       resetElastic(state);
       restoreInlineWrapper(state);
+      resetScrollbars(state);
       element.removeEventListener("scroll", state.onScroll);
       element.removeEventListener("scrollend", state.onScrollEnd);
       element.removeEventListener("click", state.onClick);
@@ -309,6 +336,7 @@
       state.mode = readMode(element);
       state.wheelEnabled = element.getAttribute(wheelAttribute) !== "false";
       state.momentumEnabled = element.getAttribute(momentumAttribute) !== "false";
+      configureScrollbars(state);
       configureElastic(state);
       configureSnap(state);
       configureInlineWrapper(state);
@@ -348,9 +376,263 @@
       refresh(state);
       if (state.snapEnabled && !state.snap.initialized) initializeSnap(state);
     }
+    function contentChildren(element) {
+      return Array.from(element.children).filter(function(child) {
+        return !child.hasAttribute(scrollbarVerticalAttribute) && !child.hasAttribute(scrollbarHorizontalAttribute);
+      });
+    }
+    function scrollbarAxes(value) {
+      if (value === null) return {
+        x: false,
+        y: false
+      };
+      var tokens = value.toLowerCase().trim().split(/[\s,|/+]+/).filter(Boolean);
+      if (!tokens.length) return {
+        x: true,
+        y: true
+      };
+      var axes = {
+        x: false,
+        y: false
+      };
+      var _iterator2 = _createForOfIteratorHelper(tokens), _step2;
+      try {
+        for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
+          var token = _step2.value;
+          var short = token.replace(/horizontal/g, "h").replace(/vertical/g, "v");
+          if (!/^[vhxy]+$/.test(short)) continue;
+          if (/[hx]/.test(short)) axes.x = true;
+          if (/[vy]/.test(short)) axes.y = true;
+        }
+      } catch (err) {
+        _iterator2.e(err);
+      } finally {
+        _iterator2.f();
+      }
+      return axes;
+    }
+    function configureScrollbars(state) {
+      var element = state.element;
+      var axes = scrollbarAxes(element.getAttribute(scrollbarAttribute));
+      configureScrollbarAxis(state, "y", axes.y, scrollbarVerticalAttribute);
+      configureScrollbarAxis(state, "x", axes.x, scrollbarHorizontalAttribute);
+      var enabled = axes.x || axes.y;
+      var scrollbar = state.scrollbar;
+      if (enabled && !scrollbar.listening) {
+        scrollbar.hideOwned = !element.classList.contains(nativeScrollbarHideClass);
+        if (scrollbar.hideOwned) element.classList.add(nativeScrollbarHideClass);
+        element.addEventListener("pointerenter", state.onScrollbarEnter);
+        element.addEventListener("pointerleave", state.onScrollbarLeave);
+        root.document.addEventListener("pointerdown", state.onScrollbarOutsideDown, true);
+        scrollbar.listening = true;
+      } else if (!enabled && scrollbar.listening) {
+        element.removeEventListener("pointerenter", state.onScrollbarEnter);
+        element.removeEventListener("pointerleave", state.onScrollbarLeave);
+        root.document.removeEventListener("pointerdown", state.onScrollbarOutsideDown, true);
+        if (scrollbar.hideOwned) element.classList.remove(nativeScrollbarHideClass);
+        scrollbar.hideOwned = false;
+        scrollbar.listening = false;
+        hideScrollbars(state);
+      }
+    }
+    function configureScrollbarAxis(state, axis, enabled, attributeName) {
+      var scrollbar = state.scrollbar;
+      var current = scrollbar[axis];
+      var element = null;
+      if (enabled) element = Array.from(state.element.children).find(function(child) {
+        return child.hasAttribute(attributeName);
+      }) || null;
+      if (current && current.element === element && enabled) return;
+      if (current) resetScrollbarAxis(state, axis);
+      if (!enabled) return;
+      var owned = !element;
+      if (!element) {
+        element = root.document.createElement("div");
+        element.setAttribute(attributeName, "");
+        state.element.appendChild(element);
+      }
+      var previous2 = scrollbarProperties.map(function(name) {
+        return {
+          name: name,
+          value: element.style.getPropertyValue(name),
+          priority: element.style.getPropertyPriority(name)
+        };
+      });
+      var record = {
+        element: element,
+        owned: owned,
+        previous: previous2,
+        axis: axis,
+        x: null,
+        y: null,
+        thumbPosition: null,
+        thumbSize: null,
+        trackSize: null,
+        max: null,
+        display: null
+      };
+      record.onPointerDown = function(event) {
+        return startScrollbarDrag(state, record, event);
+      };
+      record.onPointerMove = function(event) {
+        return moveScrollbarDrag(state, record, event);
+      };
+      record.onPointerEnd = function(event) {
+        return endScrollbarDrag(state, record, event);
+      };
+      element.addEventListener("pointerdown", record.onPointerDown);
+      element.addEventListener("pointermove", record.onPointerMove);
+      element.addEventListener("pointerup", record.onPointerEnd);
+      element.addEventListener("pointercancel", record.onPointerEnd);
+      scrollbar[axis] = record;
+    }
+    function resetScrollbarAxis(state, axis) {
+      var record = state.scrollbar[axis];
+      if (!record) return;
+      endScrollbarDrag(state, record);
+      var element = record.element;
+      element.removeEventListener("pointerdown", record.onPointerDown);
+      element.removeEventListener("pointermove", record.onPointerMove);
+      element.removeEventListener("pointerup", record.onPointerEnd);
+      element.removeEventListener("pointercancel", record.onPointerEnd);
+      if (record.owned) element.remove();
+      else {
+        var _iterator3 = _createForOfIteratorHelper(record.previous), _step3;
+        try {
+          for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
+            var original = _step3.value;
+            if (original.value) element.style.setProperty(original.name, original.value, original.priority);
+            else element.style.removeProperty(original.name);
+          }
+        } catch (err) {
+          _iterator3.e(err);
+        } finally {
+          _iterator3.f();
+        }
+      }
+      state.scrollbar[axis] = null;
+    }
+    function resetScrollbars(state) {
+      resetScrollbarAxis(state, "x");
+      resetScrollbarAxis(state, "y");
+      var scrollbar = state.scrollbar;
+      if (scrollbar.listening) {
+        state.element.removeEventListener("pointerenter", state.onScrollbarEnter);
+        state.element.removeEventListener("pointerleave", state.onScrollbarLeave);
+        root.document.removeEventListener("pointerdown", state.onScrollbarOutsideDown, true);
+        scrollbar.listening = false;
+      }
+      if (scrollbar.hideOwned) state.element.classList.remove(nativeScrollbarHideClass);
+      scrollbar.hideOwned = false;
+      hideScrollbars(state);
+    }
+    function showScrollbars(state) {
+      if (!state.scrollbar.listening) return;
+      if (!state.element.classList.contains(scrollbarVisibleClass)) {
+        state.element.classList.add(scrollbarVisibleClass);
+        state.scrollbar.visibleOwned = true;
+      }
+    }
+    function hideScrollbars(state) {
+      if (state.scrollbar.drag) return;
+      if (state.scrollbar.visibleOwned) state.element.classList.remove(scrollbarVisibleClass);
+      state.scrollbar.visibleOwned = false;
+    }
+    function updateScrollbars(state, metrics) {
+      var element = state.element;
+      for (var _i = 0, _arr = ["x", "y"]; _i < _arr.length; _i++) {
+        var axis = _arr[_i];
+        var record = state.scrollbar[axis];
+        if (!record) continue;
+        var vertical = axis === "y";
+        var trackSize = vertical ? element.clientHeight : element.clientWidth;
+        var max = vertical ? metrics.maxY : metrics.maxX;
+        var scrollSize = trackSize + max;
+        var thumbSize = max > 1 ? Math.min(trackSize, Math.max(SCROLLBAR_MIN_THUMB_PX, trackSize * trackSize / scrollSize)) : 0;
+        var position = vertical ? element.scrollTop : element.scrollLeft;
+        var thumbPosition = max > 0 ? (trackSize - thumbSize) * progress(position, max) : 0;
+        var x = element.scrollLeft + (vertical ? element.clientWidth - SCROLLBAR_SIZE_PX : 0);
+        var y = element.scrollTop + (vertical ? 0 : element.clientHeight - SCROLLBAR_SIZE_PX);
+        var display = max > 1 ? "block" : "none";
+        var style = record.element.style;
+        if (record.x !== x) style.setProperty("--ae-scrollbar-x", "".concat(x, "px"));
+        if (record.y !== y) style.setProperty("--ae-scrollbar-y", "".concat(y, "px"));
+        if (record.trackSize !== trackSize) style.setProperty("--ae-scrollbar-length", "".concat(trackSize, "px"));
+        if (record.thumbSize !== thumbSize) style.setProperty("--ae-scrollbar-thumb-size", "".concat(thumbSize, "px"));
+        if (record.thumbPosition !== thumbPosition) style.setProperty("--ae-scrollbar-thumb-position", "".concat(thumbPosition, "px"));
+        if (record.display !== display) style.setProperty("--ae-scrollbar-display", display);
+        record.x = x;
+        record.y = y;
+        record.trackSize = trackSize;
+        record.thumbSize = thumbSize;
+        record.thumbPosition = thumbPosition;
+        record.max = max;
+        record.display = display;
+      }
+    }
+    function scrollbarPointerPosition(record, event) {
+      var rect = record.element.getBoundingClientRect();
+      return record.axis === "y" ? event.clientY - rect.top : event.clientX - rect.left;
+    }
+    function startScrollbarDrag(state, record, event) {
+      if (state.disposed || event.button !== 0 || !record.max) return;
+      if (event.cancelable) event.preventDefault();
+      event.stopPropagation();
+      showScrollbars(state);
+      var position = scrollbarPointerPosition(record, event);
+      if (position < record.thumbPosition || position > record.thumbPosition + record.thumbSize) {
+        var direction = position < record.thumbPosition ? -1 : 1;
+        var distance = direction * record.trackSize;
+        if (record.axis === "y") state.element.scrollBy({
+          top: distance
+        });
+        else state.element.scrollBy({
+          left: distance
+        });
+        return;
+      }
+      state.scrollbar.drag = {
+        record: record,
+        pointerId: event.pointerId,
+        offset: position - record.thumbPosition
+      };
+      if (record.element.setPointerCapture) record.element.setPointerCapture(event.pointerId);
+    }
+    function moveScrollbarDrag(state, record, event) {
+      var drag = state.scrollbar.drag;
+      if (!drag || drag.record !== record || drag.pointerId !== event.pointerId) return;
+      if (event.cancelable) event.preventDefault();
+      event.stopPropagation();
+      var travel = record.trackSize - record.thumbSize;
+      if (travel <= 0) return;
+      var position = scrollbarPointerPosition(record, event) - drag.offset;
+      var destination = Math.max(0, Math.min(record.max, position / travel * record.max));
+      if (record.axis === "y") state.element.scrollTo({
+        top: destination,
+        behavior: "instant"
+      });
+      else state.element.scrollTo({
+        left: destination,
+        behavior: "instant"
+      });
+      publish(state);
+    }
+    function endScrollbarDrag(state, record, event) {
+      var drag = state.scrollbar.drag;
+      if (!drag || drag.record !== record || event && drag.pointerId !== event.pointerId) return;
+      if (event) {
+        if (event.cancelable) event.preventDefault();
+        event.stopPropagation();
+      }
+      state.scrollbar.drag = null;
+      if (record.element.hasPointerCapture && record.element.hasPointerCapture(drag.pointerId)) record.element.releasePointerCapture(drag.pointerId);
+      if (!state.element.matches(":hover")) hideScrollbars(state);
+      if (state.snapEnabled && !state.disposed) scheduleScrollEnd(state);
+    }
     function configureSnap(state) {
       var element = state.element;
-      var child = element.children.length === 1 ? element.children[0] : null;
+      var children = contentChildren(element);
+      var child = children.length === 1 ? children[0] : null;
       var wrapper = child && child.hasAttribute(snapAttribute) && child.getAttribute(snapAttribute) !== "false" ? child : null;
       if (!wrapper) {
         state.snapEnabled = false;
@@ -361,7 +643,7 @@
         state.snap.wheelTarget = null;
         clearScrollEnd(state);
         clearSnapWheel(state);
-        var requested = element.hasAttribute(snapAttribute) || Array.from(element.children).some(function(item) {
+        var requested = element.hasAttribute(snapAttribute) || children.some(function(item) {
           return item.hasAttribute(snapAttribute) && item.getAttribute(snapAttribute) !== "false";
         });
         if (requested && !state.snap.invalidReported) AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_SCROLLBOX_SNAP_WRAPPER, {
@@ -521,7 +803,7 @@
       }, SNAP_WHEEL_IDLE_MS);
     }
     function finishNativeScroll(state) {
-      if (state.disposed || !state.snapEnabled || state.snap.pending || state.momentum || activePointerScrollState && activePointerScrollState.pointerScroll && activePointerScrollState.pointerScroll.chain.includes(state)) return;
+      if (state.disposed || !state.snapEnabled || state.snap.pending || state.momentum || state.scrollbar.drag || activePointerScrollState && activePointerScrollState.pointerScroll && activePointerScrollState.pointerScroll.chain.includes(state)) return;
       var items = snapItems(state);
       if (!items.length) return;
       if (state.snap.wheelTarget) {
@@ -583,13 +865,14 @@
     }
     function configureElastic(state) {
       var element = state.element;
-      var child = element.children.length === 1 ? element.children[0] : null;
+      var children = contentChildren(element);
+      var child = children.length === 1 ? children[0] : null;
       var wrapper = child && child.hasAttribute(elasticAttribute) && child.getAttribute(elasticAttribute) !== "false" ? child : null;
       if (!wrapper) {
         resetElastic(state);
         state.elasticEnabled = false;
         state.elastic.wrapper = null;
-        var requested = element.hasAttribute(elasticAttribute) || Array.from(element.children).some(function(item) {
+        var requested = element.hasAttribute(elasticAttribute) || children.some(function(item) {
           return item.hasAttribute(elasticAttribute) && item.getAttribute(elasticAttribute) !== "false";
         });
         if (requested && !state.elastic.invalidReported) {
@@ -688,28 +971,28 @@
     function isTextAtPoint(element, x, y) {
       if (root.getComputedStyle(element).userSelect === "none") return false;
       var range = document.createRange();
-      var _iterator2 = _createForOfIteratorHelper(element.childNodes), _step2;
+      var _iterator4 = _createForOfIteratorHelper(element.childNodes), _step4;
       try {
-        for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
-          var node = _step2.value;
+        for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
+          var node = _step4.value;
           if (node.nodeType !== 3 || !node.textContent.trim()) continue;
           range.selectNodeContents(node);
-          var _iterator3 = _createForOfIteratorHelper(range.getClientRects()), _step3;
+          var _iterator5 = _createForOfIteratorHelper(range.getClientRects()), _step5;
           try {
-            for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
-              var rect = _step3.value;
+            for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
+              var rect = _step5.value;
               if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) return true;
             }
           } catch (err) {
-            _iterator3.e(err);
+            _iterator5.e(err);
           } finally {
-            _iterator3.f();
+            _iterator5.f();
           }
         }
       } catch (err) {
-        _iterator2.e(err);
+        _iterator4.e(err);
       } finally {
-        _iterator2.f();
+        _iterator4.f();
       }
       return false;
     }
@@ -757,8 +1040,8 @@
         return pointerAxisMaximum(member2, "x") > 0;
       });
       if (!textOrigin && event.cancelable) event.preventDefault();
-      for (var _i = 0, _chain = chain; _i < _chain.length; _i++) {
-        var _member = _chain[_i];
+      for (var _i2 = 0, _chain = chain; _i2 < _chain.length; _i2++) {
+        var _member = _chain[_i2];
         cancelMomentum(_member);
         _member.snap.pending = null;
         _member.snap.wheelTarget = null;
@@ -814,31 +1097,31 @@
         passive: false,
         capture: true
       });
-      var _iterator4 = _createForOfIteratorHelper(pointerScrollDragEvents), _step4;
+      var _iterator6 = _createForOfIteratorHelper(pointerScrollDragEvents), _step6;
       try {
-        for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
-          var name = _step4.value;
+        for (_iterator6.s(); !(_step6 = _iterator6.n()).done; ) {
+          var name = _step6.value;
           root.addEventListener(name, state.onPointerScrollNativeEvent, true);
         }
       } catch (err) {
-        _iterator4.e(err);
+        _iterator6.e(err);
       } finally {
-        _iterator4.f();
+        _iterator6.f();
       }
       root.addEventListener("selectstart", state.onPointerScrollNativeEvent, true);
-      var _iterator5 = _createForOfIteratorHelper(pointerScrollMouseEvents), _step5;
+      var _iterator7 = _createForOfIteratorHelper(pointerScrollMouseEvents), _step7;
       try {
-        for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
-          var _name = _step5.value;
+        for (_iterator7.s(); !(_step7 = _iterator7.n()).done; ) {
+          var _name = _step7.value;
           root.addEventListener(_name, state.onMouseEvent, {
             passive: false,
             capture: true
           });
         }
       } catch (err) {
-        _iterator5.e(err);
+        _iterator7.e(err);
       } finally {
-        _iterator5.f();
+        _iterator7.f();
       }
       root.addEventListener("pointerup", state.onPointerEnd, true);
       root.addEventListener("pointercancel", state.onPointerEnd, true);
@@ -901,16 +1184,16 @@
       if (event.cancelable) event.preventDefault();
       if (!remaining) return;
       var outermost = null;
-      var _iterator6 = _createForOfIteratorHelper(pointerScroll.chain), _step6;
+      var _iterator8 = _createForOfIteratorHelper(pointerScroll.chain), _step8;
       try {
-        for (_iterator6.s(); !(_step6 = _iterator6.n()).done; ) {
-          var member = _step6.value;
+        for (_iterator8.s(); !(_step8 = _iterator8.n()).done; ) {
+          var member = _step8.value;
           if (!member.disposed && member.pointerListening && pointerAxisMaximum(member, axis) > 0) outermost = member;
         }
       } catch (err) {
-        _iterator6.e(err);
+        _iterator8.e(err);
       } finally {
-        _iterator6.f();
+        _iterator8.f();
       }
       if (outermost && outermost.elasticEnabled && pointerScroll.elasticForce) {
         var force = pointerScroll.elasticForce + remaining;
@@ -924,10 +1207,10 @@
       }
       var lastUsed = null;
       var lastStartX = 0, lastStartY = 0;
-      var _iterator7 = _createForOfIteratorHelper(pointerScroll.chain), _step7;
+      var _iterator9 = _createForOfIteratorHelper(pointerScroll.chain), _step9;
       try {
-        for (_iterator7.s(); !(_step7 = _iterator7.n()).done; ) {
-          var _member2 = _step7.value;
+        for (_iterator9.s(); !(_step9 = _iterator9.n()).done; ) {
+          var _member2 = _step9.value;
           if (_member2.disposed || !_member2.pointerListening || pointerAxisMaximum(_member2, axis) <= 0) continue;
           if (Math.abs(remaining) < 1e-3) continue;
           var _element = _member2.element;
@@ -948,9 +1231,9 @@
           lastStartY = previousY;
         }
       } catch (err) {
-        _iterator7.e(err);
+        _iterator9.e(err);
       } finally {
-        _iterator7.f();
+        _iterator9.f();
       }
       if (outermost && outermost.elasticEnabled) {
         pointerScroll.elasticForce += remaining;
@@ -1004,28 +1287,25 @@
       pointerScroll.axis = axis;
       pointerScroll.moved = true;
       restorePointerScrollCursor(state);
-      var _iterator8 = _createForOfIteratorHelper(pointerScroll.chain), _step8;
+      var _iterator0 = _createForOfIteratorHelper(pointerScroll.chain), _step0;
       try {
-        for (_iterator8.s(); !(_step8 = _iterator8.n()).done; ) {
-          var member = _step8.value;
+        for (_iterator0.s(); !(_step0 = _iterator0.n()).done; ) {
+          var member = _step0.value;
           if (pointerAxisMaximum(member, axis) <= 0) continue;
           var element = member.element;
           pointerScroll.styles.push({
             element: element,
             classOwned: !element.classList.contains(pointerScrollingClass),
-            userSelect: element.style.getPropertyValue("user-select"),
-            userSelectPriority: element.style.getPropertyPriority("user-select"),
             scrollBehavior: element.style.getPropertyValue("scroll-behavior"),
             scrollBehaviorPriority: element.style.getPropertyPriority("scroll-behavior")
           });
-          element.style.setProperty("user-select", "none");
           element.style.setProperty("scroll-behavior", "auto", "important");
           element.classList.add(pointerScrollingClass);
         }
       } catch (err) {
-        _iterator8.e(err);
+        _iterator0.e(err);
       } finally {
-        _iterator8.f();
+        _iterator0.f();
       }
     }
     function endPointerScroll(state, event) {
@@ -1050,16 +1330,16 @@
       if (pointerScroll.selectionWaitTimeout !== null) root.clearTimeout(pointerScroll.selectionWaitTimeout);
       root.removeEventListener("pointermove", state.onPointerMove, true);
       root.removeEventListener("touchmove", state.onPointerScrollTouchMove, true);
-      var _iterator9 = _createForOfIteratorHelper(pointerScrollDragEvents), _step9;
+      var _iterator1 = _createForOfIteratorHelper(pointerScrollDragEvents), _step1;
       try {
-        for (_iterator9.s(); !(_step9 = _iterator9.n()).done; ) {
-          var name = _step9.value;
+        for (_iterator1.s(); !(_step1 = _iterator1.n()).done; ) {
+          var name = _step1.value;
           root.removeEventListener(name, state.onPointerScrollNativeEvent, true);
         }
       } catch (err) {
-        _iterator9.e(err);
+        _iterator1.e(err);
       } finally {
-        _iterator9.f();
+        _iterator1.f();
       }
       root.removeEventListener("selectstart", state.onPointerScrollNativeEvent, true);
       root.removeEventListener("pointerup", state.onPointerEnd, true);
@@ -1074,20 +1354,18 @@
       } else {
         stopPointerScrollMouseEvents(state);
       }
-      var _iterator0 = _createForOfIteratorHelper(pointerScroll.styles), _step0;
+      var _iterator10 = _createForOfIteratorHelper(pointerScroll.styles), _step10;
       try {
-        for (_iterator0.s(); !(_step0 = _iterator0.n()).done; ) {
-          var saved = _step0.value;
+        for (_iterator10.s(); !(_step10 = _iterator10.n()).done; ) {
+          var saved = _step10.value;
           if (saved.classOwned) saved.element.classList.remove(pointerScrollingClass);
-          if (saved.userSelect) saved.element.style.setProperty("user-select", saved.userSelect, saved.userSelectPriority);
-          else saved.element.style.removeProperty("user-select");
           if (saved.scrollBehavior) saved.element.style.setProperty("scroll-behavior", saved.scrollBehavior, saved.scrollBehaviorPriority);
           else saved.element.style.removeProperty("scroll-behavior");
         }
       } catch (err) {
-        _iterator0.e(err);
+        _iterator10.e(err);
       } finally {
-        _iterator0.f();
+        _iterator10.f();
       }
       if (event && event.type === "pointerup" && state.pointerListening) {
         updatePointerScrollCursor(state, document.elementFromPoint(event.clientX, event.clientY), event.clientX, event.clientY);
@@ -1101,16 +1379,16 @@
       });
       var shouldSnap = event && event.type === "pointerup" && pointerScroll.moved && snapState && !snapState.disposed && snapItems(snapState).length;
       if (shouldSnap) schedulePointerSnap(snapState, pointerScroll);
-      var _iterator1 = _createForOfIteratorHelper(pointerScroll.chain), _step1;
+      var _iterator11 = _createForOfIteratorHelper(pointerScroll.chain), _step11;
       try {
-        for (_iterator1.s(); !(_step1 = _iterator1.n()).done; ) {
-          var member = _step1.value;
+        for (_iterator11.s(); !(_step11 = _iterator11.n()).done; ) {
+          var member = _step11.value;
           releaseElastic(member);
         }
       } catch (err) {
-        _iterator1.e(err);
+        _iterator11.e(err);
       } finally {
-        _iterator1.f();
+        _iterator11.f();
       }
       if (!shouldSnap && event && event.type === "pointerup" && pointerScroll.moved && momentumState && momentumState.momentumEnabled && !hadElastic && !momentumState.disposed && now() - pointerScroll.momentumStartTime < MOMENTUM_LIMIT_TIME_MS) {
         startMomentum(momentumState, pointerScroll);
@@ -1166,16 +1444,16 @@
       if (state.mouseReleaseTimeout !== null) root.clearTimeout(state.mouseReleaseTimeout);
       state.mouseReleaseTimeout = null;
       state.mouseReleaseButton = null;
-      var _iterator10 = _createForOfIteratorHelper(pointerScrollMouseEvents), _step10;
+      var _iterator12 = _createForOfIteratorHelper(pointerScrollMouseEvents), _step12;
       try {
-        for (_iterator10.s(); !(_step10 = _iterator10.n()).done; ) {
-          var name = _step10.value;
+        for (_iterator12.s(); !(_step12 = _iterator12.n()).done; ) {
+          var name = _step12.value;
           root.removeEventListener(name, state.onMouseEvent, true);
         }
       } catch (err) {
-        _iterator10.e(err);
+        _iterator12.e(err);
       } finally {
-        _iterator10.f();
+        _iterator12.f();
       }
     }
     function startMomentum(state, pointerScroll) {
@@ -1278,19 +1556,19 @@
       var start = state.elastic.touch;
       if (!start) return;
       var touch = null;
-      var _iterator11 = _createForOfIteratorHelper(event.touches), _step11;
+      var _iterator13 = _createForOfIteratorHelper(event.touches), _step13;
       try {
-        for (_iterator11.s(); !(_step11 = _iterator11.n()).done; ) {
-          var item = _step11.value;
+        for (_iterator13.s(); !(_step13 = _iterator13.n()).done; ) {
+          var item = _step13.value;
           if (item.identifier === start.identifier) {
             touch = item;
             break;
           }
         }
       } catch (err) {
-        _iterator11.e(err);
+        _iterator13.e(err);
       } finally {
-        _iterator11.f();
+        _iterator13.f();
       }
       if (!touch) return;
       var desiredX = start.scrollLeft + start.x - touch.clientX;
@@ -1303,16 +1581,16 @@
     function endTouch(state, event) {
       var touch = state.elastic.touch;
       if (!touch) return;
-      var _iterator12 = _createForOfIteratorHelper(event.touches), _step12;
+      var _iterator14 = _createForOfIteratorHelper(event.touches), _step14;
       try {
-        for (_iterator12.s(); !(_step12 = _iterator12.n()).done; ) {
-          var item = _step12.value;
+        for (_iterator14.s(); !(_step14 = _iterator14.n()).done; ) {
+          var item = _step14.value;
           if (item.identifier === touch.identifier) return;
         }
       } catch (err) {
-        _iterator12.e(err);
+        _iterator14.e(err);
       } finally {
-        _iterator12.f();
+        _iterator14.f();
       }
       state.elastic.touch = null;
       releaseElastic(state);
@@ -1471,16 +1749,16 @@
           return scheduleResize(state);
         });
         state.resizeObserver.observe(state.element);
-        var _iterator13 = _createForOfIteratorHelper(state.element.children), _step13;
+        var _iterator15 = _createForOfIteratorHelper(state.element.children), _step15;
         try {
-          for (_iterator13.s(); !(_step13 = _iterator13.n()).done; ) {
-            var child = _step13.value;
+          for (_iterator15.s(); !(_step15 = _iterator15.n()).done; ) {
+            var child = _step15.value;
             state.resizeObserver.observe(child);
           }
         } catch (err) {
-          _iterator13.e(err);
+          _iterator15.e(err);
         } finally {
-          _iterator13.f();
+          _iterator15.f();
         }
       }
       if (root.MutationObserver) {
@@ -1488,16 +1766,16 @@
           if (state.resizeObserver) {
             state.resizeObserver.disconnect();
             state.resizeObserver.observe(state.element);
-            var _iterator14 = _createForOfIteratorHelper(state.element.children), _step14;
+            var _iterator16 = _createForOfIteratorHelper(state.element.children), _step16;
             try {
-              for (_iterator14.s(); !(_step14 = _iterator14.n()).done; ) {
-                var _child = _step14.value;
+              for (_iterator16.s(); !(_step16 = _iterator16.n()).done; ) {
+                var _child = _step16.value;
                 state.resizeObserver.observe(_child);
               }
             } catch (err) {
-              _iterator14.e(err);
+              _iterator16.e(err);
             } finally {
-              _iterator14.f();
+              _iterator16.f();
             }
           }
           if (records.some(function(record) {
@@ -1562,18 +1840,19 @@
       var snapValues = state.snapEnabled ? measureSnapValues(state) : [];
       state.element.style.setProperty(properties[0], progress(state.element.scrollTop, metrics.maxY));
       state.element.style.setProperty(properties[1], progress(state.element.scrollLeft, metrics.maxX));
-      var _iterator15 = _createForOfIteratorHelper(snapValues), _step15;
+      var _iterator17 = _createForOfIteratorHelper(snapValues), _step17;
       try {
-        for (_iterator15.s(); !(_step15 = _iterator15.n()).done; ) {
-          var _step15$value = _step15.value, item = _step15$value.item, viewport = _step15$value.viewport, focus = _step15$value.focus;
+        for (_iterator17.s(); !(_step17 = _iterator17.n()).done; ) {
+          var _step17$value = _step17.value, item = _step17$value.item, viewport = _step17$value.viewport, focus = _step17$value.focus;
           item.style.setProperty(snapProperties[0], viewport);
           item.style.setProperty(snapProperties[1], focus);
         }
       } catch (err) {
-        _iterator15.e(err);
+        _iterator17.e(err);
       } finally {
-        _iterator15.f();
+        _iterator17.f();
       }
+      updateScrollbars(state, metrics);
     }
     function measureSnapValues(state) {
       var element = state.element;
