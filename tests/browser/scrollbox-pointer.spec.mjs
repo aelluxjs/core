@@ -48,6 +48,39 @@ async function drag(page, id, pointerType = "mouse") {
   }, { id, pointerType });
 }
 
+test("elastic and snap wrappers normalize non-inline display and restore it", async ({ page }) => {
+  await setup(page, `<div id="block" data-ae-scrollbox style="width:100px;height:100px">
+    <div data-ae-scrollbox-elastic style="display:block!important;width:100px;height:300px"></div>
+  </div>
+  <div id="flex" data-ae-scrollbox style="width:100px;height:100px">
+    <div data-ae-scrollbox-snap style="display:flex;width:300px">
+      <div style="flex:none;width:100px;height:100px"></div>
+      <div style="flex:none;width:100px;height:100px"></div>
+      <div style="flex:none;width:100px;height:100px"></div>
+    </div>
+  </div>
+  <div id="grid" data-ae-scrollbox style="width:100px;height:100px">
+    <div data-ae-scrollbox-elastic data-ae-scrollbox-snap
+      style="display:grid;grid-auto-flow:column;width:300px">
+      <div style="width:100px;height:100px"></div>
+      <div style="width:100px;height:100px"></div>
+      <div style="width:100px;height:100px"></div>
+    </div>
+  </div>`);
+  const result = await page.evaluate(async () => {
+    const ids = ["block", "flex", "grid"];
+    const wrappers = ids.map(id => document.getElementById(id).firstElementChild);
+    const displays = wrappers.map(item => getComputedStyle(item).display);
+    const warnings = AelluxJs.diagnostics.showHistory().filter(item => item.code === 2016);
+    await AelluxJs.mountManager.unmount(document.body, "scrollbox");
+    return { displays, warnings: warnings.length,
+      restored: wrappers.map(item => [item.style.getPropertyValue("display"),
+        item.style.getPropertyPriority("display")]) };
+  });
+  expect(result).toEqual({ displays: ["inline-block", "inline-flex", "inline-grid"],
+    warnings: 3, restored: [["block", "important"], ["flex", ""], ["grid", ""]] });
+});
+
 test("snap initializes and controller navigates its direct children", async ({ page }) => {
   await setup(page, `<div id="gallery" data-ae-scrollbox="native"
     style="width:100px;height:100px;overflow:auto">
@@ -124,6 +157,59 @@ test("wheel advances snap points after horizontal conversion", async ({ page }) 
     .toBe(100);
 });
 
+test("converted snap wheel stretches only the horizontal elastic axis", async ({ page }) => {
+  await setup(page, `<div id="gallery" data-ae-scrollbox="native"
+    style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden">
+    <div id="wrapper" data-ae-scrollbox-snap data-ae-scrollbox-elastic
+      style="display:flex;width:300px;height:200px">
+      <div style="flex:none;width:100px;height:200px"></div>
+      <div style="flex:none;width:100px;height:200px"></div>
+      <div style="flex:none;width:100px;height:200px"></div>
+    </div>
+  </div>`);
+  await page.evaluate(() => AelluxJs.mountManager.controller("gallery").scrollbox.goto(2));
+  await expect.poll(() => page.evaluate(() => document.getElementById("gallery").scrollLeft))
+    .toBe(200);
+  const result = await page.evaluate(() => {
+    const element = document.getElementById("gallery");
+    const event = new WheelEvent("wheel", {
+      deltaY: 120, bubbles: true, cancelable: true
+    });
+    element.dispatchEvent(event);
+    return { prevented: event.defaultPrevented,
+      overflowY: getComputedStyle(element).overflowY,
+      maxY: element.scrollHeight - element.clientHeight,
+      transform: document.getElementById("wrapper").style.transform };
+  });
+  expect(result.prevented).toBe(false);
+  expect(result.overflowY).toBe("hidden");
+  expect(result.maxY).toBeGreaterThan(1);
+  expect(result.transform).toMatch(/^scale\([^,]+, 1\) translate3d\(-[^,]+, 0px, 0px\)/);
+});
+
+test("horizontal wheel ignores hidden vertical overflow during elastic pressure", async ({ page }) => {
+  await setup(page, `<div id="gallery" data-ae-scrollbox="native"
+    style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden">
+    <div id="wrapper" data-ae-scrollbox-elastic
+      style="width:300px;height:200px"></div>
+  </div>`);
+  const result = await page.evaluate(() => {
+    const element = document.getElementById("gallery");
+    element.scrollTo({ left: element.scrollWidth, behavior: "instant" });
+    const event = new WheelEvent("wheel", {
+      deltaX: 130, deltaY: 120, bubbles: true, cancelable: true
+    });
+    element.dispatchEvent(event);
+    return { maxY: element.scrollHeight - element.clientHeight,
+      maxX: element.scrollWidth - element.clientWidth,
+      scrollLeft: element.scrollLeft,
+      transform: document.getElementById("wrapper").style.transform };
+  });
+  expect(result.maxY).toBeGreaterThan(1);
+  expect(result.maxX).toBeGreaterThan(1);
+  expect(result.transform).toMatch(/^scale\([^,]+, 1\) translate3d\(-[^,]+, 0px, 0px\)/);
+});
+
 test("pointer snap advances one point on a fast horizontal swipe", async ({ page }) => {
   await setup(page, `<div id="gallery" data-ae-scrollbox="pointer"
     style="width:100px;height:100px;overflow:auto">
@@ -151,6 +237,66 @@ test("pointer snap advances one point on a fast horizontal swipe", async ({ page
       button: 0, buttons: 0, clientX: x - 60, clientY: y
     }));
   });
+  await expect.poll(() => page.evaluate(() => document.getElementById("gallery").scrollLeft))
+    .toBe(100);
+});
+
+test("snap advances wide items on a short flick or significant drag", async ({ page }) => {
+  await setup(page, `<div id="gallery" data-ae-scrollbox="pointer"
+    style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden">
+    <div data-ae-scrollbox-snap style="display:flex;width:900px">
+      <div style="flex:none;width:300px;height:100px"></div>
+      <div style="flex:none;width:300px;height:100px"></div>
+      <div style="flex:none;width:300px;height:100px"></div>
+    </div>
+  </div>`);
+  const move = async (distance, pointerId, immediateRelease = false) =>
+    page.evaluate(({ distance, pointerId, immediateRelease }) => {
+    const element = document.getElementById("gallery");
+    const rect = element.getBoundingClientRect();
+    const x = rect.left + 70, y = rect.top + 50;
+    element.dispatchEvent(new PointerEvent("pointerdown", {
+      bubbles: true, cancelable: true, isPrimary: true, pointerId,
+      pointerType: "mouse", button: 0, buttons: 1, clientX: x, clientY: y
+    }));
+    window.dispatchEvent(new PointerEvent("pointermove", {
+      bubbles: true, cancelable: true, isPrimary: true, pointerId,
+      pointerType: "mouse", buttons: 1, clientX: x - distance, clientY: y
+    }));
+    const point = { x: x - distance, y };
+    if (immediateRelease) window.dispatchEvent(new PointerEvent("pointerup", {
+      bubbles: true, isPrimary: true, pointerId, pointerType: "mouse",
+      button: 0, buttons: 0, clientX: point.x, clientY: point.y
+    }));
+    return point;
+  }, { distance, pointerId, immediateRelease });
+  const release = async (point, pointerId) => page.evaluate(({ point, pointerId }) => {
+    window.dispatchEvent(new PointerEvent("pointerup", {
+      bubbles: true, isPrimary: true, pointerId, pointerType: "mouse",
+      button: 0, buttons: 0, clientX: point.x, clientY: point.y
+    }));
+  }, { point, pointerId });
+  const reset = async () => {
+    await page.evaluate(() => AelluxJs.mountManager.controller("gallery").scrollbox.goto(0));
+    await expect.poll(() => page.evaluate(() => document.getElementById("gallery").scrollLeft))
+      .toBe(100);
+  };
+
+  await move(8, 301, true);
+  await expect.poll(() => page.evaluate(() => document.getElementById("gallery").scrollLeft))
+    .toBe(400);
+
+  await reset();
+  const drag = await move(35, 302);
+  await page.waitForTimeout(150);
+  await release(drag, 302);
+  await expect.poll(() => page.evaluate(() => document.getElementById("gallery").scrollLeft))
+    .toBe(400);
+
+  await reset();
+  const small = await move(10, 303);
+  await page.waitForTimeout(150);
+  await release(small, 303);
   await expect.poll(() => page.evaluate(() => document.getElementById("gallery").scrollLeft))
     .toBe(100);
 });

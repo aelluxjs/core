@@ -67,6 +67,8 @@
     var MOMENTUM_LIMIT_DISTANCE_PX = 15;
     var MOMENTUM_DECELERATION = 15e-4;
     var SNAP_SWIPE_SPEED_PX_MS = 0.5;
+    var SNAP_FLICK_WINDOW_MS = 120;
+    var SNAP_DRAG_DISTANCE_RATIO = 0.25;
     var SNAP_SCROLL_IDLE_MS = 120;
     var SNAP_WHEEL_IDLE_MS = 120;
     var ELASTIC_DAMPING = 1 / 3;
@@ -155,6 +157,12 @@
         scrollEndTimeout: null,
         wheelTimeout: null
       };
+      var inlineWrapper = {
+        element: null,
+        previousDisplay: null,
+        owned: false,
+        reportedDisplay: null
+      };
       var state = {
         element: element,
         previous: previous2,
@@ -180,6 +188,7 @@
         momentum: null,
         elastic: elastic,
         snap: snap,
+        inlineWrapper: inlineWrapper,
         resizeObserver: null,
         mutationObserver: null,
         lastResizeTime: -RESIZE_INTERVAL_MS,
@@ -263,6 +272,7 @@
       clearScrollEnd(state);
       clearSnapWheel(state);
       resetElastic(state);
+      restoreInlineWrapper(state);
       element.removeEventListener("scroll", state.onScroll);
       element.removeEventListener("scrollend", state.onScrollEnd);
       if (state.wheelListening) element.removeEventListener("wheel", state.onWheel, true);
@@ -291,6 +301,7 @@
       state.momentumEnabled = element.getAttribute(momentumAttribute) !== "false";
       configureElastic(state);
       configureSnap(state);
+      configureInlineWrapper(state);
       state.desktop = isDesktop();
       if ((state.desktop || state.elasticEnabled || state.snapEnabled) && !state.wheelListening) {
         element.addEventListener("wheel", state.onWheel, {
@@ -360,12 +371,63 @@
       }
       state.snapEnabled = true;
     }
+    function configureInlineWrapper(state) {
+      var inline = state.inlineWrapper;
+      var wrapper = state.elastic.wrapper || state.snap.wrapper;
+      if (inline.element !== wrapper) {
+        restoreInlineWrapper(state);
+        inline.element = wrapper;
+      }
+      if (!wrapper) return;
+      var display = root.getComputedStyle(wrapper).display;
+      if (display.startsWith("inline")) return;
+      if (inline.reportedDisplay !== display) {
+        AelluxJs.diagnostics.warn(AelluxJs.diagnostics.WARN_SCROLLBOX_WRAPPER_DISPLAY, {
+          element: wrapper,
+          display: display
+        });
+        inline.reportedDisplay = display;
+      }
+      var replacement = {
+        block: "inline-block",
+        flex: "inline-flex",
+        grid: "inline-grid",
+        "flow-root": "inline-block",
+        table: "inline-table"
+      }[display];
+      if (!replacement) return;
+      if (!inline.owned) {
+        inline.previousDisplay = {
+          value: wrapper.style.getPropertyValue("display"),
+          priority: wrapper.style.getPropertyPriority("display")
+        };
+      }
+      wrapper.style.setProperty("display", replacement, "important");
+      inline.owned = true;
+    }
+    function restoreInlineWrapper(state) {
+      var inline = state.inlineWrapper;
+      if (inline.owned && inline.element) {
+        var _previous = inline.previousDisplay;
+        if (_previous.value) inline.element.style.setProperty("display", _previous.value, _previous.priority);
+        else inline.element.style.removeProperty("display");
+      }
+      inline.element = null;
+      inline.previousDisplay = null;
+      inline.owned = false;
+      inline.reportedDisplay = null;
+    }
     function snapItems(state) {
       return state.snapEnabled && state.snap.wrapper ? Array.from(state.snap.wrapper.children) : [];
     }
     function snapAxis(state) {
       var metrics = nativeMetrics(state.element);
       return metrics.maxX > 1 ? "x" : metrics.maxY > 1 ? "y" : "x";
+    }
+    function snapCenterOffset(state, item, axis) {
+      var box = state.element.getBoundingClientRect();
+      var target = item.getBoundingClientRect();
+      return axis === "x" ? target.left + target.width / 2 - (box.left + state.element.clientLeft + state.element.clientWidth / 2) : target.top + target.height / 2 - (box.top + state.element.clientTop + state.element.clientHeight / 2);
     }
     function nearestSnapIndex(state, items) {
       var rect = state.element.getBoundingClientRect();
@@ -422,8 +484,9 @@
       if (!items.length) return;
       if (state.snap.wheelTarget) {
         var _target = state.snap.wheelTarget;
+        if (items.includes(_target) && snapNeedsScroll(state, _target)) return;
         state.snap.wheelTarget = null;
-        if (items.includes(_target) && !snapNeedsScroll(state, _target)) return;
+        if (items.includes(_target)) return;
       }
       var target = items[nearestSnapIndex(state, items)];
       state.snap.index = items.indexOf(target);
@@ -451,7 +514,7 @@
       clearSnapWheel(state);
       state.snap.pending = null;
       state.snap.index = index;
-      state.snap.wheelTarget = null;
+      state.snap.wheelTarget = items[index];
       if (state.elastic.owned) resetElastic(state);
       items[index].scrollIntoView({
         block: "center",
@@ -656,6 +719,7 @@
         var _member = _chain[_i];
         cancelMomentum(_member);
         _member.snap.pending = null;
+        _member.snap.wheelTarget = null;
         if (_member.elastic.owned) {
           resetElastic(_member);
           refresh(_member);
@@ -679,11 +743,21 @@
         momentumStartX: 0,
         momentumStartY: 0,
         elasticForce: 0,
+        flickSamples: [{
+          x: event.clientX,
+          y: event.clientY,
+          time: time
+        }],
         snapStarts: new Map(chain.filter(function(member2) {
           return member2.snapEnabled;
         }).map(function(member2) {
           var items = snapItems(member2);
-          return [member2, items[member2.snap.index] || null];
+          var item = items[member2.snap.index] || null;
+          var axis = snapAxis(member2);
+          return [member2, item ? {
+            item: item,
+            offset: snapCenterOffset(member2, item, axis)
+          } : null];
         })),
         selectionAtDown: selectionAtDown,
         verticalOnly: verticalOnly,
@@ -782,6 +856,14 @@
       var remaining = axis === "x" ? pointerScroll.lastX - event.clientX : pointerScroll.lastY - event.clientY;
       pointerScroll.lastX = event.clientX;
       pointerScroll.lastY = event.clientY;
+      var samples = pointerScroll.flickSamples;
+      var time = now();
+      samples.push({
+        x: event.clientX,
+        y: event.clientY,
+        time: time
+      });
+      while (samples.length > 1 && time - samples[0].time > SNAP_FLICK_WINDOW_MS) samples.shift();
       if (event.cancelable) event.preventDefault();
       if (!remaining) return;
       var outermost = null;
@@ -846,16 +928,16 @@
         publish(outermost);
       }
       if (lastUsed) {
-        var time = now();
+        var _time = now();
         if (pointerScroll.momentumState !== lastUsed) {
           pointerScroll.momentumState = lastUsed;
           pointerScroll.momentumStartX = lastStartX;
           pointerScroll.momentumStartY = lastStartY;
-          pointerScroll.momentumStartTime = time;
-        } else if (time - pointerScroll.momentumStartTime > MOMENTUM_LIMIT_TIME_MS) {
+          pointerScroll.momentumStartTime = _time;
+        } else if (_time - pointerScroll.momentumStartTime > MOMENTUM_LIMIT_TIME_MS) {
           pointerScroll.momentumStartX = lastUsed.element.scrollLeft;
           pointerScroll.momentumStartY = lastUsed.element.scrollTop;
-          pointerScroll.momentumStartTime = time;
+          pointerScroll.momentumStartTime = _time;
         }
       }
     }
@@ -988,16 +1070,21 @@
     function schedulePointerSnap(state, pointerScroll) {
       var items = snapItems(state);
       var axis = snapAxis(state);
+      var start = pointerScroll.snapStarts.get(state);
+      var startIndex = start ? items.indexOf(start.item) : -1;
       var index = nearestSnapIndex(state, items);
-      if (axis === pointerScroll.axis && pointerScroll.momentumState === state) {
-        var elapsed = Math.max(1, now() - pointerScroll.momentumStartTime);
-        var current = axis === "x" ? state.element.scrollLeft : state.element.scrollTop;
-        var start = axis === "x" ? pointerScroll.momentumStartX : pointerScroll.momentumStartY;
-        var distance = current - start;
-        if (elapsed < MOMENTUM_LIMIT_TIME_MS && Math.abs(distance) >= MOMENTUM_LIMIT_DISTANCE_PX && Math.abs(distance) / elapsed >= SNAP_SWIPE_SPEED_PX_MS) {
-          var startItem = pointerScroll.snapStarts.get(state);
-          var startIndex = items.indexOf(startItem);
-          index = Math.max(0, Math.min(items.length - 1, (startIndex < 0 ? index : startIndex) + Math.sign(distance)));
+      if (index === startIndex && axis === pointerScroll.axis && start) {
+        var samples = pointerScroll.flickSamples;
+        var first = samples[0], last = samples[samples.length - 1];
+        var distance = axis === "x" ? first.x - last.x : first.y - last.y;
+        var elapsed = Math.max(1, last.time - first.time);
+        var flick = now() - last.time <= SNAP_FLICK_WINDOW_MS && Math.abs(distance) >= POINTER_SCROLL_THRESHOLD_PX && Math.abs(distance) / elapsed >= SNAP_SWIPE_SPEED_PX_MS;
+        var offset = snapCenterOffset(state, start.item, axis);
+        var size = axis === "x" ? state.element.clientWidth : state.element.clientHeight;
+        var movedAway = Math.abs(offset) - Math.abs(start.offset) >= size * SNAP_DRAG_DISTANCE_RATIO;
+        if (flick || movedAway) {
+          var direction = flick ? Math.sign(distance) : Math.sign(start.offset - offset);
+          index = Math.max(0, Math.min(items.length - 1, index + direction));
         }
       }
       state.snap.pending = items[index];
@@ -1178,17 +1265,18 @@
       releaseElastic(state);
     }
     function applyElasticFromDesired(state, desiredX, desiredY, additive) {
+      var axis = arguments.length > 4 && arguments[4] !== void 0 ? arguments[4] : null;
       if (!state.elasticEnabled) return false;
       var element = state.element;
       var metrics = state.metrics || nativeMetrics(element);
       var elastic = state.elastic;
       var amounts = [0, 0, 0, 0];
-      if (metrics.maxY > 1) {
+      if (axis !== "x" && metrics.maxY > 1) {
         var limitY = elasticLimit(element.clientHeight, elastic.limits[0]);
         if (desiredY < 0) amounts[0] = elasticResistance(-desiredY, additive ? elastic.amounts[0] : 0, limitY);
         else if (desiredY > metrics.maxY) amounts[2] = elasticResistance(desiredY - metrics.maxY, additive ? elastic.amounts[2] : 0, limitY);
       }
-      if (metrics.maxX > 1) {
+      if (axis !== "y" && metrics.maxX > 1) {
         var limitX = elasticLimit(element.clientWidth, elastic.limits[1]);
         if (desiredX > metrics.maxX) amounts[1] = elasticResistance(desiredX - metrics.maxX, additive ? elastic.amounts[1] : 0, limitX);
         else if (desiredX < 0) amounts[3] = elasticResistance(-desiredX, additive ? elastic.amounts[3] : 0, limitX);
@@ -1295,8 +1383,8 @@
       elastic.wheelTimeout = null;
       if (elastic.wrapper) elastic.wrapper.classList.remove(elasticReleaseClass);
       if (elastic.owned && elastic.wrapper) {
-        var _previous = elastic.previousTransform;
-        if (_previous.value) elastic.wrapper.style.setProperty("transform", _previous.value, _previous.priority);
+        var _previous2 = elastic.previousTransform;
+        if (_previous2.value) elastic.wrapper.style.setProperty("transform", _previous2.value, _previous2.priority);
         else elastic.wrapper.style.removeProperty("transform");
         var previousOrigin = elastic.previousOrigin;
         if (previousOrigin.value) elastic.wrapper.style.setProperty("transform-origin", previousOrigin.value, previousOrigin.priority);
@@ -1406,6 +1494,16 @@
         page: element.clientHeight || 1
       };
     }
+    function wheelAxes(state, metrics) {
+      var style = root.getComputedStyle(state.element);
+      var available = function available2(value) {
+        return value === "auto" || value === "scroll";
+      };
+      return {
+        x: metrics.maxX > 1 && available(style.overflowX),
+        y: metrics.maxY > 1 && available(style.overflowY)
+      };
+    }
     function publish(state) {
       var metrics = state.metrics || nativeMetrics(state.element);
       state.element.style.setProperty(properties[0], progress(state.element.scrollTop, metrics.maxY));
@@ -1414,11 +1512,11 @@
     function progress(position, distance) {
       return distance > 0 ? Math.min(1, Math.max(0, position / distance)) : 0;
     }
-    function handleSnapWheel(state, event, deltaX, deltaY) {
+    function handleSnapWheel(state, event, deltaX, deltaY, axes) {
       var items = snapItems(state);
       if (!items.length) return false;
-      var metrics = nativeMetrics(state.element);
-      var hasX = metrics.maxX > 1, hasY = metrics.maxY > 1;
+      var hasX = axes.x, hasY = axes.y;
+      if (!hasX && !hasY) return false;
       var axis = hasX && hasY ? Math.abs(deltaX) >= Math.abs(deltaY) ? "x" : "y" : hasX ? "x" : "y";
       var delta = axis === "x" ? deltaX : deltaY;
       if (!delta) return false;
@@ -1433,7 +1531,7 @@
         if (state.elasticEnabled) {
           var desiredX = state.element.scrollLeft + (axis === "x" ? delta : 0);
           var desiredY = state.element.scrollTop + (axis === "y" ? delta : 0);
-          if (applyElasticFromDesired(state, desiredX, desiredY, true)) {
+          if (applyElasticFromDesired(state, desiredX, desiredY, true, axis)) {
             scrollWithinElasticBounds(state, desiredX, desiredY);
             publish(state);
             if (state.elastic.wheelTimeout !== null) root.clearTimeout(state.elastic.wheelTimeout);
@@ -1462,11 +1560,12 @@
       if (event.target.closest("[".concat(attribute, "]")) !== state.element) return;
       var metrics = state.metrics;
       if (!metrics) return;
+      var axes = wheelAxes(state, metrics);
       var factor = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? metrics.page : 1;
-      var converted = state.desktop && state.wheelEnabled && metrics.maxX > 1 && metrics.maxY <= 1 && Math.abs(event.deltaX) <= Math.abs(event.deltaY);
+      var converted = state.desktop && state.wheelEnabled && axes.x && !axes.y && Math.abs(event.deltaX) <= Math.abs(event.deltaY);
       var deltaX = (converted ? event.deltaY : event.deltaX) * factor;
       var deltaY = (converted ? 0 : event.deltaY) * factor;
-      if (state.snapEnabled && handleSnapWheel(state, event, deltaX, deltaY)) return;
+      if (state.snapEnabled && handleSnapWheel(state, event, deltaX, deltaY, axes)) return;
       if (converted && deltaX) {
         var current = state.element.scrollLeft;
         var desiredX = current + deltaX;
@@ -1474,7 +1573,7 @@
         var overflow = desiredX < 0 || desiredX > metrics.maxX;
         var stretched = false;
         if (overflow && state.elasticEnabled) {
-          stretched = applyElasticFromDesired(state, desiredX, state.element.scrollTop, true);
+          stretched = applyElasticFromDesired(state, desiredX, state.element.scrollTop, true, "x");
           if (stretched) {
             scrollWithinElasticBounds(state, desiredX, state.element.scrollTop);
             if (state.elastic.wheelTimeout !== null) root.clearTimeout(state.elastic.wheelTimeout);
@@ -1494,10 +1593,11 @@
         if (!overflow && _next !== current) event.preventDefault();
         return;
       }
-      if (state.elasticEnabled) {
-        var _desiredX = Math.max(0, Math.min(metrics.maxX, state.element.scrollLeft)) + deltaX;
-        var desiredY = Math.max(0, Math.min(metrics.maxY, state.element.scrollTop)) + deltaY;
-        if (applyElasticFromDesired(state, _desiredX, desiredY, true)) {
+      if (state.elasticEnabled && (axes.x || axes.y)) {
+        var _desiredX = state.element.scrollLeft + (axes.x ? deltaX : 0);
+        var desiredY = state.element.scrollTop + (axes.y ? deltaY : 0);
+        var axis = axes.x && axes.y ? null : axes.x ? "x" : "y";
+        if (applyElasticFromDesired(state, _desiredX, desiredY, true, axis)) {
           event.preventDefault();
           scrollWithinElasticBounds(state, _desiredX, desiredY);
           publish(state);
