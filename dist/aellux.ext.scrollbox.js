@@ -11,8 +11,11 @@
     const momentumAttribute = AelluxJs.attr("scrollbox-momentum");
     const elasticAttribute = AelluxJs.attr("scrollbox-elastic");
     const elasticReleaseClass = AelluxJs.className("scrollbox-elastic-release");
+    const pointerScrollExceptionSelector = "a, button, input, select, textarea, [contenteditable], [draggable='true']";
     const RESIZE_INTERVAL_MS = 100;
-    const DRAG_THRESHOLD_PX = 3;
+    const POINTER_SCROLL_THRESHOLD_PX = 3;
+    const POINTER_SCROLL_MULTICLICK_MS = 500;
+    const POINTER_SCROLL_MULTICLICK_DISTANCE_PX = 8;
     const SELECTION_HORIZONTAL_THRESHOLD_PX = 8;
     const SELECTION_VERTICAL_TOLERANCE_PX = 6;
     const MOMENTUM_LIMIT_TIME_MS = 300;
@@ -23,7 +26,7 @@
     const ELASTIC_RETURN_LERP = 0.15;
     const ELASTIC_RETURN_EPSILON = 0.01;
     const ELASTIC_WHEEL_IDLE_MS = 80;
-    const mouseDragEvents = [
+    const pointerScrollMouseEvents = [
       "mousedown",
       "mousemove",
       "mouseup",
@@ -98,13 +101,19 @@
         metrics: null,
         mode: null,
         desktop: false,
+        cursor: {
+          value: element.style.getPropertyValue("cursor"),
+          priority: element.style.getPropertyPriority("cursor"),
+          owned: false
+        },
         wheelEnabled: true,
         momentumEnabled: true,
         elasticEnabled: false,
         wheelListening: false,
         pointerListening: false,
         touchListening: false,
-        drag: null,
+        pointerScroll: null,
+        lastPointerDown: null,
         mouseReleaseButton: null,
         mouseReleaseTimeout: null,
         momentum: null,
@@ -117,14 +126,33 @@
       };
       state.onScroll = () => publish(state);
       state.onWheel = (event) => handleWheel(state, event);
-      state.onPointerDown = (event) => startDrag(state, event);
-      state.onMouseDown = (event) => {
-        if (event.button === 0 && event.detail > 1) endDrag(state);
+      state.onPointerDown = (event) => startPointerScroll(state, event);
+      state.onPointerOver = (event) => updatePointerScrollCursor(
+        state,
+        event.target,
+        event.clientX,
+        event.clientY
+      );
+      state.onPointerOut = (event) => {
+        if (state.pointerScroll && state.pointerScroll.moved) return;
+        if (!event.relatedTarget || !element.contains(event.relatedTarget))
+          restorePointerScrollCursor(state);
       };
-      state.onPointerMove = (event) => moveDrag(state, event);
-      state.onMouseEvent = (event) => cancelDragMouseEvent(state, event);
-      state.onPointerEnd = (event) => endDrag(state, event);
-      state.onBlur = () => endDrag(state);
+      state.onMouseDown = (event) => {
+        if (event.button === 0 && event.detail > 1) endPointerScroll(state);
+      };
+      state.onPointerMove = (event) => movePointerScroll(state, event);
+      state.onMouseEvent = (event) => cancelPointerScrollMouseEvent(state, event);
+      state.onPointerScrollTouchMove = (event) => {
+        if (state.pointerScroll && state.pointerScroll.moved && event.cancelable)
+          event.preventDefault();
+      };
+      state.onPointerScrollNativeStart = (event) => {
+        if (state.pointerScroll && state.pointerScroll.moved && event.cancelable)
+          event.preventDefault();
+      };
+      state.onPointerEnd = (event) => endPointerScroll(state, event);
+      state.onBlur = () => endPointerScroll(state);
       state.onTouchStart = (event) => startTouch(state, event);
       state.onTouchMove = (event) => moveTouch(state, event);
       state.onTouchEnd = (event) => endTouch(state, event);
@@ -141,14 +169,17 @@
       const state = scrollboxes.get(element);
       if (!state) return;
       state.disposed = true;
-      endDrag(state);
-      stopMouseDragEvents(state);
+      endPointerScroll(state);
+      stopPointerScrollMouseEvents(state);
+      restorePointerScrollCursor(state);
       cancelMomentum(state);
       resetElastic(state);
       element.removeEventListener("scroll", state.onScroll);
       if (state.wheelListening) element.removeEventListener("wheel", state.onWheel, true);
       if (state.pointerListening) {
         element.removeEventListener("pointerdown", state.onPointerDown);
+        element.removeEventListener("pointerover", state.onPointerOver);
+        element.removeEventListener("pointerout", state.onPointerOut);
         element.removeEventListener("mousedown", state.onMouseDown);
       }
       if (state.touchListening) removeTouchListeners(state);
@@ -184,13 +215,19 @@
       if (!pointerEnabled || !state.momentumEnabled) cancelMomentum(state);
       if (pointerEnabled && !state.pointerListening) {
         element.addEventListener("pointerdown", state.onPointerDown);
+        element.addEventListener("pointerover", state.onPointerOver);
+        element.addEventListener("pointerout", state.onPointerOut);
         element.addEventListener("mousedown", state.onMouseDown);
         state.pointerListening = true;
       } else if (!pointerEnabled && state.pointerListening) {
         element.removeEventListener("pointerdown", state.onPointerDown);
+        element.removeEventListener("pointerover", state.onPointerOver);
+        element.removeEventListener("pointerout", state.onPointerOut);
         element.removeEventListener("mousedown", state.onMouseDown);
         state.pointerListening = false;
-        endDrag(state);
+        endPointerScroll(state);
+        state.lastPointerDown = null;
+        restorePointerScrollCursor(state);
       }
       refresh(state);
     }
@@ -281,19 +318,58 @@
     function isDesktop() {
       return !!(root.matchMedia && root.matchMedia("(hover: hover) and (pointer: fine)").matches);
     }
-    function startDrag(state, event) {
+    function updatePointerScrollCursor(state, target, x, y) {
+      if (!state.pointerListening || state.pointerScroll && state.pointerScroll.moved) return;
+      if (!target || target.nodeType !== 1 || target.closest(`[${attribute}]`) !== state.element || target.closest(pointerScrollExceptionSelector) || isTextAtPoint(target, x, y)) {
+        restorePointerScrollCursor(state);
+        return;
+      }
+      setPointerScrollCursor(state, "grab");
+    }
+    function isTextAtPoint(element, x, y) {
+      if (root.getComputedStyle(element).userSelect === "none") return false;
+      const range = document.createRange();
+      for (const node of element.childNodes) {
+        if (node.nodeType !== 3 || !node.textContent.trim()) continue;
+        range.selectNodeContents(node);
+        for (const rect of range.getClientRects()) {
+          if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom)
+            return true;
+        }
+      }
+      return false;
+    }
+    function setPointerScrollCursor(state, value) {
+      state.element.style.setProperty("cursor", value, "important");
+      state.cursor.owned = true;
+    }
+    function restorePointerScrollCursor(state) {
+      if (!state.cursor.owned) return;
+      if (state.cursor.value) state.element.style.setProperty(
+        "cursor",
+        state.cursor.value,
+        state.cursor.priority
+      );
+      else state.element.style.removeProperty("cursor");
+      state.cursor.owned = false;
+    }
+    function startPointerScroll(state, event) {
       if (event.detail > 1) return;
       cancelMomentum(state);
-      if (state.drag || event.defaultPrevented || event.button !== 0 || !event.isPrimary || event.pointerType === "touch" || (event.buttons & 1) === 0) return;
+      if (state.pointerScroll || event.defaultPrevented || event.button !== 0 || !event.isPrimary || event.pointerType === "touch" || (event.buttons & 1) === 0) return;
       const element = state.element;
       const nested = event.target.closest(`[${attribute}]`);
-      if (nested !== element || event.target.closest(
-        "a, button, input, select, textarea, [contenteditable], [draggable='true']"
-      )) return;
+      if (nested !== element || event.target.closest(pointerScrollExceptionSelector)) return;
       let metrics = nativeMetrics(element);
       if (metrics.maxX <= 0 && metrics.maxY <= 0) return;
       const rect = element.getBoundingClientRect();
       if (event.clientX >= rect.left + element.clientWidth || event.clientY >= rect.top + element.clientHeight) return;
+      const previousDown = state.lastPointerDown;
+      const time = now();
+      state.lastPointerDown = { x: event.clientX, y: event.clientY, time };
+      if (previousDown && time - previousDown.time <= POINTER_SCROLL_MULTICLICK_MS && Math.abs(event.clientX - previousDown.x) <= POINTER_SCROLL_MULTICLICK_DISTANCE_PX && Math.abs(event.clientY - previousDown.y) <= POINTER_SCROLL_MULTICLICK_DISTANCE_PX) return;
+      if (!isTextAtPoint(event.target, event.clientX, event.clientY) && event.cancelable)
+        event.preventDefault();
       if (state.elastic.owned) {
         resetElastic(state);
         refresh(state);
@@ -302,7 +378,7 @@
       if (state.mouseReleaseTimeout !== null) root.clearTimeout(state.mouseReleaseTimeout);
       state.mouseReleaseTimeout = null;
       state.mouseReleaseButton = null;
-      state.drag = {
+      state.pointerScroll = {
         pointerId: event.pointerId,
         button: event.button,
         startX: event.clientX,
@@ -316,90 +392,119 @@
         momentumStartY: element.scrollTop,
         momentumStartTime: now(),
         userSelect: element.style.getPropertyValue("user-select"),
-        userSelectPriority: element.style.getPropertyPriority("user-select")
+        userSelectPriority: element.style.getPropertyPriority("user-select"),
+        scrollBehavior: element.style.getPropertyValue("scroll-behavior"),
+        scrollBehaviorPriority: element.style.getPropertyPriority("scroll-behavior")
       };
-      if (!state.drag.selectionPending) {
-        element.style.setProperty("user-select", "none");
-        state.drag.userSelectApplied = true;
-      }
       root.addEventListener("pointermove", state.onPointerMove, { passive: false, capture: true });
-      for (const name of mouseDragEvents) {
+      root.addEventListener(
+        "touchmove",
+        state.onPointerScrollTouchMove,
+        { passive: false, capture: true }
+      );
+      root.addEventListener("dragstart", state.onPointerScrollNativeStart, true);
+      root.addEventListener("selectstart", state.onPointerScrollNativeStart, true);
+      for (const name of pointerScrollMouseEvents) {
         root.addEventListener(name, state.onMouseEvent, { passive: false, capture: true });
       }
       root.addEventListener("pointerup", state.onPointerEnd, true);
       root.addEventListener("pointercancel", state.onPointerEnd, true);
       root.addEventListener("blur", state.onBlur);
     }
-    function moveDrag(state, event) {
-      const drag = state.drag;
-      if (!drag || event.pointerId !== drag.pointerId) return;
+    function movePointerScroll(state, event) {
+      const pointerScroll = state.pointerScroll;
+      if (!pointerScroll || event.pointerId !== pointerScroll.pointerId) return;
       if ((event.buttons & 1) === 0) {
-        endDrag(state);
+        endPointerScroll(state);
         return;
       }
-      const dx = drag.startX - event.clientX;
-      const dy = drag.startY - event.clientY;
-      if (drag.selectionPending) {
+      const dx = pointerScroll.startX - event.clientX;
+      const dy = pointerScroll.startY - event.clientY;
+      if (pointerScroll.selectionPending) {
         const horizontal = Math.abs(dx);
         const vertical = Math.abs(dy);
         if (horizontal >= SELECTION_HORIZONTAL_THRESHOLD_PX && horizontal > vertical) {
-          endDrag(state);
+          endPointerScroll(state);
           return;
         }
         if (vertical < SELECTION_VERTICAL_TOLERANCE_PX || vertical < horizontal) return;
-        drag.selectionPending = false;
-        state.element.style.setProperty("user-select", "none");
-        drag.userSelectApplied = true;
+        pointerScroll.selectionPending = false;
       }
-      if (!drag.moved && dx * dx + dy * dy < DRAG_THRESHOLD_PX * DRAG_THRESHOLD_PX) return;
-      drag.moved = true;
-      if (event.cancelable) event.preventDefault();
+      if (!pointerScroll.moved && dx * dx + dy * dy < POINTER_SCROLL_THRESHOLD_PX * POINTER_SCROLL_THRESHOLD_PX) return;
+      if (!pointerScroll.moved) {
+        state.element.style.setProperty("user-select", "none");
+        state.element.style.setProperty("scroll-behavior", "auto", "important");
+        setPointerScrollCursor(state, "grabbing");
+        pointerScroll.userSelectApplied = true;
+        const selection = root.getSelection();
+        if (selection && selection.anchorNode && state.element.contains(selection.anchorNode))
+          selection.removeAllRanges();
+      }
+      pointerScroll.moved = true;
       const time = now();
-      const resetMomentum = time - drag.momentumStartTime > MOMENTUM_LIMIT_TIME_MS;
-      const desiredX = drag.scrollLeft + dx;
-      const desiredY = drag.scrollTop + dy;
+      const resetMomentum = time - pointerScroll.momentumStartTime > MOMENTUM_LIMIT_TIME_MS;
+      const desiredX = pointerScroll.scrollLeft + dx;
+      const desiredY = pointerScroll.scrollTop + dy;
+      if (event.cancelable) event.preventDefault();
       applyElasticFromDesired(state, desiredX, desiredY, false);
       scrollWithinElasticBounds(state, desiredX, desiredY);
       if (resetMomentum) {
-        drag.momentumStartX = state.element.scrollLeft;
-        drag.momentumStartY = state.element.scrollTop;
-        drag.momentumStartTime = time;
+        pointerScroll.momentumStartX = state.element.scrollLeft;
+        pointerScroll.momentumStartY = state.element.scrollTop;
+        pointerScroll.momentumStartTime = time;
       }
       publish(state);
     }
-    function endDrag(state, event) {
-      const drag = state.drag;
-      if (!drag || event && event.pointerId !== drag.pointerId) return;
-      state.drag = null;
+    function endPointerScroll(state, event) {
+      const pointerScroll = state.pointerScroll;
+      if (!pointerScroll || event && event.pointerId !== pointerScroll.pointerId) return;
+      state.pointerScroll = null;
       root.removeEventListener("pointermove", state.onPointerMove, true);
+      root.removeEventListener("touchmove", state.onPointerScrollTouchMove, true);
+      root.removeEventListener("dragstart", state.onPointerScrollNativeStart, true);
+      root.removeEventListener("selectstart", state.onPointerScrollNativeStart, true);
       root.removeEventListener("pointerup", state.onPointerEnd, true);
       root.removeEventListener("pointercancel", state.onPointerEnd, true);
       root.removeEventListener("blur", state.onBlur);
-      if (drag.moved && !state.disposed) {
-        state.mouseReleaseButton = drag.button;
+      if (pointerScroll.moved && !state.disposed) {
+        state.mouseReleaseButton = pointerScroll.button;
         if (state.mouseReleaseTimeout !== null) root.clearTimeout(state.mouseReleaseTimeout);
-        state.mouseReleaseTimeout = root.setTimeout(() => stopMouseDragEvents(state), 0);
+        state.mouseReleaseTimeout = root.setTimeout(() => stopPointerScrollMouseEvents(state), 0);
       } else {
-        stopMouseDragEvents(state);
+        stopPointerScrollMouseEvents(state);
       }
-      if (drag.userSelectApplied) {
-        if (drag.userSelect) state.element.style.setProperty(
+      if (pointerScroll.userSelectApplied) {
+        if (pointerScroll.userSelect) state.element.style.setProperty(
           "user-select",
-          drag.userSelect,
-          drag.userSelectPriority
+          pointerScroll.userSelect,
+          pointerScroll.userSelectPriority
         );
         else state.element.style.removeProperty("user-select");
+        if (pointerScroll.scrollBehavior) state.element.style.setProperty(
+          "scroll-behavior",
+          pointerScroll.scrollBehavior,
+          pointerScroll.scrollBehaviorPriority
+        );
+        else state.element.style.removeProperty("scroll-behavior");
       }
+      if (event && event.type === "pointerup" && state.pointerListening) {
+        updatePointerScrollCursor(
+          state,
+          document.elementFromPoint(event.clientX, event.clientY),
+          event.clientX,
+          event.clientY
+        );
+      } else restorePointerScrollCursor(state);
       const hadElastic = state.elastic.active;
       releaseElastic(state);
-      if (event && event.type === "pointerup" && drag.moved && state.momentumEnabled && !hadElastic && !state.disposed && now() - drag.momentumStartTime < MOMENTUM_LIMIT_TIME_MS) {
-        startMomentum(state, drag);
+      if (event && event.type === "pointerup" && pointerScroll.moved && state.momentumEnabled && !hadElastic && !state.disposed && now() - pointerScroll.momentumStartTime < MOMENTUM_LIMIT_TIME_MS) {
+        startMomentum(state, pointerScroll);
       }
     }
-    function cancelDragMouseEvent(state, event) {
-      const active = state.drag && state.drag.moved;
+    function cancelPointerScrollMouseEvent(state, event) {
+      const active = state.pointerScroll && state.pointerScroll.moved;
       if (!active && !mouseReleaseEvents.has(event.type)) return;
-      const button = active ? state.drag.button : state.mouseReleaseButton;
+      const button = active ? state.pointerScroll.button : state.mouseReleaseButton;
       if (button === null || !event.cancelable) return;
       if (mouseHoldEvents.has(event.type)) {
         if ((event.buttons & 1 << button) === 0) return;
@@ -408,24 +513,26 @@
       }
       event.preventDefault();
     }
-    function stopMouseDragEvents(state) {
+    function stopPointerScrollMouseEvents(state) {
       if (state.mouseReleaseTimeout !== null) root.clearTimeout(state.mouseReleaseTimeout);
       state.mouseReleaseTimeout = null;
       state.mouseReleaseButton = null;
-      for (const name of mouseDragEvents) root.removeEventListener(name, state.onMouseEvent, true);
+      for (const name of pointerScrollMouseEvents) {
+        root.removeEventListener(name, state.onMouseEvent, true);
+      }
     }
-    function startMomentum(state, drag) {
+    function startMomentum(state, pointerScroll) {
       const element = state.element;
-      const elapsed = Math.max(1, now() - drag.momentumStartTime);
+      const elapsed = Math.max(1, now() - pointerScroll.momentumStartTime);
       const x = momentumAxis(
         element.scrollLeft,
-        drag.momentumStartX,
+        pointerScroll.momentumStartX,
         elapsed,
         Math.max(0, element.scrollWidth - element.clientWidth)
       );
       const y = momentumAxis(
         element.scrollTop,
-        drag.momentumStartY,
+        pointerScroll.momentumStartY,
         elapsed,
         Math.max(0, element.scrollHeight - element.clientHeight)
       );
@@ -780,7 +887,7 @@
       return distance > 0 ? Math.min(1, Math.max(0, position / distance)) : 0;
     }
     function handleWheel(state, event) {
-      if (state.desktop && state.mode === "pointer" && state.drag && state.drag.moved) {
+      if (state.desktop && state.mode === "pointer" && state.pointerScroll && state.pointerScroll.moved) {
         if (event.cancelable) event.preventDefault();
         event.stopPropagation();
         return;

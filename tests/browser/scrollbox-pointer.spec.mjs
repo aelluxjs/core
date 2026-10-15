@@ -68,7 +68,7 @@ test("pointer drag keeps native scroll events and progress", async ({ page }) =>
       if (event.target === element) window.scrollEvents.push(event.isTrusted);
     }, true);
   });
-  expect(await drag(page, "box")).toEqual({ x: 50, y: 40, during: "none", after: "" });
+  expect(await drag(page, "box")).toEqual({ x: 50, y: 40, during: "", after: "" });
   await expect.poll(() => page.evaluate(() => ({
     events: window.scrollEvents.length,
     x: document.getElementById("box").style.getPropertyValue("--ae-scroll-x-progress"),
@@ -76,6 +76,118 @@ test("pointer drag keeps native scroll events and progress", async ({ page }) =>
   }))).toMatchObject({ x: "0.25", y: "0.2" });
   expect(await page.evaluate(() => window.scrollEvents.length)).toBeGreaterThan(0);
   expect(await page.evaluate(() => window.scrollEvents.every(Boolean))).toBe(true);
+});
+
+test("move defaults are canceled only after pointer scrolling begins", async ({ page }) => {
+  await setup(page, box("box", "pointer", "", "<input id='control'>"));
+  const result = await page.evaluate(() => {
+    const element = document.getElementById("box");
+    const rect = element.getBoundingClientRect();
+    const x = rect.left + 70, y = rect.top + 70;
+    const pointerMove = offset => {
+      const event = new PointerEvent("pointermove", {
+        bubbles: true, cancelable: true, isPrimary: true, pointerId: 96,
+        pointerType: "mouse", button: -1, buttons: 1,
+        clientX: x - offset, clientY: y - offset
+      });
+      window.dispatchEvent(event);
+      return event.defaultPrevented;
+    };
+    const touchMove = () => {
+      const event = new Event("touchmove", { bubbles: true, cancelable: true });
+      element.dispatchEvent(event);
+      return event.defaultPrevented;
+    };
+    const mouseMove = () => {
+      const event = new MouseEvent("mousemove", {
+        bubbles: true, cancelable: true, buttons: 1
+      });
+      element.dispatchEvent(event);
+      return event.defaultPrevented;
+    };
+    element.dispatchEvent(new PointerEvent("pointerdown", {
+      bubbles: true, isPrimary: true, pointerId: 96, pointerType: "mouse",
+      button: 0, buttons: 1, clientX: x, clientY: y
+    }));
+    const pending = { pointer: pointerMove(1), touch: touchMove(), mouse: mouseMove() };
+    const during = { pointer: pointerMove(30), touch: touchMove(), mouse: mouseMove() };
+    window.dispatchEvent(new PointerEvent("pointerup", {
+      bubbles: true, isPrimary: true, pointerId: 96, pointerType: "mouse",
+      button: 0, buttons: 0, clientX: x - 30, clientY: y - 30
+    }));
+    const after = { touch: touchMove(), mouse: mouseMove() };
+    document.getElementById("control").dispatchEvent(new PointerEvent("pointerdown", {
+      bubbles: true, isPrimary: true, pointerId: 97, pointerType: "mouse",
+      button: 0, buttons: 1, clientX: x, clientY: y
+    }));
+    const control = { touch: touchMove(), mouse: mouseMove() };
+    return { pending, during, after, control };
+  });
+  expect(result).toEqual({
+    pending: { pointer: false, touch: false, mouse: false },
+    during: { pointer: true, touch: true, mouse: true },
+    after: { touch: false, mouse: false },
+    control: { touch: false, mouse: false }
+  });
+});
+
+test("pointer scroll uses grab on open space and grabbing during text-origin scrolling", async ({ page }) => {
+  await setup(page, `<div id="box" data-ae-scrollbox="pointer"
+    data-ae-scrollbox-momentum="false" style="width:200px;height:100px;overflow:auto">
+    <div style="width:180px;height:300px;padding-top:20px">
+      <span id="text">selectable words here</span>
+      <button id="button">Click</button>
+      <div id="item" draggable="true">Drag me</div>
+    </div></div>`);
+  const box = await page.locator("#box").boundingBox();
+  await page.mouse.move(box.x + 160, box.y + 10);
+  expect(await page.locator("#box").evaluate(element => element.style.cursor)).toBe("grab");
+
+  for (const id of ["text", "button", "item"]) {
+    const rect = await page.locator(`#${id}`).boundingBox();
+    await page.mouse.move(rect.x + 4, rect.y + rect.height / 2);
+    expect(await page.locator("#box").evaluate(element => element.style.cursor)).toBe("");
+  }
+
+  const text = await page.locator("#text").boundingBox();
+  await page.mouse.move(text.x + 5, text.y + text.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(text.x + 5, text.y - 10, { steps: 4 });
+  expect(await page.locator("#box").evaluate(element => element.style.cursor)).toBe("grabbing");
+  await page.mouse.up();
+  await page.mouse.move(box.x - 20, box.y - 20);
+  expect(await page.locator("#box").evaluate(element => element.style.cursor)).toBe("");
+});
+
+test("pointer scroll reserves open space but leaves text and controls native", async ({ page }) => {
+  await setup(page, `<div id="box" data-ae-scrollbox="pointer"
+    data-ae-scrollbox-momentum="false" style="width:200px;height:100px;overflow:auto">
+    <div style="width:180px;height:300px;padding-top:20px">
+      <span id="text">selectable words here</span>
+      <button id="button">Click</button>
+      <input id="input" value="editable text">
+      <div id="item" draggable="true">Drag me</div>
+    </div></div>`);
+  await page.evaluate(() => {
+    window.pointerDowns = [];
+    document.addEventListener("pointerdown", event => {
+      if (event.target.closest("#box")) window.pointerDowns.push({
+        target: event.target.id || "open", prevented: event.defaultPrevented
+      });
+    });
+  });
+  const rect = await page.locator("#box").boundingBox();
+  await page.mouse.click(rect.x + 160, rect.y + 10);
+  for (const id of ["text", "button", "input", "item"]) {
+    await page.locator(`#${id}`).click();
+  }
+  expect(await page.evaluate(() => window.pointerDowns)).toEqual([
+    { target: "open", prevented: true },
+    { target: "text", prevented: false },
+    { target: "button", prevented: false },
+    { target: "input", prevented: false },
+    { target: "item", prevented: false }
+  ]);
 });
 
 test("desktop pointer drag cancels wheel until pointer release", async ({ page }) => {

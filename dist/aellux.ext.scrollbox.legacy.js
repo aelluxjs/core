@@ -54,8 +54,11 @@
     var momentumAttribute = AelluxJs.attr("scrollbox-momentum");
     var elasticAttribute = AelluxJs.attr("scrollbox-elastic");
     var elasticReleaseClass = AelluxJs.className("scrollbox-elastic-release");
+    var pointerScrollExceptionSelector = "a, button, input, select, textarea, [contenteditable], [draggable='true']";
     var RESIZE_INTERVAL_MS = 100;
-    var DRAG_THRESHOLD_PX = 3;
+    var POINTER_SCROLL_THRESHOLD_PX = 3;
+    var POINTER_SCROLL_MULTICLICK_MS = 500;
+    var POINTER_SCROLL_MULTICLICK_DISTANCE_PX = 8;
     var SELECTION_HORIZONTAL_THRESHOLD_PX = 8;
     var SELECTION_VERTICAL_TOLERANCE_PX = 6;
     var MOMENTUM_LIMIT_TIME_MS = 300;
@@ -69,7 +72,7 @@
     var ELASTIC_RETURN_LERP = 0.15;
     var ELASTIC_RETURN_EPSILON = 0.01;
     var ELASTIC_WHEEL_IDLE_MS = 80;
-    var mouseDragEvents = ["mousedown", "mousemove", "mouseup", "click", "dblclick", "auxclick", "contextmenu", "mouseover", "mouseout", "mouseenter", "mouseleave"];
+    var pointerScrollMouseEvents = ["mousedown", "mousemove", "mouseup", "click", "dblclick", "auxclick", "contextmenu", "mouseover", "mouseout", "mouseenter", "mouseleave"];
     var mouseHoldEvents = /* @__PURE__ */ new Set(["mousemove", "mouseover", "mouseout", "mouseenter", "mouseleave"]);
     var mouseReleaseEvents = /* @__PURE__ */ new Set(["mouseup", "click", "dblclick", "auxclick", "contextmenu"]);
     var properties = ["--ae-scroll-y-progress", "--ae-scroll-x-progress"];
@@ -137,13 +140,19 @@
         metrics: null,
         mode: null,
         desktop: false,
+        cursor: {
+          value: element.style.getPropertyValue("cursor"),
+          priority: element.style.getPropertyPriority("cursor"),
+          owned: false
+        },
         wheelEnabled: true,
         momentumEnabled: true,
         elasticEnabled: false,
         wheelListening: false,
         pointerListening: false,
         touchListening: false,
-        drag: null,
+        pointerScroll: null,
+        lastPointerDown: null,
         mouseReleaseButton: null,
         mouseReleaseTimeout: null,
         momentum: null,
@@ -161,22 +170,35 @@
         return handleWheel(state, event);
       };
       state.onPointerDown = function(event) {
-        return startDrag(state, event);
+        return startPointerScroll(state, event);
+      };
+      state.onPointerOver = function(event) {
+        return updatePointerScrollCursor(state, event.target, event.clientX, event.clientY);
+      };
+      state.onPointerOut = function(event) {
+        if (state.pointerScroll && state.pointerScroll.moved) return;
+        if (!event.relatedTarget || !element.contains(event.relatedTarget)) restorePointerScrollCursor(state);
       };
       state.onMouseDown = function(event) {
-        if (event.button === 0 && event.detail > 1) endDrag(state);
+        if (event.button === 0 && event.detail > 1) endPointerScroll(state);
       };
       state.onPointerMove = function(event) {
-        return moveDrag(state, event);
+        return movePointerScroll(state, event);
       };
       state.onMouseEvent = function(event) {
-        return cancelDragMouseEvent(state, event);
+        return cancelPointerScrollMouseEvent(state, event);
+      };
+      state.onPointerScrollTouchMove = function(event) {
+        if (state.pointerScroll && state.pointerScroll.moved && event.cancelable) event.preventDefault();
+      };
+      state.onPointerScrollNativeStart = function(event) {
+        if (state.pointerScroll && state.pointerScroll.moved && event.cancelable) event.preventDefault();
       };
       state.onPointerEnd = function(event) {
-        return endDrag(state, event);
+        return endPointerScroll(state, event);
       };
       state.onBlur = function() {
-        return endDrag(state);
+        return endPointerScroll(state);
       };
       state.onTouchStart = function(event) {
         return startTouch(state, event);
@@ -202,14 +224,17 @@
       var state = scrollboxes.get(element);
       if (!state) return;
       state.disposed = true;
-      endDrag(state);
-      stopMouseDragEvents(state);
+      endPointerScroll(state);
+      stopPointerScrollMouseEvents(state);
+      restorePointerScrollCursor(state);
       cancelMomentum(state);
       resetElastic(state);
       element.removeEventListener("scroll", state.onScroll);
       if (state.wheelListening) element.removeEventListener("wheel", state.onWheel, true);
       if (state.pointerListening) {
         element.removeEventListener("pointerdown", state.onPointerDown);
+        element.removeEventListener("pointerover", state.onPointerOver);
+        element.removeEventListener("pointerout", state.onPointerOut);
         element.removeEventListener("mousedown", state.onMouseDown);
       }
       if (state.touchListening) removeTouchListeners(state);
@@ -248,13 +273,19 @@
       if (!pointerEnabled || !state.momentumEnabled) cancelMomentum(state);
       if (pointerEnabled && !state.pointerListening) {
         element.addEventListener("pointerdown", state.onPointerDown);
+        element.addEventListener("pointerover", state.onPointerOver);
+        element.addEventListener("pointerout", state.onPointerOut);
         element.addEventListener("mousedown", state.onMouseDown);
         state.pointerListening = true;
       } else if (!pointerEnabled && state.pointerListening) {
         element.removeEventListener("pointerdown", state.onPointerDown);
+        element.removeEventListener("pointerover", state.onPointerOver);
+        element.removeEventListener("pointerout", state.onPointerOut);
         element.removeEventListener("mousedown", state.onMouseDown);
         state.pointerListening = false;
-        endDrag(state);
+        endPointerScroll(state);
+        state.lastPointerDown = null;
+        restorePointerScrollCursor(state);
       }
       refresh(state);
     }
@@ -354,17 +385,72 @@
     function isDesktop() {
       return !!(root.matchMedia && root.matchMedia("(hover: hover) and (pointer: fine)").matches);
     }
-    function startDrag(state, event) {
+    function updatePointerScrollCursor(state, target, x, y) {
+      if (!state.pointerListening || state.pointerScroll && state.pointerScroll.moved) return;
+      if (!target || target.nodeType !== 1 || target.closest("[".concat(attribute, "]")) !== state.element || target.closest(pointerScrollExceptionSelector) || isTextAtPoint(target, x, y)) {
+        restorePointerScrollCursor(state);
+        return;
+      }
+      setPointerScrollCursor(state, "grab");
+    }
+    function isTextAtPoint(element, x, y) {
+      if (root.getComputedStyle(element).userSelect === "none") return false;
+      var range = document.createRange();
+      var _iterator2 = _createForOfIteratorHelper(element.childNodes), _step2;
+      try {
+        for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
+          var node = _step2.value;
+          if (node.nodeType !== 3 || !node.textContent.trim()) continue;
+          range.selectNodeContents(node);
+          var _iterator3 = _createForOfIteratorHelper(range.getClientRects()), _step3;
+          try {
+            for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
+              var rect = _step3.value;
+              if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) return true;
+            }
+          } catch (err) {
+            _iterator3.e(err);
+          } finally {
+            _iterator3.f();
+          }
+        }
+      } catch (err) {
+        _iterator2.e(err);
+      } finally {
+        _iterator2.f();
+      }
+      return false;
+    }
+    function setPointerScrollCursor(state, value) {
+      state.element.style.setProperty("cursor", value, "important");
+      state.cursor.owned = true;
+    }
+    function restorePointerScrollCursor(state) {
+      if (!state.cursor.owned) return;
+      if (state.cursor.value) state.element.style.setProperty("cursor", state.cursor.value, state.cursor.priority);
+      else state.element.style.removeProperty("cursor");
+      state.cursor.owned = false;
+    }
+    function startPointerScroll(state, event) {
       if (event.detail > 1) return;
       cancelMomentum(state);
-      if (state.drag || event.defaultPrevented || event.button !== 0 || !event.isPrimary || event.pointerType === "touch" || (event.buttons & 1) === 0) return;
+      if (state.pointerScroll || event.defaultPrevented || event.button !== 0 || !event.isPrimary || event.pointerType === "touch" || (event.buttons & 1) === 0) return;
       var element = state.element;
       var nested = event.target.closest("[".concat(attribute, "]"));
-      if (nested !== element || event.target.closest("a, button, input, select, textarea, [contenteditable], [draggable='true']")) return;
+      if (nested !== element || event.target.closest(pointerScrollExceptionSelector)) return;
       var metrics = nativeMetrics(element);
       if (metrics.maxX <= 0 && metrics.maxY <= 0) return;
       var rect = element.getBoundingClientRect();
       if (event.clientX >= rect.left + element.clientWidth || event.clientY >= rect.top + element.clientHeight) return;
+      var previousDown = state.lastPointerDown;
+      var time = now();
+      state.lastPointerDown = {
+        x: event.clientX,
+        y: event.clientY,
+        time: time
+      };
+      if (previousDown && time - previousDown.time <= POINTER_SCROLL_MULTICLICK_MS && Math.abs(event.clientX - previousDown.x) <= POINTER_SCROLL_MULTICLICK_DISTANCE_PX && Math.abs(event.clientY - previousDown.y) <= POINTER_SCROLL_MULTICLICK_DISTANCE_PX) return;
+      if (!isTextAtPoint(event.target, event.clientX, event.clientY) && event.cancelable) event.preventDefault();
       if (state.elastic.owned) {
         resetElastic(state);
         refresh(state);
@@ -373,7 +459,7 @@
       if (state.mouseReleaseTimeout !== null) root.clearTimeout(state.mouseReleaseTimeout);
       state.mouseReleaseTimeout = null;
       state.mouseReleaseButton = null;
-      state.drag = {
+      state.pointerScroll = {
         pointerId: event.pointerId,
         button: event.button,
         startX: event.clientX,
@@ -387,102 +473,120 @@
         momentumStartY: element.scrollTop,
         momentumStartTime: now(),
         userSelect: element.style.getPropertyValue("user-select"),
-        userSelectPriority: element.style.getPropertyPriority("user-select")
+        userSelectPriority: element.style.getPropertyPriority("user-select"),
+        scrollBehavior: element.style.getPropertyValue("scroll-behavior"),
+        scrollBehaviorPriority: element.style.getPropertyPriority("scroll-behavior")
       };
-      if (!state.drag.selectionPending) {
-        element.style.setProperty("user-select", "none");
-        state.drag.userSelectApplied = true;
-      }
       root.addEventListener("pointermove", state.onPointerMove, {
         passive: false,
         capture: true
       });
-      var _iterator2 = _createForOfIteratorHelper(mouseDragEvents), _step2;
+      root.addEventListener("touchmove", state.onPointerScrollTouchMove, {
+        passive: false,
+        capture: true
+      });
+      root.addEventListener("dragstart", state.onPointerScrollNativeStart, true);
+      root.addEventListener("selectstart", state.onPointerScrollNativeStart, true);
+      var _iterator4 = _createForOfIteratorHelper(pointerScrollMouseEvents), _step4;
       try {
-        for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
-          var name = _step2.value;
+        for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
+          var name = _step4.value;
           root.addEventListener(name, state.onMouseEvent, {
             passive: false,
             capture: true
           });
         }
       } catch (err) {
-        _iterator2.e(err);
+        _iterator4.e(err);
       } finally {
-        _iterator2.f();
+        _iterator4.f();
       }
       root.addEventListener("pointerup", state.onPointerEnd, true);
       root.addEventListener("pointercancel", state.onPointerEnd, true);
       root.addEventListener("blur", state.onBlur);
     }
-    function moveDrag(state, event) {
-      var drag = state.drag;
-      if (!drag || event.pointerId !== drag.pointerId) return;
+    function movePointerScroll(state, event) {
+      var pointerScroll = state.pointerScroll;
+      if (!pointerScroll || event.pointerId !== pointerScroll.pointerId) return;
       if ((event.buttons & 1) === 0) {
-        endDrag(state);
+        endPointerScroll(state);
         return;
       }
-      var dx = drag.startX - event.clientX;
-      var dy = drag.startY - event.clientY;
-      if (drag.selectionPending) {
+      var dx = pointerScroll.startX - event.clientX;
+      var dy = pointerScroll.startY - event.clientY;
+      if (pointerScroll.selectionPending) {
         var horizontal = Math.abs(dx);
         var vertical = Math.abs(dy);
         if (horizontal >= SELECTION_HORIZONTAL_THRESHOLD_PX && horizontal > vertical) {
-          endDrag(state);
+          endPointerScroll(state);
           return;
         }
         if (vertical < SELECTION_VERTICAL_TOLERANCE_PX || vertical < horizontal) return;
-        drag.selectionPending = false;
-        state.element.style.setProperty("user-select", "none");
-        drag.userSelectApplied = true;
+        pointerScroll.selectionPending = false;
       }
-      if (!drag.moved && dx * dx + dy * dy < DRAG_THRESHOLD_PX * DRAG_THRESHOLD_PX) return;
-      drag.moved = true;
-      if (event.cancelable) event.preventDefault();
+      if (!pointerScroll.moved && dx * dx + dy * dy < POINTER_SCROLL_THRESHOLD_PX * POINTER_SCROLL_THRESHOLD_PX) return;
+      if (!pointerScroll.moved) {
+        state.element.style.setProperty("user-select", "none");
+        state.element.style.setProperty("scroll-behavior", "auto", "important");
+        setPointerScrollCursor(state, "grabbing");
+        pointerScroll.userSelectApplied = true;
+        var selection = root.getSelection();
+        if (selection && selection.anchorNode && state.element.contains(selection.anchorNode)) selection.removeAllRanges();
+      }
+      pointerScroll.moved = true;
       var time = now();
-      var resetMomentum = time - drag.momentumStartTime > MOMENTUM_LIMIT_TIME_MS;
-      var desiredX = drag.scrollLeft + dx;
-      var desiredY = drag.scrollTop + dy;
+      var resetMomentum = time - pointerScroll.momentumStartTime > MOMENTUM_LIMIT_TIME_MS;
+      var desiredX = pointerScroll.scrollLeft + dx;
+      var desiredY = pointerScroll.scrollTop + dy;
+      if (event.cancelable) event.preventDefault();
       applyElasticFromDesired(state, desiredX, desiredY, false);
       scrollWithinElasticBounds(state, desiredX, desiredY);
       if (resetMomentum) {
-        drag.momentumStartX = state.element.scrollLeft;
-        drag.momentumStartY = state.element.scrollTop;
-        drag.momentumStartTime = time;
+        pointerScroll.momentumStartX = state.element.scrollLeft;
+        pointerScroll.momentumStartY = state.element.scrollTop;
+        pointerScroll.momentumStartTime = time;
       }
       publish(state);
     }
-    function endDrag(state, event) {
-      var drag = state.drag;
-      if (!drag || event && event.pointerId !== drag.pointerId) return;
-      state.drag = null;
+    function endPointerScroll(state, event) {
+      var pointerScroll = state.pointerScroll;
+      if (!pointerScroll || event && event.pointerId !== pointerScroll.pointerId) return;
+      state.pointerScroll = null;
       root.removeEventListener("pointermove", state.onPointerMove, true);
+      root.removeEventListener("touchmove", state.onPointerScrollTouchMove, true);
+      root.removeEventListener("dragstart", state.onPointerScrollNativeStart, true);
+      root.removeEventListener("selectstart", state.onPointerScrollNativeStart, true);
       root.removeEventListener("pointerup", state.onPointerEnd, true);
       root.removeEventListener("pointercancel", state.onPointerEnd, true);
       root.removeEventListener("blur", state.onBlur);
-      if (drag.moved && !state.disposed) {
-        state.mouseReleaseButton = drag.button;
+      if (pointerScroll.moved && !state.disposed) {
+        state.mouseReleaseButton = pointerScroll.button;
         if (state.mouseReleaseTimeout !== null) root.clearTimeout(state.mouseReleaseTimeout);
         state.mouseReleaseTimeout = root.setTimeout(function() {
-          return stopMouseDragEvents(state);
+          return stopPointerScrollMouseEvents(state);
         }, 0);
       } else {
-        stopMouseDragEvents(state);
+        stopPointerScrollMouseEvents(state);
       }
-      if (drag.userSelectApplied) {
-        if (drag.userSelect) state.element.style.setProperty("user-select", drag.userSelect, drag.userSelectPriority);
+      if (pointerScroll.userSelectApplied) {
+        if (pointerScroll.userSelect) state.element.style.setProperty("user-select", pointerScroll.userSelect, pointerScroll.userSelectPriority);
         else state.element.style.removeProperty("user-select");
+        if (pointerScroll.scrollBehavior) state.element.style.setProperty("scroll-behavior", pointerScroll.scrollBehavior, pointerScroll.scrollBehaviorPriority);
+        else state.element.style.removeProperty("scroll-behavior");
       }
+      if (event && event.type === "pointerup" && state.pointerListening) {
+        updatePointerScrollCursor(state, document.elementFromPoint(event.clientX, event.clientY), event.clientX, event.clientY);
+      } else restorePointerScrollCursor(state);
       var hadElastic = state.elastic.active;
       releaseElastic(state);
-      if (event && event.type === "pointerup" && drag.moved && state.momentumEnabled && !hadElastic && !state.disposed && now() - drag.momentumStartTime < MOMENTUM_LIMIT_TIME_MS) {
-        startMomentum(state, drag);
+      if (event && event.type === "pointerup" && pointerScroll.moved && state.momentumEnabled && !hadElastic && !state.disposed && now() - pointerScroll.momentumStartTime < MOMENTUM_LIMIT_TIME_MS) {
+        startMomentum(state, pointerScroll);
       }
     }
-    function cancelDragMouseEvent(state, event) {
-      var active = state.drag && state.drag.moved;
+    function cancelPointerScrollMouseEvent(state, event) {
+      var active = state.pointerScroll && state.pointerScroll.moved;
       if (!active && !mouseReleaseEvents.has(event.type)) return;
-      var button = active ? state.drag.button : state.mouseReleaseButton;
+      var button = active ? state.pointerScroll.button : state.mouseReleaseButton;
       if (button === null || !event.cancelable) return;
       if (mouseHoldEvents.has(event.type)) {
         if ((event.buttons & 1 << button) === 0) return;
@@ -491,27 +595,27 @@
       }
       event.preventDefault();
     }
-    function stopMouseDragEvents(state) {
+    function stopPointerScrollMouseEvents(state) {
       if (state.mouseReleaseTimeout !== null) root.clearTimeout(state.mouseReleaseTimeout);
       state.mouseReleaseTimeout = null;
       state.mouseReleaseButton = null;
-      var _iterator3 = _createForOfIteratorHelper(mouseDragEvents), _step3;
+      var _iterator5 = _createForOfIteratorHelper(pointerScrollMouseEvents), _step5;
       try {
-        for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
-          var name = _step3.value;
+        for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
+          var name = _step5.value;
           root.removeEventListener(name, state.onMouseEvent, true);
         }
       } catch (err) {
-        _iterator3.e(err);
+        _iterator5.e(err);
       } finally {
-        _iterator3.f();
+        _iterator5.f();
       }
     }
-    function startMomentum(state, drag) {
+    function startMomentum(state, pointerScroll) {
       var element = state.element;
-      var elapsed = Math.max(1, now() - drag.momentumStartTime);
-      var x = momentumAxis(element.scrollLeft, drag.momentumStartX, elapsed, Math.max(0, element.scrollWidth - element.clientWidth));
-      var y = momentumAxis(element.scrollTop, drag.momentumStartY, elapsed, Math.max(0, element.scrollHeight - element.clientHeight));
+      var elapsed = Math.max(1, now() - pointerScroll.momentumStartTime);
+      var x = momentumAxis(element.scrollLeft, pointerScroll.momentumStartX, elapsed, Math.max(0, element.scrollWidth - element.clientWidth));
+      var y = momentumAxis(element.scrollTop, pointerScroll.momentumStartY, elapsed, Math.max(0, element.scrollHeight - element.clientHeight));
       if (x === element.scrollLeft && y === element.scrollTop) return;
       var momentum = {
         currentX: element.scrollLeft,
@@ -607,19 +711,19 @@
       var start = state.elastic.touch;
       if (!start) return;
       var touch = null;
-      var _iterator4 = _createForOfIteratorHelper(event.touches), _step4;
+      var _iterator6 = _createForOfIteratorHelper(event.touches), _step6;
       try {
-        for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
-          var item = _step4.value;
+        for (_iterator6.s(); !(_step6 = _iterator6.n()).done; ) {
+          var item = _step6.value;
           if (item.identifier === start.identifier) {
             touch = item;
             break;
           }
         }
       } catch (err) {
-        _iterator4.e(err);
+        _iterator6.e(err);
       } finally {
-        _iterator4.f();
+        _iterator6.f();
       }
       if (!touch) return;
       var desiredX = start.scrollLeft + start.x - touch.clientX;
@@ -632,16 +736,16 @@
     function endTouch(state, event) {
       var touch = state.elastic.touch;
       if (!touch) return;
-      var _iterator5 = _createForOfIteratorHelper(event.touches), _step5;
+      var _iterator7 = _createForOfIteratorHelper(event.touches), _step7;
       try {
-        for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
-          var item = _step5.value;
+        for (_iterator7.s(); !(_step7 = _iterator7.n()).done; ) {
+          var item = _step7.value;
           if (item.identifier === touch.identifier) return;
         }
       } catch (err) {
-        _iterator5.e(err);
+        _iterator7.e(err);
       } finally {
-        _iterator5.f();
+        _iterator7.f();
       }
       state.elastic.touch = null;
       releaseElastic(state);
@@ -793,16 +897,16 @@
           return scheduleResize(state);
         });
         state.resizeObserver.observe(state.element);
-        var _iterator6 = _createForOfIteratorHelper(state.element.children), _step6;
+        var _iterator8 = _createForOfIteratorHelper(state.element.children), _step8;
         try {
-          for (_iterator6.s(); !(_step6 = _iterator6.n()).done; ) {
-            var child = _step6.value;
+          for (_iterator8.s(); !(_step8 = _iterator8.n()).done; ) {
+            var child = _step8.value;
             state.resizeObserver.observe(child);
           }
         } catch (err) {
-          _iterator6.e(err);
+          _iterator8.e(err);
         } finally {
-          _iterator6.f();
+          _iterator8.f();
         }
       }
       if (root.MutationObserver) {
@@ -810,16 +914,16 @@
           if (state.resizeObserver) {
             state.resizeObserver.disconnect();
             state.resizeObserver.observe(state.element);
-            var _iterator7 = _createForOfIteratorHelper(state.element.children), _step7;
+            var _iterator9 = _createForOfIteratorHelper(state.element.children), _step9;
             try {
-              for (_iterator7.s(); !(_step7 = _iterator7.n()).done; ) {
-                var _child = _step7.value;
+              for (_iterator9.s(); !(_step9 = _iterator9.n()).done; ) {
+                var _child = _step9.value;
                 state.resizeObserver.observe(_child);
               }
             } catch (err) {
-              _iterator7.e(err);
+              _iterator9.e(err);
             } finally {
-              _iterator7.f();
+              _iterator9.f();
             }
           }
           if (records.some(function(record) {
@@ -878,7 +982,7 @@
       return distance > 0 ? Math.min(1, Math.max(0, position / distance)) : 0;
     }
     function handleWheel(state, event) {
-      if (state.desktop && state.mode === "pointer" && state.drag && state.drag.moved) {
+      if (state.desktop && state.mode === "pointer" && state.pointerScroll && state.pointerScroll.moved) {
         if (event.cancelable) event.preventDefault();
         event.stopPropagation();
         return;
