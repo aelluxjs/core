@@ -206,6 +206,30 @@ test("intersection changes schedule placement updates and unmount disconnects th
   expect(await page.evaluate(() => window.anchorIntersectionObservers[0].observed.size)).toBe(0);
 });
 
+test("target movement without observer events updates within the position check interval", async ({ page }) => {
+  await page.goto("/tests/index.htm");
+  await page.addScriptTag({ url: "/dist/aellux.js" });
+  await page.evaluate(() => {
+    window.IntersectionObserver = class {
+      observe() {}
+      disconnect() {}
+    };
+    document.body.innerHTML = `<div style="position:relative;width:300px;height:100px">
+      <div id="target" style="position:absolute;left:20px;top:10px;width:30px;height:20px"></div>
+      <div id="anchor" data-ae-anchor-target="target" data-ae-anchor="top-left:top-left"
+        style="width:10px;height:10px"></div></div>`;
+    AelluxJs.ext("anchor");
+  });
+  await page.addScriptTag({ url: "/src/aellux.ext.anchor.js" });
+  await page.evaluate(() => AelluxJs.init({ mode: "basic" }));
+  const x = () => page.locator("#anchor").evaluate(element =>
+    element.style.getPropertyValue("--ae-anchor-x")
+  );
+  await expect.poll(x).toBe("20px");
+  await page.evaluate(() => document.getElementById("target").style.left = "45px");
+  await expect.poll(x, { timeout: 3000 }).toBe("45px");
+});
+
 test("scroll bursts throttle layout measurements and keep the latest position", async ({ page }) => {
   await startAnchor(page, `
     <div style="position: relative; width: 300px; height: 100px">

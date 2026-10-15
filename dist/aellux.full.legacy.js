@@ -17939,9 +17939,9 @@
       var $ = require_export();
       var globalThis2 = require_global_this();
       var schedulersFix = require_schedulers_fix();
-      var setInterval = schedulersFix(globalThis2.setInterval, true);
-      $({ global: true, bind: true, forced: globalThis2.setInterval !== setInterval }, {
-        setInterval: setInterval
+      var setInterval2 = schedulersFix(globalThis2.setInterval, true);
+      $({ global: true, bind: true, forced: globalThis2.setInterval !== setInterval2 }, {
+        setInterval: setInterval2
       });
     }
   });
@@ -24749,6 +24749,36 @@
       r2 ? i ? i(e2, r2, { value: n2, enumerable: !t2, configurable: !t2, writable: !t2 }) : e2[r2] = n2 : (o("next", 0), o("throw", 1), o("return", 2));
     }, _regeneratorDefine25(e, r, n, t);
   }
+  function _slicedToArray3(r, e) {
+    return _arrayWithHoles3(r) || _iterableToArrayLimit3(r, e) || _unsupportedIterableToArray8(r, e) || _nonIterableRest3();
+  }
+  function _nonIterableRest3() {
+    throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+  }
+  function _iterableToArrayLimit3(r, l) {
+    var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
+    if (null != t) {
+      var e, n, i, u, a = [], f = true, o = false;
+      try {
+        if (i = (t = t.call(r)).next, 0 === l) {
+          if (Object(t) !== t) return;
+          f = false;
+        } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = true) ;
+      } catch (r2) {
+        o = true, n = r2;
+      } finally {
+        try {
+          if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return;
+        } finally {
+          if (o) throw n;
+        }
+      }
+      return a;
+    }
+  }
+  function _arrayWithHoles3(r) {
+    if (Array.isArray(r)) return r;
+  }
   function _createForOfIteratorHelper8(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
@@ -24842,8 +24872,11 @@
           "bottom-right": [1, 1]
         };
         var UPDATE_INTERVAL_MS = 100;
+        var POSITION_CHECK_INTERVAL_MS = 1e3;
         var anchors = /* @__PURE__ */ new Map();
         var updateTimeout = null;
+        var positionInterval = null;
+        var positionCheckPending = false;
         var lastUpdateTime = -UPDATE_INTERVAL_MS;
         AelluxJs2.extAttach(extensionName, {
           init: init,
@@ -24879,7 +24912,9 @@
               while (1) switch (_context.n) {
                 case 0:
                   if (updateTimeout !== null) clearTimeout(updateTimeout);
+                  if (positionInterval !== null) clearInterval(positionInterval);
                   updateTimeout = null;
+                  positionInterval = null;
                   lastUpdateTime = -UPDATE_INTERVAL_MS;
                   _context.n = 1;
                   return Promise.all(Array.from(anchors.keys(), unmountAnchor));
@@ -24909,6 +24944,7 @@
             revision: 0,
             target: null,
             reference: null,
+            targetPosition: null,
             observer: null,
             intersectionObserver: null
           };
@@ -24919,6 +24955,7 @@
               passive: true
             });
             root2.addEventListener("resize", scheduleUpdate);
+            positionInterval = setInterval(checkPositions, POSITION_CHECK_INTERVAL_MS);
           }
           if (typeof root2.ResizeObserver === "function") {
             state.observer = new root2.ResizeObserver(scheduleUpdate);
@@ -24952,7 +24989,9 @@
                     root2.removeEventListener("scroll", scheduleUpdate, true);
                     root2.removeEventListener("resize", scheduleUpdate);
                     if (updateTimeout !== null) clearTimeout(updateTimeout);
+                    if (positionInterval !== null) clearInterval(positionInterval);
                     updateTimeout = null;
+                    positionInterval = null;
                     lastUpdateTime = -UPDATE_INTERVAL_MS;
                   }
                   _context2.n = 2;
@@ -25000,6 +25039,40 @@
           } finally {
             _iterator.f();
           }
+        }
+        function checkPositions() {
+          if (!anchors.size || positionCheckPending) return;
+          positionCheckPending = true;
+          AelluxJs2.waitLayout.read(function() {
+            var _iterator2 = _createForOfIteratorHelper8(anchors), _step2;
+            try {
+              for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
+                var _step2$value = _slicedToArray3(_step2.value, 2), element = _step2$value[0], state = _step2$value[1];
+                if (!state.target || !state.reference || !state.targetPosition) continue;
+                if (element.offsetParent !== state.reference) return true;
+                var referenceRect = state.reference.getBoundingClientRect();
+                var scaleX = state.reference.offsetWidth ? referenceRect.width / state.reference.offsetWidth : 1;
+                var scaleY = state.reference.offsetHeight ? referenceRect.height / state.reference.offsetHeight : 1;
+                var position = toReference(state.target.getBoundingClientRect(), state.reference, referenceRect, scaleX, scaleY);
+                if (position.left !== state.targetPosition.left || position.top !== state.targetPosition.top) return true;
+              }
+            } catch (err) {
+              _iterator2.e(err);
+            } finally {
+              _iterator2.f();
+            }
+            return false;
+          }).then(function(changed) {
+            if (changed) scheduleUpdate();
+          }).catch(function(cause) {
+            AelluxJs2.diagnostics.error(AelluxJs2.diagnostics.ERROR_EXTENSION_MOUNT, {
+              cause: cause,
+              extension: extensionName,
+              method: "update"
+            });
+          }).finally(function() {
+            positionCheckPending = false;
+          });
         }
         function now() {
           return root2.performance && typeof root2.performance.now === "function" ? root2.performance.now() : Date.now();
@@ -25107,21 +25180,22 @@
                     if (!current()) return;
                     state.invalidContext = false;
                     observe(state, element, placement.target, placement.reference);
+                    state.targetPosition = placement.targetPosition;
                     var selected = placement.selected;
                     element.style.setProperty("--ae-anchor-x", "".concat(selected.x, "px"));
                     element.style.setProperty("--ae-anchor-y", "".concat(selected.y, "px"));
                     element.style.setProperty("--ae-anchor-origin-x", "".concat(selected.self[0] * 100, "%"));
                     element.style.setProperty("--ae-anchor-origin-y", "".concat(selected.self[1] * 100, "%"));
-                    var _iterator5 = _createForOfIteratorHelper8(baseProperties), _step5;
+                    var _iterator6 = _createForOfIteratorHelper8(baseProperties), _step6;
                     try {
-                      for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
-                        var name = _step5.value;
+                      for (_iterator6.s(); !(_step6 = _iterator6.n()).done; ) {
+                        var name = _step6.value;
                         element.style.removeProperty(name);
                       }
                     } catch (err) {
-                      _iterator5.e(err);
+                      _iterator6.e(err);
                     } finally {
-                      _iterator5.f();
+                      _iterator6.f();
                     }
                     element.classList.add(anchoredClass);
                   });
@@ -25159,10 +25233,10 @@
             height: root2.innerHeight
           }, reference, referenceRect, scaleX, scaleY);
           var selected = null;
-          var _iterator2 = _createForOfIteratorHelper8(candidates), _step2;
+          var _iterator3 = _createForOfIteratorHelper8(candidates), _step3;
           try {
-            for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
-              var candidate = _step2.value;
+            for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
+              var candidate = _step3.value;
               var x = targetRect.left + targetRect.width * candidate.target[0] - selfWidth * candidate.self[0];
               var y = targetRect.top + targetRect.height * candidate.target[1] - selfHeight * candidate.self[1];
               var result = {
@@ -25177,15 +25251,19 @@
               }
             }
           } catch (err) {
-            _iterator2.e(err);
+            _iterator3.e(err);
           } finally {
-            _iterator2.f();
+            _iterator3.f();
           }
           return {
             valid: true,
             target: target,
             reference: reference,
-            selected: selected
+            selected: selected,
+            targetPosition: {
+              left: targetRect.left,
+              top: targetRect.top
+            }
           };
         }
         function invalidContext(element, state, target) {
@@ -25204,18 +25282,18 @@
           state.reference = reference;
           if (state.observer) state.observer.disconnect();
           if (state.intersectionObserver) state.intersectionObserver.disconnect();
-          var _iterator3 = _createForOfIteratorHelper8(/* @__PURE__ */ new Set([element, target, reference])), _step3;
+          var _iterator4 = _createForOfIteratorHelper8(/* @__PURE__ */ new Set([element, target, reference])), _step4;
           try {
-            for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
-              var observed = _step3.value;
+            for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
+              var observed = _step4.value;
               if (!observed) continue;
               if (state.observer) state.observer.observe(observed);
               if (state.intersectionObserver) state.intersectionObserver.observe(observed);
             }
           } catch (err) {
-            _iterator3.e(err);
+            _iterator4.e(err);
           } finally {
-            _iterator3.f();
+            _iterator4.f();
           }
         }
         function applyBaseStyles(element) {
@@ -25229,6 +25307,7 @@
           if (state.observer) state.observer.disconnect();
           if (state.intersectionObserver) state.intersectionObserver.disconnect();
           state.target = state.reference = null;
+          state.targetPosition = null;
           element.classList.remove(anchoredClass);
           if (state.active) restoreStyles(element, state.original);
           state.active = false;
@@ -25254,10 +25333,10 @@
         }
         function parseCandidates(value) {
           var result = [];
-          var _iterator4 = _createForOfIteratorHelper8((value || "").split(",")), _step4;
+          var _iterator5 = _createForOfIteratorHelper8((value || "").split(",")), _step5;
           try {
-            for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
-              var token = _step4.value;
+            for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
+              var token = _step5.value;
               var pair = token.trim().toLowerCase().split(":");
               if (pair.length !== 2 || !pivots[pair[0].trim()] || !pivots[pair[1].trim()]) continue;
               result.push({
@@ -25266,9 +25345,9 @@
               });
             }
           } catch (err) {
-            _iterator4.e(err);
+            _iterator5.e(err);
           } finally {
-            _iterator4.f();
+            _iterator5.f();
           }
           return result;
         }
@@ -25362,6 +25441,7 @@
         var SNAP_DRAG_DISTANCE_RATIO = 0.25;
         var SNAP_SCROLL_IDLE_MS = 120;
         var SNAP_WHEEL_IDLE_MS = 120;
+        var SNAP_EDGE_DISTANCE_PX = 10;
         var ELASTIC_DAMPING = 1 / 3;
         var DEFAULT_ELASTIC_LIMIT = {
           unit: "ratio",
@@ -25375,6 +25455,7 @@
         var mouseHoldEvents = /* @__PURE__ */ new Set(["mousemove", "mouseover", "mouseout", "mouseenter", "mouseleave"]);
         var mouseReleaseEvents = /* @__PURE__ */ new Set(["mouseup", "click", "dblclick", "auxclick", "contextmenu"]);
         var properties = ["--ae-scroll-y-progress", "--ae-scroll-x-progress"];
+        var snapProperties = ["--ae-snap-viewport", "--ae-snap-focus"];
         var scrollboxes = /* @__PURE__ */ new Map();
         var activePointerScrollState = null;
         AelluxJs2.extAttach(extensionName, {
@@ -25496,6 +25577,9 @@
           state.onWheel = function(event) {
             return handleWheel(state, event);
           };
+          state.onClick = function(event) {
+            return handleSnapClick(state, event);
+          };
           state.onPointerDown = function(event) {
             return startPointerScroll(state, event);
           };
@@ -25543,6 +25627,7 @@
           element.addEventListener("scrollend", state.onScrollEnd, {
             passive: true
           });
+          element.addEventListener("click", state.onClick);
           observe(state);
           configure(state);
         }
@@ -25566,6 +25651,7 @@
           restoreInlineWrapper(state);
           element.removeEventListener("scroll", state.onScroll);
           element.removeEventListener("scrollend", state.onScrollEnd);
+          element.removeEventListener("click", state.onClick);
           if (state.wheelListening) element.removeEventListener("wheel", state.onWheel, true);
           if (state.pointerListening) {
             element.removeEventListener("pointerdown", state.onPointerDown);
@@ -25720,6 +25806,18 @@
           var target = item.getBoundingClientRect();
           return axis === "x" ? target.left + target.width / 2 - (box.left + state.element.clientLeft + state.element.clientWidth / 2) : target.top + target.height / 2 - (box.top + state.element.clientTop + state.element.clientHeight / 2);
         }
+        function edgeSnapIndex(state, items) {
+          var element = state.element;
+          var metrics = nativeMetrics(element);
+          var horizontal = metrics.maxX > 1 || metrics.maxY <= 1;
+          var maximum = horizontal ? metrics.maxX : metrics.maxY;
+          var position = horizontal ? element.scrollLeft : element.scrollTop;
+          var startDistance = position;
+          var endDistance = maximum - position;
+          if (startDistance <= SNAP_EDGE_DISTANCE_PX && startDistance <= endDistance) return 0;
+          if (endDistance <= SNAP_EDGE_DISTANCE_PX) return items.length - 1;
+          return null;
+        }
         function nearestSnapIndex(state, items) {
           var projectionX = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : 0;
           var projectionY = arguments.length > 3 && arguments[3] !== void 0 ? arguments[3] : 0;
@@ -25749,6 +25847,23 @@
           var x = Math.max(0, Math.min(metrics.maxX, element.scrollLeft + dx));
           var y = Math.max(0, Math.min(metrics.maxY, element.scrollTop + dy));
           return Math.abs(x - element.scrollLeft) > 0.5 || Math.abs(y - element.scrollTop) > 0.5;
+        }
+        function snapItemFullyVisible(state, item) {
+          var element = state.element;
+          var box = element.getBoundingClientRect();
+          var target = item.getBoundingClientRect();
+          var left = box.left + element.clientLeft;
+          var top = box.top + element.clientTop;
+          return target.left >= left - 0.5 && target.top >= top - 0.5 && target.right <= left + element.clientWidth + 0.5 && target.bottom <= top + element.clientHeight + 0.5;
+        }
+        function handleSnapClick(state, event) {
+          if (!state.snapEnabled || state.disposed || event.button !== 0 || event.detail !== 1 || event.defaultPrevented) return;
+          var item = event.target.nodeType === 1 ? event.target : event.target.parentElement;
+          if (!item || item.closest("[".concat(attribute, "]")) !== state.element) return;
+          var wrapper = state.snap.wrapper;
+          while (item && item.parentElement !== wrapper) item = item.parentElement;
+          if (!item || snapItemFullyVisible(state, item)) return;
+          scrollToSnap(state, snapItems(state).indexOf(item));
         }
         function scheduleScrollEnd(state) {
           clearScrollEnd(state);
@@ -25781,7 +25896,8 @@
             state.snap.wheelTarget = null;
             if (items.includes(_target)) return;
           }
-          var target = items[nearestSnapIndex(state, items)];
+          var edgeIndex = edgeSnapIndex(state, items);
+          var target = items[edgeIndex === null ? nearestSnapIndex(state, items) : edgeIndex];
           state.snap.index = items.indexOf(target);
           if (!snapNeedsScroll(state, target)) return;
           if (state.elastic.active) state.snap.pending = target;
@@ -26369,11 +26485,12 @@
         function schedulePointerSnap(state, pointerScroll) {
           var items = snapItems(state);
           var axis = snapAxis(state);
+          var edgeIndex = edgeSnapIndex(state, items);
           var start = pointerScroll.snapStarts.get(state);
           var startIndex = start ? items.indexOf(start.item) : -1;
           var projection = axis === pointerScroll.axis ? axis === "x" ? pointerScroll.lastX - pointerScroll.startX : pointerScroll.lastY - pointerScroll.startY : 0;
-          var index = nearestSnapIndex(state, items, axis === "x" ? projection : 0, axis === "y" ? projection : 0);
-          if (index === startIndex && axis === pointerScroll.axis && start) {
+          var index = edgeIndex === null ? nearestSnapIndex(state, items, axis === "x" ? projection : 0, axis === "y" ? projection : 0) : edgeIndex;
+          if (edgeIndex === null && index === startIndex && axis === pointerScroll.axis && start) {
             var flick = isSnapFlick(pointerScroll, axis);
             var distance = axis === "x" ? pointerScroll.startX - pointerScroll.lastX : pointerScroll.startY - pointerScroll.lastY;
             var offset = snapCenterOffset(state, start.item, axis);
@@ -26808,8 +26925,40 @@
         }
         function publish(state) {
           var metrics = state.metrics || nativeMetrics(state.element);
+          var snapValues = state.snapEnabled ? measureSnapValues(state) : [];
           state.element.style.setProperty(properties[0], progress(state.element.scrollTop, metrics.maxY));
           state.element.style.setProperty(properties[1], progress(state.element.scrollLeft, metrics.maxX));
+          var _iterator15 = _createForOfIteratorHelper9(snapValues), _step15;
+          try {
+            for (_iterator15.s(); !(_step15 = _iterator15.n()).done; ) {
+              var _step15$value = _step15.value, item = _step15$value.item, viewport = _step15$value.viewport, focus2 = _step15$value.focus;
+              item.style.setProperty(snapProperties[0], viewport);
+              item.style.setProperty(snapProperties[1], focus2);
+            }
+          } catch (err) {
+            _iterator15.e(err);
+          } finally {
+            _iterator15.f();
+          }
+        }
+        function measureSnapValues(state) {
+          var element = state.element;
+          var rect = element.getBoundingClientRect();
+          var axis = snapAxis(state);
+          var size = axis === "x" ? element.clientWidth : element.clientHeight;
+          if (!size) return [];
+          var center = axis === "x" ? rect.left + element.clientLeft + size / 2 : rect.top + element.clientTop + size / 2;
+          return snapItems(state).map(function(item) {
+            var box = item.getBoundingClientRect();
+            var itemCenter = axis === "x" ? box.left + box.width / 2 : box.top + box.height / 2;
+            var viewport = Math.max(-2, Math.min(2, (itemCenter - center) * 2 / size));
+            var focus2 = Math.max(0, 1 - Math.abs(viewport) / 2);
+            return {
+              item: item,
+              viewport: viewport,
+              focus: focus2
+            };
+          });
         }
         function progress(position, distance) {
           return distance > 0 ? Math.min(1, Math.max(0, position / distance)) : 0;
@@ -26952,10 +27101,10 @@
       }
     } };
   }
-  function _slicedToArray3(r, e) {
-    return _arrayWithHoles3(r) || _iterableToArrayLimit3(r, e) || _unsupportedIterableToArray10(r, e) || _nonIterableRest3();
+  function _slicedToArray4(r, e) {
+    return _arrayWithHoles4(r) || _iterableToArrayLimit4(r, e) || _unsupportedIterableToArray10(r, e) || _nonIterableRest4();
   }
-  function _nonIterableRest3() {
+  function _nonIterableRest4() {
     throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
   function _unsupportedIterableToArray10(r, a) {
@@ -26970,7 +27119,7 @@
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
   }
-  function _iterableToArrayLimit3(r, l) {
+  function _iterableToArrayLimit4(r, l) {
     var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (null != t) {
       var e, n, i, u, a = [], f = true, o = false;
@@ -26991,7 +27140,7 @@
       return a;
     }
   }
-  function _arrayWithHoles3(r) {
+  function _arrayWithHoles4(r) {
     if (Array.isArray(r)) return r;
   }
   function _typeof4(o) {
@@ -27080,7 +27229,7 @@
           var classes = [modifier.shapeHorizontal, modifier.shapeVertical, modifier.shapeSquare];
           sizeThresholds = [];
           for (var _i3 = 0, _Object$entries = Object.entries(adaptiveParams.minSizes); _i3 < _Object$entries.length; _i3++) {
-            var _Object$entries$_i = _slicedToArray3(_Object$entries[_i3], 2), size = _Object$entries$_i[0], minimum = _Object$entries$_i[1];
+            var _Object$entries$_i = _slicedToArray4(_Object$entries[_i3], 2), size = _Object$entries$_i[0], minimum = _Object$entries$_i[1];
             var className = AelluxJs2.className("fits-" + size);
             sizeThresholds.push({
               className: className,
@@ -27374,13 +27523,13 @@
       });
     };
   }
-  function _slicedToArray4(r, e) {
-    return _arrayWithHoles4(r) || _iterableToArrayLimit4(r, e) || _unsupportedIterableToArray11(r, e) || _nonIterableRest4();
+  function _slicedToArray5(r, e) {
+    return _arrayWithHoles5(r) || _iterableToArrayLimit5(r, e) || _unsupportedIterableToArray11(r, e) || _nonIterableRest5();
   }
-  function _nonIterableRest4() {
+  function _nonIterableRest5() {
     throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
-  function _iterableToArrayLimit4(r, l) {
+  function _iterableToArrayLimit5(r, l) {
     var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (null != t) {
       var e, n, i, u, a = [], f = true, o = false;
@@ -27401,7 +27550,7 @@
       return a;
     }
   }
-  function _arrayWithHoles4(r) {
+  function _arrayWithHoles5(r) {
     if (Array.isArray(r)) return r;
   }
   function _toConsumableArray2(r) {
@@ -27776,7 +27925,7 @@
           var _iterator5 = _createForOfIteratorHelper11(saved), _step5;
           try {
             for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
-              var _step5$value = _slicedToArray4(_step5.value, 3), name = _step5$value[0], value = _step5$value[1], priority = _step5$value[2];
+              var _step5$value = _slicedToArray5(_step5.value, 3), name = _step5$value[0], value = _step5$value[1], priority = _step5$value[2];
               if (value) element.style.setProperty(name, value, priority);
               else element.style.removeProperty(name);
             }
@@ -27797,7 +27946,7 @@
           var _iterator6 = _createForOfIteratorHelper11(controller.measuredStyles), _step6;
           try {
             for (_iterator6.s(); !(_step6 = _iterator6.n()).done; ) {
-              var _step6$value = _slicedToArray4(_step6.value, 3), name = _step6$value[0], value = _step6$value[1], priority = _step6$value[2];
+              var _step6$value = _slicedToArray5(_step6.value, 3), name = _step6$value[0], value = _step6$value[1], priority = _step6$value[2];
               if (value) element.style.setProperty(name, value, priority);
               else element.style.removeProperty(name);
             }

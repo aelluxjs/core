@@ -74,6 +74,7 @@
     var SNAP_DRAG_DISTANCE_RATIO = 0.25;
     var SNAP_SCROLL_IDLE_MS = 120;
     var SNAP_WHEEL_IDLE_MS = 120;
+    var SNAP_EDGE_DISTANCE_PX = 10;
     var ELASTIC_DAMPING = 1 / 3;
     var DEFAULT_ELASTIC_LIMIT = {
       unit: "ratio",
@@ -87,6 +88,7 @@
     var mouseHoldEvents = /* @__PURE__ */ new Set(["mousemove", "mouseover", "mouseout", "mouseenter", "mouseleave"]);
     var mouseReleaseEvents = /* @__PURE__ */ new Set(["mouseup", "click", "dblclick", "auxclick", "contextmenu"]);
     var properties = ["--ae-scroll-y-progress", "--ae-scroll-x-progress"];
+    var snapProperties = ["--ae-snap-viewport", "--ae-snap-focus"];
     var scrollboxes = /* @__PURE__ */ new Map();
     var activePointerScrollState = null;
     AelluxJs.extAttach(extensionName, {
@@ -208,6 +210,9 @@
       state.onWheel = function(event) {
         return handleWheel(state, event);
       };
+      state.onClick = function(event) {
+        return handleSnapClick(state, event);
+      };
       state.onPointerDown = function(event) {
         return startPointerScroll(state, event);
       };
@@ -255,6 +260,7 @@
       element.addEventListener("scrollend", state.onScrollEnd, {
         passive: true
       });
+      element.addEventListener("click", state.onClick);
       observe(state);
       configure(state);
     }
@@ -278,6 +284,7 @@
       restoreInlineWrapper(state);
       element.removeEventListener("scroll", state.onScroll);
       element.removeEventListener("scrollend", state.onScrollEnd);
+      element.removeEventListener("click", state.onClick);
       if (state.wheelListening) element.removeEventListener("wheel", state.onWheel, true);
       if (state.pointerListening) {
         element.removeEventListener("pointerdown", state.onPointerDown);
@@ -432,6 +439,18 @@
       var target = item.getBoundingClientRect();
       return axis === "x" ? target.left + target.width / 2 - (box.left + state.element.clientLeft + state.element.clientWidth / 2) : target.top + target.height / 2 - (box.top + state.element.clientTop + state.element.clientHeight / 2);
     }
+    function edgeSnapIndex(state, items) {
+      var element = state.element;
+      var metrics = nativeMetrics(element);
+      var horizontal = metrics.maxX > 1 || metrics.maxY <= 1;
+      var maximum = horizontal ? metrics.maxX : metrics.maxY;
+      var position = horizontal ? element.scrollLeft : element.scrollTop;
+      var startDistance = position;
+      var endDistance = maximum - position;
+      if (startDistance <= SNAP_EDGE_DISTANCE_PX && startDistance <= endDistance) return 0;
+      if (endDistance <= SNAP_EDGE_DISTANCE_PX) return items.length - 1;
+      return null;
+    }
     function nearestSnapIndex(state, items) {
       var projectionX = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : 0;
       var projectionY = arguments.length > 3 && arguments[3] !== void 0 ? arguments[3] : 0;
@@ -461,6 +480,23 @@
       var x = Math.max(0, Math.min(metrics.maxX, element.scrollLeft + dx));
       var y = Math.max(0, Math.min(metrics.maxY, element.scrollTop + dy));
       return Math.abs(x - element.scrollLeft) > 0.5 || Math.abs(y - element.scrollTop) > 0.5;
+    }
+    function snapItemFullyVisible(state, item) {
+      var element = state.element;
+      var box = element.getBoundingClientRect();
+      var target = item.getBoundingClientRect();
+      var left = box.left + element.clientLeft;
+      var top = box.top + element.clientTop;
+      return target.left >= left - 0.5 && target.top >= top - 0.5 && target.right <= left + element.clientWidth + 0.5 && target.bottom <= top + element.clientHeight + 0.5;
+    }
+    function handleSnapClick(state, event) {
+      if (!state.snapEnabled || state.disposed || event.button !== 0 || event.detail !== 1 || event.defaultPrevented) return;
+      var item = event.target.nodeType === 1 ? event.target : event.target.parentElement;
+      if (!item || item.closest("[".concat(attribute, "]")) !== state.element) return;
+      var wrapper = state.snap.wrapper;
+      while (item && item.parentElement !== wrapper) item = item.parentElement;
+      if (!item || snapItemFullyVisible(state, item)) return;
+      scrollToSnap(state, snapItems(state).indexOf(item));
     }
     function scheduleScrollEnd(state) {
       clearScrollEnd(state);
@@ -493,7 +529,8 @@
         state.snap.wheelTarget = null;
         if (items.includes(_target)) return;
       }
-      var target = items[nearestSnapIndex(state, items)];
+      var edgeIndex = edgeSnapIndex(state, items);
+      var target = items[edgeIndex === null ? nearestSnapIndex(state, items) : edgeIndex];
       state.snap.index = items.indexOf(target);
       if (!snapNeedsScroll(state, target)) return;
       if (state.elastic.active) state.snap.pending = target;
@@ -1081,11 +1118,12 @@
     function schedulePointerSnap(state, pointerScroll) {
       var items = snapItems(state);
       var axis = snapAxis(state);
+      var edgeIndex = edgeSnapIndex(state, items);
       var start = pointerScroll.snapStarts.get(state);
       var startIndex = start ? items.indexOf(start.item) : -1;
       var projection = axis === pointerScroll.axis ? axis === "x" ? pointerScroll.lastX - pointerScroll.startX : pointerScroll.lastY - pointerScroll.startY : 0;
-      var index = nearestSnapIndex(state, items, axis === "x" ? projection : 0, axis === "y" ? projection : 0);
-      if (index === startIndex && axis === pointerScroll.axis && start) {
+      var index = edgeIndex === null ? nearestSnapIndex(state, items, axis === "x" ? projection : 0, axis === "y" ? projection : 0) : edgeIndex;
+      if (edgeIndex === null && index === startIndex && axis === pointerScroll.axis && start) {
         var flick = isSnapFlick(pointerScroll, axis);
         var distance = axis === "x" ? pointerScroll.startX - pointerScroll.lastX : pointerScroll.startY - pointerScroll.lastY;
         var offset = snapCenterOffset(state, start.item, axis);
@@ -1520,8 +1558,40 @@
     }
     function publish(state) {
       var metrics = state.metrics || nativeMetrics(state.element);
+      var snapValues = state.snapEnabled ? measureSnapValues(state) : [];
       state.element.style.setProperty(properties[0], progress(state.element.scrollTop, metrics.maxY));
       state.element.style.setProperty(properties[1], progress(state.element.scrollLeft, metrics.maxX));
+      var _iterator15 = _createForOfIteratorHelper(snapValues), _step15;
+      try {
+        for (_iterator15.s(); !(_step15 = _iterator15.n()).done; ) {
+          var _step15$value = _step15.value, item = _step15$value.item, viewport = _step15$value.viewport, focus = _step15$value.focus;
+          item.style.setProperty(snapProperties[0], viewport);
+          item.style.setProperty(snapProperties[1], focus);
+        }
+      } catch (err) {
+        _iterator15.e(err);
+      } finally {
+        _iterator15.f();
+      }
+    }
+    function measureSnapValues(state) {
+      var element = state.element;
+      var rect = element.getBoundingClientRect();
+      var axis = snapAxis(state);
+      var size = axis === "x" ? element.clientWidth : element.clientHeight;
+      if (!size) return [];
+      var center = axis === "x" ? rect.left + element.clientLeft + size / 2 : rect.top + element.clientTop + size / 2;
+      return snapItems(state).map(function(item) {
+        var box = item.getBoundingClientRect();
+        var itemCenter = axis === "x" ? box.left + box.width / 2 : box.top + box.height / 2;
+        var viewport = Math.max(-2, Math.min(2, (itemCenter - center) * 2 / size));
+        var focus = Math.max(0, 1 - Math.abs(viewport) / 2);
+        return {
+          item: item,
+          viewport: viewport,
+          focus: focus
+        };
+      });
     }
     function progress(position, distance) {
       return distance > 0 ? Math.min(1, Math.max(0, position / distance)) : 0;

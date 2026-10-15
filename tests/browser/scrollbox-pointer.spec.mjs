@@ -106,6 +106,82 @@ test("snap initializes and controller navigates its direct children", async ({ p
     .toBe(false);
 });
 
+test("a simple click centers a partially visible snap child but leaves a visible child alone", async ({ page }) => {
+  await setup(page, `<div id="gallery" data-ae-scrollbox="native"
+    style="width:180px;height:100px;overflow-x:auto;overflow-y:hidden">
+    <div data-ae-scrollbox-snap style="display:flex;width:240px">
+      <div id="first" style="flex:none;width:80px;height:100px"></div>
+      <div id="second" style="flex:none;width:80px;height:100px">
+        <span style="display:block;width:100%;height:100%"></span></div>
+      <div id="third" style="flex:none;width:80px;height:100px">
+        <span style="display:block;width:100%;height:100%"></span></div>
+    </div>
+  </div>`);
+  await page.evaluate(() => {
+    window.snapClickCalls = [];
+    for (const id of ["second", "third"]) {
+      const item = document.getElementById(id);
+      const original = item.scrollIntoView;
+      item.scrollIntoView = function (options) {
+        window.snapClickCalls.push(id);
+        return original.call(this, options);
+      };
+    }
+  });
+  const box = await page.locator("#gallery").boundingBox();
+  await page.mouse.click(box.x + 120, box.y + 40);
+  expect(await page.evaluate(() => window.snapClickCalls)).toEqual([]);
+  expect(await page.evaluate(() => document.getElementById("gallery").scrollLeft)).toBe(0);
+  await page.mouse.click(box.x + 170, box.y + 40);
+  expect(await page.evaluate(() => window.snapClickCalls)).toEqual(["third"]);
+  await expect.poll(() => page.evaluate(() => document.getElementById("gallery").scrollLeft))
+    .toBe(60);
+});
+
+test("snap children publish viewport and focus values through native scrolling", async ({ page }) => {
+  await setup(page, `<div id="gallery" data-ae-scrollbox="native"
+    style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden">
+    <div data-ae-scrollbox-snap style="display:flex;width:300px">
+      <div style="flex:none;width:100px;height:100px"></div>
+      <div style="flex:none;width:100px;height:100px"></div>
+      <div style="flex:none;width:100px;height:100px"></div>
+    </div>
+  </div>`);
+  const values = (left = null) => page.evaluate(left => {
+    const element = document.getElementById("gallery");
+    if (left !== null) {
+      element.scrollTo({ left, behavior: "instant" });
+      element.dispatchEvent(new Event("scroll"));
+    }
+    return Array.from(element.firstElementChild.children,
+      item => [Number(item.style.getPropertyValue("--ae-snap-viewport")),
+        Number(item.style.getPropertyValue("--ae-snap-focus"))]);
+  }, left);
+  expect(await values()).toEqual([[0, 1], [2, 0], [2, 0]]);
+  expect(await values(50)).toEqual([[-1, 0.5], [1, 0.5], [2, 0]]);
+  expect(await values(100)).toEqual([[-2, 0], [0, 1], [2, 0]]);
+  await page.evaluate(() => AelluxJs.mountManager.unmount(document.body, "scrollbox"));
+  expect(await values()).toEqual([[-2, 0], [0, 1], [2, 0]]);
+});
+
+test("vertical snap children publish values along the vertical axis", async ({ page }) => {
+  await setup(page, `<div id="gallery" data-ae-scrollbox="native"
+    style="width:100px;height:100px;overflow-x:hidden;overflow-y:auto">
+    <div data-ae-scrollbox-snap style="width:100px">
+      <div style="height:100px"></div>
+      <div style="height:100px"></div>
+      <div style="height:100px"></div>
+    </div>
+  </div>`);
+  await page.evaluate(() => document.getElementById("gallery")
+    .scrollTo({ top: 100, behavior: "instant" }));
+  await expect.poll(() => page.evaluate(() => Array.from(
+    document.querySelector("[data-ae-scrollbox-snap]").children,
+    item => [Number(item.style.getPropertyValue("--ae-snap-viewport")),
+      Number(item.style.getPropertyValue("--ae-snap-focus"))]
+  ))).toEqual([[-2, 0], [0, 1], [2, 0]]);
+});
+
 test("native scroll end snaps the nearest point after scrollbar scrolling", async ({ page }) => {
   await setup(page, `<div id="gallery" data-ae-scrollbox="native"
     style="width:100px;height:100px;overflow:auto">
@@ -122,6 +198,44 @@ test("native scroll end snaps the nearest point after scrollbar scrolling", asyn
   });
   await expect.poll(() => page.evaluate(() => document.getElementById("gallery").scrollTop))
     .toBe(100);
+});
+
+test("snap chooses the first or last point within 10 px of a scroll limit", async ({ page }) => {
+  await setup(page, `<div id="start" data-ae-scrollbox="native"
+    style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden">
+    <div data-ae-scrollbox-snap style="display:flex;width:280px">
+      <div id="start-first" style="flex:none;width:20px;height:100px"></div>
+      <div id="start-middle" style="flex:none;width:60px;height:100px"></div>
+      <div style="flex:none;width:200px;height:100px"></div>
+    </div>
+  </div>
+  <div id="end" data-ae-scrollbox="native"
+    style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden">
+    <div data-ae-scrollbox-snap style="display:flex;width:280px">
+      <div style="flex:none;width:200px;height:100px"></div>
+      <div id="end-middle" style="flex:none;width:60px;height:100px"></div>
+      <div id="end-last" style="flex:none;width:20px;height:100px"></div>
+    </div>
+  </div>`);
+  const calls = await page.evaluate(() => {
+    const calls = [];
+    for (const id of ["start-first", "start-middle", "end-middle", "end-last"]) {
+      const item = document.getElementById(id);
+      const original = item.scrollIntoView;
+      item.scrollIntoView = function (options) {
+        calls.push(id);
+        return original.call(this, options);
+      };
+    }
+    const start = document.getElementById("start");
+    const end = document.getElementById("end");
+    start.scrollTo({ left: 5, behavior: "instant" });
+    end.scrollTo({ left: end.scrollWidth - end.clientWidth - 5, behavior: "instant" });
+    start.dispatchEvent(new Event("scrollend"));
+    end.dispatchEvent(new Event("scrollend"));
+    return calls;
+  });
+  expect(calls).toEqual(["start-first", "end-last"]);
 });
 
 test("wheel advances snap points after horizontal conversion", async ({ page }) => {

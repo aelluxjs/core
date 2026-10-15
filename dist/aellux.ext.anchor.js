@@ -31,8 +31,11 @@
       "bottom-right": [1, 1]
     };
     const UPDATE_INTERVAL_MS = 100;
+    const POSITION_CHECK_INTERVAL_MS = 1e3;
     const anchors = /* @__PURE__ */ new Map();
     let updateTimeout = null;
+    let positionInterval = null;
+    let positionCheckPending = false;
     let lastUpdateTime = -UPDATE_INTERVAL_MS;
     AelluxJs.extAttach(extensionName, { init, destroy });
     function init() {
@@ -58,7 +61,9 @@
     }
     async function destroy() {
       if (updateTimeout !== null) clearTimeout(updateTimeout);
+      if (positionInterval !== null) clearInterval(positionInterval);
       updateTimeout = null;
+      positionInterval = null;
       lastUpdateTime = -UPDATE_INTERVAL_MS;
       await Promise.all(Array.from(anchors.keys(), unmountAnchor));
       AelluxJs.mountManager.remove({ extensionName });
@@ -76,6 +81,7 @@
         revision: 0,
         target: null,
         reference: null,
+        targetPosition: null,
         observer: null,
         intersectionObserver: null
       };
@@ -83,6 +89,7 @@
       if (anchors.size === 1) {
         root.addEventListener("scroll", scheduleUpdate, { capture: true, passive: true });
         root.addEventListener("resize", scheduleUpdate);
+        positionInterval = setInterval(checkPositions, POSITION_CHECK_INTERVAL_MS);
       }
       if (typeof root.ResizeObserver === "function") {
         state.observer = new root.ResizeObserver(scheduleUpdate);
@@ -103,7 +110,9 @@
         root.removeEventListener("scroll", scheduleUpdate, true);
         root.removeEventListener("resize", scheduleUpdate);
         if (updateTimeout !== null) clearTimeout(updateTimeout);
+        if (positionInterval !== null) clearInterval(positionInterval);
         updateTimeout = null;
+        positionInterval = null;
         lastUpdateTime = -UPDATE_INTERVAL_MS;
       }
       await AelluxJs.waitLayout.update(deactivate, [element, state]);
@@ -131,6 +140,37 @@
           );
         });
       }
+    }
+    function checkPositions() {
+      if (!anchors.size || positionCheckPending) return;
+      positionCheckPending = true;
+      AelluxJs.waitLayout.read(() => {
+        for (const [element, state] of anchors) {
+          if (!state.target || !state.reference || !state.targetPosition) continue;
+          if (element.offsetParent !== state.reference) return true;
+          const referenceRect = state.reference.getBoundingClientRect();
+          const scaleX = state.reference.offsetWidth ? referenceRect.width / state.reference.offsetWidth : 1;
+          const scaleY = state.reference.offsetHeight ? referenceRect.height / state.reference.offsetHeight : 1;
+          const position = toReference(
+            state.target.getBoundingClientRect(),
+            state.reference,
+            referenceRect,
+            scaleX,
+            scaleY
+          );
+          if (position.left !== state.targetPosition.left || position.top !== state.targetPosition.top) return true;
+        }
+        return false;
+      }).then((changed) => {
+        if (changed) scheduleUpdate();
+      }).catch((cause) => {
+        AelluxJs.diagnostics.error(
+          AelluxJs.diagnostics.ERROR_EXTENSION_MOUNT,
+          { cause, extension: extensionName, method: "update" }
+        );
+      }).finally(() => {
+        positionCheckPending = false;
+      });
     }
     function now() {
       return root.performance && typeof root.performance.now === "function" ? root.performance.now() : Date.now();
@@ -182,6 +222,7 @@
         if (!current()) return;
         state.invalidContext = false;
         observe(state, element, placement.target, placement.reference);
+        state.targetPosition = placement.targetPosition;
         const selected = placement.selected;
         element.style.setProperty("--ae-anchor-x", `${selected.x}px`);
         element.style.setProperty("--ae-anchor-y", `${selected.y}px`);
@@ -223,7 +264,13 @@
           break;
         }
       }
-      return { valid: true, target, reference, selected };
+      return {
+        valid: true,
+        target,
+        reference,
+        selected,
+        targetPosition: { left: targetRect.left, top: targetRect.top }
+      };
     }
     function invalidContext(element, state, target) {
       deactivate(element, state);
@@ -263,6 +310,7 @@
       if (state.observer) state.observer.disconnect();
       if (state.intersectionObserver) state.intersectionObserver.disconnect();
       state.target = state.reference = null;
+      state.targetPosition = null;
       element.classList.remove(anchoredClass);
       if (state.active) restoreStyles(element, state.original);
       state.active = false;

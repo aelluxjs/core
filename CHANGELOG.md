@@ -12,6 +12,7 @@ All notable changes to aellux.js will be documented in this file.
 - Raised the boot, full-bundle, and Scrollbox size budgets for snap support.
 
 - Anchor now schedules repositioning when an observed intersection changes, where `IntersectionObserver` is available.
+- Anchor checks the target's position relative to its positioning reference every second and updates when it changes.
 - Raised the full-bundle raw-size budgets for Anchor's intersection observer.
 - Elastic Scrollbox accepts one or two maximum displacement values as fractions or pixels through `data-ae-scrollbox-elastic`.
 - Weak CSS now uses smooth scrolling by default and restores immediate scrolling for all elements when reduced motion is requested.
@@ -32,6 +33,9 @@ All notable changes to aellux.js will be documented in this file.
 - Snap release prioritizes the point nearest the viewport center, then uses a short flick or significant displacement of the current point to advance wide carousel items.
 - Snap now projects point centers by an additional pointer delta before comparison and accepts very short, fast flicks while rejecting slow short drags.
 - Snap recognizes flicks released during the 100 ms text-selection wait, while preserving any selection that changed during the gesture.
+- Snap children now expose inline `--ae-snap-viewport` and `--ae-snap-focus` values as their centers move through and beyond the viewport.
+- A single click inside a partly visible snap point now centers it; clicks inside fully visible points leave scrolling unchanged.
+- Snap selection now chooses the first or last point within 10 px of the corresponding scroll limit.
 
 - Pointer Drag Scroll (PDS) now cancels `pointermove`, `touchmove`, and matching-button `mousemove` defaults once scrolling begins. It prevents native pointer-down behavior on open content, preserves text and controls, and changes the cursor from `grab` to `grabbing` during PDS.
 - PDS also cancels cancelable native drag events while the scroll gesture is active.
