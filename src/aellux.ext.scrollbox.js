@@ -28,6 +28,7 @@
   const MOMENTUM_DECELERATION = 0.0015;
   const SNAP_SWIPE_SPEED_PX_MS = 0.5;
   const SNAP_FLICK_WINDOW_MS = 200;
+  const SNAP_FLICK_FAST_TIME_MS = 50;
   const SNAP_FLICK_MAX_DISTANCE_PX = 100;
   const SNAP_FLICK_MIN_DISTANCE_PX = 1;
   const SNAP_DRAG_DISTANCE_RATIO = 0.25;
@@ -634,7 +635,7 @@
       lastX: event.clientX, lastY: event.clientY, moved: false, axis: null, chain,
       styles: [], momentumState: null, momentumStartX: 0, momentumStartY: 0,
       elasticForce: 0,
-      flickSamples: [{ x: event.clientX, y: event.clientY, time }],
+      startTime: time, endTime: null,
       snapStarts: new Map(chain.filter(member => member.snapEnabled).map(member => {
         const items = snapItems(member);
         const item = items[member.snap.index] || null;
@@ -710,11 +711,6 @@
       pointerScroll.lastY - event.clientY;
     pointerScroll.lastX = event.clientX;
     pointerScroll.lastY = event.clientY;
-    const samples = pointerScroll.flickSamples;
-    const time = now();
-    samples.push({ x: event.clientX, y: event.clientY, time });
-    while (samples.length > 1 && time - samples[0].time > SNAP_FLICK_WINDOW_MS)
-      samples.shift();
     if (event.cancelable) event.preventDefault();
     if (!remaining) return;
     let outermost = null;
@@ -832,6 +828,22 @@
   function endPointerScroll(state, event) {
     const pointerScroll = state.pointerScroll;
     if (!pointerScroll || (event && event.pointerId !== pointerScroll.pointerId)) return;
+    pointerScroll.endTime = now();
+    if (event && event.type === "pointerup" && !pointerScroll.moved &&
+      pointerScroll.endTime < pointerScroll.selectionReadyTime &&
+      !selectionHasChanged(pointerScroll.selectionAtDown)) {
+      const dx = pointerScroll.startX - event.clientX;
+      const dy = pointerScroll.startY - event.clientY;
+      const axis = pointerScroll.axis || (Math.abs(dx) >= Math.abs(dy) ? "x" : "y");
+      pointerScroll.lastX = event.clientX;
+      pointerScroll.lastY = event.clientY;
+      if (pointerScroll.chain.some(member => member.snapEnabled &&
+        snapAxis(member) === axis && pointerAxisMaximum(member, axis) > 0) &&
+        isSnapFlick(pointerScroll, axis)) {
+        pointerScroll.axis = axis;
+        pointerScroll.moved = true;
+      }
+    }
     state.pointerScroll = null;
     if (activePointerScrollState === state) activePointerScrollState = null;
     if (pointerScroll.selectionWaitTimeout !== null)
@@ -894,14 +906,9 @@
     let index = nearestSnapIndex(state, items,
       axis === "x" ? projection : 0, axis === "y" ? projection : 0);
     if (index === startIndex && axis === pointerScroll.axis && start) {
-      const samples = pointerScroll.flickSamples;
-      const first = samples[0], last = samples[samples.length - 1];
-      const distance = axis === "x" ? first.x - last.x : first.y - last.y;
-      const elapsed = Math.max(1, last.time - first.time);
-      const flick = now() - last.time <= SNAP_FLICK_WINDOW_MS &&
-        Math.abs(distance) > SNAP_FLICK_MIN_DISTANCE_PX &&
-        Math.abs(distance) < SNAP_FLICK_MAX_DISTANCE_PX &&
-        Math.abs(distance) / elapsed >= SNAP_SWIPE_SPEED_PX_MS;
+      const flick = isSnapFlick(pointerScroll, axis);
+      const distance = axis === "x" ? pointerScroll.startX - pointerScroll.lastX :
+        pointerScroll.startY - pointerScroll.lastY;
       const offset = snapCenterOffset(state, start.item, axis);
       const size = axis === "x" ? state.element.clientWidth : state.element.clientHeight;
       const movedAway = Math.abs(offset) - Math.abs(start.offset) >=
@@ -913,6 +920,17 @@
     }
     state.snap.pending = items[index];
     flushPendingSnap(state);
+  }
+
+  function isSnapFlick(pointerScroll, axis) {
+    const distance = axis === "x" ? pointerScroll.startX - pointerScroll.lastX :
+      pointerScroll.startY - pointerScroll.lastY;
+    const elapsed = Math.max(1, pointerScroll.endTime - pointerScroll.startTime);
+    return elapsed <= SNAP_FLICK_WINDOW_MS &&
+      Math.abs(distance) > SNAP_FLICK_MIN_DISTANCE_PX &&
+      Math.abs(distance) < SNAP_FLICK_MAX_DISTANCE_PX &&
+      (elapsed <= SNAP_FLICK_FAST_TIME_MS ||
+        Math.abs(distance) / elapsed >= SNAP_SWIPE_SPEED_PX_MS);
   }
 
   function flushPendingSnap(state) {

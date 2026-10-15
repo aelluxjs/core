@@ -342,6 +342,81 @@ test("snap uses projected centers to recognize a deliberate drag", async ({ page
     .toBe(200);
 });
 
+test("text-origin snap flick works before the 100 ms selection wait ends", async ({ page }) => {
+  await setup(page, `<div id="gallery" data-ae-scrollbox="pointer"
+    style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden">
+    <div data-ae-scrollbox-snap style="display:flex;width:300px">
+      <div id="text" style="flex:none;width:100px;height:100px">selectable words</div>
+      <div style="flex:none;width:100px;height:100px"></div>
+      <div style="flex:none;width:100px;height:100px"></div>
+    </div>
+  </div>`);
+  const pending = await page.evaluate(() => {
+    const text = document.getElementById("text");
+    const rect = text.getBoundingClientRect();
+    const x = rect.left + 10, y = rect.top + 10;
+    text.dispatchEvent(new PointerEvent("pointerdown", {
+      bubbles: true, cancelable: true, isPrimary: true, pointerId: 305,
+      pointerType: "mouse", button: 0, buttons: 1, clientX: x, clientY: y
+    }));
+    const move = new PointerEvent("pointermove", {
+      bubbles: true, cancelable: true, isPrimary: true, pointerId: 305,
+      pointerType: "mouse", buttons: 1, clientX: x - 2, clientY: y
+    });
+    window.dispatchEvent(move);
+    const pending = { prevented: move.defaultPrevented,
+      left: document.getElementById("gallery").scrollLeft };
+    window.dispatchEvent(new PointerEvent("pointerup", {
+      bubbles: true, isPrimary: true, pointerId: 305, pointerType: "mouse",
+      button: 0, buttons: 0, clientX: x - 2, clientY: y
+    }));
+    return pending;
+  });
+  expect(pending).toEqual({ prevented: false, left: 0 });
+  await expect.poll(() => page.evaluate(() => document.getElementById("gallery").scrollLeft))
+    .toBe(100);
+});
+
+test("selection during the snap wait prevents an early flick", async ({ page }) => {
+  await setup(page, `<div id="gallery" data-ae-scrollbox="pointer"
+    style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden">
+    <div data-ae-scrollbox-snap style="display:flex;width:300px">
+      <div id="text" style="flex:none;width:100px;height:100px">selectable words</div>
+      <div style="flex:none;width:100px;height:100px"></div>
+      <div style="flex:none;width:100px;height:100px"></div>
+    </div>
+  </div>`);
+  const result = await page.evaluate(() => {
+    const text = document.getElementById("text");
+    const rect = text.getBoundingClientRect();
+    const x = rect.left + 10, y = rect.top + 10;
+    text.dispatchEvent(new PointerEvent("pointerdown", {
+      bubbles: true, cancelable: true, isPrimary: true, pointerId: 306,
+      pointerType: "mouse", button: 0, buttons: 1, clientX: x, clientY: y
+    }));
+    window.dispatchEvent(new PointerEvent("pointermove", {
+      bubbles: true, cancelable: true, isPrimary: true, pointerId: 306,
+      pointerType: "mouse", buttons: 1, clientX: x - 2, clientY: y
+    }));
+    const range = document.createRange();
+    range.setStart(text.firstChild, 0);
+    range.setEnd(text.firstChild, 4);
+    const selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
+    window.dispatchEvent(new PointerEvent("pointerup", {
+      bubbles: true, isPrimary: true, pointerId: 306, pointerType: "mouse",
+      button: 0, buttons: 0, clientX: x - 2, clientY: y
+    }));
+    return { selected: selection.toString(),
+      left: document.getElementById("gallery").scrollLeft };
+  });
+  expect(result).toEqual({ selected: "sele", left: 0 });
+  await page.waitForTimeout(150);
+  expect(await page.evaluate(() => document.getElementById("gallery").scrollLeft))
+    .toBe(0);
+});
+
 test("native is the default and never loads a dependency", async ({ page }) => {
   let requests = 0;
   await page.route("https://unpkg.com/**", route => { requests++; return route.abort(); });

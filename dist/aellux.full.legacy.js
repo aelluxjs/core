@@ -25356,6 +25356,7 @@
         var MOMENTUM_DECELERATION = 15e-4;
         var SNAP_SWIPE_SPEED_PX_MS = 0.5;
         var SNAP_FLICK_WINDOW_MS = 200;
+        var SNAP_FLICK_FAST_TIME_MS = 50;
         var SNAP_FLICK_MAX_DISTANCE_PX = 100;
         var SNAP_FLICK_MIN_DISTANCE_PX = 1;
         var SNAP_DRAG_DISTANCE_RATIO = 0.25;
@@ -26035,11 +26036,8 @@
             momentumStartX: 0,
             momentumStartY: 0,
             elasticForce: 0,
-            flickSamples: [{
-              x: event.clientX,
-              y: event.clientY,
-              time: time
-            }],
+            startTime: time,
+            endTime: null,
             snapStarts: new Map(chain.filter(function(member2) {
               return member2.snapEnabled;
             }).map(function(member2) {
@@ -26151,14 +26149,6 @@
           var remaining = axis === "x" ? pointerScroll.lastX - event.clientX : pointerScroll.lastY - event.clientY;
           pointerScroll.lastX = event.clientX;
           pointerScroll.lastY = event.clientY;
-          var samples = pointerScroll.flickSamples;
-          var time = now();
-          samples.push({
-            x: event.clientX,
-            y: event.clientY,
-            time: time
-          });
-          while (samples.length > 1 && time - samples[0].time > SNAP_FLICK_WINDOW_MS) samples.shift();
           if (event.cancelable) event.preventDefault();
           if (!remaining) return;
           var outermost = null;
@@ -26223,16 +26213,16 @@
             publish(outermost);
           }
           if (lastUsed) {
-            var _time = now();
+            var time = now();
             if (pointerScroll.momentumState !== lastUsed) {
               pointerScroll.momentumState = lastUsed;
               pointerScroll.momentumStartX = lastStartX;
               pointerScroll.momentumStartY = lastStartY;
-              pointerScroll.momentumStartTime = _time;
-            } else if (_time - pointerScroll.momentumStartTime > MOMENTUM_LIMIT_TIME_MS) {
+              pointerScroll.momentumStartTime = time;
+            } else if (time - pointerScroll.momentumStartTime > MOMENTUM_LIMIT_TIME_MS) {
               pointerScroll.momentumStartX = lastUsed.element.scrollLeft;
               pointerScroll.momentumStartY = lastUsed.element.scrollTop;
-              pointerScroll.momentumStartTime = _time;
+              pointerScroll.momentumStartTime = time;
             }
           }
         }
@@ -26291,6 +26281,20 @@
         function endPointerScroll(state, event) {
           var pointerScroll = state.pointerScroll;
           if (!pointerScroll || event && event.pointerId !== pointerScroll.pointerId) return;
+          pointerScroll.endTime = now();
+          if (event && event.type === "pointerup" && !pointerScroll.moved && pointerScroll.endTime < pointerScroll.selectionReadyTime && !selectionHasChanged(pointerScroll.selectionAtDown)) {
+            var dx = pointerScroll.startX - event.clientX;
+            var dy = pointerScroll.startY - event.clientY;
+            var axis = pointerScroll.axis || (Math.abs(dx) >= Math.abs(dy) ? "x" : "y");
+            pointerScroll.lastX = event.clientX;
+            pointerScroll.lastY = event.clientY;
+            if (pointerScroll.chain.some(function(member2) {
+              return member2.snapEnabled && snapAxis(member2) === axis && pointerAxisMaximum(member2, axis) > 0;
+            }) && isSnapFlick(pointerScroll, axis)) {
+              pointerScroll.axis = axis;
+              pointerScroll.moved = true;
+            }
+          }
           state.pointerScroll = null;
           if (activePointerScrollState === state) activePointerScrollState = null;
           if (pointerScroll.selectionWaitTimeout !== null) root2.clearTimeout(pointerScroll.selectionWaitTimeout);
@@ -26370,11 +26374,8 @@
           var projection = axis === pointerScroll.axis ? axis === "x" ? pointerScroll.lastX - pointerScroll.startX : pointerScroll.lastY - pointerScroll.startY : 0;
           var index = nearestSnapIndex(state, items, axis === "x" ? projection : 0, axis === "y" ? projection : 0);
           if (index === startIndex && axis === pointerScroll.axis && start) {
-            var samples = pointerScroll.flickSamples;
-            var first = samples[0], last = samples[samples.length - 1];
-            var distance = axis === "x" ? first.x - last.x : first.y - last.y;
-            var elapsed = Math.max(1, last.time - first.time);
-            var flick = now() - last.time <= SNAP_FLICK_WINDOW_MS && Math.abs(distance) > SNAP_FLICK_MIN_DISTANCE_PX && Math.abs(distance) < SNAP_FLICK_MAX_DISTANCE_PX && Math.abs(distance) / elapsed >= SNAP_SWIPE_SPEED_PX_MS;
+            var flick = isSnapFlick(pointerScroll, axis);
+            var distance = axis === "x" ? pointerScroll.startX - pointerScroll.lastX : pointerScroll.startY - pointerScroll.lastY;
             var offset = snapCenterOffset(state, start.item, axis);
             var size = axis === "x" ? state.element.clientWidth : state.element.clientHeight;
             var movedAway = Math.abs(offset) - Math.abs(start.offset) >= size * SNAP_DRAG_DISTANCE_RATIO;
@@ -26385,6 +26386,11 @@
           }
           state.snap.pending = items[index];
           flushPendingSnap(state);
+        }
+        function isSnapFlick(pointerScroll, axis) {
+          var distance = axis === "x" ? pointerScroll.startX - pointerScroll.lastX : pointerScroll.startY - pointerScroll.lastY;
+          var elapsed = Math.max(1, pointerScroll.endTime - pointerScroll.startTime);
+          return elapsed <= SNAP_FLICK_WINDOW_MS && Math.abs(distance) > SNAP_FLICK_MIN_DISTANCE_PX && Math.abs(distance) < SNAP_FLICK_MAX_DISTANCE_PX && (elapsed <= SNAP_FLICK_FAST_TIME_MS || Math.abs(distance) / elapsed >= SNAP_SWIPE_SPEED_PX_MS);
         }
         function flushPendingSnap(state) {
           var target = state.snap.pending;
