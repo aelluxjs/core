@@ -24,6 +24,8 @@ All notable changes to aellux.js will be documented in this file.
 
 ### Fixed
 
+- Scrollbox pointer mode no longer starts a drag when a second or later click is held and moved outside the box.
+- Elastic Scrollbox now keeps trailing scroll extent stable when content overflows the wrapper's own box, so bottom and right pressure remains visible.
 - Anchor now uses its positioning parent when no target is specified and accepts that parent as an explicit target.
 
 ## [0.1.0-beta.10] - 2026-10-14

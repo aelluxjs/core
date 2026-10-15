@@ -1318,6 +1318,10 @@
             baseOrigin: "",
             previousTransform: null,
             previousOrigin: null,
+            previousMinWidth: null,
+            previousMinHeight: null,
+            extentX: false,
+            extentY: false,
             invalidReported: false,
             amounts: [0, 0, 0, 0],
             active: false,
@@ -1350,6 +1354,9 @@
           state.onScroll = () => publish(state);
           state.onWheel = (event) => handleWheel(state, event);
           state.onPointerDown = (event) => startDrag(state, event);
+          state.onMouseDown = (event) => {
+            if (event.button === 0 && event.detail > 1) endDrag(state);
+          };
           state.onPointerMove = (event) => moveDrag(state, event);
           state.onPointerEnd = (event) => endDrag(state, event);
           state.onBlur = () => endDrag(state);
@@ -1374,7 +1381,10 @@
           resetElastic(state);
           element.removeEventListener("scroll", state.onScroll);
           if (state.wheelListening) element.removeEventListener("wheel", state.onWheel, true);
-          if (state.pointerListening) element.removeEventListener("pointerdown", state.onPointerDown);
+          if (state.pointerListening) {
+            element.removeEventListener("pointerdown", state.onPointerDown);
+            element.removeEventListener("mousedown", state.onMouseDown);
+          }
           if (state.touchListening) removeTouchListeners(state);
           if (state.resizeObserver) state.resizeObserver.disconnect();
           if (state.mutationObserver) state.mutationObserver.disconnect();
@@ -1408,9 +1418,11 @@
           if (!pointerEnabled || !state.momentumEnabled) cancelMomentum(state);
           if (pointerEnabled && !state.pointerListening) {
             element.addEventListener("pointerdown", state.onPointerDown);
+            element.addEventListener("mousedown", state.onMouseDown);
             state.pointerListening = true;
           } else if (!pointerEnabled && state.pointerListening) {
             element.removeEventListener("pointerdown", state.onPointerDown);
+            element.removeEventListener("mousedown", state.onMouseDown);
             state.pointerListening = false;
             endDrag(state);
           }
@@ -1448,6 +1460,14 @@
             state.elastic.previousOrigin = {
               value: wrapper.style.getPropertyValue("transform-origin"),
               priority: wrapper.style.getPropertyPriority("transform-origin")
+            };
+            state.elastic.previousMinWidth = {
+              value: wrapper.style.getPropertyValue("min-width"),
+              priority: wrapper.style.getPropertyPriority("min-width")
+            };
+            state.elastic.previousMinHeight = {
+              value: wrapper.style.getPropertyValue("min-height"),
+              priority: wrapper.style.getPropertyPriority("min-height")
             };
           }
           state.elasticEnabled = true;
@@ -1717,6 +1737,22 @@
           elastic.amounts = amounts;
           elastic.active = active;
           elastic.owned = true;
+          if (amounts[1] > 0 && !elastic.extentX) {
+            elastic.wrapper.style.setProperty(
+              "min-width",
+              `${Math.max(elastic.wrapper.offsetWidth, elastic.wrapper.scrollWidth)}px`,
+              elastic.previousMinWidth.priority
+            );
+            elastic.extentX = true;
+          }
+          if (amounts[2] > 0 && !elastic.extentY) {
+            elastic.wrapper.style.setProperty(
+              "min-height",
+              `${Math.max(elastic.wrapper.offsetHeight, elastic.wrapper.scrollHeight)}px`,
+              elastic.previousMinHeight.priority
+            );
+            elastic.extentY = true;
+          }
           setElasticTransform(state);
           return active;
         }
@@ -1733,8 +1769,14 @@
           const scale = scaleX > 1 || scaleY > 1 ? `scale(${scaleX}, ${scaleY})` : "";
           if (scaleX > 1 || scaleY > 1) {
             const baseOrigin = elastic.baseOrigin.split(" ");
-            const originX = elastic.amounts[3] > 0 ? "0%" : elastic.amounts[1] > 0 ? "100%" : baseOrigin[0];
-            const originY = elastic.amounts[0] > 0 ? "0%" : elastic.amounts[2] > 0 ? "100%" : baseOrigin[1];
+            const originX = elastic.amounts[3] > 0 ? "0%" : elastic.amounts[1] > 0 ? `${Math.max(
+              wrapper.offsetWidth,
+              wrapper.scrollWidth + wrapper.clientLeft
+            )}px` : baseOrigin[0];
+            const originY = elastic.amounts[0] > 0 ? "0%" : elastic.amounts[2] > 0 ? `${Math.max(
+              wrapper.offsetHeight,
+              wrapper.scrollHeight + wrapper.clientTop
+            )}px` : baseOrigin[1];
             wrapper.style.setProperty(
               "transform-origin",
               `${originX} ${originY}`,
@@ -1796,10 +1838,30 @@
               previousOrigin.priority
             );
             else elastic.wrapper.style.removeProperty("transform-origin");
+            if (elastic.extentX) {
+              const previousMinWidth = elastic.previousMinWidth;
+              if (previousMinWidth.value) elastic.wrapper.style.setProperty(
+                "min-width",
+                previousMinWidth.value,
+                previousMinWidth.priority
+              );
+              else elastic.wrapper.style.removeProperty("min-width");
+            }
+            if (elastic.extentY) {
+              const previousMinHeight = elastic.previousMinHeight;
+              if (previousMinHeight.value) elastic.wrapper.style.setProperty(
+                "min-height",
+                previousMinHeight.value,
+                previousMinHeight.priority
+              );
+              else elastic.wrapper.style.removeProperty("min-height");
+            }
           }
           elastic.amounts = [0, 0, 0, 0];
           elastic.active = false;
           elastic.owned = false;
+          elastic.extentX = false;
+          elastic.extentY = false;
         }
         function observe(state) {
           state.onResize = () => scheduleResize(state);

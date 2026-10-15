@@ -121,6 +121,30 @@ test("real mouse drag scrolls while the pointer leaves the box", async ({ page }
   })).toEqual([73, 73]);
 });
 
+for (const elastic of [false, true]) {
+  test(`second click dragged outside does not start pointer scrolling${elastic ? " with elastic" : ""}`,
+    async ({ page }) => {
+      const childAttribute = elastic ? " data-ae-scrollbox-elastic" : "";
+      await setup(page, `<div id="box" data-ae-scrollbox="pointer"
+        data-ae-scrollbox-momentum="false" style="width:100px;height:100px;overflow:auto">
+        <div${childAttribute} style="width:300px;height:300px"></div></div>`);
+      const rect = await page.locator("#box").boundingBox();
+      const x = rect.x + 50, y = rect.y + 50;
+      await page.mouse.move(x, y);
+      await page.mouse.click(x, y);
+      await page.mouse.down({ clickCount: 2 });
+      await page.mouse.move(rect.x - 20, rect.y - 20, { steps: 4 });
+      const during = await page.evaluate(() => {
+        const element = document.getElementById("box");
+        return { x: element.scrollLeft, y: element.scrollTop,
+          userSelect: element.style.getPropertyValue("user-select"),
+          transform: element.firstElementChild.style.transform };
+      });
+      await page.mouse.up();
+      expect(during).toEqual({ x: 0, y: 0, userSelect: "", transform: "" });
+    });
+}
+
 test("horizontal pointer movement selects text in a vertical-only box", async ({ page }) => {
   await setup(page, `<div id="box" data-ae-scrollbox="pointer" data-ae-scrollbox-momentum="false"
     style="width:200px;height:100px;overflow:auto;font:16px monospace">
@@ -508,11 +532,60 @@ test("elastic pointer drag moves its wrapper away from bottom and right edges", 
   expect(result.transform).toContain("translate3d(-20px, -20px, 0px)");
   expect(result.transform).toMatch(/scale\(1\.\d+(?:, 1\.\d+)?\)/);
   expect(result.transform.startsWith("scale(")).toBe(true);
-  expect(result.origin.startsWith("100% 100%")).toBe(true);
+  expect(Number.parseFloat(result.origin.split(" ")[0])).toBeGreaterThanOrEqual(300);
+  expect(Number.parseFloat(result.origin.split(" ")[1])).toBeGreaterThanOrEqual(300);
   expect(result.scrollLeft).toBe(result.maxX);
   expect(result.scrollTop).toBe(result.maxY);
   expect(result.gapX).toBeGreaterThan(15);
   expect(result.gapY).toBeGreaterThan(15);
+});
+
+test("elastic trailing pivot follows content overflowing its wrapper", async ({ page }) => {
+  await setup(page, `<div id="box" data-ae-scrollbox="pointer"
+    data-ae-scrollbox-momentum="false" style="width:100px;height:100px;overflow:auto">
+    <div data-ae-scrollbox-elastic style="width:100px;height:100px">
+      <div id="content" style="width:400px;height:400px"></div>
+    </div></div>`);
+  const result = await page.evaluate(async () => {
+    const element = document.getElementById("box");
+    const wrapper = element.firstElementChild;
+    const content = document.getElementById("content");
+    const rect = element.getBoundingClientRect();
+    element.scrollTo({ left: element.scrollWidth, top: element.scrollHeight, behavior: "instant" });
+    const before = content.getBoundingClientRect();
+    const beforeScroll = { x: element.scrollLeft, y: element.scrollTop };
+    const beforeWrapper = { width: wrapper.offsetWidth, height: wrapper.offsetHeight };
+    const x = rect.left + 50, y = rect.top + 50;
+    element.dispatchEvent(new PointerEvent("pointerdown", {
+      bubbles: true, isPrimary: true, pointerId: 53, pointerType: "mouse",
+      button: 0, buttons: 1, clientX: x, clientY: y
+    }));
+    window.dispatchEvent(new PointerEvent("pointermove", {
+      bubbles: true, cancelable: true, isPrimary: true, pointerId: 53,
+      pointerType: "mouse", buttons: 1, clientX: x - 60, clientY: y - 60
+    }));
+    const after = content.getBoundingClientRect();
+    const origin = wrapper.style.transformOrigin.split(" ");
+    const result = { gapX: before.right - after.right, gapY: before.bottom - after.bottom,
+      originX: Number.parseFloat(origin[0]), originY: Number.parseFloat(origin[1]),
+      wrapperWidth: wrapper.offsetWidth, wrapperHeight: wrapper.offsetHeight, beforeWrapper,
+      contentWidth: wrapper.scrollWidth, contentHeight: wrapper.scrollHeight,
+      beforeScroll, afterScroll: { x: element.scrollLeft, y: element.scrollTop },
+      transform: wrapper.style.transform };
+    await AelluxJs.unmount(element, "scrollbox");
+    return { ...result, restoredMinWidth: wrapper.style.minWidth,
+      restoredMinHeight: wrapper.style.minHeight };
+  });
+  expect(result.beforeWrapper).toEqual({ width: 100, height: 100 });
+  expect(result.wrapperWidth).toBeGreaterThanOrEqual(400);
+  expect(result.wrapperHeight).toBeGreaterThanOrEqual(400);
+  expect(result.originX).toBeGreaterThanOrEqual(result.contentWidth);
+  expect(result.originY).toBeGreaterThanOrEqual(result.contentHeight);
+  expect(result.afterScroll).toEqual(result.beforeScroll);
+  expect(result.gapX, JSON.stringify(result)).toBeGreaterThan(15);
+  expect(result.gapY).toBeGreaterThan(15);
+  expect(result.restoredMinWidth).toBe("");
+  expect(result.restoredMinHeight).toBe("");
 });
 
 test("elastic bottom and right transform animates during release", async ({ page }) => {
