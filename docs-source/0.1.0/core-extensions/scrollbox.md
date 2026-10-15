@@ -27,7 +27,7 @@ Pointer Drag Scroll (PDS) uses the primary mouse button or pen. Once movement re
 
 Once PDS begins, Scrollbox adds `ae--pointerscrolling` to the box. The boot's weak CSS applies `cursor: grabbing !important` to the box and its contents until the gesture ends. If its only direct child enables `data-ae-scrollbox-elastic`, that child and its descendants also receive `pointer-events: none !important` during PDS. Scrollbox cancels wheel input over the box during this interval, along with the default action of its `pointermove`, matching-button `mousemove`, `touchmove`, and cancelable drag events. Canceling `dragstart` prevents a native drag from taking over the gesture. Native `scroll` events still reach listeners and report the updated scroll position.
 
-Gestures starting on text wait 100 ms after pointer-down so a native selection can begin. The first qualifying movement still chooses the axis during that wait. If text selection begins before PDS takes over, Scrollbox stops tracking and leaves the selection intact. Otherwise it scrolls in the locked axis after the wait, including any movement already made while waiting. If no pointer Scrollbox in the ancestry can scroll that axis, PDS does not start.
+Gestures starting on text wait 100 ms after pointer-down so a native selection can begin. The first qualifying movement still chooses the axis during that wait. A text selection that remains unchanged from pointer-down does not block PDS; a new or altered selection stops tracking and remains intact. A collapsed caret by itself does not count as a text selection. In a vertical-only scroll chain, movement of more than 10 px vertically with no more than 6 px of horizontal drift starts PDS immediately and prevents native selection. Otherwise PDS scrolls in the locked axis after the wait, including any movement already made while waiting. If no pointer Scrollbox in the ancestry can scroll that axis, PDS does not start.
 
 In nested pointer Scrollboxes, the innermost box consumes movement in the locked axis until it reaches an edge. Any remaining movement goes to the next scrollable ancestor, repeating upward as needed. Reversing direction returns to the innermost box first. Elastic pressure applies only after every eligible box reaches its edge; release momentum applies to the last box that moved.
 
@@ -41,7 +41,7 @@ In `pointer` mode, a quick release continues scrolling with gradually decreasing
 
 ## Horizontal wheel handoff
 
-On a fine-pointer desktop, a predominantly vertical wheel gesture scrolls a horizontal-only box sideways while it has room in that direction. At either edge, the next wheel event passes to the parent or document. Native horizontal wheel gestures remain native. A box with meaningful vertical overflow does not convert vertical wheel motion. This behavior applies to both modes.
+On a fine-pointer desktop, a predominantly vertical wheel gesture scrolls a horizontal-only box sideways while it has room in that direction. At either edge, the next wheel event passes to the parent or document, including when the box has an elastic child. Converted wheel input does not stretch that child. Native horizontal wheel gestures remain native. A box with meaningful vertical overflow does not convert vertical wheel motion. This behavior applies to both modes.
 
 Set `data-ae-scrollbox-wheel-horizontal="false"` to disable the vertical-to-horizontal conversion:
 

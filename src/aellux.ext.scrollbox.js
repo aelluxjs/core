@@ -21,6 +21,8 @@
   const POINTER_SCROLL_MULTICLICK_MS = 500;
   const POINTER_SCROLL_MULTICLICK_DISTANCE_PX = 8;
   const TEXT_SELECTION_WAIT_MS = 100;
+  const VERTICAL_TEXT_DRAG_PX = 10;
+  const VERTICAL_TEXT_DRAG_X_TOLERANCE_PX = 6;
   const MOMENTUM_LIMIT_TIME_MS = 300;
   const MOMENTUM_LIMIT_DISTANCE_PX = 15;
   const MOMENTUM_DECELERATION = 0.0015;
@@ -361,6 +363,9 @@
       Math.abs(event.clientX - previousDown.x) <= POINTER_SCROLL_MULTICLICK_DISTANCE_PX &&
       Math.abs(event.clientY - previousDown.y) <= POINTER_SCROLL_MULTICLICK_DISTANCE_PX) return;
     const textOrigin = isTextAtPoint(event.target, event.clientX, event.clientY);
+    const selectionAtDown = readSelection();
+    const verticalOnly = chain.some(member => pointerAxisMaximum(member, "y") > 0) &&
+      !chain.some(member => pointerAxisMaximum(member, "x") > 0);
     if (!textOrigin && event.cancelable) event.preventDefault();
     for (const member of chain) {
       cancelMomentum(member);
@@ -378,6 +383,7 @@
       lastX: event.clientX, lastY: event.clientY, moved: false, axis: null, chain,
       styles: [], momentumState: null, momentumStartX: 0, momentumStartY: 0,
       elasticForce: 0,
+      selectionAtDown, verticalOnly,
       selectionReadyTime: textOrigin ? time + TEXT_SELECTION_WAIT_MS : 0,
       selectionWaitTimeout: null, pendingMove: null,
       momentumStartTime: time
@@ -405,21 +411,20 @@
       endPointerScroll(state);
       return;
     }
-    if (!pointerScroll.moved) {
-      const selection = root.getSelection();
-      if (selection && !selection.isCollapsed && selection.anchorNode &&
-        state.element.contains(selection.anchorNode)) {
-        endPointerScroll(state);
-        return;
-      }
-    }
     const dx = pointerScroll.startX - event.clientX;
     const dy = pointerScroll.startY - event.clientY;
+    if (!pointerScroll.moved && selectionHasChanged(pointerScroll.selectionAtDown)) {
+      endPointerScroll(state);
+      return;
+    }
     if (!pointerScroll.moved && dx * dx + dy * dy <
       POINTER_SCROLL_THRESHOLD_PX * POINTER_SCROLL_THRESHOLD_PX) return;
     if (!pointerScroll.axis)
       pointerScroll.axis = Math.abs(dx) >= Math.abs(dy) ? "x" : "y";
-    if (!pointerScroll.moved && now() < pointerScroll.selectionReadyTime) {
+    const verticalTextDrag = pointerScroll.verticalOnly && pointerScroll.axis === "y" &&
+      Math.abs(dy) > VERTICAL_TEXT_DRAG_PX &&
+      Math.abs(dx) <= VERTICAL_TEXT_DRAG_X_TOLERANCE_PX;
+    if (!pointerScroll.moved && now() < pointerScroll.selectionReadyTime && !verticalTextDrag) {
       pointerScroll.pendingMove = { x: event.clientX, y: event.clientY };
       if (pointerScroll.selectionWaitTimeout === null) {
         pointerScroll.selectionWaitTimeout = root.setTimeout(() => {
@@ -510,6 +515,30 @@
         pointerScroll.momentumStartTime = time;
       }
     }
+  }
+
+  function readSelection() {
+    const selection = root.getSelection();
+    if (!selection) return null;
+    return {
+      rangeCount: selection.rangeCount, isCollapsed: selection.isCollapsed,
+      anchorNode: selection.anchorNode, anchorOffset: selection.anchorOffset,
+      focusNode: selection.focusNode, focusOffset: selection.focusOffset
+    };
+  }
+
+  function selectionHasChanged(initial) {
+    const current = readSelection();
+    const initialSelected = initial && initial.rangeCount && !initial.isCollapsed;
+    const currentSelected = current && current.rangeCount && !current.isCollapsed;
+    if (!initialSelected && !currentSelected) return false;
+    if (!initial || !current) return initial !== current;
+    return current.rangeCount !== initial.rangeCount ||
+      current.isCollapsed !== initial.isCollapsed ||
+      current.anchorNode !== initial.anchorNode ||
+      current.anchorOffset !== initial.anchorOffset ||
+      current.focusNode !== initial.focusNode ||
+      current.focusOffset !== initial.focusOffset;
   }
 
   function pointerAxisMaximum(state, axis) {
@@ -963,6 +992,19 @@
       metrics.maxY <= 1 && Math.abs(event.deltaX) <= Math.abs(event.deltaY);
     const deltaX = (converted ? event.deltaY : event.deltaX) * factor;
     const deltaY = (converted ? 0 : event.deltaY) * factor;
+    if (converted && deltaX) {
+      if (state.elastic.owned) {
+        resetElastic(state);
+        refresh(state);
+      }
+      const current = state.element.scrollLeft;
+      const next = Math.max(0, Math.min(metrics.maxX, current + deltaX));
+      if (next === current) return;
+      event.preventDefault();
+      state.element.scrollTo({ left: next, behavior: "instant" });
+      publish(state);
+      return;
+    }
     if (state.elasticEnabled) {
       const desiredX = Math.max(0, Math.min(metrics.maxX, state.element.scrollLeft)) + deltaX;
       const desiredY = Math.max(0, Math.min(metrics.maxY, state.element.scrollTop)) + deltaY;
@@ -979,12 +1021,5 @@
         refresh(state);
       }
     }
-    if (!converted || !deltaX) return;
-    const current = state.element.scrollLeft;
-    const next = Math.max(0, Math.min(metrics.maxX, current + deltaX));
-    if (next === current) return;
-    event.preventDefault();
-    state.element.scrollTo({ left: next, behavior: "instant" });
-    publish(state);
   }
 })(typeof globalThis !== "undefined" ? globalThis : window);

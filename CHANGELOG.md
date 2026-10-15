@@ -25,6 +25,8 @@ All notable changes to aellux.js will be documented in this file.
 - PDS now uses `ae--pointerscrolling` to apply the `grabbing` cursor during scrolling and disable pointer events on an active elastic child.
 - PDS now leaves an active text selection alone and waits 100 ms before scrolling gestures that start on text.
 - PDS now locks each gesture to its first dominant axis and passes remaining movement from nested pointer Scrollboxes to scrollable ancestors.
+- PDS now compares text selection against its pointer-down state, allowing an unchanged earlier selection. Vertical-only scroll chains start dragging before the 100 ms wait when vertical movement exceeds 10 px with little horizontal drift.
+- Converted vertical wheel input now bypasses elastic pressure in horizontal-only Scrollboxes, so wheel events at an edge can scroll the parent.
 - Desktop pointer Scrollboxes now cancel mouse events from the button used for an active scroll drag, including the matching release and click, to suppress native edge autoscroll from draggable descendants.
 - Focus now records `ae-focus={elementid}` only for focused elements with an ID; elements without one remain in local focus history.
 - Desktop pointer Scrollboxes now cancel `mousedown` from the button used for an active drag; other mouse buttons remain available.

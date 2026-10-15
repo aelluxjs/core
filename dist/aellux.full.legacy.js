@@ -25349,6 +25349,8 @@
         var POINTER_SCROLL_MULTICLICK_MS = 500;
         var POINTER_SCROLL_MULTICLICK_DISTANCE_PX = 8;
         var TEXT_SELECTION_WAIT_MS = 100;
+        var VERTICAL_TEXT_DRAG_PX = 10;
+        var VERTICAL_TEXT_DRAG_X_TOLERANCE_PX = 6;
         var MOMENTUM_LIMIT_TIME_MS = 300;
         var MOMENTUM_LIMIT_DISTANCE_PX = 15;
         var MOMENTUM_DECELERATION = 15e-4;
@@ -25751,6 +25753,12 @@
           };
           if (previousDown && time - previousDown.time <= POINTER_SCROLL_MULTICLICK_MS && Math.abs(event.clientX - previousDown.x) <= POINTER_SCROLL_MULTICLICK_DISTANCE_PX && Math.abs(event.clientY - previousDown.y) <= POINTER_SCROLL_MULTICLICK_DISTANCE_PX) return;
           var textOrigin = isTextAtPoint(event.target, event.clientX, event.clientY);
+          var selectionAtDown = readSelection();
+          var verticalOnly = chain.some(function(member2) {
+            return pointerAxisMaximum(member2, "y") > 0;
+          }) && !chain.some(function(member2) {
+            return pointerAxisMaximum(member2, "x") > 0;
+          });
           if (!textOrigin && event.cancelable) event.preventDefault();
           for (var _i = 0, _chain = chain; _i < _chain.length; _i++) {
             var _member = _chain[_i];
@@ -25778,6 +25786,8 @@
             momentumStartX: 0,
             momentumStartY: 0,
             elasticForce: 0,
+            selectionAtDown: selectionAtDown,
+            verticalOnly: verticalOnly,
             selectionReadyTime: textOrigin ? time + TEXT_SELECTION_WAIT_MS : 0,
             selectionWaitTimeout: null,
             pendingMove: null,
@@ -25829,18 +25839,16 @@
             endPointerScroll(state);
             return;
           }
-          if (!pointerScroll.moved) {
-            var selection = root2.getSelection();
-            if (selection && !selection.isCollapsed && selection.anchorNode && state.element.contains(selection.anchorNode)) {
-              endPointerScroll(state);
-              return;
-            }
-          }
           var dx = pointerScroll.startX - event.clientX;
           var dy = pointerScroll.startY - event.clientY;
+          if (!pointerScroll.moved && selectionHasChanged(pointerScroll.selectionAtDown)) {
+            endPointerScroll(state);
+            return;
+          }
           if (!pointerScroll.moved && dx * dx + dy * dy < POINTER_SCROLL_THRESHOLD_PX * POINTER_SCROLL_THRESHOLD_PX) return;
           if (!pointerScroll.axis) pointerScroll.axis = Math.abs(dx) >= Math.abs(dy) ? "x" : "y";
-          if (!pointerScroll.moved && now() < pointerScroll.selectionReadyTime) {
+          var verticalTextDrag = pointerScroll.verticalOnly && pointerScroll.axis === "y" && Math.abs(dy) > VERTICAL_TEXT_DRAG_PX && Math.abs(dx) <= VERTICAL_TEXT_DRAG_X_TOLERANCE_PX;
+          if (!pointerScroll.moved && now() < pointerScroll.selectionReadyTime && !verticalTextDrag) {
             pointerScroll.pendingMove = {
               x: event.clientX,
               y: event.clientY
@@ -25951,6 +25959,26 @@
               pointerScroll.momentumStartTime = time;
             }
           }
+        }
+        function readSelection() {
+          var selection = root2.getSelection();
+          if (!selection) return null;
+          return {
+            rangeCount: selection.rangeCount,
+            isCollapsed: selection.isCollapsed,
+            anchorNode: selection.anchorNode,
+            anchorOffset: selection.anchorOffset,
+            focusNode: selection.focusNode,
+            focusOffset: selection.focusOffset
+          };
+        }
+        function selectionHasChanged(initial) {
+          var current = readSelection();
+          var initialSelected = initial && initial.rangeCount && !initial.isCollapsed;
+          var currentSelected = current && current.rangeCount && !current.isCollapsed;
+          if (!initialSelected && !currentSelected) return false;
+          if (!initial || !current) return initial !== current;
+          return current.rangeCount !== initial.rangeCount || current.isCollapsed !== initial.isCollapsed || current.anchorNode !== initial.anchorNode || current.anchorOffset !== initial.anchorOffset || current.focusNode !== initial.focusNode || current.focusOffset !== initial.focusOffset;
         }
         function pointerAxisMaximum(state, axis) {
           var metrics = state.metrics || nativeMetrics(state.element);
@@ -26466,6 +26494,22 @@
           var converted = state.desktop && state.wheelEnabled && metrics.maxX > 1 && metrics.maxY <= 1 && Math.abs(event.deltaX) <= Math.abs(event.deltaY);
           var deltaX = (converted ? event.deltaY : event.deltaX) * factor;
           var deltaY = (converted ? 0 : event.deltaY) * factor;
+          if (converted && deltaX) {
+            if (state.elastic.owned) {
+              resetElastic(state);
+              refresh(state);
+            }
+            var current = state.element.scrollLeft;
+            var next = Math.max(0, Math.min(metrics.maxX, current + deltaX));
+            if (next === current) return;
+            event.preventDefault();
+            state.element.scrollTo({
+              left: next,
+              behavior: "instant"
+            });
+            publish(state);
+            return;
+          }
           if (state.elasticEnabled) {
             var desiredX = Math.max(0, Math.min(metrics.maxX, state.element.scrollLeft)) + deltaX;
             var desiredY = Math.max(0, Math.min(metrics.maxY, state.element.scrollTop)) + deltaY;
@@ -26484,16 +26528,6 @@
               refresh(state);
             }
           }
-          if (!converted || !deltaX) return;
-          var current = state.element.scrollLeft;
-          var next = Math.max(0, Math.min(metrics.maxX, current + deltaX));
-          if (next === current) return;
-          event.preventDefault();
-          state.element.scrollTo({
-            left: next,
-            behavior: "instant"
-          });
-          publish(state);
         }
       })(typeof globalThis !== "undefined" ? globalThis : window);
     }
