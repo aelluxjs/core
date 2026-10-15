@@ -6,6 +6,11 @@ All notable changes to aellux.js will be documented in this file.
 
 ### Added
 
+- Scrollbox snap centers its first point on mount, selects the nearest point or next swipe point on PDS release, supports elastic wrappers, and exposes `next`, `previous`, and `goto(index)` controller methods.
+- Snap now runs after native scrollbar scrolling through `scrollend`, with a short scroll-idle fallback for older browsers.
+- Snap now routes mouse wheel input to the next or previous point after horizontal wheel conversion when applicable.
+- Raised the boot, full-bundle, and Scrollbox size budgets for snap support.
+
 - Anchor now schedules repositioning when an observed intersection changes, where `IntersectionObserver` is available.
 - Raised the full-bundle raw-size budgets for Anchor's intersection observer.
 - Elastic Scrollbox accepts one or two maximum displacement values as fractions or pixels through `data-ae-scrollbox-elastic`.
@@ -20,13 +25,17 @@ All notable changes to aellux.js will be documented in this file.
 
 ### Changed
 
+- Vertical-only PDS now starts early after more than 10 px of dominant vertical movement without a separate 6 px horizontal drift limit.
+- Wheel snap navigation now uses the active point index and skips nearest-point selection when its scrolling ends.
+
 - Pointer Drag Scroll (PDS) now cancels `pointermove`, `touchmove`, and matching-button `mousemove` defaults once scrolling begins. It prevents native pointer-down behavior on open content, preserves text and controls, and changes the cursor from `grab` to `grabbing` during PDS.
 - PDS also cancels cancelable native drag events while the scroll gesture is active.
 - PDS now uses `ae--pointerscrolling` to apply the `grabbing` cursor during scrolling and disable pointer events on an active elastic child.
 - PDS now leaves an active text selection alone and waits 100 ms before scrolling gestures that start on text.
 - PDS now locks each gesture to its first dominant axis and passes remaining movement from nested pointer Scrollboxes to scrollable ancestors.
-- PDS now compares text selection against its pointer-down state, allowing an unchanged earlier selection. Vertical-only scroll chains start dragging before the 100 ms wait when vertical movement exceeds 10 px with little horizontal drift.
+- PDS now compares text selection against its pointer-down state, allowing an unchanged earlier selection. Vertical-only scroll chains start dragging before the 100 ms wait when dominant vertical movement exceeds 10 px.
 - Converted vertical wheel input now keeps elastic pressure in horizontal-only Scrollboxes while allowing events beyond an edge to scroll the parent.
+- Weak CSS now gives elastic Scrollbox content `display: inline-block`.
 - Desktop pointer Scrollboxes now cancel mouse events from the button used for an active scroll drag, including the matching release and click, to suppress native edge autoscroll from draggable descendants.
 - Focus now records `ae-focus={elementid}` only for focused elements with an ID; elements without one remain in local focus history.
 - Desktop pointer Scrollboxes now cancel `mousedown` from the button used for an active drag; other mouse buttons remain available.

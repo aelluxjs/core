@@ -48,6 +48,113 @@ async function drag(page, id, pointerType = "mouse") {
   }, { id, pointerType });
 }
 
+test("snap initializes and controller navigates its direct children", async ({ page }) => {
+  await setup(page, `<div id="gallery" data-ae-scrollbox="native"
+    style="width:100px;height:100px;overflow:auto">
+    <div data-ae-scrollbox-snap style="display:flex;width:300px">
+      <div style="flex:none;width:100px;height:100px"></div>
+      <div style="flex:none;width:100px;height:100px"></div>
+      <div style="flex:none;width:100px;height:100px"></div>
+    </div>
+  </div>`);
+  expect(await page.evaluate(() => document.getElementById("gallery").scrollLeft)).toBe(0);
+  expect(await page.evaluate(() => AelluxJs.mountManager.controller("gallery").scrollbox.goto(2))).toBe(true);
+  await expect.poll(() => page.evaluate(() => document.getElementById("gallery").scrollLeft))
+    .toBe(200);
+  expect(await page.evaluate(() => AelluxJs.mountManager.controller("gallery").scrollbox.previous()))
+    .toBe(true);
+  await expect.poll(() => page.evaluate(() => document.getElementById("gallery").scrollLeft))
+    .toBe(100);
+  expect(await page.evaluate(() => AelluxJs.mountManager.controller("gallery").scrollbox.next()))
+    .toBe(true);
+  await expect.poll(() => page.evaluate(() => document.getElementById("gallery").scrollLeft))
+    .toBe(200);
+  expect(await page.evaluate(() => AelluxJs.mountManager.controller("gallery").scrollbox.goto(3)))
+    .toBe(false);
+});
+
+test("native scroll end snaps the nearest point after scrollbar scrolling", async ({ page }) => {
+  await setup(page, `<div id="gallery" data-ae-scrollbox="native"
+    style="width:100px;height:100px;overflow:auto">
+    <div data-ae-scrollbox-snap style="width:100px">
+      <div style="height:100px"></div>
+      <div style="height:100px"></div>
+      <div style="height:100px"></div>
+    </div>
+  </div>`);
+  await page.evaluate(() => {
+    const element = document.getElementById("gallery");
+    element.scrollTo({ top: 130, behavior: "instant" });
+    element.dispatchEvent(new Event("scrollend"));
+  });
+  await expect.poll(() => page.evaluate(() => document.getElementById("gallery").scrollTop))
+    .toBe(100);
+});
+
+test("wheel advances snap points after horizontal conversion", async ({ page }) => {
+  await setup(page, `<div id="gallery" data-ae-scrollbox="native"
+    style="width:100px;height:100px;overflow:auto">
+    <div data-ae-scrollbox-snap style="display:flex;width:300px">
+      <div style="flex:none;width:100px;height:100px"></div>
+      <div style="flex:none;width:100px;height:100px"></div>
+      <div style="flex:none;width:100px;height:100px"></div>
+    </div>
+  </div>`);
+  const wheel = deltas => page.evaluate(values => {
+    const element = document.getElementById("gallery");
+    return values.map(deltaY => {
+      const event = new WheelEvent("wheel", {
+        deltaY, bubbles: true, cancelable: true
+      });
+      element.dispatchEvent(event);
+      return event.defaultPrevented;
+    });
+  }, deltas);
+  expect(await wheel([120, 120])).toEqual([true, true]);
+  await expect.poll(() => page.evaluate(() => document.getElementById("gallery").scrollLeft))
+    .toBe(100);
+  await page.waitForTimeout(150);
+  expect(await wheel([120])).toEqual([true]);
+  await expect.poll(() => page.evaluate(() => document.getElementById("gallery").scrollLeft))
+    .toBe(200);
+  await page.waitForTimeout(150);
+  expect(await wheel([120])).toEqual([false]);
+  expect(await wheel([-120])).toEqual([true]);
+  await expect.poll(() => page.evaluate(() => document.getElementById("gallery").scrollLeft))
+    .toBe(100);
+});
+
+test("pointer snap advances one point on a fast horizontal swipe", async ({ page }) => {
+  await setup(page, `<div id="gallery" data-ae-scrollbox="pointer"
+    style="width:100px;height:100px;overflow:auto">
+    <div data-ae-scrollbox-snap data-ae-scrollbox-elastic
+      style="display:flex;width:300px">
+      <div style="flex:none;width:100px;height:100px"></div>
+      <div style="flex:none;width:100px;height:100px"></div>
+      <div style="flex:none;width:100px;height:100px"></div>
+    </div>
+  </div>`);
+  await page.evaluate(() => {
+    const element = document.getElementById("gallery");
+    const rect = element.getBoundingClientRect();
+    const x = rect.left + 70, y = rect.top + 70;
+    element.dispatchEvent(new PointerEvent("pointerdown", {
+      bubbles: true, cancelable: true, isPrimary: true, pointerId: 232,
+      pointerType: "mouse", button: 0, buttons: 1, clientX: x, clientY: y
+    }));
+    window.dispatchEvent(new PointerEvent("pointermove", {
+      bubbles: true, cancelable: true, isPrimary: true, pointerId: 232,
+      pointerType: "mouse", buttons: 1, clientX: x - 60, clientY: y
+    }));
+    window.dispatchEvent(new PointerEvent("pointerup", {
+      bubbles: true, isPrimary: true, pointerId: 232, pointerType: "mouse",
+      button: 0, buttons: 0, clientX: x - 60, clientY: y
+    }));
+  });
+  await expect.poll(() => page.evaluate(() => document.getElementById("gallery").scrollLeft))
+    .toBe(100);
+});
+
 test("native is the default and never loads a dependency", async ({ page }) => {
   let requests = 0;
   await page.route("https://unpkg.com/**", route => { requests++; return route.abort(); });
@@ -796,7 +903,7 @@ test("vertical-only text drag takes over before 100 ms when motion is vertical",
     }));
     const move = new PointerEvent("pointermove", {
       bubbles: true, cancelable: true, isPrimary: true, pointerId: 129,
-      pointerType: "mouse", buttons: 1, clientX: x + 4, clientY: y - 11
+      pointerType: "mouse", buttons: 1, clientX: x + 8, clientY: y - 11
     });
     window.dispatchEvent(move);
     const during = { prevented: move.defaultPrevented, x: element.scrollLeft,
