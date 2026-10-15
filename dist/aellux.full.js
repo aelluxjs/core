@@ -1320,6 +1320,15 @@
           "mouseenter",
           "mouseleave"
         ];
+        const pointerScrollDragEvents = [
+          "dragstart",
+          "drag",
+          "dragenter",
+          "dragover",
+          "dragleave",
+          "drop",
+          "dragend"
+        ];
         const mouseHoldEvents = /* @__PURE__ */ new Set([
           "mousemove",
           "mouseover",
@@ -1428,7 +1437,7 @@
             if (state.pointerScroll && state.pointerScroll.moved && event.cancelable)
               event.preventDefault();
           };
-          state.onPointerScrollNativeStart = (event) => {
+          state.onPointerScrollNativeEvent = (event) => {
             if (state.pointerScroll && state.pointerScroll.moved && event.cancelable)
               event.preventDefault();
           };
@@ -1683,8 +1692,10 @@
             state.onPointerScrollTouchMove,
             { passive: false, capture: true }
           );
-          root2.addEventListener("dragstart", state.onPointerScrollNativeStart, true);
-          root2.addEventListener("selectstart", state.onPointerScrollNativeStart, true);
+          for (const name of pointerScrollDragEvents) {
+            root2.addEventListener(name, state.onPointerScrollNativeEvent, true);
+          }
+          root2.addEventListener("selectstart", state.onPointerScrollNativeEvent, true);
           for (const name of pointerScrollMouseEvents) {
             root2.addEventListener(name, state.onMouseEvent, { passive: false, capture: true });
           }
@@ -1742,8 +1753,10 @@
           state.pointerScroll = null;
           root2.removeEventListener("pointermove", state.onPointerMove, true);
           root2.removeEventListener("touchmove", state.onPointerScrollTouchMove, true);
-          root2.removeEventListener("dragstart", state.onPointerScrollNativeStart, true);
-          root2.removeEventListener("selectstart", state.onPointerScrollNativeStart, true);
+          for (const name of pointerScrollDragEvents) {
+            root2.removeEventListener(name, state.onPointerScrollNativeEvent, true);
+          }
+          root2.removeEventListener("selectstart", state.onPointerScrollNativeEvent, true);
           root2.removeEventListener("pointerup", state.onPointerEnd, true);
           root2.removeEventListener("pointercancel", state.onPointerEnd, true);
           root2.removeEventListener("blur", state.onBlur);

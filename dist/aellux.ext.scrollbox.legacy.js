@@ -73,6 +73,7 @@
     var ELASTIC_RETURN_EPSILON = 0.01;
     var ELASTIC_WHEEL_IDLE_MS = 80;
     var pointerScrollMouseEvents = ["mousedown", "mousemove", "mouseup", "click", "dblclick", "auxclick", "contextmenu", "mouseover", "mouseout", "mouseenter", "mouseleave"];
+    var pointerScrollDragEvents = ["dragstart", "drag", "dragenter", "dragover", "dragleave", "drop", "dragend"];
     var mouseHoldEvents = /* @__PURE__ */ new Set(["mousemove", "mouseover", "mouseout", "mouseenter", "mouseleave"]);
     var mouseReleaseEvents = /* @__PURE__ */ new Set(["mouseup", "click", "dblclick", "auxclick", "contextmenu"]);
     var properties = ["--ae-scroll-y-progress", "--ae-scroll-x-progress"];
@@ -191,7 +192,7 @@
       state.onPointerScrollTouchMove = function(event) {
         if (state.pointerScroll && state.pointerScroll.moved && event.cancelable) event.preventDefault();
       };
-      state.onPointerScrollNativeStart = function(event) {
+      state.onPointerScrollNativeEvent = function(event) {
         if (state.pointerScroll && state.pointerScroll.moved && event.cancelable) event.preventDefault();
       };
       state.onPointerEnd = function(event) {
@@ -485,21 +486,31 @@
         passive: false,
         capture: true
       });
-      root.addEventListener("dragstart", state.onPointerScrollNativeStart, true);
-      root.addEventListener("selectstart", state.onPointerScrollNativeStart, true);
-      var _iterator4 = _createForOfIteratorHelper(pointerScrollMouseEvents), _step4;
+      var _iterator4 = _createForOfIteratorHelper(pointerScrollDragEvents), _step4;
       try {
         for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
           var name = _step4.value;
-          root.addEventListener(name, state.onMouseEvent, {
-            passive: false,
-            capture: true
-          });
+          root.addEventListener(name, state.onPointerScrollNativeEvent, true);
         }
       } catch (err) {
         _iterator4.e(err);
       } finally {
         _iterator4.f();
+      }
+      root.addEventListener("selectstart", state.onPointerScrollNativeEvent, true);
+      var _iterator5 = _createForOfIteratorHelper(pointerScrollMouseEvents), _step5;
+      try {
+        for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
+          var _name = _step5.value;
+          root.addEventListener(_name, state.onMouseEvent, {
+            passive: false,
+            capture: true
+          });
+        }
+      } catch (err) {
+        _iterator5.e(err);
+      } finally {
+        _iterator5.f();
       }
       root.addEventListener("pointerup", state.onPointerEnd, true);
       root.addEventListener("pointercancel", state.onPointerEnd, true);
@@ -554,8 +565,18 @@
       state.pointerScroll = null;
       root.removeEventListener("pointermove", state.onPointerMove, true);
       root.removeEventListener("touchmove", state.onPointerScrollTouchMove, true);
-      root.removeEventListener("dragstart", state.onPointerScrollNativeStart, true);
-      root.removeEventListener("selectstart", state.onPointerScrollNativeStart, true);
+      var _iterator6 = _createForOfIteratorHelper(pointerScrollDragEvents), _step6;
+      try {
+        for (_iterator6.s(); !(_step6 = _iterator6.n()).done; ) {
+          var name = _step6.value;
+          root.removeEventListener(name, state.onPointerScrollNativeEvent, true);
+        }
+      } catch (err) {
+        _iterator6.e(err);
+      } finally {
+        _iterator6.f();
+      }
+      root.removeEventListener("selectstart", state.onPointerScrollNativeEvent, true);
       root.removeEventListener("pointerup", state.onPointerEnd, true);
       root.removeEventListener("pointercancel", state.onPointerEnd, true);
       root.removeEventListener("blur", state.onBlur);
@@ -599,16 +620,16 @@
       if (state.mouseReleaseTimeout !== null) root.clearTimeout(state.mouseReleaseTimeout);
       state.mouseReleaseTimeout = null;
       state.mouseReleaseButton = null;
-      var _iterator5 = _createForOfIteratorHelper(pointerScrollMouseEvents), _step5;
+      var _iterator7 = _createForOfIteratorHelper(pointerScrollMouseEvents), _step7;
       try {
-        for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
-          var name = _step5.value;
+        for (_iterator7.s(); !(_step7 = _iterator7.n()).done; ) {
+          var name = _step7.value;
           root.removeEventListener(name, state.onMouseEvent, true);
         }
       } catch (err) {
-        _iterator5.e(err);
+        _iterator7.e(err);
       } finally {
-        _iterator5.f();
+        _iterator7.f();
       }
     }
     function startMomentum(state, pointerScroll) {
@@ -711,19 +732,19 @@
       var start = state.elastic.touch;
       if (!start) return;
       var touch = null;
-      var _iterator6 = _createForOfIteratorHelper(event.touches), _step6;
+      var _iterator8 = _createForOfIteratorHelper(event.touches), _step8;
       try {
-        for (_iterator6.s(); !(_step6 = _iterator6.n()).done; ) {
-          var item = _step6.value;
+        for (_iterator8.s(); !(_step8 = _iterator8.n()).done; ) {
+          var item = _step8.value;
           if (item.identifier === start.identifier) {
             touch = item;
             break;
           }
         }
       } catch (err) {
-        _iterator6.e(err);
+        _iterator8.e(err);
       } finally {
-        _iterator6.f();
+        _iterator8.f();
       }
       if (!touch) return;
       var desiredX = start.scrollLeft + start.x - touch.clientX;
@@ -736,16 +757,16 @@
     function endTouch(state, event) {
       var touch = state.elastic.touch;
       if (!touch) return;
-      var _iterator7 = _createForOfIteratorHelper(event.touches), _step7;
+      var _iterator9 = _createForOfIteratorHelper(event.touches), _step9;
       try {
-        for (_iterator7.s(); !(_step7 = _iterator7.n()).done; ) {
-          var item = _step7.value;
+        for (_iterator9.s(); !(_step9 = _iterator9.n()).done; ) {
+          var item = _step9.value;
           if (item.identifier === touch.identifier) return;
         }
       } catch (err) {
-        _iterator7.e(err);
+        _iterator9.e(err);
       } finally {
-        _iterator7.f();
+        _iterator9.f();
       }
       state.elastic.touch = null;
       releaseElastic(state);
@@ -897,16 +918,16 @@
           return scheduleResize(state);
         });
         state.resizeObserver.observe(state.element);
-        var _iterator8 = _createForOfIteratorHelper(state.element.children), _step8;
+        var _iterator0 = _createForOfIteratorHelper(state.element.children), _step0;
         try {
-          for (_iterator8.s(); !(_step8 = _iterator8.n()).done; ) {
-            var child = _step8.value;
+          for (_iterator0.s(); !(_step0 = _iterator0.n()).done; ) {
+            var child = _step0.value;
             state.resizeObserver.observe(child);
           }
         } catch (err) {
-          _iterator8.e(err);
+          _iterator0.e(err);
         } finally {
-          _iterator8.f();
+          _iterator0.f();
         }
       }
       if (root.MutationObserver) {
@@ -914,16 +935,16 @@
           if (state.resizeObserver) {
             state.resizeObserver.disconnect();
             state.resizeObserver.observe(state.element);
-            var _iterator9 = _createForOfIteratorHelper(state.element.children), _step9;
+            var _iterator1 = _createForOfIteratorHelper(state.element.children), _step1;
             try {
-              for (_iterator9.s(); !(_step9 = _iterator9.n()).done; ) {
-                var _child = _step9.value;
+              for (_iterator1.s(); !(_step1 = _iterator1.n()).done; ) {
+                var _child = _step1.value;
                 state.resizeObserver.observe(_child);
               }
             } catch (err) {
-              _iterator9.e(err);
+              _iterator1.e(err);
             } finally {
-              _iterator9.f();
+              _iterator1.f();
             }
           }
           if (records.some(function(record) {

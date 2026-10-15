@@ -131,6 +131,46 @@ test("move defaults are canceled only after pointer scrolling begins", async ({ 
   });
 });
 
+test("drag events are canceled only while pointer scrolling is active", async ({ page }) => {
+  await setup(page, box("box", "pointer", "", "<div id='item' draggable='true'>drag</div>"));
+  const result = await page.evaluate(() => {
+    const element = document.getElementById("box");
+    const item = document.getElementById("item");
+    const rect = element.getBoundingClientRect();
+    const x = rect.left + 70, y = rect.top + 70;
+    const drag = type => {
+      const event = new Event(type, { bubbles: true, cancelable: true });
+      item.dispatchEvent(event);
+      return event.defaultPrevented;
+    };
+    const before = drag("dragstart");
+    item.dispatchEvent(new PointerEvent("pointerdown", {
+      bubbles: true, isPrimary: true, pointerId: 97, pointerType: "mouse",
+      button: 0, buttons: 1, clientX: x, clientY: y
+    }));
+    const draggable = drag("dragstart");
+    element.dispatchEvent(new PointerEvent("pointerdown", {
+      bubbles: true, isPrimary: true, pointerId: 98, pointerType: "mouse",
+      button: 0, buttons: 1, clientX: x, clientY: y
+    }));
+    const pending = drag("dragstart");
+    window.dispatchEvent(new PointerEvent("pointermove", {
+      bubbles: true, cancelable: true, isPrimary: true, pointerId: 98,
+      pointerType: "mouse", buttons: 1, clientX: x - 30, clientY: y - 30
+    }));
+    const during = ["dragstart", "drag", "dragenter", "dragover", "dragleave", "drop", "dragend"]
+      .map(drag);
+    window.dispatchEvent(new PointerEvent("pointerup", {
+      bubbles: true, isPrimary: true, pointerId: 98, pointerType: "mouse",
+      button: 0, buttons: 0, clientX: x - 30, clientY: y - 30
+    }));
+    const after = drag("dragover");
+    return { before, draggable, pending, during, after };
+  });
+  expect(result).toEqual({ before: false, draggable: false, pending: false,
+    during: [true, true, true, true, true, true, true], after: false });
+});
+
 test("pointer scroll uses grab on open space and grabbing during text-origin scrolling", async ({ page }) => {
   await setup(page, `<div id="box" data-ae-scrollbox="pointer"
     data-ae-scrollbox-momentum="false" style="width:200px;height:100px;overflow:auto">

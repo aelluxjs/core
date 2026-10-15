@@ -34,6 +34,9 @@
     "mousedown", "mousemove", "mouseup", "click", "dblclick", "auxclick",
     "contextmenu", "mouseover", "mouseout", "mouseenter", "mouseleave"
   ];
+  const pointerScrollDragEvents = [
+    "dragstart", "drag", "dragenter", "dragover", "dragleave", "drop", "dragend"
+  ];
   const mouseHoldEvents = new Set([
     "mousemove", "mouseover", "mouseout", "mouseenter", "mouseleave"
   ]);
@@ -105,7 +108,7 @@
       if (state.pointerScroll && state.pointerScroll.moved && event.cancelable)
         event.preventDefault();
     };
-    state.onPointerScrollNativeStart = event => {
+    state.onPointerScrollNativeEvent = event => {
       if (state.pointerScroll && state.pointerScroll.moved && event.cancelable)
         event.preventDefault();
     };
@@ -367,8 +370,10 @@
     root.addEventListener("pointermove", state.onPointerMove, { passive: false, capture: true });
     root.addEventListener("touchmove", state.onPointerScrollTouchMove,
       { passive: false, capture: true });
-    root.addEventListener("dragstart", state.onPointerScrollNativeStart, true);
-    root.addEventListener("selectstart", state.onPointerScrollNativeStart, true);
+    for (const name of pointerScrollDragEvents) {
+      root.addEventListener(name, state.onPointerScrollNativeEvent, true);
+    }
+    root.addEventListener("selectstart", state.onPointerScrollNativeEvent, true);
     for (const name of pointerScrollMouseEvents) {
       root.addEventListener(name, state.onMouseEvent, { passive: false, capture: true });
     }
@@ -429,8 +434,10 @@
     state.pointerScroll = null;
     root.removeEventListener("pointermove", state.onPointerMove, true);
     root.removeEventListener("touchmove", state.onPointerScrollTouchMove, true);
-    root.removeEventListener("dragstart", state.onPointerScrollNativeStart, true);
-    root.removeEventListener("selectstart", state.onPointerScrollNativeStart, true);
+    for (const name of pointerScrollDragEvents) {
+      root.removeEventListener(name, state.onPointerScrollNativeEvent, true);
+    }
+    root.removeEventListener("selectstart", state.onPointerScrollNativeEvent, true);
     root.removeEventListener("pointerup", state.onPointerEnd, true);
     root.removeEventListener("pointercancel", state.onPointerEnd, true);
     root.removeEventListener("blur", state.onBlur);
@@ -652,8 +659,8 @@
     const translate = x || y ? `translate3d(${x}px, ${y}px, 0)` : "";
     const width = Math.max(wrapper.offsetWidth, wrapper.scrollWidth, 1);
     const height = Math.max(wrapper.offsetHeight, wrapper.scrollHeight, 1);
-    const scaleX = 1 + Math.max(elastic.amounts[1], elastic.amounts[3]) / width;
-    const scaleY = 1 + Math.max(elastic.amounts[0], elastic.amounts[2]) / height;
+    const scaleX = 1 + 2 * (Math.max(elastic.amounts[1], elastic.amounts[3]) / width);
+    const scaleY = 1 + 2 * (Math.max(elastic.amounts[0], elastic.amounts[2]) / height);
     const scale = scaleX > 1 || scaleY > 1 ? `scale(${scaleX}, ${scaleY})` : "";
     if (scaleX > 1 || scaleY > 1) {
       const baseOrigin = elastic.baseOrigin.split(" ");

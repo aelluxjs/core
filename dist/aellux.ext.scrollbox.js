@@ -39,6 +39,15 @@
       "mouseenter",
       "mouseleave"
     ];
+    const pointerScrollDragEvents = [
+      "dragstart",
+      "drag",
+      "dragenter",
+      "dragover",
+      "dragleave",
+      "drop",
+      "dragend"
+    ];
     const mouseHoldEvents = /* @__PURE__ */ new Set([
       "mousemove",
       "mouseover",
@@ -147,7 +156,7 @@
         if (state.pointerScroll && state.pointerScroll.moved && event.cancelable)
           event.preventDefault();
       };
-      state.onPointerScrollNativeStart = (event) => {
+      state.onPointerScrollNativeEvent = (event) => {
         if (state.pointerScroll && state.pointerScroll.moved && event.cancelable)
           event.preventDefault();
       };
@@ -402,8 +411,10 @@
         state.onPointerScrollTouchMove,
         { passive: false, capture: true }
       );
-      root.addEventListener("dragstart", state.onPointerScrollNativeStart, true);
-      root.addEventListener("selectstart", state.onPointerScrollNativeStart, true);
+      for (const name of pointerScrollDragEvents) {
+        root.addEventListener(name, state.onPointerScrollNativeEvent, true);
+      }
+      root.addEventListener("selectstart", state.onPointerScrollNativeEvent, true);
       for (const name of pointerScrollMouseEvents) {
         root.addEventListener(name, state.onMouseEvent, { passive: false, capture: true });
       }
@@ -461,8 +472,10 @@
       state.pointerScroll = null;
       root.removeEventListener("pointermove", state.onPointerMove, true);
       root.removeEventListener("touchmove", state.onPointerScrollTouchMove, true);
-      root.removeEventListener("dragstart", state.onPointerScrollNativeStart, true);
-      root.removeEventListener("selectstart", state.onPointerScrollNativeStart, true);
+      for (const name of pointerScrollDragEvents) {
+        root.removeEventListener(name, state.onPointerScrollNativeEvent, true);
+      }
+      root.removeEventListener("selectstart", state.onPointerScrollNativeEvent, true);
       root.removeEventListener("pointerup", state.onPointerEnd, true);
       root.removeEventListener("pointercancel", state.onPointerEnd, true);
       root.removeEventListener("blur", state.onBlur);
