@@ -11,9 +11,9 @@ export default function createWeakCss() {
   :where(*) { scroll-behavior: initial !important; }
 }
 :where(button,a[href],[role='button'],[role='tab']) { touch-action: manipulation; cursor: pointer; }
-:where([?anchor]) { visibility: hidden; contain: layout paint; }
+:where([?anchor]) { visibility: hidden; pointer-events:none; position:absolute; contain: layout paint; }
 :where([?anchor].%anchored) {
-  position: absolute;
+  pointer-events: all;
   left: 0;
   top: 0;
   transform: translate3d(var(--ae-anchor-x, 0px), var(--ae-anchor-y, 0px), 0);
@@ -23,6 +23,7 @@ export default function createWeakCss() {
 [?wait-mounted]:not(.%mounted) > *:not([?loader]) { visibility: hidden !important; }
 [?wait-mounted].%mounted > [?loader] { display: none !important; }
 :where([?scrollbox]) { contain:layout paint; overflow:auto; scrollbar-width: thin; scrollbar-color: color-mix(in srgb, CanvasText 50%, transparent) transparent;}
+.%pointerscrolling, .%pointerscrolling * { pointer-events: none !important; }
 :where([?scrollbox]::-webkit-scrollbar) { width: 8px; height: 8px;}
 :where([?scrollbox]::-webkit-scrollbar-track) { background: transparent;}
 :where([?scrollbox]::-webkit-scrollbar-thumb) { background: color-mix(in srgb, CanvasText 50%, transparent); border-radius: 10px;}

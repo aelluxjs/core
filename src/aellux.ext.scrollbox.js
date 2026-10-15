@@ -13,6 +13,7 @@
   const momentumAttribute = AelluxJs.attr("scrollbox-momentum");
   const elasticAttribute = AelluxJs.attr("scrollbox-elastic");
   const elasticReleaseClass = AelluxJs.className("scrollbox-elastic-release");
+  const pointerScrollingClass = AelluxJs.className("pointerscrolling");
   const pointerScrollExceptionSelector =
     "a, button, input, select, textarea, [contenteditable], [draggable='true']";
   const RESIZE_INTERVAL_MS = 100;
@@ -84,7 +85,7 @@
       },
       wheelEnabled: true, momentumEnabled: true, elasticEnabled: false,
       wheelListening: false, pointerListening: false, touchListening: false,
-      pointerScroll: null, lastPointerDown: null,
+      pointerScroll: null, lastPointerDown: null, pointerScrollingClassOwned: false,
       mouseReleaseButton: null, mouseReleaseTimeout: null,
       momentum: null, elastic, resizeObserver: null, mutationObserver: null,
       lastResizeTime: -RESIZE_INTERVAL_MS, resizeTimeout: null, disposed: false
@@ -103,6 +104,9 @@
       if (event.button === 0 && event.detail > 1) endPointerScroll(state);
     };
     state.onPointerMove = event => movePointerScroll(state, event);
+    state.onPointerScrollWheel = event => {
+      if (event.cancelable) event.preventDefault();
+    };
     state.onMouseEvent = event => cancelPointerScrollMouseEvent(state, event);
     state.onPointerScrollTouchMove = event => {
       if (state.pointerScroll && state.pointerScroll.moved && event.cancelable)
@@ -407,6 +411,10 @@
       state.element.style.setProperty("user-select", "none");
       state.element.style.setProperty("scroll-behavior", "auto", "important");
       setPointerScrollCursor(state, "grabbing");
+      state.pointerScrollingClassOwned = !state.element.classList.contains(pointerScrollingClass);
+      state.element.classList.add(pointerScrollingClass);
+      root.addEventListener("wheel", state.onPointerScrollWheel,
+        { passive: false, capture: true });
       pointerScroll.userSelectApplied = true;
       const selection = root.getSelection();
       if (selection && selection.anchorNode && state.element.contains(selection.anchorNode))
@@ -432,6 +440,9 @@
     const pointerScroll = state.pointerScroll;
     if (!pointerScroll || (event && event.pointerId !== pointerScroll.pointerId)) return;
     state.pointerScroll = null;
+    if (state.pointerScrollingClassOwned) state.element.classList.remove(pointerScrollingClass);
+    state.pointerScrollingClassOwned = false;
+    root.removeEventListener("wheel", state.onPointerScrollWheel, true);
     root.removeEventListener("pointermove", state.onPointerMove, true);
     root.removeEventListener("touchmove", state.onPointerScrollTouchMove, true);
     for (const name of pointerScrollDragEvents) {

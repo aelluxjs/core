@@ -22,6 +22,7 @@ All notable changes to aellux.js will be documented in this file.
 
 - Pointer Drag Scroll (PDS) now cancels `pointermove`, `touchmove`, and matching-button `mousemove` defaults once scrolling begins. It prevents native pointer-down behavior on open content, preserves text and controls, and changes the cursor from `grab` to `grabbing` during PDS.
 - PDS also cancels cancelable native drag events while the scroll gesture is active.
+- PDS now applies `ae--pointerscrolling` with `pointer-events: none !important` during scrolling to avoid native edge autoscroll; wheel input is canceled while the class is active.
 - Desktop pointer Scrollboxes now cancel mouse events from the button used for an active scroll drag, including the matching release and click, to suppress native edge autoscroll from draggable descendants.
 - Focus now records `ae-focus={elementid}` only for focused elements with an ID; elements without one remain in local focus history.
 - Desktop pointer Scrollboxes now cancel `mousedown` from the button used for an active drag; other mouse buttons remain available.

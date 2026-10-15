@@ -1292,6 +1292,7 @@
         const momentumAttribute = AelluxJs2.attr("scrollbox-momentum");
         const elasticAttribute = AelluxJs2.attr("scrollbox-elastic");
         const elasticReleaseClass = AelluxJs2.className("scrollbox-elastic-release");
+        const pointerScrollingClass = AelluxJs2.className("pointerscrolling");
         const pointerScrollExceptionSelector = "a, button, input, select, textarea, [contenteditable], [draggable='true']";
         const RESIZE_INTERVAL_MS = 100;
         const POINTER_SCROLL_THRESHOLD_PX = 3;
@@ -1404,6 +1405,7 @@
             touchListening: false,
             pointerScroll: null,
             lastPointerDown: null,
+            pointerScrollingClassOwned: false,
             mouseReleaseButton: null,
             mouseReleaseTimeout: null,
             momentum: null,
@@ -1432,6 +1434,9 @@
             if (event.button === 0 && event.detail > 1) endPointerScroll(state);
           };
           state.onPointerMove = (event) => movePointerScroll(state, event);
+          state.onPointerScrollWheel = (event) => {
+            if (event.cancelable) event.preventDefault();
+          };
           state.onMouseEvent = (event) => cancelPointerScrollMouseEvent(state, event);
           state.onPointerScrollTouchMove = (event) => {
             if (state.pointerScroll && state.pointerScroll.moved && event.cancelable)
@@ -1727,6 +1732,13 @@
             state.element.style.setProperty("user-select", "none");
             state.element.style.setProperty("scroll-behavior", "auto", "important");
             setPointerScrollCursor(state, "grabbing");
+            state.pointerScrollingClassOwned = !state.element.classList.contains(pointerScrollingClass);
+            state.element.classList.add(pointerScrollingClass);
+            root2.addEventListener(
+              "wheel",
+              state.onPointerScrollWheel,
+              { passive: false, capture: true }
+            );
             pointerScroll.userSelectApplied = true;
             const selection = root2.getSelection();
             if (selection && selection.anchorNode && state.element.contains(selection.anchorNode))
@@ -1751,6 +1763,9 @@
           const pointerScroll = state.pointerScroll;
           if (!pointerScroll || event && event.pointerId !== pointerScroll.pointerId) return;
           state.pointerScroll = null;
+          if (state.pointerScrollingClassOwned) state.element.classList.remove(pointerScrollingClass);
+          state.pointerScrollingClassOwned = false;
+          root2.removeEventListener("wheel", state.onPointerScrollWheel, true);
           root2.removeEventListener("pointermove", state.onPointerMove, true);
           root2.removeEventListener("touchmove", state.onPointerScrollTouchMove, true);
           for (const name of pointerScrollDragEvents) {
@@ -2003,8 +2018,8 @@
           const translate = x || y ? `translate3d(${x}px, ${y}px, 0)` : "";
           const width = Math.max(wrapper.offsetWidth, wrapper.scrollWidth, 1);
           const height = Math.max(wrapper.offsetHeight, wrapper.scrollHeight, 1);
-          const scaleX = 1 + Math.max(elastic.amounts[1], elastic.amounts[3]) / width;
-          const scaleY = 1 + Math.max(elastic.amounts[0], elastic.amounts[2]) / height;
+          const scaleX = 1 + 2 * (Math.max(elastic.amounts[1], elastic.amounts[3]) / width);
+          const scaleY = 1 + 2 * (Math.max(elastic.amounts[0], elastic.amounts[2]) / height);
           const scale = scaleX > 1 || scaleY > 1 ? `scale(${scaleX}, ${scaleY})` : "";
           if (scaleX > 1 || scaleY > 1) {
             const baseOrigin = elastic.baseOrigin.split(" ");
