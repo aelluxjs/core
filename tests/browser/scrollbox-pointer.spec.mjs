@@ -123,7 +123,7 @@ test("real mouse drag scrolls while the pointer leaves the box", async ({ page }
   })).toEqual([73, 73]);
 });
 
-test("mousedown is canceled only after a pointer drag has moved", async ({ page }) => {
+test("all mouse buttons are canceled after a pointer drag has moved", async ({ page }) => {
   await setup(page, box("box"));
   const result = await page.evaluate(() => {
     const element = document.getElementById("box");
@@ -141,17 +141,30 @@ test("mousedown is canceled only after a pointer drag has moved", async ({ page 
       bubbles: true, cancelable: true, isPrimary: true, pointerId: 93,
       pointerType: "mouse", buttons: 1, clientX: x - 30, clientY: y - 30
     }));
-    const during = new MouseEvent("mousedown", {
+    const whileDragging = [0, 1, 2].map(button => {
+      const event = new MouseEvent("mousedown", {
+        bubbles: true, cancelable: true, button, buttons: 1, detail: 1
+      });
+      element.dispatchEvent(event);
+      return event.defaultPrevented;
+    });
+    const repeated = new MouseEvent("mousedown", {
+      bubbles: true, cancelable: true, button: 0, buttons: 1, detail: 2
+    });
+    element.dispatchEvent(repeated);
+    const after = new MouseEvent("mousedown", {
       bubbles: true, cancelable: true, button: 0, buttons: 1, detail: 1
     });
-    element.dispatchEvent(during);
+    element.dispatchEvent(after);
     window.dispatchEvent(new PointerEvent("pointerup", {
       bubbles: true, isPrimary: true, pointerId: 93, pointerType: "mouse",
       button: 0, buttons: 0, clientX: x - 30, clientY: y - 30
     }));
-    return { before: before.defaultPrevented, during: during.defaultPrevented };
+    return { before: before.defaultPrevented, whileDragging,
+      repeated: repeated.defaultPrevented, after: after.defaultPrevented };
   });
-  expect(result).toEqual({ before: false, during: true });
+  expect(result).toEqual({ before: false, whileDragging: [true, true, true],
+    repeated: true, after: false });
 });
 
 for (const elastic of [false, true]) {

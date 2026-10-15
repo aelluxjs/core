@@ -90,12 +90,8 @@
       state.onWheel = (event) => handleWheel(state, event);
       state.onPointerDown = (event) => startDrag(state, event);
       state.onMouseDown = (event) => {
-        if (event.button !== 0) return;
-        if (event.detail > 1) {
-          endDrag(state);
-          return;
-        }
         if (state.drag && state.drag.moved && event.cancelable) event.preventDefault();
+        if (event.button === 0 && event.detail > 1) endDrag(state);
       };
       state.onPointerMove = (event) => moveDrag(state, event);
       state.onPointerEnd = (event) => endDrag(state, event);

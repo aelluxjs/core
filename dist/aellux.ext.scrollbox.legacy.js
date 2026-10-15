@@ -159,12 +159,8 @@
         return startDrag(state, event);
       };
       state.onMouseDown = function(event) {
-        if (event.button !== 0) return;
-        if (event.detail > 1) {
-          endDrag(state);
-          return;
-        }
         if (state.drag && state.drag.moved && event.cancelable) event.preventDefault();
+        if (event.button === 0 && event.detail > 1) endDrag(state);
       };
       state.onPointerMove = function(event) {
         return moveDrag(state, event);

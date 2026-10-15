@@ -170,6 +170,42 @@ test("scrolling a nested container updates coordinates in the shared reference",
   expect(await page.locator("#reference").evaluate(element => element.children.length)).toBe(2);
 });
 
+test("intersection changes schedule placement updates and unmount disconnects the observer", async ({ page }) => {
+  await page.goto("/tests/index.htm");
+  await page.addScriptTag({ url: "/dist/aellux.js" });
+  await page.evaluate(() => {
+    window.anchorIntersectionObservers = [];
+    window.IntersectionObserver = class {
+      constructor(callback) {
+        this.callback = callback;
+        this.observed = new Set();
+        window.anchorIntersectionObservers.push(this);
+      }
+      observe(element) { this.observed.add(element); }
+      disconnect() { this.observed.clear(); }
+    };
+    document.body.innerHTML = `<div id="reference" style="position:relative;width:300px;height:100px">
+      <div id="target" style="position:absolute;left:20px;top:10px;width:30px;height:20px"></div>
+      <div id="anchor" data-ae-anchor-target="target" data-ae-anchor="top-left:top-left"
+        style="width:10px;height:10px"></div></div>`;
+    AelluxJs.ext("anchor");
+  });
+  await page.addScriptTag({ url: "/src/aellux.ext.anchor.js" });
+  await page.evaluate(() => AelluxJs.init({ mode: "basic" }));
+  await expect.poll(() => page.locator("#anchor").evaluate(element =>
+    element.style.getPropertyValue("--ae-anchor-x"))).toBe("20px");
+  expect(await page.evaluate(() => Array.from(window.anchorIntersectionObservers[0].observed,
+    element => element.id).sort())).toEqual(["anchor", "reference", "target"]);
+  await page.evaluate(() => {
+    document.getElementById("target").style.left = "45px";
+    window.anchorIntersectionObservers[0].callback([]);
+  });
+  await expect.poll(() => page.locator("#anchor").evaluate(element =>
+    element.style.getPropertyValue("--ae-anchor-x"))).toBe("45px");
+  await page.evaluate(() => AelluxJs.unmount(document.getElementById("anchor"), "anchor"));
+  expect(await page.evaluate(() => window.anchorIntersectionObservers[0].observed.size)).toBe(0);
+});
+
 test("scroll bursts throttle layout measurements and keep the latest position", async ({ page }) => {
   await startAnchor(page, `
     <div style="position: relative; width: 300px; height: 100px">

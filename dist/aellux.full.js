@@ -1042,7 +1042,8 @@
             revision: 0,
             target: null,
             reference: null,
-            observer: null
+            observer: null,
+            intersectionObserver: null
           };
           anchors.set(element, state);
           if (anchors.size === 1) {
@@ -1052,6 +1053,9 @@
           if (typeof root2.ResizeObserver === "function") {
             state.observer = new root2.ResizeObserver(scheduleUpdate);
           }
+          if (typeof root2.IntersectionObserver === "function") {
+            state.intersectionObserver = new root2.IntersectionObserver(scheduleUpdate);
+          }
           return updateAnchor(element);
         }
         async function unmountAnchor(element) {
@@ -1059,6 +1063,7 @@
           if (!state) return;
           state.revision++;
           if (state.observer) state.observer.disconnect();
+          if (state.intersectionObserver) state.intersectionObserver.disconnect();
           anchors.delete(element);
           if (!anchors.size) {
             root2.removeEventListener("scroll", scheduleUpdate, true);
@@ -1070,6 +1075,7 @@
           await AelluxJs2.waitLayout.update(deactivate, [element, state]);
         }
         function scheduleUpdate() {
+          if (!anchors.size) return;
           const elapsed = now() - lastUpdateTime;
           if (elapsed >= UPDATE_INTERVAL_MS) {
             if (updateTimeout !== null) clearTimeout(updateTimeout);
@@ -1198,10 +1204,12 @@
           if (state.target === target && state.reference === reference) return;
           state.target = target;
           state.reference = reference;
-          if (!state.observer) return;
-          state.observer.disconnect();
+          if (state.observer) state.observer.disconnect();
+          if (state.intersectionObserver) state.intersectionObserver.disconnect();
           for (const observed of /* @__PURE__ */ new Set([element, target, reference])) {
-            if (observed) state.observer.observe(observed);
+            if (!observed) continue;
+            if (state.observer) state.observer.observe(observed);
+            if (state.intersectionObserver) state.intersectionObserver.observe(observed);
           }
         }
         function applyBaseStyles(element) {
@@ -1219,6 +1227,7 @@
         }
         function deactivate(element, state) {
           if (state.observer) state.observer.disconnect();
+          if (state.intersectionObserver) state.intersectionObserver.disconnect();
           state.target = state.reference = null;
           element.classList.remove(anchoredClass);
           if (state.active) restoreStyles(element, state.original);
@@ -1358,12 +1367,8 @@
           state.onWheel = (event) => handleWheel(state, event);
           state.onPointerDown = (event) => startDrag(state, event);
           state.onMouseDown = (event) => {
-            if (event.button !== 0) return;
-            if (event.detail > 1) {
-              endDrag(state);
-              return;
-            }
             if (state.drag && state.drag.moved && event.cancelable) event.preventDefault();
+            if (event.button === 0 && event.detail > 1) endDrag(state);
           };
           state.onPointerMove = (event) => moveDrag(state, event);
           state.onPointerEnd = (event) => endDrag(state, event);

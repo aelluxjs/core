@@ -236,7 +236,8 @@
         revision: 0,
         target: null,
         reference: null,
-        observer: null
+        observer: null,
+        intersectionObserver: null
       };
       anchors.set(element, state);
       if (anchors.size === 1) {
@@ -248,6 +249,9 @@
       }
       if (typeof root.ResizeObserver === "function") {
         state.observer = new root.ResizeObserver(scheduleUpdate);
+      }
+      if (typeof root.IntersectionObserver === "function") {
+        state.intersectionObserver = new root.IntersectionObserver(scheduleUpdate);
       }
       return updateAnchor(element);
     }
@@ -269,6 +273,7 @@
             case 1:
               state.revision++;
               if (state.observer) state.observer.disconnect();
+              if (state.intersectionObserver) state.intersectionObserver.disconnect();
               anchors.delete(element);
               if (!anchors.size) {
                 root.removeEventListener("scroll", scheduleUpdate, true);
@@ -287,6 +292,7 @@
       return _unmountAnchor.apply(this, arguments);
     }
     function scheduleUpdate() {
+      if (!anchors.size) return;
       var elapsed = now() - lastUpdateTime;
       if (elapsed >= UPDATE_INTERVAL_MS) {
         if (updateTimeout !== null) clearTimeout(updateTimeout);
@@ -523,13 +529,15 @@
       if (state.target === target && state.reference === reference) return;
       state.target = target;
       state.reference = reference;
-      if (!state.observer) return;
-      state.observer.disconnect();
+      if (state.observer) state.observer.disconnect();
+      if (state.intersectionObserver) state.intersectionObserver.disconnect();
       var _iterator3 = _createForOfIteratorHelper(/* @__PURE__ */ new Set([element, target, reference])), _step3;
       try {
         for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
           var observed = _step3.value;
-          if (observed) state.observer.observe(observed);
+          if (!observed) continue;
+          if (state.observer) state.observer.observe(observed);
+          if (state.intersectionObserver) state.intersectionObserver.observe(observed);
         }
       } catch (err) {
         _iterator3.e(err);
@@ -546,6 +554,7 @@
     }
     function deactivate(element, state) {
       if (state.observer) state.observer.disconnect();
+      if (state.intersectionObserver) state.intersectionObserver.disconnect();
       state.target = state.reference = null;
       element.classList.remove(anchoredClass);
       if (state.active) restoreStyles(element, state.original);

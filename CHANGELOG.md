@@ -6,6 +6,8 @@ All notable changes to aellux.js will be documented in this file.
 
 ### Added
 
+- Anchor now schedules repositioning when an observed intersection changes, where `IntersectionObserver` is available.
+- Raised the full-bundle raw-size budgets for Anchor's intersection observer.
 - Elastic Scrollbox accepts one or two maximum displacement values as fractions or pixels through `data-ae-scrollbox-elastic`.
 - Weak CSS now uses smooth scrolling by default and restores immediate scrolling for all elements when reduced motion is requested.
 - Scrollbox now supports native and desktop pointer-drag modes with horizontal wheel handoff at scroll boundaries.
@@ -18,6 +20,7 @@ All notable changes to aellux.js will be documented in this file.
 
 ### Changed
 
+- Desktop pointer Scrollboxes now cancel every cancelable `mousedown` during an active drag, regardless of mouse button or click count.
 - Elastic pressure now eases exponentially toward its limit and returns with a 15% per-frame interpolation.
 - Raised the Scrollbox and full-bundle size budgets for configurable elastic limits and frame-based snapback.
 - Elastic Scrollbox scale now grows its scrollable wrapper extent by the elastic displacement in pixels.
