@@ -30,6 +30,7 @@ All notable changes to aellux.js will be documented in this file.
 - Elastic and snap wrappers now warn on non-inline display and normalize block, flex, and grid to inline counterparts, restoring the original inline display on unmount.
 - Horizontal wheel conversion and elastic pressure now respect each axis's computed overflow, including `overflow-y: hidden` when content still extends vertically.
 - Snap release prioritizes the point nearest the viewport center, then uses a short flick or significant displacement of the current point to advance wide carousel items.
+- Snap now projects point centers by an additional pointer delta before comparison and accepts very short, fast flicks while rejecting slow short drags.
 
 - Pointer Drag Scroll (PDS) now cancels `pointermove`, `touchmove`, and matching-button `mousemove` defaults once scrolling begins. It prevents native pointer-down behavior on open content, preserves text and controls, and changes the cursor from `grab` to `grabbing` during PDS.
 - PDS also cancels cancelable native drag events while the scroll gesture is active.

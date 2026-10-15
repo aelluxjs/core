@@ -27,7 +27,9 @@
   const MOMENTUM_LIMIT_DISTANCE_PX = 15;
   const MOMENTUM_DECELERATION = 0.0015;
   const SNAP_SWIPE_SPEED_PX_MS = 0.5;
-  const SNAP_FLICK_WINDOW_MS = 120;
+  const SNAP_FLICK_WINDOW_MS = 200;
+  const SNAP_FLICK_MAX_DISTANCE_PX = 100;
+  const SNAP_FLICK_MIN_DISTANCE_PX = 1;
   const SNAP_DRAG_DISTANCE_RATIO = 0.25;
   const SNAP_SCROLL_IDLE_MS = 120;
   const SNAP_WHEEL_IDLE_MS = 120;
@@ -331,15 +333,15 @@
       (box.top + state.element.clientTop + state.element.clientHeight / 2);
   }
 
-  function nearestSnapIndex(state, items) {
+  function nearestSnapIndex(state, items, projectionX = 0, projectionY = 0) {
     const rect = state.element.getBoundingClientRect();
     const centerX = rect.left + state.element.clientLeft + state.element.clientWidth / 2;
     const centerY = rect.top + state.element.clientTop + state.element.clientHeight / 2;
     let nearest = 0, distance = Infinity;
     for (let index = 0; index < items.length; index++) {
       const item = items[index].getBoundingClientRect();
-      const dx = item.left + item.width / 2 - centerX;
-      const dy = item.top + item.height / 2 - centerY;
+      const dx = item.left + item.width / 2 + projectionX - centerX;
+      const dy = item.top + item.height / 2 + projectionY - centerY;
       const candidate = dx * dx + dy * dy;
       if (candidate < distance) { nearest = index; distance = candidate; }
     }
@@ -673,8 +675,9 @@
       endPointerScroll(state);
       return;
     }
-    if (!pointerScroll.moved && dx * dx + dy * dy <
-      POINTER_SCROLL_THRESHOLD_PX * POINTER_SCROLL_THRESHOLD_PX) return;
+    const threshold = pointerScroll.chain.some(member => member.snapEnabled) ?
+      SNAP_FLICK_MIN_DISTANCE_PX : POINTER_SCROLL_THRESHOLD_PX;
+    if (!pointerScroll.moved && dx * dx + dy * dy < threshold * threshold) return;
     if (!pointerScroll.axis)
       pointerScroll.axis = Math.abs(dx) >= Math.abs(dy) ? "x" : "y";
     const verticalTextDrag = pointerScroll.verticalOnly && pointerScroll.axis === "y" &&
@@ -885,14 +888,19 @@
     const axis = snapAxis(state);
     const start = pointerScroll.snapStarts.get(state);
     const startIndex = start ? items.indexOf(start.item) : -1;
-    let index = nearestSnapIndex(state, items);
+    const projection = axis === pointerScroll.axis ?
+      (axis === "x" ? pointerScroll.lastX - pointerScroll.startX :
+        pointerScroll.lastY - pointerScroll.startY) : 0;
+    let index = nearestSnapIndex(state, items,
+      axis === "x" ? projection : 0, axis === "y" ? projection : 0);
     if (index === startIndex && axis === pointerScroll.axis && start) {
       const samples = pointerScroll.flickSamples;
       const first = samples[0], last = samples[samples.length - 1];
       const distance = axis === "x" ? first.x - last.x : first.y - last.y;
       const elapsed = Math.max(1, last.time - first.time);
       const flick = now() - last.time <= SNAP_FLICK_WINDOW_MS &&
-        Math.abs(distance) >= POINTER_SCROLL_THRESHOLD_PX &&
+        Math.abs(distance) > SNAP_FLICK_MIN_DISTANCE_PX &&
+        Math.abs(distance) < SNAP_FLICK_MAX_DISTANCE_PX &&
         Math.abs(distance) / elapsed >= SNAP_SWIPE_SPEED_PX_MS;
       const offset = snapCenterOffset(state, start.item, axis);
       const size = axis === "x" ? state.element.clientWidth : state.element.clientHeight;

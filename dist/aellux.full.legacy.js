@@ -25355,7 +25355,9 @@
         var MOMENTUM_LIMIT_DISTANCE_PX = 15;
         var MOMENTUM_DECELERATION = 15e-4;
         var SNAP_SWIPE_SPEED_PX_MS = 0.5;
-        var SNAP_FLICK_WINDOW_MS = 120;
+        var SNAP_FLICK_WINDOW_MS = 200;
+        var SNAP_FLICK_MAX_DISTANCE_PX = 100;
+        var SNAP_FLICK_MIN_DISTANCE_PX = 1;
         var SNAP_DRAG_DISTANCE_RATIO = 0.25;
         var SNAP_SCROLL_IDLE_MS = 120;
         var SNAP_WHEEL_IDLE_MS = 120;
@@ -25718,14 +25720,16 @@
           return axis === "x" ? target.left + target.width / 2 - (box.left + state.element.clientLeft + state.element.clientWidth / 2) : target.top + target.height / 2 - (box.top + state.element.clientTop + state.element.clientHeight / 2);
         }
         function nearestSnapIndex(state, items) {
+          var projectionX = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : 0;
+          var projectionY = arguments.length > 3 && arguments[3] !== void 0 ? arguments[3] : 0;
           var rect = state.element.getBoundingClientRect();
           var centerX = rect.left + state.element.clientLeft + state.element.clientWidth / 2;
           var centerY = rect.top + state.element.clientTop + state.element.clientHeight / 2;
           var nearest = 0, distance = Infinity;
           for (var index = 0; index < items.length; index++) {
             var item = items[index].getBoundingClientRect();
-            var dx = item.left + item.width / 2 - centerX;
-            var dy = item.top + item.height / 2 - centerY;
+            var dx = item.left + item.width / 2 + projectionX - centerX;
+            var dy = item.top + item.height / 2 + projectionY - centerY;
             var candidate = dx * dx + dy * dy;
             if (candidate < distance) {
               nearest = index;
@@ -26106,7 +26110,10 @@
             endPointerScroll(state);
             return;
           }
-          if (!pointerScroll.moved && dx * dx + dy * dy < POINTER_SCROLL_THRESHOLD_PX * POINTER_SCROLL_THRESHOLD_PX) return;
+          var threshold = pointerScroll.chain.some(function(member2) {
+            return member2.snapEnabled;
+          }) ? SNAP_FLICK_MIN_DISTANCE_PX : POINTER_SCROLL_THRESHOLD_PX;
+          if (!pointerScroll.moved && dx * dx + dy * dy < threshold * threshold) return;
           if (!pointerScroll.axis) pointerScroll.axis = Math.abs(dx) >= Math.abs(dy) ? "x" : "y";
           var verticalTextDrag = pointerScroll.verticalOnly && pointerScroll.axis === "y" && Math.abs(dy) > VERTICAL_TEXT_DRAG_PX;
           if (!pointerScroll.moved && now() < pointerScroll.selectionReadyTime && !verticalTextDrag) {
@@ -26360,13 +26367,14 @@
           var axis = snapAxis(state);
           var start = pointerScroll.snapStarts.get(state);
           var startIndex = start ? items.indexOf(start.item) : -1;
-          var index = nearestSnapIndex(state, items);
+          var projection = axis === pointerScroll.axis ? axis === "x" ? pointerScroll.lastX - pointerScroll.startX : pointerScroll.lastY - pointerScroll.startY : 0;
+          var index = nearestSnapIndex(state, items, axis === "x" ? projection : 0, axis === "y" ? projection : 0);
           if (index === startIndex && axis === pointerScroll.axis && start) {
             var samples = pointerScroll.flickSamples;
             var first = samples[0], last = samples[samples.length - 1];
             var distance = axis === "x" ? first.x - last.x : first.y - last.y;
             var elapsed = Math.max(1, last.time - first.time);
-            var flick = now() - last.time <= SNAP_FLICK_WINDOW_MS && Math.abs(distance) >= POINTER_SCROLL_THRESHOLD_PX && Math.abs(distance) / elapsed >= SNAP_SWIPE_SPEED_PX_MS;
+            var flick = now() - last.time <= SNAP_FLICK_WINDOW_MS && Math.abs(distance) > SNAP_FLICK_MIN_DISTANCE_PX && Math.abs(distance) < SNAP_FLICK_MAX_DISTANCE_PX && Math.abs(distance) / elapsed >= SNAP_SWIPE_SPEED_PX_MS;
             var offset = snapCenterOffset(state, start.item, axis);
             var size = axis === "x" ? state.element.clientWidth : state.element.clientHeight;
             var movedAway = Math.abs(offset) - Math.abs(start.offset) >= size * SNAP_DRAG_DISTANCE_RATIO;

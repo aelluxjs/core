@@ -282,7 +282,7 @@ test("snap advances wide items on a short flick or significant drag", async ({ p
       .toBe(100);
   };
 
-  await move(8, 301, true);
+  await move(2, 301, true);
   await expect.poll(() => page.evaluate(() => document.getElementById("gallery").scrollLeft))
     .toBe(400);
 
@@ -294,11 +294,52 @@ test("snap advances wide items on a short flick or significant drag", async ({ p
     .toBe(400);
 
   await reset();
-  const small = await move(10, 303);
-  await page.waitForTimeout(150);
+  const small = await move(2, 303);
+  await page.waitForTimeout(250);
   await release(small, 303);
   await expect.poll(() => page.evaluate(() => document.getElementById("gallery").scrollLeft))
     .toBe(100);
+});
+
+test("snap uses projected centers to recognize a deliberate drag", async ({ page }) => {
+  await setup(page, `<div id="gallery" data-ae-scrollbox="pointer"
+    style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden">
+    <div data-ae-scrollbox-snap style="display:flex;width:300px">
+      <div style="flex:none;width:100px;height:100px"></div>
+      <div style="flex:none;width:100px;height:100px"></div>
+      <div style="flex:none;width:100px;height:100px"></div>
+    </div>
+  </div>`);
+  const result = await page.evaluate(() => {
+    const element = document.getElementById("gallery");
+    const rect = element.getBoundingClientRect();
+    const x = rect.left + 95, y = rect.top + 50;
+    element.dispatchEvent(new PointerEvent("pointerdown", {
+      bubbles: true, cancelable: true, isPrimary: true, pointerId: 304,
+      pointerType: "mouse", button: 0, buttons: 1, clientX: x, clientY: y
+    }));
+    window.dispatchEvent(new PointerEvent("pointermove", {
+      bubbles: true, cancelable: true, isPrimary: true, pointerId: 304,
+      pointerType: "mouse", buttons: 1, clientX: x - 90, clientY: y
+    }));
+    const center = rect.left + element.clientWidth / 2;
+    const items = Array.from(element.firstElementChild.children);
+    const distances = items.map(item => {
+      const box = item.getBoundingClientRect();
+      return Math.abs(box.left + box.width / 2 - center);
+    });
+    const nearest = distances.indexOf(Math.min(...distances));
+    return { nearest, left: element.scrollLeft, x: x - 90, y };
+  });
+  expect(result.nearest).toBe(1);
+  expect(result.left).toBe(90);
+  await page.waitForTimeout(250);
+  await page.evaluate(point => window.dispatchEvent(new PointerEvent("pointerup", {
+    bubbles: true, isPrimary: true, pointerId: 304, pointerType: "mouse",
+    button: 0, buttons: 0, clientX: point.x, clientY: point.y
+  })), result);
+  await expect.poll(() => page.evaluate(() => document.getElementById("gallery").scrollLeft))
+    .toBe(200);
 });
 
 test("native is the default and never loads a dependency", async ({ page }) => {
