@@ -66,7 +66,6 @@
     var ELASTIC_RELEASE_MS = 800;
     var ELASTIC_WHEEL_IDLE_MS = 80;
     var properties = ["--ae-scroll-y-progress", "--ae-scroll-x-progress"];
-    var paddingProperties = ["padding-top", "padding-right", "padding-bottom", "padding-left"];
     var scrollboxes = /* @__PURE__ */ new Map();
     AelluxJs.extAttach(extensionName, {
       init: init,
@@ -105,17 +104,11 @@
           priority: element.style.getPropertyPriority(name)
         };
       });
-      var computed = root.getComputedStyle(element);
       var elastic = {
-        base: paddingProperties.map(function(name) {
-          return parseFloat(computed.getPropertyValue(name)) || 0;
-        }),
-        previous: paddingProperties.map(function(name) {
-          return {
-            value: element.style.getPropertyValue(name),
-            priority: element.style.getPropertyPriority(name)
-          };
-        }),
+        wrapper: null,
+        baseTransform: "",
+        previousTransform: null,
+        invalidReported: false,
         amounts: [0, 0, 0, 0],
         active: false,
         owned: false,
@@ -209,7 +202,7 @@
       state.mode = readMode(element);
       state.wheelEnabled = element.getAttribute(wheelAttribute) !== "false";
       state.momentumEnabled = element.getAttribute(momentumAttribute) !== "false";
-      state.elasticEnabled = element.hasAttribute(elasticAttribute) && element.getAttribute(elasticAttribute) !== "false";
+      configureElastic(state);
       state.desktop = isDesktop();
       if ((state.desktop || state.elasticEnabled) && !state.wheelListening) {
         element.addEventListener("wheel", state.onWheel, {
@@ -235,6 +228,38 @@
         endDrag(state);
       }
       refresh(state);
+    }
+    function configureElastic(state) {
+      var element = state.element;
+      var child = element.children.length === 1 ? element.children[0] : null;
+      var wrapper = child && child.hasAttribute(elasticAttribute) && child.getAttribute(elasticAttribute) !== "false" ? child : null;
+      if (!wrapper) {
+        resetElastic(state);
+        state.elasticEnabled = false;
+        state.elastic.wrapper = null;
+        var requested = element.hasAttribute(elasticAttribute) || Array.from(element.children).some(function(item) {
+          return item.hasAttribute(elasticAttribute) && item.getAttribute(elasticAttribute) !== "false";
+        });
+        if (requested && !state.elastic.invalidReported) {
+          AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_SCROLLBOX_ELASTIC_WRAPPER, {
+            element: element
+          });
+        }
+        state.elastic.invalidReported = requested;
+        return;
+      }
+      state.elastic.invalidReported = false;
+      if (state.elastic.wrapper !== wrapper) {
+        resetElastic(state);
+        var computed = root.getComputedStyle(wrapper);
+        state.elastic.wrapper = wrapper;
+        state.elastic.baseTransform = computed.transform === "none" ? "" : computed.transform;
+        state.elastic.previousTransform = {
+          value: wrapper.style.getPropertyValue("transform"),
+          priority: wrapper.style.getPropertyPriority("transform")
+        };
+      }
+      state.elasticEnabled = true;
     }
     function readMode(element) {
       var value = (element.getAttribute(attribute) || "").trim().toLowerCase() || "native";
@@ -502,22 +527,40 @@
       if (!active && !elastic.owned) return false;
       if (elastic.releaseTimeout !== null) root.clearTimeout(elastic.releaseTimeout);
       elastic.releaseTimeout = null;
-      element.classList.remove(elasticReleaseClass);
+      elastic.wrapper.classList.remove(elasticReleaseClass);
       elastic.amounts = amounts;
       elastic.active = active;
       elastic.owned = true;
-      paddingProperties.forEach(function(name, index) {
-        return element.style.setProperty(name, "".concat(elastic.base[index] + amounts[index], "px"));
-      });
+      setElasticTransform(state);
       return active;
+    }
+    function setElasticTransform(state) {
+      var elastic = state.elastic;
+      var wrapper = elastic.wrapper;
+      var x = elastic.amounts[3] - elastic.amounts[1];
+      var y = elastic.amounts[0] - elastic.amounts[2];
+      var translate = x || y ? "translate3d(".concat(x, "px, ").concat(y, "px, 0)") : "";
+      var limitX = state.element.clientWidth * ELASTIC_LIMIT_RATIO || 1;
+      var limitY = state.element.clientHeight * ELASTIC_LIMIT_RATIO || 1;
+      var scaleX = 1 + 0.1 * Math.max(elastic.amounts[1], elastic.amounts[3]) / limitX;
+      var scaleY = 1 + 0.1 * Math.max(elastic.amounts[0], elastic.amounts[2]) / limitY;
+      var scale = "";
+      if (scaleX > 1 || scaleY > 1) {
+        var origin = root.getComputedStyle(wrapper).transformOrigin.split(" ");
+        var originX = parseFloat(origin[0]) || 0;
+        var originY = parseFloat(origin[1]) || 0;
+        var pivotX = elastic.amounts[3] > 0 ? -originX : elastic.amounts[1] > 0 ? wrapper.offsetWidth - originX : 0;
+        var pivotY = elastic.amounts[0] > 0 ? -originY : elastic.amounts[2] > 0 ? wrapper.offsetHeight - originY : 0;
+        scale = "translate3d(".concat(pivotX, "px, ").concat(pivotY, "px, 0) scale(").concat(scaleX, ", ").concat(scaleY, ") ") + "translate3d(".concat(-pivotX, "px, ").concat(-pivotY, "px, 0)");
+      }
+      wrapper.style.setProperty("transform", [translate, scale, elastic.baseTransform].filter(Boolean).join(" ") || "none", elastic.previousTransform.priority);
     }
     function scrollWithinElasticBounds(state, desiredX, desiredY) {
       var element = state.element;
       var metrics = state.metrics || nativeMetrics(element);
-      var amounts = state.elastic.amounts;
       element.scrollTo({
-        left: amounts[1] > 0 ? Math.max(0, element.scrollWidth - element.clientWidth) : Math.max(0, Math.min(metrics.maxX, desiredX)),
-        top: amounts[2] > 0 ? Math.max(0, element.scrollHeight - element.clientHeight) : Math.max(0, Math.min(metrics.maxY, desiredY)),
+        left: Math.max(0, Math.min(metrics.maxX, desiredX)),
+        top: Math.max(0, Math.min(metrics.maxY, desiredY)),
         behavior: "instant"
       });
     }
@@ -530,11 +573,9 @@
         resetElastic(state);
         return;
       }
-      state.element.classList.add(elasticReleaseClass);
+      elastic.wrapper.classList.add(elasticReleaseClass);
       elastic.amounts = [0, 0, 0, 0];
-      paddingProperties.forEach(function(name, index) {
-        return state.element.style.setProperty(name, "".concat(elastic.base[index], "px"));
-      });
+      setElasticTransform(state);
       if (elastic.releaseTimeout !== null) root.clearTimeout(elastic.releaseTimeout);
       elastic.releaseTimeout = root.setTimeout(function() {
         resetElastic(state);
@@ -547,12 +588,12 @@
       if (elastic.wheelTimeout !== null) root.clearTimeout(elastic.wheelTimeout);
       elastic.releaseTimeout = null;
       elastic.wheelTimeout = null;
-      state.element.classList.remove(elasticReleaseClass);
-      if (elastic.owned) paddingProperties.forEach(function(name, index) {
-        var previous = elastic.previous[index];
-        if (previous.value) state.element.style.setProperty(name, previous.value, previous.priority);
-        else state.element.style.removeProperty(name);
-      });
+      if (elastic.wrapper) elastic.wrapper.classList.remove(elasticReleaseClass);
+      if (elastic.owned && elastic.wrapper) {
+        var previous = elastic.previousTransform;
+        if (previous.value) elastic.wrapper.style.setProperty("transform", previous.value, previous.priority);
+        else elastic.wrapper.style.removeProperty("transform");
+      }
       elastic.amounts = [0, 0, 0, 0];
       elastic.active = false;
       elastic.owned = false;
@@ -582,7 +623,7 @@
         }
       }
       if (root.MutationObserver) {
-        state.mutationObserver = new root.MutationObserver(function() {
+        state.mutationObserver = new root.MutationObserver(function(records) {
           if (state.resizeObserver) {
             state.resizeObserver.disconnect();
             state.resizeObserver.observe(state.element);
@@ -598,7 +639,10 @@
               _iterator5.f();
             }
           }
-          refresh(state);
+          if (records.some(function(record) {
+            return record.target === state.element;
+          })) configure(state);
+          else refresh(state);
         });
         state.mutationObserver.observe(state.element, {
           childList: true,

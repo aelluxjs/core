@@ -2,7 +2,7 @@
 
 `data-ae-scrollbox` uses the browser's native scrolling and publishes `--ae-scroll-y-progress` and `--ae-scroll-x-progress` on the scroll container. Each value runs from 0 at the start to 1 at the end of its axis; an axis without overflow reports 0. Native `scroll` events continue to reach ordinary listeners, including Anchor's capture listener. On unmount, Scrollbox restores the previous inline progress values and priorities.
 
-The boot's weak CSS supplies `overflow: auto`, `contain: layout paint`, and thin scrollbars. It also enables smooth programmatic scrolling on all elements; `prefers-reduced-motion: reduce` restores immediate scrolling. Pointer dragging and momentum set each position immediately so they follow the gesture. An application can override the weak styles. Scrollbox works with any content structure; it does not require a single content child or load a scrolling library.
+The boot's weak CSS supplies `overflow: auto`, `contain: layout paint`, and thin scrollbars. It also enables smooth programmatic scrolling on all elements; `prefers-reduced-motion: reduce` restores immediate scrolling. Pointer dragging and momentum set each position immediately so they follow the gesture. An application can override the weak styles. Basic Scrollbox works with any content structure and does not load a scrolling library. Elastic edges require a single marked content child.
 
 ```html
 <div data-ae-scrollbox style="width: 20rem; height: 12rem">
@@ -49,12 +49,11 @@ Set `data-ae-scrollbox-wheel-horizontal="false"` to disable the vertical-to-hori
 
 ## Elastic edges
 
-Add `data-ae-scrollbox-elastic` to opt into a padding-based edge response in either `native` or `pointer` mode. The weak CSS applies `box-sizing: border-box` to elastic boxes so extra padding remains visible at the trailing edges. When pointer dragging, touch dragging, or a wheel gesture pushes past a scroll limit, Scrollbox adds damped padding on that edge. The padding measured when the box mounts remains the base. The extra amount is one third of the force beyond the limit, capped at one quarter of the visible size of that axis. On release, the padding returns to its base with an 800 ms transition; reduced-motion users get an immediate return. Set the attribute to `false` or unmount the box to stop the effect and restore its original inline padding.
+Place `data-ae-scrollbox-elastic` on the Scrollbox's only direct child to enable elastic edges in either `native` or `pointer` mode. That child wraps all scrollable content. A marked child alongside another direct child reports diagnostic 1120 and leaves the elastic effect disabled. When pointer dragging, touch dragging, or a wheel gesture pushes past a scroll limit, Scrollbox translates the wrapper away from that edge with `translate3d` and scales the active axis up to 1.1 around the pressed edge. The displacement is one third of the force beyond the limit, capped at one quarter of the visible size of that axis. On release, its transform returns to the value measured at mount over 800 ms; reduced-motion users get an immediate return. The original inline transform is restored on unmount. Set the child's attribute to `false` to disable the effect.
 
 ```html
-<div data-ae-scrollbox="native" data-ae-scrollbox-elastic
-  style="width: 20rem; height: 12rem; padding: 1rem">
-  <div>Scrollable content</div>
+<div data-ae-scrollbox="native" style="width: 20rem; height: 12rem">
+  <div data-ae-scrollbox-elastic>Scrollable content</div>
 </div>
 ```
 

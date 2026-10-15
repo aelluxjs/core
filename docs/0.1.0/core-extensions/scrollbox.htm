@@ -573,7 +573,7 @@ Scrollbox                  </li>
         <div id="doc-content" style="min-height: calc(100vh - 200px);" class="js-toc-content" ajax-load="doc-content">
 <h1>Scrollbox Extension</h1>
 <p><code>data-ae-scrollbox</code> uses the browser&#39;s native scrolling and publishes <code>--ae-scroll-y-progress</code> and <code>--ae-scroll-x-progress</code> on the scroll container. Each value runs from 0 at the start to 1 at the end of its axis; an axis without overflow reports 0. Native <code>scroll</code> events continue to reach ordinary listeners, including Anchor&#39;s capture listener. On unmount, Scrollbox restores the previous inline progress values and priorities.</p>
-<p>The boot&#39;s weak CSS supplies <code>overflow: auto</code>, <code>contain: layout paint</code>, and thin scrollbars. It also enables smooth programmatic scrolling on all elements; <code>prefers-reduced-motion: reduce</code> restores immediate scrolling. Pointer dragging and momentum set each position immediately so they follow the gesture. An application can override the weak styles. Scrollbox works with any content structure; it does not require a single content child or load a scrolling library.</p>
+<p>The boot&#39;s weak CSS supplies <code>overflow: auto</code>, <code>contain: layout paint</code>, and thin scrollbars. It also enables smooth programmatic scrolling on all elements; <code>prefers-reduced-motion: reduce</code> restores immediate scrolling. Pointer dragging and momentum set each position immediately so they follow the gesture. An application can override the weak styles. Basic Scrollbox works with any content structure and does not load a scrolling library. Elastic edges require a single marked content child.</p>
 <pre><code class="language-html">&lt;div data-ae-scrollbox style=&quot;width: 20rem; height: 12rem&quot;&gt;
   &lt;div&gt;&lt;!-- scrollable content --&gt;&lt;/div&gt;
 &lt;/div&gt;
@@ -614,10 +614,9 @@ Scrollbox                  </li>
 &lt;/div&gt;
 </code></pre>
 <h2>Elastic edges</h2>
-<p>Add <code>data-ae-scrollbox-elastic</code> to opt into a padding-based edge response in either <code>native</code> or <code>pointer</code> mode. The weak CSS applies <code>box-sizing: border-box</code> to elastic boxes so extra padding remains visible at the trailing edges. When pointer dragging, touch dragging, or a wheel gesture pushes past a scroll limit, Scrollbox adds damped padding on that edge. The padding measured when the box mounts remains the base. The extra amount is one third of the force beyond the limit, capped at one quarter of the visible size of that axis. On release, the padding returns to its base with an 800 ms transition; reduced-motion users get an immediate return. Set the attribute to <code>false</code> or unmount the box to stop the effect and restore its original inline padding.</p>
-<pre><code class="language-html">&lt;div data-ae-scrollbox=&quot;native&quot; data-ae-scrollbox-elastic
-  style=&quot;width: 20rem; height: 12rem; padding: 1rem&quot;&gt;
-  &lt;div&gt;Scrollable content&lt;/div&gt;
+<p>Place <code>data-ae-scrollbox-elastic</code> on the Scrollbox&#39;s only direct child to enable elastic edges in either <code>native</code> or <code>pointer</code> mode. That child wraps all scrollable content. A marked child alongside another direct child reports diagnostic 1120 and leaves the elastic effect disabled. When pointer dragging, touch dragging, or a wheel gesture pushes past a scroll limit, Scrollbox translates the wrapper away from that edge with <code>translate3d</code> and scales the active axis up to 1.1 around the pressed edge. The displacement is one third of the force beyond the limit, capped at one quarter of the visible size of that axis. On release, its transform returns to the value measured at mount over 800 ms; reduced-motion users get an immediate return. The original inline transform is restored on unmount. Set the child&#39;s attribute to <code>false</code> to disable the effect.</p>
+<pre><code class="language-html">&lt;div data-ae-scrollbox=&quot;native&quot; style=&quot;width: 20rem; height: 12rem&quot;&gt;
+  &lt;div data-ae-scrollbox-elastic&gt;Scrollable content&lt;/div&gt;
 &lt;/div&gt;
 </code></pre>
 <p>Scrollbox updates measurements after content mutations, box resize, or window resize. Resize updates use a 100 ms throttle.</p>
