@@ -647,6 +647,87 @@ test("nested pointer scrolling skips a child without the chosen axis", async ({ 
   expect(result).toEqual({ inner: [0, 0], outer: [60, 0] });
 });
 
+for (const axis of ["x", "y"]) {
+  test(`pointer scrolling ignores overflow-${axis}: hidden despite overflowing content`,
+    async ({ page }) => {
+      await setup(page, `<div id="box" data-ae-scrollbox="pointer"
+        data-ae-scrollbox-momentum="false"
+        style="width:100px;height:100px;overflow-${axis}:hidden;overflow-${axis === "x" ? "y" : "x"}:auto">
+        <div style="width:300px;height:300px"></div>
+      </div>`);
+      const result = await page.evaluate(axis => {
+        const element = document.getElementById("box");
+        const rect = element.getBoundingClientRect();
+        const gesture = (id, startX, startY, moveX, moveY) => {
+          element.dispatchEvent(new PointerEvent("pointerdown", {
+            bubbles: true, cancelable: true, isPrimary: true, pointerId: id,
+            pointerType: "mouse", button: 0, buttons: 1,
+            clientX: rect.left + startX, clientY: rect.top + startY
+          }));
+          const move = new PointerEvent("pointermove", {
+            bubbles: true, cancelable: true, isPrimary: true, pointerId: id,
+            pointerType: "mouse", buttons: 1,
+            clientX: rect.left + moveX, clientY: rect.top + moveY
+          });
+          window.dispatchEvent(move);
+          const during = { prevented: move.defaultPrevented,
+            active: element.classList.contains("ae--pointerscrolling"),
+            x: element.scrollLeft, y: element.scrollTop };
+          window.dispatchEvent(new PointerEvent("pointerup", {
+            bubbles: true, isPrimary: true, pointerId: id, pointerType: "mouse",
+            button: 0, buttons: 0, clientX: rect.left + moveX, clientY: rect.top + moveY
+          }));
+          return during;
+        };
+        const disabled = gesture(151, 30, 30,
+          axis === "x" ? -30 : 30, axis === "y" ? -30 : 30);
+        const enabled = gesture(152, 70, 70,
+          axis === "y" ? 10 : 70, axis === "x" ? 10 : 70);
+        return { disabled, enabled, overflow: getComputedStyle(element)[
+          axis === "x" ? "overflowX" : "overflowY"] };
+      }, axis);
+      expect(result.overflow).toBe("hidden");
+      expect(result.disabled).toEqual({ prevented: false, active: false, x: 0, y: 0 });
+      expect(result.enabled).toEqual(axis === "x" ?
+        { prevented: true, active: true, x: 0, y: 60 } :
+        { prevented: true, active: true, x: 60, y: 0 });
+    });
+}
+
+test("nested pointer scrolling skips hidden overflow in the child and uses the parent", async ({ page }) => {
+  await setup(page, `<div id="outer" data-ae-scrollbox="pointer"
+    data-ae-scrollbox-momentum="false" style="width:120px;height:120px;overflow:auto">
+    <div style="width:300px;height:360px">
+      <div id="inner" data-ae-scrollbox="pointer"
+        data-ae-scrollbox-momentum="false"
+        style="width:100px;height:100px;overflow-x:hidden;overflow-y:auto">
+        <div style="width:300px;height:300px"></div>
+      </div>
+    </div>
+  </div>`);
+  const result = await page.evaluate(() => {
+    const inner = document.getElementById("inner");
+    const outer = document.getElementById("outer");
+    const rect = inner.getBoundingClientRect();
+    const x = rect.left + 50, y = rect.top + 50;
+    inner.dispatchEvent(new PointerEvent("pointerdown", {
+      bubbles: true, cancelable: true, isPrimary: true, pointerId: 153,
+      pointerType: "mouse", button: 0, buttons: 1, clientX: x, clientY: y
+    }));
+    window.dispatchEvent(new PointerEvent("pointermove", {
+      bubbles: true, cancelable: true, isPrimary: true, pointerId: 153,
+      pointerType: "mouse", buttons: 1, clientX: x - 60, clientY: y
+    }));
+    const during = { inner: inner.scrollLeft, outer: outer.scrollLeft };
+    window.dispatchEvent(new PointerEvent("pointerup", {
+      bubbles: true, isPrimary: true, pointerId: 153, pointerType: "mouse",
+      button: 0, buttons: 0, clientX: x - 60, clientY: y
+    }));
+    return during;
+  });
+  expect(result).toEqual({ inner: 0, outer: 60 });
+});
+
 test("pointer scrolling passes one gesture through three nested boxes", async ({ page }) => {
   await setup(page, `<div id="outer" data-ae-scrollbox="pointer"
     data-ae-scrollbox-momentum="false" style="width:100px;height:100px;overflow:auto">

@@ -26,6 +26,7 @@ All notable changes to aellux.js will be documented in this file.
 
 ### Changed
 
+- PDS now ignores axes whose computed overflow is not scrollable, even when their content exceeds the viewport, and hands nested gestures to an eligible ancestor.
 - Vertical-only PDS now starts early after more than 10 px of dominant vertical movement without a separate 6 px horizontal drift limit.
 - Wheel snap navigation now uses the active point index and skips nearest-point selection when its scrolling ends.
 - Elastic and snap wrappers now warn on non-inline display and normalize block, flex, and grid to inline counterparts, restoring the original inline display on unmount.

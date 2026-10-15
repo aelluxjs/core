@@ -327,7 +327,9 @@
 
   function snapAxis(state) {
     const metrics = nativeMetrics(state.element);
-    return metrics.maxX > 1 ? "x" : metrics.maxY > 1 ? "y" : "x";
+    const axes = wheelAxes(state, metrics);
+    return axes.x ? "x" : axes.y ? "y" :
+      metrics.maxX > 1 ? "x" : metrics.maxY > 1 ? "y" : "x";
   }
 
   function snapCenterOffset(state, item, axis) {
@@ -342,7 +344,7 @@
   function edgeSnapIndex(state, items) {
     const element = state.element;
     const metrics = nativeMetrics(element);
-    const horizontal = metrics.maxX > 1 || metrics.maxY <= 1;
+    const horizontal = snapAxis(state) === "x";
     const maximum = horizontal ? metrics.maxX : metrics.maxY;
     const position = horizontal ? element.scrollLeft : element.scrollTop;
     const startDistance = position;
@@ -641,10 +643,8 @@
       if (member && member.pointerListening && !member.disposed) chain.push(member);
       node = node.parentElement && node.parentElement.closest(`[${attribute}]`);
     }
-    if (!chain.some(member => {
-      const metrics = nativeMetrics(member.element);
-      return metrics.maxX > 0 || metrics.maxY > 0;
-    })) return;
+    if (!chain.some(member => pointerAxisMaximum(member, "x") > 0 ||
+      pointerAxisMaximum(member, "y") > 0)) return;
     const rect = element.getBoundingClientRect();
     if (event.clientX >= rect.left + element.clientWidth ||
       event.clientY >= rect.top + element.clientHeight) return;
@@ -844,7 +844,8 @@
 
   function pointerAxisMaximum(state, axis) {
     const metrics = state.metrics || nativeMetrics(state.element);
-    return axis === "x" ? metrics.maxX : metrics.maxY;
+    const axes = wheelAxes(state, metrics);
+    return axes[axis] ? (axis === "x" ? metrics.maxX : metrics.maxY) : 0;
   }
 
   function activatePointerScroll(state, pointerScroll, axis) {

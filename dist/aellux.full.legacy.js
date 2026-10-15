@@ -25799,7 +25799,8 @@
         }
         function snapAxis(state) {
           var metrics = nativeMetrics(state.element);
-          return metrics.maxX > 1 ? "x" : metrics.maxY > 1 ? "y" : "x";
+          var axes = wheelAxes(state, metrics);
+          return axes.x ? "x" : axes.y ? "y" : metrics.maxX > 1 ? "x" : metrics.maxY > 1 ? "y" : "x";
         }
         function snapCenterOffset(state, item, axis) {
           var box = state.element.getBoundingClientRect();
@@ -25809,7 +25810,7 @@
         function edgeSnapIndex(state, items) {
           var element = state.element;
           var metrics = nativeMetrics(element);
-          var horizontal = metrics.maxX > 1 || metrics.maxY <= 1;
+          var horizontal = snapAxis(state) === "x";
           var maximum = horizontal ? metrics.maxX : metrics.maxY;
           var position = horizontal ? element.scrollLeft : element.scrollTop;
           var startDistance = position;
@@ -26103,8 +26104,7 @@
             node = node.parentElement && node.parentElement.closest("[".concat(attribute, "]"));
           }
           if (!chain.some(function(member2) {
-            var metrics = nativeMetrics(member2.element);
-            return metrics.maxX > 0 || metrics.maxY > 0;
+            return pointerAxisMaximum(member2, "x") > 0 || pointerAxisMaximum(member2, "y") > 0;
           })) return;
           var rect = element.getBoundingClientRect();
           if (event.clientX >= rect.left + element.clientWidth || event.clientY >= rect.top + element.clientHeight) return;
@@ -26364,7 +26364,8 @@
         }
         function pointerAxisMaximum(state, axis) {
           var metrics = state.metrics || nativeMetrics(state.element);
-          return axis === "x" ? metrics.maxX : metrics.maxY;
+          var axes = wheelAxes(state, metrics);
+          return axes[axis] ? axis === "x" ? metrics.maxX : metrics.maxY : 0;
         }
         function activatePointerScroll(state, pointerScroll, axis) {
           pointerScroll.axis = axis;
