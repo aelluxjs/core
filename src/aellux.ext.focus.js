@@ -13,9 +13,9 @@
  * to the next available control when Enter is pressed.
  *
  * Outputs and owned state: keeps up to 100 in-memory focus entries and exposes
- * `restoreLastFocus()`. Each new focus target emits `AelluxJsPushState`; when
- * state-navigation is active it records the `ae-focus` snapshot state. Snapshot
- * restoration returns to that target if it is still connected and visible.
+ * `restoreLastFocus()`. A new focus target with an ID emits `AelluxJsPushState`;
+ * when state-navigation is active it records that ID as `ae-focus`. Snapshot
+ * restoration returns to the matching target if it is connected and visible.
  *
  * Lifecycle: removes listeners and mounted behavior, then clears focus history
  * on destruction. Focus history does not survive a page reload.
@@ -45,7 +45,7 @@
   const textEntrySelector = "input:not([type]), input[type=text], input[type=search], input[type=email], input[type=url], input[type=tel], input[type=password], input[type=number], textarea, [contenteditable]:not([contenteditable=false])";
   const focusableSelector = "a[href], area[href], button, input, select, textarea, [tabindex], [contenteditable]:not([contenteditable=false])";
 
-  let sequence = 0, current = null, restoring = false;
+  let current = null, restoring = false;
 
   function init() {
     AelluxJs.mountManager.add({
@@ -125,13 +125,13 @@
 
   function remember(element, push) {
     if (!isValid(element) || (current && current.element === element)) return;
-    const entry = { token: String(++sequence), element };
+    const entry = { element };
     entries.push(entry);
     if (entries.length > 100) entries.shift();
     current = entry;
-    if (!push) return;
+    if (!push || !element.id || !element.id.trim()) return;
     AelluxJs.dispatch("PushState", {
-      detail: { key: snapshotKey, value: entry.token }
+      detail: { key: snapshotKey, value: element.id }
     });
   }
 
@@ -180,11 +180,15 @@
   function onSnapshotRestore(event) {
     const snapshot = event.detail && event.detail.snapshot;
     if (!snapshot || !Object.prototype.hasOwnProperty.call(snapshot, snapshotKey)) return;
-    for (let i = entries.length - 1; i >= 0; i--) {
-      if (entries[i].token === snapshot[snapshotKey]) {
-        if (!restore(entries[i])) restoreLastFocus();
-        return;
+    const target = document.getElementById(snapshot[snapshotKey]);
+    if (target) {
+      for (let i = entries.length - 1; i >= 0; i--) {
+        if (entries[i].element === target) {
+          if (!restore(entries[i])) restoreLastFocus();
+          return;
+        }
       }
+      if (restore({ element: target })) return;
     }
     restoreLastFocus();
   }

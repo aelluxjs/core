@@ -123,7 +123,7 @@ test("real mouse drag scrolls while the pointer leaves the box", async ({ page }
   })).toEqual([73, 73]);
 });
 
-test("all mouse buttons are canceled after a pointer drag has moved", async ({ page }) => {
+test("only the pointer drag button has mouse events canceled", async ({ page }) => {
   await setup(page, box("box"));
   const result = await page.evaluate(() => {
     const element = document.getElementById("box");
@@ -163,8 +163,91 @@ test("all mouse buttons are canceled after a pointer drag has moved", async ({ p
     return { before: before.defaultPrevented, whileDragging,
       repeated: repeated.defaultPrevented, after: after.defaultPrevented };
   });
-  expect(result).toEqual({ before: false, whileDragging: [true, true, true],
+  expect(result).toEqual({ before: false, whileDragging: [true, false, false],
     repeated: true, after: false });
+});
+
+test("mousemove is canceled only during pointer scrolling, including over a draggable child", async ({ page }) => {
+  await setup(page, `<div id="box" data-ae-scrollbox="pointer" data-ae-scrollbox-momentum="false"
+    style="width:100px;height:100px;overflow:auto">
+    <div style="width:300px;height:300px"><div id="draggable" draggable="true">drag</div></div>
+  </div>`);
+  const result = await page.evaluate(() => {
+    const element = document.getElementById("box");
+    const draggable = document.getElementById("draggable");
+    const rect = element.getBoundingClientRect();
+    const x = rect.left + 70, y = rect.top + 70;
+    const mouseMove = (buttons = 1) => {
+      const event = new MouseEvent("mousemove", {
+        bubbles: true, cancelable: true, buttons, clientX: x, clientY: y
+      });
+      draggable.dispatchEvent(event);
+      return event.defaultPrevented;
+    };
+    const before = mouseMove();
+    element.dispatchEvent(new PointerEvent("pointerdown", {
+      bubbles: true, isPrimary: true, pointerId: 94, pointerType: "mouse",
+      button: 0, buttons: 1, clientX: x, clientY: y
+    }));
+    const pending = mouseMove();
+    window.dispatchEvent(new PointerEvent("pointermove", {
+      bubbles: true, cancelable: true, isPrimary: true, pointerId: 94,
+      pointerType: "mouse", buttons: 1, clientX: x - 30, clientY: y - 30
+    }));
+    const during = mouseMove();
+    const otherButton = mouseMove(2);
+    window.dispatchEvent(new PointerEvent("pointerup", {
+      bubbles: true, isPrimary: true, pointerId: 94, pointerType: "mouse",
+      button: 0, buttons: 0, clientX: x - 30, clientY: y - 30
+    }));
+    const after = mouseMove(0);
+    return { before, pending, during, otherButton, after };
+  });
+  expect(result).toEqual({ before: false, pending: false, during: true,
+    otherButton: false, after: false });
+});
+
+test("mouse release and click are canceled only for the drag button", async ({ page }) => {
+  await setup(page, box("box"));
+  const result = await page.evaluate(async () => {
+    const element = document.getElementById("box");
+    const rect = element.getBoundingClientRect();
+    const x = rect.left + 50, y = rect.top + 50;
+    const mouse = (type, button, buttons = 0) => {
+      const event = new MouseEvent(type, {
+        bubbles: true, cancelable: true, button, buttons
+      });
+      element.dispatchEvent(event);
+      return event.defaultPrevented;
+    };
+    element.dispatchEvent(new PointerEvent("pointerdown", {
+      bubbles: true, isPrimary: true, pointerId: 95, pointerType: "mouse",
+      button: 0, buttons: 1, clientX: x, clientY: y
+    }));
+    window.dispatchEvent(new PointerEvent("pointermove", {
+      bubbles: true, cancelable: true, isPrimary: true, pointerId: 95,
+      pointerType: "mouse", buttons: 1, clientX: x - 30, clientY: y - 30
+    }));
+    const during = {
+      mouseup: mouse("mouseup", 0), click: mouse("click", 0),
+      dblclick: mouse("dblclick", 0), contextmenu: mouse("contextmenu", 2),
+      rightClick: mouse("click", 2)
+    };
+    window.dispatchEvent(new PointerEvent("pointerup", {
+      bubbles: true, isPrimary: true, pointerId: 95, pointerType: "mouse",
+      button: 0, buttons: 0, clientX: x - 30, clientY: y - 30
+    }));
+    const release = { mouseup: mouse("mouseup", 0), click: mouse("click", 0),
+      rightClick: mouse("click", 2) };
+    await new Promise(resolve => setTimeout(resolve, 0));
+    const later = mouse("click", 0);
+    return { during, release, later };
+  });
+  expect(result).toEqual({
+    during: { mouseup: true, click: true, dblclick: true,
+      contextmenu: false, rightClick: false },
+    release: { mouseup: true, click: true, rightClick: false }, later: false
+  });
 });
 
 for (const elastic of [false, true]) {

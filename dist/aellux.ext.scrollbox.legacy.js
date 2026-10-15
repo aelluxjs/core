@@ -69,6 +69,9 @@
     var ELASTIC_RETURN_LERP = 0.15;
     var ELASTIC_RETURN_EPSILON = 0.01;
     var ELASTIC_WHEEL_IDLE_MS = 80;
+    var mouseDragEvents = ["mousedown", "mousemove", "mouseup", "click", "dblclick", "auxclick", "contextmenu", "mouseover", "mouseout", "mouseenter", "mouseleave"];
+    var mouseHoldEvents = /* @__PURE__ */ new Set(["mousemove", "mouseover", "mouseout", "mouseenter", "mouseleave"]);
+    var mouseReleaseEvents = /* @__PURE__ */ new Set(["mouseup", "click", "dblclick", "auxclick", "contextmenu"]);
     var properties = ["--ae-scroll-y-progress", "--ae-scroll-x-progress"];
     var scrollboxes = /* @__PURE__ */ new Map();
     AelluxJs.extAttach(extensionName, {
@@ -141,6 +144,8 @@
         pointerListening: false,
         touchListening: false,
         drag: null,
+        mouseReleaseButton: null,
+        mouseReleaseTimeout: null,
         momentum: null,
         elastic: elastic,
         resizeObserver: null,
@@ -159,11 +164,13 @@
         return startDrag(state, event);
       };
       state.onMouseDown = function(event) {
-        if (state.drag && state.drag.moved && event.cancelable) event.preventDefault();
         if (event.button === 0 && event.detail > 1) endDrag(state);
       };
       state.onPointerMove = function(event) {
         return moveDrag(state, event);
+      };
+      state.onMouseEvent = function(event) {
+        return cancelDragMouseEvent(state, event);
       };
       state.onPointerEnd = function(event) {
         return endDrag(state, event);
@@ -196,6 +203,7 @@
       if (!state) return;
       state.disposed = true;
       endDrag(state);
+      stopMouseDragEvents(state);
       cancelMomentum(state);
       resetElastic(state);
       element.removeEventListener("scroll", state.onScroll);
@@ -362,8 +370,12 @@
         refresh(state);
         metrics = state.metrics;
       }
+      if (state.mouseReleaseTimeout !== null) root.clearTimeout(state.mouseReleaseTimeout);
+      state.mouseReleaseTimeout = null;
+      state.mouseReleaseButton = null;
       state.drag = {
         pointerId: event.pointerId,
+        button: event.button,
         startX: event.clientX,
         startY: event.clientY,
         scrollLeft: element.scrollLeft,
@@ -385,6 +397,20 @@
         passive: false,
         capture: true
       });
+      var _iterator2 = _createForOfIteratorHelper(mouseDragEvents), _step2;
+      try {
+        for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
+          var name = _step2.value;
+          root.addEventListener(name, state.onMouseEvent, {
+            passive: false,
+            capture: true
+          });
+        }
+      } catch (err) {
+        _iterator2.e(err);
+      } finally {
+        _iterator2.f();
+      }
       root.addEventListener("pointerup", state.onPointerEnd, true);
       root.addEventListener("pointercancel", state.onPointerEnd, true);
       root.addEventListener("blur", state.onBlur);
@@ -434,6 +460,15 @@
       root.removeEventListener("pointerup", state.onPointerEnd, true);
       root.removeEventListener("pointercancel", state.onPointerEnd, true);
       root.removeEventListener("blur", state.onBlur);
+      if (drag.moved && !state.disposed) {
+        state.mouseReleaseButton = drag.button;
+        if (state.mouseReleaseTimeout !== null) root.clearTimeout(state.mouseReleaseTimeout);
+        state.mouseReleaseTimeout = root.setTimeout(function() {
+          return stopMouseDragEvents(state);
+        }, 0);
+      } else {
+        stopMouseDragEvents(state);
+      }
       if (drag.userSelectApplied) {
         if (drag.userSelect) state.element.style.setProperty("user-select", drag.userSelect, drag.userSelectPriority);
         else state.element.style.removeProperty("user-select");
@@ -442,6 +477,34 @@
       releaseElastic(state);
       if (event && event.type === "pointerup" && drag.moved && state.momentumEnabled && !hadElastic && !state.disposed && now() - drag.momentumStartTime < MOMENTUM_LIMIT_TIME_MS) {
         startMomentum(state, drag);
+      }
+    }
+    function cancelDragMouseEvent(state, event) {
+      var active = state.drag && state.drag.moved;
+      if (!active && !mouseReleaseEvents.has(event.type)) return;
+      var button = active ? state.drag.button : state.mouseReleaseButton;
+      if (button === null || !event.cancelable) return;
+      if (mouseHoldEvents.has(event.type)) {
+        if ((event.buttons & 1 << button) === 0) return;
+      } else if (event.button !== button) {
+        return;
+      }
+      event.preventDefault();
+    }
+    function stopMouseDragEvents(state) {
+      if (state.mouseReleaseTimeout !== null) root.clearTimeout(state.mouseReleaseTimeout);
+      state.mouseReleaseTimeout = null;
+      state.mouseReleaseButton = null;
+      var _iterator3 = _createForOfIteratorHelper(mouseDragEvents), _step3;
+      try {
+        for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
+          var name = _step3.value;
+          root.removeEventListener(name, state.onMouseEvent, true);
+        }
+      } catch (err) {
+        _iterator3.e(err);
+      } finally {
+        _iterator3.f();
       }
     }
     function startMomentum(state, drag) {
@@ -544,19 +607,19 @@
       var start = state.elastic.touch;
       if (!start) return;
       var touch = null;
-      var _iterator2 = _createForOfIteratorHelper(event.touches), _step2;
+      var _iterator4 = _createForOfIteratorHelper(event.touches), _step4;
       try {
-        for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
-          var item = _step2.value;
+        for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
+          var item = _step4.value;
           if (item.identifier === start.identifier) {
             touch = item;
             break;
           }
         }
       } catch (err) {
-        _iterator2.e(err);
+        _iterator4.e(err);
       } finally {
-        _iterator2.f();
+        _iterator4.f();
       }
       if (!touch) return;
       var desiredX = start.scrollLeft + start.x - touch.clientX;
@@ -569,16 +632,16 @@
     function endTouch(state, event) {
       var touch = state.elastic.touch;
       if (!touch) return;
-      var _iterator3 = _createForOfIteratorHelper(event.touches), _step3;
+      var _iterator5 = _createForOfIteratorHelper(event.touches), _step5;
       try {
-        for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
-          var item = _step3.value;
+        for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
+          var item = _step5.value;
           if (item.identifier === touch.identifier) return;
         }
       } catch (err) {
-        _iterator3.e(err);
+        _iterator5.e(err);
       } finally {
-        _iterator3.f();
+        _iterator5.f();
       }
       state.elastic.touch = null;
       releaseElastic(state);
@@ -730,16 +793,16 @@
           return scheduleResize(state);
         });
         state.resizeObserver.observe(state.element);
-        var _iterator4 = _createForOfIteratorHelper(state.element.children), _step4;
+        var _iterator6 = _createForOfIteratorHelper(state.element.children), _step6;
         try {
-          for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
-            var child = _step4.value;
+          for (_iterator6.s(); !(_step6 = _iterator6.n()).done; ) {
+            var child = _step6.value;
             state.resizeObserver.observe(child);
           }
         } catch (err) {
-          _iterator4.e(err);
+          _iterator6.e(err);
         } finally {
-          _iterator4.f();
+          _iterator6.f();
         }
       }
       if (root.MutationObserver) {
@@ -747,16 +810,16 @@
           if (state.resizeObserver) {
             state.resizeObserver.disconnect();
             state.resizeObserver.observe(state.element);
-            var _iterator5 = _createForOfIteratorHelper(state.element.children), _step5;
+            var _iterator7 = _createForOfIteratorHelper(state.element.children), _step7;
             try {
-              for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
-                var _child = _step5.value;
+              for (_iterator7.s(); !(_step7 = _iterator7.n()).done; ) {
+                var _child = _step7.value;
                 state.resizeObserver.observe(_child);
               }
             } catch (err) {
-              _iterator5.e(err);
+              _iterator7.e(err);
             } finally {
-              _iterator5.f();
+              _iterator7.f();
             }
           }
           if (records.some(function(record) {

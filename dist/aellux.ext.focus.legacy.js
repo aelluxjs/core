@@ -63,7 +63,7 @@
     var nextElements = /* @__PURE__ */ new WeakSet();
     var textEntrySelector = "input:not([type]), input[type=text], input[type=search], input[type=email], input[type=url], input[type=tel], input[type=password], input[type=number], textarea, [contenteditable]:not([contenteditable=false])";
     var focusableSelector = "a[href], area[href], button, input, select, textarea, [tabindex], [contenteditable]:not([contenteditable=false])";
-    var sequence = 0, current = null, restoring = false;
+    var current = null, restoring = false;
     function init() {
       AelluxJs.mountManager.add({
         extensionName: extensionName,
@@ -145,17 +145,16 @@
     function remember(element, push) {
       if (!isValid(element) || current && current.element === element) return;
       var entry = {
-        token: String(++sequence),
         element: element
       };
       entries.push(entry);
       if (entries.length > 100) entries.shift();
       current = entry;
-      if (!push) return;
+      if (!push || !element.id || !element.id.trim()) return;
       AelluxJs.dispatch("PushState", {
         detail: {
           key: snapshotKey,
-          value: entry.token
+          value: element.id
         }
       });
     }
@@ -200,11 +199,17 @@
     function onSnapshotRestore(event) {
       var snapshot = event.detail && event.detail.snapshot;
       if (!snapshot || !Object.prototype.hasOwnProperty.call(snapshot, snapshotKey)) return;
-      for (var i = entries.length - 1; i >= 0; i--) {
-        if (entries[i].token === snapshot[snapshotKey]) {
-          if (!restore(entries[i])) restoreLastFocus();
-          return;
+      var target = document.getElementById(snapshot[snapshotKey]);
+      if (target) {
+        for (var i = entries.length - 1; i >= 0; i--) {
+          if (entries[i].element === target) {
+            if (!restore(entries[i])) restoreLastFocus();
+            return;
+          }
         }
+        if (restore({
+          element: target
+        })) return;
       }
       restoreLastFocus();
     }

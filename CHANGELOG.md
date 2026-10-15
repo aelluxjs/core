@@ -20,7 +20,9 @@ All notable changes to aellux.js will be documented in this file.
 
 ### Changed
 
-- Desktop pointer Scrollboxes now cancel every cancelable `mousedown` during an active drag, regardless of mouse button or click count.
+- Desktop pointer Scrollboxes now cancel mouse events from the button used for an active scroll drag, including the matching release and click, to suppress native edge autoscroll from draggable descendants.
+- Focus now records `ae-focus={elementid}` only for focused elements with an ID; elements without one remain in local focus history.
+- Desktop pointer Scrollboxes now cancel `mousedown` from the button used for an active drag; other mouse buttons remain available.
 - Elastic pressure now eases exponentially toward its limit and returns with a 15% per-frame interpolation.
 - Raised the Scrollbox and full-bundle size budgets for configurable elastic limits and frame-based snapback.
 - Elastic Scrollbox scale now grows its scrollable wrapper extent by the elastic displacement in pixels.

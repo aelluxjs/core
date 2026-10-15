@@ -25,6 +25,18 @@
   const ELASTIC_RETURN_LERP = 0.15;
   const ELASTIC_RETURN_EPSILON = 0.01;
   const ELASTIC_WHEEL_IDLE_MS = 80;
+
+  const mouseDragEvents = [
+    "mousedown", "mousemove", "mouseup", "click", "dblclick", "auxclick",
+    "contextmenu", "mouseover", "mouseout", "mouseenter", "mouseleave"
+  ];
+  const mouseHoldEvents = new Set([
+    "mousemove", "mouseover", "mouseout", "mouseenter", "mouseleave"
+  ]);
+  const mouseReleaseEvents = new Set([
+    "mouseup", "click", "dblclick", "auxclick", "contextmenu"
+  ]);
+
   const properties = ["--ae-scroll-y-progress", "--ae-scroll-x-progress"];
   const scrollboxes = new Map();
 
@@ -61,17 +73,18 @@
       element, previous, metrics: null, mode: null, desktop: false,
       wheelEnabled: true, momentumEnabled: true, elasticEnabled: false,
       wheelListening: false, pointerListening: false, touchListening: false,
-      drag: null, momentum: null, elastic, resizeObserver: null, mutationObserver: null,
+      drag: null, mouseReleaseButton: null, mouseReleaseTimeout: null,
+      momentum: null, elastic, resizeObserver: null, mutationObserver: null,
       lastResizeTime: -RESIZE_INTERVAL_MS, resizeTimeout: null, disposed: false
     };
     state.onScroll = () => publish(state);
     state.onWheel = event => handleWheel(state, event);
     state.onPointerDown = event => startDrag(state, event);
     state.onMouseDown = event => {
-      if (state.drag && state.drag.moved && event.cancelable) event.preventDefault();
       if (event.button === 0 && event.detail > 1) endDrag(state);
     };
     state.onPointerMove = event => moveDrag(state, event);
+    state.onMouseEvent = event => cancelDragMouseEvent(state, event);
     state.onPointerEnd = event => endDrag(state, event);
     state.onBlur = () => endDrag(state);
     state.onTouchStart = event => startTouch(state, event);
@@ -93,6 +106,7 @@
     if (!state) return;
     state.disposed = true;
     endDrag(state);
+    stopMouseDragEvents(state);
     cancelMomentum(state);
     resetElastic(state);
     element.removeEventListener("scroll", state.onScroll);
@@ -256,8 +270,12 @@
       refresh(state);
       metrics = state.metrics;
     }
+    if (state.mouseReleaseTimeout !== null) root.clearTimeout(state.mouseReleaseTimeout);
+    state.mouseReleaseTimeout = null;
+    state.mouseReleaseButton = null;
     state.drag = {
-      pointerId: event.pointerId, startX: event.clientX, startY: event.clientY,
+      pointerId: event.pointerId, button: event.button,
+      startX: event.clientX, startY: event.clientY,
       scrollLeft: element.scrollLeft, scrollTop: element.scrollTop, moved: false,
       selectionPending: metrics.maxX <= 1 && metrics.maxY > 1,
       userSelectApplied: false,
@@ -271,6 +289,9 @@
       state.drag.userSelectApplied = true;
     }
     root.addEventListener("pointermove", state.onPointerMove, { passive: false, capture: true });
+    for (const name of mouseDragEvents) {
+      root.addEventListener(name, state.onMouseEvent, { passive: false, capture: true });
+    }
     root.addEventListener("pointerup", state.onPointerEnd, true);
     root.addEventListener("pointercancel", state.onPointerEnd, true);
     root.addEventListener("blur", state.onBlur);
@@ -322,6 +343,15 @@
     root.removeEventListener("pointerup", state.onPointerEnd, true);
     root.removeEventListener("pointercancel", state.onPointerEnd, true);
     root.removeEventListener("blur", state.onBlur);
+
+    if (drag.moved && !state.disposed) {
+      state.mouseReleaseButton = drag.button;
+      if (state.mouseReleaseTimeout !== null) root.clearTimeout(state.mouseReleaseTimeout);
+      state.mouseReleaseTimeout = root.setTimeout(() => stopMouseDragEvents(state), 0);
+    } else {
+      stopMouseDragEvents(state);
+    }
+
     if (drag.userSelectApplied) {
       if (drag.userSelect) state.element.style.setProperty(
         "user-select", drag.userSelect, drag.userSelectPriority);
@@ -333,6 +363,26 @@
       !hadElastic && !state.disposed && now() - drag.momentumStartTime < MOMENTUM_LIMIT_TIME_MS) {
       startMomentum(state, drag);
     }
+  }
+
+  function cancelDragMouseEvent(state, event) {
+    const active = state.drag && state.drag.moved;
+    if (!active && !mouseReleaseEvents.has(event.type)) return;
+    const button = active ? state.drag.button : state.mouseReleaseButton;
+    if (button === null || !event.cancelable) return;
+    if (mouseHoldEvents.has(event.type)) {
+      if ((event.buttons & (1 << button)) === 0) return;
+    } else if (event.button !== button) {
+      return;
+    }
+    event.preventDefault();
+  }
+
+  function stopMouseDragEvents(state) {
+    if (state.mouseReleaseTimeout !== null) root.clearTimeout(state.mouseReleaseTimeout);
+    state.mouseReleaseTimeout = null;
+    state.mouseReleaseButton = null;
+    for (const name of mouseDragEvents) root.removeEventListener(name, state.onMouseEvent, true);
   }
 
   function startMomentum(state, drag) {
