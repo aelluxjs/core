@@ -11,6 +11,8 @@ All notable changes to aellux.js will be documented in this file.
 - Vertical-only pointer Scrollboxes now leave horizontal text-selection gestures to the browser.
 - Pointer momentum now advances by 10% of the remaining distance per frame and stops at three-decimal precision.
 - Scrollbox now supports opt-in elastic edges for native wheel, native touch, and desktop pointer gestures while preserving mounted padding.
+- Elastic Scrollboxes keep the scroll position at the new bottom or right limit while those edges are stretched.
+- Desktop pointer dragging now cancels wheel events until the drag ends.
 - Desktop pointer dragging in Scrollbox now has optional momentum, enabled by default and controlled by `data-ae-scrollbox-momentum`.
 - Shared dependencies now accept positional SRI and crossorigin arguments.
 

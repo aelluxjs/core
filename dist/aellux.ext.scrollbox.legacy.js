@@ -512,10 +512,12 @@
       return active;
     }
     function scrollWithinElasticBounds(state, desiredX, desiredY) {
-      var metrics = state.metrics || nativeMetrics(state.element);
-      state.element.scrollTo({
-        left: Math.max(0, Math.min(metrics.maxX, desiredX)) + state.elastic.amounts[1],
-        top: Math.max(0, Math.min(metrics.maxY, desiredY)) + state.elastic.amounts[2],
+      var element = state.element;
+      var metrics = state.metrics || nativeMetrics(element);
+      var amounts = state.elastic.amounts;
+      element.scrollTo({
+        left: amounts[1] > 0 ? Math.max(0, element.scrollWidth - element.clientWidth) : Math.max(0, Math.min(metrics.maxX, desiredX)),
+        top: amounts[2] > 0 ? Math.max(0, element.scrollHeight - element.clientHeight) : Math.max(0, Math.min(metrics.maxY, desiredY)),
         behavior: "instant"
       });
     }
@@ -649,6 +651,11 @@
       return distance > 0 ? Math.min(1, Math.max(0, position / distance)) : 0;
     }
     function handleWheel(state, event) {
+      if (state.desktop && state.mode === "pointer" && state.drag && state.drag.moved) {
+        if (event.cancelable) event.preventDefault();
+        event.stopPropagation();
+        return;
+      }
       cancelMomentum(state);
       if (event.defaultPrevented || event.ctrlKey) return;
       if (event.target.closest("[".concat(attribute, "]")) !== state.element) return;

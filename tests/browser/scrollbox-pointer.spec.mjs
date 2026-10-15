@@ -76,6 +76,38 @@ test("pointer drag keeps native scroll events and progress", async ({ page }) =>
   expect(await page.evaluate(() => window.scrollEvents.every(Boolean))).toBe(true);
 });
 
+test("desktop pointer drag cancels wheel until pointer release", async ({ page }) => {
+  await setup(page, box("box"));
+  const result = await page.evaluate(() => {
+    const element = document.getElementById("box");
+    const rect = element.getBoundingClientRect();
+    const x = rect.left + 70, y = rect.top + 70;
+    let bubbled = 0;
+    document.body.addEventListener("wheel", () => { bubbled++; });
+    element.dispatchEvent(new PointerEvent("pointerdown", {
+      bubbles: true, isPrimary: true, pointerId: 29, pointerType: "mouse",
+      button: 0, buttons: 1, clientX: x, clientY: y
+    }));
+    window.dispatchEvent(new PointerEvent("pointermove", {
+      bubbles: true, cancelable: true, isPrimary: true, pointerId: 29,
+      pointerType: "mouse", buttons: 1, clientX: x - 30, clientY: y - 30
+    }));
+    const during = new WheelEvent("wheel", { deltaY: 40, bubbles: true, cancelable: true });
+    element.dispatchEvent(during);
+    const scrollTop = element.scrollTop;
+    window.dispatchEvent(new PointerEvent("pointerup", {
+      bubbles: true, isPrimary: true, pointerId: 29, pointerType: "mouse",
+      button: 0, buttons: 0, clientX: x - 30, clientY: y - 30
+    }));
+    const after = new WheelEvent("wheel", { deltaY: 40, bubbles: true, cancelable: true });
+    element.dispatchEvent(after);
+    return { preventedDuring: during.defaultPrevented, preventedAfter: after.defaultPrevented,
+      bubbled, scrollTop };
+  });
+  expect(result).toEqual({ preventedDuring: true, preventedAfter: false,
+    bubbled: 1, scrollTop: 30 });
+});
+
 test("real mouse drag scrolls while the pointer leaves the box", async ({ page }) => {
   await setup(page, box("box"));
   const rect = await page.locator("#box").boundingBox();
@@ -456,6 +488,8 @@ test("elastic pointer drag exposes bottom and right padding past their scroll li
       paddingRight: Number.parseFloat(element.style.getPropertyValue("padding-right")),
       paddingBottom: Number.parseFloat(element.style.getPropertyValue("padding-bottom")),
       scrollLeft: element.scrollLeft, scrollTop: element.scrollTop, maxX, maxY,
+      elasticMaxX: element.scrollWidth - element.clientWidth,
+      elasticMaxY: element.scrollHeight - element.clientHeight,
       gapX: rect.right - child.getBoundingClientRect().right - beforeGapX,
       gapY: rect.bottom - child.getBoundingClientRect().bottom - beforeGapY
     };
@@ -464,8 +498,37 @@ test("elastic pointer drag exposes bottom and right padding past their scroll li
   expect(result.paddingBottom).toBe(31);
   expect(result.scrollLeft).toBeGreaterThan(result.maxX);
   expect(result.scrollTop).toBeGreaterThan(result.maxY);
+  expect(result.scrollLeft).toBe(result.elasticMaxX);
+  expect(result.scrollTop).toBe(result.elasticMaxY);
   expect(result.gapX).toBeGreaterThan(15);
   expect(result.gapY).toBeGreaterThan(15);
+});
+
+test("elastic native wheel stays at the new bottom and right limits", async ({ page }) => {
+  await setup(page, `<div id="box" data-ae-scrollbox="native" data-ae-scrollbox-elastic
+    style="width:100px;height:100px;overflow:auto;padding:8px">
+    <div style="width:300px;height:300px"></div></div>`);
+  const result = await page.evaluate(() => {
+    const element = document.getElementById("box");
+    element.scrollTo({ left: element.scrollWidth, top: element.scrollHeight, behavior: "instant" });
+    const event = new WheelEvent("wheel", {
+      deltaX: 60, deltaY: 60, bubbles: true, cancelable: true
+    });
+    element.dispatchEvent(event);
+    return {
+      prevented: event.defaultPrevented,
+      paddingRight: Number.parseFloat(element.style.getPropertyValue("padding-right")),
+      paddingBottom: Number.parseFloat(element.style.getPropertyValue("padding-bottom")),
+      scrollLeft: element.scrollLeft, scrollTop: element.scrollTop,
+      maxX: element.scrollWidth - element.clientWidth,
+      maxY: element.scrollHeight - element.clientHeight
+    };
+  });
+  expect(result.prevented).toBe(true);
+  expect(result.paddingRight).toBe(28);
+  expect(result.paddingBottom).toBe(28);
+  expect(result.scrollLeft).toBe(result.maxX);
+  expect(result.scrollTop).toBe(result.maxY);
 });
 
 test("elastic false leaves native wheel and padding unchanged", async ({ page }) => {
