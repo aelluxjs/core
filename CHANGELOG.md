@@ -8,7 +8,7 @@ All notable changes to aellux.js will be documented in this file.
 
 - Weak CSS now uses smooth scrolling by default and restores immediate scrolling for all elements when reduced motion is requested.
 - Scrollbox now supports native and desktop pointer-drag modes with horizontal wheel handoff at scroll boundaries.
-- Vertical-only pointer Scrollboxes now leave horizontal text-selection gestures to the browser.
+- Vertical-only pointer Scrollboxes ignore mostly horizontal drag gestures.
 - Pointer momentum now advances by 10% of the remaining distance per frame and stops at three-decimal precision.
 - Scrollbox now supports opt-in elastic edges for native wheel, native touch, and desktop pointer gestures by translating its sole marked content child.
 - Desktop pointer dragging now cancels wheel events until the drag ends.
@@ -17,6 +17,8 @@ All notable changes to aellux.js will be documented in this file.
 
 ### Changed
 
+- Elastic Scrollboxes now add a 1 px `::after` spacer so bottom padding stays visible at the scroll end.
+- Desktop pointer Scrollboxes now cancel every cancelable primary `mousedown` inside the box.
 - Elastic Scrollbox now uses `transform-origin` at the pressed edge and applies scale before translation in its wrapper transform, restoring both inline properties on unmount.
 - Raised the Scrollbox and full-bundle size budgets for the elastic edge option.
 - Removed BetterScroll loading and its development dependency; Scrollbox uses native browser scrolling in both modes.

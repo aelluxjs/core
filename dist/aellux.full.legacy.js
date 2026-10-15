@@ -25327,6 +25327,7 @@
         var wheelAttribute = AelluxJs2.attr("scrollbox-wheel-horizontal");
         var momentumAttribute = AelluxJs2.attr("scrollbox-momentum");
         var elasticAttribute = AelluxJs2.attr("scrollbox-elastic");
+        var elasticClass = AelluxJs2.className("scrollbox-elastic");
         var elasticReleaseClass = AelluxJs2.className("scrollbox-elastic-release");
         var RESIZE_INTERVAL_MS = 100;
         var DRAG_THRESHOLD_PX = 3;
@@ -25399,6 +25400,7 @@
           var state = {
             element: element,
             previous: previous,
+            hadElasticClass: element.classList.contains(elasticClass),
             metrics: null,
             mode: null,
             desktop: false,
@@ -25427,7 +25429,9 @@
             return startDrag(state, event);
           };
           state.onMouseDown = function(event) {
-            if (event.button === 0 && event.detail > 1) endDrag(state);
+            if (event.button !== 0) return;
+            if (event.cancelable) event.preventDefault();
+            if (event.detail > 1) endDrag(state);
           };
           state.onPointerMove = function(event) {
             return moveDrag(state, event);
@@ -25465,6 +25469,7 @@
           endDrag(state);
           cancelMomentum(state);
           resetElastic(state);
+          element.classList.toggle(elasticClass, state.hadElasticClass);
           element.removeEventListener("scroll", state.onScroll);
           if (state.wheelListening) element.removeEventListener("wheel", state.onWheel, true);
           if (state.pointerListening) {
@@ -25525,6 +25530,7 @@
             resetElastic(state);
             state.elasticEnabled = false;
             state.elastic.wrapper = null;
+            element.classList.remove(elasticClass);
             var requested = element.hasAttribute(elasticAttribute) || Array.from(element.children).some(function(item) {
               return item.hasAttribute(elasticAttribute) && item.getAttribute(elasticAttribute) !== "false";
             });
@@ -25561,6 +25567,7 @@
             };
           }
           state.elasticEnabled = true;
+          element.classList.add(elasticClass);
         }
         function readMode(element) {
           var value = (element.getAttribute(attribute) || "").trim().toLowerCase() || "native";

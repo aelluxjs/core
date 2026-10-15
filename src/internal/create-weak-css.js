@@ -27,6 +27,7 @@ export default function createWeakCss() {
 :where([?scrollbox]::-webkit-scrollbar-track) { background: transparent;}
 :where([?scrollbox]::-webkit-scrollbar-thumb) { background: color-mix(in srgb, CanvasText 50%, transparent); border-radius: 10px;}
 :where([?scrollbox]::-webkit-scrollbar-thumb:hover) { background: color-mix(in srgb, CanvasText 90%, transparent);}
+:where([?scrollbox].%scrollbox-elastic)::after { content: ""; display: block; height: 1px; }
 :where([?scrollbox] > [?scrollbox-elastic].%scrollbox-elastic-release) {
   transition-property: transform;
   transition-duration: 800ms;

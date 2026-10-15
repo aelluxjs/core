@@ -145,11 +145,16 @@ for (const elastic of [false, true]) {
     });
 }
 
-test("horizontal pointer movement selects text in a vertical-only box", async ({ page }) => {
+test("pointer mode cancels mousedown and native text selection", async ({ page }) => {
   await setup(page, `<div id="box" data-ae-scrollbox="pointer" data-ae-scrollbox-momentum="false"
     style="width:200px;height:100px;overflow:auto;font:16px monospace">
     <div style="width:180px;height:300px;padding-top:60px;box-sizing:border-box"><span id="text">abcdefghijklmno</span></div>
   </div>`);
+  await page.evaluate(() => {
+    document.addEventListener("mousedown", event => {
+      window.mouseDownPrevented = event.defaultPrevented;
+    });
+  });
   const rect = await page.locator("#text").boundingBox();
   await page.mouse.move(rect.x + 5, rect.y + rect.height / 2);
   await page.mouse.down();
@@ -158,11 +163,13 @@ test("horizontal pointer movement selects text in a vertical-only box", async ({
   const result = await page.evaluate(() => ({
     selection: getSelection().toString(),
     scrollTop: document.getElementById("box").scrollTop,
-    userSelect: document.getElementById("box").style.getPropertyValue("user-select")
+    userSelect: document.getElementById("box").style.getPropertyValue("user-select"),
+    mouseDownPrevented: window.mouseDownPrevented
   }));
-  expect(result.selection.length).toBeGreaterThan(0);
+  expect(result.selection).toBe("");
   expect(result.scrollTop).toBe(0);
   expect(result.userSelect).toBe("");
+  expect(result.mouseDownPrevented).toBe(true);
 });
 
 test("vertical pointer movement still drags a vertical-only box", async ({ page }) => {
@@ -184,6 +191,17 @@ test("vertical pointer movement still drags a vertical-only box", async ({ page 
 test("touch and interactive controls do not start pointer dragging", async ({ page }) => {
   await setup(page, box("box", "pointer", "", "<button id='button'>Click</button>"));
   expect(await drag(page, "box", "touch")).toMatchObject({ x: 0, y: 0 });
+  await page.evaluate(() => {
+    window.buttonClicks = 0;
+    document.getElementById("button").addEventListener("click", () => { window.buttonClicks++; });
+    document.addEventListener("mousedown", event => {
+      if (event.target.id === "button") window.buttonMouseDownPrevented = event.defaultPrevented;
+    });
+  });
+  await page.locator("#button").click();
+  expect(await page.evaluate(() => ({
+    prevented: window.buttonMouseDownPrevented, clicks: window.buttonClicks
+  }))).toEqual({ prevented: true, clicks: 1 });
   const result = await page.evaluate(() => {
     const element = document.getElementById("box");
     const button = document.getElementById("button");
@@ -401,6 +419,58 @@ test("weak CSS makes scrolling smooth and honors reduced motion on every element
   expect(await behaviors()).toEqual(["smooth", "smooth", "smooth"]);
   await page.emulateMedia({ reducedMotion: "reduce" });
   expect(await behaviors()).toEqual(["auto", "auto", "auto"]);
+});
+
+test("elastic child adds a one-pixel after spacer to the scrollbox", async ({ page }) => {
+  await setup(page, `<div id="box" data-ae-scrollbox="native"
+    style="width:100px;height:100px;overflow:auto">
+    <div data-ae-scrollbox-elastic style="height:100px"></div></div>`);
+  const result = await page.evaluate(async () => {
+    const element = document.getElementById("box");
+    const child = element.firstElementChild;
+    const snapshot = () => ({
+      active: element.classList.contains("ae--scrollbox-elastic"),
+      content: getComputedStyle(element, "::after").content,
+      height: getComputedStyle(element, "::after").height,
+      scrollHeight: element.scrollHeight,
+      childCount: element.children.length
+    });
+    const enabled = snapshot();
+    child.setAttribute("data-ae-scrollbox-elastic", "false");
+    await AelluxJs.mountManager.update(element, "scrollbox");
+    const disabled = snapshot();
+    child.removeAttribute("data-ae-scrollbox-elastic");
+    await AelluxJs.mountManager.update(element, "scrollbox");
+    await AelluxJs.unmount(element, "scrollbox");
+    const unmounted = snapshot();
+    return { enabled, disabled, unmounted };
+  });
+  expect(result.enabled).toEqual({ active: true, content: '""', height: "1px",
+    scrollHeight: 101, childCount: 1 });
+  expect(result.disabled.active).toBe(false);
+  expect(result.disabled.scrollHeight).toBe(100);
+  expect(result.unmounted.active).toBe(false);
+  expect(result.unmounted.scrollHeight).toBe(100);
+});
+
+test("elastic after spacer exposes the scrollbox bottom padding at the scroll end", async ({ page }) => {
+  await setup(page, `<div id="box" data-ae-scrollbox="native"
+    style="width:100px;height:100px;overflow:auto;padding-bottom:20px">
+    <div data-ae-scrollbox-elastic style="height:300px"></div></div>`);
+  const result = await page.evaluate(() => {
+    const element = document.getElementById("box");
+    const wrapper = element.firstElementChild;
+    element.scrollTo({ top: element.scrollHeight, behavior: "instant" });
+    return {
+      gap: element.getBoundingClientRect().bottom - wrapper.getBoundingClientRect().bottom,
+      scrollTop: element.scrollTop,
+      maxY: element.scrollHeight - element.clientHeight,
+      afterHeight: getComputedStyle(element, "::after").height
+    };
+  });
+  expect(result.scrollTop).toBe(result.maxY);
+  expect(result.afterHeight).toBe("1px");
+  expect(result.gap).toBeGreaterThanOrEqual(20);
 });
 
 test("elastic pointer drag transforms its marked wrapper and restores it on unmount", async ({ page }) => {

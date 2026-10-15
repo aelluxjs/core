@@ -10,6 +10,7 @@
     const wheelAttribute = AelluxJs.attr("scrollbox-wheel-horizontal");
     const momentumAttribute = AelluxJs.attr("scrollbox-momentum");
     const elasticAttribute = AelluxJs.attr("scrollbox-elastic");
+    const elasticClass = AelluxJs.className("scrollbox-elastic");
     const elasticReleaseClass = AelluxJs.className("scrollbox-elastic-release");
     const RESIZE_INTERVAL_MS = 100;
     const DRAG_THRESHOLD_PX = 3;
@@ -65,6 +66,7 @@
       const state = {
         element,
         previous,
+        hadElasticClass: element.classList.contains(elasticClass),
         metrics: null,
         mode: null,
         desktop: false,
@@ -87,7 +89,9 @@
       state.onWheel = (event) => handleWheel(state, event);
       state.onPointerDown = (event) => startDrag(state, event);
       state.onMouseDown = (event) => {
-        if (event.button === 0 && event.detail > 1) endDrag(state);
+        if (event.button !== 0) return;
+        if (event.cancelable) event.preventDefault();
+        if (event.detail > 1) endDrag(state);
       };
       state.onPointerMove = (event) => moveDrag(state, event);
       state.onPointerEnd = (event) => endDrag(state, event);
@@ -111,6 +115,7 @@
       endDrag(state);
       cancelMomentum(state);
       resetElastic(state);
+      element.classList.toggle(elasticClass, state.hadElasticClass);
       element.removeEventListener("scroll", state.onScroll);
       if (state.wheelListening) element.removeEventListener("wheel", state.onWheel, true);
       if (state.pointerListening) {
@@ -168,6 +173,7 @@
         resetElastic(state);
         state.elasticEnabled = false;
         state.elastic.wrapper = null;
+        element.classList.remove(elasticClass);
         const requested = element.hasAttribute(elasticAttribute) || Array.from(element.children).some((item) => item.hasAttribute(elasticAttribute) && item.getAttribute(elasticAttribute) !== "false");
         if (requested && !state.elastic.invalidReported) {
           AelluxJs.diagnostics.error(
@@ -203,6 +209,7 @@
         };
       }
       state.elasticEnabled = true;
+      element.classList.add(elasticClass);
     }
     function readMode(element) {
       const value = (element.getAttribute(attribute) || "").trim().toLowerCase() || "native";
