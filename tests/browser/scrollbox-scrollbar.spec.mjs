@@ -229,3 +229,29 @@ test("hidden overflow hides only the scrollbar on that axis", async ({ page }) =
   await expect(horizontal).toHaveCSS("display", "none");
   await expect(vertical).toHaveCSS("display", "block");
 });
+
+test("scrollbox batches repeated scroll measurements into one frame", async ({ page }) => {
+  await setup(page, `<div id="box" data-ae-scrollbox data-ae-scrollbar="vertical"
+    style="width:120px;height:120px;overflow-y:auto">
+    <div style="height:600px"></div>
+  </div>`);
+  await expect.poll(() => page.evaluate(() =>
+    document.getElementById("box").style.getPropertyValue("--ae-scroll-y-progress"))).toBe("0");
+  const result = await page.evaluate(async () => {
+    const element = document.getElementById("box");
+    const original = window.getComputedStyle;
+    let reads = 0;
+    window.getComputedStyle = function (target, ...args) {
+      if (target === element) reads++;
+      return original.call(this, target, ...args);
+    };
+    element.scrollTo({ top: 240, behavior: "instant" });
+    for (let index = 0; index < 40; index++)
+      element.dispatchEvent(new Event("scroll"));
+    await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    window.getComputedStyle = original;
+    return { reads, progress: Number(element.style.getPropertyValue("--ae-scroll-y-progress")) };
+  });
+  expect(result.reads).toBeLessThanOrEqual(2);
+  expect(result.progress).toBeCloseTo(0.5, 2);
+});

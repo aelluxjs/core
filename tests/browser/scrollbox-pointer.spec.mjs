@@ -179,17 +179,18 @@ test("snap children publish viewport and focus values through native scrolling",
       <div style="flex:none;width:100px;height:100px"></div>
     </div>
   </div>`);
-  const values = (left = null) => page.evaluate(left => {
+  const values = (left = null) => page.evaluate(async left => {
     const element = document.getElementById("gallery");
     if (left !== null) {
       element.scrollTo({ left, behavior: "instant" });
       element.dispatchEvent(new Event("scroll"));
+      await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
     }
     return Array.from(element.firstElementChild.children,
       item => [Number(item.style.getPropertyValue("--ae-snap-viewport")),
         Number(item.style.getPropertyValue("--ae-snap-focus"))]);
   }, left);
-  expect(await values()).toEqual([[0, 1], [2, 0], [2, 0]]);
+  await expect.poll(values).toEqual([[0, 1], [2, 0], [2, 0]]);
   expect(await values(50)).toEqual([[-1, 0.5], [1, 0.5], [2, 0]]);
   expect(await values(100)).toEqual([[-2, 0], [0, 1], [2, 0]]);
   await page.evaluate(() => AelluxJs.mountManager.unmount(document.body, "scrollbox"));
@@ -1715,13 +1716,19 @@ test("momentum advances ten percent of the remaining distance each frame and ter
     };
   });
   expect(await drag(page, "box")).toMatchObject({ x: 50, y: 0 });
-  const result = await page.evaluate(() => {
+  const result = await page.evaluate(async () => {
     const element = document.getElementById("box");
     const positions = [];
+    let previous = element.scrollLeft;
     try {
-      for (let step = 0; step < 180 && window.pendingMomentumFrames.length; step++) {
+      for (let step = 0; step < 360 && window.pendingMomentumFrames.length; step++) {
         window.pendingMomentumFrames.shift()(performance.now());
-        positions.push([element.scrollLeft, element.scrollTop]);
+        if (previous !== element.scrollLeft) {
+          positions.push([element.scrollLeft, element.scrollTop]);
+          previous = element.scrollLeft;
+        }
+        await Promise.resolve();
+        await Promise.resolve();
       }
       return { positions, pending: window.pendingMomentumFrames.length };
     } finally {
@@ -2187,7 +2194,8 @@ test("elastic pressure eases toward the limit and returns by 15 percent per fram
     }
     window.dispatchEvent(pointer("pointerup", y + 90, 0));
     const beforeFrame = amount();
-    frameCallbacks.shift()(performance.now());
+    for (let step = 0; step < 4 && frameCallbacks.length && amount() === beforeFrame; step++)
+      frameCallbacks.shift()(performance.now());
     const afterFrame = amount();
     return { pressures, beforeFrame, afterFrame, limit: element.clientHeight / 4 };
   });

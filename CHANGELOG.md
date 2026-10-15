@@ -28,6 +28,10 @@ All notable changes to aellux.js will be documented in this file.
 
 ### Changed
 
+- Scrollbox now batches progress, snap variables, and custom scrollbar measurements before applying their CSS updates in one frame; pointer gestures keep synchronous scroll decisions.
+- Adaptive uses the first `ResizeObserver` entry for initial dimensions and defers fallback mount measurement to the layout scheduler.
+- Present waits one layout frame instead of forcing an immediate geometry read when separating measured transition states.
+- Raised raw-size budgets for the full bundles and Scrollbox after layout batching.
 - Custom Scrollbox scrollbars now hide on axes with non-scrollable overflow, including `hidden` and `clip`.
 - Snap now centers only its main scroll axis and uses `nearest` alignment on the other axis.
 - Custom Scrollbox scrollbars remain visible for one second after PDS; active mouse or pointer hover takes precedence when the hide timer ends.

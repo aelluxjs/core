@@ -14,7 +14,7 @@
 
 <meta name="description" content="aellux.js Docs">
   <link rel="canonical" href="https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/adaptive.htm">
-  
+
     <meta property="og:title" content="Adaptive | 0.1.0 | aellux.js Docs" />
     <meta property="og:type" content="website" />
           <meta property="og:url" content="https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/adaptive.htm" />
@@ -26,7 +26,7 @@
         <meta name="twitter:description" content="aellux.js Docs">
 
                   <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Adaptive | 0.1.0 | aellux.js Docs","description":"aellux.js Docs","url":"https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/adaptive.htm"}</script>
-          
+
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -561,7 +561,7 @@ Adaptive                  </li>
     ← <span class="text-truncate overflow-hidden d-inline-block align-middle flex-fill"
       style="max-width:200px">Modern &amp; Legacy Variants</span>
   </a>
-  
+
     <a href="/core/docs/0.1.0/core-extensions/anchor.htm" class="text-decoration-none d-inline-flex flex-row justify-content-end gap-2"
     style="width: 40%;">
     <span class="text-truncate overflow-hidden d-inline-block align-middle flex-fill text-end"
@@ -575,7 +575,7 @@ Adaptive                  </li>
 <p><code>adaptive</code> adds size and shape classes to elements marked with <code>data-ae-adaptive</code>. It is included in the <code>full</code> runtime and automatically requests its stylesheet there. In <code>basic</code> mode, register it with <code>$ae.ext(&quot;adaptive&quot;, { loadStyle: true })</code> before initialization.</p>
 <pre><code class="language-html">&lt;div data-ae-adaptive&gt;Responsive content&lt;/div&gt;
 </code></pre>
-<p>The Extension measures each marked element with <code>ResizeObserver</code>, or uses the window resize event when that API is unavailable. It applies one shape class (<code>ae--shape-vertical</code>, <code>ae--shape-square</code>, or <code>ae--shape-horizontal</code>) according to width divided by height. It also sets <code>aria-orientation</code> to <code>vertical</code> when height exceeds width and to <code>horizontal</code> otherwise, including square elements. It toggles <code>ae--fits-&lt;size&gt;</code> classes when <code>sqrt(width * height)</code> reaches each configured minimum. After an update it dispatches <code>AelluxJsAdaptiveUpdate</code> from the element. Initial <code>ae--*</code> classes are discarded before mounting. Unmounting removes the managed classes and restores the initial <code>aria-orientation</code>; unrelated classes and inline styles are left as they are.</p>
+<p>The Extension measures each marked element with <code>ResizeObserver</code>, or uses the window resize event when that API is unavailable. With <code>ResizeObserver</code>, the first observer entry supplies the initial size; otherwise the initial size is read in the next layout frame. It applies one shape class (<code>ae--shape-vertical</code>, <code>ae--shape-square</code>, or <code>ae--shape-horizontal</code>) according to width divided by height. It also sets <code>aria-orientation</code> to <code>vertical</code> when height exceeds width and to <code>horizontal</code> otherwise, including square elements. It toggles <code>ae--fits-&lt;size&gt;</code> classes when <code>sqrt(width * height)</code> reaches each configured minimum. After an update it dispatches <code>AelluxJsAdaptiveUpdate</code> from the element. Initial <code>ae--*</code> classes are discarded before mounting. Unmounting removes the managed classes and restores the initial <code>aria-orientation</code>; unrelated classes and inline styles are left as they are.</p>
 <h2>Accessibility profile</h2>
 <ul>
 <li><strong>Capabilities:</strong> visual and adaptive; infrastructure.</li>
@@ -607,7 +607,7 @@ Adaptive                  </li>
     ← <span class="text-truncate overflow-hidden d-inline-block align-middle flex-fill"
       style="max-width:200px">Modern &amp; Legacy Variants</span>
   </a>
-  
+
     <a href="/core/docs/0.1.0/core-extensions/anchor.htm" class="text-decoration-none d-inline-flex flex-row justify-content-end gap-2"
     style="width: 40%;">
     <span class="text-truncate overflow-hidden d-inline-block align-middle flex-fill text-end"

@@ -6,7 +6,7 @@
 <div data-ae-adaptive>Responsive content</div>
 ```
 
-The Extension measures each marked element with `ResizeObserver`, or uses the window resize event when that API is unavailable. It applies one shape class (`ae--shape-vertical`, `ae--shape-square`, or `ae--shape-horizontal`) according to width divided by height. It also sets `aria-orientation` to `vertical` when height exceeds width and to `horizontal` otherwise, including square elements. It toggles `ae--fits-<size>` classes when `sqrt(width * height)` reaches each configured minimum. After an update it dispatches `AelluxJsAdaptiveUpdate` from the element. Initial `ae--*` classes are discarded before mounting. Unmounting removes the managed classes and restores the initial `aria-orientation`; unrelated classes and inline styles are left as they are.
+The Extension measures each marked element with `ResizeObserver`, or uses the window resize event when that API is unavailable. With `ResizeObserver`, the first observer entry supplies the initial size; otherwise the initial size is read in the next layout frame. It applies one shape class (`ae--shape-vertical`, `ae--shape-square`, or `ae--shape-horizontal`) according to width divided by height. It also sets `aria-orientation` to `vertical` when height exceeds width and to `horizontal` otherwise, including square elements. It toggles `ae--fits-<size>` classes when `sqrt(width * height)` reaches each configured minimum. After an update it dispatches `AelluxJsAdaptiveUpdate` from the element. Initial `ae--*` classes are discarded before mounting. Unmounting removes the managed classes and restores the initial `aria-orientation`; unrelated classes and inline styles are left as they are.
 
 ## Accessibility profile
 

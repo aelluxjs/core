@@ -346,7 +346,7 @@
     controller.measuredStyles = null;
   }
 
-  function prepareMeasuredSize(element, controller, gotoVisible, previousSize, waitForPreparation) {
+  async function prepareMeasuredSize(element, controller, gotoVisible, previousSize, waitForPreparation) {
     if (!controller.measuredHeight && !controller.measuredWidth) return null;
     if (!controller.measuredStyles) {
       controller.measuredStyles = ["max-height", "max-width"].map(name => [
@@ -375,7 +375,8 @@
     if (controller.measuredWidth) {
       element.style.setProperty("max-width", `${Math.max(0, start.width)}px`, "important");
     }
-    if (!waitForPreparation) element.getBoundingClientRect();
+    if (!waitForPreparation)
+      await AelluxJs.waitLayout.read(() => element.getBoundingClientRect());
     return size;
   }
 
@@ -436,12 +437,16 @@
         };
         controller.transition = transition;
       });
+      interrupted.catch(() => {});
 
       element.hidden = false;
       openPresentElements.add(element);
-      const size = prepareMeasuredSize(
-        element, controller, gotoVisible, previousSize, waitForPreparation
-      );
+      let size = null;
+      if (controller.measuredHeight || controller.measuredWidth)
+        size = await prepareMeasuredSize(
+          element, controller, gotoVisible, previousSize, waitForPreparation
+        );
+      if (controller.transition !== transition) return;
       if (controller.motionEnabled) {
         controller.classList.add(className.willChange);
       }
@@ -461,25 +466,32 @@
         .getPropertyValue(`--ae-${newDirection}-duration`.toLowerCase()).trim();
       const timeMs = getString2Time(duration);
 
-      element.style.setProperty(
-        `--ae-${newDirection}-low-steps`.toLowerCase(),
-        Math.max(1, parseInt(timeMs / 62.5))
-      );
+      const activateTransition = () => {
+        if (controller.transition !== transition) return;
+        element.style.setProperty(
+          `--ae-${newDirection}-low-steps`.toLowerCase(),
+          Math.max(1, parseInt(timeMs / 62.5))
+        );
 
-      controller.classList.remove(
-        className.pop,
-        className.popping,
-        className.unpopping
-      );
-      controller.classList.add(transition.className);
-      if (size) {
-        if (controller.measuredHeight) {
-          element.style.setProperty("max-height", `${gotoVisible ? size.height : 0}px`, "important");
+        controller.classList.remove(
+          className.pop,
+          className.popping,
+          className.unpopping
+        );
+        controller.classList.add(transition.className);
+        if (size) {
+          if (controller.measuredHeight) {
+            element.style.setProperty("max-height", `${gotoVisible ? size.height : 0}px`, "important");
+          }
+          if (controller.measuredWidth) {
+            element.style.setProperty("max-width", `${gotoVisible ? size.width : 0}px`, "important");
+          }
         }
-        if (controller.measuredWidth) {
-          element.style.setProperty("max-width", `${gotoVisible ? size.width : 0}px`, "important");
-        }
-      }
+      };
+      if (size && !waitForPreparation)
+        await AelluxJs.waitLayout.update(activateTransition);
+      else activateTransition();
+      if (controller.transition !== transition) return;
       const completed = new Promise(completeTransition => {
         transition.timeout = setTimeout(
           finishTransition,

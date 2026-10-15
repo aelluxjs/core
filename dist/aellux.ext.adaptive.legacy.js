@@ -200,10 +200,11 @@
         };
       }));
       adaptiveElements.add(element);
-      var bounds = element.getBoundingClientRect();
-      updateAdaptive(element, bounds.width, bounds.height);
       if (resizeObserver) resizeObserver.observe(element);
-      else if (adaptiveElements.size === 1) root.addEventListener("resize", onWindowResize);
+      else {
+        AelluxJs.waitLayout.read(readBounds, [element]);
+        if (adaptiveElements.size === 1) root.addEventListener("resize", onWindowResize);
+      }
     }
     function unmountAdaptive(element) {
       if (!adaptiveElements.delete(element)) return;
