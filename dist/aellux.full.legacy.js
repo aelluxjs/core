@@ -26495,27 +26495,38 @@
           var deltaX = (converted ? event.deltaY : event.deltaX) * factor;
           var deltaY = (converted ? 0 : event.deltaY) * factor;
           if (converted && deltaX) {
-            if (state.elastic.owned) {
+            var current = state.element.scrollLeft;
+            var desiredX = current + deltaX;
+            var next = Math.max(0, Math.min(metrics.maxX, desiredX));
+            var overflow = desiredX < 0 || desiredX > metrics.maxX;
+            var stretched = false;
+            if (overflow && state.elasticEnabled) {
+              stretched = applyElasticFromDesired(state, desiredX, state.element.scrollTop, true);
+              if (stretched) {
+                scrollWithinElasticBounds(state, desiredX, state.element.scrollTop);
+                if (state.elastic.wheelTimeout !== null) root2.clearTimeout(state.elastic.wheelTimeout);
+                state.elastic.wheelTimeout = root2.setTimeout(function() {
+                  return releaseElastic(state);
+                }, ELASTIC_WHEEL_IDLE_MS);
+              }
+            } else if (state.elastic.owned) {
               resetElastic(state);
               refresh(state);
             }
-            var current = state.element.scrollLeft;
-            var next = Math.max(0, Math.min(metrics.maxX, current + deltaX));
-            if (next === current) return;
-            event.preventDefault();
-            state.element.scrollTo({
+            if (!stretched && next !== current) state.element.scrollTo({
               left: next,
               behavior: "instant"
             });
-            publish(state);
+            if (stretched || next !== current) publish(state);
+            if (!overflow && next !== current) event.preventDefault();
             return;
           }
           if (state.elasticEnabled) {
-            var desiredX = Math.max(0, Math.min(metrics.maxX, state.element.scrollLeft)) + deltaX;
+            var _desiredX = Math.max(0, Math.min(metrics.maxX, state.element.scrollLeft)) + deltaX;
             var desiredY = Math.max(0, Math.min(metrics.maxY, state.element.scrollTop)) + deltaY;
-            if (applyElasticFromDesired(state, desiredX, desiredY, true)) {
+            if (applyElasticFromDesired(state, _desiredX, desiredY, true)) {
               event.preventDefault();
-              scrollWithinElasticBounds(state, desiredX, desiredY);
+              scrollWithinElasticBounds(state, _desiredX, desiredY);
               publish(state);
               if (state.elastic.wheelTimeout !== null) root2.clearTimeout(state.elastic.wheelTimeout);
               state.elastic.wheelTimeout = root2.setTimeout(function() {

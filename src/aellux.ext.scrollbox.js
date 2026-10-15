@@ -993,16 +993,28 @@
     const deltaX = (converted ? event.deltaY : event.deltaX) * factor;
     const deltaY = (converted ? 0 : event.deltaY) * factor;
     if (converted && deltaX) {
-      if (state.elastic.owned) {
+      const current = state.element.scrollLeft;
+      const desiredX = current + deltaX;
+      const next = Math.max(0, Math.min(metrics.maxX, desiredX));
+      const overflow = desiredX < 0 || desiredX > metrics.maxX;
+      let stretched = false;
+      if (overflow && state.elasticEnabled) {
+        stretched = applyElasticFromDesired(state, desiredX, state.element.scrollTop, true);
+        if (stretched) {
+          scrollWithinElasticBounds(state, desiredX, state.element.scrollTop);
+          if (state.elastic.wheelTimeout !== null)
+            root.clearTimeout(state.elastic.wheelTimeout);
+          state.elastic.wheelTimeout = root.setTimeout(() => releaseElastic(state),
+            ELASTIC_WHEEL_IDLE_MS);
+        }
+      } else if (state.elastic.owned) {
         resetElastic(state);
         refresh(state);
       }
-      const current = state.element.scrollLeft;
-      const next = Math.max(0, Math.min(metrics.maxX, current + deltaX));
-      if (next === current) return;
-      event.preventDefault();
-      state.element.scrollTo({ left: next, behavior: "instant" });
-      publish(state);
+      if (!stretched && next !== current)
+        state.element.scrollTo({ left: next, behavior: "instant" });
+      if (stretched || next !== current) publish(state);
+      if (!overflow && next !== current) event.preventDefault();
       return;
     }
     if (state.elasticEnabled) {

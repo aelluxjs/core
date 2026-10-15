@@ -609,7 +609,7 @@ Scrollbox                  </li>
 &lt;/div&gt;
 </code></pre>
 <h2>Horizontal wheel handoff</h2>
-<p>On a fine-pointer desktop, a predominantly vertical wheel gesture scrolls a horizontal-only box sideways while it has room in that direction. At either edge, the next wheel event passes to the parent or document, including when the box has an elastic child. Converted wheel input does not stretch that child. Native horizontal wheel gestures remain native. A box with meaningful vertical overflow does not convert vertical wheel motion. This behavior applies to both modes.</p>
+<p>On a fine-pointer desktop, a predominantly vertical wheel gesture scrolls a horizontal-only box sideways while it has room in that direction. If one event goes beyond an edge, the box reaches the edge and shows elastic pressure when enabled, while the uncanceled wheel event also scrolls the parent or document. Further wheel events at that edge continue both behaviors. Native horizontal wheel gestures remain native. A box with meaningful vertical overflow does not convert vertical wheel motion. This behavior applies to both modes.</p>
 <p>Set <code>data-ae-scrollbox-wheel-horizontal=&quot;false&quot;</code> to disable the vertical-to-horizontal conversion:</p>
 <pre><code class="language-html">&lt;div data-ae-scrollbox data-ae-scrollbox-wheel-horizontal=&quot;false&quot;&gt;
   &lt;div&gt;Horizontal content&lt;/div&gt;

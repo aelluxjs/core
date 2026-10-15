@@ -1005,11 +1005,11 @@ test("vertical wheel converts for horizontal-only native boxes and releases at a
     return { prevented: event.defaultPrevented, x: element.scrollLeft };
   }, deltaY);
   expect(await wheel(120)).toEqual({ prevented: true, x: 120 });
-  expect(await wheel(120)).toEqual({ prevented: true, x: 200 });
+  expect(await wheel(120)).toEqual({ prevented: false, x: 200 });
   expect(await wheel(120)).toEqual({ prevented: false, x: 200 });
 });
 
-test("converted wheel reaches a vertical parent past an elastic child's edge", async ({ page }) => {
+test("converted wheel stretches an elastic child and scrolls its vertical parent", async ({ page }) => {
   await setup(page, `<div id="parent" data-ae-scrollbox="native"
     style="width:180px;height:120px;overflow:auto">
     <div style="height:500px">
@@ -1025,11 +1025,28 @@ test("converted wheel reaches a vertical parent past an elastic child's edge", a
       transform: document.getElementById("elastic").style.transform };
   }, deltaY);
   expect(await wheel(120)).toEqual({ prevented: true, x: 120, transform: "" });
-  expect(await wheel(120)).toEqual({ prevented: true, x: 200, transform: "" });
-  expect(await wheel(120)).toEqual({ prevented: false, x: 200, transform: "" });
+  const crossing = await wheel(120);
+  expect(crossing).toMatchObject({ prevented: false, x: 200 });
+  expect(crossing.transform).toContain("scale(");
+  const edge = await wheel(120);
+  expect(edge).toMatchObject({ prevented: false, x: 200 });
+  expect(edge.transform).toContain("scale(");
+  await page.evaluate(() => {
+    document.getElementById("parent").scrollTo({ top: 0, behavior: "instant" });
+    window.wheelAtParent = null;
+    document.getElementById("parent").addEventListener("wheel", event => {
+      window.wheelAtParent = {
+        prevented: event.defaultPrevented,
+        transform: document.getElementById("elastic").style.transform
+      };
+    });
+  });
   const rect = await page.locator("#box").boundingBox();
   await page.mouse.move(rect.x + 50, rect.y + 50);
   await page.mouse.wheel(0, 120);
+  await expect.poll(() => page.evaluate(() => window.wheelAtParent)).toMatchObject({
+    prevented: false, transform: expect.stringContaining("scale(")
+  });
   await expect.poll(() => page.evaluate(() => document.getElementById("parent").scrollTop))
     .toBeGreaterThan(0);
 });

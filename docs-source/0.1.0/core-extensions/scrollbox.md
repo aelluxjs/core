@@ -41,7 +41,7 @@ In `pointer` mode, a quick release continues scrolling with gradually decreasing
 
 ## Horizontal wheel handoff
 
-On a fine-pointer desktop, a predominantly vertical wheel gesture scrolls a horizontal-only box sideways while it has room in that direction. At either edge, the next wheel event passes to the parent or document, including when the box has an elastic child. Converted wheel input does not stretch that child. Native horizontal wheel gestures remain native. A box with meaningful vertical overflow does not convert vertical wheel motion. This behavior applies to both modes.
+On a fine-pointer desktop, a predominantly vertical wheel gesture scrolls a horizontal-only box sideways while it has room in that direction. If one event goes beyond an edge, the box reaches the edge and shows elastic pressure when enabled, while the uncanceled wheel event also scrolls the parent or document. Further wheel events at that edge continue both behaviors. Native horizontal wheel gestures remain native. A box with meaningful vertical overflow does not convert vertical wheel motion. This behavior applies to both modes.
 
 Set `data-ae-scrollbox-wheel-horizontal="false"` to disable the vertical-to-horizontal conversion:
 
