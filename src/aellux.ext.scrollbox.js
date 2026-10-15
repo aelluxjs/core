@@ -20,8 +20,7 @@
   const POINTER_SCROLL_THRESHOLD_PX = 3;
   const POINTER_SCROLL_MULTICLICK_MS = 500;
   const POINTER_SCROLL_MULTICLICK_DISTANCE_PX = 8;
-  const SELECTION_HORIZONTAL_THRESHOLD_PX = 8;
-  const SELECTION_VERTICAL_TOLERANCE_PX = 6;
+  const TEXT_SELECTION_WAIT_MS = 100;
   const MOMENTUM_LIMIT_TIME_MS = 300;
   const MOMENTUM_LIMIT_DISTANCE_PX = 15;
   const MOMENTUM_DECELERATION = 0.0015;
@@ -47,6 +46,7 @@
 
   const properties = ["--ae-scroll-y-progress", "--ae-scroll-x-progress"];
   const scrollboxes = new Map();
+  let activePointerScrollState = null;
 
   AelluxJs.extAttach(extensionName, { init, destroy });
 
@@ -85,7 +85,7 @@
       },
       wheelEnabled: true, momentumEnabled: true, elasticEnabled: false,
       wheelListening: false, pointerListening: false, touchListening: false,
-      pointerScroll: null, lastPointerDown: null, pointerScrollingClassOwned: false,
+      pointerScroll: null, lastPointerDown: null,
       mouseReleaseButton: null, mouseReleaseTimeout: null,
       momentum: null, elastic, resizeObserver: null, mutationObserver: null,
       lastResizeTime: -RESIZE_INTERVAL_MS, resizeTimeout: null, disposed: false
@@ -133,6 +133,9 @@
     const state = scrollboxes.get(element);
     if (!state) return;
     state.disposed = true;
+    if (activePointerScrollState && activePointerScrollState.pointerScroll &&
+      activePointerScrollState.pointerScroll.chain.includes(state))
+      endPointerScroll(activePointerScrollState);
     endPointerScroll(state);
     stopPointerScrollMouseEvents(state);
     restorePointerScrollCursor(state);
@@ -185,6 +188,9 @@
       element.addEventListener("mousedown", state.onMouseDown);
       state.pointerListening = true;
     } else if (!pointerEnabled && state.pointerListening) {
+      if (activePointerScrollState && activePointerScrollState.pointerScroll &&
+        activePointerScrollState.pointerScroll.chain.includes(state))
+        endPointerScroll(activePointerScrollState);
       element.removeEventListener("pointerdown", state.onPointerDown);
       element.removeEventListener("pointerover", state.onPointerOver);
       element.removeEventListener("pointerout", state.onPointerOut);
@@ -328,14 +334,23 @@
 
   function startPointerScroll(state, event) {
     if (event.detail > 1) return;
-    cancelMomentum(state);
-    if (state.pointerScroll || event.defaultPrevented || event.button !== 0 || !event.isPrimary ||
+    if (activePointerScrollState || state.pointerScroll || event.defaultPrevented ||
+      event.button !== 0 || !event.isPrimary ||
       event.pointerType === "touch" || (event.buttons & 1) === 0) return;
     const element = state.element;
     const nested = event.target.closest(`[${attribute}]`);
     if (nested !== element || event.target.closest(pointerScrollExceptionSelector)) return;
-    let metrics = nativeMetrics(element);
-    if (metrics.maxX <= 0 && metrics.maxY <= 0) return;
+    const chain = [];
+    let node = element;
+    while (node) {
+      const member = scrollboxes.get(node);
+      if (member && member.pointerListening && !member.disposed) chain.push(member);
+      node = node.parentElement && node.parentElement.closest(`[${attribute}]`);
+    }
+    if (!chain.some(member => {
+      const metrics = nativeMetrics(member.element);
+      return metrics.maxX > 0 || metrics.maxY > 0;
+    })) return;
     const rect = element.getBoundingClientRect();
     if (event.clientX >= rect.left + element.clientWidth ||
       event.clientY >= rect.top + element.clientHeight) return;
@@ -345,12 +360,14 @@
     if (previousDown && time - previousDown.time <= POINTER_SCROLL_MULTICLICK_MS &&
       Math.abs(event.clientX - previousDown.x) <= POINTER_SCROLL_MULTICLICK_DISTANCE_PX &&
       Math.abs(event.clientY - previousDown.y) <= POINTER_SCROLL_MULTICLICK_DISTANCE_PX) return;
-    if (!isTextAtPoint(event.target, event.clientX, event.clientY) && event.cancelable)
-      event.preventDefault();
-    if (state.elastic.owned) {
-      resetElastic(state);
-      refresh(state);
-      metrics = state.metrics;
+    const textOrigin = isTextAtPoint(event.target, event.clientX, event.clientY);
+    if (!textOrigin && event.cancelable) event.preventDefault();
+    for (const member of chain) {
+      cancelMomentum(member);
+      if (member.elastic.owned) {
+        resetElastic(member);
+        refresh(member);
+      }
     }
     if (state.mouseReleaseTimeout !== null) root.clearTimeout(state.mouseReleaseTimeout);
     state.mouseReleaseTimeout = null;
@@ -358,16 +375,14 @@
     state.pointerScroll = {
       pointerId: event.pointerId, button: event.button,
       startX: event.clientX, startY: event.clientY,
-      scrollLeft: element.scrollLeft, scrollTop: element.scrollTop, moved: false,
-      selectionPending: metrics.maxX <= 1 && metrics.maxY > 1,
-      userSelectApplied: false,
-      momentumStartX: element.scrollLeft, momentumStartY: element.scrollTop,
-      momentumStartTime: now(),
-      userSelect: element.style.getPropertyValue("user-select"),
-      userSelectPriority: element.style.getPropertyPriority("user-select"),
-      scrollBehavior: element.style.getPropertyValue("scroll-behavior"),
-      scrollBehaviorPriority: element.style.getPropertyPriority("scroll-behavior")
+      lastX: event.clientX, lastY: event.clientY, moved: false, axis: null, chain,
+      styles: [], momentumState: null, momentumStartX: 0, momentumStartY: 0,
+      elasticForce: 0,
+      selectionReadyTime: textOrigin ? time + TEXT_SELECTION_WAIT_MS : 0,
+      selectionWaitTimeout: null, pendingMove: null,
+      momentumStartTime: time
     };
+    activePointerScrollState = state;
     root.addEventListener("pointermove", state.onPointerMove, { passive: false, capture: true });
     root.addEventListener("touchmove", state.onPointerScrollTouchMove,
       { passive: false, capture: true });
@@ -390,53 +405,145 @@
       endPointerScroll(state);
       return;
     }
-    const dx = pointerScroll.startX - event.clientX;
-    const dy = pointerScroll.startY - event.clientY;
-    if (pointerScroll.selectionPending) {
-      const horizontal = Math.abs(dx);
-      const vertical = Math.abs(dy);
-      if (horizontal >= SELECTION_HORIZONTAL_THRESHOLD_PX && horizontal > vertical) {
+    if (!pointerScroll.moved) {
+      const selection = root.getSelection();
+      if (selection && !selection.isCollapsed && selection.anchorNode &&
+        state.element.contains(selection.anchorNode)) {
         endPointerScroll(state);
         return;
       }
-      if (vertical < SELECTION_VERTICAL_TOLERANCE_PX || vertical < horizontal) return;
-      pointerScroll.selectionPending = false;
     }
+    const dx = pointerScroll.startX - event.clientX;
+    const dy = pointerScroll.startY - event.clientY;
     if (!pointerScroll.moved && dx * dx + dy * dy <
       POINTER_SCROLL_THRESHOLD_PX * POINTER_SCROLL_THRESHOLD_PX) return;
+    if (!pointerScroll.axis)
+      pointerScroll.axis = Math.abs(dx) >= Math.abs(dy) ? "x" : "y";
+    if (!pointerScroll.moved && now() < pointerScroll.selectionReadyTime) {
+      pointerScroll.pendingMove = { x: event.clientX, y: event.clientY };
+      if (pointerScroll.selectionWaitTimeout === null) {
+        pointerScroll.selectionWaitTimeout = root.setTimeout(() => {
+          pointerScroll.selectionWaitTimeout = null;
+          if (state.pointerScroll !== pointerScroll) return;
+          const pendingMove = pointerScroll.pendingMove;
+          movePointerScroll(state, {
+            pointerId: pointerScroll.pointerId, buttons: 1, cancelable: false,
+            clientX: pendingMove.x, clientY: pendingMove.y
+          });
+        }, Math.max(0, pointerScroll.selectionReadyTime - now()));
+      }
+      return;
+    }
     if (!pointerScroll.moved) {
-      state.element.style.setProperty("user-select", "none");
-      state.element.style.setProperty("scroll-behavior", "auto", "important");
-      restorePointerScrollCursor(state);
-      state.pointerScrollingClassOwned = !state.element.classList.contains(pointerScrollingClass);
-      state.element.classList.add(pointerScrollingClass);
-      pointerScroll.userSelectApplied = true;
-      const selection = root.getSelection();
-      if (selection && selection.anchorNode && state.element.contains(selection.anchorNode))
-        selection.removeAllRanges();
+      const axis = pointerScroll.axis;
+      if (!pointerScroll.chain.some(member => pointerAxisMaximum(member, axis) > 0)) {
+        endPointerScroll(state);
+        return;
+      }
+      activatePointerScroll(state, pointerScroll, axis);
     }
-    pointerScroll.moved = true;
-    const time = now();
-    const resetMomentum = time - pointerScroll.momentumStartTime > MOMENTUM_LIMIT_TIME_MS;
-    const desiredX = pointerScroll.scrollLeft + dx;
-    const desiredY = pointerScroll.scrollTop + dy;
+    const axis = pointerScroll.axis;
+    let remaining = axis === "x" ? pointerScroll.lastX - event.clientX :
+      pointerScroll.lastY - event.clientY;
+    pointerScroll.lastX = event.clientX;
+    pointerScroll.lastY = event.clientY;
     if (event.cancelable) event.preventDefault();
-    applyElasticFromDesired(state, desiredX, desiredY, false);
-    scrollWithinElasticBounds(state, desiredX, desiredY);
-    if (resetMomentum) {
-      pointerScroll.momentumStartX = state.element.scrollLeft;
-      pointerScroll.momentumStartY = state.element.scrollTop;
-      pointerScroll.momentumStartTime = time;
+    if (!remaining) return;
+    let outermost = null;
+    for (const member of pointerScroll.chain) {
+      if (!member.disposed && member.pointerListening &&
+        pointerAxisMaximum(member, axis) > 0) outermost = member;
     }
-    publish(state);
+    if (outermost && outermost.elasticEnabled && pointerScroll.elasticForce) {
+      const force = pointerScroll.elasticForce + remaining;
+      if (!force || Math.sign(force) === Math.sign(pointerScroll.elasticForce)) {
+        pointerScroll.elasticForce = force;
+        remaining = 0;
+      } else {
+        pointerScroll.elasticForce = 0;
+        remaining = force;
+      }
+    }
+    let lastUsed = null;
+    let lastStartX = 0, lastStartY = 0;
+    for (const member of pointerScroll.chain) {
+      if (member.disposed || !member.pointerListening ||
+        pointerAxisMaximum(member, axis) <= 0) continue;
+      if (Math.abs(remaining) < 0.001) continue;
+      const element = member.element;
+      const previousX = element.scrollLeft, previousY = element.scrollTop;
+      const current = axis === "x" ? previousX : previousY;
+      const desired = Math.max(0, Math.min(pointerAxisMaximum(member, axis),
+        current + remaining));
+      element.scrollTo({
+        left: axis === "x" ? desired : previousX,
+        top: axis === "y" ? desired : previousY,
+        behavior: "instant"
+      });
+      const used = (axis === "x" ? element.scrollLeft : element.scrollTop) - current;
+      if (!used) continue;
+      remaining -= used;
+      publish(member);
+      lastUsed = member;
+      lastStartX = previousX;
+      lastStartY = previousY;
+    }
+    if (outermost && outermost.elasticEnabled) {
+      pointerScroll.elasticForce += remaining;
+      const element = outermost.element;
+      const desiredX = element.scrollLeft + (axis === "x" ? pointerScroll.elasticForce : 0);
+      const desiredY = element.scrollTop + (axis === "y" ? pointerScroll.elasticForce : 0);
+      applyElasticFromDesired(outermost, desiredX, desiredY, false);
+      scrollWithinElasticBounds(outermost, desiredX, desiredY);
+      publish(outermost);
+    }
+    if (lastUsed) {
+      const time = now();
+      if (pointerScroll.momentumState !== lastUsed) {
+        pointerScroll.momentumState = lastUsed;
+        pointerScroll.momentumStartX = lastStartX;
+        pointerScroll.momentumStartY = lastStartY;
+        pointerScroll.momentumStartTime = time;
+      } else if (time - pointerScroll.momentumStartTime > MOMENTUM_LIMIT_TIME_MS) {
+        pointerScroll.momentumStartX = lastUsed.element.scrollLeft;
+        pointerScroll.momentumStartY = lastUsed.element.scrollTop;
+        pointerScroll.momentumStartTime = time;
+      }
+    }
+  }
+
+  function pointerAxisMaximum(state, axis) {
+    const metrics = state.metrics || nativeMetrics(state.element);
+    return axis === "x" ? metrics.maxX : metrics.maxY;
+  }
+
+  function activatePointerScroll(state, pointerScroll, axis) {
+    pointerScroll.axis = axis;
+    pointerScroll.moved = true;
+    restorePointerScrollCursor(state);
+    for (const member of pointerScroll.chain) {
+      if (pointerAxisMaximum(member, axis) <= 0) continue;
+      const element = member.element;
+      pointerScroll.styles.push({
+        element, classOwned: !element.classList.contains(pointerScrollingClass),
+        userSelect: element.style.getPropertyValue("user-select"),
+        userSelectPriority: element.style.getPropertyPriority("user-select"),
+        scrollBehavior: element.style.getPropertyValue("scroll-behavior"),
+        scrollBehaviorPriority: element.style.getPropertyPriority("scroll-behavior")
+      });
+      element.style.setProperty("user-select", "none");
+      element.style.setProperty("scroll-behavior", "auto", "important");
+      element.classList.add(pointerScrollingClass);
+    }
   }
 
   function endPointerScroll(state, event) {
     const pointerScroll = state.pointerScroll;
     if (!pointerScroll || (event && event.pointerId !== pointerScroll.pointerId)) return;
     state.pointerScroll = null;
-    if (state.pointerScrollingClassOwned) state.element.classList.remove(pointerScrollingClass);
-    state.pointerScrollingClassOwned = false;
+    if (activePointerScrollState === state) activePointerScrollState = null;
+    if (pointerScroll.selectionWaitTimeout !== null)
+      root.clearTimeout(pointerScroll.selectionWaitTimeout);
     root.removeEventListener("pointermove", state.onPointerMove, true);
     root.removeEventListener("touchmove", state.onPointerScrollTouchMove, true);
     for (const name of pointerScrollDragEvents) {
@@ -455,24 +562,26 @@
       stopPointerScrollMouseEvents(state);
     }
 
-    if (pointerScroll.userSelectApplied) {
-      if (pointerScroll.userSelect) state.element.style.setProperty(
-        "user-select", pointerScroll.userSelect, pointerScroll.userSelectPriority);
-      else state.element.style.removeProperty("user-select");
-      if (pointerScroll.scrollBehavior) state.element.style.setProperty(
-        "scroll-behavior", pointerScroll.scrollBehavior, pointerScroll.scrollBehaviorPriority);
-      else state.element.style.removeProperty("scroll-behavior");
+    for (const saved of pointerScroll.styles) {
+      if (saved.classOwned) saved.element.classList.remove(pointerScrollingClass);
+      if (saved.userSelect) saved.element.style.setProperty(
+        "user-select", saved.userSelect, saved.userSelectPriority);
+      else saved.element.style.removeProperty("user-select");
+      if (saved.scrollBehavior) saved.element.style.setProperty(
+        "scroll-behavior", saved.scrollBehavior, saved.scrollBehaviorPriority);
+      else saved.element.style.removeProperty("scroll-behavior");
     }
     if (event && event.type === "pointerup" && state.pointerListening) {
       updatePointerScrollCursor(state, document.elementFromPoint(event.clientX, event.clientY),
         event.clientX, event.clientY);
     } else restorePointerScrollCursor(state);
-    const hadElastic = state.elastic.active;
-    releaseElastic(state);
-    if (event && event.type === "pointerup" && pointerScroll.moved && state.momentumEnabled &&
-      !hadElastic && !state.disposed &&
+    const hadElastic = pointerScroll.chain.some(member => member.elastic.active);
+    for (const member of pointerScroll.chain) releaseElastic(member);
+    const momentumState = pointerScroll.momentumState;
+    if (event && event.type === "pointerup" && pointerScroll.moved && momentumState &&
+      momentumState.momentumEnabled && !hadElastic && !momentumState.disposed &&
       now() - pointerScroll.momentumStartTime < MOMENTUM_LIMIT_TIME_MS) {
-      startMomentum(state, pointerScroll);
+      startMomentum(momentumState, pointerScroll);
     }
   }
 
@@ -501,10 +610,12 @@
   function startMomentum(state, pointerScroll) {
     const element = state.element;
     const elapsed = Math.max(1, now() - pointerScroll.momentumStartTime);
-    const x = momentumAxis(element.scrollLeft, pointerScroll.momentumStartX, elapsed,
-      Math.max(0, element.scrollWidth - element.clientWidth));
-    const y = momentumAxis(element.scrollTop, pointerScroll.momentumStartY, elapsed,
-      Math.max(0, element.scrollHeight - element.clientHeight));
+    const x = pointerScroll.axis === "x" ? momentumAxis(element.scrollLeft,
+      pointerScroll.momentumStartX, elapsed,
+      Math.max(0, element.scrollWidth - element.clientWidth)) : element.scrollLeft;
+    const y = pointerScroll.axis === "y" ? momentumAxis(element.scrollTop,
+      pointerScroll.momentumStartY, elapsed,
+      Math.max(0, element.scrollHeight - element.clientHeight)) : element.scrollTop;
     if (x === element.scrollLeft && y === element.scrollTop) return;
     const momentum = {
       currentX: element.scrollLeft, currentY: element.scrollTop,
@@ -836,8 +947,8 @@
   }
 
   function handleWheel(state, event) {
-    if (state.desktop && state.mode === "pointer" && state.pointerScroll &&
-      state.pointerScroll.moved) {
+    if (state.desktop && state.mode === "pointer" &&
+      state.element.classList.contains(pointerScrollingClass)) {
       if (event.cancelable) event.preventDefault();
       event.stopPropagation();
       return;
