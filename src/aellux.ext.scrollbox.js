@@ -517,6 +517,9 @@
 
   function startScrollbarDrag(state, record, event) {
     if (state.disposed || event.button !== 0 || !record.max) return;
+    if (activePointerScrollState && activePointerScrollState.pointerScroll &&
+      activePointerScrollState.pointerScroll.chain.includes(state))
+      endPointerScroll(activePointerScrollState);
     if (event.cancelable) event.preventDefault();
     event.stopPropagation();
     const position = scrollbarPointerPosition(record, event);
@@ -970,7 +973,8 @@
 
   function startPointerScroll(state, event) {
     if (event.detail > 1) return;
-    if (activePointerScrollState || state.pointerScroll || event.defaultPrevented ||
+    if (activePointerScrollState || state.pointerScroll || state.scrollbar.drag ||
+      event.defaultPrevented ||
       event.button !== 0 || !event.isPrimary ||
       event.pointerType === "touch" || (event.buttons & 1) === 0) return;
     const element = state.element;
@@ -983,6 +987,7 @@
       if (member && member.pointerListening && !member.disposed) chain.push(member);
       node = node.parentElement && node.parentElement.closest(`[${attribute}]`);
     }
+    if (chain.some(member => member.scrollbar.drag)) return;
     const axes = new Map(chain.map(member => {
       const metrics = nativeMetrics(member.element);
       member.metrics = metrics;
@@ -1819,7 +1824,7 @@
     cancelMomentum(state);
     if (event.defaultPrevented || event.ctrlKey) return;
     if (event.target.closest(`[${attribute}]`) !== state.element) return;
-    const metrics = state.metrics || nativeMetrics(state.element);
+    const metrics = nativeMetrics(state.element);
     if (!metrics) return;
     const axes = wheelAxes(state, metrics);
     const factor = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? metrics.page : 1;

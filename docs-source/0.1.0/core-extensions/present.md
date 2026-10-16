@@ -25,7 +25,15 @@ A trigger or dismiss control with neither an ID nor a containing `data-ae-presen
 
 ## Motion and state
 
-The Extension exposes `pop(element)`, `unpop(element)`, `toggle(element, goto)`, and `trigger(element, action)` through `$ae.ext.present`. Each method returns a Promise that resolves after preparation and transition cleanup, including the final visibility, classes, ARIA state and events. It manages `hidden`, `aria-expanded`, `ae--pop`, `ae--popping`, and `ae--unpopping` on the main `data-ae-present` container and updates `aria-expanded` and `aria-controls` on its triggers.
+The Extension exposes `pop(element)`, `unpop(element)`, `toggle(element, goto)`, and `trigger(element, action)` through `$ae.ext.present`. A mounted element also has controller methods:
+
+```js
+const panel = $ae("details").present;
+await panel.pop();
+await panel.unpop();
+```
+
+Each method returns a Promise that resolves after preparation and transition cleanup, including the final visibility, classes, ARIA state and events. Present manages `hidden`, `aria-expanded`, `ae--pop`, `ae--popping`, and `ae--unpopping` on the main `data-ae-present` container and updates `aria-expanded` and `aria-controls` on its triggers.
 
 Calling `pop(element)` starts a fresh opening even when the region is already open or opening. It interrupts any active transition, removes presentation state classes, hides the region immediately, and starts the new pop from its hidden state. `toggle(element, true)` keeps its existing idempotent behavior.
 
@@ -35,7 +43,7 @@ Before starting a transition from a stable state, Present makes the container av
 
 The generated `aellux.ext.present.css` stylesheet treats the whitespace-separated `data-ae-present` value as a list of transition instructions. `opacity` controls opacity and `transform` controls transform. `height` and `width` control `grid-template-rows` and `grid-template-columns` when a direct motion child exists, or measured `max-height` and `max-width` when it does not. Values can be used alone or in any combination, such as `data-ae-present="opacity height"`. An empty attribute remains empty and disables the transition with zero duration. The value `all` expands to `opacity transform height width` during mount and is restored to its original value on unmount.
 
-The `--ae-from-height`, `--ae-pop-height`, and `--ae-unpop-height` properties define the height keyframes, while `--ae-from-width`, `--ae-pop-width`, and `--ae-unpop-width` define the width keyframes. Its minified counterpart is `aellux.ext.present.min.css`; the boot runtime selects the variant that matches the loaded Aellux script. CSS custom properties `--ae-pop-duration` and `--ae-unpop-duration` on the container set the corresponding duration. When the document root has `data-ae-reduced-motion="reduced"`, the generated stylesheet disables transitions. When it has `data-ae-low-hardware`, Present uses stepped easing and derives the step count from the transition duration; `--ae-pop-low-steps` and `--ae-unpop-low-steps` can override those counts. The Extension emits cancelable `AelluxJsBeforePop` and `AelluxJsBeforeUnpop` events immediately, waits through the preparation period, then emits `AelluxJsPopping`/`AelluxJsUnpopping` and finally `AelluxJsPop`/`AelluxJsUnpop` as transitions progress.
+The `--ae-from-height`, `--ae-pop-height`, and `--ae-unpop-height` properties define the height keyframes, while `--ae-from-width`, `--ae-pop-width`, and `--ae-unpop-width` define the width keyframes. Its minified counterpart is `aellux.ext.present.min.css`; the boot runtime selects the variant that matches the loaded Aellux script. CSS custom properties `--ae-pop-duration` and `--ae-unpop-duration` on the container set the corresponding duration. When the document root has `data-ae-reduced-motion="reduced"`, the generated stylesheet disables transitions. When it has `data-ae-low-hardware`, Present uses stepped easing and derives the step count from the transition duration; `--ae-pop-low-steps` and `--ae-unpop-low-steps` can override those counts. The Extension emits cancelable `AelluxJsBeforePop` and `AelluxJsBeforeUnpop` events immediately, waits through the preparation period, then emits `AelluxJsPopping`/`AelluxJsUnpopping` and finally `AelluxJsPop`/`AelluxJsUnpop` as transitions progress. After each completed Pop or Unpop, it emits a bubbling `AelluxJsLayout` event from the Present element to notify layout observers such as Anchor.
 
 When an `unpop` hides a region containing the active element, Present releases focus if the browser has not already done so, then dispatches `UnpopFocusLost` through `AelluxJs.dispatch`. If the active element is outside the region at the time it becomes hidden, no focus event is dispatched.
 

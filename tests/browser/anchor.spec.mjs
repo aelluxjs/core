@@ -206,7 +206,7 @@ test("intersection changes schedule placement updates and unmount disconnects th
   expect(await page.evaluate(() => window.anchorIntersectionObservers[0].observed.size)).toBe(0);
 });
 
-test("target movement without observer events updates within the position check interval", async ({ page }) => {
+test("layout event on the shared positioning parent replaces position polling", async ({ page }) => {
   await page.goto("/tests/index.htm");
   await page.addScriptTag({ url: "/dist/aellux.js" });
   await page.evaluate(() => {
@@ -217,6 +217,8 @@ test("target movement without observer events updates within the position check 
     document.body.innerHTML = `<div style="position:relative;width:300px;height:100px">
       <div id="target" style="position:absolute;left:20px;top:10px;width:30px;height:20px"></div>
       <div id="anchor" data-ae-anchor-target="target" data-ae-anchor="top-left:top-left"
+        style="width:10px;height:10px"></div>
+      <div id="other" data-ae-anchor-target="target" data-ae-anchor="top-left:top-left"
         style="width:10px;height:10px"></div></div>`;
     AelluxJs.ext("anchor");
   });
@@ -227,7 +229,50 @@ test("target movement without observer events updates within the position check 
   );
   await expect.poll(x).toBe("20px");
   await page.evaluate(() => document.getElementById("target").style.left = "45px");
-  await expect.poll(x, { timeout: 3000 }).toBe("45px");
+  await page.waitForTimeout(1200);
+  expect(await x()).toBe("20px");
+  await page.evaluate(() => document.getElementById("target").dispatchEvent(
+    new CustomEvent("AelluxJsLayout", { bubbles: true })
+  ));
+  await expect.poll(x).toBe("45px");
+  await page.evaluate(async () => {
+    await AelluxJs.unmount(document.getElementById("anchor"), "anchor");
+    document.getElementById("target").style.left = "60px";
+    document.getElementById("target").dispatchEvent(
+      new CustomEvent("AelluxJsLayout", { bubbles: true })
+    );
+  });
+  await expect.poll(() => page.locator("#other").evaluate(element =>
+    element.style.getPropertyValue("--ae-anchor-x")
+  )).toBe("60px");
+});
+
+test("present layout event activates an anchor whose target started hidden", async ({ page }) => {
+  await page.goto("/tests/index.htm");
+  await page.addScriptTag({ url: "/dist/aellux.js" });
+  await page.evaluate(() => {
+    document.body.innerHTML = `<div style="position:relative;width:300px;height:100px">
+      <div id="panel" data-ae-present hidden
+        style="--ae-pop-duration:0ms;--ae-unpop-duration:0ms">
+        <div id="target" style="position:absolute;left:40px;top:20px;width:30px;height:20px"></div>
+      </div>
+      <div id="anchor" data-ae-anchor-target="target" data-ae-anchor="top-left:top-left"
+        style="width:10px;height:10px"></div>
+    </div>`;
+    AelluxJs.init({ mode: "full" });
+  });
+  await expect.poll(() => page.evaluate(() =>
+    typeof $ae("panel")?.present?.pop === "function"
+  )).toBe(true);
+  await expect(page.locator("#anchor")).not.toHaveClass(/ae--anchored/);
+
+  await page.evaluate(() => $ae("panel").present.pop());
+  await expect.poll(() => page.locator("#anchor").evaluate(element =>
+    element.style.getPropertyValue("--ae-anchor-x")
+  )).toBe("40px");
+
+  await page.evaluate(() => $ae("panel").present.unpop());
+  await expect(page.locator("#anchor")).not.toHaveClass(/ae--anchored/);
 });
 
 test("scroll bursts throttle layout measurements and keep the latest position", async ({ page }) => {

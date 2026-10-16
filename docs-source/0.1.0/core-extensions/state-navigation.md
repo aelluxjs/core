@@ -16,11 +16,30 @@ navigation.setState("tab", "details", "Details");
 
 `setState(key, value, title, silent)` updates a snapshot entry. With `silent: true`, it replaces the current history entry; otherwise it pushes a new entry. `globalSnapshot` exposes the current snapshot, and `updateBaseTitle(title)` changes the title suffix used for later updates.
 
-Other Extensions can request a state update without accessing `state-navigation` directly by dispatching `AelluxJsPushState` with `detail: { key, value, title? }`. `key` and `value` must be non-empty strings, while `title` is optional. State Navigation consumes this command when loaded; malformed details produce a navigation warning without changing history. Focus uses this event contract to record the focused element's ID as `ae-focus`.
+Other Extensions can request a state update without accessing `state-navigation` directly:
+
+```js
+$ae.dispatch("PushState", {
+  detail: { key: "tab", value: "details", title: "Details" }
+});
+```
+
+The `key` and `value` fields must be non-empty strings; `title` is optional. State Navigation consumes this command when loaded; malformed details produce a navigation warning without changing history. Focus uses this event contract to record the focused element's ID as `ae-focus`.
 
 The Extension dispatches `AelluxJsSnapshotChange` after writing a new state and `AelluxJsSnapshotRestore` after reading a state from history or the hash. Event `detail` contains `snapshot`, `removeSnapshot`, and `popState`. For a `popstate` restoration, `popState` is the history entry that was read; it is `undefined` for a hash-only restoration or a snapshot change. The snapshot and document title are updated before `AelluxJsSnapshotRestore` is dispatched. The current implementation reads `useHash` from the top-level `$ae.options.useHash` setting. With `useHash: false`, restoring a history entry whose snapshot is `null` clears the current snapshot.
 
-Dispatch `AelluxJsPushAjaxReplace` with `detail: { url, selectors }` to record the current and target URLs in browser history. Each entry stores `ajaxReplace: { url, selectors }`; the target entry has `snapshot: null`. The optional `ajaxHref` Extension can use this history metadata when available. It is not part of the `full` runtime's bundled Extension list. Dispatch `AelluxJsUpdateBaseTitle` with `detail: { title }` to update the base document title. Malformed event details produce a navigation warning.
+Dispatch `AelluxJsPushAjaxReplace` to record the current and target URLs in browser history, or `AelluxJsUpdateBaseTitle` to update the base document title:
+
+```js
+$ae.dispatch("PushAjaxReplace", {
+  detail: { url: "/details", selectors: ["#main"] }
+});
+$ae.dispatch("UpdateBaseTitle", {
+  detail: { title: "Example" }
+});
+```
+
+Each history entry stores `ajaxReplace: { url, selectors }`; the target entry has `snapshot: null`. The optional `ajaxHref` Extension can use this history metadata when available. It is not part of the `full` runtime's bundled Extension list. Malformed event details produce a navigation warning.
 
 ## Parent page and iframe
 

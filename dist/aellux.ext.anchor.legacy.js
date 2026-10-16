@@ -78,36 +78,6 @@
       r2 ? i ? i(e2, r2, { value: n2, enumerable: !t2, configurable: !t2, writable: !t2 }) : e2[r2] = n2 : (o("next", 0), o("throw", 1), o("return", 2));
     }, _regeneratorDefine2(e, r, n, t);
   }
-  function _slicedToArray(r, e) {
-    return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest();
-  }
-  function _nonIterableRest() {
-    throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
-  }
-  function _iterableToArrayLimit(r, l) {
-    var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
-    if (null != t) {
-      var e, n, i, u, a = [], f = true, o = false;
-      try {
-        if (i = (t = t.call(r)).next, 0 === l) {
-          if (Object(t) !== t) return;
-          f = false;
-        } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = true) ;
-      } catch (r2) {
-        o = true, n = r2;
-      } finally {
-        try {
-          if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return;
-        } finally {
-          if (o) throw n;
-        }
-      }
-      return a;
-    }
-  }
-  function _arrayWithHoles(r) {
-    if (Array.isArray(r)) return r;
-  }
   function _createForOfIteratorHelper(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
@@ -184,6 +154,7 @@
     }
     var attribute = AelluxJs.attr(extensionName);
     var targetAttribute = AelluxJs.attr("anchor-target");
+    var layoutEvent = AelluxJs.eventName("Layout");
     var anchoredClass = AelluxJs.className("anchored");
     var baseProperties = ["position", "left", "top", "transform", "transform-origin"];
     var ownedProperties = [].concat(baseProperties, ["--ae-anchor-x", "--ae-anchor-y", "--ae-anchor-origin-x", "--ae-anchor-origin-y"]);
@@ -199,11 +170,8 @@
       "bottom-right": [1, 1]
     };
     var UPDATE_INTERVAL_MS = 100;
-    var POSITION_CHECK_INTERVAL_MS = 1e3;
     var anchors = /* @__PURE__ */ new Map();
     var updateTimeout = null;
-    var positionInterval = null;
-    var positionCheckPending = false;
     var lastUpdateTime = -UPDATE_INTERVAL_MS;
     AelluxJs.extAttach(extensionName, {
       init: init,
@@ -239,9 +207,7 @@
           while (1) switch (_context.n) {
             case 0:
               if (updateTimeout !== null) clearTimeout(updateTimeout);
-              if (positionInterval !== null) clearInterval(positionInterval);
               updateTimeout = null;
-              positionInterval = null;
               lastUpdateTime = -UPDATE_INTERVAL_MS;
               _context.n = 1;
               return Promise.all(Array.from(anchors.keys(), unmountAnchor));
@@ -271,7 +237,9 @@
         revision: 0,
         target: null,
         reference: null,
-        targetPosition: null,
+        layoutListener: function layoutListener() {
+          return scheduleUpdate();
+        },
         observer: null,
         intersectionObserver: null
       };
@@ -282,7 +250,6 @@
           passive: true
         });
         root.addEventListener("resize", scheduleUpdate);
-        positionInterval = setInterval(checkPositions, POSITION_CHECK_INTERVAL_MS);
       }
       if (typeof root.ResizeObserver === "function") {
         state.observer = new root.ResizeObserver(scheduleUpdate);
@@ -309,6 +276,7 @@
               return _context2.a(2);
             case 1:
               state.revision++;
+              if (state.reference) state.reference.removeEventListener(layoutEvent, state.layoutListener);
               if (state.observer) state.observer.disconnect();
               if (state.intersectionObserver) state.intersectionObserver.disconnect();
               anchors.delete(element);
@@ -316,9 +284,7 @@
                 root.removeEventListener("scroll", scheduleUpdate, true);
                 root.removeEventListener("resize", scheduleUpdate);
                 if (updateTimeout !== null) clearTimeout(updateTimeout);
-                if (positionInterval !== null) clearInterval(positionInterval);
                 updateTimeout = null;
-                positionInterval = null;
                 lastUpdateTime = -UPDATE_INTERVAL_MS;
               }
               _context2.n = 2;
@@ -366,40 +332,6 @@
       } finally {
         _iterator.f();
       }
-    }
-    function checkPositions() {
-      if (!anchors.size || positionCheckPending) return;
-      positionCheckPending = true;
-      AelluxJs.waitLayout.read(function() {
-        var _iterator2 = _createForOfIteratorHelper(anchors), _step2;
-        try {
-          for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
-            var _step2$value = _slicedToArray(_step2.value, 2), element = _step2$value[0], state = _step2$value[1];
-            if (!state.target || !state.reference || !state.targetPosition) continue;
-            if (element.offsetParent !== state.reference) return true;
-            var referenceRect = state.reference.getBoundingClientRect();
-            var scaleX = state.reference.offsetWidth ? referenceRect.width / state.reference.offsetWidth : 1;
-            var scaleY = state.reference.offsetHeight ? referenceRect.height / state.reference.offsetHeight : 1;
-            var position = toReference(state.target.getBoundingClientRect(), state.reference, referenceRect, scaleX, scaleY);
-            if (position.left !== state.targetPosition.left || position.top !== state.targetPosition.top) return true;
-          }
-        } catch (err) {
-          _iterator2.e(err);
-        } finally {
-          _iterator2.f();
-        }
-        return false;
-      }).then(function(changed) {
-        if (changed) scheduleUpdate();
-      }).catch(function(cause) {
-        AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_EXTENSION_MOUNT, {
-          cause: cause,
-          extension: extensionName,
-          method: "update"
-        });
-      }).finally(function() {
-        positionCheckPending = false;
-      });
     }
     function now() {
       return root.performance && typeof root.performance.now === "function" ? root.performance.now() : Date.now();
@@ -457,7 +389,7 @@
               }
               _context3.n = 6;
               return AelluxJs.waitLayout.update(function() {
-                if (current()) invalidContext(element, state, placement.target);
+                if (current()) invalidContext(element, state, placement);
               });
             case 6:
               return _context3.a(2);
@@ -497,7 +429,7 @@
               }
               _context3.n = 12;
               return AelluxJs.waitLayout.update(function() {
-                if (current()) invalidContext(element, state, placement.target);
+                if (current()) invalidContext(element, state, placement);
               });
             case 12:
               return _context3.a(2);
@@ -507,22 +439,21 @@
                 if (!current()) return;
                 state.invalidContext = false;
                 observe(state, element, placement.target, placement.reference);
-                state.targetPosition = placement.targetPosition;
                 var selected = placement.selected;
                 element.style.setProperty("--ae-anchor-x", "".concat(selected.x, "px"));
                 element.style.setProperty("--ae-anchor-y", "".concat(selected.y, "px"));
                 element.style.setProperty("--ae-anchor-origin-x", "".concat(selected.self[0] * 100, "%"));
                 element.style.setProperty("--ae-anchor-origin-y", "".concat(selected.self[1] * 100, "%"));
-                var _iterator6 = _createForOfIteratorHelper(baseProperties), _step6;
+                var _iterator5 = _createForOfIteratorHelper(baseProperties), _step5;
                 try {
-                  for (_iterator6.s(); !(_step6 = _iterator6.n()).done; ) {
-                    var name = _step6.value;
+                  for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
+                    var name = _step5.value;
                     element.style.removeProperty(name);
                   }
                 } catch (err) {
-                  _iterator6.e(err);
+                  _iterator5.e(err);
                 } finally {
-                  _iterator6.f();
+                  _iterator5.f();
                 }
                 element.classList.add(anchoredClass);
               });
@@ -539,7 +470,8 @@
       if (!reference || target !== reference && target.offsetParent !== reference) {
         return {
           valid: false,
-          target: target
+          target: target,
+          reference: reference
         };
       }
       if (!measure) return {
@@ -560,10 +492,10 @@
         height: root.innerHeight
       }, reference, referenceRect, scaleX, scaleY);
       var selected = null;
-      var _iterator3 = _createForOfIteratorHelper(candidates), _step3;
+      var _iterator2 = _createForOfIteratorHelper(candidates), _step2;
       try {
-        for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
-          var candidate = _step3.value;
+        for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
+          var candidate = _step2.value;
           var x = targetRect.left + targetRect.width * candidate.target[0] - selfWidth * candidate.self[0];
           var y = targetRect.top + targetRect.height * candidate.target[1] - selfHeight * candidate.self[1];
           var result = {
@@ -578,50 +510,53 @@
           }
         }
       } catch (err) {
-        _iterator3.e(err);
+        _iterator2.e(err);
       } finally {
-        _iterator3.f();
+        _iterator2.f();
       }
       return {
         valid: true,
         target: target,
         reference: reference,
-        selected: selected,
-        targetPosition: {
-          left: targetRect.left,
-          top: targetRect.top
-        }
+        selected: selected
       };
     }
-    function invalidContext(element, state, target) {
+    function invalidContext(element, state, placement) {
       deactivate(element, state);
+      if (placement.reference) listenForLayout(state, placement.reference);
       if (state.invalidContext) return;
       AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_ANCHOR_REFERENCE_CONTEXT, {
         extension: extensionName,
         element: element,
-        target: target
+        target: placement.target
       });
       state.invalidContext = true;
     }
     function observe(state, element, target, reference) {
       if (state.target === target && state.reference === reference) return;
+      listenForLayout(state, reference);
       state.target = target;
-      state.reference = reference;
       if (state.observer) state.observer.disconnect();
       if (state.intersectionObserver) state.intersectionObserver.disconnect();
-      var _iterator4 = _createForOfIteratorHelper(/* @__PURE__ */ new Set([element, target, reference])), _step4;
+      var _iterator3 = _createForOfIteratorHelper(/* @__PURE__ */ new Set([element, target, reference])), _step3;
       try {
-        for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
-          var observed = _step4.value;
+        for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
+          var observed = _step3.value;
           if (!observed) continue;
           if (state.observer) state.observer.observe(observed);
           if (state.intersectionObserver) state.intersectionObserver.observe(observed);
         }
       } catch (err) {
-        _iterator4.e(err);
+        _iterator3.e(err);
       } finally {
-        _iterator4.f();
+        _iterator3.f();
       }
+    }
+    function listenForLayout(state, reference) {
+      if (state.reference === reference) return;
+      if (state.reference) state.reference.removeEventListener(layoutEvent, state.layoutListener);
+      state.reference = reference;
+      if (reference) reference.addEventListener(layoutEvent, state.layoutListener);
     }
     function applyBaseStyles(element) {
       element.style.setProperty("position", "absolute");
@@ -631,10 +566,10 @@
       element.style.setProperty("transform-origin", "var(--ae-anchor-origin-x, 50%) var(--ae-anchor-origin-y, 0%)");
     }
     function deactivate(element, state) {
+      if (state.reference) state.reference.removeEventListener(layoutEvent, state.layoutListener);
       if (state.observer) state.observer.disconnect();
       if (state.intersectionObserver) state.intersectionObserver.disconnect();
       state.target = state.reference = null;
-      state.targetPosition = null;
       element.classList.remove(anchoredClass);
       if (state.active) restoreStyles(element, state.original);
       state.active = false;
@@ -660,10 +595,10 @@
     }
     function parseCandidates(value) {
       var result = [];
-      var _iterator5 = _createForOfIteratorHelper((value || "").split(",")), _step5;
+      var _iterator4 = _createForOfIteratorHelper((value || "").split(",")), _step4;
       try {
-        for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
-          var token = _step5.value;
+        for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
+          var token = _step4.value;
           var pair = token.trim().toLowerCase().split(":");
           if (pair.length !== 2 || !pivots[pair[0].trim()] || !pivots[pair[1].trim()]) continue;
           result.push({
@@ -672,9 +607,9 @@
           });
         }
       } catch (err) {
-        _iterator5.e(err);
+        _iterator4.e(err);
       } finally {
-        _iterator5.f();
+        _iterator4.f();
       }
       return result;
     }

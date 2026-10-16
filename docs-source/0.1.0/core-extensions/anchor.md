@@ -26,4 +26,18 @@ The anchored element and an explicit target must share the same `offsetParent`. 
 
 Before the first valid calculation, the boot's weak CSS keeps the element hidden and applies `contain: layout paint`. Once calculated, the `ae--anchored` class makes it visible and applies absolute positioning at `top: 0; left: 0` with `translate3d()`. Anchor publishes `--ae-anchor-x`, `--ae-anchor-y`, `--ae-anchor-origin-x`, and `--ae-anchor-origin-y` as inline CSS properties. Add a `transform` transition in your own CSS if you want animated movement. On unmount, Anchor removes its class and restores the previous inline values and priorities.
 
-Anchor updates after captured scroll events, including native Scrollbox scrolling, window resize, observed size changes, or intersection changes when `IntersectionObserver` is available, with a 100 ms throttle. It observes the anchored element, target, and positioning reference. Once per second, Anchor also checks whether the target moved relative to the positioning reference and schedules an update if it did. Anchor reads geometry through `$ae.waitLayout.read()` and writes CSS through `$ae.waitLayout.update()`. After changing the target or pivot attributes, call `$ae.mountManager.update(element, "anchor")` to recalculate immediately.
+Anchor updates after captured scroll events, including native Scrollbox scrolling, window resize, observed size changes, intersection changes when `IntersectionObserver` is available, or a bubbling `AelluxJsLayout` event received by the shared positioning parent, with a 100 ms throttle. It observes the anchored element, target, and positioning reference; it does not poll their positions. Present emits `AelluxJsLayout` after a Pop or Unpop transition finishes. Other code that changes layout without triggering those observers can dispatch the event from a descendant of the positioning parent:
+
+```js
+$ae.dispatchFrom(document.getElementById("menu"), "Layout", { bubbles: true });
+```
+
+After changing the target or pivot attributes, request an immediate update:
+
+```js
+const anchor = document.getElementById("menu");
+anchor.setAttribute("data-ae-anchor-target", "new-trigger");
+await $ae.mountManager.update(anchor, "anchor");
+```
+
+Anchor reads geometry through `$ae.waitLayout.read()` and writes CSS through `$ae.waitLayout.update()`.

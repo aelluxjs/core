@@ -31,4 +31,6 @@ Each separately distributed minified Core Extension, including Anchor and Scroll
 
 This budget detects distribution-size regressions. It does not measure page-specific network time, parsing time, boot time, layout, mount duration, memory use, or real-user performance. The Legacy full bundle is materially larger because it includes the shared polyfills required for its ES5 path. Runtime-performance budgets require representative application fixtures and remain post-release work.
 
+For layout work inside an Extension, use [`waitLayout`](wait-layout.md) to batch geometry reads and dependent CSS or DOM writes. The guide includes code for coalescing frequent scroll and resize notifications.
+
 The Present JavaScript raw limit is 10 KiB after adding the optional measured size-transition path; its 4 KiB gzip limit remains unchanged.

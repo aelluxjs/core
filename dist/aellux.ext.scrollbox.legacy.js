@@ -668,6 +668,7 @@
     }
     function startScrollbarDrag(state, record, event) {
       if (state.disposed || event.button !== 0 || !record.max) return;
+      if (activePointerScrollState && activePointerScrollState.pointerScroll && activePointerScrollState.pointerScroll.chain.includes(state)) endPointerScroll(activePointerScrollState);
       if (event.cancelable) event.preventDefault();
       event.stopPropagation();
       var position = scrollbarPointerPosition(record, event);
@@ -1106,7 +1107,7 @@
     }
     function startPointerScroll(state, event) {
       if (event.detail > 1) return;
-      if (activePointerScrollState || state.pointerScroll || event.defaultPrevented || event.button !== 0 || !event.isPrimary || event.pointerType === "touch" || (event.buttons & 1) === 0) return;
+      if (activePointerScrollState || state.pointerScroll || state.scrollbar.drag || event.defaultPrevented || event.button !== 0 || !event.isPrimary || event.pointerType === "touch" || (event.buttons & 1) === 0) return;
       var element = state.element;
       var nested = event.target.closest("[".concat(attribute, "]"));
       if (nested !== element || event.target.closest(pointerScrollExceptionSelector)) return;
@@ -1117,6 +1118,9 @@
         if (member && member.pointerListening && !member.disposed) chain.push(member);
         node = node.parentElement && node.parentElement.closest("[".concat(attribute, "]"));
       }
+      if (chain.some(function(member2) {
+        return member2.scrollbar.drag;
+      })) return;
       var axes = new Map(chain.map(function(member2) {
         var metrics = nativeMetrics(member2.element);
         member2.metrics = metrics;
@@ -2079,7 +2083,7 @@
       cancelMomentum(state);
       if (event.defaultPrevented || event.ctrlKey) return;
       if (event.target.closest("[".concat(attribute, "]")) !== state.element) return;
-      var metrics = state.metrics || nativeMetrics(state.element);
+      var metrics = nativeMetrics(state.element);
       if (!metrics) return;
       var axes = wheelAxes(state, metrics);
       var factor = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? metrics.page : 1;

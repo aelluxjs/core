@@ -337,6 +337,16 @@ Runtime API                            </a>
                           </li>
                           <li class="nav-item small-md rounded-1 ps-md-1"
                             style="flex:0">
+                            <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/runtime/wait-layout.htm">
+waitLayout                            </a>
+                          </li>
+                          <li class="nav-item small-md rounded-1 ps-md-1"
+                            style="flex:0">
+                            <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/runtime/events.htm">
+Events                            </a>
+                          </li>
+                          <li class="nav-item small-md rounded-1 ps-md-1"
+                            style="flex:0">
                             <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/runtime/modern-legacy.htm">
 Modern &amp; Legacy                            </a>
                           </li>
@@ -584,9 +594,22 @@ State Navigation                  </li>
 navigation.setState(&quot;tab&quot;, &quot;details&quot;, &quot;Details&quot;);
 </code></pre>
 <p><code>setState(key, value, title, silent)</code> updates a snapshot entry. With <code>silent: true</code>, it replaces the current history entry; otherwise it pushes a new entry. <code>globalSnapshot</code> exposes the current snapshot, and <code>updateBaseTitle(title)</code> changes the title suffix used for later updates.</p>
-<p>Other Extensions can request a state update without accessing <code>state-navigation</code> directly by dispatching <code>AelluxJsPushState</code> with <code>detail: { key, value, title? }</code>. <code>key</code> and <code>value</code> must be non-empty strings, while <code>title</code> is optional. State Navigation consumes this command when loaded; malformed details produce a navigation warning without changing history. Focus uses this event contract to record the focused element&#39;s ID as <code>ae-focus</code>.</p>
+<p>Other Extensions can request a state update without accessing <code>state-navigation</code> directly:</p>
+<pre><code class="language-js">$ae.dispatch(&quot;PushState&quot;, {
+  detail: { key: &quot;tab&quot;, value: &quot;details&quot;, title: &quot;Details&quot; }
+});
+</code></pre>
+<p>The <code>key</code> and <code>value</code> fields must be non-empty strings; <code>title</code> is optional. State Navigation consumes this command when loaded; malformed details produce a navigation warning without changing history. Focus uses this event contract to record the focused element&#39;s ID as <code>ae-focus</code>.</p>
 <p>The Extension dispatches <code>AelluxJsSnapshotChange</code> after writing a new state and <code>AelluxJsSnapshotRestore</code> after reading a state from history or the hash. Event <code>detail</code> contains <code>snapshot</code>, <code>removeSnapshot</code>, and <code>popState</code>. For a <code>popstate</code> restoration, <code>popState</code> is the history entry that was read; it is <code>undefined</code> for a hash-only restoration or a snapshot change. The snapshot and document title are updated before <code>AelluxJsSnapshotRestore</code> is dispatched. The current implementation reads <code>useHash</code> from the top-level <code>$ae.options.useHash</code> setting. With <code>useHash: false</code>, restoring a history entry whose snapshot is <code>null</code> clears the current snapshot.</p>
-<p>Dispatch <code>AelluxJsPushAjaxReplace</code> with <code>detail: { url, selectors }</code> to record the current and target URLs in browser history. Each entry stores <code>ajaxReplace: { url, selectors }</code>; the target entry has <code>snapshot: null</code>. The optional <code>ajaxHref</code> Extension can use this history metadata when available. It is not part of the <code>full</code> runtime&#39;s bundled Extension list. Dispatch <code>AelluxJsUpdateBaseTitle</code> with <code>detail: { title }</code> to update the base document title. Malformed event details produce a navigation warning.</p>
+<p>Dispatch <code>AelluxJsPushAjaxReplace</code> to record the current and target URLs in browser history, or <code>AelluxJsUpdateBaseTitle</code> to update the base document title:</p>
+<pre><code class="language-js">$ae.dispatch(&quot;PushAjaxReplace&quot;, {
+  detail: { url: &quot;/details&quot;, selectors: [&quot;#main&quot;] }
+});
+$ae.dispatch(&quot;UpdateBaseTitle&quot;, {
+  detail: { title: &quot;Example&quot; }
+});
+</code></pre>
+<p>Each history entry stores <code>ajaxReplace: { url, selectors }</code>; the target entry has <code>snapshot: null</code>. The optional <code>ajaxHref</code> Extension can use this history metadata when available. It is not part of the <code>full</code> runtime&#39;s bundled Extension list. Malformed event details produce a navigation warning.</p>
 <h2>Parent page and iframe</h2>
 <p>A browser fixture runs this Extension in <code>basic</code> mode in both a parent page and an iframe, keeping Focus out of this history-isolation test. Its test confirms that after a parent state followed by an iframe <code>ajaxReplace</code> state, the first Back fires <code>popstate</code> and <code>AelluxJsSnapshotRestore</code> only in the iframe; the next Back fires them only in the parent. The test passes in Chromium, Firefox and WebKit. Build <code>dist/</code> first, then run <code>npx playwright test tests/browser/state-navigation-iframe.spec.mjs</code> to repeat it, or start <code>node tests/browser/server.mjs</code> and open <code>/tests/browser/state-navigation-iframe-parent.html</code> to use the buttons manually.</p>
 <p>The parent and iframe do not need an owner marker to route <code>popstate</code>: each instance reads the history state of its own window. Applications that need to share data between the two documents can implement that exchange separately.</p>

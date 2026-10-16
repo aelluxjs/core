@@ -14,7 +14,7 @@
 
 <meta name="description" content="aellux.js Docs">
   <link rel="canonical" href="https://aelluxjs.github.io/core/docs/0.1.0/runtime/es5-support.htm">
-  
+
     <meta property="og:title" content="ES5 Support | 0.1.0 | aellux.js Docs" />
     <meta property="og:type" content="website" />
           <meta property="og:url" content="https://aelluxjs.github.io/core/docs/0.1.0/runtime/es5-support.htm" />
@@ -26,7 +26,7 @@
         <meta name="twitter:description" content="aellux.js Docs">
 
                   <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"ES5 Support | 0.1.0 | aellux.js Docs","description":"aellux.js Docs","url":"https://aelluxjs.github.io/core/docs/0.1.0/runtime/es5-support.htm"}</script>
-          
+
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -337,6 +337,16 @@ Runtime API                            </a>
                           </li>
                           <li class="nav-item small-md rounded-1 ps-md-1"
                             style="flex:0">
+                            <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/runtime/wait-layout.htm">
+waitLayout                            </a>
+                          </li>
+                          <li class="nav-item small-md rounded-1 ps-md-1"
+                            style="flex:0">
+                            <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/runtime/events.htm">
+Events                            </a>
+                          </li>
+                          <li class="nav-item small-md rounded-1 ps-md-1"
+                            style="flex:0">
                             <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/runtime/modern-legacy.htm">
 Modern &amp; Legacy                            </a>
                           </li>
@@ -561,7 +571,7 @@ ES5 Support                  </li>
     ← <span class="text-truncate overflow-hidden d-inline-block align-middle flex-fill"
       style="max-width:200px">Performance and Bundle Budget</span>
   </a>
-  
+
     <a href="/core/docs/0.1.0/runtime/visual-mounting.htm" class="text-decoration-none d-inline-flex flex-row justify-content-end gap-2"
     style="width: 40%;">
     <span class="text-truncate overflow-hidden d-inline-block align-middle flex-fill text-end"
@@ -588,7 +598,7 @@ ES5 Support                  </li>
 <p>The generated Legacy Extensions do not embed these dependencies again. They are loaded after, and share the environment prepared by, the Legacy orchestrator.</p>
 <p>Third-party Extensions may rely on this list only while running under the aellux.js Legacy runtime. Any additional API must be feature-detected and included by the Extension&#39;s own build or loaded as an explicit dependency. Babel or another transpiler can produce ES5 syntax, but does not automatically provide missing browser APIs.</p>
 <p>Browser primitives such as the DOM, <code>XMLHttpRequest</code> and <code>DOMParser</code> are still expected from the host environment. For <code>0.1.0</code>, the Legacy contract covers the ES5 output, runtime selection and fallback, shared polyfill installation, and generated Extension variants when exercised in the current tested browser engines. It does not declare compatibility with any historical browser version. ES5 syntax must therefore not be interpreted as unrestricted support for old browsers.</p>
-<p>See <a href="../extensions/authoring.htm">Authoring Third-Party aellux.js Extensions</a> for the publication contract and reference build.</p>
+<p>See <a href="../extensions/authoring.htm">Extension Authoring</a> for the publication contract and reference build.</p>
 <h2>Build Tooling</h2>
 <p>Node.js 20 or newer is required to build aellux.js. This tooling requirement is independent of the browser syntax baseline.</p>
         </div>
@@ -599,7 +609,7 @@ ES5 Support                  </li>
     ← <span class="text-truncate overflow-hidden d-inline-block align-middle flex-fill"
       style="max-width:200px">Performance and Bundle Budget</span>
   </a>
-  
+
     <a href="/core/docs/0.1.0/runtime/visual-mounting.htm" class="text-decoration-none d-inline-flex flex-row justify-content-end gap-2"
     style="width: 40%;">
     <span class="text-truncate overflow-hidden d-inline-block align-middle flex-fill text-end"

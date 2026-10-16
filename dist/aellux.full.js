@@ -980,6 +980,7 @@
         }
         const attribute = AelluxJs2.attr(extensionName);
         const targetAttribute = AelluxJs2.attr("anchor-target");
+        const layoutEvent = AelluxJs2.eventName("Layout");
         const anchoredClass = AelluxJs2.className("anchored");
         const baseProperties = ["position", "left", "top", "transform", "transform-origin"];
         const ownedProperties = [
@@ -1001,11 +1002,8 @@
           "bottom-right": [1, 1]
         };
         const UPDATE_INTERVAL_MS = 100;
-        const POSITION_CHECK_INTERVAL_MS = 1e3;
         const anchors = /* @__PURE__ */ new Map();
         let updateTimeout = null;
-        let positionInterval = null;
-        let positionCheckPending = false;
         let lastUpdateTime = -UPDATE_INTERVAL_MS;
         AelluxJs2.extAttach(extensionName, { init, destroy });
         function init() {
@@ -1031,9 +1029,7 @@
         }
         async function destroy() {
           if (updateTimeout !== null) clearTimeout(updateTimeout);
-          if (positionInterval !== null) clearInterval(positionInterval);
           updateTimeout = null;
-          positionInterval = null;
           lastUpdateTime = -UPDATE_INTERVAL_MS;
           await Promise.all(Array.from(anchors.keys(), unmountAnchor));
           AelluxJs2.mountManager.remove({ extensionName });
@@ -1051,7 +1047,7 @@
             revision: 0,
             target: null,
             reference: null,
-            targetPosition: null,
+            layoutListener: () => scheduleUpdate(),
             observer: null,
             intersectionObserver: null
           };
@@ -1059,7 +1055,6 @@
           if (anchors.size === 1) {
             root2.addEventListener("scroll", scheduleUpdate, { capture: true, passive: true });
             root2.addEventListener("resize", scheduleUpdate);
-            positionInterval = setInterval(checkPositions, POSITION_CHECK_INTERVAL_MS);
           }
           if (typeof root2.ResizeObserver === "function") {
             state.observer = new root2.ResizeObserver(scheduleUpdate);
@@ -1073,6 +1068,7 @@
           const state = anchors.get(element);
           if (!state) return;
           state.revision++;
+          if (state.reference) state.reference.removeEventListener(layoutEvent, state.layoutListener);
           if (state.observer) state.observer.disconnect();
           if (state.intersectionObserver) state.intersectionObserver.disconnect();
           anchors.delete(element);
@@ -1080,9 +1076,7 @@
             root2.removeEventListener("scroll", scheduleUpdate, true);
             root2.removeEventListener("resize", scheduleUpdate);
             if (updateTimeout !== null) clearTimeout(updateTimeout);
-            if (positionInterval !== null) clearInterval(positionInterval);
             updateTimeout = null;
-            positionInterval = null;
             lastUpdateTime = -UPDATE_INTERVAL_MS;
           }
           await AelluxJs2.waitLayout.update(deactivate, [element, state]);
@@ -1111,37 +1105,6 @@
             });
           }
         }
-        function checkPositions() {
-          if (!anchors.size || positionCheckPending) return;
-          positionCheckPending = true;
-          AelluxJs2.waitLayout.read(() => {
-            for (const [element, state] of anchors) {
-              if (!state.target || !state.reference || !state.targetPosition) continue;
-              if (element.offsetParent !== state.reference) return true;
-              const referenceRect = state.reference.getBoundingClientRect();
-              const scaleX = state.reference.offsetWidth ? referenceRect.width / state.reference.offsetWidth : 1;
-              const scaleY = state.reference.offsetHeight ? referenceRect.height / state.reference.offsetHeight : 1;
-              const position = toReference(
-                state.target.getBoundingClientRect(),
-                state.reference,
-                referenceRect,
-                scaleX,
-                scaleY
-              );
-              if (position.left !== state.targetPosition.left || position.top !== state.targetPosition.top) return true;
-            }
-            return false;
-          }).then((changed) => {
-            if (changed) scheduleUpdate();
-          }).catch((cause) => {
-            AelluxJs2.diagnostics.error(
-              AelluxJs2.diagnostics.ERROR_EXTENSION_MOUNT,
-              { cause, extension: extensionName, method: "update" }
-            );
-          }).finally(() => {
-            positionCheckPending = false;
-          });
-        }
         function now() {
           return root2.performance && typeof root2.performance.now === "function" ? root2.performance.now() : Date.now();
         }
@@ -1166,7 +1129,7 @@
           if (!current() || !placement) return;
           if (!placement.valid) {
             await AelluxJs2.waitLayout.update(() => {
-              if (current()) invalidContext(element, state, placement.target);
+              if (current()) invalidContext(element, state, placement);
             });
             return;
           }
@@ -1183,7 +1146,7 @@
             if (!current() || !placement) return;
             if (!placement.valid) {
               await AelluxJs2.waitLayout.update(() => {
-                if (current()) invalidContext(element, state, placement.target);
+                if (current()) invalidContext(element, state, placement);
               });
               return;
             }
@@ -1192,7 +1155,6 @@
             if (!current()) return;
             state.invalidContext = false;
             observe(state, element, placement.target, placement.reference);
-            state.targetPosition = placement.targetPosition;
             const selected = placement.selected;
             element.style.setProperty("--ae-anchor-x", `${selected.x}px`);
             element.style.setProperty("--ae-anchor-y", `${selected.y}px`);
@@ -1206,7 +1168,7 @@
           const reference = element.offsetParent;
           target = target || reference;
           if (!reference || target !== reference && target.offsetParent !== reference) {
-            return { valid: false, target };
+            return { valid: false, target, reference };
           }
           if (!measure) return { valid: true, target };
           const referenceRect = reference.getBoundingClientRect();
@@ -1234,27 +1196,23 @@
               break;
             }
           }
-          return {
-            valid: true,
-            target,
-            reference,
-            selected,
-            targetPosition: { left: targetRect.left, top: targetRect.top }
-          };
+          return { valid: true, target, reference, selected };
         }
-        function invalidContext(element, state, target) {
+        function invalidContext(element, state, placement) {
           deactivate(element, state);
+          if (placement.reference)
+            listenForLayout(state, placement.reference);
           if (state.invalidContext) return;
           AelluxJs2.diagnostics.error(
             AelluxJs2.diagnostics.ERROR_ANCHOR_REFERENCE_CONTEXT,
-            { extension: extensionName, element, target }
+            { extension: extensionName, element, target: placement.target }
           );
           state.invalidContext = true;
         }
         function observe(state, element, target, reference) {
           if (state.target === target && state.reference === reference) return;
+          listenForLayout(state, reference);
           state.target = target;
-          state.reference = reference;
           if (state.observer) state.observer.disconnect();
           if (state.intersectionObserver) state.intersectionObserver.disconnect();
           for (const observed of /* @__PURE__ */ new Set([element, target, reference])) {
@@ -1262,6 +1220,12 @@
             if (state.observer) state.observer.observe(observed);
             if (state.intersectionObserver) state.intersectionObserver.observe(observed);
           }
+        }
+        function listenForLayout(state, reference) {
+          if (state.reference === reference) return;
+          if (state.reference) state.reference.removeEventListener(layoutEvent, state.layoutListener);
+          state.reference = reference;
+          if (reference) reference.addEventListener(layoutEvent, state.layoutListener);
         }
         function applyBaseStyles(element) {
           element.style.setProperty("position", "absolute");
@@ -1277,10 +1241,10 @@
           );
         }
         function deactivate(element, state) {
+          if (state.reference) state.reference.removeEventListener(layoutEvent, state.layoutListener);
           if (state.observer) state.observer.disconnect();
           if (state.intersectionObserver) state.intersectionObserver.disconnect();
           state.target = state.reference = null;
-          state.targetPosition = null;
           element.classList.remove(anchoredClass);
           if (state.active) restoreStyles(element, state.original);
           state.active = false;
@@ -1910,6 +1874,8 @@
         }
         function startScrollbarDrag(state, record, event) {
           if (state.disposed || event.button !== 0 || !record.max) return;
+          if (activePointerScrollState && activePointerScrollState.pointerScroll && activePointerScrollState.pointerScroll.chain.includes(state))
+            endPointerScroll(activePointerScrollState);
           if (event.cancelable) event.preventDefault();
           event.stopPropagation();
           const position = scrollbarPointerPosition(record, event);
@@ -2329,7 +2295,7 @@
         }
         function startPointerScroll(state, event) {
           if (event.detail > 1) return;
-          if (activePointerScrollState || state.pointerScroll || event.defaultPrevented || event.button !== 0 || !event.isPrimary || event.pointerType === "touch" || (event.buttons & 1) === 0) return;
+          if (activePointerScrollState || state.pointerScroll || state.scrollbar.drag || event.defaultPrevented || event.button !== 0 || !event.isPrimary || event.pointerType === "touch" || (event.buttons & 1) === 0) return;
           const element = state.element;
           const nested = event.target.closest(`[${attribute}]`);
           if (nested !== element || event.target.closest(pointerScrollExceptionSelector)) return;
@@ -2340,6 +2306,7 @@
             if (member && member.pointerListening && !member.disposed) chain.push(member);
             node = node.parentElement && node.parentElement.closest(`[${attribute}]`);
           }
+          if (chain.some((member) => member.scrollbar.drag)) return;
           const axes = new Map(chain.map((member) => {
             const metrics = nativeMetrics(member.element);
             member.metrics = metrics;
@@ -3193,7 +3160,7 @@
           cancelMomentum(state);
           if (event.defaultPrevented || event.ctrlKey) return;
           if (event.target.closest(`[${attribute}]`) !== state.element) return;
-          const metrics = state.metrics || nativeMetrics(state.element);
+          const metrics = nativeMetrics(state.element);
           if (!metrics) return;
           const axes = wheelAxes(state, metrics);
           const factor = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? metrics.page : 1;
@@ -3948,6 +3915,7 @@
               controller.setAriaExpanded("false");
               AelluxJs2.dispatchFrom(element, UNPOP, { bubbles: true });
             }
+            AelluxJs2.dispatchFrom(element, "Layout", { bubbles: true });
           } catch (error) {
             const ownsTransition = transition && controller.transition === transition;
             if (ownsTransition && transition.timeout !== null) {
@@ -4191,6 +4159,15 @@
       spawn,
       despawn,
       hasMounts,
+      on(event, handler, options) {
+        element.addEventListener(root2.AelluxJs.eventName(event), handler, options);
+      },
+      off(event, handler, options) {
+        element.removeEventListener(root2.AelluxJs.eventName(event), handler, options);
+      },
+      dispatch(event, options) {
+        return root2.AelluxJs.dispatchFrom(element, event, options);
+      },
       mount(extensionNames = null) {
         return root2.AelluxJs.mountManager.mount(element, extensionNames);
       },

@@ -49,6 +49,50 @@ test("custom scrollbar stays over the viewport and supports track click and thum
   await expect(track).toHaveCSS("opacity", "0");
 });
 
+for (const axis of ["vertical", "horizontal"]) {
+  test(`${axis} scrollbar drag excludes pointer drag scroll`, async ({ page }) => {
+    await setup(page, `<div id="box" data-ae-scrollbox="pointer" data-ae-scrollbar="${axis}"
+      style="width:120px;height:120px;overflow:${axis === "vertical" ? "hidden auto" : "auto hidden"}">
+      <div id="content" style="width:600px;height:600px"></div>
+    </div>`);
+    const box = page.locator("#box");
+    const track = page.locator(`#box > [data-ae-scrollbar-${axis}]`);
+    await expect(track).toHaveCount(1);
+    const rect = await track.boundingBox();
+    const size = await track.evaluate(element =>
+      Number.parseFloat(element.style.getPropertyValue("--ae-scrollbar-thumb-size")));
+    const x = axis === "vertical" ? rect.x + rect.width / 2 : rect.x + size / 2;
+    const y = axis === "vertical" ? rect.y + size / 2 : rect.y + rect.height / 2;
+    await page.mouse.move(x, y);
+    await page.mouse.down();
+    await page.mouse.move(x + (axis === "horizontal" ? 30 : 0),
+      y + (axis === "vertical" ? 30 : 0), { steps: 3 });
+    const duringDrag = await box.evaluate((element, axis) => {
+      const content = element.querySelector("#content");
+      const rect = content.getBoundingClientRect();
+      const x = rect.left + 40, y = rect.top + 40;
+      content.dispatchEvent(new PointerEvent("pointerdown", {
+        bubbles: true, cancelable: true, isPrimary: true, pointerId: 901,
+        pointerType: "mouse", button: 0, buttons: 1, clientX: x, clientY: y
+      }));
+      window.dispatchEvent(new PointerEvent("pointermove", {
+        bubbles: true, cancelable: true, isPrimary: true, pointerId: 901,
+        pointerType: "mouse", buttons: 1,
+        clientX: x - (axis === "horizontal" ? 40 : 0),
+        clientY: y - (axis === "vertical" ? 40 : 0)
+      }));
+      return {
+        pds: element.classList.contains("ae--pointerscrolling"),
+        scroll: axis === "vertical" ? element.scrollTop : element.scrollLeft
+      };
+    }, axis);
+    expect(duringDrag.pds).toBe(false);
+    expect(duringDrag.scroll).toBeGreaterThan(0);
+    await page.mouse.up();
+    await expect(box).not.toHaveClass(/ae--pointerscrolling/);
+  });
+}
+
 test("mouse and pointer hover keep scrollbars visible independently", async ({ page }) => {
   await setup(page, `<div id="box" data-ae-scrollbox data-ae-scrollbar="v"
     style="width:120px;height:120px;overflow-y:auto">

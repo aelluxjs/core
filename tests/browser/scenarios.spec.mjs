@@ -1291,6 +1291,52 @@ test("MutationObserver unmounts removed elements but preserves moved elements", 
   }))).toEqual({ mounted: false, calls: ["observed"], aria: "original" });
 });
 
+test("mounted controller listens and dispatches events on its element", async ({ page }) => {
+  await page.goto("/tests/index.htm");
+  await page.addScriptTag({ url: "/dist/aellux.js" });
+  await page.evaluate(() => AelluxJs.init({ mode: "basic" }));
+  await expect.poll(() => page.evaluate(() => AelluxJs.diagnostics.supported)).toBe(true);
+
+  const result = await page.evaluate(async () => {
+    document.body.innerHTML = '<div id="first" data-event-probe></div><div id="second" data-event-probe></div>';
+    AelluxJs.ext("event-probe");
+    AelluxJs.extAttach("event-probe", {
+      init() {
+        AelluxJs.mountManager.add({
+          extensionName: "event-probe", selector: "[data-event-probe]",
+          mount() {}, unmount() {}
+        });
+      }
+    });
+    await AelluxJs.wait("event-probe");
+    await AelluxJs.mount(document);
+    const first = document.getElementById("first");
+    const second = document.getElementById("second");
+    const controller = $ae("first");
+    const received = [];
+    const handler = event => received.push({
+      target: event.target.id, type: event.type,
+      bubbles: event.bubbles, cancelable: event.cancelable
+    });
+    controller.on("Example", handler);
+    second.dispatchEvent(new Event("AelluxJsExample", { bubbles: true }));
+    const dispatched = controller.dispatch("Example", { bubbles: false, cancelable: true });
+    controller.off("Example", handler);
+    controller.dispatch("Example");
+    return {
+      sameController: controller === AelluxJs(first),
+      received, dispatched,
+      dispatchTarget: first.id
+    };
+  });
+  expect(result).toEqual({
+    sameController: true,
+    received: [{ target: "first", type: "AelluxJsExample", bubbles: false, cancelable: true }],
+    dispatched: true,
+    dispatchTarget: "first"
+  });
+});
+
 test("MutationObserver cleans elements removed during an earlier async cleanup", async ({ page }) => {
   await page.goto("/tests/index.htm");
   await page.addScriptTag({ url: "/dist/aellux.js" });

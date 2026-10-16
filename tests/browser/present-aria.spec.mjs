@@ -1,5 +1,36 @@
 import { expect, test } from "@playwright/test";
 
+test("present announces layout after pop and unpop finish", async ({ page }) => {
+  await page.goto("/tests/index.htm");
+  await page.evaluate(() => {
+    document.body.innerHTML = `<div id="panel" data-ae-present hidden
+      style="--ae-pop-duration:0ms;--ae-unpop-duration:0ms">
+      <div data-ae-present-motion></div>
+    </div>`;
+  });
+  await page.addScriptTag({ url: "/dist/aellux.js" });
+  await page.evaluate(() => AelluxJs.init({ mode: "full" }));
+  await expect.poll(() => page.evaluate(() =>
+    typeof AelluxJs.mountManager?.controller("panel")?.present?.pop === "function"
+  )).toBe(true);
+
+  const events = await page.evaluate(async () => {
+    const panel = document.getElementById("panel");
+    const received = [];
+    for (const name of ["Pop", "Unpop"])
+      panel.addEventListener(`AelluxJs${name}`, () => received.push(name));
+    document.body.addEventListener("AelluxJsLayout", event => {
+      received.push(`Layout:${event.target.id}:${event.target.hidden}`);
+    });
+    await $ae("panel").present.pop();
+    await $ae("panel").present.unpop();
+    return received;
+  });
+  expect(events).toEqual([
+    "Pop", "Layout:panel:false", "Unpop", "Layout:panel:true"
+  ]);
+});
+
 test("unpop restores previous focus only when hiding the active element", async ({ page }) => {
   await page.goto("/tests/index.htm");
   await page.evaluate(() => {

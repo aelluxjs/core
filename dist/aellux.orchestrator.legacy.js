@@ -21050,6 +21050,15 @@
       spawn: spawn,
       despawn: despawn,
       hasMounts: hasMounts,
+      on: function on(event, handler, options) {
+        element.addEventListener(root.AelluxJs.eventName(event), handler, options);
+      },
+      off: function off(event, handler, options) {
+        element.removeEventListener(root.AelluxJs.eventName(event), handler, options);
+      },
+      dispatch: function dispatch(event, options) {
+        return root.AelluxJs.dispatchFrom(element, event, options);
+      },
       mount: function mount() {
         var extensionNames = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : null;
         return root.AelluxJs.mountManager.mount(element, extensionNames);

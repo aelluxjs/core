@@ -21,11 +21,23 @@ The goal of aellux.js is to make rich browser experiences easier to build and ma
 
 Add aellux.js to a page and enable the Extensions it needs. The library coordinates those Extensions as the page loads and changes. Well-defined contracts keep the public API and Extension behavior consistent, making features easier to combine and maintain.
 
+```html
+<div data-ae-scrollbox style="width: 20rem; height: 12rem; overflow: auto">
+  <div style="height: 30rem">Scrollable content</div>
+</div>
+<script src="./dist/aellux.js"></script>
+<script>
+  $ae.init({ mode: "full" });
+</script>
+```
+
 ## Getting Started
 
 - [Installation, build, and runtime modes](getting-started.md)
 - [Compatibility for 0.1.0 Beta](compatibility.md)
 - [Runtime API](runtime/api.md)
+- [`waitLayout` layout scheduling](runtime/wait-layout.md)
+- [Runtime and Extension events](runtime/events.md)
 
 ## Runtime and Compatibility
 

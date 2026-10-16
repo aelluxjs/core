@@ -4,7 +4,24 @@
 
 `data-ae-focus="next"` adds `enterkeyhint="next"` to text-entry inputs, textareas and editable elements when `enterkeyhint` is absent. An explicit hint is preserved. Pressing Enter on a mounted element moves focus to the next connected, visible, enabled focusable control in document order. If there is no next control, Enter keeps its usual behavior. This also applies when a mobile keyboard sends Enter for its Next or confirmation key.
 
+```html
+<label>Name <input id="name" data-ae-focus="next"></label>
+<label>Email <input id="email" data-ae-focus="next" type="email"></label>
+<button type="submit">Continue</button>
+```
+
+In `basic` mode, register Focus before starting the runtime:
+
+```js
+$ae.ext("focus");
+$ae.init({ mode: "basic" });
+```
+
 The Extension observes `focusin`, capture-phase `focus` and `blur` on the document, and `focus` and `blur` on the window. A blur preserves the last valid element target; repeated notifications for the same element do not create duplicate history entries. Focus changes are recorded in a bounded, in-memory history. Call `AelluxJs.ext.focus.restoreLastFocus()` to focus the previous connected, visible target. It returns `true` if focus moved and `false` when no valid target remains. Hidden, inert, disabled and detached targets are skipped.
+
+```js
+const restored = $ae.ext.focus.restoreLastFocus();
+```
 
 When Present dispatches `AelluxJsUnpopFocusLost` after hiding a region containing the active element, Focus attempts to restore the previous valid target from its history. Ordinary blur events do not trigger automatic restoration.
 

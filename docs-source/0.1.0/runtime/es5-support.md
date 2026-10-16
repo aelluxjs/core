@@ -23,7 +23,7 @@ Third-party Extensions may rely on this list only while running under the aellux
 
 Browser primitives such as the DOM, `XMLHttpRequest` and `DOMParser` are still expected from the host environment. For `0.1.0`, the Legacy contract covers the ES5 output, runtime selection and fallback, shared polyfill installation, and generated Extension variants when exercised in the current tested browser engines. It does not declare compatibility with any historical browser version. ES5 syntax must therefore not be interpreted as unrestricted support for old browsers.
 
-See [Authoring Third-Party aellux.js Extensions](../extensions/authoring.md) for the publication contract and reference build.
+See [Extension Authoring](../extensions/authoring.md) for the publication contract and reference build.
 
 ## Build Tooling
 

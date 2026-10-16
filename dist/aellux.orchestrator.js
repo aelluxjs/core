@@ -121,6 +121,15 @@
       spawn,
       despawn,
       hasMounts,
+      on(event, handler, options) {
+        element.addEventListener(root.AelluxJs.eventName(event), handler, options);
+      },
+      off(event, handler, options) {
+        element.removeEventListener(root.AelluxJs.eventName(event), handler, options);
+      },
+      dispatch(event, options) {
+        return root.AelluxJs.dispatchFrom(element, event, options);
+      },
       mount(extensionNames = null) {
         return root.AelluxJs.mountManager.mount(element, extensionNames);
       },

@@ -337,6 +337,16 @@ Runtime API                            </a>
                           </li>
                           <li class="nav-item small-md rounded-1 ps-md-1"
                             style="flex:0">
+                            <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/runtime/wait-layout.htm">
+waitLayout                            </a>
+                          </li>
+                          <li class="nav-item small-md rounded-1 ps-md-1"
+                            style="flex:0">
+                            <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/runtime/events.htm">
+Events                            </a>
+                          </li>
+                          <li class="nav-item small-md rounded-1 ps-md-1"
+                            style="flex:0">
                             <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/runtime/modern-legacy.htm">
 Modern &amp; Legacy                            </a>
                           </li>
@@ -589,7 +599,15 @@ Anchor                  </li>
 </code></pre>
 <p>The anchored element and an explicit target must share the same <code>offsetParent</code>. The target may also be that <code>offsetParent</code> itself. This is the positioning reference, which need not be the immediate DOM parent. If an explicit target is missing or the pivot list has no valid pair, Anchor leaves the element inactive. If the positioning references differ, Anchor reports <code>ERROR_ANCHOR_REFERENCE_CONTEXT</code> and leaves the element inactive.</p>
 <p>Before the first valid calculation, the boot&#39;s weak CSS keeps the element hidden and applies <code>contain: layout paint</code>. Once calculated, the <code>ae--anchored</code> class makes it visible and applies absolute positioning at <code>top: 0; left: 0</code> with <code>translate3d()</code>. Anchor publishes <code>--ae-anchor-x</code>, <code>--ae-anchor-y</code>, <code>--ae-anchor-origin-x</code>, and <code>--ae-anchor-origin-y</code> as inline CSS properties. Add a <code>transform</code> transition in your own CSS if you want animated movement. On unmount, Anchor removes its class and restores the previous inline values and priorities.</p>
-<p>Anchor updates after captured scroll events, including native Scrollbox scrolling, window resize, observed size changes, or intersection changes when <code>IntersectionObserver</code> is available, with a 100 ms throttle. It observes the anchored element, target, and positioning reference. Once per second, Anchor also checks whether the target moved relative to the positioning reference and schedules an update if it did. Anchor reads geometry through <code>$ae.waitLayout.read()</code> and writes CSS through <code>$ae.waitLayout.update()</code>. After changing the target or pivot attributes, call <code>$ae.mountManager.update(element, &quot;anchor&quot;)</code> to recalculate immediately.</p>
+<p>Anchor updates after captured scroll events, including native Scrollbox scrolling, window resize, observed size changes, intersection changes when <code>IntersectionObserver</code> is available, or a bubbling <code>AelluxJsLayout</code> event received by the shared positioning parent, with a 100 ms throttle. It observes the anchored element, target, and positioning reference; it does not poll their positions. Present emits <code>AelluxJsLayout</code> after a Pop or Unpop transition finishes. Other code that changes layout without triggering those observers can dispatch the event from a descendant of the positioning parent:</p>
+<pre><code class="language-js">$ae.dispatchFrom(document.getElementById(&quot;menu&quot;), &quot;Layout&quot;, { bubbles: true });
+</code></pre>
+<p>After changing the target or pivot attributes, request an immediate update:</p>
+<pre><code class="language-js">const anchor = document.getElementById(&quot;menu&quot;);
+anchor.setAttribute(&quot;data-ae-anchor-target&quot;, &quot;new-trigger&quot;);
+await $ae.mountManager.update(anchor, &quot;anchor&quot;);
+</code></pre>
+<p>Anchor reads geometry through <code>$ae.waitLayout.read()</code> and writes CSS through <code>$ae.waitLayout.update()</code>.</p>
         </div>
 
         <div id="doc-navlinks2" ajax-load="doc-navlinks2">

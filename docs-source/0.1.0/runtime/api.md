@@ -21,7 +21,17 @@ The optional `crossOrigin` initialization setting controls the `crossorigin` att
 The `autoViewportMeta` option defaults to `true`. During initialization, the boot checks for `<meta name="viewport">` and adds `<meta name="viewport" content="width=device-width, initial-scale=1">` when it is absent. Set `autoViewportMeta: false` to leave the document head unchanged.
 The boot does not set `data-ae-low-hardware`. Applications may add it to the document root when appropriate; Extensions such as Present use it when present.
 `$ae.registerCssProperty(descriptor)` accepts the same descriptor as `CSS.registerProperty()`. It returns `true` when the browser registers the property, or `false` when the API is unavailable or registration is rejected, including an already registered name. Extensions can call it during their `init()` without requiring Properties and Values API support for their basic behavior.
-Pass Extension-specific configuration through `extensions` in `init()` options. Keys such as `"tab-group"` are normalized to `tabGroup` in `$ae.options.extensions`, and each Extension receives its matching object in `init(options)`. An Extension with no matching configuration receives `{}`.
+Pass Extension-specific configuration through `extensions` in `init()` options:
+
+```js
+$ae.init({
+  extensions: {
+    "tab-group": { initialTab: "overview" }
+  }
+});
+```
+
+Keys such as `"tab-group"` are normalized to `tabGroup` in `$ae.options.extensions`, and each Extension receives its matching object in `init(options)`. An Extension with no matching configuration receives `{}`.
 An Extension's `init(options)` may return a Promise. The runtime awaits it before setting the Extension's `initialized` flag and resolving `wait(extensionName)`; rejection is diagnosed as `ERROR_EXTENSION_INITIALIZE` (`1102`) and leaves the Extension available for a later retry.
 
 ## DOM Lifecycle
@@ -33,7 +43,21 @@ await $ae.unmount(elementOrId);
 
 `mount(elementOrId)` resolves one root from a DOM element or an existing element ID, with or without a leading `#`. It discovers matching declarations below that root, loads required Extensions, and requests idempotent `mount` operations. It resolves to an array of DOM elements mounted during that call, with each element listed once across the matching mount maps; it returns `[]` when nothing is newly mounted or the root cannot be resolved. A failed element mount is diagnosed, its captured attributes and registration are rolled back, and later matching elements continue mounting. The returned array contains only the successful mounts. `unmount(elementOrId)` requests the corresponding cleanup operations and returns `false` when the root cannot be resolved. When the argument is omitted, the document is used. When `MutationObserver` is available, the mount manager automatically unmounts mounted elements removed from the document; moving an element elsewhere in the document keeps it mounted. Without that API, call `unmount(document)` or `destroyExtensions()` to clean detached elements. Unmounting the document also cleans previously mounted elements that have been detached; unmounting a specific element stays within that element's subtree.
 
-Extensions register element handlers with `$ae.mountManager.add({ extensionName, selector, mount, unmount, update, controllers })` during `init()` and call `$ae.mountManager.remove({ extensionName, selector })` during `destroy()`. Omitting `selector` removes all registrations for the Extension. `$ae.mountManager.mount(elementOrId, extensionNames)` and `$ae.mountManager.unmount(elementOrId, extensionNames)` use the same single-root resolution and lifecycle execution as `$ae.mount()` and `$ae.unmount()`. `$ae.mountManager.update(elementOrId, extensionNames)` resolves the same input and runs `update` handlers only for elements already mounted; registrations without an `update` handler are skipped. During mounting, `$ae.mountManager.initialAttribute(element, name)` reads the captured initial value of a managed attribute.
+Extensions register element handlers during `init()` and remove their registration during `destroy()`:
+
+```js
+$ae.mountManager.add({
+  extensionName: "example",
+  selector: "[data-ae-example]",
+  mount(element) { /* attach behavior */ },
+  unmount(element) { /* release behavior */ },
+  update(element) { /* refresh behavior */ }
+});
+
+$ae.mountManager.remove({ extensionName: "example" });
+```
+
+Omitting `selector` removes all registrations for the Extension. The manager's `mount(elementOrId, extensionNames)` and `unmount(elementOrId, extensionNames)` use the same single-root resolution and lifecycle execution as `$ae.mount()` and `$ae.unmount()`. Its `update(elementOrId, extensionNames)` runs `update` handlers only for elements already mounted; registrations without an `update` handler are skipped. During mounting, `initialAttribute(element, name)` reads the captured initial value of a managed attribute.
 
 `add()` requires a previously declared Extension name, valid CSS selector, and `mount` function. `unmount` and `update` are optional functions; `controllers` is an optional array of nonempty method names. Invalid registration arguments and attempts to replace an existing `extensionName` and `selector` pair report `ERROR_MOUNT_REGISTRATION` (`1113`), return `false`, and leave the mount map unchanged. `remove()` returns `false` and reports `ERROR_MOUNT_MAP_IN_USE` (`1115`) if any matching element is still mounted or mounting; unmount those elements before removing the map.
 
@@ -50,11 +74,32 @@ Unmounting removes the corresponding methods from the element controller.
 
 Every mounted element controller offers `mount(extensionNames)`, `unmount(extensionNames)`, and `update(extensionNames)`. These methods use that element as the root, including matching descendants, and return promises. `mount` is idempotent; `update` tries every declared `update` callback for mounted elements and leaves mount registrations intact. A mounted Extension namespace also has an `update` property: `$ae(element).present.update` is `null` when no mounted `present` map declares an `update` callback; otherwise it is a function that updates that Extension's mounted elements under the root. After `unmount` removes every registration, a new controller is created on a later mount.
 
+The controller also offers `on(event, handler, options)`, `off(event, handler, options)`, and `dispatch(event, options)`. These use the same event names and options as the main API, but `on` and `off` register on the mounted element, and `dispatch` calls `dispatchFrom` with that element as the target:
+
+```js
+const panel = $ae("panel");
+const onLayout = event => console.log(event.target);
+panel.on("Layout", onLayout);
+panel.dispatch("Layout", { bubbles: true });
+panel.off("Layout", onLayout);
+```
+
 ```js
 await $ae("panel").update();
 await $ae("panel").unmount();
 await $ae.mount(document.getElementById("panel"));
 ```
+
+## Layout Scheduling
+
+`$ae.waitLayout.read(callback)` batches geometry and computed-style reads; `$ae.waitLayout.update(callback)` applies dependent DOM and CSS changes after those reads. Both return Promises. Queue the update after the read when it needs the measured value:
+
+```js
+const width = await $ae.waitLayout.read(() => panel.getBoundingClientRect().width);
+await $ae.waitLayout.update(() => panel.style.setProperty("--panel-width", `${width}px`));
+```
+
+See [waitLayout](wait-layout.md) for frame order, frequent-event coalescing, lifecycle guards, and examples.
 
 ## Destruction
 
@@ -78,7 +123,15 @@ const preference = await $ae.wait("preference");
 $ae.ext.preference === preference;
 ```
 
-`ext()` registers loading information in `$ae.registry.ext` using camelCase keys. Its `builds` option declares `modern`, `legacy`, or both published artifacts; omission defaults to both. `wait()` loads and initializes the compatible Extension when necessary, then resolves to its public API or `null` after an isolated initialization or compatibility failure. Registered Extension APIs are available under `$ae.ext.<camelCaseName>`. `$ae.dep(label, url)` immediately loads a shared script dependency and returns a Promise that resolves after its `load` event. Pass `$ae.dep(label, url, integrity, crossOrigin)` to set the script's SRI and CORS attributes; omitting `crossOrigin` when SRI is supplied uses `anonymous`. The existing `$ae.dep(label, url, { integrity, crossOrigin })` form also works. Calls with the same label and URL share one load, recorded in `$ae.registry.dep[label]`. The lazy selector and mount indexes are `$ae.registry.lazyExtSelectors` and `$ae.registry.extMounters`.
+`ext()` registers loading information in `$ae.registry.ext` using camelCase keys. Its `builds` option declares `modern`, `legacy`, or both published artifacts; omission defaults to both. `wait()` loads and initializes the compatible Extension when necessary, then resolves to its public API or `null` after an isolated initialization or compatibility failure. Registered Extension APIs are available under `$ae.ext.<camelCaseName>`.
+
+Load a shared script dependency and await its `load` event before using it:
+
+```js
+await $ae.dep("shared-widget", "/vendor/shared-widget.min.js");
+```
+
+Pass `integrity` and `crossOrigin` as the third and fourth arguments when the dependency needs SRI and CORS attributes. Omitting `crossOrigin` when SRI is supplied uses `anonymous`; the options-object form also works. Calls with the same label and URL share one load, recorded in `$ae.registry.dep[label]`. The lazy selector and mount indexes are `$ae.registry.lazyExtSelectors` and `$ae.registry.extMounters`.
 
 `extName(filename)` extracts the Extension name from an `aellux.ext.<name>.js` filename.
 
@@ -93,6 +146,8 @@ $ae.dispatch("Example", { detail: {} });
 ```
 
 aellux.js event names use the `AelluxJs` prefix. `Ready` becomes `AelluxJsReady`. Readiness means the orchestrator is available; it does not guarantee that every Extension or element mounted successfully.
+
+See [Events](events.md) for the complete runtime and Core Extension event list, including `AelluxJsUpdate`.
 
 ## Persistence
 

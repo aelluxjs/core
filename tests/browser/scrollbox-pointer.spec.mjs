@@ -1634,6 +1634,26 @@ test("vertical wheel converts for horizontal-only native boxes and releases at a
   expect(await wheel(120)).toEqual({ prevented: false, x: 200 });
 });
 
+test("vertical wheel stops converting when vertical scrolling becomes available", async ({ page }) => {
+  await setup(page, `<div id="box" data-ae-scrollbox="native"
+    style="width:100px;height:100px;overflow:auto">
+    <div id="content" style="width:300px;height:100px"></div>
+  </div>`);
+  const wheel = () => page.evaluate(() => {
+    const element = document.getElementById("box");
+    const event = new WheelEvent("wheel", {
+      deltaY: 40, bubbles: true, cancelable: true
+    });
+    element.dispatchEvent(event);
+    return { prevented: event.defaultPrevented, x: element.scrollLeft };
+  });
+  expect(await wheel()).toEqual({ prevented: true, x: 40 });
+  await page.evaluate(() => document.getElementById("content").style.height = "300px");
+  expect(await wheel()).toEqual({ prevented: false, x: 40 });
+  await page.evaluate(() => document.getElementById("box").style.overflowY = "hidden");
+  expect(await wheel()).toEqual({ prevented: true, x: 80 });
+});
+
 test("converted wheel stretches an elastic child and scrolls its vertical parent", async ({ page }) => {
   await setup(page, `<div id="parent" data-ae-scrollbox="native"
     style="width:180px;height:120px;overflow:auto">

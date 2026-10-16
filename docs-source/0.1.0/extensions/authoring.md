@@ -1,6 +1,6 @@
-# Authoring Third-Party aellux.js Extensions
+# Authoring aellux.js Extensions
 
-An aellux.js Extension is a classic browser script that attaches one focused behavior through `AelluxJs.extAttach()`. Third-party Extensions follow the same naming, lifecycle, compatibility, and cleanup rules as Core Extensions.
+An aellux.js Extension is a classic browser script that attaches one focused behavior through `AelluxJs.extAttach()`. Core and third-party Extensions follow the same naming, lifecycle, compatibility, and cleanup rules.
 
 Start from [`templates/aellux.ext.template.js`](https://github.com/aelluxjs/core/blob/main/templates/aellux.ext.template.js). The scaffold contains the required structure and a compatibility summary.
 
@@ -15,7 +15,17 @@ Start from [`templates/aellux.ext.template.js`](https://github.com/aelluxjs/core
 7. Keep the public API and lifecycle behavior equivalent across Modern and Legacy variants.
 
 The runtime exposes a kebab-case name as camelCase under `AelluxJs.ext`: `tab-group` becomes `AelluxJs.ext.tabGroup`.
-An Extension receives its configuration as the `options` argument to `init(options)`. Supply it through `$ae.init({ extensions: { "tab-group": { initialTab: "overview" } } })`; the boot script normalizes `tab-group` to `tabGroup` in `$ae.options.extensions`. Extensions without a matching entry receive `{}`.
+An Extension receives its configuration as the `options` argument to `init(options)`. Supply it through `extensions`:
+
+```js
+$ae.init({
+  extensions: {
+    "tab-group": { initialTab: "overview" }
+  }
+});
+```
+
+The boot script normalizes `tab-group` to `tabGroup` in `$ae.options.extensions`. Extensions without a matching entry receive `{}`.
 
 The runtime awaits the value returned by `init(options)`. The Extension receives `initialized: true` only after that value resolves, and `$ae.wait(extensionName)` resolves to its public API at that point. Concurrent calls share the pending initialization. If `init()` throws or its Promise rejects, the runtime reports `ERROR_EXTENSION_INITIALIZE` (`1102`), leaves `initialized` false, resolves that attempt to `null`, and allows a later call to retry initialization. Register mount maps and expose usable Extension-wide services before the Promise resolves.
 
@@ -43,6 +53,89 @@ function destroy() {
 ```
 
 The manager runs matching handlers through the mount helper during `$ae.mount(root)` and `$ae.unmount(root)`. Register before mounting and remove only after unmounting. `mount` must be safe against repeated calls, and `unmount` must reverse the element-level resources created by `mount`.
+
+## Layout work in Core Extensions
+
+Core Extensions must avoid interleaving DOM or CSS writes with reads that can force layout, such as `getBoundingClientRect()`, `offsetWidth`, `clientHeight`, `scrollWidth`, and `getComputedStyle()`. Collect related measurements in one `$ae.waitLayout.read()` callback, then apply dependent styles, classes, attributes, or DOM changes in `$ae.waitLayout.update()`. Queueing the update from the completed read lets the scheduler run the writes after the batched reads in the same layout frame when possible.
+
+For a single measurement and write, no revision guard is needed. These three forms do the same work. With `async`/`await`:
+
+```js
+async function refresh() {
+  const geometry = await AelluxJs.waitLayout.read(() => ({
+    width: element.getBoundingClientRect().width,
+    available: container.clientWidth
+  }));
+
+  await AelluxJs.waitLayout.update(() => {
+    element.style.setProperty("--ae-width", `${geometry.width}px`);
+    element.classList.toggle("ae--fits", geometry.width <= geometry.available);
+  });
+}
+```
+
+The equivalent nested Promise form puts `update()` in `.then(geometry => ...)`:
+
+```js
+function refreshWithThen() {
+  return AelluxJs.waitLayout.read(() => ({
+    width: element.getBoundingClientRect().width,
+    available: container.clientWidth
+  })).then(geometry => AelluxJs.waitLayout.update(() => {
+    element.style.setProperty("--ae-width", `${geometry.width}px`);
+    element.classList.toggle("ae--fits", geometry.width <= geometry.available);
+  }));
+}
+```
+
+An `update()` may also be queued directly inside the `read()` callback after collecting the values. Returning its Promise makes the outer `read()` Promise wait for the write:
+
+```js
+function refreshInsideRead() {
+  return AelluxJs.waitLayout.read(() => {
+    const width = element.getBoundingClientRect().width;
+    const available = container.clientWidth;
+    return AelluxJs.waitLayout.update(() => {
+      element.style.setProperty("--ae-width", `${width}px`);
+      element.classList.toggle("ae--fits", width <= available);
+    });
+  });
+}
+```
+
+All three forms batch the reads before the dependent writes. The `isCurrent` guard used in some Core Extensions serves a separate purpose: `waitLayout` is asynchronous, so an element can unmount or a newer refresh can start before an older callback writes. For that case, give the mounted element a revision and check it inside `update()`:
+
+```js
+const state = {
+  mounted: true, revision: 0,
+  width: {
+    value: element.style.getPropertyValue("--ae-width"),
+    priority: element.style.getPropertyPriority("--ae-width")
+  }
+};
+
+function refreshMounted() {
+  const revision = ++state.revision;
+  return AelluxJs.waitLayout.read(() => element.getBoundingClientRect().width)
+    .then(width => AelluxJs.waitLayout.update(() => {
+      if (!state.mounted || revision !== state.revision) return;
+      element.style.setProperty("--ae-width", `${width}px`);
+    }));
+}
+
+function unmount() {
+  state.mounted = false;
+  state.revision++;
+  if (state.width.value)
+    element.style.setProperty("--ae-width", state.width.value, state.width.priority);
+  else
+    element.style.removeProperty("--ae-width");
+}
+```
+
+The guard is only needed where that race is possible; it is not a requirement for using `waitLayout` itself. The example also restores the original inline value and priority on unmount.
+
+Coalesce repeated scroll, resize, observer, and pointer notifications into one pending measurement and publication when the latest state is sufficient. Do not build a chain of separate read and update frames for values that can be gathered together. Guard asynchronous callbacks against unmounting or a newer update before writing. Keep reads needed for an immediate input decision synchronous when delaying them would change the interaction; schedule the resulting visual publication through `waitLayout` where practical. Restore any inline values an Extension owns when its mount ends. Third-party Extensions can use the same pattern. See the [waitLayout guide](../runtime/wait-layout.md) for a complete event-coalescing example and frame-order details.
 
 ## Declaring Available Builds
 
@@ -118,5 +211,6 @@ Do not leave the Extension partially initialized when an optional resource fails
 - Extra APIs are feature-detected and polyfilled by the Extension when required.
 - `init`, `mount`, `unmount`, and `destroy` obey the lifecycle contract.
 - Repeated mount and destroy operations do not duplicate or retain resources.
+- Layout-sensitive Core Extensions batch measurements with `waitLayout.read()` and dependent writes with `waitLayout.update()` without adding avoidable frame delays.
 - The accessibility capability profile is documented and its applicable minimum behavior is validated.
 - Both runtime selections are covered by browser tests.

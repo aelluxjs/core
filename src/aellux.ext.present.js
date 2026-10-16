@@ -517,6 +517,7 @@
         controller.setAriaExpanded("false");
         AelluxJs.dispatchFrom(element, UNPOP, { bubbles: true });
       }
+      AelluxJs.dispatchFrom(element, "Layout", { bubbles: true });
     } catch (error) {
       const ownsTransition = transition && controller.transition === transition;
       if (ownsTransition && transition.timeout !== null) {

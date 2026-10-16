@@ -14,7 +14,7 @@
 
 <meta name="description" content="aellux.js Docs">
   <link rel="canonical" href="https://aelluxjs.github.io/core/docs/0.1.0/runtime/performance.htm">
-  
+
     <meta property="og:title" content="Performance and Bundle Budget | 0.1.0 | aellux.js Docs" />
     <meta property="og:type" content="website" />
           <meta property="og:url" content="https://aelluxjs.github.io/core/docs/0.1.0/runtime/performance.htm" />
@@ -26,7 +26,7 @@
         <meta name="twitter:description" content="aellux.js Docs">
 
                   <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Performance and Bundle Budget | 0.1.0 | aellux.js Docs","description":"aellux.js Docs","url":"https://aelluxjs.github.io/core/docs/0.1.0/runtime/performance.htm"}</script>
-          
+
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -337,6 +337,16 @@ Runtime API                            </a>
                           </li>
                           <li class="nav-item small-md rounded-1 ps-md-1"
                             style="flex:0">
+                            <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/runtime/wait-layout.htm">
+waitLayout                            </a>
+                          </li>
+                          <li class="nav-item small-md rounded-1 ps-md-1"
+                            style="flex:0">
+                            <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/runtime/events.htm">
+Events                            </a>
+                          </li>
+                          <li class="nav-item small-md rounded-1 ps-md-1"
+                            style="flex:0">
                             <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/runtime/modern-legacy.htm">
 Modern &amp; Legacy                            </a>
                           </li>
@@ -561,7 +571,7 @@ Performance and Bundle Budget                  </li>
     ← <span class="text-truncate overflow-hidden d-inline-block align-middle flex-fill"
       style="max-width:200px">Browser Support</span>
   </a>
-  
+
     <a href="/core/docs/0.1.0/runtime/es5-support.htm" class="text-decoration-none d-inline-flex flex-row justify-content-end gap-2"
     style="width: 40%;">
     <span class="text-truncate overflow-hidden d-inline-block align-middle flex-fill text-end"
@@ -643,6 +653,7 @@ npm run test:budget
 <p>Each separately distributed minified Core Extension, including Anchor and Scrollbox, is also checked. Their individual limits are held in the executable configuration so the documentation does not duplicate a second table of values.</p>
 <h2>Scope and Limitations</h2>
 <p>This budget detects distribution-size regressions. It does not measure page-specific network time, parsing time, boot time, layout, mount duration, memory use, or real-user performance. The Legacy full bundle is materially larger because it includes the shared polyfills required for its ES5 path. Runtime-performance budgets require representative application fixtures and remain post-release work.</p>
+<p>For layout work inside an Extension, use <a href="wait-layout.htm"><code>waitLayout</code></a> to batch geometry reads and dependent CSS or DOM writes. The guide includes code for coalescing frequent scroll and resize notifications.</p>
 <p>The Present JavaScript raw limit is 10 KiB after adding the optional measured size-transition path; its 4 KiB gzip limit remains unchanged.</p>
         </div>
 
@@ -652,7 +663,7 @@ npm run test:budget
     ← <span class="text-truncate overflow-hidden d-inline-block align-middle flex-fill"
       style="max-width:200px">Browser Support</span>
   </a>
-  
+
     <a href="/core/docs/0.1.0/runtime/es5-support.htm" class="text-decoration-none d-inline-flex flex-row justify-content-end gap-2"
     style="width: 40%;">
     <span class="text-truncate overflow-hidden d-inline-block align-middle flex-fill text-end"

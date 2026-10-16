@@ -744,6 +744,9 @@
                   bubbles: true
                 });
               }
+              AelluxJs.dispatchFrom(element, "Layout", {
+                bubbles: true
+              });
               _context2.n = 17;
               break;
             case 14:

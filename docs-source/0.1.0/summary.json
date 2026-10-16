@@ -16,6 +16,8 @@
       "slug": "runtime",
       "children": [
         { "label": "Runtime API", "href": "runtime/api.md" },
+        { "label": "waitLayout", "href": "runtime/wait-layout.md" },
+        { "label": "Events", "href": "runtime/events.md" },
         { "label": "Modern & Legacy", "href": "runtime/modern-legacy.md" },
         { "label": "Browser Support", "href": "runtime/browser-support.md" },
         { "label": "Performance and Bundle Budget", "href": "runtime/performance.md" },

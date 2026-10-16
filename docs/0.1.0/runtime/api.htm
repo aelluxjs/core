@@ -14,7 +14,7 @@
 
 <meta name="description" content="aellux.js Docs">
   <link rel="canonical" href="https://aelluxjs.github.io/core/docs/0.1.0/runtime/api.htm">
-  
+
     <meta property="og:title" content="Runtime API | 0.1.0 | aellux.js Docs" />
     <meta property="og:type" content="website" />
           <meta property="og:url" content="https://aelluxjs.github.io/core/docs/0.1.0/runtime/api.htm" />
@@ -26,7 +26,7 @@
         <meta name="twitter:description" content="aellux.js Docs">
 
                   <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Runtime API | 0.1.0 | aellux.js Docs","description":"aellux.js Docs","url":"https://aelluxjs.github.io/core/docs/0.1.0/runtime/api.htm"}</script>
-          
+
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -337,6 +337,16 @@ Runtime API                            </a>
                           </li>
                           <li class="nav-item small-md rounded-1 ps-md-1"
                             style="flex:0">
+                            <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/runtime/wait-layout.htm">
+waitLayout                            </a>
+                          </li>
+                          <li class="nav-item small-md rounded-1 ps-md-1"
+                            style="flex:0">
+                            <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/runtime/events.htm">
+Events                            </a>
+                          </li>
+                          <li class="nav-item small-md rounded-1 ps-md-1"
+                            style="flex:0">
                             <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/runtime/modern-legacy.htm">
 Modern &amp; Legacy                            </a>
                           </li>
@@ -561,11 +571,11 @@ Runtime API                  </li>
     ← <span class="text-truncate overflow-hidden d-inline-block align-middle flex-fill"
       style="max-width:200px">Validation Scenarios</span>
   </a>
-  
-    <a href="/core/docs/0.1.0/runtime/modern-legacy.htm" class="text-decoration-none d-inline-flex flex-row justify-content-end gap-2"
+
+    <a href="/core/docs/0.1.0/runtime/wait-layout.htm" class="text-decoration-none d-inline-flex flex-row justify-content-end gap-2"
     style="width: 40%;">
     <span class="text-truncate overflow-hidden d-inline-block align-middle flex-fill text-end"
-      style="max-width:200px">Modern &amp; Legacy</span> →
+      style="max-width:200px">waitLayout</span> →
   </a>
   </div>
         </div>
@@ -585,14 +595,32 @@ The optional <code>crossOrigin</code> initialization setting controls the <code>
 The <code>autoViewportMeta</code> option defaults to <code>true</code>. During initialization, the boot checks for <code>&lt;meta name=&quot;viewport&quot;&gt;</code> and adds <code>&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1&quot;&gt;</code> when it is absent. Set <code>autoViewportMeta: false</code> to leave the document head unchanged.
 The boot does not set <code>data-ae-low-hardware</code>. Applications may add it to the document root when appropriate; Extensions such as Present use it when present.
 <code>$ae.registerCssProperty(descriptor)</code> accepts the same descriptor as <code>CSS.registerProperty()</code>. It returns <code>true</code> when the browser registers the property, or <code>false</code> when the API is unavailable or registration is rejected, including an already registered name. Extensions can call it during their <code>init()</code> without requiring Properties and Values API support for their basic behavior.
-Pass Extension-specific configuration through <code>extensions</code> in <code>init()</code> options. Keys such as <code>&quot;tab-group&quot;</code> are normalized to <code>tabGroup</code> in <code>$ae.options.extensions</code>, and each Extension receives its matching object in <code>init(options)</code>. An Extension with no matching configuration receives <code>{}</code>.
+Pass Extension-specific configuration through <code>extensions</code> in <code>init()</code> options:</p>
+<pre><code class="language-js">$ae.init({
+  extensions: {
+    &quot;tab-group&quot;: { initialTab: &quot;overview&quot; }
+  }
+});
+</code></pre>
+<p>Keys such as <code>&quot;tab-group&quot;</code> are normalized to <code>tabGroup</code> in <code>$ae.options.extensions</code>, and each Extension receives its matching object in <code>init(options)</code>. An Extension with no matching configuration receives <code>{}</code>.
 An Extension&#39;s <code>init(options)</code> may return a Promise. The runtime awaits it before setting the Extension&#39;s <code>initialized</code> flag and resolving <code>wait(extensionName)</code>; rejection is diagnosed as <code>ERROR_EXTENSION_INITIALIZE</code> (<code>1102</code>) and leaves the Extension available for a later retry.</p>
 <h2>DOM Lifecycle</h2>
 <pre><code class="language-js">await $ae.mount(elementOrId);
 await $ae.unmount(elementOrId);
 </code></pre>
 <p><code>mount(elementOrId)</code> resolves one root from a DOM element or an existing element ID, with or without a leading <code>#</code>. It discovers matching declarations below that root, loads required Extensions, and requests idempotent <code>mount</code> operations. It resolves to an array of DOM elements mounted during that call, with each element listed once across the matching mount maps; it returns <code>[]</code> when nothing is newly mounted or the root cannot be resolved. A failed element mount is diagnosed, its captured attributes and registration are rolled back, and later matching elements continue mounting. The returned array contains only the successful mounts. <code>unmount(elementOrId)</code> requests the corresponding cleanup operations and returns <code>false</code> when the root cannot be resolved. When the argument is omitted, the document is used. When <code>MutationObserver</code> is available, the mount manager automatically unmounts mounted elements removed from the document; moving an element elsewhere in the document keeps it mounted. Without that API, call <code>unmount(document)</code> or <code>destroyExtensions()</code> to clean detached elements. Unmounting the document also cleans previously mounted elements that have been detached; unmounting a specific element stays within that element&#39;s subtree.</p>
-<p>Extensions register element handlers with <code>$ae.mountManager.add({ extensionName, selector, mount, unmount, update, controllers })</code> during <code>init()</code> and call <code>$ae.mountManager.remove({ extensionName, selector })</code> during <code>destroy()</code>. Omitting <code>selector</code> removes all registrations for the Extension. <code>$ae.mountManager.mount(elementOrId, extensionNames)</code> and <code>$ae.mountManager.unmount(elementOrId, extensionNames)</code> use the same single-root resolution and lifecycle execution as <code>$ae.mount()</code> and <code>$ae.unmount()</code>. <code>$ae.mountManager.update(elementOrId, extensionNames)</code> resolves the same input and runs <code>update</code> handlers only for elements already mounted; registrations without an <code>update</code> handler are skipped. During mounting, <code>$ae.mountManager.initialAttribute(element, name)</code> reads the captured initial value of a managed attribute.</p>
+<p>Extensions register element handlers during <code>init()</code> and remove their registration during <code>destroy()</code>:</p>
+<pre><code class="language-js">$ae.mountManager.add({
+  extensionName: &quot;example&quot;,
+  selector: &quot;[data-ae-example]&quot;,
+  mount(element) { /* attach behavior */ },
+  unmount(element) { /* release behavior */ },
+  update(element) { /* refresh behavior */ }
+});
+
+$ae.mountManager.remove({ extensionName: &quot;example&quot; });
+</code></pre>
+<p>Omitting <code>selector</code> removes all registrations for the Extension. The manager&#39;s <code>mount(elementOrId, extensionNames)</code> and <code>unmount(elementOrId, extensionNames)</code> use the same single-root resolution and lifecycle execution as <code>$ae.mount()</code> and <code>$ae.unmount()</code>. Its <code>update(elementOrId, extensionNames)</code> runs <code>update</code> handlers only for elements already mounted; registrations without an <code>update</code> handler are skipped. During mounting, <code>initialAttribute(element, name)</code> reads the captured initial value of a managed attribute.</p>
 <p><code>add()</code> requires a previously declared Extension name, valid CSS selector, and <code>mount</code> function. <code>unmount</code> and <code>update</code> are optional functions; <code>controllers</code> is an optional array of nonempty method names. Invalid registration arguments and attempts to replace an existing <code>extensionName</code> and <code>selector</code> pair report <code>ERROR_MOUNT_REGISTRATION</code> (<code>1113</code>), return <code>false</code>, and leave the mount map unchanged. <code>remove()</code> returns <code>false</code> and reports <code>ERROR_MOUNT_MAP_IN_USE</code> (<code>1115</code>) if any matching element is still mounted or mounting; unmount those elements before removing the map.</p>
 <p>The mount helper removes existing <code>ae--*</code> classes from an element before its first mount, leaving other classes intact. It captures <code>data-ae-*</code>, <code>aria-*</code>, and <code>hidden</code> attributes on each mounted element before <code>mount()</code>, then restores them after <code>unmount()</code>. It removes newly added attributes in those groups. Descendants are restored only when they are mounted themselves; other attributes, including <code>style</code>, are left as they are. Library classes are managed by their Extensions rather than restored from the initial HTML. When mounts overlap, the element is restored after its last mount ends. If <code>mount()</code> fails, its captured attributes are restored immediately. During a mount, <code>mountManager.initialAttribute(element, name)</code> returns a captured value or <code>null</code> when absent.</p>
 <p>After an element mounts, use <code>$ae(elementOrId).{extensionName}.{mountedExtensionMethod}(...args)</code> to call its public Extension methods. <code>AelluxJs(elementOrId)</code> works the same way. Both calls resolve through <code>mountManager.controller(elementOrId)</code>. <code>elementOrId</code> can be a DOM element, an ID, or an ID prefixed with <code>#</code>. Invalid values and IDs that do not resolve emit a warning and return <code>null</code>. An element without a mounted controller emits an error explaining that it may not be mounted, then returns <code>null</code>. Before runtime initialization, the shortcut returns <code>null</code>. The <code>controllers</code> names registered by an Extension become methods under its camelCase namespace. Each method receives the element as its first argument, followed by <code>...args</code>:</p>
@@ -601,10 +629,23 @@ await $ae(&quot;#panel&quot;).present.toggle(false);
 </code></pre>
 <p>Unmounting removes the corresponding methods from the element controller.</p>
 <p>Every mounted element controller offers <code>mount(extensionNames)</code>, <code>unmount(extensionNames)</code>, and <code>update(extensionNames)</code>. These methods use that element as the root, including matching descendants, and return promises. <code>mount</code> is idempotent; <code>update</code> tries every declared <code>update</code> callback for mounted elements and leaves mount registrations intact. A mounted Extension namespace also has an <code>update</code> property: <code>$ae(element).present.update</code> is <code>null</code> when no mounted <code>present</code> map declares an <code>update</code> callback; otherwise it is a function that updates that Extension&#39;s mounted elements under the root. After <code>unmount</code> removes every registration, a new controller is created on a later mount.</p>
+<p>The controller also offers <code>on(event, handler, options)</code>, <code>off(event, handler, options)</code>, and <code>dispatch(event, options)</code>. These use the same event names and options as the main API, but <code>on</code> and <code>off</code> register on the mounted element, and <code>dispatch</code> calls <code>dispatchFrom</code> with that element as the target:</p>
+<pre><code class="language-js">const panel = $ae(&quot;panel&quot;);
+const onLayout = event =&gt; console.log(event.target);
+panel.on(&quot;Layout&quot;, onLayout);
+panel.dispatch(&quot;Layout&quot;, { bubbles: true });
+panel.off(&quot;Layout&quot;, onLayout);
+</code></pre>
 <pre><code class="language-js">await $ae(&quot;panel&quot;).update();
 await $ae(&quot;panel&quot;).unmount();
 await $ae.mount(document.getElementById(&quot;panel&quot;));
 </code></pre>
+<h2>Layout Scheduling</h2>
+<p><code>$ae.waitLayout.read(callback)</code> batches geometry and computed-style reads; <code>$ae.waitLayout.update(callback)</code> applies dependent DOM and CSS changes after those reads. Both return Promises. Queue the update after the read when it needs the measured value:</p>
+<pre><code class="language-js">const width = await $ae.waitLayout.read(() =&gt; panel.getBoundingClientRect().width);
+await $ae.waitLayout.update(() =&gt; panel.style.setProperty(&quot;--panel-width&quot;, `${width}px`));
+</code></pre>
+<p>See <a href="wait-layout.htm">waitLayout</a> for frame order, frequent-event coalescing, lifecycle guards, and examples.</p>
 <h2>Destruction</h2>
 <pre><code class="language-js">await $ae.destroyExtensions(&quot;preference&quot;);
 await $ae.destroy();
@@ -619,7 +660,11 @@ await $ae.destroy();
 const preference = await $ae.wait(&quot;preference&quot;);
 $ae.ext.preference === preference;
 </code></pre>
-<p><code>ext()</code> registers loading information in <code>$ae.registry.ext</code> using camelCase keys. Its <code>builds</code> option declares <code>modern</code>, <code>legacy</code>, or both published artifacts; omission defaults to both. <code>wait()</code> loads and initializes the compatible Extension when necessary, then resolves to its public API or <code>null</code> after an isolated initialization or compatibility failure. Registered Extension APIs are available under <code>$ae.ext.&lt;camelCaseName&gt;</code>. <code>$ae.dep(label, url)</code> immediately loads a shared script dependency and returns a Promise that resolves after its <code>load</code> event. Pass <code>$ae.dep(label, url, integrity, crossOrigin)</code> to set the script&#39;s SRI and CORS attributes; omitting <code>crossOrigin</code> when SRI is supplied uses <code>anonymous</code>. The existing <code>$ae.dep(label, url, { integrity, crossOrigin })</code> form also works. Calls with the same label and URL share one load, recorded in <code>$ae.registry.dep[label]</code>. The lazy selector and mount indexes are <code>$ae.registry.lazyExtSelectors</code> and <code>$ae.registry.extMounters</code>.</p>
+<p><code>ext()</code> registers loading information in <code>$ae.registry.ext</code> using camelCase keys. Its <code>builds</code> option declares <code>modern</code>, <code>legacy</code>, or both published artifacts; omission defaults to both. <code>wait()</code> loads and initializes the compatible Extension when necessary, then resolves to its public API or <code>null</code> after an isolated initialization or compatibility failure. Registered Extension APIs are available under <code>$ae.ext.&lt;camelCaseName&gt;</code>.</p>
+<p>Load a shared script dependency and await its <code>load</code> event before using it:</p>
+<pre><code class="language-js">await $ae.dep(&quot;shared-widget&quot;, &quot;/vendor/shared-widget.min.js&quot;);
+</code></pre>
+<p>Pass <code>integrity</code> and <code>crossOrigin</code> as the third and fourth arguments when the dependency needs SRI and CORS attributes. Omitting <code>crossOrigin</code> when SRI is supplied uses <code>anonymous</code>; the options-object form also works. Calls with the same label and URL share one load, recorded in <code>$ae.registry.dep[label]</code>. The lazy selector and mount indexes are <code>$ae.registry.lazyExtSelectors</code> and <code>$ae.registry.extMounters</code>.</p>
 <p><code>extName(filename)</code> extracts the Extension name from an <code>aellux.ext.&lt;name&gt;.js</code> filename.</p>
 <p>Preference media queries are available in <code>$ae.registry.preferenceMediaQueries</code>.</p>
 <h2>Events</h2>
@@ -628,6 +673,7 @@ $ae.off(&quot;Ready&quot;, handler);
 $ae.dispatch(&quot;Example&quot;, { detail: {} });
 </code></pre>
 <p>aellux.js event names use the <code>AelluxJs</code> prefix. <code>Ready</code> becomes <code>AelluxJsReady</code>. Readiness means the orchestrator is available; it does not guarantee that every Extension or element mounted successfully.</p>
+<p>See <a href="events.htm">Events</a> for the complete runtime and Core Extension event list, including <code>AelluxJsUpdate</code>.</p>
 <h2>Persistence</h2>
 <pre><code class="language-js">$ae.persist.local.set(&quot;key&quot;, &quot;value&quot;);
 $ae.persist.local.get(&quot;key&quot;, &quot;fallback&quot;);
@@ -644,11 +690,11 @@ $ae.persist.session.set(&quot;key&quot;, &quot;value&quot;);
     ← <span class="text-truncate overflow-hidden d-inline-block align-middle flex-fill"
       style="max-width:200px">Validation Scenarios</span>
   </a>
-  
-    <a href="/core/docs/0.1.0/runtime/modern-legacy.htm" class="text-decoration-none d-inline-flex flex-row justify-content-end gap-2"
+
+    <a href="/core/docs/0.1.0/runtime/wait-layout.htm" class="text-decoration-none d-inline-flex flex-row justify-content-end gap-2"
     style="width: 40%;">
     <span class="text-truncate overflow-hidden d-inline-block align-middle flex-fill text-end"
-      style="max-width:200px">Modern &amp; Legacy</span> →
+      style="max-width:200px">waitLayout</span> →
   </a>
   </div>
         </div>

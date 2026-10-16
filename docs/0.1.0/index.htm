@@ -14,7 +14,7 @@
 
 <meta name="description" content="aellux.js Docs">
   <link rel="canonical" href="https://aelluxjs.github.io/core/docs/0.1.0/index.htm">
-  
+
     <meta property="og:title" content="0.1.0 | aellux.js Docs" />
     <meta property="og:type" content="website" />
           <meta property="og:url" content="https://aelluxjs.github.io/core/docs/0.1.0/index.htm" />
@@ -26,7 +26,7 @@
         <meta name="twitter:description" content="aellux.js Docs">
 
                   <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"0.1.0 | aellux.js Docs","description":"aellux.js Docs","url":"https://aelluxjs.github.io/core/docs/0.1.0/index.htm"}</script>
-          
+
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -337,6 +337,16 @@ Runtime API                            </a>
                           </li>
                           <li class="nav-item small-md rounded-1 ps-md-1"
                             style="flex:0">
+                            <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/runtime/wait-layout.htm">
+waitLayout                            </a>
+                          </li>
+                          <li class="nav-item small-md rounded-1 ps-md-1"
+                            style="flex:0">
+                            <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/runtime/events.htm">
+Events                            </a>
+                          </li>
+                          <li class="nav-item small-md rounded-1 ps-md-1"
+                            style="flex:0">
                             <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/runtime/modern-legacy.htm">
 Modern &amp; Legacy                            </a>
                           </li>
@@ -550,7 +560,7 @@ Home                  </li>
         <div id="doc-navlinks" ajax-load="doc-navlinks">
 <div class="d-flex justify-content-between flex-row gap-2 p-2 pb-4 px-0">
     <a>&nbsp;</a>
-  
+
     <a href="/core/docs/0.1.0/getting-started.htm" class="text-decoration-none d-inline-flex flex-row justify-content-end gap-2"
     style="width: 40%;">
     <span class="text-truncate overflow-hidden d-inline-block align-middle flex-fill text-end"
@@ -575,11 +585,21 @@ Get Started
 <p>The goal of aellux.js is to make rich browser experiences easier to build and maintain. It helps developers organize UX features into reusable, modular pieces, reduce duplicated code, and keep applications lean as they grow. For end users, the aim is a faster, more consistent, and more reliable experience across pages and devices.</p>
 <h2>How it Works</h2>
 <p>Add aellux.js to a page and enable the Extensions it needs. The library coordinates those Extensions as the page loads and changes. Well-defined contracts keep the public API and Extension behavior consistent, making features easier to combine and maintain.</p>
+<pre><code class="language-html">&lt;div data-ae-scrollbox style=&quot;width: 20rem; height: 12rem; overflow: auto&quot;&gt;
+  &lt;div style=&quot;height: 30rem&quot;&gt;Scrollable content&lt;/div&gt;
+&lt;/div&gt;
+&lt;script src=&quot;./dist/aellux.js&quot;&gt;&lt;/script&gt;
+&lt;script&gt;
+  $ae.init({ mode: &quot;full&quot; });
+&lt;/script&gt;
+</code></pre>
 <h2>Getting Started</h2>
 <ul>
 <li><a href="getting-started.htm">Installation, build, and runtime modes</a></li>
 <li><a href="compatibility.htm">Compatibility for 0.1.0 Beta</a></li>
 <li><a href="runtime/api.htm">Runtime API</a></li>
+<li><a href="runtime/wait-layout.htm"><code>waitLayout</code> layout scheduling</a></li>
+<li><a href="runtime/events.htm">Runtime and Extension events</a></li>
 </ul>
 <h2>Runtime and Compatibility</h2>
 <ul>
@@ -626,7 +646,7 @@ Get Started
         <div id="doc-navlinks2" ajax-load="doc-navlinks2">
 <div class="d-flex justify-content-between flex-row gap-2 p-2 pb-4 px-0">
     <a>&nbsp;</a>
-  
+
     <a href="/core/docs/0.1.0/getting-started.htm" class="text-decoration-none d-inline-flex flex-row justify-content-end gap-2"
     style="width: 40%;">
     <span class="text-truncate overflow-hidden d-inline-block align-middle flex-fill text-end"
