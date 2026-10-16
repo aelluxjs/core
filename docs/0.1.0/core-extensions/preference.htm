@@ -596,6 +596,12 @@ preference.update();
 console.log(preference.get(&quot;colorScheme&quot;));
 </code></pre>
 <p><code>set(name, value)</code> saves the user value in the <code>AelluxJsPreferences</code> persistence store. Call <code>update()</code> to recompute and publish the current values; <code>set()</code> does not call <code>update()</code> automatically. Changes from the browser <code>storage</code> event are updated automatically. <code>update()</code> synchronizes mounted controls for preferences whose computed values changed and always dispatches <code>AelluxJsPreferencesChange</code>, including when the values stay the same. Newly mounted controls are synchronized immediately.</p>
+<p><code>AelluxJsPreferencesChange</code> carries a changed-key array and a copy of the current values. The array is empty when an update finds no changed values:</p>
+<pre><code class="language-js">$ae.on(&quot;PreferencesChange&quot;, event =&gt; {
+  const { changed, preferences } = event.detail;
+  if (changed.includes(&quot;colorScheme&quot;)) console.log(preferences.colorScheme);
+});
+</code></pre>
 <h2>Preference controls</h2>
 <p>An element marked with <code>data-ae-preference</code> is a clickable preference container. Descendants with <code>data-ae-option</code> set a value for that preference and receive the <code>ae--active</code> class when selected.</p>
 <pre><code class="language-html">&lt;div data-ae-preference=&quot;colorScheme&quot;&gt;

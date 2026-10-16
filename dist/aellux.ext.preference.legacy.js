@@ -143,6 +143,7 @@
       AelluxJs.mountManager.add({
         extensionName: extensionName,
         selector: "[".concat(attr.preference, "]"),
+        priority: 0,
         mount: mountPreferenceContainer,
         unmount: unmountPreferenceContainer
       });
@@ -255,7 +256,12 @@
       } finally {
         _iterator2.f();
       }
-      AelluxJs.dispatch("PreferencesChange");
+      AelluxJs.dispatch("PreferencesChange", {
+        detail: {
+          changed: Array.from(changed),
+          preferences: Object.assign({}, computedPreferences)
+        }
+      });
     }
     function indexContainer(container) {
       var key = toCamelCase2(container.getAttribute(attr.preference) || "");

@@ -52,6 +52,7 @@
       AelluxJs.mountManager.add({
         extensionName,
         selector: `[${attribute}]`,
+        priority: 0,
         mount: mountAnchor,
         unmount: unmountAnchor,
         update: updateAnchor

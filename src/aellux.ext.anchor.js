@@ -20,8 +20,10 @@
 
   const attribute = AelluxJs.attr(extensionName);
   const targetAttribute = AelluxJs.attr("anchor-target");
+
   const layoutEvent = AelluxJs.eventName("Layout");
   const anchoredClass = AelluxJs.className("anchored");
+
   const baseProperties = ["position", "left", "top", "transform", "transform-origin"];
   const ownedProperties = [
     ...baseProperties,
@@ -33,8 +35,10 @@
     "center-left": [0, 0.5], center: [0.5, 0.5], "center-right": [1, 0.5],
     "bottom-left": [0, 1], "bottom-center": [0.5, 1], "bottom-right": [1, 1]
   };
+
   const UPDATE_INTERVAL_MS = 100;
   const anchors = new Map();
+
   let updateTimeout = null;
   let lastUpdateTime = -UPDATE_INTERVAL_MS;
 
@@ -49,6 +53,7 @@
     });
     AelluxJs.mountManager.add({
       extensionName, selector: `[${attribute}]`,
+      priority: 0,
       mount: mountAnchor, unmount: unmountAnchor, update: updateAnchor
     });
   }
@@ -67,10 +72,13 @@
       value: element.style.getPropertyValue(name),
       priority: element.style.getPropertyPriority(name)
     }));
-    const state = { original, invalidContext: false, active: false, revision: 0,
+    const state = {
+      original, invalidContext: false, active: false, revision: 0,
       target: null, reference: null,
       layoutListener: () => scheduleUpdate(),
-      observer: null, intersectionObserver: null };
+      observer: null, intersectionObserver: null
+    };
+
     anchors.set(element, state);
     if (anchors.size === 1) {
       root.addEventListener("scroll", scheduleUpdate, { capture: true, passive: true });

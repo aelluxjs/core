@@ -78,6 +78,7 @@
           AelluxJs2.mountManager.add({
             extensionName,
             selector: `[${attr.preference}]`,
+            priority: 0,
             mount: mountPreferenceContainer,
             unmount: unmountPreferenceContainer
           });
@@ -161,7 +162,12 @@
             const containers = containersByPreference.get(key);
             if (containers) for (const container of containers) updateContainer(container);
           }
-          AelluxJs2.dispatch("PreferencesChange");
+          AelluxJs2.dispatch("PreferencesChange", {
+            detail: {
+              changed: Array.from(changed),
+              preferences: Object.assign({}, computedPreferences)
+            }
+          });
         }
         function indexContainer(container) {
           const key = toCamelCase2(container.getAttribute(attr.preference) || "");
@@ -344,13 +350,26 @@
           updateBaseTitle();
           const options = {
             detail: {
-              snapshot: globalSnapshot,
-              removeSnapshot: globalRemoveSnapshot,
-              popState
+              snapshot: Object.assign({}, globalSnapshot),
+              removeSnapshot: Object.assign({}, globalRemoveSnapshot),
+              popState: copyHistoryState(popState)
             },
             bubbles: true
           };
           AelluxJs2.dispatch(name, options);
+        }
+        function copyHistoryState(state) {
+          if (!state || typeof state !== "object") return state;
+          if (typeof root2.structuredClone === "function") return root2.structuredClone(state);
+          const copy = Array.isArray(state) ? state.slice() : Object.assign({}, state);
+          if (state.snapshot && typeof state.snapshot === "object")
+            copy.snapshot = Object.assign({}, state.snapshot);
+          if (state.ajaxReplace && typeof state.ajaxReplace === "object") {
+            copy.ajaxReplace = Object.assign({}, state.ajaxReplace);
+            if (Array.isArray(state.ajaxReplace.selectors))
+              copy.ajaxReplace.selectors = state.ajaxReplace.selectors.slice();
+          }
+          return copy;
         }
         function onHashChange() {
           if (!useHash) return;
@@ -594,6 +613,7 @@
           AelluxJs2.mountManager.add({
             extensionName,
             selector: `[${attribute}]`,
+            priority: 0,
             mount: mountFocusElement,
             unmount: unmountFocusElement
           });
@@ -751,6 +771,7 @@
           AelluxJs2.mountManager.add({
             extensionName,
             selector: pointableSelector,
+            priority: 0,
             mount: mountPointable,
             unmount: unmountPointable,
             controllers: ["pointers"]
@@ -1022,6 +1043,7 @@
           AelluxJs2.mountManager.add({
             extensionName,
             selector: `[${attribute}]`,
+            priority: 0,
             mount: mountAnchor,
             unmount: unmountAnchor,
             update: updateAnchor
@@ -1311,8 +1333,15 @@
         const pointerScrollingClass = AelluxJs2.className("pointerscrolling");
         const nativeScrollbarHideClass = AelluxJs2.className("native-sb-hide");
         const scrollbarVisibleClass = AelluxJs2.className("scrollbar-visible");
+        const scrollEdgeClasses = [
+          AelluxJs2.className("scroll-v-start"),
+          AelluxJs2.className("scroll-v-end"),
+          AelluxJs2.className("scroll-h-start"),
+          AelluxJs2.className("scroll-h-end")
+        ];
         const pointerScrollExceptionSelector = `a, button, input, select, textarea, [contenteditable], [draggable='true'], [${scrollbarVerticalAttribute}], [${scrollbarHorizontalAttribute}]`;
         const RESIZE_INTERVAL_MS = 100;
+        const SCROLL_EDGE_MARGIN_PX = 5;
         const POINTER_SCROLL_THRESHOLD_PX = 3;
         const POINTER_SCROLL_MULTICLICK_MS = 500;
         const POINTER_SCROLL_MULTICLICK_DISTANCE_PX = 8;
@@ -1391,6 +1420,7 @@
           AelluxJs2.mountManager.add({
             extensionName,
             selector: `[${attribute}]`,
+            priority: 0,
             mount: mountScrollbox,
             update: updateScrollbox,
             unmount: unmountScrollbox,
@@ -1435,6 +1465,8 @@
             pending: null,
             index: 0,
             wheelTarget: null,
+            notifiedItem: null,
+            notifiedIndex: null,
             scrollEndTimeout: null,
             wheelTimeout: null
           };
@@ -1593,6 +1625,7 @@
             if (original.value) element.style.setProperty(name, original.value, original.priority);
             else element.style.removeProperty(name);
           });
+          for (const name of scrollEdgeClasses) element.classList.remove(name);
           scrollboxes.delete(element);
         }
         function configure(state) {
@@ -1945,6 +1978,8 @@
             state.snap.pending = null;
             state.snap.index = 0;
             state.snap.wheelTarget = null;
+            state.snap.notifiedItem = null;
+            state.snap.notifiedIndex = null;
             clearScrollEnd(state);
             clearSnapWheel(state);
             const requested = element.hasAttribute(snapAttribute) || children.some((item) => item.hasAttribute(snapAttribute) && item.getAttribute(snapAttribute) !== "false");
@@ -1963,6 +1998,8 @@
             state.snap.pending = null;
             state.snap.index = 0;
             state.snap.wheelTarget = null;
+            state.snap.notifiedItem = null;
+            state.snap.notifiedIndex = null;
             clearSnapWheel(state);
           }
           state.snapEnabled = true;
@@ -2117,12 +2154,18 @@
             const target2 = state.snap.wheelTarget;
             if (items.includes(target2) && snapNeedsScroll(state, target2, axis, metrics)) return;
             state.snap.wheelTarget = null;
-            if (items.includes(target2)) return;
+            if (items.includes(target2)) {
+              notifySnapChange(state, target2, axis);
+              return;
+            }
           }
           const edgeIndex = edgeSnapIndex(state, items, axis, metrics);
           const target = items[edgeIndex === null ? nearestSnapIndex(state, items) : edgeIndex];
           state.snap.index = items.indexOf(target);
-          if (!snapNeedsScroll(state, target, axis, metrics)) return;
+          if (!snapNeedsScroll(state, target, axis, metrics)) {
+            notifySnapChange(state, target, axis);
+            return;
+          }
           if (state.elastic.active) state.snap.pending = target;
           else scrollToSnap(state, items.indexOf(target), axis);
         }
@@ -2131,8 +2174,21 @@
           if (!first) return;
           state.snap.initialized = true;
           state.snap.index = 0;
-          first.scrollIntoView(snapScrollOptions(snapAxis(state), "instant"));
+          const axis = snapAxis(state);
+          first.scrollIntoView(snapScrollOptions(axis, "instant"));
+          notifySnapChange(state, first, axis);
           refresh(state);
+        }
+        function notifySnapChange(state, item, axis) {
+          const index = snapItems(state).indexOf(item);
+          if (index < 0 || state.snap.notifiedItem === item && state.snap.notifiedIndex === index) return;
+          const previousIndex = state.snap.notifiedIndex;
+          state.snap.index = index;
+          state.snap.notifiedItem = item;
+          state.snap.notifiedIndex = index;
+          AelluxJs2.dispatchFrom(state.element, "ScrollboxSnapChange", {
+            detail: { item, index, previousIndex, axis }
+          });
         }
         function snapScrollOptions(axis, behavior) {
           const horizontal = axis === "x";
@@ -2155,6 +2211,7 @@
           state.snap.wheelTarget = items[index];
           if (state.elastic.owned) resetElastic(state);
           items[index].scrollIntoView(snapScrollOptions(axis));
+          scheduleScrollEnd(state);
           return true;
         }
         function goto(element, index) {
@@ -2347,12 +2404,14 @@
           state.mouseReleaseButton = null;
           state.pointerScroll = {
             pointerId: event.pointerId,
+            pointerType: event.pointerType,
             button: event.button,
             startX: event.clientX,
             startY: event.clientY,
             lastX: event.clientX,
             lastY: event.clientY,
             moved: false,
+            started: false,
             axis: null,
             chain,
             axes,
@@ -2437,6 +2496,7 @@
               return;
             }
             activatePointerScroll(state, pointerScroll, axis2);
+            if (state.pointerScroll !== pointerScroll) return;
           }
           const axis = pointerScroll.axis;
           let remaining = axis === "x" ? pointerScroll.lastX - event.clientX : pointerScroll.lastY - event.clientY;
@@ -2534,6 +2594,7 @@
         function activatePointerScroll(state, pointerScroll, axis) {
           pointerScroll.axis = axis;
           pointerScroll.moved = true;
+          pointerScroll.started = true;
           restorePointerScrollCursor(state);
           for (const member of pointerScroll.chain) {
             if (pointerAxisMaximum(member, axis, pointerScroll) <= 0) continue;
@@ -2548,6 +2609,17 @@
             element.classList.add(pointerScrollingClass);
             startScrollbarPdsVisibility(member);
           }
+          dispatchPointerScroll(state, pointerScroll, "PointerScrollStart");
+        }
+        function dispatchPointerScroll(state, pointerScroll, name) {
+          AelluxJs2.dispatchFrom(state.element, name, {
+            detail: {
+              axis: pointerScroll.axis,
+              pointerId: pointerScroll.pointerId,
+              pointerType: pointerScroll.pointerType,
+              elements: pointerScroll.styles.map((saved) => saved.element)
+            }
+          });
         }
         function endPointerScroll(state, event) {
           const pointerScroll = state.pointerScroll;
@@ -2603,6 +2675,8 @@
               event.clientY
             );
           } else restorePointerScrollCursor(state);
+          if (pointerScroll.started)
+            dispatchPointerScroll(state, pointerScroll, "PointerScrollEnd");
           const hadElastic = pointerScroll.chain.some((member) => member.elastic.active);
           const momentumState = pointerScroll.momentumState;
           const snapState = momentumState ? momentumState.snapEnabled ? momentumState : null : pointerScroll.chain.find((member) => member.snapEnabled && pointerAxisMaximum(member, pointerScroll.axis, pointerScroll) > 0);
@@ -2946,6 +3020,7 @@
         }
         function resetElastic(state) {
           const elastic = state.elastic;
+          const wasOwned = elastic.owned;
           if (elastic.releaseFrame !== null) root2.cancelAnimationFrame(elastic.releaseFrame);
           if (elastic.wheelTimeout !== null) root2.clearTimeout(elastic.wheelTimeout);
           elastic.releaseFrame = null;
@@ -2990,6 +3065,7 @@
           elastic.owned = false;
           elastic.extentX = false;
           elastic.extentY = false;
+          if (wasOwned && !state.disposed) publish(state);
         }
         function observe(state) {
           state.onResize = () => scheduleResize(state);
@@ -3064,6 +3140,8 @@
             if (state.disposed) return null;
             state.publishDirty = false;
             const metrics = nativeMetrics(state.element);
+            const scrollTop = state.element.scrollTop;
+            const scrollLeft = state.element.scrollLeft;
             if (!state.elastic.active) state.metrics = metrics;
             if (state.elasticEnabled && state.elastic.wrapper && !state.elastic.active)
               state.elastic.dimensions = measureElasticWrapper(state.elastic.wrapper);
@@ -3071,8 +3149,14 @@
             const axes = state.snapEnabled || bars ? wheelAxes(state, metrics) : null;
             return {
               revision: state.layoutRevision,
-              y: progress(state.element.scrollTop, metrics.maxY),
-              x: progress(state.element.scrollLeft, metrics.maxX),
+              y: progress(scrollTop, metrics.maxY),
+              x: progress(scrollLeft, metrics.maxX),
+              edges: state.elastic.owned ? null : [
+                scrollTop < SCROLL_EDGE_MARGIN_PX,
+                scrollTop >= metrics.maxY - SCROLL_EDGE_MARGIN_PX,
+                scrollLeft < SCROLL_EDGE_MARGIN_PX,
+                scrollLeft >= metrics.maxX - SCROLL_EDGE_MARGIN_PX
+              ],
               snapValues: state.snapEnabled ? measureSnapValues(state, metrics, axes) : [],
               scrollbars: bars ? readScrollbars(state, metrics, axes) : []
             };
@@ -3085,6 +3169,9 @@
               if (state.disposed || state.layoutRevision !== values.revision) return;
               state.element.style.setProperty(properties[0], values.y);
               state.element.style.setProperty(properties[1], values.x);
+              if (values.edges && !state.elastic.owned) {
+                scrollEdgeClasses.forEach((name, index) => state.element.classList.toggle(name, values.edges[index]));
+              }
               for (const { item, viewport, focus } of values.snapValues) {
                 item.style.setProperty(snapProperties[0], viewport);
                 item.style.setProperty(snapProperties[1], focus);
@@ -3290,6 +3377,7 @@
           AelluxJs2.mountManager.add({
             extensionName,
             selector: `[${attr.adaptive}]`,
+            priority: 0,
             mount: mountAdaptive,
             unmount: unmountAdaptive
           });
@@ -3437,7 +3525,9 @@
           }
           element.style.setProperty("--ae-width", width);
           element.style.setProperty("--ae-height", height);
-          AelluxJs2.dispatchFrom(element, "AdaptiveUpdate", { detail: null });
+          AelluxJs2.dispatchFrom(element, "AdaptiveUpdate", {
+            detail: { width, height, ratio }
+          });
         }
         function inferOrientation(flexBox, selector = "*") {
           return AelluxJs2.waitLayout.read(() => {
@@ -3515,12 +3605,14 @@
           AelluxJs2.mountManager.add({
             extensionName,
             selector: `[${attr.present}]`,
+            priority: 0,
             mount: mountPresentContainer,
             unmount: unmountPresentContainer,
             controllers: ["pop", "unpop", "trigger", "toggle"]
           });
           AelluxJs2.mountManager.add({
             extensionName,
+            priority: 0,
             selector: `[${[
               attr.trigger,
               attr.dismiss,
@@ -3971,7 +4063,9 @@
           else openPresentElements.add(element);
           if (focused) {
             if (document.activeElement === focused) focused.blur();
-            if (document.activeElement !== focused) AelluxJs2.dispatch("UnpopFocusLost");
+            if (document.activeElement !== focused) AelluxJs2.dispatch("UnpopFocusLost", {
+              detail: { element, focused }
+            });
           }
           transition.timeout = null;
           completeTransition();
@@ -4373,7 +4467,12 @@
           if (extensionNames.indexOf(fromCamelCase2(key)) !== -1)
             filter.push(selectorString);
       }
-      if (filter.length === 0) return;
+      if (filter.length === 0) {
+        AelluxJs2.dispatch("Mount", {
+          detail: { root: rootElement, extensions: extensionNames, elements: [] }
+        });
+        return;
+      }
       const candidatesByExtension = /* @__PURE__ */ new Map();
       const allElements = findElements(rootElement, filter.join(","));
       for (const element of allElements) {
@@ -4408,14 +4507,12 @@
       for (const result of loaded) {
         if (Object.prototype.hasOwnProperty.call(result, "error")) throw result.error;
       }
-      const elementsAffected = /* @__PURE__ */ new Set();
+      const registrations = [];
       for (let index = 0; index < extensions.length; index++) {
         if (!loaded[index].value) continue;
         const [extensionName, candidates] = extensions[index];
         const mounter = mountMaps.get(toCamelCase2(extensionName));
-        if (!mounter) {
-          continue;
-        }
+        if (!mounter) continue;
         const searchRoots = [];
         for (const candidate of candidates) {
           let ancestor = candidate.parentNode;
@@ -4423,76 +4520,88 @@
           if (!ancestor) searchRoots.push(candidate);
         }
         for (const [selector, controller] of mounter) {
-          try {
-            if (!controller.mount) {
-              continue;
-            }
-            for (const searchRoot of searchRoots) {
-              const mountableElements = findElements(searchRoot, selector);
-              for (const mountable of mountableElements) {
-                const mountId = `${extensionName}@${selector}`;
-                if (isMounted(mountable, mountId)) {
-                  const pendingMount = getPendingMount(mountable, mountId);
-                  if (pendingMount) await pendingMount;
-                  continue;
-                }
-                if (!isMounted(mountable)) {
-                  for (const name of Array.from(mountable.classList)) {
-                    if (name.startsWith(classPrefix)) mountable.classList.remove(name);
-                  }
-                }
-                rememberInitialAttributes(mountable);
-                setMounted(mountable, mountId);
-                const finishPendingMount = beginPendingMount(mountable, mountId);
-                try {
-                  await controller.mount(mountable);
-                  let elementController = elementControllers.get(mountable);
-                  if (!elementController) {
-                    elementController = createControllerHelper(root2, mountable);
-                    elementControllers.set(mountable, elementController);
-                  }
-                  elementController.spawn(
-                    extensionName,
-                    mountId,
-                    controller.controllers,
-                    typeof controller.update === "function"
-                  );
-                  elementsAffected.add(mountable);
-                  newlyMounted.add(mountable);
-                } catch (error) {
-                  setMounted(mountable, mountId, false);
-                  const elementController = elementControllers.get(mountable);
-                  if (elementController) {
-                    elementController.despawn(mountId);
-                    if (!elementController.hasMounts()) elementControllers.delete(mountable);
-                  }
-                  restoreInitialAttributes(mountable);
-                  AelluxJs2.diagnostics.error(
-                    AelluxJs2.diagnostics.ERROR_EXTENSION_MOUNT,
-                    {
-                      cause: error,
-                      extension: extensionName,
-                      method: "mount",
-                      selector,
-                      element: mountable
-                    }
-                  );
-                } finally {
-                  finishPendingMount();
-                }
-              }
-            }
-          } catch (error) {
-            AelluxJs2.diagnostics.error(
-              AelluxJs2.diagnostics.ERROR_EXTENSION_MOUNT,
-              {
-                cause: error,
-                extension: extensionName,
-                method: "mount",
-                selector
-              }
-            );
+          registrations.push({
+            extensionName,
+            selector,
+            controller,
+            searchRoots,
+            priority: controller.priority,
+            order: registrations.length
+          });
+        }
+      }
+      registrations.sort((left, right) => left.priority - right.priority || left.order - right.order);
+      const elementsAffected = /* @__PURE__ */ new Set();
+      for (const { extensionName, selector, controller, searchRoots } of registrations) {
+        try {
+          if (!controller.mount) {
+            continue;
           }
+          for (const searchRoot of searchRoots) {
+            const mountableElements = findElements(searchRoot, selector);
+            for (const mountable of mountableElements) {
+              const mountId = `${extensionName}@${selector}`;
+              if (isMounted(mountable, mountId)) {
+                const pendingMount = getPendingMount(mountable, mountId);
+                if (pendingMount) await pendingMount;
+                continue;
+              }
+              if (!isMounted(mountable)) {
+                for (const name of Array.from(mountable.classList)) {
+                  if (name.startsWith(classPrefix)) mountable.classList.remove(name);
+                }
+              }
+              rememberInitialAttributes(mountable);
+              setMounted(mountable, mountId);
+              const finishPendingMount = beginPendingMount(mountable, mountId);
+              try {
+                await controller.mount(mountable);
+                let elementController = elementControllers.get(mountable);
+                if (!elementController) {
+                  elementController = createControllerHelper(root2, mountable);
+                  elementControllers.set(mountable, elementController);
+                }
+                elementController.spawn(
+                  extensionName,
+                  mountId,
+                  controller.controllers,
+                  typeof controller.update === "function"
+                );
+                elementsAffected.add(mountable);
+                newlyMounted.add(mountable);
+              } catch (error) {
+                setMounted(mountable, mountId, false);
+                const elementController = elementControllers.get(mountable);
+                if (elementController) {
+                  elementController.despawn(mountId);
+                  if (!elementController.hasMounts()) elementControllers.delete(mountable);
+                }
+                restoreInitialAttributes(mountable);
+                AelluxJs2.diagnostics.error(
+                  AelluxJs2.diagnostics.ERROR_EXTENSION_MOUNT,
+                  {
+                    cause: error,
+                    extension: extensionName,
+                    method: "mount",
+                    selector,
+                    element: mountable
+                  }
+                );
+              } finally {
+                finishPendingMount();
+              }
+            }
+          }
+        } catch (error) {
+          AelluxJs2.diagnostics.error(
+            AelluxJs2.diagnostics.ERROR_EXTENSION_MOUNT,
+            {
+              cause: error,
+              extension: extensionName,
+              method: "mount",
+              selector
+            }
+          );
         }
       }
       for (const affected of elementsAffected) {
@@ -4503,11 +4612,18 @@
         }
         affected.classList.toggle(AelluxJs2.className("mounted"), true);
       }
-      AelluxJs2.dispatch("Mount");
+      AelluxJs2.dispatch("Mount", {
+        detail: {
+          root: rootElement,
+          extensions: extensionNames,
+          elements: Array.from(newlyMounted)
+        }
+      });
     }
     async function AelluxJsMounted(rootElement, method, extensionNames = null, detachedOnly = false) {
       const AelluxJs2 = root2.AelluxJs;
       const selectedNames = extensionNames === null ? null : new Set((typeof extensionNames === "string" ? [extensionNames] : extensionNames).map((name) => fromCamelCase2(name)));
+      const affected = /* @__PURE__ */ new Set();
       for (const [element, mountIds] of Array.from(mountedElements)) {
         const inRoot = element === rootElement || rootElement.contains(element);
         const detachedInGlobalUnmount = method === "unmount" && rootElement === root2.document && !element.isConnected;
@@ -4521,11 +4637,13 @@
           const mounter = mountMaps.get(extensionKey);
           const controller = mounter && mounter.get(selector);
           if (method === "unmount") {
-            await unmountRegistration(element, mountId, controller, extensionName, selector);
+            if (await unmountRegistration(element, mountId, controller, extensionName, selector))
+              affected.add(element);
             continue;
           }
           try {
             if (controller && controller[method]) {
+              affected.add(element);
               await controller[method](element);
             }
           } catch (error) {
@@ -4538,12 +4656,18 @@
           }
         }
       }
-      AelluxJs2.dispatch(toCapitalized2(method));
+      AelluxJs2.dispatch(toCapitalized2(method), {
+        detail: {
+          root: rootElement,
+          extensions: selectedNames ? Array.from(selectedNames) : null,
+          elements: Array.from(affected)
+        }
+      });
     }
     async function unmountRegistration(element, mountId, controller, extensionName, selector) {
       const pendingMount = getPendingMount(element, mountId);
       if (pendingMount) await pendingMount;
-      if (!isMounted(element, mountId)) return;
+      if (!isMounted(element, mountId)) return false;
       let tasks = pendingUnmounts.get(element);
       if (!tasks) {
         tasks = /* @__PURE__ */ new Map();
@@ -4551,7 +4675,7 @@
       }
       if (tasks.has(mountId)) {
         await tasks.get(mountId);
-        return;
+        return false;
       }
       let finish;
       tasks.set(mountId, new Promise((resolve) => {
@@ -4592,6 +4716,7 @@
         if (!tasks.size) pendingUnmounts.delete(element);
         finish();
       }
+      return !isMounted(element, mountId);
     }
     async function unmountElementRegistrations(element) {
       const mountIds = Array.from(mountedElements.get(element) || []);
@@ -4802,6 +4927,7 @@
       if (!options || typeof options !== "object" || Array.isArray(options))
         return reject("options");
       const { extensionName, selector, mount, unmount, update, controllers } = options;
+      const priority = options.priority === void 0 ? 0 : options.priority;
       if (typeof extensionName !== "string" || !/^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$|^[a-z][a-zA-Z0-9]*$/.test(extensionName))
         return reject("extensionName");
       const key = keyFor(extensionName);
@@ -4817,11 +4943,12 @@
         return reject("selector", cause);
       }
       if (typeof mount !== "function") return reject("mount");
+      if (typeof priority !== "number" || !isFinite(priority)) return reject("priority");
       if (unmount !== void 0 && typeof unmount !== "function") return reject("unmount");
       if (update !== void 0 && typeof update !== "function") return reject("update");
       if (controllers !== void 0 && (!Array.isArray(controllers) || controllers.some((name) => typeof name !== "string" || !name.trim())))
         return reject("controllers");
-      const allowed = ["extensionName", "selector", "mount", "unmount", "update", "controllers"];
+      const allowed = ["extensionName", "selector", "mount", "unmount", "update", "controllers", "priority"];
       const unknown = Object.keys(options).find((name) => !allowed.includes(name));
       if (unknown) return reject(unknown);
       let map = maps.get(key);
@@ -4830,7 +4957,7 @@
         maps.set(key, map);
       }
       if (map.has(selector)) return reject("selector");
-      map.set(selector, { mount, unmount, update, controllers });
+      map.set(selector, { mount, unmount, update, controllers, priority });
       root2.AelluxJs.registry.extMounters[key] = [...map.keys()].join(",");
       return manager;
     }

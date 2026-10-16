@@ -233,12 +233,14 @@
       AelluxJs.mountManager.add({
         extensionName: extensionName,
         selector: "[".concat(attr.present, "]"),
+        priority: 0,
         mount: mountPresentContainer,
         unmount: unmountPresentContainer,
         controllers: ["pop", "unpop", "trigger", "toggle"]
       });
       AelluxJs.mountManager.add({
         extensionName: extensionName,
+        priority: 0,
         selector: "[".concat([attr.trigger, attr.dismiss, attr.target].join("],["), "]"),
         mount: mountTriggerElement,
         unmount: unmountTriggerElement
@@ -802,7 +804,12 @@
       else openPresentElements.add(element);
       if (focused) {
         if (document.activeElement === focused) focused.blur();
-        if (document.activeElement !== focused) AelluxJs.dispatch("UnpopFocusLost");
+        if (document.activeElement !== focused) AelluxJs.dispatch("UnpopFocusLost", {
+          detail: {
+            element: element,
+            focused: focused
+          }
+        });
       }
       transition.timeout = null;
       completeTransition();

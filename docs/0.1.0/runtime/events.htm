@@ -626,9 +626,9 @@ panel.off(&quot;Layout&quot;, onLayout);
 <td>A valid <code>$ae.mountManager.update(...)</code> pass finishes after awaiting the matching mounted <code>update</code> callbacks. It also fires if no matching callback exists.</td>
 </tr>
 </tbody></table>
-<p>These lifecycle events are dispatched on <code>document</code>. <code>AelluxJsUpdate</code> is a pass completion signal: it does not identify an element, include a <code>detail</code> payload, or mean that a visual change occurred. An invalid root does not start an update pass and does not dispatch it. <code>$ae(element).update()</code> and an Extension controller&#39;s <code>update()</code> use this same mount manager. For a size update on one Adaptive element, listen for <code>AelluxJsAdaptiveUpdate</code> instead.</p>
-<pre><code class="language-js">document.addEventListener(&quot;AelluxJsUpdate&quot;, () =&gt; {
-  // A mount manager update pass finished.
+<p>These lifecycle events are dispatched on <code>document</code>. <code>Mount</code>, <code>Unmount</code>, and <code>Update</code> carry <code>detail: { root, extensions, elements }</code>. <code>root</code> is the resolved root of the pass, <code>extensions</code> is the selected name array or <code>null</code> for all Extensions, and <code>elements</code> contains distinct elements actually mounted, unmounted, or passed to an <code>update</code> callback. An update callback that throws still counts as invoked. The array is empty for a pass with no affected elements. An invalid root does not start a pass or dispatch its event. <code>$ae(element).update()</code> and an Extension controller&#39;s <code>update()</code> use this same mount manager. For a size update on one Adaptive element, listen for <code>AelluxJsAdaptiveUpdate</code> instead.</p>
+<pre><code class="language-js">document.addEventListener(&quot;AelluxJsMount&quot;, event =&gt; {
+  console.log(event.detail.elements); // Newly mounted DOM elements.
 });
 
 await $ae.mountManager.update(document.getElementById(&quot;panel&quot;));
@@ -646,7 +646,7 @@ await $ae.mountManager.update(document.getElementById(&quot;panel&quot;));
 <tbody><tr>
 <td>Adaptive</td>
 <td><code>AelluxJsAdaptiveUpdate</code></td>
-<td>Updated element; <code>detail</code> is <code>null</code>.</td>
+<td>Updated element; <code>detail</code> is <code>{ width, height, ratio }</code>.</td>
 </tr>
 <tr>
 <td>Feedback</td>
@@ -661,7 +661,7 @@ await $ae.mountManager.update(document.getElementById(&quot;panel&quot;));
 <tr>
 <td>Preference</td>
 <td><code>AelluxJsPreferencesChange</code></td>
-<td><code>document</code>; dispatched on each preference update, even if values do not change.</td>
+<td><code>document</code>; <code>detail</code> is <code>{ changed, preferences }</code>, with a changed-key array and a snapshot of current values. <code>changed</code> can be empty.</td>
 </tr>
 <tr>
 <td>Present</td>
@@ -681,12 +681,22 @@ await $ae.mountManager.update(document.getElementById(&quot;panel&quot;));
 <tr>
 <td>Present</td>
 <td><code>AelluxJsUnpopFocusLost</code></td>
-<td><code>document</code>; an active descendant lost focus while the region closed.</td>
+<td><code>document</code>; <code>detail</code> is <code>{ element, focused }</code>, identifying the closed Present region and the element that lost focus.</td>
+</tr>
+<tr>
+<td>Scrollbox</td>
+<td><code>AelluxJsScrollboxSnapChange</code></td>
+<td>Scrollbox element; <code>detail</code> is <code>{ item, index, previousIndex, axis }</code> after a new snap item is selected and scrolling settles. The initial item uses <code>previousIndex: null</code>.</td>
+</tr>
+<tr>
+<td>Scrollbox</td>
+<td><code>AelluxJsPointerScrollStart</code>, <code>AelluxJsPointerScrollEnd</code></td>
+<td>Pointer gesture&#39;s originating scrollbox; <code>detail</code> is <code>{ axis, pointerId, pointerType, elements }</code>. <code>elements</code> lists the scrollboxes activated for that gesture. A short flick that never activates PDS does not emit them.</td>
 </tr>
 <tr>
 <td>State Navigation</td>
 <td><code>AelluxJsSnapshotChange</code>, <code>AelluxJsSnapshotRestore</code></td>
-<td><code>document</code>; <code>detail</code> contains <code>snapshot</code>, <code>removeSnapshot</code>, and <code>popState</code>.</td>
+<td><code>document</code>; <code>detail</code> contains copies of <code>snapshot</code>, <code>removeSnapshot</code>, and <code>popState</code>.</td>
 </tr>
 </tbody></table>
 <pre><code class="language-js">panel.addEventListener(&quot;AelluxJsLayout&quot;, () =&gt; {

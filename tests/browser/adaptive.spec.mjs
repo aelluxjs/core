@@ -52,10 +52,15 @@ test("adaptive updates shape and size classes as its dimensions change", async (
 
   await page.evaluate(() => {
     const element = document.querySelector("#adaptive");
+    window.adaptiveDetails = [];
+    element.addEventListener("AelluxJsAdaptiveUpdate", event =>
+      window.adaptiveDetails.push(event.detail));
     element.style.width = "200px";
     element.style.height = "500px";
   });
   await expect(element).toHaveClass(/ae--shape-vertical/);
+  await expect.poll(() => page.evaluate(() => window.adaptiveDetails.at(-1)))
+    .toEqual({ width: 200, height: 500, ratio: 0.4 });
   await expect(element).toHaveAttribute("aria-orientation", "vertical");
   await expect(element).not.toHaveClass(/ae--shape-horizontal/);
   await expect(element).not.toHaveClass(/ae--fits-small/);

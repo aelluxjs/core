@@ -13,25 +13,37 @@
   const momentumAttribute = AelluxJs.attr("scrollbox-momentum");
   const elasticAttribute = AelluxJs.attr("scrollbox-elastic");
   const snapAttribute = AelluxJs.attr("scrollbox-snap");
+
   const scrollbarAttribute = AelluxJs.attr("scrollbar");
   const scrollbarVerticalAttribute = AelluxJs.attr("scrollbar-vertical");
   const scrollbarHorizontalAttribute = AelluxJs.attr("scrollbar-horizontal");
+
   const elasticReleaseClass = AelluxJs.className("scrollbox-elastic-release");
   const pointerScrollingClass = AelluxJs.className("pointerscrolling");
   const nativeScrollbarHideClass = AelluxJs.className("native-sb-hide");
   const scrollbarVisibleClass = AelluxJs.className("scrollbar-visible");
+  const scrollEdgeClasses = [
+    AelluxJs.className("scroll-v-start"), AelluxJs.className("scroll-v-end"),
+    AelluxJs.className("scroll-h-start"), AelluxJs.className("scroll-h-end")
+  ];
+
   const pointerScrollExceptionSelector =
     `a, button, input, select, textarea, [contenteditable], [draggable='true'], ` +
     `[${scrollbarVerticalAttribute}], [${scrollbarHorizontalAttribute}]`;
+
   const RESIZE_INTERVAL_MS = 100;
+  const SCROLL_EDGE_MARGIN_PX = 5;
+
   const POINTER_SCROLL_THRESHOLD_PX = 3;
   const POINTER_SCROLL_MULTICLICK_MS = 500;
   const POINTER_SCROLL_MULTICLICK_DISTANCE_PX = 8;
   const TEXT_SELECTION_WAIT_MS = 100;
   const VERTICAL_TEXT_DRAG_PX = 10;
+
   const MOMENTUM_LIMIT_TIME_MS = 300;
   const MOMENTUM_LIMIT_DISTANCE_PX = 15;
   const MOMENTUM_DECELERATION = 0.0015;
+
   const SNAP_SWIPE_SPEED_PX_MS = 0.5;
   const SNAP_FLICK_WINDOW_MS = 200;
   const SNAP_FLICK_FAST_TIME_MS = 50;
@@ -41,14 +53,17 @@
   const SNAP_SCROLL_IDLE_MS = 120;
   const SNAP_WHEEL_IDLE_MS = 120;
   const SNAP_EDGE_DISTANCE_PX = 10;
+
   const ELASTIC_DAMPING = 1 / 3;
   const DEFAULT_ELASTIC_LIMIT = { unit: "ratio", value: 1 / 4 };
   const ELASTIC_RETURN_LERP = 0.15;
   const ELASTIC_RETURN_EPSILON = 0.01;
   const ELASTIC_WHEEL_IDLE_MS = 80;
+
   const SCROLLBAR_SIZE_PX = 8;
   const SCROLLBAR_MIN_THUMB_PX = 20;
   const SCROLLBAR_PDS_HIDE_DELAY_MS = 1000;
+
   const scrollbarProperties = [
     "--ae-scrollbar-x", "--ae-scrollbar-y", "--ae-scrollbar-length",
     "--ae-scrollbar-thumb-size", "--ae-scrollbar-thumb-position",
@@ -79,6 +94,7 @@
   function init() {
     AelluxJs.mountManager.add({
       extensionName, selector: `[${attribute}]`,
+      priority: 0,
       mount: mountScrollbox, update: updateScrollbox, unmount: unmountScrollbox,
       controllers: ["next", "previous", "goto"]
     });
@@ -98,40 +114,53 @@
     const elastic = {
       wrapper: null, baseTransform: "", baseOrigin: "",
       previousTransform: null, previousOrigin: null,
-      previousMinWidth: null, previousMinHeight: null, extentX: false, extentY: false,
-      dimensions: null,
+      previousMinWidth: null, previousMinHeight: null,
+      extentX: false, extentY: false, dimensions: null,
+
       invalidReported: false, invalidLimit: null,
       limits: [DEFAULT_ELASTIC_LIMIT, DEFAULT_ELASTIC_LIMIT],
       amounts: [0, 0, 0, 0], active: false, owned: false, touch: null,
       releaseFrame: null, wheelTimeout: null
     };
-    const snap = { wrapper: null, initialized: false, invalidReported: false,
+
+    const snap = {
+      wrapper: null, initialized: false, invalidReported: false,
       pending: null, index: 0, wheelTarget: null,
-      scrollEndTimeout: null, wheelTimeout: null };
+      notifiedItem: null, notifiedIndex: null,
+      scrollEndTimeout: null, wheelTimeout: null
+    };
+
     const inlineWrapper = {
       element: null, previousDisplay: null, owned: false, reportedDisplay: null
     };
+
     const scrollbar = {
       x: null, y: null, drag: null, hideOwned: false, visibleOwned: false,
       listening: false, pointerHover: false, mouseHover: false,
       pdsVisible: false, hideTimeout: null
     };
+
     const state = {
       element, previous, metrics: null, mode: null, desktop: false,
       cursor: {
         value: element.style.getPropertyValue("cursor"),
         priority: element.style.getPropertyPriority("cursor"), owned: false
       },
+
       wheelEnabled: true, momentumEnabled: true, elasticEnabled: false,
       snapEnabled: false,
       wheelListening: false, pointerListening: false, touchListening: false,
+
       pointerScroll: null, lastPointerDown: null,
       mouseReleaseButton: null, mouseReleaseTimeout: null,
+
       momentum: null, elastic, snap, inlineWrapper, scrollbar,
       resizeObserver: null, mutationObserver: null,
+
       publishPending: false, publishDirty: false, layoutRevision: 0,
       lastResizeTime: -RESIZE_INTERVAL_MS, resizeTimeout: null, disposed: false
     };
+
     state.onScroll = () => {
       publish(state);
       if (state.snapEnabled && !("onscrollend" in element)) scheduleScrollEnd(state);
@@ -139,6 +168,7 @@
     state.onScrollEnd = () => finishNativeScroll(state);
     state.onWheel = event => handleWheel(state, event);
     state.onClick = event => handleSnapClick(state, event);
+
     state.onPointerDown = event => startPointerScroll(state, event);
     state.onPointerOver = event => updatePointerScrollCursor(state, event.target,
       event.clientX, event.clientY);
@@ -162,9 +192,11 @@
     };
     state.onPointerEnd = event => endPointerScroll(state, event);
     state.onBlur = () => endPointerScroll(state);
+
     state.onTouchStart = event => startTouch(state, event);
     state.onTouchMove = event => moveTouch(state, event);
     state.onTouchEnd = event => endTouch(state, event);
+
     state.onScrollbarPointerEnter = event => {
       if (event.pointerType !== "touch") setScrollbarHover(state, "pointerHover", true);
     };
@@ -182,6 +214,7 @@
         syncScrollbarVisibility(state);
       }
     };
+
     scrollboxes.set(element, state);
     element.addEventListener("scroll", state.onScroll, { passive: true });
     element.addEventListener("scrollend", state.onScrollEnd, { passive: true });
@@ -232,19 +265,23 @@
       if (original.value) element.style.setProperty(name, original.value, original.priority);
       else element.style.removeProperty(name);
     });
+    for (const name of scrollEdgeClasses) element.classList.remove(name);
     scrollboxes.delete(element);
   }
 
   function configure(state) {
     const element = state.element;
+
     state.layoutRevision++;
     state.mode = readMode(element);
     state.wheelEnabled = element.getAttribute(wheelAttribute) !== "false";
     state.momentumEnabled = element.getAttribute(momentumAttribute) !== "false";
+
     configureElastic(state);
     configureSnap(state);
     configureInlineWrapper(state);
     configureScrollbars(state);
+
     state.desktop = isDesktop();
     if ((state.desktop || state.elasticEnabled || state.snapEnabled) && !state.wheelListening) {
       element.addEventListener("wheel", state.onWheel, { passive: false, capture: true });
@@ -254,9 +291,11 @@
       element.removeEventListener("wheel", state.onWheel, true);
       state.wheelListening = false;
     }
+
     if (state.elasticEnabled && !state.touchListening) addTouchListeners(state);
     else if (!state.elasticEnabled && state.touchListening) removeTouchListeners(state);
     if (!state.elasticEnabled) resetElastic(state);
+
     const pointerEnabled = state.desktop && state.mode === "pointer";
     if (!pointerEnabled || !state.momentumEnabled) cancelMomentum(state);
     if (pointerEnabled && !state.pointerListening) {
@@ -278,6 +317,7 @@
       state.lastPointerDown = null;
       restorePointerScrollCursor(state);
     }
+
     refresh(state);
     if (state.snapEnabled && !state.snap.initialized) initializeSnap(state);
   }
@@ -305,8 +345,10 @@
   function configureScrollbars(state) {
     const element = state.element;
     const axes = scrollbarAxes(element.getAttribute(scrollbarAttribute));
+
     configureScrollbarAxis(state, "y", axes.y, scrollbarVerticalAttribute);
     configureScrollbarAxis(state, "x", axes.x, scrollbarHorizontalAttribute);
+
     const enabled = axes.x || axes.y;
     const scrollbar = state.scrollbar;
     if (enabled && !scrollbar.listening) {
@@ -314,11 +356,13 @@
       if (scrollbar.hideOwned) element.classList.add(nativeScrollbarHideClass);
       scrollbar.mouseHover = element.matches(":hover") &&
         !!(root.matchMedia && root.matchMedia("(any-hover: hover)").matches);
+
       element.addEventListener("pointerenter", state.onScrollbarPointerEnter);
       element.addEventListener("pointerleave", state.onScrollbarPointerLeave);
       element.addEventListener("mouseenter", state.onScrollbarMouseEnter);
       element.addEventListener("mouseleave", state.onScrollbarMouseLeave);
       root.document.addEventListener("pointerdown", state.onScrollbarOutsideDown, true);
+
       scrollbar.listening = true;
       syncScrollbarVisibility(state);
     } else if (!enabled && scrollbar.listening) {
@@ -327,6 +371,7 @@
       element.removeEventListener("mouseenter", state.onScrollbarMouseEnter);
       element.removeEventListener("mouseleave", state.onScrollbarMouseLeave);
       root.document.removeEventListener("pointerdown", state.onScrollbarOutsideDown, true);
+
       if (scrollbar.hideOwned) element.classList.remove(nativeScrollbarHideClass);
       scrollbar.hideOwned = false;
       scrollbar.listening = false;
@@ -341,29 +386,35 @@
     const scrollbar = state.scrollbar;
     const current = scrollbar[axis];
     let element = null;
+
     if (enabled) element = Array.from(state.element.children).find(child =>
       child.hasAttribute(attributeName)) || null;
     if (current && current.element === element && enabled) return;
     if (current) resetScrollbarAxis(state, axis);
     if (!enabled) return;
+
     const owned = !element;
     if (!element) {
       element = root.document.createElement("div");
       element.setAttribute(attributeName, "");
       state.element.appendChild(element);
     }
+
     const previous = scrollbarProperties.map(name => ({
       name, value: element.style.getPropertyValue(name),
       priority: element.style.getPropertyPriority(name)
     }));
     const record = {
-      element, owned, previous, axis, x: null, y: null,
-      thumbPosition: null, thumbSize: null, trackSize: null, max: null,
-      display: null
+      element, owned, previous, axis,
+      x: null, y: null,
+      thumbPosition: null, thumbSize: null,
+      trackSize: null, max: null, display: null
     };
+
     record.onPointerDown = event => startScrollbarDrag(state, record, event);
     record.onPointerMove = event => moveScrollbarDrag(state, record, event);
     record.onPointerEnd = event => endScrollbarDrag(state, record, event);
+
     element.addEventListener("pointerdown", record.onPointerDown);
     element.addEventListener("pointermove", record.onPointerMove);
     element.addEventListener("pointerup", record.onPointerEnd);
@@ -517,11 +568,13 @@
 
   function startScrollbarDrag(state, record, event) {
     if (state.disposed || event.button !== 0 || !record.max) return;
+
     if (activePointerScrollState && activePointerScrollState.pointerScroll &&
       activePointerScrollState.pointerScroll.chain.includes(state))
       endPointerScroll(activePointerScrollState);
     if (event.cancelable) event.preventDefault();
     event.stopPropagation();
+
     const position = scrollbarPointerPosition(record, event);
     if (event.pointerType !== "touch") state.scrollbar.pointerHover = true;
     showScrollbars(state);
@@ -534,6 +587,7 @@
       else state.element.scrollTo({ left: destination });
       return;
     }
+
     state.scrollbar.drag = {
       record, pointerId: event.pointerId,
       offset: position - record.thumbPosition
@@ -545,14 +599,18 @@
   function moveScrollbarDrag(state, record, event) {
     const drag = state.scrollbar.drag;
     if (!drag || drag.record !== record || drag.pointerId !== event.pointerId) return;
+
     if (event.cancelable) event.preventDefault();
     event.stopPropagation();
+
     const travel = record.trackSize - record.thumbSize;
     if (travel <= 0) return;
     const position = scrollbarPointerPosition(record, event) - drag.offset;
     const destination = Math.max(0, Math.min(record.max, position / travel * record.max));
+
     if (record.axis === "y") state.element.scrollTo({ top: destination, behavior: "instant" });
     else state.element.scrollTo({ left: destination, behavior: "instant" });
+
     updateScrollbars(state, [{
       record,
       x: record.axis === "x" ? destination : record.x,
@@ -561,6 +619,7 @@
       thumbPosition: travel * destination / record.max,
       max: record.max, display: record.display
     }]);
+
     publish(state);
   }
 
@@ -586,6 +645,7 @@
     const child = children.length === 1 ? children[0] : null;
     const wrapper = child && child.hasAttribute(snapAttribute) &&
       child.getAttribute(snapAttribute) !== "false" ? child : null;
+
     if (!wrapper) {
       state.snapEnabled = false;
       state.snap.wrapper = null;
@@ -593,8 +653,11 @@
       state.snap.pending = null;
       state.snap.index = 0;
       state.snap.wheelTarget = null;
+      state.snap.notifiedItem = null;
+      state.snap.notifiedIndex = null;
       clearScrollEnd(state);
       clearSnapWheel(state);
+
       const requested = element.hasAttribute(snapAttribute) ||
         children.some(item => item.hasAttribute(snapAttribute) &&
           item.getAttribute(snapAttribute) !== "false");
@@ -604,6 +667,7 @@
       state.snap.invalidReported = requested;
       return;
     }
+
     state.snap.invalidReported = false;
     if (state.snap.wrapper !== wrapper) {
       state.snap.wrapper = wrapper;
@@ -611,19 +675,24 @@
       state.snap.pending = null;
       state.snap.index = 0;
       state.snap.wheelTarget = null;
+      state.snap.notifiedItem = null;
+      state.snap.notifiedIndex = null;
       clearSnapWheel(state);
     }
+
     state.snapEnabled = true;
   }
 
   function configureInlineWrapper(state) {
     const inline = state.inlineWrapper;
     const wrapper = state.elastic.wrapper || state.snap.wrapper;
+
     if (inline.element !== wrapper) {
       restoreInlineWrapper(state);
       inline.element = wrapper;
     }
     if (!wrapper) return;
+
     const display = root.getComputedStyle(wrapper).display;
     if (display.startsWith("inline")) return;
     if (inline.reportedDisplay !== display) {
@@ -631,17 +700,20 @@
         { element: wrapper, display });
       inline.reportedDisplay = display;
     }
+
     const replacement = {
       block: "inline-block", flex: "inline-flex", grid: "inline-grid",
       "flow-root": "inline-block", table: "inline-table"
     }[display];
     if (!replacement) return;
+
     if (!inline.owned) {
       inline.previousDisplay = {
         value: wrapper.style.getPropertyValue("display"),
         priority: wrapper.style.getPropertyPriority("display")
       };
     }
+
     wrapper.style.setProperty("display", replacement, "important");
     inline.owned = true;
   }
@@ -783,12 +855,18 @@
       const target = state.snap.wheelTarget;
       if (items.includes(target) && snapNeedsScroll(state, target, axis, metrics)) return;
       state.snap.wheelTarget = null;
-      if (items.includes(target)) return;
+      if (items.includes(target)) {
+        notifySnapChange(state, target, axis);
+        return;
+      }
     }
     const edgeIndex = edgeSnapIndex(state, items, axis, metrics);
     const target = items[edgeIndex === null ? nearestSnapIndex(state, items) : edgeIndex];
     state.snap.index = items.indexOf(target);
-    if (!snapNeedsScroll(state, target, axis, metrics)) return;
+    if (!snapNeedsScroll(state, target, axis, metrics)) {
+      notifySnapChange(state, target, axis);
+      return;
+    }
     if (state.elastic.active) state.snap.pending = target;
     else scrollToSnap(state, items.indexOf(target), axis);
   }
@@ -798,8 +876,24 @@
     if (!first) return;
     state.snap.initialized = true;
     state.snap.index = 0;
-    first.scrollIntoView(snapScrollOptions(snapAxis(state), "instant"));
+    const axis = snapAxis(state);
+    first.scrollIntoView(snapScrollOptions(axis, "instant"));
+    notifySnapChange(state, first, axis);
     refresh(state);
+  }
+
+  function notifySnapChange(state, item, axis) {
+    const index = snapItems(state).indexOf(item);
+    if (index < 0 ||
+      state.snap.notifiedItem === item && state.snap.notifiedIndex === index) return;
+
+    const previousIndex = state.snap.notifiedIndex;
+    state.snap.index = index;
+    state.snap.notifiedItem = item;
+    state.snap.notifiedIndex = index;
+    AelluxJs.dispatchFrom(state.element, "ScrollboxSnapChange", {
+      detail: { item, index, previousIndex, axis }
+    });
   }
 
   function snapScrollOptions(axis, behavior) {
@@ -824,6 +918,7 @@
     state.snap.wheelTarget = items[index];
     if (state.elastic.owned) resetElastic(state);
     items[index].scrollIntoView(snapScrollOptions(axis));
+    scheduleScrollEnd(state);
     return true;
   }
 
@@ -985,9 +1080,11 @@
       event.defaultPrevented ||
       event.button !== 0 || !event.isPrimary ||
       event.pointerType === "touch" || (event.buttons & 1) === 0) return;
+
     const element = state.element;
     const nested = event.target.closest(`[${attribute}]`);
     if (nested !== element || event.target.closest(pointerScrollExceptionSelector)) return;
+
     const chain = [];
     let node = element;
     while (node) {
@@ -995,27 +1092,34 @@
       if (member && member.pointerListening && !member.disposed) chain.push(member);
       node = node.parentElement && node.parentElement.closest(`[${attribute}]`);
     }
+
     if (chain.some(member => member.scrollbar.drag)) return;
+
     const axes = new Map(chain.map(member => {
       const metrics = nativeMetrics(member.element);
       member.metrics = metrics;
       return [member, wheelAxes(member, metrics)];
     }));
     if (!chain.some(member => axes.get(member).x || axes.get(member).y)) return;
+
     const rect = element.getBoundingClientRect();
     if (event.clientX >= rect.left + element.clientWidth ||
       event.clientY >= rect.top + element.clientHeight) return;
+
     const previousDown = state.lastPointerDown;
     const time = now();
     state.lastPointerDown = { x: event.clientX, y: event.clientY, time };
     if (previousDown && time - previousDown.time <= POINTER_SCROLL_MULTICLICK_MS &&
       Math.abs(event.clientX - previousDown.x) <= POINTER_SCROLL_MULTICLICK_DISTANCE_PX &&
       Math.abs(event.clientY - previousDown.y) <= POINTER_SCROLL_MULTICLICK_DISTANCE_PX) return;
+
     const textOrigin = isTextAtPoint(event.target, event.clientX, event.clientY);
     const selectionAtDown = readSelection();
     const verticalOnly = chain.some(member => axes.get(member).y) &&
       !chain.some(member => axes.get(member).x);
+
     if (!textOrigin && event.cancelable) event.preventDefault();
+
     for (const member of chain) {
       cancelMomentum(member);
       member.snap.pending = null;
@@ -1025,29 +1129,36 @@
         refresh(member);
       }
     }
+
     if (state.mouseReleaseTimeout !== null) root.clearTimeout(state.mouseReleaseTimeout);
     state.mouseReleaseTimeout = null;
     state.mouseReleaseButton = null;
     state.pointerScroll = {
-      pointerId: event.pointerId, button: event.button,
+      pointerId: event.pointerId, pointerType: event.pointerType, button: event.button,
       startX: event.clientX, startY: event.clientY,
-      lastX: event.clientX, lastY: event.clientY, moved: false, axis: null, chain,
-      axes,
-      styles: [], momentumState: null, momentumStartX: 0, momentumStartY: 0,
+      lastX: event.clientX, lastY: event.clientY,
+      moved: false, started: false, axis: null, chain, axes,
+
+      styles: [],
+      momentumState: null, momentumStartX: 0, momentumStartY: 0,
       elasticForce: 0,
       startTime: time, endTime: null,
+
       snapStarts: new Map(chain.filter(member => member.snapEnabled).map(member => {
         const items = snapItems(member);
         const item = items[member.snap.index] || null;
         const axis = snapAxis(member, member.metrics, axes.get(member));
         return [member, item ? { item, offset: snapCenterOffset(member, item, axis) } : null];
       })),
+
       selectionAtDown, verticalOnly,
       selectionReadyTime: textOrigin ? time + TEXT_SELECTION_WAIT_MS : 0,
       selectionWaitTimeout: null, pendingMove: null,
       momentumStartTime: time
     };
+
     activePointerScrollState = state;
+
     root.addEventListener("pointermove", state.onPointerMove, { passive: false, capture: true });
     root.addEventListener("touchmove", state.onPointerScrollTouchMove,
       { passive: false, capture: true });
@@ -1066,16 +1177,20 @@
   function movePointerScroll(state, event) {
     const pointerScroll = state.pointerScroll;
     if (!pointerScroll || event.pointerId !== pointerScroll.pointerId) return;
+
     if ((event.buttons & 1) === 0) {
       endPointerScroll(state);
       return;
     }
+
     const dx = pointerScroll.startX - event.clientX;
     const dy = pointerScroll.startY - event.clientY;
+
     if (!pointerScroll.moved && selectionHasChanged(pointerScroll.selectionAtDown)) {
       endPointerScroll(state);
       return;
     }
+
     const threshold = pointerScroll.chain.some(member => member.snapEnabled) ?
       SNAP_FLICK_MIN_DISTANCE_PX : POINTER_SCROLL_THRESHOLD_PX;
     if (!pointerScroll.moved && dx * dx + dy * dy < threshold * threshold) return;
@@ -1083,6 +1198,7 @@
       pointerScroll.axis = Math.abs(dx) >= Math.abs(dy) ? "x" : "y";
     const verticalTextDrag = pointerScroll.verticalOnly && pointerScroll.axis === "y" &&
       Math.abs(dy) > VERTICAL_TEXT_DRAG_PX;
+
     if (!pointerScroll.moved && now() < pointerScroll.selectionReadyTime && !verticalTextDrag) {
       pointerScroll.pendingMove = { x: event.clientX, y: event.clientY };
       if (pointerScroll.selectionWaitTimeout === null) {
@@ -1098,6 +1214,7 @@
       }
       return;
     }
+
     if (!pointerScroll.moved) {
       const axis = pointerScroll.axis;
       if (!pointerScroll.chain.some(member => pointerAxisMaximum(member, axis, pointerScroll) > 0)) {
@@ -1105,19 +1222,24 @@
         return;
       }
       activatePointerScroll(state, pointerScroll, axis);
+      if (state.pointerScroll !== pointerScroll) return;
     }
+
     const axis = pointerScroll.axis;
     let remaining = axis === "x" ? pointerScroll.lastX - event.clientX :
       pointerScroll.lastY - event.clientY;
     pointerScroll.lastX = event.clientX;
     pointerScroll.lastY = event.clientY;
+
     if (event.cancelable) event.preventDefault();
     if (!remaining) return;
+
     let outermost = null;
     for (const member of pointerScroll.chain) {
       if (!member.disposed && member.pointerListening &&
         pointerAxisMaximum(member, axis, pointerScroll) > 0) outermost = member;
     }
+
     if (outermost && outermost.elasticEnabled && pointerScroll.elasticForce) {
       const force = pointerScroll.elasticForce + remaining;
       if (!force || Math.sign(force) === Math.sign(pointerScroll.elasticForce)) {
@@ -1128,6 +1250,7 @@
         remaining = force;
       }
     }
+
     let lastUsed = null;
     let lastStartX = 0, lastStartY = 0;
     for (const member of pointerScroll.chain) {
@@ -1152,6 +1275,7 @@
       lastStartX = previousX;
       lastStartY = previousY;
     }
+
     if (outermost && outermost.elasticEnabled) {
       pointerScroll.elasticForce += remaining;
       const element = outermost.element;
@@ -1161,6 +1285,7 @@
       scrollWithinElasticBounds(outermost, desiredX, desiredY);
       publish(outermost);
     }
+
     if (lastUsed) {
       const time = now();
       if (pointerScroll.momentumState !== lastUsed) {
@@ -1209,6 +1334,7 @@
   function activatePointerScroll(state, pointerScroll, axis) {
     pointerScroll.axis = axis;
     pointerScroll.moved = true;
+    pointerScroll.started = true;
     restorePointerScrollCursor(state);
     for (const member of pointerScroll.chain) {
       if (pointerAxisMaximum(member, axis, pointerScroll) <= 0) continue;
@@ -1222,11 +1348,24 @@
       element.classList.add(pointerScrollingClass);
       startScrollbarPdsVisibility(member);
     }
+    dispatchPointerScroll(state, pointerScroll, "PointerScrollStart");
+  }
+
+  function dispatchPointerScroll(state, pointerScroll, name) {
+    AelluxJs.dispatchFrom(state.element, name, {
+      detail: {
+        axis: pointerScroll.axis,
+        pointerId: pointerScroll.pointerId,
+        pointerType: pointerScroll.pointerType,
+        elements: pointerScroll.styles.map(saved => saved.element)
+      }
+    });
   }
 
   function endPointerScroll(state, event) {
     const pointerScroll = state.pointerScroll;
     if (!pointerScroll || (event && event.pointerId !== pointerScroll.pointerId)) return;
+
     pointerScroll.endTime = now();
     if (event && event.type === "pointerup" && !pointerScroll.moved &&
       pointerScroll.endTime < pointerScroll.selectionReadyTime &&
@@ -1244,6 +1383,7 @@
         pointerScroll.moved = true;
       }
     }
+
     state.pointerScroll = null;
     if (activePointerScrollState === state) activePointerScrollState = null;
     if (pointerScroll.selectionWaitTimeout !== null)
@@ -1274,10 +1414,15 @@
       const member = scrollboxes.get(saved.element);
       if (member) scheduleScrollbarPdsHide(member);
     }
+
     if (event && event.type === "pointerup" && state.pointerListening) {
       updatePointerScrollCursor(state, document.elementFromPoint(event.clientX, event.clientY),
         event.clientX, event.clientY);
     } else restorePointerScrollCursor(state);
+
+    if (pointerScroll.started)
+      dispatchPointerScroll(state, pointerScroll, "PointerScrollEnd");
+
     const hadElastic = pointerScroll.chain.some(member => member.elastic.active);
     const momentumState = pointerScroll.momentumState;
     const snapState = momentumState ? (momentumState.snapEnabled ? momentumState : null) :
@@ -1285,6 +1430,7 @@
         pointerAxisMaximum(member, pointerScroll.axis, pointerScroll) > 0);
     const shouldSnap = event && event.type === "pointerup" && pointerScroll.moved &&
       snapState && !snapState.disposed && snapItems(snapState).length;
+
     if (shouldSnap) schedulePointerSnap(snapState, pointerScroll);
     for (const member of pointerScroll.chain) releaseElastic(member);
     if (!shouldSnap && event && event.type === "pointerup" && pointerScroll.moved && momentumState &&
@@ -1378,6 +1524,7 @@
       currentX: element.scrollLeft, currentY: element.scrollTop,
       toX: x, toY: y, frame: null
     };
+
     state.momentum = momentum;
     momentum.frame = root.requestAnimationFrame(() => stepMomentum(state, momentum));
   }
@@ -1482,10 +1629,12 @@
 
   function applyElasticFromDesired(state, desiredX, desiredY, additive, axis = null) {
     if (!state.elasticEnabled) return false;
+
     const element = state.element;
     const metrics = state.metrics || nativeMetrics(element);
     const elastic = state.elastic;
     const amounts = [0, 0, 0, 0];
+
     if (axis !== "x" && metrics.maxY > 1) {
       const limitY = elasticLimit(element.clientHeight, elastic.limits[0]);
       if (desiredY < 0) amounts[0] = elasticResistance(-desiredY,
@@ -1493,6 +1642,7 @@
       else if (desiredY > metrics.maxY) amounts[2] = elasticResistance(desiredY - metrics.maxY,
         additive ? elastic.amounts[2] : 0, limitY);
     }
+
     if (axis !== "y" && metrics.maxX > 1) {
       const limitX = elasticLimit(element.clientWidth, elastic.limits[1]);
       if (desiredX > metrics.maxX) amounts[1] = elasticResistance(desiredX - metrics.maxX,
@@ -1500,9 +1650,11 @@
       else if (desiredX < 0) amounts[3] = elasticResistance(-desiredX,
         additive ? elastic.amounts[3] : 0, limitX);
     }
+
     const active = amounts.some(amount => amount > 0);
     if (!active && !elastic.owned) return false;
     const dimensions = elastic.dimensions || measureElasticWrapper(elastic.wrapper);
+
     elastic.dimensions = dimensions;
     if (elastic.releaseFrame !== null) root.cancelAnimationFrame(elastic.releaseFrame);
     elastic.releaseFrame = null;
@@ -1510,6 +1662,7 @@
     elastic.amounts = amounts;
     elastic.active = active;
     elastic.owned = true;
+
     if (amounts[1] > 0 && !elastic.extentX) {
       elastic.wrapper.style.setProperty("min-width",
         `${Math.max(dimensions.offsetWidth, dimensions.scrollWidth)}px`,
@@ -1522,6 +1675,7 @@
         elastic.previousMinHeight.priority);
       elastic.extentY = true;
     }
+
     setElasticTransform(state, dimensions);
     return active;
   }
@@ -1541,11 +1695,13 @@
     const x = elastic.amounts[3] - elastic.amounts[1];
     const y = elastic.amounts[0] - elastic.amounts[2];
     const translate = x || y ? `translate3d(${x}px, ${y}px, 0)` : "";
+
     const width = Math.max(dimensions.offsetWidth, dimensions.scrollWidth, 1);
     const height = Math.max(dimensions.offsetHeight, dimensions.scrollHeight, 1);
     const scaleX = 1 + 2 * (Math.max(elastic.amounts[1], elastic.amounts[3]) / width);
     const scaleY = 1 + 2 * (Math.max(elastic.amounts[0], elastic.amounts[2]) / height);
     const scale = scaleX > 1 || scaleY > 1 ? `scale(${scaleX}, ${scaleY})` : "";
+
     if (scaleX > 1 || scaleY > 1) {
       const baseOrigin = elastic.baseOrigin.split(" ");
       const originX = elastic.amounts[3] > 0 ? "0%" :
@@ -1557,6 +1713,7 @@
       wrapper.style.setProperty("transform-origin", `${originX} ${originY}`,
         elastic.previousOrigin.priority);
     }
+
     wrapper.style.setProperty("transform",
       [scale, translate, elastic.baseTransform].filter(Boolean).join(" ") || "none",
       elastic.previousTransform.priority);
@@ -1611,6 +1768,7 @@
 
   function resetElastic(state) {
     const elastic = state.elastic;
+    const wasOwned = elastic.owned;
     if (elastic.releaseFrame !== null) root.cancelAnimationFrame(elastic.releaseFrame);
     if (elastic.wheelTimeout !== null) root.clearTimeout(elastic.wheelTimeout);
     elastic.releaseFrame = null;
@@ -1643,6 +1801,8 @@
     elastic.owned = false;
     elastic.extentX = false;
     elastic.extentY = false;
+
+    if (wasOwned && !state.disposed) publish(state);
   }
 
   function observe(state) {
@@ -1717,22 +1877,34 @@
 
   function publish(state) {
     if (state.disposed) return;
+
     state.publishDirty = true;
     if (state.publishPending) return;
+
     state.publishPending = true;
     AelluxJs.waitLayout.read(() => {
       if (state.disposed) return null;
+
       state.publishDirty = false;
       const metrics = nativeMetrics(state.element);
+      const scrollTop = state.element.scrollTop;
+      const scrollLeft = state.element.scrollLeft;
       if (!state.elastic.active) state.metrics = metrics;
       if (state.elasticEnabled && state.elastic.wrapper && !state.elastic.active)
         state.elastic.dimensions = measureElasticWrapper(state.elastic.wrapper);
       const bars = state.scrollbar.x || state.scrollbar.y;
       const axes = state.snapEnabled || bars ? wheelAxes(state, metrics) : null;
+
       return {
         revision: state.layoutRevision,
-        y: progress(state.element.scrollTop, metrics.maxY),
-        x: progress(state.element.scrollLeft, metrics.maxX),
+        y: progress(scrollTop, metrics.maxY),
+        x: progress(scrollLeft, metrics.maxX),
+        edges: state.elastic.owned ? null : [
+          scrollTop < SCROLL_EDGE_MARGIN_PX,
+          scrollTop >= metrics.maxY - SCROLL_EDGE_MARGIN_PX,
+          scrollLeft < SCROLL_EDGE_MARGIN_PX,
+          scrollLeft >= metrics.maxX - SCROLL_EDGE_MARGIN_PX
+        ],
         snapValues: state.snapEnabled ? measureSnapValues(state, metrics, axes) : [],
         scrollbars: bars ? readScrollbars(state, metrics, axes) : []
       };
@@ -1741,14 +1913,21 @@
         state.publishDirty = false;
         return;
       }
+
       return AelluxJs.waitLayout.update(() => {
         if (state.disposed || state.layoutRevision !== values.revision) return;
+
         state.element.style.setProperty(properties[0], values.y);
         state.element.style.setProperty(properties[1], values.x);
+        if (values.edges && !state.elastic.owned) {
+          scrollEdgeClasses.forEach((name, index) =>
+            state.element.classList.toggle(name, values.edges[index]));
+        }
         for (const { item, viewport, focus } of values.snapValues) {
           item.style.setProperty(snapProperties[0], viewport);
           item.style.setProperty(snapProperties[1], focus);
         }
+
         updateScrollbars(state, values.scrollbars);
       });
     }).catch(cause => {
@@ -1785,17 +1964,20 @@
   function handleSnapWheel(state, event, deltaX, deltaY, axes) {
     const items = snapItems(state);
     if (!items.length) return false;
+
     const hasX = axes.x, hasY = axes.y;
     if (!hasX && !hasY) return false;
     const axis = hasX && hasY ? (Math.abs(deltaX) >= Math.abs(deltaY) ? "x" : "y") :
       hasX ? "x" : "y";
     const delta = axis === "x" ? deltaX : deltaY;
     if (!delta) return false;
+
     if (state.snap.wheelTimeout !== null) {
       if (event.cancelable) event.preventDefault();
       scheduleSnapWheelEnd(state);
       return true;
     }
+
     const index = Math.max(0, Math.min(items.length - 1, state.snap.index));
     const destination = Math.max(0, Math.min(items.length - 1,
       index + Math.sign(delta)));
@@ -1814,6 +1996,7 @@
       }
       return true;
     }
+
     if (event.cancelable) event.preventDefault();
     scrollToSnap(state, destination);
     state.snap.wheelTarget = items[destination];
@@ -1823,15 +2006,18 @@
 
   function handleWheel(state, event) {
     state.snap.pending = null;
+
     if (state.desktop && state.mode === "pointer" &&
       state.element.classList.contains(pointerScrollingClass)) {
       if (event.cancelable) event.preventDefault();
       event.stopPropagation();
       return;
     }
+
     cancelMomentum(state);
     if (event.defaultPrevented || event.ctrlKey) return;
     if (event.target.closest(`[${attribute}]`) !== state.element) return;
+
     const metrics = nativeMetrics(state.element);
     if (!metrics) return;
     const axes = wheelAxes(state, metrics);
@@ -1840,13 +2026,16 @@
       Math.abs(event.deltaX) <= Math.abs(event.deltaY);
     const deltaX = (converted ? event.deltaY : event.deltaX) * factor;
     const deltaY = (converted ? 0 : event.deltaY) * factor;
+
     if (state.snapEnabled && handleSnapWheel(state, event, deltaX, deltaY, axes)) return;
+
     if (converted && deltaX) {
       const current = state.element.scrollLeft;
       const desiredX = current + deltaX;
       const next = Math.max(0, Math.min(metrics.maxX, desiredX));
       const overflow = desiredX < 0 || desiredX > metrics.maxX;
       let stretched = false;
+
       if (overflow && state.elasticEnabled) {
         stretched = applyElasticFromDesired(state, desiredX, state.element.scrollTop,
           true, "x");
@@ -1861,16 +2050,19 @@
         resetElastic(state);
         refresh(state);
       }
+
       if (!stretched && next !== current)
         state.element.scrollTo({ left: next, behavior: "instant" });
       if (stretched || next !== current) publish(state);
       if (!overflow && next !== current) event.preventDefault();
       return;
     }
+
     if (state.elasticEnabled && (axes.x || axes.y)) {
       const desiredX = state.element.scrollLeft + (axes.x ? deltaX : 0);
       const desiredY = state.element.scrollTop + (axes.y ? deltaY : 0);
       const axis = axes.x && axes.y ? null : axes.x ? "x" : "y";
+
       if (applyElasticFromDesired(state, desiredX, desiredY, true, axis)) {
         event.preventDefault();
         scrollWithinElasticBounds(state, desiredX, desiredY);
@@ -1879,6 +2071,7 @@
         state.elastic.wheelTimeout = root.setTimeout(() => releaseElastic(state), ELASTIC_WHEEL_IDLE_MS);
         return;
       }
+
       if (state.elastic.owned) {
         resetElastic(state);
         refresh(state);

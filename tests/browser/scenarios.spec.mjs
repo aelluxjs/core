@@ -207,6 +207,81 @@ test("mount resolves plain and hashed IDs to one root", async ({ page }) => {
   expect(result).toEqual({ first: ["first", "second"], second: [], missing: [] });
 });
 
+test("mount maps run in ascending priority across extensions and selectors", async ({ page }) => {
+  await page.goto("/tests/index.htm");
+  await page.addScriptTag({ url: "/dist/aellux.js" });
+  await page.evaluate(() => AelluxJs.init({ mode: "basic" }));
+
+  const result = await page.evaluate(async () => {
+    document.body.innerHTML = '<div id="priority-target" data-priority-probe></div>';
+    const calls = [];
+
+    for (const name of ["priority-first", "priority-second"]) {
+      AelluxJs.ext(name);
+      AelluxJs.extAttach(name, { init() {} });
+      await AelluxJs.wait(name);
+    }
+
+    const add = (extensionName, selector, priority, label) =>
+      AelluxJs.mountManager.add({
+        extensionName, selector, priority,
+        mount() { calls.push(label); }
+      });
+
+    add("priority-first", "[data-priority-probe]", 10, "high");
+    add("priority-first", "#priority-target", -10, "low");
+    add("priority-first", "div[data-priority-probe]", 0, "zero-first");
+    add("priority-second", "div#priority-target", 0, "zero-second");
+
+    await AelluxJs.mount("priority-target");
+    return calls;
+  });
+
+  expect(result).toEqual(["low", "zero-first", "zero-second", "high"]);
+});
+
+test("mount lifecycle events report the resolved root and distinct affected elements", async ({ page }) => {
+  await page.goto("/tests/index.htm");
+  await page.addScriptTag({ url: "/dist/aellux.js" });
+  await page.evaluate(() => AelluxJs.init({ mode: "basic" }));
+
+  const result = await page.evaluate(async () => {
+    document.body.innerHTML = '<div id="lifecycle-detail" data-lifecycle-detail></div>';
+    const target = document.getElementById("lifecycle-detail");
+    const events = [];
+
+    AelluxJs.ext("lifecycle-detail-probe");
+    AelluxJs.extAttach("lifecycle-detail-probe", { init() {
+      for (const selector of ["[data-lifecycle-detail]", "#lifecycle-detail"]) {
+        AelluxJs.mountManager.add({
+          extensionName: "lifecycle-detail-probe", selector,
+          mount() {}, update() {}, unmount() {}
+        });
+      }
+    } });
+    await AelluxJs.wait("lifecycle-detail-probe");
+
+    for (const name of ["Mount", "Update", "Unmount"]) {
+      document.addEventListener(`AelluxJs${name}`, event => {
+        const { root, extensions, elements } = event.detail;
+        events.push({ name, root: root === target, extensions,
+          elements: elements.map(element => element.id) });
+      });
+    }
+
+    await AelluxJs.mountManager.mount(target, "lifecycle-detail-probe");
+    await AelluxJs.mountManager.update(target, "lifecycle-detail-probe");
+    await AelluxJs.mountManager.unmount(target, "lifecycle-detail-probe");
+    await AelluxJs.mountManager.update(target, "lifecycle-detail-probe");
+    return events;
+  });
+
+  expect(result).toEqual(["Mount", "Update", "Unmount", "Update"].map((name, index) => ({
+    name, root: true, extensions: ["lifecycle-detail-probe"],
+    elements: index === 3 ? [] : ["lifecycle-detail"]
+  })));
+});
+
 test("mount unmounts elements detached by an async mount callback", async ({ page }) => {
   await page.goto("/tests/index.htm");
   await page.addScriptTag({ url: "/dist/aellux.js" });
@@ -1633,6 +1708,55 @@ test("navigation exposes ajaxReplace metadata on snapshot restoration", async ({
   });
 });
 
+test("navigation event details retain snapshots after later changes", async ({ page }) => {
+  await page.goto("/tests/index.htm");
+  await page.addScriptTag({ url: "/dist/aellux.js" });
+  await page.evaluate(() => AelluxJs.init({ mode: "full", useHash: false }));
+  await expect.poll(() => page.evaluate(() => AelluxJs.ext.stateNavigation?.initialized)).toBe(true);
+
+  const result = await page.evaluate(async () => {
+    let firstChange, restoration;
+    document.addEventListener("AelluxJsSnapshotChange", event => {
+      if (!firstChange) firstChange = event.detail;
+    });
+
+    await AelluxJs.ext.stateNavigation.setState("section", "one");
+    await AelluxJs.ext.stateNavigation.setState("section", "two");
+
+    const state = {
+      aelluxJsState: true,
+      snapshot: { section: "three" },
+      ajaxReplace: { url: "/next", selectors: ["#content"] }
+    };
+    document.addEventListener("AelluxJsSnapshotRestore", event => {
+      restoration = event.detail;
+    }, { once: true });
+    window.dispatchEvent(new PopStateEvent("popstate", { state }));
+    state.snapshot.section = "changed";
+    state.ajaxReplace.selectors.push("#other");
+
+    return {
+      firstSnapshot: firstChange.snapshot,
+      firstRemoved: firstChange.removeSnapshot,
+      restoredSnapshot: restoration.snapshot,
+      popState: restoration.popState,
+      copied: restoration.popState !== state
+    };
+  });
+
+  expect(result).toEqual({
+    firstSnapshot: { section: "one" },
+    firstRemoved: {},
+    restoredSnapshot: { section: "three" },
+    popState: {
+      aelluxJsState: true,
+      snapshot: { section: "three" },
+      ajaxReplace: { url: "/next", selectors: ["#content"] }
+    },
+    copied: true
+  });
+});
+
 test("navigation preserves existing history state when replacing the current entry", async ({ page }) => {
   await page.goto("/tests/index.htm");
   await page.addScriptTag({ url: "/dist/aellux.js" });
@@ -2201,6 +2325,34 @@ test("preference options update inputs and value-label visibility", async ({ pag
   await page.getByText("Dark", { exact: true }).click();
   await expect(page.locator("#label-light")).toBeHidden();
   await expect(page.locator("#label-dark")).toBeVisible();
+});
+
+test("preference change details report changed keys and stable values", async ({ page }) => {
+  await page.goto("/tests/index.htm");
+  await page.addScriptTag({ url: "/dist/aellux.js" });
+  await page.evaluate(() => AelluxJs.init({ mode: "full" }));
+  await expect.poll(() => page.evaluate(() => AelluxJs.ext.preference?.initialized)).toBe(true);
+
+  const result = await page.evaluate(() => {
+    const events = [];
+    document.addEventListener("AelluxJsPreferencesChange", event => events.push(event.detail));
+    const preference = AelluxJs.ext.preference;
+    preference.update();
+    preference.set("color-scheme", "light");
+    preference.update();
+    preference.set("color-scheme", "dark");
+    preference.update();
+    return events.map(detail => ({
+      changed: detail.changed,
+      colorScheme: detail.preferences.colorScheme
+    }));
+  });
+
+  expect(result).toEqual([
+    { changed: [], colorScheme: "auto" },
+    { changed: ["colorScheme"], colorScheme: "light" },
+    { changed: ["colorScheme"], colorScheme: "dark" }
+  ]);
 });
 
 test("preference updates only affected mounted controls and still dispatches change", async ({ page }) => {

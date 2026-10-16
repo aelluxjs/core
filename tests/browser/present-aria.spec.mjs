@@ -56,12 +56,21 @@ test("unpop restores previous focus only when hiding the active element", async 
   await page.locator("#inside").focus();
   await page.evaluate(() => {
     window.focusLostCount = 0;
-    AelluxJs.on("UnpopFocusLost", () => window.focusLostCount++);
+    window.focusLostDetails = [];
+    AelluxJs.on("UnpopFocusLost", event => {
+      window.focusLostCount++;
+      window.focusLostDetails.push({
+        element: event.detail.element.id,
+        focused: event.detail.focused.id
+      });
+    });
     AelluxJs.mountManager.controller("panel").present.unpop();
   });
   await expect(page.locator("#panel")).toHaveJSProperty("hidden", true);
   await expect.poll(() => page.evaluate(() => document.activeElement.id)).toBe("previous");
   expect(await page.evaluate(() => window.focusLostCount)).toBe(1);
+  expect(await page.evaluate(() => window.focusLostDetails))
+    .toEqual([{ element: "panel", focused: "inside" }]);
 
   await page.evaluate(() => AelluxJs.mountManager.controller("panel").present.pop());
   await expect(page.locator("#panel")).toHaveJSProperty("hidden", false);

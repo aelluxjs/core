@@ -43,6 +43,7 @@ AelluxJs.extAttach(extensionName, { init, destroy });
 function init() {
   AelluxJs.mountManager.add({
     extensionName, selector: "[data-ae-example]",
+    priority: 0,
     mount: mountElement, unmount: unmountElement
   });
 }
@@ -52,7 +53,7 @@ function destroy() {
 }
 ```
 
-The manager runs matching handlers through the mount helper during `$ae.mount(root)` and `$ae.unmount(root)`. Register before mounting and remove only after unmounting. `mount` must be safe against repeated calls, and `unmount` must reverse the element-level resources created by `mount`.
+The manager runs matching handlers through the mount helper during `$ae.mount(root)` and `$ae.unmount(root)`. Mount registrations run in ascending `priority` order across Extensions and selectors. The default is `0`, and equal priorities keep discovery order. Register before mounting and remove only after unmounting. `mount` must be safe against repeated calls, and `unmount` must reverse the element-level resources created by `mount`.
 
 ## Layout work in Core Extensions
 

@@ -26,11 +26,11 @@ The modern runtime dispatches `CustomEvent` objects; the boot API uses a regular
 | `AelluxJsUnmount` | A valid unmount pass finishes. It can also fire when no matching elements were mounted. |
 | `AelluxJsUpdate` | A valid `$ae.mountManager.update(...)` pass finishes after awaiting the matching mounted `update` callbacks. It also fires if no matching callback exists. |
 
-These lifecycle events are dispatched on `document`. `AelluxJsUpdate` is a pass completion signal: it does not identify an element, include a `detail` payload, or mean that a visual change occurred. An invalid root does not start an update pass and does not dispatch it. `$ae(element).update()` and an Extension controller's `update()` use this same mount manager. For a size update on one Adaptive element, listen for `AelluxJsAdaptiveUpdate` instead.
+These lifecycle events are dispatched on `document`. `Mount`, `Unmount`, and `Update` carry `detail: { root, extensions, elements }`. `root` is the resolved root of the pass, `extensions` is the selected name array or `null` for all Extensions, and `elements` contains distinct elements actually mounted, unmounted, or passed to an `update` callback. An update callback that throws still counts as invoked. The array is empty for a pass with no affected elements. An invalid root does not start a pass or dispatch its event. `$ae(element).update()` and an Extension controller's `update()` use this same mount manager. For a size update on one Adaptive element, listen for `AelluxJsAdaptiveUpdate` instead.
 
 ```js
-document.addEventListener("AelluxJsUpdate", () => {
-  // A mount manager update pass finished.
+document.addEventListener("AelluxJsMount", event => {
+  console.log(event.detail.elements); // Newly mounted DOM elements.
 });
 
 await $ae.mountManager.update(document.getElementById("panel"));
@@ -42,15 +42,17 @@ These events are available when the corresponding Extension is loaded. Events fr
 
 | Extension | Event | Target and payload |
 | --- | --- | --- |
-| Adaptive | `AelluxJsAdaptiveUpdate` | Updated element; `detail` is `null`. |
+| Adaptive | `AelluxJsAdaptiveUpdate` | Updated element; `detail` is `{ width, height, ratio }`. |
 | Feedback | `AelluxJsFeedback` | Feedback target, or `document`; `detail` is `{ type, message, value, target }`. |
 | Point | `AelluxJsPointerDown`, `AelluxJsPointerMove`, `AelluxJsPointerUp`, `AelluxJsPointerCancel`, `AelluxJsPointerHover` | Selected element; `detail` includes `pointer`, `target`, `pressStart`, `originalEvent`, and `hover`. These events do **not** bubble. |
-| Preference | `AelluxJsPreferencesChange` | `document`; dispatched on each preference update, even if values do not change. |
+| Preference | `AelluxJsPreferencesChange` | `document`; `detail` is `{ changed, preferences }`, with a changed-key array and a snapshot of current values. `changed` can be empty. |
 | Present | `AelluxJsBeforePop`, `AelluxJsBeforeUnpop` | Present element; cancelable before a transition starts. |
 | Present | `AelluxJsPopping`, `AelluxJsUnpopping`, `AelluxJsPop`, `AelluxJsUnpop` | Present element; transition start and completion notifications. |
 | Present | `AelluxJsLayout` | Present element; bubbles after a completed Pop or Unpop to indicate that layout may have changed. Anchor listens for it on the shared positioning parent. |
-| Present | `AelluxJsUnpopFocusLost` | `document`; an active descendant lost focus while the region closed. |
-| State Navigation | `AelluxJsSnapshotChange`, `AelluxJsSnapshotRestore` | `document`; `detail` contains `snapshot`, `removeSnapshot`, and `popState`. |
+| Present | `AelluxJsUnpopFocusLost` | `document`; `detail` is `{ element, focused }`, identifying the closed Present region and the element that lost focus. |
+| Scrollbox | `AelluxJsScrollboxSnapChange` | Scrollbox element; `detail` is `{ item, index, previousIndex, axis }` after a new snap item is selected and scrolling settles. The initial item uses `previousIndex: null`. |
+| Scrollbox | `AelluxJsPointerScrollStart`, `AelluxJsPointerScrollEnd` | Pointer gesture's originating scrollbox; `detail` is `{ axis, pointerId, pointerType, elements }`. `elements` lists the scrollboxes activated for that gesture. A short flick that never activates PDS does not emit them. |
+| State Navigation | `AelluxJsSnapshotChange`, `AelluxJsSnapshotRestore` | `document`; `detail` contains copies of `snapshot`, `removeSnapshot`, and `popState`. |
 
 ```js
 panel.addEventListener("AelluxJsLayout", () => {

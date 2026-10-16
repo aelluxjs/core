@@ -76,6 +76,7 @@ import utilsNameCase from "./internal/utils-name-case.js";
   function init(options) {
     AelluxJs.mountManager.add({
       extensionName, selector: `[${attr.preference}]`,
+      priority: 0,
       mount: mountPreferenceContainer, unmount: unmountPreferenceContainer
     });
 
@@ -169,7 +170,12 @@ import utilsNameCase from "./internal/utils-name-case.js";
       const containers = containersByPreference.get(key);
       if (containers) for (const container of containers) updateContainer(container);
     }
-    AelluxJs.dispatch("PreferencesChange");
+    AelluxJs.dispatch("PreferencesChange", {
+      detail: {
+        changed: Array.from(changed),
+        preferences: Object.assign({}, computedPreferences)
+      }
+    });
   }
 
   function indexContainer(container) {

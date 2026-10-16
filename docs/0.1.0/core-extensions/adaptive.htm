@@ -586,6 +586,12 @@ Adaptive                  </li>
 <pre><code class="language-html">&lt;div data-ae-adaptive&gt;Responsive content&lt;/div&gt;
 </code></pre>
 <p>The Extension measures each marked element with <code>ResizeObserver</code>, or uses the window resize event when that API is unavailable. With <code>ResizeObserver</code>, the first observer entry supplies the initial size; otherwise the initial size is read in the next layout frame. It applies one shape class (<code>ae--shape-vertical</code>, <code>ae--shape-square</code>, or <code>ae--shape-horizontal</code>) according to width divided by height. It also sets <code>aria-orientation</code> to <code>vertical</code> when height exceeds width and to <code>horizontal</code> otherwise, including square elements. It toggles <code>ae--fits-&lt;size&gt;</code> classes when <code>sqrt(width * height)</code> reaches each configured minimum. After an update it dispatches <code>AelluxJsAdaptiveUpdate</code> from the element. Initial <code>ae--*</code> classes are discarded before mounting. Unmounting removes the managed classes and restores the initial <code>aria-orientation</code>; unrelated classes and inline styles are left as they are.</p>
+<p><code>AelluxJsAdaptiveUpdate</code> includes the measured dimensions in <code>detail</code>, so listeners can use them without reading layout again:</p>
+<pre><code class="language-js">element.addEventListener(&quot;AelluxJsAdaptiveUpdate&quot;, event =&gt; {
+  const { width, height, ratio } = event.detail;
+  console.log(width, height, ratio);
+});
+</code></pre>
 <h2>Accessibility profile</h2>
 <ul>
 <li><strong>Capabilities:</strong> visual and adaptive; infrastructure.</li>

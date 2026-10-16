@@ -82,6 +82,7 @@
     Object.freeze(adaptiveParams);
     AelluxJs.mountManager.add({
       extensionName, selector: `[${attr.adaptive}]`,
+      priority: 0,
       mount: mountAdaptive, unmount: unmountAdaptive
     });
   }
@@ -240,7 +241,9 @@
     element.style.setProperty("--ae-width", width);
     element.style.setProperty("--ae-height", height);
 
-    AelluxJs.dispatchFrom(element, "AdaptiveUpdate", { detail: null });
+    AelluxJs.dispatchFrom(element, "AdaptiveUpdate", {
+      detail: { width, height, ratio }
+    });
   }
 
   function inferOrientation(flexBox, selector = "*") {

@@ -47,6 +47,7 @@
   function init() {
     AelluxJs.mountManager.add({
       extensionName, selector: pointableSelector,
+      priority: 0,
       mount: mountPointable, unmount: unmountPointable,
       controllers: ["pointers"]
     });

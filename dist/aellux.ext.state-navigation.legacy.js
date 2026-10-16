@@ -237,13 +237,24 @@
       updateBaseTitle();
       var options = {
         detail: {
-          snapshot: globalSnapshot,
-          removeSnapshot: globalRemoveSnapshot,
-          popState: popState
+          snapshot: Object.assign({}, globalSnapshot),
+          removeSnapshot: Object.assign({}, globalRemoveSnapshot),
+          popState: copyHistoryState(popState)
         },
         bubbles: true
       };
       AelluxJs.dispatch(name, options);
+    }
+    function copyHistoryState(state) {
+      if (!state || _typeof(state) !== "object") return state;
+      if (typeof root.structuredClone === "function") return root.structuredClone(state);
+      var copy = Array.isArray(state) ? state.slice() : Object.assign({}, state);
+      if (state.snapshot && _typeof(state.snapshot) === "object") copy.snapshot = Object.assign({}, state.snapshot);
+      if (state.ajaxReplace && _typeof(state.ajaxReplace) === "object") {
+        copy.ajaxReplace = Object.assign({}, state.ajaxReplace);
+        if (Array.isArray(state.ajaxReplace.selectors)) copy.ajaxReplace.selectors = state.ajaxReplace.selectors.slice();
+      }
+      return copy;
     }
     function onHashChange() {
       if (!useHash) return;

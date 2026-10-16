@@ -21624,7 +21624,7 @@
     }
     function _AelluxJsMount() {
       _AelluxJsMount = _asyncToGenerator(/* @__PURE__ */ _regenerator().m(function _callee5(rootElement, extensionNames, newlyMounted) {
-        var AelluxJs2, filter, mounterSelectors, lazySelectors, _i2, _Object$entries2, _Object$entries2$_i, key, selectorString, _i3, _Object$entries3, _Object$entries3$_i, _key, _selectorString, candidatesByExtension, allElements, _iterator5, _step5, element, localExtensionNames, _i5, _Object$entries4, _Object$entries4$_i, _key2, _selector, _i6, _Object$entries5, _Object$entries5$_i, _key3, _selector2, _iterator10, _step10, _extensionName, _candidates, extensions, loaded, _iterator6, _step6, result, elementsAffected, index, _extensions$index, extensionName, candidates, mounter, searchRoots, _iterator7, _step7, candidate, ancestor, _iterator8, _step8, _step8$value, selector, controller, _iterator9, _step9, searchRoot, mountableElements, _iterator0, _step0, mountable, mountId, pendingMount, _i4, _Array$from, name, finishPendingMount, elementController, _elementController, _iterator1, _step1, affected, _t3, _t4, _t5, _t6, _t7, _t8, _t9;
+        var AelluxJs2, filter, mounterSelectors, lazySelectors, _i2, _Object$entries2, _Object$entries2$_i, key, selectorString, _i3, _Object$entries3, _Object$entries3$_i, _key, _selectorString, candidatesByExtension, allElements, _iterator5, _step5, element, localExtensionNames, _i6, _Object$entries4, _Object$entries4$_i, _key2, _selector2, _i7, _Object$entries5, _Object$entries5$_i, _key3, _selector3, _iterator10, _step10, _extensionName2, _candidates, extensions, loaded, _iterator6, _step6, result, registrations, index, _extensions$index, extensionName, candidates, mounter, searchRoots, _iterator7, _step7, candidate, ancestor, _iterator8, _step8, _step8$value, selector, controller, elementsAffected, _i4, _registrations, _registrations$_i, _extensionName, _selector, _controller, _searchRoots, _iterator9, _step9, searchRoot, mountableElements, _iterator0, _step0, mountable, mountId, pendingMount, _i5, _Array$from, name, finishPendingMount, elementController, _elementController, _iterator1, _step1, affected, _t3, _t4, _t5, _t6, _t7, _t8;
         return _regenerator().w(function(_context5) {
           while (1) switch (_context5.p = _context5.n) {
             case 0:
@@ -21652,6 +21652,13 @@
                 _context5.n = 1;
                 break;
               }
+              AelluxJs2.dispatch("Mount", {
+                detail: {
+                  root: rootElement,
+                  extensions: extensionNames,
+                  elements: []
+                }
+              });
               return _context5.a(2);
             case 1:
               candidatesByExtension = /* @__PURE__ */ new Map();
@@ -21665,23 +21672,23 @@
                     localExtensionNames = extensionNames;
                   } else {
                     localExtensionNames = /* @__PURE__ */ new Set();
-                    for (_i5 = 0, _Object$entries4 = Object.entries(AelluxJs2.registry.lazyExtSelectors); _i5 < _Object$entries4.length; _i5++) {
-                      _Object$entries4$_i = _slicedToArray(_Object$entries4[_i5], 2), _key2 = _Object$entries4$_i[0], _selector = _Object$entries4$_i[1];
-                      if (element.matches(_selector) && filter.indexOf(_selector) !== -1) localExtensionNames.add(fromCamelCase2(_key2));
+                    for (_i6 = 0, _Object$entries4 = Object.entries(AelluxJs2.registry.lazyExtSelectors); _i6 < _Object$entries4.length; _i6++) {
+                      _Object$entries4$_i = _slicedToArray(_Object$entries4[_i6], 2), _key2 = _Object$entries4$_i[0], _selector2 = _Object$entries4$_i[1];
+                      if (element.matches(_selector2) && filter.indexOf(_selector2) !== -1) localExtensionNames.add(fromCamelCase2(_key2));
                     }
-                    for (_i6 = 0, _Object$entries5 = Object.entries(AelluxJs2.registry.extMounters); _i6 < _Object$entries5.length; _i6++) {
-                      _Object$entries5$_i = _slicedToArray(_Object$entries5[_i6], 2), _key3 = _Object$entries5$_i[0], _selector2 = _Object$entries5$_i[1];
-                      if (element.matches(_selector2) && filter.indexOf(_selector2) !== -1) localExtensionNames.add(fromCamelCase2(_key3));
+                    for (_i7 = 0, _Object$entries5 = Object.entries(AelluxJs2.registry.extMounters); _i7 < _Object$entries5.length; _i7++) {
+                      _Object$entries5$_i = _slicedToArray(_Object$entries5[_i7], 2), _key3 = _Object$entries5$_i[0], _selector3 = _Object$entries5$_i[1];
+                      if (element.matches(_selector3) && filter.indexOf(_selector3) !== -1) localExtensionNames.add(fromCamelCase2(_key3));
                     }
                   }
                   _iterator10 = _createForOfIteratorHelper2(localExtensionNames);
                   try {
                     for (_iterator10.s(); !(_step10 = _iterator10.n()).done; ) {
-                      _extensionName = _step10.value;
-                      _candidates = candidatesByExtension.get(_extensionName);
+                      _extensionName2 = _step10.value;
+                      _candidates = candidatesByExtension.get(_extensionName2);
                       if (!_candidates) {
                         _candidates = /* @__PURE__ */ new Set();
-                        candidatesByExtension.set(_extensionName, _candidates);
+                        candidatesByExtension.set(_extensionName2, _candidates);
                       }
                       _candidates.add(element);
                     }
@@ -21741,18 +21748,18 @@
               _iterator6.f();
               return _context5.f(8);
             case 9:
-              elementsAffected = /* @__PURE__ */ new Set();
+              registrations = [];
               index = 0;
             case 10:
               if (!(index < extensions.length)) {
-                _context5.n = 42;
+                _context5.n = 14;
                 break;
               }
               if (loaded[index].value) {
                 _context5.n = 11;
                 break;
               }
-              return _context5.a(3, 41);
+              return _context5.a(3, 13);
             case 11:
               _extensions$index = _slicedToArray(extensions[index], 2), extensionName = _extensions$index[0], candidates = _extensions$index[1];
               mounter = mountMaps.get(toCamelCase2(extensionName));
@@ -21760,7 +21767,7 @@
                 _context5.n = 12;
                 break;
               }
-              return _context5.a(3, 41);
+              return _context5.a(3, 13);
             case 12:
               searchRoots = [];
               _iterator7 = _createForOfIteratorHelper2(candidates);
@@ -21777,80 +21784,105 @@
                 _iterator7.f();
               }
               _iterator8 = _createForOfIteratorHelper2(mounter);
-              _context5.p = 13;
-              _iterator8.s();
+              try {
+                for (_iterator8.s(); !(_step8 = _iterator8.n()).done; ) {
+                  _step8$value = _slicedToArray(_step8.value, 2), selector = _step8$value[0], controller = _step8$value[1];
+                  registrations.push({
+                    extensionName: extensionName,
+                    selector: selector,
+                    controller: controller,
+                    searchRoots: searchRoots,
+                    priority: controller.priority,
+                    order: registrations.length
+                  });
+                }
+              } catch (err) {
+                _iterator8.e(err);
+              } finally {
+                _iterator8.f();
+              }
+            case 13:
+              index++;
+              _context5.n = 10;
+              break;
             case 14:
-              if ((_step8 = _iterator8.n()).done) {
-                _context5.n = 38;
+              registrations.sort(function(left, right) {
+                return left.priority - right.priority || left.order - right.order;
+              });
+              elementsAffected = /* @__PURE__ */ new Set();
+              _i4 = 0, _registrations = registrations;
+            case 15:
+              if (!(_i4 < _registrations.length)) {
+                _context5.n = 39;
                 break;
               }
-              _step8$value = _slicedToArray(_step8.value, 2), selector = _step8$value[0], controller = _step8$value[1];
-              _context5.p = 15;
-              if (controller.mount) {
-                _context5.n = 16;
+              _registrations$_i = _registrations[_i4], _extensionName = _registrations$_i.extensionName, _selector = _registrations$_i.selector, _controller = _registrations$_i.controller, _searchRoots = _registrations$_i.searchRoots;
+              _context5.p = 16;
+              if (_controller.mount) {
+                _context5.n = 17;
                 break;
               }
-              return _context5.a(3, 37);
-            case 16:
-              _iterator9 = _createForOfIteratorHelper2(searchRoots);
-              _context5.p = 17;
+              return _context5.a(3, 38);
+            case 17:
+              _iterator9 = _createForOfIteratorHelper2(_searchRoots);
+              _context5.p = 18;
               _iterator9.s();
-            case 18:
+            case 19:
               if ((_step9 = _iterator9.n()).done) {
-                _context5.n = 32;
+                _context5.n = 33;
                 break;
               }
               searchRoot = _step9.value;
-              mountableElements = findElements(searchRoot, selector);
+              mountableElements = findElements(searchRoot, _selector);
               _iterator0 = _createForOfIteratorHelper2(mountableElements);
-              _context5.p = 19;
+              _context5.p = 20;
               _iterator0.s();
-            case 20:
+            case 21:
               if ((_step0 = _iterator0.n()).done) {
-                _context5.n = 28;
+                _context5.n = 29;
                 break;
               }
               mountable = _step0.value;
-              mountId = "".concat(extensionName, "@").concat(selector);
+              mountId = "".concat(_extensionName, "@").concat(_selector);
               if (!isMounted(mountable, mountId)) {
-                _context5.n = 22;
+                _context5.n = 23;
                 break;
               }
               pendingMount = getPendingMount(mountable, mountId);
               if (!pendingMount) {
-                _context5.n = 21;
+                _context5.n = 22;
                 break;
               }
-              _context5.n = 21;
+              _context5.n = 22;
               return pendingMount;
-            case 21:
-              return _context5.a(3, 27);
             case 22:
+              return _context5.a(3, 28);
+            case 23:
               if (!isMounted(mountable)) {
-                for (_i4 = 0, _Array$from = Array.from(mountable.classList); _i4 < _Array$from.length; _i4++) {
-                  name = _Array$from[_i4];
+                for (_i5 = 0, _Array$from = Array.from(mountable.classList); _i5 < _Array$from.length; _i5++) {
+                  name = _Array$from[_i5];
                   if (name.startsWith(classPrefix)) mountable.classList.remove(name);
                 }
               }
               rememberInitialAttributes(mountable);
               setMounted(mountable, mountId);
               finishPendingMount = beginPendingMount(mountable, mountId);
-              _context5.p = 23;
-              _context5.n = 24;
-              return controller.mount(mountable);
-            case 24:
+              _context5.p = 24;
+              _context5.n = 25;
+              return _controller.mount(mountable);
+            case 25:
               elementController = elementControllers.get(mountable);
               if (!elementController) {
                 elementController = createControllerHelper(root2, mountable);
                 elementControllers.set(mountable, elementController);
               }
-              elementController.spawn(extensionName, mountId, controller.controllers, typeof controller.update === "function");
+              elementController.spawn(_extensionName, mountId, _controller.controllers, typeof _controller.update === "function");
               elementsAffected.add(mountable);
               newlyMounted.add(mountable);
-              _context5.n = 26;
+              _context5.n = 27;
               break;
-            case 25:
-              _context5.p = 25;
+            case 26:
+              _context5.p = 26;
               _t4 = _context5.v;
               setMounted(mountable, mountId, false);
               _elementController = elementControllers.get(mountable);
@@ -21861,118 +21893,110 @@
               restoreInitialAttributes(mountable);
               AelluxJs2.diagnostics.error(AelluxJs2.diagnostics.ERROR_EXTENSION_MOUNT, {
                 cause: _t4,
-                extension: extensionName,
+                extension: _extensionName,
                 method: "mount",
-                selector: selector,
+                selector: _selector,
                 element: mountable
               });
-            case 26:
-              _context5.p = 26;
-              finishPendingMount();
-              return _context5.f(26);
             case 27:
-              _context5.n = 20;
-              break;
+              _context5.p = 27;
+              finishPendingMount();
+              return _context5.f(27);
             case 28:
-              _context5.n = 30;
+              _context5.n = 21;
               break;
             case 29:
-              _context5.p = 29;
-              _t5 = _context5.v;
-              _iterator0.e(_t5);
+              _context5.n = 31;
+              break;
             case 30:
               _context5.p = 30;
-              _iterator0.f();
-              return _context5.f(30);
+              _t5 = _context5.v;
+              _iterator0.e(_t5);
             case 31:
-              _context5.n = 18;
-              break;
+              _context5.p = 31;
+              _iterator0.f();
+              return _context5.f(31);
             case 32:
-              _context5.n = 34;
+              _context5.n = 19;
               break;
             case 33:
-              _context5.p = 33;
-              _t6 = _context5.v;
-              _iterator9.e(_t6);
+              _context5.n = 35;
+              break;
             case 34:
               _context5.p = 34;
-              _iterator9.f();
-              return _context5.f(34);
+              _t6 = _context5.v;
+              _iterator9.e(_t6);
             case 35:
-              _context5.n = 37;
-              break;
+              _context5.p = 35;
+              _iterator9.f();
+              return _context5.f(35);
             case 36:
-              _context5.p = 36;
+              _context5.n = 38;
+              break;
+            case 37:
+              _context5.p = 37;
               _t7 = _context5.v;
               AelluxJs2.diagnostics.error(AelluxJs2.diagnostics.ERROR_EXTENSION_MOUNT, {
                 cause: _t7,
-                extension: extensionName,
+                extension: _extensionName,
                 method: "mount",
-                selector: selector
+                selector: _selector
               });
-            case 37:
-              _context5.n = 14;
-              break;
             case 38:
-              _context5.n = 40;
+              _i4++;
+              _context5.n = 15;
               break;
             case 39:
-              _context5.p = 39;
-              _t8 = _context5.v;
-              _iterator8.e(_t8);
-            case 40:
-              _context5.p = 40;
-              _iterator8.f();
-              return _context5.f(40);
-            case 41:
-              index++;
-              _context5.n = 10;
-              break;
-            case 42:
               _iterator1 = _createForOfIteratorHelper2(elementsAffected);
-              _context5.p = 43;
+              _context5.p = 40;
               _iterator1.s();
-            case 44:
+            case 41:
               if ((_step1 = _iterator1.n()).done) {
-                _context5.n = 48;
+                _context5.n = 45;
                 break;
               }
               affected = _step1.value;
               if (!(!affected.isConnected || !isMounted(affected))) {
-                _context5.n = 46;
+                _context5.n = 43;
                 break;
               }
               if (affected.isConnected) {
-                _context5.n = 45;
+                _context5.n = 42;
                 break;
               }
-              _context5.n = 45;
+              _context5.n = 42;
               return unmountElementRegistrations(affected);
-            case 45:
+            case 42:
               newlyMounted.delete(affected);
-              return _context5.a(3, 47);
-            case 46:
+              return _context5.a(3, 44);
+            case 43:
               affected.classList.toggle(AelluxJs2.className("mounted"), true);
+            case 44:
+              _context5.n = 41;
+              break;
+            case 45:
+              _context5.n = 47;
+              break;
+            case 46:
+              _context5.p = 46;
+              _t8 = _context5.v;
+              _iterator1.e(_t8);
             case 47:
-              _context5.n = 44;
-              break;
-            case 48:
-              _context5.n = 50;
-              break;
-            case 49:
-              _context5.p = 49;
-              _t9 = _context5.v;
-              _iterator1.e(_t9);
-            case 50:
-              _context5.p = 50;
+              _context5.p = 47;
               _iterator1.f();
-              return _context5.f(50);
-            case 51:
-              AelluxJs2.dispatch("Mount");
-            case 52:
+              return _context5.f(47);
+            case 48:
+              AelluxJs2.dispatch("Mount", {
+                detail: {
+                  root: rootElement,
+                  extensions: extensionNames,
+                  elements: Array.from(newlyMounted)
+                }
+              });
+            case 49:
               return _context5.a(2);
           }
-        }, _callee5, null, [[43, 49, 50, 51], [23, 25, 26, 27], [19, 29, 30, 31], [17, 33, 34, 35], [15, 36], [13, 39, 40, 41], [3, 7, 8, 9]]);
+        }, _callee5, null, [[40, 46, 47, 48], [24, 26, 27, 28], [20, 30, 31, 32], [18, 34, 35, 36], [16, 37], [3, 7, 8, 9]]);
       }));
       return _AelluxJsMount.apply(this, arguments);
     }
@@ -21981,7 +22005,7 @@
     }
     function _AelluxJsMounted() {
       _AelluxJsMounted = _asyncToGenerator(/* @__PURE__ */ _regenerator().m(function _callee6(rootElement, method) {
-        var extensionNames, detachedOnly, AelluxJs2, selectedNames, _i7, _Array$from2, _Array$from2$_i, element, mountIds, inRoot, detachedInGlobalUnmount, _i8, _Array$from3, mountId, separator, extensionName, selector, extensionKey, mounter, controller, _args6 = arguments, _t0;
+        var extensionNames, detachedOnly, AelluxJs2, selectedNames, affected, _i8, _Array$from2, _Array$from2$_i, element, mountIds, inRoot, detachedInGlobalUnmount, _i9, _Array$from3, mountId, separator, extensionName, selector, extensionKey, mounter, controller, _args6 = arguments, _t9;
         return _regenerator().w(function(_context6) {
           while (1) switch (_context6.p = _context6.n) {
             case 0:
@@ -21991,28 +22015,29 @@
               selectedNames = extensionNames === null ? null : new Set((typeof extensionNames === "string" ? [extensionNames] : extensionNames).map(function(name) {
                 return fromCamelCase2(name);
               }));
-              _i7 = 0, _Array$from2 = Array.from(mountedElements);
+              affected = /* @__PURE__ */ new Set();
+              _i8 = 0, _Array$from2 = Array.from(mountedElements);
             case 1:
-              if (!(_i7 < _Array$from2.length)) {
-                _context6.n = 11;
+              if (!(_i8 < _Array$from2.length)) {
+                _context6.n = 12;
                 break;
               }
-              _Array$from2$_i = _slicedToArray(_Array$from2[_i7], 2), element = _Array$from2$_i[0], mountIds = _Array$from2$_i[1];
+              _Array$from2$_i = _slicedToArray(_Array$from2[_i8], 2), element = _Array$from2$_i[0], mountIds = _Array$from2$_i[1];
               inRoot = element === rootElement || rootElement.contains(element);
               detachedInGlobalUnmount = method === "unmount" && rootElement === root2.document && !element.isConnected;
               if (!(detachedOnly ? element.isConnected || hasPendingMounts(element) : !inRoot && !detachedInGlobalUnmount)) {
                 _context6.n = 2;
                 break;
               }
-              return _context6.a(3, 10);
+              return _context6.a(3, 11);
             case 2:
-              _i8 = 0, _Array$from3 = Array.from(mountIds);
+              _i9 = 0, _Array$from3 = Array.from(mountIds);
             case 3:
-              if (!(_i8 < _Array$from3.length)) {
-                _context6.n = 10;
+              if (!(_i9 < _Array$from3.length)) {
+                _context6.n = 11;
                 break;
               }
-              mountId = _Array$from3[_i8];
+              mountId = _Array$from3[_i9];
               separator = mountId.indexOf("@");
               extensionName = mountId.slice(0, separator);
               selector = mountId.slice(separator + 1);
@@ -22020,53 +22045,66 @@
                 _context6.n = 4;
                 break;
               }
-              return _context6.a(3, 9);
+              return _context6.a(3, 10);
             case 4:
               extensionKey = toCamelCase2(extensionName);
               mounter = mountMaps.get(extensionKey);
               controller = mounter && mounter.get(selector);
               if (!(method === "unmount")) {
-                _context6.n = 6;
+                _context6.n = 7;
                 break;
               }
               _context6.n = 5;
               return unmountRegistration(element, mountId, controller, extensionName, selector);
             case 5:
-              return _context6.a(3, 9);
-            case 6:
-              _context6.p = 6;
-              if (!(controller && controller[method])) {
-                _context6.n = 7;
+              if (!_context6.v) {
+                _context6.n = 6;
                 break;
               }
-              _context6.n = 7;
-              return controller[method](element);
+              affected.add(element);
+            case 6:
+              return _context6.a(3, 10);
             case 7:
-              _context6.n = 9;
-              break;
+              _context6.p = 7;
+              if (!(controller && controller[method])) {
+                _context6.n = 8;
+                break;
+              }
+              affected.add(element);
+              _context6.n = 8;
+              return controller[method](element);
             case 8:
-              _context6.p = 8;
-              _t0 = _context6.v;
+              _context6.n = 10;
+              break;
+            case 9:
+              _context6.p = 9;
+              _t9 = _context6.v;
               AelluxJs2.diagnostics.error(AelluxJs2.diagnostics.ERROR_EXTENSION_MOUNT, {
-                cause: _t0,
+                cause: _t9,
                 extension: extensionName,
                 method: method,
                 selector: selector
               });
-            case 9:
-              _i8++;
+            case 10:
+              _i9++;
               _context6.n = 3;
               break;
-            case 10:
-              _i7++;
+            case 11:
+              _i8++;
               _context6.n = 1;
               break;
-            case 11:
-              AelluxJs2.dispatch(toCapitalized2(method));
             case 12:
+              AelluxJs2.dispatch(toCapitalized2(method), {
+                detail: {
+                  root: rootElement,
+                  extensions: selectedNames ? Array.from(selectedNames) : null,
+                  elements: Array.from(affected)
+                }
+              });
+            case 13:
               return _context6.a(2);
           }
-        }, _callee6, null, [[6, 8]]);
+        }, _callee6, null, [[7, 9]]);
       }));
       return _AelluxJsMounted.apply(this, arguments);
     }
@@ -22075,7 +22113,7 @@
     }
     function _unmountRegistration() {
       _unmountRegistration = _asyncToGenerator(/* @__PURE__ */ _regenerator().m(function _callee7(element, mountId, controller, extensionName, selector) {
-        var pendingMount, tasks, finish, AelluxJs2, diagnostics, elementController, _t1;
+        var pendingMount, tasks, finish, AelluxJs2, diagnostics, elementController, _t0;
         return _regenerator().w(function(_context7) {
           while (1) switch (_context7.p = _context7.n) {
             case 0:
@@ -22091,7 +22129,7 @@
                 _context7.n = 2;
                 break;
               }
-              return _context7.a(2);
+              return _context7.a(2, false);
             case 2:
               tasks = pendingUnmounts.get(element);
               if (!tasks) {
@@ -22105,7 +22143,7 @@
               _context7.n = 3;
               return tasks.get(mountId);
             case 3:
-              return _context7.a(2);
+              return _context7.a(2, false);
             case 4:
               tasks.set(mountId, new Promise(function(resolve) {
                 finish = resolve;
@@ -22125,9 +22163,9 @@
               break;
             case 8:
               _context7.p = 8;
-              _t1 = _context7.v;
+              _t0 = _context7.v;
               diagnostics.error(diagnostics.ERROR_EXTENSION_MOUNT, {
-                cause: _t1,
+                cause: _t0,
                 extension: extensionName,
                 method: "unmount",
                 selector: selector
@@ -22157,7 +22195,7 @@
               finish();
               return _context7.f(10);
             case 11:
-              return _context7.a(2);
+              return _context7.a(2, !isMounted(element, mountId));
           }
         }, _callee7, null, [[6, 8], [5, , 10, 11]]);
       }));
@@ -22168,18 +22206,18 @@
     }
     function _unmountElementRegistrations() {
       _unmountElementRegistrations = _asyncToGenerator(/* @__PURE__ */ _regenerator().m(function _callee8(element) {
-        var mountIds, _i9, _mountIds, mountId, separator, extensionName, selector, mounter, controller;
+        var mountIds, _i0, _mountIds, mountId, separator, extensionName, selector, mounter, controller;
         return _regenerator().w(function(_context8) {
           while (1) switch (_context8.n) {
             case 0:
               mountIds = Array.from(mountedElements.get(element) || []);
-              _i9 = 0, _mountIds = mountIds;
+              _i0 = 0, _mountIds = mountIds;
             case 1:
-              if (!(_i9 < _mountIds.length)) {
+              if (!(_i0 < _mountIds.length)) {
                 _context8.n = 3;
                 break;
               }
-              mountId = _mountIds[_i9];
+              mountId = _mountIds[_i0];
               separator = mountId.indexOf("@");
               extensionName = mountId.slice(0, separator);
               selector = mountId.slice(separator + 1);
@@ -22188,7 +22226,7 @@
               _context8.n = 2;
               return unmountRegistration(element, mountId, controller, extensionName, selector);
             case 2:
-              _i9++;
+              _i0++;
               _context8.n = 1;
               break;
             case 3:
@@ -22498,6 +22536,7 @@
       }
       if (!options || _typeof(options) !== "object" || Array.isArray(options)) return reject("options");
       var extensionName = options.extensionName, selector = options.selector, mount = options.mount, unmount = options.unmount, update = options.update, controllers = options.controllers;
+      var priority = options.priority === void 0 ? 0 : options.priority;
       if (typeof extensionName !== "string" || !/^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$|^[a-z][a-zA-Z0-9]*$/.test(extensionName)) return reject("extensionName");
       var key = keyFor(extensionName);
       if (key in Object.prototype || key === "prototype") return reject("extensionName");
@@ -22509,12 +22548,13 @@
         return reject("selector", cause);
       }
       if (typeof mount !== "function") return reject("mount");
+      if (typeof priority !== "number" || !isFinite(priority)) return reject("priority");
       if (unmount !== void 0 && typeof unmount !== "function") return reject("unmount");
       if (update !== void 0 && typeof update !== "function") return reject("update");
       if (controllers !== void 0 && (!Array.isArray(controllers) || controllers.some(function(name) {
         return typeof name !== "string" || !name.trim();
       }))) return reject("controllers");
-      var allowed = ["extensionName", "selector", "mount", "unmount", "update", "controllers"];
+      var allowed = ["extensionName", "selector", "mount", "unmount", "update", "controllers", "priority"];
       var unknown = Object.keys(options).find(function(name) {
         return !allowed.includes(name);
       });
@@ -22529,7 +22569,8 @@
         mount: mount,
         unmount: unmount,
         update: update,
-        controllers: controllers
+        controllers: controllers,
+        priority: priority
       });
       root2.AelluxJs.registry.extMounters[key] = _toConsumableArray(map.keys()).join(",");
       return manager;
@@ -23262,6 +23303,7 @@
           AelluxJs2.mountManager.add({
             extensionName: extensionName,
             selector: "[".concat(attr.preference, "]"),
+            priority: 0,
             mount: mountPreferenceContainer,
             unmount: unmountPreferenceContainer
           });
@@ -23374,7 +23416,12 @@
           } finally {
             _iterator2.f();
           }
-          AelluxJs2.dispatch("PreferencesChange");
+          AelluxJs2.dispatch("PreferencesChange", {
+            detail: {
+              changed: Array.from(changed),
+              preferences: Object.assign({}, computedPreferences)
+            }
+          });
         }
         function indexContainer(container) {
           var key = toCamelCase2(container.getAttribute(attr.preference) || "");
@@ -23709,13 +23756,24 @@
           updateBaseTitle();
           var options = {
             detail: {
-              snapshot: globalSnapshot,
-              removeSnapshot: globalRemoveSnapshot,
-              popState: popState
+              snapshot: Object.assign({}, globalSnapshot),
+              removeSnapshot: Object.assign({}, globalRemoveSnapshot),
+              popState: copyHistoryState(popState)
             },
             bubbles: true
           };
           AelluxJs2.dispatch(name, options);
+        }
+        function copyHistoryState(state) {
+          if (!state || _typeof2(state) !== "object") return state;
+          if (typeof root2.structuredClone === "function") return root2.structuredClone(state);
+          var copy = Array.isArray(state) ? state.slice() : Object.assign({}, state);
+          if (state.snapshot && _typeof2(state.snapshot) === "object") copy.snapshot = Object.assign({}, state.snapshot);
+          if (state.ajaxReplace && _typeof2(state.ajaxReplace) === "object") {
+            copy.ajaxReplace = Object.assign({}, state.ajaxReplace);
+            if (Array.isArray(state.ajaxReplace.selectors)) copy.ajaxReplace.selectors = state.ajaxReplace.selectors.slice();
+          }
+          return copy;
         }
         function onHashChange() {
           if (!useHash) return;
@@ -24156,6 +24214,7 @@
           AelluxJs2.mountManager.add({
             extensionName: extensionName,
             selector: "[".concat(attribute, "]"),
+            priority: 0,
             mount: mountFocusElement,
             unmount: unmountFocusElement
           });
@@ -24407,6 +24466,7 @@
           AelluxJs2.mountManager.add({
             extensionName: extensionName,
             selector: pointableSelector,
+            priority: 0,
             mount: mountPointable,
             unmount: unmountPointable,
             controllers: ["pointers"]
@@ -24875,6 +24935,7 @@
           AelluxJs2.mountManager.add({
             extensionName: extensionName,
             selector: "[".concat(attribute, "]"),
+            priority: 0,
             mount: mountAnchor,
             unmount: unmountAnchor,
             update: updateAnchor
@@ -25372,8 +25433,10 @@
         var pointerScrollingClass = AelluxJs2.className("pointerscrolling");
         var nativeScrollbarHideClass = AelluxJs2.className("native-sb-hide");
         var scrollbarVisibleClass = AelluxJs2.className("scrollbar-visible");
+        var scrollEdgeClasses = [AelluxJs2.className("scroll-v-start"), AelluxJs2.className("scroll-v-end"), AelluxJs2.className("scroll-h-start"), AelluxJs2.className("scroll-h-end")];
         var pointerScrollExceptionSelector = "a, button, input, select, textarea, [contenteditable], [draggable='true'], " + "[".concat(scrollbarVerticalAttribute, "], [").concat(scrollbarHorizontalAttribute, "]");
         var RESIZE_INTERVAL_MS = 100;
+        var SCROLL_EDGE_MARGIN_PX = 5;
         var POINTER_SCROLL_THRESHOLD_PX = 3;
         var POINTER_SCROLL_MULTICLICK_MS = 500;
         var POINTER_SCROLL_MULTICLICK_DISTANCE_PX = 8;
@@ -25422,6 +25485,7 @@
           AelluxJs2.mountManager.add({
             extensionName: extensionName,
             selector: "[".concat(attribute, "]"),
+            priority: 0,
             mount: mountScrollbox,
             update: updateScrollbox,
             unmount: unmountScrollbox,
@@ -25480,6 +25544,8 @@
             pending: null,
             index: 0,
             wheelTarget: null,
+            notifiedItem: null,
+            notifiedIndex: null,
             scrollEndTimeout: null,
             wheelTimeout: null
           };
@@ -25655,11 +25721,22 @@
           if (state.mutationObserver) state.mutationObserver.disconnect();
           if (state.resizeTimeout !== null) root2.clearTimeout(state.resizeTimeout);
           root2.removeEventListener("resize", state.onResize);
-          properties.forEach(function(name, index) {
+          properties.forEach(function(name2, index) {
             var original = state.previous[index];
-            if (original.value) element.style.setProperty(name, original.value, original.priority);
-            else element.style.removeProperty(name);
+            if (original.value) element.style.setProperty(name2, original.value, original.priority);
+            else element.style.removeProperty(name2);
           });
+          var _iterator2 = _createForOfIteratorHelper9(scrollEdgeClasses), _step2;
+          try {
+            for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
+              var name = _step2.value;
+              element.classList.remove(name);
+            }
+          } catch (err) {
+            _iterator2.e(err);
+          } finally {
+            _iterator2.f();
+          }
           scrollboxes.delete(element);
         }
         function configure(state) {
@@ -25727,19 +25804,19 @@
             x: false,
             y: false
           };
-          var _iterator2 = _createForOfIteratorHelper9(tokens), _step2;
+          var _iterator3 = _createForOfIteratorHelper9(tokens), _step3;
           try {
-            for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
-              var token = _step2.value;
+            for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
+              var token = _step3.value;
               var short = token.replace(/horizontal/g, "h").replace(/vertical/g, "v");
               if (!/^[vhxy]+$/.test(short)) continue;
               if (/[hx]/.test(short)) axes.x = true;
               if (/[vy]/.test(short)) axes.y = true;
             }
           } catch (err) {
-            _iterator2.e(err);
+            _iterator3.e(err);
           } finally {
-            _iterator2.f();
+            _iterator3.f();
           }
           return axes;
         }
@@ -25838,17 +25915,17 @@
           element.removeEventListener("pointercancel", record.onPointerEnd);
           if (record.owned) element.remove();
           else {
-            var _iterator3 = _createForOfIteratorHelper9(record.previous), _step3;
+            var _iterator4 = _createForOfIteratorHelper9(record.previous), _step4;
             try {
-              for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
-                var original = _step3.value;
+              for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
+                var original = _step4.value;
                 if (original.value) element.style.setProperty(original.name, original.value, original.priority);
                 else element.style.removeProperty(original.name);
               }
             } catch (err) {
-              _iterator3.e(err);
+              _iterator4.e(err);
             } finally {
-              _iterator3.f();
+              _iterator4.f();
             }
           }
           state.scrollbar[axis] = null;
@@ -25947,10 +26024,10 @@
           return values;
         }
         function updateScrollbars(state, values) {
-          var _iterator4 = _createForOfIteratorHelper9(values), _step4;
+          var _iterator5 = _createForOfIteratorHelper9(values), _step5;
           try {
-            for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
-              var _step4$value = _step4.value, record = _step4$value.record, x = _step4$value.x, y = _step4$value.y, trackSize = _step4$value.trackSize, thumbSize = _step4$value.thumbSize, thumbPosition = _step4$value.thumbPosition, max = _step4$value.max, display = _step4$value.display;
+            for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
+              var _step5$value = _step5.value, record = _step5$value.record, x = _step5$value.x, y = _step5$value.y, trackSize = _step5$value.trackSize, thumbSize = _step5$value.thumbSize, thumbPosition = _step5$value.thumbPosition, max = _step5$value.max, display = _step5$value.display;
               if (state.scrollbar[record.axis] !== record) continue;
               var style = record.element.style;
               if (record.x !== x) style.setProperty("--ae-scrollbar-x", "".concat(x, "px"));
@@ -25968,9 +26045,9 @@
               record.display = display;
             }
           } catch (err) {
-            _iterator4.e(err);
+            _iterator5.e(err);
           } finally {
-            _iterator4.f();
+            _iterator5.f();
           }
         }
         function scrollbarPointerPosition(record, event) {
@@ -26057,6 +26134,8 @@
             state.snap.pending = null;
             state.snap.index = 0;
             state.snap.wheelTarget = null;
+            state.snap.notifiedItem = null;
+            state.snap.notifiedIndex = null;
             clearScrollEnd(state);
             clearSnapWheel(state);
             var requested = element.hasAttribute(snapAttribute) || children.some(function(item) {
@@ -26075,6 +26154,8 @@
             state.snap.pending = null;
             state.snap.index = 0;
             state.snap.wheelTarget = null;
+            state.snap.notifiedItem = null;
+            state.snap.notifiedIndex = null;
             clearSnapWheel(state);
           }
           state.snapEnabled = true;
@@ -26226,12 +26307,18 @@
             var _target = state.snap.wheelTarget;
             if (items.includes(_target) && snapNeedsScroll(state, _target, axis, metrics)) return;
             state.snap.wheelTarget = null;
-            if (items.includes(_target)) return;
+            if (items.includes(_target)) {
+              notifySnapChange(state, _target, axis);
+              return;
+            }
           }
           var edgeIndex = edgeSnapIndex(state, items, axis, metrics);
           var target = items[edgeIndex === null ? nearestSnapIndex(state, items) : edgeIndex];
           state.snap.index = items.indexOf(target);
-          if (!snapNeedsScroll(state, target, axis, metrics)) return;
+          if (!snapNeedsScroll(state, target, axis, metrics)) {
+            notifySnapChange(state, target, axis);
+            return;
+          }
           if (state.elastic.active) state.snap.pending = target;
           else scrollToSnap(state, items.indexOf(target), axis);
         }
@@ -26240,8 +26327,26 @@
           if (!first) return;
           state.snap.initialized = true;
           state.snap.index = 0;
-          first.scrollIntoView(snapScrollOptions(snapAxis(state), "instant"));
+          var axis = snapAxis(state);
+          first.scrollIntoView(snapScrollOptions(axis, "instant"));
+          notifySnapChange(state, first, axis);
           refresh(state);
+        }
+        function notifySnapChange(state, item, axis) {
+          var index = snapItems(state).indexOf(item);
+          if (index < 0 || state.snap.notifiedItem === item && state.snap.notifiedIndex === index) return;
+          var previousIndex = state.snap.notifiedIndex;
+          state.snap.index = index;
+          state.snap.notifiedItem = item;
+          state.snap.notifiedIndex = index;
+          AelluxJs2.dispatchFrom(state.element, "ScrollboxSnapChange", {
+            detail: {
+              item: item,
+              index: index,
+              previousIndex: previousIndex,
+              axis: axis
+            }
+          });
         }
         function snapScrollOptions(axis, behavior) {
           var horizontal = axis === "x";
@@ -26264,6 +26369,7 @@
           state.snap.wheelTarget = items[index];
           if (state.elastic.owned) resetElastic(state);
           items[index].scrollIntoView(snapScrollOptions(axis));
+          scheduleScrollEnd(state);
           return true;
         }
         function goto(element, index) {
@@ -26391,28 +26497,28 @@
         function isTextAtPoint(element, x, y) {
           if (root2.getComputedStyle(element).userSelect === "none") return false;
           var range = document.createRange();
-          var _iterator5 = _createForOfIteratorHelper9(element.childNodes), _step5;
+          var _iterator6 = _createForOfIteratorHelper9(element.childNodes), _step6;
           try {
-            for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
-              var node = _step5.value;
+            for (_iterator6.s(); !(_step6 = _iterator6.n()).done; ) {
+              var node = _step6.value;
               if (node.nodeType !== 3 || !node.textContent.trim()) continue;
               range.selectNodeContents(node);
-              var _iterator6 = _createForOfIteratorHelper9(range.getClientRects()), _step6;
+              var _iterator7 = _createForOfIteratorHelper9(range.getClientRects()), _step7;
               try {
-                for (_iterator6.s(); !(_step6 = _iterator6.n()).done; ) {
-                  var rect = _step6.value;
+                for (_iterator7.s(); !(_step7 = _iterator7.n()).done; ) {
+                  var rect = _step7.value;
                   if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) return true;
                 }
               } catch (err) {
-                _iterator6.e(err);
+                _iterator7.e(err);
               } finally {
-                _iterator6.f();
+                _iterator7.f();
               }
             }
           } catch (err) {
-            _iterator5.e(err);
+            _iterator6.e(err);
           } finally {
-            _iterator5.f();
+            _iterator6.f();
           }
           return false;
         }
@@ -26483,12 +26589,14 @@
           state.mouseReleaseButton = null;
           state.pointerScroll = {
             pointerId: event.pointerId,
+            pointerType: event.pointerType,
             button: event.button,
             startX: event.clientX,
             startY: event.clientY,
             lastX: event.clientX,
             lastY: event.clientY,
             moved: false,
+            started: false,
             axis: null,
             chain: chain,
             axes: axes,
@@ -26526,31 +26634,31 @@
             passive: false,
             capture: true
           });
-          var _iterator7 = _createForOfIteratorHelper9(pointerScrollDragEvents), _step7;
+          var _iterator8 = _createForOfIteratorHelper9(pointerScrollDragEvents), _step8;
           try {
-            for (_iterator7.s(); !(_step7 = _iterator7.n()).done; ) {
-              var name = _step7.value;
+            for (_iterator8.s(); !(_step8 = _iterator8.n()).done; ) {
+              var name = _step8.value;
               root2.addEventListener(name, state.onPointerScrollNativeEvent, true);
             }
           } catch (err) {
-            _iterator7.e(err);
+            _iterator8.e(err);
           } finally {
-            _iterator7.f();
+            _iterator8.f();
           }
           root2.addEventListener("selectstart", state.onPointerScrollNativeEvent, true);
-          var _iterator8 = _createForOfIteratorHelper9(pointerScrollMouseEvents), _step8;
+          var _iterator9 = _createForOfIteratorHelper9(pointerScrollMouseEvents), _step9;
           try {
-            for (_iterator8.s(); !(_step8 = _iterator8.n()).done; ) {
-              var _name = _step8.value;
+            for (_iterator9.s(); !(_step9 = _iterator9.n()).done; ) {
+              var _name = _step9.value;
               root2.addEventListener(_name, state.onMouseEvent, {
                 passive: false,
                 capture: true
               });
             }
           } catch (err) {
-            _iterator8.e(err);
+            _iterator9.e(err);
           } finally {
-            _iterator8.f();
+            _iterator9.f();
           }
           root2.addEventListener("pointerup", state.onPointerEnd, true);
           root2.addEventListener("pointercancel", state.onPointerEnd, true);
@@ -26605,6 +26713,7 @@
               return;
             }
             activatePointerScroll(state, pointerScroll, _axis);
+            if (state.pointerScroll !== pointerScroll) return;
           }
           var axis = pointerScroll.axis;
           var remaining = axis === "x" ? pointerScroll.lastX - event.clientX : pointerScroll.lastY - event.clientY;
@@ -26613,16 +26722,16 @@
           if (event.cancelable) event.preventDefault();
           if (!remaining) return;
           var outermost = null;
-          var _iterator9 = _createForOfIteratorHelper9(pointerScroll.chain), _step9;
+          var _iterator0 = _createForOfIteratorHelper9(pointerScroll.chain), _step0;
           try {
-            for (_iterator9.s(); !(_step9 = _iterator9.n()).done; ) {
-              var member = _step9.value;
+            for (_iterator0.s(); !(_step0 = _iterator0.n()).done; ) {
+              var member = _step0.value;
               if (!member.disposed && member.pointerListening && pointerAxisMaximum(member, axis, pointerScroll) > 0) outermost = member;
             }
           } catch (err) {
-            _iterator9.e(err);
+            _iterator0.e(err);
           } finally {
-            _iterator9.f();
+            _iterator0.f();
           }
           if (outermost && outermost.elasticEnabled && pointerScroll.elasticForce) {
             var force = pointerScroll.elasticForce + remaining;
@@ -26636,10 +26745,10 @@
           }
           var lastUsed = null;
           var lastStartX = 0, lastStartY = 0;
-          var _iterator0 = _createForOfIteratorHelper9(pointerScroll.chain), _step0;
+          var _iterator1 = _createForOfIteratorHelper9(pointerScroll.chain), _step1;
           try {
-            for (_iterator0.s(); !(_step0 = _iterator0.n()).done; ) {
-              var _member2 = _step0.value;
+            for (_iterator1.s(); !(_step1 = _iterator1.n()).done; ) {
+              var _member2 = _step1.value;
               if (_member2.disposed || !_member2.pointerListening || pointerAxisMaximum(_member2, axis, pointerScroll) <= 0) continue;
               if (Math.abs(remaining) < 1e-3) continue;
               var _element = _member2.element;
@@ -26660,9 +26769,9 @@
               lastStartY = previousY;
             }
           } catch (err) {
-            _iterator0.e(err);
+            _iterator1.e(err);
           } finally {
-            _iterator0.f();
+            _iterator1.f();
           }
           if (outermost && outermost.elasticEnabled) {
             pointerScroll.elasticForce += remaining;
@@ -26716,11 +26825,12 @@
         function activatePointerScroll(state, pointerScroll, axis) {
           pointerScroll.axis = axis;
           pointerScroll.moved = true;
+          pointerScroll.started = true;
           restorePointerScrollCursor(state);
-          var _iterator1 = _createForOfIteratorHelper9(pointerScroll.chain), _step1;
+          var _iterator10 = _createForOfIteratorHelper9(pointerScroll.chain), _step10;
           try {
-            for (_iterator1.s(); !(_step1 = _iterator1.n()).done; ) {
-              var member = _step1.value;
+            for (_iterator10.s(); !(_step10 = _iterator10.n()).done; ) {
+              var member = _step10.value;
               if (pointerAxisMaximum(member, axis, pointerScroll) <= 0) continue;
               var element = member.element;
               pointerScroll.styles.push({
@@ -26734,10 +26844,23 @@
               startScrollbarPdsVisibility(member);
             }
           } catch (err) {
-            _iterator1.e(err);
+            _iterator10.e(err);
           } finally {
-            _iterator1.f();
+            _iterator10.f();
           }
+          dispatchPointerScroll(state, pointerScroll, "PointerScrollStart");
+        }
+        function dispatchPointerScroll(state, pointerScroll, name) {
+          AelluxJs2.dispatchFrom(state.element, name, {
+            detail: {
+              axis: pointerScroll.axis,
+              pointerId: pointerScroll.pointerId,
+              pointerType: pointerScroll.pointerType,
+              elements: pointerScroll.styles.map(function(saved) {
+                return saved.element;
+              })
+            }
+          });
         }
         function endPointerScroll(state, event) {
           var pointerScroll = state.pointerScroll;
@@ -26761,16 +26884,16 @@
           if (pointerScroll.selectionWaitTimeout !== null) root2.clearTimeout(pointerScroll.selectionWaitTimeout);
           root2.removeEventListener("pointermove", state.onPointerMove, true);
           root2.removeEventListener("touchmove", state.onPointerScrollTouchMove, true);
-          var _iterator10 = _createForOfIteratorHelper9(pointerScrollDragEvents), _step10;
+          var _iterator11 = _createForOfIteratorHelper9(pointerScrollDragEvents), _step11;
           try {
-            for (_iterator10.s(); !(_step10 = _iterator10.n()).done; ) {
-              var name = _step10.value;
+            for (_iterator11.s(); !(_step11 = _iterator11.n()).done; ) {
+              var name = _step11.value;
               root2.removeEventListener(name, state.onPointerScrollNativeEvent, true);
             }
           } catch (err) {
-            _iterator10.e(err);
+            _iterator11.e(err);
           } finally {
-            _iterator10.f();
+            _iterator11.f();
           }
           root2.removeEventListener("selectstart", state.onPointerScrollNativeEvent, true);
           root2.removeEventListener("pointerup", state.onPointerEnd, true);
@@ -26785,10 +26908,10 @@
           } else {
             stopPointerScrollMouseEvents(state);
           }
-          var _iterator11 = _createForOfIteratorHelper9(pointerScroll.styles), _step11;
+          var _iterator12 = _createForOfIteratorHelper9(pointerScroll.styles), _step12;
           try {
-            for (_iterator11.s(); !(_step11 = _iterator11.n()).done; ) {
-              var saved = _step11.value;
+            for (_iterator12.s(); !(_step12 = _iterator12.n()).done; ) {
+              var saved = _step12.value;
               if (saved.classOwned) saved.element.classList.remove(pointerScrollingClass);
               if (saved.scrollBehavior) saved.element.style.setProperty("scroll-behavior", saved.scrollBehavior, saved.scrollBehaviorPriority);
               else saved.element.style.removeProperty("scroll-behavior");
@@ -26796,13 +26919,14 @@
               if (member) scheduleScrollbarPdsHide(member);
             }
           } catch (err) {
-            _iterator11.e(err);
+            _iterator12.e(err);
           } finally {
-            _iterator11.f();
+            _iterator12.f();
           }
           if (event && event.type === "pointerup" && state.pointerListening) {
             updatePointerScrollCursor(state, document.elementFromPoint(event.clientX, event.clientY), event.clientX, event.clientY);
           } else restorePointerScrollCursor(state);
+          if (pointerScroll.started) dispatchPointerScroll(state, pointerScroll, "PointerScrollEnd");
           var hadElastic = pointerScroll.chain.some(function(member2) {
             return member2.elastic.active;
           });
@@ -26812,16 +26936,16 @@
           });
           var shouldSnap = event && event.type === "pointerup" && pointerScroll.moved && snapState && !snapState.disposed && snapItems(snapState).length;
           if (shouldSnap) schedulePointerSnap(snapState, pointerScroll);
-          var _iterator12 = _createForOfIteratorHelper9(pointerScroll.chain), _step12;
+          var _iterator13 = _createForOfIteratorHelper9(pointerScroll.chain), _step13;
           try {
-            for (_iterator12.s(); !(_step12 = _iterator12.n()).done; ) {
-              var _member3 = _step12.value;
+            for (_iterator13.s(); !(_step13 = _iterator13.n()).done; ) {
+              var _member3 = _step13.value;
               releaseElastic(_member3);
             }
           } catch (err) {
-            _iterator12.e(err);
+            _iterator13.e(err);
           } finally {
-            _iterator12.f();
+            _iterator13.f();
           }
           if (!shouldSnap && event && event.type === "pointerup" && pointerScroll.moved && momentumState && momentumState.momentumEnabled && !hadElastic && !momentumState.disposed && now() - pointerScroll.momentumStartTime < MOMENTUM_LIMIT_TIME_MS) {
             startMomentum(momentumState, pointerScroll);
@@ -26878,16 +27002,16 @@
           if (state.mouseReleaseTimeout !== null) root2.clearTimeout(state.mouseReleaseTimeout);
           state.mouseReleaseTimeout = null;
           state.mouseReleaseButton = null;
-          var _iterator13 = _createForOfIteratorHelper9(pointerScrollMouseEvents), _step13;
+          var _iterator14 = _createForOfIteratorHelper9(pointerScrollMouseEvents), _step14;
           try {
-            for (_iterator13.s(); !(_step13 = _iterator13.n()).done; ) {
-              var name = _step13.value;
+            for (_iterator14.s(); !(_step14 = _iterator14.n()).done; ) {
+              var name = _step14.value;
               root2.removeEventListener(name, state.onMouseEvent, true);
             }
           } catch (err) {
-            _iterator13.e(err);
+            _iterator14.e(err);
           } finally {
-            _iterator13.f();
+            _iterator14.f();
           }
         }
         function startMomentum(state, pointerScroll) {
@@ -26990,19 +27114,19 @@
           var start = state.elastic.touch;
           if (!start) return;
           var touch = null;
-          var _iterator14 = _createForOfIteratorHelper9(event.touches), _step14;
+          var _iterator15 = _createForOfIteratorHelper9(event.touches), _step15;
           try {
-            for (_iterator14.s(); !(_step14 = _iterator14.n()).done; ) {
-              var item = _step14.value;
+            for (_iterator15.s(); !(_step15 = _iterator15.n()).done; ) {
+              var item = _step15.value;
               if (item.identifier === start.identifier) {
                 touch = item;
                 break;
               }
             }
           } catch (err) {
-            _iterator14.e(err);
+            _iterator15.e(err);
           } finally {
-            _iterator14.f();
+            _iterator15.f();
           }
           if (!touch) return;
           var desiredX = start.scrollLeft + start.x - touch.clientX;
@@ -27015,16 +27139,16 @@
         function endTouch(state, event) {
           var touch = state.elastic.touch;
           if (!touch) return;
-          var _iterator15 = _createForOfIteratorHelper9(event.touches), _step15;
+          var _iterator16 = _createForOfIteratorHelper9(event.touches), _step16;
           try {
-            for (_iterator15.s(); !(_step15 = _iterator15.n()).done; ) {
-              var item = _step15.value;
+            for (_iterator16.s(); !(_step16 = _iterator16.n()).done; ) {
+              var item = _step16.value;
               if (item.identifier === touch.identifier) return;
             }
           } catch (err) {
-            _iterator15.e(err);
+            _iterator16.e(err);
           } finally {
-            _iterator15.f();
+            _iterator16.f();
           }
           state.elastic.touch = null;
           releaseElastic(state);
@@ -27155,6 +27279,7 @@
         }
         function resetElastic(state) {
           var elastic = state.elastic;
+          var wasOwned = elastic.owned;
           if (elastic.releaseFrame !== null) root2.cancelAnimationFrame(elastic.releaseFrame);
           if (elastic.wheelTimeout !== null) root2.clearTimeout(elastic.wheelTimeout);
           elastic.releaseFrame = null;
@@ -27183,6 +27308,7 @@
           elastic.owned = false;
           elastic.extentX = false;
           elastic.extentY = false;
+          if (wasOwned && !state.disposed) publish(state);
         }
         function observe(state) {
           state.onResize = function() {
@@ -27196,16 +27322,16 @@
               return scheduleResize(state);
             });
             state.resizeObserver.observe(state.element);
-            var _iterator16 = _createForOfIteratorHelper9(state.element.children), _step16;
+            var _iterator17 = _createForOfIteratorHelper9(state.element.children), _step17;
             try {
-              for (_iterator16.s(); !(_step16 = _iterator16.n()).done; ) {
-                var child = _step16.value;
+              for (_iterator17.s(); !(_step17 = _iterator17.n()).done; ) {
+                var child = _step17.value;
                 state.resizeObserver.observe(child);
               }
             } catch (err) {
-              _iterator16.e(err);
+              _iterator17.e(err);
             } finally {
-              _iterator16.f();
+              _iterator17.f();
             }
           }
           if (root2.MutationObserver) {
@@ -27213,16 +27339,16 @@
               if (state.resizeObserver) {
                 state.resizeObserver.disconnect();
                 state.resizeObserver.observe(state.element);
-                var _iterator17 = _createForOfIteratorHelper9(state.element.children), _step17;
+                var _iterator18 = _createForOfIteratorHelper9(state.element.children), _step18;
                 try {
-                  for (_iterator17.s(); !(_step17 = _iterator17.n()).done; ) {
-                    var _child = _step17.value;
+                  for (_iterator18.s(); !(_step18 = _iterator18.n()).done; ) {
+                    var _child = _step18.value;
                     state.resizeObserver.observe(_child);
                   }
                 } catch (err) {
-                  _iterator17.e(err);
+                  _iterator18.e(err);
                 } finally {
-                  _iterator17.f();
+                  _iterator18.f();
                 }
               }
               if (records.some(function(record) {
@@ -27290,14 +27416,17 @@
             if (state.disposed) return null;
             state.publishDirty = false;
             var metrics = nativeMetrics(state.element);
+            var scrollTop = state.element.scrollTop;
+            var scrollLeft = state.element.scrollLeft;
             if (!state.elastic.active) state.metrics = metrics;
             if (state.elasticEnabled && state.elastic.wrapper && !state.elastic.active) state.elastic.dimensions = measureElasticWrapper(state.elastic.wrapper);
             var bars = state.scrollbar.x || state.scrollbar.y;
             var axes = state.snapEnabled || bars ? wheelAxes(state, metrics) : null;
             return {
               revision: state.layoutRevision,
-              y: progress(state.element.scrollTop, metrics.maxY),
-              x: progress(state.element.scrollLeft, metrics.maxX),
+              y: progress(scrollTop, metrics.maxY),
+              x: progress(scrollLeft, metrics.maxX),
+              edges: state.elastic.owned ? null : [scrollTop < SCROLL_EDGE_MARGIN_PX, scrollTop >= metrics.maxY - SCROLL_EDGE_MARGIN_PX, scrollLeft < SCROLL_EDGE_MARGIN_PX, scrollLeft >= metrics.maxX - SCROLL_EDGE_MARGIN_PX],
               snapValues: state.snapEnabled ? measureSnapValues(state, metrics, axes) : [],
               scrollbars: bars ? readScrollbars(state, metrics, axes) : []
             };
@@ -27310,17 +27439,22 @@
               if (state.disposed || state.layoutRevision !== values.revision) return;
               state.element.style.setProperty(properties[0], values.y);
               state.element.style.setProperty(properties[1], values.x);
-              var _iterator18 = _createForOfIteratorHelper9(values.snapValues), _step18;
+              if (values.edges && !state.elastic.owned) {
+                scrollEdgeClasses.forEach(function(name, index) {
+                  return state.element.classList.toggle(name, values.edges[index]);
+                });
+              }
+              var _iterator19 = _createForOfIteratorHelper9(values.snapValues), _step19;
               try {
-                for (_iterator18.s(); !(_step18 = _iterator18.n()).done; ) {
-                  var _step18$value = _step18.value, item = _step18$value.item, viewport = _step18$value.viewport, focus2 = _step18$value.focus;
+                for (_iterator19.s(); !(_step19 = _iterator19.n()).done; ) {
+                  var _step19$value = _step19.value, item = _step19$value.item, viewport = _step19$value.viewport, focus2 = _step19$value.focus;
                   item.style.setProperty(snapProperties[0], viewport);
                   item.style.setProperty(snapProperties[1], focus2);
                 }
               } catch (err) {
-                _iterator18.e(err);
+                _iterator19.e(err);
               } finally {
-                _iterator18.f();
+                _iterator19.f();
               }
               updateScrollbars(state, values.scrollbars);
             });
@@ -27616,6 +27750,7 @@
           AelluxJs2.mountManager.add({
             extensionName: extensionName,
             selector: "[".concat(attr.adaptive, "]"),
+            priority: 0,
             mount: mountAdaptive,
             unmount: unmountAdaptive
           });
@@ -27791,7 +27926,11 @@
           element.style.setProperty("--ae-width", width);
           element.style.setProperty("--ae-height", height);
           AelluxJs2.dispatchFrom(element, "AdaptiveUpdate", {
-            detail: null
+            detail: {
+              width: width,
+              height: height,
+              ratio: ratio
+            }
           });
         }
         function inferOrientation(flexBox) {
@@ -28053,12 +28192,14 @@
           AelluxJs2.mountManager.add({
             extensionName: extensionName,
             selector: "[".concat(attr.present, "]"),
+            priority: 0,
             mount: mountPresentContainer,
             unmount: unmountPresentContainer,
             controllers: ["pop", "unpop", "trigger", "toggle"]
           });
           AelluxJs2.mountManager.add({
             extensionName: extensionName,
+            priority: 0,
             selector: "[".concat([attr.trigger, attr.dismiss, attr.target].join("],["), "]"),
             mount: mountTriggerElement,
             unmount: unmountTriggerElement
@@ -28622,7 +28763,12 @@
           else openPresentElements.add(element);
           if (focused) {
             if (document.activeElement === focused) focused.blur();
-            if (document.activeElement !== focused) AelluxJs2.dispatch("UnpopFocusLost");
+            if (document.activeElement !== focused) AelluxJs2.dispatch("UnpopFocusLost", {
+              detail: {
+                element: element,
+                focused: focused
+              }
+            });
           }
           transition.timeout = null;
           completeTransition();

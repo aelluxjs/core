@@ -588,7 +588,7 @@ Present                  </li>
 <li><strong>Capabilities:</strong> interaction and input; structure and state; motion and timing.</li>
 <li><strong>Owned state:</strong> presentation and <code>will-change</code> classes and its changes to <code>hidden</code>, <code>aria-expanded</code> and <code>aria-controls</code>.</li>
 <li><strong>Consumer responsibility:</strong> use native, named trigger and dismiss controls; ensure configured motion respects reduced-motion preferences; manage focus for dialog, disclosure and similar patterns.</li>
-<li><strong>Focus on close:</strong> if the active element is inside the region when it becomes hidden, Present releases its focus and emits <code>AelluxJsUnpopFocusLost</code>. Focus restoration is handled by the optional Focus Extension.</li>
+<li><strong>Focus on close:</strong> if the active element is inside the region when it becomes hidden, Present releases its focus and emits <code>AelluxJsUnpopFocusLost</code> with <code>detail: { element, focused }</code>. Focus restoration is handled by the optional Focus Extension.</li>
 </ul>
 <pre><code class="language-html">&lt;button type=&quot;button&quot; data-ae-trigger=&quot;toggle&quot; data-ae-target=&quot;#details&quot;&gt;Details&lt;/button&gt;
 &lt;section id=&quot;details&quot; data-ae-present hidden&gt;

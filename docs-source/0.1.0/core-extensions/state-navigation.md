@@ -28,6 +28,8 @@ The `key` and `value` fields must be non-empty strings; `title` is optional. Sta
 
 The Extension dispatches `AelluxJsSnapshotChange` after writing a new state and `AelluxJsSnapshotRestore` after reading a state from history or the hash. Event `detail` contains `snapshot`, `removeSnapshot`, and `popState`. For a `popstate` restoration, `popState` is the history entry that was read; it is `undefined` for a hash-only restoration or a snapshot change. The snapshot and document title are updated before `AelluxJsSnapshotRestore` is dispatched. The current implementation reads `useHash` from the top-level `$ae.options.useHash` setting. With `useHash: false`, restoring a history entry whose snapshot is `null` clears the current snapshot.
 
+The event's `snapshot` and `removeSnapshot` values are copies made at dispatch time, so retaining a detail object does not expose later changes to the internal snapshot. `popState` is also copied, including its snapshot and Ajax replacement metadata.
+
 Dispatch `AelluxJsPushAjaxReplace` to record the current and target URLs in browser history, or `AelluxJsUpdateBaseTitle` to update the base document title:
 
 ```js

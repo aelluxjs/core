@@ -2,6 +2,14 @@
 
 `data-ae-scrollbox` uses the browser's native scrolling and publishes `--ae-scroll-y-progress` and `--ae-scroll-x-progress` on the scroll container. Each value runs from 0 at the start to 1 at the end of its axis; an axis without overflow reports 0. Repeated scroll events share one layout read and one CSS update in the next frame, using the latest position. Native `scroll` events continue to reach ordinary listeners, including Anchor's capture listener. On unmount, Scrollbox restores the previous inline progress values and priorities.
 
+Scrollbox marks positions within 5 px of each scroll limit with `ae--scroll-v-start`, `ae--scroll-v-end`, `ae--scroll-h-start`, and `ae--scroll-h-end` on the container. An axis without overflow has both its start and end classes. During elastic pressure and its return animation, the classes keep their last state; they update again when the effect ends. Scrollbox removes these classes on unmount.
+
+```css
+[data-ae-scrollbox]:not(.ae--scroll-v-end) {
+  box-shadow: inset 0 -8px 8px -8px rgb(0 0 0 / 0.25);
+}
+```
+
 The boot's weak CSS supplies `overflow: auto`, `contain: layout paint`, and thin scrollbars. It gives elastic and snap children `display: inline-block` with `vertical-align: top` so the inline line box adds no scrollable space below. If application CSS sets the wrapper to `block`, `flex`, or `grid`, Scrollbox reports diagnostic 2016 and uses `inline-block`, `inline-flex`, or `inline-grid` respectively. It restores the previous inline `display` when the wrapper changes or unmounts. It also enables smooth programmatic scrolling on all elements; `prefers-reduced-motion: reduce` restores immediate scrolling. Pointer dragging and momentum set each position immediately so they follow the gesture. An application can override the weak styles. Basic Scrollbox works with any content structure and does not load a scrolling library. Elastic edges and snap require a single marked content child.
 
 ## Custom scrollbars
@@ -39,6 +47,8 @@ The bars normally have opacity 0. Mouse and pointer hover are tracked separately
 Pointer Drag Scroll (PDS) uses the primary mouse button or pen. Once movement reaches 3 px, the larger component of that first movement locks the gesture to the horizontal or vertical axis. PDS keeps working when the pointer moves outside the box. Touch input retains native behavior. PDS does not start on links, buttons, form controls, editable content, or explicitly draggable elements. On open content, PDS prevents the pointer-down default so the browser does not start its own drag or edge scroll. Text and excluded elements keep their native pointer-down behavior. The cursor is `grab` over empty scrollable content, keeps its native appearance over selectable text and excluded elements, and becomes `grabbing` once PDS begins. On desktop, pointer mode cancels cancelable mouse events from the same button while PDS is moving, including when the pointer leaves the box. The matching release and click are canceled too; events from other mouse buttons remain available. A second or later mouse click stops drag tracking and allows native text selection when no drag is underway. PDS leaves `user-select` unchanged; its temporary scroll-behavior and cursor styles are restored when the gesture ends. Change the mode with `$ae.mountManager.update(element, "scrollbox")` after editing the attribute.
 
 Once PDS begins, Scrollbox adds `ae--pointerscrolling` to the box. The boot's weak CSS applies `cursor: grabbing !important` to the box and its contents until the gesture ends. If its only direct child enables `data-ae-scrollbox-elastic`, that child and its descendants also receive `pointer-events: none !important` during PDS. Scrollbox cancels wheel input over the box during this interval, along with the default action of its `pointermove`, matching-button `mousemove`, `touchmove`, and cancelable drag events. Canceling `dragstart` prevents a native drag from taking over the gesture. Native `scroll` events still reach listeners and report the updated scroll position.
+
+`AelluxJsPointerScrollStart` fires when PDS actually activates, after the axis is locked. `AelluxJsPointerScrollEnd` fires after its temporary classes and styles are removed. Both events originate on the scrollbox where the gesture began and bubble; their `detail` contains `{ axis, pointerId, pointerType, elements }`, where `elements` lists the activated boxes in a nested chain. A snap flick that ends before PDS activates emits neither event.
 
 Gestures starting on text wait 100 ms after pointer-down so a native selection can begin. The first qualifying movement still chooses the axis during that wait. A text selection that remains unchanged from pointer-down does not block PDS; a new or altered selection stops tracking and remains intact. A collapsed caret by itself does not count as a text selection. In a vertical-only scroll chain, movement of more than 10 px vertically starts PDS immediately when vertical movement is dominant, and prevents native selection. Otherwise PDS scrolls in the locked axis after the wait, including any movement already made while waiting. PDS only captures an axis whose computed overflow is `auto` or `scroll` and whose content overflows. `hidden`, `clip`, and other non-scrollable overflow values disable PDS on that axis even if its content is larger than the box. A nested gesture can continue on an ancestor that permits the chosen axis.
 
@@ -81,6 +91,15 @@ The attribute value sets the maximum displacement. With no value it defaults to 
 Scrollbox updates measurements after content mutations, box resize, or window resize. Resize updates use a 100 ms throttle.
 
 ## Snap points
+
+`AelluxJsScrollboxSnapChange` fires on the scrollbox when a newly selected snap point finishes settling. Its `detail` contains `{ item, index, previousIndex, axis }`; the initial selection uses `previousIndex: null`. Selecting the same item again does not emit another change.
+
+```js
+document.getElementById("gallery").addEventListener("AelluxJsScrollboxSnapChange", event => {
+  const { item, index } = event.detail;
+  console.log(index, item);
+});
+```
 
 Each direct child of the snap wrapper receives inline `--ae-snap-viewport` and `--ae-snap-focus` values at mount and as the box scrolls or refreshes. The values use the snap axis and compare the child's center with the viewport center. `--ae-snap-viewport` is `0` at the center, `-1` and `1` at the starting and ending viewport edges, and clamps to `-2` and `2` farther outside. `--ae-snap-focus` is `1` at the center, `0.5` at either viewport edge, and clamps to `0` at the outside limits. These inline values remain on the children after unmount.
 

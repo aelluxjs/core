@@ -613,6 +613,7 @@ An Extension receives its configuration as the <code>options</code> argument to 
 function init() {
   AelluxJs.mountManager.add({
     extensionName, selector: &quot;[data-ae-example]&quot;,
+    priority: 0,
     mount: mountElement, unmount: unmountElement
   });
 }
@@ -621,7 +622,7 @@ function destroy() {
   AelluxJs.mountManager.remove({ extensionName });
 }
 </code></pre>
-<p>The manager runs matching handlers through the mount helper during <code>$ae.mount(root)</code> and <code>$ae.unmount(root)</code>. Register before mounting and remove only after unmounting. <code>mount</code> must be safe against repeated calls, and <code>unmount</code> must reverse the element-level resources created by <code>mount</code>.</p>
+<p>The manager runs matching handlers through the mount helper during <code>$ae.mount(root)</code> and <code>$ae.unmount(root)</code>. Mount registrations run in ascending <code>priority</code> order across Extensions and selectors. The default is <code>0</code>, and equal priorities keep discovery order. Register before mounting and remove only after unmounting. <code>mount</code> must be safe against repeated calls, and <code>unmount</code> must reverse the element-level resources created by <code>mount</code>.</p>
 <h2>Layout work in Core Extensions</h2>
 <p>Core Extensions must avoid interleaving DOM or CSS writes with reads that can force layout, such as <code>getBoundingClientRect()</code>, <code>offsetWidth</code>, <code>clientHeight</code>, <code>scrollWidth</code>, and <code>getComputedStyle()</code>. Collect related measurements in one <code>$ae.waitLayout.read()</code> callback, then apply dependent styles, classes, attributes, or DOM changes in <code>$ae.waitLayout.update()</code>. Queueing the update from the completed read lets the scheduler run the writes after the batched reads in the same layout frame when possible.</p>
 <p>For a single measurement and write, no revision guard is needed. These three forms do the same work. With <code>async</code>/<code>await</code>:</p>

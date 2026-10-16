@@ -68,6 +68,7 @@
       AelluxJs.mountManager.add({
         extensionName: extensionName,
         selector: "[".concat(attribute, "]"),
+        priority: 0,
         mount: mountFocusElement,
         unmount: unmountFocusElement
       });

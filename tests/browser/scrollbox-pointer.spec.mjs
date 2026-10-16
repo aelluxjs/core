@@ -48,6 +48,131 @@ async function drag(page, id, pointerType = "mouse") {
   }, { id, pointerType });
 }
 
+test("scroll edge classes follow both axes and clear on unmount", async ({ page }) => {
+  await setup(page, box("edges", "native"));
+
+  const classes = () => page.evaluate(() => {
+    const names = ["v-start", "v-end", "h-start", "h-end"];
+    const element = document.getElementById("edges");
+    return names.map(name => element.classList.contains(`ae--scroll-${name}`));
+  });
+
+  await expect.poll(classes).toEqual([true, false, true, false]);
+
+  await page.evaluate(() => document.getElementById("edges")
+    .scrollTo({ top: 4, left: 4, behavior: "instant" }));
+  await expect.poll(classes).toEqual([true, false, true, false]);
+
+  await page.evaluate(() => document.getElementById("edges")
+    .scrollTo({ top: 100, left: 100, behavior: "instant" }));
+  await expect.poll(classes).toEqual([false, false, false, false]);
+
+  await page.evaluate(() => {
+    const element = document.getElementById("edges");
+    element.scrollTo({
+      top: element.scrollHeight - element.clientHeight - 4,
+      left: element.scrollWidth - element.clientWidth - 4,
+      behavior: "instant"
+    });
+  });
+  await expect.poll(classes).toEqual([false, true, false, true]);
+
+  await page.evaluate(() => AelluxJs.mountManager.unmount("edges", "scrollbox"));
+  expect(await classes()).toEqual([false, false, false, false]);
+});
+
+test("scroll edge classes stay fixed during elastic pressure", async ({ page }) => {
+  await setup(page, `<div id="elastic-edges" data-ae-scrollbox="native"
+    style="width:100px;height:100px;overflow:auto">
+    <div data-ae-scrollbox-elastic style="display:inline-block;width:100px;height:300px"></div>
+  </div>`);
+
+  await page.evaluate(() => {
+    const element = document.getElementById("elastic-edges");
+    element.scrollTo({ top: element.scrollHeight - element.clientHeight, behavior: "instant" });
+  });
+  await expect.poll(() => page.evaluate(() => document.getElementById("elastic-edges")
+    .classList.contains("ae--scroll-v-end"))).toBe(true);
+
+  const duringPressure = await page.evaluate(async () => {
+    const element = document.getElementById("elastic-edges");
+    element.dispatchEvent(new WheelEvent("wheel", {
+      bubbles: true, cancelable: true, deltaY: 60
+    }));
+    element.scrollTo({ top: 50, behavior: "instant" });
+    await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    return element.classList.contains("ae--scroll-v-end");
+  });
+
+  expect(duringPressure).toBe(true);
+  await expect.poll(() => page.evaluate(() => document.getElementById("elastic-edges")
+    .classList.contains("ae--scroll-v-end"))).toBe(false);
+});
+
+test("snap change reports the selected item after scrolling settles", async ({ page }) => {
+  await setup(page, `<div id="snap-events" data-ae-scrollbox="native"
+    style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden">
+    <div data-ae-scrollbox-snap style="display:flex;width:300px;height:100px">
+      <div id="snap-one" style="flex:none;width:100px"></div>
+      <div id="snap-two" style="flex:none;width:100px"></div>
+      <div id="snap-three" style="flex:none;width:100px"></div>
+    </div>
+  </div>`);
+
+  await page.evaluate(() => {
+    window.snapEvents = [];
+    document.getElementById("snap-events").addEventListener("AelluxJsScrollboxSnapChange", event => {
+      const { item, index, previousIndex, axis } = event.detail;
+      window.snapEvents.push({ item: item.id, index, previousIndex, axis });
+    });
+    AelluxJs.mountManager.controller("snap-events").scrollbox.goto(1);
+  });
+
+  await expect.poll(() => page.evaluate(() => window.snapEvents)).toEqual([
+    { item: "snap-two", index: 1, previousIndex: 0, axis: "x" }
+  ]);
+  await page.evaluate(() => AelluxJs.mountManager.controller("snap-events").scrollbox.goto(1));
+  await page.waitForTimeout(180);
+  expect(await page.evaluate(() => window.snapEvents)).toHaveLength(1);
+});
+
+test("pointer scroll start and end report the activated gesture", async ({ page }) => {
+  await setup(page, box("pointer-events"));
+
+  const events = await page.evaluate(() => {
+    const element = document.getElementById("pointer-events");
+    const events = [];
+    for (const name of ["PointerScrollStart", "PointerScrollEnd"]) {
+      element.addEventListener(`AelluxJs${name}`, event => {
+        const { axis, pointerId, pointerType, elements } = event.detail;
+        events.push({ name, axis, pointerId, pointerType,
+          elements: elements.map(item => item.id) });
+      });
+    }
+
+    element.dispatchEvent(new PointerEvent("pointerdown", {
+      bubbles: true, cancelable: true, isPrimary: true,
+      pointerId: 29, pointerType: "mouse", button: 0, buttons: 1,
+      clientX: 70, clientY: 70
+    }));
+    window.dispatchEvent(new PointerEvent("pointermove", {
+      bubbles: true, cancelable: true, isPrimary: true,
+      pointerId: 29, pointerType: "mouse", buttons: 1,
+      clientX: 30, clientY: 70
+    }));
+    window.dispatchEvent(new PointerEvent("pointerup", {
+      bubbles: true, isPrimary: true,
+      pointerId: 29, pointerType: "mouse", button: 0, buttons: 0,
+      clientX: 30, clientY: 70
+    }));
+    return events;
+  });
+
+  expect(events).toEqual(["PointerScrollStart", "PointerScrollEnd"].map(name => ({
+    name, axis: "x", pointerId: 29, pointerType: "mouse", elements: ["pointer-events"]
+  })));
+});
+
 test("elastic and snap wrappers normalize non-inline display and restore it", async ({ page }) => {
   await setup(page, `<div id="block" data-ae-scrollbox style="width:100px;height:100px">
     <div data-ae-scrollbox-elastic style="display:block!important;width:100px;height:300px"></div>

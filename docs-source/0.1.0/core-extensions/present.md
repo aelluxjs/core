@@ -7,7 +7,7 @@
 - **Capabilities:** interaction and input; structure and state; motion and timing.
 - **Owned state:** presentation and `will-change` classes and its changes to `hidden`, `aria-expanded` and `aria-controls`.
 - **Consumer responsibility:** use native, named trigger and dismiss controls; ensure configured motion respects reduced-motion preferences; manage focus for dialog, disclosure and similar patterns.
-- **Focus on close:** if the active element is inside the region when it becomes hidden, Present releases its focus and emits `AelluxJsUnpopFocusLost`. Focus restoration is handled by the optional Focus Extension.
+- **Focus on close:** if the active element is inside the region when it becomes hidden, Present releases its focus and emits `AelluxJsUnpopFocusLost` with `detail: { element, focused }`. Focus restoration is handled by the optional Focus Extension.
 
 ```html
 <button type="button" data-ae-trigger="toggle" data-ae-target="#details">Details</button>

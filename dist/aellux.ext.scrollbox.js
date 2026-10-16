@@ -18,8 +18,15 @@
     const pointerScrollingClass = AelluxJs.className("pointerscrolling");
     const nativeScrollbarHideClass = AelluxJs.className("native-sb-hide");
     const scrollbarVisibleClass = AelluxJs.className("scrollbar-visible");
+    const scrollEdgeClasses = [
+      AelluxJs.className("scroll-v-start"),
+      AelluxJs.className("scroll-v-end"),
+      AelluxJs.className("scroll-h-start"),
+      AelluxJs.className("scroll-h-end")
+    ];
     const pointerScrollExceptionSelector = `a, button, input, select, textarea, [contenteditable], [draggable='true'], [${scrollbarVerticalAttribute}], [${scrollbarHorizontalAttribute}]`;
     const RESIZE_INTERVAL_MS = 100;
+    const SCROLL_EDGE_MARGIN_PX = 5;
     const POINTER_SCROLL_THRESHOLD_PX = 3;
     const POINTER_SCROLL_MULTICLICK_MS = 500;
     const POINTER_SCROLL_MULTICLICK_DISTANCE_PX = 8;
@@ -98,6 +105,7 @@
       AelluxJs.mountManager.add({
         extensionName,
         selector: `[${attribute}]`,
+        priority: 0,
         mount: mountScrollbox,
         update: updateScrollbox,
         unmount: unmountScrollbox,
@@ -142,6 +150,8 @@
         pending: null,
         index: 0,
         wheelTarget: null,
+        notifiedItem: null,
+        notifiedIndex: null,
         scrollEndTimeout: null,
         wheelTimeout: null
       };
@@ -300,6 +310,7 @@
         if (original.value) element.style.setProperty(name, original.value, original.priority);
         else element.style.removeProperty(name);
       });
+      for (const name of scrollEdgeClasses) element.classList.remove(name);
       scrollboxes.delete(element);
     }
     function configure(state) {
@@ -652,6 +663,8 @@
         state.snap.pending = null;
         state.snap.index = 0;
         state.snap.wheelTarget = null;
+        state.snap.notifiedItem = null;
+        state.snap.notifiedIndex = null;
         clearScrollEnd(state);
         clearSnapWheel(state);
         const requested = element.hasAttribute(snapAttribute) || children.some((item) => item.hasAttribute(snapAttribute) && item.getAttribute(snapAttribute) !== "false");
@@ -670,6 +683,8 @@
         state.snap.pending = null;
         state.snap.index = 0;
         state.snap.wheelTarget = null;
+        state.snap.notifiedItem = null;
+        state.snap.notifiedIndex = null;
         clearSnapWheel(state);
       }
       state.snapEnabled = true;
@@ -824,12 +839,18 @@
         const target2 = state.snap.wheelTarget;
         if (items.includes(target2) && snapNeedsScroll(state, target2, axis, metrics)) return;
         state.snap.wheelTarget = null;
-        if (items.includes(target2)) return;
+        if (items.includes(target2)) {
+          notifySnapChange(state, target2, axis);
+          return;
+        }
       }
       const edgeIndex = edgeSnapIndex(state, items, axis, metrics);
       const target = items[edgeIndex === null ? nearestSnapIndex(state, items) : edgeIndex];
       state.snap.index = items.indexOf(target);
-      if (!snapNeedsScroll(state, target, axis, metrics)) return;
+      if (!snapNeedsScroll(state, target, axis, metrics)) {
+        notifySnapChange(state, target, axis);
+        return;
+      }
       if (state.elastic.active) state.snap.pending = target;
       else scrollToSnap(state, items.indexOf(target), axis);
     }
@@ -838,8 +859,21 @@
       if (!first) return;
       state.snap.initialized = true;
       state.snap.index = 0;
-      first.scrollIntoView(snapScrollOptions(snapAxis(state), "instant"));
+      const axis = snapAxis(state);
+      first.scrollIntoView(snapScrollOptions(axis, "instant"));
+      notifySnapChange(state, first, axis);
       refresh(state);
+    }
+    function notifySnapChange(state, item, axis) {
+      const index = snapItems(state).indexOf(item);
+      if (index < 0 || state.snap.notifiedItem === item && state.snap.notifiedIndex === index) return;
+      const previousIndex = state.snap.notifiedIndex;
+      state.snap.index = index;
+      state.snap.notifiedItem = item;
+      state.snap.notifiedIndex = index;
+      AelluxJs.dispatchFrom(state.element, "ScrollboxSnapChange", {
+        detail: { item, index, previousIndex, axis }
+      });
     }
     function snapScrollOptions(axis, behavior) {
       const horizontal = axis === "x";
@@ -862,6 +896,7 @@
       state.snap.wheelTarget = items[index];
       if (state.elastic.owned) resetElastic(state);
       items[index].scrollIntoView(snapScrollOptions(axis));
+      scheduleScrollEnd(state);
       return true;
     }
     function goto(element, index) {
@@ -1054,12 +1089,14 @@
       state.mouseReleaseButton = null;
       state.pointerScroll = {
         pointerId: event.pointerId,
+        pointerType: event.pointerType,
         button: event.button,
         startX: event.clientX,
         startY: event.clientY,
         lastX: event.clientX,
         lastY: event.clientY,
         moved: false,
+        started: false,
         axis: null,
         chain,
         axes,
@@ -1144,6 +1181,7 @@
           return;
         }
         activatePointerScroll(state, pointerScroll, axis2);
+        if (state.pointerScroll !== pointerScroll) return;
       }
       const axis = pointerScroll.axis;
       let remaining = axis === "x" ? pointerScroll.lastX - event.clientX : pointerScroll.lastY - event.clientY;
@@ -1241,6 +1279,7 @@
     function activatePointerScroll(state, pointerScroll, axis) {
       pointerScroll.axis = axis;
       pointerScroll.moved = true;
+      pointerScroll.started = true;
       restorePointerScrollCursor(state);
       for (const member of pointerScroll.chain) {
         if (pointerAxisMaximum(member, axis, pointerScroll) <= 0) continue;
@@ -1255,6 +1294,17 @@
         element.classList.add(pointerScrollingClass);
         startScrollbarPdsVisibility(member);
       }
+      dispatchPointerScroll(state, pointerScroll, "PointerScrollStart");
+    }
+    function dispatchPointerScroll(state, pointerScroll, name) {
+      AelluxJs.dispatchFrom(state.element, name, {
+        detail: {
+          axis: pointerScroll.axis,
+          pointerId: pointerScroll.pointerId,
+          pointerType: pointerScroll.pointerType,
+          elements: pointerScroll.styles.map((saved) => saved.element)
+        }
+      });
     }
     function endPointerScroll(state, event) {
       const pointerScroll = state.pointerScroll;
@@ -1310,6 +1360,8 @@
           event.clientY
         );
       } else restorePointerScrollCursor(state);
+      if (pointerScroll.started)
+        dispatchPointerScroll(state, pointerScroll, "PointerScrollEnd");
       const hadElastic = pointerScroll.chain.some((member) => member.elastic.active);
       const momentumState = pointerScroll.momentumState;
       const snapState = momentumState ? momentumState.snapEnabled ? momentumState : null : pointerScroll.chain.find((member) => member.snapEnabled && pointerAxisMaximum(member, pointerScroll.axis, pointerScroll) > 0);
@@ -1653,6 +1705,7 @@
     }
     function resetElastic(state) {
       const elastic = state.elastic;
+      const wasOwned = elastic.owned;
       if (elastic.releaseFrame !== null) root.cancelAnimationFrame(elastic.releaseFrame);
       if (elastic.wheelTimeout !== null) root.clearTimeout(elastic.wheelTimeout);
       elastic.releaseFrame = null;
@@ -1697,6 +1750,7 @@
       elastic.owned = false;
       elastic.extentX = false;
       elastic.extentY = false;
+      if (wasOwned && !state.disposed) publish(state);
     }
     function observe(state) {
       state.onResize = () => scheduleResize(state);
@@ -1771,6 +1825,8 @@
         if (state.disposed) return null;
         state.publishDirty = false;
         const metrics = nativeMetrics(state.element);
+        const scrollTop = state.element.scrollTop;
+        const scrollLeft = state.element.scrollLeft;
         if (!state.elastic.active) state.metrics = metrics;
         if (state.elasticEnabled && state.elastic.wrapper && !state.elastic.active)
           state.elastic.dimensions = measureElasticWrapper(state.elastic.wrapper);
@@ -1778,8 +1834,14 @@
         const axes = state.snapEnabled || bars ? wheelAxes(state, metrics) : null;
         return {
           revision: state.layoutRevision,
-          y: progress(state.element.scrollTop, metrics.maxY),
-          x: progress(state.element.scrollLeft, metrics.maxX),
+          y: progress(scrollTop, metrics.maxY),
+          x: progress(scrollLeft, metrics.maxX),
+          edges: state.elastic.owned ? null : [
+            scrollTop < SCROLL_EDGE_MARGIN_PX,
+            scrollTop >= metrics.maxY - SCROLL_EDGE_MARGIN_PX,
+            scrollLeft < SCROLL_EDGE_MARGIN_PX,
+            scrollLeft >= metrics.maxX - SCROLL_EDGE_MARGIN_PX
+          ],
           snapValues: state.snapEnabled ? measureSnapValues(state, metrics, axes) : [],
           scrollbars: bars ? readScrollbars(state, metrics, axes) : []
         };
@@ -1792,6 +1854,9 @@
           if (state.disposed || state.layoutRevision !== values.revision) return;
           state.element.style.setProperty(properties[0], values.y);
           state.element.style.setProperty(properties[1], values.x);
+          if (values.edges && !state.elastic.owned) {
+            scrollEdgeClasses.forEach((name, index) => state.element.classList.toggle(name, values.edges[index]));
+          }
           for (const { item, viewport, focus } of values.snapValues) {
             item.style.setProperty(snapProperties[0], viewport);
             item.style.setProperty(snapProperties[1], focus);
