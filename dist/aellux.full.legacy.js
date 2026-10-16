@@ -28063,7 +28063,8 @@
             if (event.cancelable) event.preventDefault();
             return true;
           }
-          var index = state.snap.scrollingToTarget !== -1 ? state.snap.index : selectedSnapIndex(state);
+          var edge = edgeSnapIndex(state, items, axis, nativeMetrics(state.element));
+          var index = edge !== null ? edge : state.snap.scrollingToTarget !== -1 ? state.snap.index : selectedSnapIndex(state);
           var next2 = index + Math.sign(delta);
           if (next2 < 0 || next2 >= items.length) return false;
           if (event.cancelable) event.preventDefault();

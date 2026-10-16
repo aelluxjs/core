@@ -3473,7 +3473,8 @@
             if (event.cancelable) event.preventDefault();
             return true;
           }
-          const index = state.snap.scrollingToTarget !== -1 ? state.snap.index : selectedSnapIndex(state);
+          const edge = edgeSnapIndex(state, items, axis, nativeMetrics(state.element));
+          const index = edge !== null ? edge : state.snap.scrollingToTarget !== -1 ? state.snap.index : selectedSnapIndex(state);
           const next2 = index + Math.sign(delta);
           if (next2 < 0 || next2 >= items.length) return false;
           if (event.cancelable) event.preventDefault();

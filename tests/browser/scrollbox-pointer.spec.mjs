@@ -750,6 +750,72 @@ test("snap wheel advances one item per gesture, including inverted wheel", async
     .toBe(100);
 });
 
+for (const behavior of ["auto", "contain"]) {
+  test(`snap wheel at both list ends respects overscroll-behavior ${behavior}`, async ({ page }) => {
+    await setup(page, `<div id="parent" style="height:120px;overflow-y:auto">
+      <div style="height:150px"></div>
+      <div id="gallery" data-ae-scrollbox="native" data-ae-scrollbox-snap="vertical"
+        style="width:100px;height:100px;overflow-y:auto;overscroll-behavior-y:${behavior}">
+        <div data-ae-snap-item style="height:100px"></div>
+        <div data-ae-snap-item style="height:100px"></div>
+        <div data-ae-snap-item style="height:100px"></div>
+      </div>
+      <div style="height:400px"></div>
+    </div>`);
+    const parent = page.locator("#parent");
+    const gallery = page.locator("#gallery");
+    await parent.evaluate(element => element.scrollTo({ top: 100, behavior: "instant" }));
+    const point = await gallery.boundingBox();
+    await page.mouse.move(point.x + 50, point.y + 50);
+    await page.mouse.wheel(0, -120);
+    if (behavior === "auto") {
+      await expect.poll(() => parent.evaluate(element => element.scrollTop))
+        .toBeLessThan(100);
+    } else {
+      expect(await parent.evaluate(element => element.scrollTop)).toBe(100);
+    }
+
+    await parent.evaluate(element => element.scrollTo({ top: 100, behavior: "instant" }));
+    await gallery.evaluate(element => element.scrollTo({ top: 200, behavior: "instant" }));
+    await expect.poll(() => gallery.evaluate(element => element.scrollTop)).toBe(200);
+    await page.mouse.wheel(0, 120);
+    if (behavior === "auto") {
+      await expect.poll(() => parent.evaluate(element => element.scrollTop))
+        .toBeGreaterThan(100);
+    } else {
+      expect(await parent.evaluate(element => element.scrollTop)).toBe(100);
+    }
+  });
+}
+
+test("wheel at a physical snap edge ignores a pending navigation target", async ({ page }) => {
+  await setup(page, `<div id="gallery" data-ae-scrollbox="native" data-ae-scrollbox-snap
+    style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden">
+    <div style="display:flex;width:300px">
+      <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+      <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+      <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+    </div>
+  </div>`);
+  const result = await page.evaluate(() => {
+    const element = document.getElementById("gallery");
+    const controller = AelluxJs.mountManager.controller("gallery").scrollbox;
+    const wheel = deltaY => {
+      const event = new WheelEvent("wheel", { deltaY, bubbles: true, cancelable: true });
+      element.dispatchEvent(event);
+      return event.defaultPrevented;
+    };
+    controller.goto(1);
+    element.scrollTo({ left: 200, behavior: "instant" });
+    const end = wheel(120);
+    controller.goto(1);
+    element.scrollTo({ left: 0, behavior: "instant" });
+    const start = wheel(-120);
+    return { end, start };
+  });
+  expect(result).toEqual({ end: false, start: false });
+});
+
 test("snap wheel uses the dominant gesture axis", async ({ page }) => {
   await setup(page, `<div id="horizontal" data-ae-scrollbox data-ae-scrollbox-snap
     style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden">

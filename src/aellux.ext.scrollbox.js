@@ -2192,7 +2192,8 @@
       return true;
     }
 
-    const index = state.snap.scrollingToTarget !== -1 ?
+    const edge = edgeSnapIndex(state, items, axis, nativeMetrics(state.element));
+    const index = edge !== null ? edge : state.snap.scrollingToTarget !== -1 ?
       state.snap.index : selectedSnapIndex(state);
     const next = index + Math.sign(delta);
     if (next < 0 || next >= items.length) return false;
