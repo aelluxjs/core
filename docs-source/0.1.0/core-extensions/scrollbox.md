@@ -76,9 +76,11 @@ In `pointer` mode, a quick release continues scrolling with gradually decreasing
 
 On a fine-pointer desktop, a predominantly vertical wheel gesture scrolls a horizontal-only box sideways while it has room in that direction. If one event goes beyond an edge, the box reaches the edge and shows elastic pressure when enabled, while the uncanceled wheel event also scrolls the parent or document. Further wheel events at that edge continue both behaviors. Native horizontal wheel gestures remain native. Only axes with `overflow: auto` or `scroll` count as wheel-scrollable: content taller than a box with `overflow-y: hidden` does not stop the horizontal conversion or produce vertical elastic pressure. This behavior applies to both modes.
 
-With snap enabled, each wheel gesture advances to the next or previous point instead of scrolling by pixels. A vertical wheel gesture also navigates a horizontal snap box. Repeated wheel events within 120 ms count as one gesture. Scrollbox cancels the wheel event even at the first or last point, so it does not scroll an ancestor or stretch an elastic wrapper.
+With snap enabled, each wheel gesture advances to the next or previous point instead of scrolling by pixels. A vertical wheel gesture also navigates a horizontal snap box. Repeated wheel events within 120 ms count as one gesture. At the first or last item, a wheel gesture toward that edge follows the normal wheel path: it can stretch an elastic wrapper and continue to a scrollable ancestor when the browser permits chaining.
 
-Set `data-ae-scrollbox-wheel-horizontal="false"` to disable the vertical-to-horizontal conversion:
+`Ctrl` + wheel is left to the browser for zoom. Scrollbox also leaves noncancelable wheel events untouched; neither gesture starts snap navigation, elastic pressure, or horizontal conversion.
+
+Set `data-ae-scrollbox-wheel-horizontal="false"` to disable the vertical-to-horizontal conversion, including snap navigation. A vertical wheel gesture then follows its native path; a horizontal wheel gesture still navigates horizontal snap items:
 
 ```html
 <div data-ae-scrollbox data-ae-scrollbox-wheel-horizontal="false">

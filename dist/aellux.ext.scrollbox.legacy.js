@@ -2430,20 +2430,27 @@
     }
     function handleSnapWheel(state, event) {
       if (!state.snapEnabled) return false;
-      if (event.cancelable) event.preventDefault();
       var axis = snapAxis(state);
-      var delta = axis === "x" ? event.deltaX || event.deltaY : event.deltaY || event.deltaX;
+      var delta = axis === "x" ? event.deltaX || (state.wheelEnabled ? event.deltaY : 0) : event.deltaY || event.deltaX;
+      if (axis === "x" && !state.wheelEnabled && !event.deltaX) return false;
       var items = snapItems(state);
-      if (!delta || !items.length || state.scrollbar.drag || state.snap.suspensions.elastic) return true;
+      if (!delta || !items.length) {
+        if (event.cancelable) event.preventDefault();
+        return true;
+      }
+      var index = state.snap.scrollingToTarget !== -1 ? state.snap.index : selectedSnapIndex(state);
+      var next2 = index + Math.sign(delta);
+      if (next2 < 0 || next2 >= items.length) return false;
+      if (event.cancelable) event.preventDefault();
+      if (state.scrollbar.drag || state.snap.suspensions.elastic) return true;
       var busy = state.snap.wheelTimeout !== null;
       scheduleSnapWheelIdle(state);
       if (busy) return true;
-      var index = state.snap.scrollingToTarget !== -1 ? state.snap.index : selectedSnapIndex(state);
-      var next2 = Math.max(0, Math.min(items.length - 1, index + Math.sign(delta)));
-      if (next2 !== index) scrollToSnap(state, next2, axis);
+      scrollToSnap(state, next2, axis);
       return true;
     }
     function handleWheel(state, event) {
+      if (event.ctrlKey || !event.cancelable) return;
       state.snap.flick = null;
       if (state.desktop && state.mode === "pointer" && state.element.classList.contains(pointerScrollingClass)) {
         if (event.cancelable) event.preventDefault();
@@ -2454,7 +2461,6 @@
       if (event.defaultPrevented) return;
       if (event.target.closest("[".concat(attribute, "]")) !== state.element) return;
       if (handleSnapWheel(state, event)) return;
-      if (event.ctrlKey) return;
       var interruptedSnap = state.snap.scrollingToTarget !== -1;
       clearSnapTarget(state);
       clearScrollEnd(state);
@@ -2498,7 +2504,7 @@
         var desiredY = state.element.scrollTop + (axes.y ? deltaY : 0);
         var axis = axes.x && axes.y ? null : axes.x ? "x" : "y";
         if (applyElasticFromDesired(state, _desiredX, desiredY, true, axis)) {
-          event.preventDefault();
+          if (!state.snapEnabled) event.preventDefault();
           scrollWithinElasticBounds(state, _desiredX, desiredY);
           publish(state);
           if (state.elastic.wheelTimeout !== null) root.clearTimeout(state.elastic.wheelTimeout);

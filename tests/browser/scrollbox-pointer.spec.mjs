@@ -693,7 +693,7 @@ test("snap wheel advances one item per gesture, including inverted wheel", async
   await expect.poll(() => page.evaluate(() => document.getElementById("gallery").scrollLeft))
     .toBe(200);
   await page.waitForTimeout(150);
-  expect(await wheel([{ deltaY: 120 }])).toEqual([true]);
+  expect(await wheel([{ deltaY: 120 }])).toEqual([false]);
   await expect.poll(() => page.evaluate(() => document.getElementById("gallery").scrollLeft))
     .toBe(200);
   await page.waitForTimeout(150);
@@ -702,7 +702,37 @@ test("snap wheel advances one item per gesture, including inverted wheel", async
     .toBe(100);
 });
 
-test("snap wheel at the edge does not scroll or stretch the elastic wrapper", async ({ page }) => {
+test("horizontal snap honors disabled vertical wheel conversion", async ({ page }) => {
+  await setup(page, `<div id="gallery" data-ae-scrollbox data-ae-scrollbox-snap
+    data-ae-scrollbox-wheel-horizontal="false"
+    style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden">
+    <div style="display:flex;width:300px">
+      <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+      <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+      <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+    </div>
+  </div>`);
+
+  const wheel = deltas => page.evaluate(values => {
+    const element = document.getElementById("gallery");
+    return values.map(({ deltaX = 0, deltaY = 0 }) => {
+      const event = new WheelEvent("wheel", {
+        deltaX, deltaY, bubbles: true, cancelable: true
+      });
+      element.dispatchEvent(event);
+      return event.defaultPrevented;
+    });
+  }, deltas);
+
+  expect(await wheel([{ deltaY: 120 }])).toEqual([false]);
+  expect(await page.evaluate(() => document.getElementById("gallery").scrollLeft))
+    .toBe(0);
+  expect(await wheel([{ deltaX: 120 }])).toEqual([true]);
+  await expect.poll(() => page.evaluate(() => document.getElementById("gallery").scrollLeft))
+    .toBe(100);
+});
+
+test("snap wheel at the edge stretches the elastic wrapper and remains uncanceled", async ({ page }) => {
   await setup(page, `<div id="gallery" data-ae-scrollbox="native" data-ae-scrollbox-snap
     style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden">
     <div id="wrapper" data-ae-scrollbox-elastic
@@ -726,10 +756,92 @@ test("snap wheel at the edge does not scroll or stretch the elastic wrapper", as
       maxY: element.scrollHeight - element.clientHeight,
       transform: document.getElementById("wrapper").style.transform };
   });
-  expect(result.prevented).toBe(true);
+  expect(result.prevented).toBe(false);
   expect(result.overflowY).toBe("hidden");
   expect(result.maxY).toBeGreaterThan(1);
-  expect(result.transform).toBe("");
+  expect(result.transform).toMatch(/^scale\([^,]+, 1\) translate3d\(-[^,]+, 0px, 0px\)/);
+});
+
+test("vertical snap wheel at its last item stretches elastic and scrolls the parent", async ({ page }) => {
+  await setup(page, `<div id="parent" style="height:120px;overflow-y:auto">
+    <div id="gallery" data-ae-scrollbox data-ae-scrollbox-snap="vertical"
+      style="width:100px;height:100px;overflow-y:auto;overflow-x:hidden">
+      <div id="wrapper" data-ae-scrollbox-elastic style="height:300px">
+        <div data-ae-snap-item style="height:100px"></div>
+        <div data-ae-snap-item style="height:100px"></div>
+        <div data-ae-snap-item style="height:100px"></div>
+      </div>
+    </div>
+    <div style="height:400px"></div>
+  </div>`);
+
+  await page.evaluate(() => document.getElementById("gallery")
+    .scrollTo({ top: 200, behavior: "instant" }));
+  await expect.poll(() => page.evaluate(() => document.getElementById("gallery").scrollTop))
+    .toBe(200);
+
+  const box = await page.locator("#gallery").boundingBox();
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  await page.mouse.wheel(0, 120);
+
+  await expect.poll(() => page.evaluate(() => document.getElementById("parent").scrollTop))
+    .toBeGreaterThan(0);
+  expect(await page.evaluate(() => document.getElementById("wrapper")
+    .style.transform)).toMatch(/^scale\(1, [^,]+\) translate3d\(0px, -[^,]+, 0px\)/);
+});
+
+test("ctrl+wheel remains untouched by snap and elastic", async ({ page }) => {
+  await setup(page, `<div id="gallery" data-ae-scrollbox data-ae-scrollbox-snap
+    style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden">
+    <div id="wrapper" data-ae-scrollbox-elastic
+      style="display:flex;width:200px;height:100px">
+      <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+      <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+    </div>
+  </div>`);
+
+  const result = await page.evaluate(() => {
+    const element = document.getElementById("gallery");
+    const event = new WheelEvent("wheel", {
+      deltaY: 120, ctrlKey: true, bubbles: true, cancelable: true
+    });
+    element.dispatchEvent(event);
+    return { prevented: event.defaultPrevented, scroll: element.scrollLeft,
+      transform: document.getElementById("wrapper").style.transform };
+  });
+  expect(result).toEqual({ prevented: false, scroll: 0, transform: "" });
+});
+
+test("noncancelable wheel is ignored by snap, elastic and horizontal conversion", async ({ page }) => {
+  await setup(page, `<div id="snap" data-ae-scrollbox data-ae-scrollbox-snap
+    style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden">
+    <div id="wrapper" data-ae-scrollbox-elastic
+      style="display:flex;width:200px;height:100px">
+      <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+      <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+    </div>
+  </div>
+  <div id="native" data-ae-scrollbox style="width:100px;height:100px;
+    overflow-x:auto;overflow-y:hidden">
+    <div style="width:200px;height:100px"></div>
+  </div>`);
+
+  const result = await page.evaluate(() => {
+    const snap = document.getElementById("snap");
+    const native = document.getElementById("native");
+    const wheel = element => element.dispatchEvent(new WheelEvent("wheel", {
+      deltaY: 120, bubbles: true, cancelable: false
+    }));
+
+    wheel(snap);
+    const first = snap.scrollLeft;
+    snap.scrollTo({ left: 100, behavior: "instant" });
+    wheel(snap);
+    wheel(native);
+    return { first, last: snap.scrollLeft, native: native.scrollLeft,
+      transform: document.getElementById("wrapper").style.transform };
+  });
+  expect(result).toEqual({ first: 0, last: 100, native: 0, transform: "" });
 });
 
 test("elastic pressure suspends CSS snap through the return animation", async ({ page }) => {
