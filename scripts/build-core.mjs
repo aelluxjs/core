@@ -200,11 +200,12 @@ for (const minify of [false, true]) {
 
 // Hash the final bytes, then embed the map in the boot script that loads them.
 // The boot script cannot contain its own hash.
-const coreAssetIntegrity = {};
+const coreAssetIntegrity = { regular: {}, minified: {} };
 for (const filename of generatedFiles) {
   if (!/\.(?:js|css)$/.test(filename)) continue;
   const content = await readFile(join(outputDirectory, filename));
-  coreAssetIntegrity[filename] = "sha384-" +
+  const variant = /\.min\.(?:js|css)$/.test(filename) ? "minified" : "regular";
+  coreAssetIntegrity[variant][filename] = "sha384-" +
     createHash("sha384").update(content).digest("base64");
 }
 
@@ -222,7 +223,8 @@ for (const minify of [false, true]) {
     sourcemap: true,
     legalComments: "inline",
     define: {
-      __AELLUX_CORE_ASSET_INTEGRITY__: JSON.stringify(coreAssetIntegrity)
+      __AELLUX_CORE_ASSET_INTEGRITY__: JSON.stringify(
+        coreAssetIntegrity[minify ? "minified" : "regular"])
     }
   });
   generatedFiles.add(outputFilename);

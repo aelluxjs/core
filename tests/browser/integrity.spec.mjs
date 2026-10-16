@@ -10,6 +10,22 @@ async function expectedIntegrity(filename) {
   return "sha384-" + createHash("sha384").update(bytes).digest("base64");
 }
 
+test("each boot embeds SRI only for its asset variant", async ({ page }) => {
+  for (const { boot, minified } of [
+    { boot: "aellux.js", minified: false },
+    { boot: "aellux.min.js", minified: true }
+  ]) {
+    await page.goto("/tests/index.htm");
+    await page.addScriptTag({ url: `/dist/${boot}` });
+    const entries = await page.evaluate(() => Object.entries(AelluxJs.coreAssetIntegrity));
+    expect(entries.length).toBeGreaterThan(0);
+    for (const [filename, integrity] of entries) {
+      expect(/\.min\.(?:js|css)$/.test(filename)).toBe(minified);
+      expect(integrity).toBe(await expectedIntegrity(filename));
+    }
+  }
+});
+
 test("generated integrity covers the orchestrator and built-in Extension assets", async ({ page }) => {
   await page.goto("/tests/index.htm");
   await page.addScriptTag({ url: "/dist/aellux.js" });

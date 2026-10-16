@@ -14,7 +14,7 @@ The boot script also inserts a `<style>` element for its weak default styles. A 
 
 ## Subresource integrity
 
-`build:core` calculates SHA-384 integrity values from the final JavaScript and CSS files and embeds the map in `aellux.js` and `aellux.min.js`. The boot script applies the matching `integrity` and `crossorigin="anonymous"` attributes to the Modern or Legacy orchestrator or `full` bundle it loads. The orchestrator applies the generated values to separately loaded Core Extension scripts and stylesheets when their URLs point to the matching files beside the boot script. In `full` mode, bundled Extensions are part of the `full` runtime file, so that file's integrity value covers their code. The boot script itself cannot contain its own integrity value; applications can set one on their initial `<script src=".../aellux.js">` tag.
+`build:core` calculates SHA-384 integrity values from the final JavaScript and CSS files. It embeds only hashes for unminified assets in `aellux.js`, and only hashes for minified assets in `aellux.min.js`, including their Modern and Legacy variants. The boot script applies the matching `integrity` and `crossorigin="anonymous"` attributes to the orchestrator or `full` bundle it loads. The orchestrator applies the generated values to separately loaded Core Extension scripts and stylesheets when their URLs point to the matching files beside the boot script. In `full` mode, bundled Extensions are part of the `full` runtime file, so that file's integrity value covers their code. The boot script itself cannot contain its own integrity value; applications can set one on their initial `<script src=".../aellux.js">` tag.
 
 
 For a third-party Extension, declare the expected hashes with `$ae.ext()`:

@@ -58,6 +58,19 @@ for (const axis of ["vertical", "horizontal"]) {
     const box = page.locator("#box");
     const track = page.locator(`#box > [data-ae-scrollbar-${axis}]`);
     await expect(track).toHaveCount(1);
+    await box.evaluate(element => {
+      window.scrollbarPdsActivations = 0;
+      window.scrollbarTrackOffsets = [];
+      new MutationObserver(() => {
+        if (element.classList.contains("ae--pointerscrolling"))
+          window.scrollbarPdsActivations++;
+      }).observe(element, { attributes: true, attributeFilter: ["class"] });
+    });
+    await track.evaluate((element, axis) => element.addEventListener("pointermove", () => {
+      const box = element.parentElement.getBoundingClientRect();
+      const bar = element.getBoundingClientRect();
+      window.scrollbarTrackOffsets.push(axis === "vertical" ? bar.top - box.top : bar.left - box.left);
+    }), axis);
     const rect = await track.boundingBox();
     const size = await track.evaluate(element =>
       Number.parseFloat(element.style.getPropertyValue("--ae-scrollbar-thumb-size")));
@@ -90,6 +103,9 @@ for (const axis of ["vertical", "horizontal"]) {
     expect(duringDrag.scroll).toBeGreaterThan(0);
     await page.mouse.up();
     await expect(box).not.toHaveClass(/ae--pointerscrolling/);
+    expect(await page.evaluate(() => window.scrollbarPdsActivations)).toBe(0);
+    expect(Math.max(...await page.evaluate(() =>
+      window.scrollbarTrackOffsets.map(Math.abs)))).toBeLessThan(2);
   });
 }
 

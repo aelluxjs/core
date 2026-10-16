@@ -553,6 +553,14 @@
     const destination = Math.max(0, Math.min(record.max, position / travel * record.max));
     if (record.axis === "y") state.element.scrollTo({ top: destination, behavior: "instant" });
     else state.element.scrollTo({ left: destination, behavior: "instant" });
+    updateScrollbars(state, [{
+      record,
+      x: record.axis === "x" ? destination : record.x,
+      y: record.axis === "y" ? destination : record.y,
+      trackSize: record.trackSize, thumbSize: record.thumbSize,
+      thumbPosition: travel * destination / record.max,
+      max: record.max, display: record.display
+    }]);
     publish(state);
   }
 

@@ -26021,6 +26021,16 @@
             left: destination,
             behavior: "instant"
           });
+          updateScrollbars(state, [{
+            record: record,
+            x: record.axis === "x" ? destination : record.x,
+            y: record.axis === "y" ? destination : record.y,
+            trackSize: record.trackSize,
+            thumbSize: record.thumbSize,
+            thumbPosition: travel * destination / record.max,
+            max: record.max,
+            display: record.display
+          }]);
           publish(state);
         }
         function endScrollbarDrag(state, record, event) {
