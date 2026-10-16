@@ -81,6 +81,9 @@
   const triggerTargets = new Map();
   const triggersByTargetId = new Map();
   const indexedTriggerValues = new Map();
+  const elementMemories = new WeakMap();
+  const triggerMemories = new WeakMap();
+  const measuredMemories = new WeakMap();
 
   function init(options) {
     AelluxJs.mountManager.add({
@@ -101,12 +104,12 @@
       mount: mountTriggerElement, unmount: unmountTriggerElement
     });
 
-    document.addEventListener("click", OnClick);
+    AelluxJs.on("$click", OnClick);
   }
 
   function destroy() {
     AelluxJs.mountManager.remove({ extensionName });
-    document.removeEventListener("click", OnClick);
+    AelluxJs.off("$click", OnClick);
 
     for (const triggerElement of triggerElementsSet) {
       unmountTriggerElement(triggerElement);
@@ -119,6 +122,11 @@
 
   function mountPresentContainer(element) {
     if (presentElements.has(element)) return;
+    elementMemories.set(element, AelluxJs.persist.element.save(
+      element,
+      [attr.present, attr.presentMotion, ARIA_EXPANDED, "hidden"],
+      ["--ae-pop-low-steps", "--ae-unpop-low-steps"]
+    ));
     if ((element.getAttribute(attr.present) || "").trim().toLowerCase() === "all") {
       element.setAttribute(attr.present, DEFAULT_PRESENT);
     }
@@ -140,7 +148,6 @@
       presentMotion,
       measuredHeight,
       measuredWidth,
-      measuredStyles: null,
       motionEnabled: (element.getAttribute(attr.present) || "").trim() !== "",
       transition: null,
       autoUnpopTimeout: null,
@@ -221,11 +228,16 @@
     element.classList.remove(className.grid);
     presentElements.delete(element);
     openPresentElements.delete(element);
+    elementMemories.get(element)?.restore();
+    elementMemories.delete(element);
     controller.triggers.forEach(updateTriggerAriaExpanded);
   }
 
   function mountTriggerElement(triggerElement) {
     if (triggerElementsSet.has(triggerElement)) return;
+    triggerMemories.set(triggerElement, AelluxJs.persist.element.save(
+      triggerElement, [ARIA_CONTROLS, ARIA_EXPANDED], []
+    ));
     triggerElementsSet.add(triggerElement);
     refreshTriggerTargets(triggerElement);
   }
@@ -239,6 +251,8 @@
     }
     unindexTriggerTarget(triggerElement);
     triggerElementsSet.delete(triggerElement);
+    triggerMemories.get(triggerElement)?.restore();
+    triggerMemories.delete(triggerElement);
   }
 
   function targetIdFor(value) {
@@ -339,26 +353,20 @@
   }
 
   function restoreMeasuredStyles(element, controller) {
-    const saved = controller.measuredStyles;
-    if (!saved) return;
-    for (const [name, value, priority] of saved) {
-      if (value) element.style.setProperty(name, value, priority);
-      else element.style.removeProperty(name);
-    }
-    controller.measuredStyles = null;
+    const memory = measuredMemories.get(element);
+    if (!memory) return;
+    memory.restore();
+    measuredMemories.delete(element);
   }
 
   async function prepareMeasuredSize(element, controller, gotoVisible, previousSize, waitForPreparation) {
     if (!controller.measuredHeight && !controller.measuredWidth) return null;
-    if (!controller.measuredStyles) {
-      controller.measuredStyles = ["max-height", "max-width"].map(name => [
-        name, element.style.getPropertyValue(name), element.style.getPropertyPriority(name)
-      ]);
+    if (!measuredMemories.has(element)) {
+      measuredMemories.set(element, AelluxJs.persist.element.save(
+        element, [], ["max-height", "max-width"]
+      ));
     }
-    for (const [name, value, priority] of controller.measuredStyles) {
-      if (value) element.style.setProperty(name, value, priority);
-      else element.style.removeProperty(name);
-    }
+    measuredMemories.get(element).restore();
     let size = previousSize;
     if (gotoVisible || !size) {
       const computed = root.getComputedStyle(element);
@@ -506,7 +514,13 @@
         );
       });
 
-      AelluxJs.dispatchFrom(element, "Layout", { detail: { origin: `present.${newDirection}`.toLocaleLowerCase() }, bubbles: true });
+      AelluxJs.dispatchFrom(element, "Layout", {
+        detail: {
+          origin: `present.${newDirection}`.toLowerCase(),
+          durationMs: Number.isFinite(timeMs) ? Math.max(0, timeMs) : 0
+        },
+        bubbles: true
+      });
       AelluxJs.dispatchFrom(element, `${newDirection}${PING}`, { bubbles: true });
       await Promise.race([completed, interrupted]);
 
@@ -520,7 +534,6 @@
         controller.setAriaExpanded("false");
         AelluxJs.dispatchFrom(element, UNPOP, { bubbles: true });
       }
-      AelluxJs.dispatchFrom(element, "Layout", { detail: { origin: `present.${newDirection}`.toLocaleLowerCase() }, bubbles: true });
     } catch (error) {
       const ownsTransition = transition && controller.transition === transition;
       if (ownsTransition && transition.timeout !== null) {

@@ -21051,10 +21051,10 @@
       despawn: despawn,
       hasMounts: hasMounts,
       on: function on(event, handler, options) {
-        element.addEventListener(root2.AelluxJs.eventName(event), handler, options);
+        root2.AelluxJs.onTarget(element, event, handler, options);
       },
       off: function off(event, handler, options) {
-        element.removeEventListener(root2.AelluxJs.eventName(event), handler, options);
+        root2.AelluxJs.offTarget(element, event, handler, options);
       },
       dispatch: function dispatch(event, options) {
         return root2.AelluxJs.dispatchFrom(element, event, options);
@@ -21404,6 +21404,8 @@
     var initialAttributeValues = /* @__PURE__ */ new WeakMap();
     var pendingMounts = /* @__PURE__ */ new WeakMap();
     var pendingUnmounts = /* @__PURE__ */ new WeakMap();
+    var mountRecords = /* @__PURE__ */ new WeakMap();
+    var mountOrder = 0;
     var classPrefix = root2.AelluxJs.className("");
     return {
       mount: mount,
@@ -21865,7 +21867,7 @@
                 }
               }
               rememberInitialAttributes(mountable);
-              setMounted(mountable, mountId);
+              setMounted(mountable, mountId, true, _controller.priority);
               finishPendingMount = beginPendingMount(mountable, mountId);
               _context5.p = 24;
               _context5.n = 25;
@@ -22005,7 +22007,7 @@
     }
     function _AelluxJsMounted() {
       _AelluxJsMounted = _asyncToGenerator(/* @__PURE__ */ _regenerator().m(function _callee6(rootElement, method) {
-        var extensionNames, detachedOnly, AelluxJs2, selectedNames, affected, _i8, _Array$from2, _Array$from2$_i, element, mountIds, inRoot, detachedInGlobalUnmount, _i9, _Array$from3, mountId, separator, extensionName, selector, extensionKey, mounter, controller, _args6 = arguments, _t9;
+        var extensionNames, detachedOnly, AelluxJs2, selectedNames, affected, registrations, _i8, _Array$from2, _Array$from2$_i, element, mountIds, inRoot, detachedInGlobalUnmount, _i9, _Array$from3, mountId, separator, extensionName, selector, extensionKey, mounter, controller, _iterator11, _step11, _step11$value, _element, _mountId, _controller2, _extensionName3, _selector4, _args6 = arguments, _t9, _t0;
         return _regenerator().w(function(_context6) {
           while (1) switch (_context6.p = _context6.n) {
             case 0:
@@ -22016,10 +22018,11 @@
                 return fromCamelCase2(name);
               }));
               affected = /* @__PURE__ */ new Set();
+              registrations = [];
               _i8 = 0, _Array$from2 = Array.from(mountedElements);
             case 1:
               if (!(_i8 < _Array$from2.length)) {
-                _context6.n = 12;
+                _context6.n = 10;
                 break;
               }
               _Array$from2$_i = _slicedToArray(_Array$from2[_i8], 2), element = _Array$from2$_i[0], mountIds = _Array$from2$_i[1];
@@ -22029,12 +22032,12 @@
                 _context6.n = 2;
                 break;
               }
-              return _context6.a(3, 11);
+              return _context6.a(3, 9);
             case 2:
               _i9 = 0, _Array$from3 = Array.from(mountIds);
             case 3:
               if (!(_i9 < _Array$from3.length)) {
-                _context6.n = 11;
+                _context6.n = 9;
                 break;
               }
               mountId = _Array$from3[_i9];
@@ -22045,39 +22048,37 @@
                 _context6.n = 4;
                 break;
               }
-              return _context6.a(3, 10);
+              return _context6.a(3, 8);
             case 4:
               extensionKey = toCamelCase2(extensionName);
               mounter = mountMaps.get(extensionKey);
               controller = mounter && mounter.get(selector);
               if (!(method === "unmount")) {
-                _context6.n = 7;
+                _context6.n = 5;
                 break;
               }
-              _context6.n = 5;
-              return unmountRegistration(element, mountId, controller, extensionName, selector);
+              registrations.push({
+                element: element,
+                mountId: mountId,
+                controller: controller,
+                extensionName: extensionName,
+                selector: selector
+              });
+              return _context6.a(3, 8);
             case 5:
-              if (!_context6.v) {
+              _context6.p = 5;
+              if (!(controller && controller[method])) {
                 _context6.n = 6;
                 break;
               }
               affected.add(element);
+              _context6.n = 6;
+              return controller[method](element);
             case 6:
-              return _context6.a(3, 10);
+              _context6.n = 8;
+              break;
             case 7:
               _context6.p = 7;
-              if (!(controller && controller[method])) {
-                _context6.n = 8;
-                break;
-              }
-              affected.add(element);
-              _context6.n = 8;
-              return controller[method](element);
-            case 8:
-              _context6.n = 10;
-              break;
-            case 9:
-              _context6.p = 9;
               _t9 = _context6.v;
               AelluxJs2.diagnostics.error(AelluxJs2.diagnostics.ERROR_EXTENSION_MOUNT, {
                 cause: _t9,
@@ -22085,15 +22086,52 @@
                 method: method,
                 selector: selector
               });
-            case 10:
+            case 8:
               _i9++;
               _context6.n = 3;
               break;
-            case 11:
+            case 9:
               _i8++;
               _context6.n = 1;
               break;
+            case 10:
+              if (!(method === "unmount")) {
+                _context6.n = 18;
+                break;
+              }
+              registrations.sort(compareUnmountOrder);
+              _iterator11 = _createForOfIteratorHelper2(registrations);
+              _context6.p = 11;
+              _iterator11.s();
             case 12:
+              if ((_step11 = _iterator11.n()).done) {
+                _context6.n = 15;
+                break;
+              }
+              _step11$value = _step11.value, _element = _step11$value.element, _mountId = _step11$value.mountId, _controller2 = _step11$value.controller, _extensionName3 = _step11$value.extensionName, _selector4 = _step11$value.selector;
+              _context6.n = 13;
+              return unmountRegistration(_element, _mountId, _controller2, _extensionName3, _selector4);
+            case 13:
+              if (!_context6.v) {
+                _context6.n = 14;
+                break;
+              }
+              affected.add(_element);
+            case 14:
+              _context6.n = 12;
+              break;
+            case 15:
+              _context6.n = 17;
+              break;
+            case 16:
+              _context6.p = 16;
+              _t0 = _context6.v;
+              _iterator11.e(_t0);
+            case 17:
+              _context6.p = 17;
+              _iterator11.f();
+              return _context6.f(17);
+            case 18:
               AelluxJs2.dispatch(toCapitalized2(method), {
                 detail: {
                   root: rootElement,
@@ -22101,10 +22139,10 @@
                   elements: Array.from(affected)
                 }
               });
-            case 13:
+            case 19:
               return _context6.a(2);
           }
-        }, _callee6, null, [[7, 9]]);
+        }, _callee6, null, [[11, 16, 17, 18], [5, 7]]);
       }));
       return _AelluxJsMounted.apply(this, arguments);
     }
@@ -22113,7 +22151,7 @@
     }
     function _unmountRegistration() {
       _unmountRegistration = _asyncToGenerator(/* @__PURE__ */ _regenerator().m(function _callee7(element, mountId, controller, extensionName, selector) {
-        var pendingMount, tasks, finish, AelluxJs2, diagnostics, elementController, _t0;
+        var pendingMount, tasks, finish, AelluxJs2, diagnostics, elementController, _t1;
         return _regenerator().w(function(_context7) {
           while (1) switch (_context7.p = _context7.n) {
             case 0:
@@ -22163,9 +22201,9 @@
               break;
             case 8:
               _context7.p = 8;
-              _t0 = _context7.v;
+              _t1 = _context7.v;
               diagnostics.error(diagnostics.ERROR_EXTENSION_MOUNT, {
-                cause: _t0,
+                cause: _t1,
                 extension: extensionName,
                 method: "unmount",
                 selector: selector
@@ -22206,23 +22244,32 @@
     }
     function _unmountElementRegistrations() {
       _unmountElementRegistrations = _asyncToGenerator(/* @__PURE__ */ _regenerator().m(function _callee8(element) {
-        var mountIds, _i0, _mountIds, mountId, separator, extensionName, selector, mounter, controller;
+        var registrations, _i0, _registrations2, _registrations2$_i, mountId, controller, extensionName, selector;
         return _regenerator().w(function(_context8) {
           while (1) switch (_context8.n) {
             case 0:
-              mountIds = Array.from(mountedElements.get(element) || []);
-              _i0 = 0, _mountIds = mountIds;
+              registrations = Array.from(mountedElements.get(element) || [], function(mountId2) {
+                var separator = mountId2.indexOf("@");
+                var extensionName2 = mountId2.slice(0, separator);
+                var selector2 = mountId2.slice(separator + 1);
+                var mounter = mountMaps.get(toCamelCase2(extensionName2));
+                var controller2 = mounter && mounter.get(selector2);
+                return {
+                  element: element,
+                  mountId: mountId2,
+                  controller: controller2,
+                  extensionName: extensionName2,
+                  selector: selector2
+                };
+              });
+              registrations.sort(compareUnmountOrder);
+              _i0 = 0, _registrations2 = registrations;
             case 1:
-              if (!(_i0 < _mountIds.length)) {
+              if (!(_i0 < _registrations2.length)) {
                 _context8.n = 3;
                 break;
               }
-              mountId = _mountIds[_i0];
-              separator = mountId.indexOf("@");
-              extensionName = mountId.slice(0, separator);
-              selector = mountId.slice(separator + 1);
-              mounter = mountMaps.get(toCamelCase2(extensionName));
-              controller = mounter && mounter.get(selector);
+              _registrations2$_i = _registrations2[_i0], mountId = _registrations2$_i.mountId, controller = _registrations2$_i.controller, extensionName = _registrations2$_i.extensionName, selector = _registrations2$_i.selector;
               _context8.n = 2;
               return unmountRegistration(element, mountId, controller, extensionName, selector);
             case 2:
@@ -22235,6 +22282,12 @@
         }, _callee8);
       }));
       return _unmountElementRegistrations.apply(this, arguments);
+    }
+    function compareUnmountOrder(left, right) {
+      var _mountRecords$get, _mountRecords$get2, _rightRecord$priority, _leftRecord$priority, _rightRecord$order, _leftRecord$order;
+      var leftRecord = (_mountRecords$get = mountRecords.get(left.element)) === null || _mountRecords$get === void 0 ? void 0 : _mountRecords$get.get(left.mountId);
+      var rightRecord = (_mountRecords$get2 = mountRecords.get(right.element)) === null || _mountRecords$get2 === void 0 ? void 0 : _mountRecords$get2.get(right.mountId);
+      return ((_rightRecord$priority = rightRecord === null || rightRecord === void 0 ? void 0 : rightRecord.priority) !== null && _rightRecord$priority !== void 0 ? _rightRecord$priority : 0) - ((_leftRecord$priority = leftRecord === null || leftRecord === void 0 ? void 0 : leftRecord.priority) !== null && _leftRecord$priority !== void 0 ? _leftRecord$priority : 0) || ((_rightRecord$order = rightRecord === null || rightRecord === void 0 ? void 0 : rightRecord.order) !== null && _rightRecord$order !== void 0 ? _rightRecord$order : 0) - ((_leftRecord$order = leftRecord === null || leftRecord === void 0 ? void 0 : leftRecord.order) !== null && _leftRecord$order !== void 0 ? _leftRecord$order : 0);
     }
     function beginPendingMount(element, mountId) {
       var mounts = pendingMounts.get(element);
@@ -22287,11 +22340,26 @@
     }
     function setMounted(element, mountId) {
       var mounted = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : true;
+      var priority = arguments.length > 3 && arguments[3] !== void 0 ? arguments[3] : 0;
       if (!mountedElements.has(element)) {
         mountedElements.set(element, /* @__PURE__ */ new Set());
       }
       var mounts = mountedElements.get(element);
       mounts[mounted ? "add" : "delete"](mountId);
+      var records = mountRecords.get(element);
+      if (mounted) {
+        if (!records) {
+          records = /* @__PURE__ */ new Map();
+          mountRecords.set(element, records);
+        }
+        records.set(mountId, {
+          priority: priority,
+          order: mountOrder++
+        });
+      } else if (records) {
+        records.delete(mountId);
+        if (!records.size) mountRecords.delete(element);
+      }
       if (mounts.size === 0) mountedElements.delete(element);
     }
     function rememberInitialAttributes(element) {
@@ -22811,11 +22879,11 @@
                     return new Promise(function(resolve) {
                       var _startMountCallback = function startMountCallback() {
                         AelluxJs.mount().then(function() {
-                          document.removeEventListener("DOMContentLoaded", _startMountCallback);
+                          AelluxJs.off("$DOMContentLoaded", _startMountCallback);
                           resolve();
                         });
                       };
-                      if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", _startMountCallback, {
+                      if (document.readyState === "loading") AelluxJs.on("$DOMContentLoaded", _startMountCallback, {
                         once: true
                       });
                       else _startMountCallback();
@@ -23268,6 +23336,8 @@
         var computedPreferences = /* @__PURE__ */ Object.create(null);
         var containersByPreference = /* @__PURE__ */ new Map();
         var containerPreferences = /* @__PURE__ */ new Map();
+        var containerLabels = /* @__PURE__ */ new Map();
+        var labelMemories = /* @__PURE__ */ new WeakMap();
         AelluxJs2.extAttach(extensionName, {
           init: init,
           destroy: destroy,
@@ -23307,13 +23377,13 @@
             mount: mountPreferenceContainer,
             unmount: unmountPreferenceContainer
           });
-          window.addEventListener("storage", storageEvent);
+          AelluxJs2.onTarget(window, "$storage", storageEvent);
           var allQueries = AelluxJs2.registry.preferenceMediaQueries;
           Object.values(allQueries).forEach(function(queries) {
             return Object.values(queries).forEach(function(query) {
               if (!query) return;
               if (query.addEventListener) {
-                query.addEventListener("change", update);
+                AelluxJs2.onTarget(query, "$change", update);
               } else if (query.addListener) {
                 query.addListener(update);
               }
@@ -23327,19 +23397,30 @@
           update();
         }
         function destroy() {
+          var _iterator = _createForOfIteratorHelper5(containerPreferences.keys()), _step;
+          try {
+            for (_iterator.s(); !(_step = _iterator.n()).done; ) {
+              var container = _step.value;
+              unmountPreferenceContainer(container);
+            }
+          } catch (err) {
+            _iterator.e(err);
+          } finally {
+            _iterator.f();
+          }
           AelluxJs2.mountManager.remove({
             extensionName: extensionName
           });
           containersByPreference.clear();
           containerPreferences.clear();
-          window.removeEventListener("storage", storageEvent);
-          document.removeEventListener("DOMContentLoaded", update);
+          AelluxJs2.offTarget(window, "$storage", storageEvent);
+          AelluxJs2.off("$DOMContentLoaded", update);
           var allQueries = AelluxJs2.registry.preferenceMediaQueries;
           Object.values(allQueries).forEach(function(queries) {
             return Object.values(queries).forEach(function(query) {
               if (!query) return;
               if (query.removeEventListener) {
-                query.removeEventListener("change", update);
+                AelluxJs2.offTarget(query, "$change", update);
               } else if (query.removeListener) {
                 query.removeListener(update);
               }
@@ -23381,40 +23462,40 @@
             computedPreferences[_key] = nextPreferences[_key];
           }
           AelluxJs2.updatePreferenceAttributesHTML(computedPreferences);
-          var _iterator = _createForOfIteratorHelper5(containerPreferences.keys()), _step;
-          try {
-            for (_iterator.s(); !(_step = _iterator.n()).done; ) {
-              var container = _step.value;
-              if (indexContainer(container)) updateContainer(container);
-            }
-          } catch (err) {
-            _iterator.e(err);
-          } finally {
-            _iterator.f();
-          }
-          var _iterator2 = _createForOfIteratorHelper5(changed), _step2;
+          var _iterator2 = _createForOfIteratorHelper5(containerPreferences.keys()), _step2;
           try {
             for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
-              var _key2 = _step2.value;
-              var containers = containersByPreference.get(_key2);
-              if (containers) {
-                var _iterator3 = _createForOfIteratorHelper5(containers), _step3;
-                try {
-                  for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
-                    var _container = _step3.value;
-                    updateContainer(_container);
-                  }
-                } catch (err) {
-                  _iterator3.e(err);
-                } finally {
-                  _iterator3.f();
-                }
-              }
+              var container = _step2.value;
+              if (indexContainer(container)) updateContainer(container);
             }
           } catch (err) {
             _iterator2.e(err);
           } finally {
             _iterator2.f();
+          }
+          var _iterator3 = _createForOfIteratorHelper5(changed), _step3;
+          try {
+            for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
+              var _key2 = _step3.value;
+              var containers = containersByPreference.get(_key2);
+              if (containers) {
+                var _iterator4 = _createForOfIteratorHelper5(containers), _step4;
+                try {
+                  for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
+                    var _container = _step4.value;
+                    updateContainer(_container);
+                  }
+                } catch (err) {
+                  _iterator4.e(err);
+                } finally {
+                  _iterator4.f();
+                }
+              }
+            }
+          } catch (err) {
+            _iterator3.e(err);
+          } finally {
+            _iterator3.f();
           }
           AelluxJs2.dispatch("PreferencesChange", {
             detail: {
@@ -23447,6 +23528,15 @@
           var labels = container.querySelectorAll("[".concat(attr.label, "]"));
           var currentValue = get(preference2 || "");
           labels.forEach(function(label) {
+            var ownedLabels = containerLabels.get(container);
+            if (!ownedLabels) {
+              ownedLabels = /* @__PURE__ */ new Set();
+              containerLabels.set(container, ownedLabels);
+            }
+            if (!ownedLabels.has(label)) {
+              labelMemories.set(label, AelluxJs2.persist.element.save(label, ["hidden"], []));
+              ownedLabels.add(label);
+            }
             var value = label.getAttribute(attr.label);
             var selected = String(value) === String(currentValue);
             label.hidden = !selected;
@@ -23474,10 +23564,27 @@
         function mountPreferenceContainer(container) {
           indexContainer(container);
           updateContainer(container);
-          container.addEventListener("click", onContainerClick);
+          AelluxJs2.onTarget(container, "$click", onContainerClick);
         }
         function unmountPreferenceContainer(container) {
-          container.removeEventListener("click", onContainerClick);
+          AelluxJs2.offTarget(container, "$click", onContainerClick);
+          var labels = containerLabels.get(container);
+          if (labels) {
+            var _iterator5 = _createForOfIteratorHelper5(labels), _step5;
+            try {
+              for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
+                var _labelMemories$get;
+                var label = _step5.value;
+                (_labelMemories$get = labelMemories.get(label)) === null || _labelMemories$get === void 0 || _labelMemories$get.restore();
+                labelMemories.delete(label);
+              }
+            } catch (err) {
+              _iterator5.e(err);
+            } finally {
+              _iterator5.f();
+            }
+          }
+          containerLabels.delete(container);
           var key = containerPreferences.get(container);
           if (key === void 0) return;
           var containers = containersByPreference.get(key);
@@ -23650,8 +23757,8 @@
         var baseTitle = "";
         var useHash = true;
         function init(options) {
-          window.addEventListener("popstate", onPopState);
-          window.addEventListener("hashchange", onHashChange);
+          AelluxJs2.onTarget(window, "$popstate", onPopState);
+          AelluxJs2.onTarget(window, "$hashchange", onHashChange);
           AelluxJs2.on("PushState", OnPushState);
           AelluxJs2.on("PushAjaxReplace", OnPushAjaxReplace);
           AelluxJs2.on("UpdateBaseTitle", OnUpdateBaseTitle);
@@ -23671,8 +23778,8 @@
             return _regenerator3().w(function(_context) {
               while (1) switch (_context.n) {
                 case 0:
-                  window.removeEventListener("popstate", onPopState);
-                  window.removeEventListener("hashchange", onHashChange);
+                  AelluxJs2.offTarget(window, "$popstate", onPopState);
+                  AelluxJs2.offTarget(window, "$hashchange", onHashChange);
                   AelluxJs2.off("PushState", OnPushState);
                   AelluxJs2.off("PushAjaxReplace", OnPushAjaxReplace);
                   AelluxJs2.off("UpdateBaseTitle", OnUpdateBaseTitle);
@@ -24205,7 +24312,7 @@
         var attribute = AelluxJs2.attr(extensionName);
         var snapshotKey = "ae-focus";
         var entries = [];
-        var generatedHints = /* @__PURE__ */ new WeakSet();
+        var hintMemories = /* @__PURE__ */ new WeakMap();
         var nextElements = /* @__PURE__ */ new WeakSet();
         var textEntrySelector = "input:not([type]), input[type=text], input[type=search], input[type=email], input[type=url], input[type=tel], input[type=password], input[type=number], textarea, [contenteditable]:not([contenteditable=false])";
         var focusableSelector = "a[href], area[href], button, input, select, textarea, [tabindex], [contenteditable]:not([contenteditable=false])";
@@ -24218,21 +24325,21 @@
             mount: mountFocusElement,
             unmount: unmountFocusElement
           });
-          document.addEventListener("focusin", onFocusIn, true);
-          document.addEventListener("focus", onFocusChange, true);
-          document.addEventListener("blur", onBlur, true);
-          root2.addEventListener("focus", onWindowFocus);
-          root2.addEventListener("blur", onWindowBlur);
+          AelluxJs2.on("$focusin", onFocusIn, true);
+          AelluxJs2.on("$focus", onFocusChange, true);
+          AelluxJs2.on("$blur", onBlur, true);
+          AelluxJs2.onTarget(root2, "$focus", onWindowFocus);
+          AelluxJs2.onTarget(root2, "$blur", onWindowBlur);
           AelluxJs2.on("SnapshotRestore", onSnapshotRestore);
           AelluxJs2.on("UnpopFocusLost", onUnpopFocusLost);
           remember(document.activeElement, false);
         }
         function destroy() {
-          document.removeEventListener("focusin", onFocusIn, true);
-          document.removeEventListener("focus", onFocusChange, true);
-          document.removeEventListener("blur", onBlur, true);
-          root2.removeEventListener("focus", onWindowFocus);
-          root2.removeEventListener("blur", onWindowBlur);
+          AelluxJs2.off("$focusin", onFocusIn, true);
+          AelluxJs2.off("$focus", onFocusChange, true);
+          AelluxJs2.off("$blur", onBlur, true);
+          AelluxJs2.offTarget(root2, "$focus", onWindowFocus);
+          AelluxJs2.offTarget(root2, "$blur", onWindowBlur);
           AelluxJs2.off("SnapshotRestore", onSnapshotRestore);
           AelluxJs2.off("UnpopFocusLost", onUnpopFocusLost);
           AelluxJs2.mountManager.remove({
@@ -24245,18 +24352,20 @@
           var type = element.getAttribute(attribute);
           switch (type) {
             case "next":
-              element.addEventListener("keydown", onNextKeyDown);
+              AelluxJs2.onTarget(element, "$keydown", onNextKeyDown);
               nextElements.add(element);
               if (!element.hasAttribute("enterkeyhint") && element.matches(textEntrySelector)) {
+                hintMemories.set(element, AelluxJs2.persist.element.save(element, ["enterkeyhint"], []));
                 element.setAttribute("enterkeyhint", "next");
-                generatedHints.add(element);
               }
               break;
           }
         }
         function unmountFocusElement(element) {
-          if (nextElements.delete(element)) element.removeEventListener("keydown", onNextKeyDown);
-          if (generatedHints.delete(element)) element.removeAttribute("enterkeyhint");
+          var _hintMemories$get;
+          if (nextElements.delete(element)) AelluxJs2.offTarget(element, "$keydown", onNextKeyDown);
+          (_hintMemories$get = hintMemories.get(element)) === null || _hintMemories$get === void 0 || _hintMemories$get.restore();
+          hintMemories.delete(element);
         }
         function onNextKeyDown(event) {
           if (event.key !== "Enter" || event.isComposing || event.repeat || event.defaultPrevented || event.target !== event.currentTarget && event.target.closest(focusableSelector) !== event.currentTarget) return;
@@ -24471,23 +24580,23 @@
             unmount: unmountPointable,
             controllers: ["pointers"]
           });
-          document.addEventListener("pointerdown", onPointerDown, true);
-          document.addEventListener("pointermove", onPointerMove, true);
-          document.addEventListener("pointerup", onPointerUp, true);
-          document.addEventListener("pointercancel", onPointerCancel, true);
-          document.addEventListener("pointerover", onPointerOver, true);
-          document.addEventListener("pointerout", onPointerOut, true);
+          AelluxJs2.on("$pointerdown", onPointerDown, true);
+          AelluxJs2.on("$pointermove", onPointerMove, true);
+          AelluxJs2.on("$pointerup", onPointerUp, true);
+          AelluxJs2.on("$pointercancel", onPointerCancel, true);
+          AelluxJs2.on("$pointerover", onPointerOver, true);
+          AelluxJs2.on("$pointerout", onPointerOut, true);
         }
         function destroy() {
           AelluxJs2.mountManager.remove({
             extensionName: extensionName
           });
-          document.removeEventListener("pointerdown", onPointerDown, true);
-          document.removeEventListener("pointermove", onPointerMove, true);
-          document.removeEventListener("pointerup", onPointerUp, true);
-          document.removeEventListener("pointercancel", onPointerCancel, true);
-          document.removeEventListener("pointerover", onPointerOver, true);
-          document.removeEventListener("pointerout", onPointerOut, true);
+          AelluxJs2.off("$pointerdown", onPointerDown, true);
+          AelluxJs2.off("$pointermove", onPointerMove, true);
+          AelluxJs2.off("$pointerup", onPointerUp, true);
+          AelluxJs2.off("$pointercancel", onPointerCancel, true);
+          AelluxJs2.off("$pointerover", onPointerOver, true);
+          AelluxJs2.off("$pointerout", onPointerOut, true);
           trackedPointers.clear();
           pointableElements.clear();
         }
@@ -24913,7 +25022,10 @@
         };
         var UPDATE_INTERVAL_MS = 100;
         var anchors = /* @__PURE__ */ new Map();
+        var elementMemories = /* @__PURE__ */ new WeakMap();
         var updateTimeout = null;
+        var layoutUpdateTimeout = null;
+        var layoutUpdateUntil = 0;
         var lastUpdateTime = -UPDATE_INTERVAL_MS;
         AelluxJs2.extAttach(extensionName, {
           init: init,
@@ -24950,7 +25062,10 @@
               while (1) switch (_context.n) {
                 case 0:
                   if (updateTimeout !== null) clearTimeout(updateTimeout);
+                  if (layoutUpdateTimeout !== null) clearTimeout(layoutUpdateTimeout);
                   updateTimeout = null;
+                  layoutUpdateTimeout = null;
+                  layoutUpdateUntil = 0;
                   lastUpdateTime = -UPDATE_INTERVAL_MS;
                   _context.n = 1;
                   return Promise.all(Array.from(anchors.keys(), unmountAnchor));
@@ -24967,32 +25082,26 @@
         }
         function mountAnchor(element) {
           if (anchors.has(element)) return;
-          var original = ownedProperties.map(function(name) {
-            return {
-              value: element.style.getPropertyValue(name),
-              priority: element.style.getPropertyPriority(name)
-            };
-          });
+          elementMemories.set(element, AelluxJs2.persist.element.save(element, [], ownedProperties));
           var state = {
-            original: original,
             invalidContext: false,
             active: false,
             revision: 0,
             target: null,
             reference: null,
-            layoutListener: function layoutListener() {
-              return scheduleUpdate();
+            layoutListener: function layoutListener(event) {
+              return scheduleLayoutUpdate(event);
             },
             observer: null,
             intersectionObserver: null
           };
           anchors.set(element, state);
           if (anchors.size === 1) {
-            root2.addEventListener("scroll", scheduleUpdate, {
+            AelluxJs2.onTarget(root2, "$scroll", scheduleUpdate, {
               capture: true,
               passive: true
             });
-            root2.addEventListener("resize", scheduleUpdate);
+            AelluxJs2.onTarget(root2, "$resize", scheduleUpdate);
           }
           if (typeof root2.ResizeObserver === "function") {
             state.observer = new root2.ResizeObserver(scheduleUpdate);
@@ -25007,7 +25116,7 @@
         }
         function _unmountAnchor() {
           _unmountAnchor = _asyncToGenerator5(/* @__PURE__ */ _regenerator5().m(function _callee2(element) {
-            var state;
+            var state, memory;
             return _regenerator5().w(function(_context2) {
               while (1) switch (_context2.n) {
                 case 0:
@@ -25018,20 +25127,25 @@
                   }
                   return _context2.a(2);
                 case 1:
+                  memory = elementMemories.get(element);
+                  elementMemories.delete(element);
                   state.revision++;
-                  if (state.reference) state.reference.removeEventListener(layoutEvent, state.layoutListener);
+                  if (state.reference) AelluxJs2.offTarget(state.reference, layoutEvent, state.layoutListener);
                   if (state.observer) state.observer.disconnect();
                   if (state.intersectionObserver) state.intersectionObserver.disconnect();
                   anchors.delete(element);
                   if (!anchors.size) {
-                    root2.removeEventListener("scroll", scheduleUpdate, true);
-                    root2.removeEventListener("resize", scheduleUpdate);
+                    AelluxJs2.offTarget(root2, "$scroll", scheduleUpdate, true);
+                    AelluxJs2.offTarget(root2, "$resize", scheduleUpdate);
                     if (updateTimeout !== null) clearTimeout(updateTimeout);
+                    if (layoutUpdateTimeout !== null) clearTimeout(layoutUpdateTimeout);
                     updateTimeout = null;
+                    layoutUpdateTimeout = null;
+                    layoutUpdateUntil = 0;
                     lastUpdateTime = -UPDATE_INTERVAL_MS;
                   }
                   _context2.n = 2;
-                  return AelluxJs2.waitLayout.update(deactivate, [element, state]);
+                  return AelluxJs2.waitLayout.update(deactivate, [element, state, memory]);
                 case 2:
                   return _context2.a(2);
               }
@@ -25050,6 +25164,31 @@
           }
           if (updateTimeout !== null) return;
           updateTimeout = setTimeout(flushUpdate, UPDATE_INTERVAL_MS - elapsed);
+        }
+        function scheduleLayoutUpdate(event) {
+          var durationMs = Number(event && event.detail ? event.detail.durationMs : NaN);
+          if (!Number.isFinite(durationMs) || durationMs < 0) {
+            scheduleUpdate();
+            return;
+          }
+          if (durationMs === 0) {
+            if (layoutUpdateTimeout === null) layoutUpdateTimeout = setTimeout(checkLayoutUpdate, UPDATE_INTERVAL_MS);
+            return;
+          }
+          scheduleUpdate();
+          layoutUpdateUntil = Math.max(layoutUpdateUntil, now() + durationMs);
+          if (layoutUpdateTimeout !== null) return;
+          layoutUpdateTimeout = setTimeout(checkLayoutUpdate, Math.min(UPDATE_INTERVAL_MS, durationMs));
+        }
+        function checkLayoutUpdate() {
+          layoutUpdateTimeout = null;
+          scheduleUpdate();
+          var remaining = layoutUpdateUntil - now();
+          if (remaining > 0) {
+            layoutUpdateTimeout = setTimeout(checkLayoutUpdate, Math.min(UPDATE_INTERVAL_MS, remaining));
+          } else {
+            layoutUpdateUntil = 0;
+          }
         }
         function flushUpdate() {
           updateTimeout = null;
@@ -25297,9 +25436,9 @@
         }
         function listenForLayout(state, reference) {
           if (state.reference === reference) return;
-          if (state.reference) state.reference.removeEventListener(layoutEvent, state.layoutListener);
+          if (state.reference) AelluxJs2.offTarget(state.reference, layoutEvent, state.layoutListener);
           state.reference = reference;
-          if (reference) reference.addEventListener(layoutEvent, state.layoutListener);
+          if (reference) AelluxJs2.onTarget(reference, layoutEvent, state.layoutListener);
         }
         function applyBaseStyles(element) {
           element.style.setProperty("position", "absolute");
@@ -25309,20 +25448,14 @@
           element.style.setProperty("transform-origin", "var(--ae-anchor-origin-x, 50%) var(--ae-anchor-origin-y, 0%)");
         }
         function deactivate(element, state) {
-          if (state.reference) state.reference.removeEventListener(layoutEvent, state.layoutListener);
+          var memory = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : elementMemories.get(element);
+          if (state.reference) AelluxJs2.offTarget(state.reference, layoutEvent, state.layoutListener);
           if (state.observer) state.observer.disconnect();
           if (state.intersectionObserver) state.intersectionObserver.disconnect();
           state.target = state.reference = null;
           element.classList.remove(anchoredClass);
-          if (state.active) restoreStyles(element, state.original);
+          if (state.active && memory) memory.restore();
           state.active = false;
-        }
-        function restoreStyles(element, original) {
-          ownedProperties.forEach(function(name, index) {
-            var _original$index = original[index], value = _original$index.value, priority = _original$index.priority;
-            if (value) element.style.setProperty(name, value, priority);
-            else element.style.removeProperty(name);
-          });
         }
         function resolveElement(value) {
           if (!value || !value.trim()) return null;
@@ -25479,6 +25612,7 @@
         var AelluxJs2 = root2.AelluxJs;
         var extensionName = "scrollbox";
         if (!AelluxJs2) throw new Error("[aellux.js] Load the boot script before the scrollbox extension.");
+        var onTarget = AelluxJs2.onTarget, offTarget = AelluxJs2.offTarget;
         var attribute = AelluxJs2.attr(extensionName);
         var wheelAttribute = AelluxJs2.attr("scrollbox-wheel-horizontal");
         var momentumAttribute = AelluxJs2.attr("scrollbox-momentum");
@@ -25512,6 +25646,7 @@
         var SNAP_FLICK_MAX_DISTANCE_PX = 100;
         var SNAP_FLICK_MIN_DISTANCE_PX = 1;
         var SNAP_SCROLL_IDLE_MS = 120;
+        var SNAP_TARGET_IDLE_MS = 500;
         var SNAP_EDGE_DISTANCE_PX = 10;
         var ELASTIC_DAMPING = 1 / 3;
         var DEFAULT_ELASTIC_LIMIT = {
@@ -25532,6 +25667,15 @@
         var properties = ["--ae-scroll-y-progress", "--ae-scroll-x-progress"];
         var snapProperties = ["--ae-snap-viewport", "--ae-snap-focus"];
         var scrollboxes = /* @__PURE__ */ new Map();
+        var elementMemories = /* @__PURE__ */ new WeakMap();
+        var cursorMemories = /* @__PURE__ */ new WeakMap();
+        var scrollbarMemories = /* @__PURE__ */ new WeakMap();
+        var inlineMemories = /* @__PURE__ */ new WeakMap();
+        var elasticMemories = /* @__PURE__ */ new WeakMap();
+        var elasticWidthMemories = /* @__PURE__ */ new WeakMap();
+        var elasticHeightMemories = /* @__PURE__ */ new WeakMap();
+        var pointerScrollMemories = /* @__PURE__ */ new WeakMap();
+        var snapItemMemories = /* @__PURE__ */ new WeakMap();
         var activePointerScrollState = null;
         AelluxJs2.extAttach(extensionName, {
           init: init,
@@ -25569,20 +25713,12 @@
         }
         function mountScrollbox(element) {
           if (scrollboxes.has(element)) return;
-          var previous2 = properties.map(function(name) {
-            return {
-              value: element.style.getPropertyValue(name),
-              priority: element.style.getPropertyPriority(name)
-            };
-          });
+          elementMemories.set(element, AelluxJs2.persist.element.save(element, [], properties));
+          cursorMemories.set(element, AelluxJs2.persist.element.save(element, [], ["cursor"]));
           var elastic = {
             wrapper: null,
             baseTransform: "",
             baseOrigin: "",
-            previousTransform: null,
-            previousOrigin: null,
-            previousMinWidth: null,
-            previousMinHeight: null,
             extentX: false,
             extentY: false,
             dimensions: null,
@@ -25617,6 +25753,7 @@
             wheelTimeout: null,
             activePointers: /* @__PURE__ */ new Set(),
             activeTouches: /* @__PURE__ */ new Set(),
+            savedItems: /* @__PURE__ */ new Set(),
             touchStarts: /* @__PURE__ */ new Map(),
             gestureListening: false,
             endListening: false,
@@ -25624,7 +25761,6 @@
           };
           var inlineWrapper = {
             element: null,
-            previousDisplay: null,
             owned: false,
             reportedDisplay: null
           };
@@ -25642,13 +25778,10 @@
           };
           var state = {
             element: element,
-            previous: previous2,
             metrics: null,
             mode: null,
             desktop: false,
             cursor: {
-              value: element.style.getPropertyValue("cursor"),
-              priority: element.style.getPropertyPriority("cursor"),
               owned: false
             },
             wheelEnabled: true,
@@ -25681,7 +25814,10 @@
             publish(state);
             if (!state.snapEnabled) return;
             if (state.snap.scrollingToTarget !== -1) {
-              if (!snapTargetReached(state)) return;
+              if (!snapTargetReached(state)) {
+                scheduleSnapTargetIdle(state);
+                return;
+              }
               clearSnapTarget(state);
               scheduleScrollEnd(state);
             } else if (!("onscrollend" in element) || state.snap.scrollEndTimeout !== null) {
@@ -25773,10 +25909,10 @@
             }
           };
           scrollboxes.set(element, state);
-          element.addEventListener("scroll", state.onScroll, {
+          onTarget(element, "$scroll", state.onScroll, {
             passive: true
           });
-          element.addEventListener("scrollend", state.onScrollEnd, {
+          onTarget(element, "$scrollend", state.onScrollEnd, {
             passive: true
           });
           observe(state);
@@ -25787,6 +25923,7 @@
           if (state) configure(state);
         }
         function unmountScrollbox(element) {
+          var _elementMemories$get;
           var state = scrollboxes.get(element);
           if (!state) return;
           state.disposed = true;
@@ -25802,27 +25939,26 @@
           removeSnapGestureListeners(state);
           restoreSnapStyles(state);
           resetElastic(state);
+          if (state.elastic.wrapper) elasticMemories.delete(state.elastic.wrapper);
           restoreInlineWrapper(state);
           resetScrollbars(state);
-          element.removeEventListener("scroll", state.onScroll);
-          element.removeEventListener("scrollend", state.onScrollEnd);
-          if (state.wheelListening) element.removeEventListener("wheel", state.onWheel, true);
+          offTarget(element, "$scroll", state.onScroll);
+          offTarget(element, "$scrollend", state.onScrollEnd);
+          if (state.wheelListening) offTarget(element, "$wheel", state.onWheel, true);
           if (state.pointerListening) {
-            element.removeEventListener("pointerdown", state.onPointerDown);
-            element.removeEventListener("pointerover", state.onPointerOver);
-            element.removeEventListener("pointerout", state.onPointerOut);
-            element.removeEventListener("mousedown", state.onMouseDown);
+            offTarget(element, "$pointerdown", state.onPointerDown);
+            offTarget(element, "$pointerover", state.onPointerOver);
+            offTarget(element, "$pointerout", state.onPointerOut);
+            offTarget(element, "$mousedown", state.onMouseDown);
           }
           if (state.touchListening) removeTouchListeners(state);
           if (state.resizeObserver) state.resizeObserver.disconnect();
           if (state.mutationObserver) state.mutationObserver.disconnect();
           if (state.resizeTimeout !== null) root2.clearTimeout(state.resizeTimeout);
-          root2.removeEventListener("resize", state.onResize);
-          properties.forEach(function(name2, index) {
-            var original = state.previous[index];
-            if (original.value) element.style.setProperty(name2, original.value, original.priority);
-            else element.style.removeProperty(name2);
-          });
+          offTarget(root2, "$resize", state.onResize);
+          (_elementMemories$get = elementMemories.get(element)) === null || _elementMemories$get === void 0 || _elementMemories$get.restore();
+          elementMemories.delete(element);
+          cursorMemories.delete(element);
           var _iterator2 = _createForOfIteratorHelper9(scrollEdgeClasses), _step2;
           try {
             for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
@@ -25848,13 +25984,13 @@
           configureScrollbars(state);
           state.desktop = isDesktop();
           if ((state.desktop || state.elasticEnabled || state.snapEnabled) && !state.wheelListening) {
-            element.addEventListener("wheel", state.onWheel, {
+            onTarget(element, "$wheel", state.onWheel, {
               passive: false,
               capture: true
             });
             state.wheelListening = true;
           } else if (!state.desktop && !state.elasticEnabled && !state.snapEnabled && state.wheelListening) {
-            element.removeEventListener("wheel", state.onWheel, true);
+            offTarget(element, "$wheel", state.onWheel, true);
             state.wheelListening = false;
           }
           if (state.elasticEnabled && !state.touchListening) addTouchListeners(state);
@@ -25863,17 +25999,17 @@
           var pointerEnabled = state.desktop && state.mode === "pointer";
           if (!pointerEnabled || !state.momentumEnabled) cancelMomentum(state);
           if (pointerEnabled && !state.pointerListening) {
-            element.addEventListener("pointerdown", state.onPointerDown);
-            element.addEventListener("pointerover", state.onPointerOver);
-            element.addEventListener("pointerout", state.onPointerOut);
-            element.addEventListener("mousedown", state.onMouseDown);
+            onTarget(element, "$pointerdown", state.onPointerDown);
+            onTarget(element, "$pointerover", state.onPointerOver);
+            onTarget(element, "$pointerout", state.onPointerOut);
+            onTarget(element, "$mousedown", state.onMouseDown);
             state.pointerListening = true;
           } else if (!pointerEnabled && state.pointerListening) {
             if (activePointerScrollState && activePointerScrollState.pointerScroll && activePointerScrollState.pointerScroll.chain.includes(state)) endPointerScroll(activePointerScrollState);
-            element.removeEventListener("pointerdown", state.onPointerDown);
-            element.removeEventListener("pointerover", state.onPointerOver);
-            element.removeEventListener("pointerout", state.onPointerOut);
-            element.removeEventListener("mousedown", state.onMouseDown);
+            offTarget(element, "$pointerdown", state.onPointerDown);
+            offTarget(element, "$pointerover", state.onPointerOver);
+            offTarget(element, "$pointerout", state.onPointerOut);
+            offTarget(element, "$mousedown", state.onMouseDown);
             state.pointerListening = false;
             endPointerScroll(state);
             state.lastPointerDown = null;
@@ -25928,19 +26064,19 @@
           var scrollbar = state.scrollbar;
           if (enabled && !scrollbar.listening) {
             scrollbar.mouseHover = element.matches(":hover") && !!(root2.matchMedia && root2.matchMedia("(any-hover: hover)").matches);
-            element.addEventListener("pointerenter", state.onScrollbarPointerEnter);
-            element.addEventListener("pointerleave", state.onScrollbarPointerLeave);
-            element.addEventListener("mouseenter", state.onScrollbarMouseEnter);
-            element.addEventListener("mouseleave", state.onScrollbarMouseLeave);
-            root2.document.addEventListener("pointerdown", state.onScrollbarOutsideDown, true);
+            onTarget(element, "$pointerenter", state.onScrollbarPointerEnter);
+            onTarget(element, "$pointerleave", state.onScrollbarPointerLeave);
+            onTarget(element, "$mouseenter", state.onScrollbarMouseEnter);
+            onTarget(element, "$mouseleave", state.onScrollbarMouseLeave);
+            AelluxJs2.on("$pointerdown", state.onScrollbarOutsideDown, true);
             scrollbar.listening = true;
             syncScrollbarVisibility(state);
           } else if (!enabled && scrollbar.listening) {
-            element.removeEventListener("pointerenter", state.onScrollbarPointerEnter);
-            element.removeEventListener("pointerleave", state.onScrollbarPointerLeave);
-            element.removeEventListener("mouseenter", state.onScrollbarMouseEnter);
-            element.removeEventListener("mouseleave", state.onScrollbarMouseLeave);
-            root2.document.removeEventListener("pointerdown", state.onScrollbarOutsideDown, true);
+            offTarget(element, "$pointerenter", state.onScrollbarPointerEnter);
+            offTarget(element, "$pointerleave", state.onScrollbarPointerLeave);
+            offTarget(element, "$mouseenter", state.onScrollbarMouseEnter);
+            offTarget(element, "$mouseleave", state.onScrollbarMouseLeave);
+            AelluxJs2.off("$pointerdown", state.onScrollbarOutsideDown, true);
             scrollbar.listening = false;
             clearScrollbarPdsVisibility(state);
             scrollbar.pointerHover = false;
@@ -25972,17 +26108,10 @@
             element.setAttribute(attributeName, "");
             state.element.appendChild(element);
           }
-          var previous2 = scrollbarProperties.map(function(name) {
-            return {
-              name: name,
-              value: element.style.getPropertyValue(name),
-              priority: element.style.getPropertyPriority(name)
-            };
-          });
+          if (!owned) scrollbarMemories.set(element, AelluxJs2.persist.element.save(element, [], scrollbarProperties));
           var record = {
             element: element,
             owned: owned,
-            previous: previous2,
             axis: axis,
             x: null,
             y: null,
@@ -26001,36 +26130,25 @@
           record.onPointerEnd = function(event) {
             return endScrollbarDrag(state, record, event);
           };
-          element.addEventListener("pointerdown", record.onPointerDown);
-          element.addEventListener("pointermove", record.onPointerMove);
-          element.addEventListener("pointerup", record.onPointerEnd);
-          element.addEventListener("pointercancel", record.onPointerEnd);
+          onTarget(element, "$pointerdown", record.onPointerDown);
+          onTarget(element, "$pointermove", record.onPointerMove);
+          onTarget(element, "$pointerup", record.onPointerEnd);
+          onTarget(element, "$pointercancel", record.onPointerEnd);
           scrollbar[axis] = record;
         }
         function resetScrollbarAxis(state, axis) {
+          var _scrollbarMemories$ge;
           var record = state.scrollbar[axis];
           if (!record) return;
           endScrollbarDrag(state, record);
           var element = record.element;
-          element.removeEventListener("pointerdown", record.onPointerDown);
-          element.removeEventListener("pointermove", record.onPointerMove);
-          element.removeEventListener("pointerup", record.onPointerEnd);
-          element.removeEventListener("pointercancel", record.onPointerEnd);
+          offTarget(element, "$pointerdown", record.onPointerDown);
+          offTarget(element, "$pointermove", record.onPointerMove);
+          offTarget(element, "$pointerup", record.onPointerEnd);
+          offTarget(element, "$pointercancel", record.onPointerEnd);
           if (record.owned) element.remove();
-          else {
-            var _iterator4 = _createForOfIteratorHelper9(record.previous), _step4;
-            try {
-              for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
-                var original = _step4.value;
-                if (original.value) element.style.setProperty(original.name, original.value, original.priority);
-                else element.style.removeProperty(original.name);
-              }
-            } catch (err) {
-              _iterator4.e(err);
-            } finally {
-              _iterator4.f();
-            }
-          }
+          else (_scrollbarMemories$ge = scrollbarMemories.get(element)) === null || _scrollbarMemories$ge === void 0 || _scrollbarMemories$ge.restore();
+          scrollbarMemories.delete(element);
           state.scrollbar[axis] = null;
         }
         function resetScrollbars(state) {
@@ -26038,11 +26156,11 @@
           resetScrollbarAxis(state, "y");
           var scrollbar = state.scrollbar;
           if (scrollbar.listening) {
-            state.element.removeEventListener("pointerenter", state.onScrollbarPointerEnter);
-            state.element.removeEventListener("pointerleave", state.onScrollbarPointerLeave);
-            state.element.removeEventListener("mouseenter", state.onScrollbarMouseEnter);
-            state.element.removeEventListener("mouseleave", state.onScrollbarMouseLeave);
-            root2.document.removeEventListener("pointerdown", state.onScrollbarOutsideDown, true);
+            offTarget(state.element, "$pointerenter", state.onScrollbarPointerEnter);
+            offTarget(state.element, "$pointerleave", state.onScrollbarPointerLeave);
+            offTarget(state.element, "$mouseenter", state.onScrollbarMouseEnter);
+            offTarget(state.element, "$mouseleave", state.onScrollbarMouseLeave);
+            AelluxJs2.off("$pointerdown", state.onScrollbarOutsideDown, true);
             scrollbar.listening = false;
           }
           if (scrollbar.hideOwned) state.element.classList.remove(nativeScrollbarHideClass);
@@ -26127,10 +26245,10 @@
           return values;
         }
         function updateScrollbars(state, values) {
-          var _iterator5 = _createForOfIteratorHelper9(values), _step5;
+          var _iterator4 = _createForOfIteratorHelper9(values), _step4;
           try {
-            for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
-              var _step5$value = _step5.value, record = _step5$value.record, x = _step5$value.x, y = _step5$value.y, trackSize = _step5$value.trackSize, thumbSize = _step5$value.thumbSize, thumbPosition = _step5$value.thumbPosition, max = _step5$value.max, display = _step5$value.display;
+            for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
+              var _step4$value = _step4.value, record = _step4$value.record, x = _step4$value.x, y = _step4$value.y, trackSize = _step4$value.trackSize, thumbSize = _step4$value.thumbSize, thumbPosition = _step4$value.thumbPosition, max = _step4$value.max, display = _step4$value.display;
               if (state.scrollbar[record.axis] !== record) continue;
               var style = record.element.style;
               if (record.x !== x) style.setProperty("--ae-scrollbar-x", "".concat(x, "px"));
@@ -26148,9 +26266,9 @@
               record.display = display;
             }
           } catch (err) {
-            _iterator5.e(err);
+            _iterator4.e(err);
           } finally {
-            _iterator5.f();
+            _iterator4.f();
           }
         }
         function scrollbarPointerPosition(record, event) {
@@ -26291,24 +26409,16 @@
             table: "inline-table"
           }[display];
           if (!replacement) return;
-          if (!inline.owned) {
-            inline.previousDisplay = {
-              value: wrapper.style.getPropertyValue("display"),
-              priority: wrapper.style.getPropertyPriority("display")
-            };
-          }
+          if (!inline.owned) inlineMemories.set(wrapper, AelluxJs2.persist.element.save(wrapper, [], ["display"]));
           wrapper.style.setProperty("display", replacement, "important");
           inline.owned = true;
         }
         function restoreInlineWrapper(state) {
+          var _inlineMemories$get;
           var inline = state.inlineWrapper;
-          if (inline.owned && inline.element) {
-            var _previous = inline.previousDisplay;
-            if (_previous.value) inline.element.style.setProperty("display", _previous.value, _previous.priority);
-            else inline.element.style.removeProperty("display");
-          }
+          if (inline.owned && inline.element) (_inlineMemories$get = inlineMemories.get(inline.element)) === null || _inlineMemories$get === void 0 || _inlineMemories$get.restore();
+          if (inline.element) inlineMemories.delete(inline.element);
           inline.element = null;
-          inline.previousDisplay = null;
           inline.owned = false;
           inline.reportedDisplay = null;
         }
@@ -26340,6 +26450,20 @@
         function restoreSnapStyles(state) {
           var snap = state.snap;
           clearSnapWheelTimeout(state);
+          var _iterator5 = _createForOfIteratorHelper9(snap.savedItems), _step5;
+          try {
+            for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
+              var _snapItemMemories$get;
+              var item = _step5.value;
+              (_snapItemMemories$get = snapItemMemories.get(item)) === null || _snapItemMemories$get === void 0 || _snapItemMemories$get.restore();
+              snapItemMemories.delete(item);
+            }
+          } catch (err) {
+            _iterator5.e(err);
+          } finally {
+            _iterator5.f();
+          }
+          snap.savedItems.clear();
           state.element.classList.remove(snapReadyClass, snapSuspendedClass);
           snap.axis = null;
           snap.suspensions.pointer = false;
@@ -26401,8 +26525,8 @@
         }
         function addSnapGestureListeners(state) {
           if (state.snap.gestureListening) return;
-          state.element.addEventListener("pointerdown", state.onSnapPointerDown, true);
-          state.element.addEventListener("touchstart", state.onSnapTouchStart, {
+          onTarget(state.element, "$pointerdown", state.onSnapPointerDown, true);
+          onTarget(state.element, "$touchstart", state.onSnapTouchStart, {
             passive: true,
             capture: true
           });
@@ -26410,8 +26534,8 @@
         }
         function removeSnapGestureListeners(state) {
           if (state.snap.gestureListening) {
-            state.element.removeEventListener("pointerdown", state.onSnapPointerDown, true);
-            state.element.removeEventListener("touchstart", state.onSnapTouchStart, true);
+            offTarget(state.element, "$pointerdown", state.onSnapPointerDown, true);
+            offTarget(state.element, "$touchstart", state.onSnapTouchStart, true);
             state.snap.gestureListening = false;
           }
           stopSnapGestureEndListeners(state);
@@ -26422,20 +26546,20 @@
         }
         function listenSnapGestureEnd(state) {
           if (state.snap.endListening) return;
-          root2.addEventListener("pointerup", state.onSnapPointerEnd, true);
-          root2.addEventListener("pointercancel", state.onSnapPointerEnd, true);
-          root2.addEventListener("touchend", state.onSnapTouchEnd, true);
-          root2.addEventListener("touchcancel", state.onSnapTouchEnd, true);
-          root2.addEventListener("blur", state.onSnapBlur);
+          onTarget(root2, "$pointerup", state.onSnapPointerEnd, true);
+          onTarget(root2, "$pointercancel", state.onSnapPointerEnd, true);
+          onTarget(root2, "$touchend", state.onSnapTouchEnd, true);
+          onTarget(root2, "$touchcancel", state.onSnapTouchEnd, true);
+          onTarget(root2, "$blur", state.onSnapBlur);
           state.snap.endListening = true;
         }
         function stopSnapGestureEndListeners(state) {
           if (!state.snap.endListening) return;
-          root2.removeEventListener("pointerup", state.onSnapPointerEnd, true);
-          root2.removeEventListener("pointercancel", state.onSnapPointerEnd, true);
-          root2.removeEventListener("touchend", state.onSnapTouchEnd, true);
-          root2.removeEventListener("touchcancel", state.onSnapTouchEnd, true);
-          root2.removeEventListener("blur", state.onSnapBlur);
+          offTarget(root2, "$pointerup", state.onSnapPointerEnd, true);
+          offTarget(root2, "$pointercancel", state.onSnapPointerEnd, true);
+          offTarget(root2, "$touchend", state.onSnapTouchEnd, true);
+          offTarget(root2, "$touchcancel", state.onSnapTouchEnd, true);
+          offTarget(root2, "$blur", state.onSnapBlur);
           state.snap.endListening = false;
         }
         function beginSnapGesture(state, kind, event) {
@@ -26511,8 +26635,8 @@
           }
         }
         function scheduleScrollEnd(state) {
-          clearScrollEnd(state);
           if (state.snap.scrollingToTarget !== -1) return;
+          clearScrollEnd(state);
           if (state.snap.activePointers.size || state.snap.activeTouches.size) {
             state.snap.waitingForGestureEnd = true;
             return;
@@ -26522,6 +26646,15 @@
             state.snap.scrollEndTimeout = null;
             finishNativeScroll(state);
           }, SNAP_SCROLL_IDLE_MS);
+        }
+        function scheduleSnapTargetIdle(state) {
+          clearScrollEnd(state);
+          state.snap.scrollEndTimeout = root2.setTimeout(function() {
+            state.snap.scrollEndTimeout = null;
+            if (state.snap.scrollingToTarget === -1) return;
+            clearSnapTarget(state);
+            finishNativeScroll(state);
+          }, SNAP_TARGET_IDLE_MS);
         }
         function clearScrollEnd(state) {
           if (state.snap.scrollEndTimeout !== null) root2.clearTimeout(state.snap.scrollEndTimeout);
@@ -26651,6 +26784,7 @@
           var wrapper = child && child.hasAttribute(elasticAttribute) && child.getAttribute(elasticAttribute) !== "false" ? child : null;
           if (!wrapper) {
             resetElastic(state);
+            if (state.elastic.wrapper) elasticMemories.delete(state.elastic.wrapper);
             state.elasticEnabled = false;
             state.elastic.wrapper = null;
             var requested = element.hasAttribute(elasticAttribute) || children.some(function(item) {
@@ -26667,27 +26801,13 @@
           state.elastic.invalidReported = false;
           if (state.elastic.wrapper !== wrapper) {
             resetElastic(state);
+            if (state.elastic.wrapper) elasticMemories.delete(state.elastic.wrapper);
             var computed = root2.getComputedStyle(wrapper);
             state.elastic.wrapper = wrapper;
             state.elastic.dimensions = null;
             state.elastic.baseTransform = computed.transform === "none" ? "" : computed.transform;
             state.elastic.baseOrigin = computed.transformOrigin;
-            state.elastic.previousTransform = {
-              value: wrapper.style.getPropertyValue("transform"),
-              priority: wrapper.style.getPropertyPriority("transform")
-            };
-            state.elastic.previousOrigin = {
-              value: wrapper.style.getPropertyValue("transform-origin"),
-              priority: wrapper.style.getPropertyPriority("transform-origin")
-            };
-            state.elastic.previousMinWidth = {
-              value: wrapper.style.getPropertyValue("min-width"),
-              priority: wrapper.style.getPropertyPriority("min-width")
-            };
-            state.elastic.previousMinHeight = {
-              value: wrapper.style.getPropertyValue("min-height"),
-              priority: wrapper.style.getPropertyPriority("min-height")
-            };
+            elasticMemories.set(wrapper, AelluxJs2.persist.element.save(wrapper, [], ["transform", "transform-origin"]));
           }
           state.elasticEnabled = true;
           var value = wrapper.getAttribute(elasticAttribute).trim();
@@ -26783,9 +26903,9 @@
           state.cursor.owned = true;
         }
         function restorePointerScrollCursor(state) {
+          var _cursorMemories$get;
           if (!state.cursor.owned) return;
-          if (state.cursor.value) state.element.style.setProperty("cursor", state.cursor.value, state.cursor.priority);
-          else state.element.style.removeProperty("cursor");
+          (_cursorMemories$get = cursorMemories.get(state.element)) === null || _cursorMemories$get === void 0 || _cursorMemories$get.restore();
           state.cursor.owned = false;
         }
         function startPointerScroll(state, event) {
@@ -26890,11 +27010,11 @@
             momentumStartTime: time
           };
           activePointerScrollState = state;
-          root2.addEventListener("pointermove", state.onPointerMove, {
+          onTarget(root2, "$pointermove", state.onPointerMove, {
             passive: false,
             capture: true
           });
-          root2.addEventListener("touchmove", state.onPointerScrollTouchMove, {
+          onTarget(root2, "$touchmove", state.onPointerScrollTouchMove, {
             passive: false,
             capture: true
           });
@@ -26902,19 +27022,19 @@
           try {
             for (_iterator1.s(); !(_step1 = _iterator1.n()).done; ) {
               var name = _step1.value;
-              root2.addEventListener(name, state.onPointerScrollNativeEvent, true);
+              onTarget(root2, "$" + name, state.onPointerScrollNativeEvent, true);
             }
           } catch (err) {
             _iterator1.e(err);
           } finally {
             _iterator1.f();
           }
-          root2.addEventListener("selectstart", state.onPointerScrollNativeEvent, true);
+          onTarget(root2, "$selectstart", state.onPointerScrollNativeEvent, true);
           var _iterator10 = _createForOfIteratorHelper9(pointerScrollMouseEvents), _step10;
           try {
             for (_iterator10.s(); !(_step10 = _iterator10.n()).done; ) {
               var _name = _step10.value;
-              root2.addEventListener(_name, state.onMouseEvent, {
+              onTarget(root2, "$" + _name, state.onMouseEvent, {
                 passive: false,
                 capture: true
               });
@@ -26924,9 +27044,9 @@
           } finally {
             _iterator10.f();
           }
-          root2.addEventListener("pointerup", state.onPointerEnd, true);
-          root2.addEventListener("pointercancel", state.onPointerEnd, true);
-          root2.addEventListener("blur", state.onBlur);
+          onTarget(root2, "$pointerup", state.onPointerEnd, true);
+          onTarget(root2, "$pointercancel", state.onPointerEnd, true);
+          onTarget(root2, "$blur", state.onBlur);
         }
         function movePointerScroll(state, event) {
           var pointerScroll = state.pointerScroll;
@@ -27117,11 +27237,10 @@
               var member = _step14.value;
               if (pointerAxisMaximum(member, axis, pointerScroll) <= 0) continue;
               var element = member.element;
+              pointerScrollMemories.set(element, AelluxJs2.persist.element.save(element, [], ["scroll-behavior"]));
               pointerScroll.styles.push({
                 element: element,
-                classOwned: !element.classList.contains(pointerScrollingClass),
-                scrollBehavior: element.style.getPropertyValue("scroll-behavior"),
-                scrollBehaviorPriority: element.style.getPropertyPriority("scroll-behavior")
+                classOwned: !element.classList.contains(pointerScrollingClass)
               });
               element.style.setProperty("scroll-behavior", "auto", "important");
               element.classList.add(pointerScrollingClass);
@@ -27169,23 +27288,23 @@
           state.pointerScroll = null;
           if (activePointerScrollState === state) activePointerScrollState = null;
           if (pointerScroll.selectionWaitTimeout !== null) root2.clearTimeout(pointerScroll.selectionWaitTimeout);
-          root2.removeEventListener("pointermove", state.onPointerMove, true);
-          root2.removeEventListener("touchmove", state.onPointerScrollTouchMove, true);
+          offTarget(root2, "$pointermove", state.onPointerMove, true);
+          offTarget(root2, "$touchmove", state.onPointerScrollTouchMove, true);
           var _iterator15 = _createForOfIteratorHelper9(pointerScrollDragEvents), _step15;
           try {
             for (_iterator15.s(); !(_step15 = _iterator15.n()).done; ) {
               var name = _step15.value;
-              root2.removeEventListener(name, state.onPointerScrollNativeEvent, true);
+              offTarget(root2, "$" + name, state.onPointerScrollNativeEvent, true);
             }
           } catch (err) {
             _iterator15.e(err);
           } finally {
             _iterator15.f();
           }
-          root2.removeEventListener("selectstart", state.onPointerScrollNativeEvent, true);
-          root2.removeEventListener("pointerup", state.onPointerEnd, true);
-          root2.removeEventListener("pointercancel", state.onPointerEnd, true);
-          root2.removeEventListener("blur", state.onBlur);
+          offTarget(root2, "$selectstart", state.onPointerScrollNativeEvent, true);
+          offTarget(root2, "$pointerup", state.onPointerEnd, true);
+          offTarget(root2, "$pointercancel", state.onPointerEnd, true);
+          offTarget(root2, "$blur", state.onBlur);
           if (pointerScroll.moved && !state.disposed) {
             state.mouseReleaseButton = pointerScroll.button;
             if (state.mouseReleaseTimeout !== null) root2.clearTimeout(state.mouseReleaseTimeout);
@@ -27198,10 +27317,11 @@
           var _iterator16 = _createForOfIteratorHelper9(pointerScroll.styles), _step16;
           try {
             for (_iterator16.s(); !(_step16 = _iterator16.n()).done; ) {
+              var _pointerScrollMemorie;
               var saved = _step16.value;
               if (saved.classOwned) saved.element.classList.remove(pointerScrollingClass);
-              if (saved.scrollBehavior) saved.element.style.setProperty("scroll-behavior", saved.scrollBehavior, saved.scrollBehaviorPriority);
-              else saved.element.style.removeProperty("scroll-behavior");
+              (_pointerScrollMemorie = pointerScrollMemories.get(saved.element)) === null || _pointerScrollMemorie === void 0 || _pointerScrollMemorie.restore();
+              pointerScrollMemories.delete(saved.element);
               var member = scrollboxes.get(saved.element);
               if (member) {
                 suspendSnapStyles(member, "pointer", false);
@@ -27284,7 +27404,7 @@
           try {
             for (_iterator18.s(); !(_step18 = _iterator18.n()).done; ) {
               var name = _step18.value;
-              root2.removeEventListener(name, state.onMouseEvent, true);
+              offTarget(root2, "$" + name, state.onMouseEvent, true);
             }
           } catch (err) {
             _iterator18.e(err);
@@ -27344,26 +27464,26 @@
         }
         function addTouchListeners(state) {
           var element = state.element;
-          element.addEventListener("touchstart", state.onTouchStart, {
+          onTarget(element, "$touchstart", state.onTouchStart, {
             passive: true
           });
-          element.addEventListener("touchmove", state.onTouchMove, {
+          onTarget(element, "$touchmove", state.onTouchMove, {
             passive: false
           });
-          element.addEventListener("touchend", state.onTouchEnd, {
+          onTarget(element, "$touchend", state.onTouchEnd, {
             passive: true
           });
-          element.addEventListener("touchcancel", state.onTouchEnd, {
+          onTarget(element, "$touchcancel", state.onTouchEnd, {
             passive: true
           });
           state.touchListening = true;
         }
         function removeTouchListeners(state) {
           var element = state.element;
-          element.removeEventListener("touchstart", state.onTouchStart);
-          element.removeEventListener("touchmove", state.onTouchMove);
-          element.removeEventListener("touchend", state.onTouchEnd);
-          element.removeEventListener("touchcancel", state.onTouchEnd);
+          offTarget(element, "$touchstart", state.onTouchStart);
+          offTarget(element, "$touchmove", state.onTouchMove);
+          offTarget(element, "$touchend", state.onTouchEnd);
+          offTarget(element, "$touchcancel", state.onTouchEnd);
           state.touchListening = false;
           state.elastic.touch = null;
         }
@@ -27471,11 +27591,13 @@
           elastic.owned = true;
           if (active) suspendSnapStyles(state, "elastic", true);
           if (amounts[1] > 0 && !elastic.extentX) {
-            elastic.wrapper.style.setProperty("min-width", "".concat(Math.max(dimensions.offsetWidth, dimensions.scrollWidth), "px"), elastic.previousMinWidth.priority);
+            elasticWidthMemories.set(elastic.wrapper, AelluxJs2.persist.element.save(elastic.wrapper, [], ["min-width"]));
+            elastic.wrapper.style.setProperty("min-width", "".concat(Math.max(dimensions.offsetWidth, dimensions.scrollWidth), "px"), elasticWidthMemories.get(elastic.wrapper).cssProperties["min-width"].priority);
             elastic.extentX = true;
           }
           if (amounts[2] > 0 && !elastic.extentY) {
-            elastic.wrapper.style.setProperty("min-height", "".concat(Math.max(dimensions.offsetHeight, dimensions.scrollHeight), "px"), elastic.previousMinHeight.priority);
+            elasticHeightMemories.set(elastic.wrapper, AelluxJs2.persist.element.save(elastic.wrapper, [], ["min-height"]));
+            elastic.wrapper.style.setProperty("min-height", "".concat(Math.max(dimensions.offsetHeight, dimensions.scrollHeight), "px"), elasticHeightMemories.get(elastic.wrapper).cssProperties["min-height"].priority);
             elastic.extentY = true;
           }
           setElasticTransform(state, dimensions);
@@ -27507,9 +27629,9 @@
             var baseOrigin = elastic.baseOrigin.split(" ");
             var originX = elastic.amounts[3] > 0 ? "0%" : elastic.amounts[1] > 0 ? "".concat(Math.max(dimensions.offsetWidth, dimensions.scrollWidth + dimensions.clientLeft), "px") : baseOrigin[0];
             var originY = elastic.amounts[0] > 0 ? "0%" : elastic.amounts[2] > 0 ? "".concat(Math.max(dimensions.offsetHeight, dimensions.scrollHeight + dimensions.clientTop), "px") : baseOrigin[1];
-            wrapper.style.setProperty("transform-origin", "".concat(originX, " ").concat(originY), elastic.previousOrigin.priority);
+            wrapper.style.setProperty("transform-origin", "".concat(originX, " ").concat(originY), elasticMemories.get(wrapper).cssProperties["transform-origin"].priority);
           }
-          wrapper.style.setProperty("transform", [scale, translate, elastic.baseTransform].filter(Boolean).join(" ") || "none", elastic.previousTransform.priority);
+          wrapper.style.setProperty("transform", [scale, translate, elastic.baseTransform].filter(Boolean).join(" ") || "none", elasticMemories.get(wrapper).cssProperties.transform.priority);
         }
         function scrollWithinElasticBounds(state, desiredX, desiredY) {
           var element = state.element;
@@ -27575,22 +27697,14 @@
           elastic.wheelTimeout = null;
           if (elastic.wrapper) elastic.wrapper.classList.remove(elasticReleaseClass);
           if (elastic.owned && elastic.wrapper) {
-            var _previous2 = elastic.previousTransform;
-            if (_previous2.value) elastic.wrapper.style.setProperty("transform", _previous2.value, _previous2.priority);
-            else elastic.wrapper.style.removeProperty("transform");
-            var previousOrigin = elastic.previousOrigin;
-            if (previousOrigin.value) elastic.wrapper.style.setProperty("transform-origin", previousOrigin.value, previousOrigin.priority);
-            else elastic.wrapper.style.removeProperty("transform-origin");
-            if (elastic.extentX) {
-              var previousMinWidth = elastic.previousMinWidth;
-              if (previousMinWidth.value) elastic.wrapper.style.setProperty("min-width", previousMinWidth.value, previousMinWidth.priority);
-              else elastic.wrapper.style.removeProperty("min-width");
-            }
-            if (elastic.extentY) {
-              var previousMinHeight = elastic.previousMinHeight;
-              if (previousMinHeight.value) elastic.wrapper.style.setProperty("min-height", previousMinHeight.value, previousMinHeight.priority);
-              else elastic.wrapper.style.removeProperty("min-height");
-            }
+            var _elasticMemories$get, _elasticWidthMemories, _elasticHeightMemorie;
+            (_elasticMemories$get = elasticMemories.get(elastic.wrapper)) === null || _elasticMemories$get === void 0 || _elasticMemories$get.restore();
+            if (elastic.extentX) (_elasticWidthMemories = elasticWidthMemories.get(elastic.wrapper)) === null || _elasticWidthMemories === void 0 || _elasticWidthMemories.restore();
+            if (elastic.extentY) (_elasticHeightMemorie = elasticHeightMemories.get(elastic.wrapper)) === null || _elasticHeightMemorie === void 0 || _elasticHeightMemorie.restore();
+          }
+          if (elastic.wrapper) {
+            elasticWidthMemories.delete(elastic.wrapper);
+            elasticHeightMemories.delete(elastic.wrapper);
           }
           elastic.amounts = [0, 0, 0, 0];
           elastic.active = false;
@@ -27611,7 +27725,7 @@
           state.onResize = function() {
             return scheduleResize(state);
           };
-          root2.addEventListener("resize", state.onResize, {
+          onTarget(root2, "$resize", state.onResize, {
             passive: true
           });
           if (root2.ResizeObserver) {
@@ -27756,6 +27870,10 @@
               try {
                 for (_iterator23.s(); !(_step23 = _iterator23.n()).done; ) {
                   var _step23$value = _step23.value, item = _step23$value.item, viewport = _step23$value.viewport, focus2 = _step23$value.focus;
+                  if (!state.snap.savedItems.has(item)) {
+                    snapItemMemories.set(item, AelluxJs2.persist.element.save(item, [], snapProperties));
+                    state.snap.savedItems.add(item);
+                  }
                   item.style.setProperty(snapProperties[0], viewport);
                   item.style.setProperty(snapProperties[1], focus2);
                 }
@@ -27803,10 +27921,11 @@
         function handleSnapWheel(state, event) {
           if (!state.snapEnabled) return false;
           var axis = snapAxis(state);
-          var delta = axis === "x" ? event.deltaX || (state.wheelEnabled ? event.deltaY : 0) : event.deltaY || event.deltaX;
-          if (axis === "x" && !state.wheelEnabled && !event.deltaX) return false;
+          var horizontal = Math.abs(event.deltaX) > Math.abs(event.deltaY);
+          var delta = axis === "x" ? horizontal ? event.deltaX : state.wheelEnabled ? event.deltaY : 0 : horizontal ? 0 : event.deltaY;
+          if (!delta) return false;
           var items = snapItems(state);
-          if (!delta || !items.length) {
+          if (!items.length) {
             if (event.cancelable) event.preventDefault();
             return true;
           }
@@ -27997,7 +28116,7 @@
           shapeSquare: AelluxJs2.className("shape-square")
         };
         var adaptiveElements = /* @__PURE__ */ new Set();
-        var initialDimensions = /* @__PURE__ */ new Map();
+        var elementMemories = /* @__PURE__ */ new WeakMap();
         var dimensionProperties = ["--ae-width", "--ae-height"];
         var pendingResizeEntries = /* @__PURE__ */ new Map();
         var pendingResizeElements = /* @__PURE__ */ new Set();
@@ -28093,25 +28212,21 @@
         }
         function mountAdaptive(element) {
           if (adaptiveElements.has(element)) return;
-          initialDimensions.set(element, dimensionProperties.map(function(name) {
-            return {
-              value: element.style.getPropertyValue(name),
-              priority: element.style.getPropertyPriority(name)
-            };
-          }));
+          elementMemories.set(element, AelluxJs2.persist.element.save(element, ["aria-orientation"], dimensionProperties));
           adaptiveElements.add(element);
           if (resizeObserver) resizeObserver.observe(element);
           else {
             AelluxJs2.waitLayout.read(readBounds, [element]);
-            if (adaptiveElements.size === 1) root2.addEventListener("resize", onWindowResize);
+            if (adaptiveElements.size === 1) AelluxJs2.onTarget(root2, "$resize", onWindowResize);
           }
         }
         function unmountAdaptive(element) {
+          var _elementMemories$get;
           if (!adaptiveElements.delete(element)) return;
           pendingResizeEntries.delete(element);
           pendingResizeElements.delete(element);
           if (resizeObserver) resizeObserver.unobserve(element);
-          else if (adaptiveElements.size === 0) root2.removeEventListener("resize", onWindowResize);
+          else if (adaptiveElements.size === 0) AelluxJs2.offTarget(root2, "$resize", onWindowResize);
           var _iterator2 = _createForOfIteratorHelper10(managedClasses), _step2;
           try {
             for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
@@ -28123,13 +28238,8 @@
           } finally {
             _iterator2.f();
           }
-          var initial = initialDimensions.get(element);
-          dimensionProperties.forEach(function(name2, index) {
-            var _initial$index = initial[index], value = _initial$index.value, priority = _initial$index.priority;
-            if (value) element.style.setProperty(name2, value, priority);
-            else element.style.removeProperty(name2);
-          });
-          initialDimensions.delete(element);
+          (_elementMemories$get = elementMemories.get(element)) === null || _elementMemories$get === void 0 || _elementMemories$get.restore();
+          elementMemories.delete(element);
         }
         function onResize(entries) {
           var _iterator3 = _createForOfIteratorHelper10(entries), _step3;
@@ -28356,36 +28466,6 @@
       });
     };
   }
-  function _slicedToArray4(r, e) {
-    return _arrayWithHoles4(r) || _iterableToArrayLimit4(r, e) || _unsupportedIterableToArray11(r, e) || _nonIterableRest4();
-  }
-  function _nonIterableRest4() {
-    throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
-  }
-  function _iterableToArrayLimit4(r, l) {
-    var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
-    if (null != t) {
-      var e, n, i, u, a = [], f = true, o = false;
-      try {
-        if (i = (t = t.call(r)).next, 0 === l) {
-          if (Object(t) !== t) return;
-          f = false;
-        } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = true) ;
-      } catch (r2) {
-        o = true, n = r2;
-      } finally {
-        try {
-          if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return;
-        } finally {
-          if (o) throw n;
-        }
-      }
-      return a;
-    }
-  }
-  function _arrayWithHoles4(r) {
-    if (Array.isArray(r)) return r;
-  }
   function _toConsumableArray3(r) {
     return _arrayWithoutHoles3(r) || _iterableToArray3(r) || _unsupportedIterableToArray11(r) || _nonIterableSpread3();
   }
@@ -28486,6 +28566,9 @@
         var triggerTargets = /* @__PURE__ */ new Map();
         var triggersByTargetId = /* @__PURE__ */ new Map();
         var indexedTriggerValues = /* @__PURE__ */ new Map();
+        var elementMemories = /* @__PURE__ */ new WeakMap();
+        var triggerMemories = /* @__PURE__ */ new WeakMap();
+        var measuredMemories = /* @__PURE__ */ new WeakMap();
         function init(options) {
           AelluxJs2.mountManager.add({
             extensionName: extensionName,
@@ -28502,13 +28585,13 @@
             mount: mountTriggerElement,
             unmount: unmountTriggerElement
           });
-          document.addEventListener("click", OnClick);
+          AelluxJs2.on("$click", OnClick);
         }
         function destroy() {
           AelluxJs2.mountManager.remove({
             extensionName: extensionName
           });
-          document.removeEventListener("click", OnClick);
+          AelluxJs2.off("$click", OnClick);
           var _iterator = _createForOfIteratorHelper11(triggerElementsSet), _step;
           try {
             for (_iterator.s(); !(_step = _iterator.n()).done; ) {
@@ -28535,6 +28618,7 @@
         }
         function mountPresentContainer(element) {
           if (presentElements.has(element)) return;
+          elementMemories.set(element, AelluxJs2.persist.element.save(element, [attr.present, attr.presentMotion, ARIA_EXPANDED, "hidden"], ["--ae-pop-low-steps", "--ae-unpop-low-steps"]));
           if ((element.getAttribute(attr.present) || "").trim().toLowerCase() === "all") {
             element.setAttribute(attr.present, DEFAULT_PRESENT);
           }
@@ -28556,7 +28640,6 @@
             presentMotion: presentMotion,
             measuredHeight: measuredHeight,
             measuredWidth: measuredWidth,
-            measuredStyles: null,
             motionEnabled: (element.getAttribute(attr.present) || "").trim() !== "",
             transition: null,
             autoUnpopTimeout: null,
@@ -28636,20 +28719,25 @@
           autoUnpopSchedule(element, presentController);
         }
         function unmountPresentContainer(element) {
+          var _elementMemories$get;
           if (!presentElements.has(element)) return;
           var controller = presentElements.get(element);
           controller.stop();
           element.classList.remove(className.grid);
           presentElements.delete(element);
           openPresentElements.delete(element);
+          (_elementMemories$get = elementMemories.get(element)) === null || _elementMemories$get === void 0 || _elementMemories$get.restore();
+          elementMemories.delete(element);
           controller.triggers.forEach(updateTriggerAriaExpanded);
         }
         function mountTriggerElement(triggerElement) {
           if (triggerElementsSet.has(triggerElement)) return;
+          triggerMemories.set(triggerElement, AelluxJs2.persist.element.save(triggerElement, [ARIA_CONTROLS, ARIA_EXPANDED], []));
           triggerElementsSet.add(triggerElement);
           refreshTriggerTargets(triggerElement);
         }
         function unmountTriggerElement(triggerElement) {
+          var _triggerMemories$get;
           if (!triggerElementsSet.has(triggerElement)) return;
           var target = triggerTargets.get(triggerElement);
           if (target) {
@@ -28659,6 +28747,8 @@
           }
           unindexTriggerTarget(triggerElement);
           triggerElementsSet.delete(triggerElement);
+          (_triggerMemories$get = triggerMemories.get(triggerElement)) === null || _triggerMemories$get === void 0 || _triggerMemories$get.restore();
+          triggerMemories.delete(triggerElement);
         }
         function targetIdFor(value) {
           if (!value) return null;
@@ -28755,28 +28845,17 @@
           return method && typeof method === "function" ? method(element) : toggle(element);
         }
         function restoreMeasuredStyles(element, controller) {
-          var saved = controller.measuredStyles;
-          if (!saved) return;
-          var _iterator5 = _createForOfIteratorHelper11(saved), _step5;
-          try {
-            for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
-              var _step5$value = _slicedToArray4(_step5.value, 3), name = _step5$value[0], value = _step5$value[1], priority = _step5$value[2];
-              if (value) element.style.setProperty(name, value, priority);
-              else element.style.removeProperty(name);
-            }
-          } catch (err) {
-            _iterator5.e(err);
-          } finally {
-            _iterator5.f();
-          }
-          controller.measuredStyles = null;
+          var memory = measuredMemories.get(element);
+          if (!memory) return;
+          memory.restore();
+          measuredMemories.delete(element);
         }
         function prepareMeasuredSize(_x, _x2, _x3, _x4, _x5) {
           return _prepareMeasuredSize.apply(this, arguments);
         }
         function _prepareMeasuredSize() {
           _prepareMeasuredSize = _asyncToGenerator6(/* @__PURE__ */ _regenerator6().m(function _callee(element, controller, gotoVisible, previousSize, waitForPreparation) {
-            var _iterator7, _step7, _step7$value, name, value, priority, size, computed, height, width, start;
+            var size, computed, height, width, start;
             return _regenerator6().w(function(_context) {
               while (1) switch (_context.n) {
                 case 0:
@@ -28786,23 +28865,10 @@
                   }
                   return _context.a(2, null);
                 case 1:
-                  if (!controller.measuredStyles) {
-                    controller.measuredStyles = ["max-height", "max-width"].map(function(name2) {
-                      return [name2, element.style.getPropertyValue(name2), element.style.getPropertyPriority(name2)];
-                    });
+                  if (!measuredMemories.has(element)) {
+                    measuredMemories.set(element, AelluxJs2.persist.element.save(element, [], ["max-height", "max-width"]));
                   }
-                  _iterator7 = _createForOfIteratorHelper11(controller.measuredStyles);
-                  try {
-                    for (_iterator7.s(); !(_step7 = _iterator7.n()).done; ) {
-                      _step7$value = _slicedToArray4(_step7.value, 3), name = _step7$value[0], value = _step7$value[1], priority = _step7$value[2];
-                      if (value) element.style.setProperty(name, value, priority);
-                      else element.style.removeProperty(name);
-                    }
-                  } catch (err) {
-                    _iterator7.e(err);
-                  } finally {
-                    _iterator7.f();
-                  }
+                  measuredMemories.get(element).restore();
                   size = previousSize;
                   if (gotoVisible || !size) {
                     computed = root2.getComputedStyle(element);
@@ -28985,7 +29051,8 @@
                   });
                   AelluxJs2.dispatchFrom(element, "Layout", {
                     detail: {
-                      origin: "present.".concat(newDirection).toLocaleLowerCase()
+                      origin: "present.".concat(newDirection).toLowerCase(),
+                      durationMs: Number.isFinite(timeMs) ? Math.max(0, timeMs) : 0
                     },
                     bubbles: true
                   });
@@ -29009,12 +29076,6 @@
                       bubbles: true
                     });
                   }
-                  AelluxJs2.dispatchFrom(element, "Layout", {
-                    detail: {
-                      origin: "present.".concat(newDirection).toLocaleLowerCase()
-                    },
-                    bubbles: true
-                  });
                   _context2.n = 17;
                   break;
                 case 14:
@@ -29092,10 +29153,10 @@
           unpop(element);
         }
         function outsideClickAutoUnpop(currentExceptions) {
-          var _iterator6 = _createForOfIteratorHelper11(openPresentElements), _step6;
+          var _iterator5 = _createForOfIteratorHelper11(openPresentElements), _step5;
           try {
             var _loop = function _loop2() {
-              var pContainer = _step6.value;
+              var pContainer = _step5.value;
               if (pContainer.hidden === true || pContainer.getAttribute(attr.unpopOnOutside) === "false" || currentExceptions.some(function(e) {
                 return pContainer.contains(e);
               })) {
@@ -29103,13 +29164,13 @@
               }
               unpop(pContainer);
             };
-            for (_iterator6.s(); !(_step6 = _iterator6.n()).done; ) {
+            for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
               if (_loop()) continue;
             }
           } catch (err) {
-            _iterator6.e(err);
+            _iterator5.e(err);
           } finally {
-            _iterator6.f();
+            _iterator5.f();
           }
         }
         function refreshChangedTrigger(button) {

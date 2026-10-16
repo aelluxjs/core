@@ -122,10 +122,10 @@
       despawn,
       hasMounts,
       on(event, handler, options) {
-        element.addEventListener(root.AelluxJs.eventName(event), handler, options);
+        root.AelluxJs.onTarget(element, event, handler, options);
       },
       off(event, handler, options) {
-        element.removeEventListener(root.AelluxJs.eventName(event), handler, options);
+        root.AelluxJs.offTarget(element, event, handler, options);
       },
       dispatch(event, options) {
         return root.AelluxJs.dispatchFrom(element, event, options);
@@ -239,6 +239,8 @@
     const initialAttributeValues = /* @__PURE__ */ new WeakMap();
     const pendingMounts = /* @__PURE__ */ new WeakMap();
     const pendingUnmounts = /* @__PURE__ */ new WeakMap();
+    const mountRecords = /* @__PURE__ */ new WeakMap();
+    let mountOrder = 0;
     const classPrefix = root.AelluxJs.className("");
     return { mount, unmount, unmountDetached, update, initialAttribute };
     function initialAttribute(element, name) {
@@ -410,7 +412,7 @@
                 }
               }
               rememberInitialAttributes(mountable);
-              setMounted(mountable, mountId);
+              setMounted(mountable, mountId, true, controller.priority);
               const finishPendingMount = beginPendingMount(mountable, mountId);
               try {
                 await controller.mount(mountable);
@@ -482,6 +484,7 @@
       const AelluxJs2 = root.AelluxJs;
       const selectedNames = extensionNames === null ? null : new Set((typeof extensionNames === "string" ? [extensionNames] : extensionNames).map((name) => fromCamelCase2(name)));
       const affected = /* @__PURE__ */ new Set();
+      const registrations = [];
       for (const [element, mountIds] of Array.from(mountedElements)) {
         const inRoot = element === rootElement || rootElement.contains(element);
         const detachedInGlobalUnmount = method === "unmount" && rootElement === root.document && !element.isConnected;
@@ -495,8 +498,7 @@
           const mounter = mountMaps.get(extensionKey);
           const controller = mounter && mounter.get(selector);
           if (method === "unmount") {
-            if (await unmountRegistration(element, mountId, controller, extensionName, selector))
-              affected.add(element);
+            registrations.push({ element, mountId, controller, extensionName, selector });
             continue;
           }
           try {
@@ -512,6 +514,13 @@
               selector
             });
           }
+        }
+      }
+      if (method === "unmount") {
+        registrations.sort(compareUnmountOrder);
+        for (const { element, mountId, controller, extensionName, selector } of registrations) {
+          if (await unmountRegistration(element, mountId, controller, extensionName, selector))
+            affected.add(element);
         }
       }
       AelluxJs2.dispatch(toCapitalized2(method), {
@@ -577,15 +586,24 @@
       return !isMounted(element, mountId);
     }
     async function unmountElementRegistrations(element) {
-      const mountIds = Array.from(mountedElements.get(element) || []);
-      for (const mountId of mountIds) {
+      const registrations = Array.from(mountedElements.get(element) || [], (mountId) => {
         const separator = mountId.indexOf("@");
         const extensionName = mountId.slice(0, separator);
         const selector = mountId.slice(separator + 1);
         const mounter = mountMaps.get(toCamelCase2(extensionName));
         const controller = mounter && mounter.get(selector);
+        return { element, mountId, controller, extensionName, selector };
+      });
+      registrations.sort(compareUnmountOrder);
+      for (const { mountId, controller, extensionName, selector } of registrations) {
         await unmountRegistration(element, mountId, controller, extensionName, selector);
       }
+    }
+    function compareUnmountOrder(left, right) {
+      var _a, _b, _c, _d, _e, _f;
+      const leftRecord = (_a = mountRecords.get(left.element)) == null ? void 0 : _a.get(left.mountId);
+      const rightRecord = (_b = mountRecords.get(right.element)) == null ? void 0 : _b.get(right.mountId);
+      return ((_c = rightRecord == null ? void 0 : rightRecord.priority) != null ? _c : 0) - ((_d = leftRecord == null ? void 0 : leftRecord.priority) != null ? _d : 0) || ((_e = rightRecord == null ? void 0 : rightRecord.order) != null ? _e : 0) - ((_f = leftRecord == null ? void 0 : leftRecord.order) != null ? _f : 0);
     }
     function beginPendingMount(element, mountId) {
       let mounts = pendingMounts.get(element);
@@ -639,12 +657,23 @@
       if (!mounts) return false;
       return mountId ? mounts.has(mountId) : mounts.size > 0;
     }
-    function setMounted(element, mountId, mounted = true) {
+    function setMounted(element, mountId, mounted = true, priority = 0) {
       if (!mountedElements.has(element)) {
         mountedElements.set(element, /* @__PURE__ */ new Set());
       }
       const mounts = mountedElements.get(element);
       mounts[mounted ? "add" : "delete"](mountId);
+      let records = mountRecords.get(element);
+      if (mounted) {
+        if (!records) {
+          records = /* @__PURE__ */ new Map();
+          mountRecords.set(element, records);
+        }
+        records.set(mountId, { priority, order: mountOrder++ });
+      } else if (records) {
+        records.delete(mountId);
+        if (!records.size) mountRecords.delete(element);
+      }
       if (mounts.size === 0) mountedElements.delete(element);
     }
     function rememberInitialAttributes(element) {
@@ -876,19 +905,12 @@
           await new Promise((resolve) => {
             const startMountCallback = function() {
               AelluxJs.mount().then(function() {
-                document.removeEventListener(
-                  "DOMContentLoaded",
-                  startMountCallback
-                );
+                AelluxJs.off("$DOMContentLoaded", startMountCallback);
                 resolve();
               });
             };
             if (document.readyState === "loading")
-              document.addEventListener(
-                "DOMContentLoaded",
-                startMountCallback,
-                { once: true }
-              );
+              AelluxJs.on("$DOMContentLoaded", startMountCallback, { once: true });
             else
               startMountCallback();
           });

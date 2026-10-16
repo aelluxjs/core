@@ -12,7 +12,9 @@
  * Inputs and activation: mounts `[data-ae-anchor]` and resolves an optional
  * `data-ae-anchor-target`; without one, the positioning parent is the target.
  * Scroll, resize, size and intersection changes, and bubbling `AelluxJsLayout`
- * events schedule placement updates with a 100 ms throttle.
+ * events schedule placement updates with a 100 ms throttle. A Layout event with
+ * `detail.durationMs` keeps checking at that interval until the time expires;
+ * zero duration schedules one check after 100 ms.
  *
  * Outputs and owned state: publishes anchor position and origin through inline
  * CSS properties. The boot's weak CSS hides uncalculated elements and positions
@@ -54,8 +56,11 @@
 
   const UPDATE_INTERVAL_MS = 100;
   const anchors = new Map();
+  const elementMemories = new WeakMap();
 
   let updateTimeout = null;
+  let layoutUpdateTimeout = null;
+  let layoutUpdateUntil = 0;
   let lastUpdateTime = -UPDATE_INTERVAL_MS;
 
   AelluxJs.extAttach(extensionName, { init, destroy });
@@ -76,7 +81,10 @@
 
   async function destroy() {
     if (updateTimeout !== null) clearTimeout(updateTimeout);
+    if (layoutUpdateTimeout !== null) clearTimeout(layoutUpdateTimeout);
     updateTimeout = null;
+    layoutUpdateTimeout = null;
+    layoutUpdateUntil = 0;
     lastUpdateTime = -UPDATE_INTERVAL_MS;
     await Promise.all(Array.from(anchors.keys(), unmountAnchor));
     AelluxJs.mountManager.remove({ extensionName });
@@ -84,21 +92,18 @@
 
   function mountAnchor(element) {
     if (anchors.has(element)) return;
-    const original = ownedProperties.map(name => ({
-      value: element.style.getPropertyValue(name),
-      priority: element.style.getPropertyPriority(name)
-    }));
+    elementMemories.set(element, AelluxJs.persist.element.save(element, [], ownedProperties));
     const state = {
-      original, invalidContext: false, active: false, revision: 0,
+      invalidContext: false, active: false, revision: 0,
       target: null, reference: null,
-      layoutListener: () => scheduleUpdate(),
+      layoutListener: event => scheduleLayoutUpdate(event),
       observer: null, intersectionObserver: null
     };
 
     anchors.set(element, state);
     if (anchors.size === 1) {
-      root.addEventListener("scroll", scheduleUpdate, { capture: true, passive: true });
-      root.addEventListener("resize", scheduleUpdate);
+      AelluxJs.onTarget(root, "$scroll", scheduleUpdate, { capture: true, passive: true });
+      AelluxJs.onTarget(root, "$resize", scheduleUpdate);
     }
     if (typeof root.ResizeObserver === "function") {
       state.observer = new root.ResizeObserver(scheduleUpdate);
@@ -112,19 +117,24 @@
   async function unmountAnchor(element) {
     const state = anchors.get(element);
     if (!state) return;
+    const memory = elementMemories.get(element);
+    elementMemories.delete(element);
     state.revision++;
-    if (state.reference) state.reference.removeEventListener(layoutEvent, state.layoutListener);
+    if (state.reference) AelluxJs.offTarget(state.reference, layoutEvent, state.layoutListener);
     if (state.observer) state.observer.disconnect();
     if (state.intersectionObserver) state.intersectionObserver.disconnect();
     anchors.delete(element);
     if (!anchors.size) {
-      root.removeEventListener("scroll", scheduleUpdate, true);
-      root.removeEventListener("resize", scheduleUpdate);
+      AelluxJs.offTarget(root, "$scroll", scheduleUpdate, true);
+      AelluxJs.offTarget(root, "$resize", scheduleUpdate);
       if (updateTimeout !== null) clearTimeout(updateTimeout);
+      if (layoutUpdateTimeout !== null) clearTimeout(layoutUpdateTimeout);
       updateTimeout = null;
+      layoutUpdateTimeout = null;
+      layoutUpdateUntil = 0;
       lastUpdateTime = -UPDATE_INTERVAL_MS;
     }
-    await AelluxJs.waitLayout.update(deactivate, [element, state]);
+    await AelluxJs.waitLayout.update(deactivate, [element, state, memory]);
   }
 
   function scheduleUpdate() {
@@ -138,6 +148,41 @@
     }
     if (updateTimeout !== null) return;
     updateTimeout = setTimeout(flushUpdate, UPDATE_INTERVAL_MS - elapsed);
+  }
+
+  function scheduleLayoutUpdate(event) {
+    const durationMs = Number(event && event.detail ? event.detail.durationMs : NaN);
+    if (!Number.isFinite(durationMs) || durationMs < 0) {
+      scheduleUpdate();
+      return;
+    }
+
+    if (durationMs === 0) {
+      if (layoutUpdateTimeout === null)
+        layoutUpdateTimeout = setTimeout(checkLayoutUpdate, UPDATE_INTERVAL_MS);
+      return;
+    }
+
+    scheduleUpdate();
+    layoutUpdateUntil = Math.max(layoutUpdateUntil, now() + durationMs);
+    if (layoutUpdateTimeout !== null) return;
+    layoutUpdateTimeout = setTimeout(
+      checkLayoutUpdate, Math.min(UPDATE_INTERVAL_MS, durationMs)
+    );
+  }
+
+  function checkLayoutUpdate() {
+    layoutUpdateTimeout = null;
+    scheduleUpdate();
+
+    const remaining = layoutUpdateUntil - now();
+    if (remaining > 0) {
+      layoutUpdateTimeout = setTimeout(
+        checkLayoutUpdate, Math.min(UPDATE_INTERVAL_MS, remaining)
+      );
+    } else {
+      layoutUpdateUntil = 0;
+    }
   }
 
   function flushUpdate() {
@@ -276,9 +321,9 @@
 
   function listenForLayout(state, reference) {
     if (state.reference === reference) return;
-    if (state.reference) state.reference.removeEventListener(layoutEvent, state.layoutListener);
+    if (state.reference) AelluxJs.offTarget(state.reference, layoutEvent, state.layoutListener);
     state.reference = reference;
-    if (reference) reference.addEventListener(layoutEvent, state.layoutListener);
+    if (reference) AelluxJs.onTarget(reference, layoutEvent, state.layoutListener);
   }
 
   function applyBaseStyles(element) {
@@ -291,22 +336,14 @@
       "var(--ae-anchor-origin-x, 50%) var(--ae-anchor-origin-y, 0%)");
   }
 
-  function deactivate(element, state) {
-    if (state.reference) state.reference.removeEventListener(layoutEvent, state.layoutListener);
+  function deactivate(element, state, memory = elementMemories.get(element)) {
+    if (state.reference) AelluxJs.offTarget(state.reference, layoutEvent, state.layoutListener);
     if (state.observer) state.observer.disconnect();
     if (state.intersectionObserver) state.intersectionObserver.disconnect();
     state.target = state.reference = null;
     element.classList.remove(anchoredClass);
-    if (state.active) restoreStyles(element, state.original);
+    if (state.active && memory) memory.restore();
     state.active = false;
-  }
-
-  function restoreStyles(element, original) {
-    ownedProperties.forEach((name, index) => {
-      const { value, priority } = original[index];
-      if (value) element.style.setProperty(name, value, priority);
-      else element.style.removeProperty(name);
-    });
   }
 
   function resolveElement(value) {

@@ -2,18 +2,20 @@
 
 import { buildDiagnostics } from "./build-diagnostics.js";
 import { buildPersistMemory } from "./build-persist-memory.js";
+import { createSaveElementMemoryHelper } from "./create-save-element-memory-helper.js";
 import { buildPreferenceMediaQueries } from "./build-preference-media-queries.js";
 import { saveAttr, restoreAttr } from "./build-initial-attr-memory.js";
 import utilsNameCase from "./utils-name-case.js";
+import { createNamingNormalization } from "./create-naming-normalization.js";
 import { createPreferenceHtmlHelper } from "./create-preference-html-helper.js";
 import { assetLoadHelper } from "./asset-load-helper.js";
 
 // Build-time imports aside, keep this factory ES5-compatible for the boot bundle.
 // The caller publishes the returned function and replaces init with the boot loader.
 export function createAelluxApi(root, constants) {
-  var toCapitalized = utilsNameCase.toCapitalized;
   var toCamelCase = utilsNameCase.toCamelCase;
   var fromCamelCase = utilsNameCase.fromCamelCase;
+  var namingNormalization = createNamingNormalization(constants);
 
   var options = constants.AELLUXJS_DEFAULT_INITIALIZATION_OPTIONS;
   var diagnostics = buildDiagnostics(constants.AELLUXJS_DIAGNOSTICS);
@@ -35,24 +37,25 @@ export function createAelluxApi(root, constants) {
     persist: {
       local: buildPersistMemory(root, "localStorage", null, diagnostics),
       session: buildPersistMemory(root, "sessionStorage", null, diagnostics),
-      preferences: buildPersistMemory(root, "localStorage", "AelluxJsPreferences", diagnostics)
+      preferences: buildPersistMemory(root, "localStorage", "AelluxJsPreferences", diagnostics),
+      element: createSaveElementMemoryHelper()
     },
     updatePreferenceAttributesHTML: preferenceHtml.updatePreferenceAttributesHTML,
     on: function (event, handler, options) {
-      document.addEventListener(api.eventName(event), handler, options);
+      api.onTarget(document, event, handler, options);
     },
     off: function (event, handler, options) {
-      document.removeEventListener(api.eventName(event), handler, options);
+      api.offTarget(document, event, handler, options);
     },
-    attr: function (name) {
-      name = fromCamelCase(name);
-      return "data-" + constants.AELLUXJS_DATA_ATTRIBUTE_NAME_PREFFIX.replace(/\?/, name);
+    onTarget: function (target, event, handler, options) {
+      target.addEventListener(api.eventName(event), handler, options);
     },
+    offTarget: function (target, event, handler, options) {
+      target.removeEventListener(api.eventName(event), handler, options);
+    },
+    attr: namingNormalization.attr,
     attrMem: { save: saveAttr, restore: restoreAttr },
-    className: function (name) {
-      name = fromCamelCase(name);
-      return constants.AELLUXJS_CLASS_NAME_PREFFIX.replace(/\?/, name);
-    },
+    className: namingNormalization.className,
     registerCssProperty: function (descriptor) {
       if (!root.CSS || typeof root.CSS.registerProperty !== "function") return false;
       try {
@@ -62,22 +65,10 @@ export function createAelluxApi(root, constants) {
         return false;
       }
     },
-    extFilename: function (extensionName) {
-      extensionName = fromCamelCase(extensionName);
-      return "aellux." + constants.AELLUXJS_EXT_SCRIPT_PREFIX + "." + extensionName +
-        (api.minified ? ".min.js" : ".js");
-    },
-    extName: function (filename) {
-      return filename.replace(
-        new RegExp("^.*aellux\\." + constants.AELLUXJS_EXT_SCRIPT_PREFIX +
-          "\\.([^.\\/?#]+)(?:\\.min)?\\.js(?:[?#].*)?$"),
-        "$1"
-      );
-    },
-    eventName: function (name) {
-      name = toCapitalized(name);
-      return constants.AELLUXJS_EVENT_NAME_PREFFIX.replace(/\?/, name);
-    },
+    // Keep minified tied to the API even when callers store this method separately.
+    extFilename: namingNormalization.extFilename.bind(api),
+    extName: namingNormalization.extName,
+    eventName: namingNormalization.eventName,
     noConflict: function () { return oldShortInstance; },
     registry: {
       ext: {},
@@ -138,7 +129,7 @@ export function createAelluxApi(root, constants) {
       if ((typeof options.integrity !== "undefined" && options.integrity !== null &&
         typeof options.integrity !== "string") ||
         (typeof options.crossOrigin !== "undefined" && options.crossOrigin !== null &&
-        typeof options.crossOrigin !== "string")) {
+          typeof options.crossOrigin !== "string")) {
         return root.Promise.reject(diagnostics.error(
           diagnostics.ERROR_DEPENDENCY_ARGUMENT,
           { label: label, url: url, expected: "integrity and crossOrigin strings" }

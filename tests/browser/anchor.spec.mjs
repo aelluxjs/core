@@ -1,12 +1,16 @@
 import { expect, test } from "@playwright/test";
 
-async function startAnchor(page, markup) {
+async function startAnchor(page, markup, options = {}) {
   await page.goto("/tests/index.htm");
   await page.addScriptTag({ url: "/dist/aellux.js" });
-  await page.evaluate(html => {
+  await page.evaluate(({ html, disableObservers }) => {
+    if (disableObservers) {
+      window.ResizeObserver = class { observe() {} disconnect() {} };
+      window.IntersectionObserver = class { observe() {} disconnect() {} };
+    }
     document.body.innerHTML = html;
     AelluxJs.ext("anchor");
-  }, markup);
+  }, { html: markup, disableObservers: options.disableObservers });
   await page.addScriptTag({ url: "/src/aellux.ext.anchor.js" });
   await page.evaluate(() => AelluxJs.init({ mode: "basic" }));
   await expect.poll(() => page.evaluate(() => AelluxJs.ext.anchor?.initialized)).toBe(true);
@@ -210,6 +214,10 @@ test("layout event on the shared positioning parent replaces position polling", 
   await page.goto("/tests/index.htm");
   await page.addScriptTag({ url: "/dist/aellux.js" });
   await page.evaluate(() => {
+    window.ResizeObserver = class {
+      observe() {}
+      disconnect() {}
+    };
     window.IntersectionObserver = class {
       observe() {}
       disconnect() {}
@@ -245,6 +253,52 @@ test("layout event on the shared positioning parent replaces position polling", 
   await expect.poll(() => page.locator("#other").evaluate(element =>
     element.style.getPropertyValue("--ae-anchor-x")
   )).toBe("60px");
+});
+
+test("layout duration keeps anchor checking at the 100 ms interval", async ({ page }) => {
+  await startAnchor(page, `
+    <div style="position: relative; width: 300px; height: 100px">
+      <div id="target" style="position: absolute; left: 20px; top: 10px; width: 30px; height: 20px"></div>
+      <div id="anchor" data-ae-anchor-target="target" data-ae-anchor="top-left:top-left"
+        style="width: 10px; height: 10px"></div>
+    </div>`);
+
+  const x = () => page.locator("#anchor").evaluate(element =>
+    element.style.getPropertyValue("--ae-anchor-x")
+  );
+  await expect.poll(x).toBe("20px");
+
+  await page.evaluate(() => {
+    document.getElementById("target").dispatchEvent(new CustomEvent("AelluxJsLayout", {
+      detail: { origin: "test.move", durationMs: 400 }, bubbles: true
+    }));
+    setTimeout(() => { document.getElementById("target").style.left = "45px"; }, 150);
+  });
+  await expect.poll(x, { timeout: 1000 }).toBe("45px");
+});
+
+test("zero layout duration checks once after 100 ms", async ({ page }) => {
+  await startAnchor(page, `
+    <div style="position: relative; width: 300px; height: 100px">
+      <div id="target" style="position: absolute; left: 20px; top: 10px; width: 30px; height: 20px"></div>
+      <div id="anchor" data-ae-anchor-target="target" data-ae-anchor="top-left:top-left"
+        style="width: 10px; height: 10px"></div>
+    </div>`, { disableObservers: true });
+
+  const x = () => page.locator("#anchor").evaluate(element =>
+    element.style.getPropertyValue("--ae-anchor-x")
+  );
+  await expect.poll(x).toBe("20px");
+  await page.evaluate(() => {
+    const target = document.getElementById("target");
+    target.style.left = "45px";
+    target.dispatchEvent(new CustomEvent("AelluxJsLayout", {
+      detail: { durationMs: 0 }, bubbles: true
+    }));
+  });
+  await page.waitForTimeout(50);
+  expect(await x()).toBe("20px");
+  await expect.poll(x).toBe("45px");
 });
 
 test("present layout event activates an anchor whose target started hidden", async ({ page }) => {

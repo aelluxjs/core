@@ -21051,10 +21051,10 @@
       despawn: despawn,
       hasMounts: hasMounts,
       on: function on(event, handler, options) {
-        element.addEventListener(root.AelluxJs.eventName(event), handler, options);
+        root.AelluxJs.onTarget(element, event, handler, options);
       },
       off: function off(event, handler, options) {
-        element.removeEventListener(root.AelluxJs.eventName(event), handler, options);
+        root.AelluxJs.offTarget(element, event, handler, options);
       },
       dispatch: function dispatch(event, options) {
         return root.AelluxJs.dispatchFrom(element, event, options);
@@ -21404,6 +21404,8 @@
     var initialAttributeValues = /* @__PURE__ */ new WeakMap();
     var pendingMounts = /* @__PURE__ */ new WeakMap();
     var pendingUnmounts = /* @__PURE__ */ new WeakMap();
+    var mountRecords = /* @__PURE__ */ new WeakMap();
+    var mountOrder = 0;
     var classPrefix = root.AelluxJs.className("");
     return {
       mount: mount,
@@ -21865,7 +21867,7 @@
                 }
               }
               rememberInitialAttributes(mountable);
-              setMounted(mountable, mountId);
+              setMounted(mountable, mountId, true, _controller.priority);
               finishPendingMount = beginPendingMount(mountable, mountId);
               _context5.p = 24;
               _context5.n = 25;
@@ -22005,7 +22007,7 @@
     }
     function _AelluxJsMounted() {
       _AelluxJsMounted = _asyncToGenerator(/* @__PURE__ */ _regenerator().m(function _callee6(rootElement, method) {
-        var extensionNames, detachedOnly, AelluxJs2, selectedNames, affected, _i8, _Array$from2, _Array$from2$_i, element, mountIds, inRoot, detachedInGlobalUnmount, _i9, _Array$from3, mountId, separator, extensionName, selector, extensionKey, mounter, controller, _args6 = arguments, _t9;
+        var extensionNames, detachedOnly, AelluxJs2, selectedNames, affected, registrations, _i8, _Array$from2, _Array$from2$_i, element, mountIds, inRoot, detachedInGlobalUnmount, _i9, _Array$from3, mountId, separator, extensionName, selector, extensionKey, mounter, controller, _iterator11, _step11, _step11$value, _element, _mountId, _controller2, _extensionName3, _selector4, _args6 = arguments, _t9, _t0;
         return _regenerator().w(function(_context6) {
           while (1) switch (_context6.p = _context6.n) {
             case 0:
@@ -22016,10 +22018,11 @@
                 return fromCamelCase2(name);
               }));
               affected = /* @__PURE__ */ new Set();
+              registrations = [];
               _i8 = 0, _Array$from2 = Array.from(mountedElements);
             case 1:
               if (!(_i8 < _Array$from2.length)) {
-                _context6.n = 12;
+                _context6.n = 10;
                 break;
               }
               _Array$from2$_i = _slicedToArray(_Array$from2[_i8], 2), element = _Array$from2$_i[0], mountIds = _Array$from2$_i[1];
@@ -22029,12 +22032,12 @@
                 _context6.n = 2;
                 break;
               }
-              return _context6.a(3, 11);
+              return _context6.a(3, 9);
             case 2:
               _i9 = 0, _Array$from3 = Array.from(mountIds);
             case 3:
               if (!(_i9 < _Array$from3.length)) {
-                _context6.n = 11;
+                _context6.n = 9;
                 break;
               }
               mountId = _Array$from3[_i9];
@@ -22045,39 +22048,37 @@
                 _context6.n = 4;
                 break;
               }
-              return _context6.a(3, 10);
+              return _context6.a(3, 8);
             case 4:
               extensionKey = toCamelCase2(extensionName);
               mounter = mountMaps.get(extensionKey);
               controller = mounter && mounter.get(selector);
               if (!(method === "unmount")) {
-                _context6.n = 7;
+                _context6.n = 5;
                 break;
               }
-              _context6.n = 5;
-              return unmountRegistration(element, mountId, controller, extensionName, selector);
+              registrations.push({
+                element: element,
+                mountId: mountId,
+                controller: controller,
+                extensionName: extensionName,
+                selector: selector
+              });
+              return _context6.a(3, 8);
             case 5:
-              if (!_context6.v) {
+              _context6.p = 5;
+              if (!(controller && controller[method])) {
                 _context6.n = 6;
                 break;
               }
               affected.add(element);
+              _context6.n = 6;
+              return controller[method](element);
             case 6:
-              return _context6.a(3, 10);
+              _context6.n = 8;
+              break;
             case 7:
               _context6.p = 7;
-              if (!(controller && controller[method])) {
-                _context6.n = 8;
-                break;
-              }
-              affected.add(element);
-              _context6.n = 8;
-              return controller[method](element);
-            case 8:
-              _context6.n = 10;
-              break;
-            case 9:
-              _context6.p = 9;
               _t9 = _context6.v;
               AelluxJs2.diagnostics.error(AelluxJs2.diagnostics.ERROR_EXTENSION_MOUNT, {
                 cause: _t9,
@@ -22085,15 +22086,52 @@
                 method: method,
                 selector: selector
               });
-            case 10:
+            case 8:
               _i9++;
               _context6.n = 3;
               break;
-            case 11:
+            case 9:
               _i8++;
               _context6.n = 1;
               break;
+            case 10:
+              if (!(method === "unmount")) {
+                _context6.n = 18;
+                break;
+              }
+              registrations.sort(compareUnmountOrder);
+              _iterator11 = _createForOfIteratorHelper2(registrations);
+              _context6.p = 11;
+              _iterator11.s();
             case 12:
+              if ((_step11 = _iterator11.n()).done) {
+                _context6.n = 15;
+                break;
+              }
+              _step11$value = _step11.value, _element = _step11$value.element, _mountId = _step11$value.mountId, _controller2 = _step11$value.controller, _extensionName3 = _step11$value.extensionName, _selector4 = _step11$value.selector;
+              _context6.n = 13;
+              return unmountRegistration(_element, _mountId, _controller2, _extensionName3, _selector4);
+            case 13:
+              if (!_context6.v) {
+                _context6.n = 14;
+                break;
+              }
+              affected.add(_element);
+            case 14:
+              _context6.n = 12;
+              break;
+            case 15:
+              _context6.n = 17;
+              break;
+            case 16:
+              _context6.p = 16;
+              _t0 = _context6.v;
+              _iterator11.e(_t0);
+            case 17:
+              _context6.p = 17;
+              _iterator11.f();
+              return _context6.f(17);
+            case 18:
               AelluxJs2.dispatch(toCapitalized2(method), {
                 detail: {
                   root: rootElement,
@@ -22101,10 +22139,10 @@
                   elements: Array.from(affected)
                 }
               });
-            case 13:
+            case 19:
               return _context6.a(2);
           }
-        }, _callee6, null, [[7, 9]]);
+        }, _callee6, null, [[11, 16, 17, 18], [5, 7]]);
       }));
       return _AelluxJsMounted.apply(this, arguments);
     }
@@ -22113,7 +22151,7 @@
     }
     function _unmountRegistration() {
       _unmountRegistration = _asyncToGenerator(/* @__PURE__ */ _regenerator().m(function _callee7(element, mountId, controller, extensionName, selector) {
-        var pendingMount, tasks, finish, AelluxJs2, diagnostics, elementController, _t0;
+        var pendingMount, tasks, finish, AelluxJs2, diagnostics, elementController, _t1;
         return _regenerator().w(function(_context7) {
           while (1) switch (_context7.p = _context7.n) {
             case 0:
@@ -22163,9 +22201,9 @@
               break;
             case 8:
               _context7.p = 8;
-              _t0 = _context7.v;
+              _t1 = _context7.v;
               diagnostics.error(diagnostics.ERROR_EXTENSION_MOUNT, {
-                cause: _t0,
+                cause: _t1,
                 extension: extensionName,
                 method: "unmount",
                 selector: selector
@@ -22206,23 +22244,32 @@
     }
     function _unmountElementRegistrations() {
       _unmountElementRegistrations = _asyncToGenerator(/* @__PURE__ */ _regenerator().m(function _callee8(element) {
-        var mountIds, _i0, _mountIds, mountId, separator, extensionName, selector, mounter, controller;
+        var registrations, _i0, _registrations2, _registrations2$_i, mountId, controller, extensionName, selector;
         return _regenerator().w(function(_context8) {
           while (1) switch (_context8.n) {
             case 0:
-              mountIds = Array.from(mountedElements.get(element) || []);
-              _i0 = 0, _mountIds = mountIds;
+              registrations = Array.from(mountedElements.get(element) || [], function(mountId2) {
+                var separator = mountId2.indexOf("@");
+                var extensionName2 = mountId2.slice(0, separator);
+                var selector2 = mountId2.slice(separator + 1);
+                var mounter = mountMaps.get(toCamelCase2(extensionName2));
+                var controller2 = mounter && mounter.get(selector2);
+                return {
+                  element: element,
+                  mountId: mountId2,
+                  controller: controller2,
+                  extensionName: extensionName2,
+                  selector: selector2
+                };
+              });
+              registrations.sort(compareUnmountOrder);
+              _i0 = 0, _registrations2 = registrations;
             case 1:
-              if (!(_i0 < _mountIds.length)) {
+              if (!(_i0 < _registrations2.length)) {
                 _context8.n = 3;
                 break;
               }
-              mountId = _mountIds[_i0];
-              separator = mountId.indexOf("@");
-              extensionName = mountId.slice(0, separator);
-              selector = mountId.slice(separator + 1);
-              mounter = mountMaps.get(toCamelCase2(extensionName));
-              controller = mounter && mounter.get(selector);
+              _registrations2$_i = _registrations2[_i0], mountId = _registrations2$_i.mountId, controller = _registrations2$_i.controller, extensionName = _registrations2$_i.extensionName, selector = _registrations2$_i.selector;
               _context8.n = 2;
               return unmountRegistration(element, mountId, controller, extensionName, selector);
             case 2:
@@ -22235,6 +22282,12 @@
         }, _callee8);
       }));
       return _unmountElementRegistrations.apply(this, arguments);
+    }
+    function compareUnmountOrder(left, right) {
+      var _mountRecords$get, _mountRecords$get2, _rightRecord$priority, _leftRecord$priority, _rightRecord$order, _leftRecord$order;
+      var leftRecord = (_mountRecords$get = mountRecords.get(left.element)) === null || _mountRecords$get === void 0 ? void 0 : _mountRecords$get.get(left.mountId);
+      var rightRecord = (_mountRecords$get2 = mountRecords.get(right.element)) === null || _mountRecords$get2 === void 0 ? void 0 : _mountRecords$get2.get(right.mountId);
+      return ((_rightRecord$priority = rightRecord === null || rightRecord === void 0 ? void 0 : rightRecord.priority) !== null && _rightRecord$priority !== void 0 ? _rightRecord$priority : 0) - ((_leftRecord$priority = leftRecord === null || leftRecord === void 0 ? void 0 : leftRecord.priority) !== null && _leftRecord$priority !== void 0 ? _leftRecord$priority : 0) || ((_rightRecord$order = rightRecord === null || rightRecord === void 0 ? void 0 : rightRecord.order) !== null && _rightRecord$order !== void 0 ? _rightRecord$order : 0) - ((_leftRecord$order = leftRecord === null || leftRecord === void 0 ? void 0 : leftRecord.order) !== null && _leftRecord$order !== void 0 ? _leftRecord$order : 0);
     }
     function beginPendingMount(element, mountId) {
       var mounts = pendingMounts.get(element);
@@ -22287,11 +22340,26 @@
     }
     function setMounted(element, mountId) {
       var mounted = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : true;
+      var priority = arguments.length > 3 && arguments[3] !== void 0 ? arguments[3] : 0;
       if (!mountedElements.has(element)) {
         mountedElements.set(element, /* @__PURE__ */ new Set());
       }
       var mounts = mountedElements.get(element);
       mounts[mounted ? "add" : "delete"](mountId);
+      var records = mountRecords.get(element);
+      if (mounted) {
+        if (!records) {
+          records = /* @__PURE__ */ new Map();
+          mountRecords.set(element, records);
+        }
+        records.set(mountId, {
+          priority: priority,
+          order: mountOrder++
+        });
+      } else if (records) {
+        records.delete(mountId);
+        if (!records.size) mountRecords.delete(element);
+      }
       if (mounts.size === 0) mountedElements.delete(element);
     }
     function rememberInitialAttributes(element) {
@@ -22812,11 +22880,11 @@
                     return new Promise(function(resolve) {
                       var _startMountCallback = function startMountCallback() {
                         AelluxJs.mount().then(function() {
-                          document.removeEventListener("DOMContentLoaded", _startMountCallback);
+                          AelluxJs.off("$DOMContentLoaded", _startMountCallback);
                           resolve();
                         });
                       };
-                      if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", _startMountCallback, {
+                      if (document.readyState === "loading") AelluxJs.on("$DOMContentLoaded", _startMountCallback, {
                         once: true
                       });
                       else _startMountCallback();

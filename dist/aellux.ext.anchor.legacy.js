@@ -171,7 +171,10 @@
     };
     var UPDATE_INTERVAL_MS = 100;
     var anchors = /* @__PURE__ */ new Map();
+    var elementMemories = /* @__PURE__ */ new WeakMap();
     var updateTimeout = null;
+    var layoutUpdateTimeout = null;
+    var layoutUpdateUntil = 0;
     var lastUpdateTime = -UPDATE_INTERVAL_MS;
     AelluxJs.extAttach(extensionName, {
       init: init,
@@ -208,7 +211,10 @@
           while (1) switch (_context.n) {
             case 0:
               if (updateTimeout !== null) clearTimeout(updateTimeout);
+              if (layoutUpdateTimeout !== null) clearTimeout(layoutUpdateTimeout);
               updateTimeout = null;
+              layoutUpdateTimeout = null;
+              layoutUpdateUntil = 0;
               lastUpdateTime = -UPDATE_INTERVAL_MS;
               _context.n = 1;
               return Promise.all(Array.from(anchors.keys(), unmountAnchor));
@@ -225,32 +231,26 @@
     }
     function mountAnchor(element) {
       if (anchors.has(element)) return;
-      var original = ownedProperties.map(function(name) {
-        return {
-          value: element.style.getPropertyValue(name),
-          priority: element.style.getPropertyPriority(name)
-        };
-      });
+      elementMemories.set(element, AelluxJs.persist.element.save(element, [], ownedProperties));
       var state = {
-        original: original,
         invalidContext: false,
         active: false,
         revision: 0,
         target: null,
         reference: null,
-        layoutListener: function layoutListener() {
-          return scheduleUpdate();
+        layoutListener: function layoutListener(event) {
+          return scheduleLayoutUpdate(event);
         },
         observer: null,
         intersectionObserver: null
       };
       anchors.set(element, state);
       if (anchors.size === 1) {
-        root.addEventListener("scroll", scheduleUpdate, {
+        AelluxJs.onTarget(root, "$scroll", scheduleUpdate, {
           capture: true,
           passive: true
         });
-        root.addEventListener("resize", scheduleUpdate);
+        AelluxJs.onTarget(root, "$resize", scheduleUpdate);
       }
       if (typeof root.ResizeObserver === "function") {
         state.observer = new root.ResizeObserver(scheduleUpdate);
@@ -265,7 +265,7 @@
     }
     function _unmountAnchor() {
       _unmountAnchor = _asyncToGenerator(/* @__PURE__ */ _regenerator().m(function _callee2(element) {
-        var state;
+        var state, memory;
         return _regenerator().w(function(_context2) {
           while (1) switch (_context2.n) {
             case 0:
@@ -276,20 +276,25 @@
               }
               return _context2.a(2);
             case 1:
+              memory = elementMemories.get(element);
+              elementMemories.delete(element);
               state.revision++;
-              if (state.reference) state.reference.removeEventListener(layoutEvent, state.layoutListener);
+              if (state.reference) AelluxJs.offTarget(state.reference, layoutEvent, state.layoutListener);
               if (state.observer) state.observer.disconnect();
               if (state.intersectionObserver) state.intersectionObserver.disconnect();
               anchors.delete(element);
               if (!anchors.size) {
-                root.removeEventListener("scroll", scheduleUpdate, true);
-                root.removeEventListener("resize", scheduleUpdate);
+                AelluxJs.offTarget(root, "$scroll", scheduleUpdate, true);
+                AelluxJs.offTarget(root, "$resize", scheduleUpdate);
                 if (updateTimeout !== null) clearTimeout(updateTimeout);
+                if (layoutUpdateTimeout !== null) clearTimeout(layoutUpdateTimeout);
                 updateTimeout = null;
+                layoutUpdateTimeout = null;
+                layoutUpdateUntil = 0;
                 lastUpdateTime = -UPDATE_INTERVAL_MS;
               }
               _context2.n = 2;
-              return AelluxJs.waitLayout.update(deactivate, [element, state]);
+              return AelluxJs.waitLayout.update(deactivate, [element, state, memory]);
             case 2:
               return _context2.a(2);
           }
@@ -308,6 +313,31 @@
       }
       if (updateTimeout !== null) return;
       updateTimeout = setTimeout(flushUpdate, UPDATE_INTERVAL_MS - elapsed);
+    }
+    function scheduleLayoutUpdate(event) {
+      var durationMs = Number(event && event.detail ? event.detail.durationMs : NaN);
+      if (!Number.isFinite(durationMs) || durationMs < 0) {
+        scheduleUpdate();
+        return;
+      }
+      if (durationMs === 0) {
+        if (layoutUpdateTimeout === null) layoutUpdateTimeout = setTimeout(checkLayoutUpdate, UPDATE_INTERVAL_MS);
+        return;
+      }
+      scheduleUpdate();
+      layoutUpdateUntil = Math.max(layoutUpdateUntil, now() + durationMs);
+      if (layoutUpdateTimeout !== null) return;
+      layoutUpdateTimeout = setTimeout(checkLayoutUpdate, Math.min(UPDATE_INTERVAL_MS, durationMs));
+    }
+    function checkLayoutUpdate() {
+      layoutUpdateTimeout = null;
+      scheduleUpdate();
+      var remaining = layoutUpdateUntil - now();
+      if (remaining > 0) {
+        layoutUpdateTimeout = setTimeout(checkLayoutUpdate, Math.min(UPDATE_INTERVAL_MS, remaining));
+      } else {
+        layoutUpdateUntil = 0;
+      }
     }
     function flushUpdate() {
       updateTimeout = null;
@@ -555,9 +585,9 @@
     }
     function listenForLayout(state, reference) {
       if (state.reference === reference) return;
-      if (state.reference) state.reference.removeEventListener(layoutEvent, state.layoutListener);
+      if (state.reference) AelluxJs.offTarget(state.reference, layoutEvent, state.layoutListener);
       state.reference = reference;
-      if (reference) reference.addEventListener(layoutEvent, state.layoutListener);
+      if (reference) AelluxJs.onTarget(reference, layoutEvent, state.layoutListener);
     }
     function applyBaseStyles(element) {
       element.style.setProperty("position", "absolute");
@@ -567,20 +597,14 @@
       element.style.setProperty("transform-origin", "var(--ae-anchor-origin-x, 50%) var(--ae-anchor-origin-y, 0%)");
     }
     function deactivate(element, state) {
-      if (state.reference) state.reference.removeEventListener(layoutEvent, state.layoutListener);
+      var memory = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : elementMemories.get(element);
+      if (state.reference) AelluxJs.offTarget(state.reference, layoutEvent, state.layoutListener);
       if (state.observer) state.observer.disconnect();
       if (state.intersectionObserver) state.intersectionObserver.disconnect();
       state.target = state.reference = null;
       element.classList.remove(anchoredClass);
-      if (state.active) restoreStyles(element, state.original);
+      if (state.active && memory) memory.restore();
       state.active = false;
-    }
-    function restoreStyles(element, original) {
-      ownedProperties.forEach(function(name, index) {
-        var _original$index = original[index], value = _original$index.value, priority = _original$index.priority;
-        if (value) element.style.setProperty(name, value, priority);
-        else element.style.removeProperty(name);
-      });
     }
     function resolveElement(value) {
       if (!value || !value.trim()) return null;

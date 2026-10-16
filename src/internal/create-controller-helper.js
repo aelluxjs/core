@@ -9,10 +9,10 @@ export function createControllerHelper(root, element) {
     spawn, despawn, hasMounts,
 
     on(event, handler, options) {
-      element.addEventListener(root.AelluxJs.eventName(event), handler, options);
+      root.AelluxJs.onTarget(element, event, handler, options);
     },
     off(event, handler, options) {
-      element.removeEventListener(root.AelluxJs.eventName(event), handler, options);
+      root.AelluxJs.offTarget(element, event, handler, options);
     },
     dispatch(event, options) {
       return root.AelluxJs.dispatchFrom(element, event, options);

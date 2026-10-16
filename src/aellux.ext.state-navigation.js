@@ -47,8 +47,8 @@
   let useHash = true;
 
   function init(options) {
-    window.addEventListener("popstate", onPopState);
-    window.addEventListener("hashchange", onHashChange);
+    AelluxJs.onTarget(window, "$popstate", onPopState);
+    AelluxJs.onTarget(window, "$hashchange", onHashChange);
     AelluxJs.on("PushState", OnPushState);
     AelluxJs.on("PushAjaxReplace", OnPushAjaxReplace);
     AelluxJs.on("UpdateBaseTitle", OnUpdateBaseTitle);
@@ -65,8 +65,8 @@
   }
 
   async function destroy() {
-    window.removeEventListener("popstate", onPopState);
-    window.removeEventListener("hashchange", onHashChange);
+    AelluxJs.offTarget(window, "$popstate", onPopState);
+    AelluxJs.offTarget(window, "$hashchange", onHashChange);
     AelluxJs.off("PushState", OnPushState);
     AelluxJs.off("PushAjaxReplace", OnPushAjaxReplace);
     AelluxJs.off("UpdateBaseTitle", OnUpdateBaseTitle);

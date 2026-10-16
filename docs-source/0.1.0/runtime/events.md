@@ -1,6 +1,6 @@
 # Events
 
-AelluxJs names its DOM events with the `AelluxJs` prefix. The main API listens on `document`; a mounted element controller listens on its element. A document listener also receives bubbling events from elements:
+AelluxJs names its DOM events with the `AelluxJs` prefix. The main API listens on `document`; `onTarget` and `offTarget` listen on an explicit target; a mounted element controller listens on its element. A document listener also receives bubbling events from elements:
 
 ```js
 const onUpdate = event => console.log(event.type);
@@ -48,7 +48,7 @@ These events are available when the corresponding Extension is loaded. Events fr
 | Preference | `AelluxJsPreferencesChange` | `document`; `detail` is `{ changed, preferences }`, with a changed-key array and a snapshot of current values. `changed` can be empty. |
 | Present | `AelluxJsBeforePop`, `AelluxJsBeforeUnpop` | Present element; cancelable before a transition starts. |
 | Present | `AelluxJsPopping`, `AelluxJsUnpopping`, `AelluxJsPop`, `AelluxJsUnpop` | Present element; transition start and completion notifications. |
-| Present | `AelluxJsLayout` | Present element; bubbles when a Pop or Unpop transition starts and again after it finishes. `detail.origin` is `"present.pop"` or `"present.unpop"` (the `extension.method` format). Anchor listens on the shared positioning parent. |
+| Present | `AelluxJsLayout` | Present element; bubbles when a Pop or Unpop transition starts. `detail` contains `origin` (`"present.pop"` or `"present.unpop"`) and `durationMs`, the maximum expected layout change time in milliseconds. Anchor listens on the shared positioning parent. |
 | Present | `AelluxJsUnpopFocusLost` | `document`; `detail` is `{ element, focused }`, identifying the closed Present region and the element that lost focus. |
 | Scrollbox | `AelluxJsScrollboxSnapChange` | Scrollbox element; `detail` is `{ item, index, previousIndex, axis }` after a new snap item is selected and scrolling settles. The initial item uses `previousIndex: null`. |
 | Scrollbox | `AelluxJsPointerScrollStart`, `AelluxJsPointerScrollEnd` | Pointer gesture's originating scrollbox; `detail` is `{ axis, pointerId, pointerType, elements }`. `elements` lists the scrollboxes activated for that gesture. A short flick that never activates PDS does not emit them. |
@@ -57,6 +57,7 @@ These events are available when the corresponding Extension is loaded. Events fr
 ```js
 panel.addEventListener("AelluxJsLayout", event => {
   console.log(event.detail.origin); // "present.pop" or "present.unpop"
+  console.log(event.detail.durationMs); // Maximum transition time in milliseconds.
 });
 ```
 

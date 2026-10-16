@@ -1,6 +1,6 @@
 (function() {
   // <define:__AELLUX_CORE_ASSET_INTEGRITY__>
-  var define_AELLUX_CORE_ASSET_INTEGRITY_default = { "aellux.ext.adaptive.css": "sha384-HfIjX9Zk0VFRimzPvUaTS5AtwuHJHjXKoM/xbNJXj5vE7bSdBGEzbrBHfbNmYah0", "aellux.ext.present.css": "sha384-9GTFJ0OxBj6ta/iiV07BLGTdfe9pbmBMYXFn9kT+wB4KwiLO8zxJ39XzLYOGgfui", "aellux.esm.js": "sha384-rgDihihlhbzVltm9gV+mQFgCwKUrtlsOKMSmLJtWjxZJpfCD3k2Uysc92jcprohU", "aellux.ext.adaptive.js": "sha384-xWhTiTVmqgZ9WVoMUwVTmW1J1V6eeNq7+cfDOi8/sNqOUBFYVkwSisvDqIqp7rgN", "aellux.ext.anchor.js": "sha384-qoAo86ydPMhBNVLJSNWYNEVKvzP6kZEt/ikZ056bTpjeICfZR2wbRDHxa/+dzWHj", "aellux.ext.feedback.js": "sha384-sUr2lKsTasJ3yf1tg1IhDk5slfwTjAOCX2t5jQV/Ls4WAPRh2r/k36/8OXjJJaBv", "aellux.ext.focus.js": "sha384-9/NWzf98DqGLtkazEX77EJmKIEbwUnIsy5O84VhePDbre2or7a2cjZa755A+IE1J", "aellux.ext.point.js": "sha384-VDi9BrRv519srNkJGdshkolUH1dPr3g9CgwEc+95sMVYVPRvXig+lGpuETQ4qXZN", "aellux.ext.preference.js": "sha384-pI0d+43dZBLMdlIy/ctBnFjdqica7MWKvWfazaX3fhEf0p4yF76umhNpiwe6UkLL", "aellux.ext.present.js": "sha384-fnzdqmpLtvRxBRcM3QQzRboSFbZZuajgwiSH36bZ1dJrTkKRudZbndItWK4xmT2V", "aellux.ext.scrollbox.js": "sha384-3/33loUVMkipB8PFhbQhjvsmdiEU+fejk/iHVWH/YDnKAoVJTBzWnuk4Mczlg1WV", "aellux.ext.state-navigation.js": "sha384-oZh7dRE5RLU7/FN7Osqn7m1UHvQxgQ9KNuLrWzERsWNM0denAcYIc9f+5hs/OpM4", "aellux.full.js": "sha384-ldLISqA7UQaqUNj+IBTirYb9Do4rNLah/VARMmpJbVvK0LuhDTcZF7MI1K5fjV63", "aellux.orchestrator.js": "sha384-Z0bGVVIa3YyKkzcZNff+prNRyPLJQjWxCKe4t8KKB71SUfEQHJdCnei2U+lKthYe", "aellux.ext.adaptive.legacy.js": "sha384-YFAH5D/LjIMeCcR0h8niHrrbMP2MEPHuB588oz59lj32TJjKHdteOLOUzSv+XNb6", "aellux.ext.anchor.legacy.js": "sha384-btTjOZ6kx7+W75wzkVW90KQbdgjHBHCFFzWqmdel+X6ZnvEhCMbz1K6QRpyWRWJl", "aellux.ext.feedback.legacy.js": "sha384-jyvYvbzuSua5FWZsAWeXWqmab/DjA1LVg2oOHb6Ey6wH4W2bB9qwt+QhGwIkk1gL", "aellux.ext.focus.legacy.js": "sha384-fG/f1t3Tqo8oLyugoQLLy7CDtskUlH7l4+jmCmD2+DDkqPSsLcfjtF5wk68GU603", "aellux.ext.point.legacy.js": "sha384-3xmw1dEZMSD+JY6rSfbFnj2UJzsv+Z/IDNS4LsbcgKdAzXbVQJJb4+mCMV1lhUFF", "aellux.ext.preference.legacy.js": "sha384-KuSIPxzIyWrcWE4jZpLVcjfi3O+Nr+5eP3hRiZLiUAYol6mZ+BJVMZoGOSf1ZHjv", "aellux.ext.present.legacy.js": "sha384-BMZxo54Qf/ov3t0zh2bmRDJAatEXo2BIU80TVfzU3zg3aiiHMFsZBBVlG26niUTo", "aellux.ext.scrollbox.legacy.js": "sha384-Fapf9KAQ+cXVOHr4DLtMOMw6JLjjbu0RPLuRhjZl6LW1fU+f5pDzpq1X3HdLUagQ", "aellux.ext.state-navigation.legacy.js": "sha384-OeM2eMkqzI8VwnJcBbXc6KWCSEbdN3raTzdTa1+H3RSMspC0yMRxZpK5H3GOQKxU", "aellux.orchestrator.legacy.js": "sha384-hEYwgzN6L6wSznrEIdLI9jNdLzEtQNkCn7/6iNb+4J4GrtTmmVPipHHkj1LNB9rr", "aellux.full.legacy.js": "sha384-7NoimLMp41tLirY8y+5EWq8XcSLHZY/f+2Feb0tFL7buskPzlw6ABzg6A/Cwuysr" };
+  var define_AELLUX_CORE_ASSET_INTEGRITY_default = { "aellux.ext.adaptive.css": "sha384-HfIjX9Zk0VFRimzPvUaTS5AtwuHJHjXKoM/xbNJXj5vE7bSdBGEzbrBHfbNmYah0", "aellux.ext.present.css": "sha384-9GTFJ0OxBj6ta/iiV07BLGTdfe9pbmBMYXFn9kT+wB4KwiLO8zxJ39XzLYOGgfui", "aellux.esm.js": "sha384-gCmMUFzWNqOS0KDZ364wCps+Wi4NV5dV98ZmSEBGVwULT7yinh0Pe24oRyYYJS9Y", "aellux.ext.adaptive.js": "sha384-w381PSkTuZDTxVAOK2v4piV43HERnluGrkxNSX+akHaxv9ARfXBHVVC7NlwBDZaI", "aellux.ext.anchor.js": "sha384-zLnKsBGvP/y/v7xEjKItV/srcgHONLQYwpwcgDAQgNirF/P8jAwnFsJpQyHrxpjt", "aellux.ext.feedback.js": "sha384-sUr2lKsTasJ3yf1tg1IhDk5slfwTjAOCX2t5jQV/Ls4WAPRh2r/k36/8OXjJJaBv", "aellux.ext.focus.js": "sha384-BgjEpKiYDdntLBdNI3+7eaBqsEEBmuVJKOuKlzavdpOx5Wpgnt8fJmIyDFWZ4NHT", "aellux.ext.point.js": "sha384-Fy47+2IuFIypjR3oSu2R7JqEgzhYvxoAIPmcMU7h2mW/ITkUcJDxeHwaxd1SuZqD", "aellux.ext.preference.js": "sha384-6DMFPGp25ss/D1iZpGy8F62bbl8TRDf4w8BoNnpMWIrxvHw+yNIoSNqyZpSE1MJT", "aellux.ext.present.js": "sha384-U9oiqlPwTXcJOUDfMawQkgXOeKh1XFlzpYQp5aD9++hCkbNVHQZyUYl+SQg8Kb/A", "aellux.ext.scrollbox.js": "sha384-desQ78YZ5zL3k7H6T/qxpLfBw+VKTjDcghY1g7Ev9dWQRD0DhVzvchi/+KCN6TnN", "aellux.ext.state-navigation.js": "sha384-ojMP+FjofEPLzTRO5pGeYq4JEWEkM1MxERFMzeAhkQ7/IB7YUHX0r4pSzBph+bMo", "aellux.full.js": "sha384-H8d64uLrRlz+U8WSvLAiYbm/tfUqTDPT9oFTde6IwG6d65d3eOJ2rODHa2up8oKq", "aellux.orchestrator.js": "sha384-A1aGUGyFEBlSzihr3t/LBnCjByYNee6P2wOWe/4y8rLEj2qLLvnJ+XkgG5aJcfCr", "aellux.ext.adaptive.legacy.js": "sha384-7E6TmWH445g4CXD+c5+I8mtEcTA3yAV4eplD/VvYMCyf130/PHRDeotBq5yB0lOL", "aellux.ext.anchor.legacy.js": "sha384-3S56n/OJ2AEzaxRKDe5+vjbh9mFsHLRHGAsvOeWQbV4M7jSOd1lKaKTsVo1Plbgy", "aellux.ext.feedback.legacy.js": "sha384-jyvYvbzuSua5FWZsAWeXWqmab/DjA1LVg2oOHb6Ey6wH4W2bB9qwt+QhGwIkk1gL", "aellux.ext.focus.legacy.js": "sha384-DYmxYMExXzgL5t/8T8hn/9qv525QV6jEQcIQhPJWc2/AN3vehPVHv10nZ3bVVHjn", "aellux.ext.point.legacy.js": "sha384-ffDBmCo5xaCEgP9C4V/GvkJytBQ/nRdK/O59TyHWtVn8rbIBgKx+LiWGM6paATbf", "aellux.ext.preference.legacy.js": "sha384-2tgjAv468sdg6UCwLCmyipHm3QAq21AZp7KeODNmRLxaNyIK+jfvT7HbnDE5K9zn", "aellux.ext.present.legacy.js": "sha384-uG9N6u328E6cHOysFCbBi65GHjJd2A/49vJazN0g81NdfgnvV8/K3WkFCqpMXY4y", "aellux.ext.scrollbox.legacy.js": "sha384-0hy3gzYtbn9jqJ2+g5Lvx2V6z6vZwCI99RZ8BAS4xLB/KQlSOtctAJ5rXrEY49Ri", "aellux.ext.state-navigation.legacy.js": "sha384-HcV8z5DzSASAfYufopO0ma95ZJ+PWFoOo6re6gztY8u4m0tZnHSLy8bxdoqtpZOm", "aellux.orchestrator.legacy.js": "sha384-ePyAtrVucPhg5jz0KmKD+7fOpYkbt0MUwp+YXXEKymBZxJ6w8rMuYN+ybyOJbSO5", "aellux.full.legacy.js": "sha384-TTFpdwyWTto3yq1zbxjHDY2QlI8PTOnXaAAivgp79730e8l3/Vx+0Gr0Roeha2+W" };
 
   // src/internal/asset-load-helper.js
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
@@ -218,6 +218,72 @@
     };
   }
 
+  // src/internal/create-save-element-memory-helper.js
+  /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+  function createSaveElementMemoryHelper() {
+    return { save: saveElementMemory };
+  }
+  function saveElementMemory(element, attributes, cssProperties) {
+    if (!element || typeof element.hasAttribute !== "function" || typeof element.setAttribute !== "function" || !element.style) {
+      throw new TypeError("persist.element.save requires an element");
+    }
+    if (typeof attributes === "undefined") attributes = [];
+    if (typeof cssProperties === "undefined") cssProperties = [];
+    if (!Array.isArray(attributes) || !Array.isArray(cssProperties)) {
+      throw new TypeError("persist.element.save requires arrays of attributes and CSS properties");
+    }
+    var savedAttributes2 = /* @__PURE__ */ Object.create(null);
+    var savedCssProperties = /* @__PURE__ */ Object.create(null);
+    var style = element.style;
+    var i;
+    for (i = 0; i < attributes.length; i++) {
+      var attribute = attributes[i];
+      savedAttributes2[attribute] = {
+        present: element.hasAttribute(attribute),
+        value: element.getAttribute(attribute)
+      };
+    }
+    for (i = 0; i < cssProperties.length; i++) {
+      var property = cssProperties[i];
+      var value = style.getPropertyValue(property);
+      var priority = style.getPropertyPriority(property);
+      var present = value !== "" || priority !== "";
+      if (!present) {
+        for (var j = 0; j < style.length; j++) {
+          if (style.item(j) === property) {
+            present = true;
+            break;
+          }
+        }
+      }
+      savedCssProperties[property] = {
+        present: present,
+        value: value,
+        priority: priority
+      };
+    }
+    return {
+      attributes: savedAttributes2,
+      cssProperties: savedCssProperties,
+      restore: function() {
+        if (!element || typeof element.setAttribute !== "function" || !element.style) return false;
+        for (var name in savedAttributes2) {
+          if (!Object.prototype.hasOwnProperty.call(savedAttributes2, name)) continue;
+          var savedAttribute = savedAttributes2[name];
+          if (savedAttribute.present) element.setAttribute(name, savedAttribute.value);
+          else element.removeAttribute(name);
+        }
+        for (var cssName in savedCssProperties) {
+          if (!Object.prototype.hasOwnProperty.call(savedCssProperties, cssName)) continue;
+          var savedCss = savedCssProperties[cssName];
+          if (savedCss.present) element.style.setProperty(cssName, savedCss.value, savedCss.priority);
+          else element.style.removeProperty(cssName);
+        }
+        return true;
+      }
+    };
+  }
+
   // src/internal/build-preference-media-queries.js
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   function buildPreferenceMediaQueries(root) {
@@ -295,6 +361,40 @@
     fromCamelCase: fromCamelCase
   };
 
+  // src/internal/create-naming-normalization.js
+  /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+  function createNamingNormalization(constants) {
+    var fromCamelCase2 = utils_name_case_default.fromCamelCase;
+    var toCapitalized2 = utils_name_case_default.toCapitalized;
+    return {
+      attr: function(name) {
+        name = fromCamelCase2(name);
+        return "data-" + constants.AELLUXJS_DATA_ATTRIBUTE_NAME_PREFFIX.replace(/\?/, name);
+      },
+      className: function(name) {
+        name = fromCamelCase2(name);
+        return constants.AELLUXJS_CLASS_NAME_PREFFIX.replace(/\?/, name);
+      },
+      extFilename: function(extensionName) {
+        extensionName = fromCamelCase2(extensionName);
+        return "aellux." + constants.AELLUXJS_EXT_SCRIPT_PREFIX + "." + extensionName + (this.minified ? ".min.js" : ".js");
+      },
+      extName: function(filename) {
+        return filename.replace(
+          new RegExp("^.*aellux\\." + constants.AELLUXJS_EXT_SCRIPT_PREFIX + "\\.([^.\\/?#]+)(?:\\.min)?\\.js(?:[?#].*)?$"),
+          "$1"
+        );
+      },
+      eventName: function(name) {
+        if (/^[$#_!]/.test(name)) return name.slice(1).trim();
+        var format = constants.AELLUXJS_EVENT_NAME_PREFFIX;
+        var prefix = format.slice(0, format.indexOf("?"));
+        if (name.indexOf(prefix) === 0) return name;
+        return format.replace(/\?/, toCapitalized2(name));
+      }
+    };
+  }
+
   // src/internal/create-preference-html-helper.js
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   function createPreferenceHtmlHelper(root, getApi) {
@@ -362,9 +462,9 @@
   // src/internal/aellux-api-integration.js
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   function createAelluxApi(root, constants) {
-    var toCapitalized2 = utils_name_case_default.toCapitalized;
     var toCamelCase2 = utils_name_case_default.toCamelCase;
     var fromCamelCase2 = utils_name_case_default.fromCamelCase;
+    var namingNormalization = createNamingNormalization(constants);
     var options = constants.AELLUXJS_DEFAULT_INITIALIZATION_OPTIONS;
     var diagnostics = buildDiagnostics(constants.AELLUXJS_DIAGNOSTICS);
     var oldShortInstance = root[constants.AELLUXJS_SHORT_JS_NAME];
@@ -388,24 +488,25 @@
       persist: {
         local: buildPersistMemory(root, "localStorage", null, diagnostics),
         session: buildPersistMemory(root, "sessionStorage", null, diagnostics),
-        preferences: buildPersistMemory(root, "localStorage", "AelluxJsPreferences", diagnostics)
+        preferences: buildPersistMemory(root, "localStorage", "AelluxJsPreferences", diagnostics),
+        element: createSaveElementMemoryHelper()
       },
       updatePreferenceAttributesHTML: preferenceHtml.updatePreferenceAttributesHTML,
       on: function(event, handler, options2) {
-        document2.addEventListener(api.eventName(event), handler, options2);
+        api.onTarget(document2, event, handler, options2);
       },
       off: function(event, handler, options2) {
-        document2.removeEventListener(api.eventName(event), handler, options2);
+        api.offTarget(document2, event, handler, options2);
       },
-      attr: function(name) {
-        name = fromCamelCase2(name);
-        return "data-" + constants.AELLUXJS_DATA_ATTRIBUTE_NAME_PREFFIX.replace(/\?/, name);
+      onTarget: function(target, event, handler, options2) {
+        target.addEventListener(api.eventName(event), handler, options2);
       },
+      offTarget: function(target, event, handler, options2) {
+        target.removeEventListener(api.eventName(event), handler, options2);
+      },
+      attr: namingNormalization.attr,
       attrMem: { save: saveAttr, restore: restoreAttr },
-      className: function(name) {
-        name = fromCamelCase2(name);
-        return constants.AELLUXJS_CLASS_NAME_PREFFIX.replace(/\?/, name);
-      },
+      className: namingNormalization.className,
       registerCssProperty: function(descriptor) {
         if (!root.CSS || typeof root.CSS.registerProperty !== "function") return false;
         try {
@@ -415,20 +516,10 @@
           return false;
         }
       },
-      extFilename: function(extensionName) {
-        extensionName = fromCamelCase2(extensionName);
-        return "aellux." + constants.AELLUXJS_EXT_SCRIPT_PREFIX + "." + extensionName + (api.minified ? ".min.js" : ".js");
-      },
-      extName: function(filename) {
-        return filename.replace(
-          new RegExp("^.*aellux\\." + constants.AELLUXJS_EXT_SCRIPT_PREFIX + "\\.([^.\\/?#]+)(?:\\.min)?\\.js(?:[?#].*)?$"),
-          "$1"
-        );
-      },
-      eventName: function(name) {
-        name = toCapitalized2(name);
-        return constants.AELLUXJS_EVENT_NAME_PREFFIX.replace(/\?/, name);
-      },
+      // Keep minified tied to the API even when callers store this method separately.
+      extFilename: namingNormalization.extFilename.bind(api),
+      extName: namingNormalization.extName,
+      eventName: namingNormalization.eventName,
       noConflict: function() {
         return oldShortInstance;
       },

@@ -207,14 +207,14 @@ test("mount resolves plain and hashed IDs to one root", async ({ page }) => {
   expect(result).toEqual({ first: ["first", "second"], second: [], missing: [] });
 });
 
-test("mount maps run in ascending priority across extensions and selectors", async ({ page }) => {
+test("mount and unmount run in opposite priority order across extensions and selectors", async ({ page }) => {
   await page.goto("/tests/index.htm");
   await page.addScriptTag({ url: "/dist/aellux.js" });
   await page.evaluate(() => AelluxJs.init({ mode: "basic" }));
 
   const result = await page.evaluate(async () => {
     document.body.innerHTML = '<div id="priority-target" data-priority-probe></div>';
-    const calls = [];
+    const calls = { mount: [], unmount: [] };
 
     for (const name of ["priority-first", "priority-second"]) {
       AelluxJs.ext(name);
@@ -225,7 +225,8 @@ test("mount maps run in ascending priority across extensions and selectors", asy
     const add = (extensionName, selector, priority, label) =>
       AelluxJs.mountManager.add({
         extensionName, selector, priority,
-        mount() { calls.push(label); }
+        mount() { calls.mount.push(label); },
+        unmount() { calls.unmount.push(label); }
       });
 
     add("priority-first", "[data-priority-probe]", 10, "high");
@@ -234,10 +235,39 @@ test("mount maps run in ascending priority across extensions and selectors", asy
     add("priority-second", "div#priority-target", 0, "zero-second");
 
     await AelluxJs.mount("priority-target");
+    await AelluxJs.unmount("priority-target");
     return calls;
   });
 
-  expect(result).toEqual(["low", "zero-first", "zero-second", "high"]);
+  expect(result).toEqual({
+    mount: ["low", "zero-first", "zero-second", "high"],
+    unmount: ["high", "zero-second", "zero-first", "low"]
+  });
+});
+
+test("equal-priority unmount reverses mount order across elements", async ({ page }) => {
+  await page.goto("/tests/index.htm");
+  await page.addScriptTag({ url: "/dist/aellux.js" });
+  await page.evaluate(() => AelluxJs.init({ mode: "basic" }));
+
+  const calls = await page.evaluate(async () => {
+    document.body.innerHTML = '<div id="first" data-order-probe></div><div id="second" data-order-probe></div>';
+    const calls = { mount: [], unmount: [] };
+    AelluxJs.ext("order-probe");
+    AelluxJs.extAttach("order-probe", { init() {
+      AelluxJs.mountManager.add({
+        extensionName: "order-probe", selector: "[data-order-probe]",
+        mount(element) { calls.mount.push(element.id); },
+        unmount(element) { calls.unmount.push(element.id); }
+      });
+    } });
+    await AelluxJs.wait("order-probe");
+    await AelluxJs.mount(document, "order-probe");
+    await AelluxJs.unmount(document, "order-probe");
+    return calls;
+  });
+
+  expect(calls).toEqual({ mount: ["first", "second"], unmount: ["second", "first"] });
 });
 
 test("mount lifecycle events report the resolved root and distinct affected elements", async ({ page }) => {
@@ -1201,7 +1231,7 @@ test("mounted element controller runs mount, update, and unmount lifecycle metho
     counts: {
       mount: ["root", "child", "root", "child"],
       update: ["root", "child", "root", "child"],
-      unmount: ["root", "child"]
+      unmount: ["child", "root"]
     },
     removed: true,
     updateAfterUnmount: "function",
@@ -1497,7 +1527,7 @@ test("observed cleanup and explicit unmount share each registration once", async
       childMounted: childController.hasMounts()
     };
   });
-  expect(result).toEqual({ calls: ["parent", "child"], parentMounted: false, childMounted: false });
+  expect(result).toEqual({ calls: ["child", "parent"], parentMounted: false, childMounted: false });
 });
 
 test("core destroy survives lifecycle failures and clears resources", async ({ page }) => {
@@ -2074,6 +2104,51 @@ test("renamed global and event prefix are available", async ({ page }) => {
   expect(dispatchedType).toBe("AelluxJsProbe");
 });
 
+test("event names preserve existing formatting and explicit raw names", async ({ page }) => {
+  await openScenario(page, "runtime-modern");
+  const result = await page.evaluate(() => {
+    const names = ["pointerdown", "AelluxJsPointerDown", "$pointerdown", "#pointerdown",
+      "_pointerdown", "!pointerdown", "!my-CustomEvent"];
+    const normalized = names.map(name => AelluxJs.eventName(name));
+    const received = [];
+    for (const name of ["AelluxJsPointerDown", "_pointerdown", "$pointerdown"]) {
+      const handler = event => received.push(event.type);
+      AelluxJs.on(name, handler);
+      AelluxJs.dispatch(name);
+      AelluxJs.off(name, handler);
+    }
+    const element = document.createElement("div");
+    element.addEventListener("pointerdown", event => received.push(event.type));
+    AelluxJs.dispatchFrom(element, "!pointerdown");
+    return { normalized, received };
+  });
+  expect(result).toEqual({
+    normalized: ["AelluxJsPointerdown", "AelluxJsPointerDown", "pointerdown",
+      "pointerdown", "pointerdown", "pointerdown", "my-CustomEvent"],
+    received: ["AelluxJsPointerDown", "pointerdown", "pointerdown", "pointerdown"]
+  });
+});
+
+test("target listeners handle native and Aellux events with matching removal", async ({ page }) => {
+  await openScenario(page, "runtime-modern");
+  const received = await page.evaluate(() => {
+    const target = document.createElement("div");
+    const events = [];
+    const onClick = event => events.push(event.type);
+    const onLayout = event => events.push(event.type);
+    AelluxJs.onTarget(target, "$click", onClick, { capture: true });
+    AelluxJs.onTarget(target, "Layout", onLayout);
+    AelluxJs.dispatchFrom(target, "$click");
+    AelluxJs.dispatchFrom(target, "Layout");
+    AelluxJs.offTarget(target, "$click", onClick, true);
+    AelluxJs.offTarget(target, "Layout", onLayout);
+    AelluxJs.dispatchFrom(target, "$click");
+    AelluxJs.dispatchFrom(target, "Layout");
+    return events;
+  });
+  expect(received).toEqual(["click", "AelluxJsLayout"]);
+});
+
 test("ESM entry exports the shared core API", async ({ page }) => {
   await page.goto("/tests/index.htm");
   const created = await page.evaluate(async () => {
@@ -2324,6 +2399,12 @@ test("preference options update inputs and value-label visibility", async ({ pag
 
   await page.getByText("Dark", { exact: true }).click();
   await expect(page.locator("#label-light")).toBeHidden();
+  await expect(page.locator("#label-dark")).toBeVisible();
+  await page.evaluate(() => AelluxJs.unmount(
+    document.querySelector("[data-ae-preference]"), "preference"
+  ));
+  await expect(page.locator("#label-auto")).toBeVisible();
+  await expect(page.locator("#label-light")).toBeVisible();
   await expect(page.locator("#label-dark")).toBeVisible();
 });
 

@@ -26,10 +26,13 @@ The anchored element and an explicit target must share the same `offsetParent`. 
 
 Before the first valid calculation, the boot's weak CSS keeps the element hidden and applies `contain: layout paint`. Once calculated, the `ae--anchored` class makes it visible and applies absolute positioning at `top: 0; left: 0` with `translate3d()`. Anchor publishes `--ae-anchor-x`, `--ae-anchor-y`, `--ae-anchor-origin-x`, and `--ae-anchor-origin-y` as inline CSS properties. Add a `transform` transition in your own CSS if you want animated movement. On unmount, Anchor removes its class and restores the previous inline values and priorities.
 
-Anchor updates after captured scroll events, including native Scrollbox scrolling, window resize, observed size changes, intersection changes when `IntersectionObserver` is available, or a bubbling `AelluxJsLayout` event received by the shared positioning parent, with a 100 ms throttle. It observes the anchored element, target, and positioning reference; it does not poll their positions. Present emits `AelluxJsLayout` when a Pop or Unpop transition starts and again after it finishes, with `detail.origin` set to `"present.pop"` or `"present.unpop"`. Other code that changes layout without triggering those observers can dispatch the event from a descendant of the positioning parent:
+Anchor updates after captured scroll events, including native Scrollbox scrolling, window resize, observed size changes, intersection changes when `IntersectionObserver` is available, or a bubbling `AelluxJsLayout` event received by the shared positioning parent, with a 100 ms throttle. It observes the anchored element, target, and positioning reference; it does not poll their positions. Present emits `AelluxJsLayout` when a Pop or Unpop transition starts, with `detail.origin` set to `"present.pop"` or `"present.unpop"` and `detail.durationMs` set to the transition time. Anchor then checks the position every 100 ms until that time expires. A zero duration schedules only one check after 100 ms. Other code that changes layout without triggering those observers can dispatch the event from a descendant of the positioning parent:
 
 ```js
-$ae.dispatchFrom(document.getElementById("menu"), "Layout", { bubbles: true });
+$ae.dispatchFrom(document.getElementById("menu"), "Layout", {
+  detail: { origin: "app.openPanel", durationMs: 300 },
+  bubbles: true
+});
 ```
 
 After changing the target or pivot attributes, request an immediate update:

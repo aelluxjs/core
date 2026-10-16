@@ -64,6 +64,21 @@ In nested pointer Scrollboxes, the innermost box consumes movement in the locked
 </div>
 ```
 
+For native touch, keep the browser's default `touch-action` on nested boxes that scroll in different axes. A mostly vertical touch over a vertical child can scroll that child; a mostly horizontal touch can reach the horizontal parent. Forcing `touch-action: pan-y` on the child can block the parent's horizontal gesture when the touch starts inside the child.
+
+```html
+<div data-ae-scrollbox style="width: 20rem; overflow-x: auto; overflow-y: hidden">
+  <div style="display: flex; width: max-content">
+    <div data-ae-scrollbox style="width: 20rem; height: 12rem; overflow-x: hidden; overflow-y: auto">
+      <!-- Vertical content -->
+    </div>
+    <div data-ae-scrollbox style="width: 20rem; height: 12rem; overflow-x: hidden; overflow-y: auto">
+      <!-- Another vertical column -->
+    </div>
+  </div>
+</div>
+```
+
 In `pointer` mode, a quick release continues scrolling with gradually decreasing speed. Momentum is enabled by default and applies only to desktop pointer dragging. It starts after more than 15 px within the latest 300 ms of dragging and uses a deceleration value of 0.0015 to calculate the destination. Each animation frame moves 10% of the remaining distance to that destination; it ends when both axes match to three decimal places. It stops at the scroll boundary, on a new pointer or wheel interaction, when the mode changes, or when the box unmounts. Set `data-ae-scrollbox-momentum="false"` to disable it:
 
 ```html
@@ -76,7 +91,7 @@ In `pointer` mode, a quick release continues scrolling with gradually decreasing
 
 On a fine-pointer desktop, a predominantly vertical wheel gesture scrolls a horizontal-only box sideways while it has room in that direction. If one event goes beyond an edge, the box reaches the edge and shows elastic pressure when enabled, while the uncanceled wheel event also scrolls the parent or document. Further wheel events at that edge continue both behaviors. Native horizontal wheel gestures remain native. Only axes with `overflow: auto` or `scroll` count as wheel-scrollable: content taller than a box with `overflow-y: hidden` does not stop the horizontal conversion or produce vertical elastic pressure. This behavior applies to both modes.
 
-With snap enabled, each wheel gesture advances to the next or previous point instead of scrolling by pixels. A vertical wheel gesture also navigates a horizontal snap box. Repeated wheel events within 120 ms count as one gesture. At the first or last item, a wheel gesture toward that edge follows the normal wheel path: it can stretch an elastic wrapper and continue to a scrollable ancestor when the browser permits chaining.
+With snap enabled, each wheel gesture advances to the next or previous point instead of scrolling by pixels. The dominant wheel delta determines the gesture direction. A predominantly vertical gesture also navigates a horizontal snap box; a horizontal-only gesture does not navigate a vertical snap box. Repeated cancelable wheel events within 120 ms count as one gesture. Some browsers make later events in a wheel sequence noncancelable, so native scrolling can continue after the first snap step. At the first or last item, a wheel gesture toward that edge follows the normal wheel path: it can stretch an elastic wrapper and continue to a scrollable ancestor when the browser permits chaining.
 
 `Ctrl` + wheel is left to the browser for zoom. Scrollbox also leaves noncancelable wheel events untouched; neither gesture starts snap navigation, elastic pressure, or horizontal conversion.
 
@@ -113,7 +128,7 @@ document.getElementById("gallery").addEventListener("AelluxJsScrollboxSnapChange
 });
 ```
 
-Each `data-ae-snap-item` receives inline `--ae-snap-viewport` and `--ae-snap-focus` values at mount and as the box scrolls or refreshes. The values use the snap axis and compare the item's center with the viewport center. `--ae-snap-viewport` is `0` at the center, `-1` and `1` at the starting and ending viewport edges, and clamps to `-2` and `2` farther outside. `--ae-snap-focus` is `1` at the center, `0.5` at either viewport edge, and clamps to `0` at the outside limits. These inline values remain on the items after unmount.
+Each `data-ae-snap-item` receives inline `--ae-snap-viewport` and `--ae-snap-focus` values at mount and as the box scrolls or refreshes. The values use the snap axis and compare the item's center with the viewport center. `--ae-snap-viewport` is `0` at the center, `-1` and `1` at the starting and ending viewport edges, and clamps to `-2` and `2` farther outside. `--ae-snap-focus` is `1` at the center, `0.5` at either viewport edge, and clamps to `0` at the outside limits. The item's prior inline values and priorities are restored when Scrollbox unmounts.
 
 Place `data-ae-scrollbox-snap` on the Scrollbox itself and mark each point with `data-ae-snap-item`. An empty value or `horizontal` selects the horizontal axis; `vertical` selects the vertical axis. Without elastic, marked descendants of the scrollbox are points; with elastic, only marked descendants inside its wrapper are points. Items belonging to a nested scrollbox are excluded. If no eligible item exists, diagnostic 1121 reports the missing points and snap stays disabled. The weak CSS applies `scroll-snap-type: x mandatory` or `y mandatory` to the box. An empty `data-ae-snap-item` aligns its center; `start`, `left`, and `top` align its start, while `end`, `right`, and `bottom` align its end along the selected axis. The directional names are aliases for CSS's logical `start` and `end`. The extension toggles CSS classes to suspend snapping during PDS, elastic pressure, and scrollbar thumb dragging. The focus and viewport variables keep updating while snapping is suspended. At mount, Scrollbox aligns the first point immediately. Snap does not alter the box's or items' inline snap declarations.
 
@@ -123,7 +138,7 @@ Native CSS Scroll Snap permits free scrolling within a snap point wider or talle
 
 While elastic pressure is active and throughout its return, Scrollbox temporarily sets `scroll-snap-type: none`. It restores the snap rule only after the elastic wrapper returns to its original position. A controller navigation requested during that interval runs after the return.
 
-When scrolling settles, Scrollbox identifies the selected point and emits `AelluxJsScrollboxSnapChange`. It uses `scrollend` when available, with a 120 ms scroll-idle fallback elsewhere. During controller navigation and flick navigation, the fallback waits until the requested scroll position is reached. A new wheel, pointer, or touch gesture clears that pending destination. It waits for an active pointer or touch to end before using the fallback. A position within 10 px of either scroll limit selects the first or last point directly; otherwise it compares each item's requested alignment with the corresponding viewport position. The event reports the selection; it does not perform an additional alignment scroll.
+When scrolling settles, Scrollbox identifies the selected point and emits `AelluxJsScrollboxSnapChange`. It uses `scrollend` when available, with a 120 ms scroll-idle fallback. During controller navigation and flick navigation, reaching the requested position completes the navigation. If scrolling stops at another position for 500 ms, the pending destination is cleared and the actual selected point is reported. A new cancelable wheel, pointer, or touch gesture also clears that pending destination. It waits for an active pointer or touch to end before using the fallback. A position within 10 px of either scroll limit selects the first or last point directly; otherwise it compares each item's requested alignment with the corresponding viewport position. The event reports the selection; it does not perform an additional alignment scroll.
 
 ```html
 <div id="gallery" data-ae-scrollbox="pointer" data-ae-scrollbox-snap

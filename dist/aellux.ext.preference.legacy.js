@@ -108,6 +108,8 @@
     var computedPreferences = /* @__PURE__ */ Object.create(null);
     var containersByPreference = /* @__PURE__ */ new Map();
     var containerPreferences = /* @__PURE__ */ new Map();
+    var containerLabels = /* @__PURE__ */ new Map();
+    var labelMemories = /* @__PURE__ */ new WeakMap();
     AelluxJs.extAttach(extensionName, {
       init: init,
       destroy: destroy,
@@ -147,13 +149,13 @@
         mount: mountPreferenceContainer,
         unmount: unmountPreferenceContainer
       });
-      window.addEventListener("storage", storageEvent);
+      AelluxJs.onTarget(window, "$storage", storageEvent);
       var allQueries = AelluxJs.registry.preferenceMediaQueries;
       Object.values(allQueries).forEach(function(queries) {
         return Object.values(queries).forEach(function(query) {
           if (!query) return;
           if (query.addEventListener) {
-            query.addEventListener("change", update);
+            AelluxJs.onTarget(query, "$change", update);
           } else if (query.addListener) {
             query.addListener(update);
           }
@@ -167,19 +169,30 @@
       update();
     }
     function destroy() {
+      var _iterator = _createForOfIteratorHelper(containerPreferences.keys()), _step;
+      try {
+        for (_iterator.s(); !(_step = _iterator.n()).done; ) {
+          var container = _step.value;
+          unmountPreferenceContainer(container);
+        }
+      } catch (err) {
+        _iterator.e(err);
+      } finally {
+        _iterator.f();
+      }
       AelluxJs.mountManager.remove({
         extensionName: extensionName
       });
       containersByPreference.clear();
       containerPreferences.clear();
-      window.removeEventListener("storage", storageEvent);
-      document.removeEventListener("DOMContentLoaded", update);
+      AelluxJs.offTarget(window, "$storage", storageEvent);
+      AelluxJs.off("$DOMContentLoaded", update);
       var allQueries = AelluxJs.registry.preferenceMediaQueries;
       Object.values(allQueries).forEach(function(queries) {
         return Object.values(queries).forEach(function(query) {
           if (!query) return;
           if (query.removeEventListener) {
-            query.removeEventListener("change", update);
+            AelluxJs.offTarget(query, "$change", update);
           } else if (query.removeListener) {
             query.removeListener(update);
           }
@@ -221,40 +234,40 @@
         computedPreferences[_key] = nextPreferences[_key];
       }
       AelluxJs.updatePreferenceAttributesHTML(computedPreferences);
-      var _iterator = _createForOfIteratorHelper(containerPreferences.keys()), _step;
-      try {
-        for (_iterator.s(); !(_step = _iterator.n()).done; ) {
-          var container = _step.value;
-          if (indexContainer(container)) updateContainer(container);
-        }
-      } catch (err) {
-        _iterator.e(err);
-      } finally {
-        _iterator.f();
-      }
-      var _iterator2 = _createForOfIteratorHelper(changed), _step2;
+      var _iterator2 = _createForOfIteratorHelper(containerPreferences.keys()), _step2;
       try {
         for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
-          var _key2 = _step2.value;
-          var containers = containersByPreference.get(_key2);
-          if (containers) {
-            var _iterator3 = _createForOfIteratorHelper(containers), _step3;
-            try {
-              for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
-                var _container = _step3.value;
-                updateContainer(_container);
-              }
-            } catch (err) {
-              _iterator3.e(err);
-            } finally {
-              _iterator3.f();
-            }
-          }
+          var container = _step2.value;
+          if (indexContainer(container)) updateContainer(container);
         }
       } catch (err) {
         _iterator2.e(err);
       } finally {
         _iterator2.f();
+      }
+      var _iterator3 = _createForOfIteratorHelper(changed), _step3;
+      try {
+        for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
+          var _key2 = _step3.value;
+          var containers = containersByPreference.get(_key2);
+          if (containers) {
+            var _iterator4 = _createForOfIteratorHelper(containers), _step4;
+            try {
+              for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
+                var _container = _step4.value;
+                updateContainer(_container);
+              }
+            } catch (err) {
+              _iterator4.e(err);
+            } finally {
+              _iterator4.f();
+            }
+          }
+        }
+      } catch (err) {
+        _iterator3.e(err);
+      } finally {
+        _iterator3.f();
       }
       AelluxJs.dispatch("PreferencesChange", {
         detail: {
@@ -287,6 +300,15 @@
       var labels = container.querySelectorAll("[".concat(attr.label, "]"));
       var currentValue = get(preference || "");
       labels.forEach(function(label) {
+        var ownedLabels = containerLabels.get(container);
+        if (!ownedLabels) {
+          ownedLabels = /* @__PURE__ */ new Set();
+          containerLabels.set(container, ownedLabels);
+        }
+        if (!ownedLabels.has(label)) {
+          labelMemories.set(label, AelluxJs.persist.element.save(label, ["hidden"], []));
+          ownedLabels.add(label);
+        }
         var value = label.getAttribute(attr.label);
         var selected = String(value) === String(currentValue);
         label.hidden = !selected;
@@ -314,10 +336,27 @@
     function mountPreferenceContainer(container) {
       indexContainer(container);
       updateContainer(container);
-      container.addEventListener("click", onContainerClick);
+      AelluxJs.onTarget(container, "$click", onContainerClick);
     }
     function unmountPreferenceContainer(container) {
-      container.removeEventListener("click", onContainerClick);
+      AelluxJs.offTarget(container, "$click", onContainerClick);
+      var labels = containerLabels.get(container);
+      if (labels) {
+        var _iterator5 = _createForOfIteratorHelper(labels), _step5;
+        try {
+          for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
+            var _labelMemories$get;
+            var label = _step5.value;
+            (_labelMemories$get = labelMemories.get(label)) === null || _labelMemories$get === void 0 || _labelMemories$get.restore();
+            labelMemories.delete(label);
+          }
+        } catch (err) {
+          _iterator5.e(err);
+        } finally {
+          _iterator5.f();
+        }
+      }
+      containerLabels.delete(container);
       var key = containerPreferences.get(container);
       if (key === void 0) return;
       var containers = containersByPreference.get(key);

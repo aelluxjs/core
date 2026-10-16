@@ -162,6 +162,39 @@ test("long smooth snap navigation reports only the reached destination", async (
   expect(await page.evaluate(() => window.snapEvents)).toEqual([4]);
 });
 
+test("interrupted snap navigation settles without scrollend", async ({ page }) => {
+  await setup(page, `<div id="gallery" data-ae-scrollbox data-ae-scrollbox-snap
+    style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden">
+    <div style="display:flex;width:500px;height:100px">
+      ${Array.from({ length: 5 }, (_, index) =>
+        `<div data-ae-snap-item style="flex:none;width:100px"></div>`).join("")}
+    </div>
+  </div>`);
+
+  await page.evaluate(() => {
+    const element = document.getElementById("gallery");
+    window.snapEvents = [];
+    element.addEventListener("scrollend", event => event.stopImmediatePropagation(), true);
+    element.addEventListener("AelluxJsScrollboxSnapChange", event =>
+      window.snapEvents.push(event.detail.index));
+    element.classList.add("ae--snap-suspended");
+    element.scrollTo = () => {};
+    AelluxJs.mountManager.controller("gallery").scrollbox.goto(4);
+    delete element.scrollTo;
+    element.dispatchEvent(new WheelEvent("wheel", {
+      deltaX: -120, bubbles: true, cancelable: false
+    }));
+    element.scrollLeft = 100;
+  });
+
+  await expect.poll(() => page.evaluate(() => document.getElementById("gallery").scrollLeft))
+    .toBe(100);
+  await expect.poll(() => page.evaluate(() => window.snapEvents), { timeout: 5000 })
+    .toContain(1);
+  await page.evaluate(() => document.getElementById("gallery")
+    .classList.remove("ae--snap-suspended"));
+});
+
 test("a descendant scrollend does not finish its parent snap navigation", async ({ page }) => {
   await setup(page, `<div id="gallery" data-ae-scrollbox="native" data-ae-scrollbox-snap
     style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden">
@@ -474,7 +507,12 @@ test("snap children publish viewport and focus values through native scrolling",
   expect(await values(50)).toEqual([[-1, 0.5], [1, 0.5], [2, 0]]);
   expect(await values(100)).toEqual([[-2, 0], [0, 1], [2, 0]]);
   await page.evaluate(() => AelluxJs.mountManager.unmount(document.body, "scrollbox"));
-  expect(await values()).toEqual([[-2, 0], [0, 1], [2, 0]]);
+  expect(await page.evaluate(() => Array.from(
+    document.querySelectorAll("[data-ae-snap-item]"), item => [
+      item.style.getPropertyValue("--ae-snap-viewport"),
+      item.style.getPropertyValue("--ae-snap-focus")
+    ]
+  ))).toEqual([["", ""], ["", ""], ["", ""]]);
 });
 
 test("vertical snap children publish values along the vertical axis", async ({ page }) => {
@@ -700,6 +738,42 @@ test("snap wheel advances one item per gesture, including inverted wheel", async
   expect(await wheel([{ deltaY: -120 }])).toEqual([true]);
   await expect.poll(() => page.evaluate(() => document.getElementById("gallery").scrollLeft))
     .toBe(100);
+});
+
+test("snap wheel uses the dominant gesture axis", async ({ page }) => {
+  await setup(page, `<div id="horizontal" data-ae-scrollbox data-ae-scrollbox-snap
+    style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden">
+    <div style="display:flex;width:200px;height:100px">
+      <div data-ae-snap-item style="flex:none;width:100px"></div>
+      <div data-ae-snap-item style="flex:none;width:100px"></div>
+    </div>
+  </div>
+  <div id="vertical" data-ae-scrollbox data-ae-scrollbox-snap="vertical"
+    style="width:100px;height:100px;overflow-y:auto;overflow-x:hidden">
+    <div data-ae-snap-item style="height:100px"></div>
+    <div data-ae-snap-item style="height:100px"></div>
+  </div>`);
+
+  const result = await page.evaluate(() => {
+    const horizontal = document.getElementById("horizontal");
+    const vertical = document.getElementById("vertical");
+    const wheel = (element, deltaX, deltaY) => {
+      const event = new WheelEvent("wheel", {
+        deltaX, deltaY, bubbles: true, cancelable: true
+      });
+      element.dispatchEvent(event);
+      return event.defaultPrevented;
+    };
+    return {
+      diagonal: wheel(horizontal, -2, 120),
+      horizontalOnly: wheel(vertical, 120, 0)
+    };
+  });
+  expect(result).toEqual({ diagonal: true, horizontalOnly: false });
+  await expect.poll(() => page.evaluate(() => document.getElementById("horizontal").scrollLeft))
+    .toBe(100);
+  expect(await page.evaluate(() => document.getElementById("vertical").scrollTop))
+    .toBe(0);
 });
 
 test("horizontal snap honors disabled vertical wheel conversion", async ({ page }) => {
@@ -1142,6 +1216,88 @@ test("native is the default and never loads a dependency", async ({ page }) => {
   expect(await drag(page, "empty")).toMatchObject({ x: 0, y: 0 });
   expect(await drag(page, "native")).toMatchObject({ x: 0, y: 0 });
   expect(await drag(page, "pointer")).toMatchObject({ x: 50, y: 0 });
+});
+
+test("native touch selects one axis across nested scrollboxes", async ({ page, browserName }) => {
+  test.skip(browserName !== "chromium", "Touch drag injection uses the Chromium protocol");
+  await setup(page, `<div id="outer" data-ae-scrollbox
+    style="width:180px;height:140px;overflow-x:auto;overflow-y:hidden">
+    <div style="display:flex;width:540px;height:140px">
+      ${Array.from({ length: 3 }, (_, index) => `
+        <div id="inner-${index}" data-ae-scrollbox
+          style="flex:none;width:180px;height:140px;overflow-y:auto;overflow-x:hidden">
+          <div style="height:500px"></div>
+        </div>`).join("")}
+    </div>
+  </div>`);
+
+  const rect = await page.locator("#inner-0").boundingBox();
+  const cdp = await page.context().newCDPSession(page);
+  await cdp.send("Emulation.setTouchEmulationEnabled", { enabled: true });
+  const drag = async (startX, startY, moveX, moveY) => {
+    await cdp.send("Input.dispatchTouchEvent", {
+      type: "touchStart", touchPoints: [{ x: startX, y: startY, id: 1 }]
+    });
+    for (let step = 1; step <= 6; step++) {
+      await cdp.send("Input.dispatchTouchEvent", {
+        type: "touchMove", touchPoints: [{
+          x: startX + moveX * step / 6,
+          y: startY + moveY * step / 6,
+          id: 1
+        }]
+      });
+      await page.waitForTimeout(20);
+    }
+    await cdp.send("Input.dispatchTouchEvent", {
+      type: "touchEnd", touchPoints: []
+    });
+  };
+
+  await drag(rect.x + 125, rect.y + 110, 8, -75);
+  await expect.poll(() => page.evaluate(() => document.getElementById("inner-0").scrollTop))
+    .toBeGreaterThan(0);
+  expect(await page.evaluate(() => document.getElementById("outer").scrollLeft)).toBe(0);
+
+  const vertical = await page.evaluate(() => document.getElementById("inner-0").scrollTop);
+  await drag(rect.x + 125, rect.y + 110, -75, 8);
+  await expect.poll(() => page.evaluate(() => document.getElementById("outer").scrollLeft))
+    .toBeGreaterThan(0);
+  expect(await page.evaluate(() => document.getElementById("inner-0").scrollTop))
+    .toBe(vertical);
+});
+
+test("a forced child pan-y blocks the horizontal parent gesture", async ({ page, browserName }) => {
+  test.skip(browserName !== "chromium", "Touch drag injection uses the Chromium protocol");
+  await setup(page, `<div id="outer" data-ae-scrollbox
+    style="width:180px;height:140px;overflow-x:auto;overflow-y:hidden">
+    <div style="display:flex;width:540px;height:140px">
+      <div id="inner" data-ae-scrollbox
+        style="flex:none;width:180px;height:140px;overflow-y:auto;overflow-x:hidden;touch-action:pan-y">
+        <div style="height:500px"></div>
+      </div>
+      <div style="flex:none;width:360px"></div>
+    </div>
+  </div>`);
+
+  const rect = await page.locator("#inner").boundingBox();
+  const cdp = await page.context().newCDPSession(page);
+  await cdp.send("Emulation.setTouchEmulationEnabled", { enabled: true });
+  await cdp.send("Input.dispatchTouchEvent", {
+    type: "touchStart", touchPoints: [{ x: rect.x + 125, y: rect.y + 100, id: 1 }]
+  });
+  for (let step = 1; step <= 6; step++) {
+    await cdp.send("Input.dispatchTouchEvent", {
+      type: "touchMove", touchPoints: [{
+        x: rect.x + 125 - 75 * step / 6,
+        y: rect.y + 100 + 8 * step / 6,
+        id: 1
+      }]
+    });
+    await page.waitForTimeout(20);
+  }
+  await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+  expect(await page.evaluate(() => document.getElementById("outer").scrollLeft))
+    .toBe(0);
 });
 
 test("pointer drag keeps native scroll events and progress", async ({ page }) => {

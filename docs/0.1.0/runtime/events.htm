@@ -587,7 +587,7 @@ Events                  </li>
 
         <div id="doc-content" style="min-height: calc(100vh - 200px);" class="js-toc-content" ajax-load="doc-content">
 <h1>Events</h1>
-<p>AelluxJs names its DOM events with the <code>AelluxJs</code> prefix. The main API listens on <code>document</code>; a mounted element controller listens on its element. A document listener also receives bubbling events from elements:</p>
+<p>AelluxJs names its DOM events with the <code>AelluxJs</code> prefix. The main API listens on <code>document</code>; <code>onTarget</code> and <code>offTarget</code> listen on an explicit target; a mounted element controller listens on its element. A document listener also receives bubbling events from elements:</p>
 <pre><code class="language-js">const onUpdate = event =&gt; console.log(event.type);
 $ae.on(&quot;Update&quot;, onUpdate);
 $ae.off(&quot;Update&quot;, onUpdate);
@@ -681,7 +681,7 @@ await $ae.mountManager.update(document.getElementById(&quot;panel&quot;));
 <tr>
 <td>Present</td>
 <td><code>AelluxJsLayout</code></td>
-<td>Present element; bubbles when a Pop or Unpop transition starts and again after it finishes. <code>detail.origin</code> is <code>&quot;present.pop&quot;</code> or <code>&quot;present.unpop&quot;</code> (the <code>extension.method</code> format). Anchor listens on the shared positioning parent.</td>
+<td>Present element; bubbles when a Pop or Unpop transition starts. <code>detail</code> contains <code>origin</code> (<code>&quot;present.pop&quot;</code> or <code>&quot;present.unpop&quot;</code>) and <code>durationMs</code>, the maximum expected layout change time in milliseconds. Anchor listens on the shared positioning parent.</td>
 </tr>
 <tr>
 <td>Present</td>
@@ -706,6 +706,7 @@ await $ae.mountManager.update(document.getElementById(&quot;panel&quot;));
 </tbody></table>
 <pre><code class="language-js">panel.addEventListener(&quot;AelluxJsLayout&quot;, event =&gt; {
   console.log(event.detail.origin); // &quot;present.pop&quot; or &quot;present.unpop&quot;
+  console.log(event.detail.durationMs); // Maximum transition time in milliseconds.
 });
 </code></pre>
 <h2>Extension command events</h2>

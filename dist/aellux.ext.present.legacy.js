@@ -101,36 +101,6 @@
       });
     };
   }
-  function _slicedToArray(r, e) {
-    return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest();
-  }
-  function _nonIterableRest() {
-    throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
-  }
-  function _iterableToArrayLimit(r, l) {
-    var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
-    if (null != t) {
-      var e, n, i, u, a = [], f = true, o = false;
-      try {
-        if (i = (t = t.call(r)).next, 0 === l) {
-          if (Object(t) !== t) return;
-          f = false;
-        } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = true) ;
-      } catch (r2) {
-        o = true, n = r2;
-      } finally {
-        try {
-          if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return;
-        } finally {
-          if (o) throw n;
-        }
-      }
-      return a;
-    }
-  }
-  function _arrayWithHoles(r) {
-    if (Array.isArray(r)) return r;
-  }
   function _toConsumableArray(r) {
     return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread();
   }
@@ -229,6 +199,9 @@
     var triggerTargets = /* @__PURE__ */ new Map();
     var triggersByTargetId = /* @__PURE__ */ new Map();
     var indexedTriggerValues = /* @__PURE__ */ new Map();
+    var elementMemories = /* @__PURE__ */ new WeakMap();
+    var triggerMemories = /* @__PURE__ */ new WeakMap();
+    var measuredMemories = /* @__PURE__ */ new WeakMap();
     function init(options) {
       AelluxJs.mountManager.add({
         extensionName: extensionName,
@@ -245,13 +218,13 @@
         mount: mountTriggerElement,
         unmount: unmountTriggerElement
       });
-      document.addEventListener("click", OnClick);
+      AelluxJs.on("$click", OnClick);
     }
     function destroy() {
       AelluxJs.mountManager.remove({
         extensionName: extensionName
       });
-      document.removeEventListener("click", OnClick);
+      AelluxJs.off("$click", OnClick);
       var _iterator = _createForOfIteratorHelper(triggerElementsSet), _step;
       try {
         for (_iterator.s(); !(_step = _iterator.n()).done; ) {
@@ -278,6 +251,7 @@
     }
     function mountPresentContainer(element) {
       if (presentElements.has(element)) return;
+      elementMemories.set(element, AelluxJs.persist.element.save(element, [attr.present, attr.presentMotion, ARIA_EXPANDED, "hidden"], ["--ae-pop-low-steps", "--ae-unpop-low-steps"]));
       if ((element.getAttribute(attr.present) || "").trim().toLowerCase() === "all") {
         element.setAttribute(attr.present, DEFAULT_PRESENT);
       }
@@ -299,7 +273,6 @@
         presentMotion: presentMotion,
         measuredHeight: measuredHeight,
         measuredWidth: measuredWidth,
-        measuredStyles: null,
         motionEnabled: (element.getAttribute(attr.present) || "").trim() !== "",
         transition: null,
         autoUnpopTimeout: null,
@@ -379,20 +352,25 @@
       autoUnpopSchedule(element, presentController);
     }
     function unmountPresentContainer(element) {
+      var _elementMemories$get;
       if (!presentElements.has(element)) return;
       var controller = presentElements.get(element);
       controller.stop();
       element.classList.remove(className.grid);
       presentElements.delete(element);
       openPresentElements.delete(element);
+      (_elementMemories$get = elementMemories.get(element)) === null || _elementMemories$get === void 0 || _elementMemories$get.restore();
+      elementMemories.delete(element);
       controller.triggers.forEach(updateTriggerAriaExpanded);
     }
     function mountTriggerElement(triggerElement) {
       if (triggerElementsSet.has(triggerElement)) return;
+      triggerMemories.set(triggerElement, AelluxJs.persist.element.save(triggerElement, [ARIA_CONTROLS, ARIA_EXPANDED], []));
       triggerElementsSet.add(triggerElement);
       refreshTriggerTargets(triggerElement);
     }
     function unmountTriggerElement(triggerElement) {
+      var _triggerMemories$get;
       if (!triggerElementsSet.has(triggerElement)) return;
       var target = triggerTargets.get(triggerElement);
       if (target) {
@@ -402,6 +380,8 @@
       }
       unindexTriggerTarget(triggerElement);
       triggerElementsSet.delete(triggerElement);
+      (_triggerMemories$get = triggerMemories.get(triggerElement)) === null || _triggerMemories$get === void 0 || _triggerMemories$get.restore();
+      triggerMemories.delete(triggerElement);
     }
     function targetIdFor(value) {
       if (!value) return null;
@@ -498,28 +478,17 @@
       return method && typeof method === "function" ? method(element) : toggle(element);
     }
     function restoreMeasuredStyles(element, controller) {
-      var saved = controller.measuredStyles;
-      if (!saved) return;
-      var _iterator5 = _createForOfIteratorHelper(saved), _step5;
-      try {
-        for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
-          var _step5$value = _slicedToArray(_step5.value, 3), name = _step5$value[0], value = _step5$value[1], priority = _step5$value[2];
-          if (value) element.style.setProperty(name, value, priority);
-          else element.style.removeProperty(name);
-        }
-      } catch (err) {
-        _iterator5.e(err);
-      } finally {
-        _iterator5.f();
-      }
-      controller.measuredStyles = null;
+      var memory = measuredMemories.get(element);
+      if (!memory) return;
+      memory.restore();
+      measuredMemories.delete(element);
     }
     function prepareMeasuredSize(_x, _x2, _x3, _x4, _x5) {
       return _prepareMeasuredSize.apply(this, arguments);
     }
     function _prepareMeasuredSize() {
       _prepareMeasuredSize = _asyncToGenerator(/* @__PURE__ */ _regenerator().m(function _callee(element, controller, gotoVisible, previousSize, waitForPreparation) {
-        var _iterator7, _step7, _step7$value, name, value, priority, size, computed, height, width, start;
+        var size, computed, height, width, start;
         return _regenerator().w(function(_context) {
           while (1) switch (_context.n) {
             case 0:
@@ -529,23 +498,10 @@
               }
               return _context.a(2, null);
             case 1:
-              if (!controller.measuredStyles) {
-                controller.measuredStyles = ["max-height", "max-width"].map(function(name2) {
-                  return [name2, element.style.getPropertyValue(name2), element.style.getPropertyPriority(name2)];
-                });
+              if (!measuredMemories.has(element)) {
+                measuredMemories.set(element, AelluxJs.persist.element.save(element, [], ["max-height", "max-width"]));
               }
-              _iterator7 = _createForOfIteratorHelper(controller.measuredStyles);
-              try {
-                for (_iterator7.s(); !(_step7 = _iterator7.n()).done; ) {
-                  _step7$value = _slicedToArray(_step7.value, 3), name = _step7$value[0], value = _step7$value[1], priority = _step7$value[2];
-                  if (value) element.style.setProperty(name, value, priority);
-                  else element.style.removeProperty(name);
-                }
-              } catch (err) {
-                _iterator7.e(err);
-              } finally {
-                _iterator7.f();
-              }
+              measuredMemories.get(element).restore();
               size = previousSize;
               if (gotoVisible || !size) {
                 computed = root.getComputedStyle(element);
@@ -728,7 +684,8 @@
               });
               AelluxJs.dispatchFrom(element, "Layout", {
                 detail: {
-                  origin: "present.".concat(newDirection).toLocaleLowerCase()
+                  origin: "present.".concat(newDirection).toLowerCase(),
+                  durationMs: Number.isFinite(timeMs) ? Math.max(0, timeMs) : 0
                 },
                 bubbles: true
               });
@@ -752,12 +709,6 @@
                   bubbles: true
                 });
               }
-              AelluxJs.dispatchFrom(element, "Layout", {
-                detail: {
-                  origin: "present.".concat(newDirection).toLocaleLowerCase()
-                },
-                bubbles: true
-              });
               _context2.n = 17;
               break;
             case 14:
@@ -835,10 +786,10 @@
       unpop(element);
     }
     function outsideClickAutoUnpop(currentExceptions) {
-      var _iterator6 = _createForOfIteratorHelper(openPresentElements), _step6;
+      var _iterator5 = _createForOfIteratorHelper(openPresentElements), _step5;
       try {
         var _loop = function _loop2() {
-          var pContainer = _step6.value;
+          var pContainer = _step5.value;
           if (pContainer.hidden === true || pContainer.getAttribute(attr.unpopOnOutside) === "false" || currentExceptions.some(function(e) {
             return pContainer.contains(e);
           })) {
@@ -846,13 +797,13 @@
           }
           unpop(pContainer);
         };
-        for (_iterator6.s(); !(_step6 = _iterator6.n()).done; ) {
+        for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
           if (_loop()) continue;
         }
       } catch (err) {
-        _iterator6.e(err);
+        _iterator5.e(err);
       } finally {
-        _iterator6.f();
+        _iterator5.f();
       }
     }
     function refreshChangedTrigger(button) {

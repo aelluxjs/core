@@ -39,18 +39,13 @@ import utilsNameCase from "./internal/utils-name-case.js";
         await new Promise((resolve) => {
           const startMountCallback = function () {
             AelluxJs.mount().then(function () {
-              document.removeEventListener(
-                "DOMContentLoaded", startMountCallback
-              );
+              AelluxJs.off("$DOMContentLoaded", startMountCallback);
               resolve();
             });
           };
 
           if (document.readyState === "loading")
-            document.addEventListener(
-              "DOMContentLoaded", startMountCallback,
-              { once: true }
-            );
+            AelluxJs.on("$DOMContentLoaded", startMountCallback, { once: true });
           else
             startMountCallback();
         });

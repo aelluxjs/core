@@ -17,7 +17,7 @@
       shapeSquare: AelluxJs.className("shape-square")
     };
     const adaptiveElements = /* @__PURE__ */ new Set();
-    const initialDimensions = /* @__PURE__ */ new Map();
+    const elementMemories = /* @__PURE__ */ new WeakMap();
     const dimensionProperties = ["--ae-width", "--ae-height"];
     const pendingResizeEntries = /* @__PURE__ */ new Map();
     const pendingResizeElements = /* @__PURE__ */ new Set();
@@ -86,33 +86,30 @@
     }
     function mountAdaptive(element) {
       if (adaptiveElements.has(element)) return;
-      initialDimensions.set(element, dimensionProperties.map((name) => ({
-        value: element.style.getPropertyValue(name),
-        priority: element.style.getPropertyPriority(name)
-      })));
+      elementMemories.set(element, AelluxJs.persist.element.save(
+        element,
+        ["aria-orientation"],
+        dimensionProperties
+      ));
       adaptiveElements.add(element);
       if (resizeObserver) resizeObserver.observe(element);
       else {
         AelluxJs.waitLayout.read(readBounds, [element]);
-        if (adaptiveElements.size === 1) root.addEventListener("resize", onWindowResize);
+        if (adaptiveElements.size === 1) AelluxJs.onTarget(root, "$resize", onWindowResize);
       }
     }
     function unmountAdaptive(element) {
+      var _a;
       if (!adaptiveElements.delete(element)) return;
       pendingResizeEntries.delete(element);
       pendingResizeElements.delete(element);
       if (resizeObserver) resizeObserver.unobserve(element);
-      else if (adaptiveElements.size === 0) root.removeEventListener("resize", onWindowResize);
+      else if (adaptiveElements.size === 0) AelluxJs.offTarget(root, "$resize", onWindowResize);
       for (const name of managedClasses) {
         element.classList.remove(name);
       }
-      const initial = initialDimensions.get(element);
-      dimensionProperties.forEach((name, index) => {
-        const { value, priority } = initial[index];
-        if (value) element.style.setProperty(name, value, priority);
-        else element.style.removeProperty(name);
-      });
-      initialDimensions.delete(element);
+      (_a = elementMemories.get(element)) == null ? void 0 : _a.restore();
+      elementMemories.delete(element);
     }
     function onResize(entries) {
       for (const entry of entries) {

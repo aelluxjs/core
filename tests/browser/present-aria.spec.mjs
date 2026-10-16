@@ -1,10 +1,19 @@
 import { expect, test } from "@playwright/test";
 
-test("present announces layout after pop and unpop finish", async ({ page }) => {
+async function attachElementMemoryToStub(page) {
+  await page.evaluate(async () => {
+    const { createSaveElementMemoryHelper } = await import(
+      "/src/internal/create-save-element-memory-helper.js"
+    );
+    AelluxJs.persist = { element: createSaveElementMemoryHelper() };
+  });
+}
+
+test("present announces layout at transition start with its duration", async ({ page }) => {
   await page.goto("/tests/index.htm");
   await page.evaluate(() => {
-    document.body.innerHTML = `<div id="panel" data-ae-present hidden
-      style="--ae-pop-duration:0ms;--ae-unpop-duration:0ms">
+    document.body.innerHTML = `<div id="panel" data-ae-present="opacity" hidden
+      style="--ae-pop-duration:30ms;--ae-unpop-duration:40ms">
       <div data-ae-present-motion></div>
     </div>`;
   });
@@ -20,14 +29,15 @@ test("present announces layout after pop and unpop finish", async ({ page }) => 
     for (const name of ["Pop", "Unpop"])
       panel.addEventListener(`AelluxJs${name}`, () => received.push(name));
     document.body.addEventListener("AelluxJsLayout", event => {
-      received.push(`Layout:${event.target.id}:${event.target.hidden}`);
+      received.push(`Layout:${event.target.id}:${event.detail.origin}:${event.detail.durationMs}`);
     });
     await $ae("panel").present.pop();
     await $ae("panel").present.unpop();
     return received;
   });
   expect(events).toEqual([
-    "Pop", "Layout:panel:false", "Unpop", "Layout:panel:true"
+    "Layout:panel:present.pop:30", "Pop",
+    "Layout:panel:present.unpop:40", "Unpop"
   ]);
 });
 
@@ -331,11 +341,17 @@ test("replacement transitions reuse preparation and final interruptions clean it
 test("direct pop restarts from hidden during either transition and when already visible", async ({ page }) => {
   await page.goto("/tests/index.htm");
   const result = await page.evaluate(async () => {
+    const { createSaveElementMemoryHelper } = await import(
+      "/src/internal/create-save-element-memory-helper.js"
+    );
     document.body.innerHTML = `
       <div id="panel" data-ae-present="opacity" hidden
         style="--ae-pop-duration: 80ms; --ae-unpop-duration: 80ms"></div>`;
     const events = [];
     window.AelluxJs = {
+      persist: { element: createSaveElementMemoryHelper() },
+      on: (event, handler, options) => document.addEventListener(event.slice(1), handler, options),
+      off: (event, handler, options) => document.removeEventListener(event.slice(1), handler, options),
       attr: name => `data-ae-${name}`,
       className: name => `ae-${name}`,
       diagnostics: {
@@ -961,6 +977,8 @@ test("present reports invalid target IDs without throwing from click", async ({ 
     const reports = [];
     window.selectorReports = reports;
     window.AelluxJs = {
+      on: (event, handler, options) => document.addEventListener(event.slice(1), handler, options),
+      off: (event, handler, options) => document.removeEventListener(event.slice(1), handler, options),
       attr: name => `data-ae-${name}`,
       className: name => `ae-${name}`,
       attrMem: { save() {}, restore() {} },
@@ -979,6 +997,7 @@ test("present reports invalid target IDs without throwing from click", async ({ 
     };
   });
   await page.addScriptTag({ url: "/src/aellux.ext.present.js" });
+  await attachElementMemoryToStub(page);
   const reports = await page.evaluate(() => {
     const extension = window.presentExtension;
     extension.init();
@@ -1000,6 +1019,8 @@ test("present restores a trigger without targets and can mount it again", async 
     const { saveAttr, restoreAttr } = await import("/src/internal/build-initial-attr-memory.js");
     document.body.innerHTML = '<button id="control" data-ae-trigger="toggle" data-ae-target="#later"></button>';
     window.AelluxJs = {
+      on: (event, handler, options) => document.addEventListener(event.slice(1), handler, options),
+      off: (event, handler, options) => document.removeEventListener(event.slice(1), handler, options),
       attr: name => `data-ae-${name}`,
       className: name => `ae-${name}`,
       attrMem: { save: saveAttr, restore: restoreAttr },
@@ -1016,6 +1037,7 @@ test("present restores a trigger without targets and can mount it again", async 
   });
   expect(result).toBe(true);
   await page.addScriptTag({ url: "/src/aellux.ext.present.js" });
+  await attachElementMemoryToStub(page);
   const state = await page.evaluate(() => {
     const extension = window.presentExtension;
     extension.init();
@@ -1055,6 +1077,8 @@ test("present records interrupted transitions as warnings and failures as errors
     ]);
     document.body.innerHTML = '<div id="panel" data-ae-present hidden style="--ae-pop-duration: 100ms; --ae-unpop-duration: 0ms"><div data-ae-present-motion></div></div>';
     window.AelluxJs = {
+      on: (event, handler, options) => document.addEventListener(event.slice(1), handler, options),
+      off: (event, handler, options) => document.removeEventListener(event.slice(1), handler, options),
       attr: name => `data-ae-${name}`,
       className: name => `ae-${name}`,
       attrMem: { save: saveAttr, restore: restoreAttr },
@@ -1073,6 +1097,7 @@ test("present records interrupted transitions as warnings and failures as errors
     };
   });
   await page.addScriptTag({ url: "/src/aellux.ext.present.js" });
+  await attachElementMemoryToStub(page);
   const entries = await page.evaluate(async () => {
     const extension = window.presentExtension;
     extension.init();
@@ -1106,6 +1131,8 @@ test("present reports a transition callback failure with its own diagnostic", as
       <div id="panel" data-ae-present hidden><div data-ae-present-motion></div></div>
     `;
     window.AelluxJs = {
+      on: (event, handler, options) => document.addEventListener(event.slice(1), handler, options),
+      off: (event, handler, options) => document.removeEventListener(event.slice(1), handler, options),
       attr: name => `data-ae-${name}`,
       className: name => `ae-${name}`,
       attrMem: { save: saveAttr, restore: restoreAttr },
@@ -1125,6 +1152,7 @@ test("present reports a transition callback failure with its own diagnostic", as
     };
   });
   await page.addScriptTag({ url: "/src/aellux.ext.present.js" });
+  await attachElementMemoryToStub(page);
   const codes = await page.evaluate(() => {
     const extension = window.presentExtension;
     extension.init();

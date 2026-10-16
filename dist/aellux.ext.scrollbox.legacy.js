@@ -107,6 +107,7 @@
     var AelluxJs = root.AelluxJs;
     var extensionName = "scrollbox";
     if (!AelluxJs) throw new Error("[aellux.js] Load the boot script before the scrollbox extension.");
+    var onTarget = AelluxJs.onTarget, offTarget = AelluxJs.offTarget;
     var attribute = AelluxJs.attr(extensionName);
     var wheelAttribute = AelluxJs.attr("scrollbox-wheel-horizontal");
     var momentumAttribute = AelluxJs.attr("scrollbox-momentum");
@@ -140,6 +141,7 @@
     var SNAP_FLICK_MAX_DISTANCE_PX = 100;
     var SNAP_FLICK_MIN_DISTANCE_PX = 1;
     var SNAP_SCROLL_IDLE_MS = 120;
+    var SNAP_TARGET_IDLE_MS = 500;
     var SNAP_EDGE_DISTANCE_PX = 10;
     var ELASTIC_DAMPING = 1 / 3;
     var DEFAULT_ELASTIC_LIMIT = {
@@ -160,6 +162,15 @@
     var properties = ["--ae-scroll-y-progress", "--ae-scroll-x-progress"];
     var snapProperties = ["--ae-snap-viewport", "--ae-snap-focus"];
     var scrollboxes = /* @__PURE__ */ new Map();
+    var elementMemories = /* @__PURE__ */ new WeakMap();
+    var cursorMemories = /* @__PURE__ */ new WeakMap();
+    var scrollbarMemories = /* @__PURE__ */ new WeakMap();
+    var inlineMemories = /* @__PURE__ */ new WeakMap();
+    var elasticMemories = /* @__PURE__ */ new WeakMap();
+    var elasticWidthMemories = /* @__PURE__ */ new WeakMap();
+    var elasticHeightMemories = /* @__PURE__ */ new WeakMap();
+    var pointerScrollMemories = /* @__PURE__ */ new WeakMap();
+    var snapItemMemories = /* @__PURE__ */ new WeakMap();
     var activePointerScrollState = null;
     AelluxJs.extAttach(extensionName, {
       init: init,
@@ -197,20 +208,12 @@
     }
     function mountScrollbox(element) {
       if (scrollboxes.has(element)) return;
-      var previous2 = properties.map(function(name) {
-        return {
-          value: element.style.getPropertyValue(name),
-          priority: element.style.getPropertyPriority(name)
-        };
-      });
+      elementMemories.set(element, AelluxJs.persist.element.save(element, [], properties));
+      cursorMemories.set(element, AelluxJs.persist.element.save(element, [], ["cursor"]));
       var elastic = {
         wrapper: null,
         baseTransform: "",
         baseOrigin: "",
-        previousTransform: null,
-        previousOrigin: null,
-        previousMinWidth: null,
-        previousMinHeight: null,
         extentX: false,
         extentY: false,
         dimensions: null,
@@ -245,6 +248,7 @@
         wheelTimeout: null,
         activePointers: /* @__PURE__ */ new Set(),
         activeTouches: /* @__PURE__ */ new Set(),
+        savedItems: /* @__PURE__ */ new Set(),
         touchStarts: /* @__PURE__ */ new Map(),
         gestureListening: false,
         endListening: false,
@@ -252,7 +256,6 @@
       };
       var inlineWrapper = {
         element: null,
-        previousDisplay: null,
         owned: false,
         reportedDisplay: null
       };
@@ -270,13 +273,10 @@
       };
       var state = {
         element: element,
-        previous: previous2,
         metrics: null,
         mode: null,
         desktop: false,
         cursor: {
-          value: element.style.getPropertyValue("cursor"),
-          priority: element.style.getPropertyPriority("cursor"),
           owned: false
         },
         wheelEnabled: true,
@@ -309,7 +309,10 @@
         publish(state);
         if (!state.snapEnabled) return;
         if (state.snap.scrollingToTarget !== -1) {
-          if (!snapTargetReached(state)) return;
+          if (!snapTargetReached(state)) {
+            scheduleSnapTargetIdle(state);
+            return;
+          }
           clearSnapTarget(state);
           scheduleScrollEnd(state);
         } else if (!("onscrollend" in element) || state.snap.scrollEndTimeout !== null) {
@@ -401,10 +404,10 @@
         }
       };
       scrollboxes.set(element, state);
-      element.addEventListener("scroll", state.onScroll, {
+      onTarget(element, "$scroll", state.onScroll, {
         passive: true
       });
-      element.addEventListener("scrollend", state.onScrollEnd, {
+      onTarget(element, "$scrollend", state.onScrollEnd, {
         passive: true
       });
       observe(state);
@@ -415,6 +418,7 @@
       if (state) configure(state);
     }
     function unmountScrollbox(element) {
+      var _elementMemories$get;
       var state = scrollboxes.get(element);
       if (!state) return;
       state.disposed = true;
@@ -430,27 +434,26 @@
       removeSnapGestureListeners(state);
       restoreSnapStyles(state);
       resetElastic(state);
+      if (state.elastic.wrapper) elasticMemories.delete(state.elastic.wrapper);
       restoreInlineWrapper(state);
       resetScrollbars(state);
-      element.removeEventListener("scroll", state.onScroll);
-      element.removeEventListener("scrollend", state.onScrollEnd);
-      if (state.wheelListening) element.removeEventListener("wheel", state.onWheel, true);
+      offTarget(element, "$scroll", state.onScroll);
+      offTarget(element, "$scrollend", state.onScrollEnd);
+      if (state.wheelListening) offTarget(element, "$wheel", state.onWheel, true);
       if (state.pointerListening) {
-        element.removeEventListener("pointerdown", state.onPointerDown);
-        element.removeEventListener("pointerover", state.onPointerOver);
-        element.removeEventListener("pointerout", state.onPointerOut);
-        element.removeEventListener("mousedown", state.onMouseDown);
+        offTarget(element, "$pointerdown", state.onPointerDown);
+        offTarget(element, "$pointerover", state.onPointerOver);
+        offTarget(element, "$pointerout", state.onPointerOut);
+        offTarget(element, "$mousedown", state.onMouseDown);
       }
       if (state.touchListening) removeTouchListeners(state);
       if (state.resizeObserver) state.resizeObserver.disconnect();
       if (state.mutationObserver) state.mutationObserver.disconnect();
       if (state.resizeTimeout !== null) root.clearTimeout(state.resizeTimeout);
-      root.removeEventListener("resize", state.onResize);
-      properties.forEach(function(name2, index) {
-        var original = state.previous[index];
-        if (original.value) element.style.setProperty(name2, original.value, original.priority);
-        else element.style.removeProperty(name2);
-      });
+      offTarget(root, "$resize", state.onResize);
+      (_elementMemories$get = elementMemories.get(element)) === null || _elementMemories$get === void 0 || _elementMemories$get.restore();
+      elementMemories.delete(element);
+      cursorMemories.delete(element);
       var _iterator2 = _createForOfIteratorHelper(scrollEdgeClasses), _step2;
       try {
         for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
@@ -476,13 +479,13 @@
       configureScrollbars(state);
       state.desktop = isDesktop();
       if ((state.desktop || state.elasticEnabled || state.snapEnabled) && !state.wheelListening) {
-        element.addEventListener("wheel", state.onWheel, {
+        onTarget(element, "$wheel", state.onWheel, {
           passive: false,
           capture: true
         });
         state.wheelListening = true;
       } else if (!state.desktop && !state.elasticEnabled && !state.snapEnabled && state.wheelListening) {
-        element.removeEventListener("wheel", state.onWheel, true);
+        offTarget(element, "$wheel", state.onWheel, true);
         state.wheelListening = false;
       }
       if (state.elasticEnabled && !state.touchListening) addTouchListeners(state);
@@ -491,17 +494,17 @@
       var pointerEnabled = state.desktop && state.mode === "pointer";
       if (!pointerEnabled || !state.momentumEnabled) cancelMomentum(state);
       if (pointerEnabled && !state.pointerListening) {
-        element.addEventListener("pointerdown", state.onPointerDown);
-        element.addEventListener("pointerover", state.onPointerOver);
-        element.addEventListener("pointerout", state.onPointerOut);
-        element.addEventListener("mousedown", state.onMouseDown);
+        onTarget(element, "$pointerdown", state.onPointerDown);
+        onTarget(element, "$pointerover", state.onPointerOver);
+        onTarget(element, "$pointerout", state.onPointerOut);
+        onTarget(element, "$mousedown", state.onMouseDown);
         state.pointerListening = true;
       } else if (!pointerEnabled && state.pointerListening) {
         if (activePointerScrollState && activePointerScrollState.pointerScroll && activePointerScrollState.pointerScroll.chain.includes(state)) endPointerScroll(activePointerScrollState);
-        element.removeEventListener("pointerdown", state.onPointerDown);
-        element.removeEventListener("pointerover", state.onPointerOver);
-        element.removeEventListener("pointerout", state.onPointerOut);
-        element.removeEventListener("mousedown", state.onMouseDown);
+        offTarget(element, "$pointerdown", state.onPointerDown);
+        offTarget(element, "$pointerover", state.onPointerOver);
+        offTarget(element, "$pointerout", state.onPointerOut);
+        offTarget(element, "$mousedown", state.onMouseDown);
         state.pointerListening = false;
         endPointerScroll(state);
         state.lastPointerDown = null;
@@ -556,19 +559,19 @@
       var scrollbar = state.scrollbar;
       if (enabled && !scrollbar.listening) {
         scrollbar.mouseHover = element.matches(":hover") && !!(root.matchMedia && root.matchMedia("(any-hover: hover)").matches);
-        element.addEventListener("pointerenter", state.onScrollbarPointerEnter);
-        element.addEventListener("pointerleave", state.onScrollbarPointerLeave);
-        element.addEventListener("mouseenter", state.onScrollbarMouseEnter);
-        element.addEventListener("mouseleave", state.onScrollbarMouseLeave);
-        root.document.addEventListener("pointerdown", state.onScrollbarOutsideDown, true);
+        onTarget(element, "$pointerenter", state.onScrollbarPointerEnter);
+        onTarget(element, "$pointerleave", state.onScrollbarPointerLeave);
+        onTarget(element, "$mouseenter", state.onScrollbarMouseEnter);
+        onTarget(element, "$mouseleave", state.onScrollbarMouseLeave);
+        AelluxJs.on("$pointerdown", state.onScrollbarOutsideDown, true);
         scrollbar.listening = true;
         syncScrollbarVisibility(state);
       } else if (!enabled && scrollbar.listening) {
-        element.removeEventListener("pointerenter", state.onScrollbarPointerEnter);
-        element.removeEventListener("pointerleave", state.onScrollbarPointerLeave);
-        element.removeEventListener("mouseenter", state.onScrollbarMouseEnter);
-        element.removeEventListener("mouseleave", state.onScrollbarMouseLeave);
-        root.document.removeEventListener("pointerdown", state.onScrollbarOutsideDown, true);
+        offTarget(element, "$pointerenter", state.onScrollbarPointerEnter);
+        offTarget(element, "$pointerleave", state.onScrollbarPointerLeave);
+        offTarget(element, "$mouseenter", state.onScrollbarMouseEnter);
+        offTarget(element, "$mouseleave", state.onScrollbarMouseLeave);
+        AelluxJs.off("$pointerdown", state.onScrollbarOutsideDown, true);
         scrollbar.listening = false;
         clearScrollbarPdsVisibility(state);
         scrollbar.pointerHover = false;
@@ -600,17 +603,10 @@
         element.setAttribute(attributeName, "");
         state.element.appendChild(element);
       }
-      var previous2 = scrollbarProperties.map(function(name) {
-        return {
-          name: name,
-          value: element.style.getPropertyValue(name),
-          priority: element.style.getPropertyPriority(name)
-        };
-      });
+      if (!owned) scrollbarMemories.set(element, AelluxJs.persist.element.save(element, [], scrollbarProperties));
       var record = {
         element: element,
         owned: owned,
-        previous: previous2,
         axis: axis,
         x: null,
         y: null,
@@ -629,36 +625,25 @@
       record.onPointerEnd = function(event) {
         return endScrollbarDrag(state, record, event);
       };
-      element.addEventListener("pointerdown", record.onPointerDown);
-      element.addEventListener("pointermove", record.onPointerMove);
-      element.addEventListener("pointerup", record.onPointerEnd);
-      element.addEventListener("pointercancel", record.onPointerEnd);
+      onTarget(element, "$pointerdown", record.onPointerDown);
+      onTarget(element, "$pointermove", record.onPointerMove);
+      onTarget(element, "$pointerup", record.onPointerEnd);
+      onTarget(element, "$pointercancel", record.onPointerEnd);
       scrollbar[axis] = record;
     }
     function resetScrollbarAxis(state, axis) {
+      var _scrollbarMemories$ge;
       var record = state.scrollbar[axis];
       if (!record) return;
       endScrollbarDrag(state, record);
       var element = record.element;
-      element.removeEventListener("pointerdown", record.onPointerDown);
-      element.removeEventListener("pointermove", record.onPointerMove);
-      element.removeEventListener("pointerup", record.onPointerEnd);
-      element.removeEventListener("pointercancel", record.onPointerEnd);
+      offTarget(element, "$pointerdown", record.onPointerDown);
+      offTarget(element, "$pointermove", record.onPointerMove);
+      offTarget(element, "$pointerup", record.onPointerEnd);
+      offTarget(element, "$pointercancel", record.onPointerEnd);
       if (record.owned) element.remove();
-      else {
-        var _iterator4 = _createForOfIteratorHelper(record.previous), _step4;
-        try {
-          for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
-            var original = _step4.value;
-            if (original.value) element.style.setProperty(original.name, original.value, original.priority);
-            else element.style.removeProperty(original.name);
-          }
-        } catch (err) {
-          _iterator4.e(err);
-        } finally {
-          _iterator4.f();
-        }
-      }
+      else (_scrollbarMemories$ge = scrollbarMemories.get(element)) === null || _scrollbarMemories$ge === void 0 || _scrollbarMemories$ge.restore();
+      scrollbarMemories.delete(element);
       state.scrollbar[axis] = null;
     }
     function resetScrollbars(state) {
@@ -666,11 +651,11 @@
       resetScrollbarAxis(state, "y");
       var scrollbar = state.scrollbar;
       if (scrollbar.listening) {
-        state.element.removeEventListener("pointerenter", state.onScrollbarPointerEnter);
-        state.element.removeEventListener("pointerleave", state.onScrollbarPointerLeave);
-        state.element.removeEventListener("mouseenter", state.onScrollbarMouseEnter);
-        state.element.removeEventListener("mouseleave", state.onScrollbarMouseLeave);
-        root.document.removeEventListener("pointerdown", state.onScrollbarOutsideDown, true);
+        offTarget(state.element, "$pointerenter", state.onScrollbarPointerEnter);
+        offTarget(state.element, "$pointerleave", state.onScrollbarPointerLeave);
+        offTarget(state.element, "$mouseenter", state.onScrollbarMouseEnter);
+        offTarget(state.element, "$mouseleave", state.onScrollbarMouseLeave);
+        AelluxJs.off("$pointerdown", state.onScrollbarOutsideDown, true);
         scrollbar.listening = false;
       }
       if (scrollbar.hideOwned) state.element.classList.remove(nativeScrollbarHideClass);
@@ -755,10 +740,10 @@
       return values;
     }
     function updateScrollbars(state, values) {
-      var _iterator5 = _createForOfIteratorHelper(values), _step5;
+      var _iterator4 = _createForOfIteratorHelper(values), _step4;
       try {
-        for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
-          var _step5$value = _step5.value, record = _step5$value.record, x = _step5$value.x, y = _step5$value.y, trackSize = _step5$value.trackSize, thumbSize = _step5$value.thumbSize, thumbPosition = _step5$value.thumbPosition, max = _step5$value.max, display = _step5$value.display;
+        for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
+          var _step4$value = _step4.value, record = _step4$value.record, x = _step4$value.x, y = _step4$value.y, trackSize = _step4$value.trackSize, thumbSize = _step4$value.thumbSize, thumbPosition = _step4$value.thumbPosition, max = _step4$value.max, display = _step4$value.display;
           if (state.scrollbar[record.axis] !== record) continue;
           var style = record.element.style;
           if (record.x !== x) style.setProperty("--ae-scrollbar-x", "".concat(x, "px"));
@@ -776,9 +761,9 @@
           record.display = display;
         }
       } catch (err) {
-        _iterator5.e(err);
+        _iterator4.e(err);
       } finally {
-        _iterator5.f();
+        _iterator4.f();
       }
     }
     function scrollbarPointerPosition(record, event) {
@@ -919,24 +904,16 @@
         table: "inline-table"
       }[display];
       if (!replacement) return;
-      if (!inline.owned) {
-        inline.previousDisplay = {
-          value: wrapper.style.getPropertyValue("display"),
-          priority: wrapper.style.getPropertyPriority("display")
-        };
-      }
+      if (!inline.owned) inlineMemories.set(wrapper, AelluxJs.persist.element.save(wrapper, [], ["display"]));
       wrapper.style.setProperty("display", replacement, "important");
       inline.owned = true;
     }
     function restoreInlineWrapper(state) {
+      var _inlineMemories$get;
       var inline = state.inlineWrapper;
-      if (inline.owned && inline.element) {
-        var _previous = inline.previousDisplay;
-        if (_previous.value) inline.element.style.setProperty("display", _previous.value, _previous.priority);
-        else inline.element.style.removeProperty("display");
-      }
+      if (inline.owned && inline.element) (_inlineMemories$get = inlineMemories.get(inline.element)) === null || _inlineMemories$get === void 0 || _inlineMemories$get.restore();
+      if (inline.element) inlineMemories.delete(inline.element);
       inline.element = null;
-      inline.previousDisplay = null;
       inline.owned = false;
       inline.reportedDisplay = null;
     }
@@ -968,6 +945,20 @@
     function restoreSnapStyles(state) {
       var snap = state.snap;
       clearSnapWheelTimeout(state);
+      var _iterator5 = _createForOfIteratorHelper(snap.savedItems), _step5;
+      try {
+        for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
+          var _snapItemMemories$get;
+          var item = _step5.value;
+          (_snapItemMemories$get = snapItemMemories.get(item)) === null || _snapItemMemories$get === void 0 || _snapItemMemories$get.restore();
+          snapItemMemories.delete(item);
+        }
+      } catch (err) {
+        _iterator5.e(err);
+      } finally {
+        _iterator5.f();
+      }
+      snap.savedItems.clear();
       state.element.classList.remove(snapReadyClass, snapSuspendedClass);
       snap.axis = null;
       snap.suspensions.pointer = false;
@@ -1029,8 +1020,8 @@
     }
     function addSnapGestureListeners(state) {
       if (state.snap.gestureListening) return;
-      state.element.addEventListener("pointerdown", state.onSnapPointerDown, true);
-      state.element.addEventListener("touchstart", state.onSnapTouchStart, {
+      onTarget(state.element, "$pointerdown", state.onSnapPointerDown, true);
+      onTarget(state.element, "$touchstart", state.onSnapTouchStart, {
         passive: true,
         capture: true
       });
@@ -1038,8 +1029,8 @@
     }
     function removeSnapGestureListeners(state) {
       if (state.snap.gestureListening) {
-        state.element.removeEventListener("pointerdown", state.onSnapPointerDown, true);
-        state.element.removeEventListener("touchstart", state.onSnapTouchStart, true);
+        offTarget(state.element, "$pointerdown", state.onSnapPointerDown, true);
+        offTarget(state.element, "$touchstart", state.onSnapTouchStart, true);
         state.snap.gestureListening = false;
       }
       stopSnapGestureEndListeners(state);
@@ -1050,20 +1041,20 @@
     }
     function listenSnapGestureEnd(state) {
       if (state.snap.endListening) return;
-      root.addEventListener("pointerup", state.onSnapPointerEnd, true);
-      root.addEventListener("pointercancel", state.onSnapPointerEnd, true);
-      root.addEventListener("touchend", state.onSnapTouchEnd, true);
-      root.addEventListener("touchcancel", state.onSnapTouchEnd, true);
-      root.addEventListener("blur", state.onSnapBlur);
+      onTarget(root, "$pointerup", state.onSnapPointerEnd, true);
+      onTarget(root, "$pointercancel", state.onSnapPointerEnd, true);
+      onTarget(root, "$touchend", state.onSnapTouchEnd, true);
+      onTarget(root, "$touchcancel", state.onSnapTouchEnd, true);
+      onTarget(root, "$blur", state.onSnapBlur);
       state.snap.endListening = true;
     }
     function stopSnapGestureEndListeners(state) {
       if (!state.snap.endListening) return;
-      root.removeEventListener("pointerup", state.onSnapPointerEnd, true);
-      root.removeEventListener("pointercancel", state.onSnapPointerEnd, true);
-      root.removeEventListener("touchend", state.onSnapTouchEnd, true);
-      root.removeEventListener("touchcancel", state.onSnapTouchEnd, true);
-      root.removeEventListener("blur", state.onSnapBlur);
+      offTarget(root, "$pointerup", state.onSnapPointerEnd, true);
+      offTarget(root, "$pointercancel", state.onSnapPointerEnd, true);
+      offTarget(root, "$touchend", state.onSnapTouchEnd, true);
+      offTarget(root, "$touchcancel", state.onSnapTouchEnd, true);
+      offTarget(root, "$blur", state.onSnapBlur);
       state.snap.endListening = false;
     }
     function beginSnapGesture(state, kind, event) {
@@ -1139,8 +1130,8 @@
       }
     }
     function scheduleScrollEnd(state) {
-      clearScrollEnd(state);
       if (state.snap.scrollingToTarget !== -1) return;
+      clearScrollEnd(state);
       if (state.snap.activePointers.size || state.snap.activeTouches.size) {
         state.snap.waitingForGestureEnd = true;
         return;
@@ -1150,6 +1141,15 @@
         state.snap.scrollEndTimeout = null;
         finishNativeScroll(state);
       }, SNAP_SCROLL_IDLE_MS);
+    }
+    function scheduleSnapTargetIdle(state) {
+      clearScrollEnd(state);
+      state.snap.scrollEndTimeout = root.setTimeout(function() {
+        state.snap.scrollEndTimeout = null;
+        if (state.snap.scrollingToTarget === -1) return;
+        clearSnapTarget(state);
+        finishNativeScroll(state);
+      }, SNAP_TARGET_IDLE_MS);
     }
     function clearScrollEnd(state) {
       if (state.snap.scrollEndTimeout !== null) root.clearTimeout(state.snap.scrollEndTimeout);
@@ -1279,6 +1279,7 @@
       var wrapper = child && child.hasAttribute(elasticAttribute) && child.getAttribute(elasticAttribute) !== "false" ? child : null;
       if (!wrapper) {
         resetElastic(state);
+        if (state.elastic.wrapper) elasticMemories.delete(state.elastic.wrapper);
         state.elasticEnabled = false;
         state.elastic.wrapper = null;
         var requested = element.hasAttribute(elasticAttribute) || children.some(function(item) {
@@ -1295,27 +1296,13 @@
       state.elastic.invalidReported = false;
       if (state.elastic.wrapper !== wrapper) {
         resetElastic(state);
+        if (state.elastic.wrapper) elasticMemories.delete(state.elastic.wrapper);
         var computed = root.getComputedStyle(wrapper);
         state.elastic.wrapper = wrapper;
         state.elastic.dimensions = null;
         state.elastic.baseTransform = computed.transform === "none" ? "" : computed.transform;
         state.elastic.baseOrigin = computed.transformOrigin;
-        state.elastic.previousTransform = {
-          value: wrapper.style.getPropertyValue("transform"),
-          priority: wrapper.style.getPropertyPriority("transform")
-        };
-        state.elastic.previousOrigin = {
-          value: wrapper.style.getPropertyValue("transform-origin"),
-          priority: wrapper.style.getPropertyPriority("transform-origin")
-        };
-        state.elastic.previousMinWidth = {
-          value: wrapper.style.getPropertyValue("min-width"),
-          priority: wrapper.style.getPropertyPriority("min-width")
-        };
-        state.elastic.previousMinHeight = {
-          value: wrapper.style.getPropertyValue("min-height"),
-          priority: wrapper.style.getPropertyPriority("min-height")
-        };
+        elasticMemories.set(wrapper, AelluxJs.persist.element.save(wrapper, [], ["transform", "transform-origin"]));
       }
       state.elasticEnabled = true;
       var value = wrapper.getAttribute(elasticAttribute).trim();
@@ -1411,9 +1398,9 @@
       state.cursor.owned = true;
     }
     function restorePointerScrollCursor(state) {
+      var _cursorMemories$get;
       if (!state.cursor.owned) return;
-      if (state.cursor.value) state.element.style.setProperty("cursor", state.cursor.value, state.cursor.priority);
-      else state.element.style.removeProperty("cursor");
+      (_cursorMemories$get = cursorMemories.get(state.element)) === null || _cursorMemories$get === void 0 || _cursorMemories$get.restore();
       state.cursor.owned = false;
     }
     function startPointerScroll(state, event) {
@@ -1518,11 +1505,11 @@
         momentumStartTime: time
       };
       activePointerScrollState = state;
-      root.addEventListener("pointermove", state.onPointerMove, {
+      onTarget(root, "$pointermove", state.onPointerMove, {
         passive: false,
         capture: true
       });
-      root.addEventListener("touchmove", state.onPointerScrollTouchMove, {
+      onTarget(root, "$touchmove", state.onPointerScrollTouchMove, {
         passive: false,
         capture: true
       });
@@ -1530,19 +1517,19 @@
       try {
         for (_iterator1.s(); !(_step1 = _iterator1.n()).done; ) {
           var name = _step1.value;
-          root.addEventListener(name, state.onPointerScrollNativeEvent, true);
+          onTarget(root, "$" + name, state.onPointerScrollNativeEvent, true);
         }
       } catch (err) {
         _iterator1.e(err);
       } finally {
         _iterator1.f();
       }
-      root.addEventListener("selectstart", state.onPointerScrollNativeEvent, true);
+      onTarget(root, "$selectstart", state.onPointerScrollNativeEvent, true);
       var _iterator10 = _createForOfIteratorHelper(pointerScrollMouseEvents), _step10;
       try {
         for (_iterator10.s(); !(_step10 = _iterator10.n()).done; ) {
           var _name = _step10.value;
-          root.addEventListener(_name, state.onMouseEvent, {
+          onTarget(root, "$" + _name, state.onMouseEvent, {
             passive: false,
             capture: true
           });
@@ -1552,9 +1539,9 @@
       } finally {
         _iterator10.f();
       }
-      root.addEventListener("pointerup", state.onPointerEnd, true);
-      root.addEventListener("pointercancel", state.onPointerEnd, true);
-      root.addEventListener("blur", state.onBlur);
+      onTarget(root, "$pointerup", state.onPointerEnd, true);
+      onTarget(root, "$pointercancel", state.onPointerEnd, true);
+      onTarget(root, "$blur", state.onBlur);
     }
     function movePointerScroll(state, event) {
       var pointerScroll = state.pointerScroll;
@@ -1745,11 +1732,10 @@
           var member = _step14.value;
           if (pointerAxisMaximum(member, axis, pointerScroll) <= 0) continue;
           var element = member.element;
+          pointerScrollMemories.set(element, AelluxJs.persist.element.save(element, [], ["scroll-behavior"]));
           pointerScroll.styles.push({
             element: element,
-            classOwned: !element.classList.contains(pointerScrollingClass),
-            scrollBehavior: element.style.getPropertyValue("scroll-behavior"),
-            scrollBehaviorPriority: element.style.getPropertyPriority("scroll-behavior")
+            classOwned: !element.classList.contains(pointerScrollingClass)
           });
           element.style.setProperty("scroll-behavior", "auto", "important");
           element.classList.add(pointerScrollingClass);
@@ -1797,23 +1783,23 @@
       state.pointerScroll = null;
       if (activePointerScrollState === state) activePointerScrollState = null;
       if (pointerScroll.selectionWaitTimeout !== null) root.clearTimeout(pointerScroll.selectionWaitTimeout);
-      root.removeEventListener("pointermove", state.onPointerMove, true);
-      root.removeEventListener("touchmove", state.onPointerScrollTouchMove, true);
+      offTarget(root, "$pointermove", state.onPointerMove, true);
+      offTarget(root, "$touchmove", state.onPointerScrollTouchMove, true);
       var _iterator15 = _createForOfIteratorHelper(pointerScrollDragEvents), _step15;
       try {
         for (_iterator15.s(); !(_step15 = _iterator15.n()).done; ) {
           var name = _step15.value;
-          root.removeEventListener(name, state.onPointerScrollNativeEvent, true);
+          offTarget(root, "$" + name, state.onPointerScrollNativeEvent, true);
         }
       } catch (err) {
         _iterator15.e(err);
       } finally {
         _iterator15.f();
       }
-      root.removeEventListener("selectstart", state.onPointerScrollNativeEvent, true);
-      root.removeEventListener("pointerup", state.onPointerEnd, true);
-      root.removeEventListener("pointercancel", state.onPointerEnd, true);
-      root.removeEventListener("blur", state.onBlur);
+      offTarget(root, "$selectstart", state.onPointerScrollNativeEvent, true);
+      offTarget(root, "$pointerup", state.onPointerEnd, true);
+      offTarget(root, "$pointercancel", state.onPointerEnd, true);
+      offTarget(root, "$blur", state.onBlur);
       if (pointerScroll.moved && !state.disposed) {
         state.mouseReleaseButton = pointerScroll.button;
         if (state.mouseReleaseTimeout !== null) root.clearTimeout(state.mouseReleaseTimeout);
@@ -1826,10 +1812,11 @@
       var _iterator16 = _createForOfIteratorHelper(pointerScroll.styles), _step16;
       try {
         for (_iterator16.s(); !(_step16 = _iterator16.n()).done; ) {
+          var _pointerScrollMemorie;
           var saved = _step16.value;
           if (saved.classOwned) saved.element.classList.remove(pointerScrollingClass);
-          if (saved.scrollBehavior) saved.element.style.setProperty("scroll-behavior", saved.scrollBehavior, saved.scrollBehaviorPriority);
-          else saved.element.style.removeProperty("scroll-behavior");
+          (_pointerScrollMemorie = pointerScrollMemories.get(saved.element)) === null || _pointerScrollMemorie === void 0 || _pointerScrollMemorie.restore();
+          pointerScrollMemories.delete(saved.element);
           var member = scrollboxes.get(saved.element);
           if (member) {
             suspendSnapStyles(member, "pointer", false);
@@ -1912,7 +1899,7 @@
       try {
         for (_iterator18.s(); !(_step18 = _iterator18.n()).done; ) {
           var name = _step18.value;
-          root.removeEventListener(name, state.onMouseEvent, true);
+          offTarget(root, "$" + name, state.onMouseEvent, true);
         }
       } catch (err) {
         _iterator18.e(err);
@@ -1972,26 +1959,26 @@
     }
     function addTouchListeners(state) {
       var element = state.element;
-      element.addEventListener("touchstart", state.onTouchStart, {
+      onTarget(element, "$touchstart", state.onTouchStart, {
         passive: true
       });
-      element.addEventListener("touchmove", state.onTouchMove, {
+      onTarget(element, "$touchmove", state.onTouchMove, {
         passive: false
       });
-      element.addEventListener("touchend", state.onTouchEnd, {
+      onTarget(element, "$touchend", state.onTouchEnd, {
         passive: true
       });
-      element.addEventListener("touchcancel", state.onTouchEnd, {
+      onTarget(element, "$touchcancel", state.onTouchEnd, {
         passive: true
       });
       state.touchListening = true;
     }
     function removeTouchListeners(state) {
       var element = state.element;
-      element.removeEventListener("touchstart", state.onTouchStart);
-      element.removeEventListener("touchmove", state.onTouchMove);
-      element.removeEventListener("touchend", state.onTouchEnd);
-      element.removeEventListener("touchcancel", state.onTouchEnd);
+      offTarget(element, "$touchstart", state.onTouchStart);
+      offTarget(element, "$touchmove", state.onTouchMove);
+      offTarget(element, "$touchend", state.onTouchEnd);
+      offTarget(element, "$touchcancel", state.onTouchEnd);
       state.touchListening = false;
       state.elastic.touch = null;
     }
@@ -2099,11 +2086,13 @@
       elastic.owned = true;
       if (active) suspendSnapStyles(state, "elastic", true);
       if (amounts[1] > 0 && !elastic.extentX) {
-        elastic.wrapper.style.setProperty("min-width", "".concat(Math.max(dimensions.offsetWidth, dimensions.scrollWidth), "px"), elastic.previousMinWidth.priority);
+        elasticWidthMemories.set(elastic.wrapper, AelluxJs.persist.element.save(elastic.wrapper, [], ["min-width"]));
+        elastic.wrapper.style.setProperty("min-width", "".concat(Math.max(dimensions.offsetWidth, dimensions.scrollWidth), "px"), elasticWidthMemories.get(elastic.wrapper).cssProperties["min-width"].priority);
         elastic.extentX = true;
       }
       if (amounts[2] > 0 && !elastic.extentY) {
-        elastic.wrapper.style.setProperty("min-height", "".concat(Math.max(dimensions.offsetHeight, dimensions.scrollHeight), "px"), elastic.previousMinHeight.priority);
+        elasticHeightMemories.set(elastic.wrapper, AelluxJs.persist.element.save(elastic.wrapper, [], ["min-height"]));
+        elastic.wrapper.style.setProperty("min-height", "".concat(Math.max(dimensions.offsetHeight, dimensions.scrollHeight), "px"), elasticHeightMemories.get(elastic.wrapper).cssProperties["min-height"].priority);
         elastic.extentY = true;
       }
       setElasticTransform(state, dimensions);
@@ -2135,9 +2124,9 @@
         var baseOrigin = elastic.baseOrigin.split(" ");
         var originX = elastic.amounts[3] > 0 ? "0%" : elastic.amounts[1] > 0 ? "".concat(Math.max(dimensions.offsetWidth, dimensions.scrollWidth + dimensions.clientLeft), "px") : baseOrigin[0];
         var originY = elastic.amounts[0] > 0 ? "0%" : elastic.amounts[2] > 0 ? "".concat(Math.max(dimensions.offsetHeight, dimensions.scrollHeight + dimensions.clientTop), "px") : baseOrigin[1];
-        wrapper.style.setProperty("transform-origin", "".concat(originX, " ").concat(originY), elastic.previousOrigin.priority);
+        wrapper.style.setProperty("transform-origin", "".concat(originX, " ").concat(originY), elasticMemories.get(wrapper).cssProperties["transform-origin"].priority);
       }
-      wrapper.style.setProperty("transform", [scale, translate, elastic.baseTransform].filter(Boolean).join(" ") || "none", elastic.previousTransform.priority);
+      wrapper.style.setProperty("transform", [scale, translate, elastic.baseTransform].filter(Boolean).join(" ") || "none", elasticMemories.get(wrapper).cssProperties.transform.priority);
     }
     function scrollWithinElasticBounds(state, desiredX, desiredY) {
       var element = state.element;
@@ -2203,22 +2192,14 @@
       elastic.wheelTimeout = null;
       if (elastic.wrapper) elastic.wrapper.classList.remove(elasticReleaseClass);
       if (elastic.owned && elastic.wrapper) {
-        var _previous2 = elastic.previousTransform;
-        if (_previous2.value) elastic.wrapper.style.setProperty("transform", _previous2.value, _previous2.priority);
-        else elastic.wrapper.style.removeProperty("transform");
-        var previousOrigin = elastic.previousOrigin;
-        if (previousOrigin.value) elastic.wrapper.style.setProperty("transform-origin", previousOrigin.value, previousOrigin.priority);
-        else elastic.wrapper.style.removeProperty("transform-origin");
-        if (elastic.extentX) {
-          var previousMinWidth = elastic.previousMinWidth;
-          if (previousMinWidth.value) elastic.wrapper.style.setProperty("min-width", previousMinWidth.value, previousMinWidth.priority);
-          else elastic.wrapper.style.removeProperty("min-width");
-        }
-        if (elastic.extentY) {
-          var previousMinHeight = elastic.previousMinHeight;
-          if (previousMinHeight.value) elastic.wrapper.style.setProperty("min-height", previousMinHeight.value, previousMinHeight.priority);
-          else elastic.wrapper.style.removeProperty("min-height");
-        }
+        var _elasticMemories$get, _elasticWidthMemories, _elasticHeightMemorie;
+        (_elasticMemories$get = elasticMemories.get(elastic.wrapper)) === null || _elasticMemories$get === void 0 || _elasticMemories$get.restore();
+        if (elastic.extentX) (_elasticWidthMemories = elasticWidthMemories.get(elastic.wrapper)) === null || _elasticWidthMemories === void 0 || _elasticWidthMemories.restore();
+        if (elastic.extentY) (_elasticHeightMemorie = elasticHeightMemories.get(elastic.wrapper)) === null || _elasticHeightMemorie === void 0 || _elasticHeightMemorie.restore();
+      }
+      if (elastic.wrapper) {
+        elasticWidthMemories.delete(elastic.wrapper);
+        elasticHeightMemories.delete(elastic.wrapper);
       }
       elastic.amounts = [0, 0, 0, 0];
       elastic.active = false;
@@ -2239,7 +2220,7 @@
       state.onResize = function() {
         return scheduleResize(state);
       };
-      root.addEventListener("resize", state.onResize, {
+      onTarget(root, "$resize", state.onResize, {
         passive: true
       });
       if (root.ResizeObserver) {
@@ -2384,6 +2365,10 @@
           try {
             for (_iterator23.s(); !(_step23 = _iterator23.n()).done; ) {
               var _step23$value = _step23.value, item = _step23$value.item, viewport = _step23$value.viewport, focus = _step23$value.focus;
+              if (!state.snap.savedItems.has(item)) {
+                snapItemMemories.set(item, AelluxJs.persist.element.save(item, [], snapProperties));
+                state.snap.savedItems.add(item);
+              }
               item.style.setProperty(snapProperties[0], viewport);
               item.style.setProperty(snapProperties[1], focus);
             }
@@ -2431,10 +2416,11 @@
     function handleSnapWheel(state, event) {
       if (!state.snapEnabled) return false;
       var axis = snapAxis(state);
-      var delta = axis === "x" ? event.deltaX || (state.wheelEnabled ? event.deltaY : 0) : event.deltaY || event.deltaX;
-      if (axis === "x" && !state.wheelEnabled && !event.deltaX) return false;
+      var horizontal = Math.abs(event.deltaX) > Math.abs(event.deltaY);
+      var delta = axis === "x" ? horizontal ? event.deltaX : state.wheelEnabled ? event.deltaY : 0 : horizontal ? 0 : event.deltaY;
+      if (!delta) return false;
       var items = snapItems(state);
-      if (!delta || !items.length) {
+      if (!items.length) {
         if (event.cancelable) event.preventDefault();
         return true;
       }

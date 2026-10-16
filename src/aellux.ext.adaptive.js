@@ -42,7 +42,7 @@
     shapeSquare: AelluxJs.className("shape-square")
   };
   const adaptiveElements = new Set();
-  const initialDimensions = new Map();
+  const elementMemories = new WeakMap();
   const dimensionProperties = ["--ae-width", "--ae-height"];
   const pendingResizeEntries = new Map();
   const pendingResizeElements = new Set();
@@ -117,15 +117,14 @@
 
   function mountAdaptive(element) {
     if (adaptiveElements.has(element)) return;
-    initialDimensions.set(element, dimensionProperties.map(name => ({
-      value: element.style.getPropertyValue(name),
-      priority: element.style.getPropertyPriority(name)
-    })));
+    elementMemories.set(element, AelluxJs.persist.element.save(
+      element, ["aria-orientation"], dimensionProperties
+    ));
     adaptiveElements.add(element);
     if (resizeObserver) resizeObserver.observe(element);
     else {
       AelluxJs.waitLayout.read(readBounds, [element]);
-      if (adaptiveElements.size === 1) root.addEventListener("resize", onWindowResize);
+      if (adaptiveElements.size === 1) AelluxJs.onTarget(root, "$resize", onWindowResize);
     }
   }
 
@@ -134,16 +133,11 @@
     pendingResizeEntries.delete(element);
     pendingResizeElements.delete(element);
     if (resizeObserver) resizeObserver.unobserve(element);
-    else if (adaptiveElements.size === 0) root.removeEventListener("resize", onWindowResize);
+    else if (adaptiveElements.size === 0) AelluxJs.offTarget(root, "$resize", onWindowResize);
 
     for (const name of managedClasses) { element.classList.remove(name); }
-    const initial = initialDimensions.get(element);
-    dimensionProperties.forEach((name, index) => {
-      const { value, priority } = initial[index];
-      if (value) element.style.setProperty(name, value, priority);
-      else element.style.removeProperty(name);
-    });
-    initialDimensions.delete(element);
+    elementMemories.get(element)?.restore();
+    elementMemories.delete(element);
   }
 
   function onResize(entries) {

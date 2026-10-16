@@ -162,7 +162,15 @@ var bootstrapProperties = Object.freeze({
   init: method,
   persist: Object.freeze({
     type: "object",
-    properties: Object.freeze({ local: memory, session: memory, preferences: memory })
+    properties: Object.freeze({
+      local: memory,
+      session: memory,
+      preferences: memory,
+      element: Object.freeze({
+        type: "object",
+        properties: Object.freeze({ save: method })
+      })
+    })
   }),
   updatePreferenceAttributesHTML: method,
   on: method,

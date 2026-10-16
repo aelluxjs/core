@@ -189,6 +189,72 @@ function buildPersistMemory(root2, name, identifier, diagnostics) {
   };
 }
 
+// src/internal/create-save-element-memory-helper.js
+/*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+function createSaveElementMemoryHelper() {
+  return { save: saveElementMemory };
+}
+function saveElementMemory(element, attributes, cssProperties) {
+  if (!element || typeof element.hasAttribute !== "function" || typeof element.setAttribute !== "function" || !element.style) {
+    throw new TypeError("persist.element.save requires an element");
+  }
+  if (typeof attributes === "undefined") attributes = [];
+  if (typeof cssProperties === "undefined") cssProperties = [];
+  if (!Array.isArray(attributes) || !Array.isArray(cssProperties)) {
+    throw new TypeError("persist.element.save requires arrays of attributes and CSS properties");
+  }
+  var savedAttributes2 = /* @__PURE__ */ Object.create(null);
+  var savedCssProperties = /* @__PURE__ */ Object.create(null);
+  var style = element.style;
+  var i;
+  for (i = 0; i < attributes.length; i++) {
+    var attribute = attributes[i];
+    savedAttributes2[attribute] = {
+      present: element.hasAttribute(attribute),
+      value: element.getAttribute(attribute)
+    };
+  }
+  for (i = 0; i < cssProperties.length; i++) {
+    var property = cssProperties[i];
+    var value = style.getPropertyValue(property);
+    var priority = style.getPropertyPriority(property);
+    var present = value !== "" || priority !== "";
+    if (!present) {
+      for (var j = 0; j < style.length; j++) {
+        if (style.item(j) === property) {
+          present = true;
+          break;
+        }
+      }
+    }
+    savedCssProperties[property] = {
+      present,
+      value,
+      priority
+    };
+  }
+  return {
+    attributes: savedAttributes2,
+    cssProperties: savedCssProperties,
+    restore: function() {
+      if (!element || typeof element.setAttribute !== "function" || !element.style) return false;
+      for (var name in savedAttributes2) {
+        if (!Object.prototype.hasOwnProperty.call(savedAttributes2, name)) continue;
+        var savedAttribute = savedAttributes2[name];
+        if (savedAttribute.present) element.setAttribute(name, savedAttribute.value);
+        else element.removeAttribute(name);
+      }
+      for (var cssName in savedCssProperties) {
+        if (!Object.prototype.hasOwnProperty.call(savedCssProperties, cssName)) continue;
+        var savedCss = savedCssProperties[cssName];
+        if (savedCss.present) element.style.setProperty(cssName, savedCss.value, savedCss.priority);
+        else element.style.removeProperty(cssName);
+      }
+      return true;
+    }
+  };
+}
+
 // src/internal/build-preference-media-queries.js
 /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
 function buildPreferenceMediaQueries(root2) {
@@ -265,6 +331,40 @@ var utils_name_case_default = {
   toCamelCase,
   fromCamelCase
 };
+
+// src/internal/create-naming-normalization.js
+/*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+function createNamingNormalization(constants) {
+  var fromCamelCase2 = utils_name_case_default.fromCamelCase;
+  var toCapitalized2 = utils_name_case_default.toCapitalized;
+  return {
+    attr: function(name) {
+      name = fromCamelCase2(name);
+      return "data-" + constants.AELLUXJS_DATA_ATTRIBUTE_NAME_PREFFIX.replace(/\?/, name);
+    },
+    className: function(name) {
+      name = fromCamelCase2(name);
+      return constants.AELLUXJS_CLASS_NAME_PREFFIX.replace(/\?/, name);
+    },
+    extFilename: function(extensionName) {
+      extensionName = fromCamelCase2(extensionName);
+      return "aellux." + constants.AELLUXJS_EXT_SCRIPT_PREFIX + "." + extensionName + (this.minified ? ".min.js" : ".js");
+    },
+    extName: function(filename) {
+      return filename.replace(
+        new RegExp("^.*aellux\\." + constants.AELLUXJS_EXT_SCRIPT_PREFIX + "\\.([^.\\/?#]+)(?:\\.min)?\\.js(?:[?#].*)?$"),
+        "$1"
+      );
+    },
+    eventName: function(name) {
+      if (/^[$#_!]/.test(name)) return name.slice(1).trim();
+      var format = constants.AELLUXJS_EVENT_NAME_PREFFIX;
+      var prefix = format.slice(0, format.indexOf("?"));
+      if (name.indexOf(prefix) === 0) return name;
+      return format.replace(/\?/, toCapitalized2(name));
+    }
+  };
+}
 
 // src/internal/create-preference-html-helper.js
 /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
@@ -358,9 +458,9 @@ function assetLoadHelper(asset, options) {
 // src/internal/aellux-api-integration.js
 /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
 function createAelluxApi(root2, constants) {
-  var toCapitalized2 = utils_name_case_default.toCapitalized;
   var toCamelCase2 = utils_name_case_default.toCamelCase;
   var fromCamelCase2 = utils_name_case_default.fromCamelCase;
+  var namingNormalization = createNamingNormalization(constants);
   var options = constants.AELLUXJS_DEFAULT_INITIALIZATION_OPTIONS;
   var diagnostics = buildDiagnostics(constants.AELLUXJS_DIAGNOSTICS);
   var oldShortInstance = root2[constants.AELLUXJS_SHORT_JS_NAME];
@@ -384,24 +484,25 @@ function createAelluxApi(root2, constants) {
     persist: {
       local: buildPersistMemory(root2, "localStorage", null, diagnostics),
       session: buildPersistMemory(root2, "sessionStorage", null, diagnostics),
-      preferences: buildPersistMemory(root2, "localStorage", "AelluxJsPreferences", diagnostics)
+      preferences: buildPersistMemory(root2, "localStorage", "AelluxJsPreferences", diagnostics),
+      element: createSaveElementMemoryHelper()
     },
     updatePreferenceAttributesHTML: preferenceHtml.updatePreferenceAttributesHTML,
     on: function(event, handler, options2) {
-      document2.addEventListener(api.eventName(event), handler, options2);
+      api.onTarget(document2, event, handler, options2);
     },
     off: function(event, handler, options2) {
-      document2.removeEventListener(api.eventName(event), handler, options2);
+      api.offTarget(document2, event, handler, options2);
     },
-    attr: function(name) {
-      name = fromCamelCase2(name);
-      return "data-" + constants.AELLUXJS_DATA_ATTRIBUTE_NAME_PREFFIX.replace(/\?/, name);
+    onTarget: function(target, event, handler, options2) {
+      target.addEventListener(api.eventName(event), handler, options2);
     },
+    offTarget: function(target, event, handler, options2) {
+      target.removeEventListener(api.eventName(event), handler, options2);
+    },
+    attr: namingNormalization.attr,
     attrMem: { save: saveAttr, restore: restoreAttr },
-    className: function(name) {
-      name = fromCamelCase2(name);
-      return constants.AELLUXJS_CLASS_NAME_PREFFIX.replace(/\?/, name);
-    },
+    className: namingNormalization.className,
     registerCssProperty: function(descriptor) {
       if (!root2.CSS || typeof root2.CSS.registerProperty !== "function") return false;
       try {
@@ -411,20 +512,10 @@ function createAelluxApi(root2, constants) {
         return false;
       }
     },
-    extFilename: function(extensionName) {
-      extensionName = fromCamelCase2(extensionName);
-      return "aellux." + constants.AELLUXJS_EXT_SCRIPT_PREFIX + "." + extensionName + (api.minified ? ".min.js" : ".js");
-    },
-    extName: function(filename) {
-      return filename.replace(
-        new RegExp("^.*aellux\\." + constants.AELLUXJS_EXT_SCRIPT_PREFIX + "\\.([^.\\/?#]+)(?:\\.min)?\\.js(?:[?#].*)?$"),
-        "$1"
-      );
-    },
-    eventName: function(name) {
-      name = toCapitalized2(name);
-      return constants.AELLUXJS_EVENT_NAME_PREFFIX.replace(/\?/, name);
-    },
+    // Keep minified tied to the API even when callers store this method separately.
+    extFilename: namingNormalization.extFilename.bind(api),
+    extName: namingNormalization.extName,
+    eventName: namingNormalization.eventName,
     noConflict: function() {
       return oldShortInstance;
     },

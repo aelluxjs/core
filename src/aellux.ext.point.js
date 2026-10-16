@@ -51,22 +51,22 @@
       mount: mountPointable, unmount: unmountPointable,
       controllers: ["pointers"]
     });
-    document.addEventListener("pointerdown", onPointerDown, true);
-    document.addEventListener("pointermove", onPointerMove, true);
-    document.addEventListener("pointerup", onPointerUp, true);
-    document.addEventListener("pointercancel", onPointerCancel, true);
-    document.addEventListener("pointerover", onPointerOver, true);
-    document.addEventListener("pointerout", onPointerOut, true);
+    AelluxJs.on("$pointerdown", onPointerDown, true);
+    AelluxJs.on("$pointermove", onPointerMove, true);
+    AelluxJs.on("$pointerup", onPointerUp, true);
+    AelluxJs.on("$pointercancel", onPointerCancel, true);
+    AelluxJs.on("$pointerover", onPointerOver, true);
+    AelluxJs.on("$pointerout", onPointerOut, true);
   }
 
   function destroy() {
     AelluxJs.mountManager.remove({ extensionName });
-    document.removeEventListener("pointerdown", onPointerDown, true);
-    document.removeEventListener("pointermove", onPointerMove, true);
-    document.removeEventListener("pointerup", onPointerUp, true);
-    document.removeEventListener("pointercancel", onPointerCancel, true);
-    document.removeEventListener("pointerover", onPointerOver, true);
-    document.removeEventListener("pointerout", onPointerOut, true);
+    AelluxJs.off("$pointerdown", onPointerDown, true);
+    AelluxJs.off("$pointermove", onPointerMove, true);
+    AelluxJs.off("$pointerup", onPointerUp, true);
+    AelluxJs.off("$pointercancel", onPointerCancel, true);
+    AelluxJs.off("$pointerover", onPointerOver, true);
+    AelluxJs.off("$pointerout", onPointerOut, true);
     trackedPointers.clear();
     pointableElements.clear();
   }

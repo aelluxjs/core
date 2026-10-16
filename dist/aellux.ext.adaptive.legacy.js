@@ -98,7 +98,7 @@
       shapeSquare: AelluxJs.className("shape-square")
     };
     var adaptiveElements = /* @__PURE__ */ new Set();
-    var initialDimensions = /* @__PURE__ */ new Map();
+    var elementMemories = /* @__PURE__ */ new WeakMap();
     var dimensionProperties = ["--ae-width", "--ae-height"];
     var pendingResizeEntries = /* @__PURE__ */ new Map();
     var pendingResizeElements = /* @__PURE__ */ new Set();
@@ -194,25 +194,21 @@
     }
     function mountAdaptive(element) {
       if (adaptiveElements.has(element)) return;
-      initialDimensions.set(element, dimensionProperties.map(function(name) {
-        return {
-          value: element.style.getPropertyValue(name),
-          priority: element.style.getPropertyPriority(name)
-        };
-      }));
+      elementMemories.set(element, AelluxJs.persist.element.save(element, ["aria-orientation"], dimensionProperties));
       adaptiveElements.add(element);
       if (resizeObserver) resizeObserver.observe(element);
       else {
         AelluxJs.waitLayout.read(readBounds, [element]);
-        if (adaptiveElements.size === 1) root.addEventListener("resize", onWindowResize);
+        if (adaptiveElements.size === 1) AelluxJs.onTarget(root, "$resize", onWindowResize);
       }
     }
     function unmountAdaptive(element) {
+      var _elementMemories$get;
       if (!adaptiveElements.delete(element)) return;
       pendingResizeEntries.delete(element);
       pendingResizeElements.delete(element);
       if (resizeObserver) resizeObserver.unobserve(element);
-      else if (adaptiveElements.size === 0) root.removeEventListener("resize", onWindowResize);
+      else if (adaptiveElements.size === 0) AelluxJs.offTarget(root, "$resize", onWindowResize);
       var _iterator2 = _createForOfIteratorHelper(managedClasses), _step2;
       try {
         for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
@@ -224,13 +220,8 @@
       } finally {
         _iterator2.f();
       }
-      var initial = initialDimensions.get(element);
-      dimensionProperties.forEach(function(name2, index) {
-        var _initial$index = initial[index], value = _initial$index.value, priority = _initial$index.priority;
-        if (value) element.style.setProperty(name2, value, priority);
-        else element.style.removeProperty(name2);
-      });
-      initialDimensions.delete(element);
+      (_elementMemories$get = elementMemories.get(element)) === null || _elementMemories$get === void 0 || _elementMemories$get.restore();
+      elementMemories.delete(element);
     }
     function onResize(entries) {
       var _iterator3 = _createForOfIteratorHelper(entries), _step3;
