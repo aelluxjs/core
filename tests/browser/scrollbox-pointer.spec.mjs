@@ -666,7 +666,7 @@ test("snap reports the first or last point at a scroll limit", async ({ page }) 
   expect(result).toEqual(["end-last"]);
 });
 
-test("wheel conversion preserves native CSS snap", async ({ page }) => {
+test("snap wheel advances one item per gesture, including inverted wheel", async ({ page }) => {
   await setup(page, `<div id="gallery" data-ae-scrollbox="native" data-ae-scrollbox-snap
     style="width:100px;height:100px;overflow:auto">
     <div style="display:flex;width:300px">
@@ -677,27 +677,32 @@ test("wheel conversion preserves native CSS snap", async ({ page }) => {
   </div>`);
   const wheel = deltas => page.evaluate(values => {
     const element = document.getElementById("gallery");
-    return values.map(deltaY => {
+    return values.map(({ deltaX = 0, deltaY = 0 }) => {
       const event = new WheelEvent("wheel", {
-        deltaY, bubbles: true, cancelable: true
+        deltaX, deltaY, bubbles: true, cancelable: true
       });
       element.dispatchEvent(event);
       return event.defaultPrevented;
     });
   }, deltas);
-  expect(await wheel([120])).toEqual([true]);
+  expect(await wheel([{ deltaY: 120 }, { deltaY: 120 }])).toEqual([true, true]);
   await expect.poll(() => page.evaluate(() => document.getElementById("gallery").scrollLeft))
     .toBe(100);
-  expect(await wheel([120])).toEqual([false]);
+  await page.waitForTimeout(150);
+  expect(await wheel([{ deltaX: 120 }])).toEqual([true]);
   await expect.poll(() => page.evaluate(() => document.getElementById("gallery").scrollLeft))
     .toBe(200);
-  expect(await wheel([120])).toEqual([false]);
-  expect(await wheel([-120])).toEqual([true]);
+  await page.waitForTimeout(150);
+  expect(await wheel([{ deltaY: 120 }])).toEqual([true]);
+  await expect.poll(() => page.evaluate(() => document.getElementById("gallery").scrollLeft))
+    .toBe(200);
+  await page.waitForTimeout(150);
+  expect(await wheel([{ deltaY: -120 }])).toEqual([true]);
   await expect.poll(() => page.evaluate(() => document.getElementById("gallery").scrollLeft))
     .toBe(100);
 });
 
-test("converted snap wheel stretches only the horizontal elastic axis", async ({ page }) => {
+test("snap wheel at the edge does not scroll or stretch the elastic wrapper", async ({ page }) => {
   await setup(page, `<div id="gallery" data-ae-scrollbox="native" data-ae-scrollbox-snap
     style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden">
     <div id="wrapper" data-ae-scrollbox-elastic
@@ -721,14 +726,14 @@ test("converted snap wheel stretches only the horizontal elastic axis", async ({
       maxY: element.scrollHeight - element.clientHeight,
       transform: document.getElementById("wrapper").style.transform };
   });
-  expect(result.prevented).toBe(false);
+  expect(result.prevented).toBe(true);
   expect(result.overflowY).toBe("hidden");
   expect(result.maxY).toBeGreaterThan(1);
-  expect(result.transform).toMatch(/^scale\([^,]+, 1\) translate3d\(-[^,]+, 0px, 0px\)/);
+  expect(result.transform).toBe("");
 });
 
 test("elastic pressure suspends CSS snap through the return animation", async ({ page }) => {
-  await setup(page, `<div id="gallery" data-ae-scrollbox="native" data-ae-scrollbox-snap
+  await setup(page, `<div id="gallery" data-ae-scrollbox="pointer" data-ae-scrollbox-snap
     style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden">
     <div data-ae-scrollbox-elastic
       style="display:flex;width:300px;height:100px">
@@ -741,12 +746,15 @@ test("elastic pressure suspends CSS snap through the return animation", async ({
   await page.evaluate(() => {
     const element = document.getElementById("gallery");
     element.scrollTo({ left: 200, behavior: "instant" });
-    element.dispatchEvent(new WheelEvent("wheel", {
-      deltaY: 80, bubbles: true, cancelable: true
-    }));
   });
+  const box = await page.locator("#gallery").boundingBox();
+  await page.mouse.move(box.x + 55, box.y + 50);
+  await page.mouse.down();
+  await page.waitForTimeout(120);
+  await page.mouse.move(box.x + 20, box.y + 50, { steps: 3 });
   expect(await page.evaluate(() => getComputedStyle(
     document.getElementById("gallery")).scrollSnapType)).toBe("none");
+  await page.mouse.up();
   await page.waitForTimeout(120);
   expect(await page.evaluate(() => getComputedStyle(
     document.getElementById("gallery")).scrollSnapType)).toBe("none");

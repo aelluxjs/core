@@ -154,9 +154,10 @@
     const snap = {
       root: null, initialized: false, invalidReported: false,
       index: 0, flick: null, axis: null, deferredIndex: null,
-      suspensions: { pointer: false, elastic: false },
+      suspensions: { pointer: false, elastic: false, scrollbar: false },
       notifiedItem: null, notifiedIndex: null,
       scrollEndTimeout: null, scrollingToTarget: -1, scrollingToAxis: null,
+      wheelTimeout: null,
       activePointers: new Set(), activeTouches: new Set(),
       touchStarts: new Map(),
       gestureListening: false, endListening: false, waitingForGestureEnd: false
@@ -397,7 +398,8 @@
 
   function configureScrollbars(state) {
     const element = state.element;
-    const axes = scrollbarAxes(element.getAttribute(scrollbarAttribute));
+    const value = element.getAttribute(scrollbarAttribute);
+    const axes = scrollbarAxes(value);
 
     configureScrollbarAxis(state, "y", axes.y, scrollbarVerticalAttribute);
     configureScrollbarAxis(state, "x", axes.x, scrollbarHorizontalAttribute);
@@ -405,8 +407,6 @@
     const enabled = axes.x || axes.y;
     const scrollbar = state.scrollbar;
     if (enabled && !scrollbar.listening) {
-      scrollbar.hideOwned = !element.classList.contains(nativeScrollbarHideClass);
-      if (scrollbar.hideOwned) element.classList.add(nativeScrollbarHideClass);
       scrollbar.mouseHover = element.matches(":hover") &&
         !!(root.matchMedia && root.matchMedia("(any-hover: hover)").matches);
 
@@ -425,13 +425,20 @@
       element.removeEventListener("mouseleave", state.onScrollbarMouseLeave);
       root.document.removeEventListener("pointerdown", state.onScrollbarOutsideDown, true);
 
-      if (scrollbar.hideOwned) element.classList.remove(nativeScrollbarHideClass);
-      scrollbar.hideOwned = false;
       scrollbar.listening = false;
       clearScrollbarPdsVisibility(state);
       scrollbar.pointerHover = false;
       scrollbar.mouseHover = false;
       syncScrollbarVisibility(state);
+    }
+
+    const hideNative = enabled || value !== null && value.trim().toLowerCase() === "none";
+    if (hideNative && !element.classList.contains(nativeScrollbarHideClass)) {
+      element.classList.add(nativeScrollbarHideClass);
+      scrollbar.hideOwned = true;
+    } else if (!hideNative && scrollbar.hideOwned) {
+      element.classList.remove(nativeScrollbarHideClass);
+      scrollbar.hideOwned = false;
     }
   }
 
@@ -645,6 +652,7 @@
       record, pointerId: event.pointerId,
       offset: position - record.thumbPosition
     };
+    suspendSnapStyles(state, "scrollbar", true);
     if (record.element.setPointerCapture)
       record.element.setPointerCapture(event.pointerId);
   }
@@ -689,7 +697,7 @@
       record.element.hasPointerCapture(drag.pointerId))
       record.element.releasePointerCapture(drag.pointerId);
     syncScrollbarVisibility(state);
-    if (state.snapEnabled && !state.disposed) scheduleScrollEnd(state);
+    suspendSnapStyles(state, "scrollbar", false);
   }
 
   function configureSnap(state) {
@@ -794,7 +802,8 @@
     snap.axis = axis;
     state.element.classList.add(snapReadyClass);
     state.element.classList.toggle(snapSuspendedClass,
-      snap.suspensions.pointer || snap.suspensions.elastic);
+      snap.suspensions.pointer || snap.suspensions.elastic ||
+      snap.suspensions.scrollbar);
   }
 
   function suspendSnapStyles(state, reason, suspended) {
@@ -802,16 +811,31 @@
       state.snap.suspensions[reason] === suspended) return;
     state.snap.suspensions[reason] = suspended;
     syncSnapStyles(state, state.snap.axis || snapAxis(state));
-    if (!suspended && !state.snap.suspensions.pointer && !state.snap.suspensions.elastic)
+    if (!suspended && !Object.values(state.snap.suspensions).some(Boolean))
       scheduleScrollEnd(state);
+  }
+
+  function scheduleSnapWheelIdle(state) {
+    clearSnapWheelTimeout(state);
+    state.snap.wheelTimeout = root.setTimeout(() => {
+      state.snap.wheelTimeout = null;
+    }, SNAP_SCROLL_IDLE_MS);
+  }
+
+  function clearSnapWheelTimeout(state) {
+    const snap = state.snap;
+    if (snap.wheelTimeout !== null) root.clearTimeout(snap.wheelTimeout);
+    snap.wheelTimeout = null;
   }
 
   function restoreSnapStyles(state) {
     const snap = state.snap;
+    clearSnapWheelTimeout(state);
     state.element.classList.remove(snapReadyClass, snapSuspendedClass);
     snap.axis = null;
     snap.suspensions.pointer = false;
     snap.suspensions.elastic = false;
+    snap.suspensions.scrollbar = false;
   }
 
   function collectSnapItems(state, root) {
@@ -916,7 +940,8 @@
   }
 
   function beginSnapGesture(state, kind, event) {
-    if (!state.snapEnabled) return;
+    if (!state.snapEnabled || event.target.closest(
+      `[${scrollbarVerticalAttribute}], [${scrollbarHorizontalAttribute}]`)) return;
     const snap = state.snap;
     const active = kind === "pointer" ? snap.activePointers : snap.activeTouches;
     if (kind === "pointer") active.add(event.pointerId);
@@ -1766,6 +1791,8 @@
   }
 
   function startTouch(state, event) {
+    if (event.target.closest(
+      `[${scrollbarVerticalAttribute}], [${scrollbarHorizontalAttribute}]`)) return;
     if (event.touches.length !== 1) {
       state.elastic.touch = null;
       releaseElastic(state);
@@ -1956,6 +1983,7 @@
       return;
     }
     setElasticTransform(state);
+    publish(state);
     elastic.releaseFrame = root.requestAnimationFrame(() => stepElasticRelease(state));
   }
 
@@ -2032,7 +2060,8 @@
       state.mutationObserver.observe(state.element,
         { childList: true, subtree: true, characterData: true,
           attributes: true,
-          attributeFilter: [snapAttribute, snapItemAttribute, elasticAttribute] });
+          attributeFilter: [snapAttribute, snapItemAttribute, elasticAttribute,
+            scrollbarAttribute] });
     }
   }
 
@@ -2175,6 +2204,30 @@
     return distance > 0 ? Math.min(1, Math.max(0, position / distance)) : 0;
   }
 
+  function handleSnapWheel(state, event) {
+    if (!state.snapEnabled) return false;
+
+    if (event.cancelable) event.preventDefault();
+
+    const axis = snapAxis(state);
+    const delta = axis === "x" ? event.deltaX || event.deltaY :
+      event.deltaY || event.deltaX;
+    const items = snapItems(state);
+    if (!delta || !items.length || state.scrollbar.drag ||
+      state.snap.suspensions.elastic) return true;
+
+    const busy = state.snap.wheelTimeout !== null;
+    scheduleSnapWheelIdle(state);
+    if (busy) return true;
+
+    const index = state.snap.scrollingToTarget !== -1 ?
+      state.snap.index : selectedSnapIndex(state);
+    const next = Math.max(0, Math.min(items.length - 1,
+      index + Math.sign(delta)));
+    if (next !== index) scrollToSnap(state, next, axis);
+    return true;
+  }
+
   function handleWheel(state, event) {
     state.snap.flick = null;
 
@@ -2186,8 +2239,11 @@
     }
 
     cancelMomentum(state);
-    if (event.defaultPrevented || event.ctrlKey) return;
+    if (event.defaultPrevented) return;
     if (event.target.closest(`[${attribute}]`) !== state.element) return;
+    if (handleSnapWheel(state, event)) return;
+    if (event.ctrlKey) return;
+
     const interruptedSnap = state.snap.scrollingToTarget !== -1;
     clearSnapTarget(state);
     clearScrollEnd(state);

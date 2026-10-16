@@ -49,6 +49,87 @@ test("custom scrollbar stays over the viewport and supports track click and thum
   await expect(track).toHaveCSS("opacity", "0");
 });
 
+test("snap pauses during scrollbar thumb drag while focus variables update", async ({ page }) => {
+  await setup(page, `<div id="box" data-ae-scrollbox data-ae-scrollbox-snap
+    data-ae-scrollbar="horizontal"
+    style="width:120px;height:120px;overflow-x:auto;overflow-y:hidden">
+    <div style="display:flex;width:360px">
+      <div data-ae-snap-item style="flex:none;width:120px;height:100px"></div>
+      <div data-ae-snap-item style="flex:none;width:120px;height:100px"></div>
+      <div data-ae-snap-item style="flex:none;width:120px;height:100px"></div>
+    </div>
+  </div>`);
+
+  const box = page.locator("#box");
+  const track = page.locator("#box > [data-ae-scrollbar-horizontal]");
+  const rect = await track.boundingBox();
+  const thumb = await track.evaluate(element =>
+    Number.parseFloat(element.style.getPropertyValue("--ae-scrollbar-thumb-size")));
+
+  await page.mouse.move(rect.x + thumb / 2, rect.y + rect.height / 2);
+  await page.mouse.down();
+  await expect(box).toHaveCSS("scroll-snap-type", "none");
+
+  await page.mouse.move(rect.x + thumb / 2 + 22, rect.y + rect.height / 2,
+    { steps: 4 });
+  await expect.poll(() => box.evaluate(element => element.scrollLeft)).toBeGreaterThan(0);
+  await expect.poll(() => box.evaluate(element =>
+    Number.parseFloat(element.querySelector("[data-ae-snap-item]")
+      .style.getPropertyValue("--ae-snap-viewport")))).toBeLessThan(0);
+
+  await page.mouse.up();
+  await expect(box).toHaveCSS("scroll-snap-type", "x mandatory");
+});
+
+test("scrollbar none hides native bars without creating custom bars", async ({ page }) => {
+  await setup(page, `<div id="box" data-ae-scrollbox data-ae-scrollbar="none"
+    style="width:120px;height:120px;overflow:auto">
+    <div style="width:300px;height:300px"></div>
+  </div>`);
+
+  const box = page.locator("#box");
+  await expect(box).toHaveClass(/ae--native-sb-hide/);
+  await expect(box.locator("[data-ae-scrollbar-horizontal], [data-ae-scrollbar-vertical]"))
+    .toHaveCount(0);
+  await box.evaluate(element => element.setAttribute("data-ae-scrollbar", "horizontal"));
+  await expect(box.locator("[data-ae-scrollbar-horizontal]")).toHaveCount(1);
+  await box.evaluate(element => element.removeAttribute("data-ae-scrollbar"));
+  await expect(box).not.toHaveClass(/ae--native-sb-hide/);
+});
+
+test("touch can drag a snap scrollbar without activating a snap flick", async ({ page }) => {
+  await setup(page, `<div id="box" data-ae-scrollbox data-ae-scrollbox-snap
+    data-ae-scrollbar="horizontal"
+    style="width:120px;height:120px;overflow-x:auto;overflow-y:hidden">
+    <div style="display:flex;width:360px">
+      <div data-ae-snap-item style="flex:none;width:120px;height:100px"></div>
+      <div data-ae-snap-item style="flex:none;width:120px;height:100px"></div>
+      <div data-ae-snap-item style="flex:none;width:120px;height:100px"></div>
+    </div>
+  </div>`);
+
+  const box = page.locator("#box");
+  const track = page.locator("#box > [data-ae-scrollbar-horizontal]");
+  const rect = await track.boundingBox();
+  const thumb = await track.evaluate(element =>
+    Number.parseFloat(element.style.getPropertyValue("--ae-scrollbar-thumb-size")));
+  const x = rect.x + thumb / 2, y = rect.y + rect.height / 2;
+  const cdp = await page.context().newCDPSession(page);
+  await cdp.send("Emulation.setTouchEmulationEnabled", { enabled: true });
+  await cdp.send("Input.dispatchTouchEvent", {
+    type: "touchStart", touchPoints: [{ x, y, id: 1 }]
+  });
+  await expect(box).toHaveCSS("scroll-snap-type", "none");
+  await cdp.send("Input.dispatchTouchEvent", {
+    type: "touchMove", touchPoints: [{ x: x + 25, y, id: 1 }]
+  });
+  await expect.poll(() => box.evaluate(element => element.scrollLeft)).toBeGreaterThan(0);
+  await cdp.send("Input.dispatchTouchEvent", {
+    type: "touchEnd", touchPoints: []
+  });
+  await expect(box).toHaveCSS("scroll-snap-type", "x mandatory");
+});
+
 for (const axis of ["vertical", "horizontal"]) {
   test(`${axis} scrollbar drag excludes pointer drag scroll`, async ({ page }) => {
     await setup(page, `<div id="box" data-ae-scrollbox="pointer" data-ae-scrollbar="${axis}"
