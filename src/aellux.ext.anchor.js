@@ -3,10 +3,26 @@
 /**
  * Anchor Extension
  *
- * Positions a marked element against a target in the same absolute-positioning
- * containing block. Candidate pivot pairs are tried in declaration order.
- * The boot's weak CSS positions elements marked `ae--anchored`. The extension
- * publishes their geometry and restores previous inline values on unmount.
+ * Purpose: positions `data-ae-anchor` elements against a target sharing their
+ * absolute-positioning reference, using pivot pairs in declaration order. The
+ * reference itself can also be the target.
+ *
+ * Capability profile: visual positioning and layout observation.
+ *
+ * Inputs and activation: mounts `[data-ae-anchor]` and resolves an optional
+ * `data-ae-anchor-target`; without one, the positioning parent is the target.
+ * Scroll, resize, size and intersection changes, and bubbling `AelluxJsLayout`
+ * events schedule placement updates with a 100 ms throttle.
+ *
+ * Outputs and owned state: publishes anchor position and origin through inline
+ * CSS properties. The boot's weak CSS hides uncalculated elements and positions
+ * them when `ae--anchored` marks a valid calculation.
+ *
+ * Lifecycle: disconnects observers and listeners, cancels pending updates, and
+ * restores previous inline values and priorities on unmount or destruction.
+ *
+ * Accessibility: positioning does not change DOM or focus order. Consumers
+ * remain responsible for a meaningful reading order and reachable content.
  */
 
 (function (root) {

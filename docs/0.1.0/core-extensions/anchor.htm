@@ -14,7 +14,7 @@
 
 <meta name="description" content="aellux.js Docs">
   <link rel="canonical" href="https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/anchor.htm">
-
+  
     <meta property="og:title" content="Anchor | 0.1.0 | aellux.js Docs" />
     <meta property="og:type" content="website" />
           <meta property="og:url" content="https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/anchor.htm" />
@@ -26,7 +26,7 @@
         <meta name="twitter:description" content="aellux.js Docs">
 
                   <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Anchor | 0.1.0 | aellux.js Docs","description":"aellux.js Docs","url":"https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/anchor.htm"}</script>
-
+          
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -421,6 +421,11 @@ Extension Styles                            </a>
                           </li>
                           <li class="nav-item small-md rounded-1 ps-md-1"
                             style="flex:0">
+                            <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/extensions/csp-and-trust.htm">
+CSP and Extension Trust                            </a>
+                          </li>
+                          <li class="nav-item small-md rounded-1 ps-md-1"
+                            style="flex:0">
                             <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/extensions/legacy-variants.htm">
 Modern &amp; Legacy Variants                            </a>
                           </li>
@@ -571,7 +576,7 @@ Anchor                  </li>
     ← <span class="text-truncate overflow-hidden d-inline-block align-middle flex-fill"
       style="max-width:200px">Adaptive</span>
   </a>
-
+  
     <a href="/core/docs/0.1.0/core-extensions/feedback.htm" class="text-decoration-none d-inline-flex flex-row justify-content-end gap-2"
     style="width: 40%;">
     <span class="text-truncate overflow-hidden d-inline-block align-middle flex-fill text-end"
@@ -599,7 +604,7 @@ Anchor                  </li>
 </code></pre>
 <p>The anchored element and an explicit target must share the same <code>offsetParent</code>. The target may also be that <code>offsetParent</code> itself. This is the positioning reference, which need not be the immediate DOM parent. If an explicit target is missing or the pivot list has no valid pair, Anchor leaves the element inactive. If the positioning references differ, Anchor reports <code>ERROR_ANCHOR_REFERENCE_CONTEXT</code> and leaves the element inactive.</p>
 <p>Before the first valid calculation, the boot&#39;s weak CSS keeps the element hidden and applies <code>contain: layout paint</code>. Once calculated, the <code>ae--anchored</code> class makes it visible and applies absolute positioning at <code>top: 0; left: 0</code> with <code>translate3d()</code>. Anchor publishes <code>--ae-anchor-x</code>, <code>--ae-anchor-y</code>, <code>--ae-anchor-origin-x</code>, and <code>--ae-anchor-origin-y</code> as inline CSS properties. Add a <code>transform</code> transition in your own CSS if you want animated movement. On unmount, Anchor removes its class and restores the previous inline values and priorities.</p>
-<p>Anchor updates after captured scroll events, including native Scrollbox scrolling, window resize, observed size changes, intersection changes when <code>IntersectionObserver</code> is available, or a bubbling <code>AelluxJsLayout</code> event received by the shared positioning parent, with a 100 ms throttle. It observes the anchored element, target, and positioning reference; it does not poll their positions. Present emits <code>AelluxJsLayout</code> after a Pop or Unpop transition finishes. Other code that changes layout without triggering those observers can dispatch the event from a descendant of the positioning parent:</p>
+<p>Anchor updates after captured scroll events, including native Scrollbox scrolling, window resize, observed size changes, intersection changes when <code>IntersectionObserver</code> is available, or a bubbling <code>AelluxJsLayout</code> event received by the shared positioning parent, with a 100 ms throttle. It observes the anchored element, target, and positioning reference; it does not poll their positions. Present emits <code>AelluxJsLayout</code> when a Pop or Unpop transition starts and again after it finishes, with <code>detail.origin</code> set to <code>&quot;present.pop&quot;</code> or <code>&quot;present.unpop&quot;</code>. Other code that changes layout without triggering those observers can dispatch the event from a descendant of the positioning parent:</p>
 <pre><code class="language-js">$ae.dispatchFrom(document.getElementById(&quot;menu&quot;), &quot;Layout&quot;, { bubbles: true });
 </code></pre>
 <p>After changing the target or pivot attributes, request an immediate update:</p>
@@ -616,7 +621,7 @@ await $ae.mountManager.update(anchor, &quot;anchor&quot;);
     ← <span class="text-truncate overflow-hidden d-inline-block align-middle flex-fill"
       style="max-width:200px">Adaptive</span>
   </a>
-
+  
     <a href="/core/docs/0.1.0/core-extensions/feedback.htm" class="text-decoration-none d-inline-flex flex-row justify-content-end gap-2"
     style="width: 40%;">
     <span class="text-truncate overflow-hidden d-inline-block align-middle flex-fill text-end"

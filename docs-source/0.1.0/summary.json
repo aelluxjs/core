@@ -36,6 +36,7 @@
         { "label": "Declarative Loading", "href": "extensions/declarative-loading.md" },
         { "label": "Lazy Loading", "href": "extensions/lazy-loading.md" },
         { "label": "Extension Styles", "href": "extensions/styles.md" },
+        { "label": "CSP and Extension Trust", "href": "extensions/csp-and-trust.md" },
         { "label": "Modern & Legacy Variants", "href": "extensions/legacy-variants.md" }
       ]
     },

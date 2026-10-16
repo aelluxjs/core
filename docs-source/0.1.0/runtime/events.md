@@ -48,15 +48,15 @@ These events are available when the corresponding Extension is loaded. Events fr
 | Preference | `AelluxJsPreferencesChange` | `document`; `detail` is `{ changed, preferences }`, with a changed-key array and a snapshot of current values. `changed` can be empty. |
 | Present | `AelluxJsBeforePop`, `AelluxJsBeforeUnpop` | Present element; cancelable before a transition starts. |
 | Present | `AelluxJsPopping`, `AelluxJsUnpopping`, `AelluxJsPop`, `AelluxJsUnpop` | Present element; transition start and completion notifications. |
-| Present | `AelluxJsLayout` | Present element; bubbles after a completed Pop or Unpop to indicate that layout may have changed. Anchor listens for it on the shared positioning parent. |
+| Present | `AelluxJsLayout` | Present element; bubbles when a Pop or Unpop transition starts and again after it finishes. `detail.origin` is `"present.pop"` or `"present.unpop"` (the `extension.method` format). Anchor listens on the shared positioning parent. |
 | Present | `AelluxJsUnpopFocusLost` | `document`; `detail` is `{ element, focused }`, identifying the closed Present region and the element that lost focus. |
 | Scrollbox | `AelluxJsScrollboxSnapChange` | Scrollbox element; `detail` is `{ item, index, previousIndex, axis }` after a new snap item is selected and scrolling settles. The initial item uses `previousIndex: null`. |
 | Scrollbox | `AelluxJsPointerScrollStart`, `AelluxJsPointerScrollEnd` | Pointer gesture's originating scrollbox; `detail` is `{ axis, pointerId, pointerType, elements }`. `elements` lists the scrollboxes activated for that gesture. A short flick that never activates PDS does not emit them. |
 | State Navigation | `AelluxJsSnapshotChange`, `AelluxJsSnapshotRestore` | `document`; `detail` contains copies of `snapshot`, `removeSnapshot`, and `popState`. |
 
 ```js
-panel.addEventListener("AelluxJsLayout", () => {
-  console.log("A completed Present transition may have changed layout");
+panel.addEventListener("AelluxJsLayout", event => {
+  console.log(event.detail.origin); // "present.pop" or "present.unpop"
 });
 ```
 

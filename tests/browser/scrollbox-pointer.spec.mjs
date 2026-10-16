@@ -110,12 +110,12 @@ test("scroll edge classes stay fixed during elastic pressure", async ({ page }) 
 });
 
 test("snap change reports the selected item after scrolling settles", async ({ page }) => {
-  await setup(page, `<div id="snap-events" data-ae-scrollbox="native"
+  await setup(page, `<div id="snap-events" data-ae-scrollbox="native" data-ae-scrollbox-snap
     style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden">
-    <div data-ae-scrollbox-snap style="display:flex;width:300px;height:100px">
-      <div id="snap-one" style="flex:none;width:100px"></div>
-      <div id="snap-two" style="flex:none;width:100px"></div>
-      <div id="snap-three" style="flex:none;width:100px"></div>
+    <div style="display:flex;width:300px;height:100px">
+      <div data-ae-snap-item id="snap-one" style="flex:none;width:100px"></div>
+      <div data-ae-snap-item id="snap-two" style="flex:none;width:100px"></div>
+      <div data-ae-snap-item id="snap-three" style="flex:none;width:100px"></div>
     </div>
   </div>`);
 
@@ -134,6 +134,57 @@ test("snap change reports the selected item after scrolling settles", async ({ p
   await page.evaluate(() => AelluxJs.mountManager.controller("snap-events").scrollbox.goto(1));
   await page.waitForTimeout(180);
   expect(await page.evaluate(() => window.snapEvents)).toHaveLength(1);
+});
+
+test("long smooth snap navigation reports only the reached destination", async ({ page }) => {
+  await setup(page, `<div id="gallery" data-ae-scrollbox="native" data-ae-scrollbox-snap
+    style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden">
+    <div style="display:flex;width:500px;height:100px">
+      ${Array.from({ length: 5 }, (_, index) =>
+        `<div id="item-${index}" data-ae-snap-item style="flex:none;width:100px"></div>`).join("")}
+    </div>
+  </div>`);
+
+  await page.evaluate(() => {
+    const element = document.getElementById("gallery");
+    window.snapEvents = [];
+    element.addEventListener("AelluxJsScrollboxSnapChange", event => {
+      window.snapEvents.push(event.detail.index);
+    });
+    AelluxJs.mountManager.controller("gallery").scrollbox.goto(4);
+  });
+
+  await expect.poll(() => page.evaluate(() => window.snapEvents), { timeout: 10000 })
+    .toEqual([4]);
+  await expect.poll(() => page.evaluate(() => document.getElementById("gallery").scrollLeft))
+    .toBe(400);
+  await page.waitForTimeout(250);
+  expect(await page.evaluate(() => window.snapEvents)).toEqual([4]);
+});
+
+test("a descendant scrollend does not finish its parent snap navigation", async ({ page }) => {
+  await setup(page, `<div id="gallery" data-ae-scrollbox="native" data-ae-scrollbox-snap
+    style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden">
+    <div style="display:flex;width:500px;height:100px">
+      ${Array.from({ length: 5 }, (_, index) =>
+        `<div id="item-${index}" data-ae-snap-item style="flex:none;width:100px"></div>`).join("")}
+    </div>
+  </div>`);
+
+  await page.evaluate(() => {
+    const element = document.getElementById("gallery");
+    window.snapEvents = [];
+    element.addEventListener("AelluxJsScrollboxSnapChange", event =>
+      window.snapEvents.push(event.detail.index));
+    AelluxJs.mountManager.controller("gallery").scrollbox.goto(4);
+    setTimeout(() => document.getElementById("item-0")
+      .dispatchEvent(new Event("scrollend", { bubbles: true })), 100);
+  });
+
+  await expect.poll(() => page.evaluate(() => window.snapEvents), { timeout: 10000 })
+    .toEqual([4]);
+  await page.waitForTimeout(250);
+  expect(await page.evaluate(() => window.snapEvents)).toEqual([4]);
 });
 
 test("pointer scroll start and end report the activated gesture", async ({ page }) => {
@@ -173,23 +224,23 @@ test("pointer scroll start and end report the activated gesture", async ({ page 
   })));
 });
 
-test("elastic and snap wrappers normalize non-inline display and restore it", async ({ page }) => {
+test("elastic wrapper normalizes non-inline display while snap keeps its layout", async ({ page }) => {
   await setup(page, `<div id="block" data-ae-scrollbox style="width:100px;height:100px">
     <div data-ae-scrollbox-elastic style="display:block!important;width:100px;height:300px"></div>
   </div>
-  <div id="flex" data-ae-scrollbox style="width:100px;height:100px">
-    <div data-ae-scrollbox-snap style="display:flex;width:300px">
-      <div style="flex:none;width:100px;height:100px"></div>
-      <div style="flex:none;width:100px;height:100px"></div>
-      <div style="flex:none;width:100px;height:100px"></div>
+  <div id="flex" data-ae-scrollbox data-ae-scrollbox-snap style="width:100px;height:100px">
+    <div style="display:flex;width:300px">
+      <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+      <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+      <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
     </div>
   </div>
-  <div id="grid" data-ae-scrollbox style="width:100px;height:100px">
-    <div data-ae-scrollbox-elastic data-ae-scrollbox-snap
+  <div id="grid" data-ae-scrollbox data-ae-scrollbox-snap style="width:100px;height:100px">
+    <div data-ae-scrollbox-elastic
       style="display:grid;grid-auto-flow:column;width:300px">
-      <div style="width:100px;height:100px"></div>
-      <div style="width:100px;height:100px"></div>
-      <div style="width:100px;height:100px"></div>
+      <div data-ae-snap-item style="width:100px;height:100px"></div>
+      <div data-ae-snap-item style="width:100px;height:100px"></div>
+      <div data-ae-snap-item style="width:100px;height:100px"></div>
     </div>
   </div>`);
   const result = await page.evaluate(async () => {
@@ -202,17 +253,17 @@ test("elastic and snap wrappers normalize non-inline display and restore it", as
       restored: wrappers.map(item => [item.style.getPropertyValue("display"),
         item.style.getPropertyPriority("display")]) };
   });
-  expect(result).toEqual({ displays: ["inline-block", "inline-flex", "inline-grid"],
-    warnings: 3, restored: [["block", "important"], ["flex", ""], ["grid", ""]] });
+  expect(result).toEqual({ displays: ["inline-block", "flex", "inline-grid"],
+    warnings: 2, restored: [["block", "important"], ["flex", ""], ["grid", ""]] });
 });
 
 test("snap initializes and controller navigates its direct children", async ({ page }) => {
-  await setup(page, `<div id="gallery" data-ae-scrollbox="native"
+  await setup(page, `<div id="gallery" data-ae-scrollbox="native" data-ae-scrollbox-snap
     style="width:100px;height:100px;overflow:auto">
-    <div data-ae-scrollbox-snap style="display:flex;width:300px">
-      <div style="flex:none;width:100px;height:100px"></div>
-      <div style="flex:none;width:100px;height:100px"></div>
-      <div style="flex:none;width:100px;height:100px"></div>
+    <div style="display:flex;width:300px">
+      <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+      <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+      <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
     </div>
   </div>`);
   expect(await page.evaluate(() => document.getElementById("gallery").scrollLeft)).toBe(0);
@@ -231,82 +282,186 @@ test("snap initializes and controller navigates its direct children", async ({ p
     .toBe(false);
 });
 
-test("snap centers only its main scroll axis", async ({ page }) => {
-  await setup(page, `<div id="horizontal" data-ae-scrollbox
-    style="width:100px;height:100px;overflow:auto">
-    <div data-ae-scrollbox-snap style="display:flex;width:300px;height:200px">
-      <div style="flex:none;width:100px;height:40px"></div>
-      <div style="flex:none;width:100px;height:40px"></div>
-      <div style="flex:none;width:100px;height:40px"></div>
-    </div>
-  </div>
-  <div id="vertical" data-ae-scrollbox
-    style="width:100px;height:100px;overflow-x:hidden;overflow-y:auto">
-    <div data-ae-scrollbox-snap style="width:300px;height:300px">
-      <div style="width:40px;height:100px"></div>
-      <div style="width:40px;height:100px"></div>
-      <div style="width:40px;height:100px"></div>
-    </div>
+test("snap without an elastic wrapper ignores custom scrollbars", async ({ page }) => {
+  await setup(page, `<div id="gallery" data-ae-scrollbox="native" data-ae-scrollbox-snap
+    data-ae-scrollbar="x"
+    style="display:flex;width:100px;height:100px;overflow-x:auto;overflow-y:hidden">
+    <div id="first" data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+    <div id="second" data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+    <div id="third" data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
   </div>`);
-  const options = await page.evaluate(() => {
-    const result = {};
-    for (const id of ["horizontal", "vertical"]) {
-      const item = document.querySelector(`#${id} [data-ae-scrollbox-snap]`).children[1];
-      item.scrollIntoView = value => { result[id] = value; };
-      AelluxJs.mountManager.controller(id).scrollbox.goto(1);
-    }
-    return result;
+
+  const initial = await page.evaluate(() => {
+    const box = document.getElementById("gallery");
+    const bar = box.querySelector(":scope > [data-ae-scrollbar-horizontal]");
+    return {
+      children: box.children.length,
+      barAlign: bar.style.scrollSnapAlign,
+      itemAlign: getComputedStyle(box.children[1]).scrollSnapAlign,
+      errors: AelluxJs.diagnostics.showHistory().filter(item => item.code === 1121).length
+    };
   });
-  expect(options).toEqual({
-    horizontal: { block: "nearest", inline: "center" },
-    vertical: { block: "center", inline: "nearest" }
-  });
+  expect(initial).toEqual({ children: 4, barAlign: "", itemAlign: "center", errors: 0 });
+
+  expect(await page.evaluate(() => AelluxJs.mountManager.controller("gallery").scrollbox.goto(2)))
+    .toBe(true);
+  await expect.poll(() => page.evaluate(() => document.getElementById("gallery").scrollLeft))
+    .toBe(200);
+  expect(await page.evaluate(() => AelluxJs.mountManager.controller("gallery").scrollbox.goto(3)))
+    .toBe(false);
 });
 
-test("a simple click centers a partially visible snap child but leaves a visible child alone", async ({ page }) => {
-  await setup(page, `<div id="gallery" data-ae-scrollbox="native"
-    style="width:180px;height:100px;overflow-x:auto;overflow-y:hidden">
-    <div data-ae-scrollbox-snap style="display:flex;width:240px">
-      <div id="first" style="flex:none;width:80px;height:100px"></div>
-      <div id="second" style="flex:none;width:80px;height:100px">
-        <span style="display:block;width:100%;height:100%"></span></div>
-      <div id="third" style="flex:none;width:80px;height:100px">
-        <span style="display:block;width:100%;height:100%"></span></div>
+test("snap requires marked items and follows marker changes", async ({ page }) => {
+  await setup(page, `<div id="gallery" data-ae-scrollbox data-ae-scrollbox-snap
+    style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden">
+    <div id="item" style="width:300px;height:100px;scroll-snap-align:start"></div>
+  </div>`);
+
+  const initial = await page.evaluate(() => ({
+    enabled: AelluxJs.mountManager.controller("gallery").scrollbox.goto(0),
+    errors: AelluxJs.diagnostics.showHistory().filter(item => item.code === 1121).length
+  }));
+  expect(initial).toEqual({ enabled: false, errors: 1 });
+
+  await page.evaluate(() => document.getElementById("item")
+    .setAttribute("data-ae-snap-item", ""));
+  await expect.poll(() => page.evaluate(() => getComputedStyle(
+    document.getElementById("item")).scrollSnapAlign)).toBe("center");
+  expect(await page.evaluate(() => AelluxJs.mountManager.controller("gallery").scrollbox.goto(0)))
+    .toBe(true);
+
+  await page.evaluate(() => document.getElementById("item")
+    .removeAttribute("data-ae-snap-item"));
+  await expect.poll(() => page.evaluate(() => getComputedStyle(
+    document.getElementById("item")).scrollSnapAlign)).toBe("start");
+  expect(await page.evaluate(() => AelluxJs.mountManager.controller("gallery").scrollbox.goto(0)))
+    .toBe(false);
+});
+
+test("snap uses horizontal by default and centers only its selected axis", async ({ page }) => {
+  await setup(page, `<div id="horizontal" data-ae-scrollbox data-ae-scrollbox-snap
+    style="width:100px;height:100px;overflow:auto">
+    <div style="display:flex;width:300px;height:200px">
+      <div data-ae-snap-item style="flex:none;width:100px;height:40px"></div>
+      <div data-ae-snap-item style="flex:none;width:100px;height:40px"></div>
+      <div data-ae-snap-item style="flex:none;width:100px;height:40px"></div>
+    </div>
+  </div>
+  <div id="vertical" data-ae-scrollbox data-ae-scrollbox-snap="vertical"
+    style="width:100px;height:100px;overflow-x:hidden;overflow-y:auto">
+    <div style="width:300px;height:300px">
+      <div data-ae-snap-item style="width:40px;height:100px"></div>
+      <div data-ae-snap-item style="width:40px;height:100px"></div>
+      <div data-ae-snap-item style="width:40px;height:100px"></div>
     </div>
   </div>`);
+  const styles = await page.evaluate(() => ["horizontal", "vertical"].map(id => {
+    const element = document.getElementById(id);
+    return [getComputedStyle(element).scrollSnapType,
+      getComputedStyle(element.firstElementChild.children[1]).scrollSnapAlign];
+  }));
+  expect(styles).toEqual([["x mandatory", "center"], ["y mandatory", "center"]]);
+
+  await page.evaluate(() => document.getElementById("vertical")
+    .setAttribute("data-ae-scrollbox-snap", "horizontal"));
+  await expect.poll(() => page.evaluate(() => getComputedStyle(
+    document.getElementById("vertical")).scrollSnapType)).toBe("x mandatory");
+  await page.evaluate(() => document.getElementById("vertical")
+    .setAttribute("data-ae-scrollbox-snap", "vertical"));
+  await expect.poll(() => page.evaluate(() => getComputedStyle(
+    document.getElementById("vertical")).scrollSnapType)).toBe("y mandatory");
+
   await page.evaluate(() => {
-    window.snapClickCalls = [];
-    for (const id of ["second", "third"]) {
-      const item = document.getElementById(id);
-      const original = item.scrollIntoView;
-      item.scrollIntoView = function (options) {
-        window.snapClickCalls.push(id);
-        return original.call(this, options);
-      };
-    }
+    AelluxJs.mountManager.controller("horizontal").scrollbox.goto(1);
+    AelluxJs.mountManager.controller("vertical").scrollbox.goto(1);
   });
-  const box = await page.locator("#gallery").boundingBox();
-  await page.mouse.click(box.x + 120, box.y + 40);
-  expect(await page.evaluate(() => window.snapClickCalls)).toEqual([]);
-  expect(await page.evaluate(() => document.getElementById("gallery").scrollLeft)).toBe(0);
-  await page.mouse.click(box.x + 170, box.y + 40);
-  expect(await page.evaluate(() => window.snapClickCalls)).toEqual(["third"]);
-  await expect.poll(() => page.evaluate(() => document.getElementById("gallery").scrollLeft))
-    .toBe(60);
+  await expect.poll(() => page.evaluate(() => ["horizontal", "vertical"].map(id => {
+    const element = document.getElementById(id);
+    return [element.scrollLeft, element.scrollTop];
+  }))).toEqual([[100, 0], [0, 100]]);
+});
+
+test("snap item values align controller navigation on both axes", async ({ page }) => {
+  await setup(page, `<div id="horizontal" data-ae-scrollbox data-ae-scrollbox-snap
+    style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden">
+    <div style="display:flex;gap:20px;width:260px;height:100px">
+      <div data-ae-snap-item style="flex:none;width:60px;height:100px"></div>
+      <div data-ae-snap-item="left" style="flex:none;width:60px;height:100px"></div>
+      <div data-ae-snap-item="right" style="flex:none;width:60px;height:100px"></div>
+    </div>
+  </div>
+  <div id="vertical" data-ae-scrollbox data-ae-scrollbox-snap="vertical"
+    style="width:100px;height:100px;overflow-x:hidden;overflow-y:auto">
+    <div style="display:flex;flex-direction:column;gap:20px;height:260px">
+      <div data-ae-snap-item style="flex:none;width:100px;height:60px"></div>
+      <div data-ae-snap-item="top" style="flex:none;width:100px;height:60px"></div>
+      <div data-ae-snap-item="bottom" style="flex:none;width:100px;height:60px"></div>
+    </div>
+  </div>`);
+
+  const alignments = await page.evaluate(() => ["horizontal", "vertical"].map(id =>
+    Array.from(document.getElementById(id).firstElementChild.children,
+      item => getComputedStyle(item).scrollSnapAlign)));
+  expect(alignments).toEqual([["center", "start", "end"], ["center", "start", "end"]]);
+
+  await page.evaluate(() => ["horizontal", "vertical"].forEach(id =>
+    AelluxJs.mountManager.controller(id).scrollbox.goto(1)));
+  await expect.poll(() => page.evaluate(() => [
+    document.getElementById("horizontal").scrollLeft,
+    document.getElementById("vertical").scrollTop
+  ])).toEqual([80, 80]);
+
+  await page.evaluate(() => ["horizontal", "vertical"].forEach(id =>
+    AelluxJs.mountManager.controller(id).scrollbox.goto(2)));
+  await expect.poll(() => page.evaluate(() => [
+    document.getElementById("horizontal").scrollLeft,
+    document.getElementById("vertical").scrollTop
+  ])).toEqual([120, 120]);
+
+  await page.evaluate(() => {
+    const box = document.getElementById("horizontal");
+    box.firstElementChild.children[1].setAttribute("data-ae-snap-item", "center");
+    AelluxJs.mountManager.controller("horizontal").scrollbox.goto(1);
+  });
+  await expect.poll(() => page.evaluate(() => document.getElementById("horizontal")
+    .scrollLeft)).toBe(60);
+});
+
+test("snap restores the box and child inline rules on unmount", async ({ page }) => {
+  await setup(page, `<div id="gallery" data-ae-scrollbox="native" data-ae-scrollbox-snap
+    style="width:180px;height:100px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x proximity">
+    <div style="display:flex;width:240px">
+      <div data-ae-snap-item style="flex:none;width:80px;height:100px;scroll-snap-align:start"></div>
+      <div data-ae-snap-item style="flex:none;width:80px;height:100px"></div>
+      <div data-ae-snap-item style="flex:none;width:80px;height:100px"></div>
+    </div>
+  </div>`);
+  const styles = await page.evaluate(async () => {
+    const element = document.getElementById("gallery");
+    const child = element.firstElementChild.firstElementChild;
+    const during = [getComputedStyle(element).scrollSnapType,
+      getComputedStyle(child).scrollSnapAlign];
+    await AelluxJs.mountManager.unmount(element, "scrollbox");
+    return { during, after: [element.style.scrollSnapType, child.style.scrollSnapAlign],
+      ready: element.classList.contains("ae--snap-ready") };
+  });
+  expect(styles).toEqual({ during: ["x mandatory", "center"],
+    after: ["x", "start"], ready: false });
 });
 
 test("snap children publish viewport and focus values through native scrolling", async ({ page }) => {
-  await setup(page, `<div id="gallery" data-ae-scrollbox="native"
+  await setup(page, `<div id="gallery" data-ae-scrollbox="native" data-ae-scrollbox-snap
     style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden">
-    <div data-ae-scrollbox-snap style="display:flex;width:300px">
-      <div style="flex:none;width:100px;height:100px"></div>
-      <div style="flex:none;width:100px;height:100px"></div>
-      <div style="flex:none;width:100px;height:100px"></div>
+    <div style="display:flex;width:300px">
+      <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+      <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+      <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
     </div>
   </div>`);
   const values = (left = null) => page.evaluate(async left => {
     const element = document.getElementById("gallery");
     if (left !== null) {
+      element.style.setProperty("scroll-snap-type", "none", "important");
       element.scrollTo({ left, behavior: "instant" });
       element.dispatchEvent(new Event("scroll"));
       await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
@@ -323,30 +478,30 @@ test("snap children publish viewport and focus values through native scrolling",
 });
 
 test("vertical snap children publish values along the vertical axis", async ({ page }) => {
-  await setup(page, `<div id="gallery" data-ae-scrollbox="native"
+  await setup(page, `<div id="gallery" data-ae-scrollbox="native" data-ae-scrollbox-snap="vertical"
     style="width:100px;height:100px;overflow-x:hidden;overflow-y:auto">
-    <div data-ae-scrollbox-snap style="width:100px">
-      <div style="height:100px"></div>
-      <div style="height:100px"></div>
-      <div style="height:100px"></div>
+    <div style="width:100px">
+      <div data-ae-snap-item style="height:100px"></div>
+      <div data-ae-snap-item style="height:100px"></div>
+      <div data-ae-snap-item style="height:100px"></div>
     </div>
   </div>`);
   await page.evaluate(() => document.getElementById("gallery")
     .scrollTo({ top: 100, behavior: "instant" }));
   await expect.poll(() => page.evaluate(() => Array.from(
-    document.querySelector("[data-ae-scrollbox-snap]").children,
+    document.querySelectorAll("[data-ae-snap-item]"),
     item => [Number(item.style.getPropertyValue("--ae-snap-viewport")),
       Number(item.style.getPropertyValue("--ae-snap-focus"))]
   ))).toEqual([[-2, 0], [0, 1], [2, 0]]);
 });
 
 test("native scroll end snaps the nearest point after scrollbar scrolling", async ({ page }) => {
-  await setup(page, `<div id="gallery" data-ae-scrollbox="native"
+  await setup(page, `<div id="gallery" data-ae-scrollbox="native" data-ae-scrollbox-snap="vertical"
     style="width:100px;height:100px;overflow:auto">
-    <div data-ae-scrollbox-snap style="width:100px">
-      <div style="height:100px"></div>
-      <div style="height:100px"></div>
-      <div style="height:100px"></div>
+    <div style="width:100px">
+      <div data-ae-snap-item style="height:100px"></div>
+      <div data-ae-snap-item style="height:100px"></div>
+      <div data-ae-snap-item style="height:100px"></div>
     </div>
   </div>`);
   await page.evaluate(() => {
@@ -358,51 +513,166 @@ test("native scroll end snaps the nearest point after scrollbar scrolling", asyn
     .toBe(100);
 });
 
-test("snap chooses the first or last point within 10 px of a scroll limit", async ({ page }) => {
-  await setup(page, `<div id="start" data-ae-scrollbox="native"
-    style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden">
-    <div data-ae-scrollbox-snap style="display:flex;width:280px">
-      <div id="start-first" style="flex:none;width:20px;height:100px"></div>
-      <div id="start-middle" style="flex:none;width:60px;height:100px"></div>
-      <div style="flex:none;width:200px;height:100px"></div>
-    </div>
-  </div>
-  <div id="end" data-ae-scrollbox="native"
-    style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden">
-    <div data-ae-scrollbox-snap style="display:flex;width:280px">
-      <div style="flex:none;width:200px;height:100px"></div>
-      <div id="end-middle" style="flex:none;width:60px;height:100px"></div>
-      <div id="end-last" style="flex:none;width:20px;height:100px"></div>
+test("native snap compares centers only on the selected axis", async ({ page }) => {
+  await setup(page, `<div id="gallery" data-ae-scrollbox="native" data-ae-scrollbox-snap
+    style="width:100px;height:100px;overflow:auto">
+    <div style="position:relative;width:400px;height:400px">
+      <div data-ae-snap-item id="first" style="position:absolute;left:0;top:0;width:100px;height:100px"></div>
+      <div data-ae-snap-item id="horizontal-nearest"
+        style="position:absolute;left:180px;top:300px;width:100px;height:100px"></div>
+      <div data-ae-snap-item id="diagonal-nearest"
+        style="position:absolute;left:240px;top:0;width:100px;height:100px"></div>
     </div>
   </div>`);
-  const calls = await page.evaluate(() => {
-    const calls = [];
-    for (const id of ["start-first", "start-middle", "end-middle", "end-last"]) {
-      const item = document.getElementById(id);
-      const original = item.scrollIntoView;
-      item.scrollIntoView = function (options) {
-        calls.push(id);
-        return original.call(this, options);
-      };
-    }
-    const start = document.getElementById("start");
-    const end = document.getElementById("end");
-    start.scrollTo({ left: 5, behavior: "instant" });
-    end.scrollTo({ left: end.scrollWidth - end.clientWidth - 5, behavior: "instant" });
-    start.dispatchEvent(new Event("scrollend"));
-    end.dispatchEvent(new Event("scrollend"));
-    return calls;
+  const result = await page.evaluate(() => {
+    const element = document.getElementById("gallery");
+    const events = [];
+    element.addEventListener("AelluxJsScrollboxSnapChange", event =>
+      events.push(event.detail.item.id));
+    element.style.setProperty("scroll-snap-type", "none", "important");
+    element.scrollTo({ left: 125, top: 0, behavior: "instant" });
+    element.dispatchEvent(new Event("scrollend"));
+    return { events, top: element.scrollTop };
   });
-  expect(calls).toEqual(["start-first", "end-last"]);
+  expect(result).toEqual({ events: ["horizontal-nearest"], top: 0 });
 });
 
-test("wheel advances snap points after horizontal conversion", async ({ page }) => {
-  await setup(page, `<div id="gallery" data-ae-scrollbox="native"
+test("snap change compares each item's requested alignment", async ({ page }) => {
+  await setup(page, `<div id="gallery" data-ae-scrollbox="native" data-ae-scrollbox-snap
+    style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden">
+    <div style="position:relative;width:300px;height:100px">
+      <div data-ae-snap-item id="first"
+        style="position:absolute;left:0;width:40px;height:100px"></div>
+      <div data-ae-snap-item="left" id="aligned-left"
+        style="position:absolute;left:100px;width:40px;height:100px"></div>
+      <div data-ae-snap-item id="centered"
+        style="position:absolute;left:180px;width:40px;height:100px"></div>
+    </div>
+  </div>`);
+
+  const selected = await page.evaluate(() => {
+    const element = document.getElementById("gallery");
+    const events = [];
+    element.addEventListener("AelluxJsScrollboxSnapChange", event =>
+      events.push(event.detail.item.id));
+    element.style.setProperty("scroll-snap-type", "none", "important");
+    element.scrollTo({ left: 120, behavior: "instant" });
+    element.dispatchEvent(new Event("scrollend"));
+    return events;
+  });
+  expect(selected).toEqual(["aligned-left"]);
+});
+
+for (const ending of ["pointerup", "pointercancel"]) {
+  test(`snap completion waits for ${ending} before starting its idle timer`, async ({ page }) => {
+    await setup(page, `<div id="gallery" data-ae-scrollbox="native" data-ae-scrollbox-snap
+      style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden">
+      <div style="display:flex;width:300px">
+        <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+        <div data-ae-snap-item id="second" style="flex:none;width:100px;height:100px"></div>
+        <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+      </div>
+    </div>`);
+    await page.evaluate(() => {
+      const element = document.getElementById("gallery");
+      window.snapChanges = [];
+      element.addEventListener("AelluxJsScrollboxSnapChange", event =>
+        window.snapChanges.push(event.detail.index));
+      element.dispatchEvent(new PointerEvent("pointerdown", {
+        bubbles: true, isPrimary: true, pointerId: 91,
+        pointerType: "touch", button: 0, buttons: 1
+      }));
+      AelluxJs.mountManager.controller("gallery").scrollbox.goto(1);
+    });
+    await page.waitForTimeout(170);
+    expect(await page.evaluate(() => window.snapChanges)).toEqual([]);
+    await page.evaluate(ending => window.dispatchEvent(new PointerEvent(ending, {
+      bubbles: true, isPrimary: true, pointerId: 91,
+      pointerType: "touch", button: 0, buttons: 0
+    })), ending);
+    await expect.poll(() => page.evaluate(() => window.snapChanges)).toEqual([1]);
+  });
+}
+
+test("snap timer waits for touchend after a touch pointer is canceled", async ({ page }) => {
+  await setup(page, `<div id="gallery" data-ae-scrollbox="native" data-ae-scrollbox-snap
+    style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden">
+    <div style="display:flex;width:300px">
+      <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+      <div data-ae-snap-item id="second" style="flex:none;width:100px;height:100px"></div>
+      <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+    </div>
+  </div>`);
+  await page.evaluate(() => {
+    const element = document.getElementById("gallery");
+    window.snapChanges = [];
+    element.addEventListener("AelluxJsScrollboxSnapChange", event =>
+      window.snapChanges.push(event.detail.index));
+    const touch = { identifier: 92 };
+    const start = new Event("touchstart", { bubbles: true });
+    Object.defineProperty(start, "changedTouches", { value: [touch] });
+    element.dispatchEvent(start);
+    element.dispatchEvent(new PointerEvent("pointerdown", {
+      bubbles: true, isPrimary: true, pointerId: 92,
+      pointerType: "touch", button: 0, buttons: 1
+    }));
+    AelluxJs.mountManager.controller("gallery").scrollbox.goto(1);
+    window.dispatchEvent(new PointerEvent("pointercancel", {
+      bubbles: true, isPrimary: true, pointerId: 92,
+      pointerType: "touch", button: 0, buttons: 0
+    }));
+  });
+  await page.waitForTimeout(170);
+  expect(await page.evaluate(() => window.snapChanges)).toEqual([]);
+  await page.evaluate(() => {
+    const end = new Event("touchend", { bubbles: true });
+    Object.defineProperty(end, "changedTouches", { value: [{ identifier: 92 }] });
+    window.dispatchEvent(end);
+  });
+  await expect.poll(() => page.evaluate(() => window.snapChanges)).toEqual([1]);
+});
+
+test("snap reports the first or last point at a scroll limit", async ({ page }) => {
+  await setup(page, `<div id="start" data-ae-scrollbox="native" data-ae-scrollbox-snap
+    style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden">
+    <div style="display:flex;width:280px">
+      <div data-ae-snap-item id="start-first" style="flex:none;width:20px;height:100px"></div>
+      <div data-ae-snap-item id="start-middle" style="flex:none;width:60px;height:100px"></div>
+      <div data-ae-snap-item style="flex:none;width:200px;height:100px"></div>
+    </div>
+  </div>
+  <div id="end" data-ae-scrollbox="native" data-ae-scrollbox-snap
+    style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden">
+    <div style="display:flex;width:280px">
+      <div data-ae-snap-item style="flex:none;width:200px;height:100px"></div>
+      <div data-ae-snap-item id="end-middle" style="flex:none;width:60px;height:100px"></div>
+      <div data-ae-snap-item id="end-last" style="flex:none;width:20px;height:100px"></div>
+    </div>
+  </div>`);
+  const result = await page.evaluate(() => {
+    const start = document.getElementById("start");
+    const end = document.getElementById("end");
+    const events = [];
+    start.addEventListener("AelluxJsScrollboxSnapChange", event =>
+      events.push(event.detail.item.id));
+    end.addEventListener("AelluxJsScrollboxSnapChange", event =>
+      events.push(event.detail.item.id));
+    start.scrollTo({ left: 0, behavior: "instant" });
+    end.scrollTo({ left: end.scrollWidth - end.clientWidth, behavior: "instant" });
+    start.dispatchEvent(new Event("scrollend"));
+    end.dispatchEvent(new Event("scrollend"));
+    return events;
+  });
+  expect(result).toEqual(["end-last"]);
+});
+
+test("wheel conversion preserves native CSS snap", async ({ page }) => {
+  await setup(page, `<div id="gallery" data-ae-scrollbox="native" data-ae-scrollbox-snap
     style="width:100px;height:100px;overflow:auto">
-    <div data-ae-scrollbox-snap style="display:flex;width:300px">
-      <div style="flex:none;width:100px;height:100px"></div>
-      <div style="flex:none;width:100px;height:100px"></div>
-      <div style="flex:none;width:100px;height:100px"></div>
+    <div style="display:flex;width:300px">
+      <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+      <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+      <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
     </div>
   </div>`);
   const wheel = deltas => page.evaluate(values => {
@@ -415,14 +685,12 @@ test("wheel advances snap points after horizontal conversion", async ({ page }) 
       return event.defaultPrevented;
     });
   }, deltas);
-  expect(await wheel([120, 120])).toEqual([true, true]);
-  await expect.poll(() => page.evaluate(() => document.getElementById("gallery").scrollLeft))
-    .toBe(100);
-  await page.waitForTimeout(150);
   expect(await wheel([120])).toEqual([true]);
   await expect.poll(() => page.evaluate(() => document.getElementById("gallery").scrollLeft))
+    .toBe(100);
+  expect(await wheel([120])).toEqual([false]);
+  await expect.poll(() => page.evaluate(() => document.getElementById("gallery").scrollLeft))
     .toBe(200);
-  await page.waitForTimeout(150);
   expect(await wheel([120])).toEqual([false]);
   expect(await wheel([-120])).toEqual([true]);
   await expect.poll(() => page.evaluate(() => document.getElementById("gallery").scrollLeft))
@@ -430,13 +698,13 @@ test("wheel advances snap points after horizontal conversion", async ({ page }) 
 });
 
 test("converted snap wheel stretches only the horizontal elastic axis", async ({ page }) => {
-  await setup(page, `<div id="gallery" data-ae-scrollbox="native"
+  await setup(page, `<div id="gallery" data-ae-scrollbox="native" data-ae-scrollbox-snap
     style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden">
-    <div id="wrapper" data-ae-scrollbox-snap data-ae-scrollbox-elastic
+    <div id="wrapper" data-ae-scrollbox-elastic
       style="display:flex;width:300px;height:200px">
-      <div style="flex:none;width:100px;height:200px"></div>
-      <div style="flex:none;width:100px;height:200px"></div>
-      <div style="flex:none;width:100px;height:200px"></div>
+      <div data-ae-snap-item style="flex:none;width:100px;height:200px"></div>
+      <div data-ae-snap-item style="flex:none;width:100px;height:200px"></div>
+      <div data-ae-snap-item style="flex:none;width:100px;height:200px"></div>
     </div>
   </div>`);
   await page.evaluate(() => AelluxJs.mountManager.controller("gallery").scrollbox.goto(2));
@@ -457,6 +725,62 @@ test("converted snap wheel stretches only the horizontal elastic axis", async ({
   expect(result.overflowY).toBe("hidden");
   expect(result.maxY).toBeGreaterThan(1);
   expect(result.transform).toMatch(/^scale\([^,]+, 1\) translate3d\(-[^,]+, 0px, 0px\)/);
+});
+
+test("elastic pressure suspends CSS snap through the return animation", async ({ page }) => {
+  await setup(page, `<div id="gallery" data-ae-scrollbox="native" data-ae-scrollbox-snap
+    style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden">
+    <div data-ae-scrollbox-elastic
+      style="display:flex;width:300px;height:100px">
+      <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+      <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+      <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+    </div>
+  </div>`);
+
+  await page.evaluate(() => {
+    const element = document.getElementById("gallery");
+    element.scrollTo({ left: 200, behavior: "instant" });
+    element.dispatchEvent(new WheelEvent("wheel", {
+      deltaY: 80, bubbles: true, cancelable: true
+    }));
+  });
+  expect(await page.evaluate(() => getComputedStyle(
+    document.getElementById("gallery")).scrollSnapType)).toBe("none");
+  await page.waitForTimeout(120);
+  expect(await page.evaluate(() => getComputedStyle(
+    document.getElementById("gallery")).scrollSnapType)).toBe("none");
+  await expect.poll(() => page.evaluate(() => getComputedStyle(
+    document.getElementById("gallery")).scrollSnapType),
+    { timeout: 10000 }).toBe("x mandatory");
+});
+
+test("a native touch flick advances one CSS snap point within 100 ms", async ({ page }) => {
+  await setup(page, `<div id="gallery" data-ae-scrollbox="native" data-ae-scrollbox-snap
+    style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden">
+    <div style="display:flex;width:300px">
+      <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+      <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+      <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+    </div>
+  </div>`);
+
+  await page.evaluate(() => {
+    const element = document.getElementById("gallery");
+    const start = new Event("touchstart", { bubbles: true });
+    Object.defineProperty(start, "changedTouches", { value: [{
+      identifier: 47, clientX: 60, clientY: 50
+    }] });
+    element.dispatchEvent(start);
+
+    const end = new Event("touchend", { bubbles: true });
+    Object.defineProperty(end, "changedTouches", { value: [{
+      identifier: 47, clientX: 58, clientY: 50
+    }] });
+    window.dispatchEvent(end);
+  });
+  await expect.poll(() => page.evaluate(() => document.getElementById("gallery")
+    .scrollLeft)).toBe(100);
 });
 
 test("horizontal wheel ignores hidden vertical overflow during elastic pressure", async ({ page }) => {
@@ -483,13 +807,13 @@ test("horizontal wheel ignores hidden vertical overflow during elastic pressure"
 });
 
 test("pointer snap advances one point on a fast horizontal swipe", async ({ page }) => {
-  await setup(page, `<div id="gallery" data-ae-scrollbox="pointer"
+  await setup(page, `<div id="gallery" data-ae-scrollbox="pointer" data-ae-scrollbox-snap
     style="width:100px;height:100px;overflow:auto">
-    <div data-ae-scrollbox-snap data-ae-scrollbox-elastic
+    <div data-ae-scrollbox-elastic
       style="display:flex;width:300px">
-      <div style="flex:none;width:100px;height:100px"></div>
-      <div style="flex:none;width:100px;height:100px"></div>
-      <div style="flex:none;width:100px;height:100px"></div>
+      <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+      <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+      <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
     </div>
   </div>`);
   await page.evaluate(() => {
@@ -513,13 +837,13 @@ test("pointer snap advances one point on a fast horizontal swipe", async ({ page
     .toBe(100);
 });
 
-test("snap advances wide items on a short flick or significant drag", async ({ page }) => {
-  await setup(page, `<div id="gallery" data-ae-scrollbox="pointer"
+test("CSS snap flick advances wide items while a slow drag stays within one point", async ({ page }) => {
+  await setup(page, `<div id="gallery" data-ae-scrollbox="pointer" data-ae-scrollbox-snap
     style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden">
-    <div data-ae-scrollbox-snap style="display:flex;width:900px">
-      <div style="flex:none;width:300px;height:100px"></div>
-      <div style="flex:none;width:300px;height:100px"></div>
-      <div style="flex:none;width:300px;height:100px"></div>
+    <div style="display:flex;width:900px">
+      <div data-ae-snap-item style="flex:none;width:300px;height:100px"></div>
+      <div data-ae-snap-item style="flex:none;width:300px;height:100px"></div>
+      <div data-ae-snap-item style="flex:none;width:300px;height:100px"></div>
     </div>
   </div>`);
   const move = async (distance, pointerId, immediateRelease = false) =>
@@ -563,23 +887,23 @@ test("snap advances wide items on a short flick or significant drag", async ({ p
   await page.waitForTimeout(150);
   await release(drag, 302);
   await expect.poll(() => page.evaluate(() => document.getElementById("gallery").scrollLeft))
-    .toBe(400);
+    .toBeGreaterThan(125);
 
   await reset();
   const small = await move(2, 303);
   await page.waitForTimeout(250);
   await release(small, 303);
   await expect.poll(() => page.evaluate(() => document.getElementById("gallery").scrollLeft))
-    .toBe(100);
+    .toBeLessThan(110);
 });
 
-test("snap uses projected centers to recognize a deliberate drag", async ({ page }) => {
-  await setup(page, `<div id="gallery" data-ae-scrollbox="pointer"
+test("a longer drag lets CSS snap choose the nearest point", async ({ page }) => {
+  await setup(page, `<div id="gallery" data-ae-scrollbox="pointer" data-ae-scrollbox-snap
     style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden">
-    <div data-ae-scrollbox-snap style="display:flex;width:300px">
-      <div style="flex:none;width:100px;height:100px"></div>
-      <div style="flex:none;width:100px;height:100px"></div>
-      <div style="flex:none;width:100px;height:100px"></div>
+    <div style="display:flex;width:300px">
+      <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+      <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+      <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
     </div>
   </div>`);
   const result = await page.evaluate(() => {
@@ -611,16 +935,16 @@ test("snap uses projected centers to recognize a deliberate drag", async ({ page
     button: 0, buttons: 0, clientX: point.x, clientY: point.y
   })), result);
   await expect.poll(() => page.evaluate(() => document.getElementById("gallery").scrollLeft))
-    .toBe(200);
+    .toBe(100);
 });
 
 test("text-origin snap flick works before the 100 ms selection wait ends", async ({ page }) => {
-  await setup(page, `<div id="gallery" data-ae-scrollbox="pointer"
+  await setup(page, `<div id="gallery" data-ae-scrollbox="pointer" data-ae-scrollbox-snap
     style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden">
-    <div data-ae-scrollbox-snap style="display:flex;width:300px">
-      <div id="text" style="flex:none;width:100px;height:100px">selectable words</div>
-      <div style="flex:none;width:100px;height:100px"></div>
-      <div style="flex:none;width:100px;height:100px"></div>
+    <div style="display:flex;width:300px">
+      <div data-ae-snap-item id="text" style="flex:none;width:100px;height:100px">selectable words</div>
+      <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+      <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
     </div>
   </div>`);
   const pending = await page.evaluate(() => {
@@ -650,12 +974,12 @@ test("text-origin snap flick works before the 100 ms selection wait ends", async
 });
 
 test("selection during the snap wait prevents an early flick", async ({ page }) => {
-  await setup(page, `<div id="gallery" data-ae-scrollbox="pointer"
+  await setup(page, `<div id="gallery" data-ae-scrollbox="pointer" data-ae-scrollbox-snap
     style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden">
-    <div data-ae-scrollbox-snap style="display:flex;width:300px">
-      <div id="text" style="flex:none;width:100px;height:100px">selectable words</div>
-      <div style="flex:none;width:100px;height:100px"></div>
-      <div style="flex:none;width:100px;height:100px"></div>
+    <div style="display:flex;width:300px">
+      <div data-ae-snap-item id="text" style="flex:none;width:100px;height:100px">selectable words</div>
+      <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+      <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
     </div>
   </div>`);
   const result = await page.evaluate(() => {
@@ -768,6 +1092,49 @@ for (const axis of ["x", "y"]) {
     expect(result).toEqual({ first: { inner, outer: [0, 0] },
       second: { inner: innerLimit, outer }, reverse: { inner: innerReverse, outer },
       classes: [false, false] });
+  });
+}
+
+for (const [axis, behavior] of [["x", "contain"], ["y", "none"]]) {
+  test(`pointer chaining stops at overscroll-behavior-${axis}: ${behavior}`, async ({ page }) => {
+    await setup(page, `<div id="outer" data-ae-scrollbox="pointer"
+      data-ae-scrollbox-momentum="false" style="width:120px;height:120px;overflow:auto">
+      <div style="width:300px;height:360px">
+        <div id="inner" data-ae-scrollbox="pointer"
+          data-ae-scrollbox-momentum="false"
+          style="width:100px;height:100px;overflow:auto;overscroll-behavior-${axis}:${behavior}">
+          <div style="width:300px;height:300px"></div>
+        </div>
+      </div>
+    </div>`);
+    const result = await page.evaluate(({ axis, behavior }) => {
+      const inner = document.getElementById("inner");
+      const outer = document.getElementById("outer");
+      const rect = inner.getBoundingClientRect();
+      const x = rect.left + 50, y = rect.top + 50;
+      inner.dispatchEvent(new PointerEvent("pointerdown", {
+        bubbles: true, cancelable: true, isPrimary: true, pointerId: 191,
+        pointerType: "mouse", button: 0, buttons: 1, clientX: x, clientY: y
+      }));
+      window.dispatchEvent(new PointerEvent("pointermove", {
+        bubbles: true, cancelable: true, isPrimary: true, pointerId: 191,
+        pointerType: "mouse", buttons: 1,
+        clientX: x - (axis === "x" ? 300 : 0),
+        clientY: y - (axis === "y" ? 300 : 0)
+      }));
+      const positions = {
+        inner: axis === "x" ? inner.scrollLeft : inner.scrollTop,
+        outer: axis === "x" ? outer.scrollLeft : outer.scrollTop,
+        supported: CSS.supports(`overscroll-behavior-${axis}`, behavior)
+      };
+      window.dispatchEvent(new PointerEvent("pointerup", {
+        bubbles: true, isPrimary: true, pointerId: 191,
+        pointerType: "mouse", button: 0, buttons: 0
+      }));
+      return positions;
+    }, { axis, behavior });
+    expect(result).toEqual({ inner: 200, outer: result.supported ? 0 : 100,
+      supported: result.supported });
   });
 }
 
@@ -2038,6 +2405,100 @@ test("elastic native wheel transforms its wrapper and settles", async ({ page })
     return { transform: wrapper.style.transform,
       releaseClass: wrapper.classList.contains("ae--scrollbox-elastic-release") };
   })).toEqual({ transform: "", releaseClass: false });
+});
+
+test("overscroll-behavior none suppresses elastic pressure in its axis", async ({ page }) => {
+  const supported = await page.evaluate(() => CSS.supports("overscroll-behavior-y", "none"));
+  test.skip(!supported, "This browser does not support overscroll-behavior");
+
+  await setup(page, `<div id="none" data-ae-scrollbox="native"
+    style="width:100px;height:100px;overflow:auto;overscroll-behavior-y:none">
+    <div data-ae-scrollbox-elastic style="width:100px;height:300px"></div>
+  </div>
+  <div id="contain" data-ae-scrollbox="native"
+    style="width:100px;height:100px;overflow:auto;overscroll-behavior-y:contain">
+    <div data-ae-scrollbox-elastic style="width:100px;height:300px"></div>
+  </div>`);
+
+  const result = await page.evaluate(() => ["none", "contain"].map(id => {
+    const element = document.getElementById(id);
+    const wheel = new WheelEvent("wheel", {
+      deltaY: -60, bubbles: true, cancelable: true
+    });
+    element.dispatchEvent(wheel);
+    return { id, prevented: wheel.defaultPrevented,
+      transform: element.firstElementChild.style.transform };
+  }));
+
+  expect(result[0]).toEqual({ id: "none", prevented: false, transform: "" });
+  expect(result[1].prevented).toBe(true);
+  expect(result[1].transform).toContain("translate3d");
+});
+
+test("pointer drag with overscroll-behavior none reverses without elastic force", async ({ page }) => {
+  const supported = await page.evaluate(() => CSS.supports("overscroll-behavior-y", "none"));
+  test.skip(!supported, "This browser does not support overscroll-behavior");
+
+  await setup(page, `<div id="box" data-ae-scrollbox="pointer"
+    data-ae-scrollbox-momentum="false"
+    style="width:100px;height:100px;overflow:auto;overscroll-behavior-y:none">
+    <div data-ae-scrollbox-elastic style="width:100px;height:300px"></div>
+  </div>`);
+
+  const result = await page.evaluate(() => {
+    const element = document.getElementById("box");
+    const rect = element.getBoundingClientRect();
+    const x = rect.left + 50, y = rect.top + 50;
+    element.dispatchEvent(new PointerEvent("pointerdown", {
+      bubbles: true, cancelable: true, isPrimary: true, pointerId: 340,
+      pointerType: "mouse", button: 0, buttons: 1, clientX: x, clientY: y
+    }));
+    for (const position of [y + 60, y - 40]) window.dispatchEvent(new PointerEvent("pointermove", {
+      bubbles: true, cancelable: true, isPrimary: true, pointerId: 340,
+      pointerType: "mouse", buttons: 1, clientX: x, clientY: position
+    }));
+    const result = { transform: element.firstElementChild.style.transform,
+      scrollTop: element.scrollTop };
+    window.dispatchEvent(new PointerEvent("pointerup", {
+      bubbles: true, isPrimary: true, pointerId: 340,
+      pointerType: "mouse", button: 0, buttons: 0,
+      clientX: x, clientY: y - 40
+    }));
+    return result;
+  });
+
+  expect(result.transform).toBe("");
+  expect(result.scrollTop).toBe(100);
+});
+
+test("native touch respects overscroll-behavior none during elastic pressure", async ({ page }) => {
+  const supported = await page.evaluate(() => CSS.supports("overscroll-behavior-y", "none"));
+  test.skip(!supported, "This browser does not support overscroll-behavior");
+
+  await setup(page, `<div id="box" data-ae-scrollbox="native"
+    style="width:100px;height:100px;overflow:auto;overscroll-behavior-y:none">
+    <div data-ae-scrollbox-elastic style="width:100px;height:300px"></div>
+  </div>`);
+
+  const result = await page.evaluate(() => {
+    const element = document.getElementById("box");
+    const touchEvent = (type, y, active) => {
+      const event = new Event(type, { bubbles: true, cancelable: true });
+      Object.defineProperty(event, "touches", { value: active ? [
+        { identifier: 341, clientX: 40, clientY: y }
+      ] : [] });
+      return event;
+    };
+    element.dispatchEvent(touchEvent("touchstart", 40, true));
+    const move = touchEvent("touchmove", 100, true);
+    element.dispatchEvent(move);
+    const result = { prevented: move.defaultPrevented,
+      transform: element.firstElementChild.style.transform };
+    element.dispatchEvent(touchEvent("touchend", 100, false));
+    return result;
+  });
+
+  expect(result).toEqual({ prevented: false, transform: "" });
 });
 
 test("elastic native touch stretches while pulling beyond an edge", async ({ page }) => {

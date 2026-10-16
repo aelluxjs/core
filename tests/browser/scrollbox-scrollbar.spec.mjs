@@ -201,13 +201,13 @@ test("PDS hide timer fades the scrollbar when no hover remains", async ({ page }
   await expect(track).toHaveCSS("opacity", "0");
 });
 
-test("scrollbars are siblings of the snap and elastic wrapper and are removed on unmount", async ({ page }) => {
-  await setup(page, `<div id="box" data-ae-scrollbox data-ae-scrollbar="h v"
+test("scrollbars are siblings of the elastic wrapper and are removed on unmount", async ({ page }) => {
+  await setup(page, `<div id="box" data-ae-scrollbox data-ae-scrollbox-snap data-ae-scrollbar="h v"
     style="width:120px;height:120px;overflow:auto">
-    <div data-ae-scrollbox-elastic data-ae-scrollbox-snap style="display:flex;width:360px;height:360px">
-      <div style="flex:none;width:120px;height:360px"></div>
-      <div style="flex:none;width:120px;height:360px"></div>
-      <div style="flex:none;width:120px;height:360px"></div>
+    <div data-ae-scrollbox-elastic style="display:flex;width:360px;height:360px">
+      <div data-ae-snap-item style="flex:none;width:120px;height:360px"></div>
+      <div data-ae-snap-item style="flex:none;width:120px;height:360px"></div>
+      <div data-ae-snap-item style="flex:none;width:120px;height:360px"></div>
     </div>
   </div>`);
   const result = await page.evaluate(async () => {

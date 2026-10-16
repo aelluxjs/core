@@ -45,6 +45,6 @@ See [Bootstrap integration](integrations/bootstrap.md) and the browser validatio
 - The Legacy profile is validated through forced execution in the current tested desktop engines. No historical browser version is included in the `0.1.0` support matrix.
 - Legacy execution still depends on the host providing fundamental DOM capabilities.
 - Mobile browsers are not included in the validated matrix.
-- Applications must call `$ae.mount(root)` after relevant dynamic DOM insertion and `$ae.unmount(root)` before removing mounted content when cleanup is required.
+- Applications must call `$ae.mount(root)` after relevant dynamic DOM insertion. With `MutationObserver`, the mount manager cleans up detached mounted elements automatically; call `$ae.unmount(root)` before removal when cleanup must finish before the DOM change, or when that API is unavailable.
 
 See [Browser support](runtime/browser-support.md), [Modern and Legacy runtimes](runtime/modern-legacy.md), [ES5 support level](runtime/es5-support.md), and [Modern and Legacy Extension variants](extensions/legacy-variants.md) for details.

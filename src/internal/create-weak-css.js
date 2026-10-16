@@ -66,9 +66,37 @@ export default function createWeakCss() {
       scrollbar-color: color-mix(in srgb, CanvasText 50%, transparent) transparent;
     }
 
-    :where([?scrollbox-elastic], [?scrollbox-snap]) {
+    :where([?scrollbox-elastic]) {
       display: inline-block;
       vertical-align: top;
+    }
+
+    :where([?scrollbox][?scrollbox-snap].%snap-ready) {
+      scroll-snap-type: x mandatory !important;
+    }
+
+    :where([?scrollbox][?scrollbox-snap='vertical'].%snap-ready) {
+      scroll-snap-type: y mandatory !important;
+    }
+
+    :where([?scrollbox][?scrollbox-snap].%snap-ready.%snap-suspended) {
+      scroll-snap-type: none !important;
+    }
+
+    :where([?scrollbox][?scrollbox-snap].%snap-ready [?snap-item]) {
+      scroll-snap-align: center !important;
+    }
+
+    :where([?scrollbox][?scrollbox-snap].%snap-ready [?snap-item='start']),
+    :where([?scrollbox][?scrollbox-snap].%snap-ready [?snap-item='left']),
+    :where([?scrollbox][?scrollbox-snap].%snap-ready [?snap-item='top']) {
+      scroll-snap-align: start !important;
+    }
+
+    :where([?scrollbox][?scrollbox-snap].%snap-ready [?snap-item='end']),
+    :where([?scrollbox][?scrollbox-snap].%snap-ready [?snap-item='right']),
+    :where([?scrollbox][?scrollbox-snap].%snap-ready [?snap-item='bottom']) {
+      scroll-snap-align: end !important;
     }
 
     .%pointerscrolling {

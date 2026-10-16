@@ -15,7 +15,7 @@
  * association.
  *
  * Outputs and owned state: keeps positions, movement, press timing, press origin
- * and current target. It dispatches non-bubbling `AelluxJsPoint*` events and
+ * and current target. It dispatches non-bubbling `AelluxJsPointer*` events and
  * exposes `point.pointers()` on mounted controllers.
  *
  * Lifecycle: removes global listeners, clears tracked pointers and releases

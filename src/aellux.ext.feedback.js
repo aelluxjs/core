@@ -15,8 +15,7 @@
  * Outputs and owned state: dispatches `AelluxJsFeedback` and owns only its
  * subscription registry. It creates no messages, dialogs or live regions.
  *
- * Lifecycle: removes the document listener and clears all subscriptions when
- * the extension is destroyed.
+ * Lifecycle: clears all subscriptions when the extension is destroyed.
  *
  * Accessibility: a renderer must choose suitable semantics, focus behavior and
  * announcement priority. `announce()` publishes an event; it does not itself

@@ -1,5 +1,24 @@
 (() => {
+  var __defProp = Object.defineProperty;
+  var __defProps = Object.defineProperties;
+  var __getOwnPropDescs = Object.getOwnPropertyDescriptors;
   var __getOwnPropNames = Object.getOwnPropertyNames;
+  var __getOwnPropSymbols = Object.getOwnPropertySymbols;
+  var __hasOwnProp = Object.prototype.hasOwnProperty;
+  var __propIsEnum = Object.prototype.propertyIsEnumerable;
+  var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+  var __spreadValues = (a, b) => {
+    for (var prop in b || (b = {}))
+      if (__hasOwnProp.call(b, prop))
+        __defNormalProp(a, prop, b[prop]);
+    if (__getOwnPropSymbols)
+      for (var prop of __getOwnPropSymbols(b)) {
+        if (__propIsEnum.call(b, prop))
+          __defNormalProp(a, prop, b[prop]);
+      }
+    return a;
+  };
+  var __spreadProps = (a, b) => __defProps(a, __getOwnPropDescs(b));
   var __esm = (fn, res) => function __init() {
     return fn && (res = (0, fn[__getOwnPropNames(fn)[0]])(fn = 0)), res;
   };
@@ -1326,6 +1345,7 @@
         const momentumAttribute = AelluxJs2.attr("scrollbox-momentum");
         const elasticAttribute = AelluxJs2.attr("scrollbox-elastic");
         const snapAttribute = AelluxJs2.attr("scrollbox-snap");
+        const snapItemAttribute = AelluxJs2.attr("snap-item");
         const scrollbarAttribute = AelluxJs2.attr("scrollbar");
         const scrollbarVerticalAttribute = AelluxJs2.attr("scrollbar-vertical");
         const scrollbarHorizontalAttribute = AelluxJs2.attr("scrollbar-horizontal");
@@ -1333,6 +1353,8 @@
         const pointerScrollingClass = AelluxJs2.className("pointerscrolling");
         const nativeScrollbarHideClass = AelluxJs2.className("native-sb-hide");
         const scrollbarVisibleClass = AelluxJs2.className("scrollbar-visible");
+        const snapReadyClass = AelluxJs2.className("snap-ready");
+        const snapSuspendedClass = AelluxJs2.className("snap-suspended");
         const scrollEdgeClasses = [
           AelluxJs2.className("scroll-v-start"),
           AelluxJs2.className("scroll-v-end"),
@@ -1351,13 +1373,11 @@
         const MOMENTUM_LIMIT_DISTANCE_PX = 15;
         const MOMENTUM_DECELERATION = 15e-4;
         const SNAP_SWIPE_SPEED_PX_MS = 0.5;
-        const SNAP_FLICK_WINDOW_MS = 200;
+        const SNAP_FLICK_WINDOW_MS = 100;
         const SNAP_FLICK_FAST_TIME_MS = 50;
         const SNAP_FLICK_MAX_DISTANCE_PX = 100;
         const SNAP_FLICK_MIN_DISTANCE_PX = 1;
-        const SNAP_DRAG_DISTANCE_RATIO = 0.25;
         const SNAP_SCROLL_IDLE_MS = 120;
-        const SNAP_WHEEL_IDLE_MS = 120;
         const SNAP_EDGE_DISTANCE_PX = 10;
         const ELASTIC_DAMPING = 1 / 3;
         const DEFAULT_ELASTIC_LIMIT = { unit: "ratio", value: 1 / 4 };
@@ -1459,16 +1479,25 @@
             wheelTimeout: null
           };
           const snap = {
-            wrapper: null,
+            root: null,
             initialized: false,
             invalidReported: false,
-            pending: null,
             index: 0,
-            wheelTarget: null,
+            flick: null,
+            axis: null,
+            deferredIndex: null,
+            suspensions: { pointer: false, elastic: false },
             notifiedItem: null,
             notifiedIndex: null,
             scrollEndTimeout: null,
-            wheelTimeout: null
+            scrollingToTarget: -1,
+            scrollingToAxis: null,
+            activePointers: /* @__PURE__ */ new Set(),
+            activeTouches: /* @__PURE__ */ new Set(),
+            touchStarts: /* @__PURE__ */ new Map(),
+            gestureListening: false,
+            endListening: false,
+            waitingForGestureEnd: false
           };
           const inlineWrapper = {
             element: null,
@@ -1524,13 +1553,25 @@
             resizeTimeout: null,
             disposed: false
           };
-          state.onScroll = () => {
+          state.onScroll = (event) => {
+            if (event.target !== element) return;
             publish(state);
-            if (state.snapEnabled && !("onscrollend" in element)) scheduleScrollEnd(state);
+            if (!state.snapEnabled) return;
+            if (state.snap.scrollingToTarget !== -1) {
+              if (!snapTargetReached(state)) return;
+              clearSnapTarget(state);
+              scheduleScrollEnd(state);
+            } else if (!("onscrollend" in element) || state.snap.scrollEndTimeout !== null) {
+              scheduleScrollEnd(state);
+            }
           };
-          state.onScrollEnd = () => finishNativeScroll(state);
+          state.onScrollEnd = (event) => {
+            if (event.target !== element) return;
+            clearSnapTarget(state);
+            clearScrollEnd(state);
+            finishNativeScroll(state);
+          };
           state.onWheel = (event) => handleWheel(state, event);
-          state.onClick = (event) => handleSnapClick(state, event);
           state.onPointerDown = (event) => startPointerScroll(state, event);
           state.onPointerOver = (event) => updatePointerScrollCursor(
             state,
@@ -1561,6 +1602,11 @@
           state.onTouchStart = (event) => startTouch(state, event);
           state.onTouchMove = (event) => moveTouch(state, event);
           state.onTouchEnd = (event) => endTouch(state, event);
+          state.onSnapPointerDown = (event) => beginSnapGesture(state, "pointer", event);
+          state.onSnapPointerEnd = (event) => endSnapGesture(state, "pointer", event);
+          state.onSnapTouchStart = (event) => beginSnapGesture(state, "touch", event);
+          state.onSnapTouchEnd = (event) => endSnapGesture(state, "touch", event);
+          state.onSnapBlur = () => endSnapGesture(state);
           state.onScrollbarPointerEnter = (event) => {
             if (event.pointerType !== "touch") setScrollbarHover(state, "pointerHover", true);
           };
@@ -1581,7 +1627,6 @@
           scrollboxes.set(element, state);
           element.addEventListener("scroll", state.onScroll, { passive: true });
           element.addEventListener("scrollend", state.onScrollEnd, { passive: true });
-          element.addEventListener("click", state.onClick);
           observe(state);
           configure(state);
         }
@@ -1599,15 +1644,17 @@
           stopPointerScrollMouseEvents(state);
           restorePointerScrollCursor(state);
           cancelMomentum(state);
-          state.snap.pending = null;
+          state.snap.flick = null;
+          state.snap.deferredIndex = null;
+          clearSnapTarget(state);
           clearScrollEnd(state);
-          clearSnapWheel(state);
+          removeSnapGestureListeners(state);
+          restoreSnapStyles(state);
           resetElastic(state);
           restoreInlineWrapper(state);
           resetScrollbars(state);
           element.removeEventListener("scroll", state.onScroll);
           element.removeEventListener("scrollend", state.onScrollEnd);
-          element.removeEventListener("click", state.onClick);
           if (state.wheelListening) element.removeEventListener("wheel", state.onWheel, true);
           if (state.pointerListening) {
             element.removeEventListener("pointerdown", state.onPointerDown);
@@ -1669,6 +1716,7 @@
             state.lastPointerDown = null;
             restorePointerScrollCursor(state);
           }
+          if (state.snapEnabled) syncSnapStyles(state);
           refresh(state);
           if (state.snapEnabled && !state.snap.initialized) initializeSnap(state);
         }
@@ -1968,45 +2016,49 @@
         }
         function configureSnap(state) {
           const element = state.element;
-          const children = contentChildren(element);
-          const child = children.length === 1 ? children[0] : null;
-          const wrapper = child && child.hasAttribute(snapAttribute) && child.getAttribute(snapAttribute) !== "false" ? child : null;
-          if (!wrapper) {
+          const requested = element.hasAttribute(snapAttribute) && element.getAttribute(snapAttribute) !== "false";
+          const root3 = state.elastic.wrapper || element;
+          const items = collectSnapItems(state, root3);
+          if (!requested || !items.length) {
             state.snapEnabled = false;
-            state.snap.wrapper = null;
+            removeSnapGestureListeners(state);
+            restoreSnapStyles(state);
+            state.snap.root = null;
             state.snap.initialized = false;
-            state.snap.pending = null;
             state.snap.index = 0;
-            state.snap.wheelTarget = null;
+            state.snap.flick = null;
+            state.snap.deferredIndex = null;
+            clearSnapTarget(state);
             state.snap.notifiedItem = null;
             state.snap.notifiedIndex = null;
             clearScrollEnd(state);
-            clearSnapWheel(state);
-            const requested = element.hasAttribute(snapAttribute) || children.some((item) => item.hasAttribute(snapAttribute) && item.getAttribute(snapAttribute) !== "false");
-            if (requested && !state.snap.invalidReported)
+            const missingItems = requested && !items.length;
+            if (missingItems && !state.snap.invalidReported)
               AelluxJs2.diagnostics.error(
-                AelluxJs2.diagnostics.ERROR_SCROLLBOX_SNAP_WRAPPER,
+                AelluxJs2.diagnostics.ERROR_SCROLLBOX_SNAP_ITEMS,
                 { element }
               );
-            state.snap.invalidReported = requested;
+            state.snap.invalidReported = missingItems;
             return;
           }
           state.snap.invalidReported = false;
-          if (state.snap.wrapper !== wrapper) {
-            state.snap.wrapper = wrapper;
+          if (state.snap.root !== root3) {
+            restoreSnapStyles(state);
+            state.snap.root = root3;
             state.snap.initialized = false;
-            state.snap.pending = null;
             state.snap.index = 0;
-            state.snap.wheelTarget = null;
+            state.snap.flick = null;
+            state.snap.deferredIndex = null;
+            clearSnapTarget(state);
             state.snap.notifiedItem = null;
             state.snap.notifiedIndex = null;
-            clearSnapWheel(state);
           }
           state.snapEnabled = true;
+          addSnapGestureListeners(state);
         }
         function configureInlineWrapper(state) {
           const inline = state.inlineWrapper;
-          const wrapper = state.elastic.wrapper || state.snap.wrapper;
+          const wrapper = state.elastic.wrapper;
           if (inline.element !== wrapper) {
             restoreInlineWrapper(state);
             inline.element = wrapper;
@@ -2054,16 +2106,56 @@
           inline.owned = false;
           inline.reportedDisplay = null;
         }
+        function syncSnapStyles(state, axis = snapAxis(state)) {
+          const snap = state.snap;
+          if (!state.snapEnabled || !snap.root) return;
+          snap.axis = axis;
+          state.element.classList.add(snapReadyClass);
+          state.element.classList.toggle(
+            snapSuspendedClass,
+            snap.suspensions.pointer || snap.suspensions.elastic
+          );
+        }
+        function suspendSnapStyles(state, reason, suspended) {
+          if (!state.snapEnabled || !state.snap.root || state.snap.suspensions[reason] === suspended) return;
+          state.snap.suspensions[reason] = suspended;
+          syncSnapStyles(state, state.snap.axis || snapAxis(state));
+          if (!suspended && !state.snap.suspensions.pointer && !state.snap.suspensions.elastic)
+            scheduleScrollEnd(state);
+        }
+        function restoreSnapStyles(state) {
+          const snap = state.snap;
+          state.element.classList.remove(snapReadyClass, snapSuspendedClass);
+          snap.axis = null;
+          snap.suspensions.pointer = false;
+          snap.suspensions.elastic = false;
+        }
+        function collectSnapItems(state, root3) {
+          return Array.from(root3.querySelectorAll(`[${snapItemAttribute}]`)).filter((item) => item.closest(`[${attribute}]`) === state.element);
+        }
         function snapItems(state) {
-          return state.snapEnabled && state.snap.wrapper ? Array.from(state.snap.wrapper.children) : [];
+          return state.snapEnabled && state.snap.root ? collectSnapItems(state, state.snap.root) : [];
         }
-        function snapAxis(state, metrics = nativeMetrics(state.element), axes = wheelAxes(state, metrics)) {
-          return axes.x ? "x" : axes.y ? "y" : metrics.maxX > 1 ? "x" : metrics.maxY > 1 ? "y" : "x";
+        function snapAxis(state) {
+          return state.element.getAttribute(snapAttribute) === "vertical" ? "y" : "x";
         }
-        function snapCenterOffset(state, item, axis) {
-          const box = state.element.getBoundingClientRect();
+        function snapAlignment(item) {
+          const value = item.getAttribute(snapItemAttribute);
+          if (value === "start" || value === "left" || value === "top") return "start";
+          if (value === "end" || value === "right" || value === "bottom") return "end";
+          return "center";
+        }
+        function snapAlignmentOffset(state, item, axis, box = state.element.getBoundingClientRect()) {
           const target = item.getBoundingClientRect();
-          return axis === "x" ? target.left + target.width / 2 - (box.left + state.element.clientLeft + state.element.clientWidth / 2) : target.top + target.height / 2 - (box.top + state.element.clientTop + state.element.clientHeight / 2);
+          const horizontal = axis === "x";
+          const start = horizontal ? box.left + state.element.clientLeft : box.top + state.element.clientTop;
+          const size = horizontal ? state.element.clientWidth : state.element.clientHeight;
+          const itemStart = horizontal ? target.left : target.top;
+          const itemSize = horizontal ? target.width : target.height;
+          const alignment = snapAlignment(item);
+          if (alignment === "start") return itemStart - start;
+          if (alignment === "end") return itemStart + itemSize - start - size;
+          return itemStart + itemSize / 2 - start - size / 2;
         }
         function edgeSnapIndex(state, items, axis, metrics) {
           const element = state.element;
@@ -2077,16 +2169,11 @@
           if (endDistance <= SNAP_EDGE_DISTANCE_PX) return items.length - 1;
           return null;
         }
-        function nearestSnapIndex(state, items, projectionX = 0, projectionY = 0) {
-          const rect = state.element.getBoundingClientRect();
-          const centerX = rect.left + state.element.clientLeft + state.element.clientWidth / 2;
-          const centerY = rect.top + state.element.clientTop + state.element.clientHeight / 2;
+        function nearestSnapIndex(state, items, axis) {
+          const box = state.element.getBoundingClientRect();
           let nearest = 0, distance = Infinity;
           for (let index = 0; index < items.length; index++) {
-            const item = items[index].getBoundingClientRect();
-            const dx = item.left + item.width / 2 + projectionX - centerX;
-            const dy = item.top + item.height / 2 + projectionY - centerY;
-            const candidate = dx * dx + dy * dy;
+            const candidate = Math.abs(snapAlignmentOffset(state, items[index], axis, box));
             if (candidate < distance) {
               nearest = index;
               distance = candidate;
@@ -2094,35 +2181,110 @@
           }
           return nearest;
         }
-        function snapNeedsScroll(state, item, axis, metrics) {
-          const element = state.element;
-          const box = element.getBoundingClientRect();
-          const target = item.getBoundingClientRect();
-          const dx = target.left + target.width / 2 - (box.left + element.clientLeft + element.clientWidth / 2);
-          const dy = target.top + target.height / 2 - (box.top + element.clientTop + element.clientHeight / 2);
-          const x = Math.max(0, Math.min(metrics.maxX, element.scrollLeft + dx));
-          const y = Math.max(0, Math.min(metrics.maxY, element.scrollTop + dy));
-          return axis === "x" ? Math.abs(x - element.scrollLeft) > 0.5 : Math.abs(y - element.scrollTop) > 0.5;
+        function addSnapGestureListeners(state) {
+          if (state.snap.gestureListening) return;
+          state.element.addEventListener("pointerdown", state.onSnapPointerDown, true);
+          state.element.addEventListener(
+            "touchstart",
+            state.onSnapTouchStart,
+            { passive: true, capture: true }
+          );
+          state.snap.gestureListening = true;
         }
-        function snapItemFullyVisible(state, item) {
-          const element = state.element;
-          const box = element.getBoundingClientRect();
-          const target = item.getBoundingClientRect();
-          const left = box.left + element.clientLeft;
-          const top = box.top + element.clientTop;
-          return target.left >= left - 0.5 && target.top >= top - 0.5 && target.right <= left + element.clientWidth + 0.5 && target.bottom <= top + element.clientHeight + 0.5;
+        function removeSnapGestureListeners(state) {
+          if (state.snap.gestureListening) {
+            state.element.removeEventListener("pointerdown", state.onSnapPointerDown, true);
+            state.element.removeEventListener("touchstart", state.onSnapTouchStart, true);
+            state.snap.gestureListening = false;
+          }
+          stopSnapGestureEndListeners(state);
+          state.snap.activePointers.clear();
+          state.snap.activeTouches.clear();
+          state.snap.touchStarts.clear();
+          state.snap.waitingForGestureEnd = false;
         }
-        function handleSnapClick(state, event) {
-          if (!state.snapEnabled || state.disposed || event.button !== 0 || event.detail !== 1 || event.defaultPrevented) return;
-          let item = event.target.nodeType === 1 ? event.target : event.target.parentElement;
-          if (!item || item.closest(`[${attribute}]`) !== state.element) return;
-          const wrapper = state.snap.wrapper;
-          while (item && item.parentElement !== wrapper) item = item.parentElement;
-          if (!item || snapItemFullyVisible(state, item)) return;
-          scrollToSnap(state, snapItems(state).indexOf(item));
+        function listenSnapGestureEnd(state) {
+          if (state.snap.endListening) return;
+          root2.addEventListener("pointerup", state.onSnapPointerEnd, true);
+          root2.addEventListener("pointercancel", state.onSnapPointerEnd, true);
+          root2.addEventListener("touchend", state.onSnapTouchEnd, true);
+          root2.addEventListener("touchcancel", state.onSnapTouchEnd, true);
+          root2.addEventListener("blur", state.onSnapBlur);
+          state.snap.endListening = true;
+        }
+        function stopSnapGestureEndListeners(state) {
+          if (!state.snap.endListening) return;
+          root2.removeEventListener("pointerup", state.onSnapPointerEnd, true);
+          root2.removeEventListener("pointercancel", state.onSnapPointerEnd, true);
+          root2.removeEventListener("touchend", state.onSnapTouchEnd, true);
+          root2.removeEventListener("touchcancel", state.onSnapTouchEnd, true);
+          root2.removeEventListener("blur", state.onSnapBlur);
+          state.snap.endListening = false;
+        }
+        function beginSnapGesture(state, kind, event) {
+          if (!state.snapEnabled) return;
+          const snap = state.snap;
+          const active = kind === "pointer" ? snap.activePointers : snap.activeTouches;
+          if (kind === "pointer") active.add(event.pointerId);
+          else for (const touch of event.changedTouches) {
+            active.add(touch.identifier);
+            if (event.target.closest(`[${attribute}]`) === state.element) {
+              snap.touchStarts.set(touch.identifier, {
+                startX: touch.clientX,
+                startY: touch.clientY,
+                startTime: now(),
+                index: selectedSnapIndex(state)
+              });
+            }
+          }
+          if (!active.size) return;
+          snap.flick = null;
+          if (snap.scrollEndTimeout !== null || snap.scrollingToTarget !== -1)
+            snap.waitingForGestureEnd = true;
+          clearSnapTarget(state);
+          clearScrollEnd(state);
+          listenSnapGestureEnd(state);
+        }
+        function endSnapGesture(state, kind, event) {
+          const snap = state.snap;
+          if (kind === "pointer") snap.activePointers.delete(event.pointerId);
+          else if (kind === "touch") {
+            for (const touch of event.changedTouches) {
+              snap.activeTouches.delete(touch.identifier);
+              const start = snap.touchStarts.get(touch.identifier);
+              snap.touchStarts.delete(touch.identifier);
+              if (!start || event.type !== "touchend" || snap.activeTouches.size) continue;
+              const axis = snapAxis(state);
+              const dx = start.startX - touch.clientX;
+              const dy = start.startY - touch.clientY;
+              if (Math.abs(axis === "x" ? dx : dy) < Math.abs(axis === "x" ? dy : dx))
+                continue;
+              recordSnapFlick(state, __spreadProps(__spreadValues({}, start), {
+                lastX: touch.clientX,
+                lastY: touch.clientY,
+                endTime: now()
+              }), axis, start.index);
+            }
+          } else {
+            snap.activePointers.clear();
+            snap.activeTouches.clear();
+            snap.touchStarts.clear();
+          }
+          if (snap.activePointers.size || snap.activeTouches.size) return;
+          stopSnapGestureEndListeners(state);
+          if ((snap.waitingForGestureEnd || snap.flick) && snap.gestureListening && !state.disposed) {
+            snap.waitingForGestureEnd = false;
+            scheduleScrollEnd(state);
+          }
         }
         function scheduleScrollEnd(state) {
           clearScrollEnd(state);
+          if (state.snap.scrollingToTarget !== -1) return;
+          if (state.snap.activePointers.size || state.snap.activeTouches.size) {
+            state.snap.waitingForGestureEnd = true;
+            return;
+          }
+          state.snap.waitingForGestureEnd = false;
           state.snap.scrollEndTimeout = root2.setTimeout(() => {
             state.snap.scrollEndTimeout = null;
             finishNativeScroll(state);
@@ -2133,41 +2295,36 @@
             root2.clearTimeout(state.snap.scrollEndTimeout);
           state.snap.scrollEndTimeout = null;
         }
-        function clearSnapWheel(state) {
-          if (state.snap.wheelTimeout !== null)
-            root2.clearTimeout(state.snap.wheelTimeout);
-          state.snap.wheelTimeout = null;
+        function snapTargetReached(state) {
+          const snap = state.snap;
+          if (snap.scrollingToTarget === -1) return false;
+          const position = snap.scrollingToAxis === "x" ? state.element.scrollLeft : state.element.scrollTop;
+          return Math.abs(position - snap.scrollingToTarget) <= 1;
         }
-        function scheduleSnapWheelEnd(state) {
-          clearSnapWheel(state);
-          state.snap.wheelTimeout = root2.setTimeout(() => {
-            state.snap.wheelTimeout = null;
-          }, SNAP_WHEEL_IDLE_MS);
+        function clearSnapTarget(state) {
+          state.snap.scrollingToTarget = -1;
+          state.snap.scrollingToAxis = null;
         }
         function finishNativeScroll(state) {
-          if (state.disposed || !state.snapEnabled || state.snap.pending || state.momentum || state.scrollbar.drag || activePointerScrollState && activePointerScrollState.pointerScroll && activePointerScrollState.pointerScroll.chain.includes(state)) return;
+          if (state.disposed || !state.snapEnabled) return;
+          if (state.snap.activePointers.size || state.snap.activeTouches.size) {
+            state.snap.waitingForGestureEnd = true;
+            return;
+          }
+          if (state.snap.suspensions.pointer || state.snap.suspensions.elastic || state.momentum || state.scrollbar.drag || activePointerScrollState && activePointerScrollState.pointerScroll && activePointerScrollState.pointerScroll.chain.includes(state)) return;
           const items = snapItems(state);
           if (!items.length) return;
           const metrics = nativeMetrics(state.element);
-          const axis = snapAxis(state, metrics);
-          if (state.snap.wheelTarget) {
-            const target2 = state.snap.wheelTarget;
-            if (items.includes(target2) && snapNeedsScroll(state, target2, axis, metrics)) return;
-            state.snap.wheelTarget = null;
-            if (items.includes(target2)) {
-              notifySnapChange(state, target2, axis);
-              return;
-            }
-          }
+          const axis = snapAxis(state);
           const edgeIndex = edgeSnapIndex(state, items, axis, metrics);
-          const target = items[edgeIndex === null ? nearestSnapIndex(state, items) : edgeIndex];
-          state.snap.index = items.indexOf(target);
-          if (!snapNeedsScroll(state, target, axis, metrics)) {
-            notifySnapChange(state, target, axis);
+          const index = edgeIndex === null ? nearestSnapIndex(state, items, axis) : edgeIndex;
+          const flick = state.snap.flick;
+          state.snap.flick = null;
+          if (flick && flick.axis === axis && flick.index !== index && flick.index >= 0 && flick.index < items.length) {
+            scrollToSnap(state, flick.index, axis);
             return;
           }
-          if (state.elastic.active) state.snap.pending = target;
-          else scrollToSnap(state, items.indexOf(target), axis);
+          notifySnapChange(state, items[index], axis);
         }
         function initializeSnap(state) {
           const first = snapItems(state)[0];
@@ -2175,7 +2332,7 @@
           state.snap.initialized = true;
           state.snap.index = 0;
           const axis = snapAxis(state);
-          first.scrollIntoView(snapScrollOptions(axis, "instant"));
+          scrollToSnap(state, 0, axis, "instant");
           notifySnapChange(state, first, axis);
           refresh(state);
         }
@@ -2190,29 +2347,42 @@
             detail: { item, index, previousIndex, axis }
           });
         }
-        function snapScrollOptions(axis, behavior) {
-          const horizontal = axis === "x";
-          const options = {
-            block: horizontal ? "nearest" : "center",
-            inline: horizontal ? "center" : "nearest"
-          };
-          if (behavior) options.behavior = behavior;
-          return options;
-        }
-        function scrollToSnap(state, index, axis = snapAxis(state)) {
+        function scrollToSnap(state, index, axis = snapAxis(state), behavior = "smooth") {
           const items = snapItems(state);
           if (!items.length || !Number.isInteger(index) || index < 0 || index >= items.length)
             return false;
+          if (state.snap.suspensions.elastic) {
+            clearSnapTarget(state);
+            clearScrollEnd(state);
+            state.snap.deferredIndex = index;
+            return true;
+          }
           cancelMomentum(state);
           clearScrollEnd(state);
-          clearSnapWheel(state);
-          state.snap.pending = null;
+          state.snap.flick = null;
+          state.snap.deferredIndex = null;
           state.snap.index = index;
-          state.snap.wheelTarget = items[index];
-          if (state.elastic.owned) resetElastic(state);
-          items[index].scrollIntoView(snapScrollOptions(axis));
-          scheduleScrollEnd(state);
+          const element = state.element;
+          const offset = snapAlignmentOffset(state, items[index], axis);
+          const metrics = nativeMetrics(element);
+          const destination = axis === "x" ? Math.max(0, Math.min(metrics.maxX, element.scrollLeft + offset)) : Math.max(0, Math.min(metrics.maxY, element.scrollTop + offset));
+          state.snap.scrollingToTarget = destination;
+          state.snap.scrollingToAxis = axis;
+          if (axis === "x") element.scrollTo({ left: destination, behavior });
+          else element.scrollTo({ top: destination, behavior });
+          if (snapTargetReached(state)) {
+            clearSnapTarget(state);
+            scheduleScrollEnd(state);
+          }
           return true;
+        }
+        function selectedSnapIndex(state) {
+          const items = snapItems(state);
+          if (!items.length) return 0;
+          const metrics = nativeMetrics(state.element);
+          const axis = snapAxis(state);
+          const edge = edgeSnapIndex(state, items, axis, metrics);
+          return edge === null ? nearestSnapIndex(state, items, axis) : edge;
         }
         function goto(element, index) {
           const state = scrollboxes.get(element);
@@ -2379,7 +2549,11 @@
             member.metrics = metrics;
             return [member, wheelAxes(member, metrics)];
           }));
-          if (!chain.some((member) => axes.get(member).x || axes.get(member).y)) return;
+          const chains = {
+            x: pointerAxisChain(chain, axes, "x"),
+            y: pointerAxisChain(chain, axes, "y")
+          };
+          if (!chains.x.some((member) => axes.get(member).x) && !chains.y.some((member) => axes.get(member).y)) return;
           const rect = element.getBoundingClientRect();
           if (event.clientX >= rect.left + element.clientWidth || event.clientY >= rect.top + element.clientHeight) return;
           const previousDown = state.lastPointerDown;
@@ -2388,12 +2562,12 @@
           if (previousDown && time - previousDown.time <= POINTER_SCROLL_MULTICLICK_MS && Math.abs(event.clientX - previousDown.x) <= POINTER_SCROLL_MULTICLICK_DISTANCE_PX && Math.abs(event.clientY - previousDown.y) <= POINTER_SCROLL_MULTICLICK_DISTANCE_PX) return;
           const textOrigin = isTextAtPoint(event.target, event.clientX, event.clientY);
           const selectionAtDown = readSelection();
-          const verticalOnly = chain.some((member) => axes.get(member).y) && !chain.some((member) => axes.get(member).x);
+          const verticalOnly = chains.y.some((member) => axes.get(member).y) && !chains.x.some((member) => axes.get(member).x);
           if (!textOrigin && event.cancelable) event.preventDefault();
-          for (const member of chain) {
+          for (const member of /* @__PURE__ */ new Set([...chains.x, ...chains.y])) {
             cancelMomentum(member);
-            member.snap.pending = null;
-            member.snap.wheelTarget = null;
+            member.snap.flick = null;
+            clearSnapTarget(member);
             if (member.elastic.owned) {
               resetElastic(member);
               refresh(member);
@@ -2414,6 +2588,7 @@
             started: false,
             axis: null,
             chain,
+            chains,
             axes,
             styles: [],
             momentumState: null,
@@ -2422,11 +2597,8 @@
             elasticForce: 0,
             startTime: time,
             endTime: null,
-            snapStarts: new Map(chain.filter((member) => member.snapEnabled).map((member) => {
-              const items = snapItems(member);
-              const item = items[member.snap.index] || null;
-              const axis = snapAxis(member, member.metrics, axes.get(member));
-              return [member, item ? { item, offset: snapCenterOffset(member, item, axis) } : null];
+            snapStarts: new Map(chain.filter((member) => member.snapEnabled && (chains.x.includes(member) || chains.y.includes(member))).map((member) => {
+              return [member, selectedSnapIndex(member)];
             })),
             selectionAtDown,
             verticalOnly,
@@ -2491,10 +2663,12 @@
           }
           if (!pointerScroll.moved) {
             const axis2 = pointerScroll.axis;
-            if (!pointerScroll.chain.some((member) => pointerAxisMaximum(member, axis2, pointerScroll) > 0)) {
+            const chain = pointerScroll.chains[axis2];
+            if (!chain.some((member) => pointerAxisMaximum(member, axis2, pointerScroll) > 0)) {
               endPointerScroll(state);
               return;
             }
+            pointerScroll.chain = chain;
             activatePointerScroll(state, pointerScroll, axis2);
             if (state.pointerScroll !== pointerScroll) return;
           }
@@ -2508,7 +2682,9 @@
           for (const member of pointerScroll.chain) {
             if (!member.disposed && member.pointerListening && pointerAxisMaximum(member, axis, pointerScroll) > 0) outermost = member;
           }
-          if (outermost && outermost.elasticEnabled && pointerScroll.elasticForce) {
+          const allowed = outermost && outermost.elasticEnabled ? elasticAxes(outermost) : null;
+          const canStretch = allowed && allowed[axis];
+          if (canStretch && pointerScroll.elasticForce) {
             const force = pointerScroll.elasticForce + remaining;
             if (!force || Math.sign(force) === Math.sign(pointerScroll.elasticForce)) {
               pointerScroll.elasticForce = force;
@@ -2543,15 +2719,15 @@
             lastStartX = previousX;
             lastStartY = previousY;
           }
-          if (outermost && outermost.elasticEnabled) {
+          if (canStretch) {
             pointerScroll.elasticForce += remaining;
             const element = outermost.element;
             const desiredX = element.scrollLeft + (axis === "x" ? pointerScroll.elasticForce : 0);
             const desiredY = element.scrollTop + (axis === "y" ? pointerScroll.elasticForce : 0);
-            applyElasticFromDesired(outermost, desiredX, desiredY, false);
+            applyElasticFromDesired(outermost, desiredX, desiredY, false, axis, allowed);
             scrollWithinElasticBounds(outermost, desiredX, desiredY);
             publish(outermost);
-          }
+          } else pointerScroll.elasticForce = 0;
           if (lastUsed) {
             const time = now();
             if (pointerScroll.momentumState !== lastUsed) {
@@ -2591,6 +2767,14 @@
           const axes = pointerScroll && pointerScroll.axes.get(state) || wheelAxes(state, metrics);
           return axes[axis] ? axis === "x" ? metrics.maxX : metrics.maxY : 0;
         }
+        function pointerAxisChain(chain, axes, axis) {
+          const result = [];
+          for (const member of chain) {
+            result.push(member);
+            if (axes.get(member)[axis === "x" ? "stopX" : "stopY"]) break;
+          }
+          return result;
+        }
         function activatePointerScroll(state, pointerScroll, axis) {
           pointerScroll.axis = axis;
           pointerScroll.moved = true;
@@ -2607,6 +2791,7 @@
             });
             element.style.setProperty("scroll-behavior", "auto", "important");
             element.classList.add(pointerScrollingClass);
+            if (member.snapEnabled) suspendSnapStyles(member, "pointer", true);
             startScrollbarPdsVisibility(member);
           }
           dispatchPointerScroll(state, pointerScroll, "PointerScrollStart");
@@ -2631,7 +2816,9 @@
             const axis = pointerScroll.axis || (Math.abs(dx) >= Math.abs(dy) ? "x" : "y");
             pointerScroll.lastX = event.clientX;
             pointerScroll.lastY = event.clientY;
-            if (pointerScroll.chain.some((member) => member.snapEnabled && snapAxis(member, member.metrics, pointerScroll.axes.get(member)) === axis && pointerAxisMaximum(member, axis, pointerScroll) > 0) && isSnapFlick(pointerScroll, axis)) {
+            const chain = pointerScroll.chains[axis];
+            if (chain.some((member) => member.snapEnabled && snapAxis(member) === axis && pointerAxisMaximum(member, axis, pointerScroll) > 0) && isSnapFlick(pointerScroll, axis)) {
+              pointerScroll.chain = chain;
               pointerScroll.axis = axis;
               pointerScroll.moved = true;
             }
@@ -2665,7 +2852,10 @@
             );
             else saved.element.style.removeProperty("scroll-behavior");
             const member = scrollboxes.get(saved.element);
-            if (member) scheduleScrollbarPdsHide(member);
+            if (member) {
+              suspendSnapStyles(member, "pointer", false);
+              scheduleScrollbarPdsHide(member);
+            }
           }
           if (event && event.type === "pointerup" && state.pointerListening) {
             updatePointerScrollCursor(
@@ -2681,39 +2871,31 @@
           const momentumState = pointerScroll.momentumState;
           const snapState = momentumState ? momentumState.snapEnabled ? momentumState : null : pointerScroll.chain.find((member) => member.snapEnabled && pointerAxisMaximum(member, pointerScroll.axis, pointerScroll) > 0);
           const shouldSnap = event && event.type === "pointerup" && pointerScroll.moved && snapState && !snapState.disposed && snapItems(snapState).length;
-          if (shouldSnap) schedulePointerSnap(snapState, pointerScroll);
+          if (shouldSnap) {
+            recordSnapFlick(
+              snapState,
+              pointerScroll,
+              pointerScroll.axis,
+              pointerScroll.snapStarts.get(snapState)
+            );
+            scheduleScrollEnd(snapState);
+          }
           for (const member of pointerScroll.chain) releaseElastic(member);
           if (!shouldSnap && event && event.type === "pointerup" && pointerScroll.moved && momentumState && momentumState.momentumEnabled && !hadElastic && !momentumState.disposed && now() - pointerScroll.momentumStartTime < MOMENTUM_LIMIT_TIME_MS) {
             startMomentum(momentumState, pointerScroll);
           }
         }
-        function schedulePointerSnap(state, pointerScroll) {
+        function recordSnapFlick(state, gesture, axis, startIndex) {
+          if (!state.snapEnabled || snapAxis(state) !== axis || !Number.isInteger(startIndex) || !isSnapFlick(gesture, axis)) return;
+          const distance = axis === "x" ? gesture.startX - gesture.lastX : gesture.startY - gesture.lastY;
           const items = snapItems(state);
-          const metrics = nativeMetrics(state.element);
-          const axis = snapAxis(state, metrics);
-          const edgeIndex = edgeSnapIndex(state, items, axis, metrics);
-          const start = pointerScroll.snapStarts.get(state);
-          const startIndex = start ? items.indexOf(start.item) : -1;
-          const projection = axis === pointerScroll.axis ? axis === "x" ? pointerScroll.lastX - pointerScroll.startX : pointerScroll.lastY - pointerScroll.startY : 0;
-          let index = edgeIndex === null ? nearestSnapIndex(
-            state,
-            items,
-            axis === "x" ? projection : 0,
-            axis === "y" ? projection : 0
-          ) : edgeIndex;
-          if (edgeIndex === null && index === startIndex && axis === pointerScroll.axis && start) {
-            const flick = isSnapFlick(pointerScroll, axis);
-            const distance = axis === "x" ? pointerScroll.startX - pointerScroll.lastX : pointerScroll.startY - pointerScroll.lastY;
-            const offset = snapCenterOffset(state, start.item, axis);
-            const size = axis === "x" ? state.element.clientWidth : state.element.clientHeight;
-            const movedAway = Math.abs(offset) - Math.abs(start.offset) >= size * SNAP_DRAG_DISTANCE_RATIO;
-            if (flick || movedAway) {
-              const direction = flick ? Math.sign(distance) : Math.sign(start.offset - offset);
-              index = Math.max(0, Math.min(items.length - 1, index + direction));
-            }
+          const index = Math.max(0, Math.min(
+            items.length - 1,
+            startIndex + Math.sign(distance)
+          ));
+          if (index !== startIndex) {
+            state.snap.flick = { axis, index };
           }
-          state.snap.pending = items[index];
-          flushPendingSnap(state);
         }
         function isSnapFlick(pointerScroll, axis) {
           const distance = axis === "x" ? pointerScroll.startX - pointerScroll.lastX : pointerScroll.startY - pointerScroll.lastY;
@@ -2721,11 +2903,7 @@
           return elapsed <= SNAP_FLICK_WINDOW_MS && Math.abs(distance) > SNAP_FLICK_MIN_DISTANCE_PX && Math.abs(distance) < SNAP_FLICK_MAX_DISTANCE_PX && (elapsed <= SNAP_FLICK_FAST_TIME_MS || Math.abs(distance) / elapsed >= SNAP_SWIPE_SPEED_PX_MS);
         }
         function flushPendingSnap(state) {
-          const target = state.snap.pending;
-          if (!target || state.elastic.active || state.disposed) return;
-          state.snap.pending = null;
-          const index = snapItems(state).indexOf(target);
-          if (index >= 0) scrollToSnap(state, index);
+          if (state.snapEnabled && !state.disposed) scheduleScrollEnd(state);
         }
         function cancelPointerScrollMouseEvent(state, event) {
           const active = state.pointerScroll && state.pointerScroll.moved;
@@ -2868,13 +3046,20 @@
           state.elastic.touch = null;
           releaseElastic(state);
         }
-        function applyElasticFromDesired(state, desiredX, desiredY, additive, axis = null) {
+        function elasticAxes(state) {
+          const style = root2.getComputedStyle(state.element);
+          return {
+            x: style.overscrollBehaviorX !== "none",
+            y: style.overscrollBehaviorY !== "none"
+          };
+        }
+        function applyElasticFromDesired(state, desiredX, desiredY, additive, axis = null, allowed = elasticAxes(state)) {
           if (!state.elasticEnabled) return false;
           const element = state.element;
           const metrics = state.metrics || nativeMetrics(element);
           const elastic = state.elastic;
           const amounts = [0, 0, 0, 0];
-          if (axis !== "x" && metrics.maxY > 1) {
+          if (axis !== "x" && allowed.y && metrics.maxY > 1) {
             const limitY = elasticLimit(element.clientHeight, elastic.limits[0]);
             if (desiredY < 0) amounts[0] = elasticResistance(
               -desiredY,
@@ -2887,7 +3072,7 @@
               limitY
             );
           }
-          if (axis !== "y" && metrics.maxX > 1) {
+          if (axis !== "y" && allowed.x && metrics.maxX > 1) {
             const limitX = elasticLimit(element.clientWidth, elastic.limits[1]);
             if (desiredX > metrics.maxX) amounts[1] = elasticResistance(
               desiredX - metrics.maxX,
@@ -2910,6 +3095,7 @@
           elastic.amounts = amounts;
           elastic.active = active;
           elastic.owned = true;
+          if (active) suspendSnapStyles(state, "elastic", true);
           if (amounts[1] > 0 && !elastic.extentX) {
             elastic.wrapper.style.setProperty(
               "min-width",
@@ -3065,6 +3251,14 @@
           elastic.owned = false;
           elastic.extentX = false;
           elastic.extentY = false;
+          if (wasOwned && !state.disposed) {
+            suspendSnapStyles(state, "elastic", false);
+            if (state.snap.deferredIndex !== null) {
+              const index = state.snap.deferredIndex;
+              state.snap.deferredIndex = null;
+              scrollToSnap(state, index);
+            }
+          }
           if (wasOwned && !state.disposed) publish(state);
         }
         function observe(state) {
@@ -3082,12 +3276,18 @@
                 state.resizeObserver.observe(state.element);
                 for (const child of state.element.children) state.resizeObserver.observe(child);
               }
-              if (records.some((record) => record.target === state.element)) configure(state);
+              if (records.some((record) => record.type === "attributes" || record.target === state.element || record.target === state.elastic.wrapper || [...record.addedNodes, ...record.removedNodes].some((node) => node.nodeType === 1 && (node.hasAttribute(snapItemAttribute) || node.querySelector(`[${snapItemAttribute}]`))))) configure(state);
               else refresh(state);
             });
             state.mutationObserver.observe(
               state.element,
-              { childList: true, subtree: true, characterData: true }
+              {
+                childList: true,
+                subtree: true,
+                characterData: true,
+                attributes: true,
+                attributeFilter: [snapAttribute, snapItemAttribute, elasticAttribute]
+              }
             );
           }
         }
@@ -3126,9 +3326,12 @@
         function wheelAxes(state, metrics) {
           const style = root2.getComputedStyle(state.element);
           const available = (value) => value === "auto" || value === "scroll";
+          const stopsChain = (value) => value === "contain" || value === "none";
           return {
             x: metrics.maxX > 1 && available(style.overflowX),
-            y: metrics.maxY > 1 && available(style.overflowY)
+            y: metrics.maxY > 1 && available(style.overflowY),
+            stopX: available(style.overflowX) && stopsChain(style.overscrollBehaviorX),
+            stopY: available(style.overflowY) && stopsChain(style.overscrollBehaviorY)
           };
         }
         function publish(state) {
@@ -3146,7 +3349,7 @@
             if (state.elasticEnabled && state.elastic.wrapper && !state.elastic.active)
               state.elastic.dimensions = measureElasticWrapper(state.elastic.wrapper);
             const bars = state.scrollbar.x || state.scrollbar.y;
-            const axes = state.snapEnabled || bars ? wheelAxes(state, metrics) : null;
+            const axes = bars ? wheelAxes(state, metrics) : null;
             return {
               revision: state.layoutRevision,
               y: progress(scrollTop, metrics.maxY),
@@ -3157,7 +3360,8 @@
                 scrollLeft < SCROLL_EDGE_MARGIN_PX,
                 scrollLeft >= metrics.maxX - SCROLL_EDGE_MARGIN_PX
               ],
-              snapValues: state.snapEnabled ? measureSnapValues(state, metrics, axes) : [],
+              snapAxis: state.snapEnabled ? snapAxis(state) : null,
+              snapValues: state.snapEnabled ? measureSnapValues(state) : [],
               scrollbars: bars ? readScrollbars(state, metrics, axes) : []
             };
           }).then((values) => {
@@ -3172,6 +3376,8 @@
               if (values.edges && !state.elastic.owned) {
                 scrollEdgeClasses.forEach((name, index) => state.element.classList.toggle(name, values.edges[index]));
               }
+              if (values.snapAxis && state.snap.axis !== values.snapAxis)
+                syncSnapStyles(state, values.snapAxis);
               for (const { item, viewport, focus } of values.snapValues) {
                 item.style.setProperty(snapProperties[0], viewport);
                 item.style.setProperty(snapProperties[1], focus);
@@ -3188,10 +3394,10 @@
             if (state.publishDirty && !state.disposed) publish(state);
           });
         }
-        function measureSnapValues(state, metrics, axes) {
+        function measureSnapValues(state) {
           const element = state.element;
           const rect = element.getBoundingClientRect();
-          const axis = snapAxis(state, metrics, axes);
+          const axis = snapAxis(state);
           const size = axis === "x" ? element.clientWidth : element.clientHeight;
           if (!size) return [];
           const center = axis === "x" ? rect.left + element.clientLeft + size / 2 : rect.top + element.clientTop + size / 2;
@@ -3206,49 +3412,8 @@
         function progress(position, distance) {
           return distance > 0 ? Math.min(1, Math.max(0, position / distance)) : 0;
         }
-        function handleSnapWheel(state, event, deltaX, deltaY, axes) {
-          const items = snapItems(state);
-          if (!items.length) return false;
-          const hasX = axes.x, hasY = axes.y;
-          if (!hasX && !hasY) return false;
-          const axis = hasX && hasY ? Math.abs(deltaX) >= Math.abs(deltaY) ? "x" : "y" : hasX ? "x" : "y";
-          const delta = axis === "x" ? deltaX : deltaY;
-          if (!delta) return false;
-          if (state.snap.wheelTimeout !== null) {
-            if (event.cancelable) event.preventDefault();
-            scheduleSnapWheelEnd(state);
-            return true;
-          }
-          const index = Math.max(0, Math.min(items.length - 1, state.snap.index));
-          const destination = Math.max(0, Math.min(
-            items.length - 1,
-            index + Math.sign(delta)
-          ));
-          if (destination === index) {
-            if (state.elasticEnabled) {
-              const desiredX = state.element.scrollLeft + (axis === "x" ? delta : 0);
-              const desiredY = state.element.scrollTop + (axis === "y" ? delta : 0);
-              if (applyElasticFromDesired(state, desiredX, desiredY, true, axis)) {
-                scrollWithinElasticBounds(state, desiredX, desiredY);
-                publish(state);
-                if (state.elastic.wheelTimeout !== null)
-                  root2.clearTimeout(state.elastic.wheelTimeout);
-                state.elastic.wheelTimeout = root2.setTimeout(
-                  () => releaseElastic(state),
-                  ELASTIC_WHEEL_IDLE_MS
-                );
-              }
-            }
-            return true;
-          }
-          if (event.cancelable) event.preventDefault();
-          scrollToSnap(state, destination);
-          state.snap.wheelTarget = items[destination];
-          scheduleSnapWheelEnd(state);
-          return true;
-        }
         function handleWheel(state, event) {
-          state.snap.pending = null;
+          state.snap.flick = null;
           if (state.desktop && state.mode === "pointer" && state.element.classList.contains(pointerScrollingClass)) {
             if (event.cancelable) event.preventDefault();
             event.stopPropagation();
@@ -3257,6 +3422,10 @@
           cancelMomentum(state);
           if (event.defaultPrevented || event.ctrlKey) return;
           if (event.target.closest(`[${attribute}]`) !== state.element) return;
+          const interruptedSnap = state.snap.scrollingToTarget !== -1;
+          clearSnapTarget(state);
+          clearScrollEnd(state);
+          if (interruptedSnap && state.snapEnabled) scheduleScrollEnd(state);
           const metrics = nativeMetrics(state.element);
           if (!metrics) return;
           const axes = wheelAxes(state, metrics);
@@ -3264,7 +3433,6 @@
           const converted = state.desktop && state.wheelEnabled && axes.x && !axes.y && Math.abs(event.deltaX) <= Math.abs(event.deltaY);
           const deltaX = (converted ? event.deltaY : event.deltaX) * factor;
           const deltaY = (converted ? 0 : event.deltaY) * factor;
-          if (state.snapEnabled && handleSnapWheel(state, event, deltaX, deltaY, axes)) return;
           if (converted && deltaX) {
             const current = state.element.scrollLeft;
             const desiredX = current + deltaX;
@@ -4005,6 +4173,7 @@
                 completeTransition
               );
             });
+            AelluxJs2.dispatchFrom(element, "Layout", { detail: { origin: `present.${newDirection}`.toLocaleLowerCase() }, bubbles: true });
             AelluxJs2.dispatchFrom(element, `${newDirection}${PING}`, { bubbles: true });
             await Promise.race([completed, interrupted]);
             if (gotoVisible && !element.hidden) {
@@ -4017,7 +4186,7 @@
               controller.setAriaExpanded("false");
               AelluxJs2.dispatchFrom(element, UNPOP, { bubbles: true });
             }
-            AelluxJs2.dispatchFrom(element, "Layout", { bubbles: true });
+            AelluxJs2.dispatchFrom(element, "Layout", { detail: { origin: `present.${newDirection}`.toLocaleLowerCase() }, bubbles: true });
           } catch (error) {
             const ownsTransition = transition && controller.transition === transition;
             if (ownsTransition && transition.timeout !== null) {

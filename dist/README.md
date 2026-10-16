@@ -51,6 +51,8 @@ See [Getting Started](docs-source/0.1.0/getting-started.md) for build instructio
 - [Documentation source index](docs-source/0.1.0/README.md)
 - [Beta compatibility](docs-source/0.1.0/compatibility.md)
 - [Runtime API](docs-source/0.1.0/runtime/api.md)
+- [Runtime and Extension events](docs-source/0.1.0/runtime/events.md)
+- [Layout scheduling with `waitLayout`](docs-source/0.1.0/runtime/wait-layout.md)
 - [Diagnostics](docs-source/0.1.0/runtime/diagnostics.md)
 - [Modern and Legacy runtimes](docs-source/0.1.0/runtime/modern-legacy.md)
 - [Browser support baseline](docs-source/0.1.0/runtime/browser-support.md)
@@ -91,7 +93,7 @@ npm run test:browser
 
 `test:budget` checks the built files against raw and gzip size limits. `test:browser` rebuilds the distribution and runs the browser scenarios with Playwright in Chromium, Firefox, and WebKit. Use `npm run test:browser -- --project=chromium` to run one browser. See [Browser validation scenarios](docs-source/0.1.0/validation-scenarios.md) for focused runs and coverage.
 
-Generated browser files are written to `dist/`. The distribution uses classic scripts isolated in IIFEs; it does not expose ESM named or default exports.
+Generated browser files are written to `dist/`. The boot, runtimes, and Extensions are classic scripts isolated in IIFEs. `aellux.esm.js` and `aellux.esm.min.js` are separate module entries that export the shared Core API as their default; the browser boot script still starts the runtime through `$ae.init()`.
 
 ## Project Status
 

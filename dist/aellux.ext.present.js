@@ -447,6 +447,7 @@
             completeTransition
           );
         });
+        AelluxJs.dispatchFrom(element, "Layout", { detail: { origin: `present.${newDirection}`.toLocaleLowerCase() }, bubbles: true });
         AelluxJs.dispatchFrom(element, `${newDirection}${PING}`, { bubbles: true });
         await Promise.race([completed, interrupted]);
         if (gotoVisible && !element.hidden) {
@@ -459,7 +460,7 @@
           controller.setAriaExpanded("false");
           AelluxJs.dispatchFrom(element, UNPOP, { bubbles: true });
         }
-        AelluxJs.dispatchFrom(element, "Layout", { bubbles: true });
+        AelluxJs.dispatchFrom(element, "Layout", { detail: { origin: `present.${newDirection}`.toLocaleLowerCase() }, bubbles: true });
       } catch (error) {
         const ownsTransition = transition && controller.transition === transition;
         if (ownsTransition && transition.timeout !== null) {

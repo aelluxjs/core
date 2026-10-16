@@ -42,6 +42,13 @@ Use `aellux.min.js` to select the matching minified runtime and Extension files.
 
 ## Distribution
 
-The browser distribution consists of classic scripts isolated in IIFEs. It does not expose ESM named or default exports. The source file `src/aellux.full.js` is only the bundler entry used to generate `aellux.full.js` and `aellux.full.min.js`.
+The boot, runtimes, and Extensions are classic scripts isolated in IIFEs. The separate `aellux.esm.js` and `aellux.esm.min.js` module entries export the shared Core API as their default. They do not replace the browser boot script, which starts the runtime through `$ae.init()`:
+
+```js
+import AelluxJs from "@aelluxjs/core";
+console.log(AelluxJs.attr("scrollbox"));
+```
+
+The source file `src/aellux.full.js` is the bundler entry used to generate `aellux.full.js` and `aellux.full.min.js`.
 
 Serve the repository over HTTP to run the browser validation pages linked from `tests/index.htm`.

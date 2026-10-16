@@ -14,7 +14,7 @@
 
 <meta name="description" content="aellux.js Docs">
   <link rel="canonical" href="https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/scrollbox.htm">
-
+  
     <meta property="og:title" content="Scrollbox | 0.1.0 | aellux.js Docs" />
     <meta property="og:type" content="website" />
           <meta property="og:url" content="https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/scrollbox.htm" />
@@ -26,7 +26,7 @@
         <meta name="twitter:description" content="aellux.js Docs">
 
                   <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Scrollbox | 0.1.0 | aellux.js Docs","description":"aellux.js Docs","url":"https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/scrollbox.htm"}</script>
-
+          
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -421,6 +421,11 @@ Extension Styles                            </a>
                           </li>
                           <li class="nav-item small-md rounded-1 ps-md-1"
                             style="flex:0">
+                            <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/extensions/csp-and-trust.htm">
+CSP and Extension Trust                            </a>
+                          </li>
+                          <li class="nav-item small-md rounded-1 ps-md-1"
+                            style="flex:0">
                             <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/extensions/legacy-variants.htm">
 Modern &amp; Legacy Variants                            </a>
                           </li>
@@ -571,7 +576,7 @@ Scrollbox                  </li>
     ← <span class="text-truncate overflow-hidden d-inline-block align-middle flex-fill"
       style="max-width:200px">Present</span>
   </a>
-
+  
     <a href="/core/docs/0.1.0/core-extensions/state-navigation.htm" class="text-decoration-none d-inline-flex flex-row justify-content-end gap-2"
     style="width: 40%;">
     <span class="text-truncate overflow-hidden d-inline-block align-middle flex-fill text-end"
@@ -588,9 +593,9 @@ Scrollbox                  </li>
   box-shadow: inset 0 -8px 8px -8px rgb(0 0 0 / 0.25);
 }
 </code></pre>
-<p>The boot&#39;s weak CSS supplies <code>overflow: auto</code>, <code>contain: layout paint</code>, and thin scrollbars. It gives elastic and snap children <code>display: inline-block</code> with <code>vertical-align: top</code> so the inline line box adds no scrollable space below. If application CSS sets the wrapper to <code>block</code>, <code>flex</code>, or <code>grid</code>, Scrollbox reports diagnostic 2016 and uses <code>inline-block</code>, <code>inline-flex</code>, or <code>inline-grid</code> respectively. It restores the previous inline <code>display</code> when the wrapper changes or unmounts. It also enables smooth programmatic scrolling on all elements; <code>prefers-reduced-motion: reduce</code> restores immediate scrolling. Pointer dragging and momentum set each position immediately so they follow the gesture. An application can override the weak styles. Basic Scrollbox works with any content structure and does not load a scrolling library. Elastic edges and snap require a single marked content child.</p>
+<p>The boot&#39;s weak CSS supplies <code>overflow: auto</code>, <code>contain: layout paint</code>, and thin scrollbars. It gives the elastic child <code>display: inline-block</code> with <code>vertical-align: top</code> so the inline line box adds no scrollable space below. If application CSS sets the elastic wrapper to <code>block</code>, <code>flex</code>, or <code>grid</code>, Scrollbox reports diagnostic 2016 and uses <code>inline-block</code>, <code>inline-flex</code>, or <code>inline-grid</code> respectively. It restores the previous inline <code>display</code> when the wrapper changes or unmounts. It also enables smooth programmatic scrolling on all elements; <code>prefers-reduced-motion: reduce</code> restores immediate scrolling. Pointer dragging and momentum set each position immediately so they follow the gesture. An application can override the weak styles. Basic Scrollbox and snap do not require a content wrapper; elastic edges require a single marked content child.</p>
 <h2>Custom scrollbars</h2>
-<p>Add <code>data-ae-scrollbar=&quot;vertical&quot;</code>, <code>&quot;horizontal&quot;</code>, or both (for example, <code>&quot;v h&quot;</code> or <code>&quot;y x&quot;</code>) to show custom scrollbars. An empty <code>data-ae-scrollbar</code> enables both axes. Scrollbox creates <code>data-ae-scrollbar-vertical</code> and <code>data-ae-scrollbar-horizontal</code> as direct children of the scrollbox, or reuses existing direct children with those attributes. They are siblings of the snap or elastic wrapper and are excluded from its single-child check. A bar appears only when its axis overflows and its computed <code>overflow-x</code> or <code>overflow-y</code> is <code>auto</code> or <code>scroll</code>; <code>hidden</code> and <code>clip</code> keep that axis&#39;s bar at <code>display: none</code>. Scrollbox adds <code>ae--native-sb-hide</code> while custom bars are enabled to hide native scrollbars.</p>
+<p>Add <code>data-ae-scrollbar=&quot;vertical&quot;</code>, <code>&quot;horizontal&quot;</code>, or both (for example, <code>&quot;v h&quot;</code> or <code>&quot;y x&quot;</code>) to show custom scrollbars. An empty <code>data-ae-scrollbar</code> enables both axes. Scrollbox creates <code>data-ae-scrollbar-vertical</code> and <code>data-ae-scrollbar-horizontal</code> as direct children of the scrollbox, or reuses existing direct children with those attributes. They sit beside the content and are excluded from the elastic wrapper&#39;s single-child check. A bar is never a snap point unless explicitly marked with <code>data-ae-snap-item</code>. A bar appears only when its axis overflows and its computed <code>overflow-x</code> or <code>overflow-y</code> is <code>auto</code> or <code>scroll</code>; <code>hidden</code> and <code>clip</code> keep that axis&#39;s bar at <code>display: none</code>. Scrollbox adds <code>ae--native-sb-hide</code> while custom bars are enabled to hide native scrollbars.</p>
 <p>The bars normally have opacity 0. Mouse and pointer hover are tracked separately, so either one keeps the bars visible. They fade out after both hovers end or a click starts outside the box, unless PDS is active. After PDS ends, they remain visible for one second; when that timer ends, any active mouse or pointer hover still keeps them visible. The track overlays the viewport and follows scrolling with <code>translate3d</code>; its thumb uses a separate transform. Drag the thumb to scroll continuously; the track and thumb positions update during the pointer movement so they remain under the pointer. While a scrollbar is being dragged, PDS cannot start on that scrollbox or its scroll chain. Clicking the track outside the thumb scrolls until the thumb is centered on the click, clamped at the track ends. The weak CSS uses the same system <code>CanvasText</code> based colors as its native scrollbar styling; applications can customize <code>--ae-scrollbar-thumb-color</code>, <code>--ae-scrollbar-thumb-hover-color</code>, and <code>--ae-scrollbar-track-color</code> on the box. Owned bar elements are removed at unmount; pre-existing bars and their original inline scrollbar properties are preserved.</p>
 <pre><code class="language-html">&lt;div data-ae-scrollbox=&quot;pointer&quot; data-ae-scrollbar=&quot;v h&quot;
   style=&quot;width: 20rem; height: 12rem&quot;&gt;
@@ -601,24 +606,16 @@ Scrollbox                  </li>
   &lt;div&gt;&lt;!-- scrollable content --&gt;&lt;/div&gt;
 &lt;/div&gt;
 </code></pre>
-<h2>Modes</h2>
-<table>
-<thead>
-<tr>
-<th>Value</th>
-<th>Behavior</th>
-</tr>
-</thead>
-<tbody><tr>
-<td><code>native</code></td>
-<td>Default, including an empty attribute. Uses browser scrolling and updates the progress properties.</td>
-</tr>
-<tr>
-<td><code>pointer</code></td>
-<td>Adds mouse or pen drag-to-scroll on a hover-capable device with a fine pointer. Scrolling, wheel input, and progress remain native. On other devices it behaves like <code>native</code>.</td>
-</tr>
-</tbody></table>
-<pre><code class="language-html">&lt;div data-ae-scrollbox=&quot;pointer&quot; style=&quot;width: 20rem; height: 12rem&quot;&gt;
+<pre><code>
+## Modes
+
+| Value | Behavior |
+| --- | --- |
+| `native` | Default, including an empty attribute. Uses browser scrolling and updates the progress properties. |
+| `pointer` | Adds mouse or pen drag-to-scroll on a hover-capable device with a fine pointer. Scrolling, wheel input, and progress remain native. On other devices it behaves like `native`. |
+
+```html
+&lt;div data-ae-scrollbox=&quot;pointer&quot; style=&quot;width: 20rem; height: 12rem&quot;&gt;
   &lt;div&gt;&lt;!-- scrollable content --&gt;&lt;/div&gt;
 &lt;/div&gt;
 </code></pre>
@@ -626,7 +623,14 @@ Scrollbox                  </li>
 <p>Once PDS begins, Scrollbox adds <code>ae--pointerscrolling</code> to the box. The boot&#39;s weak CSS applies <code>cursor: grabbing !important</code> to the box and its contents until the gesture ends. If its only direct child enables <code>data-ae-scrollbox-elastic</code>, that child and its descendants also receive <code>pointer-events: none !important</code> during PDS. Scrollbox cancels wheel input over the box during this interval, along with the default action of its <code>pointermove</code>, matching-button <code>mousemove</code>, <code>touchmove</code>, and cancelable drag events. Canceling <code>dragstart</code> prevents a native drag from taking over the gesture. Native <code>scroll</code> events still reach listeners and report the updated scroll position.</p>
 <p><code>AelluxJsPointerScrollStart</code> fires when PDS actually activates, after the axis is locked. <code>AelluxJsPointerScrollEnd</code> fires after its temporary classes and styles are removed. Both events originate on the scrollbox where the gesture began and bubble; their <code>detail</code> contains <code>{ axis, pointerId, pointerType, elements }</code>, where <code>elements</code> lists the activated boxes in a nested chain. A snap flick that ends before PDS activates emits neither event.</p>
 <p>Gestures starting on text wait 100 ms after pointer-down so a native selection can begin. The first qualifying movement still chooses the axis during that wait. A text selection that remains unchanged from pointer-down does not block PDS; a new or altered selection stops tracking and remains intact. A collapsed caret by itself does not count as a text selection. In a vertical-only scroll chain, movement of more than 10 px vertically starts PDS immediately when vertical movement is dominant, and prevents native selection. Otherwise PDS scrolls in the locked axis after the wait, including any movement already made while waiting. PDS only captures an axis whose computed overflow is <code>auto</code> or <code>scroll</code> and whose content overflows. <code>hidden</code>, <code>clip</code>, and other non-scrollable overflow values disable PDS on that axis even if its content is larger than the box. A nested gesture can continue on an ancestor that permits the chosen axis.</p>
-<p>In nested pointer Scrollboxes, the innermost box consumes movement in the locked axis until it reaches an edge. Any remaining movement goes to the next scrollable ancestor, repeating upward as needed. Reversing direction returns to the innermost box first. Elastic pressure applies only after every eligible box reaches its edge; release momentum applies to the last box that moved.</p>
+<p>In nested pointer Scrollboxes, the innermost box consumes movement in the locked axis until it reaches an edge. Any remaining movement goes to the next scrollable pointer Scrollbox, repeating upward as needed. Computed <code>overscroll-behavior-x</code> or <code>overscroll-behavior-y</code> on a box can stop this PDS chain in that axis: <code>contain</code> and <code>none</code> keep movement within that box, while <code>auto</code> allows the usual handoff. A box whose overflow is disabled in the chosen axis does not stop that axis&#39;s chain. Reversing direction returns to the innermost box first. Elastic pressure applies only after every eligible box reaches its edge; release momentum applies to the last box that moved. <code>contain</code> allows local elastic feedback at the edge; <code>none</code> disables that feedback in its axis.</p>
+<pre><code class="language-html">&lt;div data-ae-scrollbox=&quot;pointer&quot; style=&quot;overflow: auto&quot;&gt;
+  &lt;div data-ae-scrollbox=&quot;pointer&quot;
+       style=&quot;overflow: auto; overscroll-behavior-y: contain&quot;&gt;
+    &lt;div&gt;Vertical PDS stops at this inner box.&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
 <p>In <code>pointer</code> mode, a quick release continues scrolling with gradually decreasing speed. Momentum is enabled by default and applies only to desktop pointer dragging. It starts after more than 15 px within the latest 300 ms of dragging and uses a deceleration value of 0.0015 to calculate the destination. Each animation frame moves 10% of the remaining distance to that destination; it ends when both axes match to three decimal places. It stops at the scroll boundary, on a new pointer or wheel interaction, when the mode changes, or when the box unmounts. Set <code>data-ae-scrollbox-momentum=&quot;false&quot;</code> to disable it:</p>
 <pre><code class="language-html">&lt;div data-ae-scrollbox=&quot;pointer&quot; data-ae-scrollbox-momentum=&quot;false&quot;&gt;
   &lt;div&gt;Scrollable content&lt;/div&gt;
@@ -634,14 +638,14 @@ Scrollbox                  </li>
 </code></pre>
 <h2>Horizontal wheel handoff</h2>
 <p>On a fine-pointer desktop, a predominantly vertical wheel gesture scrolls a horizontal-only box sideways while it has room in that direction. If one event goes beyond an edge, the box reaches the edge and shows elastic pressure when enabled, while the uncanceled wheel event also scrolls the parent or document. Further wheel events at that edge continue both behaviors. Native horizontal wheel gestures remain native. Only axes with <code>overflow: auto</code> or <code>scroll</code> count as wheel-scrollable: content taller than a box with <code>overflow-y: hidden</code> does not stop the horizontal conversion or produce vertical elastic pressure. This behavior applies to both modes.</p>
-<p>With snap enabled, wheel input moves one point forward or backward from the active snap index instead of scrolling by the wheel delta. Horizontal-only boxes still convert a predominantly vertical wheel delta to horizontal when conversion is enabled. Wheel events within a 120 ms gesture window count as one step. The scroll end of this wheel-driven animation does not search for another point. At the first or last point, the wheel event may continue to a scrollable ancestor, and elastic pressure still provides edge feedback when enabled.</p>
+<p>With snap enabled, wheel movement follows native scrolling and CSS Scroll Snap settles the result. Horizontal-only boxes still convert a predominantly vertical wheel delta to horizontal when conversion is enabled. At the first or last point, the wheel event may continue to a scrollable ancestor, and elastic pressure still provides edge feedback when enabled.</p>
 <p>Set <code>data-ae-scrollbox-wheel-horizontal=&quot;false&quot;</code> to disable the vertical-to-horizontal conversion:</p>
 <pre><code class="language-html">&lt;div data-ae-scrollbox data-ae-scrollbox-wheel-horizontal=&quot;false&quot;&gt;
   &lt;div&gt;Horizontal content&lt;/div&gt;
 &lt;/div&gt;
 </code></pre>
 <h2>Elastic edges</h2>
-<p>Place <code>data-ae-scrollbox-elastic</code> on the Scrollbox&#39;s only direct child to enable elastic edges in either <code>native</code> or <code>pointer</code> mode. That child wraps all scrollable content. A marked child alongside another direct child reports diagnostic 1120 and leaves the elastic effect disabled. When pointer dragging, touch dragging, or a wheel gesture pushes past a scroll limit, Scrollbox sets <code>transform-origin</code> to the pressed edge and applies <code>scale(...) translate3d(...)</code> to the wrapper. On each axis, the scale grows the wrapper&#39;s scrollable extent by the same number of pixels as the elastic displacement. Pressure starts with one third of the pointer or wheel movement and slows exponentially as it approaches the configured maximum. At the bottom or right edge, Scrollbox keeps the wrapper&#39;s scrollable extent stable while the transform moves its content, including content that overflows the wrapper&#39;s own box. On release, each animation frame moves the elastic displacement 15% toward zero; reduced-motion users get an immediate return. The original inline transform, transform origin, and minimum size are restored when the effect ends. Set the child&#39;s attribute to <code>false</code> to disable the effect.</p>
+<p>Place <code>data-ae-scrollbox-elastic</code> on the Scrollbox&#39;s only direct child to enable elastic edges in either <code>native</code> or <code>pointer</code> mode. That child wraps all scrollable content. A marked child alongside another direct child reports diagnostic 1120 and leaves the elastic effect disabled. When pointer dragging, touch dragging, or a wheel gesture pushes past a scroll limit, Scrollbox sets <code>transform-origin</code> to the pressed edge and applies <code>scale(...) translate3d(...)</code> to the wrapper. Computed <code>overscroll-behavior-x: none</code> or <code>overscroll-behavior-y: none</code> prevents this effect in the respective axis; <code>contain</code> still permits it. On each axis, the scale grows the wrapper&#39;s scrollable extent by the same number of pixels as the elastic displacement. Pressure starts with one third of the pointer or wheel movement and slows exponentially as it approaches the configured maximum. At the bottom or right edge, Scrollbox keeps the wrapper&#39;s scrollable extent stable while the transform moves its content, including content that overflows the wrapper&#39;s own box. On release, each animation frame moves the elastic displacement 15% toward zero; reduced-motion users get an immediate return. The original inline transform, transform origin, and minimum size are restored when the effect ends. Set the child&#39;s attribute to <code>false</code> to disable the effect.</p>
 <p>The attribute value sets the maximum displacement. With no value it defaults to <code>1/4</code> of the visible size on each axis. Fractions such as <code>1/2</code> use the visible size of their axis; <code>30px</code> and <code>30</code> both mean 30 pixels. One value applies to both axes. Two values follow CSS shorthand order: vertical, then horizontal. For example, <code>data-ae-scrollbox-elastic=&quot;1/4 40px&quot;</code> limits vertical pressure to one quarter of the visible height and horizontal pressure to 40 pixels. Invalid values report diagnostic 2015 and use the defaults.</p>
 <pre><code class="language-html">&lt;div data-ae-scrollbox=&quot;native&quot; style=&quot;width: 20rem; height: 12rem&quot;&gt;
   &lt;div data-ae-scrollbox-elastic&gt;Scrollable content&lt;/div&gt;
@@ -655,21 +659,38 @@ Scrollbox                  </li>
   console.log(index, item);
 });
 </code></pre>
-<p>Each direct child of the snap wrapper receives inline <code>--ae-snap-viewport</code> and <code>--ae-snap-focus</code> values at mount and as the box scrolls or refreshes. The values use the snap axis and compare the child&#39;s center with the viewport center. <code>--ae-snap-viewport</code> is <code>0</code> at the center, <code>-1</code> and <code>1</code> at the starting and ending viewport edges, and clamps to <code>-2</code> and <code>2</code> farther outside. <code>--ae-snap-focus</code> is <code>1</code> at the center, <code>0.5</code> at either viewport edge, and clamps to <code>0</code> at the outside limits. These inline values remain on the children after unmount.</p>
-<p>Place <code>data-ae-scrollbox-snap</code> on the Scrollbox&#39;s only direct child. Each direct child of that wrapper is a snap point. The same wrapper may also have <code>data-ae-scrollbox-elastic</code>. An invalid wrapper reports diagnostic 1121 and disables snap. At mount, the first point is centered immediately. On PDS release, Scrollbox adds the pointer&#39;s movement delta once more to each point&#39;s center and selects the projected center nearest the viewport center. This gives a drag more weight when choosing a point, even before that point becomes physically nearest. The chosen point is centered with <code>scrollIntoView</code> only on the main snap axis: horizontal snap uses <code>inline: &quot;center&quot;, block: &quot;nearest&quot;</code>, and vertical snap uses <code>block: &quot;center&quot;, inline: &quot;nearest&quot;</code>. If the current point remains nearest, a flick longer than 1 px and shorter than 100 px advances one point when it lasts at most 50 ms, or when it lasts at most 200 ms and reaches 0.5 px/ms. A drag that moves the current point&#39;s center at least one quarter of the viewport size farther from center also advances one point. A smaller, slower drag returns to the current point. Text-origin gestures normally wait 100 ms for native selection, but a snap flick released within that interval can advance before PDS starts if the selection did not change. Only gestures on the chosen scroll axis count; when both axes overflow, horizontal has priority. Snap replaces PDS momentum for that release. If elastic pressure is active, snap waits for the wrapper to return before centering.</p>
-<p>Scrollbar dragging and other native scrolling outside the snap wheel handler select the nearest point when the element&#39;s <code>scrollend</code> event fires. Browsers without <code>scrollend</code> use a 120 ms idle timer after the last <code>scroll</code> event. At PDS release or native scroll end, a scroll position within 10 px of the starting or ending limit selects the first or last point directly, before comparing centers or considering flicks. Scrollbox waits while PDS is active and ignores a completed snap that is already aligned.</p>
-<p>A single click inside a snap point centers that point when any part of it lies outside the Scrollbox viewport. Clicking a point that is fully visible leaves the scroll position unchanged.</p>
-<pre><code class="language-html">&lt;div id=&quot;gallery&quot; data-ae-scrollbox=&quot;pointer&quot; style=&quot;width: 20rem; overflow: auto&quot;&gt;
-  &lt;div data-ae-scrollbox-snap data-ae-scrollbox-elastic style=&quot;display: flex&quot;&gt;
-    &lt;article&gt;First&lt;/article&gt;
-    &lt;article&gt;Second&lt;/article&gt;
-    &lt;article&gt;Third&lt;/article&gt;
+<p>Each <code>data-ae-snap-item</code> receives inline <code>--ae-snap-viewport</code> and <code>--ae-snap-focus</code> values at mount and as the box scrolls or refreshes. The values use the snap axis and compare the item&#39;s center with the viewport center. <code>--ae-snap-viewport</code> is <code>0</code> at the center, <code>-1</code> and <code>1</code> at the starting and ending viewport edges, and clamps to <code>-2</code> and <code>2</code> farther outside. <code>--ae-snap-focus</code> is <code>1</code> at the center, <code>0.5</code> at either viewport edge, and clamps to <code>0</code> at the outside limits. These inline values remain on the items after unmount.</p>
+<p>Place <code>data-ae-scrollbox-snap</code> on the Scrollbox itself and mark each point with <code>data-ae-snap-item</code>. An empty value or <code>horizontal</code> selects the horizontal axis; <code>vertical</code> selects the vertical axis. Without elastic, marked descendants of the scrollbox are points; with elastic, only marked descendants inside its wrapper are points. Items belonging to a nested scrollbox are excluded. If no eligible item exists, diagnostic 1121 reports the missing points and snap stays disabled. The weak CSS applies <code>scroll-snap-type: x mandatory</code> or <code>y mandatory</code> to the box. An empty <code>data-ae-snap-item</code> aligns its center; <code>start</code>, <code>left</code>, and <code>top</code> align its start, while <code>end</code>, <code>right</code>, and <code>bottom</code> align its end along the selected axis. The directional names are aliases for CSS&#39;s logical <code>start</code> and <code>end</code>. The extension toggles CSS classes to suspend snapping during PDS and elastic pressure. The browser handles alignment for wheel, touch, scrollbar, and pointer scrolling. At mount, Scrollbox aligns the first point immediately. Snap does not alter the box&#39;s or items&#39; inline snap declarations.</p>
+<p>For a quick pointer or touch flick, Scrollbox advances one point in the gesture direction. The flick must last no more than 100 ms, move more than 1 px but less than 100 px, and either finish within 50 ms or reach 0.5 px/ms. Only movement along the snap axis counts. A short desktop flick can finish within the 100 ms text-selection wait if selection did not start. Longer gestures let CSS Scroll Snap choose the destination. PDS momentum does not run for a snap gesture.</p>
+<p>Native CSS Scroll Snap permits free scrolling within a snap point wider or taller than the viewport. Use points no larger than the viewport when every release must align to one center; flicks and controller navigation can still move between oversized points.</p>
+<p>While elastic pressure is active and throughout its return, Scrollbox temporarily sets <code>scroll-snap-type: none</code>. It restores the snap rule only after the elastic wrapper returns to its original position. A controller navigation requested during that interval runs after the return.</p>
+<p>When scrolling settles, Scrollbox identifies the selected point and emits <code>AelluxJsScrollboxSnapChange</code>. It uses <code>scrollend</code> when available, with a 120 ms scroll-idle fallback elsewhere. During controller navigation and flick navigation, the fallback waits until the requested scroll position is reached. A new wheel, pointer, or touch gesture clears that pending destination. It waits for an active pointer or touch to end before using the fallback. A position within 10 px of either scroll limit selects the first or last point directly; otherwise it compares each item&#39;s requested alignment with the corresponding viewport position. The event reports the selection; it does not perform an additional alignment scroll.</p>
+<pre><code class="language-html">&lt;div id=&quot;gallery&quot; data-ae-scrollbox=&quot;pointer&quot; data-ae-scrollbox-snap
+  data-ae-scrollbar=&quot;horizontal&quot; style=&quot;display: flex; width: 20rem; overflow: auto&quot;&gt;
+  &lt;article data-ae-snap-item=&quot;left&quot;&gt;First&lt;/article&gt;
+  &lt;article data-ae-snap-item&gt;Second&lt;/article&gt;
+  &lt;article data-ae-snap-item=&quot;right&quot;&gt;Third&lt;/article&gt;
+&lt;/div&gt;
+</code></pre>
+<p>Snap can share the elastic wrapper:</p>
+<pre><code class="language-html">&lt;div data-ae-scrollbox data-ae-scrollbox-snap style=&quot;width: 20rem; overflow: auto&quot;&gt;
+  &lt;div data-ae-scrollbox-elastic style=&quot;display: flex&quot;&gt;
+    &lt;article data-ae-snap-item&gt;First&lt;/article&gt;
+    &lt;article data-ae-snap-item&gt;Second&lt;/article&gt;
+    &lt;article data-ae-snap-item&gt;Third&lt;/article&gt;
   &lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<p>For a vertical list, use <code>data-ae-scrollbox-snap=&quot;vertical&quot;</code>:</p>
+<pre><code class="language-html">&lt;div data-ae-scrollbox data-ae-scrollbox-snap=&quot;vertical&quot;
+  style=&quot;height: 20rem; overflow-y: auto&quot;&gt;
+  &lt;section data-ae-snap-item=&quot;top&quot;&gt;First&lt;/section&gt;
+  &lt;section data-ae-snap-item=&quot;bottom&quot;&gt;Second&lt;/section&gt;
 &lt;/div&gt;
 </code></pre>
 <p>The mounted controller exposes <code>scrollbox.next()</code>, <code>scrollbox.previous()</code>, and <code>scrollbox.goto(index)</code>:</p>
 <pre><code class="language-js">const gallery = $ae(&quot;gallery&quot;).scrollbox;
-gallery.goto(2);     // Center the third point.
+gallery.goto(2);     // Align the third point according to its attribute.
 gallery.next();      // Move to the following point.
 gallery.previous();  // Move to the preceding point.
 </code></pre>
@@ -682,7 +703,7 @@ gallery.previous();  // Move to the preceding point.
     ← <span class="text-truncate overflow-hidden d-inline-block align-middle flex-fill"
       style="max-width:200px">Present</span>
   </a>
-
+  
     <a href="/core/docs/0.1.0/core-extensions/state-navigation.htm" class="text-decoration-none d-inline-flex flex-row justify-content-end gap-2"
     style="width: 40%;">
     <span class="text-truncate overflow-hidden d-inline-block align-middle flex-fill text-end"

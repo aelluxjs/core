@@ -3,15 +3,15 @@
 `adaptive` adds size and shape classes to elements marked with `data-ae-adaptive`. It is included in the `full` runtime and automatically requests its stylesheet there. In `basic` mode, register it with `$ae.ext("adaptive", { loadStyle: true })` before initialization.
 
 ```html
-<div data-ae-adaptive>Responsive content</div>
+<div id="responsive" data-ae-adaptive>Responsive content</div>
 ```
 
-The Extension measures each marked element with `ResizeObserver`, or uses the window resize event when that API is unavailable. With `ResizeObserver`, the first observer entry supplies the initial size; otherwise the initial size is read in the next layout frame. It applies one shape class (`ae--shape-vertical`, `ae--shape-square`, or `ae--shape-horizontal`) according to width divided by height. It also sets `aria-orientation` to `vertical` when height exceeds width and to `horizontal` otherwise, including square elements. It toggles `ae--fits-<size>` classes when `sqrt(width * height)` reaches each configured minimum. After an update it dispatches `AelluxJsAdaptiveUpdate` from the element. Initial `ae--*` classes are discarded before mounting. Unmounting removes the managed classes and restores the initial `aria-orientation`; unrelated classes and inline styles are left as they are.
+The Extension measures each marked element with `ResizeObserver`, or uses the window resize event when that API is unavailable. With `ResizeObserver`, the first observer entry supplies the initial size; otherwise the initial size is read in the next layout frame. It applies one shape class (`ae--shape-vertical`, `ae--shape-square`, or `ae--shape-horizontal`) according to width divided by height. It also sets `aria-orientation` to `vertical` when height exceeds width and to `horizontal` otherwise, including square elements. It toggles `ae--fits-<size>` classes when `sqrt(width * height)` reaches each configured minimum. The element receives inline `--ae-width` and `--ae-height` values as unitless numbers in pixels. After an update it dispatches `AelluxJsAdaptiveUpdate` from the element. Initial `ae--*` classes are discarded before mounting. Unmounting removes the managed classes and restores the initial `aria-orientation`, `--ae-width`, and `--ae-height` values and priorities; unrelated classes and inline styles are left as they are.
 
 `AelluxJsAdaptiveUpdate` includes the measured dimensions in `detail`, so listeners can use them without reading layout again:
 
 ```js
-element.addEventListener("AelluxJsAdaptiveUpdate", event => {
+document.getElementById("responsive").addEventListener("AelluxJsAdaptiveUpdate", event => {
   const { width, height, ratio } = event.detail;
   console.log(width, height, ratio);
 });

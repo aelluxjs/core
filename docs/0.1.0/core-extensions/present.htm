@@ -14,7 +14,7 @@
 
 <meta name="description" content="aellux.js Docs">
   <link rel="canonical" href="https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/present.htm">
-
+  
     <meta property="og:title" content="Present | 0.1.0 | aellux.js Docs" />
     <meta property="og:type" content="website" />
           <meta property="og:url" content="https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/present.htm" />
@@ -26,7 +26,7 @@
         <meta name="twitter:description" content="aellux.js Docs">
 
                   <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Present | 0.1.0 | aellux.js Docs","description":"aellux.js Docs","url":"https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/present.htm"}</script>
-
+          
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -421,6 +421,11 @@ Extension Styles                            </a>
                           </li>
                           <li class="nav-item small-md rounded-1 ps-md-1"
                             style="flex:0">
+                            <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/extensions/csp-and-trust.htm">
+CSP and Extension Trust                            </a>
+                          </li>
+                          <li class="nav-item small-md rounded-1 ps-md-1"
+                            style="flex:0">
                             <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/extensions/legacy-variants.htm">
 Modern &amp; Legacy Variants                            </a>
                           </li>
@@ -571,7 +576,7 @@ Present                  </li>
     ← <span class="text-truncate overflow-hidden d-inline-block align-middle flex-fill"
       style="max-width:200px">Preference</span>
   </a>
-
+  
     <a href="/core/docs/0.1.0/core-extensions/scrollbox.htm" class="text-decoration-none d-inline-flex flex-row justify-content-end gap-2"
     style="width: 40%;">
     <span class="text-truncate overflow-hidden d-inline-block align-middle flex-fill text-end"
@@ -611,7 +616,7 @@ await panel.unpop();
 <p><code>data-ae-present-motion</code> is optional. A direct child with that attribute keeps the grid strategy for <code>height</code> and <code>width</code> transitions, without measuring the final dimensions explicitly. Without it, Present leaves the content in place, records <code>INFO_PRESENT_MEASURED_LAYOUT</code> (<code>3001</code>) for size transitions, measures the visible container, and animates <code>max-height</code> and <code>max-width</code> in pixels. This path incurs a layout read. Explicit <code>height</code> and <code>width</code> values in the container&#39;s styles determine the measured final size. Temporary inline maximum dimensions are restored after a transition or interruption. All visibility, classes, and ARIA state remain on the main <code>data-ae-present</code> element.</p>
 <p>Before starting a transition from a stable state, Present makes the container available for layout, adds <code>ae--will-change</code> to it, and waits 100 ms so the browser can prepare the declared properties. During this preparation, the existing <code>ae--pop</code> or <code>ae--popping</code> state remains intact; it is replaced atomically when <code>ae--popping</code> or <code>ae--unpopping</code> is applied. When an active transition is reversed, Present preserves <code>ae--will-change</code> and starts the replacement transition without repeating the preparation delay. Measured-size transitions without that delay wait one layout frame to separate their starting and ending sizes. The class is removed after the final transition finishes or when a transition is interrupted without a replacement. The stable open state uses <code>ae--pop</code> on the container.</p>
 <p>The generated <code>aellux.ext.present.css</code> stylesheet treats the whitespace-separated <code>data-ae-present</code> value as a list of transition instructions. <code>opacity</code> controls opacity and <code>transform</code> controls transform. <code>height</code> and <code>width</code> control <code>grid-template-rows</code> and <code>grid-template-columns</code> when a direct motion child exists, or measured <code>max-height</code> and <code>max-width</code> when it does not. Values can be used alone or in any combination, such as <code>data-ae-present=&quot;opacity height&quot;</code>. An empty attribute remains empty and disables the transition with zero duration. The value <code>all</code> expands to <code>opacity transform height width</code> during mount and is restored to its original value on unmount.</p>
-<p>The <code>--ae-from-height</code>, <code>--ae-pop-height</code>, and <code>--ae-unpop-height</code> properties define the height keyframes, while <code>--ae-from-width</code>, <code>--ae-pop-width</code>, and <code>--ae-unpop-width</code> define the width keyframes. Its minified counterpart is <code>aellux.ext.present.min.css</code>; the boot runtime selects the variant that matches the loaded Aellux script. CSS custom properties <code>--ae-pop-duration</code> and <code>--ae-unpop-duration</code> on the container set the corresponding duration. When the document root has <code>data-ae-reduced-motion=&quot;reduced&quot;</code>, the generated stylesheet disables transitions. When it has <code>data-ae-low-hardware</code>, Present uses stepped easing and derives the step count from the transition duration; <code>--ae-pop-low-steps</code> and <code>--ae-unpop-low-steps</code> can override those counts. The Extension emits cancelable <code>AelluxJsBeforePop</code> and <code>AelluxJsBeforeUnpop</code> events immediately, waits through the preparation period, then emits <code>AelluxJsPopping</code>/<code>AelluxJsUnpopping</code> and finally <code>AelluxJsPop</code>/<code>AelluxJsUnpop</code> as transitions progress. After each completed Pop or Unpop, it emits a bubbling <code>AelluxJsLayout</code> event from the Present element to notify layout observers such as Anchor.</p>
+<p>The <code>--ae-from-height</code>, <code>--ae-pop-height</code>, and <code>--ae-unpop-height</code> properties define the height keyframes, while <code>--ae-from-width</code>, <code>--ae-pop-width</code>, and <code>--ae-unpop-width</code> define the width keyframes. Its minified counterpart is <code>aellux.ext.present.min.css</code>; the boot runtime selects the variant that matches the loaded Aellux script. CSS custom properties <code>--ae-pop-duration</code> and <code>--ae-unpop-duration</code> on the container set the corresponding duration. When the document root has <code>data-ae-reduced-motion=&quot;reduced&quot;</code>, the generated stylesheet disables transitions. When it has <code>data-ae-low-hardware</code>, Present uses stepped easing and derives the step count from the transition duration; <code>--ae-pop-low-steps</code> and <code>--ae-unpop-low-steps</code> can override those counts. The Extension emits cancelable <code>AelluxJsBeforePop</code> and <code>AelluxJsBeforeUnpop</code> events immediately, waits through the preparation period, then emits <code>AelluxJsPopping</code>/<code>AelluxJsUnpopping</code> and finally <code>AelluxJsPop</code>/<code>AelluxJsUnpop</code> as transitions progress. It emits a bubbling <code>AelluxJsLayout</code> event from the Present element when the transition starts and again after it finishes, notifying layout observers such as Anchor. Both events carry <code>detail.origin</code> as <code>&quot;present.pop&quot;</code> or <code>&quot;present.unpop&quot;</code>, according to the method.</p>
 <p>When an <code>unpop</code> hides a region containing the active element, Present releases focus if the browser has not already done so, then dispatches <code>UnpopFocusLost</code> through <code>AelluxJs.dispatch</code>. If the active element is outside the region at the time it becomes hidden, no focus event is dispatched.</p>
 <p><code>data-ae-auto-unpop</code> specifies a delay before closing an open container. Outside clicks also close open containers unless <code>data-ae-unpop-on-outside=&quot;false&quot;</code> is set. On unmount, the mount helper restores the initial <code>data-ae-*</code>, <code>aria-*</code>, and <code>hidden</code> attributes on each mounted container and trigger control.</p>
         </div>
@@ -622,7 +627,7 @@ await panel.unpop();
     ← <span class="text-truncate overflow-hidden d-inline-block align-middle flex-fill"
       style="max-width:200px">Preference</span>
   </a>
-
+  
     <a href="/core/docs/0.1.0/core-extensions/scrollbox.htm" class="text-decoration-none d-inline-flex flex-row justify-content-end gap-2"
     style="width: 40%;">
     <span class="text-truncate overflow-hidden d-inline-block align-middle flex-fill text-end"

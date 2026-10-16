@@ -4,23 +4,22 @@
  * State Navigation Extension
  *
  * Purpose: coordinates browser history entries, hash state, document titles and
- * saved DOM snapshots for navigation flows controlled by Aellux events.
+ * state snapshots for navigation flows controlled by Aellux events.
  *
  * Capability profile: structure and state, with browser-history and application
  * integration.
  *
  * Inputs and activation: listens for popstate, hash changes and the extension's
- * push, replace and title command events. Init options configure snapshot limits
- * and title behavior.
+ * push, replace and title command events. The Core `useHash` option controls
+ * whether state changes also update the URL hash.
  *
- * Outputs and owned state: merges its namespace into `history.state`, stores
- * bounded snapshots and dispatches restoration/navigation events. It does not
- * replace document content itself.
+ * Outputs and owned state: merges its namespace into `history.state`, keeps the
+ * current snapshot, and dispatches change and restoration events with copies
+ * of their detail values. It does not replace document content itself.
  *
- * Lifecycle: removes browser and document listeners and clears the in-memory
- * snapshot registry when destroyed.
+ * Lifecycle: removes browser and document listeners when destroyed.
  *
- * Accessibility and scope: consumers replacing content must manage focus,
+ * Accessibility: consumers replacing content must manage focus,
  * document structure and status announcements after navigation. Parent pages
  * and iframes keep their own history state and restoration events.
  */

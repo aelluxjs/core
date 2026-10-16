@@ -14,7 +14,7 @@
 
 <meta name="description" content="aellux.js Docs">
   <link rel="canonical" href="https://aelluxjs.github.io/core/docs/0.1.0/getting-started.htm">
-
+  
     <meta property="og:title" content="Getting Started | 0.1.0 | aellux.js Docs" />
     <meta property="og:type" content="website" />
           <meta property="og:url" content="https://aelluxjs.github.io/core/docs/0.1.0/getting-started.htm" />
@@ -26,7 +26,7 @@
         <meta name="twitter:description" content="aellux.js Docs">
 
                   <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Getting Started | 0.1.0 | aellux.js Docs","description":"aellux.js Docs","url":"https://aelluxjs.github.io/core/docs/0.1.0/getting-started.htm"}</script>
-
+          
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -421,6 +421,11 @@ Extension Styles                            </a>
                           </li>
                           <li class="nav-item small-md rounded-1 ps-md-1"
                             style="flex:0">
+                            <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/extensions/csp-and-trust.htm">
+CSP and Extension Trust                            </a>
+                          </li>
+                          <li class="nav-item small-md rounded-1 ps-md-1"
+                            style="flex:0">
                             <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/extensions/legacy-variants.htm">
 Modern &amp; Legacy Variants                            </a>
                           </li>
@@ -567,7 +572,7 @@ Getting Started                  </li>
     ← <span class="text-truncate overflow-hidden d-inline-block align-middle flex-fill"
       style="max-width:200px">Home</span>
   </a>
-
+  
     <a href="/core/docs/0.1.0/compatibility.htm" class="text-decoration-none d-inline-flex flex-row justify-content-end gap-2"
     style="width: 40%;">
     <span class="text-truncate overflow-hidden d-inline-block align-middle flex-fill text-end"
@@ -604,7 +609,11 @@ It includes and initializes Adaptive, Anchor, Feedback, Focus, Point, Preference
 </code></pre>
 <p>Use <code>aellux.min.js</code> to select the matching minified runtime and Extension files.</p>
 <h2>Distribution</h2>
-<p>The browser distribution consists of classic scripts isolated in IIFEs. It does not expose ESM named or default exports. The source file <code>src/aellux.full.js</code> is only the bundler entry used to generate <code>aellux.full.js</code> and <code>aellux.full.min.js</code>.</p>
+<p>The boot, runtimes, and Extensions are classic scripts isolated in IIFEs. The separate <code>aellux.esm.js</code> and <code>aellux.esm.min.js</code> module entries export the shared Core API as their default. They do not replace the browser boot script, which starts the runtime through <code>$ae.init()</code>:</p>
+<pre><code class="language-js">import AelluxJs from &quot;@aelluxjs/core&quot;;
+console.log(AelluxJs.attr(&quot;scrollbox&quot;));
+</code></pre>
+<p>The source file <code>src/aellux.full.js</code> is the bundler entry used to generate <code>aellux.full.js</code> and <code>aellux.full.min.js</code>.</p>
 <p>Serve the repository over HTTP to run the browser validation pages linked from <code>tests/index.htm</code>.</p>
         </div>
 
@@ -614,7 +623,7 @@ It includes and initializes Adaptive, Anchor, Feedback, Focus, Point, Preference
     ← <span class="text-truncate overflow-hidden d-inline-block align-middle flex-fill"
       style="max-width:200px">Home</span>
   </a>
-
+  
     <a href="/core/docs/0.1.0/compatibility.htm" class="text-decoration-none d-inline-flex flex-row justify-content-end gap-2"
     style="width: 40%;">
     <span class="text-truncate overflow-hidden d-inline-block align-middle flex-fill text-end"

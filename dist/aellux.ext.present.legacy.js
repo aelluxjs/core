@@ -726,6 +726,12 @@
               completed = new Promise(function(completeTransition) {
                 transition.timeout = setTimeout(finishTransition, timeMs, element, controller, transition, gotoVisible, completeTransition);
               });
+              AelluxJs.dispatchFrom(element, "Layout", {
+                detail: {
+                  origin: "present.".concat(newDirection).toLocaleLowerCase()
+                },
+                bubbles: true
+              });
               AelluxJs.dispatchFrom(element, "".concat(newDirection).concat(PING), {
                 bubbles: true
               });
@@ -747,6 +753,9 @@
                 });
               }
               AelluxJs.dispatchFrom(element, "Layout", {
+                detail: {
+                  origin: "present.".concat(newDirection).toLocaleLowerCase()
+                },
                 bubbles: true
               });
               _context2.n = 17;

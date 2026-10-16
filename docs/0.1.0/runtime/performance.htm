@@ -14,7 +14,7 @@
 
 <meta name="description" content="aellux.js Docs">
   <link rel="canonical" href="https://aelluxjs.github.io/core/docs/0.1.0/runtime/performance.htm">
-
+  
     <meta property="og:title" content="Performance and Bundle Budget | 0.1.0 | aellux.js Docs" />
     <meta property="og:type" content="website" />
           <meta property="og:url" content="https://aelluxjs.github.io/core/docs/0.1.0/runtime/performance.htm" />
@@ -26,7 +26,7 @@
         <meta name="twitter:description" content="aellux.js Docs">
 
                   <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Performance and Bundle Budget | 0.1.0 | aellux.js Docs","description":"aellux.js Docs","url":"https://aelluxjs.github.io/core/docs/0.1.0/runtime/performance.htm"}</script>
-
+          
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -421,6 +421,11 @@ Extension Styles                            </a>
                           </li>
                           <li class="nav-item small-md rounded-1 ps-md-1"
                             style="flex:0">
+                            <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/extensions/csp-and-trust.htm">
+CSP and Extension Trust                            </a>
+                          </li>
+                          <li class="nav-item small-md rounded-1 ps-md-1"
+                            style="flex:0">
                             <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/extensions/legacy-variants.htm">
 Modern &amp; Legacy Variants                            </a>
                           </li>
@@ -571,7 +576,7 @@ Performance and Bundle Budget                  </li>
     ← <span class="text-truncate overflow-hidden d-inline-block align-middle flex-fill"
       style="max-width:200px">Browser Support</span>
   </a>
-
+  
     <a href="/core/docs/0.1.0/runtime/es5-support.htm" class="text-decoration-none d-inline-flex flex-row justify-content-end gap-2"
     style="width: 40%;">
     <span class="text-truncate overflow-hidden d-inline-block align-middle flex-fill text-end"
@@ -587,74 +592,12 @@ Performance and Bundle Budget                  </li>
 <pre><code class="language-sh">npm run build:core
 npm run test:budget
 </code></pre>
-<p>The CI workflow runs the same command after <code>npm run build</code>. A pull request fails if an artifact exceeds either limit in <a href="https://github.com/aelluxjs/core/blob/main/scripts/bundle-budget.config.mjs"><code>scripts/bundle-budget.config.mjs</code></a>. Change a limit only with an intentional review of the generated artifact and its delivery cost.</p>
-<h2>0.1.0 Baseline and Limits</h2>
-<p>The table records the beta.10 build measured on October 14, 2026. Limits are rounded upward to allow small implementation changes while detecting material growth. The full bundle includes all nine Core Extensions.</p>
-<table>
-<thead>
-<tr>
-<th>Artifact</th>
-<th align="right">Baseline raw</th>
-<th align="right">Baseline gzip</th>
-<th align="right">Raw limit</th>
-<th align="right">Gzip limit</th>
-</tr>
-</thead>
-<tbody><tr>
-<td><code>aellux.min.js</code></td>
-<td align="right">27.9 KiB</td>
-<td align="right">10.4 KiB</td>
-<td align="right">29 KiB</td>
-<td align="right">12 KiB</td>
-</tr>
-<tr>
-<td><code>aellux.esm.min.js</code></td>
-<td align="right">17.0 KiB</td>
-<td align="right">5.7 KiB</td>
-<td align="right">18 KiB</td>
-<td align="right">7 KiB</td>
-</tr>
-<tr>
-<td><code>aellux.orchestrator.min.js</code></td>
-<td align="right">17.5 KiB</td>
-<td align="right">6.3 KiB</td>
-<td align="right">21 KiB</td>
-<td align="right">8 KiB</td>
-</tr>
-<tr>
-<td><code>aellux.full.min.js</code></td>
-<td align="right">54.4 KiB</td>
-<td align="right">16.9 KiB</td>
-<td align="right">56 KiB</td>
-<td align="right">18 KiB</td>
-</tr>
-<tr>
-<td><code>aellux.full.legacy.min.js</code></td>
-<td align="right">350.3 KiB</td>
-<td align="right">117.1 KiB</td>
-<td align="right">360 KiB</td>
-<td align="right">130 KiB</td>
-</tr>
-<tr>
-<td><code>aellux.ext.adaptive.min.css</code></td>
-<td align="right">104.1 KiB</td>
-<td align="right">8.2 KiB</td>
-<td align="right">121 KiB</td>
-<td align="right">11 KiB</td>
-</tr>
-<tr>
-<td><code>aellux.ext.present.min.css</code></td>
-<td align="right">3.8 KiB</td>
-<td align="right">0.8 KiB</td>
-<td align="right">4 KiB</td>
-<td align="right">2 KiB</td>
-</tr>
-</tbody></table>
-<p>Each separately distributed minified Core Extension, including Anchor and Scrollbox, is also checked. Their individual limits are held in the executable configuration so the documentation does not duplicate a second table of values.</p>
+<p>The CI workflow runs the same command after <code>npm run build</code>. A pull request fails if an artifact exceeds either limit. Review the generated artifact and its delivery cost before changing a limit.</p>
+<h2>Limits</h2>
+<p><a href="https://github.com/aelluxjs/core/blob/main/scripts/bundle-budget.config.mjs"><code>scripts/bundle-budget.config.mjs</code></a> is the source of truth for every raw and gzip limit. It covers the minified boot, ESM entry, orchestrator, full runtimes, Core Extensions, and generated Extension stylesheets. The <code>test:budget</code> command prints each artifact&#39;s measured size beside its current limit. The full bundle includes all nine Core Extensions.</p>
 <h2>Scope and Limitations</h2>
 <p>This budget detects distribution-size regressions. It does not measure page-specific network time, parsing time, boot time, layout, mount duration, memory use, or real-user performance. The Legacy full bundle is materially larger because it includes the shared polyfills required for its ES5 path. Runtime-performance budgets require representative application fixtures and remain post-release work.</p>
 <p>For layout work inside an Extension, use <a href="wait-layout.htm"><code>waitLayout</code></a> to batch geometry reads and dependent CSS or DOM writes. The guide includes code for coalescing frequent scroll and resize notifications.</p>
-<p>The Present JavaScript raw limit is 10 KiB after adding the optional measured size-transition path; its 4 KiB gzip limit remains unchanged.</p>
         </div>
 
         <div id="doc-navlinks2" ajax-load="doc-navlinks2">
@@ -663,7 +606,7 @@ npm run test:budget
     ← <span class="text-truncate overflow-hidden d-inline-block align-middle flex-fill"
       style="max-width:200px">Browser Support</span>
   </a>
-
+  
     <a href="/core/docs/0.1.0/runtime/es5-support.htm" class="text-decoration-none d-inline-flex flex-row justify-content-end gap-2"
     style="width: 40%;">
     <span class="text-truncate overflow-hidden d-inline-block align-middle flex-fill text-end"

@@ -14,7 +14,7 @@
 
 <meta name="description" content="aellux.js Docs">
   <link rel="canonical" href="https://aelluxjs.github.io/core/docs/0.1.0/validation-scenarios.htm">
-
+  
     <meta property="og:title" content="Validation Scenarios | 0.1.0 | aellux.js Docs" />
     <meta property="og:type" content="website" />
           <meta property="og:url" content="https://aelluxjs.github.io/core/docs/0.1.0/validation-scenarios.htm" />
@@ -26,7 +26,7 @@
         <meta name="twitter:description" content="aellux.js Docs">
 
                   <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Validation Scenarios | 0.1.0 | aellux.js Docs","description":"aellux.js Docs","url":"https://aelluxjs.github.io/core/docs/0.1.0/validation-scenarios.htm"}</script>
-
+          
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -421,6 +421,11 @@ Extension Styles                            </a>
                           </li>
                           <li class="nav-item small-md rounded-1 ps-md-1"
                             style="flex:0">
+                            <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/extensions/csp-and-trust.htm">
+CSP and Extension Trust                            </a>
+                          </li>
+                          <li class="nav-item small-md rounded-1 ps-md-1"
+                            style="flex:0">
                             <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/extensions/legacy-variants.htm">
 Modern &amp; Legacy Variants                            </a>
                           </li>
@@ -567,7 +572,7 @@ Validation Scenarios                  </li>
     ← <span class="text-truncate overflow-hidden d-inline-block align-middle flex-fill"
       style="max-width:200px">Compatibility</span>
   </a>
-
+  
     <a href="/core/docs/0.1.0/runtime/api.htm" class="text-decoration-none d-inline-flex flex-row justify-content-end gap-2"
     style="width: 40%;">
     <span class="text-truncate overflow-hidden d-inline-block align-middle flex-fill text-end"
@@ -578,20 +583,20 @@ Validation Scenarios                  </li>
 
         <div id="doc-content" style="min-height: calc(100vh - 200px);" class="js-toc-content" ajax-load="doc-content">
 <h1>Validation Scenarios</h1>
-<p>The HTML pages in <code>tests/browser/</code> are focused browser scenarios for the <code>0.1.0-beta</code> release. Each scenario page reports <code>PASSED</code> or <code>FAILED</code> in its document. Playwright also runs <code>.spec.mjs</code> tests for runtime APIs, Extension behavior, generated assets, and DOM state in Chromium, Firefox, and WebKit.</p>
+<p>The scenario HTML pages listed below are focused browser checks for the <code>0.1.0-beta</code> release. Each reports <code>PASSED</code> or <code>FAILED</code> in its document. Playwright also runs <code>.spec.mjs</code> tests for runtime APIs, Extension behavior, generated assets, and DOM state in Chromium, Firefox, and WebKit.</p>
 <h2>Automated Run</h2>
 <p>Install the Playwright browsers and run the scenarios:</p>
 <pre><code class="language-sh">npx playwright install
 npm run test:browser
 </code></pre>
 <p><code>test:browser</code> builds <code>dist/</code> before testing. Use <code>npm run test:browser -- --project=chromium</code> to run only Chromium. To use an installed Chrome or Edge instead of Playwright&#39;s Chromium, set <code>AELLUXJS_TEST_BROWSER_CHANNEL</code> to <code>chrome</code> or <code>msedge</code> and select the Chromium project. The Bootstrap scenario uses the versioned local fixture <code>tests/fixtures/bootstrap-5.3.8.min.css</code> and requires no CDN or network access.</p>
-<p>To run one spec after a build, use <code>npx playwright test tests/browser/full-bundle.spec.mjs --project=chromium</code>. Direct <code>npx playwright test</code> commands use the current <code>dist/</code> files; run <code>npm run build:core</code> first after changing runtime or Extension source. The full bundle spec compares bundled and initialized Extensions with every <code>src/aellux.ext.*.js</code> source file that calls <code>extAttach</code> in the normal and minified Modern and Legacy runtimes. Run <code>npm run test:budget</code> after a build to check raw and gzip artifact limits.</p>
+<p>To run one spec after a build, use <code>npx playwright test tests/browser/full-bundle.spec.mjs --project=chromium</code>. For a Scrollbox change, replace that path with <code>tests/browser/scrollbox-pointer.spec.mjs</code> or <code>tests/browser/scrollbox-scrollbar.spec.mjs</code>. Direct <code>npx playwright test</code> commands use the current <code>dist/</code> files; run <code>npm run build:core</code> first after changing runtime or Extension source. The full bundle spec compares bundled and initialized Extensions with every <code>src/aellux.ext.*.js</code> source file that calls <code>extAttach</code> in the normal and minified Modern and Legacy runtimes. Run <code>npm run test:budget</code> after a build to check raw and gzip artifact limits.</p>
 <h2>Browser Matrix</h2>
 <p>The Playwright configuration runs Chromium, Firefox, and WebKit. The suite covers both normal Modern selection and forced Legacy execution. Forced Legacy validates the ES5 distribution path in these current engines; it does not establish support for historical versions of those browsers.</p>
 <p>Run the complete matrix with one worker when recording a release result:</p>
 <pre><code class="language-sh">npm run test:browser -- --workers=1
 </code></pre>
-<p>The test runner&#39;s summary gives the current count and result. A single worker keeps the local HTTP fixture available for the entire matrix.</p>
+<p>The test runner&#39;s summary gives the current count and result. One worker reduces resource contention during the full browser matrix; Playwright starts the local HTTP fixture through its <code>webServer</code> configuration.</p>
 <h2>Scenario Pages</h2>
 <table>
 <thead>
@@ -701,11 +706,11 @@ npm run test:browser
 </tr>
 <tr>
 <td>Controllers and mount maps</td>
-<td>Controller lookup, bound public methods, forced mount/update/unmount, missing methods, duplicate maps, active-map removal protection, and cleanup after the last registration.</td>
+<td>Controller lookup, bound public methods and element-scoped events, forced mount/update/unmount, missing methods, duplicate maps, ascending map priorities, active-map removal protection, and cleanup after the last registration.</td>
 </tr>
 <tr>
 <td>Mount results and attributes</td>
-<td>Unique return values, partial success results, concurrent mounts, failed-mount rollback, overlapping registrations, and restoration of <code>data-ae-*</code>, <code>aria-*</code>, and <code>hidden</code>.</td>
+<td>Unique return values, partial success results, concurrent mounts, failed-mount rollback, overlapping registrations, lifecycle event details with distinct affected elements, and restoration of <code>data-ae-*</code>, <code>aria-*</code>, and <code>hidden</code>.</td>
 </tr>
 <tr>
 <td>Resource cleanup</td>
@@ -719,6 +724,22 @@ npm run test:browser
 <td>Accessibility contracts</td>
 <td>Native keyboard activation for Preference controls, Focus restoration and hint cleanup, Present focus release plus ARIA state synchronization, failed-mount <code>aria-busy</code> cleanup, and root attributes for reduced motion, contrast, and forced colors.</td>
 </tr>
+<tr>
+<td>Extension event details</td>
+<td>Adaptive dimensions, Preference changes, Scrollbox snap and pointer scroll events, and State Navigation snapshot copies.</td>
+</tr>
+<tr>
+<td>Layout and presentation</td>
+<td>Anchor geometry, event-driven refresh and throttling; Adaptive resize fallback; Present transitions, focus release, ARIA state, and generated styles.</td>
+</tr>
+<tr>
+<td>Scrollbox interactions</td>
+<td>Native progress, pointer drag and selection rules, nested scroll handoff, momentum, elastic pressure, snap navigation, custom scrollbar dragging, and scroll edge classes.</td>
+</tr>
+<tr>
+<td>Asset integrity and dependencies</td>
+<td>Variant-specific SRI, changed-byte rejection, <code>crossorigin</code>, CSS property registration, and dependency registration and retry.</td>
+</tr>
 </tbody></table>
 <p>The contract suite does not establish support for historical or mobile browsers and does not replace the separate accessibility review or additional iframe scenarios.</p>
         </div>
@@ -729,7 +750,7 @@ npm run test:browser
     ← <span class="text-truncate overflow-hidden d-inline-block align-middle flex-fill"
       style="max-width:200px">Compatibility</span>
   </a>
-
+  
     <a href="/core/docs/0.1.0/runtime/api.htm" class="text-decoration-none d-inline-flex flex-row justify-content-end gap-2"
     style="width: 40%;">
     <span class="text-truncate overflow-hidden d-inline-block align-middle flex-fill text-end"
