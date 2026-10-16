@@ -25887,7 +25887,8 @@
             suspensions: {
               pointer: false,
               elastic: false,
-              scrollbar: false
+              scrollbar: false,
+              wheel: false
             },
             notifiedItem: null,
             notifiedIndex: null,
@@ -25895,6 +25896,7 @@
             scrollingToTarget: -1,
             scrollingToAxis: null,
             wheelTimeout: null,
+            edgeWheelTimeout: null,
             activePointers: /* @__PURE__ */ new Set(),
             activeTouches: /* @__PURE__ */ new Set(),
             savedItems: /* @__PURE__ */ new Set(),
@@ -26572,7 +26574,7 @@
           if (!state.snapEnabled || !snap.root) return;
           snap.axis = axis;
           state.element.classList.add(snapReadyClass);
-          state.element.classList.toggle(snapSuspendedClass, snap.suspensions.pointer || snap.suspensions.elastic || snap.suspensions.scrollbar);
+          state.element.classList.toggle(snapSuspendedClass, snap.suspensions.pointer || snap.suspensions.elastic || snap.suspensions.scrollbar || snap.suspensions.wheel);
         }
         function suspendSnapStyles(state, reason, suspended) {
           if (!state.snapEnabled || !state.snap.root || state.snap.suspensions[reason] === suspended) return;
@@ -26591,9 +26593,26 @@
           if (snap.wheelTimeout !== null) root2.clearTimeout(snap.wheelTimeout);
           snap.wheelTimeout = null;
         }
+        function suspendSnapForEdgeWheel(state) {
+          var snap = state.snap;
+          if (snap.edgeWheelTimeout !== null) root2.clearTimeout(snap.edgeWheelTimeout);
+          suspendSnapStyles(state, "wheel", true);
+          snap.edgeWheelTimeout = root2.setTimeout(function() {
+            snap.edgeWheelTimeout = null;
+            suspendSnapStyles(state, "wheel", false);
+          }, SNAP_SCROLL_IDLE_MS);
+        }
+        function clearEdgeWheelSuspension(state) {
+          var snap = state.snap;
+          if (snap.edgeWheelTimeout !== null) root2.clearTimeout(snap.edgeWheelTimeout);
+          snap.edgeWheelTimeout = null;
+          suspendSnapStyles(state, "wheel", false);
+        }
         function restoreSnapStyles(state) {
           var snap = state.snap;
           clearSnapWheelTimeout(state);
+          if (snap.edgeWheelTimeout !== null) root2.clearTimeout(snap.edgeWheelTimeout);
+          snap.edgeWheelTimeout = null;
           var _iterator5 = _createForOfIteratorHelper9(snap.savedItems), _step5;
           try {
             for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
@@ -26613,6 +26632,7 @@
           snap.suspensions.pointer = false;
           snap.suspensions.elastic = false;
           snap.suspensions.scrollbar = false;
+          snap.suspensions.wheel = false;
         }
         function collectSnapItems(state, root3) {
           return Array.from(root3.querySelectorAll("[".concat(snapItemAttribute, "]"))).filter(function(item) {
@@ -26820,7 +26840,7 @@
             state.snap.waitingForGestureEnd = true;
             return;
           }
-          if (state.snap.suspensions.pointer || state.snap.suspensions.elastic || state.momentum || state.scrollbar.drag || activePointerScrollState && activePointerScrollState.pointerScroll && activePointerScrollState.pointerScroll.chain.includes(state)) return;
+          if (state.snap.suspensions.pointer || state.snap.suspensions.elastic || state.snap.suspensions.wheel || state.momentum || state.scrollbar.drag || activePointerScrollState && activePointerScrollState.pointerScroll && activePointerScrollState.pointerScroll.chain.includes(state)) return;
           var items = snapItems(state);
           if (!items.length) return;
           var metrics = nativeMetrics(state.element);
@@ -28063,10 +28083,22 @@
             if (event.cancelable) event.preventDefault();
             return true;
           }
-          var edge = edgeSnapIndex(state, items, axis, nativeMetrics(state.element));
+          var metrics = nativeMetrics(state.element);
+          var edge = edgeSnapIndex(state, items, axis, metrics);
           var index = edge !== null ? edge : state.snap.scrollingToTarget !== -1 ? state.snap.index : selectedSnapIndex(state);
           var next2 = index + Math.sign(delta);
-          if (next2 < 0 || next2 >= items.length) return false;
+          if (next2 < 0 || next2 >= items.length) {
+            suspendSnapForEdgeWheel(state);
+            var position = axis === "x" ? state.element.scrollLeft : state.element.scrollTop;
+            var maximum = axis === "x" ? metrics.maxX : metrics.maxY;
+            if (delta < 0 ? position <= 1 : position >= maximum - 1) {
+              var style = root2.getComputedStyle(state.element);
+              var behavior = horizontal ? style.overscrollBehaviorX : style.overscrollBehaviorY;
+              if (behavior === "contain" || behavior === "none") event.preventDefault();
+            }
+            return false;
+          }
+          clearEdgeWheelSuspension(state);
           if (event.cancelable) event.preventDefault();
           if (state.scrollbar.drag || state.snap.suspensions.elastic) return true;
           var busy = state.snap.wheelTimeout !== null;

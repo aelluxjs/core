@@ -752,6 +752,10 @@ test("snap wheel advances one item per gesture, including inverted wheel", async
 
 for (const behavior of ["auto", "contain"]) {
   test(`snap wheel at both list ends respects overscroll-behavior ${behavior}`, async ({ page }) => {
+    if (behavior === "contain") {
+      const supported = await page.evaluate(() => CSS.supports("overscroll-behavior-y", "contain"));
+      test.skip(!supported, "This browser does not support overscroll-behavior-y");
+    }
     await setup(page, `<div id="parent" style="height:120px;overflow-y:auto">
       <div style="height:150px"></div>
       <div id="gallery" data-ae-scrollbox="native" data-ae-scrollbox-snap="vertical"
@@ -785,6 +789,8 @@ for (const behavior of ["auto", "contain"]) {
     } else {
       expect(await parent.evaluate(element => element.scrollTop)).toBe(100);
     }
+    await expect.poll(() => gallery.evaluate(element =>
+      getComputedStyle(element).scrollSnapType)).toBe("y mandatory");
   });
 }
 
@@ -811,9 +817,35 @@ test("wheel at a physical snap edge ignores a pending navigation target", async 
     controller.goto(1);
     element.scrollTo({ left: 0, behavior: "instant" });
     const start = wheel(-120);
-    return { end, start };
+    return { end, start, suspended: getComputedStyle(element).scrollSnapType };
   });
-  expect(result).toEqual({ end: false, start: false });
+  expect(result).toEqual({ end: false, start: false, suspended: "none" });
+  await expect.poll(() => page.locator("#gallery").evaluate(element =>
+    getComputedStyle(element).scrollSnapType)).toBe("x mandatory");
+});
+
+test("horizontal snap releases vertical wheel to its parent at the last item", async ({ page }) => {
+  await setup(page, `<div id="parent" style="height:120px;overflow-y:auto">
+    <div id="gallery" data-ae-scrollbox="native" data-ae-scrollbox-snap
+      style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden">
+      <div style="display:flex;width:300px">
+        <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+        <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+        <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+      </div>
+    </div>
+    <div style="height:400px"></div>
+  </div>`);
+  const gallery = page.locator("#gallery");
+  await gallery.evaluate(element => element.scrollTo({ left: 200, behavior: "instant" }));
+  const point = await gallery.boundingBox();
+  await page.mouse.move(point.x + 50, point.y + 50);
+  await page.mouse.wheel(0, 120);
+  await expect.poll(() => page.locator("#parent").evaluate(element => element.scrollTop))
+    .toBeGreaterThan(0);
+  expect(await gallery.evaluate(element => element.scrollLeft)).toBe(200);
+  await expect.poll(() => gallery.evaluate(element =>
+    getComputedStyle(element).scrollSnapType)).toBe("x mandatory");
 });
 
 test("snap wheel uses the dominant gesture axis", async ({ page }) => {
