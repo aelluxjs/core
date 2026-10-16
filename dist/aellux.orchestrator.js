@@ -236,17 +236,12 @@
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   function createMountHelper(root, mountMaps, mountedElements, elementControllers) {
     const { toCapitalized: toCapitalized2, toCamelCase: toCamelCase2, fromCamelCase: fromCamelCase2 } = utils_name_case_default;
-    const initialAttributeValues = /* @__PURE__ */ new WeakMap();
     const pendingMounts = /* @__PURE__ */ new WeakMap();
     const pendingUnmounts = /* @__PURE__ */ new WeakMap();
     const mountRecords = /* @__PURE__ */ new WeakMap();
     let mountOrder = 0;
     const classPrefix = root.AelluxJs.className("");
-    return { mount, unmount, unmountDetached, update, initialAttribute };
-    function initialAttribute(element, name) {
-      var _a, _b;
-      return (_b = (_a = initialAttributeValues.get(element)) == null ? void 0 : _a.initial.get(name)) != null ? _b : null;
-    }
+    return { mount, unmount, unmountDetached, update };
     async function update(elementOrId, extensionNames = null) {
       const rootElement = resolveMountElement(elementOrId, "update");
       if (!rootElement) return false;
@@ -411,7 +406,6 @@
                   if (name.startsWith(classPrefix)) mountable.classList.remove(name);
                 }
               }
-              rememberInitialAttributes(mountable);
               setMounted(mountable, mountId, true, controller.priority);
               const finishPendingMount = beginPendingMount(mountable, mountId);
               try {
@@ -436,7 +430,6 @@
                   elementController.despawn(mountId);
                   if (!elementController.hasMounts()) elementControllers.delete(mountable);
                 }
-                restoreInitialAttributes(mountable);
                 AelluxJs2.diagnostics.error(
                   AelluxJs2.diagnostics.ERROR_EXTENSION_MOUNT,
                   {
@@ -569,7 +562,6 @@
             if (!elementController.hasMounts()) elementControllers.delete(element);
           }
           element.classList.toggle(AelluxJs2.className("mounted"), isMounted(element));
-          restoreInitialAttributes(element);
         } catch (cause) {
           diagnostics.error(diagnostics.ERROR_EXTENSION_MOUNT, {
             cause,
@@ -676,35 +668,6 @@
       }
       if (mounts.size === 0) mountedElements.delete(element);
     }
-    function rememberInitialAttributes(element) {
-      const record = initialAttributeValues.get(element);
-      if (record) {
-        record.users++;
-        return;
-      }
-      const initial = /* @__PURE__ */ new Map();
-      for (const attribute of element.attributes) {
-        if (isRestoredAttribute(attribute.name))
-          initial.set(attribute.name, attribute.value);
-      }
-      initialAttributeValues.set(element, { initial, users: 1 });
-    }
-    function restoreInitialAttributes(element) {
-      const record = initialAttributeValues.get(element);
-      if (!record || --record.users) return;
-      for (let index = element.attributes.length - 1; index >= 0; index--) {
-        const name = element.attributes[index].name;
-        if (isRestoredAttribute(name) && !record.initial.has(name))
-          element.removeAttribute(name);
-      }
-      for (const [name, value] of record.initial) {
-        if (element.getAttribute(name) !== value) element.setAttribute(name, value);
-      }
-      initialAttributeValues.delete(element);
-    }
-    function isRestoredAttribute(name) {
-      return name === "hidden" || name.startsWith("data-ae-") || name.startsWith("aria-");
-    }
   }
 
   // src/internal/build-mount-map-manager.js
@@ -730,7 +693,6 @@
       mount: helper.mount,
       unmount: helper.unmount,
       update: helper.update,
-      initialAttribute: helper.initialAttribute,
       destroy
     };
     let observer = null;
@@ -885,12 +847,119 @@
     }
   }
 
+  // src/internal/create-aria-helper.js
+  /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+  function createAriaHelper() {
+    const elements = /* @__PURE__ */ new WeakMap();
+    let nextOrder = 0;
+    function attributeName(name) {
+      if (typeof name !== "string" || !/^(?:aria-)?[a-z][a-z0-9-]*$/.test(name)) {
+        throw new TypeError("Invalid ARIA name");
+      }
+      return name.startsWith("aria-") ? name : `aria-${name}`;
+    }
+    function attributeValue(name, value) {
+      if (value === null || value === void 0) {
+        throw new TypeError("Use unset() for null");
+      }
+      if (Array.isArray(value)) {
+        return value.join(" ");
+      }
+      if (name === "aria-hidden" && typeof value !== "boolean") {
+        throw new TypeError("Invalid aria-hidden value");
+      }
+      return String(value);
+    }
+    function write(element, name, value) {
+      if (value === null) {
+        if (element.hasAttribute(name)) element.removeAttribute(name);
+      } else if (element.getAttribute(name) !== value) {
+        element.setAttribute(name, value);
+      }
+    }
+    function reconcile(element, record, name) {
+      var _a;
+      let winner = null;
+      let hidden = false;
+      record.handlers.forEach((handler) => {
+        if (!handler.values.has(name)) return;
+        if (name === "aria-hidden" && handler.values.get(name) === "true") hidden = true;
+        if (!winner || handler.priority > winner.priority || handler.priority === winner.priority && handler.order > winner.order) {
+          winner = handler;
+        }
+      });
+      if (!winner) {
+        write(element, name, (_a = record.baseline.get(name)) != null ? _a : null);
+        record.baseline.delete(name);
+        return;
+      }
+      write(element, name, name === "aria-hidden" && hidden ? "true" : winner.values.get(name));
+    }
+    function register(element, options = {}) {
+      if (!element || element.nodeType !== 1) {
+        throw new TypeError("Invalid ARIA element");
+      }
+      const priority = options.priority === void 0 ? 0 : options.priority;
+      if (typeof priority !== "number" || !Number.isFinite(priority)) {
+        throw new TypeError("Invalid ARIA priority");
+      }
+      let record = elements.get(element);
+      if (!record) {
+        record = { handlers: /* @__PURE__ */ new Set(), baseline: /* @__PURE__ */ new Map() };
+        elements.set(element, record);
+      }
+      const handler = { priority, order: nextOrder++, values: /* @__PURE__ */ new Map() };
+      record.handlers.add(handler);
+      let released = false;
+      return {
+        set(values) {
+          if (released) return false;
+          if (!values || typeof values !== "object") {
+            throw new TypeError("Invalid ARIA values");
+          }
+          const updates = Object.entries(values).map(([key, value]) => {
+            const name = attributeName(key);
+            return [name, attributeValue(name, value)];
+          });
+          updates.forEach(([name, value]) => {
+            if (!record.baseline.has(name)) record.baseline.set(name, element.getAttribute(name));
+            handler.values.set(name, value);
+            reconcile(element, record, name);
+          });
+          return true;
+        },
+        unset(key) {
+          if (released) return false;
+          const name = attributeName(key);
+          if (!handler.values.delete(name)) return false;
+          reconcile(element, record, name);
+          return true;
+        },
+        initial(key) {
+          const name = attributeName(key);
+          return record.baseline.has(name) ? record.baseline.get(name) : element.getAttribute(name);
+        },
+        release() {
+          if (released) return false;
+          released = true;
+          record.handlers.delete(handler);
+          handler.values.forEach((_, name) => reconcile(element, record, name));
+          handler.values.clear();
+          if (!record.handlers.size) elements.delete(element);
+          return true;
+        }
+      };
+    }
+    return { register };
+  }
+
   // src/aellux.orchestrator.js
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   (function(root) {
     "use strict";
     const { toCamelCase: toCamelCase2, fromCamelCase: fromCamelCase2 } = utils_name_case_default;
     const extensionPromises = {};
+    const aria = createAriaHelper();
     const mountManager = buildMountMapManager(root);
     const layoutScheduler = buildLayoutScheduler();
     root.AelluxJs = Object.assign(
@@ -903,16 +972,21 @@
             });
           }
           await new Promise((resolve) => {
-            const startMountCallback = function() {
+            const startCallback = function() {
+              if (AelluxJs.options.skipGlobalMount === true) {
+                AelluxJs.off("$DOMContentLoaded", startCallback);
+                resolve();
+                return;
+              }
               AelluxJs.mount().then(function() {
-                AelluxJs.off("$DOMContentLoaded", startMountCallback);
+                AelluxJs.off("$DOMContentLoaded", startCallback);
                 resolve();
               });
             };
             if (document.readyState === "loading")
-              AelluxJs.on("$DOMContentLoaded", startMountCallback, { once: true });
+              AelluxJs.on("$DOMContentLoaded", startCallback, { once: true });
             else
-              startMountCallback();
+              startCallback();
           });
           AelluxJs.dispatch("Ready");
           return true;
@@ -986,6 +1060,7 @@
           return getExtension(extensionName);
         },
         request: defaultRequest,
+        aria,
         waitLayout: layoutScheduler,
         mountManager
       }

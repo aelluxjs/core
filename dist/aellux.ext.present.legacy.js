@@ -192,7 +192,7 @@
       toggle: toggle,
       trigger: trigger
     });
-    var POP = "Pop", UNPOP = "Unpop", BEFORE = "Before", PING = "ping", MILLISECOND = "ms", SECOND = "s", TRANSITION_PREPARE_TIME = 100, ARIA_EXPANDED = "aria-expanded", ARIA_CONTROLS = "aria-controls", DEFAULT_PRESENT = "opacity transform height width";
+    var POP = "Pop", UNPOP = "Unpop", BEFORE = "Before", PING = "ping", MILLISECOND = "ms", SECOND = "s", TRANSITION_PREPARE_TIME = 100, DEFAULT_PRESENT = "opacity transform height width";
     var presentElements = /* @__PURE__ */ new Map();
     var openPresentElements = /* @__PURE__ */ new Set();
     var triggerElementsSet = /* @__PURE__ */ new Set();
@@ -200,7 +200,8 @@
     var triggersByTargetId = /* @__PURE__ */ new Map();
     var indexedTriggerValues = /* @__PURE__ */ new Map();
     var elementMemories = /* @__PURE__ */ new WeakMap();
-    var triggerMemories = /* @__PURE__ */ new WeakMap();
+    var containerAriaHandlers = /* @__PURE__ */ new WeakMap();
+    var triggerAriaHandlers = /* @__PURE__ */ new WeakMap();
     var measuredMemories = /* @__PURE__ */ new WeakMap();
     function init(options) {
       AelluxJs.mountManager.add({
@@ -251,7 +252,8 @@
     }
     function mountPresentContainer(element) {
       if (presentElements.has(element)) return;
-      elementMemories.set(element, AelluxJs.persist.element.save(element, [attr.present, attr.presentMotion, ARIA_EXPANDED, "hidden"], ["--ae-pop-low-steps", "--ae-unpop-low-steps"]));
+      elementMemories.set(element, AelluxJs.persist.element.save(element, [attr.present, attr.presentMotion, "hidden"], ["--ae-pop-low-steps", "--ae-unpop-low-steps"]));
+      containerAriaHandlers.set(element, AelluxJs.aria.register(element));
       if ((element.getAttribute(attr.present) || "").trim().toLowerCase() === "all") {
         element.setAttribute(attr.present, DEFAULT_PRESENT);
       }
@@ -280,7 +282,10 @@
         classList: element.classList,
         triggers: /* @__PURE__ */ new Set(),
         setAriaExpanded: function setAriaExpanded(value) {
-          element.setAttribute(ARIA_EXPANDED, value);
+          this.expanded = value === "true";
+          containerAriaHandlers.get(element).set({
+            expanded: this.expanded
+          });
           this.triggers.forEach(updateTriggerAriaExpanded);
         },
         stop: function stop() {
@@ -352,25 +357,27 @@
       autoUnpopSchedule(element, presentController);
     }
     function unmountPresentContainer(element) {
-      var _elementMemories$get;
+      var _containerAriaHandler, _elementMemories$get;
       if (!presentElements.has(element)) return;
       var controller = presentElements.get(element);
       controller.stop();
       element.classList.remove(className.grid);
       presentElements.delete(element);
       openPresentElements.delete(element);
+      (_containerAriaHandler = containerAriaHandlers.get(element)) === null || _containerAriaHandler === void 0 || _containerAriaHandler.release();
+      containerAriaHandlers.delete(element);
       (_elementMemories$get = elementMemories.get(element)) === null || _elementMemories$get === void 0 || _elementMemories$get.restore();
       elementMemories.delete(element);
       controller.triggers.forEach(updateTriggerAriaExpanded);
     }
     function mountTriggerElement(triggerElement) {
       if (triggerElementsSet.has(triggerElement)) return;
-      triggerMemories.set(triggerElement, AelluxJs.persist.element.save(triggerElement, [ARIA_CONTROLS, ARIA_EXPANDED], []));
+      triggerAriaHandlers.set(triggerElement, AelluxJs.aria.register(triggerElement));
       triggerElementsSet.add(triggerElement);
       refreshTriggerTargets(triggerElement);
     }
     function unmountTriggerElement(triggerElement) {
-      var _triggerMemories$get;
+      var _triggerAriaHandlers$;
       if (!triggerElementsSet.has(triggerElement)) return;
       var target = triggerTargets.get(triggerElement);
       if (target) {
@@ -380,8 +387,8 @@
       }
       unindexTriggerTarget(triggerElement);
       triggerElementsSet.delete(triggerElement);
-      (_triggerMemories$get = triggerMemories.get(triggerElement)) === null || _triggerMemories$get === void 0 || _triggerMemories$get.restore();
-      triggerMemories.delete(triggerElement);
+      (_triggerAriaHandlers$ = triggerAriaHandlers.get(triggerElement)) === null || _triggerAriaHandlers$ === void 0 || _triggerAriaHandlers$.release();
+      triggerAriaHandlers.delete(triggerElement);
     }
     function targetIdFor(value) {
       if (!value) return null;
@@ -425,7 +432,7 @@
       }
     }
     function refreshTriggerTargets(triggerElement) {
-      var _presentElements$get3, _AelluxJs$mountManage, _AelluxJs$mountManage2;
+      var _presentElements$get3, _triggerAriaHandlers$4;
       var previousTarget = triggerTargets.get(triggerElement);
       var targetSelector = triggerElement.getAttribute(attr.target);
       var dismiss = triggerElement.getAttribute(attr.dismiss);
@@ -442,26 +449,34 @@
         target = container;
       }
       if (!target || !target.id) {
+        var _triggerAriaHandlers$2, _triggerAriaHandlers$3;
         triggerTargets.delete(triggerElement);
+        (_triggerAriaHandlers$2 = triggerAriaHandlers.get(triggerElement)) === null || _triggerAriaHandlers$2 === void 0 || _triggerAriaHandlers$2.unset("expanded");
+        (_triggerAriaHandlers$3 = triggerAriaHandlers.get(triggerElement)) === null || _triggerAriaHandlers$3 === void 0 || _triggerAriaHandlers$3.unset("controls");
         return;
       }
       triggerTargets.set(triggerElement, target);
       (_presentElements$get3 = presentElements.get(target)) === null || _presentElements$get3 === void 0 || _presentElements$get3.triggers.add(triggerElement);
       var targetIds = /* @__PURE__ */ new Set([target.id]);
-      var initial = (_AelluxJs$mountManage = (_AelluxJs$mountManage2 = AelluxJs.mountManager).initialAttribute) === null || _AelluxJs$mountManage === void 0 ? void 0 : _AelluxJs$mountManage.call(_AelluxJs$mountManage2, triggerElement, ARIA_CONTROLS);
+      var initial = (_triggerAriaHandlers$4 = triggerAriaHandlers.get(triggerElement)) === null || _triggerAriaHandlers$4 === void 0 ? void 0 : _triggerAriaHandlers$4.initial("controls");
       if (initial) {
         initial.trim().split(/\s+/).forEach(function(x) {
           return targetIds.add(x);
         });
       }
       updateTriggerAriaExpanded(triggerElement);
-      triggerElement.setAttribute(ARIA_CONTROLS, _toConsumableArray(targetIds).join(" "));
+      triggerAriaHandlers.get(triggerElement).set({
+        controls: _toConsumableArray(targetIds)
+      });
     }
     function updateTriggerAriaExpanded(triggerElement) {
+      var _presentElements$get4, _triggerAriaHandlers$5;
       var target = triggerTargets.get(triggerElement);
       if (!target) return;
-      var expanded = presentElements.has(target) && target.getAttribute(ARIA_EXPANDED) === "true";
-      triggerElement.setAttribute(ARIA_EXPANDED, String(expanded));
+      var expanded = ((_presentElements$get4 = presentElements.get(target)) === null || _presentElements$get4 === void 0 ? void 0 : _presentElements$get4.expanded) === true;
+      (_triggerAriaHandlers$5 = triggerAriaHandlers.get(triggerElement)) === null || _triggerAriaHandlers$5 === void 0 || _triggerAriaHandlers$5.set({
+        expanded: expanded
+      });
     }
     function pop(element) {
       return presentTransition(element, true, true);

@@ -10,6 +10,7 @@
     }
     const attribute = AelluxJs.attr(extensionName);
     const targetAttribute = AelluxJs.attr("anchor-target");
+    const fpsAttribute = AelluxJs.attr("anchor-fps");
     const layoutEvent = AelluxJs.eventName("Layout");
     const anchoredClass = AelluxJs.className("anchored");
     const baseProperties = ["position", "left", "top", "transform", "transform-origin"];
@@ -31,13 +32,24 @@
       "bottom-center": [0.5, 1],
       "bottom-right": [1, 1]
     };
-    const UPDATE_INTERVAL_MS = 100;
+    const DEFAULT_FPS = 30;
+    const DEFAULT_INTERVAL_MS = Math.round(1e3 / DEFAULT_FPS);
     const anchors = /* @__PURE__ */ new Map();
     const elementMemories = /* @__PURE__ */ new WeakMap();
     let updateTimeout = null;
     let layoutUpdateTimeout = null;
     let layoutUpdateUntil = 0;
-    let lastUpdateTime = -UPDATE_INTERVAL_MS;
+    let lastUpdateTime = -DEFAULT_INTERVAL_MS;
+    function updateIntervalMs() {
+      let interval = Infinity;
+      for (const element of anchors.keys()) {
+        const value = element.getAttribute(fpsAttribute);
+        const fps = value === null || !value.trim() ? NaN : Number(value);
+        const elementInterval = Number.isFinite(fps) && fps > 0 ? Math.max(1, Math.round(1e3 / fps)) : DEFAULT_INTERVAL_MS;
+        interval = Math.min(interval, elementInterval);
+      }
+      return Number.isFinite(interval) ? interval : DEFAULT_INTERVAL_MS;
+    }
     AelluxJs.extAttach(extensionName, { init, destroy });
     function init() {
       AelluxJs.registerCssProperty({
@@ -67,7 +79,7 @@
       updateTimeout = null;
       layoutUpdateTimeout = null;
       layoutUpdateUntil = 0;
-      lastUpdateTime = -UPDATE_INTERVAL_MS;
+      lastUpdateTime = -DEFAULT_INTERVAL_MS;
       await Promise.all(Array.from(anchors.keys(), unmountAnchor));
       AelluxJs.mountManager.remove({ extensionName });
     }
@@ -115,23 +127,25 @@
         updateTimeout = null;
         layoutUpdateTimeout = null;
         layoutUpdateUntil = 0;
-        lastUpdateTime = -UPDATE_INTERVAL_MS;
+        lastUpdateTime = -DEFAULT_INTERVAL_MS;
       }
       await AelluxJs.waitLayout.update(deactivate, [element, state, memory]);
     }
     function scheduleUpdate() {
       if (!anchors.size) return;
+      const interval = updateIntervalMs();
       const elapsed = now() - lastUpdateTime;
-      if (elapsed >= UPDATE_INTERVAL_MS) {
+      if (elapsed >= interval) {
         if (updateTimeout !== null) clearTimeout(updateTimeout);
         updateTimeout = null;
         flushUpdate();
         return;
       }
       if (updateTimeout !== null) return;
-      updateTimeout = setTimeout(flushUpdate, UPDATE_INTERVAL_MS - elapsed);
+      updateTimeout = setTimeout(flushUpdate, interval - elapsed);
     }
     function scheduleLayoutUpdate(event) {
+      const interval = updateIntervalMs();
       const durationMs = Number(event && event.detail ? event.detail.durationMs : NaN);
       if (!Number.isFinite(durationMs) || durationMs < 0) {
         scheduleUpdate();
@@ -139,7 +153,7 @@
       }
       if (durationMs === 0) {
         if (layoutUpdateTimeout === null)
-          layoutUpdateTimeout = setTimeout(checkLayoutUpdate, UPDATE_INTERVAL_MS);
+          layoutUpdateTimeout = setTimeout(checkLayoutUpdate, interval);
         return;
       }
       scheduleUpdate();
@@ -147,7 +161,7 @@
       if (layoutUpdateTimeout !== null) return;
       layoutUpdateTimeout = setTimeout(
         checkLayoutUpdate,
-        Math.min(UPDATE_INTERVAL_MS, durationMs)
+        Math.min(interval, durationMs)
       );
     }
     function checkLayoutUpdate() {
@@ -157,7 +171,7 @@
       if (remaining > 0) {
         layoutUpdateTimeout = setTimeout(
           checkLayoutUpdate,
-          Math.min(UPDATE_INTERVAL_MS, remaining)
+          Math.min(updateIntervalMs(), remaining)
         );
       } else {
         layoutUpdateUntil = 0;

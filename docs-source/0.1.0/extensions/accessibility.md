@@ -109,7 +109,7 @@ Define the applicable fields on the Extension's page. State `Not applicable` wit
 
 ## Lifecycle Requirements
 
-`mount` may add temporary ARIA and AelluxJs data attributes to its mounted element. The mount manager records and restores the element's initial `aria-*`, `data-ae-*`, and `hidden` attributes when its last registration is unmounted. An Extension remains responsible for descendant elements it changes unless those descendants have their own mount registration.
+`mount` may add temporary ARIA and AelluxJs data attributes to its mounted element. Each Extension must save the specific attributes and inline styles it changes and restore them during `unmount`, including changes to descendants. Use `AelluxJs.persist.element.save(element, attributes, cssProperties)` to create an independent snapshot for each element.
 
 For every resource or user-facing state it owns, an Extension must:
 
@@ -117,7 +117,7 @@ For every resource or user-facing state it owns, an Extension must:
 2. Keep the applicable visual, interaction, semantic, and asynchronous states synchronized during update.
 3. Cancel or detach owned pending work during `unmount` and `destroy`.
 4. Remove owned listeners, observers, generated nodes, IDs, and relationships.
-5. Restore changed descendant state explicitly or mount those descendants separately so the mount manager can restore them.
+5. Restore changed descendant state explicitly, including descendants with their own mount registrations.
 6. Handle failed and partial mounting without leaving busy, hidden, focus, control, or external-operation state inconsistent.
 
 An Extension that does not mount DOM elements applies these rules to its actual lifecycle and resources rather than implementing an artificial mount contract.

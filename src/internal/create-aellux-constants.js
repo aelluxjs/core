@@ -65,6 +65,7 @@ export function createAelluxConstants() {
       mode: "full",
       verboseLevel: 0,
       forceLegacy: false,
+      skipGlobalMount: false,
       autoViewportMeta: true,
       basePath: null,
       crossOrigin: null,

@@ -121,6 +121,7 @@
       }
     };
     var UPDATE_INTERVAL_MS = 100;
+    var ariaHandlers = /* @__PURE__ */ new WeakMap();
     var managedClasses;
     var sizeThresholds = [];
     var updateTimeout = null;
@@ -194,7 +195,8 @@
     }
     function mountAdaptive(element) {
       if (adaptiveElements.has(element)) return;
-      elementMemories.set(element, AelluxJs.persist.element.save(element, ["aria-orientation"], dimensionProperties));
+      elementMemories.set(element, AelluxJs.persist.element.save(element, [], dimensionProperties));
+      ariaHandlers.set(element, AelluxJs.aria.register(element));
       adaptiveElements.add(element);
       if (resizeObserver) resizeObserver.observe(element);
       else {
@@ -203,7 +205,7 @@
       }
     }
     function unmountAdaptive(element) {
-      var _elementMemories$get;
+      var _ariaHandlers$get, _elementMemories$get;
       if (!adaptiveElements.delete(element)) return;
       pendingResizeEntries.delete(element);
       pendingResizeElements.delete(element);
@@ -220,6 +222,8 @@
       } finally {
         _iterator2.f();
       }
+      (_ariaHandlers$get = ariaHandlers.get(element)) === null || _ariaHandlers$get === void 0 || _ariaHandlers$get.release();
+      ariaHandlers.delete(element);
       (_elementMemories$get = elementMemories.get(element)) === null || _elementMemories$get === void 0 || _elementMemories$get.restore();
       elementMemories.delete(element);
     }
@@ -291,9 +295,12 @@
       AelluxJs.waitLayout.update(updateAdaptive, [entry, width, height]);
     }
     function updateAdaptive(element, width, height) {
+      var _ariaHandlers$get2;
       if (!adaptiveElements.has(element)) return;
       var ratio = height > 0 ? width / height : 0;
-      element.setAttribute("aria-orientation", height > width ? "vertical" : "horizontal");
+      (_ariaHandlers$get2 = ariaHandlers.get(element)) === null || _ariaHandlers$get2 === void 0 || _ariaHandlers$get2.set({
+        orientation: height > width ? "vertical" : "horizontal"
+      });
       element.classList.toggle(modifier.shapeVertical, ratio < adaptiveParams.ratioShapes.vertical);
       element.classList.toggle(modifier.shapeHorizontal, ratio > adaptiveParams.ratioShapes.horizontal);
       element.classList.toggle(modifier.shapeSquare, ratio >= adaptiveParams.ratioShapes.vertical && ratio <= adaptiveParams.ratioShapes.horizontal);

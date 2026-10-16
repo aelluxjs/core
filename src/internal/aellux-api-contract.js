@@ -150,6 +150,7 @@ var bootstrapProperties = Object.freeze({
         "enum": Object.freeze([0, 1, 2, "error", "warn", "info"])
       }),
       forceLegacy: flag,
+      skipGlobalMount: flag,
       autoViewportMeta: flag,
       basePath: Object.freeze({ type: ["string", "null"] }),
       crossOrigin: Object.freeze({ type: ["string", "null"] }),
@@ -176,10 +177,6 @@ var bootstrapProperties = Object.freeze({
   on: method,
   off: method,
   attr: method,
-  attrMem: Object.freeze({
-    type: "object",
-    properties: Object.freeze({ save: method, restore: method })
-  }),
   className: method,
   registerCssProperty: method,
   extFilename: method,
@@ -222,11 +219,15 @@ for (var property in bootstrapProperties) {
   }
 }
 runtimeProperties.waitLayout = layoutScheduler;
+runtimeProperties.aria = Object.freeze({
+  type: "object",
+  properties: Object.freeze({ register: method })
+});
 runtimeProperties.mountManager = Object.freeze({
   type: "object",
   properties: Object.freeze({
     add: method, remove: method, mount: method, unmount: method, update: method,
-    controller: method, initialAttribute: method, destroy: method
+    controller: method, destroy: method
   })
 });
 

@@ -27,7 +27,6 @@ export function buildMountMapManager(root) {
     mount: helper.mount,
     unmount: helper.unmount,
     update: helper.update,
-    initialAttribute: helper.initialAttribute,
     destroy
   };
 

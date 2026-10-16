@@ -60,6 +60,7 @@
     }
   };
   const UPDATE_INTERVAL_MS = 100;
+  const ariaHandlers = new WeakMap();
   let managedClasses;
   let sizeThresholds = [];
   let updateTimeout = null;
@@ -118,8 +119,9 @@
   function mountAdaptive(element) {
     if (adaptiveElements.has(element)) return;
     elementMemories.set(element, AelluxJs.persist.element.save(
-      element, ["aria-orientation"], dimensionProperties
+      element, [], dimensionProperties
     ));
+    ariaHandlers.set(element, AelluxJs.aria.register(element));
     adaptiveElements.add(element);
     if (resizeObserver) resizeObserver.observe(element);
     else {
@@ -136,6 +138,8 @@
     else if (adaptiveElements.size === 0) AelluxJs.offTarget(root, "$resize", onWindowResize);
 
     for (const name of managedClasses) { element.classList.remove(name); }
+    ariaHandlers.get(element)?.release();
+    ariaHandlers.delete(element);
     elementMemories.get(element)?.restore();
     elementMemories.delete(element);
   }
@@ -208,10 +212,9 @@
   function updateAdaptive(element, width, height) {
     if (!adaptiveElements.has(element)) return;
     const ratio = height > 0 ? width / height : 0;
-    element.setAttribute(
-      "aria-orientation",
-      height > width ? "vertical" : "horizontal"
-    );
+    ariaHandlers.get(element)?.set({
+      orientation: height > width ? "vertical" : "horizontal"
+    });
     element.classList.toggle(modifier.shapeVertical,
       ratio < adaptiveParams.ratioShapes.vertical);
     element.classList.toggle(modifier.shapeHorizontal,

@@ -21225,6 +21225,79 @@
   });
 
   // src/internal/create-mount-helper.js
+  function _slicedToArray(r, e) {
+    return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray2(r, e) || _nonIterableRest();
+  }
+  function _nonIterableRest() {
+    throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+  }
+  function _iterableToArrayLimit(r, l) {
+    var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
+    if (null != t) {
+      var e, n, i, u, a = [], f = true, o = false;
+      try {
+        if (i = (t = t.call(r)).next, 0 === l) {
+          if (Object(t) !== t) return;
+          f = false;
+        } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = true) ;
+      } catch (r2) {
+        o = true, n = r2;
+      } finally {
+        try {
+          if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return;
+        } finally {
+          if (o) throw n;
+        }
+      }
+      return a;
+    }
+  }
+  function _arrayWithHoles(r) {
+    if (Array.isArray(r)) return r;
+  }
+  function _createForOfIteratorHelper2(r, e) {
+    var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
+    if (!t) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray2(r)) || e && r && "number" == typeof r.length) {
+        t && (r = t);
+        var _n = 0, F = function F2() {
+        };
+        return { s: F, n: function n() {
+          return _n >= r.length ? { done: true } : { done: false, value: r[_n++] };
+        }, e: function e2(r2) {
+          throw r2;
+        }, f: F };
+      }
+      throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+    }
+    var o, a = true, u = false;
+    return { s: function s() {
+      t = t.call(r);
+    }, n: function n() {
+      var r2 = t.next();
+      return a = r2.done, r2;
+    }, e: function e2(r2) {
+      u = true, o = r2;
+    }, f: function f() {
+      try {
+        a || null == t.return || t.return();
+      } finally {
+        if (u) throw o;
+      }
+    } };
+  }
+  function _unsupportedIterableToArray2(r, a) {
+    if (r) {
+      if ("string" == typeof r) return _arrayLikeToArray2(r, a);
+      var t = {}.toString.call(r).slice(8, -1);
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray2(r, a) : void 0;
+    }
+  }
+  function _arrayLikeToArray2(r, a) {
+    (null == a || a > r.length) && (a = r.length);
+    for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
+    return n;
+  }
   function _regenerator() {
     /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/babel/babel/blob/main/packages/babel-helpers/LICENSE */
     var e, t, r = "function" == typeof Symbol ? Symbol : {}, n = r.iterator || "@@iterator", o = r.toStringTag || "@@toStringTag";
@@ -21303,79 +21376,6 @@
       r2 ? i ? i(e2, r2, { value: n2, enumerable: !t2, configurable: !t2, writable: !t2 }) : e2[r2] = n2 : (o("next", 0), o("throw", 1), o("return", 2));
     }, _regeneratorDefine2(e, r, n, t);
   }
-  function _slicedToArray(r, e) {
-    return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray2(r, e) || _nonIterableRest();
-  }
-  function _nonIterableRest() {
-    throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
-  }
-  function _iterableToArrayLimit(r, l) {
-    var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
-    if (null != t) {
-      var e, n, i, u, a = [], f = true, o = false;
-      try {
-        if (i = (t = t.call(r)).next, 0 === l) {
-          if (Object(t) !== t) return;
-          f = false;
-        } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = true) ;
-      } catch (r2) {
-        o = true, n = r2;
-      } finally {
-        try {
-          if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return;
-        } finally {
-          if (o) throw n;
-        }
-      }
-      return a;
-    }
-  }
-  function _arrayWithHoles(r) {
-    if (Array.isArray(r)) return r;
-  }
-  function _createForOfIteratorHelper2(r, e) {
-    var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
-    if (!t) {
-      if (Array.isArray(r) || (t = _unsupportedIterableToArray2(r)) || e && r && "number" == typeof r.length) {
-        t && (r = t);
-        var _n = 0, F = function F2() {
-        };
-        return { s: F, n: function n() {
-          return _n >= r.length ? { done: true } : { done: false, value: r[_n++] };
-        }, e: function e2(r2) {
-          throw r2;
-        }, f: F };
-      }
-      throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
-    }
-    var o, a = true, u = false;
-    return { s: function s() {
-      t = t.call(r);
-    }, n: function n() {
-      var r2 = t.next();
-      return a = r2.done, r2;
-    }, e: function e2(r2) {
-      u = true, o = r2;
-    }, f: function f() {
-      try {
-        a || null == t.return || t.return();
-      } finally {
-        if (u) throw o;
-      }
-    } };
-  }
-  function _unsupportedIterableToArray2(r, a) {
-    if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray2(r, a);
-      var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray2(r, a) : void 0;
-    }
-  }
-  function _arrayLikeToArray2(r, a) {
-    (null == a || a > r.length) && (a = r.length);
-    for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
-    return n;
-  }
   function asyncGeneratorStep(n, t, e, r, o, a, c) {
     try {
       var i = n[a](c), u = i.value;
@@ -21401,7 +21401,6 @@
   }
   function createMountHelper(root2, mountMaps, mountedElements, elementControllers) {
     var toCapitalized2 = utils_name_case_default.toCapitalized, toCamelCase2 = utils_name_case_default.toCamelCase, fromCamelCase2 = utils_name_case_default.fromCamelCase;
-    var initialAttributeValues = /* @__PURE__ */ new WeakMap();
     var pendingMounts = /* @__PURE__ */ new WeakMap();
     var pendingUnmounts = /* @__PURE__ */ new WeakMap();
     var mountRecords = /* @__PURE__ */ new WeakMap();
@@ -21411,13 +21410,8 @@
       mount: mount,
       unmount: unmount,
       unmountDetached: unmountDetached,
-      update: update,
-      initialAttribute: initialAttribute
+      update: update
     };
-    function initialAttribute(element, name) {
-      var _initialAttributeValu, _initialAttributeValu2;
-      return (_initialAttributeValu = (_initialAttributeValu2 = initialAttributeValues.get(element)) === null || _initialAttributeValu2 === void 0 ? void 0 : _initialAttributeValu2.initial.get(name)) !== null && _initialAttributeValu !== void 0 ? _initialAttributeValu : null;
-    }
     function update(_x) {
       return _update.apply(this, arguments);
     }
@@ -21475,20 +21469,20 @@
     }
     function _unmountDetached() {
       _unmountDetached = _asyncToGenerator(/* @__PURE__ */ _regenerator().m(function _callee3() {
-        var hasDetachedElement, _iterator3, _step3, element, _t;
+        var hasDetachedElement, _iterator, _step, element, _t;
         return _regenerator().w(function(_context3) {
           while (1) switch (_context3.p = _context3.n) {
             case 0:
               hasDetachedElement = false;
-              _iterator3 = _createForOfIteratorHelper2(mountedElements.keys());
+              _iterator = _createForOfIteratorHelper2(mountedElements.keys());
               _context3.p = 1;
-              _iterator3.s();
+              _iterator.s();
             case 2:
-              if ((_step3 = _iterator3.n()).done) {
+              if ((_step = _iterator.n()).done) {
                 _context3.n = 4;
                 break;
               }
-              element = _step3.value;
+              element = _step.value;
               if (element.isConnected) {
                 _context3.n = 3;
                 break;
@@ -21504,10 +21498,10 @@
             case 5:
               _context3.p = 5;
               _t = _context3.v;
-              _iterator3.e(_t);
+              _iterator.e(_t);
             case 6:
               _context3.p = 6;
-              _iterator3.f();
+              _iterator.f();
               return _context3.f(6);
             case 7:
               if (hasDetachedElement) {
@@ -21530,7 +21524,7 @@
     }
     function _mount() {
       _mount = _asyncToGenerator(/* @__PURE__ */ _regenerator().m(function _callee4(elementOrId) {
-        var extensionNames, AelluxJs2, newlyMounted, rootElement, waitMountedAttr, allWaiters, allLinks, _iterator4, _step4, link, href, loadWhen, builds, loadStyleValue, loadStyle, waitExtensions, _i, _Object$entries, _Object$entries$_i, key, options, _args4 = arguments, _t2;
+        var extensionNames, AelluxJs2, newlyMounted, rootElement, waitMountedAttr, allWaiters, allLinks, _iterator2, _step2, link, href, loadWhen, builds, loadStyleValue, loadStyle, waitExtensions, _i, _Object$entries, _Object$entries$_i, key, options, _args4 = arguments, _t2;
         return _regenerator().w(function(_context4) {
           while (1) switch (_context4.p = _context4.n) {
             case 0:
@@ -21551,10 +21545,10 @@
               });
               _context4.p = 2;
               allLinks = findElements(rootElement, "link[rel='aelluxjs-ext']");
-              _iterator4 = _createForOfIteratorHelper2(allLinks);
+              _iterator2 = _createForOfIteratorHelper2(allLinks);
               try {
-                for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
-                  link = _step4.value;
+                for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
+                  link = _step2.value;
                   href = link.getAttribute("href");
                   loadWhen = link.getAttribute(AelluxJs2.attr("load-when")) || void 0;
                   builds = link.getAttribute(AelluxJs2.attr("builds")) || void 0;
@@ -21568,9 +21562,9 @@
                   });
                 }
               } catch (err) {
-                _iterator4.e(err);
+                _iterator2.e(err);
               } finally {
-                _iterator4.f();
+                _iterator2.f();
               }
               waitExtensions = [];
               _i = 0, _Object$entries = Object.entries(root2.AelluxJs.registry.ext);
@@ -21626,7 +21620,7 @@
     }
     function _AelluxJsMount() {
       _AelluxJsMount = _asyncToGenerator(/* @__PURE__ */ _regenerator().m(function _callee5(rootElement, extensionNames, newlyMounted) {
-        var AelluxJs2, filter, mounterSelectors, lazySelectors, _i2, _Object$entries2, _Object$entries2$_i, key, selectorString, _i3, _Object$entries3, _Object$entries3$_i, _key, _selectorString, candidatesByExtension, allElements, _iterator5, _step5, element, localExtensionNames, _i6, _Object$entries4, _Object$entries4$_i, _key2, _selector2, _i7, _Object$entries5, _Object$entries5$_i, _key3, _selector3, _iterator10, _step10, _extensionName2, _candidates, extensions, loaded, _iterator6, _step6, result, registrations, index, _extensions$index, extensionName, candidates, mounter, searchRoots, _iterator7, _step7, candidate, ancestor, _iterator8, _step8, _step8$value, selector, controller, elementsAffected, _i4, _registrations, _registrations$_i, _extensionName, _selector, _controller, _searchRoots, _iterator9, _step9, searchRoot, mountableElements, _iterator0, _step0, mountable, mountId, pendingMount, _i5, _Array$from, name, finishPendingMount, elementController, _elementController, _iterator1, _step1, affected, _t3, _t4, _t5, _t6, _t7, _t8;
+        var AelluxJs2, filter, mounterSelectors, lazySelectors, _i2, _Object$entries2, _Object$entries2$_i, key, selectorString, _i3, _Object$entries3, _Object$entries3$_i, _key, _selectorString, candidatesByExtension, allElements, _iterator3, _step3, element, localExtensionNames, _i6, _Object$entries4, _Object$entries4$_i, _key2, _selector2, _i7, _Object$entries5, _Object$entries5$_i, _key3, _selector3, _iterator0, _step0, _extensionName2, _candidates, extensions, loaded, _iterator4, _step4, result, registrations, index, _extensions$index, extensionName, candidates, mounter, searchRoots, _iterator5, _step5, candidate, ancestor, _iterator6, _step6, _step6$value, selector, controller, elementsAffected, _i4, _registrations, _registrations$_i, _extensionName, _selector, _controller, _searchRoots, _iterator7, _step7, searchRoot, mountableElements, _iterator8, _step8, mountable, mountId, pendingMount, _i5, _Array$from, name, finishPendingMount, elementController, _elementController, _iterator9, _step9, affected, _t3, _t4, _t5, _t6, _t7, _t8;
         return _regenerator().w(function(_context5) {
           while (1) switch (_context5.p = _context5.n) {
             case 0:
@@ -21665,10 +21659,10 @@
             case 1:
               candidatesByExtension = /* @__PURE__ */ new Map();
               allElements = findElements(rootElement, filter.join(","));
-              _iterator5 = _createForOfIteratorHelper2(allElements);
+              _iterator3 = _createForOfIteratorHelper2(allElements);
               try {
-                for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
-                  element = _step5.value;
+                for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
+                  element = _step3.value;
                   localExtensionNames = void 0;
                   if (extensionNames) {
                     localExtensionNames = extensionNames;
@@ -21683,10 +21677,10 @@
                       if (element.matches(_selector3) && filter.indexOf(_selector3) !== -1) localExtensionNames.add(fromCamelCase2(_key3));
                     }
                   }
-                  _iterator10 = _createForOfIteratorHelper2(localExtensionNames);
+                  _iterator0 = _createForOfIteratorHelper2(localExtensionNames);
                   try {
-                    for (_iterator10.s(); !(_step10 = _iterator10.n()).done; ) {
-                      _extensionName2 = _step10.value;
+                    for (_iterator0.s(); !(_step0 = _iterator0.n()).done; ) {
+                      _extensionName2 = _step0.value;
                       _candidates = candidatesByExtension.get(_extensionName2);
                       if (!_candidates) {
                         _candidates = /* @__PURE__ */ new Set();
@@ -21695,15 +21689,15 @@
                       _candidates.add(element);
                     }
                   } catch (err) {
-                    _iterator10.e(err);
+                    _iterator0.e(err);
                   } finally {
-                    _iterator10.f();
+                    _iterator0.f();
                   }
                 }
               } catch (err) {
-                _iterator5.e(err);
+                _iterator3.e(err);
               } finally {
-                _iterator5.f();
+                _iterator3.f();
               }
               extensions = Array.from(candidatesByExtension);
               _context5.n = 2;
@@ -21721,15 +21715,15 @@
               }));
             case 2:
               loaded = _context5.v;
-              _iterator6 = _createForOfIteratorHelper2(loaded);
+              _iterator4 = _createForOfIteratorHelper2(loaded);
               _context5.p = 3;
-              _iterator6.s();
+              _iterator4.s();
             case 4:
-              if ((_step6 = _iterator6.n()).done) {
+              if ((_step4 = _iterator4.n()).done) {
                 _context5.n = 6;
                 break;
               }
-              result = _step6.value;
+              result = _step4.value;
               if (!Object.prototype.hasOwnProperty.call(result, "error")) {
                 _context5.n = 5;
                 break;
@@ -21744,10 +21738,10 @@
             case 7:
               _context5.p = 7;
               _t3 = _context5.v;
-              _iterator6.e(_t3);
+              _iterator4.e(_t3);
             case 8:
               _context5.p = 8;
-              _iterator6.f();
+              _iterator4.f();
               return _context5.f(8);
             case 9:
               registrations = [];
@@ -21772,23 +21766,23 @@
               return _context5.a(3, 13);
             case 12:
               searchRoots = [];
-              _iterator7 = _createForOfIteratorHelper2(candidates);
+              _iterator5 = _createForOfIteratorHelper2(candidates);
               try {
-                for (_iterator7.s(); !(_step7 = _iterator7.n()).done; ) {
-                  candidate = _step7.value;
+                for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
+                  candidate = _step5.value;
                   ancestor = candidate.parentNode;
                   while (ancestor && !candidates.has(ancestor)) ancestor = ancestor.parentNode;
                   if (!ancestor) searchRoots.push(candidate);
                 }
               } catch (err) {
-                _iterator7.e(err);
+                _iterator5.e(err);
               } finally {
-                _iterator7.f();
+                _iterator5.f();
               }
-              _iterator8 = _createForOfIteratorHelper2(mounter);
+              _iterator6 = _createForOfIteratorHelper2(mounter);
               try {
-                for (_iterator8.s(); !(_step8 = _iterator8.n()).done; ) {
-                  _step8$value = _slicedToArray(_step8.value, 2), selector = _step8$value[0], controller = _step8$value[1];
+                for (_iterator6.s(); !(_step6 = _iterator6.n()).done; ) {
+                  _step6$value = _slicedToArray(_step6.value, 2), selector = _step6$value[0], controller = _step6$value[1];
                   registrations.push({
                     extensionName: extensionName,
                     selector: selector,
@@ -21799,9 +21793,9 @@
                   });
                 }
               } catch (err) {
-                _iterator8.e(err);
+                _iterator6.e(err);
               } finally {
-                _iterator8.f();
+                _iterator6.f();
               }
             case 13:
               index++;
@@ -21826,25 +21820,25 @@
               }
               return _context5.a(3, 38);
             case 17:
-              _iterator9 = _createForOfIteratorHelper2(_searchRoots);
+              _iterator7 = _createForOfIteratorHelper2(_searchRoots);
               _context5.p = 18;
-              _iterator9.s();
+              _iterator7.s();
             case 19:
-              if ((_step9 = _iterator9.n()).done) {
+              if ((_step7 = _iterator7.n()).done) {
                 _context5.n = 33;
                 break;
               }
-              searchRoot = _step9.value;
+              searchRoot = _step7.value;
               mountableElements = findElements(searchRoot, _selector);
-              _iterator0 = _createForOfIteratorHelper2(mountableElements);
+              _iterator8 = _createForOfIteratorHelper2(mountableElements);
               _context5.p = 20;
-              _iterator0.s();
+              _iterator8.s();
             case 21:
-              if ((_step0 = _iterator0.n()).done) {
+              if ((_step8 = _iterator8.n()).done) {
                 _context5.n = 29;
                 break;
               }
-              mountable = _step0.value;
+              mountable = _step8.value;
               mountId = "".concat(_extensionName, "@").concat(_selector);
               if (!isMounted(mountable, mountId)) {
                 _context5.n = 23;
@@ -21866,7 +21860,6 @@
                   if (name.startsWith(classPrefix)) mountable.classList.remove(name);
                 }
               }
-              rememberInitialAttributes(mountable);
               setMounted(mountable, mountId, true, _controller.priority);
               finishPendingMount = beginPendingMount(mountable, mountId);
               _context5.p = 24;
@@ -21892,7 +21885,6 @@
                 _elementController.despawn(mountId);
                 if (!_elementController.hasMounts()) elementControllers.delete(mountable);
               }
-              restoreInitialAttributes(mountable);
               AelluxJs2.diagnostics.error(AelluxJs2.diagnostics.ERROR_EXTENSION_MOUNT, {
                 cause: _t4,
                 extension: _extensionName,
@@ -21913,10 +21905,10 @@
             case 30:
               _context5.p = 30;
               _t5 = _context5.v;
-              _iterator0.e(_t5);
+              _iterator8.e(_t5);
             case 31:
               _context5.p = 31;
-              _iterator0.f();
+              _iterator8.f();
               return _context5.f(31);
             case 32:
               _context5.n = 19;
@@ -21927,10 +21919,10 @@
             case 34:
               _context5.p = 34;
               _t6 = _context5.v;
-              _iterator9.e(_t6);
+              _iterator7.e(_t6);
             case 35:
               _context5.p = 35;
-              _iterator9.f();
+              _iterator7.f();
               return _context5.f(35);
             case 36:
               _context5.n = 38;
@@ -21949,15 +21941,15 @@
               _context5.n = 15;
               break;
             case 39:
-              _iterator1 = _createForOfIteratorHelper2(elementsAffected);
+              _iterator9 = _createForOfIteratorHelper2(elementsAffected);
               _context5.p = 40;
-              _iterator1.s();
+              _iterator9.s();
             case 41:
-              if ((_step1 = _iterator1.n()).done) {
+              if ((_step9 = _iterator9.n()).done) {
                 _context5.n = 45;
                 break;
               }
-              affected = _step1.value;
+              affected = _step9.value;
               if (!(!affected.isConnected || !isMounted(affected))) {
                 _context5.n = 43;
                 break;
@@ -21982,10 +21974,10 @@
             case 46:
               _context5.p = 46;
               _t8 = _context5.v;
-              _iterator1.e(_t8);
+              _iterator9.e(_t8);
             case 47:
               _context5.p = 47;
-              _iterator1.f();
+              _iterator9.f();
               return _context5.f(47);
             case 48:
               AelluxJs2.dispatch("Mount", {
@@ -22007,7 +21999,7 @@
     }
     function _AelluxJsMounted() {
       _AelluxJsMounted = _asyncToGenerator(/* @__PURE__ */ _regenerator().m(function _callee6(rootElement, method) {
-        var extensionNames, detachedOnly, AelluxJs2, selectedNames, affected, registrations, _i8, _Array$from2, _Array$from2$_i, element, mountIds, inRoot, detachedInGlobalUnmount, _i9, _Array$from3, mountId, separator, extensionName, selector, extensionKey, mounter, controller, _iterator11, _step11, _step11$value, _element, _mountId, _controller2, _extensionName3, _selector4, _args6 = arguments, _t9, _t0;
+        var extensionNames, detachedOnly, AelluxJs2, selectedNames, affected, registrations, _i8, _Array$from2, _Array$from2$_i, element, mountIds, inRoot, detachedInGlobalUnmount, _i9, _Array$from3, mountId, separator, extensionName, selector, extensionKey, mounter, controller, _iterator1, _step1, _step1$value, _element, _mountId, _controller2, _extensionName3, _selector4, _args6 = arguments, _t9, _t0;
         return _regenerator().w(function(_context6) {
           while (1) switch (_context6.p = _context6.n) {
             case 0:
@@ -22100,15 +22092,15 @@
                 break;
               }
               registrations.sort(compareUnmountOrder);
-              _iterator11 = _createForOfIteratorHelper2(registrations);
+              _iterator1 = _createForOfIteratorHelper2(registrations);
               _context6.p = 11;
-              _iterator11.s();
+              _iterator1.s();
             case 12:
-              if ((_step11 = _iterator11.n()).done) {
+              if ((_step1 = _iterator1.n()).done) {
                 _context6.n = 15;
                 break;
               }
-              _step11$value = _step11.value, _element = _step11$value.element, _mountId = _step11$value.mountId, _controller2 = _step11$value.controller, _extensionName3 = _step11$value.extensionName, _selector4 = _step11$value.selector;
+              _step1$value = _step1.value, _element = _step1$value.element, _mountId = _step1$value.mountId, _controller2 = _step1$value.controller, _extensionName3 = _step1$value.extensionName, _selector4 = _step1$value.selector;
               _context6.n = 13;
               return unmountRegistration(_element, _mountId, _controller2, _extensionName3, _selector4);
             case 13:
@@ -22126,10 +22118,10 @@
             case 16:
               _context6.p = 16;
               _t0 = _context6.v;
-              _iterator11.e(_t0);
+              _iterator1.e(_t0);
             case 17:
               _context6.p = 17;
-              _iterator11.f();
+              _iterator1.f();
               return _context6.f(17);
             case 18:
               AelluxJs2.dispatch(toCapitalized2(method), {
@@ -22217,7 +22209,6 @@
                   if (!elementController.hasMounts()) elementControllers.delete(element);
                 }
                 element.classList.toggle(AelluxJs2.className("mounted"), isMounted(element));
-                restoreInitialAttributes(element);
               } catch (cause) {
                 diagnostics.error(diagnostics.ERROR_EXTENSION_MOUNT, {
                   cause: cause,
@@ -22362,52 +22353,6 @@
       }
       if (mounts.size === 0) mountedElements.delete(element);
     }
-    function rememberInitialAttributes(element) {
-      var record = initialAttributeValues.get(element);
-      if (record) {
-        record.users++;
-        return;
-      }
-      var initial = /* @__PURE__ */ new Map();
-      var _iterator = _createForOfIteratorHelper2(element.attributes), _step;
-      try {
-        for (_iterator.s(); !(_step = _iterator.n()).done; ) {
-          var attribute = _step.value;
-          if (isRestoredAttribute(attribute.name)) initial.set(attribute.name, attribute.value);
-        }
-      } catch (err) {
-        _iterator.e(err);
-      } finally {
-        _iterator.f();
-      }
-      initialAttributeValues.set(element, {
-        initial: initial,
-        users: 1
-      });
-    }
-    function restoreInitialAttributes(element) {
-      var record = initialAttributeValues.get(element);
-      if (!record || --record.users) return;
-      for (var index = element.attributes.length - 1; index >= 0; index--) {
-        var name = element.attributes[index].name;
-        if (isRestoredAttribute(name) && !record.initial.has(name)) element.removeAttribute(name);
-      }
-      var _iterator2 = _createForOfIteratorHelper2(record.initial), _step2;
-      try {
-        for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
-          var _step2$value = _slicedToArray(_step2.value, 2), _name = _step2$value[0], value = _step2$value[1];
-          if (element.getAttribute(_name) !== value) element.setAttribute(_name, value);
-        }
-      } catch (err) {
-        _iterator2.e(err);
-      } finally {
-        _iterator2.f();
-      }
-      initialAttributeValues.delete(element);
-    }
-    function isRestoredAttribute(name) {
-      return name === "hidden" || name.startsWith("data-ae-") || name.startsWith("aria-");
-    }
   }
   var init_create_mount_helper = __esm({
     "src/internal/create-mount-helper.js": function() {
@@ -22498,7 +22443,6 @@
       mount: helper.mount,
       unmount: helper.unmount,
       update: helper.update,
-      initialAttribute: helper.initialAttribute,
       destroy: destroy
     };
     var observer = null;
@@ -22706,11 +22650,185 @@
     }
   });
 
+  // src/internal/create-aria-helper.js
+  function _slicedToArray2(r, e) {
+    return _arrayWithHoles2(r) || _iterableToArrayLimit2(r, e) || _unsupportedIterableToArray4(r, e) || _nonIterableRest2();
+  }
+  function _nonIterableRest2() {
+    throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+  }
+  function _unsupportedIterableToArray4(r, a) {
+    if (r) {
+      if ("string" == typeof r) return _arrayLikeToArray4(r, a);
+      var t = {}.toString.call(r).slice(8, -1);
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray4(r, a) : void 0;
+    }
+  }
+  function _arrayLikeToArray4(r, a) {
+    (null == a || a > r.length) && (a = r.length);
+    for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
+    return n;
+  }
+  function _iterableToArrayLimit2(r, l) {
+    var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
+    if (null != t) {
+      var e, n, i, u, a = [], f = true, o = false;
+      try {
+        if (i = (t = t.call(r)).next, 0 === l) {
+          if (Object(t) !== t) return;
+          f = false;
+        } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = true) ;
+      } catch (r2) {
+        o = true, n = r2;
+      } finally {
+        try {
+          if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return;
+        } finally {
+          if (o) throw n;
+        }
+      }
+      return a;
+    }
+  }
+  function _arrayWithHoles2(r) {
+    if (Array.isArray(r)) return r;
+  }
+  function _typeof2(o) {
+    "@babel/helpers - typeof";
+    return _typeof2 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
+      return typeof o2;
+    } : function(o2) {
+      return o2 && "function" == typeof Symbol && o2.constructor === Symbol && o2 !== Symbol.prototype ? "symbol" : typeof o2;
+    }, _typeof2(o);
+  }
+  function createAriaHelper() {
+    var elements = /* @__PURE__ */ new WeakMap();
+    var nextOrder = 0;
+    function attributeName(name) {
+      if (typeof name !== "string" || !/^(?:aria-)?[a-z][a-z0-9-]*$/.test(name)) {
+        throw new TypeError("Invalid ARIA name");
+      }
+      return name.startsWith("aria-") ? name : "aria-".concat(name);
+    }
+    function attributeValue(name, value) {
+      if (value === null || value === void 0) {
+        throw new TypeError("Use unset() for null");
+      }
+      if (Array.isArray(value)) {
+        return value.join(" ");
+      }
+      if (name === "aria-hidden" && typeof value !== "boolean") {
+        throw new TypeError("Invalid aria-hidden value");
+      }
+      return String(value);
+    }
+    function write(element, name, value) {
+      if (value === null) {
+        if (element.hasAttribute(name)) element.removeAttribute(name);
+      } else if (element.getAttribute(name) !== value) {
+        element.setAttribute(name, value);
+      }
+    }
+    function reconcile(element, record, name) {
+      var winner = null;
+      var hidden = false;
+      record.handlers.forEach(function(handler) {
+        if (!handler.values.has(name)) return;
+        if (name === "aria-hidden" && handler.values.get(name) === "true") hidden = true;
+        if (!winner || handler.priority > winner.priority || handler.priority === winner.priority && handler.order > winner.order) {
+          winner = handler;
+        }
+      });
+      if (!winner) {
+        var _record$baseline$get;
+        write(element, name, (_record$baseline$get = record.baseline.get(name)) !== null && _record$baseline$get !== void 0 ? _record$baseline$get : null);
+        record.baseline.delete(name);
+        return;
+      }
+      write(element, name, name === "aria-hidden" && hidden ? "true" : winner.values.get(name));
+    }
+    function register(element) {
+      var options = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : {};
+      if (!element || element.nodeType !== 1) {
+        throw new TypeError("Invalid ARIA element");
+      }
+      var priority = options.priority === void 0 ? 0 : options.priority;
+      if (typeof priority !== "number" || !Number.isFinite(priority)) {
+        throw new TypeError("Invalid ARIA priority");
+      }
+      var record = elements.get(element);
+      if (!record) {
+        record = {
+          handlers: /* @__PURE__ */ new Set(),
+          baseline: /* @__PURE__ */ new Map()
+        };
+        elements.set(element, record);
+      }
+      var handler = {
+        priority: priority,
+        order: nextOrder++,
+        values: /* @__PURE__ */ new Map()
+      };
+      record.handlers.add(handler);
+      var released = false;
+      return {
+        set: function set(values) {
+          if (released) return false;
+          if (!values || _typeof2(values) !== "object") {
+            throw new TypeError("Invalid ARIA values");
+          }
+          var updates = Object.entries(values).map(function(_ref) {
+            var _ref2 = _slicedToArray2(_ref, 2), key = _ref2[0], value = _ref2[1];
+            var name = attributeName(key);
+            return [name, attributeValue(name, value)];
+          });
+          updates.forEach(function(_ref3) {
+            var _ref4 = _slicedToArray2(_ref3, 2), name = _ref4[0], value = _ref4[1];
+            if (!record.baseline.has(name)) record.baseline.set(name, element.getAttribute(name));
+            handler.values.set(name, value);
+            reconcile(element, record, name);
+          });
+          return true;
+        },
+        unset: function unset(key) {
+          if (released) return false;
+          var name = attributeName(key);
+          if (!handler.values.delete(name)) return false;
+          reconcile(element, record, name);
+          return true;
+        },
+        initial: function initial(key) {
+          var name = attributeName(key);
+          return record.baseline.has(name) ? record.baseline.get(name) : element.getAttribute(name);
+        },
+        release: function release() {
+          if (released) return false;
+          released = true;
+          record.handlers.delete(handler);
+          handler.values.forEach(function(_, name) {
+            return reconcile(element, record, name);
+          });
+          handler.values.clear();
+          if (!record.handlers.size) elements.delete(element);
+          return true;
+        }
+      };
+    }
+    return {
+      register: register
+    };
+  }
+  var init_create_aria_helper = __esm({
+    "src/internal/create-aria-helper.js": function() {
+      /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+    }
+  });
+
   // src/aellux.orchestrator.js
   function _createForOfIteratorHelper4(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
-      if (Array.isArray(r) || (t = _unsupportedIterableToArray4(r)) || e && r && "number" == typeof r.length) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray5(r)) || e && r && "number" == typeof r.length) {
         t && (r = t);
         var _n = 0, F = function F2() {
         };
@@ -22738,14 +22856,14 @@
       }
     } };
   }
-  function _unsupportedIterableToArray4(r, a) {
+  function _unsupportedIterableToArray5(r, a) {
     if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray4(r, a);
+      if ("string" == typeof r) return _arrayLikeToArray5(r, a);
       var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray4(r, a) : void 0;
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray5(r, a) : void 0;
     }
   }
-  function _arrayLikeToArray4(r, a) {
+  function _arrayLikeToArray5(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
@@ -22856,12 +22974,14 @@
       init_asset_load_helper();
       init_build_layout_scheduler();
       init_build_mount_map_manager();
+      init_create_aria_helper();
       init_utils_name_case();
       /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
       (function(root2) {
         "use strict";
         var toCamelCase2 = utils_name_case_default.toCamelCase, fromCamelCase2 = utils_name_case_default.fromCamelCase;
         var extensionPromises = {};
+        var aria = createAriaHelper();
         var mountManager = buildMountMapManager(root2);
         var layoutScheduler = buildLayoutScheduler();
         root2.AelluxJs = Object.assign(root2.AelluxJs, {
@@ -22877,16 +22997,21 @@
                     }
                     _context.n = 1;
                     return new Promise(function(resolve) {
-                      var _startMountCallback = function startMountCallback() {
+                      var _startCallback = function startCallback() {
+                        if (AelluxJs.options.skipGlobalMount === true) {
+                          AelluxJs.off("$DOMContentLoaded", _startCallback);
+                          resolve();
+                          return;
+                        }
                         AelluxJs.mount().then(function() {
-                          AelluxJs.off("$DOMContentLoaded", _startMountCallback);
+                          AelluxJs.off("$DOMContentLoaded", _startCallback);
                           resolve();
                         });
                       };
-                      if (document.readyState === "loading") AelluxJs.on("$DOMContentLoaded", _startMountCallback, {
+                      if (document.readyState === "loading") AelluxJs.on("$DOMContentLoaded", _startCallback, {
                         once: true
                       });
-                      else _startMountCallback();
+                      else _startCallback();
                     });
                   case 1:
                     AelluxJs.dispatch("Ready");
@@ -23046,6 +23171,7 @@
             return getExtension(extensionName);
           },
           request: defaultRequest,
+          aria: aria,
           waitLayout: layoutScheduler,
           mountManager: mountManager
         });
@@ -23249,7 +23375,7 @@
   function _createForOfIteratorHelper5(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
-      if (Array.isArray(r) || (t = _unsupportedIterableToArray5(r)) || e && r && "number" == typeof r.length) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray6(r)) || e && r && "number" == typeof r.length) {
         t && (r = t);
         var _n = 0, F = function F2() {
         };
@@ -23277,25 +23403,25 @@
       }
     } };
   }
-  function _slicedToArray2(r, e) {
-    return _arrayWithHoles2(r) || _iterableToArrayLimit2(r, e) || _unsupportedIterableToArray5(r, e) || _nonIterableRest2();
+  function _slicedToArray3(r, e) {
+    return _arrayWithHoles3(r) || _iterableToArrayLimit3(r, e) || _unsupportedIterableToArray6(r, e) || _nonIterableRest3();
   }
-  function _nonIterableRest2() {
+  function _nonIterableRest3() {
     throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
-  function _unsupportedIterableToArray5(r, a) {
+  function _unsupportedIterableToArray6(r, a) {
     if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray5(r, a);
+      if ("string" == typeof r) return _arrayLikeToArray6(r, a);
       var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray5(r, a) : void 0;
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray6(r, a) : void 0;
     }
   }
-  function _arrayLikeToArray5(r, a) {
+  function _arrayLikeToArray6(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
   }
-  function _iterableToArrayLimit2(r, l) {
+  function _iterableToArrayLimit3(r, l) {
     var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (null != t) {
       var e, n, i, u, a = [], f = true, o = false;
@@ -23316,7 +23442,7 @@
       return a;
     }
   }
-  function _arrayWithHoles2(r) {
+  function _arrayWithHoles3(r) {
     if (Array.isArray(r)) return r;
   }
   var init_aellux_ext_preference = __esm({
@@ -23390,7 +23516,7 @@
             });
           });
           Object.entries(prefOptions).forEach(function(_ref) {
-            var _ref2 = _slicedToArray2(_ref, 2), param = _ref2[0], options2 = _ref2[1];
+            var _ref2 = _slicedToArray3(_ref, 2), param = _ref2[0], options2 = _ref2[1];
             defaultPreferences[param] = options2[0];
           });
           loadUserPreferences();
@@ -23702,13 +23828,13 @@
       r2 ? i ? i(e2, r2, { value: n2, enumerable: !t2, configurable: !t2, writable: !t2 }) : e2[r2] = n2 : (o("next", 0), o("throw", 1), o("return", 2));
     }, _regeneratorDefine23(e, r, n, t);
   }
-  function _typeof2(o) {
+  function _typeof3(o) {
     "@babel/helpers - typeof";
-    return _typeof2 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
+    return _typeof3 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
       return typeof o2;
     } : function(o2) {
       return o2 && "function" == typeof Symbol && o2.constructor === Symbol && o2 !== Symbol.prototype ? "symbol" : typeof o2;
-    }, _typeof2(o);
+    }, _typeof3(o);
   }
   function asyncGeneratorStep3(n, t, e, r, o, a, c) {
     try {
@@ -23872,11 +23998,11 @@
           AelluxJs2.dispatch(name, options);
         }
         function copyHistoryState(state) {
-          if (!state || _typeof2(state) !== "object") return state;
+          if (!state || _typeof3(state) !== "object") return state;
           if (typeof root2.structuredClone === "function") return root2.structuredClone(state);
           var copy = Array.isArray(state) ? state.slice() : Object.assign({}, state);
-          if (state.snapshot && _typeof2(state.snapshot) === "object") copy.snapshot = Object.assign({}, state.snapshot);
-          if (state.ajaxReplace && _typeof2(state.ajaxReplace) === "object") {
+          if (state.snapshot && _typeof3(state.snapshot) === "object") copy.snapshot = Object.assign({}, state.snapshot);
+          if (state.ajaxReplace && _typeof3(state.ajaxReplace) === "object") {
             copy.ajaxReplace = Object.assign({}, state.ajaxReplace);
             if (Array.isArray(state.ajaxReplace.selectors)) copy.ajaxReplace.selectors = state.ajaxReplace.selectors.slice();
           }
@@ -23926,13 +24052,13 @@
         }
         function mergeHistoryState(state) {
           var currentState = history.state;
-          if (!currentState || _typeof2(currentState) !== "object" || Array.isArray(currentState)) return state;
+          if (!currentState || _typeof3(currentState) !== "object" || Array.isArray(currentState)) return state;
           return Object.assign({}, currentState, state);
         }
         function OnPushState(event) {
           try {
             var detail = event && event.detail;
-            if (!detail || _typeof2(detail) !== "object" || typeof detail.key !== "string" || !detail.key.trim() || typeof detail.value !== "string" || !detail.value.trim() || detail.title !== void 0 && typeof detail.title !== "string") {
+            if (!detail || _typeof3(detail) !== "object" || typeof detail.key !== "string" || !detail.key.trim() || typeof detail.value !== "string" || !detail.value.trim() || detail.title !== void 0 && typeof detail.title !== "string") {
               AelluxJs2.diagnostics.warn(AelluxJs2.diagnostics.WARN_NAVIGATION_EVENT_INVALID, {
                 extension: extensionName,
                 event: "PushState",
@@ -23952,7 +24078,7 @@
         function OnPushAjaxReplace(event) {
           try {
             var detail = event && event.detail;
-            if (!detail || _typeof2(detail) !== "object" || typeof detail.url !== "string" || !detail.url.trim() || !Object.prototype.hasOwnProperty.call(detail, "selectors") || detail.selectors == null) {
+            if (!detail || _typeof3(detail) !== "object" || typeof detail.url !== "string" || !detail.url.trim() || !Object.prototype.hasOwnProperty.call(detail, "selectors") || detail.selectors == null) {
               AelluxJs2.diagnostics.warn(AelluxJs2.diagnostics.WARN_NAVIGATION_EVENT_INVALID, {
                 extension: extensionName,
                 event: "PushAjaxReplace",
@@ -23972,7 +24098,7 @@
         function OnUpdateBaseTitle(event) {
           try {
             var detail = event && event.detail;
-            if (!detail || _typeof2(detail) !== "object" || !Object.prototype.hasOwnProperty.call(detail, "title") || typeof detail.title !== "string") {
+            if (!detail || _typeof3(detail) !== "object" || !Object.prototype.hasOwnProperty.call(detail, "title") || typeof detail.title !== "string") {
               AelluxJs2.diagnostics.warn(AelluxJs2.diagnostics.WARN_NAVIGATION_EVENT_INVALID, {
                 extension: extensionName,
                 event: "UpdateBaseTitle",
@@ -24254,7 +24380,7 @@
   function _createForOfIteratorHelper6(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
-      if (Array.isArray(r) || (t = _unsupportedIterableToArray6(r)) || e && r && "number" == typeof r.length) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray7(r)) || e && r && "number" == typeof r.length) {
         t && (r = t);
         var _n = 0, F = function F2() {
         };
@@ -24282,14 +24408,14 @@
       }
     } };
   }
-  function _unsupportedIterableToArray6(r, a) {
+  function _unsupportedIterableToArray7(r, a) {
     if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray6(r, a);
+      if ("string" == typeof r) return _arrayLikeToArray7(r, a);
       var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray6(r, a) : void 0;
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray7(r, a) : void 0;
     }
   }
-  function _arrayLikeToArray6(r, a) {
+  function _arrayLikeToArray7(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
@@ -24475,13 +24601,13 @@
 
   // src/aellux.ext.point.js
   var aellux_ext_point_exports = {};
-  function _typeof3(o) {
+  function _typeof4(o) {
     "@babel/helpers - typeof";
-    return _typeof3 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
+    return _typeof4 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
       return typeof o2;
     } : function(o2) {
       return o2 && "function" == typeof Symbol && o2.constructor === Symbol && o2 !== Symbol.prototype ? "symbol" : typeof o2;
-    }, _typeof3(o);
+    }, _typeof4(o);
   }
   function _classCallCheck(a, n) {
     if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function");
@@ -24497,14 +24623,14 @@
   }
   function _toPropertyKey(t) {
     var i = _toPrimitive(t, "string");
-    return "symbol" == _typeof3(i) ? i : i + "";
+    return "symbol" == _typeof4(i) ? i : i + "";
   }
   function _toPrimitive(t, r) {
-    if ("object" != _typeof3(t) || !t) return t;
+    if ("object" != _typeof4(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof3(i)) return i;
+      if ("object" != _typeof4(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
@@ -24512,7 +24638,7 @@
   function _createForOfIteratorHelper7(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
-      if (Array.isArray(r) || (t = _unsupportedIterableToArray7(r)) || e && r && "number" == typeof r.length) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray8(r)) || e && r && "number" == typeof r.length) {
         t && (r = t);
         var _n = 0, F = function F2() {
         };
@@ -24540,14 +24666,14 @@
       }
     } };
   }
-  function _unsupportedIterableToArray7(r, a) {
+  function _unsupportedIterableToArray8(r, a) {
     if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray7(r, a);
+      if ("string" == typeof r) return _arrayLikeToArray8(r, a);
       var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray7(r, a) : void 0;
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray8(r, a) : void 0;
     }
   }
-  function _arrayLikeToArray7(r, a) {
+  function _arrayLikeToArray8(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
@@ -24927,10 +25053,33 @@
       r2 ? i ? i(e2, r2, { value: n2, enumerable: !t2, configurable: !t2, writable: !t2 }) : e2[r2] = n2 : (o("next", 0), o("throw", 1), o("return", 2));
     }, _regeneratorDefine25(e, r, n, t);
   }
+  function asyncGeneratorStep5(n, t, e, r, o, a, c) {
+    try {
+      var i = n[a](c), u = i.value;
+    } catch (n2) {
+      return void e(n2);
+    }
+    i.done ? t(u) : Promise.resolve(u).then(r, o);
+  }
+  function _asyncToGenerator5(n) {
+    return function() {
+      var t = this, e = arguments;
+      return new Promise(function(r, o) {
+        var a = n.apply(t, e);
+        function _next(n2) {
+          asyncGeneratorStep5(a, r, o, _next, _throw, "next", n2);
+        }
+        function _throw(n2) {
+          asyncGeneratorStep5(a, r, o, _next, _throw, "throw", n2);
+        }
+        _next(void 0);
+      });
+    };
+  }
   function _createForOfIteratorHelper8(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
-      if (Array.isArray(r) || (t = _unsupportedIterableToArray8(r)) || e && r && "number" == typeof r.length) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray9(r)) || e && r && "number" == typeof r.length) {
         t && (r = t);
         var _n = 0, F = function F2() {
         };
@@ -24958,40 +25107,17 @@
       }
     } };
   }
-  function _unsupportedIterableToArray8(r, a) {
+  function _unsupportedIterableToArray9(r, a) {
     if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray8(r, a);
+      if ("string" == typeof r) return _arrayLikeToArray9(r, a);
       var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray8(r, a) : void 0;
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray9(r, a) : void 0;
     }
   }
-  function _arrayLikeToArray8(r, a) {
+  function _arrayLikeToArray9(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
-  }
-  function asyncGeneratorStep5(n, t, e, r, o, a, c) {
-    try {
-      var i = n[a](c), u = i.value;
-    } catch (n2) {
-      return void e(n2);
-    }
-    i.done ? t(u) : Promise.resolve(u).then(r, o);
-  }
-  function _asyncToGenerator5(n) {
-    return function() {
-      var t = this, e = arguments;
-      return new Promise(function(r, o) {
-        var a = n.apply(t, e);
-        function _next(n2) {
-          asyncGeneratorStep5(a, r, o, _next, _throw, "next", n2);
-        }
-        function _throw(n2) {
-          asyncGeneratorStep5(a, r, o, _next, _throw, "throw", n2);
-        }
-        _next(void 0);
-      });
-    };
   }
   var init_aellux_ext_anchor = __esm({
     "src/aellux.ext.anchor.js": function() {
@@ -25005,6 +25131,7 @@
         }
         var attribute = AelluxJs2.attr(extensionName);
         var targetAttribute = AelluxJs2.attr("anchor-target");
+        var fpsAttribute = AelluxJs2.attr("anchor-fps");
         var layoutEvent = AelluxJs2.eventName("Layout");
         var anchoredClass = AelluxJs2.className("anchored");
         var baseProperties = ["position", "left", "top", "transform", "transform-origin"];
@@ -25020,13 +25147,32 @@
           "bottom-center": [0.5, 1],
           "bottom-right": [1, 1]
         };
-        var UPDATE_INTERVAL_MS = 100;
+        var DEFAULT_FPS = 30;
+        var DEFAULT_INTERVAL_MS = Math.round(1e3 / DEFAULT_FPS);
         var anchors = /* @__PURE__ */ new Map();
         var elementMemories = /* @__PURE__ */ new WeakMap();
         var updateTimeout = null;
         var layoutUpdateTimeout = null;
         var layoutUpdateUntil = 0;
-        var lastUpdateTime = -UPDATE_INTERVAL_MS;
+        var lastUpdateTime = -DEFAULT_INTERVAL_MS;
+        function updateIntervalMs() {
+          var interval = Infinity;
+          var _iterator = _createForOfIteratorHelper8(anchors.keys()), _step;
+          try {
+            for (_iterator.s(); !(_step = _iterator.n()).done; ) {
+              var element = _step.value;
+              var value = element.getAttribute(fpsAttribute);
+              var fps = value === null || !value.trim() ? NaN : Number(value);
+              var elementInterval = Number.isFinite(fps) && fps > 0 ? Math.max(1, Math.round(1e3 / fps)) : DEFAULT_INTERVAL_MS;
+              interval = Math.min(interval, elementInterval);
+            }
+          } catch (err) {
+            _iterator.e(err);
+          } finally {
+            _iterator.f();
+          }
+          return Number.isFinite(interval) ? interval : DEFAULT_INTERVAL_MS;
+        }
         AelluxJs2.extAttach(extensionName, {
           init: init,
           destroy: destroy
@@ -25066,7 +25212,7 @@
                   updateTimeout = null;
                   layoutUpdateTimeout = null;
                   layoutUpdateUntil = 0;
-                  lastUpdateTime = -UPDATE_INTERVAL_MS;
+                  lastUpdateTime = -DEFAULT_INTERVAL_MS;
                   _context.n = 1;
                   return Promise.all(Array.from(anchors.keys(), unmountAnchor));
                 case 1:
@@ -25142,7 +25288,7 @@
                     updateTimeout = null;
                     layoutUpdateTimeout = null;
                     layoutUpdateUntil = 0;
-                    lastUpdateTime = -UPDATE_INTERVAL_MS;
+                    lastUpdateTime = -DEFAULT_INTERVAL_MS;
                   }
                   _context2.n = 2;
                   return AelluxJs2.waitLayout.update(deactivate, [element, state, memory]);
@@ -25155,37 +25301,39 @@
         }
         function scheduleUpdate() {
           if (!anchors.size) return;
+          var interval = updateIntervalMs();
           var elapsed = now() - lastUpdateTime;
-          if (elapsed >= UPDATE_INTERVAL_MS) {
+          if (elapsed >= interval) {
             if (updateTimeout !== null) clearTimeout(updateTimeout);
             updateTimeout = null;
             flushUpdate();
             return;
           }
           if (updateTimeout !== null) return;
-          updateTimeout = setTimeout(flushUpdate, UPDATE_INTERVAL_MS - elapsed);
+          updateTimeout = setTimeout(flushUpdate, interval - elapsed);
         }
         function scheduleLayoutUpdate(event) {
+          var interval = updateIntervalMs();
           var durationMs = Number(event && event.detail ? event.detail.durationMs : NaN);
           if (!Number.isFinite(durationMs) || durationMs < 0) {
             scheduleUpdate();
             return;
           }
           if (durationMs === 0) {
-            if (layoutUpdateTimeout === null) layoutUpdateTimeout = setTimeout(checkLayoutUpdate, UPDATE_INTERVAL_MS);
+            if (layoutUpdateTimeout === null) layoutUpdateTimeout = setTimeout(checkLayoutUpdate, interval);
             return;
           }
           scheduleUpdate();
           layoutUpdateUntil = Math.max(layoutUpdateUntil, now() + durationMs);
           if (layoutUpdateTimeout !== null) return;
-          layoutUpdateTimeout = setTimeout(checkLayoutUpdate, Math.min(UPDATE_INTERVAL_MS, durationMs));
+          layoutUpdateTimeout = setTimeout(checkLayoutUpdate, Math.min(interval, durationMs));
         }
         function checkLayoutUpdate() {
           layoutUpdateTimeout = null;
           scheduleUpdate();
           var remaining = layoutUpdateUntil - now();
           if (remaining > 0) {
-            layoutUpdateTimeout = setTimeout(checkLayoutUpdate, Math.min(UPDATE_INTERVAL_MS, remaining));
+            layoutUpdateTimeout = setTimeout(checkLayoutUpdate, Math.min(updateIntervalMs(), remaining));
           } else {
             layoutUpdateUntil = 0;
           }
@@ -25193,10 +25341,10 @@
         function flushUpdate() {
           updateTimeout = null;
           lastUpdateTime = now();
-          var _iterator = _createForOfIteratorHelper8(anchors.keys()), _step;
+          var _iterator2 = _createForOfIteratorHelper8(anchors.keys()), _step2;
           try {
             var _loop = function _loop2() {
-              var element = _step.value;
+              var element = _step2.value;
               updateAnchor(element).catch(function(cause) {
                 AelluxJs2.diagnostics.error(AelluxJs2.diagnostics.ERROR_EXTENSION_MOUNT, {
                   cause: cause,
@@ -25206,13 +25354,13 @@
                 });
               });
             };
-            for (_iterator.s(); !(_step = _iterator.n()).done; ) {
+            for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
               _loop();
             }
           } catch (err) {
-            _iterator.e(err);
+            _iterator2.e(err);
           } finally {
-            _iterator.f();
+            _iterator2.f();
           }
         }
         function now() {
@@ -25326,16 +25474,16 @@
                     element.style.setProperty("--ae-anchor-y", "".concat(selected.y, "px"));
                     element.style.setProperty("--ae-anchor-origin-x", "".concat(selected.self[0] * 100, "%"));
                     element.style.setProperty("--ae-anchor-origin-y", "".concat(selected.self[1] * 100, "%"));
-                    var _iterator5 = _createForOfIteratorHelper8(baseProperties), _step5;
+                    var _iterator6 = _createForOfIteratorHelper8(baseProperties), _step6;
                     try {
-                      for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
-                        var name = _step5.value;
+                      for (_iterator6.s(); !(_step6 = _iterator6.n()).done; ) {
+                        var name = _step6.value;
                         element.style.removeProperty(name);
                       }
                     } catch (err) {
-                      _iterator5.e(err);
+                      _iterator6.e(err);
                     } finally {
-                      _iterator5.f();
+                      _iterator6.f();
                     }
                     element.classList.add(anchoredClass);
                   });
@@ -25374,10 +25522,10 @@
             height: root2.innerHeight
           }, reference, referenceRect, scaleX, scaleY);
           var selected = null;
-          var _iterator2 = _createForOfIteratorHelper8(candidates), _step2;
+          var _iterator3 = _createForOfIteratorHelper8(candidates), _step3;
           try {
-            for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
-              var candidate = _step2.value;
+            for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
+              var candidate = _step3.value;
               var x = targetRect.left + targetRect.width * candidate.target[0] - selfWidth * candidate.self[0];
               var y = targetRect.top + targetRect.height * candidate.target[1] - selfHeight * candidate.self[1];
               var result = {
@@ -25392,9 +25540,9 @@
               }
             }
           } catch (err) {
-            _iterator2.e(err);
+            _iterator3.e(err);
           } finally {
-            _iterator2.f();
+            _iterator3.f();
           }
           return {
             valid: true,
@@ -25420,18 +25568,18 @@
           state.target = target;
           if (state.observer) state.observer.disconnect();
           if (state.intersectionObserver) state.intersectionObserver.disconnect();
-          var _iterator3 = _createForOfIteratorHelper8(/* @__PURE__ */ new Set([element, target, reference])), _step3;
+          var _iterator4 = _createForOfIteratorHelper8(/* @__PURE__ */ new Set([element, target, reference])), _step4;
           try {
-            for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
-              var observed = _step3.value;
+            for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
+              var observed = _step4.value;
               if (!observed) continue;
               if (state.observer) state.observer.observe(observed);
               if (state.intersectionObserver) state.intersectionObserver.observe(observed);
             }
           } catch (err) {
-            _iterator3.e(err);
+            _iterator4.e(err);
           } finally {
-            _iterator3.f();
+            _iterator4.f();
           }
         }
         function listenForLayout(state, reference) {
@@ -25471,10 +25619,10 @@
         }
         function parseCandidates(value) {
           var result = [];
-          var _iterator4 = _createForOfIteratorHelper8((value || "").split(",")), _step4;
+          var _iterator5 = _createForOfIteratorHelper8((value || "").split(",")), _step5;
           try {
-            for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
-              var token = _step4.value;
+            for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
+              var token = _step5.value;
               var pair = token.trim().toLowerCase().split(":");
               if (pair.length !== 2 || !pivots[pair[0].trim()] || !pivots[pair[1].trim()]) continue;
               result.push({
@@ -25483,9 +25631,9 @@
               });
             }
           } catch (err) {
-            _iterator4.e(err);
+            _iterator5.e(err);
           } finally {
-            _iterator4.f();
+            _iterator5.f();
           }
           return result;
         }
@@ -25503,16 +25651,16 @@
 
   // src/aellux.ext.scrollbox.js
   var aellux_ext_scrollbox_exports = {};
-  function _typeof4(o) {
+  function _typeof5(o) {
     "@babel/helpers - typeof";
-    return _typeof4 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
+    return _typeof5 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
       return typeof o2;
     } : function(o2) {
       return o2 && "function" == typeof Symbol && o2.constructor === Symbol && o2 !== Symbol.prototype ? "symbol" : typeof o2;
-    }, _typeof4(o);
+    }, _typeof5(o);
   }
   function _toConsumableArray2(r) {
-    return _arrayWithoutHoles2(r) || _iterableToArray2(r) || _unsupportedIterableToArray9(r) || _nonIterableSpread2();
+    return _arrayWithoutHoles2(r) || _iterableToArray2(r) || _unsupportedIterableToArray10(r) || _nonIterableSpread2();
   }
   function _nonIterableSpread2() {
     throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
@@ -25521,7 +25669,7 @@
     if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
   }
   function _arrayWithoutHoles2(r) {
-    if (Array.isArray(r)) return _arrayLikeToArray9(r);
+    if (Array.isArray(r)) return _arrayLikeToArray10(r);
   }
   function ownKeys(e, r) {
     var t = Object.keys(e);
@@ -25549,14 +25697,14 @@
   }
   function _toPropertyKey2(t) {
     var i = _toPrimitive2(t, "string");
-    return "symbol" == _typeof4(i) ? i : i + "";
+    return "symbol" == _typeof5(i) ? i : i + "";
   }
   function _toPrimitive2(t, r) {
-    if ("object" != _typeof4(t) || !t) return t;
+    if ("object" != _typeof5(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof4(i)) return i;
+      if ("object" != _typeof5(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
@@ -25564,7 +25712,7 @@
   function _createForOfIteratorHelper9(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
-      if (Array.isArray(r) || (t = _unsupportedIterableToArray9(r)) || e && r && "number" == typeof r.length) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray10(r)) || e && r && "number" == typeof r.length) {
         t && (r = t);
         var _n = 0, F = function F2() {
         };
@@ -25592,14 +25740,14 @@
       }
     } };
   }
-  function _unsupportedIterableToArray9(r, a) {
+  function _unsupportedIterableToArray10(r, a) {
     if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray9(r, a);
+      if ("string" == typeof r) return _arrayLikeToArray10(r, a);
       var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray9(r, a) : void 0;
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray10(r, a) : void 0;
     }
   }
-  function _arrayLikeToArray9(r, a) {
+  function _arrayLikeToArray10(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
@@ -25672,8 +25820,6 @@
         var scrollbarMemories = /* @__PURE__ */ new WeakMap();
         var inlineMemories = /* @__PURE__ */ new WeakMap();
         var elasticMemories = /* @__PURE__ */ new WeakMap();
-        var elasticWidthMemories = /* @__PURE__ */ new WeakMap();
-        var elasticHeightMemories = /* @__PURE__ */ new WeakMap();
         var pointerScrollMemories = /* @__PURE__ */ new WeakMap();
         var snapItemMemories = /* @__PURE__ */ new WeakMap();
         var activePointerScrollState = null;
@@ -25719,8 +25865,6 @@
             wrapper: null,
             baseTransform: "",
             baseOrigin: "",
-            extentX: false,
-            extentY: false,
             dimensions: null,
             invalidReported: false,
             invalidLimit: null,
@@ -26489,7 +26633,7 @@
         }
         function snapAlignmentOffset(state, item, axis) {
           var box = arguments.length > 3 && arguments[3] !== void 0 ? arguments[3] : state.element.getBoundingClientRect();
-          var target = item.getBoundingClientRect();
+          var target = arguments.length > 4 && arguments[4] !== void 0 ? arguments[4] : item.getBoundingClientRect();
           var horizontal = axis === "x";
           var start = horizontal ? box.left + state.element.clientLeft : box.top + state.element.clientTop;
           var size = horizontal ? state.element.clientWidth : state.element.clientHeight;
@@ -26611,7 +26755,7 @@
                 var dx = start.startX - touch.clientX;
                 var dy = start.startY - touch.clientY;
                 if (Math.abs(axis === "x" ? dx : dy) < Math.abs(axis === "x" ? dy : dx)) continue;
-                recordSnapFlick(state, _objectSpread(_objectSpread({}, start), {}, {
+                recordSnapGesture(state, _objectSpread(_objectSpread({}, start), {}, {
                   lastX: touch.clientX,
                   lastY: touch.clientY,
                   endTime: now()
@@ -27270,12 +27414,14 @@
           var pointerScroll = state.pointerScroll;
           if (!pointerScroll || event && event.pointerId !== pointerScroll.pointerId) return;
           pointerScroll.endTime = now();
+          if (event && event.type === "pointerup") {
+            pointerScroll.lastX = event.clientX;
+            pointerScroll.lastY = event.clientY;
+          }
           if (event && event.type === "pointerup" && !pointerScroll.moved && pointerScroll.endTime < pointerScroll.selectionReadyTime && !selectionHasChanged(pointerScroll.selectionAtDown)) {
             var dx = pointerScroll.startX - event.clientX;
             var dy = pointerScroll.startY - event.clientY;
             var axis = pointerScroll.axis || (Math.abs(dx) >= Math.abs(dy) ? "x" : "y");
-            pointerScroll.lastX = event.clientX;
-            pointerScroll.lastY = event.clientY;
             var chain = pointerScroll.chains[axis];
             if (chain.some(function(member2) {
               return member2.snapEnabled && snapAxis(member2) === axis && pointerAxisMaximum(member2, axis, pointerScroll) > 0;
@@ -27346,7 +27492,7 @@
           });
           var shouldSnap = event && event.type === "pointerup" && pointerScroll.moved && snapState && !snapState.disposed && snapItems(snapState).length;
           if (shouldSnap) {
-            recordSnapFlick(snapState, pointerScroll, pointerScroll.axis, pointerScroll.snapStarts.get(snapState));
+            recordSnapGesture(snapState, pointerScroll, pointerScroll.axis, pointerScroll.snapStarts.get(snapState));
             scheduleScrollEnd(snapState);
           }
           var _iterator17 = _createForOfIteratorHelper9(pointerScroll.chain), _step17;
@@ -27364,12 +27510,18 @@
             startMomentum(momentumState, pointerScroll);
           }
         }
-        function recordSnapFlick(state, gesture, axis, startIndex) {
-          if (!state.snapEnabled || snapAxis(state) !== axis || !Number.isInteger(startIndex) || !isSnapFlick(gesture, axis)) return;
+        function recordSnapGesture(state, gesture, axis, startIndex) {
+          if (!state.snapEnabled || snapAxis(state) !== axis || !Number.isInteger(startIndex)) return;
           var distance = axis === "x" ? gesture.startX - gesture.lastX : gesture.startY - gesture.lastY;
           var items = snapItems(state);
-          var index = Math.max(0, Math.min(items.length - 1, startIndex + Math.sign(distance)));
-          if (index !== startIndex) {
+          var currentIndex = selectedSnapIndex(state);
+          var focusedItem = items[currentIndex];
+          if (!focusedItem) return;
+          var size = focusedItem.getBoundingClientRect()[axis === "x" ? "width" : "height"];
+          if (Math.abs(distance) <= size / 4 && !isSnapFlick(gesture, axis)) return;
+          if (currentIndex !== startIndex && Math.abs(distance) <= size) return;
+          var index = Math.max(0, Math.min(items.length - 1, currentIndex + Math.sign(distance)));
+          if (index !== currentIndex) {
             state.snap.flick = {
               axis: axis,
               index: index
@@ -27590,16 +27742,6 @@
           elastic.active = active;
           elastic.owned = true;
           if (active) suspendSnapStyles(state, "elastic", true);
-          if (amounts[1] > 0 && !elastic.extentX) {
-            elasticWidthMemories.set(elastic.wrapper, AelluxJs2.persist.element.save(elastic.wrapper, [], ["min-width"]));
-            elastic.wrapper.style.setProperty("min-width", "".concat(Math.max(dimensions.offsetWidth, dimensions.scrollWidth), "px"), elasticWidthMemories.get(elastic.wrapper).cssProperties["min-width"].priority);
-            elastic.extentX = true;
-          }
-          if (amounts[2] > 0 && !elastic.extentY) {
-            elasticHeightMemories.set(elastic.wrapper, AelluxJs2.persist.element.save(elastic.wrapper, [], ["min-height"]));
-            elastic.wrapper.style.setProperty("min-height", "".concat(Math.max(dimensions.offsetHeight, dimensions.scrollHeight), "px"), elasticHeightMemories.get(elastic.wrapper).cssProperties["min-height"].priority);
-            elastic.extentY = true;
-          }
           setElasticTransform(state, dimensions);
           return active;
         }
@@ -27697,20 +27839,12 @@
           elastic.wheelTimeout = null;
           if (elastic.wrapper) elastic.wrapper.classList.remove(elasticReleaseClass);
           if (elastic.owned && elastic.wrapper) {
-            var _elasticMemories$get, _elasticWidthMemories, _elasticHeightMemorie;
+            var _elasticMemories$get;
             (_elasticMemories$get = elasticMemories.get(elastic.wrapper)) === null || _elasticMemories$get === void 0 || _elasticMemories$get.restore();
-            if (elastic.extentX) (_elasticWidthMemories = elasticWidthMemories.get(elastic.wrapper)) === null || _elasticWidthMemories === void 0 || _elasticWidthMemories.restore();
-            if (elastic.extentY) (_elasticHeightMemorie = elasticHeightMemories.get(elastic.wrapper)) === null || _elasticHeightMemorie === void 0 || _elasticHeightMemorie.restore();
-          }
-          if (elastic.wrapper) {
-            elasticWidthMemories.delete(elastic.wrapper);
-            elasticHeightMemories.delete(elastic.wrapper);
           }
           elastic.amounts = [0, 0, 0, 0];
           elastic.active = false;
           elastic.owned = false;
-          elastic.extentX = false;
-          elastic.extentY = false;
           if (wasOwned && !state.disposed) {
             suspendSnapStyles(state, "elastic", false);
             if (state.snap.deferredIndex !== null) {
@@ -27907,7 +28041,7 @@
             var box = item.getBoundingClientRect();
             var itemCenter = axis === "x" ? box.left + box.width / 2 : box.top + box.height / 2;
             var viewport = Math.max(-2, Math.min(2, (itemCenter - center) * 2 / size));
-            var focus2 = Math.max(0, 1 - Math.abs(viewport) / 2);
+            var focus2 = Math.max(0, 1 - Math.abs(snapAlignmentOffset(state, item, axis, rect, box)) / size);
             return {
               item: item,
               viewport: viewport,
@@ -28019,7 +28153,7 @@
   function _createForOfIteratorHelper10(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
-      if (Array.isArray(r) || (t = _unsupportedIterableToArray10(r)) || e && r && "number" == typeof r.length) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray11(r)) || e && r && "number" == typeof r.length) {
         t && (r = t);
         var _n = 0, F = function F2() {
         };
@@ -28047,25 +28181,25 @@
       }
     } };
   }
-  function _slicedToArray3(r, e) {
-    return _arrayWithHoles3(r) || _iterableToArrayLimit3(r, e) || _unsupportedIterableToArray10(r, e) || _nonIterableRest3();
+  function _slicedToArray4(r, e) {
+    return _arrayWithHoles4(r) || _iterableToArrayLimit4(r, e) || _unsupportedIterableToArray11(r, e) || _nonIterableRest4();
   }
-  function _nonIterableRest3() {
+  function _nonIterableRest4() {
     throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
-  function _unsupportedIterableToArray10(r, a) {
+  function _unsupportedIterableToArray11(r, a) {
     if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray10(r, a);
+      if ("string" == typeof r) return _arrayLikeToArray11(r, a);
       var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray10(r, a) : void 0;
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray11(r, a) : void 0;
     }
   }
-  function _arrayLikeToArray10(r, a) {
+  function _arrayLikeToArray11(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
   }
-  function _iterableToArrayLimit3(r, l) {
+  function _iterableToArrayLimit4(r, l) {
     var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (null != t) {
       var e, n, i, u, a = [], f = true, o = false;
@@ -28086,16 +28220,16 @@
       return a;
     }
   }
-  function _arrayWithHoles3(r) {
+  function _arrayWithHoles4(r) {
     if (Array.isArray(r)) return r;
   }
-  function _typeof5(o) {
+  function _typeof6(o) {
     "@babel/helpers - typeof";
-    return _typeof5 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
+    return _typeof6 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
       return typeof o2;
     } : function(o2) {
       return o2 && "function" == typeof Symbol && o2.constructor === Symbol && o2 !== Symbol.prototype ? "symbol" : typeof o2;
-    }, _typeof5(o);
+    }, _typeof6(o);
   }
   var init_aellux_ext_adaptive = __esm({
     "src/aellux.ext.adaptive.js": function() {
@@ -28139,6 +28273,7 @@
           }
         };
         var UPDATE_INTERVAL_MS = 100;
+        var ariaHandlers = /* @__PURE__ */ new WeakMap();
         var managedClasses;
         var sizeThresholds = [];
         var updateTimeout = null;
@@ -28154,7 +28289,7 @@
           var overrides = options.adaptiveParams || {};
           for (var _i = 0, _Object$keys = Object.keys(adaptiveParams); _i < _Object$keys.length; _i++) {
             var group = _Object$keys[_i];
-            if (overrides[group] && _typeof5(overrides[group]) === "object") {
+            if (overrides[group] && _typeof6(overrides[group]) === "object") {
               Object.assign(adaptiveParams[group], overrides[group]);
             }
           }
@@ -28176,7 +28311,7 @@
           var classes = [modifier.shapeHorizontal, modifier.shapeVertical, modifier.shapeSquare];
           sizeThresholds = [];
           for (var _i3 = 0, _Object$entries = Object.entries(adaptiveParams.minSizes); _i3 < _Object$entries.length; _i3++) {
-            var _Object$entries$_i = _slicedToArray3(_Object$entries[_i3], 2), size = _Object$entries$_i[0], minimum = _Object$entries$_i[1];
+            var _Object$entries$_i = _slicedToArray4(_Object$entries[_i3], 2), size = _Object$entries$_i[0], minimum = _Object$entries$_i[1];
             var className = AelluxJs2.className("fits-" + size);
             sizeThresholds.push({
               className: className,
@@ -28212,7 +28347,8 @@
         }
         function mountAdaptive(element) {
           if (adaptiveElements.has(element)) return;
-          elementMemories.set(element, AelluxJs2.persist.element.save(element, ["aria-orientation"], dimensionProperties));
+          elementMemories.set(element, AelluxJs2.persist.element.save(element, [], dimensionProperties));
+          ariaHandlers.set(element, AelluxJs2.aria.register(element));
           adaptiveElements.add(element);
           if (resizeObserver) resizeObserver.observe(element);
           else {
@@ -28221,7 +28357,7 @@
           }
         }
         function unmountAdaptive(element) {
-          var _elementMemories$get;
+          var _ariaHandlers$get, _elementMemories$get;
           if (!adaptiveElements.delete(element)) return;
           pendingResizeEntries.delete(element);
           pendingResizeElements.delete(element);
@@ -28238,6 +28374,8 @@
           } finally {
             _iterator2.f();
           }
+          (_ariaHandlers$get = ariaHandlers.get(element)) === null || _ariaHandlers$get === void 0 || _ariaHandlers$get.release();
+          ariaHandlers.delete(element);
           (_elementMemories$get = elementMemories.get(element)) === null || _elementMemories$get === void 0 || _elementMemories$get.restore();
           elementMemories.delete(element);
         }
@@ -28309,9 +28447,12 @@
           AelluxJs2.waitLayout.update(updateAdaptive, [entry, width, height]);
         }
         function updateAdaptive(element, width, height) {
+          var _ariaHandlers$get2;
           if (!adaptiveElements.has(element)) return;
           var ratio = height > 0 ? width / height : 0;
-          element.setAttribute("aria-orientation", height > width ? "vertical" : "horizontal");
+          (_ariaHandlers$get2 = ariaHandlers.get(element)) === null || _ariaHandlers$get2 === void 0 || _ariaHandlers$get2.set({
+            orientation: height > width ? "vertical" : "horizontal"
+          });
           element.classList.toggle(modifier.shapeVertical, ratio < adaptiveParams.ratioShapes.vertical);
           element.classList.toggle(modifier.shapeHorizontal, ratio > adaptiveParams.ratioShapes.horizontal);
           element.classList.toggle(modifier.shapeSquare, ratio >= adaptiveParams.ratioShapes.vertical && ratio <= adaptiveParams.ratioShapes.horizontal);
@@ -28467,7 +28608,7 @@
     };
   }
   function _toConsumableArray3(r) {
-    return _arrayWithoutHoles3(r) || _iterableToArray3(r) || _unsupportedIterableToArray11(r) || _nonIterableSpread3();
+    return _arrayWithoutHoles3(r) || _iterableToArray3(r) || _unsupportedIterableToArray12(r) || _nonIterableSpread3();
   }
   function _nonIterableSpread3() {
     throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
@@ -28476,12 +28617,12 @@
     if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
   }
   function _arrayWithoutHoles3(r) {
-    if (Array.isArray(r)) return _arrayLikeToArray11(r);
+    if (Array.isArray(r)) return _arrayLikeToArray12(r);
   }
   function _createForOfIteratorHelper11(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
-      if (Array.isArray(r) || (t = _unsupportedIterableToArray11(r)) || e && r && "number" == typeof r.length) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray12(r)) || e && r && "number" == typeof r.length) {
         t && (r = t);
         var _n = 0, F = function F2() {
         };
@@ -28509,14 +28650,14 @@
       }
     } };
   }
-  function _unsupportedIterableToArray11(r, a) {
+  function _unsupportedIterableToArray12(r, a) {
     if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray11(r, a);
+      if ("string" == typeof r) return _arrayLikeToArray12(r, a);
       var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray11(r, a) : void 0;
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray12(r, a) : void 0;
     }
   }
-  function _arrayLikeToArray11(r, a) {
+  function _arrayLikeToArray12(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
@@ -28559,7 +28700,7 @@
           toggle: toggle,
           trigger: trigger
         });
-        var POP = "Pop", UNPOP = "Unpop", BEFORE = "Before", PING = "ping", MILLISECOND = "ms", SECOND = "s", TRANSITION_PREPARE_TIME = 100, ARIA_EXPANDED = "aria-expanded", ARIA_CONTROLS = "aria-controls", DEFAULT_PRESENT = "opacity transform height width";
+        var POP = "Pop", UNPOP = "Unpop", BEFORE = "Before", PING = "ping", MILLISECOND = "ms", SECOND = "s", TRANSITION_PREPARE_TIME = 100, DEFAULT_PRESENT = "opacity transform height width";
         var presentElements = /* @__PURE__ */ new Map();
         var openPresentElements = /* @__PURE__ */ new Set();
         var triggerElementsSet = /* @__PURE__ */ new Set();
@@ -28567,7 +28708,8 @@
         var triggersByTargetId = /* @__PURE__ */ new Map();
         var indexedTriggerValues = /* @__PURE__ */ new Map();
         var elementMemories = /* @__PURE__ */ new WeakMap();
-        var triggerMemories = /* @__PURE__ */ new WeakMap();
+        var containerAriaHandlers = /* @__PURE__ */ new WeakMap();
+        var triggerAriaHandlers = /* @__PURE__ */ new WeakMap();
         var measuredMemories = /* @__PURE__ */ new WeakMap();
         function init(options) {
           AelluxJs2.mountManager.add({
@@ -28618,7 +28760,8 @@
         }
         function mountPresentContainer(element) {
           if (presentElements.has(element)) return;
-          elementMemories.set(element, AelluxJs2.persist.element.save(element, [attr.present, attr.presentMotion, ARIA_EXPANDED, "hidden"], ["--ae-pop-low-steps", "--ae-unpop-low-steps"]));
+          elementMemories.set(element, AelluxJs2.persist.element.save(element, [attr.present, attr.presentMotion, "hidden"], ["--ae-pop-low-steps", "--ae-unpop-low-steps"]));
+          containerAriaHandlers.set(element, AelluxJs2.aria.register(element));
           if ((element.getAttribute(attr.present) || "").trim().toLowerCase() === "all") {
             element.setAttribute(attr.present, DEFAULT_PRESENT);
           }
@@ -28647,7 +28790,10 @@
             classList: element.classList,
             triggers: /* @__PURE__ */ new Set(),
             setAriaExpanded: function setAriaExpanded(value) {
-              element.setAttribute(ARIA_EXPANDED, value);
+              this.expanded = value === "true";
+              containerAriaHandlers.get(element).set({
+                expanded: this.expanded
+              });
               this.triggers.forEach(updateTriggerAriaExpanded);
             },
             stop: function stop() {
@@ -28719,25 +28865,27 @@
           autoUnpopSchedule(element, presentController);
         }
         function unmountPresentContainer(element) {
-          var _elementMemories$get;
+          var _containerAriaHandler, _elementMemories$get;
           if (!presentElements.has(element)) return;
           var controller = presentElements.get(element);
           controller.stop();
           element.classList.remove(className.grid);
           presentElements.delete(element);
           openPresentElements.delete(element);
+          (_containerAriaHandler = containerAriaHandlers.get(element)) === null || _containerAriaHandler === void 0 || _containerAriaHandler.release();
+          containerAriaHandlers.delete(element);
           (_elementMemories$get = elementMemories.get(element)) === null || _elementMemories$get === void 0 || _elementMemories$get.restore();
           elementMemories.delete(element);
           controller.triggers.forEach(updateTriggerAriaExpanded);
         }
         function mountTriggerElement(triggerElement) {
           if (triggerElementsSet.has(triggerElement)) return;
-          triggerMemories.set(triggerElement, AelluxJs2.persist.element.save(triggerElement, [ARIA_CONTROLS, ARIA_EXPANDED], []));
+          triggerAriaHandlers.set(triggerElement, AelluxJs2.aria.register(triggerElement));
           triggerElementsSet.add(triggerElement);
           refreshTriggerTargets(triggerElement);
         }
         function unmountTriggerElement(triggerElement) {
-          var _triggerMemories$get;
+          var _triggerAriaHandlers$;
           if (!triggerElementsSet.has(triggerElement)) return;
           var target = triggerTargets.get(triggerElement);
           if (target) {
@@ -28747,8 +28895,8 @@
           }
           unindexTriggerTarget(triggerElement);
           triggerElementsSet.delete(triggerElement);
-          (_triggerMemories$get = triggerMemories.get(triggerElement)) === null || _triggerMemories$get === void 0 || _triggerMemories$get.restore();
-          triggerMemories.delete(triggerElement);
+          (_triggerAriaHandlers$ = triggerAriaHandlers.get(triggerElement)) === null || _triggerAriaHandlers$ === void 0 || _triggerAriaHandlers$.release();
+          triggerAriaHandlers.delete(triggerElement);
         }
         function targetIdFor(value) {
           if (!value) return null;
@@ -28792,7 +28940,7 @@
           }
         }
         function refreshTriggerTargets(triggerElement) {
-          var _presentElements$get3, _AelluxJs$mountManage, _AelluxJs$mountManage2;
+          var _presentElements$get3, _triggerAriaHandlers$4;
           var previousTarget = triggerTargets.get(triggerElement);
           var targetSelector = triggerElement.getAttribute(attr.target);
           var dismiss = triggerElement.getAttribute(attr.dismiss);
@@ -28809,26 +28957,34 @@
             target = container;
           }
           if (!target || !target.id) {
+            var _triggerAriaHandlers$2, _triggerAriaHandlers$3;
             triggerTargets.delete(triggerElement);
+            (_triggerAriaHandlers$2 = triggerAriaHandlers.get(triggerElement)) === null || _triggerAriaHandlers$2 === void 0 || _triggerAriaHandlers$2.unset("expanded");
+            (_triggerAriaHandlers$3 = triggerAriaHandlers.get(triggerElement)) === null || _triggerAriaHandlers$3 === void 0 || _triggerAriaHandlers$3.unset("controls");
             return;
           }
           triggerTargets.set(triggerElement, target);
           (_presentElements$get3 = presentElements.get(target)) === null || _presentElements$get3 === void 0 || _presentElements$get3.triggers.add(triggerElement);
           var targetIds = /* @__PURE__ */ new Set([target.id]);
-          var initial = (_AelluxJs$mountManage = (_AelluxJs$mountManage2 = AelluxJs2.mountManager).initialAttribute) === null || _AelluxJs$mountManage === void 0 ? void 0 : _AelluxJs$mountManage.call(_AelluxJs$mountManage2, triggerElement, ARIA_CONTROLS);
+          var initial = (_triggerAriaHandlers$4 = triggerAriaHandlers.get(triggerElement)) === null || _triggerAriaHandlers$4 === void 0 ? void 0 : _triggerAriaHandlers$4.initial("controls");
           if (initial) {
             initial.trim().split(/\s+/).forEach(function(x) {
               return targetIds.add(x);
             });
           }
           updateTriggerAriaExpanded(triggerElement);
-          triggerElement.setAttribute(ARIA_CONTROLS, _toConsumableArray3(targetIds).join(" "));
+          triggerAriaHandlers.get(triggerElement).set({
+            controls: _toConsumableArray3(targetIds)
+          });
         }
         function updateTriggerAriaExpanded(triggerElement) {
+          var _presentElements$get4, _triggerAriaHandlers$5;
           var target = triggerTargets.get(triggerElement);
           if (!target) return;
-          var expanded = presentElements.has(target) && target.getAttribute(ARIA_EXPANDED) === "true";
-          triggerElement.setAttribute(ARIA_EXPANDED, String(expanded));
+          var expanded = ((_presentElements$get4 = presentElements.get(target)) === null || _presentElements$get4 === void 0 ? void 0 : _presentElements$get4.expanded) === true;
+          (_triggerAriaHandlers$5 = triggerAriaHandlers.get(triggerElement)) === null || _triggerAriaHandlers$5 === void 0 || _triggerAriaHandlers$5.set({
+            expanded: expanded
+          });
         }
         function pop(element) {
           return presentTransition(element, true, true);

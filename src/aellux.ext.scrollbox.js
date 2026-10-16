@@ -122,8 +122,6 @@
   const scrollbarMemories = new WeakMap();
   const inlineMemories = new WeakMap();
   const elasticMemories = new WeakMap();
-  const elasticWidthMemories = new WeakMap();
-  const elasticHeightMemories = new WeakMap();
   const pointerScrollMemories = new WeakMap();
   const snapItemMemories = new WeakMap();
   let activePointerScrollState = null;
@@ -150,7 +148,7 @@
     cursorMemories.set(element, AelluxJs.persist.element.save(element, [], ["cursor"]));
     const elastic = {
       wrapper: null, baseTransform: "", baseOrigin: "",
-      extentX: false, extentY: false, dimensions: null,
+      dimensions: null,
 
       invalidReported: false, invalidLimit: null,
       limits: [DEFAULT_ELASTIC_LIMIT, DEFAULT_ELASTIC_LIMIT],
@@ -860,8 +858,7 @@
   }
 
   function snapAlignmentOffset(state, item, axis,
-    box = state.element.getBoundingClientRect()) {
-    const target = item.getBoundingClientRect();
+    box = state.element.getBoundingClientRect(), target = item.getBoundingClientRect()) {
     const horizontal = axis === "x";
     const start = horizontal ? box.left + state.element.clientLeft :
       box.top + state.element.clientTop;
@@ -979,7 +976,7 @@
         const dy = start.startY - touch.clientY;
         if (Math.abs(axis === "x" ? dx : dy) < Math.abs(axis === "x" ? dy : dx))
           continue;
-        recordSnapFlick(state, {
+        recordSnapGesture(state, {
           ...start, lastX: touch.clientX, lastY: touch.clientY, endTime: now()
         }, axis, start.index);
       }
@@ -1583,14 +1580,16 @@
     if (!pointerScroll || (event && event.pointerId !== pointerScroll.pointerId)) return;
 
     pointerScroll.endTime = now();
+    if (event && event.type === "pointerup") {
+      pointerScroll.lastX = event.clientX;
+      pointerScroll.lastY = event.clientY;
+    }
     if (event && event.type === "pointerup" && !pointerScroll.moved &&
       pointerScroll.endTime < pointerScroll.selectionReadyTime &&
       !selectionHasChanged(pointerScroll.selectionAtDown)) {
       const dx = pointerScroll.startX - event.clientX;
       const dy = pointerScroll.startY - event.clientY;
       const axis = pointerScroll.axis || (Math.abs(dx) >= Math.abs(dy) ? "x" : "y");
-      pointerScroll.lastX = event.clientX;
-      pointerScroll.lastY = event.clientY;
       const chain = pointerScroll.chains[axis];
       if (chain.some(member => member.snapEnabled &&
         snapAxis(member) === axis &&
@@ -1652,7 +1651,7 @@
       snapState && !snapState.disposed && snapItems(snapState).length;
 
     if (shouldSnap) {
-      recordSnapFlick(snapState, pointerScroll, pointerScroll.axis,
+      recordSnapGesture(snapState, pointerScroll, pointerScroll.axis,
         pointerScroll.snapStarts.get(snapState));
       scheduleScrollEnd(snapState);
     }
@@ -1664,16 +1663,22 @@
     }
   }
 
-  function recordSnapFlick(state, gesture, axis, startIndex) {
+  function recordSnapGesture(state, gesture, axis, startIndex) {
     if (!state.snapEnabled || snapAxis(state) !== axis ||
-      !Number.isInteger(startIndex) || !isSnapFlick(gesture, axis)) return;
+      !Number.isInteger(startIndex)) return;
 
     const distance = axis === "x" ? gesture.startX - gesture.lastX :
       gesture.startY - gesture.lastY;
     const items = snapItems(state);
+    const currentIndex = selectedSnapIndex(state);
+    const focusedItem = items[currentIndex];
+    if (!focusedItem) return;
+    const size = focusedItem.getBoundingClientRect()[axis === "x" ? "width" : "height"];
+    if (Math.abs(distance) <= size / 4 && !isSnapFlick(gesture, axis)) return;
+    if (currentIndex !== startIndex && Math.abs(distance) <= size) return;
     const index = Math.max(0, Math.min(items.length - 1,
-      startIndex + Math.sign(distance)));
-    if (index !== startIndex) {
+      currentIndex + Math.sign(distance)));
+    if (index !== currentIndex) {
       state.snap.flick = { axis, index };
     }
   }
@@ -1880,25 +1885,6 @@
     elastic.owned = true;
     if (active) suspendSnapStyles(state, "elastic", true);
 
-    if (amounts[1] > 0 && !elastic.extentX) {
-      elasticWidthMemories.set(elastic.wrapper, AelluxJs.persist.element.save(
-        elastic.wrapper, [], ["min-width"]
-      ));
-      elastic.wrapper.style.setProperty("min-width",
-        `${Math.max(dimensions.offsetWidth, dimensions.scrollWidth)}px`,
-        elasticWidthMemories.get(elastic.wrapper).cssProperties["min-width"].priority);
-      elastic.extentX = true;
-    }
-    if (amounts[2] > 0 && !elastic.extentY) {
-      elasticHeightMemories.set(elastic.wrapper, AelluxJs.persist.element.save(
-        elastic.wrapper, [], ["min-height"]
-      ));
-      elastic.wrapper.style.setProperty("min-height",
-        `${Math.max(dimensions.offsetHeight, dimensions.scrollHeight)}px`,
-        elasticHeightMemories.get(elastic.wrapper).cssProperties["min-height"].priority);
-      elastic.extentY = true;
-    }
-
     setElasticTransform(state, dimensions);
     return active;
   }
@@ -2000,18 +1986,10 @@
     if (elastic.wrapper) elastic.wrapper.classList.remove(elasticReleaseClass);
     if (elastic.owned && elastic.wrapper) {
       elasticMemories.get(elastic.wrapper)?.restore();
-      if (elastic.extentX) elasticWidthMemories.get(elastic.wrapper)?.restore();
-      if (elastic.extentY) elasticHeightMemories.get(elastic.wrapper)?.restore();
-    }
-    if (elastic.wrapper) {
-      elasticWidthMemories.delete(elastic.wrapper);
-      elasticHeightMemories.delete(elastic.wrapper);
     }
     elastic.amounts = [0, 0, 0, 0];
     elastic.active = false;
     elastic.owned = false;
-    elastic.extentX = false;
-    elastic.extentY = false;
 
     if (wasOwned && !state.disposed) {
       suspendSnapStyles(state, "elastic", false);
@@ -2189,7 +2167,8 @@
       const itemCenter = axis === "x" ? box.left + box.width / 2 :
         box.top + box.height / 2;
       const viewport = Math.max(-2, Math.min(2, (itemCenter - center) * 2 / size));
-      const focus = Math.max(0, 1 - Math.abs(viewport) / 2);
+      const focus = Math.max(0, 1 -
+        Math.abs(snapAlignmentOffset(state, item, axis, rect, box)) / size);
       return { item, viewport, focus };
     });
   }

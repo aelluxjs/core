@@ -43,7 +43,7 @@ test("global element memory restores selected attributes and inline CSS", async 
       origin: element.style.getPropertyValue("transform-origin"),
       progress: element.style.getPropertyValue("--panel-progress"),
       color: element.style.getPropertyValue("color"),
-      existingAttrMem: typeof AelluxJs.attrMem.save,
+      legacyAttrMem: "attrMem" in AelluxJs,
       existingStorage: typeof AelluxJs.persist.local.set
     };
     element.remove();
@@ -75,7 +75,7 @@ test("global element memory restores selected attributes and inline CSS", async 
     origin: originValue,
     progress: "",
     color: "blue",
-    existingAttrMem: "function",
+    legacyAttrMem: false,
     existingStorage: "function"
   });
 });

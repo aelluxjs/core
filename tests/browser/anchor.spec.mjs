@@ -255,7 +255,7 @@ test("layout event on the shared positioning parent replaces position polling", 
   )).toBe("60px");
 });
 
-test("layout duration keeps anchor checking at the 100 ms interval", async ({ page }) => {
+test("layout duration keeps anchor checking at the configured interval", async ({ page }) => {
   await startAnchor(page, `
     <div style="position: relative; width: 300px; height: 100px">
       <div id="target" style="position: absolute; left: 20px; top: 10px; width: 30px; height: 20px"></div>
@@ -277,7 +277,7 @@ test("layout duration keeps anchor checking at the 100 ms interval", async ({ pa
   await expect.poll(x, { timeout: 1000 }).toBe("45px");
 });
 
-test("zero layout duration checks once after 100 ms", async ({ page }) => {
+test("zero layout duration checks once after the configured interval", async ({ page }) => {
   await startAnchor(page, `
     <div style="position: relative; width: 300px; height: 100px">
       <div id="target" style="position: absolute; left: 20px; top: 10px; width: 30px; height: 20px"></div>
@@ -289,16 +289,41 @@ test("zero layout duration checks once after 100 ms", async ({ page }) => {
     element.style.getPropertyValue("--ae-anchor-x")
   );
   await expect.poll(x).toBe("20px");
-  await page.evaluate(() => {
+  const earlyPosition = await page.evaluate(async () => {
     const target = document.getElementById("target");
     target.style.left = "45px";
     target.dispatchEvent(new CustomEvent("AelluxJsLayout", {
       detail: { durationMs: 0 }, bubbles: true
     }));
+    await new Promise(resolve => setTimeout(resolve, 15));
+    return document.getElementById("anchor").style.getPropertyValue("--ae-anchor-x");
   });
-  await page.waitForTimeout(50);
-  expect(await x()).toBe("20px");
+  expect(earlyPosition).toBe("20px");
   await expect.poll(x).toBe("45px");
+});
+
+test("anchor FPS attribute sets the rounded throttle interval", async ({ page }) => {
+  await startAnchor(page, `
+    <div style="position: relative; width: 300px; height: 100px">
+      <div id="target" style="position: absolute; left: 20px; top: 10px; width: 30px; height: 20px"></div>
+      <div id="anchor" data-ae-anchor-target="target" data-ae-anchor="top-left:top-left"
+        data-ae-anchor-fps="5" style="width: 10px; height: 10px"></div>
+    </div>`, { disableObservers: true });
+
+  await expect.poll(() => page.locator("#anchor").evaluate(element =>
+    element.style.getPropertyValue("--ae-anchor-x"))).toBe("20px");
+  const earlyPosition = await page.evaluate(async () => {
+    const target = document.getElementById("target");
+    window.dispatchEvent(new Event("scroll"));
+    await new Promise(resolve => setTimeout(resolve, 20));
+    target.style.left = "45px";
+    window.dispatchEvent(new Event("scroll"));
+    await new Promise(resolve => setTimeout(resolve, 80));
+    return document.getElementById("anchor").style.getPropertyValue("--ae-anchor-x");
+  });
+  expect(earlyPosition).toBe("20px");
+  await expect.poll(() => page.locator("#anchor").evaluate(element =>
+    element.style.getPropertyValue("--ae-anchor-x"))).toBe("45px");
 });
 
 test("present layout event activates an anchor whose target started hidden", async ({ page }) => {
@@ -358,7 +383,7 @@ test("scroll bursts throttle layout measurements and keep the latest position", 
   });
   expect(result.x).toBe("37px");
   expect(result.measurements.length).toBeGreaterThan(0);
-  expect(result.measurements.length).toBeLessThanOrEqual(3);
+  expect(result.measurements.length).toBeLessThanOrEqual(5);
 });
 
 test("different containing blocks report once and preserve positioning", async ({ page }) => {

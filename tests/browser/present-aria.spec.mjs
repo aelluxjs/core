@@ -2,10 +2,12 @@ import { expect, test } from "@playwright/test";
 
 async function attachElementMemoryToStub(page) {
   await page.evaluate(async () => {
-    const { createSaveElementMemoryHelper } = await import(
-      "/src/internal/create-save-element-memory-helper.js"
-    );
+    const [{ createSaveElementMemoryHelper }, { createAriaHelper }] = await Promise.all([
+      import("/src/internal/create-save-element-memory-helper.js"),
+      import("/src/internal/create-aria-helper.js")
+    ]);
     AelluxJs.persist = { element: createSaveElementMemoryHelper() };
+    AelluxJs.aria = createAriaHelper();
   });
 }
 
@@ -341,15 +343,17 @@ test("replacement transitions reuse preparation and final interruptions clean it
 test("direct pop restarts from hidden during either transition and when already visible", async ({ page }) => {
   await page.goto("/tests/index.htm");
   const result = await page.evaluate(async () => {
-    const { createSaveElementMemoryHelper } = await import(
-      "/src/internal/create-save-element-memory-helper.js"
-    );
+    const [{ createSaveElementMemoryHelper }, { createAriaHelper }] = await Promise.all([
+      import("/src/internal/create-save-element-memory-helper.js"),
+      import("/src/internal/create-aria-helper.js")
+    ]);
     document.body.innerHTML = `
       <div id="panel" data-ae-present="opacity" hidden
         style="--ae-pop-duration: 80ms; --ae-unpop-duration: 80ms"></div>`;
     const events = [];
     window.AelluxJs = {
       persist: { element: createSaveElementMemoryHelper() },
+      aria: createAriaHelper(),
       on: (event, handler, options) => document.addEventListener(event.slice(1), handler, options),
       off: (event, handler, options) => document.removeEventListener(event.slice(1), handler, options),
       attr: name => `data-ae-${name}`,
@@ -981,7 +985,6 @@ test("present reports invalid target IDs without throwing from click", async ({ 
       off: (event, handler, options) => document.removeEventListener(event.slice(1), handler, options),
       attr: name => `data-ae-${name}`,
       className: name => `ae-${name}`,
-      attrMem: { save() {}, restore() {} },
       diagnostics: {
         ERROR_EXTENSION_SELECTOR: { code: 1107 },
         error: (definition, context) => reports.push({ code: definition.code, selector: context.selector })
@@ -1016,14 +1019,12 @@ test("present reports invalid target IDs without throwing from click", async ({ 
 test("present restores a trigger without targets and can mount it again", async ({ page }) => {
   await page.goto("/tests/index.htm");
   const result = await page.evaluate(async () => {
-    const { saveAttr, restoreAttr } = await import("/src/internal/build-initial-attr-memory.js");
     document.body.innerHTML = '<button id="control" data-ae-trigger="toggle" data-ae-target="#later"></button>';
     window.AelluxJs = {
       on: (event, handler, options) => document.addEventListener(event.slice(1), handler, options),
       off: (event, handler, options) => document.removeEventListener(event.slice(1), handler, options),
       attr: name => `data-ae-${name}`,
       className: name => `ae-${name}`,
-      attrMem: { save: saveAttr, restore: restoreAttr },
       mountManager: {
         add: ({ selector, mount, unmount, update, controllers }) => {
           (window.mountEntries ||= new Map()).set(selector, { mount, unmount, update, controllers });
@@ -1070,10 +1071,9 @@ test("present restores a trigger without targets and can mount it again", async 
 test("present records interrupted transitions as warnings and failures as errors", async ({ page }) => {
   await page.goto("/tests/index.htm");
   await page.evaluate(async () => {
-    const [{ buildDiagnostics }, { createAelluxConstants }, { saveAttr, restoreAttr }] = await Promise.all([
+    const [{ buildDiagnostics }, { createAelluxConstants }] = await Promise.all([
       import("/src/internal/build-diagnostics.js"),
-      import("/src/internal/create-aellux-constants.js"),
-      import("/src/internal/build-initial-attr-memory.js")
+      import("/src/internal/create-aellux-constants.js")
     ]);
     document.body.innerHTML = '<div id="panel" data-ae-present hidden style="--ae-pop-duration: 100ms; --ae-unpop-duration: 0ms"><div data-ae-present-motion></div></div>';
     window.AelluxJs = {
@@ -1081,7 +1081,6 @@ test("present records interrupted transitions as warnings and failures as errors
       off: (event, handler, options) => document.removeEventListener(event.slice(1), handler, options),
       attr: name => `data-ae-${name}`,
       className: name => `ae-${name}`,
-      attrMem: { save: saveAttr, restore: restoreAttr },
       diagnostics: buildDiagnostics(createAelluxConstants().AELLUXJS_DIAGNOSTICS),
       mountManager: {
         add: ({ selector, mount, unmount, update, controllers }) => {
@@ -1121,10 +1120,9 @@ test("present records interrupted transitions as warnings and failures as errors
 test("present reports a transition callback failure with its own diagnostic", async ({ page }) => {
   await page.goto("/tests/index.htm");
   await page.evaluate(async () => {
-    const [{ buildDiagnostics }, { createAelluxConstants }, { saveAttr, restoreAttr }] = await Promise.all([
+    const [{ buildDiagnostics }, { createAelluxConstants }] = await Promise.all([
       import("/src/internal/build-diagnostics.js"),
-      import("/src/internal/create-aellux-constants.js"),
-      import("/src/internal/build-initial-attr-memory.js")
+      import("/src/internal/create-aellux-constants.js")
     ]);
     document.body.innerHTML = `
       <button id="control" data-ae-trigger="pop" data-ae-target="#panel"></button>
@@ -1135,7 +1133,6 @@ test("present reports a transition callback failure with its own diagnostic", as
       off: (event, handler, options) => document.removeEventListener(event.slice(1), handler, options),
       attr: name => `data-ae-${name}`,
       className: name => `ae-${name}`,
-      attrMem: { save: saveAttr, restore: restoreAttr },
       diagnostics: buildDiagnostics(createAelluxConstants().AELLUXJS_DIAGNOSTICS),
       ext: {},
       mountManager: {

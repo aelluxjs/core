@@ -36,7 +36,7 @@
       toggle,
       trigger
     });
-    const POP = "Pop", UNPOP = "Unpop", BEFORE = "Before", PING = "ping", MILLISECOND = "ms", SECOND = "s", TRANSITION_PREPARE_TIME = 100, ARIA_EXPANDED = "aria-expanded", ARIA_CONTROLS = "aria-controls", DEFAULT_PRESENT = "opacity transform height width";
+    const POP = "Pop", UNPOP = "Unpop", BEFORE = "Before", PING = "ping", MILLISECOND = "ms", SECOND = "s", TRANSITION_PREPARE_TIME = 100, DEFAULT_PRESENT = "opacity transform height width";
     const presentElements = /* @__PURE__ */ new Map();
     const openPresentElements = /* @__PURE__ */ new Set();
     const triggerElementsSet = /* @__PURE__ */ new Set();
@@ -44,7 +44,8 @@
     const triggersByTargetId = /* @__PURE__ */ new Map();
     const indexedTriggerValues = /* @__PURE__ */ new Map();
     const elementMemories = /* @__PURE__ */ new WeakMap();
-    const triggerMemories = /* @__PURE__ */ new WeakMap();
+    const containerAriaHandlers = /* @__PURE__ */ new WeakMap();
+    const triggerAriaHandlers = /* @__PURE__ */ new WeakMap();
     const measuredMemories = /* @__PURE__ */ new WeakMap();
     function init(options) {
       AelluxJs.mountManager.add({
@@ -83,9 +84,10 @@
       if (presentElements.has(element)) return;
       elementMemories.set(element, AelluxJs.persist.element.save(
         element,
-        [attr.present, attr.presentMotion, ARIA_EXPANDED, "hidden"],
+        [attr.present, attr.presentMotion, "hidden"],
         ["--ae-pop-low-steps", "--ae-unpop-low-steps"]
       ));
+      containerAriaHandlers.set(element, AelluxJs.aria.register(element));
       if ((element.getAttribute(attr.present) || "").trim().toLowerCase() === "all") {
         element.setAttribute(attr.present, DEFAULT_PRESENT);
       }
@@ -114,7 +116,8 @@
         classList: element.classList,
         triggers: /* @__PURE__ */ new Set(),
         setAriaExpanded: function(value) {
-          element.setAttribute(ARIA_EXPANDED, value);
+          this.expanded = value === "true";
+          containerAriaHandlers.get(element).set({ expanded: this.expanded });
           this.triggers.forEach(updateTriggerAriaExpanded);
         },
         stop: function(options = {}) {
@@ -180,24 +183,22 @@
       autoUnpopSchedule(element, presentController);
     }
     function unmountPresentContainer(element) {
-      var _a;
+      var _a, _b;
       if (!presentElements.has(element)) return;
       const controller = presentElements.get(element);
       controller.stop();
       element.classList.remove(className.grid);
       presentElements.delete(element);
       openPresentElements.delete(element);
-      (_a = elementMemories.get(element)) == null ? void 0 : _a.restore();
+      (_a = containerAriaHandlers.get(element)) == null ? void 0 : _a.release();
+      containerAriaHandlers.delete(element);
+      (_b = elementMemories.get(element)) == null ? void 0 : _b.restore();
       elementMemories.delete(element);
       controller.triggers.forEach(updateTriggerAriaExpanded);
     }
     function mountTriggerElement(triggerElement) {
       if (triggerElementsSet.has(triggerElement)) return;
-      triggerMemories.set(triggerElement, AelluxJs.persist.element.save(
-        triggerElement,
-        [ARIA_CONTROLS, ARIA_EXPANDED],
-        []
-      ));
+      triggerAriaHandlers.set(triggerElement, AelluxJs.aria.register(triggerElement));
       triggerElementsSet.add(triggerElement);
       refreshTriggerTargets(triggerElement);
     }
@@ -211,8 +212,8 @@
       }
       unindexTriggerTarget(triggerElement);
       triggerElementsSet.delete(triggerElement);
-      (_b = triggerMemories.get(triggerElement)) == null ? void 0 : _b.restore();
-      triggerMemories.delete(triggerElement);
+      (_b = triggerAriaHandlers.get(triggerElement)) == null ? void 0 : _b.release();
+      triggerAriaHandlers.delete(triggerElement);
     }
     function targetIdFor(value) {
       if (!value) return null;
@@ -256,7 +257,7 @@
       }
     }
     function refreshTriggerTargets(triggerElement) {
-      var _a, _b, _c, _d;
+      var _a, _b, _c, _d, _e;
       const previousTarget = triggerTargets.get(triggerElement);
       const targetSelector = triggerElement.getAttribute(attr.target);
       const dismiss = triggerElement.getAttribute(attr.dismiss);
@@ -273,23 +274,26 @@
       }
       if (!target || !target.id) {
         triggerTargets.delete(triggerElement);
+        (_b = triggerAriaHandlers.get(triggerElement)) == null ? void 0 : _b.unset("expanded");
+        (_c = triggerAriaHandlers.get(triggerElement)) == null ? void 0 : _c.unset("controls");
         return;
       }
       triggerTargets.set(triggerElement, target);
-      (_b = presentElements.get(target)) == null ? void 0 : _b.triggers.add(triggerElement);
+      (_d = presentElements.get(target)) == null ? void 0 : _d.triggers.add(triggerElement);
       const targetIds = /* @__PURE__ */ new Set([target.id]);
-      const initial = (_d = (_c = AelluxJs.mountManager).initialAttribute) == null ? void 0 : _d.call(_c, triggerElement, ARIA_CONTROLS);
+      const initial = (_e = triggerAriaHandlers.get(triggerElement)) == null ? void 0 : _e.initial("controls");
       if (initial) {
         initial.trim().split(/\s+/).forEach((x) => targetIds.add(x));
       }
       updateTriggerAriaExpanded(triggerElement);
-      triggerElement.setAttribute(ARIA_CONTROLS, [...targetIds].join(" "));
+      triggerAriaHandlers.get(triggerElement).set({ controls: [...targetIds] });
     }
     function updateTriggerAriaExpanded(triggerElement) {
+      var _a, _b;
       const target = triggerTargets.get(triggerElement);
       if (!target) return;
-      const expanded = presentElements.has(target) && target.getAttribute(ARIA_EXPANDED) === "true";
-      triggerElement.setAttribute(ARIA_EXPANDED, String(expanded));
+      const expanded = ((_a = presentElements.get(target)) == null ? void 0 : _a.expanded) === true;
+      (_b = triggerAriaHandlers.get(triggerElement)) == null ? void 0 : _b.set({ expanded });
     }
     function pop(element) {
       return presentTransition(element, true, true);

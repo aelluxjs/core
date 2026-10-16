@@ -31,6 +31,7 @@ $ae.init({ mode: "full" });
 Supported runtime modes are `full` and `basic`. See [Getting Started](../getting-started.md) for their loading behavior.
 The optional `crossOrigin` initialization setting controls the `crossorigin` attribute on runtime and Extension assets; integrity-protected assets use `anonymous` by default. See [CSP and Extension trust](../extensions/csp-and-trust.md#subresource-integrity).
 The `autoViewportMeta` option defaults to `true`. During initialization, the boot checks for `<meta name="viewport">` and adds `<meta name="viewport" content="width=device-width, initial-scale=1">` when it is absent. Set `autoViewportMeta: false` to leave the document head unchanged.
+The `skipGlobalMount` option defaults to `false`. Set it to `true` to finish orchestrator initialization and dispatch `Ready` without automatically mounting the document. Call `$ae.mount(document)` later to mount it explicitly.
 The boot does not set `data-ae-low-hardware`. Applications may add it to the document root when appropriate; Extensions such as Present use it when present.
 `$ae.registerCssProperty(descriptor)` accepts the same descriptor as `CSS.registerProperty()`. It returns `true` when the browser registers the property, or `false` when the API is unavailable or registration is rejected, including an already registered name. Extensions can call it during their `init()` without requiring Properties and Values API support for their basic behavior.
 Pass Extension-specific configuration through `extensions` in `init()` options:
@@ -53,7 +54,7 @@ await $ae.mount(elementOrId);
 await $ae.unmount(elementOrId);
 ```
 
-`mount(elementOrId)` resolves one root from a DOM element or an existing element ID, with or without a leading `#`. It discovers matching declarations below that root, loads required Extensions, and requests idempotent `mount` operations. It resolves to an array of DOM elements mounted during that call, with each element listed once across the matching mount maps; it returns `[]` when nothing is newly mounted or the root cannot be resolved. A failed element mount is diagnosed, its captured attributes and registration are rolled back, and later matching elements continue mounting. The returned array contains only the successful mounts. `unmount(elementOrId)` requests the corresponding cleanup operations and returns `false` when the root cannot be resolved. When the argument is omitted, the document is used. When `MutationObserver` is available, the mount manager automatically unmounts mounted elements removed from the document; moving an element elsewhere in the document keeps it mounted. Without that API, call `unmount(document)` or `destroyExtensions()` to clean detached elements. Unmounting the document also cleans previously mounted elements that have been detached; unmounting a specific element stays within that element's subtree.
+`mount(elementOrId)` resolves one root from a DOM element or an existing element ID, with or without a leading `#`. It discovers matching declarations below that root, loads required Extensions, and requests idempotent `mount` operations. It resolves to an array of DOM elements mounted during that call, with each element listed once across the matching mount maps; it returns `[]` when nothing is newly mounted or the root cannot be resolved. A failed element mount is diagnosed and its registration is rolled back; later matching elements continue mounting. The returned array contains only the successful mounts. `unmount(elementOrId)` requests the corresponding cleanup operations and returns `false` when the root cannot be resolved. When the argument is omitted, the document is used. When `MutationObserver` is available, the mount manager automatically unmounts mounted elements removed from the document; moving an element elsewhere in the document keeps it mounted. Without that API, call `unmount(document)` or `destroyExtensions()` to clean detached elements. Unmounting the document also cleans previously mounted elements that have been detached; unmounting a specific element stays within that element's subtree.
 
 Extensions register element handlers during `init()` and remove their registration during `destroy()`:
 
@@ -70,11 +71,11 @@ $ae.mountManager.add({
 $ae.mountManager.remove({ extensionName: "example" });
 ```
 
-Omitting `selector` removes all registrations for the Extension. The manager's `mount(elementOrId, extensionNames)` and `unmount(elementOrId, extensionNames)` use the same single-root resolution and lifecycle execution as `$ae.mount()` and `$ae.unmount()`. Its `update(elementOrId, extensionNames)` runs `update` handlers only for elements already mounted; registrations without an `update` handler are skipped. During mounting, `initialAttribute(element, name)` reads the captured initial value of a managed attribute.
+Omitting `selector` removes all registrations for the Extension. The manager's `mount(elementOrId, extensionNames)` and `unmount(elementOrId, extensionNames)` use the same single-root resolution and lifecycle execution as `$ae.mount()` and `$ae.unmount()`. Its `update(elementOrId, extensionNames)` runs `update` handlers only for elements already mounted; registrations without an `update` handler are skipped.
 
 `add()` requires a previously declared Extension name, valid CSS selector, and `mount` function. `unmount` and `update` are optional functions; `controllers` is an optional array of nonempty method names. `priority` is an optional finite number, defaulting to `0`. Mount registrations run in ascending priority order across Extensions and selectors; registrations with equal priority keep their previous discovery order. Unmount runs in descending priority order, reversing the actual mount order for equal priorities. Invalid registration arguments and attempts to replace an existing `extensionName` and `selector` pair report `ERROR_MOUNT_REGISTRATION` (`1113`), return `false`, and leave the mount map unchanged. `remove()` returns `false` and reports `ERROR_MOUNT_MAP_IN_USE` (`1115`) if any matching element is still mounted or mounting; unmount those elements before removing the map.
 
-The mount helper removes existing `ae--*` classes from an element before its first mount, leaving other classes intact. It captures `data-ae-*`, `aria-*`, and `hidden` attributes on each mounted element before `mount()`, then restores them after `unmount()`. It removes newly added attributes in those groups. Descendants are restored only when they are mounted themselves; other attributes, including `style`, are left as they are. Library classes are managed by their Extensions rather than restored from the initial HTML. When mounts overlap, the element is restored after its last mount ends. If `mount()` fails, its captured attributes are restored immediately. During a mount, `mountManager.initialAttribute(element, name)` returns a captured value or `null` when absent.
+The mount helper removes existing `ae--*` classes from an element before its first mount, leaving other classes intact. Extensions that change attributes or inline styles should save the specific values they own with `$ae.persist.element.save()` during mount and restore them during unmount. The mount manager does not restore attributes automatically. Library classes are managed by their Extensions rather than restored from the initial HTML.
 
 After an element mounts, use `$ae(elementOrId).{extensionName}.{mountedExtensionMethod}(...args)` to call its public Extension methods. `AelluxJs(elementOrId)` works the same way. Both calls resolve through `mountManager.controller(elementOrId)`. `elementOrId` can be a DOM element, an ID, or an ID prefixed with `#`. Invalid values and IDs that do not resolve emit a warning and return `null`. An element without a mounted controller emits an error explaining that it may not be mounted, then returns `null`. Before runtime initialization, the shortcut returns `null`. The `controllers` names registered by an Extension become methods under its camelCase namespace. Each method receives the element as its first argument, followed by `...args`:
 
@@ -191,7 +192,20 @@ function unmount(element) {
 }
 ```
 
-This helper is separate from the mount manager's automatic initial attribute restoration and the existing `attrMem` API. Snapshots are independent, so each Extension can save its own list.
+Snapshots are independent, so each Extension can save its own list.
+
+## ARIA ownership
+
+After the runtime loads, `AelluxJs.aria.register(element, { priority })` returns a handler for one element. `priority` defaults to `0` and is independent of mount registration priority. Use `set()` during mount or update, `unset(name)` to withdraw one value, and `release()` during unmount. The helper saves each attribute's original presence and value when it first receives a claim, and restores them when the last claim ends.
+
+```js
+const aria = AelluxJs.aria.register(element, { priority: 10 });
+aria.set({ expanded: true, controls: ["panel-id"], label: "Open panel" });
+aria.unset("label");
+aria.release();
+```
+
+Names can be short (`expanded`) or full (`aria-expanded`). A later registered handler wins a priority tie, even if an earlier handler updates afterward. For `aria-hidden`, `true` wins whenever any active handler requests it. Other attributes use the highest-priority handler. ID arrays are serialized as space-separated values; `aria-controls` uses the same priority rule rather than combining handlers' target lists. A handler's `initial(name)` reads the original attribute value, or `null` if it was absent. `set()` updates only the names provided, so use `unset()` or `release()` to withdraw claims. The HTML `hidden` attribute is separate and remains under the Extension's control.
 
 ## Diagnostics
 

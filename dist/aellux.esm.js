@@ -203,13 +203,13 @@ function saveElementMemory(element, attributes, cssProperties) {
   if (!Array.isArray(attributes) || !Array.isArray(cssProperties)) {
     throw new TypeError("persist.element.save requires arrays of attributes and CSS properties");
   }
-  var savedAttributes2 = /* @__PURE__ */ Object.create(null);
+  var savedAttributes = /* @__PURE__ */ Object.create(null);
   var savedCssProperties = /* @__PURE__ */ Object.create(null);
   var style = element.style;
   var i;
   for (i = 0; i < attributes.length; i++) {
     var attribute = attributes[i];
-    savedAttributes2[attribute] = {
+    savedAttributes[attribute] = {
       present: element.hasAttribute(attribute),
       value: element.getAttribute(attribute)
     };
@@ -234,13 +234,13 @@ function saveElementMemory(element, attributes, cssProperties) {
     };
   }
   return {
-    attributes: savedAttributes2,
+    attributes: savedAttributes,
     cssProperties: savedCssProperties,
     restore: function() {
       if (!element || typeof element.setAttribute !== "function" || !element.style) return false;
-      for (var name in savedAttributes2) {
-        if (!Object.prototype.hasOwnProperty.call(savedAttributes2, name)) continue;
-        var savedAttribute = savedAttributes2[name];
+      for (var name in savedAttributes) {
+        if (!Object.prototype.hasOwnProperty.call(savedAttributes, name)) continue;
+        var savedAttribute = savedAttributes[name];
         if (savedAttribute.present) element.setAttribute(name, savedAttribute.value);
         else element.removeAttribute(name);
       }
@@ -284,31 +284,6 @@ function buildPreferenceMediaQueries(root2) {
       "no-preference": mediaQuery("(prefers-contrast: no-preference)")
     }
   };
-}
-
-// src/internal/build-initial-attr-memory.js
-/*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
-var savedAttributes;
-function saveAttr(target, attributes) {
-  if (!savedAttributes) savedAttributes = /* @__PURE__ */ new WeakMap();
-  var snapshot = [];
-  for (var i = 0; i < attributes.length; i++) {
-    var name = attributes[i];
-    snapshot.push([name, target.getAttribute(name)]);
-  }
-  savedAttributes.set(target, snapshot);
-}
-function restoreAttr(target) {
-  if (!savedAttributes) return;
-  var snapshot = savedAttributes.get(target);
-  if (!snapshot) return;
-  for (var i = 0; i < snapshot.length; i++) {
-    var name = snapshot[i][0];
-    var value = snapshot[i][1];
-    if (value === null) target.removeAttribute(name);
-    else target.setAttribute(name, value);
-  }
-  savedAttributes.delete(target);
 }
 
 // src/internal/utils-name-case.js
@@ -501,7 +476,6 @@ function createAelluxApi(root2, constants) {
       target.removeEventListener(api.eventName(event), handler, options2);
     },
     attr: namingNormalization.attr,
-    attrMem: { save: saveAttr, restore: restoreAttr },
     className: namingNormalization.className,
     registerCssProperty: function(descriptor) {
       if (!root2.CSS || typeof root2.CSS.registerProperty !== "function") return false;
@@ -818,6 +792,7 @@ function createAelluxConstants() {
       mode: "full",
       verboseLevel: 0,
       forceLegacy: false,
+      skipGlobalMount: false,
       autoViewportMeta: true,
       basePath: null,
       crossOrigin: null,

@@ -6,18 +6,13 @@ import { resolveElementOrId } from "./resolve-element-or-id.js";
 
 export function createMountHelper(root, mountMaps, mountedElements, elementControllers) {
   const { toCapitalized, toCamelCase, fromCamelCase } = utilsNameCase;
-  const initialAttributeValues = new WeakMap();
   const pendingMounts = new WeakMap();
   const pendingUnmounts = new WeakMap();
   const mountRecords = new WeakMap();
   let mountOrder = 0;
   const classPrefix = root.AelluxJs.className("");
 
-  return { mount, unmount, unmountDetached, update, initialAttribute };
-
-  function initialAttribute(element, name) {
-    return initialAttributeValues.get(element)?.initial.get(name) ?? null;
-  }
+  return { mount, unmount, unmountDetached, update };
 
   async function update(elementOrId, extensionNames = null) {
     const rootElement = resolveMountElement(elementOrId, "update");
@@ -205,7 +200,6 @@ export function createMountHelper(root, mountMaps, mountedElements, elementContr
                 if (name.startsWith(classPrefix)) mountable.classList.remove(name);
               }
             }
-            rememberInitialAttributes(mountable);
             setMounted(mountable, mountId, true, controller.priority);
             const finishPendingMount = beginPendingMount(mountable, mountId);
             try {
@@ -228,7 +222,6 @@ export function createMountHelper(root, mountMaps, mountedElements, elementContr
                 elementController.despawn(mountId);
                 if (!elementController.hasMounts()) elementControllers.delete(mountable);
               }
-              restoreInitialAttributes(mountable);
               AelluxJs.diagnostics.error(
                 AelluxJs.diagnostics.ERROR_EXTENSION_MOUNT,
                 {
@@ -367,7 +360,6 @@ export function createMountHelper(root, mountMaps, mountedElements, elementContr
           if (!elementController.hasMounts()) elementControllers.delete(element);
         }
         element.classList.toggle(AelluxJs.className("mounted"), isMounted(element));
-        restoreInitialAttributes(element);
       } catch (cause) {
         diagnostics.error(diagnostics.ERROR_EXTENSION_MOUNT, {
           cause, extension: extensionName, method: "unmount", selector
@@ -477,37 +469,5 @@ export function createMountHelper(root, mountMaps, mountedElements, elementContr
       if (!records.size) mountRecords.delete(element);
     }
     if (mounts.size === 0) mountedElements.delete(element);
-  }
-
-  function rememberInitialAttributes(element) {
-    const record = initialAttributeValues.get(element);
-    if (record) {
-      record.users++;
-      return;
-    }
-    const initial = new Map();
-    for (const attribute of element.attributes) {
-      if (isRestoredAttribute(attribute.name))
-        initial.set(attribute.name, attribute.value);
-    }
-    initialAttributeValues.set(element, { initial, users: 1 });
-  }
-
-  function restoreInitialAttributes(element) {
-    const record = initialAttributeValues.get(element);
-    if (!record || --record.users) return;
-    for (let index = element.attributes.length - 1; index >= 0; index--) {
-      const name = element.attributes[index].name;
-      if (isRestoredAttribute(name) && !record.initial.has(name))
-        element.removeAttribute(name);
-    }
-    for (const [name, value] of record.initial) {
-      if (element.getAttribute(name) !== value) element.setAttribute(name, value);
-    }
-    initialAttributeValues.delete(element);
-  }
-
-  function isRestoredAttribute(name) {
-    return name === "hidden" || name.startsWith("data-ae-") || name.startsWith("aria-");
   }
 }

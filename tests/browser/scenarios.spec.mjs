@@ -107,6 +107,46 @@ test("autoViewportMeta false leaves a missing viewport meta tag absent", async (
   await expect(page.locator('meta[name="viewport"]')).toHaveCount(0);
 });
 
+for (const [label, extraOptions, expectedInitialMounts] of [
+  ["default", {}, 1],
+  ["Modern skipGlobalMount", { skipGlobalMount: true }, 0],
+  ["Legacy skipGlobalMount", { skipGlobalMount: true, forceLegacy: true }, 0]
+]) {
+  test(`boot global mount: ${label}`, async ({ page }) => {
+    await page.goto("/tests/index.htm");
+    await page.addScriptTag({ url: "/dist/aellux.js" });
+
+    const result = await page.evaluate(async options => {
+      document.body.innerHTML = '<div id="skip-mount-target" data-skip-mount-probe></div>';
+      let mountCalls = 0;
+      AelluxJs.ext("skip-mount-probe");
+      AelluxJs.extAttach("skip-mount-probe", {
+        init() {
+          AelluxJs.mountManager.add({
+            extensionName: "skip-mount-probe",
+            selector: "[data-skip-mount-probe]",
+            mount() { mountCalls++; }
+          });
+        }
+      });
+      const ready = new Promise(resolve => AelluxJs.on("Ready", resolve, { once: true }));
+      AelluxJs.init({ mode: "basic", ...options });
+      await ready;
+      const beforeManualMount = mountCalls;
+      const readyBeforeManualMount = AelluxJs.diagnostics.legacy === Boolean(options.forceLegacy)
+        && AelluxJs.options.skipGlobalMount === Boolean(options.skipGlobalMount);
+      await AelluxJs.mount(document);
+      return { beforeManualMount, afterManualMount: mountCalls, readyBeforeManualMount };
+    }, extraOptions);
+
+    expect(result).toEqual({
+      beforeManualMount: expectedInitialMounts,
+      afterManualMount: 1,
+      readyBeforeManualMount: true
+    });
+  });
+}
+
 test("invalid element or ID inputs are recorded for mount and unmount", async ({ page }) => {
   await page.goto("/tests/index.htm");
   await page.addScriptTag({ url: "/dist/aellux.js" });
@@ -325,16 +365,22 @@ test("mount unmounts elements detached by an async mount callback", async ({ pag
     AelluxJs.ext("detach-probe");
     AelluxJs.extAttach("detach-probe", {
       init() {
+        const memories = new WeakMap();
         AelluxJs.mountManager.add({
           extensionName: "detach-probe",
           selector: "[data-detach-probe]",
           async mount(element) {
+            memories.set(element, AelluxJs.persist.element.save(element, ["aria-expanded"], []));
             element.setAttribute("aria-expanded", "mounting");
             element.remove();
             await Promise.resolve();
             element.setAttribute("aria-expanded", "mounted");
           },
-          unmount() { unmountCalls++; },
+          unmount(element) {
+            unmountCalls++;
+            memories.get(element)?.restore();
+            memories.delete(element);
+          },
           controllers: []
         });
       }
@@ -412,11 +458,22 @@ test("partial mount failures return only successful elements and restore the fai
     AelluxJs.ext("partial-probe");
     AelluxJs.extAttach("partial-probe", {
       init() {
+        const memories = new WeakMap();
         AelluxJs.mountManager.add({
           extensionName: "partial-probe", selector: "[data-partial]",
           mount(element) {
+            const memory = AelluxJs.persist.element.save(element, ["aria-label"], []);
+            memories.set(element, memory);
             element.setAttribute("aria-label", `mounted-${element.id}`);
-            if (element.id === "partial-failure") throw new Error("partial failure");
+            if (element.id === "partial-failure") {
+              memory.restore();
+              memories.delete(element);
+              throw new Error("partial failure");
+            }
+          },
+          unmount(element) {
+            memories.get(element)?.restore();
+            memories.delete(element);
           }
         });
       }
@@ -500,7 +557,7 @@ test("update and unmount failures are isolated and cleanup still completes", asy
     calls: ["second-mount", "second-update", "second-unmount"],
     methods: ["update", "unmount"],
     causes: ["update failed", "unmount failed"],
-    expanded: "initial",
+    expanded: "true",
     mountedClass: false,
     controllerHasMounts: false
   });
@@ -1028,7 +1085,7 @@ test("mount maps cannot be replaced or removed while in use", async ({ page }) =
   });
 });
 
-test("mount helper restores selected attributes only on mounted elements", async ({ page }) => {
+test("mount helper leaves attribute restoration to extensions", async ({ page }) => {
   await page.goto("/tests/index.htm");
   await page.addScriptTag({ url: "/dist/aellux.js" });
   await page.evaluate(() => AelluxJs.init({ mode: "basic" }));
@@ -1044,7 +1101,6 @@ test("mount helper restores selected attributes only on mounted elements", async
     const child = document.getElementById("child");
     const failure = document.getElementById("failure");
     const duringUnmount = [];
-    const initialSeen = [];
     const initialClassSeen = [];
     AelluxJs.ext("attribute-probe");
     AelluxJs.extAttach("attribute-probe", {
@@ -1052,7 +1108,6 @@ test("mount helper restores selected attributes only on mounted elements", async
         AelluxJs.mountManager.add({
           extensionName: "attribute-probe", selector: "[data-track]",
           mount(element) {
-            initialSeen.push(AelluxJs.mountManager.initialAttribute(element, "data-ae-state"));
             initialClassSeen.push(element.classList.contains("ae--stale"));
             element.classList.add("ae--active");
             element.setAttribute("data-ae-state", "first");
@@ -1072,7 +1127,6 @@ test("mount helper restores selected attributes only on mounted elements", async
         AelluxJs.mountManager.add({
           extensionName: "attribute-probe", selector: "[data-secondary]",
           mount(element) {
-            initialSeen.push(AelluxJs.mountManager.initialAttribute(element, "data-ae-state"));
             initialClassSeen.push(element.classList.contains("ae--active"));
             element.setAttribute("data-ae-state", "second");
           },
@@ -1095,7 +1149,6 @@ test("mount helper restores selected attributes only on mounted elements", async
     await AelluxJs.mount(failure, "attribute-probe");
     return {
       mounted,
-      initialSeen,
       initialClassSeen,
       duringUnmount,
       restored: target.getAttribute("data-ae-state"),
@@ -1114,25 +1167,24 @@ test("mount helper restores selected attributes only on mounted elements", async
   });
   expect(result).toEqual({
     mounted: "second",
-    initialSeen: ["initial", "initial"],
     initialClassSeen: [false, true],
     duringUnmount: ["second", "second"],
-    restored: "initial",
-    addedRestored: false,
-    ariaRestored: "initial label",
-    hiddenRestored: true,
+    restored: "second",
+    addedRestored: true,
+    ariaRestored: "changed label",
+    hiddenRestored: false,
     unrelatedRetained: "keep",
     classRetained: true,
     staleClassRetained: false,
     styleRetained: "blue",
     childRetained: "changed",
-    failureRestored: "failure-initial",
-    failureAddedRestored: false,
+    failureRestored: "failed",
+    failureAddedRestored: true,
     failureMounted: false
   });
 });
 
-test("shared initial attributes survive partial unmount and failed mount", async ({ page }) => {
+test("extension memories restore owned attributes after partial unmount and failed mount", async ({ page }) => {
   await page.goto("/tests/index.htm");
   await page.addScriptTag({ url: "/dist/aellux.js" });
   await page.evaluate(() => AelluxJs.init({ mode: "basic" }));
@@ -1140,7 +1192,7 @@ test("shared initial attributes survive partial unmount and failed mount", async
   const result = await page.evaluate(async () => {
     document.body.innerHTML = '<div id="shared" data-first data-second data-failing data-ae-state="initial"></div>';
     const element = document.getElementById("shared");
-    const initialSeen = [];
+    const savedValues = [];
     for (const [name, selector, value] of [
       ["first-probe", "[data-first]", "first"],
       ["second-probe", "[data-second]", "second"],
@@ -1149,14 +1201,24 @@ test("shared initial attributes survive partial unmount and failed mount", async
       AelluxJs.ext(name);
       AelluxJs.extAttach(name, {
         init() {
+          const memories = new WeakMap();
           AelluxJs.mountManager.add({
             extensionName: name, selector,
             mount(target) {
-              initialSeen.push(AelluxJs.mountManager.initialAttribute(target, "data-ae-state"));
+              const memory = AelluxJs.persist.element.save(target, ["data-ae-state"], []);
+              memories.set(target, memory);
+              savedValues.push(memory.attributes["data-ae-state"].value);
               target.setAttribute("data-ae-state", value);
-              if (name === "failing-probe") throw new Error("expected failure");
+              if (name === "failing-probe") {
+                memory.restore();
+                memories.delete(target);
+                throw new Error("expected failure");
+              }
             },
-            unmount() {}
+            unmount(target) {
+              memories.get(target)?.restore();
+              memories.delete(target);
+            }
           });
         }
       });
@@ -1164,23 +1226,21 @@ test("shared initial attributes survive partial unmount and failed mount", async
       await AelluxJs.mount(element, name);
     }
     const afterFailure = element.getAttribute("data-ae-state");
-    await AelluxJs.unmount(element, "first-probe");
-    const afterFirstUnmount = element.getAttribute("data-ae-state");
     await AelluxJs.unmount(element, "second-probe");
+    const afterSecondUnmount = element.getAttribute("data-ae-state");
+    await AelluxJs.unmount(element, "first-probe");
     return {
-      initialSeen,
+      savedValues,
       afterFailure,
-      afterFirstUnmount,
-      restored: element.getAttribute("data-ae-state"),
-      initialAfterUnmount: AelluxJs.mountManager.initialAttribute(element, "data-ae-state")
+      afterSecondUnmount,
+      restored: element.getAttribute("data-ae-state")
     };
   });
   expect(result).toEqual({
-    initialSeen: ["initial", "initial", "initial"],
-    afterFailure: "failed",
-    afterFirstUnmount: "failed",
-    restored: "initial",
-    initialAfterUnmount: null
+    savedValues: ["initial", "first", "second"],
+    afterFailure: "second",
+    afterSecondUnmount: "first",
+    restored: "initial"
   });
 });
 
@@ -1364,12 +1424,18 @@ test("MutationObserver unmounts removed elements but preserves moved elements", 
     AelluxJs.ext("observed-detach");
     AelluxJs.extAttach("observed-detach", {
       init() {
+        const memories = new WeakMap();
         AelluxJs.mountManager.add({
           extensionName: "observed-detach", selector: "[data-observed-detach]",
-          mount(element) { element.setAttribute("aria-expanded", "true"); },
+          mount(element) {
+            memories.set(element, AelluxJs.persist.element.save(element, ["aria-expanded"], []));
+            element.setAttribute("aria-expanded", "true");
+          },
           async unmount(element) {
             await Promise.resolve();
             window.observedCalls.push(element.id);
+            memories.get(element)?.restore();
+            memories.delete(element);
           }
         });
       }
@@ -1614,7 +1680,7 @@ test("core destroy survives lifecycle failures and clears resources", async ({ p
   });
 });
 
-test("mount manager exposes initial attributes and idempotent observer destruction", async ({ page }) => {
+test("mount manager has idempotent observer destruction", async ({ page }) => {
   await page.goto("/tests/index.htm");
   await page.evaluate(() => {
     const NativeMutationObserver = window.MutationObserver;
@@ -1649,7 +1715,6 @@ test("mount manager exposes initial attributes and idempotent observer destructi
     });
     await AelluxJs.wait("manager-destroy");
     await AelluxJs.mount(target, "manager-destroy");
-    const initial = AelluxJs.mountManager.initialAttribute(target, "aria-label");
     const methods = {
       destroy: typeof AelluxJs.mountManager.destroy,
       initialAttribute: typeof AelluxJs.mountManager.initialAttribute
@@ -1662,7 +1727,6 @@ test("mount manager exposes initial attributes and idempotent observer destructi
     await new Promise(resolve => setTimeout(resolve, 0));
     return {
       methods,
-      initial,
       destroyed,
       observerDisconnects: window.observerDisconnects,
       unmountCalls
@@ -1670,8 +1734,7 @@ test("mount manager exposes initial attributes and idempotent observer destructi
   });
 
   expect(result).toEqual({
-    methods: { destroy: "function", initialAttribute: "function" },
-    initial: "initial",
+    methods: { destroy: "function", initialAttribute: "undefined" },
     destroyed: [true, false],
     observerDisconnects: 1,
     unmountCalls: 0

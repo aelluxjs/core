@@ -4,7 +4,6 @@ import { buildDiagnostics } from "./build-diagnostics.js";
 import { buildPersistMemory } from "./build-persist-memory.js";
 import { createSaveElementMemoryHelper } from "./create-save-element-memory-helper.js";
 import { buildPreferenceMediaQueries } from "./build-preference-media-queries.js";
-import { saveAttr, restoreAttr } from "./build-initial-attr-memory.js";
 import utilsNameCase from "./utils-name-case.js";
 import { createNamingNormalization } from "./create-naming-normalization.js";
 import { createPreferenceHtmlHelper } from "./create-preference-html-helper.js";
@@ -54,7 +53,6 @@ export function createAelluxApi(root, constants) {
       target.removeEventListener(api.eventName(event), handler, options);
     },
     attr: namingNormalization.attr,
-    attrMem: { save: saveAttr, restore: restoreAttr },
     className: namingNormalization.className,
     registerCssProperty: function (descriptor) {
       if (!root.CSS || typeof root.CSS.registerProperty !== "function") return false;

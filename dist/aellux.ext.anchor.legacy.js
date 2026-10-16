@@ -78,6 +78,29 @@
       r2 ? i ? i(e2, r2, { value: n2, enumerable: !t2, configurable: !t2, writable: !t2 }) : e2[r2] = n2 : (o("next", 0), o("throw", 1), o("return", 2));
     }, _regeneratorDefine2(e, r, n, t);
   }
+  function asyncGeneratorStep(n, t, e, r, o, a, c) {
+    try {
+      var i = n[a](c), u = i.value;
+    } catch (n2) {
+      return void e(n2);
+    }
+    i.done ? t(u) : Promise.resolve(u).then(r, o);
+  }
+  function _asyncToGenerator(n) {
+    return function() {
+      var t = this, e = arguments;
+      return new Promise(function(r, o) {
+        var a = n.apply(t, e);
+        function _next(n2) {
+          asyncGeneratorStep(a, r, o, _next, _throw, "next", n2);
+        }
+        function _throw(n2) {
+          asyncGeneratorStep(a, r, o, _next, _throw, "throw", n2);
+        }
+        _next(void 0);
+      });
+    };
+  }
   function _createForOfIteratorHelper(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
@@ -121,29 +144,6 @@
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
   }
-  function asyncGeneratorStep(n, t, e, r, o, a, c) {
-    try {
-      var i = n[a](c), u = i.value;
-    } catch (n2) {
-      return void e(n2);
-    }
-    i.done ? t(u) : Promise.resolve(u).then(r, o);
-  }
-  function _asyncToGenerator(n) {
-    return function() {
-      var t = this, e = arguments;
-      return new Promise(function(r, o) {
-        var a = n.apply(t, e);
-        function _next(n2) {
-          asyncGeneratorStep(a, r, o, _next, _throw, "next", n2);
-        }
-        function _throw(n2) {
-          asyncGeneratorStep(a, r, o, _next, _throw, "throw", n2);
-        }
-        _next(void 0);
-      });
-    };
-  }
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   (function(root) {
     "use strict";
@@ -154,6 +154,7 @@
     }
     var attribute = AelluxJs.attr(extensionName);
     var targetAttribute = AelluxJs.attr("anchor-target");
+    var fpsAttribute = AelluxJs.attr("anchor-fps");
     var layoutEvent = AelluxJs.eventName("Layout");
     var anchoredClass = AelluxJs.className("anchored");
     var baseProperties = ["position", "left", "top", "transform", "transform-origin"];
@@ -169,13 +170,32 @@
       "bottom-center": [0.5, 1],
       "bottom-right": [1, 1]
     };
-    var UPDATE_INTERVAL_MS = 100;
+    var DEFAULT_FPS = 30;
+    var DEFAULT_INTERVAL_MS = Math.round(1e3 / DEFAULT_FPS);
     var anchors = /* @__PURE__ */ new Map();
     var elementMemories = /* @__PURE__ */ new WeakMap();
     var updateTimeout = null;
     var layoutUpdateTimeout = null;
     var layoutUpdateUntil = 0;
-    var lastUpdateTime = -UPDATE_INTERVAL_MS;
+    var lastUpdateTime = -DEFAULT_INTERVAL_MS;
+    function updateIntervalMs() {
+      var interval = Infinity;
+      var _iterator = _createForOfIteratorHelper(anchors.keys()), _step;
+      try {
+        for (_iterator.s(); !(_step = _iterator.n()).done; ) {
+          var element = _step.value;
+          var value = element.getAttribute(fpsAttribute);
+          var fps = value === null || !value.trim() ? NaN : Number(value);
+          var elementInterval = Number.isFinite(fps) && fps > 0 ? Math.max(1, Math.round(1e3 / fps)) : DEFAULT_INTERVAL_MS;
+          interval = Math.min(interval, elementInterval);
+        }
+      } catch (err) {
+        _iterator.e(err);
+      } finally {
+        _iterator.f();
+      }
+      return Number.isFinite(interval) ? interval : DEFAULT_INTERVAL_MS;
+    }
     AelluxJs.extAttach(extensionName, {
       init: init,
       destroy: destroy
@@ -215,7 +235,7 @@
               updateTimeout = null;
               layoutUpdateTimeout = null;
               layoutUpdateUntil = 0;
-              lastUpdateTime = -UPDATE_INTERVAL_MS;
+              lastUpdateTime = -DEFAULT_INTERVAL_MS;
               _context.n = 1;
               return Promise.all(Array.from(anchors.keys(), unmountAnchor));
             case 1:
@@ -291,7 +311,7 @@
                 updateTimeout = null;
                 layoutUpdateTimeout = null;
                 layoutUpdateUntil = 0;
-                lastUpdateTime = -UPDATE_INTERVAL_MS;
+                lastUpdateTime = -DEFAULT_INTERVAL_MS;
               }
               _context2.n = 2;
               return AelluxJs.waitLayout.update(deactivate, [element, state, memory]);
@@ -304,37 +324,39 @@
     }
     function scheduleUpdate() {
       if (!anchors.size) return;
+      var interval = updateIntervalMs();
       var elapsed = now() - lastUpdateTime;
-      if (elapsed >= UPDATE_INTERVAL_MS) {
+      if (elapsed >= interval) {
         if (updateTimeout !== null) clearTimeout(updateTimeout);
         updateTimeout = null;
         flushUpdate();
         return;
       }
       if (updateTimeout !== null) return;
-      updateTimeout = setTimeout(flushUpdate, UPDATE_INTERVAL_MS - elapsed);
+      updateTimeout = setTimeout(flushUpdate, interval - elapsed);
     }
     function scheduleLayoutUpdate(event) {
+      var interval = updateIntervalMs();
       var durationMs = Number(event && event.detail ? event.detail.durationMs : NaN);
       if (!Number.isFinite(durationMs) || durationMs < 0) {
         scheduleUpdate();
         return;
       }
       if (durationMs === 0) {
-        if (layoutUpdateTimeout === null) layoutUpdateTimeout = setTimeout(checkLayoutUpdate, UPDATE_INTERVAL_MS);
+        if (layoutUpdateTimeout === null) layoutUpdateTimeout = setTimeout(checkLayoutUpdate, interval);
         return;
       }
       scheduleUpdate();
       layoutUpdateUntil = Math.max(layoutUpdateUntil, now() + durationMs);
       if (layoutUpdateTimeout !== null) return;
-      layoutUpdateTimeout = setTimeout(checkLayoutUpdate, Math.min(UPDATE_INTERVAL_MS, durationMs));
+      layoutUpdateTimeout = setTimeout(checkLayoutUpdate, Math.min(interval, durationMs));
     }
     function checkLayoutUpdate() {
       layoutUpdateTimeout = null;
       scheduleUpdate();
       var remaining = layoutUpdateUntil - now();
       if (remaining > 0) {
-        layoutUpdateTimeout = setTimeout(checkLayoutUpdate, Math.min(UPDATE_INTERVAL_MS, remaining));
+        layoutUpdateTimeout = setTimeout(checkLayoutUpdate, Math.min(updateIntervalMs(), remaining));
       } else {
         layoutUpdateUntil = 0;
       }
@@ -342,10 +364,10 @@
     function flushUpdate() {
       updateTimeout = null;
       lastUpdateTime = now();
-      var _iterator = _createForOfIteratorHelper(anchors.keys()), _step;
+      var _iterator2 = _createForOfIteratorHelper(anchors.keys()), _step2;
       try {
         var _loop = function _loop2() {
-          var element = _step.value;
+          var element = _step2.value;
           updateAnchor(element).catch(function(cause) {
             AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_EXTENSION_MOUNT, {
               cause: cause,
@@ -355,13 +377,13 @@
             });
           });
         };
-        for (_iterator.s(); !(_step = _iterator.n()).done; ) {
+        for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
           _loop();
         }
       } catch (err) {
-        _iterator.e(err);
+        _iterator2.e(err);
       } finally {
-        _iterator.f();
+        _iterator2.f();
       }
     }
     function now() {
@@ -475,16 +497,16 @@
                 element.style.setProperty("--ae-anchor-y", "".concat(selected.y, "px"));
                 element.style.setProperty("--ae-anchor-origin-x", "".concat(selected.self[0] * 100, "%"));
                 element.style.setProperty("--ae-anchor-origin-y", "".concat(selected.self[1] * 100, "%"));
-                var _iterator5 = _createForOfIteratorHelper(baseProperties), _step5;
+                var _iterator6 = _createForOfIteratorHelper(baseProperties), _step6;
                 try {
-                  for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
-                    var name = _step5.value;
+                  for (_iterator6.s(); !(_step6 = _iterator6.n()).done; ) {
+                    var name = _step6.value;
                     element.style.removeProperty(name);
                   }
                 } catch (err) {
-                  _iterator5.e(err);
+                  _iterator6.e(err);
                 } finally {
-                  _iterator5.f();
+                  _iterator6.f();
                 }
                 element.classList.add(anchoredClass);
               });
@@ -523,10 +545,10 @@
         height: root.innerHeight
       }, reference, referenceRect, scaleX, scaleY);
       var selected = null;
-      var _iterator2 = _createForOfIteratorHelper(candidates), _step2;
+      var _iterator3 = _createForOfIteratorHelper(candidates), _step3;
       try {
-        for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
-          var candidate = _step2.value;
+        for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
+          var candidate = _step3.value;
           var x = targetRect.left + targetRect.width * candidate.target[0] - selfWidth * candidate.self[0];
           var y = targetRect.top + targetRect.height * candidate.target[1] - selfHeight * candidate.self[1];
           var result = {
@@ -541,9 +563,9 @@
           }
         }
       } catch (err) {
-        _iterator2.e(err);
+        _iterator3.e(err);
       } finally {
-        _iterator2.f();
+        _iterator3.f();
       }
       return {
         valid: true,
@@ -569,18 +591,18 @@
       state.target = target;
       if (state.observer) state.observer.disconnect();
       if (state.intersectionObserver) state.intersectionObserver.disconnect();
-      var _iterator3 = _createForOfIteratorHelper(/* @__PURE__ */ new Set([element, target, reference])), _step3;
+      var _iterator4 = _createForOfIteratorHelper(/* @__PURE__ */ new Set([element, target, reference])), _step4;
       try {
-        for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
-          var observed = _step3.value;
+        for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
+          var observed = _step4.value;
           if (!observed) continue;
           if (state.observer) state.observer.observe(observed);
           if (state.intersectionObserver) state.intersectionObserver.observe(observed);
         }
       } catch (err) {
-        _iterator3.e(err);
+        _iterator4.e(err);
       } finally {
-        _iterator3.f();
+        _iterator4.f();
       }
     }
     function listenForLayout(state, reference) {
@@ -620,10 +642,10 @@
     }
     function parseCandidates(value) {
       var result = [];
-      var _iterator4 = _createForOfIteratorHelper((value || "").split(",")), _step4;
+      var _iterator5 = _createForOfIteratorHelper((value || "").split(",")), _step5;
       try {
-        for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
-          var token = _step4.value;
+        for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
+          var token = _step5.value;
           var pair = token.trim().toLowerCase().split(":");
           if (pair.length !== 2 || !pivots[pair[0].trim()] || !pivots[pair[1].trim()]) continue;
           result.push({
@@ -632,9 +654,9 @@
           });
         }
       } catch (err) {
-        _iterator4.e(err);
+        _iterator5.e(err);
       } finally {
-        _iterator4.f();
+        _iterator5.f();
       }
       return result;
     }

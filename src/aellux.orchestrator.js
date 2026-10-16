@@ -13,6 +13,7 @@
 import { assetLoadHelper } from "./internal/asset-load-helper.js";
 import { buildLayoutScheduler } from "./internal/build-layout-scheduler.js";
 import { buildMountMapManager } from "./internal/build-mount-map-manager.js";
+import { createAriaHelper } from "./internal/create-aria-helper.js";
 import utilsNameCase from "./internal/utils-name-case.js";
 
 (function (root) {
@@ -21,6 +22,7 @@ import utilsNameCase from "./internal/utils-name-case.js";
   const { toCamelCase, fromCamelCase } = utilsNameCase;
 
   const extensionPromises = {};
+  const aria = createAriaHelper();
   const mountManager = buildMountMapManager(root);
   const layoutScheduler = buildLayoutScheduler();
 
@@ -37,17 +39,22 @@ import utilsNameCase from "./internal/utils-name-case.js";
         }
 
         await new Promise((resolve) => {
-          const startMountCallback = function () {
+          const startCallback = function () {
+            if (AelluxJs.options.skipGlobalMount === true) {
+              AelluxJs.off("$DOMContentLoaded", startCallback);
+              resolve();
+              return;
+            }
             AelluxJs.mount().then(function () {
-              AelluxJs.off("$DOMContentLoaded", startMountCallback);
+              AelluxJs.off("$DOMContentLoaded", startCallback);
               resolve();
             });
           };
 
           if (document.readyState === "loading")
-            AelluxJs.on("$DOMContentLoaded", startMountCallback, { once: true });
+            AelluxJs.on("$DOMContentLoaded", startCallback, { once: true });
           else
-            startMountCallback();
+            startCallback();
         });
 
         AelluxJs.dispatch("Ready");
@@ -125,6 +132,7 @@ import utilsNameCase from "./internal/utils-name-case.js";
 
       request: defaultRequest,
 
+      aria,
       waitLayout: layoutScheduler,
       mountManager,
     });

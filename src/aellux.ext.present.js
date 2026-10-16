@@ -72,8 +72,6 @@
     MILLISECOND = "ms",
     SECOND = "s",
     TRANSITION_PREPARE_TIME = 100,
-    ARIA_EXPANDED = "aria-expanded",
-    ARIA_CONTROLS = "aria-controls",
     DEFAULT_PRESENT = "opacity transform height width";
   const presentElements = new Map();
   const openPresentElements = new Set();
@@ -82,7 +80,8 @@
   const triggersByTargetId = new Map();
   const indexedTriggerValues = new Map();
   const elementMemories = new WeakMap();
-  const triggerMemories = new WeakMap();
+  const containerAriaHandlers = new WeakMap();
+  const triggerAriaHandlers = new WeakMap();
   const measuredMemories = new WeakMap();
 
   function init(options) {
@@ -124,9 +123,10 @@
     if (presentElements.has(element)) return;
     elementMemories.set(element, AelluxJs.persist.element.save(
       element,
-      [attr.present, attr.presentMotion, ARIA_EXPANDED, "hidden"],
+      [attr.present, attr.presentMotion, "hidden"],
       ["--ae-pop-low-steps", "--ae-unpop-low-steps"]
     ));
+    containerAriaHandlers.set(element, AelluxJs.aria.register(element));
     if ((element.getAttribute(attr.present) || "").trim().toLowerCase() === "all") {
       element.setAttribute(attr.present, DEFAULT_PRESENT);
     }
@@ -155,7 +155,8 @@
       classList: element.classList,
       triggers: new Set(),
       setAriaExpanded: function (value) {
-        element.setAttribute(ARIA_EXPANDED, value);
+        this.expanded = value === "true";
+        containerAriaHandlers.get(element).set({ expanded: this.expanded });
         this.triggers.forEach(updateTriggerAriaExpanded);
       },
       stop: function (options = {}) {
@@ -228,6 +229,8 @@
     element.classList.remove(className.grid);
     presentElements.delete(element);
     openPresentElements.delete(element);
+    containerAriaHandlers.get(element)?.release();
+    containerAriaHandlers.delete(element);
     elementMemories.get(element)?.restore();
     elementMemories.delete(element);
     controller.triggers.forEach(updateTriggerAriaExpanded);
@@ -235,9 +238,7 @@
 
   function mountTriggerElement(triggerElement) {
     if (triggerElementsSet.has(triggerElement)) return;
-    triggerMemories.set(triggerElement, AelluxJs.persist.element.save(
-      triggerElement, [ARIA_CONTROLS, ARIA_EXPANDED], []
-    ));
+    triggerAriaHandlers.set(triggerElement, AelluxJs.aria.register(triggerElement));
     triggerElementsSet.add(triggerElement);
     refreshTriggerTargets(triggerElement);
   }
@@ -251,8 +252,8 @@
     }
     unindexTriggerTarget(triggerElement);
     triggerElementsSet.delete(triggerElement);
-    triggerMemories.get(triggerElement)?.restore();
-    triggerMemories.delete(triggerElement);
+    triggerAriaHandlers.get(triggerElement)?.release();
+    triggerAriaHandlers.delete(triggerElement);
   }
 
   function targetIdFor(value) {
@@ -320,23 +321,24 @@
 
     if (!target || !target.id) {
       triggerTargets.delete(triggerElement);
+      triggerAriaHandlers.get(triggerElement)?.unset("expanded");
+      triggerAriaHandlers.get(triggerElement)?.unset("controls");
       return;
     }
     triggerTargets.set(triggerElement, target);
     presentElements.get(target)?.triggers.add(triggerElement);
     const targetIds = new Set([target.id]);
-    const initial = AelluxJs.mountManager.initialAttribute?.(triggerElement, ARIA_CONTROLS);
+    const initial = triggerAriaHandlers.get(triggerElement)?.initial("controls");
     if (initial) { initial.trim().split(/\s+/).forEach(x => targetIds.add(x)); }
     updateTriggerAriaExpanded(triggerElement);
-    triggerElement.setAttribute(ARIA_CONTROLS, [...targetIds].join(" "));
+    triggerAriaHandlers.get(triggerElement).set({ controls: [...targetIds] });
   }
 
   function updateTriggerAriaExpanded(triggerElement) {
     const target = triggerTargets.get(triggerElement);
     if (!target) return;
-    const expanded = presentElements.has(target) &&
-      target.getAttribute(ARIA_EXPANDED) === "true";
-    triggerElement.setAttribute(ARIA_EXPANDED, String(expanded));
+    const expanded = presentElements.get(target)?.expanded === true;
+    triggerAriaHandlers.get(triggerElement)?.set({ expanded });
   }
 
   function pop(element) { return presentTransition(element, true, true); }

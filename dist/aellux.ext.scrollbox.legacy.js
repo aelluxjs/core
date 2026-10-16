@@ -167,8 +167,6 @@
     var scrollbarMemories = /* @__PURE__ */ new WeakMap();
     var inlineMemories = /* @__PURE__ */ new WeakMap();
     var elasticMemories = /* @__PURE__ */ new WeakMap();
-    var elasticWidthMemories = /* @__PURE__ */ new WeakMap();
-    var elasticHeightMemories = /* @__PURE__ */ new WeakMap();
     var pointerScrollMemories = /* @__PURE__ */ new WeakMap();
     var snapItemMemories = /* @__PURE__ */ new WeakMap();
     var activePointerScrollState = null;
@@ -214,8 +212,6 @@
         wrapper: null,
         baseTransform: "",
         baseOrigin: "",
-        extentX: false,
-        extentY: false,
         dimensions: null,
         invalidReported: false,
         invalidLimit: null,
@@ -984,7 +980,7 @@
     }
     function snapAlignmentOffset(state, item, axis) {
       var box = arguments.length > 3 && arguments[3] !== void 0 ? arguments[3] : state.element.getBoundingClientRect();
-      var target = item.getBoundingClientRect();
+      var target = arguments.length > 4 && arguments[4] !== void 0 ? arguments[4] : item.getBoundingClientRect();
       var horizontal = axis === "x";
       var start = horizontal ? box.left + state.element.clientLeft : box.top + state.element.clientTop;
       var size = horizontal ? state.element.clientWidth : state.element.clientHeight;
@@ -1106,7 +1102,7 @@
             var dx = start.startX - touch.clientX;
             var dy = start.startY - touch.clientY;
             if (Math.abs(axis === "x" ? dx : dy) < Math.abs(axis === "x" ? dy : dx)) continue;
-            recordSnapFlick(state, _objectSpread(_objectSpread({}, start), {}, {
+            recordSnapGesture(state, _objectSpread(_objectSpread({}, start), {}, {
               lastX: touch.clientX,
               lastY: touch.clientY,
               endTime: now()
@@ -1765,12 +1761,14 @@
       var pointerScroll = state.pointerScroll;
       if (!pointerScroll || event && event.pointerId !== pointerScroll.pointerId) return;
       pointerScroll.endTime = now();
+      if (event && event.type === "pointerup") {
+        pointerScroll.lastX = event.clientX;
+        pointerScroll.lastY = event.clientY;
+      }
       if (event && event.type === "pointerup" && !pointerScroll.moved && pointerScroll.endTime < pointerScroll.selectionReadyTime && !selectionHasChanged(pointerScroll.selectionAtDown)) {
         var dx = pointerScroll.startX - event.clientX;
         var dy = pointerScroll.startY - event.clientY;
         var axis = pointerScroll.axis || (Math.abs(dx) >= Math.abs(dy) ? "x" : "y");
-        pointerScroll.lastX = event.clientX;
-        pointerScroll.lastY = event.clientY;
         var chain = pointerScroll.chains[axis];
         if (chain.some(function(member2) {
           return member2.snapEnabled && snapAxis(member2) === axis && pointerAxisMaximum(member2, axis, pointerScroll) > 0;
@@ -1841,7 +1839,7 @@
       });
       var shouldSnap = event && event.type === "pointerup" && pointerScroll.moved && snapState && !snapState.disposed && snapItems(snapState).length;
       if (shouldSnap) {
-        recordSnapFlick(snapState, pointerScroll, pointerScroll.axis, pointerScroll.snapStarts.get(snapState));
+        recordSnapGesture(snapState, pointerScroll, pointerScroll.axis, pointerScroll.snapStarts.get(snapState));
         scheduleScrollEnd(snapState);
       }
       var _iterator17 = _createForOfIteratorHelper(pointerScroll.chain), _step17;
@@ -1859,12 +1857,18 @@
         startMomentum(momentumState, pointerScroll);
       }
     }
-    function recordSnapFlick(state, gesture, axis, startIndex) {
-      if (!state.snapEnabled || snapAxis(state) !== axis || !Number.isInteger(startIndex) || !isSnapFlick(gesture, axis)) return;
+    function recordSnapGesture(state, gesture, axis, startIndex) {
+      if (!state.snapEnabled || snapAxis(state) !== axis || !Number.isInteger(startIndex)) return;
       var distance = axis === "x" ? gesture.startX - gesture.lastX : gesture.startY - gesture.lastY;
       var items = snapItems(state);
-      var index = Math.max(0, Math.min(items.length - 1, startIndex + Math.sign(distance)));
-      if (index !== startIndex) {
+      var currentIndex = selectedSnapIndex(state);
+      var focusedItem = items[currentIndex];
+      if (!focusedItem) return;
+      var size = focusedItem.getBoundingClientRect()[axis === "x" ? "width" : "height"];
+      if (Math.abs(distance) <= size / 4 && !isSnapFlick(gesture, axis)) return;
+      if (currentIndex !== startIndex && Math.abs(distance) <= size) return;
+      var index = Math.max(0, Math.min(items.length - 1, currentIndex + Math.sign(distance)));
+      if (index !== currentIndex) {
         state.snap.flick = {
           axis: axis,
           index: index
@@ -2085,16 +2089,6 @@
       elastic.active = active;
       elastic.owned = true;
       if (active) suspendSnapStyles(state, "elastic", true);
-      if (amounts[1] > 0 && !elastic.extentX) {
-        elasticWidthMemories.set(elastic.wrapper, AelluxJs.persist.element.save(elastic.wrapper, [], ["min-width"]));
-        elastic.wrapper.style.setProperty("min-width", "".concat(Math.max(dimensions.offsetWidth, dimensions.scrollWidth), "px"), elasticWidthMemories.get(elastic.wrapper).cssProperties["min-width"].priority);
-        elastic.extentX = true;
-      }
-      if (amounts[2] > 0 && !elastic.extentY) {
-        elasticHeightMemories.set(elastic.wrapper, AelluxJs.persist.element.save(elastic.wrapper, [], ["min-height"]));
-        elastic.wrapper.style.setProperty("min-height", "".concat(Math.max(dimensions.offsetHeight, dimensions.scrollHeight), "px"), elasticHeightMemories.get(elastic.wrapper).cssProperties["min-height"].priority);
-        elastic.extentY = true;
-      }
       setElasticTransform(state, dimensions);
       return active;
     }
@@ -2192,20 +2186,12 @@
       elastic.wheelTimeout = null;
       if (elastic.wrapper) elastic.wrapper.classList.remove(elasticReleaseClass);
       if (elastic.owned && elastic.wrapper) {
-        var _elasticMemories$get, _elasticWidthMemories, _elasticHeightMemorie;
+        var _elasticMemories$get;
         (_elasticMemories$get = elasticMemories.get(elastic.wrapper)) === null || _elasticMemories$get === void 0 || _elasticMemories$get.restore();
-        if (elastic.extentX) (_elasticWidthMemories = elasticWidthMemories.get(elastic.wrapper)) === null || _elasticWidthMemories === void 0 || _elasticWidthMemories.restore();
-        if (elastic.extentY) (_elasticHeightMemorie = elasticHeightMemories.get(elastic.wrapper)) === null || _elasticHeightMemorie === void 0 || _elasticHeightMemorie.restore();
-      }
-      if (elastic.wrapper) {
-        elasticWidthMemories.delete(elastic.wrapper);
-        elasticHeightMemories.delete(elastic.wrapper);
       }
       elastic.amounts = [0, 0, 0, 0];
       elastic.active = false;
       elastic.owned = false;
-      elastic.extentX = false;
-      elastic.extentY = false;
       if (wasOwned && !state.disposed) {
         suspendSnapStyles(state, "elastic", false);
         if (state.snap.deferredIndex !== null) {
@@ -2402,7 +2388,7 @@
         var box = item.getBoundingClientRect();
         var itemCenter = axis === "x" ? box.left + box.width / 2 : box.top + box.height / 2;
         var viewport = Math.max(-2, Math.min(2, (itemCenter - center) * 2 / size));
-        var focus = Math.max(0, 1 - Math.abs(viewport) / 2);
+        var focus = Math.max(0, 1 - Math.abs(snapAlignmentOffset(state, item, axis, rect, box)) / size);
         return {
           item: item,
           viewport: viewport,

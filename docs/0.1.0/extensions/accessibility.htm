@@ -758,14 +758,14 @@ Accessibility Requirements                  </li>
 <li>Diagnostics intended only for developers must not be announced to users unless a consuming interface explicitly chooses to present them.</li>
 </ul>
 <h2>Lifecycle Requirements</h2>
-<p><code>mount</code> may add temporary ARIA and AelluxJs data attributes to its mounted element. The mount manager records and restores the element&#39;s initial <code>aria-*</code>, <code>data-ae-*</code>, and <code>hidden</code> attributes when its last registration is unmounted. An Extension remains responsible for descendant elements it changes unless those descendants have their own mount registration.</p>
+<p><code>mount</code> may add temporary ARIA and AelluxJs data attributes to its mounted element. Each Extension must save the specific attributes and inline styles it changes and restore them during <code>unmount</code>, including changes to descendants. Use <code>AelluxJs.persist.element.save(element, attributes, cssProperties)</code> to create an independent snapshot for each element.</p>
 <p>For every resource or user-facing state it owns, an Extension must:</p>
 <ol>
 <li>Read the initial state before overwriting it.</li>
 <li>Keep the applicable visual, interaction, semantic, and asynchronous states synchronized during update.</li>
 <li>Cancel or detach owned pending work during <code>unmount</code> and <code>destroy</code>.</li>
 <li>Remove owned listeners, observers, generated nodes, IDs, and relationships.</li>
-<li>Restore changed descendant state explicitly or mount those descendants separately so the mount manager can restore them.</li>
+<li>Restore changed descendant state explicitly, including descendants with their own mount registrations.</li>
 <li>Handle failed and partial mounting without leaving busy, hidden, focus, control, or external-operation state inconsistent.</li>
 </ol>
 <p>An Extension that does not mount DOM elements applies these rules to its actual lifecycle and resources rather than implementing an artificial mount contract.</p>

@@ -1041,6 +1041,7 @@
         }
         const attribute = AelluxJs2.attr(extensionName);
         const targetAttribute = AelluxJs2.attr("anchor-target");
+        const fpsAttribute = AelluxJs2.attr("anchor-fps");
         const layoutEvent = AelluxJs2.eventName("Layout");
         const anchoredClass = AelluxJs2.className("anchored");
         const baseProperties = ["position", "left", "top", "transform", "transform-origin"];
@@ -1062,13 +1063,24 @@
           "bottom-center": [0.5, 1],
           "bottom-right": [1, 1]
         };
-        const UPDATE_INTERVAL_MS = 100;
+        const DEFAULT_FPS = 30;
+        const DEFAULT_INTERVAL_MS = Math.round(1e3 / DEFAULT_FPS);
         const anchors = /* @__PURE__ */ new Map();
         const elementMemories = /* @__PURE__ */ new WeakMap();
         let updateTimeout = null;
         let layoutUpdateTimeout = null;
         let layoutUpdateUntil = 0;
-        let lastUpdateTime = -UPDATE_INTERVAL_MS;
+        let lastUpdateTime = -DEFAULT_INTERVAL_MS;
+        function updateIntervalMs() {
+          let interval = Infinity;
+          for (const element of anchors.keys()) {
+            const value = element.getAttribute(fpsAttribute);
+            const fps = value === null || !value.trim() ? NaN : Number(value);
+            const elementInterval = Number.isFinite(fps) && fps > 0 ? Math.max(1, Math.round(1e3 / fps)) : DEFAULT_INTERVAL_MS;
+            interval = Math.min(interval, elementInterval);
+          }
+          return Number.isFinite(interval) ? interval : DEFAULT_INTERVAL_MS;
+        }
         AelluxJs2.extAttach(extensionName, { init, destroy });
         function init() {
           AelluxJs2.registerCssProperty({
@@ -1098,7 +1110,7 @@
           updateTimeout = null;
           layoutUpdateTimeout = null;
           layoutUpdateUntil = 0;
-          lastUpdateTime = -UPDATE_INTERVAL_MS;
+          lastUpdateTime = -DEFAULT_INTERVAL_MS;
           await Promise.all(Array.from(anchors.keys(), unmountAnchor));
           AelluxJs2.mountManager.remove({ extensionName });
         }
@@ -1146,23 +1158,25 @@
             updateTimeout = null;
             layoutUpdateTimeout = null;
             layoutUpdateUntil = 0;
-            lastUpdateTime = -UPDATE_INTERVAL_MS;
+            lastUpdateTime = -DEFAULT_INTERVAL_MS;
           }
           await AelluxJs2.waitLayout.update(deactivate, [element, state, memory]);
         }
         function scheduleUpdate() {
           if (!anchors.size) return;
+          const interval = updateIntervalMs();
           const elapsed = now() - lastUpdateTime;
-          if (elapsed >= UPDATE_INTERVAL_MS) {
+          if (elapsed >= interval) {
             if (updateTimeout !== null) clearTimeout(updateTimeout);
             updateTimeout = null;
             flushUpdate();
             return;
           }
           if (updateTimeout !== null) return;
-          updateTimeout = setTimeout(flushUpdate, UPDATE_INTERVAL_MS - elapsed);
+          updateTimeout = setTimeout(flushUpdate, interval - elapsed);
         }
         function scheduleLayoutUpdate(event) {
+          const interval = updateIntervalMs();
           const durationMs = Number(event && event.detail ? event.detail.durationMs : NaN);
           if (!Number.isFinite(durationMs) || durationMs < 0) {
             scheduleUpdate();
@@ -1170,7 +1184,7 @@
           }
           if (durationMs === 0) {
             if (layoutUpdateTimeout === null)
-              layoutUpdateTimeout = setTimeout(checkLayoutUpdate, UPDATE_INTERVAL_MS);
+              layoutUpdateTimeout = setTimeout(checkLayoutUpdate, interval);
             return;
           }
           scheduleUpdate();
@@ -1178,7 +1192,7 @@
           if (layoutUpdateTimeout !== null) return;
           layoutUpdateTimeout = setTimeout(
             checkLayoutUpdate,
-            Math.min(UPDATE_INTERVAL_MS, durationMs)
+            Math.min(interval, durationMs)
           );
         }
         function checkLayoutUpdate() {
@@ -1188,7 +1202,7 @@
           if (remaining > 0) {
             layoutUpdateTimeout = setTimeout(
               checkLayoutUpdate,
-              Math.min(UPDATE_INTERVAL_MS, remaining)
+              Math.min(updateIntervalMs(), remaining)
             );
           } else {
             layoutUpdateUntil = 0;
@@ -1494,8 +1508,6 @@
         const scrollbarMemories = /* @__PURE__ */ new WeakMap();
         const inlineMemories = /* @__PURE__ */ new WeakMap();
         const elasticMemories = /* @__PURE__ */ new WeakMap();
-        const elasticWidthMemories = /* @__PURE__ */ new WeakMap();
-        const elasticHeightMemories = /* @__PURE__ */ new WeakMap();
         const pointerScrollMemories = /* @__PURE__ */ new WeakMap();
         const snapItemMemories = /* @__PURE__ */ new WeakMap();
         let activePointerScrollState = null;
@@ -1523,8 +1535,6 @@
             wrapper: null,
             baseTransform: "",
             baseOrigin: "",
-            extentX: false,
-            extentY: false,
             dimensions: null,
             invalidReported: false,
             invalidLimit: null,
@@ -2213,8 +2223,7 @@
           if (value === "end" || value === "right" || value === "bottom") return "end";
           return "center";
         }
-        function snapAlignmentOffset(state, item, axis, box = state.element.getBoundingClientRect()) {
-          const target = item.getBoundingClientRect();
+        function snapAlignmentOffset(state, item, axis, box = state.element.getBoundingClientRect(), target = item.getBoundingClientRect()) {
           const horizontal = axis === "x";
           const start = horizontal ? box.left + state.element.clientLeft : box.top + state.element.clientTop;
           const size = horizontal ? state.element.clientWidth : state.element.clientHeight;
@@ -2330,7 +2339,7 @@
               const dy = start.startY - touch.clientY;
               if (Math.abs(axis === "x" ? dx : dy) < Math.abs(axis === "x" ? dy : dx))
                 continue;
-              recordSnapFlick(state, __spreadProps(__spreadValues({}, start), {
+              recordSnapGesture(state, __spreadProps(__spreadValues({}, start), {
                 lastX: touch.clientX,
                 lastY: touch.clientY,
                 endTime: now()
@@ -2882,12 +2891,14 @@
           const pointerScroll = state.pointerScroll;
           if (!pointerScroll || event && event.pointerId !== pointerScroll.pointerId) return;
           pointerScroll.endTime = now();
+          if (event && event.type === "pointerup") {
+            pointerScroll.lastX = event.clientX;
+            pointerScroll.lastY = event.clientY;
+          }
           if (event && event.type === "pointerup" && !pointerScroll.moved && pointerScroll.endTime < pointerScroll.selectionReadyTime && !selectionHasChanged(pointerScroll.selectionAtDown)) {
             const dx = pointerScroll.startX - event.clientX;
             const dy = pointerScroll.startY - event.clientY;
             const axis = pointerScroll.axis || (Math.abs(dx) >= Math.abs(dy) ? "x" : "y");
-            pointerScroll.lastX = event.clientX;
-            pointerScroll.lastY = event.clientY;
             const chain = pointerScroll.chains[axis];
             if (chain.some((member) => member.snapEnabled && snapAxis(member) === axis && pointerAxisMaximum(member, axis, pointerScroll) > 0) && isSnapFlick(pointerScroll, axis)) {
               pointerScroll.chain = chain;
@@ -2940,7 +2951,7 @@
           const snapState = momentumState ? momentumState.snapEnabled ? momentumState : null : pointerScroll.chain.find((member) => member.snapEnabled && pointerAxisMaximum(member, pointerScroll.axis, pointerScroll) > 0);
           const shouldSnap = event && event.type === "pointerup" && pointerScroll.moved && snapState && !snapState.disposed && snapItems(snapState).length;
           if (shouldSnap) {
-            recordSnapFlick(
+            recordSnapGesture(
               snapState,
               pointerScroll,
               pointerScroll.axis,
@@ -2953,15 +2964,21 @@
             startMomentum(momentumState, pointerScroll);
           }
         }
-        function recordSnapFlick(state, gesture, axis, startIndex) {
-          if (!state.snapEnabled || snapAxis(state) !== axis || !Number.isInteger(startIndex) || !isSnapFlick(gesture, axis)) return;
+        function recordSnapGesture(state, gesture, axis, startIndex) {
+          if (!state.snapEnabled || snapAxis(state) !== axis || !Number.isInteger(startIndex)) return;
           const distance = axis === "x" ? gesture.startX - gesture.lastX : gesture.startY - gesture.lastY;
           const items = snapItems(state);
+          const currentIndex = selectedSnapIndex(state);
+          const focusedItem = items[currentIndex];
+          if (!focusedItem) return;
+          const size = focusedItem.getBoundingClientRect()[axis === "x" ? "width" : "height"];
+          if (Math.abs(distance) <= size / 4 && !isSnapFlick(gesture, axis)) return;
+          if (currentIndex !== startIndex && Math.abs(distance) <= size) return;
           const index = Math.max(0, Math.min(
             items.length - 1,
-            startIndex + Math.sign(distance)
+            currentIndex + Math.sign(distance)
           ));
-          if (index !== startIndex) {
+          if (index !== currentIndex) {
             state.snap.flick = { axis, index };
           }
         }
@@ -3167,32 +3184,6 @@
           elastic.active = active;
           elastic.owned = true;
           if (active) suspendSnapStyles(state, "elastic", true);
-          if (amounts[1] > 0 && !elastic.extentX) {
-            elasticWidthMemories.set(elastic.wrapper, AelluxJs2.persist.element.save(
-              elastic.wrapper,
-              [],
-              ["min-width"]
-            ));
-            elastic.wrapper.style.setProperty(
-              "min-width",
-              `${Math.max(dimensions.offsetWidth, dimensions.scrollWidth)}px`,
-              elasticWidthMemories.get(elastic.wrapper).cssProperties["min-width"].priority
-            );
-            elastic.extentX = true;
-          }
-          if (amounts[2] > 0 && !elastic.extentY) {
-            elasticHeightMemories.set(elastic.wrapper, AelluxJs2.persist.element.save(
-              elastic.wrapper,
-              [],
-              ["min-height"]
-            ));
-            elastic.wrapper.style.setProperty(
-              "min-height",
-              `${Math.max(dimensions.offsetHeight, dimensions.scrollHeight)}px`,
-              elasticHeightMemories.get(elastic.wrapper).cssProperties["min-height"].priority
-            );
-            elastic.extentY = true;
-          }
           setElasticTransform(state, dimensions);
           return active;
         }
@@ -3287,7 +3278,7 @@
           elastic.releaseFrame = root2.requestAnimationFrame(() => stepElasticRelease(state));
         }
         function resetElastic(state) {
-          var _a, _b, _c;
+          var _a;
           const elastic = state.elastic;
           const wasOwned = elastic.owned;
           if (elastic.releaseFrame !== null) root2.cancelAnimationFrame(elastic.releaseFrame);
@@ -3297,18 +3288,10 @@
           if (elastic.wrapper) elastic.wrapper.classList.remove(elasticReleaseClass);
           if (elastic.owned && elastic.wrapper) {
             (_a = elasticMemories.get(elastic.wrapper)) == null ? void 0 : _a.restore();
-            if (elastic.extentX) (_b = elasticWidthMemories.get(elastic.wrapper)) == null ? void 0 : _b.restore();
-            if (elastic.extentY) (_c = elasticHeightMemories.get(elastic.wrapper)) == null ? void 0 : _c.restore();
-          }
-          if (elastic.wrapper) {
-            elasticWidthMemories.delete(elastic.wrapper);
-            elasticHeightMemories.delete(elastic.wrapper);
           }
           elastic.amounts = [0, 0, 0, 0];
           elastic.active = false;
           elastic.owned = false;
-          elastic.extentX = false;
-          elastic.extentY = false;
           if (wasOwned && !state.disposed) {
             suspendSnapStyles(state, "elastic", false);
             if (state.snap.deferredIndex !== null) {
@@ -3472,7 +3455,7 @@
             const box = item.getBoundingClientRect();
             const itemCenter = axis === "x" ? box.left + box.width / 2 : box.top + box.height / 2;
             const viewport = Math.max(-2, Math.min(2, (itemCenter - center) * 2 / size));
-            const focus = Math.max(0, 1 - Math.abs(viewport) / 2);
+            const focus = Math.max(0, 1 - Math.abs(snapAlignmentOffset(state, item, axis, rect, box)) / size);
             return { item, viewport, focus };
           });
         }
@@ -3617,6 +3600,7 @@
           }
         };
         const UPDATE_INTERVAL_MS = 100;
+        const ariaHandlers = /* @__PURE__ */ new WeakMap();
         let managedClasses;
         let sizeThresholds = [];
         let updateTimeout = null;
@@ -3671,9 +3655,10 @@
           if (adaptiveElements.has(element)) return;
           elementMemories.set(element, AelluxJs2.persist.element.save(
             element,
-            ["aria-orientation"],
+            [],
             dimensionProperties
           ));
+          ariaHandlers.set(element, AelluxJs2.aria.register(element));
           adaptiveElements.add(element);
           if (resizeObserver) resizeObserver.observe(element);
           else {
@@ -3682,7 +3667,7 @@
           }
         }
         function unmountAdaptive(element) {
-          var _a;
+          var _a, _b;
           if (!adaptiveElements.delete(element)) return;
           pendingResizeEntries.delete(element);
           pendingResizeElements.delete(element);
@@ -3691,7 +3676,9 @@
           for (const name of managedClasses) {
             element.classList.remove(name);
           }
-          (_a = elementMemories.get(element)) == null ? void 0 : _a.restore();
+          (_a = ariaHandlers.get(element)) == null ? void 0 : _a.release();
+          ariaHandlers.delete(element);
+          (_b = elementMemories.get(element)) == null ? void 0 : _b.restore();
           elementMemories.delete(element);
         }
         function onResize(entries) {
@@ -3750,12 +3737,12 @@
           );
         }
         function updateAdaptive(element, width, height) {
+          var _a;
           if (!adaptiveElements.has(element)) return;
           const ratio = height > 0 ? width / height : 0;
-          element.setAttribute(
-            "aria-orientation",
-            height > width ? "vertical" : "horizontal"
-          );
+          (_a = ariaHandlers.get(element)) == null ? void 0 : _a.set({
+            orientation: height > width ? "vertical" : "horizontal"
+          });
           element.classList.toggle(
             modifier.shapeVertical,
             ratio < adaptiveParams.ratioShapes.vertical
@@ -3850,7 +3837,7 @@
           toggle,
           trigger
         });
-        const POP = "Pop", UNPOP = "Unpop", BEFORE = "Before", PING = "ping", MILLISECOND = "ms", SECOND = "s", TRANSITION_PREPARE_TIME = 100, ARIA_EXPANDED = "aria-expanded", ARIA_CONTROLS = "aria-controls", DEFAULT_PRESENT = "opacity transform height width";
+        const POP = "Pop", UNPOP = "Unpop", BEFORE = "Before", PING = "ping", MILLISECOND = "ms", SECOND = "s", TRANSITION_PREPARE_TIME = 100, DEFAULT_PRESENT = "opacity transform height width";
         const presentElements = /* @__PURE__ */ new Map();
         const openPresentElements = /* @__PURE__ */ new Set();
         const triggerElementsSet = /* @__PURE__ */ new Set();
@@ -3858,7 +3845,8 @@
         const triggersByTargetId = /* @__PURE__ */ new Map();
         const indexedTriggerValues = /* @__PURE__ */ new Map();
         const elementMemories = /* @__PURE__ */ new WeakMap();
-        const triggerMemories = /* @__PURE__ */ new WeakMap();
+        const containerAriaHandlers = /* @__PURE__ */ new WeakMap();
+        const triggerAriaHandlers = /* @__PURE__ */ new WeakMap();
         const measuredMemories = /* @__PURE__ */ new WeakMap();
         function init(options) {
           AelluxJs2.mountManager.add({
@@ -3897,9 +3885,10 @@
           if (presentElements.has(element)) return;
           elementMemories.set(element, AelluxJs2.persist.element.save(
             element,
-            [attr.present, attr.presentMotion, ARIA_EXPANDED, "hidden"],
+            [attr.present, attr.presentMotion, "hidden"],
             ["--ae-pop-low-steps", "--ae-unpop-low-steps"]
           ));
+          containerAriaHandlers.set(element, AelluxJs2.aria.register(element));
           if ((element.getAttribute(attr.present) || "").trim().toLowerCase() === "all") {
             element.setAttribute(attr.present, DEFAULT_PRESENT);
           }
@@ -3928,7 +3917,8 @@
             classList: element.classList,
             triggers: /* @__PURE__ */ new Set(),
             setAriaExpanded: function(value) {
-              element.setAttribute(ARIA_EXPANDED, value);
+              this.expanded = value === "true";
+              containerAriaHandlers.get(element).set({ expanded: this.expanded });
               this.triggers.forEach(updateTriggerAriaExpanded);
             },
             stop: function(options = {}) {
@@ -3994,24 +3984,22 @@
           autoUnpopSchedule(element, presentController);
         }
         function unmountPresentContainer(element) {
-          var _a;
+          var _a, _b;
           if (!presentElements.has(element)) return;
           const controller = presentElements.get(element);
           controller.stop();
           element.classList.remove(className.grid);
           presentElements.delete(element);
           openPresentElements.delete(element);
-          (_a = elementMemories.get(element)) == null ? void 0 : _a.restore();
+          (_a = containerAriaHandlers.get(element)) == null ? void 0 : _a.release();
+          containerAriaHandlers.delete(element);
+          (_b = elementMemories.get(element)) == null ? void 0 : _b.restore();
           elementMemories.delete(element);
           controller.triggers.forEach(updateTriggerAriaExpanded);
         }
         function mountTriggerElement(triggerElement) {
           if (triggerElementsSet.has(triggerElement)) return;
-          triggerMemories.set(triggerElement, AelluxJs2.persist.element.save(
-            triggerElement,
-            [ARIA_CONTROLS, ARIA_EXPANDED],
-            []
-          ));
+          triggerAriaHandlers.set(triggerElement, AelluxJs2.aria.register(triggerElement));
           triggerElementsSet.add(triggerElement);
           refreshTriggerTargets(triggerElement);
         }
@@ -4025,8 +4013,8 @@
           }
           unindexTriggerTarget(triggerElement);
           triggerElementsSet.delete(triggerElement);
-          (_b = triggerMemories.get(triggerElement)) == null ? void 0 : _b.restore();
-          triggerMemories.delete(triggerElement);
+          (_b = triggerAriaHandlers.get(triggerElement)) == null ? void 0 : _b.release();
+          triggerAriaHandlers.delete(triggerElement);
         }
         function targetIdFor(value) {
           if (!value) return null;
@@ -4070,7 +4058,7 @@
           }
         }
         function refreshTriggerTargets(triggerElement) {
-          var _a, _b, _c, _d;
+          var _a, _b, _c, _d, _e;
           const previousTarget = triggerTargets.get(triggerElement);
           const targetSelector = triggerElement.getAttribute(attr.target);
           const dismiss = triggerElement.getAttribute(attr.dismiss);
@@ -4087,23 +4075,26 @@
           }
           if (!target || !target.id) {
             triggerTargets.delete(triggerElement);
+            (_b = triggerAriaHandlers.get(triggerElement)) == null ? void 0 : _b.unset("expanded");
+            (_c = triggerAriaHandlers.get(triggerElement)) == null ? void 0 : _c.unset("controls");
             return;
           }
           triggerTargets.set(triggerElement, target);
-          (_b = presentElements.get(target)) == null ? void 0 : _b.triggers.add(triggerElement);
+          (_d = presentElements.get(target)) == null ? void 0 : _d.triggers.add(triggerElement);
           const targetIds = /* @__PURE__ */ new Set([target.id]);
-          const initial = (_d = (_c = AelluxJs2.mountManager).initialAttribute) == null ? void 0 : _d.call(_c, triggerElement, ARIA_CONTROLS);
+          const initial = (_e = triggerAriaHandlers.get(triggerElement)) == null ? void 0 : _e.initial("controls");
           if (initial) {
             initial.trim().split(/\s+/).forEach((x) => targetIds.add(x));
           }
           updateTriggerAriaExpanded(triggerElement);
-          triggerElement.setAttribute(ARIA_CONTROLS, [...targetIds].join(" "));
+          triggerAriaHandlers.get(triggerElement).set({ controls: [...targetIds] });
         }
         function updateTriggerAriaExpanded(triggerElement) {
+          var _a, _b;
           const target = triggerTargets.get(triggerElement);
           if (!target) return;
-          const expanded = presentElements.has(target) && target.getAttribute(ARIA_EXPANDED) === "true";
-          triggerElement.setAttribute(ARIA_EXPANDED, String(expanded));
+          const expanded = ((_a = presentElements.get(target)) == null ? void 0 : _a.expanded) === true;
+          (_b = triggerAriaHandlers.get(triggerElement)) == null ? void 0 : _b.set({ expanded });
         }
         function pop(element) {
           return presentTransition(element, true, true);
@@ -4651,17 +4642,12 @@
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   function createMountHelper(root2, mountMaps, mountedElements, elementControllers) {
     const { toCapitalized: toCapitalized2, toCamelCase: toCamelCase2, fromCamelCase: fromCamelCase2 } = utils_name_case_default;
-    const initialAttributeValues = /* @__PURE__ */ new WeakMap();
     const pendingMounts = /* @__PURE__ */ new WeakMap();
     const pendingUnmounts = /* @__PURE__ */ new WeakMap();
     const mountRecords = /* @__PURE__ */ new WeakMap();
     let mountOrder = 0;
     const classPrefix = root2.AelluxJs.className("");
-    return { mount, unmount, unmountDetached, update, initialAttribute };
-    function initialAttribute(element, name) {
-      var _a, _b;
-      return (_b = (_a = initialAttributeValues.get(element)) == null ? void 0 : _a.initial.get(name)) != null ? _b : null;
-    }
+    return { mount, unmount, unmountDetached, update };
     async function update(elementOrId, extensionNames = null) {
       const rootElement = resolveMountElement(elementOrId, "update");
       if (!rootElement) return false;
@@ -4826,7 +4812,6 @@
                   if (name.startsWith(classPrefix)) mountable.classList.remove(name);
                 }
               }
-              rememberInitialAttributes(mountable);
               setMounted(mountable, mountId, true, controller.priority);
               const finishPendingMount = beginPendingMount(mountable, mountId);
               try {
@@ -4851,7 +4836,6 @@
                   elementController.despawn(mountId);
                   if (!elementController.hasMounts()) elementControllers.delete(mountable);
                 }
-                restoreInitialAttributes(mountable);
                 AelluxJs2.diagnostics.error(
                   AelluxJs2.diagnostics.ERROR_EXTENSION_MOUNT,
                   {
@@ -4984,7 +4968,6 @@
             if (!elementController.hasMounts()) elementControllers.delete(element);
           }
           element.classList.toggle(AelluxJs2.className("mounted"), isMounted(element));
-          restoreInitialAttributes(element);
         } catch (cause) {
           diagnostics.error(diagnostics.ERROR_EXTENSION_MOUNT, {
             cause,
@@ -5091,35 +5074,6 @@
       }
       if (mounts.size === 0) mountedElements.delete(element);
     }
-    function rememberInitialAttributes(element) {
-      const record = initialAttributeValues.get(element);
-      if (record) {
-        record.users++;
-        return;
-      }
-      const initial = /* @__PURE__ */ new Map();
-      for (const attribute of element.attributes) {
-        if (isRestoredAttribute(attribute.name))
-          initial.set(attribute.name, attribute.value);
-      }
-      initialAttributeValues.set(element, { initial, users: 1 });
-    }
-    function restoreInitialAttributes(element) {
-      const record = initialAttributeValues.get(element);
-      if (!record || --record.users) return;
-      for (let index = element.attributes.length - 1; index >= 0; index--) {
-        const name = element.attributes[index].name;
-        if (isRestoredAttribute(name) && !record.initial.has(name))
-          element.removeAttribute(name);
-      }
-      for (const [name, value] of record.initial) {
-        if (element.getAttribute(name) !== value) element.setAttribute(name, value);
-      }
-      initialAttributeValues.delete(element);
-    }
-    function isRestoredAttribute(name) {
-      return name === "hidden" || name.startsWith("data-ae-") || name.startsWith("aria-");
-    }
   }
 
   // src/internal/build-mount-map-manager.js
@@ -5146,7 +5100,6 @@
       mount: helper.mount,
       unmount: helper.unmount,
       update: helper.update,
-      initialAttribute: helper.initialAttribute,
       destroy
     };
     let observer = null;
@@ -5301,6 +5254,112 @@
     }
   }
 
+  // src/internal/create-aria-helper.js
+  /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+  function createAriaHelper() {
+    const elements = /* @__PURE__ */ new WeakMap();
+    let nextOrder = 0;
+    function attributeName(name) {
+      if (typeof name !== "string" || !/^(?:aria-)?[a-z][a-z0-9-]*$/.test(name)) {
+        throw new TypeError("Invalid ARIA name");
+      }
+      return name.startsWith("aria-") ? name : `aria-${name}`;
+    }
+    function attributeValue(name, value) {
+      if (value === null || value === void 0) {
+        throw new TypeError("Use unset() for null");
+      }
+      if (Array.isArray(value)) {
+        return value.join(" ");
+      }
+      if (name === "aria-hidden" && typeof value !== "boolean") {
+        throw new TypeError("Invalid aria-hidden value");
+      }
+      return String(value);
+    }
+    function write(element, name, value) {
+      if (value === null) {
+        if (element.hasAttribute(name)) element.removeAttribute(name);
+      } else if (element.getAttribute(name) !== value) {
+        element.setAttribute(name, value);
+      }
+    }
+    function reconcile(element, record, name) {
+      var _a;
+      let winner = null;
+      let hidden = false;
+      record.handlers.forEach((handler) => {
+        if (!handler.values.has(name)) return;
+        if (name === "aria-hidden" && handler.values.get(name) === "true") hidden = true;
+        if (!winner || handler.priority > winner.priority || handler.priority === winner.priority && handler.order > winner.order) {
+          winner = handler;
+        }
+      });
+      if (!winner) {
+        write(element, name, (_a = record.baseline.get(name)) != null ? _a : null);
+        record.baseline.delete(name);
+        return;
+      }
+      write(element, name, name === "aria-hidden" && hidden ? "true" : winner.values.get(name));
+    }
+    function register(element, options = {}) {
+      if (!element || element.nodeType !== 1) {
+        throw new TypeError("Invalid ARIA element");
+      }
+      const priority = options.priority === void 0 ? 0 : options.priority;
+      if (typeof priority !== "number" || !Number.isFinite(priority)) {
+        throw new TypeError("Invalid ARIA priority");
+      }
+      let record = elements.get(element);
+      if (!record) {
+        record = { handlers: /* @__PURE__ */ new Set(), baseline: /* @__PURE__ */ new Map() };
+        elements.set(element, record);
+      }
+      const handler = { priority, order: nextOrder++, values: /* @__PURE__ */ new Map() };
+      record.handlers.add(handler);
+      let released = false;
+      return {
+        set(values) {
+          if (released) return false;
+          if (!values || typeof values !== "object") {
+            throw new TypeError("Invalid ARIA values");
+          }
+          const updates = Object.entries(values).map(([key, value]) => {
+            const name = attributeName(key);
+            return [name, attributeValue(name, value)];
+          });
+          updates.forEach(([name, value]) => {
+            if (!record.baseline.has(name)) record.baseline.set(name, element.getAttribute(name));
+            handler.values.set(name, value);
+            reconcile(element, record, name);
+          });
+          return true;
+        },
+        unset(key) {
+          if (released) return false;
+          const name = attributeName(key);
+          if (!handler.values.delete(name)) return false;
+          reconcile(element, record, name);
+          return true;
+        },
+        initial(key) {
+          const name = attributeName(key);
+          return record.baseline.has(name) ? record.baseline.get(name) : element.getAttribute(name);
+        },
+        release() {
+          if (released) return false;
+          released = true;
+          record.handlers.delete(handler);
+          handler.values.forEach((_, name) => reconcile(element, record, name));
+          handler.values.clear();
+          if (!record.handlers.size) elements.delete(element);
+          return true;
+        }
+      };
+    }
+    return { register };
+  }
+
   // src/aellux.orchestrator.js
   init_utils_name_case();
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
@@ -5308,6 +5367,7 @@
     "use strict";
     const { toCamelCase: toCamelCase2, fromCamelCase: fromCamelCase2 } = utils_name_case_default;
     const extensionPromises = {};
+    const aria = createAriaHelper();
     const mountManager = buildMountMapManager(root2);
     const layoutScheduler = buildLayoutScheduler();
     root2.AelluxJs = Object.assign(
@@ -5320,16 +5380,21 @@
             });
           }
           await new Promise((resolve) => {
-            const startMountCallback = function() {
+            const startCallback = function() {
+              if (AelluxJs.options.skipGlobalMount === true) {
+                AelluxJs.off("$DOMContentLoaded", startCallback);
+                resolve();
+                return;
+              }
               AelluxJs.mount().then(function() {
-                AelluxJs.off("$DOMContentLoaded", startMountCallback);
+                AelluxJs.off("$DOMContentLoaded", startCallback);
                 resolve();
               });
             };
             if (document.readyState === "loading")
-              AelluxJs.on("$DOMContentLoaded", startMountCallback, { once: true });
+              AelluxJs.on("$DOMContentLoaded", startCallback, { once: true });
             else
-              startMountCallback();
+              startCallback();
           });
           AelluxJs.dispatch("Ready");
           return true;
@@ -5403,6 +5468,7 @@
           return getExtension(extensionName);
         },
         request: defaultRequest,
+        aria,
         waitLayout: layoutScheduler,
         mountManager
       }

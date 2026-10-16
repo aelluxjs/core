@@ -18,6 +18,7 @@ export default function createWeakCss() {
       font-family: system-ui;
       background-color: Canvas;
       color: CanvasText;
+      margin: 0;
     }
 
     :where(*) {
