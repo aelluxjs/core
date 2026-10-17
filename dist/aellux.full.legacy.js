@@ -25890,7 +25890,6 @@
         var ELASTIC_RETURN_LERP = 0.15;
         var ELASTIC_RETURN_EPSILON = 0.01;
         var ELASTIC_WHEEL_IDLE_MS = 80;
-        var SCROLLBAR_SIZE_PX = 8;
         var SCROLLBAR_MIN_THUMB_PX = 20;
         var SCROLLBAR_INTERACTION_HIDE_DELAY_MS = 1e3;
         var SCROLLBAR_HOVER_HIDE_DELAY_MS = 300;
@@ -25957,7 +25956,35 @@
               syntax: index === 5 ? "block | none" : "<length>",
               initialValue: index === 5 ? "none" : "0px"
             };
-          }))));
+          })), [{
+            name: "--ae-scrollbar-opacity-visible",
+            syntax: "<number>",
+            initialValue: "1"
+          }, {
+            name: "--ae-scrollbar-opacity-fade",
+            syntax: "<number>",
+            initialValue: "0"
+          }, {
+            name: "--ae-scrollbar-thumb-color",
+            syntax: "<color>",
+            initialValue: "color-mix(in srgb, CanvasText 50%, transparent)"
+          }, {
+            name: "--ae-scrollbar-thumb-hover-color",
+            syntax: "<color>",
+            initialValue: "color-mix(in srgb, CanvasText 90%, transparent)"
+          }, {
+            name: "--ae-scrollbar-track-color",
+            syntax: "<color>",
+            initialValue: "transparent"
+          }, {
+            name: "--ae-scrollbar-thumb-radius",
+            syntax: "<length-percentage>",
+            initialValue: "10px"
+          }, {
+            name: "--ae-scrollbar-size",
+            syntax: "<length>",
+            initialValue: "8px"
+          }]));
           AelluxJs2.mountManager.add({
             extensionName: extensionName,
             selector: "[".concat(attribute, "]"),
@@ -26523,8 +26550,10 @@
             var thumbSize = max > 1 ? Math.min(trackSize, Math.max(SCROLLBAR_MIN_THUMB_PX, trackSize * trackSize / scrollSize)) : 0;
             var position = vertical ? element.scrollTop : element.scrollLeft;
             var thumbPosition = max > 0 ? (trackSize - thumbSize) * progress(position, max) : 0;
-            var x = element.scrollLeft + (vertical ? element.clientWidth - SCROLLBAR_SIZE_PX : 0);
-            var y = element.scrollTop + (vertical ? 0 : element.clientHeight - SCROLLBAR_SIZE_PX);
+            var barStyle = root2.getComputedStyle(record.element);
+            var thickness = parseFloat(vertical ? barStyle.width : barStyle.height) || 0;
+            var x = element.scrollLeft + (vertical ? element.clientWidth - thickness : 0);
+            var y = element.scrollTop + (vertical ? 0 : element.clientHeight - thickness);
             var display = axes[axis] ? "block" : "none";
             values.push({
               record: record,

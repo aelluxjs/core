@@ -127,20 +127,20 @@ export default function createWeakCss() {
       top: 0;
       z-index: 10;
       background: var(--ae-scrollbar-track-color, transparent);
-      opacity: 0;
+      opacity: var(--ae-scrollbar-opacity-fade, 0);
       touch-action: none;
       transform: translate3d(var(--ae-scrollbar-x, 0px), var(--ae-scrollbar-y, 0px), 0);
       transition: opacity 160ms ease;
     }
 
     :where([?scrollbox] > [?scrollbar-vertical]) {
-      width: 8px;
+      width: var(--ae-scrollbar-size, 8px);
       height: var(--ae-scrollbar-length, 0px);
     }
 
     :where([?scrollbox] > [?scrollbar-horizontal]) {
       width: var(--ae-scrollbar-length, 0px);
-      height: 8px;
+      height: var(--ae-scrollbar-size, 8px);
     }
 
     :where([?scrollbox] > [?scrollbar-vertical], [?scrollbox] > [?scrollbar-horizontal])::before {
@@ -148,7 +148,7 @@ export default function createWeakCss() {
       position: absolute;
       left: 0;
       top: 0;
-      border-radius: 10px;
+      border-radius: var(--ae-scrollbar-thumb-radius, 10px);
       background: var(--ae-scrollbar-thumb-color, color-mix(in srgb, CanvasText 50%, transparent));
     }
 
@@ -170,7 +170,7 @@ export default function createWeakCss() {
 
     :where([?scrollbox].%scrollbar-visible, [?scrollbox].%pointerscrolling) >
       :is([?scrollbar-vertical], [?scrollbar-horizontal]) {
-      opacity: 1;
+      opacity: var(--ae-scrollbar-opacity-visible, 1);
     }
 
     html[?reduced-motion='reduced'] *[?scrollbar-vertical],
@@ -179,21 +179,21 @@ export default function createWeakCss() {
     }
 
     :where([?scrollbox]::-webkit-scrollbar) {
-      width: 8px;
-      height: 8px;
+      width: var(--ae-scrollbar-size, 8px);
+      height: var(--ae-scrollbar-size, 8px);
     }
 
     :where([?scrollbox]::-webkit-scrollbar-track) {
-      background: transparent;
+      background: var(--ae-scrollbar-track-color, transparent);
     }
 
     :where([?scrollbox]::-webkit-scrollbar-thumb) {
-      background: color-mix(in srgb, CanvasText 50%, transparent);
-      border-radius: 10px;
+      background: var(--ae-scrollbar-thumb-color, color-mix(in srgb, CanvasText 50%, transparent));
+      border-radius: var(--ae-scrollbar-thumb-radius, 10px);
     }
 
     :where([?scrollbox]::-webkit-scrollbar-thumb:hover) {
-      background: color-mix(in srgb, CanvasText 90%, transparent);
+      background: var(--ae-scrollbar-thumb-hover-color, color-mix(in srgb, CanvasText 90%, transparent));
     }
   `.replace(/\s*([{};:,])\s*/g, "$1").replace(/;}/g, "}").trim();
 }

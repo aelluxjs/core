@@ -56,6 +56,73 @@ test("custom scrollbar stays over the viewport and supports track click and thum
   await expect(track).toHaveCSS("opacity", "0");
 });
 
+test("custom scrollbar opacities inherit inline values and respond to changes", async ({ page }) => {
+  await setup(page, `<div id="box" data-ae-scrollbox data-ae-scrollbar="v h"
+    style="width:120px;height:120px;overflow:auto">
+    <div style="width:300px;height:300px"></div>
+  </div>`);
+  const box = page.locator("#box");
+  const bars = box.locator(":scope > [data-ae-scrollbar-vertical], :scope > [data-ae-scrollbar-horizontal]");
+  await expect(bars).toHaveCount(2);
+  await page.mouse.move(500, 500);
+  await expect.poll(() => bars.evaluateAll(elements => elements.map(element =>
+    getComputedStyle(element).opacity))).toEqual(["0", "0"]);
+
+  await box.evaluate(element => {
+    element.style.setProperty("--ae-scrollbar-opacity-fade", "0.35");
+    element.style.setProperty("--ae-scrollbar-opacity-visible", "0.8");
+  });
+  await expect.poll(() => bars.evaluateAll(elements => elements.map(element =>
+    getComputedStyle(element).opacity))).toEqual(["0.35", "0.35"]);
+  const rect = await box.boundingBox();
+  await page.mouse.move(rect.x + 20, rect.y + 20);
+  await expect.poll(() => bars.evaluateAll(elements => elements.map(element =>
+    getComputedStyle(element).opacity))).toEqual(["0.8", "0.8"]);
+
+  await page.mouse.move(500, 500);
+  await expect.poll(() => bars.evaluateAll(elements => elements.map(element =>
+    getComputedStyle(element).opacity))).toEqual(["0.35", "0.35"]);
+  await box.evaluate(element => element.style.setProperty("--ae-scrollbar-opacity-fade", "1"));
+  await expect.poll(() => bars.evaluateAll(elements => elements.map(element =>
+    getComputedStyle(element).opacity))).toEqual(["1", "1"]);
+});
+
+test("custom scrollbar inherits inline colors, thumb radius, and thickness", async ({ page }) => {
+  await setup(page, `<div id="box" data-ae-scrollbox data-ae-scrollbar="v h"
+    style="width:120px;height:120px;overflow:auto;
+      --ae-scrollbar-thumb-color:rgb(10, 20, 30);
+      --ae-scrollbar-thumb-hover-color:rgb(40, 50, 60);
+      --ae-scrollbar-track-color:rgb(70, 80, 90);
+      --ae-scrollbar-thumb-radius:6px;
+      --ae-scrollbar-size:14px">
+    <div style="width:300px;height:300px"></div>
+  </div>`);
+  const box = page.locator("#box");
+  const vertical = box.locator(":scope > [data-ae-scrollbar-vertical]");
+  const horizontal = box.locator(":scope > [data-ae-scrollbar-horizontal]");
+  const values = async bar => bar.evaluate(element => {
+    const style = getComputedStyle(element);
+    const thumb = getComputedStyle(element, "::before");
+    const rect = element.getBoundingClientRect();
+    const boxRect = element.parentElement.getBoundingClientRect();
+    return { color: thumb.backgroundColor, track: style.backgroundColor,
+      radius: thumb.borderRadius, width: rect.width, height: rect.height,
+      right: Math.round(boxRect.right - rect.right),
+      bottom: Math.round(boxRect.bottom - rect.bottom) };
+  });
+  await expect.poll(() => values(vertical)).toMatchObject({
+    color: "rgb(10, 20, 30)", track: "rgb(70, 80, 90)", radius: "6px",
+    width: 14, right: 0
+  });
+  await expect.poll(() => values(horizontal)).toMatchObject({
+    color: "rgb(10, 20, 30)", track: "rgb(70, 80, 90)", radius: "6px",
+    height: 14, bottom: 0
+  });
+  const rect = await vertical.boundingBox();
+  await page.mouse.move(rect.x + rect.width / 2, rect.y + 10);
+  await expect.poll(() => values(vertical)).toMatchObject({ color: "rgb(40, 50, 60)" });
+});
+
 test("snap pauses during scrollbar thumb drag while focus variables update", async ({ page }) => {
   await setup(page, `<div id="box" data-ae-scrollbox data-ae-scrollbox-snap
     data-ae-scrollbar="horizontal"

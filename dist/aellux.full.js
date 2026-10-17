@@ -1466,7 +1466,6 @@
         const ELASTIC_RETURN_LERP = 0.15;
         const ELASTIC_RETURN_EPSILON = 0.01;
         const ELASTIC_WHEEL_IDLE_MS = 80;
-        const SCROLLBAR_SIZE_PX = 8;
         const SCROLLBAR_MIN_THUMB_PX = 20;
         const SCROLLBAR_INTERACTION_HIDE_DELAY_MS = 1e3;
         const SCROLLBAR_HOVER_HIDE_DELAY_MS = 300;
@@ -1578,7 +1577,26 @@
               name,
               syntax: index === 5 ? "block | none" : "<length>",
               initialValue: index === 5 ? "none" : "0px"
-            }))
+            })),
+            { name: "--ae-scrollbar-opacity-visible", syntax: "<number>", initialValue: "1" },
+            { name: "--ae-scrollbar-opacity-fade", syntax: "<number>", initialValue: "0" },
+            {
+              name: "--ae-scrollbar-thumb-color",
+              syntax: "<color>",
+              initialValue: "color-mix(in srgb, CanvasText 50%, transparent)"
+            },
+            {
+              name: "--ae-scrollbar-thumb-hover-color",
+              syntax: "<color>",
+              initialValue: "color-mix(in srgb, CanvasText 90%, transparent)"
+            },
+            { name: "--ae-scrollbar-track-color", syntax: "<color>", initialValue: "transparent" },
+            {
+              name: "--ae-scrollbar-thumb-radius",
+              syntax: "<length-percentage>",
+              initialValue: "10px"
+            },
+            { name: "--ae-scrollbar-size", syntax: "<length>", initialValue: "8px" }
           );
           AelluxJs2.mountManager.add({
             extensionName,
@@ -2069,8 +2087,10 @@
             ) : 0;
             const position = vertical ? element.scrollTop : element.scrollLeft;
             const thumbPosition = max > 0 ? (trackSize - thumbSize) * progress(position, max) : 0;
-            const x = element.scrollLeft + (vertical ? element.clientWidth - SCROLLBAR_SIZE_PX : 0);
-            const y = element.scrollTop + (vertical ? 0 : element.clientHeight - SCROLLBAR_SIZE_PX);
+            const barStyle = root2.getComputedStyle(record.element);
+            const thickness = parseFloat(vertical ? barStyle.width : barStyle.height) || 0;
+            const x = element.scrollLeft + (vertical ? element.clientWidth - thickness : 0);
+            const y = element.scrollTop + (vertical ? 0 : element.clientHeight - thickness);
             const display = axes[axis] ? "block" : "none";
             values.push({
               record,

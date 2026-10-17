@@ -97,7 +97,9 @@ test("extensions register the CSS properties they publish during init", async ({
       "--ae-scroll-y-progress", "--ae-scroll-x-progress",
       "--ae-snap-viewport", "--ae-snap-focus",
       "--ae-scrollbar-x", "--ae-scrollbar-y", "--ae-scrollbar-length",
-      "--ae-scrollbar-thumb-size", "--ae-scrollbar-thumb-position", "--ae-scrollbar-display"
+      "--ae-scrollbar-thumb-size", "--ae-scrollbar-thumb-position", "--ae-scrollbar-display",
+      "--ae-scrollbar-opacity-visible", "--ae-scrollbar-opacity-fade",
+      "--ae-scrollbar-thumb-radius", "--ae-scrollbar-size"
     ];
     const result = names.map(name => style.getPropertyValue(name).trim());
     element.remove();
@@ -108,6 +110,17 @@ test("extensions register the CSS properties they publish during init", async ({
     "0", "1", "0", "scale(0.5)", "scale(1)", "scale(1.2)",
     "0fr", "1fr", "0fr", "0fr", "1fr", "0fr",
     "ease-out", "ease-in", "0.25s", "0.25s", "4", "4",
-    "0", "0", "0", "0", "0px", "0px", "0px", "0px", "0px", "none"
+    "0", "0", "0", "0", "0px", "0px", "0px", "0px", "0px", "none", "1", "0", "10px", "8px"
   ]);
+
+  const colors = await page.evaluate(() => {
+    const element = document.createElement("div");
+    document.body.appendChild(element);
+    const style = getComputedStyle(element);
+    const values = ["--ae-scrollbar-thumb-color", "--ae-scrollbar-thumb-hover-color",
+      "--ae-scrollbar-track-color"].map(name => style.getPropertyValue(name).trim());
+    element.remove();
+    return values;
+  });
+  expect(colors.every(Boolean)).toBe(true);
 });
