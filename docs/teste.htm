@@ -1,0 +1,206 @@
+<head>
+  <script
+    src="https://cdn.jsdelivr.net/gh/aelluxjs/core@8c15c5fb8b5514d3adc899f6ca81a8816d996375/dist/aellux.js"></script>
+  <script>$ae.init();</script>
+  <style>
+    .anchor {
+      background: red;
+      padding: 10px;
+      z-index: 1;
+    }
+
+    #snap [data-ae-scrollbox-snap]>*>* {
+      opacity: var(--ae-snap-focus);
+      overflow: clip;
+    }
+
+    #snap [data-ae-scrollbox-snap]>*>*>* {
+      width: 100px;
+      height: 100px;
+      background: yellow;
+      left: 50px;
+      position: relative;
+      transform: translateX(calc(200px * var(--ae-snap-viewport))) scale(calc(0.2 + 0.8 * var(--ae-snap-focus)))
+    }
+  </style>
+</head>
+
+<body data-ae-scrollbox=" pointer" data-ae-scrollbar style="max-height: 100vh;margin:0;">
+  <div style="background:#066;position:relative;" data-ae-scrollbox="pointer" data-ae-scrollbar>
+    <div data-ae-scrollbox-elastic style="padding:20px">
+      <div style="background:yellow;padding:10px;" draggable=true>Teste</div>
+
+      <div data-ae-present="opacity transform" id="testepop"
+        style="background:rgb(78, 143, 35);width:200px;height:100px;" hidden=true>
+        <div data-ae-present-motion>
+          <div style="padding:10px">Paragraph & <a href="#">LINK</a></div>
+        </div>
+      </div>
+
+      <button id=anchoredbutton data-ae-target="#testepop" data-ae-trigger="toggle">TOGGLE PRESENT</button>
+      <button id=anchored data-ae-target="#testepop" data-ae-trigger="pop">POP PRESENT</button>
+      <button id=anchoredunpop data-ae-target="#testepop" data-ae-trigger="unpop">UNPOP PRESENT</button>
+
+      <div class="anchor" data-ae-anchor-target="#anchoredbutton" data-ae-anchor="bottom-right:top-right">Teste1</div>
+      <div class="anchor" data-ae-anchor-target="#testepop" data-ae-anchor="bottom-right:bottom-right">Teste2</div>
+
+      <div id="snap" data-ae-adaptive
+        style="background:#066;position:relative; max-height:30vh;max-width:500px; overflow-y:hidden;"
+        data-ae-scrollbox="pointer" data-ae-scrollbox-snap data-ae-scrollbar>
+        <div data-ae-scrollbox-elastic style="padding:20px;display:inline-flex;flex-direction:row;gap:10px;">
+          <div data-ae-snap-item style="flex:none;aspect-ratio:1;width:200px;background:black;">
+            <div></div>
+          </div>
+          <div data-ae-snap-item style="flex:none;aspect-ratio:1;width:200px;background:black;">
+            <div></div>
+          </div>
+          <div data-ae-snap-item style="flex:none;aspect-ratio:1;width:300px;background:black;">
+            <div></div>
+          </div>
+          <div data-ae-snap-item style="flex:none;aspect-ratio:1;width:200px;background:black;">
+            <div></div>
+          </div>
+          <div data-ae-snap-item style="flex:none;aspect-ratio:1;width:200px;background:black;">
+            <div></div>
+          </div>
+          <div data-ae-snap-item style="flex:none;aspect-ratio:1;width:200px;background:black;">
+            <div></div>
+          </div>
+        </div>
+      </div>
+      <div>
+
+        Conversa no Modo IA: css set color to canvastext opacity rgba
+
+
+        css set color to canvastext opacity rgba
+
+        Para definir a cor de um elemento como CanvasText com opacidade em CSS, você não pode envolvê-la diretamente na
+        função tradicional rgba() (como rgba(CanvasText, 0.5)), pois o rgba() clássico espera valores numéricos de
+        vermelho, verde e azul.
+        Em vez disso, a maneira correta e moderna de fazer isso é usando a sintaxe do CSS Color Module Level 4, que
+        permite aplicar opacidade a qualquer cor (incluindo palavras-chave de sistema como CanvasText) usando a função
+        rgb() ou color-mix().
+
+        Método 1: Usando a nova sintaxe rgb() (Recomendado)
+
+        A especificação moderna do CSS unificou o rgb() e o rgba(), permitindo passar uma cor padrão seguida por uma
+        barra
+        / e o valor da opacidade (de 0 a 1 ou em porcentagem):
+        css
+        .seu-elemento {
+        /* Define a cor do texto como CanvasText com 50% de opacidade */
+        color: rgb(CanvasText / 0.5);
+        }
+        Use o código com cuidado.
+
+        Método 2: Usando color-mix()
+
+        Caso precise de compatibilidade estrita garantindo uma mistura limpa, você pode misturar o CanvasText com a
+        palavra-chave transparent:
+        css
+        .seu-elemento {
+        /* Mistura 50% de CanvasText com transparente */
+        color: color-mix(in srgb, CanvasText 50%, transparent);
+        }
+        Use o código com cuidado.
+
+        Método Antigo / Alternativo (Evite se puder)
+
+        Se você estiver aplicando a opacidade ao elemento inteiro (o que afetará o texto e também fundos/bordas dele),
+        você pode declarar o CanvasText normalmente e usar a propriedade opacity isolada:
+        css
+        .seu-elemento {
+        color: CanvasText;
+        opacity: 0.5; /* Afeta o elemento inteiro e seus filhos */
+        }
+        Use o código com cuidado.
+        Se precisar de mais ajuda, me conte:
+        • Qual propriedade você está tentando estilizar (color, background-color, etc.)?
+        • Você precisa dar suporte a navegadores muito antigos que não aceitam o CSS Color Level 4?
+        Testar sem personalização
+        •
+        W3C
+        CSS Color Module Level 4 - W3C
+        9 de out. de 2026 — This specification describes CSS values, and properties for foreground color and group
+        opacity. a language for describing the rend...
+        •
+        TestMu AI
+        How to Effectively Use the CSS rgba() Function - TestMu AI
+        11 de ago. de 2026 — The CSS rgba() function sets a color from red, green, and blue values plus an alpha channel
+        that controls transparency, where 0 is...
+        •
+        W3Schools
+        CSS opacity property
+        CSS opacity property sets element transparency levels from 0 (transparent) to 1 (opaque). Opacity affects child
+        elements; use RGBA...
+        Mostrar tudo
+
+        scroll bar com cor invertida do fundo
+
+        Para criar uma barra de rolagem (scroll bar) que inverte dinamicamente as cores com base no fundo (por exemplo,
+        fica branca quando o fundo é preto e preta quando o fundo é branco), a propriedade nativa scrollbar-color não
+        resolverá sozinha, pois ela exige cores estáticas.
+        Para conseguir o efeito de inversão real e automático, a melhor abordagem é esconder a barra de rolagem padrão e
+        criar uma barra customizada usando HTML/CSS combinada com a propriedade mix-blend-mode: difference.
+        Aqui está como implementar esse efeito de forma limpa:
+
+      </div>
+
+      <div data-ae-adaptive
+        style="background:#066;position:relative; max-height:30vh;max-width:500px; overflow-y:hidden;"
+        data-ae-scrollbox="pointer" data-ae-scrollbox-snap data-ae-scrollbar>
+        <div data-ae-scrollbox-elastic style="padding:20px;display:inline-flex;flex-direction:row;gap:10px;">
+          <div data-ae-snap-item style="flex:none;aspect-ratio:1;width:500px;background:black; display:flex;">
+            <div data-ae-scrollbox="pointer" data-ae-scrollbar style="max-height: 100px;flex:1;user-select: none;">
+              Como a barra nativa foi escondida, o elemento .custom-scrollbar-thumb criado precisa se mover conforme o
+              usuáriorola a página. Isso pode ser feito nativamente se o seu layout permitir fixá-lo a uma timeline de
+              rolagem
+              CSS
+              (Scroll-driven animations) ou com um script simples de 3 linhas em JavaScript para atualizar o top dela
+              baseado no
+              window.scrollY.
+              Gostaria de adicionar o código JavaScript para fazer essa barra de rolagem customizada se mover e
+              acompanhar
+              o
+              scroll da página perfeitamente?
+            </div>
+          </div>
+          <div data-ae-snap-item style="flex:none;aspect-ratio:1;width:500px;background:black; display:flex;">
+            <div data-ae-scrollbox="pointer" data-ae-scrollbar style="max-height: 100px;flex:1;user-select: none;">
+              Como a barra nativa foi escondida, o elemento .custom-scrollbar-thumb criado precisa se mover conforme o
+              usuário
+              rola a página. Isso pode ser feito nativamente se o seu layout permitir fixá-lo a uma timeline de rolagem
+              CSS
+              (Scroll-driven animations) ou com um script simples de 3 linhas em JavaScript para atualizar o top dela
+              baseado no
+              window.scrollY.
+              Gostaria de adicionar o código JavaScript para fazer essa barra de rolagem customizada se mover e
+              acompanhar
+              o
+              scroll da página perfeitamente?
+            </div>
+          </div>
+          <div data-ae-snap-item style="flex:none;aspect-ratio:1;width:500px;background:black; display:flex;">
+            <div data-ae-scrollbox="pointer" data-ae-scrollbar style="max-height: 100px;flex:1;user-select: none;">
+              Como a barra nativa foi escondida, o elemento .custom-scrollbar-thumb criado precisa se mover conforme o
+              usuário
+              rola a página. Isso pode ser feito nativamente se o seu layout permitir fixá-lo a uma timeline de rolagem
+              CSS
+              (Scroll-driven animations) ou com um script simples de 3 linhas em JavaScript para atualizar o top dela
+              baseado no
+              window.scrollY.
+              Gostaria de adicionar o código JavaScript para fazer essa barra de rolagem customizada se mover e
+              acompanhar
+              o
+              scroll da página perfeitamente?
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+      </div>
+
+    </div>
+  </div>
+</body>
