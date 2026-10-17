@@ -18,6 +18,17 @@ console.log(preference.get("colorScheme"));
 
 `set(name, value)` saves the user value in the `AelluxJsPreferences` persistence store. Call `update()` to recompute and publish the current values; `set()` does not call `update()` automatically. Changes from the browser `storage` event are updated automatically. `update()` synchronizes mounted controls for preferences whose computed values changed and always dispatches `AelluxJsPreferencesChange`, including when the values stay the same. Newly mounted controls are synchronized immediately.
 
+For application styles and Extensions, prefer the resolved attributes on `<html>` over direct device media queries. The boot reads persisted choices and device preferences to set these attributes, and Preference updates them when the choice or device setting changes. An explicit local choice such as `no-preference` can override a device request for reduced motion. Use the same attributes in examples and future integrations:
+
+```css
+html[data-ae-reduced-motion="reduced"] .animated-panel {
+  animation: none;
+  transition: none;
+}
+```
+
+In JavaScript, check `$ae.currentPreference("reduced-motion") === "reduced"` before starting optional motion. The method reads the resolved value from `<html>` and returns `null` when no value is published. The same approach applies to other resolved preferences, such as `contrast` and `forced-colors`. Device media queries remain an input to AelluxJs preference resolution.
+
 `AelluxJsPreferencesChange` carries a changed-key array and a copy of the current values. The array is empty when an update finds no changed values:
 
 ```js

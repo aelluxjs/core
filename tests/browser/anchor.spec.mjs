@@ -18,8 +18,46 @@ async function startAnchor(page, markup, options = {}) {
 
 const properties = [
   "position", "left", "top", "transform", "transform-origin",
-  "--ae-anchor-x", "--ae-anchor-y", "--ae-anchor-origin-x", "--ae-anchor-origin-y"
+  "--ae-anchor-x", "--ae-anchor-y", "--ae-anchor-origin-x", "--ae-anchor-origin-y",
+  "--anchor-opacity"
 ];
+
+test("anchor follows its target's nearest Present opacity and allows CSS overrides", async ({ page }) => {
+  await startAnchor(page, `
+    <style>.developer-override { opacity: .9; }</style>
+    <div id="reference" style="position: relative; width: 300px; height: 200px">
+      <div id="present" data-ae-present="opacity" style="opacity: .4">
+        <div id="target" style="position: absolute; left: 20px; top: 15px;
+          width: 30px; height: 20px"></div>
+      </div>
+      <div id="plain" style="position: absolute; left: 80px; top: 15px;
+        width: 30px; height: 20px"></div>
+      <div id="anchor" data-ae-anchor-target="target" data-ae-anchor="top-left:top-left"
+        style="width: 10px; height: 10px"></div>
+    </div>`);
+  const opacity = () => page.locator("#anchor").evaluate(element => ({
+    variable: element.style.getPropertyValue("--anchor-opacity"),
+    computed: getComputedStyle(element).opacity
+  }));
+  await expect.poll(opacity).toEqual({ variable: "0.4", computed: "0.4" });
+
+  await page.evaluate(() => {
+    const present = document.getElementById("present");
+    present.style.opacity = "0.25";
+    present.dispatchEvent(new CustomEvent("AelluxJsLayout", { bubbles: true,
+      detail: { durationMs: 0 } }));
+  });
+  await expect.poll(opacity).toEqual({ variable: "0.25", computed: "0.25" });
+
+  await page.locator("#anchor").evaluate(element =>
+    element.classList.add("developer-override"));
+  expect(await opacity()).toEqual({ variable: "0.25", computed: "0.9" });
+
+  await page.locator("#anchor").evaluate(element =>
+    element.setAttribute("data-ae-anchor-target", "plain"));
+  await page.evaluate(() => AelluxJs.mountManager.update(document.getElementById("anchor"), "anchor"));
+  await expect.poll(opacity).toEqual({ variable: "1", computed: "0.9" });
+});
 
 test("empty or omitted target anchors to the positioning parent", async ({ page }) => {
   await startAnchor(page, `
@@ -430,7 +468,8 @@ test("unmount restores owned inline values and priorities", async ({ page }) => 
       <div id="anchor" data-ae-anchor-target="target" data-ae-anchor="top-left:top-left"
         style="width: 20px; height: 10px; position: relative !important; left: 8px !important;
           top: 4px; transform: rotate(3deg); transform-origin: 20% 30%;
-          --ae-anchor-x: 5px !important; --ae-anchor-origin-x: 7%"></div>
+          --ae-anchor-x: 5px !important; --ae-anchor-origin-x: 7%;
+          --anchor-opacity: .8"></div>
     </div>`);
   const beforeUnmount = await page.locator("#anchor").evaluate((element, names) =>
     names.map(name => [element.style.getPropertyValue(name), element.style.getPropertyPriority(name)]),
@@ -451,7 +490,7 @@ test("unmount restores owned inline values and priorities", async ({ page }) => 
   expect(restored).toEqual([
     ["relative", "important"], ["8px", "important"], ["4px", ""],
     ["rotate(3deg)", ""], [originalOrigin, ""],
-    ["5px", "important"], ["", ""], ["7%", ""], ["", ""]
+    ["5px", "important"], ["", ""], ["7%", ""], ["", ""], [".8", ""]
   ]);
 });
 

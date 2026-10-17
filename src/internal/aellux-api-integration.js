@@ -40,6 +40,7 @@ export function createAelluxApi(root, constants) {
       element: createSaveElementMemoryHelper()
     },
     updatePreferenceAttributesHTML: preferenceHtml.updatePreferenceAttributesHTML,
+    currentPreference: preferenceHtml.currentPreference,
     on: function (event, handler, options) {
       api.onTarget(document, event, handler, options);
     },
@@ -54,14 +55,18 @@ export function createAelluxApi(root, constants) {
     },
     attr: namingNormalization.attr,
     className: namingNormalization.className,
-    registerCssProperty: function (descriptor) {
-      if (!root.CSS || typeof root.CSS.registerProperty !== "function") return false;
-      try {
-        root.CSS.registerProperty(descriptor);
-        return true;
-      } catch (error) {
-        return false;
+    registerCssProperty: function () {
+      if (!arguments.length || !root.CSS ||
+        typeof root.CSS.registerProperty !== "function") return false;
+      var registered = true;
+      for (var index = 0; index < arguments.length; index++) {
+        try {
+          root.CSS.registerProperty(arguments[index]);
+        } catch (error) {
+          registered = false;
+        }
       }
+      return registered;
     },
     // Keep minified tied to the API even when callers store this method separately.
     extFilename: namingNormalization.extFilename.bind(api),

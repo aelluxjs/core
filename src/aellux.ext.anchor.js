@@ -38,6 +38,7 @@
   }
 
   const attribute = AelluxJs.attr(extensionName);
+  const presentAttribute = AelluxJs.attr("present");
   const targetAttribute = AelluxJs.attr("anchor-target");
   const fpsAttribute = AelluxJs.attr("anchor-fps");
 
@@ -48,7 +49,7 @@
   const ownedProperties = [
     ...baseProperties,
     "--ae-anchor-x", "--ae-anchor-y",
-    "--ae-anchor-origin-x", "--ae-anchor-origin-y"
+    "--ae-anchor-origin-x", "--ae-anchor-origin-y", "--anchor-opacity"
   ];
   const pivots = {
     "top-left": [0, 0], "top-center": [0.5, 0], "top-right": [1, 0],
@@ -81,12 +82,13 @@
   AelluxJs.extAttach(extensionName, { init, destroy });
 
   function init() {
-    AelluxJs.registerCssProperty({
-      name: "--ae-anchor-x", syntax: "<length>", inherits: false, initialValue: "0px"
-    });
-    AelluxJs.registerCssProperty({
-      name: "--ae-anchor-y", syntax: "<length>", inherits: false, initialValue: "0px"
-    });
+    AelluxJs.registerCssProperty(
+      { name: "--ae-anchor-x", syntax: "<length>", inherits: false, initialValue: "0px" },
+      { name: "--ae-anchor-y", syntax: "<length>", inherits: false, initialValue: "0px" },
+      { name: "--ae-anchor-origin-x", syntax: "<percentage>", inherits: false, initialValue: "50%" },
+      { name: "--ae-anchor-origin-y", syntax: "<percentage>", inherits: false, initialValue: "0%" },
+      { name: "--anchor-opacity", syntax: "<number>", inherits: false, initialValue: "1" }
+    );
     AelluxJs.mountManager.add({
       extensionName, selector: `[${attribute}]`,
       priority: 0,
@@ -271,6 +273,7 @@
       element.style.setProperty("--ae-anchor-y", `${selected.y}px`);
       element.style.setProperty("--ae-anchor-origin-x", `${selected.self[0] * 100}%`);
       element.style.setProperty("--ae-anchor-origin-y", `${selected.self[1] * 100}%`);
+      element.style.setProperty("--anchor-opacity", placement.opacity);
       for (const name of baseProperties) element.style.removeProperty(name);
       element.classList.add(anchoredClass);
     });
@@ -310,7 +313,9 @@
         break;
       }
     }
-    return { valid: true, target, reference, selected };
+    const present = target.closest(`[${presentAttribute}]`);
+    const opacity = present ? root.getComputedStyle(present).opacity : "1";
+    return { valid: true, target, reference, selected, opacity };
   }
 
   function invalidContext(element, state, placement) {

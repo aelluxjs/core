@@ -267,7 +267,7 @@ function buildPreferenceMediaQueries(root2) {
       dark: mediaQuery("(prefers-color-scheme: dark)")
     },
     reducedMotion: {
-      reduced: mediaQuery("(prefers-reduced-motion: reduced)"),
+      reduced: mediaQuery("(prefers-reduced-motion: reduce)"),
       "no-preference": mediaQuery("(prefers-reduced-motion: no-preference)")
     },
     reducedTransparency: {
@@ -347,8 +347,12 @@ function createPreferenceHtmlHelper(root2, getApi) {
   var document2 = root2.document;
   var fromCamelCase2 = utils_name_case_default.fromCamelCase;
   return {
-    updatePreferenceAttributesHTML
+    updatePreferenceAttributesHTML,
+    currentPreference
   };
+  function currentPreference(name) {
+    return document2.documentElement.getAttribute(getApi().attr(name));
+  }
   function updatePreferenceAttributesHTML(preferences) {
     var api = getApi();
     var allQueries = api.registry.preferenceMediaQueries;
@@ -463,6 +467,7 @@ function createAelluxApi(root2, constants) {
       element: createSaveElementMemoryHelper()
     },
     updatePreferenceAttributesHTML: preferenceHtml.updatePreferenceAttributesHTML,
+    currentPreference: preferenceHtml.currentPreference,
     on: function(event, handler, options2) {
       api.onTarget(document2, event, handler, options2);
     },
@@ -477,14 +482,17 @@ function createAelluxApi(root2, constants) {
     },
     attr: namingNormalization.attr,
     className: namingNormalization.className,
-    registerCssProperty: function(descriptor) {
-      if (!root2.CSS || typeof root2.CSS.registerProperty !== "function") return false;
-      try {
-        root2.CSS.registerProperty(descriptor);
-        return true;
-      } catch (error) {
-        return false;
+    registerCssProperty: function() {
+      if (!arguments.length || !root2.CSS || typeof root2.CSS.registerProperty !== "function") return false;
+      var registered = true;
+      for (var index = 0; index < arguments.length; index++) {
+        try {
+          root2.CSS.registerProperty(arguments[index]);
+        } catch (error) {
+          registered = false;
+        }
       }
+      return registered;
     },
     // Keep minified tied to the API even when callers store this method separately.
     extFilename: namingNormalization.extFilename.bind(api),

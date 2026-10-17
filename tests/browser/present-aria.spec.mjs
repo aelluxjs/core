@@ -352,6 +352,7 @@ test("direct pop restarts from hidden during either transition and when already 
         style="--ae-pop-duration: 80ms; --ae-unpop-duration: 80ms"></div>`;
     const events = [];
     window.AelluxJs = {
+      registerCssProperty: () => true,
       persist: { element: createSaveElementMemoryHelper() },
       aria: createAriaHelper(),
       on: (event, handler, options) => document.addEventListener(event.slice(1), handler, options),
@@ -981,6 +982,7 @@ test("present reports invalid target IDs without throwing from click", async ({ 
     const reports = [];
     window.selectorReports = reports;
     window.AelluxJs = {
+      registerCssProperty: () => true,
       on: (event, handler, options) => document.addEventListener(event.slice(1), handler, options),
       off: (event, handler, options) => document.removeEventListener(event.slice(1), handler, options),
       attr: name => `data-ae-${name}`,
@@ -1021,6 +1023,7 @@ test("present restores a trigger without targets and can mount it again", async 
   const result = await page.evaluate(async () => {
     document.body.innerHTML = '<button id="control" data-ae-trigger="toggle" data-ae-target="#later"></button>';
     window.AelluxJs = {
+      registerCssProperty: () => true,
       on: (event, handler, options) => document.addEventListener(event.slice(1), handler, options),
       off: (event, handler, options) => document.removeEventListener(event.slice(1), handler, options),
       attr: name => `data-ae-${name}`,
@@ -1077,6 +1080,7 @@ test("present records interrupted transitions as warnings and failures as errors
     ]);
     document.body.innerHTML = '<div id="panel" data-ae-present hidden style="--ae-pop-duration: 100ms; --ae-unpop-duration: 0ms"><div data-ae-present-motion></div></div>';
     window.AelluxJs = {
+      registerCssProperty: () => true,
       on: (event, handler, options) => document.addEventListener(event.slice(1), handler, options),
       off: (event, handler, options) => document.removeEventListener(event.slice(1), handler, options),
       attr: name => `data-ae-${name}`,
@@ -1129,6 +1133,7 @@ test("present reports a transition callback failure with its own diagnostic", as
       <div id="panel" data-ae-present hidden><div data-ae-present-motion></div></div>
     `;
     window.AelluxJs = {
+      registerCssProperty: () => true,
       on: (event, handler, options) => document.addEventListener(event.slice(1), handler, options),
       off: (event, handler, options) => document.removeEventListener(event.slice(1), handler, options),
       attr: name => `data-ae-${name}`,

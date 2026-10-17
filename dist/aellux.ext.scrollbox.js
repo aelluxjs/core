@@ -112,6 +112,18 @@
     let activePointerScrollState = null;
     AelluxJs.extAttach(extensionName, { init, destroy, next, previous, goto });
     function init() {
+      AelluxJs.registerCssProperty(
+        { name: "--ae-scroll-y-progress", syntax: "<number>", inherits: false, initialValue: "0" },
+        { name: "--ae-scroll-x-progress", syntax: "<number>", inherits: false, initialValue: "0" },
+        { name: "--ae-snap-viewport", syntax: "<number>", inherits: false, initialValue: "0" },
+        { name: "--ae-snap-focus", syntax: "<number>", inherits: false, initialValue: "0" },
+        { name: "--ae-scrollbar-x", syntax: "<length>", inherits: false, initialValue: "0px" },
+        { name: "--ae-scrollbar-y", syntax: "<length>", inherits: false, initialValue: "0px" },
+        { name: "--ae-scrollbar-length", syntax: "<length>", inherits: false, initialValue: "0px" },
+        { name: "--ae-scrollbar-thumb-size", syntax: "<length>", inherits: false, initialValue: "0px" },
+        { name: "--ae-scrollbar-thumb-position", syntax: "<length>", inherits: false, initialValue: "0px" },
+        { name: "--ae-scrollbar-display", syntax: "block | none", inherits: false, initialValue: "none" }
+      );
       AelluxJs.mountManager.add({
         extensionName,
         selector: `[${attribute}]`,
@@ -1843,7 +1855,7 @@
         flushPendingSnap(state);
         return;
       }
-      if (root.matchMedia && root.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      if (AelluxJs.currentPreference("reduced-motion") === "reduced") {
         resetElastic(state);
         refresh(state);
         flushPendingSnap(state);

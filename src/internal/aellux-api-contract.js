@@ -174,6 +174,7 @@ var bootstrapProperties = Object.freeze({
     })
   }),
   updatePreferenceAttributesHTML: method,
+  currentPreference: method,
   on: method,
   off: method,
   attr: method,

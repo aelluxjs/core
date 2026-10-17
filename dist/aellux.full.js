@@ -1021,6 +1021,7 @@
           throw new Error(`[aellux.js] Cannot attach the "${extensionName}" extension: root.AelluxJs is not defined. Load the aellux.js boot script before this extension.`);
         }
         const attribute = AelluxJs2.attr(extensionName);
+        const presentAttribute = AelluxJs2.attr("present");
         const targetAttribute = AelluxJs2.attr("anchor-target");
         const fpsAttribute = AelluxJs2.attr("anchor-fps");
         const layoutEvent = AelluxJs2.eventName("Layout");
@@ -1031,7 +1032,8 @@
           "--ae-anchor-x",
           "--ae-anchor-y",
           "--ae-anchor-origin-x",
-          "--ae-anchor-origin-y"
+          "--ae-anchor-origin-y",
+          "--anchor-opacity"
         ];
         const pivots = {
           "top-left": [0, 0],
@@ -1064,18 +1066,13 @@
         }
         AelluxJs2.extAttach(extensionName, { init, destroy });
         function init() {
-          AelluxJs2.registerCssProperty({
-            name: "--ae-anchor-x",
-            syntax: "<length>",
-            inherits: false,
-            initialValue: "0px"
-          });
-          AelluxJs2.registerCssProperty({
-            name: "--ae-anchor-y",
-            syntax: "<length>",
-            inherits: false,
-            initialValue: "0px"
-          });
+          AelluxJs2.registerCssProperty(
+            { name: "--ae-anchor-x", syntax: "<length>", inherits: false, initialValue: "0px" },
+            { name: "--ae-anchor-y", syntax: "<length>", inherits: false, initialValue: "0px" },
+            { name: "--ae-anchor-origin-x", syntax: "<percentage>", inherits: false, initialValue: "50%" },
+            { name: "--ae-anchor-origin-y", syntax: "<percentage>", inherits: false, initialValue: "0%" },
+            { name: "--anchor-opacity", syntax: "<number>", inherits: false, initialValue: "1" }
+          );
           AelluxJs2.mountManager.add({
             extensionName,
             selector: `[${attribute}]`,
@@ -1256,6 +1253,7 @@
             element.style.setProperty("--ae-anchor-y", `${selected.y}px`);
             element.style.setProperty("--ae-anchor-origin-x", `${selected.self[0] * 100}%`);
             element.style.setProperty("--ae-anchor-origin-y", `${selected.self[1] * 100}%`);
+            element.style.setProperty("--anchor-opacity", placement.opacity);
             for (const name of baseProperties) element.style.removeProperty(name);
             element.classList.add(anchoredClass);
           });
@@ -1292,7 +1290,9 @@
               break;
             }
           }
-          return { valid: true, target, reference, selected };
+          const present = target.closest(`[${presentAttribute}]`);
+          const opacity = present ? root2.getComputedStyle(present).opacity : "1";
+          return { valid: true, target, reference, selected, opacity };
         }
         function invalidContext(element, state, placement) {
           deactivate(element, state);
@@ -1494,6 +1494,18 @@
         let activePointerScrollState = null;
         AelluxJs2.extAttach(extensionName, { init, destroy, next, previous, goto });
         function init() {
+          AelluxJs2.registerCssProperty(
+            { name: "--ae-scroll-y-progress", syntax: "<number>", inherits: false, initialValue: "0" },
+            { name: "--ae-scroll-x-progress", syntax: "<number>", inherits: false, initialValue: "0" },
+            { name: "--ae-snap-viewport", syntax: "<number>", inherits: false, initialValue: "0" },
+            { name: "--ae-snap-focus", syntax: "<number>", inherits: false, initialValue: "0" },
+            { name: "--ae-scrollbar-x", syntax: "<length>", inherits: false, initialValue: "0px" },
+            { name: "--ae-scrollbar-y", syntax: "<length>", inherits: false, initialValue: "0px" },
+            { name: "--ae-scrollbar-length", syntax: "<length>", inherits: false, initialValue: "0px" },
+            { name: "--ae-scrollbar-thumb-size", syntax: "<length>", inherits: false, initialValue: "0px" },
+            { name: "--ae-scrollbar-thumb-position", syntax: "<length>", inherits: false, initialValue: "0px" },
+            { name: "--ae-scrollbar-display", syntax: "block | none", inherits: false, initialValue: "none" }
+          );
           AelluxJs2.mountManager.add({
             extensionName,
             selector: `[${attribute}]`,
@@ -3225,7 +3237,7 @@
             flushPendingSnap(state);
             return;
           }
-          if (root2.matchMedia && root2.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+          if (AelluxJs2.currentPreference("reduced-motion") === "reduced") {
             resetElastic(state);
             refresh(state);
             flushPendingSnap(state);
@@ -3606,6 +3618,10 @@
         const resizeObserver = typeof root2.ResizeObserver === "function" ? new root2.ResizeObserver(onResize) : null;
         AelluxJs2.extAttach(extensionName, { init, destroy, adaptiveParams });
         function init(options = {}) {
+          AelluxJs2.registerCssProperty(
+            { name: "--ae-width", syntax: "<number>", inherits: false, initialValue: "0" },
+            { name: "--ae-height", syntax: "<number>", inherits: false, initialValue: "0" }
+          );
           const overrides = options.adaptiveParams || {};
           for (const group of Object.keys(adaptiveParams)) {
             if (overrides[group] && typeof overrides[group] === "object") {
@@ -3847,6 +3863,26 @@
         const triggerAriaHandlers = /* @__PURE__ */ new WeakMap();
         const measuredMemories = /* @__PURE__ */ new WeakMap();
         function init(options) {
+          AelluxJs2.registerCssProperty(
+            { name: "--ae-from-opacity", syntax: "<number> | <percentage>", inherits: false, initialValue: "0" },
+            { name: "--ae-pop-opacity", syntax: "<number> | <percentage>", inherits: false, initialValue: "1" },
+            { name: "--ae-unpop-opacity", syntax: "<number> | <percentage>", inherits: false, initialValue: "0" },
+            { name: "--ae-from-transform", syntax: "<transform-list> | none", inherits: false, initialValue: "scale(0.5)" },
+            { name: "--ae-pop-transform", syntax: "<transform-list> | none", inherits: false, initialValue: "scale(1)" },
+            { name: "--ae-unpop-transform", syntax: "<transform-list> | none", inherits: false, initialValue: "scale(1.2)" },
+            { name: "--ae-from-height", syntax: "*", inherits: false, initialValue: "0fr" },
+            { name: "--ae-pop-height", syntax: "*", inherits: false, initialValue: "1fr" },
+            { name: "--ae-unpop-height", syntax: "*", inherits: false, initialValue: "0fr" },
+            { name: "--ae-from-width", syntax: "*", inherits: false, initialValue: "0fr" },
+            { name: "--ae-pop-width", syntax: "*", inherits: false, initialValue: "1fr" },
+            { name: "--ae-unpop-width", syntax: "*", inherits: false, initialValue: "0fr" },
+            { name: "--ae-pop-ease", syntax: "*", inherits: false, initialValue: "ease-out" },
+            { name: "--ae-unpop-ease", syntax: "*", inherits: false, initialValue: "ease-in" },
+            { name: "--ae-pop-duration", syntax: "<time>", inherits: false, initialValue: "250ms" },
+            { name: "--ae-unpop-duration", syntax: "<time>", inherits: false, initialValue: "250ms" },
+            { name: "--ae-pop-low-steps", syntax: "<integer>", inherits: false, initialValue: "4" },
+            { name: "--ae-unpop-low-steps", syntax: "<integer>", inherits: false, initialValue: "4" }
+          );
           AelluxJs2.mountManager.add({
             extensionName,
             selector: `[${attr.present}]`,

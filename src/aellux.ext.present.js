@@ -85,6 +85,26 @@
   const measuredMemories = new WeakMap();
 
   function init(options) {
+    AelluxJs.registerCssProperty(
+      { name: "--ae-from-opacity", syntax: "<number> | <percentage>", inherits: false, initialValue: "0" },
+      { name: "--ae-pop-opacity", syntax: "<number> | <percentage>", inherits: false, initialValue: "1" },
+      { name: "--ae-unpop-opacity", syntax: "<number> | <percentage>", inherits: false, initialValue: "0" },
+      { name: "--ae-from-transform", syntax: "<transform-list> | none", inherits: false, initialValue: "scale(0.5)" },
+      { name: "--ae-pop-transform", syntax: "<transform-list> | none", inherits: false, initialValue: "scale(1)" },
+      { name: "--ae-unpop-transform", syntax: "<transform-list> | none", inherits: false, initialValue: "scale(1.2)" },
+      { name: "--ae-from-height", syntax: "*", inherits: false, initialValue: "0fr" },
+      { name: "--ae-pop-height", syntax: "*", inherits: false, initialValue: "1fr" },
+      { name: "--ae-unpop-height", syntax: "*", inherits: false, initialValue: "0fr" },
+      { name: "--ae-from-width", syntax: "*", inherits: false, initialValue: "0fr" },
+      { name: "--ae-pop-width", syntax: "*", inherits: false, initialValue: "1fr" },
+      { name: "--ae-unpop-width", syntax: "*", inherits: false, initialValue: "0fr" },
+      { name: "--ae-pop-ease", syntax: "*", inherits: false, initialValue: "ease-out" },
+      { name: "--ae-unpop-ease", syntax: "*", inherits: false, initialValue: "ease-in" },
+      { name: "--ae-pop-duration", syntax: "<time>", inherits: false, initialValue: "250ms" },
+      { name: "--ae-unpop-duration", syntax: "<time>", inherits: false, initialValue: "250ms" },
+      { name: "--ae-pop-low-steps", syntax: "<integer>", inherits: false, initialValue: "4" },
+      { name: "--ae-unpop-low-steps", syntax: "<integer>", inherits: false, initialValue: "4" }
+    );
     AelluxJs.mountManager.add({
       extensionName, selector: `[${attr.present}]`,
       priority: 0,

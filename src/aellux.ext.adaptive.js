@@ -72,6 +72,10 @@
   AelluxJs.extAttach(extensionName, { init, destroy, adaptiveParams });
 
   function init(options = {}) {
+    AelluxJs.registerCssProperty(
+      { name: "--ae-width", syntax: "<number>", inherits: false, initialValue: "0" },
+      { name: "--ae-height", syntax: "<number>", inherits: false, initialValue: "0" }
+    );
     const overrides = options.adaptiveParams || {};
     for (const group of Object.keys(adaptiveParams)) {
       if (overrides[group] && typeof overrides[group] === "object") {

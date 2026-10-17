@@ -33,7 +33,7 @@ The optional `crossOrigin` initialization setting controls the `crossorigin` att
 The `autoViewportMeta` option defaults to `true`. During initialization, the boot checks for `<meta name="viewport">` and adds `<meta name="viewport" content="width=device-width, initial-scale=1">` when it is absent. Set `autoViewportMeta: false` to leave the document head unchanged.
 The `skipGlobalMount` option defaults to `false`. Set it to `true` to finish orchestrator initialization and dispatch `Ready` without automatically mounting the document. Call `$ae.mount(document)` later to mount it explicitly.
 The boot does not set `data-ae-low-hardware`. Applications may add it to the document root when appropriate; Extensions such as Present use it when present.
-`$ae.registerCssProperty(descriptor)` accepts the same descriptor as `CSS.registerProperty()`. It returns `true` when the browser registers the property, or `false` when the API is unavailable or registration is rejected, including an already registered name. Extensions can call it during their `init()` without requiring Properties and Values API support for their basic behavior.
+`$ae.registerCssProperty(...descriptors)` accepts one or more descriptors in the same format as `CSS.registerProperty()`. It attempts every registration and returns `true` only when all succeed, or `false` when the API is unavailable, no descriptors are supplied, or any registration is rejected, including an already registered name. Extensions can call it during their `init()` without requiring Properties and Values API support for their basic behavior.
 Pass Extension-specific configuration through `extensions` in `init()` options:
 
 ```js
@@ -150,6 +150,7 @@ Pass `integrity` and `crossOrigin` as the third and fourth arguments when the de
 `extName(filename)` extracts the Extension name from an `aellux.ext.<name>.js` filename.
 
 Preference media queries are available in `$ae.registry.preferenceMediaQueries`.
+`$ae.currentPreference(name)` reads the resolved preference attribute from `<html>` and returns its string value or `null` when absent. It accepts kebab-case and camelCase names, for example `$ae.currentPreference("reduced-motion")` and `$ae.currentPreference("reducedMotion")`. It is available before `init()` and reflects the latest device and local preference after the boot or Preference Extension updates the root attributes. Use it instead of reading the HTML attribute directly in application JavaScript.
 
 ## Events
 

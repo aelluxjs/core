@@ -2730,7 +2730,22 @@ test("weak CSS makes scrolling smooth and honors reduced motion on every element
   ].map(element => getComputedStyle(element).scrollBehavior));
   expect(await behaviors()).toEqual(["smooth", "smooth", "smooth"]);
   await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.evaluate(() => AelluxJs.updatePreferenceAttributesHTML({ reducedMotion: "auto" }));
   expect(await behaviors()).toEqual(["auto", "auto", "auto"]);
+  await page.evaluate(() => AelluxJs.updatePreferenceAttributesHTML({ reducedMotion: "no-preference" }));
+  expect(await behaviors()).toEqual(["smooth", "smooth", "smooth"]);
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.evaluate(() => AelluxJs.updatePreferenceAttributesHTML({ reducedMotion: "reduced" }));
+  expect(await behaviors()).toEqual(["auto", "auto", "auto"]);
+});
+
+test("local reduced-motion preference removes custom scrollbar transitions", async ({ page }) => {
+  await setup(page, box("box", "native", 'data-ae-scrollbar="vertical"'));
+  const duration = () => page.locator("[data-ae-scrollbar-vertical]").evaluate(element =>
+    getComputedStyle(element).transitionDuration);
+  await expect.poll(duration).toBe("0.16s");
+  await page.evaluate(() => AelluxJs.updatePreferenceAttributesHTML({ reducedMotion: "reduced" }));
+  expect(await duration()).toBe("0s");
 });
 
 test("elastic pointer drag transforms its marked wrapper and restores it on unmount", async ({ page }) => {
@@ -3220,10 +3235,11 @@ test("elastic pressure eases toward the limit and returns by 15 percent per fram
 });
 
 test("elastic snapback is immediate with reduced motion", async ({ page }) => {
-  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.emulateMedia({ reducedMotion: "no-preference" });
   await setup(page, `<div id="box" data-ae-scrollbox="pointer"
     data-ae-scrollbox-momentum="false" style="width:100px;height:100px;overflow:auto">
     <div data-ae-scrollbox-elastic style="width:100px;height:300px"></div></div>`);
+  await page.evaluate(() => AelluxJs.updatePreferenceAttributesHTML({ reducedMotion: "reduced" }));
   const result = await page.evaluate(() => {
     const element = document.getElementById("box");
     const wrapper = element.firstElementChild;

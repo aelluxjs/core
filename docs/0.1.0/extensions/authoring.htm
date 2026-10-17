@@ -598,6 +598,7 @@ Extension Authoring                  </li>
 <li>Make every <code>mount</code> idempotent and release its listeners, observers, timers, and references in the corresponding <code>unmount</code>.</li>
 <li>Release Extension-wide resources in <code>destroy()</code>.</li>
 <li>Keep the public API and lifecycle behavior equivalent across Modern and Legacy variants.</li>
+<li>Core Extensions that publish or define CSS custom properties must register each property during <code>init()</code> with <code>AelluxJs.registerCssProperty()</code>, using an appropriate syntax, inheritance setting, and initial value.</li>
 </ol>
 <p>The runtime exposes a kebab-case name as camelCase under <code>AelluxJs.ext</code>: <code>tab-group</code> becomes <code>AelluxJs.ext.tabGroup</code>.
 An Extension receives its configuration as the <code>options</code> argument to <code>init(options)</code>. Supply it through <code>extensions</code>:</p>
@@ -738,6 +739,13 @@ node build-extension.mjs ./src/aellux.ext.example.js ./dist
 <p>Transpilation only changes syntax. It does not create missing browser APIs, so an Extension is not Legacy-compatible until both its syntax and runtime dependencies are covered.</p>
 <h2>Styles and Resources</h2>
 <p>Use <code>loadStyle: true</code> when the stylesheet follows the Extension filename, or pass a stylesheet URL. Modern and Legacy JavaScript variants share the same CSS unless the Extension implements an explicit alternative resource strategy.</p>
+<p>Core Extensions must register every CSS custom property they write or define for application customization during <code>init()</code>. Group descriptors in one call when possible:</p>
+<pre><code class="language-js">AelluxJs.registerCssProperty(
+  { name: &quot;--ae-example-progress&quot;, syntax: &quot;&lt;number&gt;&quot;, inherits: false, initialValue: &quot;0&quot; },
+  { name: &quot;--ae-example-offset&quot;, syntax: &quot;&lt;length&gt;&quot;, inherits: false, initialValue: &quot;0px&quot; }
+);
+</code></pre>
+<p><code>registerCssProperty()</code> checks browser support for <code>CSS.registerProperty()</code> and handles rejected registrations, including duplicate names. The Extension should continue to work with ordinary custom properties when the API is unavailable. Match each initial value to the stylesheet&#39;s default and cover registered values in browser tests. See the <a href="../runtime/api.htm#initialization">Runtime API</a> for the method&#39;s return value.</p>
 <p>Do not leave the Extension partially initialized when an optional resource fails. Report failures through <code>AelluxJs.diagnostics</code> and preserve usable fallback behavior whenever possible.</p>
 <h2>Publication Checklist</h2>
 <ul>
@@ -748,6 +756,7 @@ node build-extension.mjs ./src/aellux.ext.example.js ./dist
 <li><code>init</code>, <code>mount</code>, <code>unmount</code>, and <code>destroy</code> obey the lifecycle contract.</li>
 <li>Repeated mount and destroy operations do not duplicate or retain resources.</li>
 <li>Layout-sensitive Core Extensions batch measurements with <code>waitLayout.read()</code> and dependent writes with <code>waitLayout.update()</code> without adding avoidable frame delays.</li>
+<li>Core Extensions register their published and customizable CSS properties in <code>init()</code> through <code>registerCssProperty()</code> and keep working when registration is unavailable.</li>
 <li>The accessibility capability profile is documented and its applicable minimum behavior is validated.</li>
 <li>Both runtime selections are covered by browser tests.</li>
 </ul>

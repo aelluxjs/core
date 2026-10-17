@@ -14,7 +14,7 @@ export function buildPreferenceMediaQueries(root) {
       dark: mediaQuery("(prefers-color-scheme: dark)")
     },
     reducedMotion: {
-      reduced: mediaQuery("(prefers-reduced-motion: reduced)"),
+      reduced: mediaQuery("(prefers-reduced-motion: reduce)"),
       "no-preference": mediaQuery("(prefers-reduced-motion: no-preference)")
     },
     reducedTransparency: {

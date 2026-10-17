@@ -134,6 +134,17 @@
     });
     function init() {
       var options = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : {};
+      AelluxJs.registerCssProperty({
+        name: "--ae-width",
+        syntax: "<number>",
+        inherits: false,
+        initialValue: "0"
+      }, {
+        name: "--ae-height",
+        syntax: "<number>",
+        inherits: false,
+        initialValue: "0"
+      });
       var overrides = options.adaptiveParams || {};
       for (var _i = 0, _Object$keys = Object.keys(adaptiveParams); _i < _Object$keys.length; _i++) {
         var group = _Object$keys[_i];

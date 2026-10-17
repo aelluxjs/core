@@ -25,10 +25,9 @@ export default function createWeakCss() {
       scroll-behavior: smooth;
     }
 
-    @media (prefers-reduced-motion: reduce) {
-      :where(*) {
-        scroll-behavior: initial !important;
-      }
+    html[?reduced-motion='reduced'],
+    html[?reduced-motion='reduced'] * {
+      scroll-behavior: initial !important;
     }
 
     :where(button, a[href], [role='button'], [role='tab']) {
@@ -45,6 +44,7 @@ export default function createWeakCss() {
 
     :where([?anchor].%anchored) {
       pointer-events: all;
+      opacity: var(--anchor-opacity, 1);
       left: 0;
       top: 0;
       transform: translate3d(var(--ae-anchor-x, 0px), var(--ae-anchor-y, 0px), 0);
@@ -173,10 +173,9 @@ export default function createWeakCss() {
       opacity: 1;
     }
 
-    @media (prefers-reduced-motion: reduce) {
-      :where([?scrollbox] > [?scrollbar-vertical], [?scrollbox] > [?scrollbar-horizontal]) {
-        transition: none;
-      }
+    html[?reduced-motion='reduced'] *[?scrollbar-vertical],
+    html[?reduced-motion='reduced'] *[?scrollbar-horizontal] {
+      transition: none;
     }
 
     :where([?scrollbox]::-webkit-scrollbar) {

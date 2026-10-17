@@ -22,6 +22,8 @@ When an application's Extension stylesheet should take precedence over Bootstrap
 
 The application controls the selectors and priority of its Extension stylesheet.
 
+When adding motion or accessibility rules alongside Bootstrap, target AelluxJs preference attributes on `<html>` so a saved local choice and the device setting both affect the result. For example, use `html[data-ae-reduced-motion="reduced"] .custom-transition { transition: none; }` for application owned motion. Apply this convention to future integration styles and scripts; use `$ae.currentPreference("reduced-motion")` in JavaScript before starting optional animations.
+
 ## JavaScript Coexistence
 
 Extensions should avoid unnecessary `preventDefault()` and `stopPropagation()`, should not remove third-party listeners, and must keep mounting idempotent when Bootstrap reveals or modifies content dynamically.

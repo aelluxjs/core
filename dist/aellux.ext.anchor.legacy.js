@@ -153,12 +153,13 @@
       throw new Error('[aellux.js] Cannot attach the "'.concat(extensionName, '" extension: root.AelluxJs is not defined. Load the aellux.js boot script before this extension.'));
     }
     var attribute = AelluxJs.attr(extensionName);
+    var presentAttribute = AelluxJs.attr("present");
     var targetAttribute = AelluxJs.attr("anchor-target");
     var fpsAttribute = AelluxJs.attr("anchor-fps");
     var layoutEvent = AelluxJs.eventName("Layout");
     var anchoredClass = AelluxJs.className("anchored");
     var baseProperties = ["position", "left", "top", "transform", "transform-origin"];
-    var ownedProperties = [].concat(baseProperties, ["--ae-anchor-x", "--ae-anchor-y", "--ae-anchor-origin-x", "--ae-anchor-origin-y"]);
+    var ownedProperties = [].concat(baseProperties, ["--ae-anchor-x", "--ae-anchor-y", "--ae-anchor-origin-x", "--ae-anchor-origin-y", "--anchor-opacity"]);
     var pivots = {
       "top-left": [0, 0],
       "top-center": [0.5, 0],
@@ -206,12 +207,26 @@
         syntax: "<length>",
         inherits: false,
         initialValue: "0px"
-      });
-      AelluxJs.registerCssProperty({
+      }, {
         name: "--ae-anchor-y",
         syntax: "<length>",
         inherits: false,
         initialValue: "0px"
+      }, {
+        name: "--ae-anchor-origin-x",
+        syntax: "<percentage>",
+        inherits: false,
+        initialValue: "50%"
+      }, {
+        name: "--ae-anchor-origin-y",
+        syntax: "<percentage>",
+        inherits: false,
+        initialValue: "0%"
+      }, {
+        name: "--anchor-opacity",
+        syntax: "<number>",
+        inherits: false,
+        initialValue: "1"
       });
       AelluxJs.mountManager.add({
         extensionName: extensionName,
@@ -497,6 +512,7 @@
                 element.style.setProperty("--ae-anchor-y", "".concat(selected.y, "px"));
                 element.style.setProperty("--ae-anchor-origin-x", "".concat(selected.self[0] * 100, "%"));
                 element.style.setProperty("--ae-anchor-origin-y", "".concat(selected.self[1] * 100, "%"));
+                element.style.setProperty("--anchor-opacity", placement.opacity);
                 var _iterator6 = _createForOfIteratorHelper(baseProperties), _step6;
                 try {
                   for (_iterator6.s(); !(_step6 = _iterator6.n()).done; ) {
@@ -567,11 +583,14 @@
       } finally {
         _iterator3.f();
       }
+      var present = target.closest("[".concat(presentAttribute, "]"));
+      var opacity = present ? root.getComputedStyle(present).opacity : "1";
       return {
         valid: true,
         target: target,
         reference: reference,
-        selected: selected
+        selected: selected,
+        opacity: opacity
       };
     }
     function invalidContext(element, state, placement) {

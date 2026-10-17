@@ -601,6 +601,13 @@ preference.update();
 console.log(preference.get(&quot;colorScheme&quot;));
 </code></pre>
 <p><code>set(name, value)</code> saves the user value in the <code>AelluxJsPreferences</code> persistence store. Call <code>update()</code> to recompute and publish the current values; <code>set()</code> does not call <code>update()</code> automatically. Changes from the browser <code>storage</code> event are updated automatically. <code>update()</code> synchronizes mounted controls for preferences whose computed values changed and always dispatches <code>AelluxJsPreferencesChange</code>, including when the values stay the same. Newly mounted controls are synchronized immediately.</p>
+<p>For application styles and Extensions, prefer the resolved attributes on <code>&lt;html&gt;</code> over direct device media queries. The boot reads persisted choices and device preferences to set these attributes, and Preference updates them when the choice or device setting changes. An explicit local choice such as <code>no-preference</code> can override a device request for reduced motion. Use the same attributes in examples and future integrations:</p>
+<pre><code class="language-css">html[data-ae-reduced-motion=&quot;reduced&quot;] .animated-panel {
+  animation: none;
+  transition: none;
+}
+</code></pre>
+<p>In JavaScript, check <code>$ae.currentPreference(&quot;reduced-motion&quot;) === &quot;reduced&quot;</code> before starting optional motion. The method reads the resolved value from <code>&lt;html&gt;</code> and returns <code>null</code> when no value is published. The same approach applies to other resolved preferences, such as <code>contrast</code> and <code>forced-colors</code>. Device media queries remain an input to AelluxJs preference resolution.</p>
 <p><code>AelluxJsPreferencesChange</code> carries a changed-key array and a copy of the current values. The array is empty when an update finds no changed values:</p>
 <pre><code class="language-js">$ae.on(&quot;PreferencesChange&quot;, event =&gt; {
   const { changed, preferences } = event.detail;
