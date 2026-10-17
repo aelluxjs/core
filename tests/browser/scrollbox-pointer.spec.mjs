@@ -794,7 +794,7 @@ for (const behavior of ["auto", "contain"]) {
   });
 }
 
-test("wheel at a physical snap edge ignores a pending navigation target", async ({ page }) => {
+test("wheel at a snap edge waits for the navigation target before releasing", async ({ page }) => {
   await setup(page, `<div id="gallery" data-ae-scrollbox="native" data-ae-scrollbox-snap
     style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden">
     <div style="display:flex;width:300px">
@@ -803,7 +803,7 @@ test("wheel at a physical snap edge ignores a pending navigation target", async 
       <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
     </div>
   </div>`);
-  const result = await page.evaluate(() => {
+  const pending = await page.evaluate(() => {
     const element = document.getElementById("gallery");
     const controller = AelluxJs.mountManager.controller("gallery").scrollbox;
     const wheel = deltaY => {
@@ -811,15 +811,21 @@ test("wheel at a physical snap edge ignores a pending navigation target", async 
       element.dispatchEvent(event);
       return event.defaultPrevented;
     };
-    controller.goto(1);
-    element.scrollTo({ left: 200, behavior: "instant" });
+    controller.goto(2);
     const end = wheel(120);
-    controller.goto(1);
-    element.scrollTo({ left: 0, behavior: "instant" });
-    const start = wheel(-120);
-    return { end, start, suspended: getComputedStyle(element).scrollSnapType };
+    return { end, suspended: getComputedStyle(element).scrollSnapType };
   });
-  expect(result).toEqual({ end: false, start: false, suspended: "none" });
+  expect(pending).toEqual({ end: true, suspended: "x mandatory" });
+  await page.locator("#gallery").evaluate(element =>
+    element.scrollTo({ left: 200, behavior: "instant" }));
+  await expect.poll(() => page.locator("#gallery").evaluate(element => element.scrollLeft))
+    .toBe(200);
+  const settled = await page.locator("#gallery").evaluate(element => {
+    const event = new WheelEvent("wheel", { deltaY: 120, bubbles: true, cancelable: true });
+    element.dispatchEvent(event);
+    return { prevented: event.defaultPrevented, suspended: getComputedStyle(element).scrollSnapType };
+  });
+  expect(settled).toEqual({ prevented: false, suspended: "none" });
   await expect.poll(() => page.locator("#gallery").evaluate(element =>
     getComputedStyle(element).scrollSnapType)).toBe("x mandatory");
 });
@@ -2421,6 +2427,24 @@ test("pointer mode keeps native behavior on a coarse-pointer device", async ({ p
     document.getElementById("box").style.getPropertyValue("--ae-scroll-x-progress"),
     document.getElementById("box").style.getPropertyValue("--ae-scroll-y-progress")
   ])).toEqual(["0.25", "0.2"]);
+});
+
+test("pointer mode follows touch emulation changes without reloading", async ({ page }) => {
+  await setup(page, box("box"));
+  expect(await drag(page, "box")).toMatchObject({ x: 50, y: 0 });
+
+  const session = await page.context().newCDPSession(page);
+  await session.send("Emulation.setTouchEmulationEnabled", { enabled: true, maxTouchPoints: 1 });
+  await expect.poll(() => page.evaluate(() => matchMedia(
+    "(hover: hover) and (pointer: fine)").matches)).toBe(false);
+  await page.evaluate(() => document.getElementById("box")
+    .scrollTo({ left: 0, top: 0, behavior: "instant" }));
+  expect(await drag(page, "box")).toMatchObject({ x: 0, y: 0 });
+
+  await session.send("Emulation.setTouchEmulationEnabled", { enabled: false });
+  await expect.poll(() => page.evaluate(() => matchMedia(
+    "(hover: hover) and (pointer: fine)").matches)).toBe(true);
+  expect(await drag(page, "box")).toMatchObject({ x: 50, y: 0 });
 });
 
 test("pointer dragging preserves an existing user-select declaration", async ({ page }) => {

@@ -209,6 +209,7 @@
         scrollbar,
         resizeObserver: null,
         mutationObserver: null,
+        desktopMedia: null,
         publishPending: false,
         publishDirty: false,
         layoutRevision: 0,
@@ -333,6 +334,12 @@
       if (state.touchListening) removeTouchListeners(state);
       if (state.resizeObserver) state.resizeObserver.disconnect();
       if (state.mutationObserver) state.mutationObserver.disconnect();
+      if (state.desktopMedia) {
+        if (state.desktopMedia.removeEventListener)
+          state.desktopMedia.removeEventListener("change", state.onDesktopMediaChange);
+        else if (state.desktopMedia.removeListener)
+          state.desktopMedia.removeListener(state.onDesktopMediaChange);
+      }
       if (state.resizeTimeout !== null) root.clearTimeout(state.resizeTimeout);
       offTarget(root, "$resize", state.onResize);
       (_a = elementMemories.get(element)) == null ? void 0 : _a.restore();
@@ -1889,6 +1896,14 @@
     function observe(state) {
       state.onResize = () => scheduleResize(state);
       onTarget(root, "$resize", state.onResize, { passive: true });
+      if (root.matchMedia) {
+        state.desktopMedia = root.matchMedia("(hover: hover) and (pointer: fine)");
+        state.onDesktopMediaChange = () => configure(state);
+        if (state.desktopMedia.addEventListener)
+          state.desktopMedia.addEventListener("change", state.onDesktopMediaChange);
+        else if (state.desktopMedia.addListener)
+          state.desktopMedia.addListener(state.onDesktopMediaChange);
+      }
       if (root.ResizeObserver) {
         state.resizeObserver = new root.ResizeObserver(() => scheduleResize(state));
         state.resizeObserver.observe(state.element);
@@ -2062,6 +2077,10 @@
       const index = edge !== null ? edge : state.snap.scrollingToTarget !== -1 ? state.snap.index : selectedSnapIndex(state);
       const next2 = index + Math.sign(delta);
       if (next2 < 0 || next2 >= items.length) {
+        if (state.snap.scrollingToTarget !== -1) {
+          if (event.cancelable) event.preventDefault();
+          return true;
+        }
         suspendSnapForEdgeWheel(state);
         const position = axis === "x" ? state.element.scrollLeft : state.element.scrollTop;
         const maximum = axis === "x" ? metrics.maxX : metrics.maxY;
