@@ -438,6 +438,78 @@ test("touch reveals a horizontal scrollbar at its current scroll position", asyn
   }
 });
 
+test("desktop scroll updates horizontal scrollbar alignment immediately", async ({ page }) => {
+  await setup(page, `<div id="box" data-ae-scrollbox data-ae-scrollbar="horizontal"
+    style="width:120px;height:120px;overflow-x:auto;overflow-y:hidden">
+    <div style="width:400px;height:100px"></div>
+  </div>`);
+  const result = await page.evaluate(() => {
+    const box = document.getElementById("box");
+    const bar = box.querySelector(":scope > [data-ae-scrollbar-horizontal]");
+    box.scrollTo({ left: 80, behavior: "instant" });
+    box.dispatchEvent(new Event("scroll"));
+    return { scrollLeft: box.scrollLeft,
+      offset: bar.getBoundingClientRect().left - box.getBoundingClientRect().left };
+  });
+  expect(result.scrollLeft).toBe(80);
+  expect(Math.abs(result.offset)).toBeLessThan(1);
+});
+
+test("mobile horizontal drag keeps the scrollbar aligned on every frame", async ({ browser, browserName }) => {
+  test.skip(browserName !== "chromium");
+  const context = await browser.newContext({ hasTouch: true, isMobile: true,
+    viewport: { width: 390, height: 844 } });
+  const page = await context.newPage();
+  try {
+    await setup(page, `<div id="box" data-ae-scrollbox="pointer" data-ae-scrollbox-snap
+      data-ae-scrollbar="horizontal"
+      style="width:300px;height:120px;overflow-x:auto;overflow-y:hidden">
+      <div data-ae-scrollbox-elastic style="display:inline-flex">
+        <div data-ae-snap-item style="flex:none;width:300px;height:100px"></div>
+        <div data-ae-snap-item style="flex:none;width:300px;height:100px"></div>
+        <div data-ae-snap-item style="flex:none;width:300px;height:100px"></div>
+      </div>
+    </div>`);
+    const box = page.locator("#box");
+    await expect(box.locator(":scope > [data-ae-scrollbar-horizontal]"))
+      .toHaveCSS("display", "block");
+    await page.evaluate(() => {
+      window.__scrollbarOffsets = [];
+      window.__sampleScrollbar = true;
+      const box = document.getElementById("box");
+      const bar = box.querySelector(":scope > [data-ae-scrollbar-horizontal]");
+      function sample() {
+        if (!window.__sampleScrollbar) return;
+        window.__scrollbarOffsets.push({ scrollLeft: box.scrollLeft,
+          offset: bar.getBoundingClientRect().left - box.getBoundingClientRect().left });
+        requestAnimationFrame(sample);
+      }
+      requestAnimationFrame(sample);
+    });
+    const rect = await box.boundingBox();
+    const x = rect.x + rect.width * .7;
+    const y = rect.y + rect.height * .5;
+    const session = await context.newCDPSession(page);
+    await session.send("Input.dispatchTouchEvent", { type: "touchStart",
+      touchPoints: [{ x, y, id: 1 }] });
+    for (let i = 1; i <= 12; i++) {
+      await session.send("Input.dispatchTouchEvent", { type: "touchMove",
+        touchPoints: [{ x: x - i * 12, y, id: 1 }] });
+      await page.waitForTimeout(16);
+    }
+    await session.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+    await page.waitForTimeout(200);
+    const samples = await page.evaluate(() => {
+      window.__sampleScrollbar = false;
+      return window.__scrollbarOffsets;
+    });
+    expect(Math.max(...samples.map(sample => sample.scrollLeft))).toBeGreaterThan(50);
+    expect(Math.max(...samples.map(sample => Math.abs(sample.offset)))).toBeLessThan(1);
+  } finally {
+    await context.close();
+  }
+});
+
 test("touch release timeout preserves an active desktop pointer hover", async ({ page }) => {
   await setup(page, `<div id="box" data-ae-scrollbox data-ae-scrollbar="v"
     style="width:120px;height:120px;overflow-y:auto">

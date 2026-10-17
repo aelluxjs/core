@@ -250,7 +250,9 @@
         hoverVisible: false,
         hoverTimeout: null,
         interactionVisible: false,
-        interactionTimeout: null
+        interactionTimeout: null,
+        lastScrollLeft: null,
+        lastScrollTop: null
       };
       const state = {
         element,
@@ -286,6 +288,12 @@
       };
       state.onScroll = (event) => {
         if (event.target !== element) return;
+        if ((state.scrollbar.x || state.scrollbar.y) && (state.scrollbar.lastScrollLeft !== element.scrollLeft || state.scrollbar.lastScrollTop !== element.scrollTop)) {
+          const metrics = nativeMetrics(element);
+          updateScrollbars(state, readScrollbars(state, metrics, wheelAxes(state, metrics)));
+          state.scrollbar.lastScrollLeft = element.scrollLeft;
+          state.scrollbar.lastScrollTop = element.scrollTop;
+        }
         publish(state);
         if (!state.desktop && state.scrollbar.listening) scheduleScrollbarInteractionHide(state);
         if (!state.snapEnabled) return;
