@@ -556,7 +556,8 @@
     if (!element) {
       element = root.document.createElement("div");
       element.setAttribute(attributeName, "");
-      state.element.appendChild(element);
+      if (axis === "y") state.element.insertBefore(element, state.element.firstChild);
+      else state.element.appendChild(element);
     }
 
     const marker = owned ? null : root.document.createComment("scrollbar position");
