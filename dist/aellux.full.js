@@ -1950,7 +1950,10 @@
           const current = scrollbar[axis];
           let element = null;
           if (enabled) element = Array.from(state.element.children).find((child) => child.hasAttribute(attributeName)) || null;
-          if (current && current.element === element && enabled) return;
+          if (current && current.element === element && enabled) {
+            positionScrollbarAxis(state, current);
+            return;
+          }
           if (current) resetScrollbarAxis(state, axis);
           if (!enabled) return;
           const owned = !element;
@@ -1959,6 +1962,8 @@
             element.setAttribute(attributeName, "");
             state.element.appendChild(element);
           }
+          const marker = owned ? null : root2.document.createComment("scrollbar position");
+          if (marker) element.before(marker);
           if (!owned) scrollbarMemories.set(element, AelluxJs2.persist.element.save(
             element,
             [],
@@ -1968,8 +1973,7 @@
             element,
             owned,
             axis,
-            x: null,
-            y: null,
+            marker,
             thumbPosition: null,
             thumbSize: null,
             trackSize: null,
@@ -1981,6 +1985,14 @@
           record.onPointerEnd = (event) => endScrollbarDrag(state, record, event);
           setListeners(element, record, scrollbarAxisListeners, true);
           scrollbar[axis] = record;
+          positionScrollbarAxis(state, record);
+        }
+        function positionScrollbarAxis(state, record) {
+          const element = state.element;
+          if (record.axis === "y" && element.firstElementChild !== record.element)
+            element.prepend(record.element);
+          else if (record.axis === "x" && element.lastElementChild !== record.element)
+            element.append(record.element);
         }
         function resetScrollbarAxis(state, axis) {
           var _a;
@@ -1990,7 +2002,11 @@
           const element = record.element;
           setListeners(element, record, scrollbarAxisListeners, false);
           if (record.owned) element.remove();
-          else (_a = scrollbarMemories.get(element)) == null ? void 0 : _a.restore();
+          else {
+            (_a = scrollbarMemories.get(element)) == null ? void 0 : _a.restore();
+            if (record.marker.parentNode) record.marker.replaceWith(element);
+            else record.marker.remove();
+          }
           scrollbarMemories.delete(element);
           state.scrollbar[axis] = null;
         }
@@ -2090,15 +2106,9 @@
             ) : 0;
             const position = vertical ? element.scrollTop : element.scrollLeft;
             const thumbPosition = max > 0 ? (trackSize - thumbSize) * progress(position, max) : 0;
-            const barStyle = root2.getComputedStyle(record.element);
-            const thickness = parseFloat(vertical ? barStyle.width : barStyle.height) || 0;
-            const x = element.scrollLeft + (vertical ? element.clientWidth - thickness : 0);
-            const y = element.scrollTop + (vertical ? 0 : element.clientHeight - thickness);
             const display = axes[axis] ? "block" : "none";
             values.push({
               record,
-              x,
-              y,
               trackSize,
               thumbSize,
               thumbPosition,
@@ -2109,11 +2119,9 @@
           return values;
         }
         function updateScrollbars(state, values) {
-          for (const { record, x, y, trackSize, thumbSize, thumbPosition, max, display } of values) {
+          for (const { record, trackSize, thumbSize, thumbPosition, max, display } of values) {
             if (state.scrollbar[record.axis] !== record) continue;
             const style = record.element.style;
-            if (record.x !== x) style.setProperty(scrollbarProperties[0], `${x}px`);
-            if (record.y !== y) style.setProperty(scrollbarProperties[1], `${y}px`);
             if (record.trackSize !== trackSize)
               style.setProperty(scrollbarProperties[2], `${trackSize}px`);
             if (record.thumbSize !== thumbSize)
@@ -2122,8 +2130,6 @@
               style.setProperty(scrollbarProperties[4], `${thumbPosition}px`);
             if (record.display !== display)
               style.setProperty(scrollbarProperties[5], display);
-            record.x = x;
-            record.y = y;
             record.trackSize = trackSize;
             record.thumbSize = thumbSize;
             record.thumbPosition = thumbPosition;
@@ -2174,8 +2180,6 @@
           else state.element.scrollTo({ left: destination, behavior: "instant" });
           updateScrollbars(state, [{
             record,
-            x: record.axis === "x" ? destination : record.x,
-            y: record.axis === "y" ? destination : record.y,
             trackSize: record.trackSize,
             thumbSize: record.thumbSize,
             thumbPosition: travel * destination / record.max,

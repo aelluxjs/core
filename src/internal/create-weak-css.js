@@ -121,26 +121,29 @@ export default function createWeakCss() {
     }
 
     :where([?scrollbox] > [?scrollbar-vertical], [?scrollbox] > [?scrollbar-horizontal]) {
-      position: absolute;
+      position: sticky;
       display: var(--ae-scrollbar-display, none);
-      left: 0;
-      top: 0;
       z-index: 10;
       background: var(--ae-scrollbar-track-color, transparent);
       opacity: var(--ae-scrollbar-opacity-fade, 0);
       touch-action: none;
-      transform: translate3d(var(--ae-scrollbar-x, 0px), var(--ae-scrollbar-y, 0px), 0);
       transition: opacity 160ms ease;
     }
 
     :where([?scrollbox] > [?scrollbar-vertical]) {
+      top: 0;
+      left: calc(100% - var(--ae-scrollbar-size, 8px));
       width: var(--ae-scrollbar-size, 8px);
       height: var(--ae-scrollbar-length, 0px);
+      margin-bottom: calc(-1 * var(--ae-scrollbar-length, 0px));
     }
 
     :where([?scrollbox] > [?scrollbar-horizontal]) {
+      left: 0;
+      bottom: 0;
       width: var(--ae-scrollbar-length, 0px);
       height: var(--ae-scrollbar-size, 8px);
+      margin-top: calc(-1 * var(--ae-scrollbar-size, 8px));
     }
 
     :where([?scrollbox] > [?scrollbar-vertical], [?scrollbox] > [?scrollbar-horizontal])::before {

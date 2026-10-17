@@ -56,6 +56,35 @@ test("custom scrollbar stays over the viewport and supports track click and thum
   await expect(track).toHaveCSS("opacity", "0");
 });
 
+test("sticky scrollbar tracks remain fixed without changing the scroll area", async ({ page }) => {
+  await setup(page, `<div id="box" data-ae-scrollbox data-ae-scrollbar="x y"
+    style="width:200px;height:100px;overflow:auto">
+    <div id="content" style="width:800px;height:400px"></div>
+  </div>`);
+  const result = await page.evaluate(() => {
+    const box = document.getElementById("box");
+    const vertical = box.querySelector(":scope > [data-ae-scrollbar-vertical]");
+    const horizontal = box.querySelector(":scope > [data-ae-scrollbar-horizontal]");
+    const measure = () => {
+      const rect = box.getBoundingClientRect();
+      const v = vertical.getBoundingClientRect();
+      const h = horizontal.getBoundingClientRect();
+      return { vertical: [v.right - rect.left, v.top - rect.top],
+        horizontal: [h.left - rect.left, h.bottom - rect.top] };
+    };
+    const before = measure();
+    const size = [box.scrollWidth, box.scrollHeight];
+    box.scrollLeft = 100;
+    box.scrollTop = 70;
+    return { before, after: measure(), size,
+      order: [box.firstElementChild === vertical, box.lastElementChild === horizontal] };
+  });
+  expect(result.size).toEqual([800, 400]);
+  expect(result.order).toEqual([true, true]);
+  expect(result.after.vertical).toEqual(result.before.vertical);
+  expect(result.after.horizontal).toEqual(result.before.horizontal);
+});
+
 test("custom scrollbar opacities inherit inline values and respond to changes", async ({ page }) => {
   await setup(page, `<div id="box" data-ae-scrollbox data-ae-scrollbar="v h"
     style="width:120px;height:120px;overflow:auto">
