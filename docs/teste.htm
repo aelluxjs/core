@@ -4,9 +4,11 @@
     (function () {
       var version = new URLSearchParams(location.search).get("c") ||
         "37bf06fc6b801293db47758616894f22ce05bfea";
+      var min = new URLSearchParams(location.search).get("min") ||
+        "";
       var script = document.createElement("script");
       script.src = "https://cdn.jsdelivr.net/gh/aelluxjs/core@" +
-        encodeURIComponent(version) + "/dist/aellux.js";
+        encodeURIComponent(version) + "/dist/aellux" + min + ".js";
       script.onload = function () { $ae.init(); };
       document.head.appendChild(script);
     })();
