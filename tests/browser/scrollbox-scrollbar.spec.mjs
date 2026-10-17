@@ -249,6 +249,30 @@ test("desktop pointer movement restores a scrollbar when hover state was lost in
   await expect(track).toHaveCSS("opacity", "0");
 });
 
+test("grab cursor keeps its scrollbar visible after hover state expires", async ({ page }) => {
+  await setup(page, `<div id="box" data-ae-scrollbox="pointer" data-ae-scrollbar="v"
+    style="width:120px;height:120px;overflow-y:auto">
+    <div id="content" style="height:500px"></div>
+  </div>`);
+  const box = page.locator("#box");
+  const track = box.locator("[data-ae-scrollbar-vertical]");
+  await page.locator("#content").evaluate(element => element.dispatchEvent(
+    new PointerEvent("pointerover", { bubbles: true, pointerType: "mouse" })));
+  await expect(box).toHaveCSS("cursor", "grab");
+  await expect(track).toHaveCSS("opacity", "1");
+
+  await box.evaluate(element => element.dispatchEvent(
+    new PointerEvent("pointerleave", { pointerType: "mouse" })));
+  await page.waitForTimeout(450);
+  await expect(box).toHaveCSS("cursor", "grab");
+  await expect(track).toHaveCSS("opacity", "1");
+
+  await box.evaluate(element => element.dispatchEvent(
+    new PointerEvent("pointerout", { bubbles: true, pointerType: "mouse" })));
+  await expect(box).not.toHaveCSS("cursor", "grab");
+  await expect(track).toHaveCSS("opacity", "0");
+});
+
 test("mobile touch and native scroll reveal the scrollbar until scrolling settles", async ({ browser, browserName }) => {
   test.skip(browserName !== "chromium");
   const context = await browser.newContext({ hasTouch: true, isMobile: true,
@@ -367,7 +391,12 @@ test("PDS hide timer keeps a scrollbar visible while mouse hover remains active"
   await expect(track).toHaveCSS("opacity", "1");
   await page.waitForTimeout(1150);
   await expect(track).toHaveCSS("opacity", "1");
-  await box.evaluate(element => element.dispatchEvent(new MouseEvent("mouseleave")));
+  await box.evaluate(element => {
+    element.dispatchEvent(new MouseEvent("mouseleave"));
+    element.dispatchEvent(new PointerEvent("pointerout", {
+      bubbles: true, pointerType: "mouse"
+    }));
+  });
   await expect(track).toHaveCSS("opacity", "0");
 });
 
@@ -393,6 +422,9 @@ test("PDS hide timer fades the scrollbar when no hover remains", async ({ page }
     window.dispatchEvent(new PointerEvent("pointerup", {
       bubbles: true, isPrimary: true, pointerId: 902,
       pointerType: "mouse", button: 0, buttons: 0, clientX: x, clientY: y - 40
+    }));
+    element.dispatchEvent(new PointerEvent("pointerout", {
+      bubbles: true, pointerType: "mouse"
     }));
   });
   await expect(track).toHaveCSS("opacity", "1");

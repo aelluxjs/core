@@ -2015,7 +2015,7 @@
         }
         function syncScrollbarVisibility(state) {
           const scrollbar = state.scrollbar;
-          if (scrollbar.listening && (scrollbar.hoverVisible || scrollbar.drag || scrollbar.interactionVisible)) showScrollbars(state);
+          if (scrollbar.listening && (scrollbar.hoverVisible || scrollbar.drag || scrollbar.interactionVisible || state.cursor.owned)) showScrollbars(state);
           else hideScrollbars(state);
         }
         function clearScrollbarInteractionVisibility(state) {
@@ -2676,12 +2676,14 @@
         function setPointerScrollCursor(state, value) {
           state.element.style.setProperty("cursor", value, "important");
           state.cursor.owned = true;
+          syncScrollbarVisibility(state);
         }
         function restorePointerScrollCursor(state) {
           var _a;
           if (!state.cursor.owned) return;
           (_a = cursorMemories.get(state.element)) == null ? void 0 : _a.restore();
           state.cursor.owned = false;
+          syncScrollbarVisibility(state);
         }
         function startPointerScroll(state, event) {
           if (event.detail > 1) return;

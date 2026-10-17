@@ -2,12 +2,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <script>
     (function () {
-      var version = new URLSearchParams(location.search).get("c") ||
-        "37bf06fc6b801293db47758616894f22ce05bfea";
+      var requestedVersion = new URLSearchParams(location.search).get("c");
+      var version = requestedVersion || "37bf06fc6b801293db47758616894f22ce05bfea";
       var min = new URLSearchParams(location.search).get("min") ||
         "";
       var script = document.createElement("script");
-      script.src = "https://cdn.jsdelivr.net/gh/aelluxjs/core@" +
+      var local = !requestedVersion &&
+        (location.protocol === "file:" || /^(localhost|127\.0\.0\.1)$/.test(location.hostname));
+      script.src = local ? "../dist/aellux" + min + ".js" :
+        "https://cdn.jsdelivr.net/gh/aelluxjs/core@" +
         encodeURIComponent(version) + "/dist/aellux" + min + ".js";
       script.onload = function () { $ae.init(); };
       document.head.appendChild(script);

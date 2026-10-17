@@ -26478,7 +26478,7 @@
         }
         function syncScrollbarVisibility(state) {
           var scrollbar = state.scrollbar;
-          if (scrollbar.listening && (scrollbar.hoverVisible || scrollbar.drag || scrollbar.interactionVisible)) showScrollbars(state);
+          if (scrollbar.listening && (scrollbar.hoverVisible || scrollbar.drag || scrollbar.interactionVisible || state.cursor.owned)) showScrollbars(state);
           else hideScrollbars(state);
         }
         function clearScrollbarInteractionVisibility(state) {
@@ -27191,12 +27191,14 @@
         function setPointerScrollCursor(state, value) {
           state.element.style.setProperty("cursor", value, "important");
           state.cursor.owned = true;
+          syncScrollbarVisibility(state);
         }
         function restorePointerScrollCursor(state) {
           var _cursorMemories$get;
           if (!state.cursor.owned) return;
           (_cursorMemories$get = cursorMemories.get(state.element)) === null || _cursorMemories$get === void 0 || _cursorMemories$get.restore();
           state.cursor.owned = false;
+          syncScrollbarVisibility(state);
         }
         function startPointerScroll(state, event) {
           if (event.detail > 1) return;
