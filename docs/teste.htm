@@ -1,8 +1,16 @@
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <script
-    src="https://cdn.jsdelivr.net/gh/aelluxjs/core@37bf06fc6b801293db47758616894f22ce05bfea/dist/aellux.js"></script>
-  <script>$ae.init();</script>
+  <script>
+    (function () {
+      var version = new URLSearchParams(location.search).get("c") ||
+        "37bf06fc6b801293db47758616894f22ce05bfea";
+      var script = document.createElement("script");
+      script.src = "https://cdn.jsdelivr.net/gh/aelluxjs/core@" +
+        encodeURIComponent(version) + "/dist/aellux.js";
+      script.onload = function () { $ae.init(); };
+      document.head.appendChild(script);
+    })();
+  </script>
   <style>
     .anchor {
       background: red;
