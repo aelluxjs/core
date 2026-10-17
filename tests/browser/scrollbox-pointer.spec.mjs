@@ -1057,7 +1057,7 @@ test("elastic pressure suspends CSS snap through the return animation", async ({
     { timeout: 10000 }).toBe("x mandatory");
 });
 
-test("a native touch flick advances one CSS snap point within 100 ms", async ({ page }) => {
+test("native touch release does not trigger scripted flick navigation", async ({ page }) => {
   await setup(page, `<div id="gallery" data-ae-scrollbox="native" data-ae-scrollbox-snap
     style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden">
     <div style="display:flex;width:300px">
@@ -1081,8 +1081,8 @@ test("a native touch flick advances one CSS snap point within 100 ms", async ({ 
     }] });
     window.dispatchEvent(end);
   });
-  await expect.poll(() => page.evaluate(() => document.getElementById("gallery")
-    .scrollLeft)).toBe(100);
+  await page.waitForTimeout(150);
+  expect(await page.evaluate(() => document.getElementById("gallery").scrollLeft)).toBe(0);
 });
 
 test("horizontal wheel ignores hidden vertical overflow during elastic pressure", async ({ page }) => {

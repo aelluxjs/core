@@ -1,24 +1,5 @@
 (() => {
-  var __defProp = Object.defineProperty;
-  var __defProps = Object.defineProperties;
-  var __getOwnPropDescs = Object.getOwnPropertyDescriptors;
   var __getOwnPropNames = Object.getOwnPropertyNames;
-  var __getOwnPropSymbols = Object.getOwnPropertySymbols;
-  var __hasOwnProp = Object.prototype.hasOwnProperty;
-  var __propIsEnum = Object.prototype.propertyIsEnumerable;
-  var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
-  var __spreadValues = (a, b) => {
-    for (var prop in b || (b = {}))
-      if (__hasOwnProp.call(b, prop))
-        __defNormalProp(a, prop, b[prop]);
-    if (__getOwnPropSymbols)
-      for (var prop of __getOwnPropSymbols(b)) {
-        if (__propIsEnum.call(b, prop))
-          __defNormalProp(a, prop, b[prop]);
-      }
-    return a;
-  };
-  var __spreadProps = (a, b) => __defProps(a, __getOwnPropDescs(b));
   var __esm = (fn, res) => function __init() {
     return fn && (res = (0, fn[__getOwnPropNames(fn)[0]])(fn = 0)), res;
   };
@@ -1565,7 +1546,6 @@
             activePointers: /* @__PURE__ */ new Set(),
             activeTouches: /* @__PURE__ */ new Set(),
             savedItems: /* @__PURE__ */ new Set(),
-            touchStarts: /* @__PURE__ */ new Map(),
             gestureListening: false,
             endListening: false,
             waitingForGestureEnd: false
@@ -2297,7 +2277,6 @@
           stopSnapGestureEndListeners(state);
           state.snap.activePointers.clear();
           state.snap.activeTouches.clear();
-          state.snap.touchStarts.clear();
           state.snap.waitingForGestureEnd = false;
         }
         function listenSnapGestureEnd(state) {
@@ -2325,17 +2304,7 @@
           const snap = state.snap;
           const active = kind === "pointer" ? snap.activePointers : snap.activeTouches;
           if (kind === "pointer") active.add(event.pointerId);
-          else for (const touch of event.changedTouches) {
-            active.add(touch.identifier);
-            if (event.target.closest(`[${attribute}]`) === state.element) {
-              snap.touchStarts.set(touch.identifier, {
-                startX: touch.clientX,
-                startY: touch.clientY,
-                startTime: now(),
-                index: selectedSnapIndex(state)
-              });
-            }
-          }
+          else for (const touch of event.changedTouches) active.add(touch.identifier);
           if (!active.size) return;
           snap.flick = null;
           if (snap.scrollEndTimeout !== null || snap.scrollingToTarget !== -1)
@@ -2348,26 +2317,10 @@
           const snap = state.snap;
           if (kind === "pointer") snap.activePointers.delete(event.pointerId);
           else if (kind === "touch") {
-            for (const touch of event.changedTouches) {
-              snap.activeTouches.delete(touch.identifier);
-              const start = snap.touchStarts.get(touch.identifier);
-              snap.touchStarts.delete(touch.identifier);
-              if (!start || event.type !== "touchend" || snap.activeTouches.size) continue;
-              const axis = snapAxis(state);
-              const dx = start.startX - touch.clientX;
-              const dy = start.startY - touch.clientY;
-              if (Math.abs(axis === "x" ? dx : dy) < Math.abs(axis === "x" ? dy : dx))
-                continue;
-              recordSnapFlick(state, __spreadProps(__spreadValues({}, start), {
-                lastX: touch.clientX,
-                lastY: touch.clientY,
-                endTime: now()
-              }), axis, start.index);
-            }
+            for (const touch of event.changedTouches) snap.activeTouches.delete(touch.identifier);
           } else {
             snap.activePointers.clear();
             snap.activeTouches.clear();
-            snap.touchStarts.clear();
           }
           if (snap.activePointers.size || snap.activeTouches.size) return;
           stopSnapGestureEndListeners(state);

@@ -165,7 +165,6 @@
       wheelTimeout: null, edgeWheelTimeout: null,
       activePointers: new Set(), activeTouches: new Set(),
       savedItems: new Set(),
-      touchStarts: new Map(),
       gestureListening: false, endListening: false, waitingForGestureEnd: false
     };
 
@@ -932,7 +931,6 @@
     stopSnapGestureEndListeners(state);
     state.snap.activePointers.clear();
     state.snap.activeTouches.clear();
-    state.snap.touchStarts.clear();
     state.snap.waitingForGestureEnd = false;
   }
 
@@ -962,15 +960,7 @@
     const snap = state.snap;
     const active = kind === "pointer" ? snap.activePointers : snap.activeTouches;
     if (kind === "pointer") active.add(event.pointerId);
-    else for (const touch of event.changedTouches) {
-      active.add(touch.identifier);
-      if (event.target.closest(`[${attribute}]`) === state.element) {
-        snap.touchStarts.set(touch.identifier, {
-          startX: touch.clientX, startY: touch.clientY,
-          startTime: now(), index: selectedSnapIndex(state)
-        });
-      }
-    }
+    else for (const touch of event.changedTouches) active.add(touch.identifier);
     if (!active.size) return;
 
     snap.flick = null;
@@ -985,25 +975,10 @@
     const snap = state.snap;
     if (kind === "pointer") snap.activePointers.delete(event.pointerId);
     else if (kind === "touch") {
-      for (const touch of event.changedTouches) {
-        snap.activeTouches.delete(touch.identifier);
-        const start = snap.touchStarts.get(touch.identifier);
-        snap.touchStarts.delete(touch.identifier);
-        if (!start || event.type !== "touchend" || snap.activeTouches.size) continue;
-
-        const axis = snapAxis(state);
-        const dx = start.startX - touch.clientX;
-        const dy = start.startY - touch.clientY;
-        if (Math.abs(axis === "x" ? dx : dy) < Math.abs(axis === "x" ? dy : dx))
-          continue;
-        recordSnapFlick(state, {
-          ...start, lastX: touch.clientX, lastY: touch.clientY, endTime: now()
-        }, axis, start.index);
-      }
+      for (const touch of event.changedTouches) snap.activeTouches.delete(touch.identifier);
     } else {
       snap.activePointers.clear();
       snap.activeTouches.clear();
-      snap.touchStarts.clear();
     }
     if (snap.activePointers.size || snap.activeTouches.size) return;
 

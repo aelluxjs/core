@@ -86,6 +86,7 @@ export default function createWeakCss() {
 
     :where([?scrollbox][?scrollbox-snap].%snap-ready [?snap-item]) {
       scroll-snap-align: center !important;
+      scroll-snap-stop: always;
     }
 
     :where([?scrollbox][?scrollbox-snap].%snap-ready [?snap-item='start']),

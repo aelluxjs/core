@@ -1,13 +1,5 @@
 (function() {
   // src/src/aellux.ext.scrollbox.js
-  function _typeof(o) {
-    "@babel/helpers - typeof";
-    return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
-      return typeof o2;
-    } : function(o2) {
-      return o2 && "function" == typeof Symbol && o2.constructor === Symbol && o2 !== Symbol.prototype ? "symbol" : typeof o2;
-    }, _typeof(o);
-  }
   function _toConsumableArray(r) {
     return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread();
   }
@@ -19,44 +11,6 @@
   }
   function _arrayWithoutHoles(r) {
     if (Array.isArray(r)) return _arrayLikeToArray(r);
-  }
-  function ownKeys(e, r) {
-    var t = Object.keys(e);
-    if (Object.getOwnPropertySymbols) {
-      var o = Object.getOwnPropertySymbols(e);
-      r && (o = o.filter(function(r2) {
-        return Object.getOwnPropertyDescriptor(e, r2).enumerable;
-      })), t.push.apply(t, o);
-    }
-    return t;
-  }
-  function _objectSpread(e) {
-    for (var r = 1; r < arguments.length; r++) {
-      var t = null != arguments[r] ? arguments[r] : {};
-      r % 2 ? ownKeys(Object(t), true).forEach(function(r2) {
-        _defineProperty(e, r2, t[r2]);
-      }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function(r2) {
-        Object.defineProperty(e, r2, Object.getOwnPropertyDescriptor(t, r2));
-      });
-    }
-    return e;
-  }
-  function _defineProperty(e, r, t) {
-    return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: true, configurable: true, writable: true }) : e[r] = t, e;
-  }
-  function _toPropertyKey(t) {
-    var i = _toPrimitive(t, "string");
-    return "symbol" == _typeof(i) ? i : i + "";
-  }
-  function _toPrimitive(t, r) {
-    if ("object" != _typeof(t) || !t) return t;
-    var e = t[Symbol.toPrimitive];
-    if (void 0 !== e) {
-      var i = e.call(t, r || "default");
-      if ("object" != _typeof(i)) return i;
-      throw new TypeError("@@toPrimitive must return a primitive value.");
-    }
-    return ("string" === r ? String : Number)(t);
   }
   function _createForOfIteratorHelper(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
@@ -247,7 +201,6 @@
         activePointers: /* @__PURE__ */ new Set(),
         activeTouches: /* @__PURE__ */ new Set(),
         savedItems: /* @__PURE__ */ new Set(),
-        touchStarts: /* @__PURE__ */ new Map(),
         gestureListening: false,
         endListening: false,
         waitingForGestureEnd: false
@@ -1052,7 +1005,6 @@
       stopSnapGestureEndListeners(state);
       state.snap.activePointers.clear();
       state.snap.activeTouches.clear();
-      state.snap.touchStarts.clear();
       state.snap.waitingForGestureEnd = false;
     }
     function listenSnapGestureEnd(state) {
@@ -1084,14 +1036,6 @@
           for (_iterator6.s(); !(_step6 = _iterator6.n()).done; ) {
             var touch = _step6.value;
             active.add(touch.identifier);
-            if (event.target.closest("[".concat(attribute, "]")) === state.element) {
-              snap.touchStarts.set(touch.identifier, {
-                startX: touch.clientX,
-                startY: touch.clientY,
-                startTime: now(),
-                index: selectedSnapIndex(state)
-              });
-            }
           }
         } catch (err) {
           _iterator6.e(err);
@@ -1115,18 +1059,6 @@
           for (_iterator7.s(); !(_step7 = _iterator7.n()).done; ) {
             var touch = _step7.value;
             snap.activeTouches.delete(touch.identifier);
-            var start = snap.touchStarts.get(touch.identifier);
-            snap.touchStarts.delete(touch.identifier);
-            if (!start || event.type !== "touchend" || snap.activeTouches.size) continue;
-            var axis = snapAxis(state);
-            var dx = start.startX - touch.clientX;
-            var dy = start.startY - touch.clientY;
-            if (Math.abs(axis === "x" ? dx : dy) < Math.abs(axis === "x" ? dy : dx)) continue;
-            recordSnapFlick(state, _objectSpread(_objectSpread({}, start), {}, {
-              lastX: touch.clientX,
-              lastY: touch.clientY,
-              endTime: now()
-            }), axis, start.index);
           }
         } catch (err) {
           _iterator7.e(err);
@@ -1136,7 +1068,6 @@
       } else {
         snap.activePointers.clear();
         snap.activeTouches.clear();
-        snap.touchStarts.clear();
       }
       if (snap.activePointers.size || snap.activeTouches.size) return;
       stopSnapGestureEndListeners(state);

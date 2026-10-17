@@ -1105,7 +1105,7 @@
       var getOwnPropertySymbolsModule = require_object_get_own_property_symbols();
       var anObject = require_an_object();
       var concat = uncurryThis([].concat);
-      module.exports = getBuiltIn("Reflect", "ownKeys") || function ownKeys2(it) {
+      module.exports = getBuiltIn("Reflect", "ownKeys") || function ownKeys(it) {
         var keys = getOwnPropertyNamesModule.f(anObject(it));
         var getOwnPropertySymbols = getOwnPropertySymbolsModule.f;
         return getOwnPropertySymbols ? concat(keys, getOwnPropertySymbols(it)) : keys;
@@ -1118,11 +1118,11 @@
     "node_modules/core-js/internals/copy-constructor-properties.js": function(exports, module) {
       "use strict";
       var hasOwn = require_has_own_property();
-      var ownKeys2 = require_own_keys();
+      var ownKeys = require_own_keys();
       var getOwnPropertyDescriptorModule = require_object_get_own_property_descriptor();
       var definePropertyModule = require_object_define_property();
       module.exports = function(target, source, exceptions) {
-        var keys = ownKeys2(source);
+        var keys = ownKeys(source);
         var defineProperty = definePropertyModule.f;
         var getOwnPropertyDescriptor = getOwnPropertyDescriptorModule.f;
         for (var i = 0; i < keys.length; i++) {
@@ -10021,7 +10021,7 @@
       "use strict";
       var $ = require_export();
       var DESCRIPTORS = require_descriptors();
-      var ownKeys2 = require_own_keys();
+      var ownKeys = require_own_keys();
       var toIndexedObject = require_to_indexed_object();
       var getOwnPropertyDescriptorModule = require_object_get_own_property_descriptor();
       var createProperty = require_create_property();
@@ -10029,7 +10029,7 @@
         getOwnPropertyDescriptors: function getOwnPropertyDescriptors(object) {
           var O = toIndexedObject(object);
           var getOwnPropertyDescriptor = getOwnPropertyDescriptorModule.f;
-          var keys = ownKeys2(O);
+          var keys = ownKeys(O);
           var result = {};
           var index = 0;
           var key, descriptor;
@@ -12201,9 +12201,9 @@
     "node_modules/core-js/modules/es.reflect.own-keys.js": function() {
       "use strict";
       var $ = require_export();
-      var ownKeys2 = require_own_keys();
+      var ownKeys = require_own_keys();
       $({ target: "Reflect", stat: true }, {
-        ownKeys: ownKeys2
+        ownKeys: ownKeys
       });
     }
   });
@@ -25651,14 +25651,6 @@
 
   // src/aellux.ext.scrollbox.js
   var aellux_ext_scrollbox_exports = {};
-  function _typeof5(o) {
-    "@babel/helpers - typeof";
-    return _typeof5 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
-      return typeof o2;
-    } : function(o2) {
-      return o2 && "function" == typeof Symbol && o2.constructor === Symbol && o2 !== Symbol.prototype ? "symbol" : typeof o2;
-    }, _typeof5(o);
-  }
   function _toConsumableArray2(r) {
     return _arrayWithoutHoles2(r) || _iterableToArray2(r) || _unsupportedIterableToArray10(r) || _nonIterableSpread2();
   }
@@ -25670,44 +25662,6 @@
   }
   function _arrayWithoutHoles2(r) {
     if (Array.isArray(r)) return _arrayLikeToArray10(r);
-  }
-  function ownKeys(e, r) {
-    var t = Object.keys(e);
-    if (Object.getOwnPropertySymbols) {
-      var o = Object.getOwnPropertySymbols(e);
-      r && (o = o.filter(function(r2) {
-        return Object.getOwnPropertyDescriptor(e, r2).enumerable;
-      })), t.push.apply(t, o);
-    }
-    return t;
-  }
-  function _objectSpread(e) {
-    for (var r = 1; r < arguments.length; r++) {
-      var t = null != arguments[r] ? arguments[r] : {};
-      r % 2 ? ownKeys(Object(t), true).forEach(function(r2) {
-        _defineProperty(e, r2, t[r2]);
-      }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function(r2) {
-        Object.defineProperty(e, r2, Object.getOwnPropertyDescriptor(t, r2));
-      });
-    }
-    return e;
-  }
-  function _defineProperty(e, r, t) {
-    return (r = _toPropertyKey2(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: true, configurable: true, writable: true }) : e[r] = t, e;
-  }
-  function _toPropertyKey2(t) {
-    var i = _toPrimitive2(t, "string");
-    return "symbol" == _typeof5(i) ? i : i + "";
-  }
-  function _toPrimitive2(t, r) {
-    if ("object" != _typeof5(t) || !t) return t;
-    var e = t[Symbol.toPrimitive];
-    if (void 0 !== e) {
-      var i = e.call(t, r || "default");
-      if ("object" != _typeof5(i)) return i;
-      throw new TypeError("@@toPrimitive must return a primitive value.");
-    }
-    return ("string" === r ? String : Number)(t);
   }
   function _createForOfIteratorHelper9(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
@@ -25900,7 +25854,6 @@
             activePointers: /* @__PURE__ */ new Set(),
             activeTouches: /* @__PURE__ */ new Set(),
             savedItems: /* @__PURE__ */ new Set(),
-            touchStarts: /* @__PURE__ */ new Map(),
             gestureListening: false,
             endListening: false,
             waitingForGestureEnd: false
@@ -26705,7 +26658,6 @@
           stopSnapGestureEndListeners(state);
           state.snap.activePointers.clear();
           state.snap.activeTouches.clear();
-          state.snap.touchStarts.clear();
           state.snap.waitingForGestureEnd = false;
         }
         function listenSnapGestureEnd(state) {
@@ -26737,14 +26689,6 @@
               for (_iterator6.s(); !(_step6 = _iterator6.n()).done; ) {
                 var touch = _step6.value;
                 active.add(touch.identifier);
-                if (event.target.closest("[".concat(attribute, "]")) === state.element) {
-                  snap.touchStarts.set(touch.identifier, {
-                    startX: touch.clientX,
-                    startY: touch.clientY,
-                    startTime: now(),
-                    index: selectedSnapIndex(state)
-                  });
-                }
               }
             } catch (err) {
               _iterator6.e(err);
@@ -26768,18 +26712,6 @@
               for (_iterator7.s(); !(_step7 = _iterator7.n()).done; ) {
                 var touch = _step7.value;
                 snap.activeTouches.delete(touch.identifier);
-                var start = snap.touchStarts.get(touch.identifier);
-                snap.touchStarts.delete(touch.identifier);
-                if (!start || event.type !== "touchend" || snap.activeTouches.size) continue;
-                var axis = snapAxis(state);
-                var dx = start.startX - touch.clientX;
-                var dy = start.startY - touch.clientY;
-                if (Math.abs(axis === "x" ? dx : dy) < Math.abs(axis === "x" ? dy : dx)) continue;
-                recordSnapFlick(state, _objectSpread(_objectSpread({}, start), {}, {
-                  lastX: touch.clientX,
-                  lastY: touch.clientY,
-                  endTime: now()
-                }), axis, start.index);
               }
             } catch (err) {
               _iterator7.e(err);
@@ -26789,7 +26721,6 @@
           } else {
             snap.activePointers.clear();
             snap.activeTouches.clear();
-            snap.touchStarts.clear();
           }
           if (snap.activePointers.size || snap.activeTouches.size) return;
           stopSnapGestureEndListeners(state);
@@ -28250,13 +28181,13 @@
   function _arrayWithHoles4(r) {
     if (Array.isArray(r)) return r;
   }
-  function _typeof6(o) {
+  function _typeof5(o) {
     "@babel/helpers - typeof";
-    return _typeof6 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
+    return _typeof5 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
       return typeof o2;
     } : function(o2) {
       return o2 && "function" == typeof Symbol && o2.constructor === Symbol && o2 !== Symbol.prototype ? "symbol" : typeof o2;
-    }, _typeof6(o);
+    }, _typeof5(o);
   }
   var init_aellux_ext_adaptive = __esm({
     "src/aellux.ext.adaptive.js": function() {
@@ -28316,7 +28247,7 @@
           var overrides = options.adaptiveParams || {};
           for (var _i = 0, _Object$keys = Object.keys(adaptiveParams); _i < _Object$keys.length; _i++) {
             var group = _Object$keys[_i];
-            if (overrides[group] && _typeof6(overrides[group]) === "object") {
+            if (overrides[group] && _typeof5(overrides[group]) === "object") {
               Object.assign(adaptiveParams[group], overrides[group]);
             }
           }
