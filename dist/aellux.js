@@ -1,6 +1,6 @@
 (function() {
   // <define:__AELLUX_CORE_ASSET_INTEGRITY__>
-  var define_AELLUX_CORE_ASSET_INTEGRITY_default = { "aellux.ext.adaptive.css": "sha384-HfIjX9Zk0VFRimzPvUaTS5AtwuHJHjXKoM/xbNJXj5vE7bSdBGEzbrBHfbNmYah0", "aellux.ext.present.css": "sha384-9GTFJ0OxBj6ta/iiV07BLGTdfe9pbmBMYXFn9kT+wB4KwiLO8zxJ39XzLYOGgfui", "aellux.esm.js": "sha384-j42HGz1Njt2TIgQAFF16TYguToCCCf878UbPhFzUjbdudJ2Wge+9RkhE3A/s3D4B", "aellux.ext.adaptive.js": "sha384-8vE5XSa5v/jANZz2f8fUSIQzChxPZfK3Eg4ODGa/7IvB7CYxBOOjIfOXRcHYnCvt", "aellux.ext.anchor.js": "sha384-KZp9o6AItFE68/MryuOqD74dME3OXB/EZ1IaSBVnd0K6/J5KynxnOWAXeV0kYiQx", "aellux.ext.feedback.js": "sha384-sUr2lKsTasJ3yf1tg1IhDk5slfwTjAOCX2t5jQV/Ls4WAPRh2r/k36/8OXjJJaBv", "aellux.ext.focus.js": "sha384-BgjEpKiYDdntLBdNI3+7eaBqsEEBmuVJKOuKlzavdpOx5Wpgnt8fJmIyDFWZ4NHT", "aellux.ext.point.js": "sha384-aDj7I5QEH/0+52E3e6yPZ/D0MEsNBdxeET3G5ToVvgczHtksMh3p8S/KOoAapRRN", "aellux.ext.preference.js": "sha384-kH3bIgUBycuvulVeU0qdOn+WezhAWK2lv4bFRBDP24EijtlE78cGhau48w+GV4M+", "aellux.ext.present.js": "sha384-Luwxmr6Nb0XnyV73v4H+CXbBDqxbTeIDmlAyfo9Nj4ZOBTJcTdpV5uEli7QSo79h", "aellux.ext.scrollbox.js": "sha384-7+35j234bkHx0E8gOVKDzAgPZ6yPx+pn43xf9u9AK0Q5HUYdrQYqlIlEfWR/hvS/", "aellux.ext.state-navigation.js": "sha384-MlqDzSzZwzDYS522sw8iontz17JCjyXELEs3S7OWOXK56B76mZze5Y9QFWDrQylV", "aellux.full.js": "sha384-STvVHwcBZcPripdQC9qj2xknZNWs3gSQUwj9CF5A3yVDfXjTKaFLg6ZUR3N3N8nU", "aellux.orchestrator.js": "sha384-hSmuien3XLFxQyCOiBMXOxYbBGPjcWXYRjLCw8Cqa6//RzG4j7etTVVOG9sSbV2y", "aellux.ext.adaptive.legacy.js": "sha384-rQK9y7TU8zp05j5fU0yJ19OmGIEvl7he6r0MXRQ6AdLszqv3DgpKDu988qjUGe/c", "aellux.ext.anchor.legacy.js": "sha384-e9CG+DfXZa5O1aCteo3pzpza0gaev/AlaZewSlgoy9jwKBYy/lobEgqYK6GeEJOS", "aellux.ext.feedback.legacy.js": "sha384-jyvYvbzuSua5FWZsAWeXWqmab/DjA1LVg2oOHb6Ey6wH4W2bB9qwt+QhGwIkk1gL", "aellux.ext.focus.legacy.js": "sha384-DYmxYMExXzgL5t/8T8hn/9qv525QV6jEQcIQhPJWc2/AN3vehPVHv10nZ3bVVHjn", "aellux.ext.point.legacy.js": "sha384-gG/XONYEC1tchBcJ6bUtKYmWFHz0E+50LmMaXDAiqWBKPuwdHZeYm1uXA22lMZuN", "aellux.ext.preference.legacy.js": "sha384-I2fpqPdE7bIgQcTMtdEUFnNWor1FhixnKPUCoE88LJP0FewUmGKUUwbmKNbwhL8C", "aellux.ext.present.legacy.js": "sha384-FTEmmxlKxLO9fXkfu4OeMDaNnLtMDvAnMKApQSB6nPFcOUQ9TR6ef7IJMKUn15Vk", "aellux.ext.scrollbox.legacy.js": "sha384-3xPC7uAcsYl64dBevk73ZiGllK1J32YcWVJ0XmTe9ngGI4/8ipIgu0s7uoFwmto9", "aellux.ext.state-navigation.legacy.js": "sha384-45OQBJFlqOcoCG5lYgk8oqH1wX1eHVgpR4ThCo2JffDvjaZMKGWNRm7gGfDBRKVv", "aellux.orchestrator.legacy.js": "sha384-bOGaj7ucS7i/538o2blLF3J+B+gdVE/Od0FskIjc45CPnUOu7aTHBKWrQJ6Wk5tD", "aellux.full.legacy.js": "sha384-8HJURpspejKTzM5XnSVyyDuxvYvn1lguiv29oBPWu8I9Gt2OY2Pg7v++Cgi5RgQC" };
+  var define_AELLUX_CORE_ASSET_INTEGRITY_default = { "aellux.ext.adaptive.css": "sha384-HfIjX9Zk0VFRimzPvUaTS5AtwuHJHjXKoM/xbNJXj5vE7bSdBGEzbrBHfbNmYah0", "aellux.ext.present.css": "sha384-9GTFJ0OxBj6ta/iiV07BLGTdfe9pbmBMYXFn9kT+wB4KwiLO8zxJ39XzLYOGgfui", "aellux.esm.js": "sha384-XwPI9wnRZu3czzfM/6aLCk3m+oGq81o/ZJeBmZJ4cYd4KpBCr2NBiFCWQ6qYdFcW", "aellux.ext.adaptive.js": "sha384-8vE5XSa5v/jANZz2f8fUSIQzChxPZfK3Eg4ODGa/7IvB7CYxBOOjIfOXRcHYnCvt", "aellux.ext.anchor.js": "sha384-KZp9o6AItFE68/MryuOqD74dME3OXB/EZ1IaSBVnd0K6/J5KynxnOWAXeV0kYiQx", "aellux.ext.feedback.js": "sha384-sUr2lKsTasJ3yf1tg1IhDk5slfwTjAOCX2t5jQV/Ls4WAPRh2r/k36/8OXjJJaBv", "aellux.ext.focus.js": "sha384-BgjEpKiYDdntLBdNI3+7eaBqsEEBmuVJKOuKlzavdpOx5Wpgnt8fJmIyDFWZ4NHT", "aellux.ext.point.js": "sha384-aDj7I5QEH/0+52E3e6yPZ/D0MEsNBdxeET3G5ToVvgczHtksMh3p8S/KOoAapRRN", "aellux.ext.preference.js": "sha384-kH3bIgUBycuvulVeU0qdOn+WezhAWK2lv4bFRBDP24EijtlE78cGhau48w+GV4M+", "aellux.ext.present.js": "sha384-Luwxmr6Nb0XnyV73v4H+CXbBDqxbTeIDmlAyfo9Nj4ZOBTJcTdpV5uEli7QSo79h", "aellux.ext.scrollbox.js": "sha384-QWKgV/surDwVntRTAtzx1JT8taSLYx+lrm3BneS37VEQ9+20T0t1S9xSF0S7LDks", "aellux.ext.state-navigation.js": "sha384-MlqDzSzZwzDYS522sw8iontz17JCjyXELEs3S7OWOXK56B76mZze5Y9QFWDrQylV", "aellux.full.js": "sha384-7uwCrSbqIjp4REsw0woSHU3ecrFg9JF/T6lWtu2LQL4m4GQ1iNTiFF17tE+h8nLo", "aellux.orchestrator.js": "sha384-hSmuien3XLFxQyCOiBMXOxYbBGPjcWXYRjLCw8Cqa6//RzG4j7etTVVOG9sSbV2y", "aellux.ext.adaptive.legacy.js": "sha384-rQK9y7TU8zp05j5fU0yJ19OmGIEvl7he6r0MXRQ6AdLszqv3DgpKDu988qjUGe/c", "aellux.ext.anchor.legacy.js": "sha384-e9CG+DfXZa5O1aCteo3pzpza0gaev/AlaZewSlgoy9jwKBYy/lobEgqYK6GeEJOS", "aellux.ext.feedback.legacy.js": "sha384-jyvYvbzuSua5FWZsAWeXWqmab/DjA1LVg2oOHb6Ey6wH4W2bB9qwt+QhGwIkk1gL", "aellux.ext.focus.legacy.js": "sha384-DYmxYMExXzgL5t/8T8hn/9qv525QV6jEQcIQhPJWc2/AN3vehPVHv10nZ3bVVHjn", "aellux.ext.point.legacy.js": "sha384-gG/XONYEC1tchBcJ6bUtKYmWFHz0E+50LmMaXDAiqWBKPuwdHZeYm1uXA22lMZuN", "aellux.ext.preference.legacy.js": "sha384-I2fpqPdE7bIgQcTMtdEUFnNWor1FhixnKPUCoE88LJP0FewUmGKUUwbmKNbwhL8C", "aellux.ext.present.legacy.js": "sha384-FTEmmxlKxLO9fXkfu4OeMDaNnLtMDvAnMKApQSB6nPFcOUQ9TR6ef7IJMKUn15Vk", "aellux.ext.scrollbox.legacy.js": "sha384-sbFrK/ski7q3VoQF1btcznywtMjnnO8khHHwyEdNxRCbNjDM8CtJCN/JDTT3zTVm", "aellux.ext.state-navigation.legacy.js": "sha384-45OQBJFlqOcoCG5lYgk8oqH1wX1eHVgpR4ThCo2JffDvjaZMKGWNRm7gGfDBRKVv", "aellux.orchestrator.legacy.js": "sha384-bOGaj7ucS7i/538o2blLF3J+B+gdVE/Od0FskIjc45CPnUOu7aTHBKWrQJ6Wk5tD", "aellux.full.legacy.js": "sha384-UGW3r0vXuZL/x7YV6BDRt6uWMovWNRcGOEDsfdFvw+NQanRD/4ZcddEm+rUd7dPZ" };
 
   // src/internal/asset-load-helper.js
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
@@ -827,7 +827,8 @@
         "cancelAnimationFrame",
         "fetch",
         { name: "Object", function: ["assign", "entries", "freeze"] },
-        { name: "Array", function: ["from", "isArray"] }
+        { name: "Array", function: ["from", "isArray"] },
+        { name: ["Element", "prototype"], function: ["before"] }
       ]
     };
   }
@@ -892,8 +893,14 @@
           }
         } else {
           option.function.forEach(function(method) {
-            if (!window[option.name] || typeof window[option.name][method] !== "function") {
-              AelluxJs.diagnostics.notAvailable.push(option.name + "." + method);
+            try {
+              var fullname = typeof option.name === "string" ? option.name : option.name.join(".");
+              var obj = typeof option.name === "string" ? window[option.name] : window[option.name[0]][option.name[1]];
+              if (!obj || typeof obj[method] !== "function") {
+                AelluxJs.diagnostics.notAvailable.push(fullname + "." + method);
+              }
+            } catch (error) {
+              console.error(error);
             }
           });
         }
