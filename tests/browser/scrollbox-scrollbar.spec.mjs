@@ -218,6 +218,124 @@ test("mouse and pointer hover keep scrollbars visible independently", async ({ p
   await expect(track).toHaveCSS("opacity", "0");
 });
 
+test("desktop pointer movement restores a scrollbar when hover state was lost inside the box", async ({ page }) => {
+  await setup(page, `<div id="box" data-ae-scrollbox data-ae-scrollbar="v"
+    style="width:120px;height:120px;overflow-y:auto">
+    <div id="content" style="height:500px"></div>
+  </div>`);
+  const box = page.locator("#box");
+  const track = box.locator("[data-ae-scrollbar-vertical]");
+  await box.evaluate(element => {
+    element.dispatchEvent(new PointerEvent("pointerenter", { pointerType: "mouse" }));
+    element.dispatchEvent(new PointerEvent("pointerleave", { pointerType: "mouse" }));
+  });
+  await expect(track).toHaveCSS("opacity", "0");
+
+  await page.locator("#content").evaluate(element => element.dispatchEvent(
+    new PointerEvent("pointermove", { bubbles: true, pointerType: "mouse" })));
+  await expect(track).toHaveCSS("opacity", "1");
+
+  await box.evaluate(element =>
+    element.dispatchEvent(new PointerEvent("pointerleave", { pointerType: "mouse" })));
+  await page.locator("#content").evaluate(element => element.dispatchEvent(
+    new PointerEvent("pointermove", { bubbles: true, pointerType: "touch" })));
+  await expect(track).toHaveCSS("opacity", "0");
+
+  await page.locator("#content").evaluate(element => element.dispatchEvent(
+    new PointerEvent("pointerdown", { bubbles: true, pointerType: "mouse" })));
+  await expect(track).toHaveCSS("opacity", "1");
+  await page.locator("#content").evaluate(element => element.dispatchEvent(
+    new PointerEvent("pointerup", { bubbles: true, pointerType: "mouse" })));
+  await expect(track).toHaveCSS("opacity", "0");
+});
+
+test("mobile touch and native scroll reveal the scrollbar until scrolling settles", async ({ browser, browserName }) => {
+  test.skip(browserName !== "chromium");
+  const context = await browser.newContext({ hasTouch: true, isMobile: true,
+    viewport: { width: 390, height: 844 } });
+  const page = await context.newPage();
+  try {
+    await setup(page, `<div id="box" data-ae-scrollbox data-ae-scrollbar="v"
+      style="width:120px;height:120px;overflow-y:auto">
+      <div id="content" style="height:500px"></div>
+    </div>`);
+    const box = page.locator("#box");
+    const track = box.locator("[data-ae-scrollbar-vertical]");
+    await expect(track).toHaveCSS("opacity", "0");
+    await page.locator("#content").evaluate(element => element.dispatchEvent(
+      new PointerEvent("pointerdown", { bubbles: true, pointerType: "touch" })));
+    await expect(track).toHaveCSS("opacity", "1");
+    await page.locator("#content").evaluate(element => element.dispatchEvent(
+      new PointerEvent("pointerup", { bubbles: true, pointerType: "touch" })));
+    await page.locator("#content").evaluate(element => element.dispatchEvent(
+      new MouseEvent("mouseover", { bubbles: true })));
+    await expect(track).toHaveCSS("opacity", "0");
+
+    await box.evaluate(element => { element.scrollTop = 80; });
+    await expect(track).toHaveCSS("opacity", "1");
+    await expect(track).toHaveCSS("opacity", "0");
+  } finally {
+    await context.close();
+  }
+});
+
+test("touch release timeout preserves an active desktop pointer hover", async ({ page }) => {
+  await setup(page, `<div id="box" data-ae-scrollbox data-ae-scrollbar="v"
+    style="width:120px;height:120px;overflow-y:auto">
+    <div id="content" style="height:500px"></div>
+  </div>`);
+  const box = page.locator("#box");
+  const track = box.locator("[data-ae-scrollbar-vertical]");
+  await box.evaluate(element => {
+    element.dispatchEvent(new PointerEvent("pointerenter", { pointerType: "mouse" }));
+    const content = element.querySelector("#content");
+    content.dispatchEvent(new PointerEvent("pointerdown", {
+      bubbles: true, pointerType: "touch"
+    }));
+    content.dispatchEvent(new PointerEvent("pointerup", {
+      bubbles: true, pointerType: "touch"
+    }));
+  });
+  await expect(track).toHaveCSS("opacity", "1");
+  await page.waitForTimeout(1150);
+  await expect(track).toHaveCSS("opacity", "1");
+  await box.evaluate(element =>
+    element.dispatchEvent(new PointerEvent("pointerleave", { pointerType: "mouse" })));
+  await expect(track).toHaveCSS("opacity", "0");
+});
+
+test("mouseover and pointer down use independent visibility timers", async ({ page }) => {
+  await setup(page, `<div id="box" data-ae-scrollbox data-ae-scrollbar="v"
+    style="width:120px;height:120px;overflow-y:auto">
+    <div id="content" style="height:500px"></div>
+  </div>`);
+  const box = page.locator("#box");
+  const track = box.locator("[data-ae-scrollbar-vertical]");
+  await box.evaluate(element => {
+    const content = element.querySelector("#content");
+    content.dispatchEvent(new MouseEvent("mouseover", { bubbles: true }));
+    content.dispatchEvent(new PointerEvent("pointerdown", {
+      bubbles: true, pointerType: "mouse"
+    }));
+    content.dispatchEvent(new PointerEvent("pointerup", {
+      bubbles: true, pointerType: "mouse"
+    }));
+    content.dispatchEvent(new MouseEvent("mouseout", { bubbles: true }));
+  });
+  await expect(track).toHaveCSS("opacity", "1");
+  await page.waitForTimeout(450);
+  await expect(track).toHaveCSS("opacity", "1");
+  await expect(track).toHaveCSS("opacity", "0");
+
+  await box.evaluate(element => {
+    const content = element.querySelector("#content");
+    content.dispatchEvent(new MouseEvent("mouseover", { bubbles: true }));
+    content.dispatchEvent(new MouseEvent("mouseout", { bubbles: true }));
+  });
+  await expect(track).toHaveCSS("opacity", "1");
+  await expect(track).toHaveCSS("opacity", "0");
+});
+
 test("PDS hide timer keeps a scrollbar visible while mouse hover remains active", async ({ page }) => {
   await setup(page, `<div id="box" data-ae-scrollbox="pointer" data-ae-scrollbar="v"
     style="width:120px;height:120px;overflow-y:auto">

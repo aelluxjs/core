@@ -138,10 +138,11 @@
     var ELASTIC_WHEEL_IDLE_MS = 80;
     var SCROLLBAR_SIZE_PX = 8;
     var SCROLLBAR_MIN_THUMB_PX = 20;
-    var SCROLLBAR_PDS_HIDE_DELAY_MS = 1e3;
+    var SCROLLBAR_INTERACTION_HIDE_DELAY_MS = 1e3;
+    var SCROLLBAR_HOVER_HIDE_DELAY_MS = 300;
     var scrollbarProperties = ["--ae-scrollbar-x", "--ae-scrollbar-y", "--ae-scrollbar-length", "--ae-scrollbar-thumb-size", "--ae-scrollbar-thumb-position", "--ae-scrollbar-display"];
     var pointerListeners = [[POINTER_DOWN, "onPointerDown"], [POINTER_OVER, "onPointerOver"], [POINTER_OUT, "onPointerOut"], ["mousedown", "onMouseDown"]];
-    var scrollbarHoverListeners = [[POINTER_ENTER, "onScrollbarPointerEnter"], [POINTER_LEAVE, "onScrollbarPointerLeave"], ["mouseenter", "onScrollbarMouseEnter"], ["mouseleave", "onScrollbarMouseLeave"]];
+    var scrollbarHoverListeners = [[POINTER_DOWN, "onScrollbarPointerDown"], [POINTER_ENTER, "onScrollbarPointerEnter"], [POINTER_LEAVE, "onScrollbarPointerLeave"], [POINTER_OVER, "onScrollbarPointerOver"], [POINTER_OUT, "onScrollbarPointerOut"], [POINTER_MOVE, "onScrollbarPointerMove"], [POINTER_UP, "onScrollbarPointerEnd"], [POINTER_CANCEL, "onScrollbarPointerEnd"], ["mouseenter", "onScrollbarMouseEnter"], ["mouseleave", "onScrollbarMouseLeave"], ["mouseover", "onScrollbarMouseOver"], ["mouseout", "onScrollbarMouseOut"]];
     var scrollbarAxisListeners = [[POINTER_DOWN, "onPointerDown"], [POINTER_MOVE, "onPointerMove"], [POINTER_UP, "onPointerEnd"], [POINTER_CANCEL, "onPointerEnd"]];
     var snapEndListeners = [[POINTER_UP, "onSnapPointerEnd", true], [POINTER_CANCEL, "onSnapPointerEnd", true], ["touchend", "onSnapTouchEnd", true], ["touchcancel", "onSnapTouchEnd", true], ["blur", "onSnapBlur"]];
     var touchListeners = [["touchstart", "onTouchStart", {
@@ -292,8 +293,10 @@
         listening: false,
         pointerHover: false,
         mouseHover: false,
-        pdsVisible: false,
-        hideTimeout: null
+        hoverVisible: false,
+        hoverTimeout: null,
+        interactionVisible: false,
+        interactionTimeout: null
       };
       var state = {
         element: element,
@@ -332,6 +335,7 @@
       state.onScroll = function(event) {
         if (event.target !== element) return;
         publish(state);
+        if (!state.desktop && state.scrollbar.listening) scheduleScrollbarInteractionHide(state);
         if (!state.snapEnabled) return;
         if (state.snap.scrollingToTarget !== -1) {
           if (!snapTargetReached(state)) {
@@ -408,23 +412,44 @@
       state.onSnapBlur = function() {
         return endSnapGesture(state);
       };
+      state.onScrollbarPointerDown = function() {
+        return startScrollbarInteractionVisibility(state);
+      };
+      state.onScrollbarPointerEnd = function() {
+        return scheduleScrollbarInteractionHide(state);
+      };
       state.onScrollbarPointerEnter = function(event) {
         if (event.pointerType !== "touch") setScrollbarHover(state, "pointerHover", true);
       };
       state.onScrollbarPointerLeave = function(event) {
         if (event.pointerType !== "touch") setScrollbarHover(state, "pointerHover", false);
       };
+      state.onScrollbarPointerOver = function(event) {
+        if (event.pointerType !== "touch") setScrollbarHover(state, "pointerHover", true);
+      };
+      state.onScrollbarPointerOut = function(event) {
+        if (event.pointerType !== "touch" && (!event.relatedTarget || !element.contains(event.relatedTarget))) setScrollbarHover(state, "pointerHover", false);
+      };
+      state.onScrollbarPointerMove = function(event) {
+        if (event.pointerType !== "touch" && !state.scrollbar.pointerHover) setScrollbarHover(state, "pointerHover", true);
+      };
       state.onScrollbarMouseEnter = function() {
-        return setScrollbarHover(state, "mouseHover", true);
+        if (supportsMouseHover()) setScrollbarHover(state, "mouseHover", true);
       };
       state.onScrollbarMouseLeave = function() {
         return setScrollbarHover(state, "mouseHover", false);
       };
+      state.onScrollbarMouseOver = function() {
+        if (supportsMouseHover()) setScrollbarHover(state, "mouseHover", true);
+      };
+      state.onScrollbarMouseOut = function(event) {
+        if (!event.relatedTarget || !element.contains(event.relatedTarget)) setScrollbarHover(state, "mouseHover", false);
+      };
       state.onScrollbarOutsideDown = function(event) {
         if (!element.contains(event.target)) {
-          scrollbar.pointerHover = false;
-          scrollbar.mouseHover = false;
-          if (!element.classList.contains(pointerScrollingClass)) clearScrollbarPdsVisibility(state);
+          setScrollbarHover(state, "pointerHover", false);
+          setScrollbarHover(state, "mouseHover", false);
+          if (!element.classList.contains(pointerScrollingClass)) clearScrollbarInteractionVisibility(state);
           syncScrollbarVisibility(state);
         }
       };
@@ -567,6 +592,9 @@
       }
       return axes;
     }
+    function supportsMouseHover() {
+      return !!(root.matchMedia && root.matchMedia("(any-hover: hover)").matches);
+    }
     function configureScrollbars(state) {
       var element = state.element;
       var value = element.getAttribute(scrollbarAttribute);
@@ -576,7 +604,8 @@
       var enabled = axes.x || axes.y;
       var scrollbar = state.scrollbar;
       if (enabled && !scrollbar.listening) {
-        scrollbar.mouseHover = element.matches(":hover") && !!(root.matchMedia && root.matchMedia("(any-hover: hover)").matches);
+        scrollbar.mouseHover = element.matches(":hover") && supportsMouseHover();
+        scrollbar.hoverVisible = scrollbar.mouseHover;
         setListeners(element, state, scrollbarHoverListeners, true);
         AelluxJs.on(POINTER_DOWN_TARGET, state.onScrollbarOutsideDown, true);
         scrollbar.listening = true;
@@ -585,9 +614,8 @@
         setListeners(element, state, scrollbarHoverListeners, false);
         AelluxJs.off(POINTER_DOWN_TARGET, state.onScrollbarOutsideDown, true);
         scrollbar.listening = false;
-        clearScrollbarPdsVisibility(state);
-        scrollbar.pointerHover = false;
-        scrollbar.mouseHover = false;
+        clearScrollbarInteractionVisibility(state);
+        clearScrollbarHover(state);
         syncScrollbarVisibility(state);
       }
       var hideNative = enabled || value !== null && value.trim().toLowerCase() === "none";
@@ -663,42 +691,59 @@
       }
       if (scrollbar.hideOwned) state.element.classList.remove(nativeScrollbarHideClass);
       scrollbar.hideOwned = false;
-      clearScrollbarPdsVisibility(state);
-      scrollbar.pointerHover = false;
-      scrollbar.mouseHover = false;
+      clearScrollbarInteractionVisibility(state);
+      clearScrollbarHover(state);
       syncScrollbarVisibility(state);
     }
     function setScrollbarHover(state, name, active) {
-      state.scrollbar[name] = active;
+      var scrollbar = state.scrollbar;
+      scrollbar[name] = active;
+      if (active) {
+        if (scrollbar.hoverTimeout !== null) root.clearTimeout(scrollbar.hoverTimeout);
+        scrollbar.hoverTimeout = null;
+        scrollbar.hoverVisible = true;
+      } else if (!scrollbar.pointerHover && !scrollbar.mouseHover && scrollbar.hoverVisible && scrollbar.hoverTimeout === null) {
+        scrollbar.hoverTimeout = root.setTimeout(function() {
+          scrollbar.hoverTimeout = null;
+          scrollbar.hoverVisible = false;
+          syncScrollbarVisibility(state);
+        }, SCROLLBAR_HOVER_HIDE_DELAY_MS);
+      }
       syncScrollbarVisibility(state);
+    }
+    function clearScrollbarHover(state) {
+      var scrollbar = state.scrollbar;
+      if (scrollbar.hoverTimeout !== null) root.clearTimeout(scrollbar.hoverTimeout);
+      scrollbar.hoverTimeout = null;
+      scrollbar.hoverVisible = scrollbar.pointerHover = scrollbar.mouseHover = false;
     }
     function syncScrollbarVisibility(state) {
       var scrollbar = state.scrollbar;
-      if (scrollbar.listening && (scrollbar.pointerHover || scrollbar.mouseHover || scrollbar.drag || scrollbar.pdsVisible)) showScrollbars(state);
+      if (scrollbar.listening && (scrollbar.hoverVisible || scrollbar.drag || scrollbar.interactionVisible)) showScrollbars(state);
       else hideScrollbars(state);
     }
-    function clearScrollbarPdsVisibility(state) {
+    function clearScrollbarInteractionVisibility(state) {
       var scrollbar = state.scrollbar;
-      if (scrollbar.hideTimeout !== null) root.clearTimeout(scrollbar.hideTimeout);
-      scrollbar.hideTimeout = null;
-      scrollbar.pdsVisible = false;
+      if (scrollbar.interactionTimeout !== null) root.clearTimeout(scrollbar.interactionTimeout);
+      scrollbar.interactionTimeout = null;
+      scrollbar.interactionVisible = false;
     }
-    function startScrollbarPdsVisibility(state) {
+    function startScrollbarInteractionVisibility(state) {
       if (!state.scrollbar.listening) return;
-      clearScrollbarPdsVisibility(state);
-      state.scrollbar.pdsVisible = true;
+      clearScrollbarInteractionVisibility(state);
+      state.scrollbar.interactionVisible = true;
       syncScrollbarVisibility(state);
     }
-    function scheduleScrollbarPdsHide(state) {
+    function scheduleScrollbarInteractionHide(state) {
       if (!state.scrollbar.listening || state.disposed) return;
-      clearScrollbarPdsVisibility(state);
-      state.scrollbar.pdsVisible = true;
+      clearScrollbarInteractionVisibility(state);
+      state.scrollbar.interactionVisible = true;
       syncScrollbarVisibility(state);
-      state.scrollbar.hideTimeout = root.setTimeout(function() {
-        state.scrollbar.hideTimeout = null;
-        state.scrollbar.pdsVisible = false;
+      state.scrollbar.interactionTimeout = root.setTimeout(function() {
+        state.scrollbar.interactionTimeout = null;
+        state.scrollbar.interactionVisible = false;
         syncScrollbarVisibility(state);
-      }, SCROLLBAR_PDS_HIDE_DELAY_MS);
+      }, SCROLLBAR_INTERACTION_HIDE_DELAY_MS);
     }
     function showScrollbars(state) {
       if (!state.scrollbar.listening) return;
@@ -1731,7 +1776,7 @@
           element.style.setProperty("scroll-behavior", "auto", "important");
           element.classList.add(pointerScrollingClass);
           if (member.snapEnabled) suspendSnapStyles(member, POINTER, true);
-          startScrollbarPdsVisibility(member);
+          startScrollbarInteractionVisibility(member);
         }
       } catch (err) {
         _iterator15.e(err);
@@ -1813,7 +1858,7 @@
           var member = scrollboxes.get(saved.element);
           if (member) {
             suspendSnapStyles(member, POINTER, false);
-            scheduleScrollbarPdsHide(member);
+            scheduleScrollbarInteractionHide(member);
           }
         }
       } catch (err) {
