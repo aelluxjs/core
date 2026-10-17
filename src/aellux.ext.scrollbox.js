@@ -556,7 +556,7 @@
     if (!element) {
       element = root.document.createElement("div");
       element.setAttribute(attributeName, "");
-      if (axis === "y") state.element.insertBefore(element, state.element.firstChild);
+      if (axis === "y") state.element.before(element, state.element.firstChild);
       else state.element.appendChild(element);
     }
 

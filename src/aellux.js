@@ -95,8 +95,16 @@ import createWeakCss from "./internal/create-weak-css.js";
           }
         } else {
           option.function.forEach(function (method) {
-            if (!window[option.name] || typeof window[option.name][method] !== "function") {
-              AelluxJs.diagnostics.notAvailable.push(option.name + "." + method);
+            try {
+              const fullname = typeof option.name === "string" ? option.name : option.name.join(".");
+              const obj = typeof option.name === "string" ?
+                window[option.name] :
+                window[option.name[0]][option.name[1]];
+              if (!obj || typeof obj[method] !== "function") {
+                AelluxJs.diagnostics.notAvailable.push(fullname + "." + method);
+              }
+            } catch (error) {
+              console.error(error);
             }
           });
         }

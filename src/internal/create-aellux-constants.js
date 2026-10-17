@@ -75,7 +75,8 @@ export function createAelluxConstants() {
     AELLUXJS_MODERN_API_DEPENDENCIES: [
       "Promise", "Map", "CustomEvent", "requestAnimationFrame", "cancelAnimationFrame", "fetch",
       { name: "Object", function: ["assign", "entries", "freeze"] },
-      { name: "Array", function: ["from", "isArray"] }
+      { name: "Array", function: ["from", "isArray"] },
+      { name: ["Element", "prototype"], function: ["before"] }
     ]
   };
 }
