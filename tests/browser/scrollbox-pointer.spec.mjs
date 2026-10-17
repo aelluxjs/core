@@ -1152,8 +1152,7 @@ test("CSS snap flick advances wide items while a slow drag stays within one poin
     page.evaluate(({ distance, pointerId, immediateRelease }) => {
     const element = document.getElementById("gallery");
     const rect = element.getBoundingClientRect();
-    const x = rect.left + (distance < -70 ? 5 : distance > 70 ? 95 : 70);
-    const y = rect.top + 50;
+    const x = rect.left + 70, y = rect.top + 50;
     element.dispatchEvent(new PointerEvent("pointerdown", {
       bubbles: true, cancelable: true, isPrimary: true, pointerId,
       pointerType: "mouse", button: 0, buttons: 1, clientX: x, clientY: y
@@ -1198,118 +1197,6 @@ test("CSS snap flick advances wide items while a slow drag stays within one poin
   await release(small, 303);
   await expect.poll(() => page.evaluate(() => document.getElementById("gallery").scrollLeft))
     .toBeLessThan(110);
-
-  await reset();
-  const quarterDrag = await move(80, 305);
-  await page.waitForTimeout(250);
-  await release(quarterDrag, 305);
-  await expect.poll(() => page.evaluate(() => document.getElementById("gallery").scrollLeft))
-    .toBe(400);
-
-  const reverseDrag = await move(-80, 306);
-  await page.waitForTimeout(250);
-  await release(reverseDrag, 306);
-  await expect.poll(() => page.evaluate(() => document.getElementById("gallery").scrollLeft))
-    .toBe(100);
-});
-
-test("slow touch drag past a quarter of the focused snap item advances vertically", async ({ page }) => {
-  await setup(page, `<div id="gallery" data-ae-scrollbox="native"
-    data-ae-scrollbox-snap="vertical"
-    style="width:100px;height:100px;overflow-x:hidden;overflow-y:auto">
-    <div style="height:900px">
-      <div data-ae-snap-item style="height:300px"></div>
-      <div data-ae-snap-item style="height:300px"></div>
-      <div data-ae-snap-item style="height:300px"></div>
-    </div>
-  </div>`);
-  await page.evaluate(() => {
-    const element = document.getElementById("gallery");
-    const start = new Event("touchstart", { bubbles: true });
-    Object.defineProperty(start, "changedTouches", { value: [{
-      identifier: 48, clientX: 50, clientY: 90
-    }] });
-    element.dispatchEvent(start);
-    element.scrollTo({ top: 180, behavior: "instant" });
-  });
-  await page.waitForTimeout(250);
-  await page.evaluate(() => {
-    const end = new Event("touchend", { bubbles: true });
-    Object.defineProperty(end, "changedTouches", { value: [{
-      identifier: 48, clientX: 50, clientY: 10
-    }] });
-    window.dispatchEvent(end);
-  });
-  await expect.poll(() => page.evaluate(() => document.getElementById("gallery").scrollTop))
-    .toBe(400);
-});
-
-test("a long pointer drag advances from the item centered at release", async ({ page }) => {
-  await setup(page, `<div id="gallery" data-ae-scrollbox="pointer" data-ae-scrollbox-snap
-    style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden">
-    <div style="display:flex;width:1200px">
-      <div data-ae-snap-item style="flex:none;width:300px;height:100px"></div>
-      <div data-ae-snap-item style="flex:none;width:300px;height:100px"></div>
-      <div data-ae-snap-item style="flex:none;width:300px;height:100px"></div>
-      <div data-ae-snap-item style="flex:none;width:300px;height:100px"></div>
-    </div>
-  </div>`);
-  const exposed = await page.evaluate(() => {
-    const element = document.getElementById("gallery");
-    const rect = element.getBoundingClientRect();
-    const x = rect.left + 95, y = rect.top + 50;
-    element.dispatchEvent(new PointerEvent("pointerdown", {
-      bubbles: true, cancelable: true, isPrimary: true, pointerId: 307,
-      pointerType: "mouse", button: 0, buttons: 1, clientX: x, clientY: y
-    }));
-    window.dispatchEvent(new PointerEvent("pointermove", {
-      bubbles: true, cancelable: true, isPrimary: true, pointerId: 307,
-      pointerType: "mouse", buttons: 1, clientX: x - 600, clientY: y
-    }));
-    return { scrollLeft: element.scrollLeft, x: x - 600, y };
-  });
-  expect(exposed.scrollLeft).toBe(700);
-  await page.waitForTimeout(250);
-  await page.evaluate(point => window.dispatchEvent(new PointerEvent("pointerup", {
-    bubbles: true, isPrimary: true, pointerId: 307, pointerType: "mouse",
-    button: 0, buttons: 0, clientX: point.x, clientY: point.y
-  })), exposed);
-  await expect.poll(() => page.evaluate(() => document.getElementById("gallery").scrollLeft))
-    .toBe(1000);
-});
-
-test("a long touch drag advances from the item centered at release", async ({ page }) => {
-  await setup(page, `<div id="gallery" data-ae-scrollbox="native"
-    data-ae-scrollbox-snap="vertical"
-    style="width:100px;height:100px;overflow-x:hidden;overflow-y:auto">
-    <div style="height:1200px">
-      <div data-ae-snap-item style="height:300px"></div>
-      <div data-ae-snap-item style="height:300px"></div>
-      <div data-ae-snap-item style="height:300px"></div>
-      <div data-ae-snap-item style="height:300px"></div>
-    </div>
-  </div>`);
-  const exposed = await page.evaluate(() => {
-    const element = document.getElementById("gallery");
-    const start = new Event("touchstart", { bubbles: true });
-    Object.defineProperty(start, "changedTouches", { value: [{
-      identifier: 49, clientX: 50, clientY: 90
-    }] });
-    element.dispatchEvent(start);
-    element.scrollTo({ top: 700, behavior: "instant" });
-    return element.scrollTop;
-  });
-  expect(exposed).toBe(700);
-  await page.waitForTimeout(250);
-  await page.evaluate(() => {
-    const end = new Event("touchend", { bubbles: true });
-    Object.defineProperty(end, "changedTouches", { value: [{
-      identifier: 49, clientX: 50, clientY: -410
-    }] });
-    window.dispatchEvent(end);
-  });
-  await expect.poll(() => page.evaluate(() => document.getElementById("gallery").scrollTop))
-    .toBe(1000);
 });
 
 test("a longer drag lets CSS snap choose the nearest point", async ({ page }) => {

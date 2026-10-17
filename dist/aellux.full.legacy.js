@@ -26775,7 +26775,7 @@
                 var dx = start.startX - touch.clientX;
                 var dy = start.startY - touch.clientY;
                 if (Math.abs(axis === "x" ? dx : dy) < Math.abs(axis === "x" ? dy : dx)) continue;
-                recordSnapGesture(state, _objectSpread(_objectSpread({}, start), {}, {
+                recordSnapFlick(state, _objectSpread(_objectSpread({}, start), {}, {
                   lastX: touch.clientX,
                   lastY: touch.clientY,
                   endTime: now()
@@ -27512,7 +27512,7 @@
           });
           var shouldSnap = event && event.type === "pointerup" && pointerScroll.moved && snapState && !snapState.disposed && snapItems(snapState).length;
           if (shouldSnap) {
-            recordSnapGesture(snapState, pointerScroll, pointerScroll.axis, pointerScroll.snapStarts.get(snapState));
+            recordSnapFlick(snapState, pointerScroll, pointerScroll.axis, pointerScroll.snapStarts.get(snapState));
             scheduleScrollEnd(snapState);
           }
           var _iterator17 = _createForOfIteratorHelper9(pointerScroll.chain), _step17;
@@ -27530,18 +27530,12 @@
             startMomentum(momentumState, pointerScroll);
           }
         }
-        function recordSnapGesture(state, gesture, axis, startIndex) {
-          if (!state.snapEnabled || snapAxis(state) !== axis || !Number.isInteger(startIndex)) return;
+        function recordSnapFlick(state, gesture, axis, startIndex) {
+          if (!state.snapEnabled || snapAxis(state) !== axis || !Number.isInteger(startIndex) || !isSnapFlick(gesture, axis)) return;
           var distance = axis === "x" ? gesture.startX - gesture.lastX : gesture.startY - gesture.lastY;
           var items = snapItems(state);
-          var currentIndex = selectedSnapIndex(state);
-          var focusedItem = items[currentIndex];
-          if (!focusedItem) return;
-          var size = focusedItem.getBoundingClientRect()[axis === "x" ? "width" : "height"];
-          if (Math.abs(distance) <= size / 4 && !isSnapFlick(gesture, axis)) return;
-          if (currentIndex !== startIndex && Math.abs(distance) <= size) return;
-          var index = Math.max(0, Math.min(items.length - 1, currentIndex + Math.sign(distance)));
-          if (index !== currentIndex) {
+          var index = Math.max(0, Math.min(items.length - 1, startIndex + Math.sign(distance)));
+          if (index !== startIndex) {
             state.snap.flick = {
               axis: axis,
               index: index

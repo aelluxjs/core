@@ -996,7 +996,7 @@
         const dy = start.startY - touch.clientY;
         if (Math.abs(axis === "x" ? dx : dy) < Math.abs(axis === "x" ? dy : dx))
           continue;
-        recordSnapGesture(state, {
+        recordSnapFlick(state, {
           ...start, lastX: touch.clientX, lastY: touch.clientY, endTime: now()
         }, axis, start.index);
       }
@@ -1672,7 +1672,7 @@
       snapState && !snapState.disposed && snapItems(snapState).length;
 
     if (shouldSnap) {
-      recordSnapGesture(snapState, pointerScroll, pointerScroll.axis,
+      recordSnapFlick(snapState, pointerScroll, pointerScroll.axis,
         pointerScroll.snapStarts.get(snapState));
       scheduleScrollEnd(snapState);
     }
@@ -1684,22 +1684,16 @@
     }
   }
 
-  function recordSnapGesture(state, gesture, axis, startIndex) {
+  function recordSnapFlick(state, gesture, axis, startIndex) {
     if (!state.snapEnabled || snapAxis(state) !== axis ||
-      !Number.isInteger(startIndex)) return;
+      !Number.isInteger(startIndex) || !isSnapFlick(gesture, axis)) return;
 
     const distance = axis === "x" ? gesture.startX - gesture.lastX :
       gesture.startY - gesture.lastY;
     const items = snapItems(state);
-    const currentIndex = selectedSnapIndex(state);
-    const focusedItem = items[currentIndex];
-    if (!focusedItem) return;
-    const size = focusedItem.getBoundingClientRect()[axis === "x" ? "width" : "height"];
-    if (Math.abs(distance) <= size / 4 && !isSnapFlick(gesture, axis)) return;
-    if (currentIndex !== startIndex && Math.abs(distance) <= size) return;
     const index = Math.max(0, Math.min(items.length - 1,
-      currentIndex + Math.sign(distance)));
-    if (index !== currentIndex) {
+      startIndex + Math.sign(distance)));
+    if (index !== startIndex) {
       state.snap.flick = { axis, index };
     }
   }
