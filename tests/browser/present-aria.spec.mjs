@@ -24,6 +24,8 @@ test("present announces layout at transition start with its duration", async ({ 
   await expect.poll(() => page.evaluate(() =>
     typeof AelluxJs.mountManager?.controller("panel")?.present?.pop === "function"
   )).toBe(true);
+  expect(await page.locator("[data-ae-present-motion]").evaluate(element =>
+    getComputedStyle(element).getPropertyValue("--ae-pop-duration"))).toBe("0.03s");
 
   const events = await page.evaluate(async () => {
     const panel = document.getElementById("panel");

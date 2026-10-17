@@ -241,7 +241,6 @@
         return {
           name: "--ae-".concat(name),
           syntax: syntax,
-          inherits: false,
           initialValue: initialValue
         };
       })));

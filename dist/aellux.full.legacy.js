@@ -25228,27 +25228,22 @@
           AelluxJs2.registerCssProperty({
             name: "--ae-anchor-x",
             syntax: "<length>",
-            inherits: false,
             initialValue: "0px"
           }, {
             name: "--ae-anchor-y",
             syntax: "<length>",
-            inherits: false,
             initialValue: "0px"
           }, {
             name: ORIGIN_X,
             syntax: "<percentage>",
-            inherits: false,
             initialValue: "50%"
           }, {
             name: ORIGIN_Y,
             syntax: "<percentage>",
-            inherits: false,
             initialValue: "0%"
           }, {
             name: ANCHOR_OPACITY,
             syntax: "<number>",
-            inherits: false,
             initialValue: "1"
           });
           AelluxJs2.mountManager.add({
@@ -25954,14 +25949,12 @@
             return {
               name: name,
               syntax: "<number>",
-              inherits: false,
               initialValue: "0"
             };
           })).concat(_toConsumableArray2(scrollbarProperties.map(function(name, index) {
             return {
               name: name,
               syntax: index === 5 ? "block | none" : "<length>",
-              inherits: false,
               initialValue: index === 5 ? "none" : "0px"
             };
           }))));
@@ -28440,12 +28433,10 @@
           AelluxJs2.registerCssProperty({
             name: "--ae-width",
             syntax: "<number>",
-            inherits: false,
             initialValue: "0"
           }, {
             name: "--ae-height",
             syntax: "<number>",
-            inherits: false,
             initialValue: "0"
           });
           var overrides = options.adaptiveParams || {};
@@ -28911,7 +28902,6 @@
             return {
               name: "--ae-".concat(name),
               syntax: syntax,
-              inherits: false,
               initialValue: initialValue
             };
           })));

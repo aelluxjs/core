@@ -38,6 +38,13 @@ test("custom scrollbar stays over the viewport and supports track click and thum
     Number.parseFloat(element.style.getPropertyValue("--ae-scrollbar-thumb-size")));
   const thumbPosition = await track.evaluate(element =>
     Number.parseFloat(element.style.getPropertyValue("--ae-scrollbar-thumb-position")));
+  const verticalThumb = await track.evaluate(element => {
+    const before = getComputedStyle(element, "::before");
+    return { size: Number.parseFloat(before.height),
+      position: new DOMMatrixReadOnly(before.transform).m42 };
+  });
+  expect(verticalThumb.size).toBeCloseTo(thumb, 1);
+  expect(verticalThumb.position).toBeCloseTo(thumbPosition, 1);
   const rect = await track.boundingBox();
   await page.mouse.move(rect.x + 4, rect.y + thumbPosition + thumb / 2);
   await page.mouse.down();
@@ -494,6 +501,13 @@ test("the horizontal thumb maps its drag to horizontal scroll", async ({ page })
   })).toBeLessThan(1.5);
   const thumbPosition = await track.evaluate(element =>
     Number.parseFloat(element.style.getPropertyValue("--ae-scrollbar-thumb-position")));
+  const horizontalThumb = await track.evaluate(element => {
+    const before = getComputedStyle(element, "::before");
+    return { size: Number.parseFloat(before.width),
+      position: new DOMMatrixReadOnly(before.transform).m41 };
+  });
+  expect(horizontalThumb.size).toBeCloseTo(thumb, 1);
+  expect(horizontalThumb.position).toBeCloseTo(thumbPosition, 1);
   await page.mouse.move(rect.x + thumbPosition + thumb / 2, rect.y + 4);
   await page.mouse.down();
   await page.mouse.move(rect.x + 95, rect.y + 4, { steps: 5 });

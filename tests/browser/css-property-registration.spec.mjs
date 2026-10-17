@@ -10,6 +10,18 @@ test("public CSS property registration detects support and rejected registration
     };
     const supported = !!(window.CSS && typeof CSS.registerProperty === "function");
     const beforeInit = AelluxJs.registerCssProperty(descriptor);
+    const implicitInheritance = AelluxJs.registerCssProperty({
+      name: "--ae-public-inheritance-probe", syntax: "<number>", initialValue: "0"
+    });
+    const parent = document.createElement("div");
+    const child = document.createElement("div");
+    parent.appendChild(child);
+    document.body.appendChild(parent);
+    parent.style.setProperty("--ae-public-inheritance-probe", "7");
+    parent.style.setProperty(descriptor.name, "5px");
+    const inheritedValue = getComputedStyle(child).getPropertyValue("--ae-public-inheritance-probe").trim();
+    const isolatedValue = getComputedStyle(child).getPropertyValue(descriptor.name).trim();
+    parent.remove();
     const duplicate = AelluxJs.registerCssProperty(descriptor);
     const invalid = AelluxJs.registerCssProperty({ ...descriptor, name: "invalid-name" });
     const batch = AelluxJs.registerCssProperty(
@@ -36,13 +48,18 @@ test("public CSS property registration detects support and rejected registration
       else delete css.registerProperty;
     }
     return {
-      supported, beforeInit, duplicate, invalid, batch, partial, continued, empty, unavailable,
+      supported, beforeInit, implicitInheritance, inheritedValue, isolatedValue,
+      duplicate, invalid, batch, partial, continued,
+      empty, unavailable,
       sharedAlias: AelluxJs.registerCssProperty === $ae.registerCssProperty
     };
   });
   expect(result).toEqual({
     supported: result.supported,
     beforeInit: result.supported,
+    implicitInheritance: result.supported,
+    inheritedValue: "7",
+    isolatedValue: result.supported ? "0px" : "5px",
     duplicate: false,
     invalid: false,
     batch: result.supported,

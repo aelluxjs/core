@@ -56,11 +56,11 @@
     AelluxJs.extAttach(extensionName, { init, destroy });
     function init() {
       AelluxJs.registerCssProperty(
-        { name: "--ae-anchor-x", syntax: "<length>", inherits: false, initialValue: "0px" },
-        { name: "--ae-anchor-y", syntax: "<length>", inherits: false, initialValue: "0px" },
-        { name: ORIGIN_X, syntax: "<percentage>", inherits: false, initialValue: "50%" },
-        { name: ORIGIN_Y, syntax: "<percentage>", inherits: false, initialValue: "0%" },
-        { name: ANCHOR_OPACITY, syntax: "<number>", inherits: false, initialValue: "1" }
+        { name: "--ae-anchor-x", syntax: "<length>", initialValue: "0px" },
+        { name: "--ae-anchor-y", syntax: "<length>", initialValue: "0px" },
+        { name: ORIGIN_X, syntax: "<percentage>", initialValue: "50%" },
+        { name: ORIGIN_Y, syntax: "<percentage>", initialValue: "0%" },
+        { name: ANCHOR_OPACITY, syntax: "<number>", initialValue: "1" }
       );
       AelluxJs.mountManager.add({
         extensionName,

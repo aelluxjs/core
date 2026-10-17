@@ -33,13 +33,15 @@ test("anchor follows its target's nearest Present opacity and allows CSS overrid
       <div id="plain" style="position: absolute; left: 80px; top: 15px;
         width: 30px; height: 20px"></div>
       <div id="anchor" data-ae-anchor-target="target" data-ae-anchor="top-left:top-left"
-        style="width: 10px; height: 10px"></div>
+        style="width: 10px; height: 10px"><span id="anchor-child"></span></div>
     </div>`);
   const opacity = () => page.locator("#anchor").evaluate(element => ({
     variable: element.style.getPropertyValue("--anchor-opacity"),
     computed: getComputedStyle(element).opacity
   }));
   await expect.poll(opacity).toEqual({ variable: "0.4", computed: "0.4" });
+  expect(await page.locator("#anchor-child").evaluate(element =>
+    getComputedStyle(element).getPropertyValue("--anchor-opacity"))).toBe("0.4");
 
   await page.evaluate(() => {
     const present = document.getElementById("present");

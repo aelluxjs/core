@@ -1071,11 +1071,11 @@
         AelluxJs2.extAttach(extensionName, { init, destroy });
         function init() {
           AelluxJs2.registerCssProperty(
-            { name: "--ae-anchor-x", syntax: "<length>", inherits: false, initialValue: "0px" },
-            { name: "--ae-anchor-y", syntax: "<length>", inherits: false, initialValue: "0px" },
-            { name: ORIGIN_X, syntax: "<percentage>", inherits: false, initialValue: "50%" },
-            { name: ORIGIN_Y, syntax: "<percentage>", inherits: false, initialValue: "0%" },
-            { name: ANCHOR_OPACITY, syntax: "<number>", inherits: false, initialValue: "1" }
+            { name: "--ae-anchor-x", syntax: "<length>", initialValue: "0px" },
+            { name: "--ae-anchor-y", syntax: "<length>", initialValue: "0px" },
+            { name: ORIGIN_X, syntax: "<percentage>", initialValue: "50%" },
+            { name: ORIGIN_Y, syntax: "<percentage>", initialValue: "0%" },
+            { name: ANCHOR_OPACITY, syntax: "<number>", initialValue: "1" }
           );
           AelluxJs2.mountManager.add({
             extensionName,
@@ -1573,11 +1573,10 @@
         AelluxJs2.extAttach(extensionName, { init, destroy, next, previous, goto });
         function init() {
           AelluxJs2.registerCssProperty(
-            ...[...properties, ...snapProperties].map((name) => ({ name, syntax: "<number>", inherits: false, initialValue: "0" })),
+            ...[...properties, ...snapProperties].map((name) => ({ name, syntax: "<number>", initialValue: "0" })),
             ...scrollbarProperties.map((name, index) => ({
               name,
               syntax: index === 5 ? "block | none" : "<length>",
-              inherits: false,
               initialValue: index === 5 ? "none" : "0px"
             }))
           );
@@ -3699,8 +3698,8 @@
         AelluxJs2.extAttach(extensionName, { init, destroy, adaptiveParams });
         function init(options = {}) {
           AelluxJs2.registerCssProperty(
-            { name: "--ae-width", syntax: "<number>", inherits: false, initialValue: "0" },
-            { name: "--ae-height", syntax: "<number>", inherits: false, initialValue: "0" }
+            { name: "--ae-width", syntax: "<number>", initialValue: "0" },
+            { name: "--ae-height", syntax: "<number>", initialValue: "0" }
           );
           const overrides = options.adaptiveParams || {};
           for (const group of Object.keys(adaptiveParams)) {
@@ -3965,7 +3964,7 @@
         ];
         function init(options) {
           AelluxJs2.registerCssProperty(
-            ...cssProperties.map(([name, syntax, initialValue]) => ({ name: `--ae-${name}`, syntax, inherits: false, initialValue }))
+            ...cssProperties.map(([name, syntax, initialValue]) => ({ name: `--ae-${name}`, syntax, initialValue }))
           );
           AelluxJs2.mountManager.add({
             extensionName,

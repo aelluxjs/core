@@ -195,14 +195,12 @@
         return {
           name: name,
           syntax: "<number>",
-          inherits: false,
           initialValue: "0"
         };
       })).concat(_toConsumableArray(scrollbarProperties.map(function(name, index) {
         return {
           name: name,
           syntax: index === 5 ? "block | none" : "<length>",
-          inherits: false,
           initialValue: index === 5 ? "none" : "0px"
         };
       }))));

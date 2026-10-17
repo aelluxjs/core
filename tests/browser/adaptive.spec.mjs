@@ -7,7 +7,9 @@ test("adaptive restores prior inline dimension variables on unmount", async ({ p
     document.body.innerHTML = `
       <div id="custom" data-ae-adaptive
         style="width: 120px; height: 80px; --ae-width: 42 !important; --ae-height: 24px"></div>
-      <div id="unset" data-ae-adaptive style="width: 120px; height: 80px"></div>`;
+      <div id="unset" data-ae-adaptive style="width: 120px; height: 80px">
+        <span id="adaptive-child"></span>
+      </div>`;
     AelluxJs.ext("adaptive");
   });
   await page.addScriptTag({ url: "/src/aellux.ext.adaptive.js" });
@@ -25,6 +27,8 @@ test("adaptive restores prior inline dimension variables on unmount", async ({ p
     [{ value: "120", priority: "" }, { value: "80", priority: "" }],
     [{ value: "120", priority: "" }, { value: "80", priority: "" }]
   ]);
+  expect(await page.locator("#adaptive-child").evaluate(element =>
+    Number(getComputedStyle(element).getPropertyValue("--ae-width")))).toBe(120);
 
   await page.evaluate(() => AelluxJs.unmount(document.body, "adaptive"));
   expect(await values()).toEqual([

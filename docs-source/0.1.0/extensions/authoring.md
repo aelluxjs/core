@@ -13,7 +13,7 @@ Start from [`templates/aellux.ext.template.js`](https://github.com/aelluxjs/core
 5. Make every `mount` idempotent and release its listeners, observers, timers, and references in the corresponding `unmount`.
 6. Release Extension-wide resources in `destroy()`.
 7. Keep the public API and lifecycle behavior equivalent across Modern and Legacy variants.
-8. Core Extensions that publish or define CSS custom properties must register each property during `init()` with `AelluxJs.registerCssProperty()`, using an appropriate syntax, inheritance setting, and initial value.
+8. Core Extensions that publish or define CSS custom properties must register each property during `init()` with `AelluxJs.registerCssProperty()`, using an appropriate syntax and initial value. Properties inherit by default; set `inherits: false` only when descendants must receive the initial value instead.
 
 The runtime exposes a kebab-case name as camelCase under `AelluxJs.ext`: `tab-group` becomes `AelluxJs.ext.tabGroup`.
 An Extension receives its configuration as the `options` argument to `init(options)`. Supply it through `extensions`:
@@ -207,12 +207,12 @@ Core Extensions must register every CSS custom property they write or define for
 
 ```js
 AelluxJs.registerCssProperty(
-  { name: "--ae-example-progress", syntax: "<number>", inherits: false, initialValue: "0" },
-  { name: "--ae-example-offset", syntax: "<length>", inherits: false, initialValue: "0px" }
+  { name: "--ae-example-progress", syntax: "<number>", initialValue: "0" },
+  { name: "--ae-example-offset", syntax: "<length>", initialValue: "0px" }
 );
 ```
 
-`registerCssProperty()` checks browser support for `CSS.registerProperty()` and handles rejected registrations, including duplicate names. The Extension should continue to work with ordinary custom properties when the API is unavailable. Match each initial value to the stylesheet's default and cover registered values in browser tests. See the [Runtime API](../runtime/api.md#initialization) for the method's return value.
+`registerCssProperty()` defaults `inherits` to `true`, checks browser support for `CSS.registerProperty()`, and handles rejected registrations, including duplicate names. The Extension should continue to work with ordinary custom properties when the API is unavailable. Match each initial value to the stylesheet's default and cover registered values in browser tests. See the [Runtime API](../runtime/api.md#initialization) for the method's return value.
 
 Do not leave the Extension partially initialized when an optional resource fails. Report failures through `AelluxJs.diagnostics` and preserve usable fallback behavior whenever possible.
 

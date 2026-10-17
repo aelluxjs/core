@@ -137,12 +137,10 @@
       AelluxJs.registerCssProperty({
         name: "--ae-width",
         syntax: "<number>",
-        inherits: false,
         initialValue: "0"
       }, {
         name: "--ae-height",
         syntax: "<number>",
-        inherits: false,
         initialValue: "0"
       });
       var overrides = options.adaptiveParams || {};

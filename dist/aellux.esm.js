@@ -487,7 +487,16 @@ function createAelluxApi(root2, constants) {
       var registered = true;
       for (var index = 0; index < arguments.length; index++) {
         try {
-          root2.CSS.registerProperty(arguments[index]);
+          var descriptor = arguments[index];
+          if (descriptor && typeof descriptor === "object" && !("inherits" in descriptor)) {
+            var normalized = {};
+            for (var key in descriptor)
+              if (Object.prototype.hasOwnProperty.call(descriptor, key))
+                normalized[key] = descriptor[key];
+            normalized.inherits = true;
+            descriptor = normalized;
+          }
+          root2.CSS.registerProperty(descriptor);
         } catch (error) {
           registered = false;
         }

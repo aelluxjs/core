@@ -160,11 +160,10 @@
     AelluxJs.extAttach(extensionName, { init, destroy, next, previous, goto });
     function init() {
       AelluxJs.registerCssProperty(
-        ...[...properties, ...snapProperties].map((name) => ({ name, syntax: "<number>", inherits: false, initialValue: "0" })),
+        ...[...properties, ...snapProperties].map((name) => ({ name, syntax: "<number>", initialValue: "0" })),
         ...scrollbarProperties.map((name, index) => ({
           name,
           syntax: index === 5 ? "block | none" : "<length>",
-          inherits: false,
           initialValue: index === 5 ? "none" : "0px"
         }))
       );

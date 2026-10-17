@@ -73,8 +73,8 @@
 
   function init(options = {}) {
     AelluxJs.registerCssProperty(
-      { name: "--ae-width", syntax: "<number>", inherits: false, initialValue: "0" },
-      { name: "--ae-height", syntax: "<number>", inherits: false, initialValue: "0" }
+      { name: "--ae-width", syntax: "<number>", initialValue: "0" },
+      { name: "--ae-height", syntax: "<number>", initialValue: "0" }
     );
     const overrides = options.adaptiveParams || {};
     for (const group of Object.keys(adaptiveParams)) {

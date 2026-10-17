@@ -70,7 +70,7 @@
     ];
     function init(options) {
       AelluxJs.registerCssProperty(
-        ...cssProperties.map(([name, syntax, initialValue]) => ({ name: `--ae-${name}`, syntax, inherits: false, initialValue }))
+        ...cssProperties.map(([name, syntax, initialValue]) => ({ name: `--ae-${name}`, syntax, initialValue }))
       );
       AelluxJs.mountManager.add({
         extensionName,
