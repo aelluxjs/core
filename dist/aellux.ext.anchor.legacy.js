@@ -452,58 +452,80 @@
               }
               return _context3.a(2);
             case 5:
-              if (placement.valid) {
+              if (!placement.hidden) {
                 _context3.n = 7;
                 break;
               }
               _context3.n = 6;
               return AelluxJs.waitLayout.update(function() {
-                if (current()) invalidContext(element, state, placement);
+                if (current()) hideForTarget(element, state, placement);
               });
             case 6:
               return _context3.a(2);
             case 7:
-              if (state.active) {
-                _context3.n = 13;
+              if (placement.valid) {
+                _context3.n = 9;
                 break;
               }
               _context3.n = 8;
+              return AelluxJs.waitLayout.update(function() {
+                if (current()) invalidContext(element, state, placement);
+              });
+            case 8:
+              return _context3.a(2);
+            case 9:
+              if (state.active) {
+                _context3.n = 17;
+                break;
+              }
+              _context3.n = 10;
               return AelluxJs.waitLayout.update(function() {
                 if (!current()) return;
                 applyBaseStyles(element);
                 state.active = true;
               });
-            case 8:
-              if (current()) {
-                _context3.n = 9;
-                break;
-              }
-              return _context3.a(2);
-            case 9:
-              _context3.n = 10;
-              return AelluxJs.waitLayout.read(function() {
-                return current() ? readPlacement(element, useReference ? null : target, candidates, true) : null;
-              });
             case 10:
-              placement = _context3.v;
-              if (!(!current() || !placement)) {
+              if (current()) {
                 _context3.n = 11;
                 break;
               }
               return _context3.a(2);
             case 11:
-              if (placement.valid) {
+              _context3.n = 12;
+              return AelluxJs.waitLayout.read(function() {
+                return current() ? readPlacement(element, useReference ? null : target, candidates, true) : null;
+              });
+            case 12:
+              placement = _context3.v;
+              if (!(!current() || !placement)) {
                 _context3.n = 13;
                 break;
               }
-              _context3.n = 12;
+              return _context3.a(2);
+            case 13:
+              if (!placement.hidden) {
+                _context3.n = 15;
+                break;
+              }
+              _context3.n = 14;
+              return AelluxJs.waitLayout.update(function() {
+                if (current()) hideForTarget(element, state, placement);
+              });
+            case 14:
+              return _context3.a(2);
+            case 15:
+              if (placement.valid) {
+                _context3.n = 17;
+                break;
+              }
+              _context3.n = 16;
               return AelluxJs.waitLayout.update(function() {
                 if (current()) invalidContext(element, state, placement);
               });
-            case 12:
+            case 16:
               return _context3.a(2);
-            case 13:
-              _context3.n = 14;
+            case 17:
+              _context3.n = 18;
               return AelluxJs.waitLayout.update(function() {
                 if (!current()) return;
                 state.invalidContext = false;
@@ -527,7 +549,7 @@
                 }
                 element.classList.add(anchoredClass);
               });
-            case 14:
+            case 18:
               return _context3.a(2);
           }
         }, _callee3);
@@ -537,6 +559,11 @@
     function readPlacement(element, target, candidates, measure) {
       var reference = element.offsetParent;
       target = target || reference;
+      if (target && isInvisible(target)) return {
+        hidden: true,
+        target: target,
+        reference: reference
+      };
       if (!reference || target !== reference && target.offsetParent !== reference) {
         return {
           valid: false,
@@ -593,6 +620,20 @@
         selected: selected,
         opacity: opacity
       };
+    }
+    function isInvisible(element) {
+      var visibility = root.getComputedStyle(element).visibility;
+      if (visibility === "hidden" || visibility === "collapse") return true;
+      for (var current = element; current && current.nodeType === 1; current = current.parentElement) {
+        var style = root.getComputedStyle(current);
+        if (current.hidden || style.display === "none" || style.contentVisibility === "hidden" || Number(style.opacity) === 0) return true;
+      }
+      return false;
+    }
+    function hideForTarget(element, state, placement) {
+      deactivate(element, state);
+      state.invalidContext = false;
+      if (placement.reference) listenForLayout(state, placement.reference);
     }
     function invalidContext(element, state, placement) {
       deactivate(element, state);

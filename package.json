@@ -67,6 +67,7 @@
     "custom-event-polyfill": "^1.0.7",
     "esbuild": "^0.25.0",
     "raf": "^3.4.1",
+    "terser": "^5.51.2",
     "whatwg-fetch": "^3.6.20"
   }
 }

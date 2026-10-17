@@ -209,6 +209,12 @@
         () => current() ? readPlacement(element, target, candidates, state.active) : null
       );
       if (!current() || !placement) return;
+      if (placement.hidden) {
+        await AelluxJs.waitLayout.update(() => {
+          if (current()) hideForTarget(element, state, placement);
+        });
+        return;
+      }
       if (!placement.valid) {
         await AelluxJs.waitLayout.update(() => {
           if (current()) invalidContext(element, state, placement);
@@ -226,6 +232,12 @@
           () => current() ? readPlacement(element, useReference ? null : target, candidates, true) : null
         );
         if (!current() || !placement) return;
+        if (placement.hidden) {
+          await AelluxJs.waitLayout.update(() => {
+            if (current()) hideForTarget(element, state, placement);
+          });
+          return;
+        }
         if (!placement.valid) {
           await AelluxJs.waitLayout.update(() => {
             if (current()) invalidContext(element, state, placement);
@@ -250,6 +262,7 @@
     function readPlacement(element, target, candidates, measure) {
       const reference = element.offsetParent;
       target = target || reference;
+      if (target && isInvisible(target)) return { hidden: true, target, reference };
       if (!reference || target !== reference && target.offsetParent !== reference) {
         return { valid: false, target, reference };
       }
@@ -282,6 +295,20 @@
       const present = target.closest(`[${presentAttribute}]`);
       const opacity = present ? root.getComputedStyle(present).opacity : "1";
       return { valid: true, target, reference, selected, opacity };
+    }
+    function isInvisible(element) {
+      const visibility = root.getComputedStyle(element).visibility;
+      if (visibility === "hidden" || visibility === "collapse") return true;
+      for (let current = element; current && current.nodeType === 1; current = current.parentElement) {
+        const style = root.getComputedStyle(current);
+        if (current.hidden || style.display === "none" || style.contentVisibility === "hidden" || Number(style.opacity) === 0) return true;
+      }
+      return false;
+    }
+    function hideForTarget(element, state, placement) {
+      deactivate(element, state);
+      state.invalidContext = false;
+      if (placement.reference) listenForLayout(state, placement.reference);
     }
     function invalidContext(element, state, placement) {
       deactivate(element, state);

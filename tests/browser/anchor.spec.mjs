@@ -392,6 +392,42 @@ test("present layout event activates an anchor whose target started hidden", asy
   await expect(page.locator("#anchor")).not.toHaveClass(/ae--anchored/);
 });
 
+test("hidden Present targets hide their anchors without a reference context diagnostic", async ({ page }) => {
+  await startAnchor(page, `
+    <div style="position: relative; width: 300px; height: 100px">
+      <div id="panel" data-ae-present hidden>
+        <div><div id="target" style="position: absolute; left: 40px; top: 20px;
+          width: 30px; height: 20px"></div></div>
+      </div>
+      <div id="anchor" data-ae-anchor-target="target" data-ae-anchor="top-left:top-left"
+        style="width: 10px; height: 10px"></div>
+    </div>`);
+
+  const update = () => page.evaluate(async () => {
+    await AelluxJs.mountManager.update(document.getElementById("anchor"), "anchor");
+    return {
+      anchored: document.getElementById("anchor").classList.contains("ae--anchored"),
+      diagnostics: AelluxJs.diagnostics.showHistory(100).filter(entry =>
+        entry.code === AelluxJs.diagnostics.ERROR_ANCHOR_REFERENCE_CONTEXT.code).length
+    };
+  });
+  expect(await update()).toEqual({ anchored: false, diagnostics: 0 });
+
+  for (const property of ["display", "visibility", "opacity"]) {
+    await page.evaluate(property => {
+      const panel = document.getElementById("panel");
+      panel.hidden = false;
+      panel.style[property] = property === "display" ? "none" :
+        property === "visibility" ? "hidden" : "0";
+    }, property);
+    expect(await update()).toEqual({ anchored: false, diagnostics: 0 });
+    await page.evaluate(property => {
+      document.getElementById("panel").style[property] = "";
+    }, property);
+    expect(await update()).toEqual({ anchored: true, diagnostics: 0 });
+  }
+});
+
 test("scroll bursts throttle layout measurements and keep the latest position", async ({ page }) => {
   await startAnchor(page, `
     <div style="position: relative; width: 300px; height: 100px">

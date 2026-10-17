@@ -1,6 +1,7 @@
 /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
 
 import { build } from "esbuild";
+import { minify as minifyWithTerser } from "terser";
 import { createHash } from "node:crypto";
 import { transformAsync } from "@babel/core";
 import presetEnv from "@babel/preset-env";
@@ -198,6 +199,32 @@ for (const minify of [false, true]) {
   generatedFiles.add(outputFilename + ".map");
 }
 
+// Terser performs deeper compression than esbuild on the already bundled code.
+// Run it before computing integrity hashes so the boot script uses final bytes.
+for (const filename of generatedFiles) {
+  if (filename.endsWith(".min.js")) await compressJavaScript(filename);
+}
+
+async function compressJavaScript(filename) {
+  const outputPath = join(outputDirectory, filename);
+  const originalCode = await readFile(outputPath, "utf8");
+  const originalMap = await readFile(outputPath + ".map", "utf8");
+  const legacy = filename.includes(".legacy.") || filename === "aellux.min.js";
+  const result = await minifyWithTerser({ [filename]: originalCode }, {
+    ecma: legacy ? 5 : 2017,
+    compress: { passes: 2 },
+    mangle: true,
+    format: { comments: /^!/ },
+    sourceMap: { content: originalMap, url: filename + ".map" }
+  });
+  if (!result.code || !result.map) throw new Error(`Terser failed: ${filename}`);
+  // Keep esbuild's output if Terser does not actually reduce the file.
+  if (Buffer.byteLength(result.code) < Buffer.byteLength(originalCode)) {
+    await writeFile(outputPath, result.code, "utf8");
+    await writeFile(outputPath + ".map", result.map, "utf8");
+  }
+}
+
 // Hash the final bytes, then embed the map in the boot script that loads them.
 // The boot script cannot contain its own hash.
 const coreAssetIntegrity = { regular: {}, minified: {} };
@@ -229,6 +256,7 @@ for (const minify of [false, true]) {
   });
   generatedFiles.add(outputFilename);
   generatedFiles.add(outputFilename + ".map");
+  if (minify) await compressJavaScript(outputFilename);
 }
 
 // Source maps embed the original source text. Normalize its line endings so
@@ -238,14 +266,14 @@ for (const filename of generatedFiles) {
   const mapPath = join(outputDirectory, filename);
   const mapText = await readFile(mapPath, "utf8");
   const map = JSON.parse(mapText);
-  if (!Array.isArray(map.sourcesContent) || !/^  "sourcesContent": .*,$/m.test(mapText)) {
+  if (!Array.isArray(map.sourcesContent)) {
     throw new Error(`Unexpected source map format: ${filename}`);
   }
   const sourcesContent = map.sourcesContent.map(source => source.replace(/\r\n?/g, "\n"));
-  const normalizedText = mapText.replace(
-    /^  "sourcesContent": .*,$/m,
-    `  "sourcesContent": ${JSON.stringify(sourcesContent)},`
-  );
+  const normalizedText = /^  "sourcesContent": .*,$/m.test(mapText)
+    ? mapText.replace(/^  "sourcesContent": .*,$/m,
+      `  "sourcesContent": ${JSON.stringify(sourcesContent)},`)
+    : JSON.stringify({ ...map, sourcesContent });
   if (normalizedText !== mapText) await writeFile(mapPath, normalizedText, "utf8");
 }
 
