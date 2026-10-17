@@ -2053,6 +2053,8 @@
         function showScrollbars(state) {
           if (!state.scrollbar.listening) return;
           if (!state.element.classList.contains(scrollbarVisibleClass)) {
+            const metrics = nativeMetrics(state.element);
+            updateScrollbars(state, readScrollbars(state, metrics, wheelAxes(state, metrics)));
             state.element.classList.add(scrollbarVisibleClass);
             state.scrollbar.visibleOwned = true;
           }
@@ -3483,6 +3485,8 @@
             const axes = bars ? wheelAxes(state, metrics) : null;
             return {
               revision: state.layoutRevision,
+              scrollTop,
+              scrollLeft,
               y: progress(scrollTop, metrics.maxY),
               x: progress(scrollLeft, metrics.maxX),
               edges: state.elastic.owned ? null : [
@@ -3502,6 +3506,10 @@
             }
             return AelluxJs2.waitLayout.update(() => {
               if (state.disposed || state.layoutRevision !== values.revision) return;
+              if (state.element.scrollTop !== values.scrollTop || state.element.scrollLeft !== values.scrollLeft) {
+                state.publishDirty = true;
+                return;
+              }
               state.element.style.setProperty(properties[0], values.y);
               state.element.style.setProperty(properties[1], values.x);
               if (values.edges && !state.elastic.owned) {

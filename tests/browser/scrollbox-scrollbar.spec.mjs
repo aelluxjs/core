@@ -407,6 +407,37 @@ test("mobile touch and native scroll reveal the scrollbar until scrolling settle
   }
 });
 
+test("touch reveals a horizontal scrollbar at its current scroll position", async ({ browser, browserName }) => {
+  test.skip(browserName !== "chromium");
+  const context = await browser.newContext({ hasTouch: true, isMobile: true,
+    viewport: { width: 390, height: 844 } });
+  const page = await context.newPage();
+  try {
+    await setup(page, `<div id="box" data-ae-scrollbox data-ae-scrollbar="horizontal"
+      style="width:120px;height:120px;overflow-x:auto;overflow-y:hidden">
+      <div id="content" style="width:400px;height:100px"></div>
+    </div>`);
+    const result = await page.evaluate(() => {
+      const box = document.getElementById("box");
+      const bar = box.querySelector("[data-ae-scrollbar-horizontal]");
+      box.scrollTo({ left: 80, behavior: "instant" });
+      document.getElementById("content").dispatchEvent(new PointerEvent("pointerdown", {
+        bubbles: true, pointerType: "touch", pointerId: 1, isPrimary: true
+      }));
+      const boxRect = box.getBoundingClientRect();
+      const barRect = bar.getBoundingClientRect();
+      return { scrollLeft: box.scrollLeft, offset: barRect.left - boxRect.left,
+        opacity: getComputedStyle(bar).opacity };
+    });
+    expect(result.scrollLeft).toBe(80);
+    expect(Math.abs(result.offset)).toBeLessThan(1);
+    await expect(page.locator("#box > [data-ae-scrollbar-horizontal]"))
+      .toHaveCSS("opacity", "1");
+  } finally {
+    await context.close();
+  }
+});
+
 test("touch release timeout preserves an active desktop pointer hover", async ({ page }) => {
   await setup(page, `<div id="box" data-ae-scrollbox data-ae-scrollbar="v"
     style="width:120px;height:120px;overflow-y:auto">
