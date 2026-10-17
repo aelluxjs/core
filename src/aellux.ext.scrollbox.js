@@ -152,6 +152,8 @@
     }
   }
 
+  function isTouch(callback) { return (event) => { if (event && event.pointerType !== "touch") { callback(event); } } }
+
   const pointerScrollMouseEvents = [
     "mousedown", "mousemove", "mouseup", "click", "dblclick", "auxclick",
     "contextmenu", "mouseover", "mouseout", "mouseenter", "mouseleave"
@@ -184,16 +186,20 @@
     AelluxJs.registerCssProperty(
       ...[...properties, ...snapProperties].map(name =>
         ({ name, syntax: "<number>", initialValue: "0" })),
-      ...scrollbarProperties.map((name, index) => ({ name,
+      ...scrollbarProperties.map((name, index) => ({
+        name,
         syntax: index === 5 ? "block | none" : "<length>",
-        initialValue: index === 5 ? "none" : "0px" })),
+        initialValue: index === 5 ? "none" : "0px"
+      })),
       { name: "--ae-scrollbar-opacity-visible", syntax: "<number>", initialValue: "1" },
       { name: "--ae-scrollbar-opacity-fade", syntax: "<number>", initialValue: "0" },
       { name: "--ae-scrollbar-thumb-color", syntax: "*" },
       { name: "--ae-scrollbar-thumb-hover-color", syntax: "*" },
       { name: "--ae-scrollbar-track-color", syntax: "*" },
-      { name: "--ae-scrollbar-thumb-radius", syntax: "<length-percentage>",
-        initialValue: "10px" },
+      {
+        name: "--ae-scrollbar-thumb-radius", syntax: "<length-percentage>",
+        initialValue: "10px"
+      },
       { name: "--ae-scrollbar-size", syntax: "<length>", initialValue: "8px" }
     );
     AelluxJs.mountManager.add({
@@ -334,24 +340,17 @@
 
     state.onScrollbarPointerDown = () => startScrollbarInteractionVisibility(state);
     state.onScrollbarPointerEnd = () => scheduleScrollbarInteractionHide(state);
-    state.onScrollbarPointerEnter = event => {
-      if (event.pointerType !== "touch") setScrollbarHover(state, "pointerHover", true);
-    };
-    state.onScrollbarPointerLeave = event => {
-      if (event.pointerType !== "touch") setScrollbarHover(state, "pointerHover", false);
-    };
-    state.onScrollbarPointerOver = event => {
-      if (event.pointerType !== "touch") setScrollbarHover(state, "pointerHover", true);
-    };
-    state.onScrollbarPointerOut = event => {
-      if (event.pointerType !== "touch" &&
-        (!event.relatedTarget || !element.contains(event.relatedTarget)))
+    state.onScrollbarPointerEnter = isTouch(() => setScrollbarHover(state, "pointerHover", true));
+    state.onScrollbarPointerLeave = isTouch(() => setScrollbarHover(state, "pointerHover", false));
+    state.onScrollbarPointerOver = isTouch(() => setScrollbarHover(state, "pointerHover", true));
+    state.onScrollbarPointerOut = isTouch(event => {
+      if (!event.relatedTarget || !element.contains(event.relatedTarget))
         setScrollbarHover(state, "pointerHover", false);
-    };
-    state.onScrollbarPointerMove = event => {
-      if (event.pointerType !== "touch" && !state.scrollbar.pointerHover)
+    });
+    state.onScrollbarPointerMove = isTouch(() => {
+      if (!state.scrollbar.pointerHover)
         setScrollbarHover(state, "pointerHover", true);
-    };
+    });
     state.onScrollbarMouseEnter = () => {
       if (supportsMouseHover()) setScrollbarHover(state, "mouseHover", true);
     };
@@ -698,8 +697,10 @@
       const x = element.scrollLeft + (vertical ? element.clientWidth - thickness : 0);
       const y = element.scrollTop + (vertical ? 0 : element.clientHeight - thickness);
       const display = axes[axis] ? "block" : "none";
-      values.push({ record, x, y, trackSize, thumbSize, thumbPosition,
-        max: axes[axis] ? max : 0, display });
+      values.push({
+        record, x, y, trackSize, thumbSize, thumbPosition,
+        max: axes[axis] ? max : 0, display
+      });
     }
     return values;
   }
@@ -1187,6 +1188,7 @@
     const items = snapItems(state);
     if (!items.length || !Number.isInteger(index) || index < 0 || index >= items.length)
       return false;
+    if (state.snap.activeTouches.size) return false;
     if (state.snap.suspensions.elastic) {
       clearSnapTarget(state);
       clearScrollEnd(state);
@@ -1443,8 +1445,8 @@
 
       snapStarts: new Map(chain.filter(member => member.snapEnabled &&
         (chains.x.includes(member) || chains.y.includes(member))).map(member => {
-        return [member, selectedSnapIndex(member)];
-      })),
+          return [member, selectedSnapIndex(member)];
+        })),
 
       selectionAtDown, verticalOnly,
       selectionReadyTime: textOrigin ? time + TEXT_SELECTION_WAIT_MS : 0,
@@ -2118,10 +2120,12 @@
         else refresh(state);
       });
       state.mutationObserver.observe(state.element,
-        { childList: true, subtree: true, characterData: true,
+        {
+          childList: true, subtree: true, characterData: true,
           attributes: true,
           attributeFilter: [snapAttribute, snapItemAttribute, elasticAttribute,
-            scrollbarAttribute] });
+            scrollbarAttribute]
+        });
     }
   }
 

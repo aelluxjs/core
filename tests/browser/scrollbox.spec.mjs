@@ -54,3 +54,42 @@ test("snap focus reaches content nested inside a snap item", async ({ page }) =>
   await expect.poll(() => page.locator("#nested").evaluate(element =>
     Number(getComputedStyle(element).getPropertyValue("--ae-snap-focus")))).toBe(1);
 });
+
+test("native touch drag rejects programmatic snap navigation", async ({ page }) => {
+  await page.goto("/tests/index.htm");
+  await page.addScriptTag({ url: "/dist/aellux.js" });
+  await page.evaluate(() => {
+    document.body.innerHTML = `<div id="box" data-ae-scrollbox data-ae-scrollbox-snap
+      style="width:100px;height:100px;overflow-x:auto;display:flex">
+      <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+      <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+    </div>`;
+    AelluxJs.ext("scrollbox");
+  });
+  await page.addScriptTag({ url: "/src/aellux.ext.scrollbox.js" });
+  await page.evaluate(() => AelluxJs.init({ mode: "basic" }));
+  await expect.poll(() => page.evaluate(() =>
+    !!AelluxJs.mountManager.controller(document.getElementById("box"))?.scrollbox
+  )).toBe(true);
+
+  const result = await page.evaluate(() => {
+    const box = document.getElementById("box");
+    const controller = AelluxJs.mountManager.controller(box).scrollbox;
+    const originalScrollTo = box.scrollTo.bind(box);
+    let calls = 0;
+    box.scrollTo = (...args) => { calls++; return originalScrollTo(...args); };
+    box.dispatchEvent(new TouchEvent("touchstart", {
+      bubbles: true, changedTouches: [new Touch({ identifier: 1, target: box })]
+    }));
+    const before = calls;
+    const during = [controller.goto(1), controller.next(), controller.previous()];
+    const duringCalls = calls - before;
+    box.dispatchEvent(new TouchEvent("touchend", {
+      bubbles: true, changedTouches: [new Touch({ identifier: 1, target: box })]
+    }));
+    const after = controller.goto(1);
+    return { during, duringCalls, after, afterCalls: calls - before };
+  });
+  expect(result).toEqual({ during: [false, false, false], duringCalls: 0,
+    after: true, afterCalls: 1 });
+});

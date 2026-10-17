@@ -25921,6 +25921,13 @@
             _iterator.f();
           }
         }
+        function isTouch(callback) {
+          return function(event) {
+            if (event && event.pointerType !== "touch") {
+              callback(event);
+            }
+          };
+        }
         var pointerScrollMouseEvents = ["mousedown", "mousemove", "mouseup", "click", "dblclick", "auxclick", "contextmenu", "mouseover", "mouseout", "mouseenter", "mouseleave"];
         var pointerScrollDragEvents = ["dragstart", "drag", "dragenter", "dragover", "dragleave", "drop", "dragend"];
         var mouseHoldEvents = /* @__PURE__ */ new Set(["mousemove", "mouseover", "mouseout", "mouseenter", "mouseleave"]);
@@ -26202,21 +26209,21 @@
           state.onScrollbarPointerEnd = function() {
             return scheduleScrollbarInteractionHide(state);
           };
-          state.onScrollbarPointerEnter = function(event) {
-            if (event.pointerType !== "touch") setScrollbarHover(state, "pointerHover", true);
-          };
-          state.onScrollbarPointerLeave = function(event) {
-            if (event.pointerType !== "touch") setScrollbarHover(state, "pointerHover", false);
-          };
-          state.onScrollbarPointerOver = function(event) {
-            if (event.pointerType !== "touch") setScrollbarHover(state, "pointerHover", true);
-          };
-          state.onScrollbarPointerOut = function(event) {
-            if (event.pointerType !== "touch" && (!event.relatedTarget || !element.contains(event.relatedTarget))) setScrollbarHover(state, "pointerHover", false);
-          };
-          state.onScrollbarPointerMove = function(event) {
-            if (event.pointerType !== "touch" && !state.scrollbar.pointerHover) setScrollbarHover(state, "pointerHover", true);
-          };
+          state.onScrollbarPointerEnter = isTouch(function() {
+            return setScrollbarHover(state, "pointerHover", true);
+          });
+          state.onScrollbarPointerLeave = isTouch(function() {
+            return setScrollbarHover(state, "pointerHover", false);
+          });
+          state.onScrollbarPointerOver = isTouch(function() {
+            return setScrollbarHover(state, "pointerHover", true);
+          });
+          state.onScrollbarPointerOut = isTouch(function(event) {
+            if (!event.relatedTarget || !element.contains(event.relatedTarget)) setScrollbarHover(state, "pointerHover", false);
+          });
+          state.onScrollbarPointerMove = isTouch(function() {
+            if (!state.scrollbar.pointerHover) setScrollbarHover(state, "pointerHover", true);
+          });
           state.onScrollbarMouseEnter = function() {
             if (supportsMouseHover()) setScrollbarHover(state, "mouseHover", true);
           };
@@ -27041,6 +27048,7 @@
           var behavior = arguments.length > 3 && arguments[3] !== void 0 ? arguments[3] : "smooth";
           var items = snapItems(state);
           if (!items.length || !Number.isInteger(index) || index < 0 || index >= items.length) return false;
+          if (state.snap.activeTouches.size) return false;
           if (state.snap.suspensions.elastic) {
             clearSnapTarget(state);
             clearScrollEnd(state);
