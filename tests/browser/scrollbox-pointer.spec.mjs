@@ -1114,6 +1114,42 @@ test("horizontal wheel ignores hidden vertical overflow during elastic pressure"
   expect(result.transform).toMatch(/^scale\([^,]+, 1\) translate3d\(-[^,]+, 0px, 0px\)/);
 });
 
+for (const axis of ["x", "y"]) {
+  test(`touch elastic ignores ${axis} overflow hidden despite excess content`, async ({ page }) => {
+    const overflow = axis === "x" ? "overflow-x:hidden;overflow-y:auto" :
+      "overflow-x:auto;overflow-y:hidden";
+    await setup(page, `<div id="box" data-ae-scrollbox="native"
+      style="width:100px;height:100px;${overflow}">
+      <div data-ae-scrollbox-elastic style="width:300px;height:300px"></div>
+    </div>`);
+    const result = await page.evaluate(axis => {
+      const element = document.getElementById("box");
+      const touchEvent = (type, x, y, active) => {
+        const event = new Event(type, { bubbles: true, cancelable: true });
+        Object.defineProperty(event, "touches", { value: active ? [
+          { identifier: 777, clientX: x, clientY: y }
+        ] : [] });
+        return event;
+      };
+      element.dispatchEvent(touchEvent("touchstart", 40, 40, true));
+      const move = touchEvent("touchmove", axis === "x" ? 100 : 40,
+        axis === "y" ? 100 : 40, true);
+      element.dispatchEvent(move);
+      const result = {
+        overflow: axis === "x" ? element.scrollWidth - element.clientWidth :
+          element.scrollHeight - element.clientHeight,
+        prevented: move.defaultPrevented,
+        transform: element.firstElementChild.style.transform
+      };
+      element.dispatchEvent(touchEvent("touchend", 100, 100, false));
+      return result;
+    }, axis);
+    expect(result.overflow).toBeGreaterThan(1);
+    expect(result.prevented).toBe(false);
+    expect(result.transform).toBe("");
+  });
+}
+
 test("pointer snap advances one point on a fast horizontal swipe", async ({ page }) => {
   await setup(page, `<div id="gallery" data-ae-scrollbox="pointer" data-ae-scrollbox-snap
     style="width:100px;height:100px;overflow:auto">

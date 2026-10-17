@@ -1904,9 +1904,10 @@
 
   function elasticAxes(state) {
     const style = root.getComputedStyle(state.element);
+    const scrollable = value => value === "auto" || value === "scroll";
     return {
-      x: style.overscrollBehaviorX !== "none",
-      y: style.overscrollBehaviorY !== "none"
+      x: scrollable(style.overflowX) && style.overscrollBehaviorX !== "none",
+      y: scrollable(style.overflowY) && style.overscrollBehaviorY !== "none"
     };
   }
 

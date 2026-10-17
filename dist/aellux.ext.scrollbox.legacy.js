@@ -2071,9 +2071,12 @@
     }
     function elasticAxes(state) {
       var style = root.getComputedStyle(state.element);
+      var scrollable = function scrollable2(value) {
+        return value === "auto" || value === "scroll";
+      };
       return {
-        x: style.overscrollBehaviorX !== "none",
-        y: style.overscrollBehaviorY !== "none"
+        x: scrollable(style.overflowX) && style.overscrollBehaviorX !== "none",
+        y: scrollable(style.overflowY) && style.overscrollBehaviorY !== "none"
       };
     }
     function applyElasticFromDesired(state, desiredX, desiredY, additive) {

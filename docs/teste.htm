@@ -7,8 +7,7 @@
       var min = new URLSearchParams(location.search).get("min") ||
         "";
       var script = document.createElement("script");
-      var local = !requestedVersion &&
-        (location.protocol === "file:" || /^(localhost|127\.0\.0\.1)$/.test(location.hostname));
+      var local = !requestedVersion;
       script.src = local ? "../dist/aellux" + min + ".js" :
         "https://cdn.jsdelivr.net/gh/aelluxjs/core@" +
         encodeURIComponent(version) + "/dist/aellux" + min + ".js";
