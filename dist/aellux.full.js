@@ -1960,8 +1960,7 @@
           if (!element) {
             element = root2.document.createElement("div");
             element.setAttribute(attributeName, "");
-            if (axis === "y") state.element.before(element, state.element.firstChild);
-            else state.element.appendChild(element);
+            state.element.appendChild(element);
           }
           const marker = owned ? null : root2.document.createComment("scrollbar position");
           if (marker) element.before(marker);
@@ -1989,11 +1988,11 @@
           positionScrollbarAxis(state, record);
         }
         function positionScrollbarAxis(state, record) {
-          const element = state.element;
-          if (record.axis === "y" && element.firstElementChild !== record.element)
-            element.prepend(record.element);
-          else if (record.axis === "x" && element.lastElementChild !== record.element)
-            element.append(record.element);
+          const container = state.element;
+          if (record.axis === "y" && container.firstChild !== record.element)
+            container.prepend(record.element);
+          else if (record.axis === "x" && container.lastChild !== record.element)
+            container.append(record.element);
         }
         function resetScrollbarAxis(state, axis) {
           var _a;
