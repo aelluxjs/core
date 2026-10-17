@@ -30,6 +30,10 @@ export default function createWeakCss() {
       scroll-behavior: initial !important;
     }
 
+    :where([draggable='true']){
+      cursor: grab;
+    }
+
     :where(button, a[href], [role='button'], [role='tab']) {
       touch-action: manipulation;
       cursor: pointer;
@@ -50,6 +54,10 @@ export default function createWeakCss() {
       transform: translate3d(var(--ae-anchor-x, 0px), var(--ae-anchor-y, 0px), 0);
       transform-origin: var(--ae-anchor-origin-x, 50%) var(--ae-anchor-origin-y, 0%);
       visibility: visible;
+    }
+
+    [?wait-mounted]:not(.%mounted) {
+      cursor: wait!important;
     }
 
     [?wait-mounted]:not(.%mounted) > *:not([?loader]) {

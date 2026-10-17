@@ -8,27 +8,40 @@ export function buildPreferenceMediaQueries(root) {
     return typeof root.matchMedia === "function" ? root.matchMedia(query) : null;
   }
 
+  var NO_PREFERENCE = "no-preference";
+  var PREFERS = "prefers-";
+  var REDUCED = "reduced";
+  var COLOR_SCHEME = PREFERS + "color-scheme";
+  var REDUCED_MOTION = PREFERS + "reduced-motion";
+  var REDUCED_TRANSPARENCY = PREFERS + "reduced-transparency";
+  var FORCED_COLORS = "forced-colors";
+  var CONTRAST = PREFERS + "contrast";
+
+  function preferenceQuery(feature, value) {
+    return mediaQuery("(" + feature + ": " + value + ")");
+  }
+
   return {
     colorScheme: {
-      light: mediaQuery("(prefers-color-scheme: light)"),
-      dark: mediaQuery("(prefers-color-scheme: dark)")
+      light: preferenceQuery(COLOR_SCHEME, "light"),
+      dark: preferenceQuery(COLOR_SCHEME, "dark")
     },
     reducedMotion: {
-      reduced: mediaQuery("(prefers-reduced-motion: reduce)"),
-      "no-preference": mediaQuery("(prefers-reduced-motion: no-preference)")
+      reduced: preferenceQuery(REDUCED_MOTION, "reduce"),
+      "no-preference": preferenceQuery(REDUCED_MOTION, NO_PREFERENCE)
     },
     reducedTransparency: {
-      reduced: mediaQuery("(prefers-reduced-transparency: reduced)"),
-      "no-preference": mediaQuery("(prefers-reduced-transparency: no-preference)")
+      reduced: preferenceQuery(REDUCED_TRANSPARENCY, REDUCED),
+      "no-preference": preferenceQuery(REDUCED_TRANSPARENCY, NO_PREFERENCE)
     },
     forcedColors: {
-      active: mediaQuery("(forced-colors: active)"),
-      "no-preference": mediaQuery("(forced-colors: no-preference)")
+      active: preferenceQuery(FORCED_COLORS, "active"),
+      "no-preference": preferenceQuery(FORCED_COLORS, NO_PREFERENCE)
     },
     contrast: {
-      more: mediaQuery("(prefers-contrast: more)"),
-      less: mediaQuery("(prefers-contrast: less)"),
-      "no-preference": mediaQuery("(prefers-contrast: no-preference)")
+      more: preferenceQuery(CONTRAST, "more"),
+      less: preferenceQuery(CONTRAST, "less"),
+      "no-preference": preferenceQuery(CONTRAST, NO_PREFERENCE)
     }
   };
 }

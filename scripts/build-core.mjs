@@ -212,7 +212,7 @@ async function compressJavaScript(filename) {
   const legacy = filename.includes(".legacy.") || filename === "aellux.min.js";
   const result = await minifyWithTerser({ [filename]: originalCode }, {
     ecma: legacy ? 5 : 2017,
-    compress: { passes: 2 },
+    compress: { passes: 1 },
     mangle: true,
     format: { comments: /^!/ },
     sourceMap: { content: originalMap, url: filename + ".map" }

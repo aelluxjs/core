@@ -1948,29 +1948,29 @@
         function configureScrollbarAxis(state, axis, enabled, attributeName) {
           const scrollbar = state.scrollbar;
           const current = scrollbar[axis];
-          let element = null;
-          if (enabled) element = Array.from(state.element.children).find((child) => child.hasAttribute(attributeName)) || null;
-          if (current && current.element === element && enabled) {
+          let scrollbarElement = null;
+          if (enabled) scrollbarElement = Array.from(state.element.children).find((child) => child.hasAttribute(attributeName)) || null;
+          if (current && current.element === scrollbarElement && enabled) {
             positionScrollbarAxis(state, current);
             return;
           }
           if (current) resetScrollbarAxis(state, axis);
           if (!enabled) return;
-          const owned = !element;
-          if (!element) {
-            element = root2.document.createElement("div");
-            element.setAttribute(attributeName, "");
-            state.element.appendChild(element);
+          const owned = !scrollbarElement;
+          if (!scrollbarElement) {
+            scrollbarElement = root2.document.createElement("div");
+            scrollbarElement.setAttribute(attributeName, "");
+            state.element.appendChild(scrollbarElement);
           }
           const marker = owned ? null : root2.document.createComment("scrollbar position");
-          if (marker) element.before(marker);
-          if (!owned) scrollbarMemories.set(element, AelluxJs2.persist.element.save(
-            element,
+          if (marker) scrollbarElement.before(marker);
+          if (!owned) scrollbarMemories.set(scrollbarElement, AelluxJs2.persist.element.save(
+            scrollbarElement,
             [],
             scrollbarProperties
           ));
           const record = {
-            element,
+            element: scrollbarElement,
             owned,
             axis,
             marker,
@@ -1983,7 +1983,7 @@
           record.onPointerDown = (event) => startScrollbarDrag(state, record, event);
           record.onPointerMove = (event) => moveScrollbarDrag(state, record, event);
           record.onPointerEnd = (event) => endScrollbarDrag(state, record, event);
-          setListeners(element, record, scrollbarAxisListeners, true);
+          setListeners(scrollbarElement, record, scrollbarAxisListeners, true);
           scrollbar[axis] = record;
           positionScrollbarAxis(state, record);
         }
@@ -3173,13 +3173,24 @@
         function removeTouchListeners(state) {
           setListeners(state.element, state, touchListeners, false);
           state.touchListening = false;
+          restoreTouchOverflow(state);
           state.elastic.touch = null;
+        }
+        function restoreTouchOverflow(state) {
+          const touch = state.elastic.touch;
+          if (!touch) return;
+          for (const [element, { value, priority }] of touch.scrollBehaviors) {
+            if (value) element.style.setProperty("scroll-behavior", value, priority);
+            else element.style.removeProperty("scroll-behavior");
+          }
+          touch.scrollBehaviors.clear();
         }
         function startTouch(state, event) {
           if (event.target.closest(
             `[${scrollbarVerticalAttribute}], [${scrollbarHorizontalAttribute}]`
           )) return;
           if (event.touches.length !== 1) {
+            restoreTouchOverflow(state);
             state.elastic.touch = null;
             releaseElastic(state);
             return;
@@ -3187,6 +3198,7 @@
           if (event.target.closest(`[${attribute}]`) !== state.element) return;
           cancelMomentum(state);
           const touch = event.touches[0];
+          restoreTouchOverflow(state);
           if (state.elastic.owned) {
             resetElastic(state);
             refresh(state);
@@ -3195,6 +3207,9 @@
             identifier: touch.identifier,
             x: touch.clientX,
             y: touch.clientY,
+            lastX: touch.clientX,
+            lastY: touch.clientY,
+            scrollBehaviors: /* @__PURE__ */ new Map(),
             scrollLeft: state.element.scrollLeft,
             scrollTop: state.element.scrollTop
           };
@@ -3212,10 +3227,54 @@
           if (!touch) return;
           const desiredX = start.scrollLeft + start.x - touch.clientX;
           const desiredY = start.scrollTop + start.y - touch.clientY;
+          const deltaX = start.lastX - touch.clientX;
+          const deltaY = start.lastY - touch.clientY;
+          start.lastX = touch.clientX;
+          start.lastY = touch.clientY;
           if (!applyElasticFromDesired(state, desiredX, desiredY, false)) return;
-          if (event.cancelable) event.preventDefault();
-          scrollWithinElasticBounds(state, desiredX, desiredY);
+          const metrics = state.metrics || nativeMetrics(state.element);
+          const style = root2.getComputedStyle(state.element);
+          const scrollable = (value) => value === "auto" || value === "scroll";
+          const blockedX = !scrollable(style.overflowX) || metrics.maxX <= 1;
+          const blockedY = !scrollable(style.overflowY) || metrics.maxY <= 1;
+          if (event.cancelable) {
+            event.preventDefault();
+            if (blockedX && (!style.overscrollBehaviorX || style.overscrollBehaviorX === "auto"))
+              scrollTouchOverflow(state, "x", deltaX);
+            if (blockedY && (!style.overscrollBehaviorY || style.overscrollBehaviorY === "auto"))
+              scrollTouchOverflow(state, "y", deltaY);
+          }
+          scrollWithinElasticBounds(
+            state,
+            blockedX ? state.element.scrollLeft : desiredX,
+            blockedY ? state.element.scrollTop : desiredY
+          );
           publish(state);
+        }
+        function scrollTouchOverflow(state, axis, delta) {
+          if (!delta) return;
+          const horizontal = axis === "x";
+          for (let parent = state.element.parentElement; parent && delta; parent = parent.parentElement) {
+            const style = root2.getComputedStyle(parent);
+            const overflow = horizontal ? style.overflowX : style.overflowY;
+            const position = horizontal ? parent.scrollLeft : parent.scrollTop;
+            const maximum = horizontal ? parent.scrollWidth - parent.clientWidth : parent.scrollHeight - parent.clientHeight;
+            if ((overflow === "auto" || overflow === "scroll" || parent === root2.document.scrollingElement) && maximum > 0) {
+              const next2 = Math.max(0, Math.min(maximum, position + delta));
+              if (!state.elastic.touch.scrollBehaviors.has(parent)) {
+                state.elastic.touch.scrollBehaviors.set(parent, {
+                  value: parent.style.getPropertyValue("scroll-behavior"),
+                  priority: parent.style.getPropertyPriority("scroll-behavior")
+                });
+                parent.style.setProperty("scroll-behavior", "auto", "important");
+              }
+              if (horizontal) parent.scrollLeft = next2;
+              else parent.scrollTop = next2;
+              delta -= (horizontal ? parent.scrollLeft : parent.scrollTop) - position;
+            }
+            const behavior = horizontal ? style.overscrollBehaviorX : style.overscrollBehaviorY;
+            if (behavior && behavior !== "auto") break;
+          }
         }
         function endTouch(state, event) {
           const touch = state.elastic.touch;
@@ -3223,6 +3282,7 @@
           for (const item of event.touches) {
             if (item.identifier === touch.identifier) return;
           }
+          restoreTouchOverflow(state);
           state.elastic.touch = null;
           releaseElastic(state);
         }

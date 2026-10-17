@@ -601,7 +601,7 @@ test("PDS hide timer keeps a scrollbar visible while mouse hover remains active"
   const track = page.locator("#box > [data-ae-scrollbar-vertical]");
   const result = await box.evaluate(element => {
     element.dispatchEvent(new MouseEvent("mouseenter"));
-    const content = element.firstElementChild;
+    const content = element.querySelector(":scope > div:not([data-ae-scrollbar-vertical])");
     const rect = content.getBoundingClientRect();
     const x = rect.left + 40, y = rect.top + 70;
     content.dispatchEvent(new PointerEvent("pointerdown", {
@@ -640,7 +640,7 @@ test("PDS hide timer fades the scrollbar when no hover remains", async ({ page }
   const track = page.locator("#box > [data-ae-scrollbar-vertical]");
   await page.evaluate(() => {
     const element = document.getElementById("box");
-    const content = element.firstElementChild;
+    const content = element.querySelector(":scope > div:not([data-ae-scrollbar-vertical])");
     const rect = content.getBoundingClientRect();
     const x = rect.left + 40, y = rect.top + 70;
     content.dispatchEvent(new PointerEvent("pointerdown", {

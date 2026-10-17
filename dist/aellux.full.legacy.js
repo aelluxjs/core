@@ -26421,27 +26421,27 @@
         function configureScrollbarAxis(state, axis, enabled, attributeName) {
           var scrollbar = state.scrollbar;
           var current = scrollbar[axis];
-          var element = null;
-          if (enabled) element = Array.from(state.element.children).find(function(child) {
+          var scrollbarElement = null;
+          if (enabled) scrollbarElement = Array.from(state.element.children).find(function(child) {
             return child.hasAttribute(attributeName);
           }) || null;
-          if (current && current.element === element && enabled) {
+          if (current && current.element === scrollbarElement && enabled) {
             positionScrollbarAxis(state, current);
             return;
           }
           if (current) resetScrollbarAxis(state, axis);
           if (!enabled) return;
-          var owned = !element;
-          if (!element) {
-            element = root2.document.createElement("div");
-            element.setAttribute(attributeName, "");
-            state.element.appendChild(element);
+          var owned = !scrollbarElement;
+          if (!scrollbarElement) {
+            scrollbarElement = root2.document.createElement("div");
+            scrollbarElement.setAttribute(attributeName, "");
+            state.element.appendChild(scrollbarElement);
           }
           var marker = owned ? null : root2.document.createComment("scrollbar position");
-          if (marker) element.before(marker);
-          if (!owned) scrollbarMemories.set(element, AelluxJs2.persist.element.save(element, [], scrollbarProperties));
+          if (marker) scrollbarElement.before(marker);
+          if (!owned) scrollbarMemories.set(scrollbarElement, AelluxJs2.persist.element.save(scrollbarElement, [], scrollbarProperties));
           var record = {
-            element: element,
+            element: scrollbarElement,
             owned: owned,
             axis: axis,
             marker: marker,
@@ -26460,7 +26460,7 @@
           record.onPointerEnd = function(event) {
             return endScrollbarDrag(state, record, event);
           };
-          setListeners(element, record, scrollbarAxisListeners, true);
+          setListeners(scrollbarElement, record, scrollbarAxisListeners, true);
           scrollbar[axis] = record;
           positionScrollbarAxis(state, record);
         }
@@ -27802,11 +27802,30 @@
         function removeTouchListeners(state) {
           setListeners(state.element, state, touchListeners, false);
           state.touchListening = false;
+          restoreTouchOverflow(state);
           state.elastic.touch = null;
+        }
+        function restoreTouchOverflow(state) {
+          var touch = state.elastic.touch;
+          if (!touch) return;
+          var _iterator20 = _createForOfIteratorHelper9(touch.scrollBehaviors), _step20;
+          try {
+            for (_iterator20.s(); !(_step20 = _iterator20.n()).done; ) {
+              var _step20$value = _slicedToArray5(_step20.value, 2), element = _step20$value[0], _step20$value$ = _step20$value[1], value = _step20$value$.value, priority = _step20$value$.priority;
+              if (value) element.style.setProperty("scroll-behavior", value, priority);
+              else element.style.removeProperty("scroll-behavior");
+            }
+          } catch (err) {
+            _iterator20.e(err);
+          } finally {
+            _iterator20.f();
+          }
+          touch.scrollBehaviors.clear();
         }
         function startTouch(state, event) {
           if (event.target.closest("[".concat(scrollbarVerticalAttribute, "], [").concat(scrollbarHorizontalAttribute, "]"))) return;
           if (event.touches.length !== 1) {
+            restoreTouchOverflow(state);
             state.elastic.touch = null;
             releaseElastic(state);
             return;
@@ -27814,6 +27833,7 @@
           if (event.target.closest("[".concat(attribute, "]")) !== state.element) return;
           cancelMomentum(state);
           var touch = event.touches[0];
+          restoreTouchOverflow(state);
           if (state.elastic.owned) {
             resetElastic(state);
             refresh(state);
@@ -27822,6 +27842,9 @@
             identifier: touch.identifier,
             x: touch.clientX,
             y: touch.clientY,
+            lastX: touch.clientX,
+            lastY: touch.clientY,
+            scrollBehaviors: /* @__PURE__ */ new Map(),
             scrollLeft: state.element.scrollLeft,
             scrollTop: state.element.scrollTop
           };
@@ -27830,42 +27853,83 @@
           var start = state.elastic.touch;
           if (!start) return;
           var touch = null;
-          var _iterator20 = _createForOfIteratorHelper9(event.touches), _step20;
+          var _iterator21 = _createForOfIteratorHelper9(event.touches), _step21;
           try {
-            for (_iterator20.s(); !(_step20 = _iterator20.n()).done; ) {
-              var item = _step20.value;
+            for (_iterator21.s(); !(_step21 = _iterator21.n()).done; ) {
+              var item = _step21.value;
               if (item.identifier === start.identifier) {
                 touch = item;
                 break;
               }
             }
           } catch (err) {
-            _iterator20.e(err);
-          } finally {
-            _iterator20.f();
-          }
-          if (!touch) return;
-          var desiredX = start.scrollLeft + start.x - touch.clientX;
-          var desiredY = start.scrollTop + start.y - touch.clientY;
-          if (!applyElasticFromDesired(state, desiredX, desiredY, false)) return;
-          if (event.cancelable) event.preventDefault();
-          scrollWithinElasticBounds(state, desiredX, desiredY);
-          publish(state);
-        }
-        function endTouch(state, event) {
-          var touch = state.elastic.touch;
-          if (!touch) return;
-          var _iterator21 = _createForOfIteratorHelper9(event.touches), _step21;
-          try {
-            for (_iterator21.s(); !(_step21 = _iterator21.n()).done; ) {
-              var item = _step21.value;
-              if (item.identifier === touch.identifier) return;
-            }
-          } catch (err) {
             _iterator21.e(err);
           } finally {
             _iterator21.f();
           }
+          if (!touch) return;
+          var desiredX = start.scrollLeft + start.x - touch.clientX;
+          var desiredY = start.scrollTop + start.y - touch.clientY;
+          var deltaX = start.lastX - touch.clientX;
+          var deltaY = start.lastY - touch.clientY;
+          start.lastX = touch.clientX;
+          start.lastY = touch.clientY;
+          if (!applyElasticFromDesired(state, desiredX, desiredY, false)) return;
+          var metrics = state.metrics || nativeMetrics(state.element);
+          var style = root2.getComputedStyle(state.element);
+          var scrollable = function scrollable2(value) {
+            return value === "auto" || value === "scroll";
+          };
+          var blockedX = !scrollable(style.overflowX) || metrics.maxX <= 1;
+          var blockedY = !scrollable(style.overflowY) || metrics.maxY <= 1;
+          if (event.cancelable) {
+            event.preventDefault();
+            if (blockedX && (!style.overscrollBehaviorX || style.overscrollBehaviorX === "auto")) scrollTouchOverflow(state, "x", deltaX);
+            if (blockedY && (!style.overscrollBehaviorY || style.overscrollBehaviorY === "auto")) scrollTouchOverflow(state, "y", deltaY);
+          }
+          scrollWithinElasticBounds(state, blockedX ? state.element.scrollLeft : desiredX, blockedY ? state.element.scrollTop : desiredY);
+          publish(state);
+        }
+        function scrollTouchOverflow(state, axis, delta) {
+          if (!delta) return;
+          var horizontal = axis === "x";
+          for (var parent = state.element.parentElement; parent && delta; parent = parent.parentElement) {
+            var style = root2.getComputedStyle(parent);
+            var overflow = horizontal ? style.overflowX : style.overflowY;
+            var position = horizontal ? parent.scrollLeft : parent.scrollTop;
+            var maximum = horizontal ? parent.scrollWidth - parent.clientWidth : parent.scrollHeight - parent.clientHeight;
+            if ((overflow === "auto" || overflow === "scroll" || parent === root2.document.scrollingElement) && maximum > 0) {
+              var _next = Math.max(0, Math.min(maximum, position + delta));
+              if (!state.elastic.touch.scrollBehaviors.has(parent)) {
+                state.elastic.touch.scrollBehaviors.set(parent, {
+                  value: parent.style.getPropertyValue("scroll-behavior"),
+                  priority: parent.style.getPropertyPriority("scroll-behavior")
+                });
+                parent.style.setProperty("scroll-behavior", "auto", "important");
+              }
+              if (horizontal) parent.scrollLeft = _next;
+              else parent.scrollTop = _next;
+              delta -= (horizontal ? parent.scrollLeft : parent.scrollTop) - position;
+            }
+            var behavior = horizontal ? style.overscrollBehaviorX : style.overscrollBehaviorY;
+            if (behavior && behavior !== "auto") break;
+          }
+        }
+        function endTouch(state, event) {
+          var touch = state.elastic.touch;
+          if (!touch) return;
+          var _iterator22 = _createForOfIteratorHelper9(event.touches), _step22;
+          try {
+            for (_iterator22.s(); !(_step22 = _iterator22.n()).done; ) {
+              var item = _step22.value;
+              if (item.identifier === touch.identifier) return;
+            }
+          } catch (err) {
+            _iterator22.e(err);
+          } finally {
+            _iterator22.f();
+          }
+          restoreTouchOverflow(state);
           state.elastic.touch = null;
           releaseElastic(state);
         }
@@ -28043,16 +28107,16 @@
               return scheduleResize(state);
             });
             state.resizeObserver.observe(state.element);
-            var _iterator22 = _createForOfIteratorHelper9(state.element.children), _step22;
+            var _iterator23 = _createForOfIteratorHelper9(state.element.children), _step23;
             try {
-              for (_iterator22.s(); !(_step22 = _iterator22.n()).done; ) {
-                var child = _step22.value;
+              for (_iterator23.s(); !(_step23 = _iterator23.n()).done; ) {
+                var child = _step23.value;
                 state.resizeObserver.observe(child);
               }
             } catch (err) {
-              _iterator22.e(err);
+              _iterator23.e(err);
             } finally {
-              _iterator22.f();
+              _iterator23.f();
             }
           }
           if (root2.MutationObserver) {
@@ -28060,16 +28124,16 @@
               if (state.resizeObserver) {
                 state.resizeObserver.disconnect();
                 state.resizeObserver.observe(state.element);
-                var _iterator23 = _createForOfIteratorHelper9(state.element.children), _step23;
+                var _iterator24 = _createForOfIteratorHelper9(state.element.children), _step24;
                 try {
-                  for (_iterator23.s(); !(_step23 = _iterator23.n()).done; ) {
-                    var _child = _step23.value;
+                  for (_iterator24.s(); !(_step24 = _iterator24.n()).done; ) {
+                    var _child = _step24.value;
                     state.resizeObserver.observe(_child);
                   }
                 } catch (err) {
-                  _iterator23.e(err);
+                  _iterator24.e(err);
                 } finally {
-                  _iterator23.f();
+                  _iterator24.f();
                 }
               }
               if (records.some(function(record) {
@@ -28182,10 +28246,10 @@
                 });
               }
               if (values.snapAxis && state.snap.axis !== values.snapAxis) syncSnapStyles(state, values.snapAxis);
-              var _iterator24 = _createForOfIteratorHelper9(values.snapValues), _step24;
+              var _iterator25 = _createForOfIteratorHelper9(values.snapValues), _step25;
               try {
-                for (_iterator24.s(); !(_step24 = _iterator24.n()).done; ) {
-                  var _step24$value = _step24.value, item = _step24$value.item, viewport = _step24$value.viewport, focus2 = _step24$value.focus;
+                for (_iterator25.s(); !(_step25 = _iterator25.n()).done; ) {
+                  var _step25$value = _step25.value, item = _step25$value.item, viewport = _step25$value.viewport, focus2 = _step25$value.focus;
                   if (!state.snap.savedItems.has(item)) {
                     snapItemMemories.set(item, AelluxJs2.persist.element.save(item, [], snapProperties));
                     state.snap.savedItems.add(item);
@@ -28194,9 +28258,9 @@
                   item.style.setProperty(snapProperties[1], focus2);
                 }
               } catch (err) {
-                _iterator24.e(err);
+                _iterator25.e(err);
               } finally {
-                _iterator24.f();
+                _iterator25.f();
               }
               updateScrollbars(state, values.scrollbars);
             });
@@ -28299,7 +28363,7 @@
           if (converted && deltaX) {
             var current = state.element.scrollLeft;
             var desiredX = current + deltaX;
-            var _next = Math.max(0, Math.min(metrics.maxX, desiredX));
+            var _next2 = Math.max(0, Math.min(metrics.maxX, desiredX));
             var overflow = desiredX < 0 || desiredX > metrics.maxX;
             var stretched = false;
             if (overflow && state.elasticEnabled) {
@@ -28315,12 +28379,12 @@
               resetElastic(state);
               refresh(state);
             }
-            if (!stretched && _next !== current) state.element.scrollTo({
-              left: _next,
+            if (!stretched && _next2 !== current) state.element.scrollTo({
+              left: _next2,
               behavior: "instant"
             });
-            if (stretched || _next !== current) publish(state);
-            if (!overflow && _next !== current) event.preventDefault();
+            if (stretched || _next2 !== current) publish(state);
+            if (!overflow && _next2 !== current) event.preventDefault();
             return;
           }
           if (state.elasticEnabled && (axes.x || axes.y)) {

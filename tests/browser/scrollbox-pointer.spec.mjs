@@ -2988,6 +2988,46 @@ test("elastic native touch stretches while pulling beyond an edge", async ({ pag
   expect(result.releasing).toBe(true);
 });
 
+for (const behavior of ["auto", "contain"]) {
+  test(`horizontal touch pressure ${behavior === "auto" ? "passes" : "blocks"} vertical motion to the parent`, async ({ page }) => {
+    if (behavior === "contain")
+      test.skip(!await page.evaluate(() => CSS.supports("overscroll-behavior-y", "contain")));
+    await setup(page, `<div id="parent" style="width:120px;height:100px;overflow-y:auto;scroll-behavior:smooth!important">
+      <div id="box" data-ae-scrollbox="native"
+        style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden;overscroll-behavior-y:${behavior}">
+        <div data-ae-scrollbox-elastic style="width:300px;height:300px"></div>
+      </div>
+      <div style="height:300px"></div>
+    </div>`);
+    const result = await page.evaluate(() => {
+      const box = document.getElementById("box");
+      const parent = document.getElementById("parent");
+      const touchEvent = (type, x, y, active) => {
+        const event = new Event(type, { bubbles: true, cancelable: true });
+        Object.defineProperty(event, "touches", { value: active ? [
+          { identifier: 1, clientX: x, clientY: y }
+        ] : [] });
+        return event;
+      };
+      box.dispatchEvent(touchEvent("touchstart", 40, 60, true));
+      const first = touchEvent("touchmove", 100, 40, true);
+      box.dispatchEvent(first);
+      const firstTop = parent.scrollTop;
+      const second = touchEvent("touchmove", 120, 20, true);
+      box.dispatchEvent(second);
+      const result = { firstTop, secondTop: parent.scrollTop, innerTop: box.scrollTop,
+        prevented: first.defaultPrevented && second.defaultPrevented };
+      box.dispatchEvent(touchEvent("touchend", 120, 20, false));
+      result.restored = parent.style.getPropertyValue("scroll-behavior") === "smooth" &&
+        parent.style.getPropertyPriority("scroll-behavior") === "important";
+      return result;
+    });
+    expect(result).toEqual({ firstTop: behavior === "auto" ? 20 : 0,
+      secondTop: behavior === "auto" ? 40 : 0, innerTop: 0,
+      prevented: true, restored: true });
+  });
+}
+
 test("elastic pointer drag moves its wrapper away from the right edge", async ({ page }) => {
   await setup(page, `<div id="box" data-ae-scrollbox="pointer"
     data-ae-scrollbox-momentum="false"
