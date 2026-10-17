@@ -1770,8 +1770,8 @@
           state.onSnapTouchStart = (event) => beginSnapGesture(state, "touch", event);
           state.onSnapTouchEnd = (event) => endSnapGesture(state, "touch", event);
           state.onSnapBlur = () => endSnapGesture(state);
-          state.onScrollbarPointerDown = () => startScrollbarInteractionVisibility(state);
-          state.onScrollbarPointerEnd = () => scheduleScrollbarInteractionHide(state);
+          state.onScrollbarPointerDown = isTouch(() => startScrollbarInteractionVisibility(state));
+          state.onScrollbarPointerEnd = isTouch(() => scheduleScrollbarInteractionHide(state));
           state.onScrollbarPointerEnter = isTouch(() => setScrollbarHover(state, "pointerHover", true));
           state.onScrollbarPointerLeave = isTouch(() => setScrollbarHover(state, "pointerHover", false));
           state.onScrollbarPointerOver = isTouch(() => setScrollbarHover(state, "pointerHover", true));

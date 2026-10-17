@@ -26203,12 +26203,12 @@
           state.onSnapBlur = function() {
             return endSnapGesture(state);
           };
-          state.onScrollbarPointerDown = function() {
+          state.onScrollbarPointerDown = isTouch(function() {
             return startScrollbarInteractionVisibility(state);
-          };
-          state.onScrollbarPointerEnd = function() {
+          });
+          state.onScrollbarPointerEnd = isTouch(function() {
             return scheduleScrollbarInteractionHide(state);
-          };
+          });
           state.onScrollbarPointerEnter = isTouch(function() {
             return setScrollbarHover(state, "pointerHover", true);
           });

@@ -377,7 +377,7 @@ test("grab cursor keeps its scrollbar visible after hover state expires", async 
   await expect(track).toHaveCSS("opacity", "0");
 });
 
-test("mobile touch and native scroll reveal the scrollbar until scrolling settles", async ({ browser, browserName }) => {
+test("mobile tap leaves the scrollbar hidden and native scroll reveals it", async ({ browser, browserName }) => {
   test.skip(browserName !== "chromium");
   const context = await browser.newContext({ hasTouch: true, isMobile: true,
     viewport: { width: 390, height: 844 } });
@@ -392,11 +392,9 @@ test("mobile touch and native scroll reveal the scrollbar until scrolling settle
     await expect(track).toHaveCSS("opacity", "0");
     await page.locator("#content").evaluate(element => element.dispatchEvent(
       new PointerEvent("pointerdown", { bubbles: true, pointerType: "touch" })));
-    await expect(track).toHaveCSS("opacity", "1");
     await page.locator("#content").evaluate(element => element.dispatchEvent(
       new PointerEvent("pointerup", { bubbles: true, pointerType: "touch" })));
-    await page.locator("#content").evaluate(element => element.dispatchEvent(
-      new MouseEvent("mouseover", { bubbles: true })));
+    await page.waitForTimeout(200);
     await expect(track).toHaveCSS("opacity", "0");
 
     await box.evaluate(element => { element.scrollTop = 80; });
@@ -407,7 +405,7 @@ test("mobile touch and native scroll reveal the scrollbar until scrolling settle
   }
 });
 
-test("touch reveals a horizontal scrollbar at its current scroll position", async ({ browser, browserName }) => {
+test("mobile scroll reveals a horizontal scrollbar at its current position", async ({ browser, browserName }) => {
   test.skip(browserName !== "chromium");
   const context = await browser.newContext({ hasTouch: true, isMobile: true,
     viewport: { width: 390, height: 844 } });
@@ -421,9 +419,7 @@ test("touch reveals a horizontal scrollbar at its current scroll position", asyn
       const box = document.getElementById("box");
       const bar = box.querySelector("[data-ae-scrollbar-horizontal]");
       box.scrollTo({ left: 80, behavior: "instant" });
-      document.getElementById("content").dispatchEvent(new PointerEvent("pointerdown", {
-        bubbles: true, pointerType: "touch", pointerId: 1, isPrimary: true
-      }));
+      box.dispatchEvent(new Event("scroll"));
       const boxRect = box.getBoundingClientRect();
       const barRect = bar.getBoundingClientRect();
       return { scrollLeft: box.scrollLeft, offset: barRect.left - boxRect.left,
