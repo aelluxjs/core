@@ -122,5 +122,5 @@ test("extensions register the CSS properties they publish during init", async ({
     element.remove();
     return values;
   });
-  expect(colors.every(Boolean)).toBe(true);
+  expect(colors).toEqual(["", "", ""]);
 });

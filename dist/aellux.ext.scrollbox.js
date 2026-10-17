@@ -167,17 +167,9 @@
         })),
         { name: "--ae-scrollbar-opacity-visible", syntax: "<number>", initialValue: "1" },
         { name: "--ae-scrollbar-opacity-fade", syntax: "<number>", initialValue: "0" },
-        {
-          name: "--ae-scrollbar-thumb-color",
-          syntax: "<color>",
-          initialValue: "color-mix(in srgb, CanvasText 50%, transparent)"
-        },
-        {
-          name: "--ae-scrollbar-thumb-hover-color",
-          syntax: "<color>",
-          initialValue: "color-mix(in srgb, CanvasText 90%, transparent)"
-        },
-        { name: "--ae-scrollbar-track-color", syntax: "<color>", initialValue: "transparent" },
+        { name: "--ae-scrollbar-thumb-color", syntax: "*" },
+        { name: "--ae-scrollbar-thumb-hover-color", syntax: "*" },
+        { name: "--ae-scrollbar-track-color", syntax: "*" },
         {
           name: "--ae-scrollbar-thumb-radius",
           syntax: "<length-percentage>",

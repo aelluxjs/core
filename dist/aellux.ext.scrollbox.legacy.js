@@ -212,16 +212,13 @@
         initialValue: "0"
       }, {
         name: "--ae-scrollbar-thumb-color",
-        syntax: "<color>",
-        initialValue: "color-mix(in srgb, CanvasText 50%, transparent)"
+        syntax: "*"
       }, {
         name: "--ae-scrollbar-thumb-hover-color",
-        syntax: "<color>",
-        initialValue: "color-mix(in srgb, CanvasText 90%, transparent)"
+        syntax: "*"
       }, {
         name: "--ae-scrollbar-track-color",
-        syntax: "<color>",
-        initialValue: "transparent"
+        syntax: "*"
       }, {
         name: "--ae-scrollbar-thumb-radius",
         syntax: "<length-percentage>",

@@ -123,6 +123,36 @@ test("custom scrollbar inherits inline colors, thumb radius, and thickness", asy
   await expect.poll(() => values(vertical)).toMatchObject({ color: "rgb(40, 50, 60)" });
 });
 
+test("custom scrollbar uses CanvasText fallbacks when colors are unset", async ({ page }) => {
+  await setup(page, `<div id="box" data-ae-scrollbox data-ae-scrollbar="vertical"
+    style="width:120px;height:120px;overflow-y:auto">
+    <div style="height:300px"></div>
+  </div>`);
+  const bar = page.locator("#box > [data-ae-scrollbar-vertical]");
+  const colors = await bar.evaluate(element => {
+    const probe = document.createElement("div");
+    probe.style.backgroundColor = "color-mix(in srgb, CanvasText 50%, transparent)";
+    document.body.appendChild(probe);
+    const expected = getComputedStyle(probe).backgroundColor;
+    const actual = getComputedStyle(element, "::before").backgroundColor;
+    probe.remove();
+    return { actual, expected };
+  });
+  expect(colors.actual).toBe(colors.expected);
+  const rect = await bar.boundingBox();
+  await page.mouse.move(rect.x + rect.width / 2, rect.y + 10);
+  const hoverColors = await bar.evaluate(element => {
+    const probe = document.createElement("div");
+    probe.style.backgroundColor = "color-mix(in srgb, CanvasText 90%, transparent)";
+    document.body.appendChild(probe);
+    const expected = getComputedStyle(probe).backgroundColor;
+    const actual = getComputedStyle(element, "::before").backgroundColor;
+    probe.remove();
+    return { actual, expected };
+  });
+  expect(hoverColors.actual).toBe(hoverColors.expected);
+});
+
 test("snap pauses during scrollbar thumb drag while focus variables update", async ({ page }) => {
   await setup(page, `<div id="box" data-ae-scrollbox data-ae-scrollbox-snap
     data-ae-scrollbar="horizontal"
