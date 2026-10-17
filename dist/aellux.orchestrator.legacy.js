@@ -21400,6 +21400,7 @@
     };
   }
   function createMountHelper(root, mountMaps, mountedElements, elementControllers) {
+    var UNMOUNT = "unmount";
     var toCapitalized2 = utils_name_case_default.toCapitalized, toCamelCase2 = utils_name_case_default.toCamelCase, fromCamelCase2 = utils_name_case_default.fromCamelCase;
     var pendingMounts = /* @__PURE__ */ new WeakMap();
     var pendingUnmounts = /* @__PURE__ */ new WeakMap();
@@ -21448,7 +21449,7 @@
           while (1) switch (_context2.n) {
             case 0:
               extensionNames = _args2.length > 1 && _args2[1] !== void 0 ? _args2[1] : null;
-              rootElement = resolveMountElement(elementOrId, "unmount");
+              rootElement = resolveMountElement(elementOrId, UNMOUNT);
               if (rootElement) {
                 _context2.n = 1;
                 break;
@@ -21456,7 +21457,7 @@
               return _context2.a(2, false);
             case 1:
               _context2.n = 2;
-              return AelluxJsMounted(rootElement, "unmount", extensionNames);
+              return AelluxJsMounted(rootElement, UNMOUNT, extensionNames);
             case 2:
               return _context2.a(2, true);
           }
@@ -21511,7 +21512,7 @@
               return _context3.a(2, false);
             case 8:
               _context3.n = 9;
-              return AelluxJsMounted(root.document, "unmount", null, true);
+              return AelluxJsMounted(root.document, UNMOUNT, null, true);
             case 9:
               return _context3.a(2, true);
           }
@@ -22019,7 +22020,7 @@
               }
               _Array$from2$_i = _slicedToArray(_Array$from2[_i8], 2), element = _Array$from2$_i[0], mountIds = _Array$from2$_i[1];
               inRoot = element === rootElement || rootElement.contains(element);
-              detachedInGlobalUnmount = method === "unmount" && rootElement === root.document && !element.isConnected;
+              detachedInGlobalUnmount = method === UNMOUNT && rootElement === root.document && !element.isConnected;
               if (!(detachedOnly ? element.isConnected || hasPendingMounts(element) : !inRoot && !detachedInGlobalUnmount)) {
                 _context6.n = 2;
                 break;
@@ -22045,7 +22046,7 @@
               extensionKey = toCamelCase2(extensionName);
               mounter = mountMaps.get(extensionKey);
               controller = mounter && mounter.get(selector);
-              if (!(method === "unmount")) {
+              if (!(method === UNMOUNT)) {
                 _context6.n = 5;
                 break;
               }
@@ -22087,7 +22088,7 @@
               _context6.n = 1;
               break;
             case 10:
-              if (!(method === "unmount")) {
+              if (!(method === UNMOUNT)) {
                 _context6.n = 18;
                 break;
               }
@@ -22197,7 +22198,7 @@
               diagnostics.error(diagnostics.ERROR_EXTENSION_MOUNT, {
                 cause: _t1,
                 extension: extensionName,
-                method: "unmount",
+                method: UNMOUNT,
                 selector: selector
               });
             case 9:
@@ -22213,7 +22214,7 @@
                 diagnostics.error(diagnostics.ERROR_EXTENSION_MOUNT, {
                   cause: cause,
                   extension: extensionName,
-                  method: "unmount",
+                  method: UNMOUNT,
                   selector: selector
                 });
               }

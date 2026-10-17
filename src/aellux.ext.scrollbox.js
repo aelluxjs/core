@@ -36,6 +36,21 @@
   if (!AelluxJs) throw new Error('[aellux.js] Load the boot script before the scrollbox extension.');
   const { onTarget, offTarget } = AelluxJs;
 
+  const
+    POINTER = "pointer",
+    POINTER_DOWN = `${POINTER}down`,
+    POINTER_MOVE = `${POINTER}move`,
+    POINTER_UP = `${POINTER}up`,
+    POINTER_CANCEL = `${POINTER}cancel`,
+    POINTER_OVER = `${POINTER}over`,
+    POINTER_OUT = `${POINTER}out`,
+    POINTER_ENTER = `${POINTER}enter`,
+    POINTER_LEAVE = `${POINTER}leave`,
+    POINTER_DOWN_TARGET = `$${POINTER_DOWN}`,
+    POINTER_MOVE_TARGET = `$${POINTER_MOVE}`,
+    POINTER_UP_TARGET = `$${POINTER_UP}`,
+    POINTER_CANCEL_TARGET = `$${POINTER_CANCEL}`;
+
   const attribute = AelluxJs.attr(extensionName);
   const wheelAttribute = AelluxJs.attr("scrollbox-wheel-horizontal");
   const momentumAttribute = AelluxJs.attr("scrollbox-momentum");
@@ -100,6 +115,38 @@
     "--ae-scrollbar-display"
   ];
 
+  const pointerListeners = [
+    [POINTER_DOWN, "onPointerDown"], [POINTER_OVER, "onPointerOver"],
+    [POINTER_OUT, "onPointerOut"], ["mousedown", "onMouseDown"]
+  ];
+  const scrollbarHoverListeners = [
+    [POINTER_ENTER, "onScrollbarPointerEnter"], [POINTER_LEAVE, "onScrollbarPointerLeave"],
+    ["mouseenter", "onScrollbarMouseEnter"], ["mouseleave", "onScrollbarMouseLeave"]
+  ];
+  const scrollbarAxisListeners = [
+    [POINTER_DOWN, "onPointerDown"], [POINTER_MOVE, "onPointerMove"],
+    [POINTER_UP, "onPointerEnd"], [POINTER_CANCEL, "onPointerEnd"]
+  ];
+  const snapEndListeners = [
+    [POINTER_UP, "onSnapPointerEnd", true], [POINTER_CANCEL, "onSnapPointerEnd", true],
+    ["touchend", "onSnapTouchEnd", true], ["touchcancel", "onSnapTouchEnd", true],
+    ["blur", "onSnapBlur"]
+  ];
+  const touchListeners = [
+    ["touchstart", "onTouchStart", { passive: true }],
+    ["touchmove", "onTouchMove", { passive: false }],
+    ["touchend", "onTouchEnd", { passive: true }],
+    ["touchcancel", "onTouchEnd", { passive: true }]
+  ];
+
+  function setListeners(target, owner, entries, active) {
+    const method = active ? onTarget : offTarget;
+    for (const [event, handler, options] of entries) {
+      method(target, `$${event}`, owner[handler], active ? options :
+        options === true || !!options?.capture);
+    }
+  }
+
   const pointerScrollMouseEvents = [
     "mousedown", "mousemove", "mouseup", "click", "dblclick", "auxclick",
     "contextmenu", "mouseover", "mouseout", "mouseenter", "mouseleave"
@@ -130,16 +177,11 @@
 
   function init() {
     AelluxJs.registerCssProperty(
-      { name: "--ae-scroll-y-progress", syntax: "<number>", inherits: false, initialValue: "0" },
-      { name: "--ae-scroll-x-progress", syntax: "<number>", inherits: false, initialValue: "0" },
-      { name: "--ae-snap-viewport", syntax: "<number>", inherits: false, initialValue: "0" },
-      { name: "--ae-snap-focus", syntax: "<number>", inherits: false, initialValue: "0" },
-      { name: "--ae-scrollbar-x", syntax: "<length>", inherits: false, initialValue: "0px" },
-      { name: "--ae-scrollbar-y", syntax: "<length>", inherits: false, initialValue: "0px" },
-      { name: "--ae-scrollbar-length", syntax: "<length>", inherits: false, initialValue: "0px" },
-      { name: "--ae-scrollbar-thumb-size", syntax: "<length>", inherits: false, initialValue: "0px" },
-      { name: "--ae-scrollbar-thumb-position", syntax: "<length>", inherits: false, initialValue: "0px" },
-      { name: "--ae-scrollbar-display", syntax: "block | none", inherits: false, initialValue: "none" }
+      ...[...properties, ...snapProperties].map(name =>
+        ({ name, syntax: "<number>", inherits: false, initialValue: "0" })),
+      ...scrollbarProperties.map((name, index) => ({ name,
+        syntax: index === 5 ? "block | none" : "<length>",
+        inherits: false, initialValue: index === 5 ? "none" : "0px" }))
     );
     AelluxJs.mountManager.add({
       extensionName, selector: `[${attribute}]`,
@@ -260,8 +302,8 @@
     state.onTouchMove = event => moveTouch(state, event);
     state.onTouchEnd = event => endTouch(state, event);
 
-    state.onSnapPointerDown = event => beginSnapGesture(state, "pointer", event);
-    state.onSnapPointerEnd = event => endSnapGesture(state, "pointer", event);
+    state.onSnapPointerDown = event => beginSnapGesture(state, POINTER, event);
+    state.onSnapPointerEnd = event => endSnapGesture(state, POINTER, event);
     state.onSnapTouchStart = event => beginSnapGesture(state, "touch", event);
     state.onSnapTouchEnd = event => endSnapGesture(state, "touch", event);
     state.onSnapBlur = () => endSnapGesture(state);
@@ -320,12 +362,7 @@
     offTarget(element, "$scroll", state.onScroll);
     offTarget(element, "$scrollend", state.onScrollEnd);
     if (state.wheelListening) offTarget(element, "$wheel", state.onWheel, true);
-    if (state.pointerListening) {
-      offTarget(element, "$pointerdown", state.onPointerDown);
-      offTarget(element, "$pointerover", state.onPointerOver);
-      offTarget(element, "$pointerout", state.onPointerOut);
-      offTarget(element, "$mousedown", state.onMouseDown);
-    }
+    if (state.pointerListening) setListeners(element, state, pointerListeners, false);
     if (state.touchListening) removeTouchListeners(state);
     if (state.resizeObserver) state.resizeObserver.disconnect();
     if (state.mutationObserver) state.mutationObserver.disconnect();
@@ -371,22 +408,16 @@
     else if (!state.elasticEnabled && state.touchListening) removeTouchListeners(state);
     if (!state.elasticEnabled) resetElastic(state);
 
-    const pointerEnabled = state.desktop && state.mode === "pointer";
+    const pointerEnabled = state.desktop && state.mode === POINTER;
     if (!pointerEnabled || !state.momentumEnabled) cancelMomentum(state);
     if (pointerEnabled && !state.pointerListening) {
-      onTarget(element, "$pointerdown", state.onPointerDown);
-      onTarget(element, "$pointerover", state.onPointerOver);
-      onTarget(element, "$pointerout", state.onPointerOut);
-      onTarget(element, "$mousedown", state.onMouseDown);
+      setListeners(element, state, pointerListeners, true);
       state.pointerListening = true;
     } else if (!pointerEnabled && state.pointerListening) {
       if (activePointerScrollState && activePointerScrollState.pointerScroll &&
         activePointerScrollState.pointerScroll.chain.includes(state))
         endPointerScroll(activePointerScrollState);
-      offTarget(element, "$pointerdown", state.onPointerDown);
-      offTarget(element, "$pointerover", state.onPointerOver);
-      offTarget(element, "$pointerout", state.onPointerOut);
-      offTarget(element, "$mousedown", state.onMouseDown);
+      setListeners(element, state, pointerListeners, false);
       state.pointerListening = false;
       endPointerScroll(state);
       state.lastPointerDown = null;
@@ -432,20 +463,14 @@
       scrollbar.mouseHover = element.matches(":hover") &&
         !!(root.matchMedia && root.matchMedia("(any-hover: hover)").matches);
 
-      onTarget(element, "$pointerenter", state.onScrollbarPointerEnter);
-      onTarget(element, "$pointerleave", state.onScrollbarPointerLeave);
-      onTarget(element, "$mouseenter", state.onScrollbarMouseEnter);
-      onTarget(element, "$mouseleave", state.onScrollbarMouseLeave);
-      AelluxJs.on("$pointerdown", state.onScrollbarOutsideDown, true);
+      setListeners(element, state, scrollbarHoverListeners, true);
+      AelluxJs.on(POINTER_DOWN_TARGET, state.onScrollbarOutsideDown, true);
 
       scrollbar.listening = true;
       syncScrollbarVisibility(state);
     } else if (!enabled && scrollbar.listening) {
-      offTarget(element, "$pointerenter", state.onScrollbarPointerEnter);
-      offTarget(element, "$pointerleave", state.onScrollbarPointerLeave);
-      offTarget(element, "$mouseenter", state.onScrollbarMouseEnter);
-      offTarget(element, "$mouseleave", state.onScrollbarMouseLeave);
-      AelluxJs.off("$pointerdown", state.onScrollbarOutsideDown, true);
+      setListeners(element, state, scrollbarHoverListeners, false);
+      AelluxJs.off(POINTER_DOWN_TARGET, state.onScrollbarOutsideDown, true);
 
       scrollbar.listening = false;
       clearScrollbarPdsVisibility(state);
@@ -496,10 +521,7 @@
     record.onPointerMove = event => moveScrollbarDrag(state, record, event);
     record.onPointerEnd = event => endScrollbarDrag(state, record, event);
 
-    onTarget(element, "$pointerdown", record.onPointerDown);
-    onTarget(element, "$pointermove", record.onPointerMove);
-    onTarget(element, "$pointerup", record.onPointerEnd);
-    onTarget(element, "$pointercancel", record.onPointerEnd);
+    setListeners(element, record, scrollbarAxisListeners, true);
     scrollbar[axis] = record;
   }
 
@@ -508,10 +530,7 @@
     if (!record) return;
     endScrollbarDrag(state, record);
     const element = record.element;
-    offTarget(element, "$pointerdown", record.onPointerDown);
-    offTarget(element, "$pointermove", record.onPointerMove);
-    offTarget(element, "$pointerup", record.onPointerEnd);
-    offTarget(element, "$pointercancel", record.onPointerEnd);
+    setListeners(element, record, scrollbarAxisListeners, false);
     if (record.owned) element.remove();
     else scrollbarMemories.get(element)?.restore();
     scrollbarMemories.delete(element);
@@ -523,11 +542,8 @@
     resetScrollbarAxis(state, "y");
     const scrollbar = state.scrollbar;
     if (scrollbar.listening) {
-      offTarget(state.element, "$pointerenter", state.onScrollbarPointerEnter);
-      offTarget(state.element, "$pointerleave", state.onScrollbarPointerLeave);
-      offTarget(state.element, "$mouseenter", state.onScrollbarMouseEnter);
-      offTarget(state.element, "$mouseleave", state.onScrollbarMouseLeave);
-      AelluxJs.off("$pointerdown", state.onScrollbarOutsideDown, true);
+      setListeners(state.element, state, scrollbarHoverListeners, false);
+      AelluxJs.off(POINTER_DOWN_TARGET, state.onScrollbarOutsideDown, true);
       scrollbar.listening = false;
     }
     if (scrollbar.hideOwned) state.element.classList.remove(nativeScrollbarHideClass);
@@ -619,16 +635,16 @@
     for (const { record, x, y, trackSize, thumbSize, thumbPosition, max, display } of values) {
       if (state.scrollbar[record.axis] !== record) continue;
       const style = record.element.style;
-      if (record.x !== x) style.setProperty("--ae-scrollbar-x", `${x}px`);
-      if (record.y !== y) style.setProperty("--ae-scrollbar-y", `${y}px`);
+      if (record.x !== x) style.setProperty(scrollbarProperties[0], `${x}px`);
+      if (record.y !== y) style.setProperty(scrollbarProperties[1], `${y}px`);
       if (record.trackSize !== trackSize)
-        style.setProperty("--ae-scrollbar-length", `${trackSize}px`);
+        style.setProperty(scrollbarProperties[2], `${trackSize}px`);
       if (record.thumbSize !== thumbSize)
-        style.setProperty("--ae-scrollbar-thumb-size", `${thumbSize}px`);
+        style.setProperty(scrollbarProperties[3], `${thumbSize}px`);
       if (record.thumbPosition !== thumbPosition)
-        style.setProperty("--ae-scrollbar-thumb-position", `${thumbPosition}px`);
+        style.setProperty(scrollbarProperties[4], `${thumbPosition}px`);
       if (record.display !== display)
-        style.setProperty("--ae-scrollbar-display", display);
+        style.setProperty(scrollbarProperties[5], display);
       record.x = x;
       record.y = y;
       record.trackSize = trackSize;
@@ -934,7 +950,7 @@
 
   function addSnapGestureListeners(state) {
     if (state.snap.gestureListening) return;
-    onTarget(state.element, "$pointerdown", state.onSnapPointerDown, true);
+    onTarget(state.element, POINTER_DOWN_TARGET, state.onSnapPointerDown, true);
     onTarget(state.element, "$touchstart", state.onSnapTouchStart,
       { passive: true, capture: true });
     state.snap.gestureListening = true;
@@ -942,7 +958,7 @@
 
   function removeSnapGestureListeners(state) {
     if (state.snap.gestureListening) {
-      offTarget(state.element, "$pointerdown", state.onSnapPointerDown, true);
+      offTarget(state.element, POINTER_DOWN_TARGET, state.onSnapPointerDown, true);
       offTarget(state.element, "$touchstart", state.onSnapTouchStart, true);
       state.snap.gestureListening = false;
     }
@@ -954,21 +970,13 @@
 
   function listenSnapGestureEnd(state) {
     if (state.snap.endListening) return;
-    onTarget(root, "$pointerup", state.onSnapPointerEnd, true);
-    onTarget(root, "$pointercancel", state.onSnapPointerEnd, true);
-    onTarget(root, "$touchend", state.onSnapTouchEnd, true);
-    onTarget(root, "$touchcancel", state.onSnapTouchEnd, true);
-    onTarget(root, "$blur", state.onSnapBlur);
+    setListeners(root, state, snapEndListeners, true);
     state.snap.endListening = true;
   }
 
   function stopSnapGestureEndListeners(state) {
     if (!state.snap.endListening) return;
-    offTarget(root, "$pointerup", state.onSnapPointerEnd, true);
-    offTarget(root, "$pointercancel", state.onSnapPointerEnd, true);
-    offTarget(root, "$touchend", state.onSnapTouchEnd, true);
-    offTarget(root, "$touchcancel", state.onSnapTouchEnd, true);
-    offTarget(root, "$blur", state.onSnapBlur);
+    setListeners(root, state, snapEndListeners, false);
     state.snap.endListening = false;
   }
 
@@ -976,8 +984,8 @@
     if (!state.snapEnabled || event.target.closest(
       `[${scrollbarVerticalAttribute}], [${scrollbarHorizontalAttribute}]`)) return;
     const snap = state.snap;
-    const active = kind === "pointer" ? snap.activePointers : snap.activeTouches;
-    if (kind === "pointer") active.add(event.pointerId);
+    const active = kind === POINTER ? snap.activePointers : snap.activeTouches;
+    if (kind === POINTER) active.add(event.pointerId);
     else for (const touch of event.changedTouches) active.add(touch.identifier);
     if (!active.size) return;
 
@@ -991,7 +999,7 @@
 
   function endSnapGesture(state, kind, event) {
     const snap = state.snap;
-    if (kind === "pointer") snap.activePointers.delete(event.pointerId);
+    if (kind === POINTER) snap.activePointers.delete(event.pointerId);
     else if (kind === "touch") {
       for (const touch of event.changedTouches) snap.activeTouches.delete(touch.identifier);
     } else {
@@ -1237,7 +1245,7 @@
 
   function readMode(element) {
     const value = (element.getAttribute(attribute) || "").trim().toLowerCase() || "native";
-    if (value === "native" || value === "pointer") return value;
+    if (value === "native" || value === POINTER) return value;
     AelluxJs.diagnostics.warn(AelluxJs.diagnostics.WARN_SCROLLBOX_MODE_INVALID,
       { element, value });
     return "native";
@@ -1371,7 +1379,7 @@
 
     activePointerScrollState = state;
 
-    onTarget(root, "$pointermove", state.onPointerMove, { passive: false, capture: true });
+    onTarget(root, POINTER_MOVE_TARGET, state.onPointerMove, { passive: false, capture: true });
     onTarget(root, "$touchmove", state.onPointerScrollTouchMove,
       { passive: false, capture: true });
     for (const name of pointerScrollDragEvents) {
@@ -1381,8 +1389,8 @@
     for (const name of pointerScrollMouseEvents) {
       onTarget(root, "$" + name, state.onMouseEvent, { passive: false, capture: true });
     }
-    onTarget(root, "$pointerup", state.onPointerEnd, true);
-    onTarget(root, "$pointercancel", state.onPointerEnd, true);
+    onTarget(root, POINTER_UP_TARGET, state.onPointerEnd, true);
+    onTarget(root, POINTER_CANCEL_TARGET, state.onPointerEnd, true);
     onTarget(root, "$blur", state.onBlur);
   }
 
@@ -1572,7 +1580,7 @@
       });
       element.style.setProperty("scroll-behavior", "auto", "important");
       element.classList.add(pointerScrollingClass);
-      if (member.snapEnabled) suspendSnapStyles(member, "pointer", true);
+      if (member.snapEnabled) suspendSnapStyles(member, POINTER, true);
       startScrollbarPdsVisibility(member);
     }
     dispatchPointerScroll(state, pointerScroll, "PointerScrollStart");
@@ -1594,11 +1602,11 @@
     if (!pointerScroll || (event && event.pointerId !== pointerScroll.pointerId)) return;
 
     pointerScroll.endTime = now();
-    if (event && event.type === "pointerup") {
+    if (event && event.type === POINTER_UP) {
       pointerScroll.lastX = event.clientX;
       pointerScroll.lastY = event.clientY;
     }
-    if (event && event.type === "pointerup" && !pointerScroll.moved &&
+    if (event && event.type === POINTER_UP && !pointerScroll.moved &&
       pointerScroll.endTime < pointerScroll.selectionReadyTime &&
       !selectionHasChanged(pointerScroll.selectionAtDown)) {
       const dx = pointerScroll.startX - event.clientX;
@@ -1619,14 +1627,14 @@
     if (activePointerScrollState === state) activePointerScrollState = null;
     if (pointerScroll.selectionWaitTimeout !== null)
       root.clearTimeout(pointerScroll.selectionWaitTimeout);
-    offTarget(root, "$pointermove", state.onPointerMove, true);
+    offTarget(root, POINTER_MOVE_TARGET, state.onPointerMove, true);
     offTarget(root, "$touchmove", state.onPointerScrollTouchMove, true);
     for (const name of pointerScrollDragEvents) {
       offTarget(root, "$" + name, state.onPointerScrollNativeEvent, true);
     }
     offTarget(root, "$selectstart", state.onPointerScrollNativeEvent, true);
-    offTarget(root, "$pointerup", state.onPointerEnd, true);
-    offTarget(root, "$pointercancel", state.onPointerEnd, true);
+    offTarget(root, POINTER_UP_TARGET, state.onPointerEnd, true);
+    offTarget(root, POINTER_CANCEL_TARGET, state.onPointerEnd, true);
     offTarget(root, "$blur", state.onBlur);
 
     if (pointerScroll.moved && !state.disposed) {
@@ -1643,12 +1651,12 @@
       pointerScrollMemories.delete(saved.element);
       const member = scrollboxes.get(saved.element);
       if (member) {
-        suspendSnapStyles(member, "pointer", false);
+        suspendSnapStyles(member, POINTER, false);
         scheduleScrollbarPdsHide(member);
       }
     }
 
-    if (event && event.type === "pointerup" && state.pointerListening) {
+    if (event && event.type === POINTER_UP && state.pointerListening) {
       updatePointerScrollCursor(state, document.elementFromPoint(event.clientX, event.clientY),
         event.clientX, event.clientY);
     } else restorePointerScrollCursor(state);
@@ -1661,7 +1669,7 @@
     const snapState = momentumState ? (momentumState.snapEnabled ? momentumState : null) :
       pointerScroll.chain.find(member => member.snapEnabled &&
         pointerAxisMaximum(member, pointerScroll.axis, pointerScroll) > 0);
-    const shouldSnap = event && event.type === "pointerup" && pointerScroll.moved &&
+    const shouldSnap = event && event.type === POINTER_UP && pointerScroll.moved &&
       snapState && !snapState.disposed && snapItems(snapState).length;
 
     if (shouldSnap) {
@@ -1670,7 +1678,7 @@
       scheduleScrollEnd(snapState);
     }
     for (const member of pointerScroll.chain) releaseElastic(member);
-    if (!shouldSnap && event && event.type === "pointerup" && pointerScroll.moved && momentumState &&
+    if (!shouldSnap && event && event.type === POINTER_UP && pointerScroll.moved && momentumState &&
       momentumState.momentumEnabled && !hadElastic && !momentumState.disposed &&
       now() - pointerScroll.momentumStartTime < MOMENTUM_LIMIT_TIME_MS) {
       startMomentum(momentumState, pointerScroll);
@@ -1782,20 +1790,12 @@
   }
 
   function addTouchListeners(state) {
-    const element = state.element;
-    onTarget(element, "$touchstart", state.onTouchStart, { passive: true });
-    onTarget(element, "$touchmove", state.onTouchMove, { passive: false });
-    onTarget(element, "$touchend", state.onTouchEnd, { passive: true });
-    onTarget(element, "$touchcancel", state.onTouchEnd, { passive: true });
+    setListeners(state.element, state, touchListeners, true);
     state.touchListening = true;
   }
 
   function removeTouchListeners(state) {
-    const element = state.element;
-    offTarget(element, "$touchstart", state.onTouchStart);
-    offTarget(element, "$touchmove", state.onTouchMove);
-    offTarget(element, "$touchend", state.onTouchEnd);
-    offTarget(element, "$touchcancel", state.onTouchEnd);
+    setListeners(state.element, state, touchListeners, false);
     state.touchListening = false;
     state.elastic.touch = null;
   }
@@ -2247,7 +2247,7 @@
 
     state.snap.flick = null;
 
-    if (state.desktop && state.mode === "pointer" &&
+    if (state.desktop && state.mode === POINTER &&
       state.element.classList.contains(pointerScrollingClass)) {
       if (event.cancelable) event.preventDefault();
       event.stopPropagation();

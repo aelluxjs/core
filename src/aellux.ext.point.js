@@ -35,10 +35,16 @@
     throw new Error(`[aellux.js] Cannot attach the "${extensionName}" extension: root.AelluxJs is not defined. Load the aellux.js boot script before this extension.`);
   }
 
+  const POINTER = "pointer";
+
   const trackedPointers = new Map();
   const pointableElements = new Set();
   const pointableAttribute = AelluxJs.attr("point");
   const pointableSelector = `[${pointableAttribute}]`;
+  const pointerEvents = [
+    ["down", onPointerDown], ["move", onPointerMove], ["up", onPointerUp],
+    ["cancel", onPointerCancel], ["over", onPointerOver], ["out", onPointerOut]
+  ];
 
   AelluxJs.extAttach(extensionName, {
     init, destroy, pointers
@@ -51,22 +57,14 @@
       mount: mountPointable, unmount: unmountPointable,
       controllers: ["pointers"]
     });
-    AelluxJs.on("$pointerdown", onPointerDown, true);
-    AelluxJs.on("$pointermove", onPointerMove, true);
-    AelluxJs.on("$pointerup", onPointerUp, true);
-    AelluxJs.on("$pointercancel", onPointerCancel, true);
-    AelluxJs.on("$pointerover", onPointerOver, true);
-    AelluxJs.on("$pointerout", onPointerOut, true);
+    for (const [suffix, handler] of pointerEvents)
+      AelluxJs.on(`$${POINTER}${suffix}`, handler, true);
   }
 
   function destroy() {
     AelluxJs.mountManager.remove({ extensionName });
-    AelluxJs.off("$pointerdown", onPointerDown, true);
-    AelluxJs.off("$pointermove", onPointerMove, true);
-    AelluxJs.off("$pointerup", onPointerUp, true);
-    AelluxJs.off("$pointercancel", onPointerCancel, true);
-    AelluxJs.off("$pointerover", onPointerOver, true);
-    AelluxJs.off("$pointerout", onPointerOut, true);
+    for (const [suffix, handler] of pointerEvents)
+      AelluxJs.off(`$${POINTER}${suffix}`, handler, true);
     trackedPointers.clear();
     pointableElements.clear();
   }

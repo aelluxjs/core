@@ -152,6 +152,7 @@
     if (!AelluxJs) {
       throw new Error('[aellux.js] Cannot attach the "'.concat(extensionName, '" extension: root.AelluxJs is not defined. Load the aellux.js boot script before this extension.'));
     }
+    var ORIGIN_X = "--ae-anchor-origin-x", ORIGIN_Y = "--ae-anchor-origin-y", ANCHOR_OPACITY = "--anchor-opacity";
     var attribute = AelluxJs.attr(extensionName);
     var presentAttribute = AelluxJs.attr("present");
     var targetAttribute = AelluxJs.attr("anchor-target");
@@ -159,7 +160,7 @@
     var layoutEvent = AelluxJs.eventName("Layout");
     var anchoredClass = AelluxJs.className("anchored");
     var baseProperties = ["position", "left", "top", "transform", "transform-origin"];
-    var ownedProperties = [].concat(baseProperties, ["--ae-anchor-x", "--ae-anchor-y", "--ae-anchor-origin-x", "--ae-anchor-origin-y", "--anchor-opacity"]);
+    var ownedProperties = [].concat(baseProperties, ["--ae-anchor-x", "--ae-anchor-y", ORIGIN_X, ORIGIN_Y, ANCHOR_OPACITY]);
     var pivots = {
       "top-left": [0, 0],
       "top-center": [0.5, 0],
@@ -213,17 +214,17 @@
         inherits: false,
         initialValue: "0px"
       }, {
-        name: "--ae-anchor-origin-x",
+        name: ORIGIN_X,
         syntax: "<percentage>",
         inherits: false,
         initialValue: "50%"
       }, {
-        name: "--ae-anchor-origin-y",
+        name: ORIGIN_Y,
         syntax: "<percentage>",
         inherits: false,
         initialValue: "0%"
       }, {
-        name: "--anchor-opacity",
+        name: ANCHOR_OPACITY,
         syntax: "<number>",
         inherits: false,
         initialValue: "1"
@@ -510,9 +511,9 @@
                 var selected = placement.selected;
                 element.style.setProperty("--ae-anchor-x", "".concat(selected.x, "px"));
                 element.style.setProperty("--ae-anchor-y", "".concat(selected.y, "px"));
-                element.style.setProperty("--ae-anchor-origin-x", "".concat(selected.self[0] * 100, "%"));
-                element.style.setProperty("--ae-anchor-origin-y", "".concat(selected.self[1] * 100, "%"));
-                element.style.setProperty("--anchor-opacity", placement.opacity);
+                element.style.setProperty(ORIGIN_X, "".concat(selected.self[0] * 100, "%"));
+                element.style.setProperty(ORIGIN_Y, "".concat(selected.self[1] * 100, "%"));
+                element.style.setProperty(ANCHOR_OPACITY, placement.opacity);
                 var _iterator6 = _createForOfIteratorHelper(baseProperties), _step6;
                 try {
                   for (_iterator6.s(); !(_step6 = _iterator6.n()).done; ) {

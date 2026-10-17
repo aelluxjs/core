@@ -101,18 +101,6 @@
       });
     };
   }
-  function _toConsumableArray(r) {
-    return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread();
-  }
-  function _nonIterableSpread() {
-    throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
-  }
-  function _iterableToArray(r) {
-    if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
-  }
-  function _arrayWithoutHoles(r) {
-    if (Array.isArray(r)) return _arrayLikeToArray(r);
-  }
   function _createForOfIteratorHelper(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
@@ -144,12 +132,54 @@
       }
     } };
   }
+  function _slicedToArray(r, e) {
+    return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest();
+  }
+  function _nonIterableRest() {
+    throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+  }
+  function _iterableToArrayLimit(r, l) {
+    var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
+    if (null != t) {
+      var e, n, i, u, a = [], f = true, o = false;
+      try {
+        if (i = (t = t.call(r)).next, 0 === l) {
+          if (Object(t) !== t) return;
+          f = false;
+        } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = true) ;
+      } catch (r2) {
+        o = true, n = r2;
+      } finally {
+        try {
+          if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return;
+        } finally {
+          if (o) throw n;
+        }
+      }
+      return a;
+    }
+  }
+  function _arrayWithHoles(r) {
+    if (Array.isArray(r)) return r;
+  }
+  function _toConsumableArray(r) {
+    return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread();
+  }
+  function _nonIterableSpread() {
+    throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+  }
   function _unsupportedIterableToArray(r, a) {
     if (r) {
       if ("string" == typeof r) return _arrayLikeToArray(r, a);
       var t = {}.toString.call(r).slice(8, -1);
       return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0;
     }
+  }
+  function _iterableToArray(r) {
+    if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
+  }
+  function _arrayWithoutHoles(r) {
+    if (Array.isArray(r)) return _arrayLikeToArray(r);
   }
   function _arrayLikeToArray(r, a) {
     (null == a || a > r.length) && (a = r.length);
@@ -192,7 +222,8 @@
       toggle: toggle,
       trigger: trigger
     });
-    var POP = "Pop", UNPOP = "Unpop", BEFORE = "Before", PING = "ping", MILLISECOND = "ms", SECOND = "s", TRANSITION_PREPARE_TIME = 100, DEFAULT_PRESENT = "opacity transform height width";
+    var POP = "Pop", UNPOP = "Unpop", BEFORE = "Before", PING = "ping", MILLISECOND = "ms", SECOND = "s", DEFAULT_PRESENT = "opacity transform height width", OPACITY_SYNTAX = "<number> | <percentage>", TRANSFORM_SYNTAX = "<transform-list> | none";
+    var TRANSITION_PREPARE_TIME = 100;
     var presentElements = /* @__PURE__ */ new Map();
     var openPresentElements = /* @__PURE__ */ new Set();
     var triggerElementsSet = /* @__PURE__ */ new Set();
@@ -203,98 +234,17 @@
     var containerAriaHandlers = /* @__PURE__ */ new WeakMap();
     var triggerAriaHandlers = /* @__PURE__ */ new WeakMap();
     var measuredMemories = /* @__PURE__ */ new WeakMap();
+    var cssProperties = [["from-opacity", OPACITY_SYNTAX, "0"], ["pop-opacity", OPACITY_SYNTAX, "1"], ["unpop-opacity", OPACITY_SYNTAX, "0"], ["from-transform", TRANSFORM_SYNTAX, "scale(0.5)"], ["pop-transform", TRANSFORM_SYNTAX, "scale(1)"], ["unpop-transform", TRANSFORM_SYNTAX, "scale(1.2)"], ["from-height", "*", "0fr"], ["pop-height", "*", "1fr"], ["unpop-height", "*", "0fr"], ["from-width", "*", "0fr"], ["pop-width", "*", "1fr"], ["unpop-width", "*", "0fr"], ["pop-ease", "*", "ease-out"], ["unpop-ease", "*", "ease-in"], ["pop-duration", "<time>", "250ms"], ["unpop-duration", "<time>", "250ms"], ["pop-low-steps", "<integer>", "4"], ["unpop-low-steps", "<integer>", "4"]];
     function init(options) {
-      AelluxJs.registerCssProperty({
-        name: "--ae-from-opacity",
-        syntax: "<number> | <percentage>",
-        inherits: false,
-        initialValue: "0"
-      }, {
-        name: "--ae-pop-opacity",
-        syntax: "<number> | <percentage>",
-        inherits: false,
-        initialValue: "1"
-      }, {
-        name: "--ae-unpop-opacity",
-        syntax: "<number> | <percentage>",
-        inherits: false,
-        initialValue: "0"
-      }, {
-        name: "--ae-from-transform",
-        syntax: "<transform-list> | none",
-        inherits: false,
-        initialValue: "scale(0.5)"
-      }, {
-        name: "--ae-pop-transform",
-        syntax: "<transform-list> | none",
-        inherits: false,
-        initialValue: "scale(1)"
-      }, {
-        name: "--ae-unpop-transform",
-        syntax: "<transform-list> | none",
-        inherits: false,
-        initialValue: "scale(1.2)"
-      }, {
-        name: "--ae-from-height",
-        syntax: "*",
-        inherits: false,
-        initialValue: "0fr"
-      }, {
-        name: "--ae-pop-height",
-        syntax: "*",
-        inherits: false,
-        initialValue: "1fr"
-      }, {
-        name: "--ae-unpop-height",
-        syntax: "*",
-        inherits: false,
-        initialValue: "0fr"
-      }, {
-        name: "--ae-from-width",
-        syntax: "*",
-        inherits: false,
-        initialValue: "0fr"
-      }, {
-        name: "--ae-pop-width",
-        syntax: "*",
-        inherits: false,
-        initialValue: "1fr"
-      }, {
-        name: "--ae-unpop-width",
-        syntax: "*",
-        inherits: false,
-        initialValue: "0fr"
-      }, {
-        name: "--ae-pop-ease",
-        syntax: "*",
-        inherits: false,
-        initialValue: "ease-out"
-      }, {
-        name: "--ae-unpop-ease",
-        syntax: "*",
-        inherits: false,
-        initialValue: "ease-in"
-      }, {
-        name: "--ae-pop-duration",
-        syntax: "<time>",
-        inherits: false,
-        initialValue: "250ms"
-      }, {
-        name: "--ae-unpop-duration",
-        syntax: "<time>",
-        inherits: false,
-        initialValue: "250ms"
-      }, {
-        name: "--ae-pop-low-steps",
-        syntax: "<integer>",
-        inherits: false,
-        initialValue: "4"
-      }, {
-        name: "--ae-unpop-low-steps",
-        syntax: "<integer>",
-        inherits: false,
-        initialValue: "4"
-      });
+      AelluxJs.registerCssProperty.apply(AelluxJs, _toConsumableArray(cssProperties.map(function(_ref) {
+        var _ref2 = _slicedToArray(_ref, 3), name = _ref2[0], syntax = _ref2[1], initialValue = _ref2[2];
+        return {
+          name: "--ae-".concat(name),
+          syntax: syntax,
+          inherits: false,
+          initialValue: initialValue
+        };
+      })));
       AelluxJs.mountManager.add({
         extensionName: extensionName,
         selector: "[".concat(attr.present, "]"),

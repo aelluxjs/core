@@ -71,8 +71,11 @@
     PING = "ping",
     MILLISECOND = "ms",
     SECOND = "s",
-    TRANSITION_PREPARE_TIME = 100,
-    DEFAULT_PRESENT = "opacity transform height width";
+    DEFAULT_PRESENT = "opacity transform height width",
+    OPACITY_SYNTAX = "<number> | <percentage>",
+    TRANSFORM_SYNTAX = "<transform-list> | none";
+
+  const TRANSITION_PREPARE_TIME = 100;
   const presentElements = new Map();
   const openPresentElements = new Set();
   const triggerElementsSet = new Set();
@@ -83,27 +86,25 @@
   const containerAriaHandlers = new WeakMap();
   const triggerAriaHandlers = new WeakMap();
   const measuredMemories = new WeakMap();
+  const cssProperties = [
+    ["from-opacity", OPACITY_SYNTAX, "0"],
+    ["pop-opacity", OPACITY_SYNTAX, "1"],
+    ["unpop-opacity", OPACITY_SYNTAX, "0"],
+    ["from-transform", TRANSFORM_SYNTAX, "scale(0.5)"],
+    ["pop-transform", TRANSFORM_SYNTAX, "scale(1)"],
+    ["unpop-transform", TRANSFORM_SYNTAX, "scale(1.2)"],
+    ["from-height", "*", "0fr"], ["pop-height", "*", "1fr"],
+    ["unpop-height", "*", "0fr"], ["from-width", "*", "0fr"],
+    ["pop-width", "*", "1fr"], ["unpop-width", "*", "0fr"],
+    ["pop-ease", "*", "ease-out"], ["unpop-ease", "*", "ease-in"],
+    ["pop-duration", "<time>", "250ms"], ["unpop-duration", "<time>", "250ms"],
+    ["pop-low-steps", "<integer>", "4"], ["unpop-low-steps", "<integer>", "4"]
+  ];
 
   function init(options) {
     AelluxJs.registerCssProperty(
-      { name: "--ae-from-opacity", syntax: "<number> | <percentage>", inherits: false, initialValue: "0" },
-      { name: "--ae-pop-opacity", syntax: "<number> | <percentage>", inherits: false, initialValue: "1" },
-      { name: "--ae-unpop-opacity", syntax: "<number> | <percentage>", inherits: false, initialValue: "0" },
-      { name: "--ae-from-transform", syntax: "<transform-list> | none", inherits: false, initialValue: "scale(0.5)" },
-      { name: "--ae-pop-transform", syntax: "<transform-list> | none", inherits: false, initialValue: "scale(1)" },
-      { name: "--ae-unpop-transform", syntax: "<transform-list> | none", inherits: false, initialValue: "scale(1.2)" },
-      { name: "--ae-from-height", syntax: "*", inherits: false, initialValue: "0fr" },
-      { name: "--ae-pop-height", syntax: "*", inherits: false, initialValue: "1fr" },
-      { name: "--ae-unpop-height", syntax: "*", inherits: false, initialValue: "0fr" },
-      { name: "--ae-from-width", syntax: "*", inherits: false, initialValue: "0fr" },
-      { name: "--ae-pop-width", syntax: "*", inherits: false, initialValue: "1fr" },
-      { name: "--ae-unpop-width", syntax: "*", inherits: false, initialValue: "0fr" },
-      { name: "--ae-pop-ease", syntax: "*", inherits: false, initialValue: "ease-out" },
-      { name: "--ae-unpop-ease", syntax: "*", inherits: false, initialValue: "ease-in" },
-      { name: "--ae-pop-duration", syntax: "<time>", inherits: false, initialValue: "250ms" },
-      { name: "--ae-unpop-duration", syntax: "<time>", inherits: false, initialValue: "250ms" },
-      { name: "--ae-pop-low-steps", syntax: "<integer>", inherits: false, initialValue: "4" },
-      { name: "--ae-unpop-low-steps", syntax: "<integer>", inherits: false, initialValue: "4" }
+      ...cssProperties.map(([name, syntax, initialValue]) =>
+        ({ name: `--ae-${name}`, syntax, inherits: false, initialValue }))
     );
     AelluxJs.mountManager.add({
       extensionName, selector: `[${attr.present}]`,

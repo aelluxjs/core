@@ -37,6 +37,11 @@
     throw new Error(`[aellux.js] Cannot attach the "${extensionName}" extension: root.AelluxJs is not defined. Load the aellux.js boot script before this extension.`);
   }
 
+  const
+    ORIGIN_X = "--ae-anchor-origin-x",
+    ORIGIN_Y = "--ae-anchor-origin-y",
+    ANCHOR_OPACITY = "--anchor-opacity";
+
   const attribute = AelluxJs.attr(extensionName);
   const presentAttribute = AelluxJs.attr("present");
   const targetAttribute = AelluxJs.attr("anchor-target");
@@ -49,7 +54,7 @@
   const ownedProperties = [
     ...baseProperties,
     "--ae-anchor-x", "--ae-anchor-y",
-    "--ae-anchor-origin-x", "--ae-anchor-origin-y", "--anchor-opacity"
+    ORIGIN_X, ORIGIN_Y, ANCHOR_OPACITY
   ];
   const pivots = {
     "top-left": [0, 0], "top-center": [0.5, 0], "top-right": [1, 0],
@@ -85,9 +90,9 @@
     AelluxJs.registerCssProperty(
       { name: "--ae-anchor-x", syntax: "<length>", inherits: false, initialValue: "0px" },
       { name: "--ae-anchor-y", syntax: "<length>", inherits: false, initialValue: "0px" },
-      { name: "--ae-anchor-origin-x", syntax: "<percentage>", inherits: false, initialValue: "50%" },
-      { name: "--ae-anchor-origin-y", syntax: "<percentage>", inherits: false, initialValue: "0%" },
-      { name: "--anchor-opacity", syntax: "<number>", inherits: false, initialValue: "1" }
+      { name: ORIGIN_X, syntax: "<percentage>", inherits: false, initialValue: "50%" },
+      { name: ORIGIN_Y, syntax: "<percentage>", inherits: false, initialValue: "0%" },
+      { name: ANCHOR_OPACITY, syntax: "<number>", inherits: false, initialValue: "1" }
     );
     AelluxJs.mountManager.add({
       extensionName, selector: `[${attribute}]`,
@@ -271,9 +276,9 @@
       const selected = placement.selected;
       element.style.setProperty("--ae-anchor-x", `${selected.x}px`);
       element.style.setProperty("--ae-anchor-y", `${selected.y}px`);
-      element.style.setProperty("--ae-anchor-origin-x", `${selected.self[0] * 100}%`);
-      element.style.setProperty("--ae-anchor-origin-y", `${selected.self[1] * 100}%`);
-      element.style.setProperty("--anchor-opacity", placement.opacity);
+      element.style.setProperty(ORIGIN_X, `${selected.self[0] * 100}%`);
+      element.style.setProperty(ORIGIN_Y, `${selected.self[1] * 100}%`);
+      element.style.setProperty(ANCHOR_OPACITY, placement.opacity);
       for (const name of baseProperties) element.style.removeProperty(name);
       element.classList.add(anchoredClass);
     });

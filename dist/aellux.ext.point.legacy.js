@@ -34,6 +34,36 @@
     }
     return ("string" === r ? String : Number)(t);
   }
+  function _slicedToArray(r, e) {
+    return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest();
+  }
+  function _nonIterableRest() {
+    throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+  }
+  function _iterableToArrayLimit(r, l) {
+    var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
+    if (null != t) {
+      var e, n, i, u, a = [], f = true, o = false;
+      try {
+        if (i = (t = t.call(r)).next, 0 === l) {
+          if (Object(t) !== t) return;
+          f = false;
+        } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = true) ;
+      } catch (r2) {
+        o = true, n = r2;
+      } finally {
+        try {
+          if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return;
+        } finally {
+          if (o) throw n;
+        }
+      }
+      return a;
+    }
+  }
+  function _arrayWithHoles(r) {
+    if (Array.isArray(r)) return r;
+  }
   function _createForOfIteratorHelper(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
@@ -85,10 +115,12 @@
     if (!AelluxJs) {
       throw new Error('[aellux.js] Cannot attach the "'.concat(extensionName, '" extension: root.AelluxJs is not defined. Load the aellux.js boot script before this extension.'));
     }
+    var POINTER = "pointer";
     var trackedPointers = /* @__PURE__ */ new Map();
     var pointableElements = /* @__PURE__ */ new Set();
     var pointableAttribute = AelluxJs.attr("point");
     var pointableSelector = "[".concat(pointableAttribute, "]");
+    var pointerEvents = [["down", onPointerDown], ["move", onPointerMove], ["up", onPointerUp], ["cancel", onPointerCancel], ["over", onPointerOver], ["out", onPointerOut]];
     AelluxJs.extAttach(extensionName, {
       init: init,
       destroy: destroy,
@@ -103,23 +135,33 @@
         unmount: unmountPointable,
         controllers: ["pointers"]
       });
-      AelluxJs.on("$pointerdown", onPointerDown, true);
-      AelluxJs.on("$pointermove", onPointerMove, true);
-      AelluxJs.on("$pointerup", onPointerUp, true);
-      AelluxJs.on("$pointercancel", onPointerCancel, true);
-      AelluxJs.on("$pointerover", onPointerOver, true);
-      AelluxJs.on("$pointerout", onPointerOut, true);
+      var _iterator = _createForOfIteratorHelper(pointerEvents), _step;
+      try {
+        for (_iterator.s(); !(_step = _iterator.n()).done; ) {
+          var _step$value = _slicedToArray(_step.value, 2), suffix = _step$value[0], handler = _step$value[1];
+          AelluxJs.on("$".concat(POINTER).concat(suffix), handler, true);
+        }
+      } catch (err) {
+        _iterator.e(err);
+      } finally {
+        _iterator.f();
+      }
     }
     function destroy() {
       AelluxJs.mountManager.remove({
         extensionName: extensionName
       });
-      AelluxJs.off("$pointerdown", onPointerDown, true);
-      AelluxJs.off("$pointermove", onPointerMove, true);
-      AelluxJs.off("$pointerup", onPointerUp, true);
-      AelluxJs.off("$pointercancel", onPointerCancel, true);
-      AelluxJs.off("$pointerover", onPointerOver, true);
-      AelluxJs.off("$pointerout", onPointerOut, true);
+      var _iterator2 = _createForOfIteratorHelper(pointerEvents), _step2;
+      try {
+        for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
+          var _step2$value = _slicedToArray(_step2.value, 2), suffix = _step2$value[0], handler = _step2$value[1];
+          AelluxJs.off("$".concat(POINTER).concat(suffix), handler, true);
+        }
+      } catch (err) {
+        _iterator2.e(err);
+      } finally {
+        _iterator2.f();
+      }
       trackedPointers.clear();
       pointableElements.clear();
     }
@@ -128,31 +170,31 @@
     }
     function unmountPointable(element) {
       pointableElements.delete(element);
-      var _iterator = _createForOfIteratorHelper(trackedPointers.values()), _step;
+      var _iterator3 = _createForOfIteratorHelper(trackedPointers.values()), _step3;
       try {
-        for (_iterator.s(); !(_step = _iterator.n()).done; ) {
-          var pointer = _step.value;
+        for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
+          var pointer = _step3.value;
           if (pointer.target === element) pointer.target = null;
           if (pointer.pressStart === element) pointer.pressStart = null;
         }
       } catch (err) {
-        _iterator.e(err);
+        _iterator3.e(err);
       } finally {
-        _iterator.f();
+        _iterator3.f();
       }
     }
     function pointers(element) {
       var result = [];
-      var _iterator2 = _createForOfIteratorHelper(trackedPointers.values()), _step2;
+      var _iterator4 = _createForOfIteratorHelper(trackedPointers.values()), _step4;
       try {
-        for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
-          var pointer = _step2.value;
+        for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
+          var pointer = _step4.value;
           if (pointer.target === element) result.push(pointer);
         }
       } catch (err) {
-        _iterator2.e(err);
+        _iterator4.e(err);
       } finally {
-        _iterator2.f();
+        _iterator4.f();
       }
       return result;
     }
@@ -168,16 +210,16 @@
       while (element) {
         if (pointableElements.has(element) && element.hasAttribute(pointableAttribute)) {
           var occupied = 0;
-          var _iterator3 = _createForOfIteratorHelper(trackedPointers.values()), _step3;
+          var _iterator5 = _createForOfIteratorHelper(trackedPointers.values()), _step5;
           try {
-            for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
-              var other = _step3.value;
+            for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
+              var other = _step5.value;
               if (other !== pointer && other.target === element) occupied++;
             }
           } catch (err) {
-            _iterator3.e(err);
+            _iterator5.e(err);
           } finally {
-            _iterator3.f();
+            _iterator5.f();
           }
           if (occupied < limitFor(element)) return element;
         }

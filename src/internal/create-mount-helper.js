@@ -5,6 +5,8 @@ import { createControllerHelper } from "./create-controller-helper.js";
 import { resolveElementOrId } from "./resolve-element-or-id.js";
 
 export function createMountHelper(root, mountMaps, mountedElements, elementControllers) {
+  const UNMOUNT = "unmount";
+
   const { toCapitalized, toCamelCase, fromCamelCase } = utilsNameCase;
   const pendingMounts = new WeakMap();
   const pendingUnmounts = new WeakMap();
@@ -22,9 +24,9 @@ export function createMountHelper(root, mountMaps, mountedElements, elementContr
   }
 
   async function unmount(elementOrId, extensionNames = null) {
-    const rootElement = resolveMountElement(elementOrId, "unmount");
+    const rootElement = resolveMountElement(elementOrId, UNMOUNT);
     if (!rootElement) return false;
-    await AelluxJsMounted(rootElement, "unmount", extensionNames);
+    await AelluxJsMounted(rootElement, UNMOUNT, extensionNames);
     return true;
   }
 
@@ -37,7 +39,7 @@ export function createMountHelper(root, mountMaps, mountedElements, elementContr
       }
     }
     if (!hasDetachedElement) return false;
-    await AelluxJsMounted(root.document, "unmount", null, true);
+    await AelluxJsMounted(root.document, UNMOUNT, null, true);
     return true;
   }
 
@@ -278,7 +280,7 @@ export function createMountHelper(root, mountMaps, mountedElements, elementContr
     const registrations = [];
     for (const [element, mountIds] of Array.from(mountedElements)) {
       const inRoot = element === rootElement || rootElement.contains(element);
-      const detachedInGlobalUnmount = method === "unmount" &&
+      const detachedInGlobalUnmount = method === UNMOUNT &&
         rootElement === root.document && !element.isConnected;
       if (detachedOnly ? element.isConnected || hasPendingMounts(element) :
         !inRoot && !detachedInGlobalUnmount) continue;
@@ -293,7 +295,7 @@ export function createMountHelper(root, mountMaps, mountedElements, elementContr
         const mounter = mountMaps.get(extensionKey);
         const controller = mounter && mounter.get(selector);
 
-        if (method === "unmount") {
+        if (method === UNMOUNT) {
           registrations.push({ element, mountId, controller, extensionName, selector });
           continue;
         }
@@ -310,7 +312,7 @@ export function createMountHelper(root, mountMaps, mountedElements, elementContr
         }
       }
     }
-    if (method === "unmount") {
+    if (method === UNMOUNT) {
       registrations.sort(compareUnmountOrder);
       for (const { element, mountId, controller, extensionName, selector } of registrations) {
         if (await unmountRegistration(element, mountId, controller, extensionName, selector))
@@ -348,7 +350,7 @@ export function createMountHelper(root, mountMaps, mountedElements, elementContr
         if (controller && controller.unmount) await controller.unmount(element);
       } catch (cause) {
         diagnostics.error(diagnostics.ERROR_EXTENSION_MOUNT, {
-          cause, extension: extensionName, method: "unmount", selector
+          cause, extension: extensionName, method: UNMOUNT, selector
         });
       }
 
@@ -362,7 +364,7 @@ export function createMountHelper(root, mountMaps, mountedElements, elementContr
         element.classList.toggle(AelluxJs.className("mounted"), isMounted(element));
       } catch (cause) {
         diagnostics.error(diagnostics.ERROR_EXTENSION_MOUNT, {
-          cause, extension: extensionName, method: "unmount", selector
+          cause, extension: extensionName, method: UNMOUNT, selector
         });
       }
     } finally {

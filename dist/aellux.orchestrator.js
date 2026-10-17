@@ -235,6 +235,7 @@
   // src/internal/create-mount-helper.js
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   function createMountHelper(root, mountMaps, mountedElements, elementControllers) {
+    const UNMOUNT = "unmount";
     const { toCapitalized: toCapitalized2, toCamelCase: toCamelCase2, fromCamelCase: fromCamelCase2 } = utils_name_case_default;
     const pendingMounts = /* @__PURE__ */ new WeakMap();
     const pendingUnmounts = /* @__PURE__ */ new WeakMap();
@@ -249,9 +250,9 @@
       return true;
     }
     async function unmount(elementOrId, extensionNames = null) {
-      const rootElement = resolveMountElement(elementOrId, "unmount");
+      const rootElement = resolveMountElement(elementOrId, UNMOUNT);
       if (!rootElement) return false;
-      await AelluxJsMounted(rootElement, "unmount", extensionNames);
+      await AelluxJsMounted(rootElement, UNMOUNT, extensionNames);
       return true;
     }
     async function unmountDetached() {
@@ -263,7 +264,7 @@
         }
       }
       if (!hasDetachedElement) return false;
-      await AelluxJsMounted(root.document, "unmount", null, true);
+      await AelluxJsMounted(root.document, UNMOUNT, null, true);
       return true;
     }
     async function mount(elementOrId, extensionNames = null) {
@@ -480,7 +481,7 @@
       const registrations = [];
       for (const [element, mountIds] of Array.from(mountedElements)) {
         const inRoot = element === rootElement || rootElement.contains(element);
-        const detachedInGlobalUnmount = method === "unmount" && rootElement === root.document && !element.isConnected;
+        const detachedInGlobalUnmount = method === UNMOUNT && rootElement === root.document && !element.isConnected;
         if (detachedOnly ? element.isConnected || hasPendingMounts(element) : !inRoot && !detachedInGlobalUnmount) continue;
         for (const mountId of Array.from(mountIds)) {
           const separator = mountId.indexOf("@");
@@ -490,7 +491,7 @@
           const extensionKey = toCamelCase2(extensionName);
           const mounter = mountMaps.get(extensionKey);
           const controller = mounter && mounter.get(selector);
-          if (method === "unmount") {
+          if (method === UNMOUNT) {
             registrations.push({ element, mountId, controller, extensionName, selector });
             continue;
           }
@@ -509,7 +510,7 @@
           }
         }
       }
-      if (method === "unmount") {
+      if (method === UNMOUNT) {
         registrations.sort(compareUnmountOrder);
         for (const { element, mountId, controller, extensionName, selector } of registrations) {
           if (await unmountRegistration(element, mountId, controller, extensionName, selector))
@@ -550,7 +551,7 @@
           diagnostics.error(diagnostics.ERROR_EXTENSION_MOUNT, {
             cause,
             extension: extensionName,
-            method: "unmount",
+            method: UNMOUNT,
             selector
           });
         }
@@ -566,7 +567,7 @@
           diagnostics.error(diagnostics.ERROR_EXTENSION_MOUNT, {
             cause,
             extension: extensionName,
-            method: "unmount",
+            method: UNMOUNT,
             selector
           });
         }

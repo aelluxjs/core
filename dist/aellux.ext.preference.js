@@ -30,6 +30,7 @@
     if (!AelluxJs) {
       throw new Error(`[aellux.js] Cannot attach the "${extensionName}" extension: root.AelluxJs is not defined. Load the aellux.js boot script before this extension.`);
     }
+    const NO_PREFERENCE = "no-preference";
     const userPreferences = /* @__PURE__ */ Object.create(null);
     const defaultPreferences = /* @__PURE__ */ Object.create(null);
     const computedPreferences = /* @__PURE__ */ Object.create(null);
@@ -51,10 +52,10 @@
     };
     const prefOptions = {
       colorScheme: ["auto", "light", "dark"],
-      contrast: ["auto", "no-preference", "more", "less"],
-      reducedMotion: ["auto", "no-preference", "reduced"],
-      reducedTransparency: ["auto", "no-preference", "reduced"],
-      forcedColors: ["auto", "no-preference", "active"],
+      contrast: ["auto", NO_PREFERENCE, "more", "less"],
+      reducedMotion: ["auto", NO_PREFERENCE, "reduced"],
+      reducedTransparency: ["auto", NO_PREFERENCE, "reduced"],
+      forcedColors: ["auto", NO_PREFERENCE, "active"],
       textScale: [1, 1.5, 0.8],
       interfaceScale: [1, 1.5, 0.8],
       extendedTiming: ["off", "on"],

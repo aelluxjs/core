@@ -21400,6 +21400,7 @@
     };
   }
   function createMountHelper(root2, mountMaps, mountedElements, elementControllers) {
+    var UNMOUNT = "unmount";
     var toCapitalized2 = utils_name_case_default.toCapitalized, toCamelCase2 = utils_name_case_default.toCamelCase, fromCamelCase2 = utils_name_case_default.fromCamelCase;
     var pendingMounts = /* @__PURE__ */ new WeakMap();
     var pendingUnmounts = /* @__PURE__ */ new WeakMap();
@@ -21448,7 +21449,7 @@
           while (1) switch (_context2.n) {
             case 0:
               extensionNames = _args2.length > 1 && _args2[1] !== void 0 ? _args2[1] : null;
-              rootElement = resolveMountElement(elementOrId, "unmount");
+              rootElement = resolveMountElement(elementOrId, UNMOUNT);
               if (rootElement) {
                 _context2.n = 1;
                 break;
@@ -21456,7 +21457,7 @@
               return _context2.a(2, false);
             case 1:
               _context2.n = 2;
-              return AelluxJsMounted(rootElement, "unmount", extensionNames);
+              return AelluxJsMounted(rootElement, UNMOUNT, extensionNames);
             case 2:
               return _context2.a(2, true);
           }
@@ -21511,7 +21512,7 @@
               return _context3.a(2, false);
             case 8:
               _context3.n = 9;
-              return AelluxJsMounted(root2.document, "unmount", null, true);
+              return AelluxJsMounted(root2.document, UNMOUNT, null, true);
             case 9:
               return _context3.a(2, true);
           }
@@ -22019,7 +22020,7 @@
               }
               _Array$from2$_i = _slicedToArray(_Array$from2[_i8], 2), element = _Array$from2$_i[0], mountIds = _Array$from2$_i[1];
               inRoot = element === rootElement || rootElement.contains(element);
-              detachedInGlobalUnmount = method === "unmount" && rootElement === root2.document && !element.isConnected;
+              detachedInGlobalUnmount = method === UNMOUNT && rootElement === root2.document && !element.isConnected;
               if (!(detachedOnly ? element.isConnected || hasPendingMounts(element) : !inRoot && !detachedInGlobalUnmount)) {
                 _context6.n = 2;
                 break;
@@ -22045,7 +22046,7 @@
               extensionKey = toCamelCase2(extensionName);
               mounter = mountMaps.get(extensionKey);
               controller = mounter && mounter.get(selector);
-              if (!(method === "unmount")) {
+              if (!(method === UNMOUNT)) {
                 _context6.n = 5;
                 break;
               }
@@ -22087,7 +22088,7 @@
               _context6.n = 1;
               break;
             case 10:
-              if (!(method === "unmount")) {
+              if (!(method === UNMOUNT)) {
                 _context6.n = 18;
                 break;
               }
@@ -22197,7 +22198,7 @@
               diagnostics.error(diagnostics.ERROR_EXTENSION_MOUNT, {
                 cause: _t1,
                 extension: extensionName,
-                method: "unmount",
+                method: UNMOUNT,
                 selector: selector
               });
             case 9:
@@ -22213,7 +22214,7 @@
                 diagnostics.error(diagnostics.ERROR_EXTENSION_MOUNT, {
                   cause: cause,
                   extension: extensionName,
-                  method: "unmount",
+                  method: UNMOUNT,
                   selector: selector
                 });
               }
@@ -23457,6 +23458,7 @@
         if (!AelluxJs2) {
           throw new Error('[aellux.js] Cannot attach the "'.concat(extensionName, '" extension: root.AelluxJs is not defined. Load the aellux.js boot script before this extension.'));
         }
+        var NO_PREFERENCE = "no-preference";
         var userPreferences = /* @__PURE__ */ Object.create(null);
         var defaultPreferences = /* @__PURE__ */ Object.create(null);
         var computedPreferences = /* @__PURE__ */ Object.create(null);
@@ -23484,10 +23486,10 @@
         };
         var prefOptions = {
           colorScheme: ["auto", "light", "dark"],
-          contrast: ["auto", "no-preference", "more", "less"],
-          reducedMotion: ["auto", "no-preference", "reduced"],
-          reducedTransparency: ["auto", "no-preference", "reduced"],
-          forcedColors: ["auto", "no-preference", "active"],
+          contrast: ["auto", NO_PREFERENCE, "more", "less"],
+          reducedMotion: ["auto", NO_PREFERENCE, "reduced"],
+          reducedTransparency: ["auto", NO_PREFERENCE, "reduced"],
+          forcedColors: ["auto", NO_PREFERENCE, "active"],
           textScale: [1, 1.5, 0.8],
           interfaceScale: [1, 1.5, 0.8],
           extendedTiming: ["off", "on"],
@@ -23869,6 +23871,7 @@
         if (!AelluxJs2) {
           throw new Error('[aellux.js] Cannot attach the "'.concat(extensionName, '" extension: root.AelluxJs is not defined. Load the aellux.js boot script before this extension.'));
         }
+        var PUSH_AJAX_REPLACE = "PushAjaxReplace", UPDATE_BASE_TITLE = "UpdateBaseTitle";
         var globalSnapshot = {};
         AelluxJs2.extAttach(extensionName, {
           init: init,
@@ -23886,8 +23889,8 @@
           AelluxJs2.onTarget(window, "$popstate", onPopState);
           AelluxJs2.onTarget(window, "$hashchange", onHashChange);
           AelluxJs2.on("PushState", OnPushState);
-          AelluxJs2.on("PushAjaxReplace", OnPushAjaxReplace);
-          AelluxJs2.on("UpdateBaseTitle", OnUpdateBaseTitle);
+          AelluxJs2.on(PUSH_AJAX_REPLACE, OnPushAjaxReplace);
+          AelluxJs2.on(UPDATE_BASE_TITLE, OnUpdateBaseTitle);
           if ("useHash" in AelluxJs2.options) useHash = AelluxJs2.options.useHash;
           baseTitle = document.title;
           onHashChange();
@@ -23907,8 +23910,8 @@
                   AelluxJs2.offTarget(window, "$popstate", onPopState);
                   AelluxJs2.offTarget(window, "$hashchange", onHashChange);
                   AelluxJs2.off("PushState", OnPushState);
-                  AelluxJs2.off("PushAjaxReplace", OnPushAjaxReplace);
-                  AelluxJs2.off("UpdateBaseTitle", OnUpdateBaseTitle);
+                  AelluxJs2.off(PUSH_AJAX_REPLACE, OnPushAjaxReplace);
+                  AelluxJs2.off(UPDATE_BASE_TITLE, OnUpdateBaseTitle);
                 case 1:
                   return _context.a(2);
               }
@@ -24081,7 +24084,7 @@
             if (!detail || _typeof3(detail) !== "object" || typeof detail.url !== "string" || !detail.url.trim() || !Object.prototype.hasOwnProperty.call(detail, "selectors") || detail.selectors == null) {
               AelluxJs2.diagnostics.warn(AelluxJs2.diagnostics.WARN_NAVIGATION_EVENT_INVALID, {
                 extension: extensionName,
-                event: "PushAjaxReplace",
+                event: PUSH_AJAX_REPLACE,
                 expected: "detail: { url: non-empty string, selectors: value }"
               });
               return;
@@ -24090,7 +24093,7 @@
           } catch (cause) {
             AelluxJs2.diagnostics.error(AelluxJs2.diagnostics.ERROR_CALLBACK, {
               extension: extensionName,
-              event: "PushAjaxReplace",
+              event: PUSH_AJAX_REPLACE,
               cause: cause
             });
           }
@@ -24101,7 +24104,7 @@
             if (!detail || _typeof3(detail) !== "object" || !Object.prototype.hasOwnProperty.call(detail, "title") || typeof detail.title !== "string") {
               AelluxJs2.diagnostics.warn(AelluxJs2.diagnostics.WARN_NAVIGATION_EVENT_INVALID, {
                 extension: extensionName,
-                event: "UpdateBaseTitle",
+                event: UPDATE_BASE_TITLE,
                 expected: "detail: { title: string }"
               });
               return;
@@ -24110,7 +24113,7 @@
           } catch (cause) {
             AelluxJs2.diagnostics.error(AelluxJs2.diagnostics.ERROR_CALLBACK, {
               extension: extensionName,
-              event: "UpdateBaseTitle",
+              event: UPDATE_BASE_TITLE,
               cause: cause
             });
           }
@@ -24635,6 +24638,36 @@
     }
     return ("string" === r ? String : Number)(t);
   }
+  function _slicedToArray4(r, e) {
+    return _arrayWithHoles4(r) || _iterableToArrayLimit4(r, e) || _unsupportedIterableToArray8(r, e) || _nonIterableRest4();
+  }
+  function _nonIterableRest4() {
+    throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+  }
+  function _iterableToArrayLimit4(r, l) {
+    var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
+    if (null != t) {
+      var e, n, i, u, a = [], f = true, o = false;
+      try {
+        if (i = (t = t.call(r)).next, 0 === l) {
+          if (Object(t) !== t) return;
+          f = false;
+        } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = true) ;
+      } catch (r2) {
+        o = true, n = r2;
+      } finally {
+        try {
+          if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return;
+        } finally {
+          if (o) throw n;
+        }
+      }
+      return a;
+    }
+  }
+  function _arrayWithHoles4(r) {
+    if (Array.isArray(r)) return r;
+  }
   function _createForOfIteratorHelper7(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
@@ -24688,10 +24721,12 @@
         if (!AelluxJs2) {
           throw new Error('[aellux.js] Cannot attach the "'.concat(extensionName, '" extension: root.AelluxJs is not defined. Load the aellux.js boot script before this extension.'));
         }
+        var POINTER = "pointer";
         var trackedPointers = /* @__PURE__ */ new Map();
         var pointableElements = /* @__PURE__ */ new Set();
         var pointableAttribute = AelluxJs2.attr("point");
         var pointableSelector = "[".concat(pointableAttribute, "]");
+        var pointerEvents = [["down", onPointerDown], ["move", onPointerMove], ["up", onPointerUp], ["cancel", onPointerCancel], ["over", onPointerOver], ["out", onPointerOut]];
         AelluxJs2.extAttach(extensionName, {
           init: init,
           destroy: destroy,
@@ -24706,23 +24741,33 @@
             unmount: unmountPointable,
             controllers: ["pointers"]
           });
-          AelluxJs2.on("$pointerdown", onPointerDown, true);
-          AelluxJs2.on("$pointermove", onPointerMove, true);
-          AelluxJs2.on("$pointerup", onPointerUp, true);
-          AelluxJs2.on("$pointercancel", onPointerCancel, true);
-          AelluxJs2.on("$pointerover", onPointerOver, true);
-          AelluxJs2.on("$pointerout", onPointerOut, true);
+          var _iterator = _createForOfIteratorHelper7(pointerEvents), _step;
+          try {
+            for (_iterator.s(); !(_step = _iterator.n()).done; ) {
+              var _step$value = _slicedToArray4(_step.value, 2), suffix = _step$value[0], handler = _step$value[1];
+              AelluxJs2.on("$".concat(POINTER).concat(suffix), handler, true);
+            }
+          } catch (err) {
+            _iterator.e(err);
+          } finally {
+            _iterator.f();
+          }
         }
         function destroy() {
           AelluxJs2.mountManager.remove({
             extensionName: extensionName
           });
-          AelluxJs2.off("$pointerdown", onPointerDown, true);
-          AelluxJs2.off("$pointermove", onPointerMove, true);
-          AelluxJs2.off("$pointerup", onPointerUp, true);
-          AelluxJs2.off("$pointercancel", onPointerCancel, true);
-          AelluxJs2.off("$pointerover", onPointerOver, true);
-          AelluxJs2.off("$pointerout", onPointerOut, true);
+          var _iterator2 = _createForOfIteratorHelper7(pointerEvents), _step2;
+          try {
+            for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
+              var _step2$value = _slicedToArray4(_step2.value, 2), suffix = _step2$value[0], handler = _step2$value[1];
+              AelluxJs2.off("$".concat(POINTER).concat(suffix), handler, true);
+            }
+          } catch (err) {
+            _iterator2.e(err);
+          } finally {
+            _iterator2.f();
+          }
           trackedPointers.clear();
           pointableElements.clear();
         }
@@ -24731,31 +24776,31 @@
         }
         function unmountPointable(element) {
           pointableElements.delete(element);
-          var _iterator = _createForOfIteratorHelper7(trackedPointers.values()), _step;
+          var _iterator3 = _createForOfIteratorHelper7(trackedPointers.values()), _step3;
           try {
-            for (_iterator.s(); !(_step = _iterator.n()).done; ) {
-              var pointer = _step.value;
+            for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
+              var pointer = _step3.value;
               if (pointer.target === element) pointer.target = null;
               if (pointer.pressStart === element) pointer.pressStart = null;
             }
           } catch (err) {
-            _iterator.e(err);
+            _iterator3.e(err);
           } finally {
-            _iterator.f();
+            _iterator3.f();
           }
         }
         function pointers(element) {
           var result = [];
-          var _iterator2 = _createForOfIteratorHelper7(trackedPointers.values()), _step2;
+          var _iterator4 = _createForOfIteratorHelper7(trackedPointers.values()), _step4;
           try {
-            for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
-              var pointer = _step2.value;
+            for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
+              var pointer = _step4.value;
               if (pointer.target === element) result.push(pointer);
             }
           } catch (err) {
-            _iterator2.e(err);
+            _iterator4.e(err);
           } finally {
-            _iterator2.f();
+            _iterator4.f();
           }
           return result;
         }
@@ -24771,16 +24816,16 @@
           while (element) {
             if (pointableElements.has(element) && element.hasAttribute(pointableAttribute)) {
               var occupied = 0;
-              var _iterator3 = _createForOfIteratorHelper7(trackedPointers.values()), _step3;
+              var _iterator5 = _createForOfIteratorHelper7(trackedPointers.values()), _step5;
               try {
-                for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
-                  var other = _step3.value;
+                for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
+                  var other = _step5.value;
                   if (other !== pointer && other.target === element) occupied++;
                 }
               } catch (err) {
-                _iterator3.e(err);
+                _iterator5.e(err);
               } finally {
-                _iterator3.f();
+                _iterator5.f();
               }
               if (occupied < limitFor(element)) return element;
             }
@@ -25129,6 +25174,7 @@
         if (!AelluxJs2) {
           throw new Error('[aellux.js] Cannot attach the "'.concat(extensionName, '" extension: root.AelluxJs is not defined. Load the aellux.js boot script before this extension.'));
         }
+        var ORIGIN_X = "--ae-anchor-origin-x", ORIGIN_Y = "--ae-anchor-origin-y", ANCHOR_OPACITY = "--anchor-opacity";
         var attribute = AelluxJs2.attr(extensionName);
         var presentAttribute = AelluxJs2.attr("present");
         var targetAttribute = AelluxJs2.attr("anchor-target");
@@ -25136,7 +25182,7 @@
         var layoutEvent = AelluxJs2.eventName("Layout");
         var anchoredClass = AelluxJs2.className("anchored");
         var baseProperties = ["position", "left", "top", "transform", "transform-origin"];
-        var ownedProperties = [].concat(baseProperties, ["--ae-anchor-x", "--ae-anchor-y", "--ae-anchor-origin-x", "--ae-anchor-origin-y", "--anchor-opacity"]);
+        var ownedProperties = [].concat(baseProperties, ["--ae-anchor-x", "--ae-anchor-y", ORIGIN_X, ORIGIN_Y, ANCHOR_OPACITY]);
         var pivots = {
           "top-left": [0, 0],
           "top-center": [0.5, 0],
@@ -25190,17 +25236,17 @@
             inherits: false,
             initialValue: "0px"
           }, {
-            name: "--ae-anchor-origin-x",
+            name: ORIGIN_X,
             syntax: "<percentage>",
             inherits: false,
             initialValue: "50%"
           }, {
-            name: "--ae-anchor-origin-y",
+            name: ORIGIN_Y,
             syntax: "<percentage>",
             inherits: false,
             initialValue: "0%"
           }, {
-            name: "--anchor-opacity",
+            name: ANCHOR_OPACITY,
             syntax: "<number>",
             inherits: false,
             initialValue: "1"
@@ -25487,9 +25533,9 @@
                     var selected = placement.selected;
                     element.style.setProperty("--ae-anchor-x", "".concat(selected.x, "px"));
                     element.style.setProperty("--ae-anchor-y", "".concat(selected.y, "px"));
-                    element.style.setProperty("--ae-anchor-origin-x", "".concat(selected.self[0] * 100, "%"));
-                    element.style.setProperty("--ae-anchor-origin-y", "".concat(selected.self[1] * 100, "%"));
-                    element.style.setProperty("--anchor-opacity", placement.opacity);
+                    element.style.setProperty(ORIGIN_X, "".concat(selected.self[0] * 100, "%"));
+                    element.style.setProperty(ORIGIN_Y, "".concat(selected.self[1] * 100, "%"));
+                    element.style.setProperty(ANCHOR_OPACITY, placement.opacity);
                     var _iterator6 = _createForOfIteratorHelper8(baseProperties), _step6;
                     try {
                       for (_iterator6.s(); !(_step6 = _iterator6.n()).done; ) {
@@ -25682,6 +25728,36 @@
   function _arrayWithoutHoles2(r) {
     if (Array.isArray(r)) return _arrayLikeToArray10(r);
   }
+  function _slicedToArray5(r, e) {
+    return _arrayWithHoles5(r) || _iterableToArrayLimit5(r, e) || _unsupportedIterableToArray10(r, e) || _nonIterableRest5();
+  }
+  function _nonIterableRest5() {
+    throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+  }
+  function _iterableToArrayLimit5(r, l) {
+    var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
+    if (null != t) {
+      var e, n, i, u, a = [], f = true, o = false;
+      try {
+        if (i = (t = t.call(r)).next, 0 === l) {
+          if (Object(t) !== t) return;
+          f = false;
+        } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = true) ;
+      } catch (r2) {
+        o = true, n = r2;
+      } finally {
+        try {
+          if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return;
+        } finally {
+          if (o) throw n;
+        }
+      }
+      return a;
+    }
+  }
+  function _arrayWithHoles5(r) {
+    if (Array.isArray(r)) return r;
+  }
   function _createForOfIteratorHelper9(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
@@ -25734,6 +25810,7 @@
         var extensionName = "scrollbox";
         if (!AelluxJs2) throw new Error("[aellux.js] Load the boot script before the scrollbox extension.");
         var onTarget = AelluxJs2.onTarget, offTarget = AelluxJs2.offTarget;
+        var POINTER = "pointer", POINTER_DOWN = "".concat(POINTER, "down"), POINTER_MOVE = "".concat(POINTER, "move"), POINTER_UP = "".concat(POINTER, "up"), POINTER_CANCEL = "".concat(POINTER, "cancel"), POINTER_OVER = "".concat(POINTER, "over"), POINTER_OUT = "".concat(POINTER, "out"), POINTER_ENTER = "".concat(POINTER, "enter"), POINTER_LEAVE = "".concat(POINTER, "leave"), POINTER_DOWN_TARGET = "$".concat(POINTER_DOWN), POINTER_MOVE_TARGET = "$".concat(POINTER_MOVE), POINTER_UP_TARGET = "$".concat(POINTER_UP), POINTER_CANCEL_TARGET = "$".concat(POINTER_CANCEL);
         var attribute = AelluxJs2.attr(extensionName);
         var wheelAttribute = AelluxJs2.attr("scrollbox-wheel-horizontal");
         var momentumAttribute = AelluxJs2.attr("scrollbox-momentum");
@@ -25781,6 +25858,33 @@
         var SCROLLBAR_MIN_THUMB_PX = 20;
         var SCROLLBAR_PDS_HIDE_DELAY_MS = 1e3;
         var scrollbarProperties = ["--ae-scrollbar-x", "--ae-scrollbar-y", "--ae-scrollbar-length", "--ae-scrollbar-thumb-size", "--ae-scrollbar-thumb-position", "--ae-scrollbar-display"];
+        var pointerListeners = [[POINTER_DOWN, "onPointerDown"], [POINTER_OVER, "onPointerOver"], [POINTER_OUT, "onPointerOut"], ["mousedown", "onMouseDown"]];
+        var scrollbarHoverListeners = [[POINTER_ENTER, "onScrollbarPointerEnter"], [POINTER_LEAVE, "onScrollbarPointerLeave"], ["mouseenter", "onScrollbarMouseEnter"], ["mouseleave", "onScrollbarMouseLeave"]];
+        var scrollbarAxisListeners = [[POINTER_DOWN, "onPointerDown"], [POINTER_MOVE, "onPointerMove"], [POINTER_UP, "onPointerEnd"], [POINTER_CANCEL, "onPointerEnd"]];
+        var snapEndListeners = [[POINTER_UP, "onSnapPointerEnd", true], [POINTER_CANCEL, "onSnapPointerEnd", true], ["touchend", "onSnapTouchEnd", true], ["touchcancel", "onSnapTouchEnd", true], ["blur", "onSnapBlur"]];
+        var touchListeners = [["touchstart", "onTouchStart", {
+          passive: true
+        }], ["touchmove", "onTouchMove", {
+          passive: false
+        }], ["touchend", "onTouchEnd", {
+          passive: true
+        }], ["touchcancel", "onTouchEnd", {
+          passive: true
+        }]];
+        function setListeners(target, owner, entries, active) {
+          var method = active ? onTarget : offTarget;
+          var _iterator = _createForOfIteratorHelper9(entries), _step;
+          try {
+            for (_iterator.s(); !(_step = _iterator.n()).done; ) {
+              var _step$value = _slicedToArray5(_step.value, 3), event = _step$value[0], handler = _step$value[1], options = _step$value[2];
+              method(target, "$".concat(event), owner[handler], active ? options : options === true || !!(options !== null && options !== void 0 && options.capture));
+            }
+          } catch (err) {
+            _iterator.e(err);
+          } finally {
+            _iterator.f();
+          }
+        }
         var pointerScrollMouseEvents = ["mousedown", "mousemove", "mouseup", "click", "dblclick", "auxclick", "contextmenu", "mouseover", "mouseout", "mouseenter", "mouseleave"];
         var pointerScrollDragEvents = ["dragstart", "drag", "dragenter", "dragover", "dragleave", "drop", "dragend"];
         var mouseHoldEvents = /* @__PURE__ */ new Set(["mousemove", "mouseover", "mouseout", "mouseenter", "mouseleave"]);
@@ -25804,57 +25908,21 @@
           goto: goto
         });
         function init() {
-          AelluxJs2.registerCssProperty({
-            name: "--ae-scroll-y-progress",
-            syntax: "<number>",
-            inherits: false,
-            initialValue: "0"
-          }, {
-            name: "--ae-scroll-x-progress",
-            syntax: "<number>",
-            inherits: false,
-            initialValue: "0"
-          }, {
-            name: "--ae-snap-viewport",
-            syntax: "<number>",
-            inherits: false,
-            initialValue: "0"
-          }, {
-            name: "--ae-snap-focus",
-            syntax: "<number>",
-            inherits: false,
-            initialValue: "0"
-          }, {
-            name: "--ae-scrollbar-x",
-            syntax: "<length>",
-            inherits: false,
-            initialValue: "0px"
-          }, {
-            name: "--ae-scrollbar-y",
-            syntax: "<length>",
-            inherits: false,
-            initialValue: "0px"
-          }, {
-            name: "--ae-scrollbar-length",
-            syntax: "<length>",
-            inherits: false,
-            initialValue: "0px"
-          }, {
-            name: "--ae-scrollbar-thumb-size",
-            syntax: "<length>",
-            inherits: false,
-            initialValue: "0px"
-          }, {
-            name: "--ae-scrollbar-thumb-position",
-            syntax: "<length>",
-            inherits: false,
-            initialValue: "0px"
-          }, {
-            name: "--ae-scrollbar-display",
-            syntax: "block | none",
-            inherits: false,
-            initialValue: "none"
-          });
+          AelluxJs2.registerCssProperty.apply(AelluxJs2, _toConsumableArray2([].concat(properties, snapProperties).map(function(name) {
+            return {
+              name: name,
+              syntax: "<number>",
+              inherits: false,
+              initialValue: "0"
+            };
+          })).concat(_toConsumableArray2(scrollbarProperties.map(function(name, index) {
+            return {
+              name: name,
+              syntax: index === 5 ? "block | none" : "<length>",
+              inherits: false,
+              initialValue: index === 5 ? "none" : "0px"
+            };
+          }))));
           AelluxJs2.mountManager.add({
             extensionName: extensionName,
             selector: "[".concat(attribute, "]"),
@@ -25866,16 +25934,16 @@
           });
         }
         function destroy() {
-          var _iterator = _createForOfIteratorHelper9(scrollboxes.keys()), _step;
+          var _iterator2 = _createForOfIteratorHelper9(scrollboxes.keys()), _step2;
           try {
-            for (_iterator.s(); !(_step = _iterator.n()).done; ) {
-              var element = _step.value;
+            for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
+              var element = _step2.value;
               unmountScrollbox(element);
             }
           } catch (err) {
-            _iterator.e(err);
+            _iterator2.e(err);
           } finally {
-            _iterator.f();
+            _iterator2.f();
           }
           AelluxJs2.mountManager.remove({
             extensionName: extensionName
@@ -26044,10 +26112,10 @@
             return endTouch(state, event);
           };
           state.onSnapPointerDown = function(event) {
-            return beginSnapGesture(state, "pointer", event);
+            return beginSnapGesture(state, POINTER, event);
           };
           state.onSnapPointerEnd = function(event) {
-            return endSnapGesture(state, "pointer", event);
+            return endSnapGesture(state, POINTER, event);
           };
           state.onSnapTouchStart = function(event) {
             return beginSnapGesture(state, "touch", event);
@@ -26115,12 +26183,7 @@
           offTarget(element, "$scroll", state.onScroll);
           offTarget(element, "$scrollend", state.onScrollEnd);
           if (state.wheelListening) offTarget(element, "$wheel", state.onWheel, true);
-          if (state.pointerListening) {
-            offTarget(element, "$pointerdown", state.onPointerDown);
-            offTarget(element, "$pointerover", state.onPointerOver);
-            offTarget(element, "$pointerout", state.onPointerOut);
-            offTarget(element, "$mousedown", state.onMouseDown);
-          }
+          if (state.pointerListening) setListeners(element, state, pointerListeners, false);
           if (state.touchListening) removeTouchListeners(state);
           if (state.resizeObserver) state.resizeObserver.disconnect();
           if (state.mutationObserver) state.mutationObserver.disconnect();
@@ -26133,16 +26196,16 @@
           (_elementMemories$get = elementMemories.get(element)) === null || _elementMemories$get === void 0 || _elementMemories$get.restore();
           elementMemories.delete(element);
           cursorMemories.delete(element);
-          var _iterator2 = _createForOfIteratorHelper9(scrollEdgeClasses), _step2;
+          var _iterator3 = _createForOfIteratorHelper9(scrollEdgeClasses), _step3;
           try {
-            for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
-              var name = _step2.value;
+            for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
+              var name = _step3.value;
               element.classList.remove(name);
             }
           } catch (err) {
-            _iterator2.e(err);
+            _iterator3.e(err);
           } finally {
-            _iterator2.f();
+            _iterator3.f();
           }
           scrollboxes.delete(element);
         }
@@ -26170,20 +26233,14 @@
           if (state.elasticEnabled && !state.touchListening) addTouchListeners(state);
           else if (!state.elasticEnabled && state.touchListening) removeTouchListeners(state);
           if (!state.elasticEnabled) resetElastic(state);
-          var pointerEnabled = state.desktop && state.mode === "pointer";
+          var pointerEnabled = state.desktop && state.mode === POINTER;
           if (!pointerEnabled || !state.momentumEnabled) cancelMomentum(state);
           if (pointerEnabled && !state.pointerListening) {
-            onTarget(element, "$pointerdown", state.onPointerDown);
-            onTarget(element, "$pointerover", state.onPointerOver);
-            onTarget(element, "$pointerout", state.onPointerOut);
-            onTarget(element, "$mousedown", state.onMouseDown);
+            setListeners(element, state, pointerListeners, true);
             state.pointerListening = true;
           } else if (!pointerEnabled && state.pointerListening) {
             if (activePointerScrollState && activePointerScrollState.pointerScroll && activePointerScrollState.pointerScroll.chain.includes(state)) endPointerScroll(activePointerScrollState);
-            offTarget(element, "$pointerdown", state.onPointerDown);
-            offTarget(element, "$pointerover", state.onPointerOver);
-            offTarget(element, "$pointerout", state.onPointerOut);
-            offTarget(element, "$mousedown", state.onMouseDown);
+            setListeners(element, state, pointerListeners, false);
             state.pointerListening = false;
             endPointerScroll(state);
             state.lastPointerDown = null;
@@ -26212,19 +26269,19 @@
             x: false,
             y: false
           };
-          var _iterator3 = _createForOfIteratorHelper9(tokens), _step3;
+          var _iterator4 = _createForOfIteratorHelper9(tokens), _step4;
           try {
-            for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
-              var token = _step3.value;
+            for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
+              var token = _step4.value;
               var short = token.replace(/horizontal/g, "h").replace(/vertical/g, "v");
               if (!/^[vhxy]+$/.test(short)) continue;
               if (/[hx]/.test(short)) axes.x = true;
               if (/[vy]/.test(short)) axes.y = true;
             }
           } catch (err) {
-            _iterator3.e(err);
+            _iterator4.e(err);
           } finally {
-            _iterator3.f();
+            _iterator4.f();
           }
           return axes;
         }
@@ -26238,19 +26295,13 @@
           var scrollbar = state.scrollbar;
           if (enabled && !scrollbar.listening) {
             scrollbar.mouseHover = element.matches(":hover") && !!(root2.matchMedia && root2.matchMedia("(any-hover: hover)").matches);
-            onTarget(element, "$pointerenter", state.onScrollbarPointerEnter);
-            onTarget(element, "$pointerleave", state.onScrollbarPointerLeave);
-            onTarget(element, "$mouseenter", state.onScrollbarMouseEnter);
-            onTarget(element, "$mouseleave", state.onScrollbarMouseLeave);
-            AelluxJs2.on("$pointerdown", state.onScrollbarOutsideDown, true);
+            setListeners(element, state, scrollbarHoverListeners, true);
+            AelluxJs2.on(POINTER_DOWN_TARGET, state.onScrollbarOutsideDown, true);
             scrollbar.listening = true;
             syncScrollbarVisibility(state);
           } else if (!enabled && scrollbar.listening) {
-            offTarget(element, "$pointerenter", state.onScrollbarPointerEnter);
-            offTarget(element, "$pointerleave", state.onScrollbarPointerLeave);
-            offTarget(element, "$mouseenter", state.onScrollbarMouseEnter);
-            offTarget(element, "$mouseleave", state.onScrollbarMouseLeave);
-            AelluxJs2.off("$pointerdown", state.onScrollbarOutsideDown, true);
+            setListeners(element, state, scrollbarHoverListeners, false);
+            AelluxJs2.off(POINTER_DOWN_TARGET, state.onScrollbarOutsideDown, true);
             scrollbar.listening = false;
             clearScrollbarPdsVisibility(state);
             scrollbar.pointerHover = false;
@@ -26304,10 +26355,7 @@
           record.onPointerEnd = function(event) {
             return endScrollbarDrag(state, record, event);
           };
-          onTarget(element, "$pointerdown", record.onPointerDown);
-          onTarget(element, "$pointermove", record.onPointerMove);
-          onTarget(element, "$pointerup", record.onPointerEnd);
-          onTarget(element, "$pointercancel", record.onPointerEnd);
+          setListeners(element, record, scrollbarAxisListeners, true);
           scrollbar[axis] = record;
         }
         function resetScrollbarAxis(state, axis) {
@@ -26316,10 +26364,7 @@
           if (!record) return;
           endScrollbarDrag(state, record);
           var element = record.element;
-          offTarget(element, "$pointerdown", record.onPointerDown);
-          offTarget(element, "$pointermove", record.onPointerMove);
-          offTarget(element, "$pointerup", record.onPointerEnd);
-          offTarget(element, "$pointercancel", record.onPointerEnd);
+          setListeners(element, record, scrollbarAxisListeners, false);
           if (record.owned) element.remove();
           else (_scrollbarMemories$ge = scrollbarMemories.get(element)) === null || _scrollbarMemories$ge === void 0 || _scrollbarMemories$ge.restore();
           scrollbarMemories.delete(element);
@@ -26330,11 +26375,8 @@
           resetScrollbarAxis(state, "y");
           var scrollbar = state.scrollbar;
           if (scrollbar.listening) {
-            offTarget(state.element, "$pointerenter", state.onScrollbarPointerEnter);
-            offTarget(state.element, "$pointerleave", state.onScrollbarPointerLeave);
-            offTarget(state.element, "$mouseenter", state.onScrollbarMouseEnter);
-            offTarget(state.element, "$mouseleave", state.onScrollbarMouseLeave);
-            AelluxJs2.off("$pointerdown", state.onScrollbarOutsideDown, true);
+            setListeners(state.element, state, scrollbarHoverListeners, false);
+            AelluxJs2.off(POINTER_DOWN_TARGET, state.onScrollbarOutsideDown, true);
             scrollbar.listening = false;
           }
           if (scrollbar.hideOwned) state.element.classList.remove(nativeScrollbarHideClass);
@@ -26419,18 +26461,18 @@
           return values;
         }
         function updateScrollbars(state, values) {
-          var _iterator4 = _createForOfIteratorHelper9(values), _step4;
+          var _iterator5 = _createForOfIteratorHelper9(values), _step5;
           try {
-            for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
-              var _step4$value = _step4.value, record = _step4$value.record, x = _step4$value.x, y = _step4$value.y, trackSize = _step4$value.trackSize, thumbSize = _step4$value.thumbSize, thumbPosition = _step4$value.thumbPosition, max = _step4$value.max, display = _step4$value.display;
+            for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
+              var _step5$value = _step5.value, record = _step5$value.record, x = _step5$value.x, y = _step5$value.y, trackSize = _step5$value.trackSize, thumbSize = _step5$value.thumbSize, thumbPosition = _step5$value.thumbPosition, max = _step5$value.max, display = _step5$value.display;
               if (state.scrollbar[record.axis] !== record) continue;
               var style = record.element.style;
-              if (record.x !== x) style.setProperty("--ae-scrollbar-x", "".concat(x, "px"));
-              if (record.y !== y) style.setProperty("--ae-scrollbar-y", "".concat(y, "px"));
-              if (record.trackSize !== trackSize) style.setProperty("--ae-scrollbar-length", "".concat(trackSize, "px"));
-              if (record.thumbSize !== thumbSize) style.setProperty("--ae-scrollbar-thumb-size", "".concat(thumbSize, "px"));
-              if (record.thumbPosition !== thumbPosition) style.setProperty("--ae-scrollbar-thumb-position", "".concat(thumbPosition, "px"));
-              if (record.display !== display) style.setProperty("--ae-scrollbar-display", display);
+              if (record.x !== x) style.setProperty(scrollbarProperties[0], "".concat(x, "px"));
+              if (record.y !== y) style.setProperty(scrollbarProperties[1], "".concat(y, "px"));
+              if (record.trackSize !== trackSize) style.setProperty(scrollbarProperties[2], "".concat(trackSize, "px"));
+              if (record.thumbSize !== thumbSize) style.setProperty(scrollbarProperties[3], "".concat(thumbSize, "px"));
+              if (record.thumbPosition !== thumbPosition) style.setProperty(scrollbarProperties[4], "".concat(thumbPosition, "px"));
+              if (record.display !== display) style.setProperty(scrollbarProperties[5], display);
               record.x = x;
               record.y = y;
               record.trackSize = trackSize;
@@ -26440,9 +26482,9 @@
               record.display = display;
             }
           } catch (err) {
-            _iterator4.e(err);
+            _iterator5.e(err);
           } finally {
-            _iterator4.f();
+            _iterator5.f();
           }
         }
         function scrollbarPointerPosition(record, event) {
@@ -26641,18 +26683,18 @@
           clearSnapWheelTimeout(state);
           if (snap.edgeWheelTimeout !== null) root2.clearTimeout(snap.edgeWheelTimeout);
           snap.edgeWheelTimeout = null;
-          var _iterator5 = _createForOfIteratorHelper9(snap.savedItems), _step5;
+          var _iterator6 = _createForOfIteratorHelper9(snap.savedItems), _step6;
           try {
-            for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
+            for (_iterator6.s(); !(_step6 = _iterator6.n()).done; ) {
               var _snapItemMemories$get;
-              var item = _step5.value;
+              var item = _step6.value;
               (_snapItemMemories$get = snapItemMemories.get(item)) === null || _snapItemMemories$get === void 0 || _snapItemMemories$get.restore();
               snapItemMemories.delete(item);
             }
           } catch (err) {
-            _iterator5.e(err);
+            _iterator6.e(err);
           } finally {
-            _iterator5.f();
+            _iterator6.f();
           }
           snap.savedItems.clear();
           state.element.classList.remove(snapReadyClass, snapSuspendedClass);
@@ -26717,7 +26759,7 @@
         }
         function addSnapGestureListeners(state) {
           if (state.snap.gestureListening) return;
-          onTarget(state.element, "$pointerdown", state.onSnapPointerDown, true);
+          onTarget(state.element, POINTER_DOWN_TARGET, state.onSnapPointerDown, true);
           onTarget(state.element, "$touchstart", state.onSnapTouchStart, {
             passive: true,
             capture: true
@@ -26726,7 +26768,7 @@
         }
         function removeSnapGestureListeners(state) {
           if (state.snap.gestureListening) {
-            offTarget(state.element, "$pointerdown", state.onSnapPointerDown, true);
+            offTarget(state.element, POINTER_DOWN_TARGET, state.onSnapPointerDown, true);
             offTarget(state.element, "$touchstart", state.onSnapTouchStart, true);
             state.snap.gestureListening = false;
           }
@@ -26737,38 +26779,30 @@
         }
         function listenSnapGestureEnd(state) {
           if (state.snap.endListening) return;
-          onTarget(root2, "$pointerup", state.onSnapPointerEnd, true);
-          onTarget(root2, "$pointercancel", state.onSnapPointerEnd, true);
-          onTarget(root2, "$touchend", state.onSnapTouchEnd, true);
-          onTarget(root2, "$touchcancel", state.onSnapTouchEnd, true);
-          onTarget(root2, "$blur", state.onSnapBlur);
+          setListeners(root2, state, snapEndListeners, true);
           state.snap.endListening = true;
         }
         function stopSnapGestureEndListeners(state) {
           if (!state.snap.endListening) return;
-          offTarget(root2, "$pointerup", state.onSnapPointerEnd, true);
-          offTarget(root2, "$pointercancel", state.onSnapPointerEnd, true);
-          offTarget(root2, "$touchend", state.onSnapTouchEnd, true);
-          offTarget(root2, "$touchcancel", state.onSnapTouchEnd, true);
-          offTarget(root2, "$blur", state.onSnapBlur);
+          setListeners(root2, state, snapEndListeners, false);
           state.snap.endListening = false;
         }
         function beginSnapGesture(state, kind, event) {
           if (!state.snapEnabled || event.target.closest("[".concat(scrollbarVerticalAttribute, "], [").concat(scrollbarHorizontalAttribute, "]"))) return;
           var snap = state.snap;
-          var active = kind === "pointer" ? snap.activePointers : snap.activeTouches;
-          if (kind === "pointer") active.add(event.pointerId);
+          var active = kind === POINTER ? snap.activePointers : snap.activeTouches;
+          if (kind === POINTER) active.add(event.pointerId);
           else {
-            var _iterator6 = _createForOfIteratorHelper9(event.changedTouches), _step6;
+            var _iterator7 = _createForOfIteratorHelper9(event.changedTouches), _step7;
             try {
-              for (_iterator6.s(); !(_step6 = _iterator6.n()).done; ) {
-                var touch = _step6.value;
+              for (_iterator7.s(); !(_step7 = _iterator7.n()).done; ) {
+                var touch = _step7.value;
                 active.add(touch.identifier);
               }
             } catch (err) {
-              _iterator6.e(err);
+              _iterator7.e(err);
             } finally {
-              _iterator6.f();
+              _iterator7.f();
             }
           }
           if (!active.size) return;
@@ -26780,18 +26814,18 @@
         }
         function endSnapGesture(state, kind, event) {
           var snap = state.snap;
-          if (kind === "pointer") snap.activePointers.delete(event.pointerId);
+          if (kind === POINTER) snap.activePointers.delete(event.pointerId);
           else if (kind === "touch") {
-            var _iterator7 = _createForOfIteratorHelper9(event.changedTouches), _step7;
+            var _iterator8 = _createForOfIteratorHelper9(event.changedTouches), _step8;
             try {
-              for (_iterator7.s(); !(_step7 = _iterator7.n()).done; ) {
-                var touch = _step7.value;
+              for (_iterator8.s(); !(_step8 = _iterator8.n()).done; ) {
+                var touch = _step8.value;
                 snap.activeTouches.delete(touch.identifier);
               }
             } catch (err) {
-              _iterator7.e(err);
+              _iterator8.e(err);
             } finally {
-              _iterator7.f();
+              _iterator8.f();
             }
           } else {
             snap.activePointers.clear();
@@ -27022,7 +27056,7 @@
         }
         function readMode(element) {
           var value = (element.getAttribute(attribute) || "").trim().toLowerCase() || "native";
-          if (value === "native" || value === "pointer") return value;
+          if (value === "native" || value === POINTER) return value;
           AelluxJs2.diagnostics.warn(AelluxJs2.diagnostics.WARN_SCROLLBOX_MODE_INVALID, {
             element: element,
             value: value
@@ -27043,28 +27077,28 @@
         function isTextAtPoint(element, x, y) {
           if (root2.getComputedStyle(element).userSelect === "none") return false;
           var range = document.createRange();
-          var _iterator8 = _createForOfIteratorHelper9(element.childNodes), _step8;
+          var _iterator9 = _createForOfIteratorHelper9(element.childNodes), _step9;
           try {
-            for (_iterator8.s(); !(_step8 = _iterator8.n()).done; ) {
-              var node = _step8.value;
+            for (_iterator9.s(); !(_step9 = _iterator9.n()).done; ) {
+              var node = _step9.value;
               if (node.nodeType !== 3 || !node.textContent.trim()) continue;
               range.selectNodeContents(node);
-              var _iterator9 = _createForOfIteratorHelper9(range.getClientRects()), _step9;
+              var _iterator0 = _createForOfIteratorHelper9(range.getClientRects()), _step0;
               try {
-                for (_iterator9.s(); !(_step9 = _iterator9.n()).done; ) {
-                  var rect = _step9.value;
+                for (_iterator0.s(); !(_step0 = _iterator0.n()).done; ) {
+                  var rect = _step0.value;
                   if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) return true;
                 }
               } catch (err) {
-                _iterator9.e(err);
+                _iterator0.e(err);
               } finally {
-                _iterator9.f();
+                _iterator0.f();
               }
             }
           } catch (err) {
-            _iterator8.e(err);
+            _iterator9.e(err);
           } finally {
-            _iterator8.f();
+            _iterator9.f();
           }
           return false;
         }
@@ -27126,10 +27160,10 @@
             return axes.get(member2).x;
           });
           if (!textOrigin && event.cancelable) event.preventDefault();
-          var _iterator0 = _createForOfIteratorHelper9(new Set([].concat(_toConsumableArray2(chains.x), _toConsumableArray2(chains.y)))), _step0;
+          var _iterator1 = _createForOfIteratorHelper9(new Set([].concat(_toConsumableArray2(chains.x), _toConsumableArray2(chains.y)))), _step1;
           try {
-            for (_iterator0.s(); !(_step0 = _iterator0.n()).done; ) {
-              var _member = _step0.value;
+            for (_iterator1.s(); !(_step1 = _iterator1.n()).done; ) {
+              var _member = _step1.value;
               cancelMomentum(_member);
               _member.snap.flick = null;
               clearSnapTarget(_member);
@@ -27139,9 +27173,9 @@
               }
             }
           } catch (err) {
-            _iterator0.e(err);
+            _iterator1.e(err);
           } finally {
-            _iterator0.f();
+            _iterator1.f();
           }
           if (state.mouseReleaseTimeout !== null) root2.clearTimeout(state.mouseReleaseTimeout);
           state.mouseReleaseTimeout = null;
@@ -27180,7 +27214,7 @@
             momentumStartTime: time
           };
           activePointerScrollState = state;
-          onTarget(root2, "$pointermove", state.onPointerMove, {
+          onTarget(root2, POINTER_MOVE_TARGET, state.onPointerMove, {
             passive: false,
             capture: true
           });
@@ -27188,34 +27222,34 @@
             passive: false,
             capture: true
           });
-          var _iterator1 = _createForOfIteratorHelper9(pointerScrollDragEvents), _step1;
-          try {
-            for (_iterator1.s(); !(_step1 = _iterator1.n()).done; ) {
-              var name = _step1.value;
-              onTarget(root2, "$" + name, state.onPointerScrollNativeEvent, true);
-            }
-          } catch (err) {
-            _iterator1.e(err);
-          } finally {
-            _iterator1.f();
-          }
-          onTarget(root2, "$selectstart", state.onPointerScrollNativeEvent, true);
-          var _iterator10 = _createForOfIteratorHelper9(pointerScrollMouseEvents), _step10;
+          var _iterator10 = _createForOfIteratorHelper9(pointerScrollDragEvents), _step10;
           try {
             for (_iterator10.s(); !(_step10 = _iterator10.n()).done; ) {
-              var _name = _step10.value;
-              onTarget(root2, "$" + _name, state.onMouseEvent, {
-                passive: false,
-                capture: true
-              });
+              var name = _step10.value;
+              onTarget(root2, "$" + name, state.onPointerScrollNativeEvent, true);
             }
           } catch (err) {
             _iterator10.e(err);
           } finally {
             _iterator10.f();
           }
-          onTarget(root2, "$pointerup", state.onPointerEnd, true);
-          onTarget(root2, "$pointercancel", state.onPointerEnd, true);
+          onTarget(root2, "$selectstart", state.onPointerScrollNativeEvent, true);
+          var _iterator11 = _createForOfIteratorHelper9(pointerScrollMouseEvents), _step11;
+          try {
+            for (_iterator11.s(); !(_step11 = _iterator11.n()).done; ) {
+              var _name = _step11.value;
+              onTarget(root2, "$" + _name, state.onMouseEvent, {
+                passive: false,
+                capture: true
+              });
+            }
+          } catch (err) {
+            _iterator11.e(err);
+          } finally {
+            _iterator11.f();
+          }
+          onTarget(root2, POINTER_UP_TARGET, state.onPointerEnd, true);
+          onTarget(root2, POINTER_CANCEL_TARGET, state.onPointerEnd, true);
           onTarget(root2, "$blur", state.onBlur);
         }
         function movePointerScroll(state, event) {
@@ -27278,16 +27312,16 @@
           if (event.cancelable) event.preventDefault();
           if (!remaining) return;
           var outermost = null;
-          var _iterator11 = _createForOfIteratorHelper9(pointerScroll.chain), _step11;
+          var _iterator12 = _createForOfIteratorHelper9(pointerScroll.chain), _step12;
           try {
-            for (_iterator11.s(); !(_step11 = _iterator11.n()).done; ) {
-              var member = _step11.value;
+            for (_iterator12.s(); !(_step12 = _iterator12.n()).done; ) {
+              var member = _step12.value;
               if (!member.disposed && member.pointerListening && pointerAxisMaximum(member, axis, pointerScroll) > 0) outermost = member;
             }
           } catch (err) {
-            _iterator11.e(err);
+            _iterator12.e(err);
           } finally {
-            _iterator11.f();
+            _iterator12.f();
           }
           var allowed = outermost && outermost.elasticEnabled ? elasticAxes(outermost) : null;
           var canStretch = allowed && allowed[axis];
@@ -27303,10 +27337,10 @@
           }
           var lastUsed = null;
           var lastStartX = 0, lastStartY = 0;
-          var _iterator12 = _createForOfIteratorHelper9(pointerScroll.chain), _step12;
+          var _iterator13 = _createForOfIteratorHelper9(pointerScroll.chain), _step13;
           try {
-            for (_iterator12.s(); !(_step12 = _iterator12.n()).done; ) {
-              var _member2 = _step12.value;
+            for (_iterator13.s(); !(_step13 = _iterator13.n()).done; ) {
+              var _member2 = _step13.value;
               if (_member2.disposed || !_member2.pointerListening || pointerAxisMaximum(_member2, axis, pointerScroll) <= 0) continue;
               if (Math.abs(remaining) < 1e-3) continue;
               var _element = _member2.element;
@@ -27327,9 +27361,9 @@
               lastStartY = previousY;
             }
           } catch (err) {
-            _iterator12.e(err);
+            _iterator13.e(err);
           } finally {
-            _iterator12.f();
+            _iterator13.f();
           }
           if (canStretch) {
             pointerScroll.elasticForce += remaining;
@@ -27382,17 +27416,17 @@
         }
         function pointerAxisChain(chain, axes, axis) {
           var result = [];
-          var _iterator13 = _createForOfIteratorHelper9(chain), _step13;
+          var _iterator14 = _createForOfIteratorHelper9(chain), _step14;
           try {
-            for (_iterator13.s(); !(_step13 = _iterator13.n()).done; ) {
-              var member = _step13.value;
+            for (_iterator14.s(); !(_step14 = _iterator14.n()).done; ) {
+              var member = _step14.value;
               result.push(member);
               if (axes.get(member)[axis === "x" ? "stopX" : "stopY"]) break;
             }
           } catch (err) {
-            _iterator13.e(err);
+            _iterator14.e(err);
           } finally {
-            _iterator13.f();
+            _iterator14.f();
           }
           return result;
         }
@@ -27401,10 +27435,10 @@
           pointerScroll.moved = true;
           pointerScroll.started = true;
           restorePointerScrollCursor(state);
-          var _iterator14 = _createForOfIteratorHelper9(pointerScroll.chain), _step14;
+          var _iterator15 = _createForOfIteratorHelper9(pointerScroll.chain), _step15;
           try {
-            for (_iterator14.s(); !(_step14 = _iterator14.n()).done; ) {
-              var member = _step14.value;
+            for (_iterator15.s(); !(_step15 = _iterator15.n()).done; ) {
+              var member = _step15.value;
               if (pointerAxisMaximum(member, axis, pointerScroll) <= 0) continue;
               var element = member.element;
               pointerScrollMemories.set(element, AelluxJs2.persist.element.save(element, [], ["scroll-behavior"]));
@@ -27414,13 +27448,13 @@
               });
               element.style.setProperty("scroll-behavior", "auto", "important");
               element.classList.add(pointerScrollingClass);
-              if (member.snapEnabled) suspendSnapStyles(member, "pointer", true);
+              if (member.snapEnabled) suspendSnapStyles(member, POINTER, true);
               startScrollbarPdsVisibility(member);
             }
           } catch (err) {
-            _iterator14.e(err);
+            _iterator15.e(err);
           } finally {
-            _iterator14.f();
+            _iterator15.f();
           }
           dispatchPointerScroll(state, pointerScroll, "PointerScrollStart");
         }
@@ -27440,11 +27474,11 @@
           var pointerScroll = state.pointerScroll;
           if (!pointerScroll || event && event.pointerId !== pointerScroll.pointerId) return;
           pointerScroll.endTime = now();
-          if (event && event.type === "pointerup") {
+          if (event && event.type === POINTER_UP) {
             pointerScroll.lastX = event.clientX;
             pointerScroll.lastY = event.clientY;
           }
-          if (event && event.type === "pointerup" && !pointerScroll.moved && pointerScroll.endTime < pointerScroll.selectionReadyTime && !selectionHasChanged(pointerScroll.selectionAtDown)) {
+          if (event && event.type === POINTER_UP && !pointerScroll.moved && pointerScroll.endTime < pointerScroll.selectionReadyTime && !selectionHasChanged(pointerScroll.selectionAtDown)) {
             var dx = pointerScroll.startX - event.clientX;
             var dy = pointerScroll.startY - event.clientY;
             var axis = pointerScroll.axis || (Math.abs(dx) >= Math.abs(dy) ? "x" : "y");
@@ -27460,22 +27494,22 @@
           state.pointerScroll = null;
           if (activePointerScrollState === state) activePointerScrollState = null;
           if (pointerScroll.selectionWaitTimeout !== null) root2.clearTimeout(pointerScroll.selectionWaitTimeout);
-          offTarget(root2, "$pointermove", state.onPointerMove, true);
+          offTarget(root2, POINTER_MOVE_TARGET, state.onPointerMove, true);
           offTarget(root2, "$touchmove", state.onPointerScrollTouchMove, true);
-          var _iterator15 = _createForOfIteratorHelper9(pointerScrollDragEvents), _step15;
+          var _iterator16 = _createForOfIteratorHelper9(pointerScrollDragEvents), _step16;
           try {
-            for (_iterator15.s(); !(_step15 = _iterator15.n()).done; ) {
-              var name = _step15.value;
+            for (_iterator16.s(); !(_step16 = _iterator16.n()).done; ) {
+              var name = _step16.value;
               offTarget(root2, "$" + name, state.onPointerScrollNativeEvent, true);
             }
           } catch (err) {
-            _iterator15.e(err);
+            _iterator16.e(err);
           } finally {
-            _iterator15.f();
+            _iterator16.f();
           }
           offTarget(root2, "$selectstart", state.onPointerScrollNativeEvent, true);
-          offTarget(root2, "$pointerup", state.onPointerEnd, true);
-          offTarget(root2, "$pointercancel", state.onPointerEnd, true);
+          offTarget(root2, POINTER_UP_TARGET, state.onPointerEnd, true);
+          offTarget(root2, POINTER_CANCEL_TARGET, state.onPointerEnd, true);
           offTarget(root2, "$blur", state.onBlur);
           if (pointerScroll.moved && !state.disposed) {
             state.mouseReleaseButton = pointerScroll.button;
@@ -27486,26 +27520,26 @@
           } else {
             stopPointerScrollMouseEvents(state);
           }
-          var _iterator16 = _createForOfIteratorHelper9(pointerScroll.styles), _step16;
+          var _iterator17 = _createForOfIteratorHelper9(pointerScroll.styles), _step17;
           try {
-            for (_iterator16.s(); !(_step16 = _iterator16.n()).done; ) {
+            for (_iterator17.s(); !(_step17 = _iterator17.n()).done; ) {
               var _pointerScrollMemorie;
-              var saved = _step16.value;
+              var saved = _step17.value;
               if (saved.classOwned) saved.element.classList.remove(pointerScrollingClass);
               (_pointerScrollMemorie = pointerScrollMemories.get(saved.element)) === null || _pointerScrollMemorie === void 0 || _pointerScrollMemorie.restore();
               pointerScrollMemories.delete(saved.element);
               var member = scrollboxes.get(saved.element);
               if (member) {
-                suspendSnapStyles(member, "pointer", false);
+                suspendSnapStyles(member, POINTER, false);
                 scheduleScrollbarPdsHide(member);
               }
             }
           } catch (err) {
-            _iterator16.e(err);
+            _iterator17.e(err);
           } finally {
-            _iterator16.f();
+            _iterator17.f();
           }
-          if (event && event.type === "pointerup" && state.pointerListening) {
+          if (event && event.type === POINTER_UP && state.pointerListening) {
             updatePointerScrollCursor(state, document.elementFromPoint(event.clientX, event.clientY), event.clientX, event.clientY);
           } else restorePointerScrollCursor(state);
           if (pointerScroll.started) dispatchPointerScroll(state, pointerScroll, "PointerScrollEnd");
@@ -27516,23 +27550,23 @@
           var snapState = momentumState ? momentumState.snapEnabled ? momentumState : null : pointerScroll.chain.find(function(member2) {
             return member2.snapEnabled && pointerAxisMaximum(member2, pointerScroll.axis, pointerScroll) > 0;
           });
-          var shouldSnap = event && event.type === "pointerup" && pointerScroll.moved && snapState && !snapState.disposed && snapItems(snapState).length;
+          var shouldSnap = event && event.type === POINTER_UP && pointerScroll.moved && snapState && !snapState.disposed && snapItems(snapState).length;
           if (shouldSnap) {
             recordSnapFlick(snapState, pointerScroll, pointerScroll.axis, pointerScroll.snapStarts.get(snapState));
             scheduleScrollEnd(snapState);
           }
-          var _iterator17 = _createForOfIteratorHelper9(pointerScroll.chain), _step17;
+          var _iterator18 = _createForOfIteratorHelper9(pointerScroll.chain), _step18;
           try {
-            for (_iterator17.s(); !(_step17 = _iterator17.n()).done; ) {
-              var _member3 = _step17.value;
+            for (_iterator18.s(); !(_step18 = _iterator18.n()).done; ) {
+              var _member3 = _step18.value;
               releaseElastic(_member3);
             }
           } catch (err) {
-            _iterator17.e(err);
+            _iterator18.e(err);
           } finally {
-            _iterator17.f();
+            _iterator18.f();
           }
-          if (!shouldSnap && event && event.type === "pointerup" && pointerScroll.moved && momentumState && momentumState.momentumEnabled && !hadElastic && !momentumState.disposed && now() - pointerScroll.momentumStartTime < MOMENTUM_LIMIT_TIME_MS) {
+          if (!shouldSnap && event && event.type === POINTER_UP && pointerScroll.moved && momentumState && momentumState.momentumEnabled && !hadElastic && !momentumState.disposed && now() - pointerScroll.momentumStartTime < MOMENTUM_LIMIT_TIME_MS) {
             startMomentum(momentumState, pointerScroll);
           }
         }
@@ -27572,16 +27606,16 @@
           if (state.mouseReleaseTimeout !== null) root2.clearTimeout(state.mouseReleaseTimeout);
           state.mouseReleaseTimeout = null;
           state.mouseReleaseButton = null;
-          var _iterator18 = _createForOfIteratorHelper9(pointerScrollMouseEvents), _step18;
+          var _iterator19 = _createForOfIteratorHelper9(pointerScrollMouseEvents), _step19;
           try {
-            for (_iterator18.s(); !(_step18 = _iterator18.n()).done; ) {
-              var name = _step18.value;
+            for (_iterator19.s(); !(_step19 = _iterator19.n()).done; ) {
+              var name = _step19.value;
               offTarget(root2, "$" + name, state.onMouseEvent, true);
             }
           } catch (err) {
-            _iterator18.e(err);
+            _iterator19.e(err);
           } finally {
-            _iterator18.f();
+            _iterator19.f();
           }
         }
         function startMomentum(state, pointerScroll) {
@@ -27635,27 +27669,11 @@
           state.momentum = null;
         }
         function addTouchListeners(state) {
-          var element = state.element;
-          onTarget(element, "$touchstart", state.onTouchStart, {
-            passive: true
-          });
-          onTarget(element, "$touchmove", state.onTouchMove, {
-            passive: false
-          });
-          onTarget(element, "$touchend", state.onTouchEnd, {
-            passive: true
-          });
-          onTarget(element, "$touchcancel", state.onTouchEnd, {
-            passive: true
-          });
+          setListeners(state.element, state, touchListeners, true);
           state.touchListening = true;
         }
         function removeTouchListeners(state) {
-          var element = state.element;
-          offTarget(element, "$touchstart", state.onTouchStart);
-          offTarget(element, "$touchmove", state.onTouchMove);
-          offTarget(element, "$touchend", state.onTouchEnd);
-          offTarget(element, "$touchcancel", state.onTouchEnd);
+          setListeners(state.element, state, touchListeners, false);
           state.touchListening = false;
           state.elastic.touch = null;
         }
@@ -27685,19 +27703,19 @@
           var start = state.elastic.touch;
           if (!start) return;
           var touch = null;
-          var _iterator19 = _createForOfIteratorHelper9(event.touches), _step19;
+          var _iterator20 = _createForOfIteratorHelper9(event.touches), _step20;
           try {
-            for (_iterator19.s(); !(_step19 = _iterator19.n()).done; ) {
-              var item = _step19.value;
+            for (_iterator20.s(); !(_step20 = _iterator20.n()).done; ) {
+              var item = _step20.value;
               if (item.identifier === start.identifier) {
                 touch = item;
                 break;
               }
             }
           } catch (err) {
-            _iterator19.e(err);
+            _iterator20.e(err);
           } finally {
-            _iterator19.f();
+            _iterator20.f();
           }
           if (!touch) return;
           var desiredX = start.scrollLeft + start.x - touch.clientX;
@@ -27710,16 +27728,16 @@
         function endTouch(state, event) {
           var touch = state.elastic.touch;
           if (!touch) return;
-          var _iterator20 = _createForOfIteratorHelper9(event.touches), _step20;
+          var _iterator21 = _createForOfIteratorHelper9(event.touches), _step21;
           try {
-            for (_iterator20.s(); !(_step20 = _iterator20.n()).done; ) {
-              var item = _step20.value;
+            for (_iterator21.s(); !(_step21 = _iterator21.n()).done; ) {
+              var item = _step21.value;
               if (item.identifier === touch.identifier) return;
             }
           } catch (err) {
-            _iterator20.e(err);
+            _iterator21.e(err);
           } finally {
-            _iterator20.f();
+            _iterator21.f();
           }
           state.elastic.touch = null;
           releaseElastic(state);
@@ -27895,16 +27913,16 @@
               return scheduleResize(state);
             });
             state.resizeObserver.observe(state.element);
-            var _iterator21 = _createForOfIteratorHelper9(state.element.children), _step21;
+            var _iterator22 = _createForOfIteratorHelper9(state.element.children), _step22;
             try {
-              for (_iterator21.s(); !(_step21 = _iterator21.n()).done; ) {
-                var child = _step21.value;
+              for (_iterator22.s(); !(_step22 = _iterator22.n()).done; ) {
+                var child = _step22.value;
                 state.resizeObserver.observe(child);
               }
             } catch (err) {
-              _iterator21.e(err);
+              _iterator22.e(err);
             } finally {
-              _iterator21.f();
+              _iterator22.f();
             }
           }
           if (root2.MutationObserver) {
@@ -27912,16 +27930,16 @@
               if (state.resizeObserver) {
                 state.resizeObserver.disconnect();
                 state.resizeObserver.observe(state.element);
-                var _iterator22 = _createForOfIteratorHelper9(state.element.children), _step22;
+                var _iterator23 = _createForOfIteratorHelper9(state.element.children), _step23;
                 try {
-                  for (_iterator22.s(); !(_step22 = _iterator22.n()).done; ) {
-                    var _child = _step22.value;
+                  for (_iterator23.s(); !(_step23 = _iterator23.n()).done; ) {
+                    var _child = _step23.value;
                     state.resizeObserver.observe(_child);
                   }
                 } catch (err) {
-                  _iterator22.e(err);
+                  _iterator23.e(err);
                 } finally {
-                  _iterator22.f();
+                  _iterator23.f();
                 }
               }
               if (records.some(function(record) {
@@ -28028,10 +28046,10 @@
                 });
               }
               if (values.snapAxis && state.snap.axis !== values.snapAxis) syncSnapStyles(state, values.snapAxis);
-              var _iterator23 = _createForOfIteratorHelper9(values.snapValues), _step23;
+              var _iterator24 = _createForOfIteratorHelper9(values.snapValues), _step24;
               try {
-                for (_iterator23.s(); !(_step23 = _iterator23.n()).done; ) {
-                  var _step23$value = _step23.value, item = _step23$value.item, viewport = _step23$value.viewport, focus2 = _step23$value.focus;
+                for (_iterator24.s(); !(_step24 = _iterator24.n()).done; ) {
+                  var _step24$value = _step24.value, item = _step24$value.item, viewport = _step24$value.viewport, focus2 = _step24$value.focus;
                   if (!state.snap.savedItems.has(item)) {
                     snapItemMemories.set(item, AelluxJs2.persist.element.save(item, [], snapProperties));
                     state.snap.savedItems.add(item);
@@ -28040,9 +28058,9 @@
                   item.style.setProperty(snapProperties[1], focus2);
                 }
               } catch (err) {
-                _iterator23.e(err);
+                _iterator24.e(err);
               } finally {
-                _iterator23.f();
+                _iterator24.f();
               }
               updateScrollbars(state, values.scrollbars);
             });
@@ -28122,7 +28140,7 @@
         function handleWheel(state, event) {
           if (event.ctrlKey || !event.cancelable) return;
           state.snap.flick = null;
-          if (state.desktop && state.mode === "pointer" && state.element.classList.contains(pointerScrollingClass)) {
+          if (state.desktop && state.mode === POINTER && state.element.classList.contains(pointerScrollingClass)) {
             if (event.cancelable) event.preventDefault();
             event.stopPropagation();
             return;
@@ -28226,10 +28244,10 @@
       }
     } };
   }
-  function _slicedToArray4(r, e) {
-    return _arrayWithHoles4(r) || _iterableToArrayLimit4(r, e) || _unsupportedIterableToArray11(r, e) || _nonIterableRest4();
+  function _slicedToArray6(r, e) {
+    return _arrayWithHoles6(r) || _iterableToArrayLimit6(r, e) || _unsupportedIterableToArray11(r, e) || _nonIterableRest6();
   }
-  function _nonIterableRest4() {
+  function _nonIterableRest6() {
     throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
   function _unsupportedIterableToArray11(r, a) {
@@ -28244,7 +28262,7 @@
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
   }
-  function _iterableToArrayLimit4(r, l) {
+  function _iterableToArrayLimit6(r, l) {
     var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (null != t) {
       var e, n, i, u, a = [], f = true, o = false;
@@ -28265,7 +28283,7 @@
       return a;
     }
   }
-  function _arrayWithHoles4(r) {
+  function _arrayWithHoles6(r) {
     if (Array.isArray(r)) return r;
   }
   function _typeof5(o) {
@@ -28367,7 +28385,7 @@
           var classes = [modifier.shapeHorizontal, modifier.shapeVertical, modifier.shapeSquare];
           sizeThresholds = [];
           for (var _i3 = 0, _Object$entries = Object.entries(adaptiveParams.minSizes); _i3 < _Object$entries.length; _i3++) {
-            var _Object$entries$_i = _slicedToArray4(_Object$entries[_i3], 2), size = _Object$entries$_i[0], minimum = _Object$entries$_i[1];
+            var _Object$entries$_i = _slicedToArray6(_Object$entries[_i3], 2), size = _Object$entries$_i[0], minimum = _Object$entries$_i[1];
             var className = AelluxJs2.className("fits-" + size);
             sizeThresholds.push({
               className: className,
@@ -28663,18 +28681,6 @@
       });
     };
   }
-  function _toConsumableArray3(r) {
-    return _arrayWithoutHoles3(r) || _iterableToArray3(r) || _unsupportedIterableToArray12(r) || _nonIterableSpread3();
-  }
-  function _nonIterableSpread3() {
-    throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
-  }
-  function _iterableToArray3(r) {
-    if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
-  }
-  function _arrayWithoutHoles3(r) {
-    if (Array.isArray(r)) return _arrayLikeToArray12(r);
-  }
   function _createForOfIteratorHelper11(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
@@ -28706,12 +28712,54 @@
       }
     } };
   }
+  function _slicedToArray7(r, e) {
+    return _arrayWithHoles7(r) || _iterableToArrayLimit7(r, e) || _unsupportedIterableToArray12(r, e) || _nonIterableRest7();
+  }
+  function _nonIterableRest7() {
+    throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+  }
+  function _iterableToArrayLimit7(r, l) {
+    var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
+    if (null != t) {
+      var e, n, i, u, a = [], f = true, o = false;
+      try {
+        if (i = (t = t.call(r)).next, 0 === l) {
+          if (Object(t) !== t) return;
+          f = false;
+        } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = true) ;
+      } catch (r2) {
+        o = true, n = r2;
+      } finally {
+        try {
+          if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return;
+        } finally {
+          if (o) throw n;
+        }
+      }
+      return a;
+    }
+  }
+  function _arrayWithHoles7(r) {
+    if (Array.isArray(r)) return r;
+  }
+  function _toConsumableArray3(r) {
+    return _arrayWithoutHoles3(r) || _iterableToArray3(r) || _unsupportedIterableToArray12(r) || _nonIterableSpread3();
+  }
+  function _nonIterableSpread3() {
+    throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+  }
   function _unsupportedIterableToArray12(r, a) {
     if (r) {
       if ("string" == typeof r) return _arrayLikeToArray12(r, a);
       var t = {}.toString.call(r).slice(8, -1);
       return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray12(r, a) : void 0;
     }
+  }
+  function _iterableToArray3(r) {
+    if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
+  }
+  function _arrayWithoutHoles3(r) {
+    if (Array.isArray(r)) return _arrayLikeToArray12(r);
   }
   function _arrayLikeToArray12(r, a) {
     (null == a || a > r.length) && (a = r.length);
@@ -28756,7 +28804,8 @@
           toggle: toggle,
           trigger: trigger
         });
-        var POP = "Pop", UNPOP = "Unpop", BEFORE = "Before", PING = "ping", MILLISECOND = "ms", SECOND = "s", TRANSITION_PREPARE_TIME = 100, DEFAULT_PRESENT = "opacity transform height width";
+        var POP = "Pop", UNPOP = "Unpop", BEFORE = "Before", PING = "ping", MILLISECOND = "ms", SECOND = "s", DEFAULT_PRESENT = "opacity transform height width", OPACITY_SYNTAX = "<number> | <percentage>", TRANSFORM_SYNTAX = "<transform-list> | none";
+        var TRANSITION_PREPARE_TIME = 100;
         var presentElements = /* @__PURE__ */ new Map();
         var openPresentElements = /* @__PURE__ */ new Set();
         var triggerElementsSet = /* @__PURE__ */ new Set();
@@ -28767,98 +28816,17 @@
         var containerAriaHandlers = /* @__PURE__ */ new WeakMap();
         var triggerAriaHandlers = /* @__PURE__ */ new WeakMap();
         var measuredMemories = /* @__PURE__ */ new WeakMap();
+        var cssProperties = [["from-opacity", OPACITY_SYNTAX, "0"], ["pop-opacity", OPACITY_SYNTAX, "1"], ["unpop-opacity", OPACITY_SYNTAX, "0"], ["from-transform", TRANSFORM_SYNTAX, "scale(0.5)"], ["pop-transform", TRANSFORM_SYNTAX, "scale(1)"], ["unpop-transform", TRANSFORM_SYNTAX, "scale(1.2)"], ["from-height", "*", "0fr"], ["pop-height", "*", "1fr"], ["unpop-height", "*", "0fr"], ["from-width", "*", "0fr"], ["pop-width", "*", "1fr"], ["unpop-width", "*", "0fr"], ["pop-ease", "*", "ease-out"], ["unpop-ease", "*", "ease-in"], ["pop-duration", "<time>", "250ms"], ["unpop-duration", "<time>", "250ms"], ["pop-low-steps", "<integer>", "4"], ["unpop-low-steps", "<integer>", "4"]];
         function init(options) {
-          AelluxJs2.registerCssProperty({
-            name: "--ae-from-opacity",
-            syntax: "<number> | <percentage>",
-            inherits: false,
-            initialValue: "0"
-          }, {
-            name: "--ae-pop-opacity",
-            syntax: "<number> | <percentage>",
-            inherits: false,
-            initialValue: "1"
-          }, {
-            name: "--ae-unpop-opacity",
-            syntax: "<number> | <percentage>",
-            inherits: false,
-            initialValue: "0"
-          }, {
-            name: "--ae-from-transform",
-            syntax: "<transform-list> | none",
-            inherits: false,
-            initialValue: "scale(0.5)"
-          }, {
-            name: "--ae-pop-transform",
-            syntax: "<transform-list> | none",
-            inherits: false,
-            initialValue: "scale(1)"
-          }, {
-            name: "--ae-unpop-transform",
-            syntax: "<transform-list> | none",
-            inherits: false,
-            initialValue: "scale(1.2)"
-          }, {
-            name: "--ae-from-height",
-            syntax: "*",
-            inherits: false,
-            initialValue: "0fr"
-          }, {
-            name: "--ae-pop-height",
-            syntax: "*",
-            inherits: false,
-            initialValue: "1fr"
-          }, {
-            name: "--ae-unpop-height",
-            syntax: "*",
-            inherits: false,
-            initialValue: "0fr"
-          }, {
-            name: "--ae-from-width",
-            syntax: "*",
-            inherits: false,
-            initialValue: "0fr"
-          }, {
-            name: "--ae-pop-width",
-            syntax: "*",
-            inherits: false,
-            initialValue: "1fr"
-          }, {
-            name: "--ae-unpop-width",
-            syntax: "*",
-            inherits: false,
-            initialValue: "0fr"
-          }, {
-            name: "--ae-pop-ease",
-            syntax: "*",
-            inherits: false,
-            initialValue: "ease-out"
-          }, {
-            name: "--ae-unpop-ease",
-            syntax: "*",
-            inherits: false,
-            initialValue: "ease-in"
-          }, {
-            name: "--ae-pop-duration",
-            syntax: "<time>",
-            inherits: false,
-            initialValue: "250ms"
-          }, {
-            name: "--ae-unpop-duration",
-            syntax: "<time>",
-            inherits: false,
-            initialValue: "250ms"
-          }, {
-            name: "--ae-pop-low-steps",
-            syntax: "<integer>",
-            inherits: false,
-            initialValue: "4"
-          }, {
-            name: "--ae-unpop-low-steps",
-            syntax: "<integer>",
-            inherits: false,
-            initialValue: "4"
-          });
+          AelluxJs2.registerCssProperty.apply(AelluxJs2, _toConsumableArray3(cssProperties.map(function(_ref) {
+            var _ref2 = _slicedToArray7(_ref, 3), name = _ref2[0], syntax = _ref2[1], initialValue = _ref2[2];
+            return {
+              name: "--ae-".concat(name),
+              syntax: syntax,
+              inherits: false,
+              initialValue: initialValue
+            };
+          })));
           AelluxJs2.mountManager.add({
             extensionName: extensionName,
             selector: "[".concat(attr.present, "]"),
