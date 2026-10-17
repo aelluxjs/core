@@ -823,7 +823,8 @@ function createAelluxConstants() {
       "cancelAnimationFrame",
       "fetch",
       { name: "Object", function: ["assign", "entries", "freeze"] },
-      { name: "Array", function: ["from", "isArray"] }
+      { name: "Array", function: ["from", "isArray"] },
+      { name: ["Element", "prototype"], function: ["before"] }
     ]
   };
 }
