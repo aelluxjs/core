@@ -406,6 +406,11 @@ Registration                            </a>
                           </li>
                           <li class="nav-item small-md rounded-1 ps-md-1"
                             style="flex:0">
+                            <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/extensions/official-registry.htm">
+Official Registry                            </a>
+                          </li>
+                          <li class="nav-item small-md rounded-1 ps-md-1"
+                            style="flex:0">
                             <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/extensions/declarative-loading.htm">
 Declarative Loading                            </a>
                           </li>
@@ -573,6 +578,12 @@ Home                  </li>
 <h1>CSS Motion Controller</h1>
 <p><code>AelluxJs.motion</code> coordinates CSS transitions and CSS animations with <code>waitLayout</code>. CSS remains responsible for properties, keyframes, duration, delay, iterations and the normal CSS easing. In browsers with sufficient Web Animations API support, Aellux pauses only the animations created by the requested state change and advances their <code>currentTime</code> from a monotonic clock. <code>waitLayout.sequence()</code> decides which frames perform those updates, including adaptive FPS reduction and the element&#39;s optional <code>data-ae-maxfps</code> limit.</p>
 <p>The controller intentionally accepts a small main-thread cost under ideal conditions. Its purpose is predictable degradation: if the browser begins missing frames because of a constrained device or competing applications, the shared scheduler can reduce update frequency instead of allowing managed motion to contribute to stalls.</p>
+<p>Controlled operations containing any animated property other than <code>transform</code> and <code>opacity</code> have a conservative default ceiling of 40 FPS. Configure it with <code>cssMotionPropertyMaxFPS</code> in <code>init()</code>. This is a workload policy, not a promise that <code>transform</code> or <code>opacity</code> stays on the GPU: browser composition and painting still depend on the document and device. Classification applies to the whole operation. If one transition combines <code>opacity</code>, <code>transform</code>, and <code>height</code>, all captured animations share one clock at the lowest applicable limit from <code>data-ae-maxfps</code>, <code>run({ maxFPS })</code>, and <code>cssMotionPropertyMaxFPS</code>; properties never receive independent schedules.</p>
+<pre><code class="language-js">$ae.init({
+  mode: &quot;full&quot;,
+  cssMotionPropertyMaxFPS: 40
+});
+</code></pre>
 <pre><code class="language-js">const motionId = $ae.motion.id();
 await $ae.motion.run(panel, {
   id: motionId,

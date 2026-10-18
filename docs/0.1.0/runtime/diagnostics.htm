@@ -406,6 +406,11 @@ Registration                            </a>
                           </li>
                           <li class="nav-item small-md rounded-1 ps-md-1"
                             style="flex:0">
+                            <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/extensions/official-registry.htm">
+Official Registry                            </a>
+                          </li>
+                          <li class="nav-item small-md rounded-1 ps-md-1"
+                            style="flex:0">
                             <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/extensions/declarative-loading.htm">
 Declarative Loading                            </a>
                           </li>
@@ -663,6 +668,10 @@ $ae.diagnostics.info($ae.diagnostics.INFO_LEGACY_FALLBACK);
 </tr>
 </tbody></table>
 <pre><code class="language-js">$ae.init({ verboseLevel: &quot;warn&quot; });
+</code></pre>
+<p><code>environment: &quot;development&quot;</code> selects <code>&quot;info&quot;</code> when <code>verboseLevel</code> is omitted. <code>environment: &quot;production&quot;</code> is the default and keeps error-only output. An explicit <code>verboseLevel</code> always wins in either environment; environment selection is not inferred from the hostname.</p>
+<pre><code class="language-js">$ae.init({ environment: &quot;development&quot; });
+$ae.init({ environment: &quot;production&quot;, verboseLevel: &quot;warn&quot; });
 </code></pre>
 <p><code>error()</code>, <code>warn()</code>, and <code>info()</code> are recorded even when the selected level hides them from the console. The history retains the 100 most recent entries; older entries and their context references are released as new diagnostics arrive. Call <code>$ae.diagnostics.showHistory(10)</code> to print the last 10 retained entries with timestamps; omit the argument to print all retained entries. The method also returns the selected entries, including their timestamp, level, code, message, and context. Passing <code>0</code> prints and returns no entries. Replaying history does not record new diagnostics.</p>
 <h2>Code Ranges</h2>

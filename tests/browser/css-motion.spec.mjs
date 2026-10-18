@@ -5,11 +5,12 @@ async function start(page, options = {}) {
   await page.addStyleTag({ content: `
     #motion-box { opacity: 0; transition: opacity 240ms ease-out; }
     #motion-box.active { opacity: 1; }
+    #motion-box.combined { opacity: 1; height: 80px; }
     @keyframes motion-test { from { transform: translateX(0); } to { transform: translateX(20px); } }
     #motion-box.animated { animation: motion-test 240ms ease-in-out both; }
   ` });
   await page.evaluate(() => {
-    document.body.innerHTML = '<div id="motion-box" data-ae-maxfps="30"></div>';
+    document.body.innerHTML = '<div id="motion-box" data-ae-maxfps="30" style="height:20px;transition-property:opacity,height"></div>';
   });
   await page.addScriptTag({ url: "/dist/aellux.js" });
   await page.evaluate(options => AelluxJs.init({ mode: "basic", skipGlobalMount: true, ...options }), options);
@@ -66,4 +67,37 @@ test("advanced Aellux easing is represented as native linear samples", async ({ 
   await expect.poll(() => page.locator("#motion-box").evaluate(element =>
     element.getAnimations()[0]?.effect.getTiming().easing || "")).toMatch(/^linear\(/);
   await page.evaluate(() => window.motionResult);
+});
+
+test("a mixed-property operation uses one timeline at the conservative FPS", async ({ page, browserName }) => {
+  test.skip(browserName !== "chromium", "Exact WAAPI sampling is asserted in Chromium.");
+  await start(page, { cssMotionPropertyMaxFPS: 5 });
+  const observation = await page.evaluate(async () => {
+    const element = document.getElementById("motion-box");
+    getComputedStyle(element).height;
+    const samples = [];
+    let running = true;
+    function sample() {
+      const animations = element.getAnimations();
+      if (animations.length === 2) {
+        samples.push(animations.map(animation => Number(animation.currentTime)));
+      }
+      if (running) requestAnimationFrame(sample);
+    }
+    requestAnimationFrame(sample);
+    const result = await AelluxJs.motion.run(element, {
+      id: AelluxJs.motion.id(),
+      apply: () => element.classList.add("combined")
+    });
+    running = false;
+    const distinct = new Set(samples.map(times => times.join("/")));
+    return {
+      result,
+      distinct: distinct.size,
+      synchronized: samples.every(times => Math.abs(times[0] - times[1]) < 0.01)
+    };
+  });
+  expect(observation.result).toMatchObject({ status: "completed", mode: "controlled" });
+  expect(observation.synchronized).toBe(true);
+  expect(observation.distinct).toBeLessThanOrEqual(3);
 });

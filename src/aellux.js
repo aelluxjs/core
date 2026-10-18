@@ -57,7 +57,13 @@ import createWeakCss from "./internal/create-weak-css.js";
   root[api.shortJSName] = api;
   api.aelluxBasePath = aelluxBasePath;
   api.init = function (options) {
-    api.options.verboseLevel = diagnostics.update(options);
+    options = options || {};
+    var diagnosticsOptions = options;
+    if (options.environment === "development" &&
+      !Object.prototype.hasOwnProperty.call(options, "verboseLevel")) {
+      diagnosticsOptions = mergeOptions({ verboseLevel: "info" }, options);
+    }
+    api.options.verboseLevel = diagnostics.update(diagnosticsOptions);
 
     if (typeof document === "undefined") {
       diagnostics.warn(diagnostics.WARN_BROWSER_UNSUPPORTED);
@@ -67,12 +73,17 @@ import createWeakCss from "./internal/create-weak-css.js";
     if (document.querySelector("[" + api.attr("legacy") + "]") ||
       document.querySelector("[" + api.attr("esm") + "]")) return; //Already loaded
 
-    mergeOptions(api.options, options || {});
+    mergeOptions(api.options, options);
     api.options.verboseLevel = diagnostics.verboseLevel;
     api.options.extensions = normalizeExtensionOptions(api.options.extensions);
 
     if (api.options.mode !== "basic" && api.options.mode !== "full") {
       throw diagnostics.create(diagnostics.ERROR_INVALID_MODE);
+    }
+    if (api.options.environment !== "production" && api.options.environment !== "development") {
+      throw diagnostics.create(diagnostics.ERROR_INVALID_ENVIRONMENT, {
+        environment: api.options.environment
+      });
     }
     api.aelluxBasePath = api.options.basePath || aelluxBasePath;
     api.diagnostics.notAvailable = [];

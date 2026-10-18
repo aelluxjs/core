@@ -42,7 +42,7 @@ export function createCssMotionController(root, getAelluxJs) {
     const operation = {
       id: operationId, element, options, animations: [], before: new Set(),
       start: 0, endTime: 0, done: false, cancelled: false, controlled: false,
-      captureFailed: false, nativeTimer: null, nativeResolve: null
+      captureFailed: false, conservative: false, nativeTimer: null, nativeResolve: null
     };
     operations.set(operationId, operation);
 
@@ -62,39 +62,45 @@ export function createCssMotionController(root, getAelluxJs) {
       return Promise.reject(error);
     }
 
-    const maxFPS = options.maxFPS === undefined
+    const requestedMaxFPS = options.maxFPS === undefined
       ? AelluxJs.layoutMaxFPS(element) : options.maxFPS;
     const externalAbort = typeof options.abort === "function" ? options.abort : null;
     const shouldAbort = () => operation.cancelled || !element.isConnected ||
       (externalAbort ? externalAbort() : false);
 
-    const result = AelluxJs.waitLayout.sequence(operationId,
-      {
-        read: () => capture(operation),
-        update: animations => prepare(operation, animations),
-        abort: shouldAbort
-      },
-      {
-        update: () => advance(operation),
-        repeat: { ms: 0 },
-        maxFPS,
-        abort: () => operation.done || shouldAbort()
-      }
-    );
+    const captureResult = AelluxJs.waitLayout.sequence(operationId, {
+      read: () => capture(operation),
+      update: animations => prepare(operation, animations),
+      abort: shouldAbort
+    });
 
-    return result.then(sequenceResult => {
+    return captureResult.then(sequenceResult => {
+      if (sequenceResult.status !== "completed") {
+        release(operation, false);
+        return { id: operationId, status: sequenceResult.status, mode: "native" };
+      }
       if (operation.captureFailed && !operation.cancelled) {
         release(operation, false);
         operations.set(operationId, operation);
         return nativeWait(operation);
       }
-      const completed = operation.done && !operation.cancelled;
-      release(operation, completed);
-      return {
-        id: operationId,
-        status: completed ? "completed" : sequenceResult.status,
-        mode: operation.controlled ? "controlled" : "native"
-      };
+      const policyFPS = operation.conservative
+        ? positiveFPS(AelluxJs.options.cssMotionPropertyMaxFPS, 40) : undefined;
+      const maxFPS = minimumFPS(requestedMaxFPS, policyFPS);
+      return AelluxJs.waitLayout.sequence(operationId, {
+        update: () => advance(operation),
+        repeat: { ms: 0 },
+        maxFPS,
+        abort: () => operation.done || shouldAbort()
+      }).then(progressResult => {
+        const completed = operation.done && !operation.cancelled;
+        release(operation, completed);
+        return {
+          id: operationId,
+          status: completed ? "completed" : progressResult.status,
+          mode: "controlled"
+        };
+      });
     }, error => {
       // If capture/control fails after CSS state was applied, resume anything
       // paused and let CSS complete rather than leaving the visual state stuck.
@@ -135,12 +141,47 @@ export function createCssMotionController(root, getAelluxJs) {
       const end = Number(timing.endTime);
       if (Number.isFinite(end)) endTime = Math.max(endTime, end);
       applyAelluxEasing(operation, animation);
+      if (!onlyTransformAndOpacity(animation)) operation.conservative = true;
     }
     operation.animations = animations;
     operation.endTime = endTime;
     operation.start = now();
     operation.controlled = true;
     if (!(endTime > 0)) operation.done = true;
+  }
+
+  function onlyTransformAndOpacity(animation) {
+    try {
+      if (typeof root.CSSTransition === "function" && animation instanceof root.CSSTransition) {
+        return animation.transitionProperty === "transform" ||
+          animation.transitionProperty === "opacity";
+      }
+      const frames = animation.effect.getKeyframes();
+      if (!frames.length) return false;
+      const metadata = new Set(["offset", "computedOffset", "easing", "composite"]);
+      let found = false;
+      for (const frame of frames) {
+        for (const property of Object.keys(frame)) {
+          if (metadata.has(property)) continue;
+          found = true;
+          if (property !== "transform" && property !== "opacity") return false;
+        }
+      }
+      return found;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  function positiveFPS(value, fallback) {
+    const number = Number(value);
+    return Number.isFinite(number) && number > 0 ? number : fallback;
+  }
+
+  function minimumFPS(first, second) {
+    const values = [first, second].filter(value =>
+      Number.isFinite(value) && value > 0);
+    return values.length ? Math.min(...values) : undefined;
   }
 
   function advance(operation) {

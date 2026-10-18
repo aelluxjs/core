@@ -64,6 +64,13 @@ Set `verboseLevel` in `init()` to control console output. The default is `"error
 $ae.init({ verboseLevel: "warn" });
 ```
 
+`environment: "development"` selects `"info"` when `verboseLevel` is omitted. `environment: "production"` is the default and keeps error-only output. An explicit `verboseLevel` always wins in either environment; environment selection is not inferred from the hostname.
+
+```js
+$ae.init({ environment: "development" });
+$ae.init({ environment: "production", verboseLevel: "warn" });
+```
+
 `error()`, `warn()`, and `info()` are recorded even when the selected level hides them from the console. The history retains the 100 most recent entries; older entries and their context references are released as new diagnostics arrive. Call `$ae.diagnostics.showHistory(10)` to print the last 10 retained entries with timestamps; omit the argument to print all retained entries. The method also returns the selected entries, including their timestamp, level, code, message, and context. Passing `0` prints and returns no entries. Replaying history does not record new diagnostics.
 
 ## Code Ranges

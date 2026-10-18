@@ -1,6 +1,6 @@
 (function() {
   // <define:__AELLUX_CORE_ASSET_INTEGRITY__>
-  var define_AELLUX_CORE_ASSET_INTEGRITY_default = { "aellux.ext.adaptive.css": "sha384-HfIjX9Zk0VFRimzPvUaTS5AtwuHJHjXKoM/xbNJXj5vE7bSdBGEzbrBHfbNmYah0", "aellux.ext.present.css": "sha384-9GTFJ0OxBj6ta/iiV07BLGTdfe9pbmBMYXFn9kT+wB4KwiLO8zxJ39XzLYOGgfui", "aellux.ext.feedback.css": "sha384-yk4cW+r/Mc1FRS1ZauBHC6KsKb7sxuJ0E9mmt/+AYASAdZXXMK6iuFBR+TOEh/r4", "aellux.esm.js": "sha384-fu1rL8s9Uig/LbSoJguXF2cQ1ctQhOht1zCf/f9k20baIEHWX7S3Meo8xMyjFetp", "aellux.ext.adaptive.js": "sha384-2M8mnZa3u+Fsd5SO9AmKPE1fr3jD/cirOEhErIpONXsl9LjjsyEePSclZ8pBjajo", "aellux.ext.anchor.js": "sha384-fvgB4D4YXakdKcggWaSWperStVYqDwWE7/MqRFhLGWO1shYzULetUFDEcLab+q0N", "aellux.ext.feedback.js": "sha384-12dCamILDTasnHgQpwVw8LsT8US7p/xI82RHsl2O2N6c+d08uy/5QEIdAMonzVuS", "aellux.ext.focus.js": "sha384-BgjEpKiYDdntLBdNI3+7eaBqsEEBmuVJKOuKlzavdpOx5Wpgnt8fJmIyDFWZ4NHT", "aellux.ext.point.js": "sha384-aDj7I5QEH/0+52E3e6yPZ/D0MEsNBdxeET3G5ToVvgczHtksMh3p8S/KOoAapRRN", "aellux.ext.preference.js": "sha384-kH3bIgUBycuvulVeU0qdOn+WezhAWK2lv4bFRBDP24EijtlE78cGhau48w+GV4M+", "aellux.ext.present.js": "sha384-0y5bxbVI3vBm3KY5ZSxjfx3LtreZu/24QIcAMV4mwKaZOGvxr01f/UpbyLwb3x/W", "aellux.ext.scrollbox.js": "sha384-5FxqR6VJ7dp5LqPw4qiMcioHdiVXCQToVyT3st8Mcy0kk7xS+tQNRII3S1mZmE6n", "aellux.ext.state-navigation.js": "sha384-MlqDzSzZwzDYS522sw8iontz17JCjyXELEs3S7OWOXK56B76mZze5Y9QFWDrQylV", "aellux.full.js": "sha384-GK3lfRo4rJohjO/hMUeUweucffJH9gSbS3WCCbrL2EwS9VXtOH4ph5EZ1bv45LYp", "aellux.orchestrator.js": "sha384-lflyIW2/E7AUp1LncVZjXZSQZrSyi1vr4CRX+i9lAjma/Da/V1XvSI5N9ZQNhzwk", "aellux.ext.adaptive.legacy.js": "sha384-AWjFa+CpzIDDoijx3lRMOlH7/EO6Qj9yoHbqw2sXGD4rnGpR8+zWS9mwL8n+M1j8", "aellux.ext.anchor.legacy.js": "sha384-iaFSwzXRlMEFxLnj1JJdB93LLvzzbyJf3C3OmhbZ04xFuv+KGGyPpRH5k+P0SdGC", "aellux.ext.feedback.legacy.js": "sha384-noCcjXcwaKQb8IAVF0DicDFW81iqxbRu4VF5ULkdgoxarPCFQ/tZsCqviU6Z1DmK", "aellux.ext.focus.legacy.js": "sha384-DYmxYMExXzgL5t/8T8hn/9qv525QV6jEQcIQhPJWc2/AN3vehPVHv10nZ3bVVHjn", "aellux.ext.point.legacy.js": "sha384-gG/XONYEC1tchBcJ6bUtKYmWFHz0E+50LmMaXDAiqWBKPuwdHZeYm1uXA22lMZuN", "aellux.ext.preference.legacy.js": "sha384-I2fpqPdE7bIgQcTMtdEUFnNWor1FhixnKPUCoE88LJP0FewUmGKUUwbmKNbwhL8C", "aellux.ext.present.legacy.js": "sha384-WGKvUR25VP82yXmjLzDfKiJb2+yJ6mFUPMQsZ7XE3Hx3HhYaZHphdV91EtYjr5D2", "aellux.ext.scrollbox.legacy.js": "sha384-6WrVXDGVI8jqe5M+pwwVpp7+3GHvwdaUj7S2TWHRiRp+qNGLoeJBa/RY2UO7KU22", "aellux.ext.state-navigation.legacy.js": "sha384-45OQBJFlqOcoCG5lYgk8oqH1wX1eHVgpR4ThCo2JffDvjaZMKGWNRm7gGfDBRKVv", "aellux.orchestrator.legacy.js": "sha384-UTI/ASX4ZYQXn6HQzISA7mUcR4l07kgPpt8eOZKgKAZzgcAXfno0DaIJ2FTRDsJs", "aellux.full.legacy.js": "sha384-ipmNvb1LfjKmWmN8OfaSJQ74qvwi0n2MNYA+iT61j8PeQA/XR2GZW3M+He7medBP" };
+  var define_AELLUX_CORE_ASSET_INTEGRITY_default = { "aellux.ext.adaptive.css": "sha384-HfIjX9Zk0VFRimzPvUaTS5AtwuHJHjXKoM/xbNJXj5vE7bSdBGEzbrBHfbNmYah0", "aellux.ext.present.css": "sha384-9GTFJ0OxBj6ta/iiV07BLGTdfe9pbmBMYXFn9kT+wB4KwiLO8zxJ39XzLYOGgfui", "aellux.ext.feedback.css": "sha384-yk4cW+r/Mc1FRS1ZauBHC6KsKb7sxuJ0E9mmt/+AYASAdZXXMK6iuFBR+TOEh/r4", "aellux.esm.js": "sha384-HUEQxHG0pfjVbcnc2pVokkfKaOBoDv+NqZjjoYHbWZ2CQN29t0rvDt1WpoTP3rG3", "aellux.ext.adaptive.js": "sha384-2M8mnZa3u+Fsd5SO9AmKPE1fr3jD/cirOEhErIpONXsl9LjjsyEePSclZ8pBjajo", "aellux.ext.anchor.js": "sha384-4vudH72+WSsMhCKVJVdnOdhzZQyYQdfUQeZrmVfRD4HUNP1+4JNz6h0WPcDxRE8D", "aellux.ext.feedback.js": "sha384-12dCamILDTasnHgQpwVw8LsT8US7p/xI82RHsl2O2N6c+d08uy/5QEIdAMonzVuS", "aellux.ext.focus.js": "sha384-BgjEpKiYDdntLBdNI3+7eaBqsEEBmuVJKOuKlzavdpOx5Wpgnt8fJmIyDFWZ4NHT", "aellux.ext.point.js": "sha384-aDj7I5QEH/0+52E3e6yPZ/D0MEsNBdxeET3G5ToVvgczHtksMh3p8S/KOoAapRRN", "aellux.ext.preference.js": "sha384-kH3bIgUBycuvulVeU0qdOn+WezhAWK2lv4bFRBDP24EijtlE78cGhau48w+GV4M+", "aellux.ext.present.js": "sha384-0y5bxbVI3vBm3KY5ZSxjfx3LtreZu/24QIcAMV4mwKaZOGvxr01f/UpbyLwb3x/W", "aellux.ext.scrollbox.js": "sha384-5FxqR6VJ7dp5LqPw4qiMcioHdiVXCQToVyT3st8Mcy0kk7xS+tQNRII3S1mZmE6n", "aellux.ext.state-navigation.js": "sha384-MlqDzSzZwzDYS522sw8iontz17JCjyXELEs3S7OWOXK56B76mZze5Y9QFWDrQylV", "aellux.full.js": "sha384-ns29zbFFWG8XUuSke2gjotUyOGZ9dAFW+PCT2JnayO69nXyoRYLvFRIk4X/c8hop", "aellux.orchestrator.js": "sha384-ouEEsu/Gx/6R1ZO2CLbZAuq2UaPFTKO9CUj7ArO8jlDfdHR34xexgvTHrjUvvtLA", "aellux.ext.adaptive.legacy.js": "sha384-AWjFa+CpzIDDoijx3lRMOlH7/EO6Qj9yoHbqw2sXGD4rnGpR8+zWS9mwL8n+M1j8", "aellux.ext.anchor.legacy.js": "sha384-prcDe0MLzJ3Nm7Q8MFTm7X/0JYHfUN+BsZurYl3/iUMCDLk1xVnKLep1ppIw01YX", "aellux.ext.feedback.legacy.js": "sha384-noCcjXcwaKQb8IAVF0DicDFW81iqxbRu4VF5ULkdgoxarPCFQ/tZsCqviU6Z1DmK", "aellux.ext.focus.legacy.js": "sha384-DYmxYMExXzgL5t/8T8hn/9qv525QV6jEQcIQhPJWc2/AN3vehPVHv10nZ3bVVHjn", "aellux.ext.point.legacy.js": "sha384-gG/XONYEC1tchBcJ6bUtKYmWFHz0E+50LmMaXDAiqWBKPuwdHZeYm1uXA22lMZuN", "aellux.ext.preference.legacy.js": "sha384-I2fpqPdE7bIgQcTMtdEUFnNWor1FhixnKPUCoE88LJP0FewUmGKUUwbmKNbwhL8C", "aellux.ext.present.legacy.js": "sha384-WGKvUR25VP82yXmjLzDfKiJb2+yJ6mFUPMQsZ7XE3Hx3HhYaZHphdV91EtYjr5D2", "aellux.ext.scrollbox.legacy.js": "sha384-6WrVXDGVI8jqe5M+pwwVpp7+3GHvwdaUj7S2TWHRiRp+qNGLoeJBa/RY2UO7KU22", "aellux.ext.state-navigation.legacy.js": "sha384-45OQBJFlqOcoCG5lYgk8oqH1wX1eHVgpR4ThCo2JffDvjaZMKGWNRm7gGfDBRKVv", "aellux.orchestrator.legacy.js": "sha384-FVrmhAldE+kPLA9XIhLfVsZqrdzNcF9JWisvDJr+Xmc8aQ5RMDB26f/uWEh28BnK", "aellux.full.legacy.js": "sha384-m/+4JZDSdT+HzDMvBCVC+C/4S0EWXEUlWslNPke5O9rhinMm4WWyx/+HCU6yHVU0" };
 
   // src/internal/asset-load-helper.js
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
@@ -496,6 +496,8 @@
     };
     var apiProperties = {
       shortJSName: constants.AELLUXJS_SHORT_JS_NAME,
+      version: constants.AELLUXJS_VERSION,
+      orchestratorVersion: null,
       diagnostics: diagnostics,
       options: options,
       minified: false,
@@ -574,6 +576,25 @@
       noConflict: function() {
         return oldShortInstance;
       },
+      extIndex: {
+        official: null,
+        officialURL: null,
+        fallback: null,
+        fallbackURL: null,
+        setFallback: function(url) {
+          if (typeof url !== "string" || !url.trim()) {
+            diagnostics.error(diagnostics.ERROR_EXTENSION_INDEX_INVALID, {
+              source: "custom",
+              expected: "a nonempty manifest URL"
+            });
+            return api;
+          }
+          this.fallbackURL = url.trim();
+          this.fallback = null;
+          this.fallbackPromise = null;
+          return api;
+        }
+      },
       registry: {
         ext: {},
         dep: /* @__PURE__ */ Object.create(null),
@@ -585,12 +606,14 @@
         var name = fromCamelCase2(api.extName(nameOrUrl));
         var key = toCamelCase2(name);
         var url = nameOrUrl;
+        var implicit = url === api.extName(nameOrUrl);
         if (key in api.registry.ext) {
           diagnostics.error(diagnostics.ERROR_EXTENSION_DUPLICATE, { extension: name });
           return;
         }
         if (url === api.extName(nameOrUrl)) url = "./" + api.extFilename(name);
         if (!options2) options2 = {};
+        var explicitBuilds = Object.prototype.hasOwnProperty.call(options2, "builds");
         var selector = options2.loadWhen;
         if (selector !== null && typeof selector !== "undefined") {
           if (typeof selector !== "string" || !selector.trim()) {
@@ -615,8 +638,10 @@
         if (typeof options2.loadStyle === "undefined") options2.loadStyle = false;
         if (!options2.loadWhen) options2.loadWhen = null;
         options2.builds = normalizeExtensionBuilds(options2.builds);
+        options2.explicitBuilds = explicitBuilds;
         if (options2.loadWhen) api.registry.lazyExtSelectors[key] = options2.loadWhen;
         options2.url = url;
+        options2.implicit = implicit;
         options2.load = options2.loadWhen ? false : true;
         options2.state = "wait";
         api.registry.ext[key] = options2;
@@ -818,6 +843,7 @@
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   function createAelluxConstants() {
     return {
+      AELLUXJS_VERSION: true ? "0.1.0-beta.10" : "0.1.0-beta.10",
       AELLUXJS_SHORT_JS_NAME: "$ae",
       AELLUXJS_EXT_SCRIPT_PREFIX: "ext",
       AELLUXJS_CLASS_NAME_PREFFIX: "ae--?",
@@ -853,6 +879,13 @@
         ERROR_SCROLLBOX_ELASTIC_WRAPPER: { code: 1120, message: "Elastic Scrollbox requires exactly one direct child marked with data-ae-scrollbox-elastic." },
         ERROR_SCROLLBOX_SNAP_ITEMS: { code: 1121, message: "Snap Scrollbox requires at least one eligible data-ae-snap-item." },
         ERROR_FEEDBACK_ARGUMENT: { code: 1122, message: "Feedback requires a string message, a known string type, a string motion when provided, and a DOM Element target when provided." },
+        ERROR_EXTENSION_VERSION_INCOMPATIBLE: { code: 1123, message: "aellux.js Extension is incompatible with this Core version." },
+        ERROR_RUNTIME_VERSION_MISMATCH: { code: 1124, message: "Bootscript and runtime versions do not match." },
+        ERROR_EXTENSION_INDEX_LOAD: { code: 1125, message: "The extension manifest could not be loaded." },
+        ERROR_EXTENSION_INDEX_INVALID: { code: 1126, message: "The extension manifest is invalid." },
+        ERROR_EXTENSION_VARIANT_UNAVAILABLE: { code: 1127, message: "The extension manifest has no compatible runtime variant." },
+        ERROR_INVALID_ENVIRONMENT: { code: 1128, message: "aellux.js environment must be production or development." },
+        ERROR_EXTENSION_INDEX_NOT_FOUND: { code: 1129, message: "The requested Extension was not found in an extension manifest." },
         ERROR_LEGACY_RUNTIME_START: { code: 1201, message: "aellux.js Legacy runtime failed to start." },
         ERROR_LEGACY_RUNTIME_LOAD: { code: 1202, message: "aellux.js Legacy runtime could not be loaded." },
         ERROR_MODERN_RUNTIME_START: { code: 1203, message: "aellux.js Modern runtime failed to start; trying Legacy runtime." },
@@ -873,16 +906,20 @@
         WARN_SCROLLBOX_ELASTIC_LIMIT_INVALID: { code: 2015, message: "Scrollbox elastic limit must be one or two nonnegative fractions or pixel values; using 1/4." },
         WARN_SCROLLBOX_WRAPPER_DISPLAY: { code: 2016, message: "Scrollbox elastic wrappers require an inline display; converting to an inline counterpart when available." },
         WARN_LAYOUT_MAX_FPS_INVALID: { code: 2017, message: "data-ae-maxfps must be a finite number greater than zero; the limit was ignored." },
+        WARN_EXTENSION_COMPATIBILITY_SKIPPED: { code: 2018, message: "Extension compatibility verification was explicitly skipped." },
         INFO_LEGACY_FALLBACK: { code: 3e3, message: "aellux.js is starting the Legacy runtime." },
         INFO_PRESENT_MEASURED_LAYOUT: { code: 3001, message: "Present measures size transitions without a direct present-motion child; add one to use the grid layout strategy." },
-        INFO_FEEDBACK_MOTION_CUSTOM: { code: 3002, message: "The requested feedback motion is not standard. Standard motions are listed in the diagnostic context." }
+        INFO_FEEDBACK_MOTION_CUSTOM: { code: 3002, message: "The requested feedback motion is not standard. Standard motions are listed in the diagnostic context." },
+        INFO_EXTENSION_INDEX_LOADED: { code: 3003, message: "An extension manifest was loaded." }
       },
       AELLUXJS_DEFAULT_INITIALIZATION_OPTIONS: {
         mode: "full",
         verboseLevel: 0,
+        environment: "production",
         forceLegacy: false,
         skipGlobalMount: false,
         cssMotionController: true,
+        cssMotionPropertyMaxFPS: 40,
         autoViewportMeta: true,
         basePath: null,
         crossOrigin: null,
@@ -932,17 +969,27 @@
     root[api.shortJSName] = api;
     api.aelluxBasePath = aelluxBasePath;
     api.init = function(options) {
-      api.options.verboseLevel = diagnostics.update(options);
+      options = options || {};
+      var diagnosticsOptions = options;
+      if (options.environment === "development" && !Object.prototype.hasOwnProperty.call(options, "verboseLevel")) {
+        diagnosticsOptions = mergeOptions({ verboseLevel: "info" }, options);
+      }
+      api.options.verboseLevel = diagnostics.update(diagnosticsOptions);
       if (typeof document === "undefined") {
         diagnostics.warn(diagnostics.WARN_BROWSER_UNSUPPORTED);
         return;
       }
       if (document.querySelector("[" + api.attr("legacy") + "]") || document.querySelector("[" + api.attr("esm") + "]")) return;
-      mergeOptions(api.options, options || {});
+      mergeOptions(api.options, options);
       api.options.verboseLevel = diagnostics.verboseLevel;
       api.options.extensions = normalizeExtensionOptions(api.options.extensions);
       if (api.options.mode !== "basic" && api.options.mode !== "full") {
         throw diagnostics.create(diagnostics.ERROR_INVALID_MODE);
+      }
+      if (api.options.environment !== "production" && api.options.environment !== "development") {
+        throw diagnostics.create(diagnostics.ERROR_INVALID_ENVIRONMENT, {
+          environment: api.options.environment
+        });
       }
       api.aelluxBasePath = api.options.basePath || aelluxBasePath;
       api.diagnostics.notAvailable = [];

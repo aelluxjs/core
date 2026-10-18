@@ -276,6 +276,10 @@
         layoutPolling: false,
         updatePending: false,
         updateDirty: false,
+        repeatPending: false,
+        lastUpdateAt: -Infinity,
+        updateTimer: null,
+        updateTimerDue: false,
         layoutListener: function layoutListener(event) {
           return scheduleLayoutUpdate(event);
         },
@@ -283,6 +287,7 @@
         intersectionObserver: null
       };
       anchors.set(element, state);
+      if (element.offsetParent) listenForLayout(state, element.offsetParent);
       if (anchors.size === 1) {
         AelluxJs.onTarget(root, "$scroll", scheduleUpdate, {
           capture: true,
@@ -320,6 +325,7 @@
               if (state.reference) AelluxJs.offTarget(state.reference, layoutEvent, state.layoutListener);
               if (state.observer) state.observer.disconnect();
               if (state.intersectionObserver) state.intersectionObserver.disconnect();
+              if (state.updateTimer !== null) root.clearTimeout(state.updateTimer);
               anchors.delete(element);
               if (!anchors.size) {
                 AelluxJs.offTarget(root, "$scroll", scheduleUpdate, true);
@@ -392,11 +398,37 @@
       var repeat = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : false;
       var state = anchors.get(element);
       if (!state) return;
+      if (state.updatePending) {
+        state.updateDirty = true;
+        state.repeatPending = state.repeatPending || repeat;
+        return;
+      }
+      var maxFPS = AelluxJs.layoutMaxFPS(element);
+      if (maxFPS && !repeat && !state.updateTimerDue) {
+        if (state.updateTimer === null) {
+          state.updateTimer = root.setTimeout(function() {
+            state.updateTimer = null;
+            state.updateTimerDue = true;
+            scheduleAnchor(element);
+          }, 1e3 / maxFPS);
+        }
+        return;
+      }
+      state.updateTimerDue = false;
+      var due = maxFPS ? state.lastUpdateAt + 1e3 / maxFPS : -Infinity;
+      if (due > now()) {
+        if (state.updateTimer === null) {
+          state.updateTimer = root.setTimeout(function() {
+            state.updateTimer = null;
+            scheduleAnchor(element, repeat);
+          }, Math.max(0, due - now()));
+        }
+        return;
+      }
       if (state.layoutPolling) {
         state.updateDirty = true;
         return;
       }
-      var maxFPS = AelluxJs.layoutMaxFPS(element);
       var run = function run2() {
         if (state.layoutSingle && now() < state.layoutUntil) return;
         state.layoutSingle = false;
@@ -437,7 +469,11 @@
       }).finally(function() {
         if (anchors.get(element) !== state) return;
         state.updatePending = false;
-        if (state.updateDirty && !state.layoutPolling) scheduleAnchor(element);
+        if (state.updateDirty && !state.layoutPolling) {
+          var repeat = state.repeatPending;
+          state.repeatPending = false;
+          scheduleAnchor(element, repeat);
+        }
       });
     }
     function now() {
@@ -448,7 +484,7 @@
     }
     function _updateAnchor() {
       _updateAnchor = _asyncToGenerator(/* @__PURE__ */ _regenerator().m(function _callee3(element) {
-        var state, revision, current, targetValue, useReference, target, candidates, placement;
+        var state, revision, current, targetValue, useReference, target, candidates, placement, applied;
         return _regenerator().w(function(_context3) {
           while (1) switch (_context3.n) {
             case 0:
@@ -563,6 +599,7 @@
             case 16:
               return _context3.a(2);
             case 17:
+              applied = false;
               _context3.n = 18;
               return AelluxJs.waitLayout.update(function() {
                 if (!current()) return;
@@ -586,8 +623,16 @@
                   _iterator7.f();
                 }
                 element.classList.add(anchoredClass);
+                state.lastUpdateAt = now();
+                applied = true;
               });
             case 18:
+              if (!(!applied && anchors.get(element) === state)) {
+                _context3.n = 19;
+                break;
+              }
+              return _context3.a(2, updateAnchor(element));
+            case 19:
               return _context3.a(2);
           }
         }, _callee3);

@@ -32,6 +32,7 @@ $ae.ext("preference", {
 - An invalid `loadWhen` selector reports `ERROR_EXTENSION_LOAD_WHEN` (`1114`), and `ext()` leaves the Extension undeclared.
 - `loadStyle: true` requests the stylesheet derived from the Extension script URL; a URL string requests that specific stylesheet.
 - `integrity` supplies SRI hashes for third-party Extension files; `crossOrigin` controls the associated `crossorigin` attribute. See [CSP and Extension trust](csp-and-trust.md#subresource-integrity).
+- `coreCompatibility` declares the supported Core version or range. `skipCompatibilityCheck: true` is an explicit, warned override and does not bypass integrity checks. See the [official registry and compatibility rules](official-registry.md).
 
 Register each name once. Duplicate declarations currently report an error and do not replace the existing registration.
 

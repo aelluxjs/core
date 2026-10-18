@@ -94,12 +94,17 @@
       target: null, reference: null,
       layoutId: nextLayoutId++, layoutUntil: 0, layoutSingle: false,
       layoutFinalPending: false,
-      layoutPolling: false, updatePending: false, updateDirty: false,
+      layoutPolling: false, updatePending: false, updateDirty: false, repeatPending: false,
+      lastUpdateAt: -Infinity, updateTimer: null, updateTimerDue: false,
       layoutListener: event => scheduleLayoutUpdate(event),
       observer: null, intersectionObserver: null
     };
 
     anchors.set(element, state);
+    // A hidden target can become visible before the asynchronous first
+    // placement completes. Subscribe to its containing block immediately so
+    // the Present Layout event that starts that transition is never missed.
+    if (element.offsetParent) listenForLayout(state, element.offsetParent);
     if (anchors.size === 1) {
       AelluxJs.onTarget(root, "$scroll", scheduleUpdate, { capture: true, passive: true });
       AelluxJs.onTarget(root, "$resize", scheduleUpdate);
@@ -122,6 +127,7 @@
     if (state.reference) AelluxJs.offTarget(state.reference, layoutEvent, state.layoutListener);
     if (state.observer) state.observer.disconnect();
     if (state.intersectionObserver) state.intersectionObserver.disconnect();
+    if (state.updateTimer !== null) root.clearTimeout(state.updateTimer);
     anchors.delete(element);
     if (!anchors.size) {
       AelluxJs.offTarget(root, "$scroll", scheduleUpdate, true);
@@ -165,11 +171,40 @@
   function scheduleAnchor(element, repeat = false) {
     const state = anchors.get(element);
     if (!state) return;
+    // A pending placement owns its revision until both layout phases finish.
+    // Starting another sequence before that point invalidates the first read
+    // and can lose the Layout event emitted by a newly-visible Present.
+    if (state.updatePending) {
+      state.updateDirty = true;
+      state.repeatPending = state.repeatPending || repeat;
+      return;
+    }
+    const maxFPS = AelluxJs.layoutMaxFPS(element);
+    if (maxFPS && !repeat && !state.updateTimerDue) {
+      if (state.updateTimer === null) {
+        state.updateTimer = root.setTimeout(() => {
+          state.updateTimer = null;
+          state.updateTimerDue = true;
+          scheduleAnchor(element);
+        }, 1000 / maxFPS);
+      }
+      return;
+    }
+    state.updateTimerDue = false;
+    const due = maxFPS ? state.lastUpdateAt + 1000 / maxFPS : -Infinity;
+    if (due > now()) {
+      if (state.updateTimer === null) {
+        state.updateTimer = root.setTimeout(() => {
+          state.updateTimer = null;
+          scheduleAnchor(element, repeat);
+        }, Math.max(0, due - now()));
+      }
+      return;
+    }
     if (state.layoutPolling) {
       state.updateDirty = true;
       return;
     }
-    const maxFPS = AelluxJs.layoutMaxFPS(element);
     const run = () => {
       if (state.layoutSingle && now() < state.layoutUntil) return;
       state.layoutSingle = false;
@@ -205,7 +240,11 @@
       }).finally(() => {
         if (anchors.get(element) !== state) return;
         state.updatePending = false;
-        if (state.updateDirty && !state.layoutPolling) scheduleAnchor(element);
+        if (state.updateDirty && !state.layoutPolling) {
+          const repeat = state.repeatPending;
+          state.repeatPending = false;
+          scheduleAnchor(element, repeat);
+        }
       });
   }
 
@@ -270,6 +309,7 @@
         return;
       }
     }
+    let applied = false;
     await AelluxJs.waitLayout.update(() => {
       if (!current()) return;
       state.invalidContext = false;
@@ -282,7 +322,13 @@
       element.style.setProperty(ANCHOR_OPACITY, placement.opacity);
       for (const name of baseProperties) element.style.removeProperty(name);
       element.classList.add(anchoredClass);
+      state.lastUpdateAt = now();
+      applied = true;
     });
+    // Observers may queue a newer revision while an explicit update is in
+    // flight. Complete the latest revision so mountManager.update() does not
+    // resolve with stale anchor variables (notably in WebKit).
+    if (!applied && anchors.get(element) === state) return updateAnchor(element);
   }
 
   function readPlacement(element, target, candidates, measure) {

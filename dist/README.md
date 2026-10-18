@@ -60,6 +60,7 @@ See [Getting Started](docs-source/0.1.0/getting-started.md) for build instructio
 - [Visual mounting states](docs-source/0.1.0/runtime/visual-mounting.md)
 - [Bootstrap integration](docs-source/0.1.0/integrations/bootstrap.md)
 - [Registering aellux.js Extensions](docs-source/0.1.0/extensions/registration.md)
+- [Official Extension registry and compatibility](docs-source/0.1.0/extensions/official-registry.md)
 - [Authoring third-party Extensions](docs-source/0.1.0/extensions/authoring.md)
 - [Accessibility requirements](docs-source/0.1.0/extensions/accessibility.md)
 - [Declarative Extension loading](docs-source/0.1.0/extensions/declarative-loading.md)

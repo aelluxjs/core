@@ -22,6 +22,19 @@ import utilsNameCase from "./internal/utils-name-case.js";
   "use strict";
 
   const { toCamelCase, fromCamelCase } = utilsNameCase;
+  const orchestratorVersion = typeof __AELLUX_VERSION__ !== "undefined"
+    ? __AELLUX_VERSION__ : "0.1.0-beta.10";
+
+  if (root.AelluxJs.version !== orchestratorVersion) {
+    const error = root.AelluxJs.diagnostics.error(
+      root.AelluxJs.diagnostics.ERROR_RUNTIME_VERSION_MISMATCH,
+      { expected: root.AelluxJs.version, found: orchestratorVersion }
+    );
+    root.AelluxJs.orchestratorVersion = orchestratorVersion;
+    root.AelluxJs.startAelluxJs = () => Promise.reject(error);
+    return;
+  }
+  root.AelluxJs.orchestratorVersion = orchestratorVersion;
 
   const extensionPromises = {};
   const aria = createAriaHelper();
@@ -38,6 +51,13 @@ import utilsNameCase from "./internal/utils-name-case.js";
           Object.keys(root.AelluxJs.bundledExtensions)
             .forEach(key => {
               if (!(key in AelluxJs.registry.ext)) AelluxJs.ext(key);
+              const name = fromCamelCase(key);
+              const metadata = AelluxJs.extIndex.official &&
+                AelluxJs.extIndex.official.extensions[name];
+              if (metadata && metadata.coreCompatibility) {
+                AelluxJs.registry.ext[key].coreCompatibility = metadata.coreCompatibility;
+                AelluxJs.registry.ext[key].official = true;
+              }
             });
         }
 
@@ -151,39 +171,6 @@ import utilsNameCase from "./internal/utils-name-case.js";
     if (extensionPromises[key])
       return extensionPromises[key];
 
-    const data = AelluxJs.registry.ext[key];
-    if (data && !hasCompatibleBuild(data)) {
-      AelluxJs.diagnostics.error(
-        AelluxJs.diagnostics.ERROR_EXTENSION_INCOMPATIBLE,
-        {
-          extension: extensionName,
-          runtime: AelluxJs.diagnostics.legacy ? "legacy" : "modern",
-          builds: data.builds
-        }
-      );
-      delete AelluxJs.registry.lazyExtSelectors[key];
-      extensionPromises[key] = Promise.resolve(null);
-      return extensionPromises[key];
-    }
-
-    if (AelluxJs.ext[key]) {
-      if (!AelluxJs.ext[key].initialized) {
-        extensionPromises[key] = Promise.resolve()
-          .then(() => extensionInitialize(extensionName))
-          .catch((error) => {
-            AelluxJs.diagnostics.error(
-              AelluxJs.diagnostics.ERROR_EXTENSION_INITIALIZE,
-              { cause: error, extension: extensionName }
-            );
-            delete extensionPromises[key];
-            return null;
-          });
-        return extensionPromises[key];
-      }
-      extensionPromises[key] = Promise.resolve(AelluxJs.ext[key]);
-      return extensionPromises[key];
-    }
-
     if (!(key in AelluxJs.registry.ext)) {
       return Promise.reject(AelluxJs.diagnostics.error(
         AelluxJs.diagnostics.ERROR_EXTENSION_NOT_REGISTERED,
@@ -191,19 +178,68 @@ import utilsNameCase from "./internal/utils-name-case.js";
       ));
     }
 
+    if (AelluxJs.ext[key]) {
+      if (AelluxJs.ext[key].initialized) {
+        extensionPromises[key] = Promise.resolve(AelluxJs.ext[key]);
+      } else {
+        extensionPromises[key] = Promise.resolve()
+          .then(() => extensionInitialize(extensionName))
+          .catch(error => {
+            if (!error || !error.aelluxCompatibility) {
+              AelluxJs.diagnostics.error(
+                AelluxJs.diagnostics.ERROR_EXTENSION_INITIALIZE,
+                { cause: error, extension: extensionName }
+              );
+            }
+            delete extensionPromises[key];
+            return null;
+          });
+      }
+      return extensionPromises[key];
+    }
+
     const bundledLoader =
       AelluxJs.bundledExtensions ?
         AelluxJs.bundledExtensions[key] :
         null;
 
-    extensionPromises[key] =
-      appendExtensionAssets(extensionName, bundledLoader)
-        .then(() => extensionInitialize(extensionName))
-        .catch((error) => {
+    extensionPromises[key] = Promise.resolve()
+      .then(() => {
+        const registration = AelluxJs.registry.ext[key];
+        return registration.implicit && !bundledLoader && !AelluxJs.ext[key]
+          ? resolveImplicitRegistration(extensionName, registration) : registration;
+      })
+      .then(async data => {
+        if (!hasCompatibleBuild(data)) {
           AelluxJs.diagnostics.error(
-            AelluxJs.diagnostics.ERROR_EXTENSION_INITIALIZE,
-            { cause: error, extension: extensionName }
+            AelluxJs.diagnostics.ERROR_EXTENSION_INCOMPATIBLE,
+            {
+              extension: extensionName,
+              runtime: AelluxJs.diagnostics.legacy ? "legacy" : "modern",
+              builds: data && data.builds
+            }
           );
+          delete AelluxJs.registry.lazyExtSelectors[key];
+          return null;
+        }
+        if (!AelluxJs.ext[key]) await appendExtensionAssets(extensionName, bundledLoader);
+        if (!AelluxJs.ext[key].initialized) return extensionInitialize(extensionName);
+        return AelluxJs.ext[key];
+      })
+        .catch((error) => {
+          if (!error || !error.aelluxCompatibility) {
+            const registration = AelluxJs.registry.ext[key];
+            if (registration && registration.implicit && !registration.manifestResolved) {
+              AelluxJs.diagnostics.error(
+                AelluxJs.diagnostics.ERROR_EXTENSION_INDEX_NOT_FOUND,
+                { extension: extensionName }
+              );
+            }
+            AelluxJs.diagnostics.error(
+              AelluxJs.diagnostics.ERROR_EXTENSION_INITIALIZE,
+              { cause: error, extension: extensionName }
+            );
+          }
           delete extensionPromises[key];
           return null;
         });
@@ -214,6 +250,29 @@ import utilsNameCase from "./internal/utils-name-case.js";
   async function extensionInitialize(extensionName) {
     extensionName = fromCamelCase(extensionName);
     const key = toCamelCase(extensionName);
+    const registration = AelluxJs.registry.ext[key];
+    if (registration.coreCompatibility &&
+      !versionSatisfies(AelluxJs.version, registration.coreCompatibility)) {
+      const context = {
+        extension: extensionName,
+        coreVersion: AelluxJs.version,
+        coreCompatibility: registration.coreCompatibility
+      };
+      if (registration.skipCompatibilityCheck === true) {
+        AelluxJs.diagnostics.warn(
+          AelluxJs.diagnostics.WARN_EXTENSION_COMPATIBILITY_SKIPPED,
+          { ...context, explicitlySkipped: true }
+        );
+      } else {
+        const error = AelluxJs.diagnostics.error(
+          AelluxJs.diagnostics.ERROR_EXTENSION_VERSION_INCOMPATIBLE,
+          context
+        );
+        error.aelluxCompatibility = true;
+        throw error;
+      }
+    }
+
     const options = AelluxJs.options.extensions[key] || {};
     await AelluxJs.ext[key].init(options);
     AelluxJs.ext[key].initialized = true;
@@ -228,14 +287,23 @@ import utilsNameCase from "./internal/utils-name-case.js";
     extensionName = fromCamelCase(extensionName);
     const key = toCamelCase(extensionName);
     const data = AelluxJs.registry.ext[key];
-    const url = data.url.replace(/^\.\//, AelluxJs.aelluxBasePath);
     const useLegacyBuild = AelluxJs.diagnostics.legacy || data.builds.indexOf("modern") === -1;
-    const scriptURL = useLegacyBuild ? toLegacyScriptURL(url) : url;
+    const artifact = data.artifacts && data.artifacts[useLegacyBuild ? "legacy" : "modern"];
+    const url = data.url.replace(/^\.\//, AelluxJs.aelluxBasePath);
+    const scriptURL = artifact ? artifact.url : (useLegacyBuild ? toLegacyScriptURL(url) : url);
     const minifiedScript = /\.min\.js(?=[?#]|$)/.test(scriptURL);
     const scriptVariant = useLegacyBuild
       ? (minifiedScript ? "legacyMin" : "legacy")
       : (minifiedScript ? "modernMin" : "modern");
     const loadPromises = [];
+
+    for (const dependency of data.dependencies || []) {
+      if (typeof dependency === "string") continue;
+      loadPromises.push(AelluxJs.dep(
+        dependency.label, dependency.url,
+        { integrity: dependency.integrity, crossOrigin: dependency.crossOrigin }
+      ));
+    }
 
     if (bundledLoader) {
       loadPromises.push(Promise.resolve().then(() => bundledLoader()));
@@ -246,7 +314,8 @@ import utilsNameCase from "./internal/utils-name-case.js";
           const script = document.createElement("script");
           script.src = scriptURL;
           script.setAttribute(attr, extensionName);
-          applyAssetIntegrity(script, getExtensionIntegrity(data, scriptVariant, scriptURL), data.crossOrigin);
+          applyAssetIntegrity(script, artifact && artifact.integrity ||
+            getExtensionIntegrity(data, scriptVariant, scriptURL), data.crossOrigin);
 
           assetLoadHelper(script, {
             loadCallback: resolve,
@@ -261,13 +330,15 @@ import utilsNameCase from "./internal/utils-name-case.js";
         (resolve) => {
           const styleDefaultURL = data.loadStyle === true ||
             data.loadStyle === "true" || data.loadStyle === "";
-          const href = styleDefaultURL ? url.replace(/\.js(?=[?#]|$)/, ".css") : data.loadStyle;
+          const href = data.styleArtifact ? data.styleArtifact.url :
+            (styleDefaultURL ? url.replace(/\.js(?=[?#]|$)/, ".css") : data.loadStyle);
           const attrStyle = AelluxJs.attr("ext-style");
           const link = document.createElement("link");
           link.href = href;
           link.rel = "stylesheet";
           link.setAttribute(attrStyle, extensionName);
-          applyAssetIntegrity(link, getExtensionIntegrity(data, "style", href), data.crossOrigin);
+          applyAssetIntegrity(link, data.styleArtifact && data.styleArtifact.integrity ||
+            getExtensionIntegrity(data, "style", href), data.crossOrigin);
 
           assetLoadHelper(link, {
             loadCallback: resolve,
@@ -326,6 +397,232 @@ import utilsNameCase from "./internal/utils-name-case.js";
           asset.remove();
         }
       });
+  }
+
+  async function resolveImplicitRegistration(extensionName, registration) {
+    const officialURL = AelluxJs.extIndex.officialURL ||
+      AelluxJs.aelluxBasePath + "aellux.extensions.min.json";
+    let entry = null;
+    let sourceURL = officialURL;
+
+    try {
+      const official = AelluxJs.extIndex.official ||
+        await loadExtensionIndex("official", officialURL);
+      entry = official.extensions[extensionName] || null;
+    } catch (error) {
+      reportIndexFailure(error, "official", officialURL);
+    }
+
+    if (!entry && AelluxJs.extIndex.fallbackURL) {
+      sourceURL = AelluxJs.extIndex.fallbackURL;
+      try {
+        const fallback = AelluxJs.extIndex.fallback ||
+          await loadExtensionIndex("fallback", sourceURL);
+        entry = fallback.extensions[extensionName] || null;
+      } catch (error) {
+        reportIndexFailure(error, "custom", sourceURL);
+      }
+    }
+
+    // Preserve the original local convention when neither index resolves it.
+    if (!entry) return registration;
+    applyManifestEntry(registration, entry, sourceURL, extensionName);
+    return registration;
+  }
+
+  function loadExtensionIndex(kind, url) {
+    const promiseKey = kind + "Promise";
+    if (AelluxJs.extIndex[promiseKey]) return AelluxJs.extIndex[promiseKey];
+    validateManifestURL(url, kind);
+    AelluxJs.extIndex[promiseKey] = AelluxJs.request(url)
+      .then(response => response.json())
+      .then(index => {
+        validateExtensionIndex(index, kind, url);
+        AelluxJs.extIndex[kind] = index;
+        AelluxJs.diagnostics.info(AelluxJs.diagnostics.INFO_EXTENSION_INDEX_LOADED,
+          { source: kind, url, extensions: Object.keys(index.extensions).length });
+        return index;
+      })
+      .catch(error => {
+        AelluxJs.extIndex[promiseKey] = null;
+        throw error;
+      });
+    return AelluxJs.extIndex[promiseKey];
+  }
+
+  function validateManifestURL(url, kind) {
+    let parsed;
+    try { parsed = new URL(url, document.baseURI); }
+    catch (_) { throw manifestError(kind, url, "valid URL"); }
+    const development = AelluxJs.options.environment === "development";
+    if (parsed.protocol !== "https:" && parsed.origin !== location.origin && !development) {
+      throw manifestError(kind, url, "HTTPS for external manifests");
+    }
+  }
+
+  function validateExtensionIndex(index, kind, url) {
+    if (!index || index.schemaVersion !== 1 || typeof index.coreVersion !== "string" ||
+      !index.extensions || typeof index.extensions !== "object" || Array.isArray(index.extensions)) {
+      throw manifestError(kind, url, "schemaVersion 1, coreVersion, and extensions object");
+    }
+    if (index.coreVersion !== AelluxJs.version) {
+      throw manifestError(kind, url,
+        `coreVersion ${AelluxJs.version} (received ${index.coreVersion})`);
+    }
+    for (const [name, entry] of Object.entries(index.extensions)) {
+      if (!/^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/.test(name) || !entry ||
+        typeof entry.coreCompatibility !== "string" || !entry.builds ||
+        typeof entry.builds !== "object") {
+        throw manifestError(kind, url, `valid metadata for ${name}`);
+      }
+      for (const variant of ["modern", "legacy"]) {
+        const artifact = entry.builds[variant];
+        if (!artifact) continue;
+        if (typeof artifact.url !== "string" || typeof artifact.integrity !== "string" ||
+          !/^sha384-[A-Za-z0-9+/]+={0,2}$/.test(artifact.integrity)) {
+          throw manifestError(kind, url, `URL and SHA-384 integrity for ${name}/${variant}`);
+        }
+        validateArtifactURL(artifact.url, url, kind);
+        if (artifact.regular) {
+          if (typeof artifact.regular.url !== "string" ||
+            !/^sha384-[A-Za-z0-9+/]+={0,2}$/.test(artifact.regular.integrity || "")) {
+            throw manifestError(kind, url, `regular URL and SHA-384 integrity for ${name}/${variant}`);
+          }
+          validateArtifactURL(artifact.regular.url, url, kind);
+        }
+      }
+      if (!entry.builds.modern && !entry.builds.legacy)
+        throw manifestError(kind, url, `a runtime build for ${name}`);
+      if (entry.style) {
+        if (typeof entry.style.url !== "string" ||
+          !/^sha384-[A-Za-z0-9+/]+={0,2}$/.test(entry.style.integrity || "")) {
+          throw manifestError(kind, url, `URL and SHA-384 integrity for ${name}/style`);
+        }
+        validateArtifactURL(entry.style.url, url, kind);
+        if (entry.style.regular) {
+          if (typeof entry.style.regular.url !== "string" ||
+            !/^sha384-[A-Za-z0-9+/]+={0,2}$/.test(entry.style.regular.integrity || "")) {
+            throw manifestError(kind, url, `regular URL and SHA-384 integrity for ${name}/style`);
+          }
+          validateArtifactURL(entry.style.regular.url, url, kind);
+        }
+      }
+      if (!Array.isArray(entry.dependencies)) {
+        throw manifestError(kind, url, `dependencies array for ${name}`);
+      }
+      for (const dependency of entry.dependencies) {
+        // A string references a dependency already registered by the host.
+        // Remote dependency metadata must be complete enough for the same
+        // URL and SRI checks used by extension artifacts.
+        if (typeof dependency === "string") continue;
+        if (!dependency || typeof dependency.label !== "string" || !dependency.label.trim() ||
+          typeof dependency.url !== "string" || typeof dependency.integrity !== "string" ||
+          !/^sha384-[A-Za-z0-9+/]+={0,2}$/.test(dependency.integrity)) {
+          throw manifestError(kind, url, `dependency URL and SHA-384 integrity for ${name}`);
+        }
+        validateArtifactURL(dependency.url, url, kind);
+      }
+    }
+  }
+
+  function validateArtifactURL(url, manifestURL, kind) {
+    let parsed;
+    try { parsed = new URL(url, new URL(manifestURL, document.baseURI)); }
+    catch (_) { throw manifestError(kind, manifestURL, `valid artifact URL: ${url}`); }
+    const development = AelluxJs.options.environment === "development";
+    if (parsed.protocol !== "https:" && parsed.origin !== location.origin && !development)
+      throw manifestError(kind, manifestURL, `HTTPS artifact URL: ${url}`);
+  }
+
+  function manifestError(kind, url, expected) {
+    return AelluxJs.diagnostics.create(AelluxJs.diagnostics.ERROR_EXTENSION_INDEX_INVALID,
+      { source: kind, url, expected });
+  }
+
+  function reportIndexFailure(error, source, url) {
+    if (error && error.code === AelluxJs.diagnostics.ERROR_EXTENSION_INDEX_INVALID.code) {
+      AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_EXTENSION_INDEX_INVALID,
+        { source, url, expected: error.context && error.context.expected, cause: error });
+    } else {
+      AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_EXTENSION_INDEX_LOAD,
+        { source, url, cause: error });
+    }
+  }
+
+  function applyManifestEntry(registration, entry, manifestURL, extensionName) {
+    const base = new URL(manifestURL, document.baseURI);
+    const artifacts = {};
+    for (const variant of ["modern", "legacy"]) {
+      if (entry.builds[variant] &&
+        (!registration.explicitBuilds || registration.builds.includes(variant))) {
+        const declared = !AelluxJs.minified && entry.builds[variant].regular
+          ? entry.builds[variant].regular : entry.builds[variant];
+        artifacts[variant] = {
+          url: new URL(declared.url, base).href,
+          integrity: declared.integrity
+        };
+      }
+    }
+    const selected = artifacts[AelluxJs.diagnostics.legacy ? "legacy" : "modern"] ||
+      (!AelluxJs.diagnostics.legacy && artifacts.legacy);
+    registration.artifacts = artifacts;
+    registration.manifestResolved = true;
+    registration.builds = Object.keys(artifacts);
+    if (selected) registration.url = selected.url;
+    registration.coreCompatibility = entry.coreCompatibility;
+    registration.dependencies = (entry.dependencies || []).map(dependency =>
+      typeof dependency === "string" ? dependency : {
+        ...dependency, url: new URL(dependency.url, base).href
+      });
+    registration.official = AelluxJs.extIndex.official &&
+      AelluxJs.extIndex.official.extensions[extensionName] === entry;
+    if (entry.style && registration.loadStyle && registration.loadStyle !== "false") {
+      const declaredStyle = !AelluxJs.minified && entry.style.regular
+        ? entry.style.regular : entry.style;
+      registration.styleArtifact = {
+        url: new URL(declaredStyle.url, base).href,
+        integrity: declaredStyle.integrity
+      };
+    }
+  }
+
+  function versionSatisfies(version, range) {
+    if (typeof range !== "string" || !range.trim()) return true;
+    return range.split("||").some(group => group.trim().split(/\s+/).every(token => {
+      if (token === "*" || token.toLowerCase() === "latest") return true;
+      const match = token.match(/^(\^|~|>=|<=|>|<|=)?(.+)$/);
+      if (!match) return false;
+      const operator = match[1] || "=";
+      const comparison = compareVersions(version, match[2]);
+      if (operator === "=") return comparison === 0;
+      if (operator === ">") return comparison > 0;
+      if (operator === ">=") return comparison >= 0;
+      if (operator === "<") return comparison < 0;
+      if (operator === "<=") return comparison <= 0;
+      const current = parseVersion(version);
+      const expected = parseVersion(match[2]);
+      if (!current || !expected || comparison < 0) return false;
+      if (operator === "~") return current[0] === expected[0] && current[1] === expected[1];
+      return expected[0] > 0 ? current[0] === expected[0]
+        : expected[1] > 0 ? current[0] === 0 && current[1] === expected[1]
+          : current[0] === 0 && current[1] === 0 && current[2] === expected[2];
+    }));
+  }
+
+  function compareVersions(first, second) {
+    const a = parseVersion(first);
+    const b = parseVersion(second);
+    if (!a || !b) return first === second ? 0 : -1;
+    for (let index = 0; index < 3; index++) if (a[index] !== b[index]) return a[index] > b[index] ? 1 : -1;
+    if (a[3] === b[3]) return 0;
+    if (!a[3]) return 1;
+    if (!b[3]) return -1;
+    return a[3] > b[3] ? 1 : -1;
+  }
+
+  function parseVersion(version) {
+    const match = String(version).match(/^(\d+)\.(\d+)\.(\d+)(?:-([0-9A-Za-z.-]+))?/);
+    return match ? [Number(match[1]), Number(match[2]), Number(match[3]), match[4] || ""] : null;
   }
 
   function hasCompatibleBuild(data) {

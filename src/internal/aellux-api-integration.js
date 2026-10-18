@@ -28,6 +28,8 @@ export function createAelluxApi(root, constants) {
   };
   var apiProperties = {
     shortJSName: constants.AELLUXJS_SHORT_JS_NAME,
+    version: constants.AELLUXJS_VERSION,
+    orchestratorVersion: null,
     diagnostics: diagnostics,
     options: options,
     minified: false,
@@ -102,6 +104,24 @@ export function createAelluxApi(root, constants) {
     extName: namingNormalization.extName,
     eventName: namingNormalization.eventName,
     noConflict: function () { return oldShortInstance; },
+    extIndex: {
+      official: null,
+      officialURL: null,
+      fallback: null,
+      fallbackURL: null,
+      setFallback: function (url) {
+        if (typeof url !== "string" || !url.trim()) {
+          diagnostics.error(diagnostics.ERROR_EXTENSION_INDEX_INVALID, {
+            source: "custom", expected: "a nonempty manifest URL"
+          });
+          return api;
+        }
+        this.fallbackURL = url.trim();
+        this.fallback = null;
+        this.fallbackPromise = null;
+        return api;
+      }
+    },
     registry: {
       ext: {},
       dep: Object.create(null),
@@ -113,12 +133,14 @@ export function createAelluxApi(root, constants) {
       var name = fromCamelCase(api.extName(nameOrUrl));
       var key = toCamelCase(name);
       var url = nameOrUrl;
+      var implicit = url === api.extName(nameOrUrl);
       if (key in api.registry.ext) {
         diagnostics.error(diagnostics.ERROR_EXTENSION_DUPLICATE, { extension: name });
         return;
       }
       if (url === api.extName(nameOrUrl)) url = "./" + api.extFilename(name);
       if (!options) options = {};
+      var explicitBuilds = Object.prototype.hasOwnProperty.call(options, "builds");
       var selector = options.loadWhen;
       if (selector !== null && typeof selector !== "undefined") {
         if (typeof selector !== "string" || !selector.trim()) {
@@ -139,8 +161,10 @@ export function createAelluxApi(root, constants) {
       if (typeof options.loadStyle === "undefined") options.loadStyle = false;
       if (!options.loadWhen) options.loadWhen = null;
       options.builds = normalizeExtensionBuilds(options.builds);
+      options.explicitBuilds = explicitBuilds;
       if (options.loadWhen) api.registry.lazyExtSelectors[key] = options.loadWhen;
       options.url = url;
+      options.implicit = implicit;
       options.load = options.loadWhen ? false : true;
       options.state = "wait";
       api.registry.ext[key] = options;

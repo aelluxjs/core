@@ -12,6 +12,8 @@ import { createContext, runInContext } from "node:vm";
 import { generateAdaptiveCSS } from "../src/aellux.ext.adaptive.css.js";
 import { generatePresentCSS } from "../src/aellux.ext.present.css.js";
 import { generateFeedbackCSS } from "../src/aellux.ext.feedback.css.js";
+import { officialExtensionDefinitions } from "../src/official-extension-definitions.js";
+import { createOfficialExtensionManifest } from "./extension-manifest.mjs";
 
 const projectRoot = fileURLToPath(new URL("../", import.meta.url));
 const sourceDirectory = join(projectRoot, "src");
@@ -19,12 +21,16 @@ const outputDirectory = join(projectRoot, "dist");
 const sourceFiles = [];
 
 for (const entry of await readdir(sourceDirectory, { withFileTypes: true })) {
-  if (entry.isFile() && entry.name.endsWith(".js") && !entry.name.endsWith(".css.js")) {
+  if (entry.isFile() && entry.name.endsWith(".js") && !entry.name.endsWith(".css.js") &&
+    entry.name !== "official-extension-definitions.js") {
     sourceFiles.push(join(sourceDirectory, entry.name));
   }
 }
 
 const generatedFiles = new Set();
+const packageMetadata = JSON.parse(await readFile(join(projectRoot, "package.json"), "utf8"));
+const packageVersion = packageMetadata.version;
+const versionDefine = { __AELLUX_VERSION__: JSON.stringify(packageVersion) };
 const legacyThirdPartyBanner =
   "/*! Includes Babel helpers, core-js, custom-event-polyfill, raf, performance-now and whatwg-fetch (MIT). " +
   "Copyright and license texts: third-party/licenses/ in this distribution. */";
@@ -78,7 +84,7 @@ const bootstrapEvaluationBuild = await build({
   target: "es2017",
   write: false,
   legalComments: "none",
-  define: { __AELLUX_CORE_ASSET_INTEGRITY__: "{}" }
+  define: { ...versionDefine, __AELLUX_CORE_ASSET_INTEGRITY__: "{}" }
 });
 runInContext(bootstrapEvaluationBuild.outputFiles[0].text, bootstrapContext);
 runInContext('AelluxJs.ext("adaptive")', bootstrapContext);
@@ -132,6 +138,7 @@ for (const sourceFile of sourceFiles) {
       minify,
       sourcemap: true,
       legalComments: "inline"
+      ,define: versionDefine
     });
     generatedFiles.add(outputFilename);
     generatedFiles.add(outputFilename + ".map");
@@ -171,6 +178,7 @@ for (const sourceFile of legacySourceFiles) {
       legalComments: "inline",
       ...(isOrchestrator ? { banner: { js: legacyThirdPartyBanner } } : {}),
       plugins: [legacyBundlePlugin()]
+      ,define: versionDefine
     });
     generatedFiles.add(outputFilename);
     generatedFiles.add(outputFilename + ".map");
@@ -199,6 +207,7 @@ for (const minify of [false, true]) {
     legalComments: "inline",
     banner: { js: legacyThirdPartyBanner },
     plugins: [legacyBundlePlugin()]
+    ,define: versionDefine
   });
   generatedFiles.add(outputFilename);
   generatedFiles.add(outputFilename + ".map");
@@ -241,6 +250,28 @@ for (const filename of generatedFiles) {
     createHash("sha384").update(content).digest("base64");
 }
 
+const extensionManifestResult = createOfficialExtensionManifest({
+  version: packageVersion,
+  definitions: officialExtensionDefinitions,
+  integrity: coreAssetIntegrity,
+  cdnBase: process.env.AELLUX_OFFICIAL_CDN_BASE || ""
+});
+await writeFile(
+  join(outputDirectory, "aellux.extensions.min.json"),
+  JSON.stringify(extensionManifestResult.manifest),
+  "utf8"
+);
+await writeFile(
+  join(outputDirectory, "aellux.extensions.report.json"),
+  JSON.stringify({
+    schemaVersion: 1,
+    coreVersion: packageVersion,
+    status: "valid",
+    extensions: extensionManifestResult.report
+  }, null, 2) + "\n",
+  "utf8"
+);
+
 for (const minify of [false, true]) {
   const outputFilename = minify ? "aellux.min.js" : "aellux.js";
   await build({
@@ -255,6 +286,7 @@ for (const minify of [false, true]) {
     sourcemap: true,
     legalComments: "inline",
     define: {
+      ...versionDefine,
       __AELLUX_CORE_ASSET_INTEGRITY__: JSON.stringify(
         coreAssetIntegrity[minify ? "minified" : "regular"])
     }

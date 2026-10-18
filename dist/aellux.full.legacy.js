@@ -1105,7 +1105,7 @@
       var getOwnPropertySymbolsModule = require_object_get_own_property_symbols();
       var anObject = require_an_object();
       var concat = uncurryThis([].concat);
-      module.exports = getBuiltIn("Reflect", "ownKeys") || function ownKeys(it) {
+      module.exports = getBuiltIn("Reflect", "ownKeys") || function ownKeys2(it) {
         var keys = getOwnPropertyNamesModule.f(anObject(it));
         var getOwnPropertySymbols = getOwnPropertySymbolsModule.f;
         return getOwnPropertySymbols ? concat(keys, getOwnPropertySymbols(it)) : keys;
@@ -1118,11 +1118,11 @@
     "node_modules/core-js/internals/copy-constructor-properties.js": function(exports, module) {
       "use strict";
       var hasOwn = require_has_own_property();
-      var ownKeys = require_own_keys();
+      var ownKeys2 = require_own_keys();
       var getOwnPropertyDescriptorModule = require_object_get_own_property_descriptor();
       var definePropertyModule = require_object_define_property();
       module.exports = function(target, source, exceptions) {
-        var keys = ownKeys(source);
+        var keys = ownKeys2(source);
         var defineProperty = definePropertyModule.f;
         var getOwnPropertyDescriptor = getOwnPropertyDescriptorModule.f;
         for (var i = 0; i < keys.length; i++) {
@@ -10021,7 +10021,7 @@
       "use strict";
       var $ = require_export();
       var DESCRIPTORS = require_descriptors();
-      var ownKeys = require_own_keys();
+      var ownKeys2 = require_own_keys();
       var toIndexedObject = require_to_indexed_object();
       var getOwnPropertyDescriptorModule = require_object_get_own_property_descriptor();
       var createProperty = require_create_property();
@@ -10029,7 +10029,7 @@
         getOwnPropertyDescriptors: function getOwnPropertyDescriptors(object) {
           var O = toIndexedObject(object);
           var getOwnPropertyDescriptor = getOwnPropertyDescriptorModule.f;
-          var keys = ownKeys(O);
+          var keys = ownKeys2(O);
           var result = {};
           var index = 0;
           var key, descriptor;
@@ -12201,9 +12201,9 @@
     "node_modules/core-js/modules/es.reflect.own-keys.js": function() {
       "use strict";
       var $ = require_export();
-      var ownKeys = require_own_keys();
+      var ownKeys2 = require_own_keys();
       $({ target: "Reflect", stat: true }, {
-        ownKeys: ownKeys
+        ownKeys: ownKeys2
       });
     }
   });
@@ -23382,6 +23382,18 @@
   });
 
   // src/internal/create-css-motion-controller.js
+  function _toConsumableArray2(r) {
+    return _arrayWithoutHoles2(r) || _iterableToArray2(r) || _unsupportedIterableToArray6(r) || _nonIterableSpread2();
+  }
+  function _nonIterableSpread2() {
+    throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+  }
+  function _iterableToArray2(r) {
+    if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
+  }
+  function _arrayWithoutHoles2(r) {
+    if (Array.isArray(r)) return _arrayLikeToArray6(r);
+  }
   function _createForOfIteratorHelper5(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
@@ -23469,6 +23481,7 @@
         cancelled: false,
         controlled: false,
         captureFailed: false,
+        conservative: false,
         nativeTimer: null,
         nativeResolve: null
       };
@@ -23500,12 +23513,12 @@
         operations.delete(operationId);
         return Promise.reject(error);
       }
-      var maxFPS = options.maxFPS === void 0 ? AelluxJs2.layoutMaxFPS(element) : options.maxFPS;
+      var requestedMaxFPS = options.maxFPS === void 0 ? AelluxJs2.layoutMaxFPS(element) : options.maxFPS;
       var externalAbort = typeof options.abort === "function" ? options.abort : null;
       var shouldAbort = function shouldAbort2() {
         return operation.cancelled || !element.isConnected || (externalAbort ? externalAbort() : false);
       };
-      var result = AelluxJs2.waitLayout.sequence(operationId, {
+      var captureResult = AelluxJs2.waitLayout.sequence(operationId, {
         read: function read() {
           return capture(operation);
         },
@@ -23513,31 +23526,43 @@
           return prepare(operation, animations);
         },
         abort: shouldAbort
-      }, {
-        update: function update() {
-          return advance(operation);
-        },
-        repeat: {
-          ms: 0
-        },
-        maxFPS: maxFPS,
-        abort: function abort() {
-          return operation.done || shouldAbort();
-        }
       });
-      return result.then(function(sequenceResult) {
+      return captureResult.then(function(sequenceResult) {
+        if (sequenceResult.status !== "completed") {
+          release(operation, false);
+          return {
+            id: operationId,
+            status: sequenceResult.status,
+            mode: "native"
+          };
+        }
         if (operation.captureFailed && !operation.cancelled) {
           release(operation, false);
           operations.set(operationId, operation);
           return nativeWait(operation);
         }
-        var completed = operation.done && !operation.cancelled;
-        release(operation, completed);
-        return {
-          id: operationId,
-          status: completed ? "completed" : sequenceResult.status,
-          mode: operation.controlled ? "controlled" : "native"
-        };
+        var policyFPS = operation.conservative ? positiveFPS(AelluxJs2.options.cssMotionPropertyMaxFPS, 40) : void 0;
+        var maxFPS = minimumFPS(requestedMaxFPS, policyFPS);
+        return AelluxJs2.waitLayout.sequence(operationId, {
+          update: function update() {
+            return advance(operation);
+          },
+          repeat: {
+            ms: 0
+          },
+          maxFPS: maxFPS,
+          abort: function abort() {
+            return operation.done || shouldAbort();
+          }
+        }).then(function(progressResult) {
+          var completed = operation.done && !operation.cancelled;
+          release(operation, completed);
+          return {
+            id: operationId,
+            status: completed ? "completed" : progressResult.status,
+            mode: "controlled"
+          };
+        });
       }, function(error) {
         release(operation, false, true);
         throw error;
@@ -23574,6 +23599,7 @@
           var end = Number(timing.endTime);
           if (Number.isFinite(end)) endTime = Math.max(endTime, end);
           applyAelluxEasing(operation, animation);
+          if (!onlyTransformAndOpacity(animation)) operation.conservative = true;
         }
       } catch (err) {
         _iterator2.e(err);
@@ -23586,20 +23612,60 @@
       operation.controlled = true;
       if (!(endTime > 0)) operation.done = true;
     }
+    function onlyTransformAndOpacity(animation) {
+      try {
+        if (typeof root2.CSSTransition === "function" && animation instanceof root2.CSSTransition) {
+          return animation.transitionProperty === "transform" || animation.transitionProperty === "opacity";
+        }
+        var frames = animation.effect.getKeyframes();
+        if (!frames.length) return false;
+        var metadata = /* @__PURE__ */ new Set(["offset", "computedOffset", "easing", "composite"]);
+        var found = false;
+        var _iterator3 = _createForOfIteratorHelper5(frames), _step3;
+        try {
+          for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
+            var frame = _step3.value;
+            for (var _i = 0, _Object$keys = Object.keys(frame); _i < _Object$keys.length; _i++) {
+              var property = _Object$keys[_i];
+              if (metadata.has(property)) continue;
+              found = true;
+              if (property !== "transform" && property !== "opacity") return false;
+            }
+          }
+        } catch (err) {
+          _iterator3.e(err);
+        } finally {
+          _iterator3.f();
+        }
+        return found;
+      } catch (_) {
+        return false;
+      }
+    }
+    function positiveFPS(value, fallback) {
+      var number = Number(value);
+      return Number.isFinite(number) && number > 0 ? number : fallback;
+    }
+    function minimumFPS(first, second) {
+      var values = [first, second].filter(function(value) {
+        return Number.isFinite(value) && value > 0;
+      });
+      return values.length ? Math.min.apply(Math, _toConsumableArray2(values)) : void 0;
+    }
     function advance(operation) {
       if (!operation.controlled || operation.done) return;
       var elapsed = Math.max(0, now() - operation.start);
       var time = Math.min(elapsed, operation.endTime);
-      var _iterator3 = _createForOfIteratorHelper5(operation.animations), _step3;
+      var _iterator4 = _createForOfIteratorHelper5(operation.animations), _step4;
       try {
-        for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
-          var animation = _step3.value;
+        for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
+          var animation = _step4.value;
           animation.currentTime = time;
         }
       } catch (err) {
-        _iterator3.e(err);
+        _iterator4.e(err);
       } finally {
-        _iterator3.f();
+        _iterator4.f();
       }
       if (elapsed >= operation.endTime) operation.done = true;
     }
@@ -23705,10 +23771,10 @@
       var resume = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : false;
       if (operation.nativeTimer !== null) root2.clearTimeout(operation.nativeTimer);
       operation.nativeTimer = null;
-      var _iterator4 = _createForOfIteratorHelper5(operation.animations), _step4;
+      var _iterator5 = _createForOfIteratorHelper5(operation.animations), _step5;
       try {
-        for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
-          var animation = _step4.value;
+        for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
+          var animation = _step5.value;
           try {
             if (finish) animation.finish();
             else if (resume) animation.play();
@@ -23717,9 +23783,9 @@
           }
         }
       } catch (err) {
-        _iterator4.e(err);
+        _iterator5.e(err);
       } finally {
-        _iterator4.f();
+        _iterator5.f();
       }
       operation.animations.length = 0;
       if (operations.get(operation.id) === operation) operations.delete(operation.id);
@@ -23908,6 +23974,82 @@
   });
 
   // src/aellux.orchestrator.js
+  function ownKeys(e, r) {
+    var t = Object.keys(e);
+    if (Object.getOwnPropertySymbols) {
+      var o = Object.getOwnPropertySymbols(e);
+      r && (o = o.filter(function(r2) {
+        return Object.getOwnPropertyDescriptor(e, r2).enumerable;
+      })), t.push.apply(t, o);
+    }
+    return t;
+  }
+  function _objectSpread(e) {
+    for (var r = 1; r < arguments.length; r++) {
+      var t = null != arguments[r] ? arguments[r] : {};
+      r % 2 ? ownKeys(Object(t), true).forEach(function(r2) {
+        _defineProperty(e, r2, t[r2]);
+      }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function(r2) {
+        Object.defineProperty(e, r2, Object.getOwnPropertyDescriptor(t, r2));
+      });
+    }
+    return e;
+  }
+  function _defineProperty(e, r, t) {
+    return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: true, configurable: true, writable: true }) : e[r] = t, e;
+  }
+  function _toPropertyKey(t) {
+    var i = _toPrimitive(t, "string");
+    return "symbol" == _typeof4(i) ? i : i + "";
+  }
+  function _toPrimitive(t, r) {
+    if ("object" != _typeof4(t) || !t) return t;
+    var e = t[Symbol.toPrimitive];
+    if (void 0 !== e) {
+      var i = e.call(t, r || "default");
+      if ("object" != _typeof4(i)) return i;
+      throw new TypeError("@@toPrimitive must return a primitive value.");
+    }
+    return ("string" === r ? String : Number)(t);
+  }
+  function _slicedToArray3(r, e) {
+    return _arrayWithHoles3(r) || _iterableToArrayLimit3(r, e) || _unsupportedIterableToArray8(r, e) || _nonIterableRest3();
+  }
+  function _nonIterableRest3() {
+    throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+  }
+  function _iterableToArrayLimit3(r, l) {
+    var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
+    if (null != t) {
+      var e, n, i, u, a = [], f = true, o = false;
+      try {
+        if (i = (t = t.call(r)).next, 0 === l) {
+          if (Object(t) !== t) return;
+          f = false;
+        } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = true) ;
+      } catch (r2) {
+        o = true, n = r2;
+      } finally {
+        try {
+          if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return;
+        } finally {
+          if (o) throw n;
+        }
+      }
+      return a;
+    }
+  }
+  function _arrayWithHoles3(r) {
+    if (Array.isArray(r)) return r;
+  }
+  function _typeof4(o) {
+    "@babel/helpers - typeof";
+    return _typeof4 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
+      return typeof o2;
+    } : function(o2) {
+      return o2 && "function" == typeof Symbol && o2.constructor === Symbol && o2 !== Symbol.prototype ? "symbol" : typeof o2;
+    }, _typeof4(o);
+  }
   function _createForOfIteratorHelper7(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
@@ -24065,6 +24207,19 @@
       (function(root2) {
         "use strict";
         var toCamelCase2 = utils_name_case_default.toCamelCase, fromCamelCase2 = utils_name_case_default.fromCamelCase;
+        var orchestratorVersion = true ? "0.1.0-beta.10" : "0.1.0-beta.10";
+        if (root2.AelluxJs.version !== orchestratorVersion) {
+          var error = root2.AelluxJs.diagnostics.error(root2.AelluxJs.diagnostics.ERROR_RUNTIME_VERSION_MISMATCH, {
+            expected: root2.AelluxJs.version,
+            found: orchestratorVersion
+          });
+          root2.AelluxJs.orchestratorVersion = orchestratorVersion;
+          root2.AelluxJs.startAelluxJs = function() {
+            return Promise.reject(error);
+          };
+          return;
+        }
+        root2.AelluxJs.orchestratorVersion = orchestratorVersion;
         var extensionPromises = {};
         var aria = createAriaHelper();
         var mountManager = buildMountMapManager(root2);
@@ -24081,6 +24236,12 @@
                     if (root2.AelluxJs.bundledExtensions) {
                       Object.keys(root2.AelluxJs.bundledExtensions).forEach(function(key) {
                         if (!(key in AelluxJs.registry.ext)) AelluxJs.ext(key);
+                        var name = fromCamelCase2(key);
+                        var metadata = AelluxJs.extIndex.official && AelluxJs.extIndex.official.extensions[name];
+                        if (metadata && metadata.coreCompatibility) {
+                          AelluxJs.registry.ext[key].coreCompatibility = metadata.coreCompatibility;
+                          AelluxJs.registry.ext[key].official = true;
+                        }
                       });
                     }
                     _context.n = 1;
@@ -24270,94 +24431,190 @@
           extensionName = fromCamelCase2(extensionName);
           var key = toCamelCase2(extensionName);
           if (extensionPromises[key]) return extensionPromises[key];
-          var data = AelluxJs.registry.ext[key];
-          if (data && !hasCompatibleBuild(data)) {
-            AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_EXTENSION_INCOMPATIBLE, {
-              extension: extensionName,
-              runtime: AelluxJs.diagnostics.legacy ? "legacy" : "modern",
-              builds: data.builds
-            });
-            delete AelluxJs.registry.lazyExtSelectors[key];
-            extensionPromises[key] = Promise.resolve(null);
-            return extensionPromises[key];
-          }
-          if (AelluxJs.ext[key]) {
-            if (!AelluxJs.ext[key].initialized) {
-              extensionPromises[key] = Promise.resolve().then(function() {
-                return extensionInitialize(extensionName);
-              }).catch(function(error) {
-                AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_EXTENSION_INITIALIZE, {
-                  cause: error,
-                  extension: extensionName
-                });
-                delete extensionPromises[key];
-                return null;
-              });
-              return extensionPromises[key];
-            }
-            extensionPromises[key] = Promise.resolve(AelluxJs.ext[key]);
-            return extensionPromises[key];
-          }
           if (!(key in AelluxJs.registry.ext)) {
             return Promise.reject(AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_EXTENSION_NOT_REGISTERED, {
               extension: extensionName
             }));
           }
+          if (AelluxJs.ext[key]) {
+            if (AelluxJs.ext[key].initialized) {
+              extensionPromises[key] = Promise.resolve(AelluxJs.ext[key]);
+            } else {
+              extensionPromises[key] = Promise.resolve().then(function() {
+                return extensionInitialize(extensionName);
+              }).catch(function(error2) {
+                if (!error2 || !error2.aelluxCompatibility) {
+                  AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_EXTENSION_INITIALIZE, {
+                    cause: error2,
+                    extension: extensionName
+                  });
+                }
+                delete extensionPromises[key];
+                return null;
+              });
+            }
+            return extensionPromises[key];
+          }
           var bundledLoader = AelluxJs.bundledExtensions ? AelluxJs.bundledExtensions[key] : null;
-          extensionPromises[key] = appendExtensionAssets(extensionName, bundledLoader).then(function() {
-            return extensionInitialize(extensionName);
-          }).catch(function(error) {
-            AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_EXTENSION_INITIALIZE, {
-              cause: error,
-              extension: extensionName
-            });
+          extensionPromises[key] = Promise.resolve().then(function() {
+            var registration = AelluxJs.registry.ext[key];
+            return registration.implicit && !bundledLoader && !AelluxJs.ext[key] ? resolveImplicitRegistration(extensionName, registration) : registration;
+          }).then(/* @__PURE__ */ (function() {
+            var _ref = _asyncToGenerator2(/* @__PURE__ */ _regenerator2().m(function _callee6(data) {
+              return _regenerator2().w(function(_context6) {
+                while (1) switch (_context6.n) {
+                  case 0:
+                    if (hasCompatibleBuild(data)) {
+                      _context6.n = 1;
+                      break;
+                    }
+                    AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_EXTENSION_INCOMPATIBLE, {
+                      extension: extensionName,
+                      runtime: AelluxJs.diagnostics.legacy ? "legacy" : "modern",
+                      builds: data && data.builds
+                    });
+                    delete AelluxJs.registry.lazyExtSelectors[key];
+                    return _context6.a(2, null);
+                  case 1:
+                    if (AelluxJs.ext[key]) {
+                      _context6.n = 2;
+                      break;
+                    }
+                    _context6.n = 2;
+                    return appendExtensionAssets(extensionName, bundledLoader);
+                  case 2:
+                    if (AelluxJs.ext[key].initialized) {
+                      _context6.n = 3;
+                      break;
+                    }
+                    return _context6.a(2, extensionInitialize(extensionName));
+                  case 3:
+                    return _context6.a(2, AelluxJs.ext[key]);
+                }
+              }, _callee6);
+            }));
+            return function(_x) {
+              return _ref.apply(this, arguments);
+            };
+          })()).catch(function(error2) {
+            if (!error2 || !error2.aelluxCompatibility) {
+              var registration = AelluxJs.registry.ext[key];
+              if (registration && registration.implicit && !registration.manifestResolved) {
+                AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_EXTENSION_INDEX_NOT_FOUND, {
+                  extension: extensionName
+                });
+              }
+              AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_EXTENSION_INITIALIZE, {
+                cause: error2,
+                extension: extensionName
+              });
+            }
             delete extensionPromises[key];
             return null;
           });
           return extensionPromises[key];
         }
-        function extensionInitialize(_x) {
+        function extensionInitialize(_x2) {
           return _extensionInitialize.apply(this, arguments);
         }
         function _extensionInitialize() {
-          _extensionInitialize = _asyncToGenerator2(/* @__PURE__ */ _regenerator2().m(function _callee6(extensionName) {
-            var key, options;
-            return _regenerator2().w(function(_context6) {
-              while (1) switch (_context6.n) {
-                case 0:
-                  extensionName = fromCamelCase2(extensionName);
-                  key = toCamelCase2(extensionName);
-                  options = AelluxJs.options.extensions[key] || {};
-                  _context6.n = 1;
-                  return AelluxJs.ext[key].init(options);
-                case 1:
-                  AelluxJs.ext[key].initialized = true;
-                  delete AelluxJs.registry.lazyExtSelectors[key];
-                  return _context6.a(2, AelluxJs.ext[key]);
-              }
-            }, _callee6);
-          }));
-          return _extensionInitialize.apply(this, arguments);
-        }
-        function appendExtensionAssets(_x2) {
-          return _appendExtensionAssets.apply(this, arguments);
-        }
-        function _appendExtensionAssets() {
-          _appendExtensionAssets = _asyncToGenerator2(/* @__PURE__ */ _regenerator2().m(function _callee7(extensionName) {
-            var bundledLoader, key, data, url, useLegacyBuild, scriptURL, minifiedScript, scriptVariant, loadPromises, _args7 = arguments;
+          _extensionInitialize = _asyncToGenerator2(/* @__PURE__ */ _regenerator2().m(function _callee7(extensionName) {
+            var key, registration, context, _error, options;
             return _regenerator2().w(function(_context7) {
               while (1) switch (_context7.n) {
                 case 0:
-                  bundledLoader = _args7.length > 1 && _args7[1] !== void 0 ? _args7[1] : null;
+                  extensionName = fromCamelCase2(extensionName);
+                  key = toCamelCase2(extensionName);
+                  registration = AelluxJs.registry.ext[key];
+                  if (!(registration.coreCompatibility && !versionSatisfies(AelluxJs.version, registration.coreCompatibility))) {
+                    _context7.n = 2;
+                    break;
+                  }
+                  context = {
+                    extension: extensionName,
+                    coreVersion: AelluxJs.version,
+                    coreCompatibility: registration.coreCompatibility
+                  };
+                  if (!(registration.skipCompatibilityCheck === true)) {
+                    _context7.n = 1;
+                    break;
+                  }
+                  AelluxJs.diagnostics.warn(AelluxJs.diagnostics.WARN_EXTENSION_COMPATIBILITY_SKIPPED, _objectSpread(_objectSpread({}, context), {}, {
+                    explicitlySkipped: true
+                  }));
+                  _context7.n = 2;
+                  break;
+                case 1:
+                  _error = AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_EXTENSION_VERSION_INCOMPATIBLE, context);
+                  _error.aelluxCompatibility = true;
+                  throw _error;
+                case 2:
+                  options = AelluxJs.options.extensions[key] || {};
+                  _context7.n = 3;
+                  return AelluxJs.ext[key].init(options);
+                case 3:
+                  AelluxJs.ext[key].initialized = true;
+                  delete AelluxJs.registry.lazyExtSelectors[key];
+                  return _context7.a(2, AelluxJs.ext[key]);
+              }
+            }, _callee7);
+          }));
+          return _extensionInitialize.apply(this, arguments);
+        }
+        function appendExtensionAssets(_x3) {
+          return _appendExtensionAssets.apply(this, arguments);
+        }
+        function _appendExtensionAssets() {
+          _appendExtensionAssets = _asyncToGenerator2(/* @__PURE__ */ _regenerator2().m(function _callee8(extensionName) {
+            var bundledLoader, key, data, useLegacyBuild, artifact, url, scriptURL, minifiedScript, scriptVariant, loadPromises, _iterator3, _step3, dependency, _args8 = arguments, _t4;
+            return _regenerator2().w(function(_context8) {
+              while (1) switch (_context8.p = _context8.n) {
+                case 0:
+                  bundledLoader = _args8.length > 1 && _args8[1] !== void 0 ? _args8[1] : null;
                   extensionName = fromCamelCase2(extensionName);
                   key = toCamelCase2(extensionName);
                   data = AelluxJs.registry.ext[key];
-                  url = data.url.replace(/^\.\//, AelluxJs.aelluxBasePath);
                   useLegacyBuild = AelluxJs.diagnostics.legacy || data.builds.indexOf("modern") === -1;
-                  scriptURL = useLegacyBuild ? toLegacyScriptURL(url) : url;
+                  artifact = data.artifacts && data.artifacts[useLegacyBuild ? "legacy" : "modern"];
+                  url = data.url.replace(/^\.\//, AelluxJs.aelluxBasePath);
+                  scriptURL = artifact ? artifact.url : useLegacyBuild ? toLegacyScriptURL(url) : url;
                   minifiedScript = /\.min\.js(?=[?#]|$)/.test(scriptURL);
                   scriptVariant = useLegacyBuild ? minifiedScript ? "legacyMin" : "legacy" : minifiedScript ? "modernMin" : "modern";
                   loadPromises = [];
+                  _iterator3 = _createForOfIteratorHelper7(data.dependencies || []);
+                  _context8.p = 1;
+                  _iterator3.s();
+                case 2:
+                  if ((_step3 = _iterator3.n()).done) {
+                    _context8.n = 5;
+                    break;
+                  }
+                  dependency = _step3.value;
+                  if (!(typeof dependency === "string")) {
+                    _context8.n = 3;
+                    break;
+                  }
+                  return _context8.a(3, 4);
+                case 3:
+                  loadPromises.push(AelluxJs.dep(dependency.label, dependency.url, {
+                    integrity: dependency.integrity,
+                    crossOrigin: dependency.crossOrigin
+                  }));
+                case 4:
+                  _context8.n = 2;
+                  break;
+                case 5:
+                  _context8.n = 7;
+                  break;
+                case 6:
+                  _context8.p = 6;
+                  _t4 = _context8.v;
+                  _iterator3.e(_t4);
+                case 7:
+                  _context8.p = 7;
+                  _iterator3.f();
+                  return _context8.f(7);
+                case 8:
                   if (bundledLoader) {
                     loadPromises.push(Promise.resolve().then(function() {
                       return bundledLoader();
@@ -24368,7 +24625,7 @@
                       var script = document.createElement("script");
                       script.src = scriptURL;
                       script.setAttribute(attr, extensionName);
-                      applyAssetIntegrity(script, getExtensionIntegrity(data, scriptVariant, scriptURL), data.crossOrigin);
+                      applyAssetIntegrity(script, artifact && artifact.integrity || getExtensionIntegrity(data, scriptVariant, scriptURL), data.crossOrigin);
                       assetLoadHelper(script, {
                         loadCallback: resolve,
                         errorCallback: reject
@@ -24378,13 +24635,13 @@
                   if (data.loadStyle && data.loadStyle !== "false") {
                     loadPromises.push(new Promise(function(resolve) {
                       var styleDefaultURL = data.loadStyle === true || data.loadStyle === "true" || data.loadStyle === "";
-                      var href = styleDefaultURL ? url.replace(/\.js(?=[?#]|$)/, ".css") : data.loadStyle;
+                      var href = data.styleArtifact ? data.styleArtifact.url : styleDefaultURL ? url.replace(/\.js(?=[?#]|$)/, ".css") : data.loadStyle;
                       var attrStyle = AelluxJs.attr("ext-style");
                       var link = document.createElement("link");
                       link.href = href;
                       link.rel = "stylesheet";
                       link.setAttribute(attrStyle, extensionName);
-                      applyAssetIntegrity(link, getExtensionIntegrity(data, "style", href), data.crossOrigin);
+                      applyAssetIntegrity(link, data.styleArtifact && data.styleArtifact.integrity || getExtensionIntegrity(data, "style", href), data.crossOrigin);
                       assetLoadHelper(link, {
                         loadCallback: resolve,
                         errorCallback: function errorCallback() {
@@ -24397,9 +24654,9 @@
                       });
                     }));
                   }
-                  return _context7.a(2, Promise.all(loadPromises));
+                  return _context8.a(2, Promise.all(loadPromises));
               }
-            }, _callee7);
+            }, _callee8, null, [[1, 6, 7, 8]]);
           }));
           return _appendExtensionAssets.apply(this, arguments);
         }
@@ -24431,6 +24688,271 @@
             }
           });
         }
+        function resolveImplicitRegistration(_x4, _x5) {
+          return _resolveImplicitRegistration.apply(this, arguments);
+        }
+        function _resolveImplicitRegistration() {
+          _resolveImplicitRegistration = _asyncToGenerator2(/* @__PURE__ */ _regenerator2().m(function _callee9(extensionName, registration) {
+            var officialURL, entry, sourceURL, official, fallback, _t5, _t6, _t7, _t8;
+            return _regenerator2().w(function(_context9) {
+              while (1) switch (_context9.p = _context9.n) {
+                case 0:
+                  officialURL = AelluxJs.extIndex.officialURL || AelluxJs.aelluxBasePath + "aellux.extensions.min.json";
+                  entry = null;
+                  sourceURL = officialURL;
+                  _context9.p = 1;
+                  _t5 = AelluxJs.extIndex.official;
+                  if (_t5) {
+                    _context9.n = 3;
+                    break;
+                  }
+                  _context9.n = 2;
+                  return loadExtensionIndex("official", officialURL);
+                case 2:
+                  _t5 = _context9.v;
+                case 3:
+                  official = _t5;
+                  entry = official.extensions[extensionName] || null;
+                  _context9.n = 5;
+                  break;
+                case 4:
+                  _context9.p = 4;
+                  _t6 = _context9.v;
+                  reportIndexFailure(_t6, "official", officialURL);
+                case 5:
+                  if (!(!entry && AelluxJs.extIndex.fallbackURL)) {
+                    _context9.n = 10;
+                    break;
+                  }
+                  sourceURL = AelluxJs.extIndex.fallbackURL;
+                  _context9.p = 6;
+                  _t7 = AelluxJs.extIndex.fallback;
+                  if (_t7) {
+                    _context9.n = 8;
+                    break;
+                  }
+                  _context9.n = 7;
+                  return loadExtensionIndex("fallback", sourceURL);
+                case 7:
+                  _t7 = _context9.v;
+                case 8:
+                  fallback = _t7;
+                  entry = fallback.extensions[extensionName] || null;
+                  _context9.n = 10;
+                  break;
+                case 9:
+                  _context9.p = 9;
+                  _t8 = _context9.v;
+                  reportIndexFailure(_t8, "custom", sourceURL);
+                case 10:
+                  if (entry) {
+                    _context9.n = 11;
+                    break;
+                  }
+                  return _context9.a(2, registration);
+                case 11:
+                  applyManifestEntry(registration, entry, sourceURL, extensionName);
+                  return _context9.a(2, registration);
+              }
+            }, _callee9, null, [[6, 9], [1, 4]]);
+          }));
+          return _resolveImplicitRegistration.apply(this, arguments);
+        }
+        function loadExtensionIndex(kind, url) {
+          var promiseKey = kind + "Promise";
+          if (AelluxJs.extIndex[promiseKey]) return AelluxJs.extIndex[promiseKey];
+          validateManifestURL(url, kind);
+          AelluxJs.extIndex[promiseKey] = AelluxJs.request(url).then(function(response) {
+            return response.json();
+          }).then(function(index) {
+            validateExtensionIndex(index, kind, url);
+            AelluxJs.extIndex[kind] = index;
+            AelluxJs.diagnostics.info(AelluxJs.diagnostics.INFO_EXTENSION_INDEX_LOADED, {
+              source: kind,
+              url: url,
+              extensions: Object.keys(index.extensions).length
+            });
+            return index;
+          }).catch(function(error2) {
+            AelluxJs.extIndex[promiseKey] = null;
+            throw error2;
+          });
+          return AelluxJs.extIndex[promiseKey];
+        }
+        function validateManifestURL(url, kind) {
+          var parsed;
+          try {
+            parsed = new URL(url, document.baseURI);
+          } catch (_) {
+            throw manifestError(kind, url, "valid URL");
+          }
+          var development = AelluxJs.options.environment === "development";
+          if (parsed.protocol !== "https:" && parsed.origin !== location.origin && !development) {
+            throw manifestError(kind, url, "HTTPS for external manifests");
+          }
+        }
+        function validateExtensionIndex(index, kind, url) {
+          if (!index || index.schemaVersion !== 1 || typeof index.coreVersion !== "string" || !index.extensions || _typeof4(index.extensions) !== "object" || Array.isArray(index.extensions)) {
+            throw manifestError(kind, url, "schemaVersion 1, coreVersion, and extensions object");
+          }
+          if (index.coreVersion !== AelluxJs.version) {
+            throw manifestError(kind, url, "coreVersion ".concat(AelluxJs.version, " (received ").concat(index.coreVersion, ")"));
+          }
+          for (var _i = 0, _Object$entries = Object.entries(index.extensions); _i < _Object$entries.length; _i++) {
+            var _Object$entries$_i = _slicedToArray3(_Object$entries[_i], 2), name = _Object$entries$_i[0], entry = _Object$entries$_i[1];
+            if (!/^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/.test(name) || !entry || typeof entry.coreCompatibility !== "string" || !entry.builds || _typeof4(entry.builds) !== "object") {
+              throw manifestError(kind, url, "valid metadata for ".concat(name));
+            }
+            for (var _i2 = 0, _arr = ["modern", "legacy"]; _i2 < _arr.length; _i2++) {
+              var variant = _arr[_i2];
+              var artifact = entry.builds[variant];
+              if (!artifact) continue;
+              if (typeof artifact.url !== "string" || typeof artifact.integrity !== "string" || !/^sha384-[A-Za-z0-9+/]+={0,2}$/.test(artifact.integrity)) {
+                throw manifestError(kind, url, "URL and SHA-384 integrity for ".concat(name, "/").concat(variant));
+              }
+              validateArtifactURL(artifact.url, url, kind);
+              if (artifact.regular) {
+                if (typeof artifact.regular.url !== "string" || !/^sha384-[A-Za-z0-9+/]+={0,2}$/.test(artifact.regular.integrity || "")) {
+                  throw manifestError(kind, url, "regular URL and SHA-384 integrity for ".concat(name, "/").concat(variant));
+                }
+                validateArtifactURL(artifact.regular.url, url, kind);
+              }
+            }
+            if (!entry.builds.modern && !entry.builds.legacy) throw manifestError(kind, url, "a runtime build for ".concat(name));
+            if (entry.style) {
+              if (typeof entry.style.url !== "string" || !/^sha384-[A-Za-z0-9+/]+={0,2}$/.test(entry.style.integrity || "")) {
+                throw manifestError(kind, url, "URL and SHA-384 integrity for ".concat(name, "/style"));
+              }
+              validateArtifactURL(entry.style.url, url, kind);
+              if (entry.style.regular) {
+                if (typeof entry.style.regular.url !== "string" || !/^sha384-[A-Za-z0-9+/]+={0,2}$/.test(entry.style.regular.integrity || "")) {
+                  throw manifestError(kind, url, "regular URL and SHA-384 integrity for ".concat(name, "/style"));
+                }
+                validateArtifactURL(entry.style.regular.url, url, kind);
+              }
+            }
+            if (!Array.isArray(entry.dependencies)) {
+              throw manifestError(kind, url, "dependencies array for ".concat(name));
+            }
+            var _iterator2 = _createForOfIteratorHelper7(entry.dependencies), _step2;
+            try {
+              for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
+                var dependency = _step2.value;
+                if (typeof dependency === "string") continue;
+                if (!dependency || typeof dependency.label !== "string" || !dependency.label.trim() || typeof dependency.url !== "string" || typeof dependency.integrity !== "string" || !/^sha384-[A-Za-z0-9+/]+={0,2}$/.test(dependency.integrity)) {
+                  throw manifestError(kind, url, "dependency URL and SHA-384 integrity for ".concat(name));
+                }
+                validateArtifactURL(dependency.url, url, kind);
+              }
+            } catch (err) {
+              _iterator2.e(err);
+            } finally {
+              _iterator2.f();
+            }
+          }
+        }
+        function validateArtifactURL(url, manifestURL, kind) {
+          var parsed;
+          try {
+            parsed = new URL(url, new URL(manifestURL, document.baseURI));
+          } catch (_) {
+            throw manifestError(kind, manifestURL, "valid artifact URL: ".concat(url));
+          }
+          var development = AelluxJs.options.environment === "development";
+          if (parsed.protocol !== "https:" && parsed.origin !== location.origin && !development) throw manifestError(kind, manifestURL, "HTTPS artifact URL: ".concat(url));
+        }
+        function manifestError(kind, url, expected) {
+          return AelluxJs.diagnostics.create(AelluxJs.diagnostics.ERROR_EXTENSION_INDEX_INVALID, {
+            source: kind,
+            url: url,
+            expected: expected
+          });
+        }
+        function reportIndexFailure(error2, source, url) {
+          if (error2 && error2.code === AelluxJs.diagnostics.ERROR_EXTENSION_INDEX_INVALID.code) {
+            AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_EXTENSION_INDEX_INVALID, {
+              source: source,
+              url: url,
+              expected: error2.context && error2.context.expected,
+              cause: error2
+            });
+          } else {
+            AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_EXTENSION_INDEX_LOAD, {
+              source: source,
+              url: url,
+              cause: error2
+            });
+          }
+        }
+        function applyManifestEntry(registration, entry, manifestURL, extensionName) {
+          var base = new URL(manifestURL, document.baseURI);
+          var artifacts = {};
+          for (var _i3 = 0, _arr2 = ["modern", "legacy"]; _i3 < _arr2.length; _i3++) {
+            var variant = _arr2[_i3];
+            if (entry.builds[variant] && (!registration.explicitBuilds || registration.builds.includes(variant))) {
+              var declared = !AelluxJs.minified && entry.builds[variant].regular ? entry.builds[variant].regular : entry.builds[variant];
+              artifacts[variant] = {
+                url: new URL(declared.url, base).href,
+                integrity: declared.integrity
+              };
+            }
+          }
+          var selected = artifacts[AelluxJs.diagnostics.legacy ? "legacy" : "modern"] || !AelluxJs.diagnostics.legacy && artifacts.legacy;
+          registration.artifacts = artifacts;
+          registration.manifestResolved = true;
+          registration.builds = Object.keys(artifacts);
+          if (selected) registration.url = selected.url;
+          registration.coreCompatibility = entry.coreCompatibility;
+          registration.dependencies = (entry.dependencies || []).map(function(dependency) {
+            return typeof dependency === "string" ? dependency : _objectSpread(_objectSpread({}, dependency), {}, {
+              url: new URL(dependency.url, base).href
+            });
+          });
+          registration.official = AelluxJs.extIndex.official && AelluxJs.extIndex.official.extensions[extensionName] === entry;
+          if (entry.style && registration.loadStyle && registration.loadStyle !== "false") {
+            var declaredStyle = !AelluxJs.minified && entry.style.regular ? entry.style.regular : entry.style;
+            registration.styleArtifact = {
+              url: new URL(declaredStyle.url, base).href,
+              integrity: declaredStyle.integrity
+            };
+          }
+        }
+        function versionSatisfies(version, range) {
+          if (typeof range !== "string" || !range.trim()) return true;
+          return range.split("||").some(function(group) {
+            return group.trim().split(/\s+/).every(function(token) {
+              if (token === "*" || token.toLowerCase() === "latest") return true;
+              var match = token.match(/^(\^|~|>=|<=|>|<|=)?(.+)$/);
+              if (!match) return false;
+              var operator = match[1] || "=";
+              var comparison = compareVersions(version, match[2]);
+              if (operator === "=") return comparison === 0;
+              if (operator === ">") return comparison > 0;
+              if (operator === ">=") return comparison >= 0;
+              if (operator === "<") return comparison < 0;
+              if (operator === "<=") return comparison <= 0;
+              var current = parseVersion(version);
+              var expected = parseVersion(match[2]);
+              if (!current || !expected || comparison < 0) return false;
+              if (operator === "~") return current[0] === expected[0] && current[1] === expected[1];
+              return expected[0] > 0 ? current[0] === expected[0] : expected[1] > 0 ? current[0] === 0 && current[1] === expected[1] : current[0] === 0 && current[1] === 0 && current[2] === expected[2];
+            });
+          });
+        }
+        function compareVersions(first, second) {
+          var a = parseVersion(first);
+          var b = parseVersion(second);
+          if (!a || !b) return first === second ? 0 : -1;
+          for (var index = 0; index < 3; index++) if (a[index] !== b[index]) return a[index] > b[index] ? 1 : -1;
+          if (a[3] === b[3]) return 0;
+          if (!a[3]) return 1;
+          if (!b[3]) return -1;
+          return a[3] > b[3] ? 1 : -1;
+        }
+        function parseVersion(version) {
+          var match = String(version).match(/^(\d+)\.(\d+)\.(\d+)(?:-([0-9A-Za-z.-]+))?/);
+          return match ? [Number(match[1]), Number(match[2]), Number(match[3]), match[4] || ""] : null;
+        }
         function hasCompatibleBuild(data) {
           if (!data || !Array.isArray(data.builds) || data.builds.length === 0) return false;
           if (AelluxJs.diagnostics.legacy) return data.builds.indexOf("legacy") !== -1;
@@ -24443,20 +24965,65 @@
           }, options);
           return fetch(url, requestOptions).then(function(response) {
             if (!response.ok) {
-              var error = new Error("HTTP " + response.status + " " + response.statusText);
-              error.name = "AelluxJsRequestError";
-              error.status = response.status;
-              error.statusText = response.statusText;
-              error.response = response;
-              throw error;
+              var error2 = new Error("HTTP " + response.status + " " + response.statusText);
+              error2.name = "AelluxJsRequestError";
+              error2.status = response.status;
+              error2.statusText = response.statusText;
+              error2.response = response;
+              throw error2;
             }
             return response;
-          }).catch(function(error) {
-            throw error;
+          }).catch(function(error2) {
+            throw error2;
           });
         }
         ;
       })(typeof globalThis !== "undefined" ? globalThis : window);
+    }
+  });
+
+  // src/official-extension-definitions.js
+  var officialExtensionDefinitions;
+  var init_official_extension_definitions = __esm({
+    "src/official-extension-definitions.js": function() {
+      /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+      officialExtensionDefinitions = Object.freeze([Object.freeze({
+        name: "preference",
+        style: false,
+        dependencies: Object.freeze([])
+      }), Object.freeze({
+        name: "state-navigation",
+        style: false,
+        dependencies: Object.freeze([])
+      }), Object.freeze({
+        name: "feedback",
+        style: true,
+        dependencies: Object.freeze([])
+      }), Object.freeze({
+        name: "focus",
+        style: false,
+        dependencies: Object.freeze([])
+      }), Object.freeze({
+        name: "point",
+        style: false,
+        dependencies: Object.freeze([])
+      }), Object.freeze({
+        name: "anchor",
+        style: false,
+        dependencies: Object.freeze([])
+      }), Object.freeze({
+        name: "scrollbox",
+        style: false,
+        dependencies: Object.freeze([])
+      }), Object.freeze({
+        name: "adaptive",
+        style: true,
+        dependencies: Object.freeze([])
+      }), Object.freeze({
+        name: "present",
+        style: true,
+        dependencies: Object.freeze([])
+      })]);
     }
   });
 
@@ -24493,10 +25060,10 @@
       }
     } };
   }
-  function _slicedToArray3(r, e) {
-    return _arrayWithHoles3(r) || _iterableToArrayLimit3(r, e) || _unsupportedIterableToArray9(r, e) || _nonIterableRest3();
+  function _slicedToArray4(r, e) {
+    return _arrayWithHoles4(r) || _iterableToArrayLimit4(r, e) || _unsupportedIterableToArray9(r, e) || _nonIterableRest4();
   }
-  function _nonIterableRest3() {
+  function _nonIterableRest4() {
     throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
   function _unsupportedIterableToArray9(r, a) {
@@ -24511,7 +25078,7 @@
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
   }
-  function _iterableToArrayLimit3(r, l) {
+  function _iterableToArrayLimit4(r, l) {
     var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (null != t) {
       var e, n, i, u, a = [], f = true, o = false;
@@ -24532,7 +25099,7 @@
       return a;
     }
   }
-  function _arrayWithHoles3(r) {
+  function _arrayWithHoles4(r) {
     if (Array.isArray(r)) return r;
   }
   var init_aellux_ext_preference = __esm({
@@ -24607,7 +25174,7 @@
             });
           });
           Object.entries(prefOptions).forEach(function(_ref) {
-            var _ref2 = _slicedToArray3(_ref, 2), param = _ref2[0], options2 = _ref2[1];
+            var _ref2 = _slicedToArray4(_ref, 2), param = _ref2[0], options2 = _ref2[1];
             defaultPreferences[param] = options2[0];
           });
           loadUserPreferences();
@@ -24919,13 +25486,13 @@
       r2 ? i ? i(e2, r2, { value: n2, enumerable: !t2, configurable: !t2, writable: !t2 }) : e2[r2] = n2 : (o("next", 0), o("throw", 1), o("return", 2));
     }, _regeneratorDefine23(e, r, n, t);
   }
-  function _typeof4(o) {
+  function _typeof5(o) {
     "@babel/helpers - typeof";
-    return _typeof4 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
+    return _typeof5 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
       return typeof o2;
     } : function(o2) {
       return o2 && "function" == typeof Symbol && o2.constructor === Symbol && o2 !== Symbol.prototype ? "symbol" : typeof o2;
-    }, _typeof4(o);
+    }, _typeof5(o);
   }
   function asyncGeneratorStep3(n, t, e, r, o, a, c) {
     try {
@@ -25090,11 +25657,11 @@
           AelluxJs2.dispatch(name, options);
         }
         function copyHistoryState(state) {
-          if (!state || _typeof4(state) !== "object") return state;
+          if (!state || _typeof5(state) !== "object") return state;
           if (typeof root2.structuredClone === "function") return root2.structuredClone(state);
           var copy = Array.isArray(state) ? state.slice() : Object.assign({}, state);
-          if (state.snapshot && _typeof4(state.snapshot) === "object") copy.snapshot = Object.assign({}, state.snapshot);
-          if (state.ajaxReplace && _typeof4(state.ajaxReplace) === "object") {
+          if (state.snapshot && _typeof5(state.snapshot) === "object") copy.snapshot = Object.assign({}, state.snapshot);
+          if (state.ajaxReplace && _typeof5(state.ajaxReplace) === "object") {
             copy.ajaxReplace = Object.assign({}, state.ajaxReplace);
             if (Array.isArray(state.ajaxReplace.selectors)) copy.ajaxReplace.selectors = state.ajaxReplace.selectors.slice();
           }
@@ -25144,13 +25711,13 @@
         }
         function mergeHistoryState(state) {
           var currentState = history.state;
-          if (!currentState || _typeof4(currentState) !== "object" || Array.isArray(currentState)) return state;
+          if (!currentState || _typeof5(currentState) !== "object" || Array.isArray(currentState)) return state;
           return Object.assign({}, currentState, state);
         }
         function OnPushState(event) {
           try {
             var detail = event && event.detail;
-            if (!detail || _typeof4(detail) !== "object" || typeof detail.key !== "string" || !detail.key.trim() || typeof detail.value !== "string" || !detail.value.trim() || detail.title !== void 0 && typeof detail.title !== "string") {
+            if (!detail || _typeof5(detail) !== "object" || typeof detail.key !== "string" || !detail.key.trim() || typeof detail.value !== "string" || !detail.value.trim() || detail.title !== void 0 && typeof detail.title !== "string") {
               AelluxJs2.diagnostics.warn(AelluxJs2.diagnostics.WARN_NAVIGATION_EVENT_INVALID, {
                 extension: extensionName,
                 event: "PushState",
@@ -25170,7 +25737,7 @@
         function OnPushAjaxReplace(event) {
           try {
             var detail = event && event.detail;
-            if (!detail || _typeof4(detail) !== "object" || typeof detail.url !== "string" || !detail.url.trim() || !Object.prototype.hasOwnProperty.call(detail, "selectors") || detail.selectors == null) {
+            if (!detail || _typeof5(detail) !== "object" || typeof detail.url !== "string" || !detail.url.trim() || !Object.prototype.hasOwnProperty.call(detail, "selectors") || detail.selectors == null) {
               AelluxJs2.diagnostics.warn(AelluxJs2.diagnostics.WARN_NAVIGATION_EVENT_INVALID, {
                 extension: extensionName,
                 event: PUSH_AJAX_REPLACE,
@@ -25190,7 +25757,7 @@
         function OnUpdateBaseTitle(event) {
           try {
             var detail = event && event.detail;
-            if (!detail || _typeof4(detail) !== "object" || !Object.prototype.hasOwnProperty.call(detail, "title") || typeof detail.title !== "string") {
+            if (!detail || _typeof5(detail) !== "object" || !Object.prototype.hasOwnProperty.call(detail, "title") || typeof detail.title !== "string") {
               AelluxJs2.diagnostics.warn(AelluxJs2.diagnostics.WARN_NAVIGATION_EVENT_INVALID, {
                 extension: extensionName,
                 event: UPDATE_BASE_TITLE,
@@ -25915,13 +26482,13 @@
 
   // src/aellux.ext.point.js
   var aellux_ext_point_exports = {};
-  function _typeof5(o) {
+  function _typeof6(o) {
     "@babel/helpers - typeof";
-    return _typeof5 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
+    return _typeof6 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
       return typeof o2;
     } : function(o2) {
       return o2 && "function" == typeof Symbol && o2.constructor === Symbol && o2 !== Symbol.prototype ? "symbol" : typeof o2;
-    }, _typeof5(o);
+    }, _typeof6(o);
   }
   function _classCallCheck(a, n) {
     if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function");
@@ -25929,33 +26496,33 @@
   function _defineProperties(e, r) {
     for (var t = 0; t < r.length; t++) {
       var o = r[t];
-      o.enumerable = o.enumerable || false, o.configurable = true, "value" in o && (o.writable = true), Object.defineProperty(e, _toPropertyKey(o.key), o);
+      o.enumerable = o.enumerable || false, o.configurable = true, "value" in o && (o.writable = true), Object.defineProperty(e, _toPropertyKey2(o.key), o);
     }
   }
   function _createClass(e, r, t) {
     return r && _defineProperties(e.prototype, r), t && _defineProperties(e, t), Object.defineProperty(e, "prototype", { writable: false }), e;
   }
-  function _toPropertyKey(t) {
-    var i = _toPrimitive(t, "string");
-    return "symbol" == _typeof5(i) ? i : i + "";
+  function _toPropertyKey2(t) {
+    var i = _toPrimitive2(t, "string");
+    return "symbol" == _typeof6(i) ? i : i + "";
   }
-  function _toPrimitive(t, r) {
-    if ("object" != _typeof5(t) || !t) return t;
+  function _toPrimitive2(t, r) {
+    if ("object" != _typeof6(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof5(i)) return i;
+      if ("object" != _typeof6(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
   }
-  function _slicedToArray4(r, e) {
-    return _arrayWithHoles4(r) || _iterableToArrayLimit4(r, e) || _unsupportedIterableToArray12(r, e) || _nonIterableRest4();
+  function _slicedToArray5(r, e) {
+    return _arrayWithHoles5(r) || _iterableToArrayLimit5(r, e) || _unsupportedIterableToArray12(r, e) || _nonIterableRest5();
   }
-  function _nonIterableRest4() {
+  function _nonIterableRest5() {
     throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
-  function _iterableToArrayLimit4(r, l) {
+  function _iterableToArrayLimit5(r, l) {
     var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (null != t) {
       var e, n, i, u, a = [], f = true, o = false;
@@ -25976,7 +26543,7 @@
       return a;
     }
   }
-  function _arrayWithHoles4(r) {
+  function _arrayWithHoles5(r) {
     if (Array.isArray(r)) return r;
   }
   function _createForOfIteratorHelper11(r, e) {
@@ -26055,7 +26622,7 @@
           var _iterator = _createForOfIteratorHelper11(pointerEvents), _step;
           try {
             for (_iterator.s(); !(_step = _iterator.n()).done; ) {
-              var _step$value = _slicedToArray4(_step.value, 2), suffix = _step$value[0], handler = _step$value[1];
+              var _step$value = _slicedToArray5(_step.value, 2), suffix = _step$value[0], handler = _step$value[1];
               AelluxJs2.on("$".concat(POINTER).concat(suffix), handler, true);
             }
           } catch (err) {
@@ -26071,7 +26638,7 @@
           var _iterator2 = _createForOfIteratorHelper11(pointerEvents), _step2;
           try {
             for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
-              var _step2$value = _slicedToArray4(_step2.value, 2), suffix = _step2$value[0], handler = _step2$value[1];
+              var _step2$value = _slicedToArray5(_step2.value, 2), suffix = _step2$value[0], handler = _step2$value[1];
               AelluxJs2.off("$".concat(POINTER).concat(suffix), handler, true);
             }
           } catch (err) {
@@ -26409,13 +26976,13 @@
       r2 ? i ? i(e2, r2, { value: n2, enumerable: !t2, configurable: !t2, writable: !t2 }) : e2[r2] = n2 : (o("next", 0), o("throw", 1), o("return", 2));
     }, _regeneratorDefine25(e, r, n, t);
   }
-  function _slicedToArray5(r, e) {
-    return _arrayWithHoles5(r) || _iterableToArrayLimit5(r, e) || _unsupportedIterableToArray13(r, e) || _nonIterableRest5();
+  function _slicedToArray6(r, e) {
+    return _arrayWithHoles6(r) || _iterableToArrayLimit6(r, e) || _unsupportedIterableToArray13(r, e) || _nonIterableRest6();
   }
-  function _nonIterableRest5() {
+  function _nonIterableRest6() {
     throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
-  function _iterableToArrayLimit5(r, l) {
+  function _iterableToArrayLimit6(r, l) {
     var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (null != t) {
       var e, n, i, u, a = [], f = true, o = false;
@@ -26436,7 +27003,7 @@
       return a;
     }
   }
-  function _arrayWithHoles5(r) {
+  function _arrayWithHoles6(r) {
     if (Array.isArray(r)) return r;
   }
   function _createForOfIteratorHelper12(r, e) {
@@ -26609,6 +27176,10 @@
             layoutPolling: false,
             updatePending: false,
             updateDirty: false,
+            repeatPending: false,
+            lastUpdateAt: -Infinity,
+            updateTimer: null,
+            updateTimerDue: false,
             layoutListener: function layoutListener(event) {
               return scheduleLayoutUpdate(event);
             },
@@ -26616,6 +27187,7 @@
             intersectionObserver: null
           };
           anchors.set(element, state);
+          if (element.offsetParent) listenForLayout(state, element.offsetParent);
           if (anchors.size === 1) {
             AelluxJs2.onTarget(root2, "$scroll", scheduleUpdate, {
               capture: true,
@@ -26653,6 +27225,7 @@
                   if (state.reference) AelluxJs2.offTarget(state.reference, layoutEvent, state.layoutListener);
                   if (state.observer) state.observer.disconnect();
                   if (state.intersectionObserver) state.intersectionObserver.disconnect();
+                  if (state.updateTimer !== null) root2.clearTimeout(state.updateTimer);
                   anchors.delete(element);
                   if (!anchors.size) {
                     AelluxJs2.offTarget(root2, "$scroll", scheduleUpdate, true);
@@ -26692,7 +27265,7 @@
             var _iterator2 = _createForOfIteratorHelper12(anchors), _step2;
             try {
               for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
-                var _step2$value = _slicedToArray5(_step2.value, 2), element = _step2$value[0], state = _step2$value[1];
+                var _step2$value = _slicedToArray6(_step2.value, 2), element = _step2$value[0], state = _step2$value[1];
                 var maxFPS = AelluxJs2.layoutMaxFPS(element);
                 state.layoutUntil = now() + 1e3 / (maxFPS || 60);
                 state.layoutSingle = true;
@@ -26709,7 +27282,7 @@
           var _iterator3 = _createForOfIteratorHelper12(anchors), _step3;
           try {
             for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
-              var _step3$value = _slicedToArray5(_step3.value, 2), _element = _step3$value[0], _state = _step3$value[1];
+              var _step3$value = _slicedToArray6(_step3.value, 2), _element = _step3$value[0], _state = _step3$value[1];
               _state.layoutUntil = Math.max(_state.layoutUntil, now() + durationMs);
               _state.layoutSingle = false;
               _state.layoutFinalPending = true;
@@ -26725,11 +27298,37 @@
           var repeat = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : false;
           var state = anchors.get(element);
           if (!state) return;
+          if (state.updatePending) {
+            state.updateDirty = true;
+            state.repeatPending = state.repeatPending || repeat;
+            return;
+          }
+          var maxFPS = AelluxJs2.layoutMaxFPS(element);
+          if (maxFPS && !repeat && !state.updateTimerDue) {
+            if (state.updateTimer === null) {
+              state.updateTimer = root2.setTimeout(function() {
+                state.updateTimer = null;
+                state.updateTimerDue = true;
+                scheduleAnchor(element);
+              }, 1e3 / maxFPS);
+            }
+            return;
+          }
+          state.updateTimerDue = false;
+          var due = maxFPS ? state.lastUpdateAt + 1e3 / maxFPS : -Infinity;
+          if (due > now()) {
+            if (state.updateTimer === null) {
+              state.updateTimer = root2.setTimeout(function() {
+                state.updateTimer = null;
+                scheduleAnchor(element, repeat);
+              }, Math.max(0, due - now()));
+            }
+            return;
+          }
           if (state.layoutPolling) {
             state.updateDirty = true;
             return;
           }
-          var maxFPS = AelluxJs2.layoutMaxFPS(element);
           var run = function run2() {
             if (state.layoutSingle && now() < state.layoutUntil) return;
             state.layoutSingle = false;
@@ -26770,7 +27369,11 @@
           }).finally(function() {
             if (anchors.get(element) !== state) return;
             state.updatePending = false;
-            if (state.updateDirty && !state.layoutPolling) scheduleAnchor(element);
+            if (state.updateDirty && !state.layoutPolling) {
+              var repeat = state.repeatPending;
+              state.repeatPending = false;
+              scheduleAnchor(element, repeat);
+            }
           });
         }
         function now() {
@@ -26781,7 +27384,7 @@
         }
         function _updateAnchor() {
           _updateAnchor = _asyncToGenerator5(/* @__PURE__ */ _regenerator5().m(function _callee3(element) {
-            var state, revision, current, targetValue, useReference, target, candidates, placement;
+            var state, revision, current, targetValue, useReference, target, candidates, placement, applied;
             return _regenerator5().w(function(_context3) {
               while (1) switch (_context3.n) {
                 case 0:
@@ -26896,6 +27499,7 @@
                 case 16:
                   return _context3.a(2);
                 case 17:
+                  applied = false;
                   _context3.n = 18;
                   return AelluxJs2.waitLayout.update(function() {
                     if (!current()) return;
@@ -26919,8 +27523,16 @@
                       _iterator7.f();
                     }
                     element.classList.add(anchoredClass);
+                    state.lastUpdateAt = now();
+                    applied = true;
                   });
                 case 18:
+                  if (!(!applied && anchors.get(element) === state)) {
+                    _context3.n = 19;
+                    break;
+                  }
+                  return _context3.a(2, updateAnchor(element));
+                case 19:
                   return _context3.a(2);
               }
             }, _callee3);
@@ -27106,25 +27718,25 @@
 
   // src/aellux.ext.scrollbox.js
   var aellux_ext_scrollbox_exports = {};
-  function _toConsumableArray2(r) {
-    return _arrayWithoutHoles2(r) || _iterableToArray2(r) || _unsupportedIterableToArray14(r) || _nonIterableSpread2();
+  function _toConsumableArray3(r) {
+    return _arrayWithoutHoles3(r) || _iterableToArray3(r) || _unsupportedIterableToArray14(r) || _nonIterableSpread3();
   }
-  function _nonIterableSpread2() {
+  function _nonIterableSpread3() {
     throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
-  function _iterableToArray2(r) {
+  function _iterableToArray3(r) {
     if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
   }
-  function _arrayWithoutHoles2(r) {
+  function _arrayWithoutHoles3(r) {
     if (Array.isArray(r)) return _arrayLikeToArray14(r);
   }
-  function _slicedToArray6(r, e) {
-    return _arrayWithHoles6(r) || _iterableToArrayLimit6(r, e) || _unsupportedIterableToArray14(r, e) || _nonIterableRest6();
+  function _slicedToArray7(r, e) {
+    return _arrayWithHoles7(r) || _iterableToArrayLimit7(r, e) || _unsupportedIterableToArray14(r, e) || _nonIterableRest7();
   }
-  function _nonIterableRest6() {
+  function _nonIterableRest7() {
     throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
-  function _iterableToArrayLimit6(r, l) {
+  function _iterableToArrayLimit7(r, l) {
     var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (null != t) {
       var e, n, i, u, a = [], f = true, o = false;
@@ -27145,7 +27757,7 @@
       return a;
     }
   }
-  function _arrayWithHoles6(r) {
+  function _arrayWithHoles7(r) {
     if (Array.isArray(r)) return r;
   }
   function _createForOfIteratorHelper13(r, e) {
@@ -27266,7 +27878,7 @@
           var _iterator = _createForOfIteratorHelper13(entries), _step;
           try {
             for (_iterator.s(); !(_step = _iterator.n()).done; ) {
-              var _step$value = _slicedToArray6(_step.value, 3), event = _step$value[0], handler = _step$value[1], options = _step$value[2];
+              var _step$value = _slicedToArray7(_step.value, 3), event = _step$value[0], handler = _step$value[1], options = _step$value[2];
               method(target, "$".concat(event), owner[handler], active ? options : options === true || !!(options !== null && options !== void 0 && options.capture));
             }
           } catch (err) {
@@ -27305,13 +27917,13 @@
           goto: goto
         });
         function init() {
-          AelluxJs2.registerCssProperty.apply(AelluxJs2, _toConsumableArray2([].concat(properties, snapProperties).map(function(name) {
+          AelluxJs2.registerCssProperty.apply(AelluxJs2, _toConsumableArray3([].concat(properties, snapProperties).map(function(name) {
             return {
               name: name,
               syntax: "<number>",
               initialValue: "0"
             };
-          })).concat(_toConsumableArray2(scrollbarProperties.map(function(name, index) {
+          })).concat(_toConsumableArray3(scrollbarProperties.map(function(name, index) {
             return {
               name: name,
               syntax: index === 5 ? "block | none" : "<length>",
@@ -28640,7 +29252,7 @@
             return axes.get(member2).x;
           });
           if (!textOrigin && event.cancelable) event.preventDefault();
-          var _iterator1 = _createForOfIteratorHelper13(new Set([].concat(_toConsumableArray2(chains.x), _toConsumableArray2(chains.y)))), _step1;
+          var _iterator1 = _createForOfIteratorHelper13(new Set([].concat(_toConsumableArray3(chains.x), _toConsumableArray3(chains.y)))), _step1;
           try {
             for (_iterator1.s(); !(_step1 = _iterator1.n()).done; ) {
               var _member = _step1.value;
@@ -29164,7 +29776,7 @@
           var _iterator20 = _createForOfIteratorHelper13(touch.scrollBehaviors), _step20;
           try {
             for (_iterator20.s(); !(_step20 = _iterator20.n()).done; ) {
-              var _step20$value = _slicedToArray6(_step20.value, 2), element = _step20$value[0], _step20$value$ = _step20$value[1], value = _step20$value$.value, priority = _step20$value$.priority;
+              var _step20$value = _slicedToArray7(_step20.value, 2), element = _step20$value[0], _step20$value$ = _step20$value[1], value = _step20$value$.value, priority = _step20$value$.priority;
               if (value) element.style.setProperty("scroll-behavior", value, priority);
               else element.style.removeProperty("scroll-behavior");
             }
@@ -29490,7 +30102,7 @@
                 }
               }
               if (records.some(function(record) {
-                return record.type === "attributes" || record.target === state.element || record.target === state.elastic.wrapper || [].concat(_toConsumableArray2(record.addedNodes), _toConsumableArray2(record.removedNodes)).some(function(node) {
+                return record.type === "attributes" || record.target === state.element || record.target === state.elastic.wrapper || [].concat(_toConsumableArray3(record.addedNodes), _toConsumableArray3(record.removedNodes)).some(function(node) {
                   return node.nodeType === 1 && (node.hasAttribute(snapItemAttribute) || node.querySelector("[".concat(snapItemAttribute, "]")));
                 });
               })) configure(state);
@@ -29789,10 +30401,10 @@
       }
     } };
   }
-  function _slicedToArray7(r, e) {
-    return _arrayWithHoles7(r) || _iterableToArrayLimit7(r, e) || _unsupportedIterableToArray15(r, e) || _nonIterableRest7();
+  function _slicedToArray8(r, e) {
+    return _arrayWithHoles8(r) || _iterableToArrayLimit8(r, e) || _unsupportedIterableToArray15(r, e) || _nonIterableRest8();
   }
-  function _nonIterableRest7() {
+  function _nonIterableRest8() {
     throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
   function _unsupportedIterableToArray15(r, a) {
@@ -29807,7 +30419,7 @@
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
   }
-  function _iterableToArrayLimit7(r, l) {
+  function _iterableToArrayLimit8(r, l) {
     var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (null != t) {
       var e, n, i, u, a = [], f = true, o = false;
@@ -29828,16 +30440,16 @@
       return a;
     }
   }
-  function _arrayWithHoles7(r) {
+  function _arrayWithHoles8(r) {
     if (Array.isArray(r)) return r;
   }
-  function _typeof6(o) {
+  function _typeof7(o) {
     "@babel/helpers - typeof";
-    return _typeof6 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
+    return _typeof7 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
       return typeof o2;
     } : function(o2) {
       return o2 && "function" == typeof Symbol && o2.constructor === Symbol && o2 !== Symbol.prototype ? "symbol" : typeof o2;
-    }, _typeof6(o);
+    }, _typeof7(o);
   }
   var init_aellux_ext_adaptive = __esm({
     "src/aellux.ext.adaptive.js": function() {
@@ -29905,7 +30517,7 @@
           var overrides = options.adaptiveParams || {};
           for (var _i = 0, _Object$keys = Object.keys(adaptiveParams); _i < _Object$keys.length; _i++) {
             var group = _Object$keys[_i];
-            if (overrides[group] && _typeof6(overrides[group]) === "object") {
+            if (overrides[group] && _typeof7(overrides[group]) === "object") {
               Object.assign(adaptiveParams[group], overrides[group]);
             }
           }
@@ -29927,7 +30539,7 @@
           var classes = [modifier.shapeHorizontal, modifier.shapeVertical, modifier.shapeSquare];
           sizeThresholds = [];
           for (var _i3 = 0, _Object$entries = Object.entries(adaptiveParams.minSizes); _i3 < _Object$entries.length; _i3++) {
-            var _Object$entries$_i = _slicedToArray7(_Object$entries[_i3], 2), size = _Object$entries$_i[0], minimum = _Object$entries$_i[1];
+            var _Object$entries$_i = _slicedToArray8(_Object$entries[_i3], 2), size = _Object$entries$_i[0], minimum = _Object$entries$_i[1];
             var className = AelluxJs2.className("fits-" + size);
             sizeThresholds.push({
               className: className,
@@ -30032,7 +30644,7 @@
           var entries = Array.from(pendingResizeEntries.entries());
           pendingResizeEntries.clear();
           for (var _i4 = 0, _entries = entries; _i4 < _entries.length; _i4++) {
-            var _entries$_i = _slicedToArray7(_entries[_i4], 2), element = _entries$_i[0], entry = _entries$_i[1];
+            var _entries$_i = _slicedToArray8(_entries[_i4], 2), element = _entries$_i[0], entry = _entries$_i[1];
             scheduleElement(element, entry.contentRect);
           }
           var elements = Array.from(pendingResizeElements);
@@ -30262,13 +30874,13 @@
       }
     } };
   }
-  function _slicedToArray8(r, e) {
-    return _arrayWithHoles8(r) || _iterableToArrayLimit8(r, e) || _unsupportedIterableToArray16(r, e) || _nonIterableRest8();
+  function _slicedToArray9(r, e) {
+    return _arrayWithHoles9(r) || _iterableToArrayLimit9(r, e) || _unsupportedIterableToArray16(r, e) || _nonIterableRest9();
   }
-  function _nonIterableRest8() {
+  function _nonIterableRest9() {
     throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
-  function _iterableToArrayLimit8(r, l) {
+  function _iterableToArrayLimit9(r, l) {
     var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (null != t) {
       var e, n, i, u, a = [], f = true, o = false;
@@ -30289,13 +30901,13 @@
       return a;
     }
   }
-  function _arrayWithHoles8(r) {
+  function _arrayWithHoles9(r) {
     if (Array.isArray(r)) return r;
   }
-  function _toConsumableArray3(r) {
-    return _arrayWithoutHoles3(r) || _iterableToArray3(r) || _unsupportedIterableToArray16(r) || _nonIterableSpread3();
+  function _toConsumableArray4(r) {
+    return _arrayWithoutHoles4(r) || _iterableToArray4(r) || _unsupportedIterableToArray16(r) || _nonIterableSpread4();
   }
-  function _nonIterableSpread3() {
+  function _nonIterableSpread4() {
     throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
   function _unsupportedIterableToArray16(r, a) {
@@ -30305,10 +30917,10 @@
       return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray16(r, a) : void 0;
     }
   }
-  function _iterableToArray3(r) {
+  function _iterableToArray4(r) {
     if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
   }
-  function _arrayWithoutHoles3(r) {
+  function _arrayWithoutHoles4(r) {
     if (Array.isArray(r)) return _arrayLikeToArray16(r);
   }
   function _arrayLikeToArray16(r, a) {
@@ -30369,8 +30981,8 @@
         var measuredMemories = /* @__PURE__ */ new WeakMap();
         var cssProperties = [["from-opacity", OPACITY_SYNTAX, "0"], ["pop-opacity", OPACITY_SYNTAX, "1"], ["unpop-opacity", OPACITY_SYNTAX, "0"], ["from-transform", TRANSFORM_SYNTAX, "scale(0.5)"], ["pop-transform", TRANSFORM_SYNTAX, "scale(1)"], ["unpop-transform", TRANSFORM_SYNTAX, "scale(1.2)"], ["from-height", "*", "0fr"], ["pop-height", "*", "1fr"], ["unpop-height", "*", "0fr"], ["from-width", "*", "0fr"], ["pop-width", "*", "1fr"], ["unpop-width", "*", "0fr"], ["pop-ease", "*", "ease-out"], ["unpop-ease", "*", "ease-in"], ["pop-duration", "<time>", "250ms"], ["unpop-duration", "<time>", "250ms"], ["pop-low-steps", "<integer>", "4"], ["unpop-low-steps", "<integer>", "4"]];
         function init(options) {
-          AelluxJs2.registerCssProperty.apply(AelluxJs2, _toConsumableArray3(cssProperties.map(function(_ref) {
-            var _ref2 = _slicedToArray8(_ref, 3), name = _ref2[0], syntax = _ref2[1], initialValue = _ref2[2];
+          AelluxJs2.registerCssProperty.apply(AelluxJs2, _toConsumableArray4(cssProperties.map(function(_ref) {
+            var _ref2 = _slicedToArray9(_ref, 3), name = _ref2[0], syntax = _ref2[1], initialValue = _ref2[2];
             return {
               name: "--ae-".concat(name),
               syntax: syntax,
@@ -30641,7 +31253,7 @@
           }
           updateTriggerAriaExpanded(triggerElement);
           triggerAriaHandlers.get(triggerElement).set({
-            controls: _toConsumableArray3(targetIds)
+            controls: _toConsumableArray4(targetIds)
           });
         }
         function updateTriggerAriaExpanded(triggerElement) {
@@ -31078,6 +31690,7 @@
   var init_aellux_full = __esm({
     "src/aellux.full.js": function() {
       init_aellux_orchestrator();
+      init_official_extension_definitions();
       /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
       root = typeof globalThis !== "undefined" ? globalThis : window;
       root.AelluxJs.bundledExtensions = Object.freeze({
@@ -31126,6 +31739,19 @@
             return init_aellux_ext_present(), aellux_ext_present_exports;
           });
         }
+      });
+      root.AelluxJs.extIndex.official = Object.freeze({
+        schemaVersion: 1,
+        coreVersion: root.AelluxJs.version,
+        embedded: true,
+        extensions: Object.freeze(officialExtensionDefinitions.reduce(function(extensions, definition) {
+          extensions[definition.name] = Object.freeze({
+            coreCompatibility: root.AelluxJs.version,
+            bundled: true,
+            dependencies: definition.dependencies
+          });
+          return extensions;
+        }, {}))
       });
       root.AelluxJs.ext("adaptive", {
         loadStyle: true

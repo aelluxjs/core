@@ -4,6 +4,15 @@
 
 The controller intentionally accepts a small main-thread cost under ideal conditions. Its purpose is predictable degradation: if the browser begins missing frames because of a constrained device or competing applications, the shared scheduler can reduce update frequency instead of allowing managed motion to contribute to stalls.
 
+Controlled operations containing any animated property other than `transform` and `opacity` have a conservative default ceiling of 40 FPS. Configure it with `cssMotionPropertyMaxFPS` in `init()`. This is a workload policy, not a promise that `transform` or `opacity` stays on the GPU: browser composition and painting still depend on the document and device. Classification applies to the whole operation. If one transition combines `opacity`, `transform`, and `height`, all captured animations share one clock at the lowest applicable limit from `data-ae-maxfps`, `run({ maxFPS })`, and `cssMotionPropertyMaxFPS`; properties never receive independent schedules.
+
+```js
+$ae.init({
+  mode: "full",
+  cssMotionPropertyMaxFPS: 40
+});
+```
+
 ```js
 const motionId = $ae.motion.id();
 await $ae.motion.run(panel, {

@@ -406,6 +406,11 @@ Registration                            </a>
                           </li>
                           <li class="nav-item small-md rounded-1 ps-md-1"
                             style="flex:0">
+                            <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/extensions/official-registry.htm">
+Official Registry                            </a>
+                          </li>
+                          <li class="nav-item small-md rounded-1 ps-md-1"
+                            style="flex:0">
                             <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/extensions/declarative-loading.htm">
 Declarative Loading                            </a>
                           </li>
@@ -577,10 +582,10 @@ Registration                  </li>
       style="max-width:200px">Accessibility Requirements</span>
   </a>
   
-    <a href="/core/docs/0.1.0/extensions/declarative-loading.htm" class="text-decoration-none d-inline-flex flex-row justify-content-end gap-2"
+    <a href="/core/docs/0.1.0/extensions/official-registry.htm" class="text-decoration-none d-inline-flex flex-row justify-content-end gap-2"
     style="width: 40%;">
     <span class="text-truncate overflow-hidden d-inline-block align-middle flex-fill text-end"
-      style="max-width:200px">Declarative Loading</span> →
+      style="max-width:200px">Official Registry</span> →
   </a>
   </div>
         </div>
@@ -608,6 +613,7 @@ Registration                  </li>
 <li>An invalid <code>loadWhen</code> selector reports <code>ERROR_EXTENSION_LOAD_WHEN</code> (<code>1114</code>), and <code>ext()</code> leaves the Extension undeclared.</li>
 <li><code>loadStyle: true</code> requests the stylesheet derived from the Extension script URL; a URL string requests that specific stylesheet.</li>
 <li><code>integrity</code> supplies SRI hashes for third-party Extension files; <code>crossOrigin</code> controls the associated <code>crossorigin</code> attribute. See <a href="csp-and-trust.htm#subresource-integrity">CSP and Extension trust</a>.</li>
+<li><code>coreCompatibility</code> declares the supported Core version or range. <code>skipCompatibilityCheck: true</code> is an explicit, warned override and does not bypass integrity checks. See the <a href="official-registry.htm">official registry and compatibility rules</a>.</li>
 </ul>
 <p>Register each name once. Duplicate declarations currently report an error and do not replace the existing registration.</p>
 <p>Register Extensions before calling <code>$ae.init()</code> in <code>basic</code> mode so the first document update can load eager Extensions and index lazy ones:</p>
@@ -653,10 +659,10 @@ Review <a href="csp-and-trust.htm">CSP requirements and Extension trust</a> befo
       style="max-width:200px">Accessibility Requirements</span>
   </a>
   
-    <a href="/core/docs/0.1.0/extensions/declarative-loading.htm" class="text-decoration-none d-inline-flex flex-row justify-content-end gap-2"
+    <a href="/core/docs/0.1.0/extensions/official-registry.htm" class="text-decoration-none d-inline-flex flex-row justify-content-end gap-2"
     style="width: 40%;">
     <span class="text-truncate overflow-hidden d-inline-block align-middle flex-fill text-end"
-      style="max-width:200px">Declarative Loading</span> →
+      style="max-width:200px">Official Registry</span> →
   </a>
   </div>
         </div>

@@ -13,6 +13,7 @@
 var method = Object.freeze({ type: "function" });
 var text = Object.freeze({ type: "string" });
 var flag = Object.freeze({ type: "boolean" });
+var number = Object.freeze({ type: "number" });
 var list = Object.freeze({ type: "array" });
 var mediaQuery = Object.freeze({ type: ["object", "null"] });
 var record = Object.freeze({ type: "object", additionalProperties: true });
@@ -93,6 +94,13 @@ var diagnosticNames = [
   "ERROR_DEPENDENCY_ARGUMENT",
   "ERROR_DEPENDENCY_CONFLICT",
   "ERROR_DEPENDENCY_LOAD",
+  "ERROR_EXTENSION_VERSION_INCOMPATIBLE",
+  "ERROR_RUNTIME_VERSION_MISMATCH",
+  "ERROR_EXTENSION_INDEX_LOAD",
+  "ERROR_EXTENSION_INDEX_INVALID",
+  "ERROR_EXTENSION_VARIANT_UNAVAILABLE",
+  "ERROR_INVALID_ENVIRONMENT",
+  "ERROR_EXTENSION_INDEX_NOT_FOUND",
   "ERROR_LEGACY_RUNTIME_START",
   "ERROR_LEGACY_RUNTIME_LOAD",
   "ERROR_MODERN_RUNTIME_START",
@@ -107,8 +115,10 @@ var diagnosticNames = [
   "WARN_NAVIGATION_EVENT_INVALID",
   "WARN_PRESENT_MOTION_MISSING",
   "WARN_INVALID_ELEMENT_OR_ID",
+  "WARN_EXTENSION_COMPATIBILITY_SKIPPED",
   "INFO_LEGACY_FALLBACK",
-  "INFO_PRESENT_MEASURED_LAYOUT"
+  "INFO_PRESENT_MEASURED_LAYOUT",
+  "INFO_EXTENSION_INDEX_LOADED"
 ];
 
 var diagnosticProperties = {
@@ -137,6 +147,8 @@ for (var i = 0; i < diagnosticNames.length; i++) {
 
 var bootstrapProperties = Object.freeze({
   shortJSName: Object.freeze({ type: "string", "const": "$ae" }),
+  version: text,
+  orchestratorVersion: Object.freeze({ type: ["string", "null"] }),
   diagnostics: Object.freeze({
     type: "object",
     properties: Object.freeze(diagnosticProperties)
@@ -145,6 +157,7 @@ var bootstrapProperties = Object.freeze({
     type: "object",
     properties: Object.freeze({
       mode: text,
+      environment: Object.freeze({ type: "string", "enum": Object.freeze(["production", "development"]) }),
       verboseLevel: Object.freeze({
         type: ["integer", "string"],
         "enum": Object.freeze([0, 1, 2, "error", "warn", "info"])
@@ -152,6 +165,7 @@ var bootstrapProperties = Object.freeze({
       forceLegacy: flag,
       skipGlobalMount: flag,
       cssMotionController: flag,
+      cssMotionPropertyMaxFPS: number,
       autoViewportMeta: flag,
       basePath: Object.freeze({ type: ["string", "null"] }),
       crossOrigin: Object.freeze({ type: ["string", "null"] }),
@@ -187,6 +201,10 @@ var bootstrapProperties = Object.freeze({
   extName: method,
   eventName: method,
   noConflict: method,
+  extIndex: Object.freeze({
+    type: "object",
+    properties: Object.freeze({ setFallback: method })
+  }),
   registry: Object.freeze({
     type: "object",
     properties: Object.freeze({

@@ -33,6 +33,7 @@
         { "label": "Extension Authoring", "href": "extensions/authoring.md" },
         { "label": "Accessibility Requirements", "href": "extensions/accessibility.md" },
         { "label": "Registration", "href": "extensions/registration.md" },
+        { "label": "Official Registry", "href": "extensions/official-registry.md" },
         { "label": "Declarative Loading", "href": "extensions/declarative-loading.md" },
         { "label": "Lazy Loading", "href": "extensions/lazy-loading.md" },
         { "label": "Extension Styles", "href": "extensions/styles.md" },
