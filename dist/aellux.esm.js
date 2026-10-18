@@ -756,6 +756,9 @@ function createAelluxApi(root2, constants) {
     request: function() {
       throw diagnostics.create(diagnostics.ERROR_NOT_INITIALIZED);
     },
+    ease: function() {
+      throw diagnostics.create(diagnostics.ERROR_NOT_INITIALIZED);
+    },
     startAelluxJs: function() {
       throw diagnostics.create(diagnostics.ERROR_NOT_INITIALIZED);
     },

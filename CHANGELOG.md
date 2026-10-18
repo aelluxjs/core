@@ -6,6 +6,8 @@ All notable changes to aellux.js will be documented in this file.
 
 ### Added
 
+- Core now exposes numeric easing through `$ae.ease(name, t)` in Modern and Legacy runtimes.
+- `waitLayout` now supports identified work, ordered sequences, repetition, cancellation, and adaptive frame pacing.
 - Feedback boundaries now update message text, apply type and motion classes, and ship a generated stylesheet for standard motions.
 - The Core API now exposes `elementOrId()` and `cssVar()` helpers.
 - Scrollbox now supports custom vertical and horizontal scrollbars through `data-ae-scrollbar`, including draggable thumbs, track clicks that center the thumb on the click, and overlay positioning with transforms.

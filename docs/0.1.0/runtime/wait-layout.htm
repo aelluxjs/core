@@ -611,12 +611,82 @@ await $ae.waitLayout.update(() =&gt; element.classList.add(&quot;ae--ready&quot;
 <td>Promise of the callback&#39;s return value.</td>
 </tr>
 <tr>
+<td><code>read(id, callback, parameters?)</code></td>
+<td>Queue one identified read.</td>
+<td>Promise of the callback&#39;s return value.</td>
+</tr>
+<tr>
+<td><code>update(id, callback, parameters?)</code></td>
+<td>Queue one identified update.</td>
+<td>Promise of the callback&#39;s return value.</td>
+</tr>
+<tr>
+<td><code>sequence(id, ...stages)</code></td>
+<td>Run ordered, optionally repeated read/update cycles.</td>
+<td>Promise of <code>{ id, status }</code>.</td>
+</tr>
+<tr>
+<td><code>cancel(id)</code></td>
+<td>Cancel work owned by one numeric ID.</td>
+<td><code>true</code> if that ID had work.</td>
+</tr>
+<tr>
 <td><code>clear()</code></td>
 <td>Cancel queued layout work during full runtime destruction.</td>
 <td>Queued Promises resolve with <code>undefined</code>; their callbacks do not run.</td>
 </tr>
 </tbody></table>
-<p>The optional <code>parameters</code> argument is an array passed as the callback&#39;s arguments. These methods schedule work; they do not observe future changes automatically.</p>
+<p>The optional <code>parameters</code> argument is an array passed as the callback&#39;s arguments. IDs must be safe integers, including <code>0</code>. Calls without an ID keep their original independent queue behavior. These methods schedule work; they do not observe future changes automatically.</p>
+<h2>Adaptive frame rate</h2>
+<p><code>waitLayout</code> samples <code>requestAnimationFrame()</code> timestamps while it has frame work. It starts at the browser&#39;s measured frame rate and, after sustained slow frames or expensive callbacks, reduces the rate of scheduled layout work in 15 FPS steps, down to 15 FPS. It tries to recover one step after a longer stable period. The limiter skips work on selected browser frames; it never runs catch-up frames. It pauses work while the page is hidden and resumes from a fresh measurement when visible. CSS animations and native rendering remain under browser control. There is no ongoing frame monitor when the queue is idle.</p>
+<h2>Identify and replace related work</h2>
+<p>An ID can hold one pending read and one pending update. They form a group. Adding the other phase joins that group; queuing a second task for the same phase cancels both pending tasks in the old group and starts a new group. Canceled task Promises resolve with <code>undefined</code>.</p>
+<pre><code class="language-js">const layoutId = 100;
+
+function refresh() {
+  $ae.waitLayout.read(layoutId, () =&gt; panel.getBoundingClientRect());
+  $ae.waitLayout.update(layoutId, () =&gt; panel.classList.add(&quot;ready&quot;));
+}
+
+function unmount() {
+  $ae.waitLayout.cancel(layoutId); // Does not affect another ID.
+}
+</code></pre>
+<p>Use a distinct ID for each independent feature or mounted instance. A new <code>sequence()</code> with an existing ID replaces all pending work for that ID. An external <code>read()</code> or <code>update()</code> with the sequence&#39;s ID also replaces that sequence. Results from canceled asynchronous reads cannot start its old update.</p>
+<h2>Run a sequence</h2>
+<p>Each stage can define <code>read</code>, <code>update</code>, or both. A synchronous read passes its result to the update in the same eligible frame when possible. An asynchronous read is awaited without blocking other work; its update runs in a later eligible frame. Stages run in the order supplied.</p>
+<pre><code class="language-js">const result = await $ae.waitLayout.sequence(200,
+  {
+    read: () =&gt; panel.getBoundingClientRect(),
+    update: rect =&gt; panel.style.setProperty(&quot;--width&quot;, `${rect.width}px`)
+  },
+  {
+    read: () =&gt; panel.scrollTop,
+    update: top =&gt; indicator.style.transform = `translateY(${top}px)`,
+    repeat: { ms: 100, times: 20 },
+    maxFPS: 30,
+    abort: () =&gt; !panel.isConnected
+  }
+);
+// result.status: &quot;completed&quot;, &quot;aborted&quot;, &quot;superseded&quot;, or &quot;cleared&quot;
+</code></pre>
+<p><code>repeat.ms</code> and <code>repeat.s</code> are alternative minimum intervals, counted from the end of the previous cycle. <code>repeat.times</code> includes the first cycle. An interval without <code>times</code> repeats until the sequence is canceled, replaced, aborted, or cleared. <code>times</code> alone repeats on subsequent eligible frames. Cycles never overlap or accumulate after a pause. When <code>maxFPS</code> is omitted, a repeated stage runs on every eligible browser frame, subject only to its <code>repeat</code> interval and the adaptive global limit. When provided, <code>maxFPS</code> caps complete read-to-update cycles; the adaptive global limit may lower them further.</p>
+<p><code>abort</code> may be a function, an <code>AbortSignal</code>, or an <code>AbortController</code>. A function must synchronously return a boolean; it is checked before a cycle and before callbacks that have waited in the queue. A signal stops the entire sequence immediately when its controller is aborted, including while an asynchronous read or repeat timer is pending. A signal supplied to a later stage is active from the start of the sequence. Already aborted signals prevent the first callback from running.</p>
+<pre><code class="language-js">const controller = new AbortController();
+const work = $ae.waitLayout.sequence(300, {
+  read: () =&gt; panel.getBoundingClientRect(),
+  update: rect =&gt; panel.style.width = `${rect.width}px`,
+  repeat: { ms: 100 },
+  abort: controller.signal // abort: controller also works.
+});
+
+function unmount() {
+  controller.abort();
+}
+
+const result = await work; // { id: 300, status: &quot;aborted&quot; } after abort()
+</code></pre>
+<p>Callback errors reject the sequence Promise and stop that sequence; other IDs continue. <code>cancel(id)</code> resolves an active sequence with <code>{ id, status: &quot;aborted&quot; }</code>. Full runtime destruction calls <code>clear()</code>, resolving sequences with <code>&quot;cleared&quot;</code>.</p>
 <h2>Measure once, then apply the result</h2>
 <p>Collect related geometry and computed styles in one read callback. Put every dependent style and DOM mutation in the update callback. Check that an asynchronous result still belongs to the mounted element before applying it.</p>
 <pre><code class="language-js">let revision = 0;
@@ -684,7 +754,7 @@ function unmountProgress() {
   box.style.removeProperty(&quot;--scroll-progress&quot;);
 }
 </code></pre>
-<p>This keeps the latest scroll position without queuing one read and one write for every event. The <code>dirty</code> flag preserves notifications that arrive while a task is pending. Do not call <code>$ae.waitLayout.clear()</code> from an Extension&#39;s unmount: it clears the runtime&#39;s shared queues, including work owned by other Extensions. The runtime calls it during full destruction.</p>
+<p>This keeps the latest scroll position without queuing one read and one write for every event. The <code>dirty</code> flag preserves notifications that arrive while a task is pending. An Extension may call <code>cancel(itsId)</code> during unmount. Do not call <code>$ae.waitLayout.clear()</code> from an Extension&#39;s unmount: it clears the runtime&#39;s shared queues, including work owned by other Extensions. The runtime calls it during full destruction.</p>
 <h2>When another frame is necessary</h2>
 <p>If a measurement must reflect a DOM change made by the Extension, write first and then request a new read. That read runs in a later frame because the current frame&#39;s read phase has passed.</p>
 <pre><code class="language-js">await $ae.waitLayout.update(() =&gt; panel.classList.add(&quot;expanded&quot;));

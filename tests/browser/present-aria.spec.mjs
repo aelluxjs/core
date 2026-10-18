@@ -375,7 +375,7 @@ test("direct pop restarts from hidden during either transition and when already 
     };
     await new Promise((resolve, reject) => {
       const script = document.createElement("script");
-      script.src = "/src/aellux.ext.present.js";
+      script.src = "/dist/aellux.ext.present.js";
       script.onload = resolve;
       script.onerror = reject;
       document.head.append(script);
@@ -1003,7 +1003,7 @@ test("present reports invalid target IDs without throwing from click", async ({ 
       dispatchFrom: () => true
     };
   });
-  await page.addScriptTag({ url: "/src/aellux.ext.present.js" });
+  await page.addScriptTag({ url: "/dist/aellux.ext.present.js" });
   await attachElementMemoryToStub(page);
   const reports = await page.evaluate(() => {
     const extension = window.presentExtension;
@@ -1042,7 +1042,7 @@ test("present restores a trigger without targets and can mount it again", async 
     return true;
   });
   expect(result).toBe(true);
-  await page.addScriptTag({ url: "/src/aellux.ext.present.js" });
+  await page.addScriptTag({ url: "/dist/aellux.ext.present.js" });
   await attachElementMemoryToStub(page);
   const state = await page.evaluate(() => {
     const extension = window.presentExtension;
@@ -1101,7 +1101,7 @@ test("present records interrupted transitions as warnings and failures as errors
       }
     };
   });
-  await page.addScriptTag({ url: "/src/aellux.ext.present.js" });
+  await page.addScriptTag({ url: "/dist/aellux.ext.present.js" });
   await attachElementMemoryToStub(page);
   const entries = await page.evaluate(async () => {
     const extension = window.presentExtension;
@@ -1155,7 +1155,7 @@ test("present reports a transition callback failure with its own diagnostic", as
       dispatchFrom: () => { throw new Error("callback probe"); }
     };
   });
-  await page.addScriptTag({ url: "/src/aellux.ext.present.js" });
+  await page.addScriptTag({ url: "/dist/aellux.ext.present.js" });
   await attachElementMemoryToStub(page);
   const codes = await page.evaluate(() => {
     const extension = window.presentExtension;

@@ -14,6 +14,7 @@ import { assetLoadHelper } from "./internal/asset-load-helper.js";
 import { buildLayoutScheduler } from "./internal/build-layout-scheduler.js";
 import { buildMountMapManager } from "./internal/build-mount-map-manager.js";
 import { createAriaHelper } from "./internal/create-aria-helper.js";
+import { ease } from "./internal/ease.js";
 import utilsNameCase from "./internal/utils-name-case.js";
 
 (function (root) {
@@ -131,6 +132,7 @@ import utilsNameCase from "./internal/utils-name-case.js";
       wait(extensionName) { return getExtension(extensionName); },
 
       request: defaultRequest,
+      ease,
 
       aria,
       waitLayout: layoutScheduler,

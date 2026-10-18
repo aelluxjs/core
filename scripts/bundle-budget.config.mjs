@@ -1,8 +1,8 @@
 export const bundleBudget = Object.freeze([
   { file: "aellux.min.js", maxRawBytes: 35 * 1024, maxGzipBytes: 12 * 1024 },
   { file: "aellux.esm.min.js", maxRawBytes: 21 * 1024, maxGzipBytes: 7 * 1024 },
-  { file: "aellux.orchestrator.min.js", maxRawBytes: 21 * 1024, maxGzipBytes: 8 * 1024 },
-  { file: "aellux.full.min.js", maxRawBytes: 106 * 1024, maxGzipBytes: 32 * 1024 },
+  { file: "aellux.orchestrator.min.js", maxRawBytes: 28 * 1024, maxGzipBytes: 10 * 1024 },
+  { file: "aellux.full.min.js", maxRawBytes: 115 * 1024, maxGzipBytes: 35 * 1024 },
   { file: "aellux.full.legacy.min.js", maxRawBytes: 406 * 1024, maxGzipBytes: 135 * 1024 },
   { file: "aellux.ext.adaptive.min.css", maxRawBytes: 121 * 1024, maxGzipBytes: 11 * 1024 },
   { file: "aellux.ext.adaptive.min.js", maxRawBytes: 4 * 1024, maxGzipBytes: 3 * 1024 },

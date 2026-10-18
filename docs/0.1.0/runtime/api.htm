@@ -621,6 +621,13 @@ Pass Extension-specific configuration through <code>extensions</code> in <code>i
 </code></pre>
 <p>Keys such as <code>&quot;tab-group&quot;</code> are normalized to <code>tabGroup</code> in <code>$ae.options.extensions</code>, and each Extension receives its matching object in <code>init(options)</code>. An Extension with no matching configuration receives <code>{}</code>.
 An Extension&#39;s <code>init(options)</code> may return a Promise. The runtime awaits it before setting the Extension&#39;s <code>initialized</code> flag and resolving <code>wait(extensionName)</code>; rejection is diagnosed as <code>ERROR_EXTENSION_INITIALIZE</code> (<code>1102</code>) and leaves the Extension available for a later retry.</p>
+<h2>Numeric easing</h2>
+<p><code>$ae.ease(name, t)</code> evaluates a curve at numeric progress <code>t</code> in both <code>basic</code> and <code>full</code> modes. The boot API exposes the method, but calling it before the orchestrator loads throws <code>ERROR_NOT_INITIALIZED</code> (<code>1001</code>). It does not require the Present Extension.</p>
+<p>The method clamps <code>t</code> to <code>0</code>–<code>1</code> before evaluating the curve. Its result is not clamped, so <code>back</code> and <code>elastic</code> curves can overshoot. It returns a number for scripted UI motion and does not change Present&#39;s CSS timing functions.</p>
+<pre><code class="language-js">const scale = $ae.ease(&quot;backOut&quot;, progress);
+element.style.transform = `scale(${scale})`;
+</code></pre>
+<p>The families <code>quad</code>, <code>cubic</code>, <code>quart</code>, <code>quint</code>, <code>sine</code>, <code>expo</code>, <code>circ</code>, <code>back</code>, <code>elastic</code>, and <code>bounce</code> each have <code>In</code>, <code>Out</code>, and <code>InOut</code> variants. <code>linear</code>, <code>smoothStep</code>, and <code>smootherStep</code> are also available. Names ignore case, spaces, underscores, and hyphens. An optional <code>ease</code> prefix and direction-first names are accepted: <code>backOut</code>, <code>easeBackOut</code>, <code>back-out</code>, <code>ease-back-out</code>, and <code>easeOutBack</code> evaluate the same curve. Long family names such as <code>quadratic</code>, <code>quartic</code>, <code>quintic</code>, <code>sinusoidal</code>, <code>exponential</code>, and <code>circular</code> are aliases. Invalid names or nonfinite <code>t</code> values throw.</p>
 <h2>DOM Lifecycle</h2>
 <pre><code class="language-js">await $ae.mount(elementOrId);
 await $ae.unmount(elementOrId);
@@ -663,7 +670,7 @@ await $ae.mount(document.getElementById(&quot;panel&quot;));
 <pre><code class="language-js">const width = await $ae.waitLayout.read(() =&gt; panel.getBoundingClientRect().width);
 await $ae.waitLayout.update(() =&gt; panel.style.setProperty(&quot;--panel-width&quot;, `${width}px`));
 </code></pre>
-<p>See <a href="wait-layout.htm">waitLayout</a> for frame order, frequent-event coalescing, lifecycle guards, and examples.</p>
+<p>Use numeric IDs to group and replace pending reads and updates, or <code>sequence(id, ...stages)</code> for ordered and repeated cycles with <code>maxFPS</code> and <code>abort</code> (a boolean callback, <code>AbortSignal</code>, or <code>AbortController</code>). <code>cancel(id)</code> stops one feature&#39;s work; <code>clear()</code> cancels all work during full runtime destruction. The scheduler adapts its task rate to sustained frame pressure. See <a href="wait-layout.htm">waitLayout</a> for frame order, lifecycle guards, and examples.</p>
 <h2>Destruction</h2>
 <pre><code class="language-js">await $ae.destroyExtensions(&quot;preference&quot;);
 await $ae.destroy();

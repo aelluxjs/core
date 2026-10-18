@@ -20901,105 +20901,14 @@
   });
 
   // src/internal/build-layout-scheduler.js
-  function buildLayoutScheduler() {
-    var readQueue = [];
-    var updateQueue = [];
-    var frameRequest = null;
-    var phase = "idle";
-    function scheduleFrame() {
-      if (frameRequest !== null || phase !== "idle") return;
-      frameRequest = requestAnimationFrame(flushFrame);
-    }
-    function flushFrame() {
-      frameRequest = null;
-      phase = "read";
-      var reads = readQueue.splice(0);
-      for (var i = 0; i < reads.length; i++) runTask(reads[i]);
-      Promise.resolve().then(function() {
-        phase = "update";
-        var updates = updateQueue.splice(0);
-        for (var i2 = 0; i2 < updates.length; i2++) runTask(updates[i2]);
-        phase = "idle";
-        if (readQueue.length || updateQueue.length) scheduleFrame();
-      });
-    }
-    function runTask(task) {
-      try {
-        task.resolve(task.parameters ? task.callback.apply(void 0, task.parameters) : task.callback());
-      } catch (error) {
-        task.reject(error);
-      }
-    }
-    function queueTask(queue, callback, parameters) {
-      var promise = new Promise(function(resolve, reject) {
-        queue.push({
-          callback: callback,
-          parameters: parameters,
-          resolve: resolve,
-          reject: reject
-        });
-      });
-      if (phase === "idle") scheduleFrame();
-      return promise;
-    }
-    function clear() {
-      if (frameRequest !== null) {
-        cancelAnimationFrame(frameRequest);
-        frameRequest = null;
-      }
-      settleQueue(readQueue);
-      settleQueue(updateQueue);
-      phase = "idle";
-    }
-    function settleQueue(queue) {
-      var tasks = queue.splice(0);
-      for (var i = 0; i < tasks.length; i++) {
-        tasks[i].resolve(void 0);
-      }
-    }
-    return Object.freeze({
-      read: function read(callback, parameters) {
-        return queueTask(readQueue, callback, parameters);
-      },
-      update: function update(callback, parameters) {
-        return queueTask(updateQueue, callback, parameters);
-      },
-      clear: clear
-    });
+  function _typeof(o) {
+    "@babel/helpers - typeof";
+    return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
+      return typeof o2;
+    } : function(o2) {
+      return o2 && "function" == typeof Symbol && o2.constructor === Symbol && o2 !== Symbol.prototype ? "symbol" : typeof o2;
+    }, _typeof(o);
   }
-  var init_build_layout_scheduler = __esm({
-    "src/internal/build-layout-scheduler.js": function() {
-      /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
-    }
-  });
-
-  // src/internal/utils-name-case.js
-  function toCapitalized(name) {
-    return name.replace(/^([a-z])|-([a-z])/g, function(_, first, afterHyphen) {
-      return (first || afterHyphen).toUpperCase();
-    });
-  }
-  function toCamelCase(name) {
-    return name.replace(/-([a-z])/g, function(_, character) {
-      return character.toUpperCase();
-    });
-  }
-  function fromCamelCase(name) {
-    return name.replace(/([A-Z])/g, "-$1").toLowerCase();
-  }
-  var utils_name_case_default;
-  var init_utils_name_case = __esm({
-    "src/internal/utils-name-case.js": function() {
-      /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
-      utils_name_case_default = {
-        toCapitalized: toCapitalized,
-        toCamelCase: toCamelCase,
-        fromCamelCase: fromCamelCase
-      };
-    }
-  });
-
-  // src/internal/create-controller-helper.js
   function _createForOfIteratorHelper(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
@@ -21043,6 +20952,638 @@
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
   }
+  function buildLayoutScheduler() {
+    var queues = {
+      read: [],
+      update: []
+    };
+    var groups = /* @__PURE__ */ new Map();
+    var tasks = /* @__PURE__ */ new Set();
+    var frameRequest = null;
+    var phase = "idle";
+    var waitingForVisibility = false;
+    var idleSince = null;
+    var nativeFPS = null;
+    var limitFPS = null;
+    var initialDeltas = [];
+    var lastFrameTime = null;
+    var frameCredit = 0;
+    var samples = [];
+    var slowStreak = 0;
+    var lastAdjustment = -Infinity;
+    var stableSince = null;
+    var recoveryDelay = 3e3;
+    var trialLimit = null;
+    var now = function now2() {
+      return performance.now();
+    };
+    var hidden = function hidden2() {
+      return typeof document !== "undefined" && document.hidden;
+    };
+    var hasWork = function hasWork2() {
+      return queues.read.length > 0 || queues.update.length > 0;
+    };
+    function resetMeasurements(resetLimit) {
+      lastFrameTime = null;
+      frameCredit = 0;
+      samples = [];
+      slowStreak = 0;
+      stableSince = null;
+      initialDeltas = [];
+      if (resetLimit) {
+        nativeFPS = null;
+        limitFPS = null;
+        lastAdjustment = -Infinity;
+      }
+      trialLimit = null;
+      recoveryDelay = 3e3;
+    }
+    function onVisible() {
+      if (hidden()) return;
+      document.removeEventListener("visibilitychange", onVisible);
+      waitingForVisibility = false;
+      resetMeasurements(true);
+      scheduleFrame();
+    }
+    function scheduleFrame() {
+      if (frameRequest !== null || phase !== "idle" || !hasWork()) return;
+      if (hidden()) {
+        if (!waitingForVisibility) {
+          document.addEventListener("visibilitychange", onVisible);
+          waitingForVisibility = true;
+        }
+        return;
+      }
+      if (idleSince !== null && now() - idleSince > 250) resetMeasurements(true);
+      idleSince = null;
+      frameRequest = requestAnimationFrame(flushFrame);
+    }
+    function stopFrameIfIdle() {
+      if (hasWork()) return;
+      if (frameRequest !== null) cancelAnimationFrame(frameRequest);
+      frameRequest = null;
+      if (waitingForVisibility) document.removeEventListener("visibilitychange", onVisible);
+      waitingForVisibility = false;
+      if (phase === "idle") idleSince = now();
+    }
+    function observeFrame(time) {
+      var previous = lastFrameTime;
+      lastFrameTime = time;
+      if (previous === null) return true;
+      var delta = time - previous;
+      if (delta <= 0 || delta > 250) {
+        frameCredit = 0;
+        samples = [];
+        slowStreak = 0;
+        stableSince = null;
+        return true;
+      }
+      if (nativeFPS === null) {
+        initialDeltas.push(delta);
+        if (initialDeltas.length >= 8) {
+          var ordered = initialDeltas.slice().sort(function(a, b) {
+            return a - b;
+          });
+          nativeFPS = Math.max(15, Math.round(1e3 / ordered[4]));
+          limitFPS = nativeFPS;
+          initialDeltas = [];
+        }
+      } else {
+        var expected = 1e3 / Math.max(15, limitFPS);
+        var slow = delta > expected * 1.23;
+        slowStreak = slow ? slowStreak + 1 : 0;
+        samples.push({
+          time: time,
+          slow: slow
+        });
+        while (samples.length && time - samples[0].time > 1e3) samples.shift();
+        adjustLimit(time);
+      }
+      if (limitFPS === null || limitFPS >= nativeFPS) return true;
+      var period = 1e3 / limitFPS;
+      frameCredit += delta;
+      if (frameCredit + 1e-3 < period) return false;
+      frameCredit = Math.min(period, frameCredit - period);
+      return true;
+    }
+    function adjustLimit(time) {
+      if (samples.length < 8 || time - samples[0].time < 700) return;
+      var slowCount = samples.reduce(function(n, item) {
+        return n + (item.slow ? 1 : 0);
+      }, 0);
+      if (slowStreak >= 4 || slowCount / samples.length >= 0.35) {
+        stableSince = null;
+        if (time - lastAdjustment >= 1e3 && limitFPS > 15) {
+          var previous = limitFPS;
+          limitFPS = Math.max(15, limitFPS - 15);
+          if (trialLimit === previous) recoveryDelay = Math.min(3e4, recoveryDelay * 2);
+          trialLimit = null;
+          lastAdjustment = time;
+          samples = [];
+          slowStreak = 0;
+          frameCredit = 0;
+        }
+      } else {
+        if (stableSince === null) stableSince = time;
+        if (limitFPS < nativeFPS && time - stableSince >= recoveryDelay && time - lastAdjustment >= recoveryDelay) {
+          limitFPS = Math.min(nativeFPS, limitFPS + 15);
+          trialLimit = limitFPS;
+          lastAdjustment = time;
+          stableSince = null;
+          samples = [];
+          frameCredit = 0;
+        }
+      }
+    }
+    function flushFrame(time) {
+      frameRequest = null;
+      if (hidden()) {
+        resetMeasurements(true);
+        scheduleFrame();
+        return;
+      }
+      if (!observeFrame(time)) {
+        scheduleFrame();
+        return;
+      }
+      var start = now();
+      phase = "read";
+      var reads = queues.read.splice(0);
+      var _iterator = _createForOfIteratorHelper(reads), _step;
+      try {
+        for (_iterator.s(); !(_step = _iterator.n()).done; ) {
+          var task = _step.value;
+          runTask(task);
+        }
+      } catch (err) {
+        _iterator.e(err);
+      } finally {
+        _iterator.f();
+      }
+      Promise.resolve().then(function() {
+        phase = "update";
+        var updates = queues.update.splice(0);
+        var _iterator2 = _createForOfIteratorHelper(updates), _step2;
+        try {
+          for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
+            var task2 = _step2.value;
+            runTask(task2);
+          }
+        } catch (err) {
+          _iterator2.e(err);
+        } finally {
+          _iterator2.f();
+        }
+        if (nativeFPS !== null && samples.length && now() - start > 1e3 / Math.max(15, limitFPS) * 0.8) {
+          samples[samples.length - 1].slow = true;
+        }
+        phase = "idle";
+        if (hasWork()) scheduleFrame();
+        else idleSince = now();
+      });
+    }
+    function removeTask(task) {
+      tasks.delete(task);
+      if (!task.group) return;
+      task.group.tasks.delete(task);
+      if (task.group[task.phase] === task) task.group[task.phase] = null;
+      if (!task.group.sequence && task.group.tasks.size === 0 && groups.get(task.group.id) === task.group) groups.delete(task.group.id);
+    }
+    function settleTask(task, error, value) {
+      if (task.state === "settled") return;
+      task.state = "settled";
+      removeTask(task);
+      if (error) task.reject(value);
+      else task.resolve(value);
+    }
+    function cancelTask(task) {
+      if (task.state === "settled") return;
+      if (task.state === "pending") {
+        var queue = queues[task.phase];
+        var index = queue.indexOf(task);
+        if (index !== -1) queue.splice(index, 1);
+      }
+      settleTask(task, false, void 0);
+    }
+    function runTask(task) {
+      if (task.state !== "pending") return;
+      task.state = "running";
+      if (task.group && task.group[task.phase] === task) task.group[task.phase] = null;
+      var result;
+      try {
+        result = task.parameters ? task.callback.apply(void 0, task.parameters) : task.callback();
+      } catch (error) {
+        settleTask(task, true, error);
+        return;
+      }
+      var then;
+      try {
+        then = result && result.then;
+      } catch (error) {
+        settleTask(task, true, error);
+        return;
+      }
+      if (typeof then === "function") {
+        Promise.resolve(result).then(function(value) {
+          return settleTask(task, false, value);
+        }, function(error) {
+          return settleTask(task, true, error);
+        });
+      } else {
+        settleTask(task, false, result);
+      }
+    }
+    function makeGroup(id) {
+      var group = {
+        id: id,
+        read: null,
+        update: null,
+        tasks: /* @__PURE__ */ new Set(),
+        sequence: null
+      };
+      groups.set(id, group);
+      return group;
+    }
+    function cancelGroup(group, status) {
+      if (groups.get(group.id) === group) groups.delete(group.id);
+      var sequence2 = group.sequence;
+      if (sequence2 && sequence2.active) {
+        sequence2.active = false;
+        if (sequence2.timer !== null) clearTimeout(sequence2.timer);
+        sequence2.timer = null;
+        detachAbortSignals(sequence2);
+        group.sequence = null;
+      }
+      for (var _i = 0, _Array$from = Array.from(group.tasks); _i < _Array$from.length; _i++) {
+        var task = _Array$from[_i];
+        cancelTask(task);
+      }
+      if (sequence2) sequence2.resolve({
+        id: group.id,
+        status: status
+      });
+      stopFrameIfIdle();
+    }
+    function queueTask(kind, callback, parameters, id, owner) {
+      var group = null;
+      if (id !== void 0) {
+        group = owner ? owner.group : groups.get(id);
+        if (!owner && group && (group.sequence || group[kind])) {
+          cancelGroup(group, "superseded");
+          group = null;
+        }
+        if (!group) group = makeGroup(id);
+      }
+      var task;
+      var promise = new Promise(function(resolve, reject) {
+        task = {
+          phase: kind,
+          callback: callback,
+          parameters: parameters,
+          group: group,
+          resolve: resolve,
+          reject: reject,
+          state: "pending"
+        };
+      });
+      tasks.add(task);
+      if (group) {
+        group[kind] = task;
+        group.tasks.add(task);
+      }
+      queues[kind].push(task);
+      scheduleFrame();
+      return promise;
+    }
+    function validId(id) {
+      if (!Number.isSafeInteger(id)) throw new TypeError("waitLayout ID must be a safe integer");
+    }
+    function request(kind, first, second, third) {
+      if (typeof first === "number") {
+        validId(first);
+        return queueTask(kind, second, third, first, null);
+      }
+      return queueTask(kind, first, second, void 0, null);
+    }
+    function validateStages(stages) {
+      if (!stages.length) throw new TypeError("sequence() requires at least one stage");
+      return stages.map(function(stage) {
+        if (!stage || _typeof(stage) !== "object" || typeof stage.read !== "function" && typeof stage.update !== "function") {
+          throw new TypeError("Each sequence stage needs a read or update callback");
+        }
+        if (stage.read !== void 0 && typeof stage.read !== "function" || stage.update !== void 0 && typeof stage.update !== "function") {
+          throw new TypeError("Sequence callbacks must be functions");
+        }
+        var abort = null;
+        var signal = null;
+        if (typeof stage.abort === "function") abort = stage.abort;
+        else if (stage.abort !== void 0) {
+          var candidate = stage.abort && (stage.abort.signal || stage.abort);
+          if (!candidate || typeof candidate.aborted !== "boolean" || typeof candidate.addEventListener !== "function" || typeof candidate.removeEventListener !== "function") {
+            throw new TypeError("abort must be a function, AbortController, or AbortSignal");
+          }
+          signal = candidate;
+        }
+        var interval = 0;
+        var times = 1;
+        if (stage.repeat !== void 0) {
+          var repeat = stage.repeat;
+          if (!repeat || _typeof(repeat) !== "object" || repeat.ms !== void 0 && repeat.s !== void 0) {
+            throw new TypeError("repeat must use either ms or s");
+          }
+          interval = repeat.ms !== void 0 ? repeat.ms : repeat.s !== void 0 ? repeat.s * 1e3 : 0;
+          if (!Number.isFinite(interval) || interval < 0) throw new RangeError("Invalid repeat interval");
+          times = repeat.times === void 0 ? repeat.ms !== void 0 || repeat.s !== void 0 ? Infinity : 1 : repeat.times;
+          if (repeat.times !== void 0 && (!Number.isSafeInteger(times) || times < 1)) {
+            throw new RangeError("repeat.times must be a positive integer");
+          }
+        }
+        if (stage.maxFPS !== void 0 && (!Number.isFinite(stage.maxFPS) || stage.maxFPS <= 0)) {
+          throw new RangeError("maxFPS must be positive");
+        }
+        return {
+          read: stage.read,
+          update: stage.update,
+          abort: abort,
+          signal: signal,
+          interval: interval,
+          times: times,
+          maxFPS: stage.maxFPS
+        };
+      });
+    }
+    function detachAbortSignals(owner) {
+      var _iterator3 = _createForOfIteratorHelper(owner.abortSignals), _step3;
+      try {
+        for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
+          var signal = _step3.value;
+          signal.removeEventListener("abort", owner.abortHandler);
+        }
+      } catch (err) {
+        _iterator3.e(err);
+      } finally {
+        _iterator3.f();
+      }
+      owner.abortSignals.length = 0;
+    }
+    function sequence(id) {
+      validId(id);
+      for (var _len = arguments.length, stages = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+        stages[_key - 1] = arguments[_key];
+      }
+      var configs = validateStages(stages);
+      var previous = groups.get(id);
+      if (previous) cancelGroup(previous, "superseded");
+      var group = makeGroup(id);
+      var resolve;
+      var reject;
+      var result = new Promise(function(res, rej) {
+        resolve = res;
+        reject = rej;
+      });
+      var owner = {
+        group: group,
+        configs: configs,
+        index: 0,
+        count: 0,
+        lastStart: null,
+        timer: null,
+        active: true,
+        resolve: resolve,
+        reject: reject,
+        abortSignals: [],
+        abortHandler: null
+      };
+      group.sequence = owner;
+      owner.abortHandler = function() {
+        return finishSequence(owner, "aborted");
+      };
+      try {
+        var _iterator4 = _createForOfIteratorHelper(configs), _step4;
+        try {
+          for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
+            var config = _step4.value;
+            if (config.signal && !owner.abortSignals.includes(config.signal)) {
+              config.signal.addEventListener("abort", owner.abortHandler);
+              owner.abortSignals.push(config.signal);
+            }
+          }
+        } catch (err) {
+          _iterator4.e(err);
+        } finally {
+          _iterator4.f();
+        }
+        if (owner.abortSignals.some(function(signal) {
+          return signal.aborted;
+        })) {
+          finishSequence(owner, "aborted");
+        } else {
+          startIteration(owner);
+        }
+      } catch (error) {
+        finishSequence(owner, null, error);
+      }
+      return result;
+    }
+    function finishSequence(owner, status, error) {
+      if (!owner.active) return;
+      var group = owner.group;
+      owner.active = false;
+      if (owner.timer !== null) clearTimeout(owner.timer);
+      owner.timer = null;
+      detachAbortSignals(owner);
+      group.sequence = null;
+      if (groups.get(group.id) === group) groups.delete(group.id);
+      for (var _i2 = 0, _Array$from2 = Array.from(group.tasks); _i2 < _Array$from2.length; _i2++) {
+        var task = _Array$from2[_i2];
+        cancelTask(task);
+      }
+      stopFrameIfIdle();
+      if (status === null) owner.reject(error);
+      else owner.resolve({
+        id: group.id,
+        status: status
+      });
+    }
+    function checkAbort(owner, config) {
+      if (!owner.active || !config.abort) return false;
+      var result = config.abort();
+      if (typeof result !== "boolean") throw new TypeError("abort must return a boolean");
+      if (result) finishSequence(owner, "aborted");
+      return result;
+    }
+    function startIteration(owner) {
+      if (!owner.active) return;
+      var config = owner.configs[owner.index];
+      try {
+        if (checkAbort(owner, config)) return;
+      } catch (error) {
+        finishSequence(owner, null, error);
+        return;
+      }
+      owner.lastStart = now();
+      var read = config.read ? queueTask("read", function() {
+        if (checkAbort(owner, config)) return;
+        return config.read();
+      }, void 0, owner.group.id, owner) : Promise.resolve(void 0);
+      read.then(function(value) {
+        if (!owner.active) return;
+        try {
+          if (checkAbort(owner, config)) return;
+        } catch (error) {
+          finishSequence(owner, null, error);
+          return;
+        }
+        return config.update ? queueTask("update", function(input) {
+          if (checkAbort(owner, config)) return;
+          return config.update(input);
+        }, [value], owner.group.id, owner) : void 0;
+      }).then(function() {
+        if (owner.active) completeIteration(owner, config);
+      }, function(error) {
+        return finishSequence(owner, null, error);
+      });
+    }
+    function completeIteration(owner, config) {
+      owner.count++;
+      if (owner.count >= config.times) {
+        owner.index++;
+        owner.count = 0;
+        owner.lastStart = null;
+        if (owner.index >= owner.configs.length) {
+          finishSequence(owner, "completed");
+          return;
+        }
+        startIteration(owner);
+        return;
+      }
+      var completed = now();
+      var fpsDue = config.maxFPS === void 0 ? completed : owner.lastStart + 1e3 / config.maxFPS;
+      var due = Math.max(completed + config.interval, fpsDue);
+      var delay = Math.max(0, due - now() - 1);
+      if (delay > 1) {
+        owner.timer = setTimeout(function() {
+          owner.timer = null;
+          startIteration(owner);
+        }, delay);
+      } else {
+        startIteration(owner);
+      }
+    }
+    function clear() {
+      if (frameRequest !== null) cancelAnimationFrame(frameRequest);
+      frameRequest = null;
+      if (waitingForVisibility) document.removeEventListener("visibilitychange", onVisible);
+      waitingForVisibility = false;
+      for (var _i3 = 0, _Array$from3 = Array.from(groups.values()); _i3 < _Array$from3.length; _i3++) {
+        var group = _Array$from3[_i3];
+        cancelGroup(group, "cleared");
+      }
+      for (var _i4 = 0, _Array$from4 = Array.from(tasks); _i4 < _Array$from4.length; _i4++) {
+        var task = _Array$from4[_i4];
+        cancelTask(task);
+      }
+      queues.read.length = 0;
+      queues.update.length = 0;
+      phase = "idle";
+      idleSince = null;
+      resetMeasurements(true);
+    }
+    function cancel(id) {
+      validId(id);
+      var group = groups.get(id);
+      if (!group) return false;
+      cancelGroup(group, "aborted");
+      return true;
+    }
+    return Object.freeze({
+      read: function read(first, second, third) {
+        return request("read", first, second, third);
+      },
+      update: function update(first, second, third) {
+        return request("update", first, second, third);
+      },
+      sequence: sequence,
+      cancel: cancel,
+      clear: clear
+    });
+  }
+  var init_build_layout_scheduler = __esm({
+    "src/internal/build-layout-scheduler.js": function() {
+      /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+    }
+  });
+
+  // src/internal/utils-name-case.js
+  function toCapitalized(name) {
+    return name.replace(/^([a-z])|-([a-z])/g, function(_, first, afterHyphen) {
+      return (first || afterHyphen).toUpperCase();
+    });
+  }
+  function toCamelCase(name) {
+    return name.replace(/-([a-z])/g, function(_, character) {
+      return character.toUpperCase();
+    });
+  }
+  function fromCamelCase(name) {
+    return name.replace(/([A-Z])/g, "-$1").toLowerCase();
+  }
+  var utils_name_case_default;
+  var init_utils_name_case = __esm({
+    "src/internal/utils-name-case.js": function() {
+      /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+      utils_name_case_default = {
+        toCapitalized: toCapitalized,
+        toCamelCase: toCamelCase,
+        fromCamelCase: fromCamelCase
+      };
+    }
+  });
+
+  // src/internal/create-controller-helper.js
+  function _createForOfIteratorHelper2(r, e) {
+    var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
+    if (!t) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray2(r)) || e && r && "number" == typeof r.length) {
+        t && (r = t);
+        var _n = 0, F = function F2() {
+        };
+        return { s: F, n: function n() {
+          return _n >= r.length ? { done: true } : { done: false, value: r[_n++] };
+        }, e: function e2(r2) {
+          throw r2;
+        }, f: F };
+      }
+      throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+    }
+    var o, a = true, u = false;
+    return { s: function s() {
+      t = t.call(r);
+    }, n: function n() {
+      var r2 = t.next();
+      return a = r2.done, r2;
+    }, e: function e2(r2) {
+      u = true, o = r2;
+    }, f: function f() {
+      try {
+        a || null == t.return || t.return();
+      } finally {
+        if (u) throw o;
+      }
+    } };
+  }
+  function _unsupportedIterableToArray2(r, a) {
+    if (r) {
+      if ("string" == typeof r) return _arrayLikeToArray2(r, a);
+      var t = {}.toString.call(r).slice(8, -1);
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray2(r, a) : void 0;
+    }
+  }
+  function _arrayLikeToArray2(r, a) {
+    (null == a || a > r.length) && (a = r.length);
+    for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
+    return n;
+  }
   function createControllerHelper(root2, element) {
     var toCamelCase2 = utils_name_case_default.toCamelCase, fromCamelCase2 = utils_name_case_default.fromCamelCase;
     var mounts = /* @__PURE__ */ new Map();
@@ -21077,7 +21618,7 @@
       var key = toCamelCase2(fromCamelCase2(extensionName));
       var extension = root2.AelluxJs.ext[key];
       var methods = Array.isArray(methodNames) ? methodNames : [];
-      var _iterator = _createForOfIteratorHelper(methods), _step;
+      var _iterator = _createForOfIteratorHelper2(methods), _step;
       try {
         for (_iterator.s(); !(_step = _iterator.n()).done; ) {
           var name = _step.value;
@@ -21120,11 +21661,11 @@
         return registration2.extension === key;
       });
       var names = /* @__PURE__ */ new Set();
-      var _iterator2 = _createForOfIteratorHelper(registrations), _step2;
+      var _iterator2 = _createForOfIteratorHelper2(registrations), _step2;
       try {
         for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
           var registration = _step2.value;
-          var _iterator4 = _createForOfIteratorHelper(registration.methods), _step4;
+          var _iterator4 = _createForOfIteratorHelper2(registration.methods), _step4;
           try {
             for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
               var _name2 = _step4.value;
@@ -21159,7 +21700,7 @@
         var _name = _Object$keys2[_i2];
         if (_name !== "update" && !names.has(_name)) delete namespace[_name];
       }
-      var _iterator3 = _createForOfIteratorHelper(names), _step3;
+      var _iterator3 = _createForOfIteratorHelper2(names), _step3;
       try {
         var _loop = function _loop2() {
           var name2 = _step3.value;
@@ -21226,7 +21767,7 @@
 
   // src/internal/create-mount-helper.js
   function _slicedToArray(r, e) {
-    return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray2(r, e) || _nonIterableRest();
+    return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray3(r, e) || _nonIterableRest();
   }
   function _nonIterableRest() {
     throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
@@ -21255,10 +21796,10 @@
   function _arrayWithHoles(r) {
     if (Array.isArray(r)) return r;
   }
-  function _createForOfIteratorHelper2(r, e) {
+  function _createForOfIteratorHelper3(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
-      if (Array.isArray(r) || (t = _unsupportedIterableToArray2(r)) || e && r && "number" == typeof r.length) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray3(r)) || e && r && "number" == typeof r.length) {
         t && (r = t);
         var _n = 0, F = function F2() {
         };
@@ -21286,14 +21827,14 @@
       }
     } };
   }
-  function _unsupportedIterableToArray2(r, a) {
+  function _unsupportedIterableToArray3(r, a) {
     if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray2(r, a);
+      if ("string" == typeof r) return _arrayLikeToArray3(r, a);
       var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray2(r, a) : void 0;
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray3(r, a) : void 0;
     }
   }
-  function _arrayLikeToArray2(r, a) {
+  function _arrayLikeToArray3(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
@@ -21475,7 +22016,7 @@
           while (1) switch (_context3.p = _context3.n) {
             case 0:
               hasDetachedElement = false;
-              _iterator = _createForOfIteratorHelper2(mountedElements.keys());
+              _iterator = _createForOfIteratorHelper3(mountedElements.keys());
               _context3.p = 1;
               _iterator.s();
             case 2:
@@ -21546,7 +22087,7 @@
               });
               _context4.p = 2;
               allLinks = findElements(rootElement, "link[rel='aelluxjs-ext']");
-              _iterator2 = _createForOfIteratorHelper2(allLinks);
+              _iterator2 = _createForOfIteratorHelper3(allLinks);
               try {
                 for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
                   link = _step2.value;
@@ -21660,7 +22201,7 @@
             case 1:
               candidatesByExtension = /* @__PURE__ */ new Map();
               allElements = findElements(rootElement, filter.join(","));
-              _iterator3 = _createForOfIteratorHelper2(allElements);
+              _iterator3 = _createForOfIteratorHelper3(allElements);
               try {
                 for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
                   element = _step3.value;
@@ -21678,7 +22219,7 @@
                       if (element.matches(_selector3) && filter.indexOf(_selector3) !== -1) localExtensionNames.add(fromCamelCase2(_key3));
                     }
                   }
-                  _iterator0 = _createForOfIteratorHelper2(localExtensionNames);
+                  _iterator0 = _createForOfIteratorHelper3(localExtensionNames);
                   try {
                     for (_iterator0.s(); !(_step0 = _iterator0.n()).done; ) {
                       _extensionName2 = _step0.value;
@@ -21716,7 +22257,7 @@
               }));
             case 2:
               loaded = _context5.v;
-              _iterator4 = _createForOfIteratorHelper2(loaded);
+              _iterator4 = _createForOfIteratorHelper3(loaded);
               _context5.p = 3;
               _iterator4.s();
             case 4:
@@ -21767,7 +22308,7 @@
               return _context5.a(3, 13);
             case 12:
               searchRoots = [];
-              _iterator5 = _createForOfIteratorHelper2(candidates);
+              _iterator5 = _createForOfIteratorHelper3(candidates);
               try {
                 for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
                   candidate = _step5.value;
@@ -21780,7 +22321,7 @@
               } finally {
                 _iterator5.f();
               }
-              _iterator6 = _createForOfIteratorHelper2(mounter);
+              _iterator6 = _createForOfIteratorHelper3(mounter);
               try {
                 for (_iterator6.s(); !(_step6 = _iterator6.n()).done; ) {
                   _step6$value = _slicedToArray(_step6.value, 2), selector = _step6$value[0], controller = _step6$value[1];
@@ -21821,7 +22362,7 @@
               }
               return _context5.a(3, 38);
             case 17:
-              _iterator7 = _createForOfIteratorHelper2(_searchRoots);
+              _iterator7 = _createForOfIteratorHelper3(_searchRoots);
               _context5.p = 18;
               _iterator7.s();
             case 19:
@@ -21831,7 +22372,7 @@
               }
               searchRoot = _step7.value;
               mountableElements = findElements(searchRoot, _selector);
-              _iterator8 = _createForOfIteratorHelper2(mountableElements);
+              _iterator8 = _createForOfIteratorHelper3(mountableElements);
               _context5.p = 20;
               _iterator8.s();
             case 21:
@@ -21942,7 +22483,7 @@
               _context5.n = 15;
               break;
             case 39:
-              _iterator9 = _createForOfIteratorHelper2(elementsAffected);
+              _iterator9 = _createForOfIteratorHelper3(elementsAffected);
               _context5.p = 40;
               _iterator9.s();
             case 41:
@@ -22093,7 +22634,7 @@
                 break;
               }
               registrations.sort(compareUnmountOrder);
-              _iterator1 = _createForOfIteratorHelper2(registrations);
+              _iterator1 = _createForOfIteratorHelper3(registrations);
               _context6.p = 11;
               _iterator1.s();
             case 12:
@@ -22366,7 +22907,7 @@
 
   // src/internal/build-mount-map-manager.js
   function _toConsumableArray(r) {
-    return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray3(r) || _nonIterableSpread();
+    return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray4(r) || _nonIterableSpread();
   }
   function _nonIterableSpread() {
     throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
@@ -22375,20 +22916,20 @@
     if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
   }
   function _arrayWithoutHoles(r) {
-    if (Array.isArray(r)) return _arrayLikeToArray3(r);
+    if (Array.isArray(r)) return _arrayLikeToArray4(r);
   }
-  function _typeof(o) {
+  function _typeof2(o) {
     "@babel/helpers - typeof";
-    return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
+    return _typeof2 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
       return typeof o2;
     } : function(o2) {
       return o2 && "function" == typeof Symbol && o2.constructor === Symbol && o2 !== Symbol.prototype ? "symbol" : typeof o2;
-    }, _typeof(o);
+    }, _typeof2(o);
   }
-  function _createForOfIteratorHelper3(r, e) {
+  function _createForOfIteratorHelper4(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
-      if (Array.isArray(r) || (t = _unsupportedIterableToArray3(r)) || e && r && "number" == typeof r.length) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray4(r)) || e && r && "number" == typeof r.length) {
         t && (r = t);
         var _n = 0, F = function F2() {
         };
@@ -22416,14 +22957,14 @@
       }
     } };
   }
-  function _unsupportedIterableToArray3(r, a) {
+  function _unsupportedIterableToArray4(r, a) {
     if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray3(r, a);
+      if ("string" == typeof r) return _arrayLikeToArray4(r, a);
       var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray3(r, a) : void 0;
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray4(r, a) : void 0;
     }
   }
-  function _arrayLikeToArray3(r, a) {
+  function _arrayLikeToArray4(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
@@ -22471,7 +23012,7 @@
       return task;
     }
     function hasRemovedNodes(records) {
-      var _iterator = _createForOfIteratorHelper3(records), _step;
+      var _iterator = _createForOfIteratorHelper4(records), _step;
       try {
         for (_iterator.s(); !(_step = _iterator.n()).done; ) {
           var record = _step.value;
@@ -22485,7 +23026,7 @@
       return false;
     }
     function hasDetachedMountedElement() {
-      var _iterator2 = _createForOfIteratorHelper3(mountedElements.keys()), _step2;
+      var _iterator2 = _createForOfIteratorHelper4(mountedElements.keys()), _step2;
       try {
         for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
           var element = _step2.value;
@@ -22547,7 +23088,7 @@
         });
         return false;
       }
-      if (!options || _typeof(options) !== "object" || Array.isArray(options)) return reject("options");
+      if (!options || _typeof2(options) !== "object" || Array.isArray(options)) return reject("options");
       var extensionName = options.extensionName, selector = options.selector, mount = options.mount, unmount = options.unmount, update = options.update, controllers = options.controllers;
       var priority = options.priority === void 0 ? 0 : options.priority;
       if (typeof extensionName !== "string" || !/^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$|^[a-z][a-zA-Z0-9]*$/.test(extensionName)) return reject("extensionName");
@@ -22614,7 +23155,7 @@
     function hasMountedRegistration(extensionName, selector) {
       var prefix = "".concat(fromCamelCase2(extensionName), "@");
       var mountId = selector === void 0 ? null : "".concat(prefix).concat(selector);
-      var _iterator3 = _createForOfIteratorHelper3(mountedElements.values()), _step3;
+      var _iterator3 = _createForOfIteratorHelper4(mountedElements.values()), _step3;
       try {
         for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
           var registrations = _step3.value;
@@ -22622,7 +23163,7 @@
             if (registrations.has(mountId)) return true;
             continue;
           }
-          var _iterator4 = _createForOfIteratorHelper3(registrations), _step4;
+          var _iterator4 = _createForOfIteratorHelper4(registrations), _step4;
           try {
             for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
               var id = _step4.value;
@@ -22653,19 +23194,19 @@
 
   // src/internal/create-aria-helper.js
   function _slicedToArray2(r, e) {
-    return _arrayWithHoles2(r) || _iterableToArrayLimit2(r, e) || _unsupportedIterableToArray4(r, e) || _nonIterableRest2();
+    return _arrayWithHoles2(r) || _iterableToArrayLimit2(r, e) || _unsupportedIterableToArray5(r, e) || _nonIterableRest2();
   }
   function _nonIterableRest2() {
     throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
-  function _unsupportedIterableToArray4(r, a) {
+  function _unsupportedIterableToArray5(r, a) {
     if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray4(r, a);
+      if ("string" == typeof r) return _arrayLikeToArray5(r, a);
       var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray4(r, a) : void 0;
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray5(r, a) : void 0;
     }
   }
-  function _arrayLikeToArray4(r, a) {
+  function _arrayLikeToArray5(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
@@ -22694,13 +23235,13 @@
   function _arrayWithHoles2(r) {
     if (Array.isArray(r)) return r;
   }
-  function _typeof2(o) {
+  function _typeof3(o) {
     "@babel/helpers - typeof";
-    return _typeof2 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
+    return _typeof3 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
       return typeof o2;
     } : function(o2) {
       return o2 && "function" == typeof Symbol && o2.constructor === Symbol && o2 !== Symbol.prototype ? "symbol" : typeof o2;
-    }, _typeof2(o);
+    }, _typeof3(o);
   }
   function createAriaHelper() {
     var elements = /* @__PURE__ */ new WeakMap();
@@ -22775,7 +23316,7 @@
       return {
         set: function set(values) {
           if (released) return false;
-          if (!values || _typeof2(values) !== "object") {
+          if (!values || _typeof3(values) !== "object") {
             throw new TypeError("Invalid ARIA values");
           }
           var updates = Object.entries(values).map(function(_ref) {
@@ -22825,11 +23366,11 @@
     }
   });
 
-  // src/aellux.orchestrator.js
-  function _createForOfIteratorHelper4(r, e) {
+  // src/internal/ease.js
+  function _createForOfIteratorHelper5(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
-      if (Array.isArray(r) || (t = _unsupportedIterableToArray5(r)) || e && r && "number" == typeof r.length) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray6(r)) || e && r && "number" == typeof r.length) {
         t && (r = t);
         var _n = 0, F = function F2() {
         };
@@ -22857,14 +23398,178 @@
       }
     } };
   }
-  function _unsupportedIterableToArray5(r, a) {
+  function _unsupportedIterableToArray6(r, a) {
     if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray5(r, a);
+      if ("string" == typeof r) return _arrayLikeToArray6(r, a);
       var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray5(r, a) : void 0;
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray6(r, a) : void 0;
     }
   }
-  function _arrayLikeToArray5(r, a) {
+  function _arrayLikeToArray6(r, a) {
+    (null == a || a > r.length) && (a = r.length);
+    for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
+    return n;
+  }
+  function bounceOut(t) {
+    var n = 7.5625;
+    var d = 2.75;
+    if (t < 1 / d) return n * t * t;
+    if (t < 2 / d) {
+      t -= 1.5 / d;
+      return n * t * t + 0.75;
+    }
+    if (t < 2.5 / d) {
+      t -= 2.25 / d;
+      return n * t * t + 0.9375;
+    }
+    t -= 2.625 / d;
+    return n * t * t + 0.984375;
+  }
+  function easeIn(family, t) {
+    switch (family) {
+      case QUAD:
+        return t * t;
+      case CUBIC:
+        return t * t * t;
+      case QUART:
+        return t * t * t * t;
+      case QUINT:
+        return t * t * t * t * t;
+      case SINE:
+        return 1 - Math.cos(t * Math.PI / 2);
+      case EXPO:
+        return t === 0 ? 0 : Math.pow(2, 10 * t - 10);
+      case CIRC:
+        return 1 - Math.sqrt(1 - t * t);
+      case BACK:
+        return t * t * (2.70158 * t - 1.70158);
+      case ELASTIC:
+        return t === 0 || t === 1 ? t : -Math.pow(2, 10 * t - 10) * Math.sin((10 * t - 10.75) * 2 * Math.PI / 3);
+      case BOUNCE:
+        return 1 - bounceOut(1 - t);
+      default:
+        throw new RangeError("Unknown easing family: ".concat(family));
+    }
+  }
+  function ease(name, t) {
+    if (typeof name !== "string" || typeof t !== "number" || !Number.isFinite(t)) {
+      throw new TypeError("ease(name, t) requires a name and a finite number");
+    }
+    t = Math.min(1, Math.max(0, t));
+    var key = name.replace(/[\s_-]/g, "").toLowerCase();
+    if (key.startsWith(EASE_PREFIX)) key = key.slice(EASE_PREFIX.length);
+    if (key === "linear") return t;
+    if (key === "smoothstep") return t * t * (3 - 2 * t);
+    if (key === "smootherstep") return t * t * t * (t * (6 * t - 15) + 10);
+    var family = "";
+    var direction = "";
+    var _iterator = _createForOfIteratorHelper5(DIRECTIONS), _step;
+    try {
+      for (_iterator.s(); !(_step = _iterator.n()).done; ) {
+        var candidate = _step.value;
+        if (key.endsWith(candidate)) {
+          family = key.slice(0, -candidate.length);
+          direction = candidate;
+          break;
+        }
+        if (key.startsWith(candidate)) {
+          family = key.slice(candidate.length);
+          direction = candidate;
+          break;
+        }
+      }
+    } catch (err) {
+      _iterator.e(err);
+    } finally {
+      _iterator.f();
+    }
+    family = ALIASES[family] || family;
+    if (!FAMILIES.includes(family)) throw new RangeError("Unknown easing: ".concat(name));
+    if (direction === IN) return easeIn(family, t);
+    if (direction === OUT) return 1 - easeIn(family, 1 - t);
+    if (family === BACK) {
+      var c = 1.70158 * 1.525;
+      var x = t < 0.5 ? 2 * t : 2 * t - 2;
+      return t < 0.5 ? x * x * ((c + 1) * x - c) / 2 : (x * x * ((c + 1) * x + c) + 2) / 2;
+    }
+    if (family === ELASTIC) {
+      if (t === 0 || t === 1) return t;
+      var wave = Math.sin((20 * t - 11.125) * 2 * Math.PI / 4.5);
+      return t < 0.5 ? -Math.pow(2, 20 * t - 10) * wave / 2 : Math.pow(2, -20 * t + 10) * wave / 2 + 1;
+    }
+    return t < 0.5 ? easeIn(family, 2 * t) / 2 : 1 - easeIn(family, 2 - 2 * t) / 2;
+  }
+  var EASE_PREFIX, IN, OUT, IN_OUT, DIRECTIONS, QUAD, CUBIC, QUART, QUINT, SINE, EXPO, CIRC, BACK, ELASTIC, BOUNCE, FAMILIES, ALIASES;
+  var init_ease = __esm({
+    "src/internal/ease.js": function() {
+      /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+      EASE_PREFIX = "ease";
+      IN = "in";
+      OUT = "out";
+      IN_OUT = "inout";
+      DIRECTIONS = [IN_OUT, OUT, IN];
+      QUAD = "quad";
+      CUBIC = "cubic";
+      QUART = "quart";
+      QUINT = "quint";
+      SINE = "sine";
+      EXPO = "expo";
+      CIRC = "circ";
+      BACK = "back";
+      ELASTIC = "elastic";
+      BOUNCE = "bounce";
+      FAMILIES = [QUAD, CUBIC, QUART, QUINT, SINE, EXPO, CIRC, BACK, ELASTIC, BOUNCE];
+      ALIASES = {
+        quadratic: QUAD,
+        quartic: QUART,
+        quintic: QUINT,
+        sinusoidal: SINE,
+        exponential: EXPO,
+        circular: CIRC
+      };
+    }
+  });
+
+  // src/aellux.orchestrator.js
+  function _createForOfIteratorHelper6(r, e) {
+    var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
+    if (!t) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray7(r)) || e && r && "number" == typeof r.length) {
+        t && (r = t);
+        var _n = 0, F = function F2() {
+        };
+        return { s: F, n: function n() {
+          return _n >= r.length ? { done: true } : { done: false, value: r[_n++] };
+        }, e: function e2(r2) {
+          throw r2;
+        }, f: F };
+      }
+      throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+    }
+    var o, a = true, u = false;
+    return { s: function s() {
+      t = t.call(r);
+    }, n: function n() {
+      var r2 = t.next();
+      return a = r2.done, r2;
+    }, e: function e2(r2) {
+      u = true, o = r2;
+    }, f: function f() {
+      try {
+        a || null == t.return || t.return();
+      } finally {
+        if (u) throw o;
+      }
+    } };
+  }
+  function _unsupportedIterableToArray7(r, a) {
+    if (r) {
+      if ("string" == typeof r) return _arrayLikeToArray7(r, a);
+      var t = {}.toString.call(r).slice(8, -1);
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray7(r, a) : void 0;
+    }
+  }
+  function _arrayLikeToArray7(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
@@ -22976,6 +23681,7 @@
       init_build_layout_scheduler();
       init_build_mount_map_manager();
       init_create_aria_helper();
+      init_ease();
       init_utils_name_case();
       /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
       (function(root2) {
@@ -23088,7 +23794,7 @@
                       extensions: extensionNames
                     });
                   case 4:
-                    _iterator = _createForOfIteratorHelper4(extensionNames);
+                    _iterator = _createForOfIteratorHelper6(extensionNames);
                     _context5.p = 5;
                     _iterator.s();
                   case 6:
@@ -23172,6 +23878,7 @@
             return getExtension(extensionName);
           },
           request: defaultRequest,
+          ease: ease,
           aria: aria,
           waitLayout: layoutScheduler,
           mountManager: mountManager
@@ -23373,10 +24080,10 @@
 
   // src/aellux.ext.preference.js
   var aellux_ext_preference_exports = {};
-  function _createForOfIteratorHelper5(r, e) {
+  function _createForOfIteratorHelper7(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
-      if (Array.isArray(r) || (t = _unsupportedIterableToArray6(r)) || e && r && "number" == typeof r.length) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray8(r)) || e && r && "number" == typeof r.length) {
         t && (r = t);
         var _n = 0, F = function F2() {
         };
@@ -23405,19 +24112,19 @@
     } };
   }
   function _slicedToArray3(r, e) {
-    return _arrayWithHoles3(r) || _iterableToArrayLimit3(r, e) || _unsupportedIterableToArray6(r, e) || _nonIterableRest3();
+    return _arrayWithHoles3(r) || _iterableToArrayLimit3(r, e) || _unsupportedIterableToArray8(r, e) || _nonIterableRest3();
   }
   function _nonIterableRest3() {
     throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
-  function _unsupportedIterableToArray6(r, a) {
+  function _unsupportedIterableToArray8(r, a) {
     if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray6(r, a);
+      if ("string" == typeof r) return _arrayLikeToArray8(r, a);
       var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray6(r, a) : void 0;
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray8(r, a) : void 0;
     }
   }
-  function _arrayLikeToArray6(r, a) {
+  function _arrayLikeToArray8(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
@@ -23525,7 +24232,7 @@
           update();
         }
         function destroy() {
-          var _iterator = _createForOfIteratorHelper5(containerPreferences.keys()), _step;
+          var _iterator = _createForOfIteratorHelper7(containerPreferences.keys()), _step;
           try {
             for (_iterator.s(); !(_step = _iterator.n()).done; ) {
               var container = _step.value;
@@ -23590,7 +24297,7 @@
             computedPreferences[_key] = nextPreferences[_key];
           }
           AelluxJs2.updatePreferenceAttributesHTML(computedPreferences);
-          var _iterator2 = _createForOfIteratorHelper5(containerPreferences.keys()), _step2;
+          var _iterator2 = _createForOfIteratorHelper7(containerPreferences.keys()), _step2;
           try {
             for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
               var container = _step2.value;
@@ -23601,13 +24308,13 @@
           } finally {
             _iterator2.f();
           }
-          var _iterator3 = _createForOfIteratorHelper5(changed), _step3;
+          var _iterator3 = _createForOfIteratorHelper7(changed), _step3;
           try {
             for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
               var _key2 = _step3.value;
               var containers = containersByPreference.get(_key2);
               if (containers) {
-                var _iterator4 = _createForOfIteratorHelper5(containers), _step4;
+                var _iterator4 = _createForOfIteratorHelper7(containers), _step4;
                 try {
                   for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
                     var _container = _step4.value;
@@ -23698,7 +24405,7 @@
           AelluxJs2.offTarget(container, "$click", onContainerClick);
           var labels = containerLabels.get(container);
           if (labels) {
-            var _iterator5 = _createForOfIteratorHelper5(labels), _step5;
+            var _iterator5 = _createForOfIteratorHelper7(labels), _step5;
             try {
               for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
                 var _labelMemories$get;
@@ -23830,13 +24537,13 @@
       r2 ? i ? i(e2, r2, { value: n2, enumerable: !t2, configurable: !t2, writable: !t2 }) : e2[r2] = n2 : (o("next", 0), o("throw", 1), o("return", 2));
     }, _regeneratorDefine23(e, r, n, t);
   }
-  function _typeof3(o) {
+  function _typeof4(o) {
     "@babel/helpers - typeof";
-    return _typeof3 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
+    return _typeof4 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
       return typeof o2;
     } : function(o2) {
       return o2 && "function" == typeof Symbol && o2.constructor === Symbol && o2 !== Symbol.prototype ? "symbol" : typeof o2;
-    }, _typeof3(o);
+    }, _typeof4(o);
   }
   function asyncGeneratorStep3(n, t, e, r, o, a, c) {
     try {
@@ -24001,11 +24708,11 @@
           AelluxJs2.dispatch(name, options);
         }
         function copyHistoryState(state) {
-          if (!state || _typeof3(state) !== "object") return state;
+          if (!state || _typeof4(state) !== "object") return state;
           if (typeof root2.structuredClone === "function") return root2.structuredClone(state);
           var copy = Array.isArray(state) ? state.slice() : Object.assign({}, state);
-          if (state.snapshot && _typeof3(state.snapshot) === "object") copy.snapshot = Object.assign({}, state.snapshot);
-          if (state.ajaxReplace && _typeof3(state.ajaxReplace) === "object") {
+          if (state.snapshot && _typeof4(state.snapshot) === "object") copy.snapshot = Object.assign({}, state.snapshot);
+          if (state.ajaxReplace && _typeof4(state.ajaxReplace) === "object") {
             copy.ajaxReplace = Object.assign({}, state.ajaxReplace);
             if (Array.isArray(state.ajaxReplace.selectors)) copy.ajaxReplace.selectors = state.ajaxReplace.selectors.slice();
           }
@@ -24055,13 +24762,13 @@
         }
         function mergeHistoryState(state) {
           var currentState = history.state;
-          if (!currentState || _typeof3(currentState) !== "object" || Array.isArray(currentState)) return state;
+          if (!currentState || _typeof4(currentState) !== "object" || Array.isArray(currentState)) return state;
           return Object.assign({}, currentState, state);
         }
         function OnPushState(event) {
           try {
             var detail = event && event.detail;
-            if (!detail || _typeof3(detail) !== "object" || typeof detail.key !== "string" || !detail.key.trim() || typeof detail.value !== "string" || !detail.value.trim() || detail.title !== void 0 && typeof detail.title !== "string") {
+            if (!detail || _typeof4(detail) !== "object" || typeof detail.key !== "string" || !detail.key.trim() || typeof detail.value !== "string" || !detail.value.trim() || detail.title !== void 0 && typeof detail.title !== "string") {
               AelluxJs2.diagnostics.warn(AelluxJs2.diagnostics.WARN_NAVIGATION_EVENT_INVALID, {
                 extension: extensionName,
                 event: "PushState",
@@ -24081,7 +24788,7 @@
         function OnPushAjaxReplace(event) {
           try {
             var detail = event && event.detail;
-            if (!detail || _typeof3(detail) !== "object" || typeof detail.url !== "string" || !detail.url.trim() || !Object.prototype.hasOwnProperty.call(detail, "selectors") || detail.selectors == null) {
+            if (!detail || _typeof4(detail) !== "object" || typeof detail.url !== "string" || !detail.url.trim() || !Object.prototype.hasOwnProperty.call(detail, "selectors") || detail.selectors == null) {
               AelluxJs2.diagnostics.warn(AelluxJs2.diagnostics.WARN_NAVIGATION_EVENT_INVALID, {
                 extension: extensionName,
                 event: PUSH_AJAX_REPLACE,
@@ -24101,7 +24808,7 @@
         function OnUpdateBaseTitle(event) {
           try {
             var detail = event && event.detail;
-            if (!detail || _typeof3(detail) !== "object" || !Object.prototype.hasOwnProperty.call(detail, "title") || typeof detail.title !== "string") {
+            if (!detail || _typeof4(detail) !== "object" || !Object.prototype.hasOwnProperty.call(detail, "title") || typeof detail.title !== "string") {
               AelluxJs2.diagnostics.warn(AelluxJs2.diagnostics.WARN_NAVIGATION_EVENT_INVALID, {
                 extension: extensionName,
                 event: UPDATE_BASE_TITLE,
@@ -24202,10 +24909,10 @@
       r2 ? i ? i(e2, r2, { value: n2, enumerable: !t2, configurable: !t2, writable: !t2 }) : e2[r2] = n2 : (o("next", 0), o("throw", 1), o("return", 2));
     }, _regeneratorDefine24(e, r, n, t);
   }
-  function _createForOfIteratorHelper6(r, e) {
+  function _createForOfIteratorHelper8(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
-      if (Array.isArray(r) || (t = _unsupportedIterableToArray7(r)) || e && r && "number" == typeof r.length) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray9(r)) || e && r && "number" == typeof r.length) {
         t && (r = t);
         var _n = 0, F = function F2() {
         };
@@ -24233,14 +24940,14 @@
       }
     } };
   }
-  function _unsupportedIterableToArray7(r, a) {
+  function _unsupportedIterableToArray9(r, a) {
     if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray7(r, a);
+      if ("string" == typeof r) return _arrayLikeToArray9(r, a);
       var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray7(r, a) : void 0;
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray9(r, a) : void 0;
     }
   }
-  function _arrayLikeToArray7(r, a) {
+  function _arrayLikeToArray9(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
@@ -24320,7 +25027,7 @@
                   AelluxJs2.mountManager.remove({
                     extensionName: extensionName
                   });
-                  _iterator2 = _createForOfIteratorHelper6(motionTimers.values());
+                  _iterator2 = _createForOfIteratorHelper8(motionTimers.values());
                   try {
                     for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
                       timer = _step2.value;
@@ -24371,7 +25078,7 @@
           });
           if (messageElement && typeof message === "string") {
             var textNode = null;
-            var _iterator = _createForOfIteratorHelper6(messageElement.childNodes), _step;
+            var _iterator = _createForOfIteratorHelper8(messageElement.childNodes), _step;
             try {
               for (_iterator.s(); !(_step = _iterator.n()).done; ) {
                 var child = _step.value;
@@ -24575,10 +25282,10 @@
 
   // src/aellux.ext.focus.js
   var aellux_ext_focus_exports = {};
-  function _createForOfIteratorHelper7(r, e) {
+  function _createForOfIteratorHelper9(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
-      if (Array.isArray(r) || (t = _unsupportedIterableToArray8(r)) || e && r && "number" == typeof r.length) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray10(r)) || e && r && "number" == typeof r.length) {
         t && (r = t);
         var _n = 0, F = function F2() {
         };
@@ -24606,14 +25313,14 @@
       }
     } };
   }
-  function _unsupportedIterableToArray8(r, a) {
+  function _unsupportedIterableToArray10(r, a) {
     if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray8(r, a);
+      if ("string" == typeof r) return _arrayLikeToArray10(r, a);
       var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray8(r, a) : void 0;
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray10(r, a) : void 0;
     }
   }
-  function _arrayLikeToArray8(r, a) {
+  function _arrayLikeToArray10(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
@@ -24695,7 +25402,7 @@
           if (event.key !== "Enter" || event.isComposing || event.repeat || event.defaultPrevented || event.target !== event.currentTarget && event.target.closest(focusableSelector) !== event.currentTarget) return;
           var elements = document.querySelectorAll(focusableSelector);
           var foundCurrent = false;
-          var _iterator = _createForOfIteratorHelper7(elements), _step;
+          var _iterator = _createForOfIteratorHelper9(elements), _step;
           try {
             for (_iterator.s(); !(_step = _iterator.n()).done; ) {
               var element = _step.value;
@@ -24799,13 +25506,13 @@
 
   // src/aellux.ext.point.js
   var aellux_ext_point_exports = {};
-  function _typeof4(o) {
+  function _typeof5(o) {
     "@babel/helpers - typeof";
-    return _typeof4 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
+    return _typeof5 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
       return typeof o2;
     } : function(o2) {
       return o2 && "function" == typeof Symbol && o2.constructor === Symbol && o2 !== Symbol.prototype ? "symbol" : typeof o2;
-    }, _typeof4(o);
+    }, _typeof5(o);
   }
   function _classCallCheck(a, n) {
     if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function");
@@ -24821,20 +25528,20 @@
   }
   function _toPropertyKey(t) {
     var i = _toPrimitive(t, "string");
-    return "symbol" == _typeof4(i) ? i : i + "";
+    return "symbol" == _typeof5(i) ? i : i + "";
   }
   function _toPrimitive(t, r) {
-    if ("object" != _typeof4(t) || !t) return t;
+    if ("object" != _typeof5(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof4(i)) return i;
+      if ("object" != _typeof5(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
   }
   function _slicedToArray4(r, e) {
-    return _arrayWithHoles4(r) || _iterableToArrayLimit4(r, e) || _unsupportedIterableToArray9(r, e) || _nonIterableRest4();
+    return _arrayWithHoles4(r) || _iterableToArrayLimit4(r, e) || _unsupportedIterableToArray11(r, e) || _nonIterableRest4();
   }
   function _nonIterableRest4() {
     throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
@@ -24863,10 +25570,10 @@
   function _arrayWithHoles4(r) {
     if (Array.isArray(r)) return r;
   }
-  function _createForOfIteratorHelper8(r, e) {
+  function _createForOfIteratorHelper10(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
-      if (Array.isArray(r) || (t = _unsupportedIterableToArray9(r)) || e && r && "number" == typeof r.length) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray11(r)) || e && r && "number" == typeof r.length) {
         t && (r = t);
         var _n = 0, F = function F2() {
         };
@@ -24894,14 +25601,14 @@
       }
     } };
   }
-  function _unsupportedIterableToArray9(r, a) {
+  function _unsupportedIterableToArray11(r, a) {
     if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray9(r, a);
+      if ("string" == typeof r) return _arrayLikeToArray11(r, a);
       var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray9(r, a) : void 0;
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray11(r, a) : void 0;
     }
   }
-  function _arrayLikeToArray9(r, a) {
+  function _arrayLikeToArray11(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
@@ -24936,7 +25643,7 @@
             unmount: unmountPointable,
             controllers: ["pointers"]
           });
-          var _iterator = _createForOfIteratorHelper8(pointerEvents), _step;
+          var _iterator = _createForOfIteratorHelper10(pointerEvents), _step;
           try {
             for (_iterator.s(); !(_step = _iterator.n()).done; ) {
               var _step$value = _slicedToArray4(_step.value, 2), suffix = _step$value[0], handler = _step$value[1];
@@ -24952,7 +25659,7 @@
           AelluxJs2.mountManager.remove({
             extensionName: extensionName
           });
-          var _iterator2 = _createForOfIteratorHelper8(pointerEvents), _step2;
+          var _iterator2 = _createForOfIteratorHelper10(pointerEvents), _step2;
           try {
             for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
               var _step2$value = _slicedToArray4(_step2.value, 2), suffix = _step2$value[0], handler = _step2$value[1];
@@ -24971,7 +25678,7 @@
         }
         function unmountPointable(element) {
           pointableElements.delete(element);
-          var _iterator3 = _createForOfIteratorHelper8(trackedPointers.values()), _step3;
+          var _iterator3 = _createForOfIteratorHelper10(trackedPointers.values()), _step3;
           try {
             for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
               var pointer = _step3.value;
@@ -24986,7 +25693,7 @@
         }
         function pointers(element) {
           var result = [];
-          var _iterator4 = _createForOfIteratorHelper8(trackedPointers.values()), _step4;
+          var _iterator4 = _createForOfIteratorHelper10(trackedPointers.values()), _step4;
           try {
             for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
               var pointer = _step4.value;
@@ -25011,7 +25718,7 @@
           while (element) {
             if (pointableElements.has(element) && element.hasAttribute(pointableAttribute)) {
               var occupied = 0;
-              var _iterator5 = _createForOfIteratorHelper8(trackedPointers.values()), _step5;
+              var _iterator5 = _createForOfIteratorHelper10(trackedPointers.values()), _step5;
               try {
                 for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
                   var other = _step5.value;
@@ -25316,10 +26023,10 @@
       });
     };
   }
-  function _createForOfIteratorHelper9(r, e) {
+  function _createForOfIteratorHelper11(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
-      if (Array.isArray(r) || (t = _unsupportedIterableToArray10(r)) || e && r && "number" == typeof r.length) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray12(r)) || e && r && "number" == typeof r.length) {
         t && (r = t);
         var _n = 0, F = function F2() {
         };
@@ -25347,14 +26054,14 @@
       }
     } };
   }
-  function _unsupportedIterableToArray10(r, a) {
+  function _unsupportedIterableToArray12(r, a) {
     if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray10(r, a);
+      if ("string" == typeof r) return _arrayLikeToArray12(r, a);
       var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray10(r, a) : void 0;
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray12(r, a) : void 0;
     }
   }
-  function _arrayLikeToArray10(r, a) {
+  function _arrayLikeToArray12(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
@@ -25399,7 +26106,7 @@
         var lastUpdateTime = -DEFAULT_INTERVAL_MS;
         function updateIntervalMs() {
           var interval = Infinity;
-          var _iterator = _createForOfIteratorHelper9(anchors.keys()), _step;
+          var _iterator = _createForOfIteratorHelper11(anchors.keys()), _step;
           try {
             for (_iterator.s(); !(_step = _iterator.n()).done; ) {
               var element = _step.value;
@@ -25592,7 +26299,7 @@
         function flushUpdate() {
           updateTimeout = null;
           lastUpdateTime = now();
-          var _iterator2 = _createForOfIteratorHelper9(anchors.keys()), _step2;
+          var _iterator2 = _createForOfIteratorHelper11(anchors.keys()), _step2;
           try {
             var _loop = function _loop2() {
               var element = _step2.value;
@@ -25748,7 +26455,7 @@
                     element.style.setProperty(ORIGIN_X, "".concat(selected.self[0] * 100, "%"));
                     element.style.setProperty(ORIGIN_Y, "".concat(selected.self[1] * 100, "%"));
                     element.style.setProperty(ANCHOR_OPACITY, placement.opacity);
-                    var _iterator6 = _createForOfIteratorHelper9(baseProperties), _step6;
+                    var _iterator6 = _createForOfIteratorHelper11(baseProperties), _step6;
                     try {
                       for (_iterator6.s(); !(_step6 = _iterator6.n()).done; ) {
                         var name = _step6.value;
@@ -25801,7 +26508,7 @@
             height: root2.innerHeight
           }, reference, referenceRect, scaleX, scaleY);
           var selected = null;
-          var _iterator3 = _createForOfIteratorHelper9(candidates), _step3;
+          var _iterator3 = _createForOfIteratorHelper11(candidates), _step3;
           try {
             for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
               var candidate = _step3.value;
@@ -25864,7 +26571,7 @@
           state.target = target;
           if (state.observer) state.observer.disconnect();
           if (state.intersectionObserver) state.intersectionObserver.disconnect();
-          var _iterator4 = _createForOfIteratorHelper9(/* @__PURE__ */ new Set([element, target, reference])), _step4;
+          var _iterator4 = _createForOfIteratorHelper11(/* @__PURE__ */ new Set([element, target, reference])), _step4;
           try {
             for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
               var observed = _step4.value;
@@ -25915,7 +26622,7 @@
         }
         function parseCandidates(value) {
           var result = [];
-          var _iterator5 = _createForOfIteratorHelper9((value || "").split(",")), _step5;
+          var _iterator5 = _createForOfIteratorHelper11((value || "").split(",")), _step5;
           try {
             for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
               var token = _step5.value;
@@ -25948,7 +26655,7 @@
   // src/aellux.ext.scrollbox.js
   var aellux_ext_scrollbox_exports = {};
   function _toConsumableArray2(r) {
-    return _arrayWithoutHoles2(r) || _iterableToArray2(r) || _unsupportedIterableToArray11(r) || _nonIterableSpread2();
+    return _arrayWithoutHoles2(r) || _iterableToArray2(r) || _unsupportedIterableToArray13(r) || _nonIterableSpread2();
   }
   function _nonIterableSpread2() {
     throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
@@ -25957,10 +26664,10 @@
     if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
   }
   function _arrayWithoutHoles2(r) {
-    if (Array.isArray(r)) return _arrayLikeToArray11(r);
+    if (Array.isArray(r)) return _arrayLikeToArray13(r);
   }
   function _slicedToArray5(r, e) {
-    return _arrayWithHoles5(r) || _iterableToArrayLimit5(r, e) || _unsupportedIterableToArray11(r, e) || _nonIterableRest5();
+    return _arrayWithHoles5(r) || _iterableToArrayLimit5(r, e) || _unsupportedIterableToArray13(r, e) || _nonIterableRest5();
   }
   function _nonIterableRest5() {
     throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
@@ -25989,10 +26696,10 @@
   function _arrayWithHoles5(r) {
     if (Array.isArray(r)) return r;
   }
-  function _createForOfIteratorHelper10(r, e) {
+  function _createForOfIteratorHelper12(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
-      if (Array.isArray(r) || (t = _unsupportedIterableToArray11(r)) || e && r && "number" == typeof r.length) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray13(r)) || e && r && "number" == typeof r.length) {
         t && (r = t);
         var _n = 0, F = function F2() {
         };
@@ -26020,14 +26727,14 @@
       }
     } };
   }
-  function _unsupportedIterableToArray11(r, a) {
+  function _unsupportedIterableToArray13(r, a) {
     if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray11(r, a);
+      if ("string" == typeof r) return _arrayLikeToArray13(r, a);
       var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray11(r, a) : void 0;
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray13(r, a) : void 0;
     }
   }
-  function _arrayLikeToArray11(r, a) {
+  function _arrayLikeToArray13(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
@@ -26104,7 +26811,7 @@
         }]];
         function setListeners(target, owner, entries, active) {
           var method = active ? onTarget : offTarget;
-          var _iterator = _createForOfIteratorHelper10(entries), _step;
+          var _iterator = _createForOfIteratorHelper12(entries), _step;
           try {
             for (_iterator.s(); !(_step = _iterator.n()).done; ) {
               var _step$value = _slicedToArray5(_step.value, 3), event = _step$value[0], handler = _step$value[1], options = _step$value[2];
@@ -26195,7 +26902,7 @@
           });
         }
         function destroy() {
-          var _iterator2 = _createForOfIteratorHelper10(scrollboxes.keys()), _step2;
+          var _iterator2 = _createForOfIteratorHelper12(scrollboxes.keys()), _step2;
           try {
             for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
               var element = _step2.value;
@@ -26489,7 +27196,7 @@
           (_elementMemories$get = elementMemories.get(element)) === null || _elementMemories$get === void 0 || _elementMemories$get.restore();
           elementMemories.delete(element);
           cursorMemories.delete(element);
-          var _iterator3 = _createForOfIteratorHelper10(scrollEdgeClasses), _step3;
+          var _iterator3 = _createForOfIteratorHelper12(scrollEdgeClasses), _step3;
           try {
             for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
               var name = _step3.value;
@@ -26562,7 +27269,7 @@
             x: false,
             y: false
           };
-          var _iterator4 = _createForOfIteratorHelper10(tokens), _step4;
+          var _iterator4 = _createForOfIteratorHelper12(tokens), _step4;
           try {
             for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
               var token = _step4.value;
@@ -26786,7 +27493,7 @@
           return values;
         }
         function updateScrollbars(state, values) {
-          var _iterator5 = _createForOfIteratorHelper10(values), _step5;
+          var _iterator5 = _createForOfIteratorHelper12(values), _step5;
           try {
             for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
               var _step5$value = _step5.value, record = _step5$value.record, trackSize = _step5$value.trackSize, thumbSize = _step5$value.thumbSize, thumbPosition = _step5$value.thumbPosition, max = _step5$value.max, display = _step5$value.display;
@@ -27002,7 +27709,7 @@
           clearSnapWheelTimeout(state);
           if (snap.edgeWheelTimeout !== null) root2.clearTimeout(snap.edgeWheelTimeout);
           snap.edgeWheelTimeout = null;
-          var _iterator6 = _createForOfIteratorHelper10(snap.savedItems), _step6;
+          var _iterator6 = _createForOfIteratorHelper12(snap.savedItems), _step6;
           try {
             for (_iterator6.s(); !(_step6 = _iterator6.n()).done; ) {
               var _snapItemMemories$get;
@@ -27112,7 +27819,7 @@
           var active = kind === POINTER ? snap.activePointers : snap.activeTouches;
           if (kind === POINTER) active.add(event.pointerId);
           else {
-            var _iterator7 = _createForOfIteratorHelper10(event.changedTouches), _step7;
+            var _iterator7 = _createForOfIteratorHelper12(event.changedTouches), _step7;
             try {
               for (_iterator7.s(); !(_step7 = _iterator7.n()).done; ) {
                 var touch = _step7.value;
@@ -27135,7 +27842,7 @@
           var snap = state.snap;
           if (kind === POINTER) snap.activePointers.delete(event.pointerId);
           else if (kind === "touch") {
-            var _iterator8 = _createForOfIteratorHelper10(event.changedTouches), _step8;
+            var _iterator8 = _createForOfIteratorHelper12(event.changedTouches), _step8;
             try {
               for (_iterator8.s(); !(_step8 = _iterator8.n()).done; ) {
                 var touch = _step8.value;
@@ -27397,13 +28104,13 @@
         function isTextAtPoint(element, x, y) {
           if (root2.getComputedStyle(element).userSelect === "none") return false;
           var range = document.createRange();
-          var _iterator9 = _createForOfIteratorHelper10(element.childNodes), _step9;
+          var _iterator9 = _createForOfIteratorHelper12(element.childNodes), _step9;
           try {
             for (_iterator9.s(); !(_step9 = _iterator9.n()).done; ) {
               var node = _step9.value;
               if (node.nodeType !== 3 || !node.textContent.trim()) continue;
               range.selectNodeContents(node);
-              var _iterator0 = _createForOfIteratorHelper10(range.getClientRects()), _step0;
+              var _iterator0 = _createForOfIteratorHelper12(range.getClientRects()), _step0;
               try {
                 for (_iterator0.s(); !(_step0 = _iterator0.n()).done; ) {
                   var rect = _step0.value;
@@ -27482,7 +28189,7 @@
             return axes.get(member2).x;
           });
           if (!textOrigin && event.cancelable) event.preventDefault();
-          var _iterator1 = _createForOfIteratorHelper10(new Set([].concat(_toConsumableArray2(chains.x), _toConsumableArray2(chains.y)))), _step1;
+          var _iterator1 = _createForOfIteratorHelper12(new Set([].concat(_toConsumableArray2(chains.x), _toConsumableArray2(chains.y)))), _step1;
           try {
             for (_iterator1.s(); !(_step1 = _iterator1.n()).done; ) {
               var _member = _step1.value;
@@ -27544,7 +28251,7 @@
             passive: false,
             capture: true
           });
-          var _iterator10 = _createForOfIteratorHelper10(pointerScrollDragEvents), _step10;
+          var _iterator10 = _createForOfIteratorHelper12(pointerScrollDragEvents), _step10;
           try {
             for (_iterator10.s(); !(_step10 = _iterator10.n()).done; ) {
               var name = _step10.value;
@@ -27556,7 +28263,7 @@
             _iterator10.f();
           }
           onTarget(root2, "$selectstart", state.onPointerScrollNativeEvent, true);
-          var _iterator11 = _createForOfIteratorHelper10(pointerScrollMouseEvents), _step11;
+          var _iterator11 = _createForOfIteratorHelper12(pointerScrollMouseEvents), _step11;
           try {
             for (_iterator11.s(); !(_step11 = _iterator11.n()).done; ) {
               var _name = _step11.value;
@@ -27634,7 +28341,7 @@
           if (event.cancelable) event.preventDefault();
           if (!remaining) return;
           var outermost = null;
-          var _iterator12 = _createForOfIteratorHelper10(pointerScroll.chain), _step12;
+          var _iterator12 = _createForOfIteratorHelper12(pointerScroll.chain), _step12;
           try {
             for (_iterator12.s(); !(_step12 = _iterator12.n()).done; ) {
               var member = _step12.value;
@@ -27659,7 +28366,7 @@
           }
           var lastUsed = null;
           var lastStartX = 0, lastStartY = 0;
-          var _iterator13 = _createForOfIteratorHelper10(pointerScroll.chain), _step13;
+          var _iterator13 = _createForOfIteratorHelper12(pointerScroll.chain), _step13;
           try {
             for (_iterator13.s(); !(_step13 = _iterator13.n()).done; ) {
               var _member2 = _step13.value;
@@ -27738,7 +28445,7 @@
         }
         function pointerAxisChain(chain, axes, axis) {
           var result = [];
-          var _iterator14 = _createForOfIteratorHelper10(chain), _step14;
+          var _iterator14 = _createForOfIteratorHelper12(chain), _step14;
           try {
             for (_iterator14.s(); !(_step14 = _iterator14.n()).done; ) {
               var member = _step14.value;
@@ -27757,7 +28464,7 @@
           pointerScroll.moved = true;
           pointerScroll.started = true;
           restorePointerScrollCursor(state);
-          var _iterator15 = _createForOfIteratorHelper10(pointerScroll.chain), _step15;
+          var _iterator15 = _createForOfIteratorHelper12(pointerScroll.chain), _step15;
           try {
             for (_iterator15.s(); !(_step15 = _iterator15.n()).done; ) {
               var member = _step15.value;
@@ -27818,7 +28525,7 @@
           if (pointerScroll.selectionWaitTimeout !== null) root2.clearTimeout(pointerScroll.selectionWaitTimeout);
           offTarget(root2, POINTER_MOVE_TARGET, state.onPointerMove, true);
           offTarget(root2, "$touchmove", state.onPointerScrollTouchMove, true);
-          var _iterator16 = _createForOfIteratorHelper10(pointerScrollDragEvents), _step16;
+          var _iterator16 = _createForOfIteratorHelper12(pointerScrollDragEvents), _step16;
           try {
             for (_iterator16.s(); !(_step16 = _iterator16.n()).done; ) {
               var name = _step16.value;
@@ -27842,7 +28549,7 @@
           } else {
             stopPointerScrollMouseEvents(state);
           }
-          var _iterator17 = _createForOfIteratorHelper10(pointerScroll.styles), _step17;
+          var _iterator17 = _createForOfIteratorHelper12(pointerScroll.styles), _step17;
           try {
             for (_iterator17.s(); !(_step17 = _iterator17.n()).done; ) {
               var _pointerScrollMemorie;
@@ -27877,7 +28584,7 @@
             recordSnapFlick(snapState, pointerScroll, pointerScroll.axis, pointerScroll.snapStarts.get(snapState));
             scheduleScrollEnd(snapState);
           }
-          var _iterator18 = _createForOfIteratorHelper10(pointerScroll.chain), _step18;
+          var _iterator18 = _createForOfIteratorHelper12(pointerScroll.chain), _step18;
           try {
             for (_iterator18.s(); !(_step18 = _iterator18.n()).done; ) {
               var _member3 = _step18.value;
@@ -27928,7 +28635,7 @@
           if (state.mouseReleaseTimeout !== null) root2.clearTimeout(state.mouseReleaseTimeout);
           state.mouseReleaseTimeout = null;
           state.mouseReleaseButton = null;
-          var _iterator19 = _createForOfIteratorHelper10(pointerScrollMouseEvents), _step19;
+          var _iterator19 = _createForOfIteratorHelper12(pointerScrollMouseEvents), _step19;
           try {
             for (_iterator19.s(); !(_step19 = _iterator19.n()).done; ) {
               var name = _step19.value;
@@ -28003,7 +28710,7 @@
         function restoreTouchOverflow(state) {
           var touch = state.elastic.touch;
           if (!touch) return;
-          var _iterator20 = _createForOfIteratorHelper10(touch.scrollBehaviors), _step20;
+          var _iterator20 = _createForOfIteratorHelper12(touch.scrollBehaviors), _step20;
           try {
             for (_iterator20.s(); !(_step20 = _iterator20.n()).done; ) {
               var _step20$value = _slicedToArray5(_step20.value, 2), element = _step20$value[0], _step20$value$ = _step20$value[1], value = _step20$value$.value, priority = _step20$value$.priority;
@@ -28048,7 +28755,7 @@
           var start = state.elastic.touch;
           if (!start) return;
           var touch = null;
-          var _iterator21 = _createForOfIteratorHelper10(event.touches), _step21;
+          var _iterator21 = _createForOfIteratorHelper12(event.touches), _step21;
           try {
             for (_iterator21.s(); !(_step21 = _iterator21.n()).done; ) {
               var item = _step21.value;
@@ -28113,7 +28820,7 @@
         function endTouch(state, event) {
           var touch = state.elastic.touch;
           if (!touch) return;
-          var _iterator22 = _createForOfIteratorHelper10(event.touches), _step22;
+          var _iterator22 = _createForOfIteratorHelper12(event.touches), _step22;
           try {
             for (_iterator22.s(); !(_step22 = _iterator22.n()).done; ) {
               var item = _step22.value;
@@ -28302,7 +29009,7 @@
               return scheduleResize(state);
             });
             state.resizeObserver.observe(state.element);
-            var _iterator23 = _createForOfIteratorHelper10(state.element.children), _step23;
+            var _iterator23 = _createForOfIteratorHelper12(state.element.children), _step23;
             try {
               for (_iterator23.s(); !(_step23 = _iterator23.n()).done; ) {
                 var child = _step23.value;
@@ -28319,7 +29026,7 @@
               if (state.resizeObserver) {
                 state.resizeObserver.disconnect();
                 state.resizeObserver.observe(state.element);
-                var _iterator24 = _createForOfIteratorHelper10(state.element.children), _step24;
+                var _iterator24 = _createForOfIteratorHelper12(state.element.children), _step24;
                 try {
                   for (_iterator24.s(); !(_step24 = _iterator24.n()).done; ) {
                     var _child = _step24.value;
@@ -28441,7 +29148,7 @@
                 });
               }
               if (values.snapAxis && state.snap.axis !== values.snapAxis) syncSnapStyles(state, values.snapAxis);
-              var _iterator25 = _createForOfIteratorHelper10(values.snapValues), _step25;
+              var _iterator25 = _createForOfIteratorHelper12(values.snapValues), _step25;
               try {
                 for (_iterator25.s(); !(_step25 = _iterator25.n()).done; ) {
                   var _step25$value = _step25.value, item = _step25$value.item, viewport = _step25$value.viewport, focus2 = _step25$value.focus;
@@ -28608,10 +29315,10 @@
 
   // src/aellux.ext.adaptive.js
   var aellux_ext_adaptive_exports = {};
-  function _createForOfIteratorHelper11(r, e) {
+  function _createForOfIteratorHelper13(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
-      if (Array.isArray(r) || (t = _unsupportedIterableToArray12(r)) || e && r && "number" == typeof r.length) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray14(r)) || e && r && "number" == typeof r.length) {
         t && (r = t);
         var _n = 0, F = function F2() {
         };
@@ -28640,19 +29347,19 @@
     } };
   }
   function _slicedToArray6(r, e) {
-    return _arrayWithHoles6(r) || _iterableToArrayLimit6(r, e) || _unsupportedIterableToArray12(r, e) || _nonIterableRest6();
+    return _arrayWithHoles6(r) || _iterableToArrayLimit6(r, e) || _unsupportedIterableToArray14(r, e) || _nonIterableRest6();
   }
   function _nonIterableRest6() {
     throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
-  function _unsupportedIterableToArray12(r, a) {
+  function _unsupportedIterableToArray14(r, a) {
     if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray12(r, a);
+      if ("string" == typeof r) return _arrayLikeToArray14(r, a);
       var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray12(r, a) : void 0;
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray14(r, a) : void 0;
     }
   }
-  function _arrayLikeToArray12(r, a) {
+  function _arrayLikeToArray14(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
@@ -28681,13 +29388,13 @@
   function _arrayWithHoles6(r) {
     if (Array.isArray(r)) return r;
   }
-  function _typeof5(o) {
+  function _typeof6(o) {
     "@babel/helpers - typeof";
-    return _typeof5 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
+    return _typeof6 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
       return typeof o2;
     } : function(o2) {
       return o2 && "function" == typeof Symbol && o2.constructor === Symbol && o2 !== Symbol.prototype ? "symbol" : typeof o2;
-    }, _typeof5(o);
+    }, _typeof6(o);
   }
   var init_aellux_ext_adaptive = __esm({
     "src/aellux.ext.adaptive.js": function() {
@@ -28756,7 +29463,7 @@
           var overrides = options.adaptiveParams || {};
           for (var _i = 0, _Object$keys = Object.keys(adaptiveParams); _i < _Object$keys.length; _i++) {
             var group = _Object$keys[_i];
-            if (overrides[group] && _typeof5(overrides[group]) === "object") {
+            if (overrides[group] && _typeof6(overrides[group]) === "object") {
               Object.assign(adaptiveParams[group], overrides[group]);
             }
           }
@@ -28796,7 +29503,7 @@
           pendingResizeEntries.clear();
           pendingResizeElements.clear();
           lastUpdateTime = -UPDATE_INTERVAL_MS;
-          var _iterator = _createForOfIteratorHelper11(adaptiveElements), _step;
+          var _iterator = _createForOfIteratorHelper13(adaptiveElements), _step;
           try {
             for (_iterator.s(); !(_step = _iterator.n()).done; ) {
               var element = _step.value;
@@ -28830,7 +29537,7 @@
           pendingResizeElements.delete(element);
           if (resizeObserver) resizeObserver.unobserve(element);
           else if (adaptiveElements.size === 0) AelluxJs2.offTarget(root2, "$resize", onWindowResize);
-          var _iterator2 = _createForOfIteratorHelper11(managedClasses), _step2;
+          var _iterator2 = _createForOfIteratorHelper13(managedClasses), _step2;
           try {
             for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
               var name = _step2.value;
@@ -28847,7 +29554,7 @@
           elementMemories.delete(element);
         }
         function onResize(entries) {
-          var _iterator3 = _createForOfIteratorHelper11(entries), _step3;
+          var _iterator3 = _createForOfIteratorHelper13(entries), _step3;
           try {
             for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
               var entry = _step3.value;
@@ -28863,7 +29570,7 @@
           scheduleUpdate();
         }
         function onWindowResize() {
-          var _iterator4 = _createForOfIteratorHelper11(adaptiveElements), _step4;
+          var _iterator4 = _createForOfIteratorHelper13(adaptiveElements), _step4;
           try {
             for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
               var element = _step4.value;
@@ -28928,7 +29635,7 @@
             var threshold = sizeThresholds[i];
             element.classList.toggle(threshold.className, space >= threshold.minimum);
           }
-          var _iterator5 = _createForOfIteratorHelper11(dimensionProperties), _step5;
+          var _iterator5 = _createForOfIteratorHelper13(dimensionProperties), _step5;
           try {
             for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
               var name = _step5.value;
@@ -29074,10 +29781,10 @@
       });
     };
   }
-  function _createForOfIteratorHelper12(r, e) {
+  function _createForOfIteratorHelper14(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
-      if (Array.isArray(r) || (t = _unsupportedIterableToArray13(r)) || e && r && "number" == typeof r.length) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray15(r)) || e && r && "number" == typeof r.length) {
         t && (r = t);
         var _n = 0, F = function F2() {
         };
@@ -29106,7 +29813,7 @@
     } };
   }
   function _slicedToArray7(r, e) {
-    return _arrayWithHoles7(r) || _iterableToArrayLimit7(r, e) || _unsupportedIterableToArray13(r, e) || _nonIterableRest7();
+    return _arrayWithHoles7(r) || _iterableToArrayLimit7(r, e) || _unsupportedIterableToArray15(r, e) || _nonIterableRest7();
   }
   function _nonIterableRest7() {
     throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
@@ -29136,25 +29843,25 @@
     if (Array.isArray(r)) return r;
   }
   function _toConsumableArray3(r) {
-    return _arrayWithoutHoles3(r) || _iterableToArray3(r) || _unsupportedIterableToArray13(r) || _nonIterableSpread3();
+    return _arrayWithoutHoles3(r) || _iterableToArray3(r) || _unsupportedIterableToArray15(r) || _nonIterableSpread3();
   }
   function _nonIterableSpread3() {
     throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
-  function _unsupportedIterableToArray13(r, a) {
+  function _unsupportedIterableToArray15(r, a) {
     if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray13(r, a);
+      if ("string" == typeof r) return _arrayLikeToArray15(r, a);
       var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray13(r, a) : void 0;
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray15(r, a) : void 0;
     }
   }
   function _iterableToArray3(r) {
     if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
   }
   function _arrayWithoutHoles3(r) {
-    if (Array.isArray(r)) return _arrayLikeToArray13(r);
+    if (Array.isArray(r)) return _arrayLikeToArray15(r);
   }
-  function _arrayLikeToArray13(r, a) {
+  function _arrayLikeToArray15(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
@@ -29241,7 +29948,7 @@
             extensionName: extensionName
           });
           AelluxJs2.off("$click", OnClick);
-          var _iterator = _createForOfIteratorHelper12(triggerElementsSet), _step;
+          var _iterator = _createForOfIteratorHelper14(triggerElementsSet), _step;
           try {
             for (_iterator.s(); !(_step = _iterator.n()).done; ) {
               var triggerElement = _step.value;
@@ -29252,7 +29959,7 @@
           } finally {
             _iterator.f();
           }
-          var _iterator2 = _createForOfIteratorHelper12(presentElements.keys()), _step2;
+          var _iterator2 = _createForOfIteratorHelper14(presentElements.keys()), _step2;
           try {
             for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
               var element = _step2.value;
@@ -29341,7 +30048,7 @@
             openPresentElements.add(element);
           }
           presentElements.set(element, presentController);
-          var _iterator3 = _createForOfIteratorHelper12(element.querySelectorAll("[".concat(attr.trigger, "],[").concat(attr.dismiss, "],[").concat(attr.target, "]"))), _step3;
+          var _iterator3 = _createForOfIteratorHelper14(element.querySelectorAll("[".concat(attr.trigger, "],[").concat(attr.dismiss, "],[").concat(attr.target, "]"))), _step3;
           try {
             for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
               var _triggerElement = _step3.value;
@@ -29357,7 +30064,7 @@
           }
           var idTriggers = triggersByTargetId.get(element.id);
           if (idTriggers) {
-            var _iterator4 = _createForOfIteratorHelper12(idTriggers), _step4;
+            var _iterator4 = _createForOfIteratorHelper14(idTriggers), _step4;
             try {
               for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
                 var triggerElement = _step4.value;
@@ -29816,7 +30523,7 @@
           unpop(element);
         }
         function outsideClickAutoUnpop(currentExceptions) {
-          var _iterator5 = _createForOfIteratorHelper12(openPresentElements), _step5;
+          var _iterator5 = _createForOfIteratorHelper14(openPresentElements), _step5;
           try {
             var _loop = function _loop2() {
               var pContainer = _step5.value;

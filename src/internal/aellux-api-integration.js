@@ -274,6 +274,7 @@ export function createAelluxApi(root, constants) {
     mount: function () { throw diagnostics.create(diagnostics.ERROR_NOT_INITIALIZED); },
     unmount: function () { throw diagnostics.create(diagnostics.ERROR_NOT_INITIALIZED); },
     request: function () { throw diagnostics.create(diagnostics.ERROR_NOT_INITIALIZED); },
+    ease: function () { throw diagnostics.create(diagnostics.ERROR_NOT_INITIALIZED); },
     startAelluxJs: function () { throw diagnostics.create(diagnostics.ERROR_NOT_INITIALIZED); },
     destroyExtensions: function () { throw diagnostics.create(diagnostics.ERROR_NOT_INITIALIZED); },
     destroy: function () { throw diagnostics.create(diagnostics.ERROR_NOT_INITIALIZED); }

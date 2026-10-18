@@ -48,6 +48,7 @@
     "build:core": "node scripts/build-core.mjs",
     "build:docs": "node scripts/build-docs.mjs",
     "test:budget": "node scripts/check-bundle-budget.mjs",
+    "test:unit": "node --test tests/unit/*.test.mjs",
     "pretest:browser": "npm run build:core",
     "test:browser": "playwright test",
     "prepack": "npm run build"

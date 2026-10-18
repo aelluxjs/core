@@ -27,66 +27,460 @@
   // src/internal/build-layout-scheduler.js
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   function buildLayoutScheduler() {
-    var readQueue = [];
-    var updateQueue = [];
-    var frameRequest = null;
-    var phase = "idle";
+    const queues = { read: [], update: [] };
+    const groups = /* @__PURE__ */ new Map();
+    const tasks = /* @__PURE__ */ new Set();
+    let frameRequest = null;
+    let phase = "idle";
+    let waitingForVisibility = false;
+    let idleSince = null;
+    let nativeFPS = null;
+    let limitFPS = null;
+    let initialDeltas = [];
+    let lastFrameTime = null;
+    let frameCredit = 0;
+    let samples = [];
+    let slowStreak = 0;
+    let lastAdjustment = -Infinity;
+    let stableSince = null;
+    let recoveryDelay = 3e3;
+    let trialLimit = null;
+    const now = () => performance.now();
+    const hidden = () => typeof document !== "undefined" && document.hidden;
+    const hasWork = () => queues.read.length > 0 || queues.update.length > 0;
+    function resetMeasurements(resetLimit) {
+      lastFrameTime = null;
+      frameCredit = 0;
+      samples = [];
+      slowStreak = 0;
+      stableSince = null;
+      initialDeltas = [];
+      if (resetLimit) {
+        nativeFPS = null;
+        limitFPS = null;
+        lastAdjustment = -Infinity;
+      }
+      trialLimit = null;
+      recoveryDelay = 3e3;
+    }
+    function onVisible() {
+      if (hidden()) return;
+      document.removeEventListener("visibilitychange", onVisible);
+      waitingForVisibility = false;
+      resetMeasurements(true);
+      scheduleFrame();
+    }
     function scheduleFrame() {
-      if (frameRequest !== null || phase !== "idle") return;
+      if (frameRequest !== null || phase !== "idle" || !hasWork()) return;
+      if (hidden()) {
+        if (!waitingForVisibility) {
+          document.addEventListener("visibilitychange", onVisible);
+          waitingForVisibility = true;
+        }
+        return;
+      }
+      if (idleSince !== null && now() - idleSince > 250) resetMeasurements(true);
+      idleSince = null;
       frameRequest = requestAnimationFrame(flushFrame);
     }
-    function flushFrame() {
+    function stopFrameIfIdle() {
+      if (hasWork()) return;
+      if (frameRequest !== null) cancelAnimationFrame(frameRequest);
       frameRequest = null;
+      if (waitingForVisibility) document.removeEventListener("visibilitychange", onVisible);
+      waitingForVisibility = false;
+      if (phase === "idle") idleSince = now();
+    }
+    function observeFrame(time) {
+      const previous = lastFrameTime;
+      lastFrameTime = time;
+      if (previous === null) return true;
+      const delta = time - previous;
+      if (delta <= 0 || delta > 250) {
+        frameCredit = 0;
+        samples = [];
+        slowStreak = 0;
+        stableSince = null;
+        return true;
+      }
+      if (nativeFPS === null) {
+        initialDeltas.push(delta);
+        if (initialDeltas.length >= 8) {
+          const ordered = initialDeltas.slice().sort((a, b) => a - b);
+          nativeFPS = Math.max(15, Math.round(1e3 / ordered[4]));
+          limitFPS = nativeFPS;
+          initialDeltas = [];
+        }
+      } else {
+        const expected = 1e3 / Math.max(15, limitFPS);
+        const slow = delta > expected * 1.23;
+        slowStreak = slow ? slowStreak + 1 : 0;
+        samples.push({ time, slow });
+        while (samples.length && time - samples[0].time > 1e3) samples.shift();
+        adjustLimit(time);
+      }
+      if (limitFPS === null || limitFPS >= nativeFPS) return true;
+      const period = 1e3 / limitFPS;
+      frameCredit += delta;
+      if (frameCredit + 1e-3 < period) return false;
+      frameCredit = Math.min(period, frameCredit - period);
+      return true;
+    }
+    function adjustLimit(time) {
+      if (samples.length < 8 || time - samples[0].time < 700) return;
+      const slowCount = samples.reduce((n, item) => n + (item.slow ? 1 : 0), 0);
+      if (slowStreak >= 4 || slowCount / samples.length >= 0.35) {
+        stableSince = null;
+        if (time - lastAdjustment >= 1e3 && limitFPS > 15) {
+          const previous = limitFPS;
+          limitFPS = Math.max(15, limitFPS - 15);
+          if (trialLimit === previous) recoveryDelay = Math.min(3e4, recoveryDelay * 2);
+          trialLimit = null;
+          lastAdjustment = time;
+          samples = [];
+          slowStreak = 0;
+          frameCredit = 0;
+        }
+      } else {
+        if (stableSince === null) stableSince = time;
+        if (limitFPS < nativeFPS && time - stableSince >= recoveryDelay && time - lastAdjustment >= recoveryDelay) {
+          limitFPS = Math.min(nativeFPS, limitFPS + 15);
+          trialLimit = limitFPS;
+          lastAdjustment = time;
+          stableSince = null;
+          samples = [];
+          frameCredit = 0;
+        }
+      }
+    }
+    function flushFrame(time) {
+      frameRequest = null;
+      if (hidden()) {
+        resetMeasurements(true);
+        scheduleFrame();
+        return;
+      }
+      if (!observeFrame(time)) {
+        scheduleFrame();
+        return;
+      }
+      const start = now();
       phase = "read";
-      var reads = readQueue.splice(0);
-      for (var i = 0; i < reads.length; i++)
-        runTask(reads[i]);
-      Promise.resolve().then(function() {
+      const reads = queues.read.splice(0);
+      for (const task of reads) runTask(task);
+      Promise.resolve().then(() => {
         phase = "update";
-        var updates = updateQueue.splice(0);
-        for (var i2 = 0; i2 < updates.length; i2++)
-          runTask(updates[i2]);
+        const updates = queues.update.splice(0);
+        for (const task of updates) runTask(task);
+        if (nativeFPS !== null && samples.length && now() - start > 1e3 / Math.max(15, limitFPS) * 0.8) {
+          samples[samples.length - 1].slow = true;
+        }
         phase = "idle";
-        if (readQueue.length || updateQueue.length) scheduleFrame();
+        if (hasWork()) scheduleFrame();
+        else idleSince = now();
       });
+    }
+    function removeTask(task) {
+      tasks.delete(task);
+      if (!task.group) return;
+      task.group.tasks.delete(task);
+      if (task.group[task.phase] === task) task.group[task.phase] = null;
+      if (!task.group.sequence && task.group.tasks.size === 0 && groups.get(task.group.id) === task.group) groups.delete(task.group.id);
+    }
+    function settleTask(task, error, value) {
+      if (task.state === "settled") return;
+      task.state = "settled";
+      removeTask(task);
+      if (error) task.reject(value);
+      else task.resolve(value);
+    }
+    function cancelTask(task) {
+      if (task.state === "settled") return;
+      if (task.state === "pending") {
+        const queue = queues[task.phase];
+        const index = queue.indexOf(task);
+        if (index !== -1) queue.splice(index, 1);
+      }
+      settleTask(task, false, void 0);
     }
     function runTask(task) {
+      if (task.state !== "pending") return;
+      task.state = "running";
+      if (task.group && task.group[task.phase] === task) task.group[task.phase] = null;
+      let result;
       try {
-        task.resolve(task.parameters ? task.callback.apply(void 0, task.parameters) : task.callback());
+        result = task.parameters ? task.callback.apply(void 0, task.parameters) : task.callback();
       } catch (error) {
-        task.reject(error);
+        settleTask(task, true, error);
+        return;
+      }
+      let then;
+      try {
+        then = result && result.then;
+      } catch (error) {
+        settleTask(task, true, error);
+        return;
+      }
+      if (typeof then === "function") {
+        Promise.resolve(result).then(
+          (value) => settleTask(task, false, value),
+          (error) => settleTask(task, true, error)
+        );
+      } else {
+        settleTask(task, false, result);
       }
     }
-    function queueTask(queue, callback, parameters) {
-      var promise = new Promise(function(resolve, reject) {
-        queue.push({
-          callback,
-          parameters,
-          resolve,
-          reject
-        });
+    function makeGroup(id) {
+      const group = { id, read: null, update: null, tasks: /* @__PURE__ */ new Set(), sequence: null };
+      groups.set(id, group);
+      return group;
+    }
+    function cancelGroup(group, status) {
+      if (groups.get(group.id) === group) groups.delete(group.id);
+      const sequence2 = group.sequence;
+      if (sequence2 && sequence2.active) {
+        sequence2.active = false;
+        if (sequence2.timer !== null) clearTimeout(sequence2.timer);
+        sequence2.timer = null;
+        detachAbortSignals(sequence2);
+        group.sequence = null;
+      }
+      for (const task of Array.from(group.tasks)) cancelTask(task);
+      if (sequence2) sequence2.resolve({ id: group.id, status });
+      stopFrameIfIdle();
+    }
+    function queueTask(kind, callback, parameters, id, owner) {
+      let group = null;
+      if (id !== void 0) {
+        group = owner ? owner.group : groups.get(id);
+        if (!owner && group && (group.sequence || group[kind])) {
+          cancelGroup(group, "superseded");
+          group = null;
+        }
+        if (!group) group = makeGroup(id);
+      }
+      let task;
+      const promise = new Promise((resolve, reject) => {
+        task = { phase: kind, callback, parameters, group, resolve, reject, state: "pending" };
       });
-      if (phase === "idle") scheduleFrame();
+      tasks.add(task);
+      if (group) {
+        group[kind] = task;
+        group.tasks.add(task);
+      }
+      queues[kind].push(task);
+      scheduleFrame();
       return promise;
     }
-    function clear() {
-      if (frameRequest !== null) {
-        cancelAnimationFrame(frameRequest);
-        frameRequest = null;
-      }
-      settleQueue(readQueue);
-      settleQueue(updateQueue);
-      phase = "idle";
+    function validId(id) {
+      if (!Number.isSafeInteger(id)) throw new TypeError("waitLayout ID must be a safe integer");
     }
-    function settleQueue(queue) {
-      var tasks = queue.splice(0);
-      for (var i = 0; i < tasks.length; i++) {
-        tasks[i].resolve(void 0);
+    function request(kind, first, second, third) {
+      if (typeof first === "number") {
+        validId(first);
+        return queueTask(kind, second, third, first, null);
       }
+      return queueTask(kind, first, second, void 0, null);
+    }
+    function validateStages(stages) {
+      if (!stages.length) throw new TypeError("sequence() requires at least one stage");
+      return stages.map((stage) => {
+        if (!stage || typeof stage !== "object" || typeof stage.read !== "function" && typeof stage.update !== "function") {
+          throw new TypeError("Each sequence stage needs a read or update callback");
+        }
+        if (stage.read !== void 0 && typeof stage.read !== "function" || stage.update !== void 0 && typeof stage.update !== "function") {
+          throw new TypeError("Sequence callbacks must be functions");
+        }
+        let abort = null;
+        let signal = null;
+        if (typeof stage.abort === "function") abort = stage.abort;
+        else if (stage.abort !== void 0) {
+          const candidate = stage.abort && (stage.abort.signal || stage.abort);
+          if (!candidate || typeof candidate.aborted !== "boolean" || typeof candidate.addEventListener !== "function" || typeof candidate.removeEventListener !== "function") {
+            throw new TypeError("abort must be a function, AbortController, or AbortSignal");
+          }
+          signal = candidate;
+        }
+        let interval = 0;
+        let times = 1;
+        if (stage.repeat !== void 0) {
+          const repeat = stage.repeat;
+          if (!repeat || typeof repeat !== "object" || repeat.ms !== void 0 && repeat.s !== void 0) {
+            throw new TypeError("repeat must use either ms or s");
+          }
+          interval = repeat.ms !== void 0 ? repeat.ms : repeat.s !== void 0 ? repeat.s * 1e3 : 0;
+          if (!Number.isFinite(interval) || interval < 0) throw new RangeError("Invalid repeat interval");
+          times = repeat.times === void 0 ? repeat.ms !== void 0 || repeat.s !== void 0 ? Infinity : 1 : repeat.times;
+          if (repeat.times !== void 0 && (!Number.isSafeInteger(times) || times < 1)) {
+            throw new RangeError("repeat.times must be a positive integer");
+          }
+        }
+        if (stage.maxFPS !== void 0 && (!Number.isFinite(stage.maxFPS) || stage.maxFPS <= 0)) {
+          throw new RangeError("maxFPS must be positive");
+        }
+        return {
+          read: stage.read,
+          update: stage.update,
+          abort,
+          signal,
+          interval,
+          times,
+          maxFPS: stage.maxFPS
+        };
+      });
+    }
+    function detachAbortSignals(owner) {
+      for (const signal of owner.abortSignals) {
+        signal.removeEventListener("abort", owner.abortHandler);
+      }
+      owner.abortSignals.length = 0;
+    }
+    function sequence(id, ...stages) {
+      validId(id);
+      const configs = validateStages(stages);
+      const previous = groups.get(id);
+      if (previous) cancelGroup(previous, "superseded");
+      const group = makeGroup(id);
+      let resolve;
+      let reject;
+      const result = new Promise((res, rej) => {
+        resolve = res;
+        reject = rej;
+      });
+      const owner = {
+        group,
+        configs,
+        index: 0,
+        count: 0,
+        lastStart: null,
+        timer: null,
+        active: true,
+        resolve,
+        reject,
+        abortSignals: [],
+        abortHandler: null
+      };
+      group.sequence = owner;
+      owner.abortHandler = () => finishSequence(owner, "aborted");
+      try {
+        for (const config of configs) {
+          if (config.signal && !owner.abortSignals.includes(config.signal)) {
+            config.signal.addEventListener("abort", owner.abortHandler);
+            owner.abortSignals.push(config.signal);
+          }
+        }
+        if (owner.abortSignals.some((signal) => signal.aborted)) {
+          finishSequence(owner, "aborted");
+        } else {
+          startIteration(owner);
+        }
+      } catch (error) {
+        finishSequence(owner, null, error);
+      }
+      return result;
+    }
+    function finishSequence(owner, status, error) {
+      if (!owner.active) return;
+      const group = owner.group;
+      owner.active = false;
+      if (owner.timer !== null) clearTimeout(owner.timer);
+      owner.timer = null;
+      detachAbortSignals(owner);
+      group.sequence = null;
+      if (groups.get(group.id) === group) groups.delete(group.id);
+      for (const task of Array.from(group.tasks)) cancelTask(task);
+      stopFrameIfIdle();
+      if (status === null) owner.reject(error);
+      else owner.resolve({ id: group.id, status });
+    }
+    function checkAbort(owner, config) {
+      if (!owner.active || !config.abort) return false;
+      const result = config.abort();
+      if (typeof result !== "boolean") throw new TypeError("abort must return a boolean");
+      if (result) finishSequence(owner, "aborted");
+      return result;
+    }
+    function startIteration(owner) {
+      if (!owner.active) return;
+      const config = owner.configs[owner.index];
+      try {
+        if (checkAbort(owner, config)) return;
+      } catch (error) {
+        finishSequence(owner, null, error);
+        return;
+      }
+      owner.lastStart = now();
+      const read = config.read ? queueTask("read", () => {
+        if (checkAbort(owner, config)) return;
+        return config.read();
+      }, void 0, owner.group.id, owner) : Promise.resolve(void 0);
+      read.then((value) => {
+        if (!owner.active) return;
+        try {
+          if (checkAbort(owner, config)) return;
+        } catch (error) {
+          finishSequence(owner, null, error);
+          return;
+        }
+        return config.update ? queueTask("update", (input) => {
+          if (checkAbort(owner, config)) return;
+          return config.update(input);
+        }, [value], owner.group.id, owner) : void 0;
+      }).then(() => {
+        if (owner.active) completeIteration(owner, config);
+      }, (error) => finishSequence(owner, null, error));
+    }
+    function completeIteration(owner, config) {
+      owner.count++;
+      if (owner.count >= config.times) {
+        owner.index++;
+        owner.count = 0;
+        owner.lastStart = null;
+        if (owner.index >= owner.configs.length) {
+          finishSequence(owner, "completed");
+          return;
+        }
+        startIteration(owner);
+        return;
+      }
+      const completed = now();
+      const fpsDue = config.maxFPS === void 0 ? completed : owner.lastStart + 1e3 / config.maxFPS;
+      const due = Math.max(completed + config.interval, fpsDue);
+      const delay = Math.max(0, due - now() - 1);
+      if (delay > 1) {
+        owner.timer = setTimeout(() => {
+          owner.timer = null;
+          startIteration(owner);
+        }, delay);
+      } else {
+        startIteration(owner);
+      }
+    }
+    function clear() {
+      if (frameRequest !== null) cancelAnimationFrame(frameRequest);
+      frameRequest = null;
+      if (waitingForVisibility) document.removeEventListener("visibilitychange", onVisible);
+      waitingForVisibility = false;
+      for (const group of Array.from(groups.values())) cancelGroup(group, "cleared");
+      for (const task of Array.from(tasks)) cancelTask(task);
+      queues.read.length = 0;
+      queues.update.length = 0;
+      phase = "idle";
+      idleSince = null;
+      resetMeasurements(true);
+    }
+    function cancel(id) {
+      validId(id);
+      const group = groups.get(id);
+      if (!group) return false;
+      cancelGroup(group, "aborted");
+      return true;
     }
     return Object.freeze({
-      read: (callback, parameters) => queueTask(readQueue, callback, parameters),
-      update: (callback, parameters) => queueTask(updateQueue, callback, parameters),
+      read: (first, second, third) => request("read", first, second, third),
+      update: (first, second, third) => request("update", first, second, third),
+      sequence,
+      cancel,
       clear
     });
   }
@@ -955,6 +1349,114 @@
     return { register };
   }
 
+  // src/internal/ease.js
+  /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+  var EASE_PREFIX = "ease";
+  var IN = "in";
+  var OUT = "out";
+  var IN_OUT = "inout";
+  var DIRECTIONS = [IN_OUT, OUT, IN];
+  var QUAD = "quad";
+  var CUBIC = "cubic";
+  var QUART = "quart";
+  var QUINT = "quint";
+  var SINE = "sine";
+  var EXPO = "expo";
+  var CIRC = "circ";
+  var BACK = "back";
+  var ELASTIC = "elastic";
+  var BOUNCE = "bounce";
+  var FAMILIES = [QUAD, CUBIC, QUART, QUINT, SINE, EXPO, CIRC, BACK, ELASTIC, BOUNCE];
+  var ALIASES = {
+    quadratic: QUAD,
+    quartic: QUART,
+    quintic: QUINT,
+    sinusoidal: SINE,
+    exponential: EXPO,
+    circular: CIRC
+  };
+  function bounceOut(t) {
+    const n = 7.5625;
+    const d = 2.75;
+    if (t < 1 / d) return n * t * t;
+    if (t < 2 / d) {
+      t -= 1.5 / d;
+      return n * t * t + 0.75;
+    }
+    if (t < 2.5 / d) {
+      t -= 2.25 / d;
+      return n * t * t + 0.9375;
+    }
+    t -= 2.625 / d;
+    return n * t * t + 0.984375;
+  }
+  function easeIn(family, t) {
+    switch (family) {
+      case QUAD:
+        return t * t;
+      case CUBIC:
+        return t * t * t;
+      case QUART:
+        return t * t * t * t;
+      case QUINT:
+        return t * t * t * t * t;
+      case SINE:
+        return 1 - Math.cos(t * Math.PI / 2);
+      case EXPO:
+        return t === 0 ? 0 : Math.pow(2, 10 * t - 10);
+      case CIRC:
+        return 1 - Math.sqrt(1 - t * t);
+      case BACK:
+        return t * t * (2.70158 * t - 1.70158);
+      case ELASTIC:
+        return t === 0 || t === 1 ? t : -Math.pow(2, 10 * t - 10) * Math.sin((10 * t - 10.75) * 2 * Math.PI / 3);
+      case BOUNCE:
+        return 1 - bounceOut(1 - t);
+      default:
+        throw new RangeError(`Unknown easing family: ${family}`);
+    }
+  }
+  function ease(name, t) {
+    if (typeof name !== "string" || typeof t !== "number" || !Number.isFinite(t)) {
+      throw new TypeError("ease(name, t) requires a name and a finite number");
+    }
+    t = Math.min(1, Math.max(0, t));
+    let key = name.replace(/[\s_-]/g, "").toLowerCase();
+    if (key.startsWith(EASE_PREFIX)) key = key.slice(EASE_PREFIX.length);
+    if (key === "linear") return t;
+    if (key === "smoothstep") return t * t * (3 - 2 * t);
+    if (key === "smootherstep") return t * t * t * (t * (6 * t - 15) + 10);
+    let family = "";
+    let direction = "";
+    for (const candidate of DIRECTIONS) {
+      if (key.endsWith(candidate)) {
+        family = key.slice(0, -candidate.length);
+        direction = candidate;
+        break;
+      }
+      if (key.startsWith(candidate)) {
+        family = key.slice(candidate.length);
+        direction = candidate;
+        break;
+      }
+    }
+    family = ALIASES[family] || family;
+    if (!FAMILIES.includes(family)) throw new RangeError(`Unknown easing: ${name}`);
+    if (direction === IN) return easeIn(family, t);
+    if (direction === OUT) return 1 - easeIn(family, 1 - t);
+    if (family === BACK) {
+      const c = 1.70158 * 1.525;
+      const x = t < 0.5 ? 2 * t : 2 * t - 2;
+      return t < 0.5 ? x * x * ((c + 1) * x - c) / 2 : (x * x * ((c + 1) * x + c) + 2) / 2;
+    }
+    if (family === ELASTIC) {
+      if (t === 0 || t === 1) return t;
+      const wave = Math.sin((20 * t - 11.125) * 2 * Math.PI / 4.5);
+      return t < 0.5 ? -Math.pow(2, 20 * t - 10) * wave / 2 : Math.pow(2, -20 * t + 10) * wave / 2 + 1;
+    }
+    return t < 0.5 ? easeIn(family, 2 * t) / 2 : 1 - easeIn(family, 2 - 2 * t) / 2;
+  }
+
   // src/aellux.orchestrator.js
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   (function(root) {
@@ -1062,6 +1564,7 @@
           return getExtension(extensionName);
         },
         request: defaultRequest,
+        ease,
         aria,
         waitLayout: layoutScheduler,
         mountManager

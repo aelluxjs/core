@@ -205,7 +205,8 @@ var bootstrapProperties = Object.freeze({
   wait: method,
   mount: method,
   unmount: method,
-  request: method
+  request: method,
+  ease: method
 });
 
 var layoutScheduler = Object.freeze({

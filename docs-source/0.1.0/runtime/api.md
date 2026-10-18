@@ -55,6 +55,19 @@ $ae.init({
 Keys such as `"tab-group"` are normalized to `tabGroup` in `$ae.options.extensions`, and each Extension receives its matching object in `init(options)`. An Extension with no matching configuration receives `{}`.
 An Extension's `init(options)` may return a Promise. The runtime awaits it before setting the Extension's `initialized` flag and resolving `wait(extensionName)`; rejection is diagnosed as `ERROR_EXTENSION_INITIALIZE` (`1102`) and leaves the Extension available for a later retry.
 
+## Numeric easing
+
+`$ae.ease(name, t)` evaluates a curve at numeric progress `t` in both `basic` and `full` modes. The boot API exposes the method, but calling it before the orchestrator loads throws `ERROR_NOT_INITIALIZED` (`1001`). It does not require the Present Extension.
+
+The method clamps `t` to `0`–`1` before evaluating the curve. Its result is not clamped, so `back` and `elastic` curves can overshoot. It returns a number for scripted UI motion and does not change Present's CSS timing functions.
+
+```js
+const scale = $ae.ease("backOut", progress);
+element.style.transform = `scale(${scale})`;
+```
+
+The families `quad`, `cubic`, `quart`, `quint`, `sine`, `expo`, `circ`, `back`, `elastic`, and `bounce` each have `In`, `Out`, and `InOut` variants. `linear`, `smoothStep`, and `smootherStep` are also available. Names ignore case, spaces, underscores, and hyphens. An optional `ease` prefix and direction-first names are accepted: `backOut`, `easeBackOut`, `back-out`, `ease-back-out`, and `easeOutBack` evaluate the same curve. Long family names such as `quadratic`, `quartic`, `quintic`, `sinusoidal`, `exponential`, and `circular` are aliases. Invalid names or nonfinite `t` values throw.
+
 ## DOM Lifecycle
 
 ```js
@@ -121,7 +134,7 @@ const width = await $ae.waitLayout.read(() => panel.getBoundingClientRect().widt
 await $ae.waitLayout.update(() => panel.style.setProperty("--panel-width", `${width}px`));
 ```
 
-See [waitLayout](wait-layout.md) for frame order, frequent-event coalescing, lifecycle guards, and examples.
+Use numeric IDs to group and replace pending reads and updates, or `sequence(id, ...stages)` for ordered and repeated cycles with `maxFPS` and `abort` (a boolean callback, `AbortSignal`, or `AbortController`). `cancel(id)` stops one feature's work; `clear()` cancels all work during full runtime destruction. The scheduler adapts its task rate to sustained frame pressure. See [waitLayout](wait-layout.md) for frame order, lifecycle guards, and examples.
 
 ## Destruction
 
