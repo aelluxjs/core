@@ -342,12 +342,12 @@ test("zero layout duration checks once after the configured interval", async ({ 
   await expect.poll(x).toBe("45px");
 });
 
-test("anchor FPS attribute sets the rounded throttle interval", async ({ page }) => {
+test("shared maxfps attribute limits Anchor updates", async ({ page }) => {
   await startAnchor(page, `
     <div style="position: relative; width: 300px; height: 100px">
       <div id="target" style="position: absolute; left: 20px; top: 10px; width: 30px; height: 20px"></div>
       <div id="anchor" data-ae-anchor-target="target" data-ae-anchor="top-left:top-left"
-        data-ae-anchor-fps="5" style="width: 10px; height: 10px"></div>
+        data-ae-maxfps="5" style="width: 10px; height: 10px"></div>
     </div>`, { disableObservers: true });
 
   await expect.poll(() => page.locator("#anchor").evaluate(element =>
@@ -392,6 +392,53 @@ test("present layout event activates an anchor whose target started hidden", asy
 
   await page.evaluate(() => $ae("panel").present.unpop());
   await expect(page.locator("#anchor")).not.toHaveClass(/ae--anchored/);
+});
+
+test("Anchor follows intermediate Present frames under CSS Motion control", async ({ page }) => {
+  await page.goto("/tests/index.htm");
+  await page.addScriptTag({ url: "/dist/aellux.js" });
+  await page.evaluate(() => {
+    document.body.innerHTML = `
+      <div id="reference" style="position:relative;width:500px;height:120px">
+        <div id="panel" data-ae-present="transform" hidden style="position:absolute;left:20px;top:10px;
+          width:40px;height:30px;--ae-from-transform:translateX(0px);
+          --ae-pop-transform:translateX(120px);--ae-pop-duration:400ms">
+          target
+        </div>
+        <div id="anchor" data-ae-anchor-target="panel" data-ae-anchor="top-left:top-left"
+          style="width:10px;height:10px"></div>
+      </div>`;
+    AelluxJs.init({ mode: "full", cssMotionController: true });
+  });
+  await expect.poll(() => page.evaluate(() =>
+    typeof AelluxJs("panel")?.present?.pop)).toBe("function");
+
+  const sample = await page.evaluate(async () => {
+    const panel = document.getElementById("panel");
+    const anchor = document.getElementById("anchor");
+    let layoutDetail = null;
+    panel.addEventListener("AelluxJsLayout", event => { layoutDetail = event.detail; }, { once: true });
+    const started = new Promise(resolve =>
+      panel.addEventListener("AelluxJsPopping", resolve, { once: true }));
+    const completed = AelluxJs(panel).present.pop();
+    await started;
+    await new Promise(resolve => setTimeout(resolve, 180));
+    const intermediate = parseFloat(anchor.style.getPropertyValue("--ae-anchor-x"));
+    await completed;
+    while (Math.abs(parseFloat(anchor.style.getPropertyValue("--ae-anchor-x")) - 140) > 0.5) {
+      await new Promise(resolve => setTimeout(resolve, 16));
+    }
+    return {
+      intermediate,
+      final: parseFloat(anchor.style.getPropertyValue("--ae-anchor-x")),
+      durationMs: layoutDetail && layoutDetail.durationMs
+    };
+  });
+
+  expect(sample.durationMs).toBe(400);
+  expect(sample.intermediate).toBeGreaterThan(20);
+  expect(sample.intermediate).toBeLessThan(140);
+  expect(sample.final).toBeCloseTo(140, 0);
 });
 
 test("hidden Present targets hide their anchors without a reference context diagnostic", async ({ page }) => {

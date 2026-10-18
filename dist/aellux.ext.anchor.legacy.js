@@ -186,7 +186,6 @@
     var attribute = AelluxJs.attr(extensionName);
     var presentAttribute = AelluxJs.attr("present");
     var targetAttribute = AelluxJs.attr("anchor-target");
-    var fpsAttribute = AelluxJs.attr("anchor-fps");
     var layoutEvent = AelluxJs.eventName("Layout");
     var anchoredClass = AelluxJs.className("anchored");
     var baseProperties = ["position", "left", "top", "transform", "transform-origin"];
@@ -273,6 +272,10 @@
         layoutId: nextLayoutId++,
         layoutUntil: 0,
         layoutSingle: false,
+        layoutFinalPending: false,
+        layoutPolling: false,
+        updatePending: false,
+        updateDirty: false,
         layoutListener: function layoutListener(event) {
           return scheduleLayoutUpdate(event);
         },
@@ -357,10 +360,10 @@
         try {
           for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
             var _step2$value = _slicedToArray(_step2.value, 2), element = _step2$value[0], state = _step2$value[1];
-            var configured = parseFPS(element.getAttribute(fpsAttribute));
-            var maxFPS = AelluxJs.layoutMaxFPS(element, configured);
+            var maxFPS = AelluxJs.layoutMaxFPS(element);
             state.layoutUntil = now() + 1e3 / (maxFPS || 60);
             state.layoutSingle = true;
+            state.layoutFinalPending = true;
             scheduleAnchor(element, true);
           }
         } catch (err) {
@@ -376,6 +379,7 @@
           var _step3$value = _slicedToArray(_step3.value, 2), _element = _step3$value[0], _state = _step3$value[1];
           _state.layoutUntil = Math.max(_state.layoutUntil, now() + durationMs);
           _state.layoutSingle = false;
+          _state.layoutFinalPending = true;
           scheduleAnchor(_element, durationMs > 0);
         }
       } catch (err) {
@@ -388,37 +392,56 @@
       var repeat = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : false;
       var state = anchors.get(element);
       if (!state) return;
-      var configured = parseFPS(element.getAttribute(fpsAttribute));
-      var maxFPS = AelluxJs.layoutMaxFPS(element, configured);
+      if (state.layoutPolling) {
+        state.updateDirty = true;
+        return;
+      }
+      var maxFPS = AelluxJs.layoutMaxFPS(element);
       var run = function run2() {
         if (state.layoutSingle && now() < state.layoutUntil) return;
         state.layoutSingle = false;
-        updateAnchor(element).catch(function(cause) {
-          AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_EXTENSION_MOUNT, {
-            cause: cause,
-            extension: extensionName,
-            element: element,
-            method: "update"
-          });
-        });
+        if (repeat && now() >= state.layoutUntil) state.layoutFinalPending = false;
+        requestAnchorUpdate(element, state);
       };
-      AelluxJs.waitLayout.sequence(state.layoutId, {
+      if (repeat) state.layoutPolling = true;
+      var sequence = AelluxJs.waitLayout.sequence(state.layoutId, {
         update: run,
         repeat: repeat ? {
           ms: 0
         } : void 0,
         maxFPS: maxFPS,
         abort: function abort() {
-          return !anchors.has(element) || repeat && now() >= state.layoutUntil && !state.layoutSingle;
+          return !anchors.has(element) || repeat && now() >= state.layoutUntil && !state.layoutSingle && !state.layoutFinalPending;
         }
+      });
+      if (repeat) sequence.finally(function() {
+        if (anchors.get(element) !== state) return;
+        state.layoutPolling = false;
+        if (state.updateDirty) scheduleAnchor(element);
+      });
+    }
+    function requestAnchorUpdate(element, state) {
+      if (state.updatePending) {
+        state.updateDirty = true;
+        return;
+      }
+      state.updatePending = true;
+      state.updateDirty = false;
+      updateAnchor(element).catch(function(cause) {
+        AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_EXTENSION_MOUNT, {
+          cause: cause,
+          extension: extensionName,
+          element: element,
+          method: "update"
+        });
+      }).finally(function() {
+        if (anchors.get(element) !== state) return;
+        state.updatePending = false;
+        if (state.updateDirty && !state.layoutPolling) scheduleAnchor(element);
       });
     }
     function now() {
       return root.performance && typeof root.performance.now === "function" ? root.performance.now() : Date.now();
-    }
-    function parseFPS(value) {
-      var fps = value === null || !String(value).trim() ? NaN : Number(value);
-      return Number.isFinite(fps) && fps > 0 ? fps : void 0;
     }
     function updateAnchor(_x2) {
       return _updateAnchor.apply(this, arguments);
