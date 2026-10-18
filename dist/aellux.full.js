@@ -528,11 +528,87 @@
           off,
           send
         });
+        const motionOptions = ["shake", "yes", "no", "breathe", "tremble", "pulse", "alert"];
+        const feedbackTypes = ["warning", "error", "success", "announce", "busy", "progress", "validate"];
         const handlers = /* @__PURE__ */ new Map();
-        function init(options) {
+        const motionTimers = /* @__PURE__ */ new Map();
+        const feedbackAttribute = AelluxJs2.attr(extensionName);
+        const targetMessageAttribute = AelluxJs2.attr("targetMessage");
+        const targetTransformAttribute = AelluxJs2.attr("targetTransform");
+        function init() {
+          AelluxJs2.mountManager.add({
+            extensionName,
+            selector: `[${feedbackAttribute}]`,
+            priority: 0,
+            mount: mountFeedback,
+            unmount: unmountFeedback
+          });
         }
         async function destroy() {
+          AelluxJs2.mountManager.remove({ extensionName });
+          for (const timer of motionTimers.values()) root2.clearTimeout(timer);
+          motionTimers.clear();
           handlers.clear();
+        }
+        function mountFeedback(element) {
+          AelluxJs2.onTarget(element, "Feedback", onFeedback);
+        }
+        function unmountFeedback(element) {
+          AelluxJs2.offTarget(element, "Feedback", onFeedback);
+        }
+        function onFeedback(event) {
+          const element = event.currentTarget;
+          const value = element.getAttribute(feedbackAttribute);
+          if (value === null) return;
+          const list = value.trim();
+          if (list) {
+            const type2 = event.detail && event.detail.type;
+            const names = list.split(/\s+/);
+            if (!names.includes(type2)) {
+              return;
+            }
+          }
+          event.stopPropagation();
+          if (!event.detail) return;
+          const { message, type, motion } = event.detail;
+          const messageTarget = element.getAttribute(targetMessageAttribute);
+          const transformTarget = element.getAttribute(targetTransformAttribute);
+          const messageElement = AelluxJs2.elementOrId(messageTarget, { defaultElement: element });
+          const transformElement = AelluxJs2.elementOrId(transformTarget, { defaultElement: element });
+          if (messageElement && typeof message === "string") {
+            let textNode = null;
+            for (const child of messageElement.childNodes) {
+              if (child.nodeType === 3) {
+                textNode = child;
+                break;
+              }
+            }
+            if (textNode) textNode.nodeValue = message;
+            else messageElement.appendChild(messageElement.ownerDocument.createTextNode(message));
+          }
+          if (feedbackTypes.includes(type)) {
+            const typeClass = AelluxJs2.className(`feedback-${type}`);
+            for (const target of [element, messageElement, transformElement]) {
+              if (target) target.classList.add(typeClass);
+            }
+          }
+          if (transformElement) {
+            const motionPrefix = AelluxJs2.className("feedback-motion-");
+            for (const className of Array.from(transformElement.classList)) {
+              if (className.startsWith(motionPrefix)) transformElement.classList.remove(className);
+            }
+            const previousTimer = motionTimers.get(transformElement);
+            if (previousTimer) root2.clearTimeout(previousTimer);
+            motionTimers.delete(transformElement);
+            if (typeof motion === "string") {
+              const motionClass = AelluxJs2.className(`feedback-motion-${motion}`);
+              transformElement.classList.add(motionClass);
+              motionTimers.set(transformElement, root2.setTimeout(() => {
+                transformElement.classList.remove(motionClass);
+                motionTimers.delete(transformElement);
+              }, 1e3));
+            }
+          }
         }
         function on(type, handler) {
           if (!handlers.has(type)) {
@@ -546,33 +622,68 @@
         function off(type, handler) {
           return removeHandler(type, handler);
         }
-        function warning(message) {
-          send({ type: "warning", message });
+        function warning(message, target, value, motion) {
+          send({ type: "warning", message, value, target, motion });
         }
-        function error(message) {
-          send({ type: "error", message });
+        function error(message, target, value, motion) {
+          send({ type: "error", message, value, target, motion });
         }
-        function success(message) {
-          send({ type: "success", message });
+        function success(message, target, value, motion) {
+          send({ type: "success", message, value, target, motion });
         }
-        function announce(message) {
-          send({ type: "announce", message });
+        function announce(message, target, value, motion) {
+          send({ type: "announce", message, value, target, motion });
         }
-        function busy(target, message, value) {
-          send({ type: "busy", message, value, target });
+        function busy(message, target, value, motion) {
+          send({ type: "busy", message, value, target, motion });
         }
-        function validate(target, message, value) {
-          send({ type: "validate", message, value, target });
+        function validate(message, target, value, motion) {
+          send({ type: "validate", message, value, target, motion });
         }
-        function progress(target, message, value) {
-          send({ type: "progress", message, value, target });
+        function progress(message, target, value, motion) {
+          send({ type: "progress", message, value, target, motion });
         }
-        function send({ type, message, value, target }) {
-          target = target || document;
-          const feedback = { type, message, value, target };
-          AelluxJs2.dispatchFrom(target, "Feedback", { detail: feedback });
+        function send({ type, message, value, target, motion }) {
+          if (typeof message !== "string") {
+            reportInvalidArgument("message", message);
+            return;
+          }
+          if (!feedbackTypes.includes(type)) {
+            reportInvalidArgument("type", type);
+            return;
+          }
+          if (typeof motion !== "undefined" && typeof motion !== "string") {
+            reportInvalidArgument("motion", motion);
+            return;
+          }
+          if (typeof target === "undefined") target = root2.document;
+          else if (!target || target.nodeType !== 1 || typeof target.dispatchEvent !== "function") {
+            reportInvalidArgument("target", target);
+            return;
+          }
+          if (typeof motion === "string" && !motionOptions.includes(motion)) {
+            AelluxJs2.diagnostics.info(AelluxJs2.diagnostics.INFO_FEEDBACK_MOTION_CUSTOM, {
+              extension: extensionName,
+              motion,
+              standardMotions: motionOptions.slice()
+            });
+          }
+          const feedback = { type, message, value, target, motion };
+          const options = {
+            detail: feedback,
+            bubbles: true,
+            cancelable: true
+          };
+          AelluxJs2.dispatchFrom(target, "Feedback", options);
           notifyHandlers(type, feedback);
           notifyHandlers("*", feedback);
+        }
+        function reportInvalidArgument(argument, value) {
+          AelluxJs2.diagnostics.error(AelluxJs2.diagnostics.ERROR_FEEDBACK_ARGUMENT, {
+            extension: extensionName,
+            argument,
+            value
+          });
         }
         function notifyHandlers(type, feedback) {
           if (!handlers.has(type)) return;
@@ -4828,21 +4939,22 @@
 
   // src/internal/resolve-element-or-id.js
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
-  function resolveElementOrId(root2, elementOrId, options = {}) {
-    const fallback = options.defaultElement;
+  function resolveElementOrId(root2, elementOrId, options) {
+    options = options || {};
+    var fallback = options.defaultElement;
     if ((elementOrId === void 0 || elementOrId === null) && fallback) {
       return fallback;
     }
-    const requested = elementOrId;
+    var requested = elementOrId;
     if (typeof elementOrId === "string") {
-      const id = elementOrId.trim().replace(/^#/, "");
+      var id = elementOrId.trim().replace(/^#/, "");
       elementOrId = id ? root2.document.getElementById(id) : null;
     }
-    const allowedNodeTypes = options.allowedNodeTypes || [root2.Node.ELEMENT_NODE];
+    var allowedNodeTypes = options.allowedNodeTypes || [root2.Node.ELEMENT_NODE];
     if (elementOrId && allowedNodeTypes.indexOf(elementOrId.nodeType) !== -1) {
       return elementOrId;
     }
-    const diagnostics = root2.AelluxJs.diagnostics;
+    var diagnostics = root2.AelluxJs.diagnostics;
     diagnostics.warn(diagnostics.WARN_INVALID_ELEMENT_OR_ID, {
       elementOrId: requested,
       method: options.method
@@ -5873,6 +5985,7 @@
     "present": () => Promise.resolve().then(() => (init_aellux_ext_present(), aellux_ext_present_exports))
   });
   root.AelluxJs.ext("adaptive", { loadStyle: true });
+  root.AelluxJs.ext("feedback", { loadStyle: true });
   root.AelluxJs.ext("present", { loadStyle: true });
 })();
 //# sourceMappingURL=aellux.full.js.map

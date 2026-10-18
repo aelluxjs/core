@@ -10,11 +10,19 @@ import AelluxJs from "@aelluxjs/core";
 
 This entry creates the core API when it is absent. The browser boot script starts the runtime through `init()`.
 
+## Naming and element lookup
+
+The naming helpers use the configured AelluxJs prefixes and convert camelCase names to kebab-case. For example, `$ae.attr("targetMessage")` returns `data-ae-target-message`, `$ae.className("feedbackError")` returns `ae--feedback-error`, and `$ae.cssVar("panelWidth")` returns `--ae-panel-width`. `extFilename(name)` returns the matching Extension script filename for the current minified setting; `extName(filename)` extracts an Extension name from that filename.
+
+`$ae.elementOrId(value, options?)` resolves a DOM element or an element ID, with or without a leading `#`. By default, only element nodes are accepted. Pass `{ defaultElement: element }` to use a fallback when `value` is `null` or `undefined`, or `{ allowedNodeTypes: [...] }` to accept other node types. Invalid values and missing IDs record `WARN_INVALID_ELEMENT_OR_ID` (`2011`) and return `null`; `options.method` can identify the caller in that diagnostic. This helper is available before runtime initialization.
+
 ## Events
 
 `$ae.eventName(name)` applies the `AelluxJs` prefix and capitalizes an unformatted name. It returns names already beginning with `AelluxJs` unchanged. To use an exact DOM event name with `$ae.on()`, `$ae.off()`, `$ae.onTarget()`, `$ae.offTarget()`, `$ae.dispatch()`, or `$ae.dispatchFrom()`, start it with `$`, `#`, `_`, or `!`; the marker is removed without changing the remaining name. For example, `$ae.dispatch("_pointerdown")` dispatches `pointerdown`.
 
 `on(event, handler, options)` and `off(event, handler, options)` listen on `document`. Use `onTarget(target, event, handler, options)` and `offTarget(target, event, handler, options)` for any other `EventTarget`, including `window`, an element, or a media query. The optional `options` argument is passed to the native listener methods; use the same `capture` value when removing a listener.
+
+`dispatch(event, options?)` dispatches from `document`, and `dispatchFrom(target, event, options?)` dispatches from another event target. Both return the native `dispatchEvent()` boolean. Events bubble by default and are not cancelable unless requested; pass `detail`, `bubbles`, or `cancelable` in `options`. The boot API includes `detail` on its regular `Event` objects before the orchestrator replaces this method with `CustomEvent` dispatch.
 
 ```js
 const onResize = event => console.log(event.type);
@@ -151,6 +159,8 @@ Pass `integrity` and `crossOrigin` as the third and fourth arguments when the de
 
 Preference media queries are available in `$ae.registry.preferenceMediaQueries`.
 `$ae.currentPreference(name)` reads the resolved preference attribute from `<html>` and returns its string value or `null` when absent. It accepts kebab-case and camelCase names, for example `$ae.currentPreference("reduced-motion")` and `$ae.currentPreference("reducedMotion")`. It is available before `init()` and reflects the latest device and local preference after the boot or Preference Extension updates the root attributes. Use it instead of reading the HTML attribute directly in application JavaScript.
+
+`$ae.updatePreferenceAttributesHTML(preferences?)` recomputes the root preference attributes from a supplied preference object, or from persisted preferences when omitted. The boot and Preference Extension call it as part of normal preference updates. `$ae.request(url, options?)` is available after runtime initialization; it calls `fetch` with default `GET` and `credentials: "same-origin"`, resolves to a successful `Response`, and rejects unsuccessful HTTP responses with an `AelluxJsRequestError` containing `status`, `statusText`, and `response`.
 
 ## Events
 

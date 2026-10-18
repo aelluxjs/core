@@ -68,6 +68,7 @@ The browser suite covers the release contract in Chromium, Firefox, and WebKit:
 | Detached elements | Removal during async mount, observer cleanup, moves within the document, explicit unmount races, and global cleanup when `MutationObserver` is unavailable. |
 | Accessibility contracts | Native keyboard activation for Preference controls, Focus restoration and hint cleanup, Present focus release plus ARIA state synchronization, failed-mount `aria-busy` cleanup, and root attributes for reduced motion, contrast, and forced colors. |
 | Extension event details | Adaptive dimensions, Preference changes, Scrollbox snap and pointer scroll events, and State Navigation snapshot copies. |
+| Feedback | Boundary type filtering, text and class updates, generated motion stylesheet loading, and invalid argument diagnostics. |
 | Layout and presentation | Anchor geometry, event-driven refresh and throttling; Adaptive resize fallback; Present transitions, focus release, ARIA state, and generated styles. |
 | Scrollbox interactions | Native progress, pointer drag and selection rules, nested scroll handoff, momentum, elastic pressure, snap navigation, custom scrollbar dragging, and scroll edge classes. |
 | Asset integrity and dependencies | Variant-specific SRI, changed-byte rejection, `crossorigin`, CSS property registration, and dependency registration and retry. |

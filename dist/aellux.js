@@ -1,6 +1,6 @@
 (function() {
   // <define:__AELLUX_CORE_ASSET_INTEGRITY__>
-  var define_AELLUX_CORE_ASSET_INTEGRITY_default = { "aellux.ext.adaptive.css": "sha384-HfIjX9Zk0VFRimzPvUaTS5AtwuHJHjXKoM/xbNJXj5vE7bSdBGEzbrBHfbNmYah0", "aellux.ext.present.css": "sha384-9GTFJ0OxBj6ta/iiV07BLGTdfe9pbmBMYXFn9kT+wB4KwiLO8zxJ39XzLYOGgfui", "aellux.esm.js": "sha384-RLOsSgHahdOQOIY2vs68q91UlLMMdh7kbthb0l/XsKhxrAQnskTGuraMrUygax7z", "aellux.ext.adaptive.js": "sha384-8vE5XSa5v/jANZz2f8fUSIQzChxPZfK3Eg4ODGa/7IvB7CYxBOOjIfOXRcHYnCvt", "aellux.ext.anchor.js": "sha384-KZp9o6AItFE68/MryuOqD74dME3OXB/EZ1IaSBVnd0K6/J5KynxnOWAXeV0kYiQx", "aellux.ext.feedback.js": "sha384-sUr2lKsTasJ3yf1tg1IhDk5slfwTjAOCX2t5jQV/Ls4WAPRh2r/k36/8OXjJJaBv", "aellux.ext.focus.js": "sha384-BgjEpKiYDdntLBdNI3+7eaBqsEEBmuVJKOuKlzavdpOx5Wpgnt8fJmIyDFWZ4NHT", "aellux.ext.point.js": "sha384-aDj7I5QEH/0+52E3e6yPZ/D0MEsNBdxeET3G5ToVvgczHtksMh3p8S/KOoAapRRN", "aellux.ext.preference.js": "sha384-kH3bIgUBycuvulVeU0qdOn+WezhAWK2lv4bFRBDP24EijtlE78cGhau48w+GV4M+", "aellux.ext.present.js": "sha384-Luwxmr6Nb0XnyV73v4H+CXbBDqxbTeIDmlAyfo9Nj4ZOBTJcTdpV5uEli7QSo79h", "aellux.ext.scrollbox.js": "sha384-/VH0gaa07KG3qDHG/77KvMFRSnmZYn6U3I4J7R4wOlXH2OAVN1HDX8nrpLlbc3Cn", "aellux.ext.state-navigation.js": "sha384-MlqDzSzZwzDYS522sw8iontz17JCjyXELEs3S7OWOXK56B76mZze5Y9QFWDrQylV", "aellux.full.js": "sha384-xhOVhq/nlHzi6D/Y0BTgJLVtT/9afYlUWRU9ZmajU6p8pbSw/Xw86zNN/1vkgnmL", "aellux.orchestrator.js": "sha384-hSmuien3XLFxQyCOiBMXOxYbBGPjcWXYRjLCw8Cqa6//RzG4j7etTVVOG9sSbV2y", "aellux.ext.adaptive.legacy.js": "sha384-rQK9y7TU8zp05j5fU0yJ19OmGIEvl7he6r0MXRQ6AdLszqv3DgpKDu988qjUGe/c", "aellux.ext.anchor.legacy.js": "sha384-e9CG+DfXZa5O1aCteo3pzpza0gaev/AlaZewSlgoy9jwKBYy/lobEgqYK6GeEJOS", "aellux.ext.feedback.legacy.js": "sha384-jyvYvbzuSua5FWZsAWeXWqmab/DjA1LVg2oOHb6Ey6wH4W2bB9qwt+QhGwIkk1gL", "aellux.ext.focus.legacy.js": "sha384-DYmxYMExXzgL5t/8T8hn/9qv525QV6jEQcIQhPJWc2/AN3vehPVHv10nZ3bVVHjn", "aellux.ext.point.legacy.js": "sha384-gG/XONYEC1tchBcJ6bUtKYmWFHz0E+50LmMaXDAiqWBKPuwdHZeYm1uXA22lMZuN", "aellux.ext.preference.legacy.js": "sha384-I2fpqPdE7bIgQcTMtdEUFnNWor1FhixnKPUCoE88LJP0FewUmGKUUwbmKNbwhL8C", "aellux.ext.present.legacy.js": "sha384-FTEmmxlKxLO9fXkfu4OeMDaNnLtMDvAnMKApQSB6nPFcOUQ9TR6ef7IJMKUn15Vk", "aellux.ext.scrollbox.legacy.js": "sha384-982B2XVJzhEoKL3clWV61mL+DJiswcoLZgWl05wgqW2GBwshNMqMME9mW/gHY8ZT", "aellux.ext.state-navigation.legacy.js": "sha384-45OQBJFlqOcoCG5lYgk8oqH1wX1eHVgpR4ThCo2JffDvjaZMKGWNRm7gGfDBRKVv", "aellux.orchestrator.legacy.js": "sha384-bOGaj7ucS7i/538o2blLF3J+B+gdVE/Od0FskIjc45CPnUOu7aTHBKWrQJ6Wk5tD", "aellux.full.legacy.js": "sha384-umu1sgZhSZWql1gC69IcY5lFvhUCMqO1J1KfScf2RfXBEx+rC4eKQxaAMxt/CA3G" };
+  var define_AELLUX_CORE_ASSET_INTEGRITY_default = { "aellux.ext.adaptive.css": "sha384-HfIjX9Zk0VFRimzPvUaTS5AtwuHJHjXKoM/xbNJXj5vE7bSdBGEzbrBHfbNmYah0", "aellux.ext.present.css": "sha384-9GTFJ0OxBj6ta/iiV07BLGTdfe9pbmBMYXFn9kT+wB4KwiLO8zxJ39XzLYOGgfui", "aellux.ext.feedback.css": "sha384-yk4cW+r/Mc1FRS1ZauBHC6KsKb7sxuJ0E9mmt/+AYASAdZXXMK6iuFBR+TOEh/r4", "aellux.esm.js": "sha384-wJn6iMIzt788OTf/NmNEbA3EY4yhFfPRpqcA3KK1bQ8IY4umpNsPWizYmUxaz3j2", "aellux.ext.adaptive.js": "sha384-8vE5XSa5v/jANZz2f8fUSIQzChxPZfK3Eg4ODGa/7IvB7CYxBOOjIfOXRcHYnCvt", "aellux.ext.anchor.js": "sha384-KZp9o6AItFE68/MryuOqD74dME3OXB/EZ1IaSBVnd0K6/J5KynxnOWAXeV0kYiQx", "aellux.ext.feedback.js": "sha384-ySxl1TXSip8BFPJ5MViVwTLsZVIbIPCAW+/ZAkS75KIih/VkuAchBN54qS/ywg9U", "aellux.ext.focus.js": "sha384-BgjEpKiYDdntLBdNI3+7eaBqsEEBmuVJKOuKlzavdpOx5Wpgnt8fJmIyDFWZ4NHT", "aellux.ext.point.js": "sha384-aDj7I5QEH/0+52E3e6yPZ/D0MEsNBdxeET3G5ToVvgczHtksMh3p8S/KOoAapRRN", "aellux.ext.preference.js": "sha384-kH3bIgUBycuvulVeU0qdOn+WezhAWK2lv4bFRBDP24EijtlE78cGhau48w+GV4M+", "aellux.ext.present.js": "sha384-Luwxmr6Nb0XnyV73v4H+CXbBDqxbTeIDmlAyfo9Nj4ZOBTJcTdpV5uEli7QSo79h", "aellux.ext.scrollbox.js": "sha384-/VH0gaa07KG3qDHG/77KvMFRSnmZYn6U3I4J7R4wOlXH2OAVN1HDX8nrpLlbc3Cn", "aellux.ext.state-navigation.js": "sha384-MlqDzSzZwzDYS522sw8iontz17JCjyXELEs3S7OWOXK56B76mZze5Y9QFWDrQylV", "aellux.full.js": "sha384-G4GtzphjbY/oVHcZPrx20/eWYAad9DVUd+PVt7WnRpkM6AR+i4GRMyLnHyp3zriE", "aellux.orchestrator.js": "sha384-Xn44rYcmtf2ScibUcY/umKiqqnExnaIUjC8dZ9+HsAwr72Qy9Qvbpacnms1NBFMa", "aellux.ext.adaptive.legacy.js": "sha384-rQK9y7TU8zp05j5fU0yJ19OmGIEvl7he6r0MXRQ6AdLszqv3DgpKDu988qjUGe/c", "aellux.ext.anchor.legacy.js": "sha384-e9CG+DfXZa5O1aCteo3pzpza0gaev/AlaZewSlgoy9jwKBYy/lobEgqYK6GeEJOS", "aellux.ext.feedback.legacy.js": "sha384-wXivq/8Mzbp50CWwXsx6JqWIGWpL78SI1YcH/hmr4wOnp9W/YsyC6CLBiRGaY2LE", "aellux.ext.focus.legacy.js": "sha384-DYmxYMExXzgL5t/8T8hn/9qv525QV6jEQcIQhPJWc2/AN3vehPVHv10nZ3bVVHjn", "aellux.ext.point.legacy.js": "sha384-gG/XONYEC1tchBcJ6bUtKYmWFHz0E+50LmMaXDAiqWBKPuwdHZeYm1uXA22lMZuN", "aellux.ext.preference.legacy.js": "sha384-I2fpqPdE7bIgQcTMtdEUFnNWor1FhixnKPUCoE88LJP0FewUmGKUUwbmKNbwhL8C", "aellux.ext.present.legacy.js": "sha384-FTEmmxlKxLO9fXkfu4OeMDaNnLtMDvAnMKApQSB6nPFcOUQ9TR6ef7IJMKUn15Vk", "aellux.ext.scrollbox.legacy.js": "sha384-982B2XVJzhEoKL3clWV61mL+DJiswcoLZgWl05wgqW2GBwshNMqMME9mW/gHY8ZT", "aellux.ext.state-navigation.legacy.js": "sha384-45OQBJFlqOcoCG5lYgk8oqH1wX1eHVgpR4ThCo2JffDvjaZMKGWNRm7gGfDBRKVv", "aellux.orchestrator.legacy.js": "sha384-I4rEAQW0MdJS5Rqua0I/OIgJEyOzyPz6rx5aP1gtuKVmAcCXkecZxwwOY4yv3kxC", "aellux.full.legacy.js": "sha384-RUZqtPMBlrbsHhi6OlQfOLt+c6QsLMv3S5d5ZTWbJTK4JyRbRGxFXhdr99wbN0n3" };
 
   // src/internal/asset-load-helper.js
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
@@ -361,6 +361,10 @@
         name = fromCamelCase2(name);
         return constants.AELLUXJS_CLASS_NAME_PREFFIX.replace(/\?/, name);
       },
+      cssVar: function(name) {
+        name = fromCamelCase2(name);
+        return constants.AELLUXJS_CSS_VAR_PREFFIX.replace(/\?/, name);
+      },
       extFilename: function(extensionName) {
         extensionName = fromCamelCase2(extensionName);
         return "aellux." + constants.AELLUXJS_EXT_SCRIPT_PREFIX + "." + extensionName + (this.minified ? ".min.js" : ".js");
@@ -449,6 +453,31 @@
     }
   }
 
+  // src/internal/resolve-element-or-id.js
+  /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+  function resolveElementOrId(root, elementOrId, options) {
+    options = options || {};
+    var fallback = options.defaultElement;
+    if ((elementOrId === void 0 || elementOrId === null) && fallback) {
+      return fallback;
+    }
+    var requested = elementOrId;
+    if (typeof elementOrId === "string") {
+      var id = elementOrId.trim().replace(/^#/, "");
+      elementOrId = id ? root.document.getElementById(id) : null;
+    }
+    var allowedNodeTypes = options.allowedNodeTypes || [root.Node.ELEMENT_NODE];
+    if (elementOrId && allowedNodeTypes.indexOf(elementOrId.nodeType) !== -1) {
+      return elementOrId;
+    }
+    var diagnostics = root.AelluxJs.diagnostics;
+    diagnostics.warn(diagnostics.WARN_INVALID_ELEMENT_OR_ID, {
+      elementOrId: requested,
+      method: options.method
+    });
+    return null;
+  }
+
   // src/internal/aellux-api-integration.js
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   function createAelluxApi(root, constants) {
@@ -483,6 +512,9 @@
       },
       updatePreferenceAttributesHTML: preferenceHtml.updatePreferenceAttributesHTML,
       currentPreference: preferenceHtml.currentPreference,
+      elementOrId: function(elementOrId, options2) {
+        return resolveElementOrId(root, elementOrId, options2);
+      },
       on: function(event, handler, options2) {
         api.onTarget(document2, event, handler, options2);
       },
@@ -497,6 +529,7 @@
       },
       attr: namingNormalization.attr,
       className: namingNormalization.className,
+      cssVar: namingNormalization.cssVar,
       registerCssProperty: function() {
         if (!arguments.length || !root.CSS || typeof root.CSS.registerProperty !== "function") return false;
         var registered = true;
@@ -714,6 +747,7 @@
         var bubbles = options2 && "bubbles" in options2 ? options2.bubbles : true;
         var cancelable = options2 && "cancelable" in options2 ? options2.cancelable : false;
         obj.initEvent(api.eventName(event), bubbles, cancelable);
+        if (options2 && "detail" in options2) obj.detail = options2.detail;
         return from.dispatchEvent(obj);
       },
       wait: function() {
@@ -768,6 +802,7 @@
       AELLUXJS_SHORT_JS_NAME: "$ae",
       AELLUXJS_EXT_SCRIPT_PREFIX: "ext",
       AELLUXJS_CLASS_NAME_PREFFIX: "ae--?",
+      AELLUXJS_CSS_VAR_PREFFIX: "--ae-?",
       AELLUXJS_EVENT_NAME_PREFFIX: "AelluxJs?",
       AELLUXJS_DATA_ATTRIBUTE_NAME_PREFFIX: "ae-?",
       AELLUXJS_DIAGNOSTICS: {
@@ -798,6 +833,7 @@
         ERROR_ANCHOR_REFERENCE_CONTEXT: { code: 1119, message: "Anchor target and anchored element must share the same containing block / absolute positioning reference." },
         ERROR_SCROLLBOX_ELASTIC_WRAPPER: { code: 1120, message: "Elastic Scrollbox requires exactly one direct child marked with data-ae-scrollbox-elastic." },
         ERROR_SCROLLBOX_SNAP_ITEMS: { code: 1121, message: "Snap Scrollbox requires at least one eligible data-ae-snap-item." },
+        ERROR_FEEDBACK_ARGUMENT: { code: 1122, message: "Feedback requires a string message, a known string type, a string motion when provided, and a DOM Element target when provided." },
         ERROR_LEGACY_RUNTIME_START: { code: 1201, message: "aellux.js Legacy runtime failed to start." },
         ERROR_LEGACY_RUNTIME_LOAD: { code: 1202, message: "aellux.js Legacy runtime could not be loaded." },
         ERROR_MODERN_RUNTIME_START: { code: 1203, message: "aellux.js Modern runtime failed to start; trying Legacy runtime." },
@@ -818,7 +854,8 @@
         WARN_SCROLLBOX_ELASTIC_LIMIT_INVALID: { code: 2015, message: "Scrollbox elastic limit must be one or two nonnegative fractions or pixel values; using 1/4." },
         WARN_SCROLLBOX_WRAPPER_DISPLAY: { code: 2016, message: "Scrollbox elastic wrappers require an inline display; converting to an inline counterpart when available." },
         INFO_LEGACY_FALLBACK: { code: 3e3, message: "aellux.js is starting the Legacy runtime." },
-        INFO_PRESENT_MEASURED_LAYOUT: { code: 3001, message: "Present measures size transitions without a direct present-motion child; add one to use the grid layout strategy." }
+        INFO_PRESENT_MEASURED_LAYOUT: { code: 3001, message: "Present measures size transitions without a direct present-motion child; add one to use the grid layout strategy." },
+        INFO_FEEDBACK_MOTION_CUSTOM: { code: 3002, message: "The requested feedback motion is not standard. Standard motions are listed in the diagnostic context." }
       },
       AELLUXJS_DEFAULT_INITIALIZATION_OPTIONS: {
         mode: "full",

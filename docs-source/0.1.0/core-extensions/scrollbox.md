@@ -30,7 +30,6 @@ The bars normally fade between opacity 0 and 1. Set inherited `--ae-scrollbar-op
   <div><!-- scrollable content --></div>
 </div>
 ```
-```
 
 ## Modes
 

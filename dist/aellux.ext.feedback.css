@@ -1,0 +1,94 @@
+/*! aellux.js Feedback Extension | SPDX-License-Identifier: Apache-2.0 */
+
+.ae--feedback-motion-shake {
+  animation-name: ae--feedback-motion-shake;
+  animation-duration: 500ms;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: 1;
+}
+@keyframes ae--feedback-motion-shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-8px); }
+  40%, 80% { transform: translateX(8px); }
+}
+
+.ae--feedback-motion-yes {
+  animation-name: ae--feedback-motion-yes;
+  animation-duration: 550ms;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: 1;
+}
+@keyframes ae--feedback-motion-yes {
+  0%, 100% { transform: translateY(0) rotate(0); }
+  30%, 70% { transform: translateY(5px) rotate(2deg); }
+  50% { transform: translateY(-2px) rotate(-1deg); }
+}
+
+.ae--feedback-motion-no {
+  animation-name: ae--feedback-motion-no;
+  animation-duration: 550ms;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: 1;
+}
+@keyframes ae--feedback-motion-no {
+  0%, 100% { transform: translateX(0) rotate(0); }
+  25%, 75% { transform: translateX(-5px) rotate(-3deg); }
+  50% { transform: translateX(5px) rotate(3deg); }
+}
+
+.ae--feedback-motion-breathe {
+  animation-name: ae--feedback-motion-breathe;
+  animation-duration: 900ms;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: 1;
+}
+@keyframes ae--feedback-motion-breathe {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.045); }
+}
+
+.ae--feedback-motion-tremble {
+  animation-name: ae--feedback-motion-tremble;
+  animation-duration: 350ms;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: 1;
+}
+@keyframes ae--feedback-motion-tremble {
+  0%, 100% { transform: translate(0, 0); }
+  20%, 60% { transform: translate(-2px, 1px); }
+  40%, 80% { transform: translate(2px, -1px); }
+}
+
+.ae--feedback-motion-pulse {
+  animation-name: ae--feedback-motion-pulse;
+  animation-duration: 500ms;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: 1;
+}
+@keyframes ae--feedback-motion-pulse {
+  0%, 100% { transform: scale(1); }
+  35% { transform: scale(1.12); }
+  65% { transform: scale(0.97); }
+}
+
+.ae--feedback-motion-alert {
+  animation-name: ae--feedback-motion-alert;
+  animation-duration: 850ms;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: 1;
+}
+@keyframes ae--feedback-motion-alert {
+  0%, 100% { transform: translateY(0) scale(1); }
+  20%, 60% { transform: translateY(-8px) scale(1.06); }
+  40%, 80% { transform: translateY(0) scale(1); }
+}
+
+html[data-ae-reduced-motion="reduced"] .ae--feedback-motion-shake,
+html[data-ae-reduced-motion="reduced"] .ae--feedback-motion-yes,
+html[data-ae-reduced-motion="reduced"] .ae--feedback-motion-no,
+html[data-ae-reduced-motion="reduced"] .ae--feedback-motion-breathe,
+html[data-ae-reduced-motion="reduced"] .ae--feedback-motion-tremble,
+html[data-ae-reduced-motion="reduced"] .ae--feedback-motion-pulse,
+html[data-ae-reduced-motion="reduced"] .ae--feedback-motion-alert {
+  animation: none;
+}

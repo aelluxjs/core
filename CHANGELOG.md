@@ -6,6 +6,8 @@ All notable changes to aellux.js will be documented in this file.
 
 ### Added
 
+- Feedback boundaries now update message text, apply type and motion classes, and ship a generated stylesheet for standard motions.
+- The Core API now exposes `elementOrId()` and `cssVar()` helpers.
 - Scrollbox now supports custom vertical and horizontal scrollbars through `data-ae-scrollbar`, including draggable thumbs, track clicks that center the thumb on the click, and overlay positioning with transforms.
 - Raised boot, full-bundle, and Scrollbox size budgets for custom scrollbars.
 - Scrollbox snap centers its first point on mount, selects the nearest point or next swipe point on PDS release, supports elastic wrappers, and exposes `next`, `previous`, and `goto(index)` controller methods.
@@ -28,6 +30,9 @@ All notable changes to aellux.js will be documented in this file.
 
 ### Changed
 
+- Feedback methods now share the `(message, target, value, motion)` argument order and validate their payloads before dispatch.
+- Full mode now loads the generated Feedback stylesheet.
+- Updated raw bundle limits for the current boot, ESM, full, Anchor, Feedback, and Present artifacts, and added a Feedback CSS limit.
 - Scrollbox now batches progress, snap variables, and custom scrollbar measurements before applying their CSS updates in one frame; pointer gestures keep synchronous scroll decisions.
 - Adaptive uses the first `ResizeObserver` entry for initial dimensions and defers fallback mount measurement to the layout scheduler.
 - Present waits one layout frame instead of forcing an immediate geometry read when separating measured transition states.

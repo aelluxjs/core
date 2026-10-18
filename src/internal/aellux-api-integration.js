@@ -8,6 +8,7 @@ import utilsNameCase from "./utils-name-case.js";
 import { createNamingNormalization } from "./create-naming-normalization.js";
 import { createPreferenceHtmlHelper } from "./create-preference-html-helper.js";
 import { assetLoadHelper } from "./asset-load-helper.js";
+import { resolveElementOrId } from "./resolve-element-or-id.js";
 
 // Build-time imports aside, keep this factory ES5-compatible for the boot bundle.
 // The caller publishes the returned function and replaces init with the boot loader.
@@ -41,6 +42,7 @@ export function createAelluxApi(root, constants) {
     },
     updatePreferenceAttributesHTML: preferenceHtml.updatePreferenceAttributesHTML,
     currentPreference: preferenceHtml.currentPreference,
+    elementOrId: (elementOrId, options) => resolveElementOrId(root, elementOrId, options),
     on: function (event, handler, options) {
       api.onTarget(document, event, handler, options);
     },
@@ -55,6 +57,7 @@ export function createAelluxApi(root, constants) {
     },
     attr: namingNormalization.attr,
     className: namingNormalization.className,
+    cssVar: namingNormalization.cssVar,
     registerCssProperty: function () {
       if (!arguments.length || !root.CSS ||
         typeof root.CSS.registerProperty !== "function") return false;
@@ -264,6 +267,7 @@ export function createAelluxApi(root, constants) {
       var bubbles = options && "bubbles" in options ? options.bubbles : true;
       var cancelable = options && "cancelable" in options ? options.cancelable : false;
       obj.initEvent(api.eventName(event), bubbles, cancelable);
+      if (options && "detail" in options) obj.detail = options.detail;
       return from.dispatchEvent(obj);
     },
     wait: function () { throw diagnostics.create(diagnostics.ERROR_NOT_INITIALIZED); },

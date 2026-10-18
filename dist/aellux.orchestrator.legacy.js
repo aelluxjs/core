@@ -21196,8 +21196,8 @@
   });
 
   // src/internal/resolve-element-or-id.js
-  function resolveElementOrId(root, elementOrId) {
-    var options = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : {};
+  function resolveElementOrId(root, elementOrId, options) {
+    options = options || {};
     var fallback = options.defaultElement;
     if ((elementOrId === void 0 || elementOrId === null) && fallback) {
       return fallback;

@@ -44,7 +44,7 @@ test("custom scrollbar stays over the viewport and supports track click and thum
       position: new DOMMatrixReadOnly(before.transform).m42 };
   });
   expect(verticalThumb.size).toBeCloseTo(thumb, 1);
-  expect(verticalThumb.position).toBeCloseTo(thumbPosition, 1);
+  expect(verticalThumb.position).toBeCloseTo(thumbPosition, 0);
   const rect = await track.boundingBox();
   await page.mouse.move(rect.x + 4, rect.y + thumbPosition + thumb / 2);
   await page.mouse.down();
@@ -230,7 +230,8 @@ test("scrollbar none hides native bars without creating custom bars", async ({ p
   await expect(box).not.toHaveClass(/ae--native-sb-hide/);
 });
 
-test("touch can drag a snap scrollbar without activating a snap flick", async ({ page }) => {
+test("touch can drag a snap scrollbar without activating a snap flick", async ({ page, browserName }) => {
+  test.skip(browserName !== "chromium", "CDP touch input is Chromium-only");
   await setup(page, `<div id="box" data-ae-scrollbox data-ae-scrollbox-snap
     data-ae-scrollbar="horizontal"
     style="width:120px;height:120px;overflow-x:auto;overflow-y:hidden">

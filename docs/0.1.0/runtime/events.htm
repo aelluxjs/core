@@ -656,7 +656,7 @@ await $ae.mountManager.update(document.getElementById(&quot;panel&quot;));
 <tr>
 <td>Feedback</td>
 <td><code>AelluxJsFeedback</code></td>
-<td>Feedback target, or <code>document</code>; <code>detail</code> is <code>{ type, message, value, target }</code>.</td>
+<td>Feedback target, or <code>document</code>; <code>detail</code> is <code>{ type, message, value, target, motion }</code>. The event is cancelable. A matching mounted feedback boundary stops propagation.</td>
 </tr>
 <tr>
 <td>Point</td>

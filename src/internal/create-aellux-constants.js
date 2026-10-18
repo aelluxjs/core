@@ -7,6 +7,7 @@ export function createAelluxConstants() {
     AELLUXJS_EXT_SCRIPT_PREFIX: "ext",
 
     AELLUXJS_CLASS_NAME_PREFFIX: "ae--?",
+    AELLUXJS_CSS_VAR_PREFFIX: "--ae-?",
     AELLUXJS_EVENT_NAME_PREFFIX: "AelluxJs?",
     AELLUXJS_DATA_ATTRIBUTE_NAME_PREFFIX: "ae-?",
 
@@ -38,6 +39,7 @@ export function createAelluxConstants() {
       ERROR_ANCHOR_REFERENCE_CONTEXT: { code: 1119, message: "Anchor target and anchored element must share the same containing block / absolute positioning reference." },
       ERROR_SCROLLBOX_ELASTIC_WRAPPER: { code: 1120, message: "Elastic Scrollbox requires exactly one direct child marked with data-ae-scrollbox-elastic." },
       ERROR_SCROLLBOX_SNAP_ITEMS: { code: 1121, message: "Snap Scrollbox requires at least one eligible data-ae-snap-item." },
+      ERROR_FEEDBACK_ARGUMENT: { code: 1122, message: "Feedback requires a string message, a known string type, a string motion when provided, and a DOM Element target when provided." },
       ERROR_LEGACY_RUNTIME_START: { code: 1201, message: "aellux.js Legacy runtime failed to start." },
       ERROR_LEGACY_RUNTIME_LOAD: { code: 1202, message: "aellux.js Legacy runtime could not be loaded." },
       ERROR_MODERN_RUNTIME_START: { code: 1203, message: "aellux.js Modern runtime failed to start; trying Legacy runtime." },
@@ -58,7 +60,8 @@ export function createAelluxConstants() {
       WARN_SCROLLBOX_ELASTIC_LIMIT_INVALID: { code: 2015, message: "Scrollbox elastic limit must be one or two nonnegative fractions or pixel values; using 1/4." },
       WARN_SCROLLBOX_WRAPPER_DISPLAY: { code: 2016, message: "Scrollbox elastic wrappers require an inline display; converting to an inline counterpart when available." },
       INFO_LEGACY_FALLBACK: { code: 3000, message: "aellux.js is starting the Legacy runtime." },
-      INFO_PRESENT_MEASURED_LAYOUT: { code: 3001, message: "Present measures size transitions without a direct present-motion child; add one to use the grid layout strategy." }
+      INFO_PRESENT_MEASURED_LAYOUT: { code: 3001, message: "Present measures size transitions without a direct present-motion child; add one to use the grid layout strategy." },
+      INFO_FEEDBACK_MOTION_CUSTOM: { code: 3002, message: "The requested feedback motion is not standard. Standard motions are listed in the diagnostic context." }
     },
 
     AELLUXJS_DEFAULT_INITIALIZATION_OPTIONS: {

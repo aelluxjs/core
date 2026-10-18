@@ -69,7 +69,7 @@ test("native touch drag rejects programmatic snap navigation", async ({ page }) 
   await page.addScriptTag({ url: "/src/aellux.ext.scrollbox.js" });
   await page.evaluate(() => AelluxJs.init({ mode: "basic" }));
   await expect.poll(() => page.evaluate(() =>
-    !!AelluxJs.mountManager.controller(document.getElementById("box"))?.scrollbox
+    !!AelluxJs.mountManager?.controller(document.getElementById("box"))?.scrollbox
   )).toBe(true);
 
   const result = await page.evaluate(() => {
@@ -78,15 +78,16 @@ test("native touch drag rejects programmatic snap navigation", async ({ page }) 
     const originalScrollTo = box.scrollTo.bind(box);
     let calls = 0;
     box.scrollTo = (...args) => { calls++; return originalScrollTo(...args); };
-    box.dispatchEvent(new TouchEvent("touchstart", {
-      bubbles: true, changedTouches: [new Touch({ identifier: 1, target: box })]
-    }));
+    const dispatchTouch = type => {
+      const event = new Event(type, { bubbles: true });
+      Object.defineProperty(event, "changedTouches", { value: [{ identifier: 1 }] });
+      box.dispatchEvent(event);
+    };
+    dispatchTouch("touchstart");
     const before = calls;
     const during = [controller.goto(1), controller.next(), controller.previous()];
     const duringCalls = calls - before;
-    box.dispatchEvent(new TouchEvent("touchend", {
-      bubbles: true, changedTouches: [new Touch({ identifier: 1, target: box })]
-    }));
+    dispatchTouch("touchend");
     const after = controller.goto(1);
     return { during, duringCalls, after, afterCalls: calls - before };
   });

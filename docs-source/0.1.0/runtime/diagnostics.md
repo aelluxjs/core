@@ -97,3 +97,5 @@ Present records `INFO_PRESENT_MEASURED_LAYOUT` (`3001`) when a `height` or `widt
 `mountManager.add()` records `ERROR_MOUNT_REGISTRATION` (`1113`) when a registration argument or CSS selector is invalid, or when the same Extension and selector are already registered. Its context identifies the rejected argument; no mount registration is added or replaced. `mountManager.remove()` records `ERROR_MOUNT_MAP_IN_USE` (`1115`) and leaves the map registered when a matching element is still mounted or mounting.
 
 State navigation records `WARN_NAVIGATION_EVENT_INVALID` (`2009`) when `PushAjaxReplace` or `UpdateBaseTitle` receives malformed event details. Exceptions while handling those events record `ERROR_CALLBACK` (`1108`). Feedback subscriber exceptions and rejected promises also record `ERROR_CALLBACK`; other subscribers continue to receive the feedback.
+
+Feedback records `ERROR_FEEDBACK_ARGUMENT` (`1122`) and skips dispatch when `message`, `type`, `motion`, or `target` is invalid. A valid but nonstandard motion records `INFO_FEEDBACK_MOTION_CUSTOM` (`3002`); the caller must provide its animation rule.

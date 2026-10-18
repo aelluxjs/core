@@ -16,6 +16,10 @@ export function createNamingNormalization(constants) {
       name = fromCamelCase(name);
       return constants.AELLUXJS_CLASS_NAME_PREFFIX.replace(/\?/, name);
     },
+    cssVar: function (name) {
+      name = fromCamelCase(name);
+      return constants.AELLUXJS_CSS_VAR_PREFFIX.replace(/\?/, name);
+    },
     extFilename: function (extensionName) {
       extensionName = fromCamelCase(extensionName);
       return "aellux." + constants.AELLUXJS_EXT_SCRIPT_PREFIX + "." + extensionName +

@@ -5,10 +5,12 @@ Extensions may be JavaScript-only or may request a stylesheet associated with th
 ## JavaScript Only
 
 ```js
-$ae.ext("feedback");
+$ae.ext("example");
 ```
 
 `loadStyle` defaults to `false`.
+
+Feedback includes an optional generated stylesheet for its standard motion classes. In `basic` mode, register it with `{ loadStyle: true }` to load those animations. In `full` mode, the stylesheet loads automatically.
 
 ## JavaScript and CSS
 

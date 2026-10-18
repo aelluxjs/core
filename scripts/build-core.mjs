@@ -11,6 +11,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { createContext, runInContext } from "node:vm";
 import { generateAdaptiveCSS } from "../src/aellux.ext.adaptive.css.js";
 import { generatePresentCSS } from "../src/aellux.ext.present.css.js";
+import { generateFeedbackCSS } from "../src/aellux.ext.feedback.css.js";
 
 const projectRoot = fileURLToPath(new URL("../", import.meta.url));
 const sourceDirectory = join(projectRoot, "src");
@@ -89,6 +90,10 @@ await buildGeneratedStylesheet(
 await buildGeneratedStylesheet(
   "aellux.ext.present.css",
   generatePresentCSS(bootstrapContext.AelluxJs)
+);
+await buildGeneratedStylesheet(
+  "aellux.ext.feedback.css",
+  generateFeedbackCSS(bootstrapContext.AelluxJs)
 );
 
 async function buildGeneratedStylesheet(filename, contents) {

@@ -1,6 +1,6 @@
 # Feedback Extension
 
-`feedback` sends structured feedback events and lets application code subscribe to feedback types. It is included in the `full` runtime. In `basic` mode, register it with `$ae.ext("feedback")`.
+`feedback` sends structured feedback events, lets application code subscribe by type, and updates mounted feedback boundaries. It is included in the `full` runtime. In `basic` mode, register it with `$ae.ext("feedback", { loadStyle: true })` to include the standard motion styles, or omit `loadStyle` if animations are unnecessary.
 
 ```js
 const feedback = await $ae.wait("feedback");
@@ -12,15 +12,39 @@ feedback.warning("Check the form before continuing.");
 subscription.off();
 ```
 
-The convenience methods are `warning(message)`, `error(message)`, `success(message)`, and `announce(message)`. For a target element, use `busy(target, message, value)`, `validate(target, message, value)`, or `progress(target, message, value)`. `send({ type, message, value, target })` handles custom types; `target` defaults to `document`.
+## Publishing feedback
 
-Each call dispatches an `AelluxJsFeedback` event from the target. Its `detail` contains `{ type, message, value, target }`. `on(type, handler)` subscribes to one type; `on("*", handler)` receives every type. Use `off(type, handler)` or the object returned by `on()` to unsubscribe. The Extension clears subscriptions when destroyed.
+The convenience methods are `warning(message, target?, value?, motion?)`, `error(...)`, `success(...)`, `announce(...)`, `busy(...)`, `validate(...)`, and `progress(...)`. The argument order is the same for all seven methods. `send({ type, message, target, value, motion })` accepts the same fields. `type` must be one of those seven names and `message` must be a string. `target`, when supplied, must be a DOM element; otherwise the event starts at `document`. `value` is passed through to consumers. `motion` is an optional string.
 
-The Extension emits feedback; it does not render a toast, alert, or progress indicator by itself.
+```js
+const field = document.getElementById("email");
+feedback.error("Enter a valid email address.", field, null, "shake");
+feedback.progress("Uploading…", field, 0.5);
+```
+
+Each call dispatches a bubbling, cancelable `AelluxJsFeedback` event from the target. Its `detail` contains `{ type, message, value, target, motion }`. `on(type, handler)` subscribes to one type; `on("*", handler)` receives every type. Use `off(type, handler)` or the object returned by `on()` to unsubscribe. Subscribers run after the event dispatch, even when a boundary stops propagation or a listener cancels the event. The Extension clears subscriptions when destroyed.
+
+## Mounted feedback boundaries
+
+Add `data-ae-feedback` to an element to handle feedback events that reach it. An empty value accepts every type; a space-separated list accepts only the named types. The nearest matching boundary stops propagation. A boundary updates the message and applies a type class to itself, the message target, and the transform target. Type classes have the form `ae--feedback-warning`, `ae--feedback-error`, and so on; previously added type classes remain until application code removes them.
+
+```html
+<section data-ae-feedback="error warning"
+         data-ae-target-message="email-message"
+         data-ae-target-transform="email-field">
+  <label for="email-field">Email</label>
+  <input id="email-field" type="email" aria-describedby="email-message">
+  <p id="email-message" role="alert"></p>
+</section>
+```
+
+`data-ae-target-message` and `data-ae-target-transform` accept an element ID, with or without `#`. If omitted, each target is the boundary itself. The message updates the first direct text node of the message target, or appends a text node if none exists. Child elements are preserved. A missing or invalid target ID records `WARN_INVALID_ELEMENT_OR_ID` (`2011`) and skips that target. Boundaries are mounted and unmounted with the normal DOM lifecycle.
+
+The transform target receives `ae--feedback-motion-{motion}` for one second. A new event replaces its previous motion class and restarts the timer. The generated Feedback stylesheet provides `shake`, `yes`, `no`, `breathe`, `tremble`, `pulse`, and `alert`; it disables these animations when the document root has `data-ae-reduced-motion="reduced"`. A custom motion name can be used with an application stylesheet and records an informational diagnostic.
 
 ## Accessibility profile
 
-- **Capabilities:** infrastructure and policy; external integration through consumer renderers.
-- **Owned state:** subscriptions and `AelluxJsFeedback` event payloads.
-- **Consumer responsibility:** render feedback with suitable semantics, announcement priority and focus behavior. `announce()` emits an event and does not create a live region.
-- **Not applicable:** the Extension renders no interface and directly manages no focus, keyboard input, contrast or motion.
+- **Capabilities:** event distribution, boundary text updates, and optional motion classes.
+- **Owned state:** subscriptions, mounted listeners, and motion timers.
+- **Consumer responsibility:** choose suitable semantics, live region priority, and focus behavior. `announce()` publishes an event but does not create a live region.
+- **Motion:** the generated styles respect the AelluxJs reduced-motion attribute. Application supplied motion styles must handle reduced motion themselves.

@@ -23,7 +23,7 @@ Full mode loads the orchestrator and the complete core Extension bundle:
 ```
 
 The full bundle is a runtime loaded by the aellux.js boot script; it is not a standalone entry point.
-It includes and initializes Adaptive, Anchor, Feedback, Focus, Point, Preference, Present, Scrollbox, and State Navigation. Adaptive and Present also load their generated stylesheets. No separate registration is needed for these core Extensions in `full` mode.
+It includes and initializes Adaptive, Anchor, Feedback, Focus, Point, Preference, Present, Scrollbox, and State Navigation. Adaptive, Feedback, and Present also load their generated stylesheets. No separate registration is needed for these core Extensions in `full` mode.
 
 ## Basic Mode
 

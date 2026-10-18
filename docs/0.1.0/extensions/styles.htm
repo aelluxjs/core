@@ -589,9 +589,10 @@ Extension Styles                  </li>
 <h1>Optional Extension Styles</h1>
 <p>Extensions may be JavaScript-only or may request a stylesheet associated with their script.</p>
 <h2>JavaScript Only</h2>
-<pre><code class="language-js">$ae.ext(&quot;feedback&quot;);
+<pre><code class="language-js">$ae.ext(&quot;example&quot;);
 </code></pre>
 <p><code>loadStyle</code> defaults to <code>false</code>.</p>
+<p>Feedback includes an optional generated stylesheet for its standard motion classes. In <code>basic</code> mode, register it with <code>{ loadStyle: true }</code> to load those animations. In <code>full</code> mode, the stylesheet loads automatically.</p>
 <h2>JavaScript and CSS</h2>
 <p>Use <code>true</code> to derive the stylesheet URL from the Extension script URL:</p>
 <pre><code class="language-js">$ae.ext(&quot;example&quot;, { loadStyle: true });
