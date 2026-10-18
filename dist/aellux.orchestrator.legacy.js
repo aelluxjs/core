@@ -20959,6 +20959,7 @@
     };
     var groups = /* @__PURE__ */ new Map();
     var tasks = /* @__PURE__ */ new Set();
+    var sequenceStarts = /* @__PURE__ */ new Map();
     var frameRequest = null;
     var phase = "idle";
     var waitingForVisibility = false;
@@ -21415,6 +21416,15 @@
     function startIteration(owner) {
       if (!owner.active) return;
       var config = owner.configs[owner.index];
+      var previousStart = sequenceStarts.get(owner.group.id);
+      var minimumStart = config.maxFPS === void 0 || !previousStart || previousStart.owner === owner ? 0 : previousStart.time + 1e3 / config.maxFPS;
+      if (minimumStart > now()) {
+        owner.timer = setTimeout(function() {
+          owner.timer = null;
+          startIteration(owner);
+        }, Math.max(0, minimumStart - now() - 1));
+        return;
+      }
       try {
         if (checkAbort(owner, config)) return;
       } catch (error) {
@@ -21422,6 +21432,10 @@
         return;
       }
       owner.lastStart = now();
+      sequenceStarts.set(owner.group.id, {
+        owner: owner,
+        time: owner.lastStart
+      });
       var read = config.read ? queueTask("read", function() {
         if (checkAbort(owner, config)) return;
         return config.read();
@@ -21488,6 +21502,7 @@
       phase = "idle";
       idleSince = null;
       resetMeasurements(true);
+      sequenceStarts.clear();
     }
     function cancel(id) {
       validId(id);

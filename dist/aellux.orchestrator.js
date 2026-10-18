@@ -30,6 +30,7 @@
     const queues = { read: [], update: [] };
     const groups = /* @__PURE__ */ new Map();
     const tasks = /* @__PURE__ */ new Set();
+    const sequenceStarts = /* @__PURE__ */ new Map();
     let frameRequest = null;
     let phase = "idle";
     let waitingForVisibility = false;
@@ -403,6 +404,15 @@
     function startIteration(owner) {
       if (!owner.active) return;
       const config = owner.configs[owner.index];
+      const previousStart = sequenceStarts.get(owner.group.id);
+      const minimumStart = config.maxFPS === void 0 || !previousStart || previousStart.owner === owner ? 0 : previousStart.time + 1e3 / config.maxFPS;
+      if (minimumStart > now()) {
+        owner.timer = setTimeout(() => {
+          owner.timer = null;
+          startIteration(owner);
+        }, Math.max(0, minimumStart - now() - 1));
+        return;
+      }
       try {
         if (checkAbort(owner, config)) return;
       } catch (error) {
@@ -410,6 +420,7 @@
         return;
       }
       owner.lastStart = now();
+      sequenceStarts.set(owner.group.id, { owner, time: owner.lastStart });
       const read = config.read ? queueTask("read", () => {
         if (checkAbort(owner, config)) return;
         return config.read();
@@ -468,6 +479,7 @@
       phase = "idle";
       idleSince = null;
       resetMeasurements(true);
+      sequenceStarts.clear();
     }
     function cancel(id) {
       validId(id);

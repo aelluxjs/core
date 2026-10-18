@@ -35,24 +35,9 @@
       "bottom-center": [0.5, 1],
       "bottom-right": [1, 1]
     };
-    const DEFAULT_FPS = 30;
-    const DEFAULT_INTERVAL_MS = Math.round(1e3 / DEFAULT_FPS);
     const anchors = /* @__PURE__ */ new Map();
     const elementMemories = /* @__PURE__ */ new WeakMap();
-    let updateTimeout = null;
-    let layoutUpdateTimeout = null;
-    let layoutUpdateUntil = 0;
-    let lastUpdateTime = -DEFAULT_INTERVAL_MS;
-    function updateIntervalMs() {
-      let interval = Infinity;
-      for (const element of anchors.keys()) {
-        const value = element.getAttribute(fpsAttribute);
-        const fps = value === null || !value.trim() ? NaN : Number(value);
-        const elementInterval = Number.isFinite(fps) && fps > 0 ? Math.max(1, Math.round(1e3 / fps)) : DEFAULT_INTERVAL_MS;
-        interval = Math.min(interval, elementInterval);
-      }
-      return Number.isFinite(interval) ? interval : DEFAULT_INTERVAL_MS;
-    }
+    let nextLayoutId = 2e6;
     AelluxJs.extAttach(extensionName, { init, destroy });
     function init() {
       AelluxJs.registerCssProperty(
@@ -72,12 +57,6 @@
       });
     }
     async function destroy() {
-      if (updateTimeout !== null) clearTimeout(updateTimeout);
-      if (layoutUpdateTimeout !== null) clearTimeout(layoutUpdateTimeout);
-      updateTimeout = null;
-      layoutUpdateTimeout = null;
-      layoutUpdateUntil = 0;
-      lastUpdateTime = -DEFAULT_INTERVAL_MS;
       await Promise.all(Array.from(anchors.keys(), unmountAnchor));
       AelluxJs.mountManager.remove({ extensionName });
     }
@@ -90,6 +69,9 @@
         revision: 0,
         target: null,
         reference: null,
+        layoutId: nextLayoutId++,
+        layoutUntil: 0,
+        layoutSingle: false,
         layoutListener: (event) => scheduleLayoutUpdate(event),
         observer: null,
         intersectionObserver: null
@@ -120,75 +102,64 @@
       if (!anchors.size) {
         AelluxJs.offTarget(root, "$scroll", scheduleUpdate, true);
         AelluxJs.offTarget(root, "$resize", scheduleUpdate);
-        if (updateTimeout !== null) clearTimeout(updateTimeout);
-        if (layoutUpdateTimeout !== null) clearTimeout(layoutUpdateTimeout);
-        updateTimeout = null;
-        layoutUpdateTimeout = null;
-        layoutUpdateUntil = 0;
-        lastUpdateTime = -DEFAULT_INTERVAL_MS;
       }
+      AelluxJs.waitLayout.cancel(state.layoutId);
       await AelluxJs.waitLayout.update(deactivate, [element, state, memory]);
     }
     function scheduleUpdate() {
       if (!anchors.size) return;
-      const interval = updateIntervalMs();
-      const elapsed = now() - lastUpdateTime;
-      if (elapsed >= interval) {
-        if (updateTimeout !== null) clearTimeout(updateTimeout);
-        updateTimeout = null;
-        flushUpdate();
-        return;
-      }
-      if (updateTimeout !== null) return;
-      updateTimeout = setTimeout(flushUpdate, interval - elapsed);
+      for (const element of anchors.keys()) scheduleAnchor(element);
     }
     function scheduleLayoutUpdate(event) {
-      const interval = updateIntervalMs();
       const durationMs = Number(event && event.detail ? event.detail.durationMs : NaN);
       if (!Number.isFinite(durationMs) || durationMs < 0) {
         scheduleUpdate();
         return;
       }
       if (durationMs === 0) {
-        if (layoutUpdateTimeout === null)
-          layoutUpdateTimeout = setTimeout(checkLayoutUpdate, interval);
+        for (const [element, state] of anchors) {
+          const configured = parseFPS(element.getAttribute(fpsAttribute));
+          const maxFPS = AelluxJs.layoutMaxFPS(element, configured);
+          state.layoutUntil = now() + 1e3 / (maxFPS || 60);
+          state.layoutSingle = true;
+          scheduleAnchor(element, true);
+        }
         return;
       }
-      scheduleUpdate();
-      layoutUpdateUntil = Math.max(layoutUpdateUntil, now() + durationMs);
-      if (layoutUpdateTimeout !== null) return;
-      layoutUpdateTimeout = setTimeout(
-        checkLayoutUpdate,
-        Math.min(interval, durationMs)
-      );
-    }
-    function checkLayoutUpdate() {
-      layoutUpdateTimeout = null;
-      scheduleUpdate();
-      const remaining = layoutUpdateUntil - now();
-      if (remaining > 0) {
-        layoutUpdateTimeout = setTimeout(
-          checkLayoutUpdate,
-          Math.min(updateIntervalMs(), remaining)
-        );
-      } else {
-        layoutUpdateUntil = 0;
+      for (const [element, state] of anchors) {
+        state.layoutUntil = Math.max(state.layoutUntil, now() + durationMs);
+        state.layoutSingle = false;
+        scheduleAnchor(element, durationMs > 0);
       }
     }
-    function flushUpdate() {
-      updateTimeout = null;
-      lastUpdateTime = now();
-      for (const element of anchors.keys()) {
+    function scheduleAnchor(element, repeat = false) {
+      const state = anchors.get(element);
+      if (!state) return;
+      const configured = parseFPS(element.getAttribute(fpsAttribute));
+      const maxFPS = AelluxJs.layoutMaxFPS(element, configured);
+      const run = () => {
+        if (state.layoutSingle && now() < state.layoutUntil) return;
+        state.layoutSingle = false;
         updateAnchor(element).catch((cause) => {
           AelluxJs.diagnostics.error(
             AelluxJs.diagnostics.ERROR_EXTENSION_MOUNT,
             { cause, extension: extensionName, element, method: "update" }
           );
         });
-      }
+      };
+      AelluxJs.waitLayout.sequence(state.layoutId, {
+        update: run,
+        repeat: repeat ? { ms: 0 } : void 0,
+        maxFPS,
+        abort: () => !anchors.has(element) || repeat && now() >= state.layoutUntil && !state.layoutSingle
+      });
     }
     function now() {
       return root.performance && typeof root.performance.now === "function" ? root.performance.now() : Date.now();
+    }
+    function parseFPS(value) {
+      const fps = value === null || !String(value).trim() ? NaN : Number(value);
+      return Number.isFinite(fps) && fps > 0 ? fps : void 0;
     }
     async function updateAnchor(element) {
       const state = anchors.get(element);

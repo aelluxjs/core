@@ -110,8 +110,8 @@
     var snapSuspendedClass = AelluxJs.className("snap-suspended");
     var scrollEdgeClasses = [AelluxJs.className("scroll-v-start"), AelluxJs.className("scroll-v-end"), AelluxJs.className("scroll-h-start"), AelluxJs.className("scroll-h-end")];
     var pointerScrollExceptionSelector = "a, button, input, select, textarea, [contenteditable], [draggable='true'], " + "[".concat(scrollbarVerticalAttribute, "], [").concat(scrollbarHorizontalAttribute, "]");
-    var RESIZE_INTERVAL_MS = 100;
     var SCROLL_EDGE_MARGIN_PX = 5;
+    var nextLayoutId = 3e6;
     var POINTER_SCROLL_THRESHOLD_PX = 3;
     var POINTER_SCROLL_MULTICLICK_MS = 500;
     var POINTER_SCROLL_MULTICLICK_DISTANCE_PX = 8;
@@ -359,8 +359,7 @@
         publishPending: false,
         publishDirty: false,
         layoutRevision: 0,
-        lastResizeTime: -RESIZE_INTERVAL_MS,
-        resizeTimeout: null,
+        resizeLayoutId: nextLayoutId++,
         disposed: false
       };
       state.onScroll = function(event) {
@@ -535,7 +534,7 @@
         if (state.desktopMedia.removeEventListener) state.desktopMedia.removeEventListener("change", state.onDesktopMediaChange);
         else if (state.desktopMedia.removeListener) state.desktopMedia.removeListener(state.onDesktopMediaChange);
       }
-      if (state.resizeTimeout !== null) root.clearTimeout(state.resizeTimeout);
+      AelluxJs.waitLayout.cancel(state.resizeLayoutId);
       offTarget(root, "$resize", state.onResize);
       (_elementMemories$get = elementMemories.get(element)) === null || _elementMemories$get === void 0 || _elementMemories$get.restore();
       elementMemories.delete(element);
@@ -2400,23 +2399,15 @@
     }
     function scheduleResize(state) {
       if (state.disposed) return;
-      var elapsed = now() - state.lastResizeTime;
-      if (elapsed >= RESIZE_INTERVAL_MS) {
-        if (state.resizeTimeout !== null) root.clearTimeout(state.resizeTimeout);
-        state.resizeTimeout = null;
-        flushResize(state);
-        return;
-      }
-      if (state.resizeTimeout !== null) return;
-      state.resizeTimeout = root.setTimeout(function() {
-        return flushResize(state);
-      }, RESIZE_INTERVAL_MS - elapsed);
-    }
-    function flushResize(state) {
-      state.resizeTimeout = null;
-      if (state.disposed) return;
-      state.lastResizeTime = now();
-      refresh(state);
+      AelluxJs.waitLayout.sequence(state.resizeLayoutId, {
+        update: function update() {
+          return refresh(state);
+        },
+        maxFPS: AelluxJs.layoutMaxFPS(state.element),
+        abort: function abort() {
+          return state.disposed;
+        }
+      });
     }
     function now() {
       return root.performance && typeof root.performance.now === "function" ? root.performance.now() : Date.now();

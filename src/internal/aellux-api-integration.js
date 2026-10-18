@@ -80,6 +80,22 @@ export function createAelluxApi(root, constants) {
       }
       return registered;
     },
+    // Shared by visual extensions. This value belongs only to the mounted
+    // element; it is intentionally not inherited from its ancestors.
+    layoutMaxFPS: function (element, specific) {
+      var value = element && typeof element.getAttribute === "function"
+        ? element.getAttribute(api.attr("maxfps")) : null;
+      var generic;
+      if (value !== null) {
+        generic = String(value).trim() === "" ? NaN : Number(value);
+        if (!Number.isFinite(generic) || generic <= 0) {
+          diagnostics.warn(diagnostics.WARN_LAYOUT_MAX_FPS_INVALID, { element: element, value: value });
+          generic = undefined;
+        }
+      }
+      if (!Number.isFinite(specific) || specific <= 0) return generic;
+      return generic === undefined ? specific : Math.min(generic, specific);
+    },
     // Keep minified tied to the API even when callers store this method separately.
     extFilename: namingNormalization.extFilename.bind(api),
     extName: namingNormalization.extName,

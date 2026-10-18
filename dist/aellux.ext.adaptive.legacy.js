@@ -102,6 +102,8 @@
     var dimensionProperties = ["--ae-width", "--ae-height"];
     var pendingResizeEntries = /* @__PURE__ */ new Map();
     var pendingResizeElements = /* @__PURE__ */ new Set();
+    var layoutIds = /* @__PURE__ */ new WeakMap();
+    var nextLayoutId = 1e6;
     var adaptiveParams = {
       experienceScale: {
         near: 1,
@@ -120,12 +122,9 @@
         xxl: 1600
       }
     };
-    var UPDATE_INTERVAL_MS = 100;
     var ariaHandlers = /* @__PURE__ */ new WeakMap();
     var managedClasses;
     var sizeThresholds = [];
-    var updateTimeout = null;
-    var lastUpdateTime = -UPDATE_INTERVAL_MS;
     var resizeObserver = typeof root.ResizeObserver === "function" ? new root.ResizeObserver(onResize) : null;
     AelluxJs.extAttach(extensionName, {
       init: init,
@@ -179,13 +178,8 @@
       return classes;
     }
     function destroy() {
-      if (updateTimeout !== null) {
-        clearTimeout(updateTimeout);
-        updateTimeout = null;
-      }
       pendingResizeEntries.clear();
       pendingResizeElements.clear();
-      lastUpdateTime = -UPDATE_INTERVAL_MS;
       var _iterator = _createForOfIteratorHelper(adaptiveElements), _step;
       try {
         for (_iterator.s(); !(_step = _iterator.n()).done; ) {
@@ -207,9 +201,10 @@
       elementMemories.set(element, AelluxJs.persist.element.save(element, [], dimensionProperties));
       ariaHandlers.set(element, AelluxJs.aria.register(element));
       adaptiveElements.add(element);
+      layoutIds.set(element, nextLayoutId++);
       if (resizeObserver) resizeObserver.observe(element);
       else {
-        AelluxJs.waitLayout.read(readBounds, [element]);
+        scheduleElement(element, null);
         if (adaptiveElements.size === 1) AelluxJs.onTarget(root, "$resize", onWindowResize);
       }
     }
@@ -218,6 +213,9 @@
       if (!adaptiveElements.delete(element)) return;
       pendingResizeEntries.delete(element);
       pendingResizeElements.delete(element);
+      var id = layoutIds.get(element);
+      if (id !== void 0) AelluxJs.waitLayout.cancel(id);
+      layoutIds.delete(element);
       if (resizeObserver) resizeObserver.unobserve(element);
       else if (adaptiveElements.size === 0) AelluxJs.offTarget(root, "$resize", onWindowResize);
       var _iterator2 = _createForOfIteratorHelper(managedClasses), _step2;
@@ -267,41 +265,50 @@
       scheduleUpdate();
     }
     function scheduleUpdate() {
-      var elapsed = now() - lastUpdateTime;
-      if (elapsed >= UPDATE_INTERVAL_MS) {
-        if (updateTimeout !== null) {
-          clearTimeout(updateTimeout);
-          updateTimeout = null;
-        }
-        flushPendingUpdate();
-        return;
-      }
-      if (updateTimeout !== null) return;
-      updateTimeout = setTimeout(flushPendingUpdate, UPDATE_INTERVAL_MS - elapsed);
+      flushPendingUpdate();
     }
     function flushPendingUpdate() {
-      updateTimeout = null;
       if (!pendingResizeEntries.size && !pendingResizeElements.size) return;
-      lastUpdateTime = now();
-      var entries = Array.from(pendingResizeEntries.values());
+      var entries = Array.from(pendingResizeEntries.entries());
       pendingResizeEntries.clear();
       for (var _i4 = 0, _entries = entries; _i4 < _entries.length; _i4++) {
-        var entry = _entries[_i4];
-        updateAdaptive(entry.target, entry.contentRect.width, entry.contentRect.height);
+        var _entries$_i = _slicedToArray(_entries[_i4], 2), element = _entries$_i[0], entry = _entries$_i[1];
+        scheduleElement(element, entry.contentRect);
       }
       var elements = Array.from(pendingResizeElements);
       pendingResizeElements.clear();
       for (var _i5 = 0, _elements = elements; _i5 < _elements.length; _i5++) {
-        var element = _elements[_i5];
-        AelluxJs.waitLayout.read(readBounds, [element]);
+        var _element = _elements[_i5];
+        scheduleElement(_element, null);
       }
     }
-    function now() {
-      return root.performance && typeof root.performance.now === "function" ? root.performance.now() : Date.now();
-    }
-    function readBounds(entry) {
-      var _entry$getBoundingCli = entry.getBoundingClientRect(), width = _entry$getBoundingCli.width, height = _entry$getBoundingCli.height;
-      AelluxJs.waitLayout.update(updateAdaptive, [entry, width, height]);
+    function scheduleElement(element, contentRect) {
+      var id = layoutIds.get(element);
+      if (id === void 0) return;
+      var maxFPS = AelluxJs.layoutMaxFPS(element);
+      var abort = function abort2() {
+        return !adaptiveElements.has(element);
+      };
+      if (contentRect) {
+        AelluxJs.waitLayout.sequence(id, {
+          update: function update() {
+            return updateAdaptive(element, contentRect.width, contentRect.height);
+          },
+          maxFPS: maxFPS,
+          abort: abort
+        });
+        return;
+      }
+      AelluxJs.waitLayout.sequence(id, {
+        read: function read() {
+          return element.getBoundingClientRect();
+        },
+        update: function update(rect) {
+          return updateAdaptive(element, rect.width, rect.height);
+        },
+        maxFPS: maxFPS,
+        abort: abort
+      });
     }
     function updateAdaptive(element, width, height) {
       var _ariaHandlers$get2;

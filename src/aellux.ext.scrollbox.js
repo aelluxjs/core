@@ -77,8 +77,8 @@
     `a, button, input, select, textarea, [contenteditable], [draggable='true'], ` +
     `[${scrollbarVerticalAttribute}], [${scrollbarHorizontalAttribute}]`;
 
-  const RESIZE_INTERVAL_MS = 100;
   const SCROLL_EDGE_MARGIN_PX = 5;
+  let nextLayoutId = 3000000;
 
   const POINTER_SCROLL_THRESHOLD_PX = 3;
   const POINTER_SCROLL_MULTICLICK_MS = 500;
@@ -268,7 +268,7 @@
       resizeObserver: null, mutationObserver: null, desktopMedia: null,
 
       publishPending: false, publishDirty: false, layoutRevision: 0,
-      lastResizeTime: -RESIZE_INTERVAL_MS, resizeTimeout: null, disposed: false
+      resizeLayoutId: nextLayoutId++, disposed: false
     };
 
     state.onScroll = event => {
@@ -418,7 +418,7 @@
       else if (state.desktopMedia.removeListener)
         state.desktopMedia.removeListener(state.onDesktopMediaChange);
     }
-    if (state.resizeTimeout !== null) root.clearTimeout(state.resizeTimeout);
+    AelluxJs.waitLayout.cancel(state.resizeLayoutId);
     offTarget(root, "$resize", state.onResize);
     elementMemories.get(element)?.restore();
     elementMemories.delete(element);
@@ -2198,22 +2198,11 @@
 
   function scheduleResize(state) {
     if (state.disposed) return;
-    const elapsed = now() - state.lastResizeTime;
-    if (elapsed >= RESIZE_INTERVAL_MS) {
-      if (state.resizeTimeout !== null) root.clearTimeout(state.resizeTimeout);
-      state.resizeTimeout = null;
-      flushResize(state);
-      return;
-    }
-    if (state.resizeTimeout !== null) return;
-    state.resizeTimeout = root.setTimeout(() => flushResize(state), RESIZE_INTERVAL_MS - elapsed);
-  }
-
-  function flushResize(state) {
-    state.resizeTimeout = null;
-    if (state.disposed) return;
-    state.lastResizeTime = now();
-    refresh(state);
+    AelluxJs.waitLayout.sequence(state.resizeLayoutId, {
+      update: () => refresh(state),
+      maxFPS: AelluxJs.layoutMaxFPS(state.element),
+      abort: () => state.disposed
+    });
   }
 
   function now() {

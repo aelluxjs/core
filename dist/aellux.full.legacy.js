@@ -20959,6 +20959,7 @@
     };
     var groups = /* @__PURE__ */ new Map();
     var tasks = /* @__PURE__ */ new Set();
+    var sequenceStarts = /* @__PURE__ */ new Map();
     var frameRequest = null;
     var phase = "idle";
     var waitingForVisibility = false;
@@ -21415,6 +21416,15 @@
     function startIteration(owner) {
       if (!owner.active) return;
       var config = owner.configs[owner.index];
+      var previousStart = sequenceStarts.get(owner.group.id);
+      var minimumStart = config.maxFPS === void 0 || !previousStart || previousStart.owner === owner ? 0 : previousStart.time + 1e3 / config.maxFPS;
+      if (minimumStart > now()) {
+        owner.timer = setTimeout(function() {
+          owner.timer = null;
+          startIteration(owner);
+        }, Math.max(0, minimumStart - now() - 1));
+        return;
+      }
       try {
         if (checkAbort(owner, config)) return;
       } catch (error) {
@@ -21422,6 +21432,10 @@
         return;
       }
       owner.lastStart = now();
+      sequenceStarts.set(owner.group.id, {
+        owner: owner,
+        time: owner.lastStart
+      });
       var read = config.read ? queueTask("read", function() {
         if (checkAbort(owner, config)) return;
         return config.read();
@@ -21488,6 +21502,7 @@
       phase = "idle";
       idleSince = null;
       resetMeasurements(true);
+      sequenceStarts.clear();
     }
     function cancel(id) {
       validId(id);
@@ -26000,28 +26015,35 @@
       r2 ? i ? i(e2, r2, { value: n2, enumerable: !t2, configurable: !t2, writable: !t2 }) : e2[r2] = n2 : (o("next", 0), o("throw", 1), o("return", 2));
     }, _regeneratorDefine25(e, r, n, t);
   }
-  function asyncGeneratorStep5(n, t, e, r, o, a, c) {
-    try {
-      var i = n[a](c), u = i.value;
-    } catch (n2) {
-      return void e(n2);
-    }
-    i.done ? t(u) : Promise.resolve(u).then(r, o);
+  function _slicedToArray5(r, e) {
+    return _arrayWithHoles5(r) || _iterableToArrayLimit5(r, e) || _unsupportedIterableToArray12(r, e) || _nonIterableRest5();
   }
-  function _asyncToGenerator5(n) {
-    return function() {
-      var t = this, e = arguments;
-      return new Promise(function(r, o) {
-        var a = n.apply(t, e);
-        function _next(n2) {
-          asyncGeneratorStep5(a, r, o, _next, _throw, "next", n2);
+  function _nonIterableRest5() {
+    throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+  }
+  function _iterableToArrayLimit5(r, l) {
+    var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
+    if (null != t) {
+      var e, n, i, u, a = [], f = true, o = false;
+      try {
+        if (i = (t = t.call(r)).next, 0 === l) {
+          if (Object(t) !== t) return;
+          f = false;
+        } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = true) ;
+      } catch (r2) {
+        o = true, n = r2;
+      } finally {
+        try {
+          if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return;
+        } finally {
+          if (o) throw n;
         }
-        function _throw(n2) {
-          asyncGeneratorStep5(a, r, o, _next, _throw, "throw", n2);
-        }
-        _next(void 0);
-      });
-    };
+      }
+      return a;
+    }
+  }
+  function _arrayWithHoles5(r) {
+    if (Array.isArray(r)) return r;
   }
   function _createForOfIteratorHelper11(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
@@ -26066,6 +26088,29 @@
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
   }
+  function asyncGeneratorStep5(n, t, e, r, o, a, c) {
+    try {
+      var i = n[a](c), u = i.value;
+    } catch (n2) {
+      return void e(n2);
+    }
+    i.done ? t(u) : Promise.resolve(u).then(r, o);
+  }
+  function _asyncToGenerator5(n) {
+    return function() {
+      var t = this, e = arguments;
+      return new Promise(function(r, o) {
+        var a = n.apply(t, e);
+        function _next(n2) {
+          asyncGeneratorStep5(a, r, o, _next, _throw, "next", n2);
+        }
+        function _throw(n2) {
+          asyncGeneratorStep5(a, r, o, _next, _throw, "throw", n2);
+        }
+        _next(void 0);
+      });
+    };
+  }
   var init_aellux_ext_anchor = __esm({
     "src/aellux.ext.anchor.js": function() {
       /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
@@ -26096,32 +26141,9 @@
           "bottom-center": [0.5, 1],
           "bottom-right": [1, 1]
         };
-        var DEFAULT_FPS = 30;
-        var DEFAULT_INTERVAL_MS = Math.round(1e3 / DEFAULT_FPS);
         var anchors = /* @__PURE__ */ new Map();
         var elementMemories = /* @__PURE__ */ new WeakMap();
-        var updateTimeout = null;
-        var layoutUpdateTimeout = null;
-        var layoutUpdateUntil = 0;
-        var lastUpdateTime = -DEFAULT_INTERVAL_MS;
-        function updateIntervalMs() {
-          var interval = Infinity;
-          var _iterator = _createForOfIteratorHelper11(anchors.keys()), _step;
-          try {
-            for (_iterator.s(); !(_step = _iterator.n()).done; ) {
-              var element = _step.value;
-              var value = element.getAttribute(fpsAttribute);
-              var fps = value === null || !value.trim() ? NaN : Number(value);
-              var elementInterval = Number.isFinite(fps) && fps > 0 ? Math.max(1, Math.round(1e3 / fps)) : DEFAULT_INTERVAL_MS;
-              interval = Math.min(interval, elementInterval);
-            }
-          } catch (err) {
-            _iterator.e(err);
-          } finally {
-            _iterator.f();
-          }
-          return Number.isFinite(interval) ? interval : DEFAULT_INTERVAL_MS;
-        }
+        var nextLayoutId = 2e6;
         AelluxJs2.extAttach(extensionName, {
           init: init,
           destroy: destroy
@@ -26165,12 +26187,6 @@
             return _regenerator5().w(function(_context) {
               while (1) switch (_context.n) {
                 case 0:
-                  if (updateTimeout !== null) clearTimeout(updateTimeout);
-                  if (layoutUpdateTimeout !== null) clearTimeout(layoutUpdateTimeout);
-                  updateTimeout = null;
-                  layoutUpdateTimeout = null;
-                  layoutUpdateUntil = 0;
-                  lastUpdateTime = -DEFAULT_INTERVAL_MS;
                   _context.n = 1;
                   return Promise.all(Array.from(anchors.keys(), unmountAnchor));
                 case 1:
@@ -26193,6 +26209,9 @@
             revision: 0,
             target: null,
             reference: null,
+            layoutId: nextLayoutId++,
+            layoutUntil: 0,
+            layoutSingle: false,
             layoutListener: function layoutListener(event) {
               return scheduleLayoutUpdate(event);
             },
@@ -26241,13 +26260,8 @@
                   if (!anchors.size) {
                     AelluxJs2.offTarget(root2, "$scroll", scheduleUpdate, true);
                     AelluxJs2.offTarget(root2, "$resize", scheduleUpdate);
-                    if (updateTimeout !== null) clearTimeout(updateTimeout);
-                    if (layoutUpdateTimeout !== null) clearTimeout(layoutUpdateTimeout);
-                    updateTimeout = null;
-                    layoutUpdateTimeout = null;
-                    layoutUpdateUntil = 0;
-                    lastUpdateTime = -DEFAULT_INTERVAL_MS;
                   }
+                  AelluxJs2.waitLayout.cancel(state.layoutId);
                   _context2.n = 2;
                   return AelluxJs2.waitLayout.update(deactivate, [element, state, memory]);
                 case 2:
@@ -26259,70 +26273,91 @@
         }
         function scheduleUpdate() {
           if (!anchors.size) return;
-          var interval = updateIntervalMs();
-          var elapsed = now() - lastUpdateTime;
-          if (elapsed >= interval) {
-            if (updateTimeout !== null) clearTimeout(updateTimeout);
-            updateTimeout = null;
-            flushUpdate();
-            return;
+          var _iterator = _createForOfIteratorHelper11(anchors.keys()), _step;
+          try {
+            for (_iterator.s(); !(_step = _iterator.n()).done; ) {
+              var element = _step.value;
+              scheduleAnchor(element);
+            }
+          } catch (err) {
+            _iterator.e(err);
+          } finally {
+            _iterator.f();
           }
-          if (updateTimeout !== null) return;
-          updateTimeout = setTimeout(flushUpdate, interval - elapsed);
         }
         function scheduleLayoutUpdate(event) {
-          var interval = updateIntervalMs();
           var durationMs = Number(event && event.detail ? event.detail.durationMs : NaN);
           if (!Number.isFinite(durationMs) || durationMs < 0) {
             scheduleUpdate();
             return;
           }
           if (durationMs === 0) {
-            if (layoutUpdateTimeout === null) layoutUpdateTimeout = setTimeout(checkLayoutUpdate, interval);
+            var _iterator2 = _createForOfIteratorHelper11(anchors), _step2;
+            try {
+              for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
+                var _step2$value = _slicedToArray5(_step2.value, 2), element = _step2$value[0], state = _step2$value[1];
+                var configured = parseFPS(element.getAttribute(fpsAttribute));
+                var maxFPS = AelluxJs2.layoutMaxFPS(element, configured);
+                state.layoutUntil = now() + 1e3 / (maxFPS || 60);
+                state.layoutSingle = true;
+                scheduleAnchor(element, true);
+              }
+            } catch (err) {
+              _iterator2.e(err);
+            } finally {
+              _iterator2.f();
+            }
             return;
           }
-          scheduleUpdate();
-          layoutUpdateUntil = Math.max(layoutUpdateUntil, now() + durationMs);
-          if (layoutUpdateTimeout !== null) return;
-          layoutUpdateTimeout = setTimeout(checkLayoutUpdate, Math.min(interval, durationMs));
-        }
-        function checkLayoutUpdate() {
-          layoutUpdateTimeout = null;
-          scheduleUpdate();
-          var remaining = layoutUpdateUntil - now();
-          if (remaining > 0) {
-            layoutUpdateTimeout = setTimeout(checkLayoutUpdate, Math.min(updateIntervalMs(), remaining));
-          } else {
-            layoutUpdateUntil = 0;
-          }
-        }
-        function flushUpdate() {
-          updateTimeout = null;
-          lastUpdateTime = now();
-          var _iterator2 = _createForOfIteratorHelper11(anchors.keys()), _step2;
+          var _iterator3 = _createForOfIteratorHelper11(anchors), _step3;
           try {
-            var _loop = function _loop2() {
-              var element = _step2.value;
-              updateAnchor(element).catch(function(cause) {
-                AelluxJs2.diagnostics.error(AelluxJs2.diagnostics.ERROR_EXTENSION_MOUNT, {
-                  cause: cause,
-                  extension: extensionName,
-                  element: element,
-                  method: "update"
-                });
-              });
-            };
-            for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
-              _loop();
+            for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
+              var _step3$value = _slicedToArray5(_step3.value, 2), _element = _step3$value[0], _state = _step3$value[1];
+              _state.layoutUntil = Math.max(_state.layoutUntil, now() + durationMs);
+              _state.layoutSingle = false;
+              scheduleAnchor(_element, durationMs > 0);
             }
           } catch (err) {
-            _iterator2.e(err);
+            _iterator3.e(err);
           } finally {
-            _iterator2.f();
+            _iterator3.f();
           }
+        }
+        function scheduleAnchor(element) {
+          var repeat = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : false;
+          var state = anchors.get(element);
+          if (!state) return;
+          var configured = parseFPS(element.getAttribute(fpsAttribute));
+          var maxFPS = AelluxJs2.layoutMaxFPS(element, configured);
+          var run = function run2() {
+            if (state.layoutSingle && now() < state.layoutUntil) return;
+            state.layoutSingle = false;
+            updateAnchor(element).catch(function(cause) {
+              AelluxJs2.diagnostics.error(AelluxJs2.diagnostics.ERROR_EXTENSION_MOUNT, {
+                cause: cause,
+                extension: extensionName,
+                element: element,
+                method: "update"
+              });
+            });
+          };
+          AelluxJs2.waitLayout.sequence(state.layoutId, {
+            update: run,
+            repeat: repeat ? {
+              ms: 0
+            } : void 0,
+            maxFPS: maxFPS,
+            abort: function abort() {
+              return !anchors.has(element) || repeat && now() >= state.layoutUntil && !state.layoutSingle;
+            }
+          });
         }
         function now() {
           return root2.performance && typeof root2.performance.now === "function" ? root2.performance.now() : Date.now();
+        }
+        function parseFPS(value) {
+          var fps = value === null || !String(value).trim() ? NaN : Number(value);
+          return Number.isFinite(fps) && fps > 0 ? fps : void 0;
         }
         function updateAnchor(_x2) {
           return _updateAnchor.apply(this, arguments);
@@ -26455,16 +26490,16 @@
                     element.style.setProperty(ORIGIN_X, "".concat(selected.self[0] * 100, "%"));
                     element.style.setProperty(ORIGIN_Y, "".concat(selected.self[1] * 100, "%"));
                     element.style.setProperty(ANCHOR_OPACITY, placement.opacity);
-                    var _iterator6 = _createForOfIteratorHelper11(baseProperties), _step6;
+                    var _iterator7 = _createForOfIteratorHelper11(baseProperties), _step7;
                     try {
-                      for (_iterator6.s(); !(_step6 = _iterator6.n()).done; ) {
-                        var name = _step6.value;
+                      for (_iterator7.s(); !(_step7 = _iterator7.n()).done; ) {
+                        var name = _step7.value;
                         element.style.removeProperty(name);
                       }
                     } catch (err) {
-                      _iterator6.e(err);
+                      _iterator7.e(err);
                     } finally {
-                      _iterator6.f();
+                      _iterator7.f();
                     }
                     element.classList.add(anchoredClass);
                   });
@@ -26508,10 +26543,10 @@
             height: root2.innerHeight
           }, reference, referenceRect, scaleX, scaleY);
           var selected = null;
-          var _iterator3 = _createForOfIteratorHelper11(candidates), _step3;
+          var _iterator4 = _createForOfIteratorHelper11(candidates), _step4;
           try {
-            for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
-              var candidate = _step3.value;
+            for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
+              var candidate = _step4.value;
               var x = targetRect.left + targetRect.width * candidate.target[0] - selfWidth * candidate.self[0];
               var y = targetRect.top + targetRect.height * candidate.target[1] - selfHeight * candidate.self[1];
               var result = {
@@ -26526,9 +26561,9 @@
               }
             }
           } catch (err) {
-            _iterator3.e(err);
+            _iterator4.e(err);
           } finally {
-            _iterator3.f();
+            _iterator4.f();
           }
           var present2 = target.closest("[".concat(presentAttribute, "]"));
           var opacity = present2 ? root2.getComputedStyle(present2).opacity : "1";
@@ -26571,18 +26606,18 @@
           state.target = target;
           if (state.observer) state.observer.disconnect();
           if (state.intersectionObserver) state.intersectionObserver.disconnect();
-          var _iterator4 = _createForOfIteratorHelper11(/* @__PURE__ */ new Set([element, target, reference])), _step4;
+          var _iterator5 = _createForOfIteratorHelper11(/* @__PURE__ */ new Set([element, target, reference])), _step5;
           try {
-            for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
-              var observed = _step4.value;
+            for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
+              var observed = _step5.value;
               if (!observed) continue;
               if (state.observer) state.observer.observe(observed);
               if (state.intersectionObserver) state.intersectionObserver.observe(observed);
             }
           } catch (err) {
-            _iterator4.e(err);
+            _iterator5.e(err);
           } finally {
-            _iterator4.f();
+            _iterator5.f();
           }
         }
         function listenForLayout(state, reference) {
@@ -26622,10 +26657,10 @@
         }
         function parseCandidates(value) {
           var result = [];
-          var _iterator5 = _createForOfIteratorHelper11((value || "").split(",")), _step5;
+          var _iterator6 = _createForOfIteratorHelper11((value || "").split(",")), _step6;
           try {
-            for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
-              var token = _step5.value;
+            for (_iterator6.s(); !(_step6 = _iterator6.n()).done; ) {
+              var token = _step6.value;
               var pair = token.trim().toLowerCase().split(":");
               if (pair.length !== 2 || !pivots[pair[0].trim()] || !pivots[pair[1].trim()]) continue;
               result.push({
@@ -26634,9 +26669,9 @@
               });
             }
           } catch (err) {
-            _iterator5.e(err);
+            _iterator6.e(err);
           } finally {
-            _iterator5.f();
+            _iterator6.f();
           }
           return result;
         }
@@ -26666,13 +26701,13 @@
   function _arrayWithoutHoles2(r) {
     if (Array.isArray(r)) return _arrayLikeToArray13(r);
   }
-  function _slicedToArray5(r, e) {
-    return _arrayWithHoles5(r) || _iterableToArrayLimit5(r, e) || _unsupportedIterableToArray13(r, e) || _nonIterableRest5();
+  function _slicedToArray6(r, e) {
+    return _arrayWithHoles6(r) || _iterableToArrayLimit6(r, e) || _unsupportedIterableToArray13(r, e) || _nonIterableRest6();
   }
-  function _nonIterableRest5() {
+  function _nonIterableRest6() {
     throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
-  function _iterableToArrayLimit5(r, l) {
+  function _iterableToArrayLimit6(r, l) {
     var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (null != t) {
       var e, n, i, u, a = [], f = true, o = false;
@@ -26693,7 +26728,7 @@
       return a;
     }
   }
-  function _arrayWithHoles5(r) {
+  function _arrayWithHoles6(r) {
     if (Array.isArray(r)) return r;
   }
   function _createForOfIteratorHelper12(r, e) {
@@ -26766,8 +26801,8 @@
         var snapSuspendedClass = AelluxJs2.className("snap-suspended");
         var scrollEdgeClasses = [AelluxJs2.className("scroll-v-start"), AelluxJs2.className("scroll-v-end"), AelluxJs2.className("scroll-h-start"), AelluxJs2.className("scroll-h-end")];
         var pointerScrollExceptionSelector = "a, button, input, select, textarea, [contenteditable], [draggable='true'], " + "[".concat(scrollbarVerticalAttribute, "], [").concat(scrollbarHorizontalAttribute, "]");
-        var RESIZE_INTERVAL_MS = 100;
         var SCROLL_EDGE_MARGIN_PX = 5;
+        var nextLayoutId = 3e6;
         var POINTER_SCROLL_THRESHOLD_PX = 3;
         var POINTER_SCROLL_MULTICLICK_MS = 500;
         var POINTER_SCROLL_MULTICLICK_DISTANCE_PX = 8;
@@ -26814,7 +26849,7 @@
           var _iterator = _createForOfIteratorHelper12(entries), _step;
           try {
             for (_iterator.s(); !(_step = _iterator.n()).done; ) {
-              var _step$value = _slicedToArray5(_step.value, 3), event = _step$value[0], handler = _step$value[1], options = _step$value[2];
+              var _step$value = _slicedToArray6(_step.value, 3), event = _step$value[0], handler = _step$value[1], options = _step$value[2];
               method(target, "$".concat(event), owner[handler], active ? options : options === true || !!(options !== null && options !== void 0 && options.capture));
             }
           } catch (err) {
@@ -27015,8 +27050,7 @@
             publishPending: false,
             publishDirty: false,
             layoutRevision: 0,
-            lastResizeTime: -RESIZE_INTERVAL_MS,
-            resizeTimeout: null,
+            resizeLayoutId: nextLayoutId++,
             disposed: false
           };
           state.onScroll = function(event) {
@@ -27191,7 +27225,7 @@
             if (state.desktopMedia.removeEventListener) state.desktopMedia.removeEventListener("change", state.onDesktopMediaChange);
             else if (state.desktopMedia.removeListener) state.desktopMedia.removeListener(state.onDesktopMediaChange);
           }
-          if (state.resizeTimeout !== null) root2.clearTimeout(state.resizeTimeout);
+          AelluxJs2.waitLayout.cancel(state.resizeLayoutId);
           offTarget(root2, "$resize", state.onResize);
           (_elementMemories$get = elementMemories.get(element)) === null || _elementMemories$get === void 0 || _elementMemories$get.restore();
           elementMemories.delete(element);
@@ -28713,7 +28747,7 @@
           var _iterator20 = _createForOfIteratorHelper12(touch.scrollBehaviors), _step20;
           try {
             for (_iterator20.s(); !(_step20 = _iterator20.n()).done; ) {
-              var _step20$value = _slicedToArray5(_step20.value, 2), element = _step20$value[0], _step20$value$ = _step20$value[1], value = _step20$value$.value, priority = _step20$value$.priority;
+              var _step20$value = _slicedToArray6(_step20.value, 2), element = _step20$value[0], _step20$value$ = _step20$value[1], value = _step20$value$.value, priority = _step20$value$.priority;
               if (value) element.style.setProperty("scroll-behavior", value, priority);
               else element.style.removeProperty("scroll-behavior");
             }
@@ -29056,23 +29090,15 @@
         }
         function scheduleResize(state) {
           if (state.disposed) return;
-          var elapsed = now() - state.lastResizeTime;
-          if (elapsed >= RESIZE_INTERVAL_MS) {
-            if (state.resizeTimeout !== null) root2.clearTimeout(state.resizeTimeout);
-            state.resizeTimeout = null;
-            flushResize(state);
-            return;
-          }
-          if (state.resizeTimeout !== null) return;
-          state.resizeTimeout = root2.setTimeout(function() {
-            return flushResize(state);
-          }, RESIZE_INTERVAL_MS - elapsed);
-        }
-        function flushResize(state) {
-          state.resizeTimeout = null;
-          if (state.disposed) return;
-          state.lastResizeTime = now();
-          refresh(state);
+          AelluxJs2.waitLayout.sequence(state.resizeLayoutId, {
+            update: function update() {
+              return refresh(state);
+            },
+            maxFPS: AelluxJs2.layoutMaxFPS(state.element),
+            abort: function abort() {
+              return state.disposed;
+            }
+          });
         }
         function now() {
           return root2.performance && typeof root2.performance.now === "function" ? root2.performance.now() : Date.now();
@@ -29346,10 +29372,10 @@
       }
     } };
   }
-  function _slicedToArray6(r, e) {
-    return _arrayWithHoles6(r) || _iterableToArrayLimit6(r, e) || _unsupportedIterableToArray14(r, e) || _nonIterableRest6();
+  function _slicedToArray7(r, e) {
+    return _arrayWithHoles7(r) || _iterableToArrayLimit7(r, e) || _unsupportedIterableToArray14(r, e) || _nonIterableRest7();
   }
-  function _nonIterableRest6() {
+  function _nonIterableRest7() {
     throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
   function _unsupportedIterableToArray14(r, a) {
@@ -29364,7 +29390,7 @@
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
   }
-  function _iterableToArrayLimit6(r, l) {
+  function _iterableToArrayLimit7(r, l) {
     var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (null != t) {
       var e, n, i, u, a = [], f = true, o = false;
@@ -29385,7 +29411,7 @@
       return a;
     }
   }
-  function _arrayWithHoles6(r) {
+  function _arrayWithHoles7(r) {
     if (Array.isArray(r)) return r;
   }
   function _typeof6(o) {
@@ -29419,6 +29445,8 @@
         var dimensionProperties = ["--ae-width", "--ae-height"];
         var pendingResizeEntries = /* @__PURE__ */ new Map();
         var pendingResizeElements = /* @__PURE__ */ new Set();
+        var layoutIds = /* @__PURE__ */ new WeakMap();
+        var nextLayoutId = 1e6;
         var adaptiveParams = {
           experienceScale: {
             near: 1,
@@ -29437,12 +29465,9 @@
             xxl: 1600
           }
         };
-        var UPDATE_INTERVAL_MS = 100;
         var ariaHandlers = /* @__PURE__ */ new WeakMap();
         var managedClasses;
         var sizeThresholds = [];
-        var updateTimeout = null;
-        var lastUpdateTime = -UPDATE_INTERVAL_MS;
         var resizeObserver = typeof root2.ResizeObserver === "function" ? new root2.ResizeObserver(onResize) : null;
         AelluxJs2.extAttach(extensionName, {
           init: init,
@@ -29485,7 +29510,7 @@
           var classes = [modifier.shapeHorizontal, modifier.shapeVertical, modifier.shapeSquare];
           sizeThresholds = [];
           for (var _i3 = 0, _Object$entries = Object.entries(adaptiveParams.minSizes); _i3 < _Object$entries.length; _i3++) {
-            var _Object$entries$_i = _slicedToArray6(_Object$entries[_i3], 2), size = _Object$entries$_i[0], minimum = _Object$entries$_i[1];
+            var _Object$entries$_i = _slicedToArray7(_Object$entries[_i3], 2), size = _Object$entries$_i[0], minimum = _Object$entries$_i[1];
             var className = AelluxJs2.className("fits-" + size);
             sizeThresholds.push({
               className: className,
@@ -29496,13 +29521,8 @@
           return classes;
         }
         function destroy() {
-          if (updateTimeout !== null) {
-            clearTimeout(updateTimeout);
-            updateTimeout = null;
-          }
           pendingResizeEntries.clear();
           pendingResizeElements.clear();
-          lastUpdateTime = -UPDATE_INTERVAL_MS;
           var _iterator = _createForOfIteratorHelper13(adaptiveElements), _step;
           try {
             for (_iterator.s(); !(_step = _iterator.n()).done; ) {
@@ -29524,9 +29544,10 @@
           elementMemories.set(element, AelluxJs2.persist.element.save(element, [], dimensionProperties));
           ariaHandlers.set(element, AelluxJs2.aria.register(element));
           adaptiveElements.add(element);
+          layoutIds.set(element, nextLayoutId++);
           if (resizeObserver) resizeObserver.observe(element);
           else {
-            AelluxJs2.waitLayout.read(readBounds, [element]);
+            scheduleElement(element, null);
             if (adaptiveElements.size === 1) AelluxJs2.onTarget(root2, "$resize", onWindowResize);
           }
         }
@@ -29535,6 +29556,9 @@
           if (!adaptiveElements.delete(element)) return;
           pendingResizeEntries.delete(element);
           pendingResizeElements.delete(element);
+          var id = layoutIds.get(element);
+          if (id !== void 0) AelluxJs2.waitLayout.cancel(id);
+          layoutIds.delete(element);
           if (resizeObserver) resizeObserver.unobserve(element);
           else if (adaptiveElements.size === 0) AelluxJs2.offTarget(root2, "$resize", onWindowResize);
           var _iterator2 = _createForOfIteratorHelper13(managedClasses), _step2;
@@ -29584,41 +29608,50 @@
           scheduleUpdate();
         }
         function scheduleUpdate() {
-          var elapsed = now() - lastUpdateTime;
-          if (elapsed >= UPDATE_INTERVAL_MS) {
-            if (updateTimeout !== null) {
-              clearTimeout(updateTimeout);
-              updateTimeout = null;
-            }
-            flushPendingUpdate();
-            return;
-          }
-          if (updateTimeout !== null) return;
-          updateTimeout = setTimeout(flushPendingUpdate, UPDATE_INTERVAL_MS - elapsed);
+          flushPendingUpdate();
         }
         function flushPendingUpdate() {
-          updateTimeout = null;
           if (!pendingResizeEntries.size && !pendingResizeElements.size) return;
-          lastUpdateTime = now();
-          var entries = Array.from(pendingResizeEntries.values());
+          var entries = Array.from(pendingResizeEntries.entries());
           pendingResizeEntries.clear();
           for (var _i4 = 0, _entries = entries; _i4 < _entries.length; _i4++) {
-            var entry = _entries[_i4];
-            updateAdaptive(entry.target, entry.contentRect.width, entry.contentRect.height);
+            var _entries$_i = _slicedToArray7(_entries[_i4], 2), element = _entries$_i[0], entry = _entries$_i[1];
+            scheduleElement(element, entry.contentRect);
           }
           var elements = Array.from(pendingResizeElements);
           pendingResizeElements.clear();
           for (var _i5 = 0, _elements = elements; _i5 < _elements.length; _i5++) {
-            var element = _elements[_i5];
-            AelluxJs2.waitLayout.read(readBounds, [element]);
+            var _element = _elements[_i5];
+            scheduleElement(_element, null);
           }
         }
-        function now() {
-          return root2.performance && typeof root2.performance.now === "function" ? root2.performance.now() : Date.now();
-        }
-        function readBounds(entry) {
-          var _entry$getBoundingCli = entry.getBoundingClientRect(), width = _entry$getBoundingCli.width, height = _entry$getBoundingCli.height;
-          AelluxJs2.waitLayout.update(updateAdaptive, [entry, width, height]);
+        function scheduleElement(element, contentRect) {
+          var id = layoutIds.get(element);
+          if (id === void 0) return;
+          var maxFPS = AelluxJs2.layoutMaxFPS(element);
+          var abort = function abort2() {
+            return !adaptiveElements.has(element);
+          };
+          if (contentRect) {
+            AelluxJs2.waitLayout.sequence(id, {
+              update: function update() {
+                return updateAdaptive(element, contentRect.width, contentRect.height);
+              },
+              maxFPS: maxFPS,
+              abort: abort
+            });
+            return;
+          }
+          AelluxJs2.waitLayout.sequence(id, {
+            read: function read() {
+              return element.getBoundingClientRect();
+            },
+            update: function update(rect) {
+              return updateAdaptive(element, rect.width, rect.height);
+            },
+            maxFPS: maxFPS,
+            abort: abort
+          });
         }
         function updateAdaptive(element, width, height) {
           var _ariaHandlers$get2;
@@ -29812,13 +29845,13 @@
       }
     } };
   }
-  function _slicedToArray7(r, e) {
-    return _arrayWithHoles7(r) || _iterableToArrayLimit7(r, e) || _unsupportedIterableToArray15(r, e) || _nonIterableRest7();
+  function _slicedToArray8(r, e) {
+    return _arrayWithHoles8(r) || _iterableToArrayLimit8(r, e) || _unsupportedIterableToArray15(r, e) || _nonIterableRest8();
   }
-  function _nonIterableRest7() {
+  function _nonIterableRest8() {
     throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
-  function _iterableToArrayLimit7(r, l) {
+  function _iterableToArrayLimit8(r, l) {
     var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (null != t) {
       var e, n, i, u, a = [], f = true, o = false;
@@ -29839,7 +29872,7 @@
       return a;
     }
   }
-  function _arrayWithHoles7(r) {
+  function _arrayWithHoles8(r) {
     if (Array.isArray(r)) return r;
   }
   function _toConsumableArray3(r) {
@@ -29919,7 +29952,7 @@
         var cssProperties = [["from-opacity", OPACITY_SYNTAX, "0"], ["pop-opacity", OPACITY_SYNTAX, "1"], ["unpop-opacity", OPACITY_SYNTAX, "0"], ["from-transform", TRANSFORM_SYNTAX, "scale(0.5)"], ["pop-transform", TRANSFORM_SYNTAX, "scale(1)"], ["unpop-transform", TRANSFORM_SYNTAX, "scale(1.2)"], ["from-height", "*", "0fr"], ["pop-height", "*", "1fr"], ["unpop-height", "*", "0fr"], ["from-width", "*", "0fr"], ["pop-width", "*", "1fr"], ["unpop-width", "*", "0fr"], ["pop-ease", "*", "ease-out"], ["unpop-ease", "*", "ease-in"], ["pop-duration", "<time>", "250ms"], ["unpop-duration", "<time>", "250ms"], ["pop-low-steps", "<integer>", "4"], ["unpop-low-steps", "<integer>", "4"]];
         function init(options) {
           AelluxJs2.registerCssProperty.apply(AelluxJs2, _toConsumableArray3(cssProperties.map(function(_ref) {
-            var _ref2 = _slicedToArray7(_ref, 3), name = _ref2[0], syntax = _ref2[1], initialValue = _ref2[2];
+            var _ref2 = _slicedToArray8(_ref, 3), name = _ref2[0], syntax = _ref2[1], initialValue = _ref2[2];
             return {
               name: "--ae-".concat(name),
               syntax: syntax,

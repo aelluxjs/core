@@ -180,6 +180,7 @@ var bootstrapProperties = Object.freeze({
   attr: method,
   className: method,
   registerCssProperty: method,
+  layoutMaxFPS: method,
   extFilename: method,
   extName: method,
   eventName: method,

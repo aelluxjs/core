@@ -4,6 +4,9 @@ export function buildLayoutScheduler() {
   const queues = { read: [], update: [] };
   const groups = new Map();
   const tasks = new Set();
+  // Survives replacement of a sequence so event coalescing cannot bypass an
+  // element's FPS limit.
+  const sequenceStarts = new Map();
   let frameRequest = null;
   let phase = "idle";
   let waitingForVisibility = false;
@@ -394,6 +397,16 @@ export function buildLayoutScheduler() {
   function startIteration(owner) {
     if (!owner.active) return;
     const config = owner.configs[owner.index];
+    const previousStart = sequenceStarts.get(owner.group.id);
+    const minimumStart = config.maxFPS === undefined || !previousStart || previousStart.owner === owner
+      ? 0 : previousStart.time + 1000 / config.maxFPS;
+    if (minimumStart > now()) {
+      owner.timer = setTimeout(() => {
+        owner.timer = null;
+        startIteration(owner);
+      }, Math.max(0, minimumStart - now() - 1));
+      return;
+    }
     try {
       if (checkAbort(owner, config)) return;
     } catch (error) {
@@ -401,6 +414,7 @@ export function buildLayoutScheduler() {
       return;
     }
     owner.lastStart = now();
+    sequenceStarts.set(owner.group.id, { owner, time: owner.lastStart });
     const read = config.read
       ? queueTask("read", () => {
           if (checkAbort(owner, config)) return;
@@ -468,6 +482,7 @@ export function buildLayoutScheduler() {
     phase = "idle";
     idleSince = null;
     resetMeasurements(true);
+    sequenceStarts.clear();
   }
 
   function cancel(id) {

@@ -30,8 +30,8 @@
       AelluxJs.className("scroll-h-end")
     ];
     const pointerScrollExceptionSelector = `a, button, input, select, textarea, [contenteditable], [draggable='true'], [${scrollbarVerticalAttribute}], [${scrollbarHorizontalAttribute}]`;
-    const RESIZE_INTERVAL_MS = 100;
     const SCROLL_EDGE_MARGIN_PX = 5;
+    let nextLayoutId = 3e6;
     const POINTER_SCROLL_THRESHOLD_PX = 3;
     const POINTER_SCROLL_MULTICLICK_MS = 500;
     const POINTER_SCROLL_MULTICLICK_DISTANCE_PX = 8;
@@ -289,8 +289,7 @@
         publishPending: false,
         publishDirty: false,
         layoutRevision: 0,
-        lastResizeTime: -RESIZE_INTERVAL_MS,
-        resizeTimeout: null,
+        resizeLayoutId: nextLayoutId++,
         disposed: false
       };
       state.onScroll = (event) => {
@@ -434,7 +433,7 @@
         else if (state.desktopMedia.removeListener)
           state.desktopMedia.removeListener(state.onDesktopMediaChange);
       }
-      if (state.resizeTimeout !== null) root.clearTimeout(state.resizeTimeout);
+      AelluxJs.waitLayout.cancel(state.resizeLayoutId);
       offTarget(root, "$resize", state.onResize);
       (_a = elementMemories.get(element)) == null ? void 0 : _a.restore();
       elementMemories.delete(element);
@@ -2087,21 +2086,11 @@
     }
     function scheduleResize(state) {
       if (state.disposed) return;
-      const elapsed = now() - state.lastResizeTime;
-      if (elapsed >= RESIZE_INTERVAL_MS) {
-        if (state.resizeTimeout !== null) root.clearTimeout(state.resizeTimeout);
-        state.resizeTimeout = null;
-        flushResize(state);
-        return;
-      }
-      if (state.resizeTimeout !== null) return;
-      state.resizeTimeout = root.setTimeout(() => flushResize(state), RESIZE_INTERVAL_MS - elapsed);
-    }
-    function flushResize(state) {
-      state.resizeTimeout = null;
-      if (state.disposed) return;
-      state.lastResizeTime = now();
-      refresh(state);
+      AelluxJs.waitLayout.sequence(state.resizeLayoutId, {
+        update: () => refresh(state),
+        maxFPS: AelluxJs.layoutMaxFPS(state.element),
+        abort: () => state.disposed
+      });
     }
     function now() {
       return root.performance && typeof root.performance.now === "function" ? root.performance.now() : Date.now();

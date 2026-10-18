@@ -1161,24 +1161,9 @@
           "bottom-center": [0.5, 1],
           "bottom-right": [1, 1]
         };
-        const DEFAULT_FPS = 30;
-        const DEFAULT_INTERVAL_MS = Math.round(1e3 / DEFAULT_FPS);
         const anchors = /* @__PURE__ */ new Map();
         const elementMemories = /* @__PURE__ */ new WeakMap();
-        let updateTimeout = null;
-        let layoutUpdateTimeout = null;
-        let layoutUpdateUntil = 0;
-        let lastUpdateTime = -DEFAULT_INTERVAL_MS;
-        function updateIntervalMs() {
-          let interval = Infinity;
-          for (const element of anchors.keys()) {
-            const value = element.getAttribute(fpsAttribute);
-            const fps = value === null || !value.trim() ? NaN : Number(value);
-            const elementInterval = Number.isFinite(fps) && fps > 0 ? Math.max(1, Math.round(1e3 / fps)) : DEFAULT_INTERVAL_MS;
-            interval = Math.min(interval, elementInterval);
-          }
-          return Number.isFinite(interval) ? interval : DEFAULT_INTERVAL_MS;
-        }
+        let nextLayoutId = 2e6;
         AelluxJs2.extAttach(extensionName, { init, destroy });
         function init() {
           AelluxJs2.registerCssProperty(
@@ -1198,12 +1183,6 @@
           });
         }
         async function destroy() {
-          if (updateTimeout !== null) clearTimeout(updateTimeout);
-          if (layoutUpdateTimeout !== null) clearTimeout(layoutUpdateTimeout);
-          updateTimeout = null;
-          layoutUpdateTimeout = null;
-          layoutUpdateUntil = 0;
-          lastUpdateTime = -DEFAULT_INTERVAL_MS;
           await Promise.all(Array.from(anchors.keys(), unmountAnchor));
           AelluxJs2.mountManager.remove({ extensionName });
         }
@@ -1216,6 +1195,9 @@
             revision: 0,
             target: null,
             reference: null,
+            layoutId: nextLayoutId++,
+            layoutUntil: 0,
+            layoutSingle: false,
             layoutListener: (event) => scheduleLayoutUpdate(event),
             observer: null,
             intersectionObserver: null
@@ -1246,75 +1228,64 @@
           if (!anchors.size) {
             AelluxJs2.offTarget(root2, "$scroll", scheduleUpdate, true);
             AelluxJs2.offTarget(root2, "$resize", scheduleUpdate);
-            if (updateTimeout !== null) clearTimeout(updateTimeout);
-            if (layoutUpdateTimeout !== null) clearTimeout(layoutUpdateTimeout);
-            updateTimeout = null;
-            layoutUpdateTimeout = null;
-            layoutUpdateUntil = 0;
-            lastUpdateTime = -DEFAULT_INTERVAL_MS;
           }
+          AelluxJs2.waitLayout.cancel(state.layoutId);
           await AelluxJs2.waitLayout.update(deactivate, [element, state, memory]);
         }
         function scheduleUpdate() {
           if (!anchors.size) return;
-          const interval = updateIntervalMs();
-          const elapsed = now() - lastUpdateTime;
-          if (elapsed >= interval) {
-            if (updateTimeout !== null) clearTimeout(updateTimeout);
-            updateTimeout = null;
-            flushUpdate();
-            return;
-          }
-          if (updateTimeout !== null) return;
-          updateTimeout = setTimeout(flushUpdate, interval - elapsed);
+          for (const element of anchors.keys()) scheduleAnchor(element);
         }
         function scheduleLayoutUpdate(event) {
-          const interval = updateIntervalMs();
           const durationMs = Number(event && event.detail ? event.detail.durationMs : NaN);
           if (!Number.isFinite(durationMs) || durationMs < 0) {
             scheduleUpdate();
             return;
           }
           if (durationMs === 0) {
-            if (layoutUpdateTimeout === null)
-              layoutUpdateTimeout = setTimeout(checkLayoutUpdate, interval);
+            for (const [element, state] of anchors) {
+              const configured = parseFPS(element.getAttribute(fpsAttribute));
+              const maxFPS = AelluxJs2.layoutMaxFPS(element, configured);
+              state.layoutUntil = now() + 1e3 / (maxFPS || 60);
+              state.layoutSingle = true;
+              scheduleAnchor(element, true);
+            }
             return;
           }
-          scheduleUpdate();
-          layoutUpdateUntil = Math.max(layoutUpdateUntil, now() + durationMs);
-          if (layoutUpdateTimeout !== null) return;
-          layoutUpdateTimeout = setTimeout(
-            checkLayoutUpdate,
-            Math.min(interval, durationMs)
-          );
-        }
-        function checkLayoutUpdate() {
-          layoutUpdateTimeout = null;
-          scheduleUpdate();
-          const remaining = layoutUpdateUntil - now();
-          if (remaining > 0) {
-            layoutUpdateTimeout = setTimeout(
-              checkLayoutUpdate,
-              Math.min(updateIntervalMs(), remaining)
-            );
-          } else {
-            layoutUpdateUntil = 0;
+          for (const [element, state] of anchors) {
+            state.layoutUntil = Math.max(state.layoutUntil, now() + durationMs);
+            state.layoutSingle = false;
+            scheduleAnchor(element, durationMs > 0);
           }
         }
-        function flushUpdate() {
-          updateTimeout = null;
-          lastUpdateTime = now();
-          for (const element of anchors.keys()) {
+        function scheduleAnchor(element, repeat = false) {
+          const state = anchors.get(element);
+          if (!state) return;
+          const configured = parseFPS(element.getAttribute(fpsAttribute));
+          const maxFPS = AelluxJs2.layoutMaxFPS(element, configured);
+          const run = () => {
+            if (state.layoutSingle && now() < state.layoutUntil) return;
+            state.layoutSingle = false;
             updateAnchor(element).catch((cause) => {
               AelluxJs2.diagnostics.error(
                 AelluxJs2.diagnostics.ERROR_EXTENSION_MOUNT,
                 { cause, extension: extensionName, element, method: "update" }
               );
             });
-          }
+          };
+          AelluxJs2.waitLayout.sequence(state.layoutId, {
+            update: run,
+            repeat: repeat ? { ms: 0 } : void 0,
+            maxFPS,
+            abort: () => !anchors.has(element) || repeat && now() >= state.layoutUntil && !state.layoutSingle
+          });
         }
         function now() {
           return root2.performance && typeof root2.performance.now === "function" ? root2.performance.now() : Date.now();
+        }
+        function parseFPS(value) {
+          const fps = value === null || !String(value).trim() ? NaN : Number(value);
+          return Number.isFinite(fps) && fps > 0 ? fps : void 0;
         }
         async function updateAnchor(element) {
           const state = anchors.get(element);
@@ -1554,8 +1525,8 @@
           AelluxJs2.className("scroll-h-end")
         ];
         const pointerScrollExceptionSelector = `a, button, input, select, textarea, [contenteditable], [draggable='true'], [${scrollbarVerticalAttribute}], [${scrollbarHorizontalAttribute}]`;
-        const RESIZE_INTERVAL_MS = 100;
         const SCROLL_EDGE_MARGIN_PX = 5;
+        let nextLayoutId = 3e6;
         const POINTER_SCROLL_THRESHOLD_PX = 3;
         const POINTER_SCROLL_MULTICLICK_MS = 500;
         const POINTER_SCROLL_MULTICLICK_DISTANCE_PX = 8;
@@ -1813,8 +1784,7 @@
             publishPending: false,
             publishDirty: false,
             layoutRevision: 0,
-            lastResizeTime: -RESIZE_INTERVAL_MS,
-            resizeTimeout: null,
+            resizeLayoutId: nextLayoutId++,
             disposed: false
           };
           state.onScroll = (event) => {
@@ -1958,7 +1928,7 @@
             else if (state.desktopMedia.removeListener)
               state.desktopMedia.removeListener(state.onDesktopMediaChange);
           }
-          if (state.resizeTimeout !== null) root2.clearTimeout(state.resizeTimeout);
+          AelluxJs2.waitLayout.cancel(state.resizeLayoutId);
           offTarget(root2, "$resize", state.onResize);
           (_a = elementMemories.get(element)) == null ? void 0 : _a.restore();
           elementMemories.delete(element);
@@ -3611,21 +3581,11 @@
         }
         function scheduleResize(state) {
           if (state.disposed) return;
-          const elapsed = now() - state.lastResizeTime;
-          if (elapsed >= RESIZE_INTERVAL_MS) {
-            if (state.resizeTimeout !== null) root2.clearTimeout(state.resizeTimeout);
-            state.resizeTimeout = null;
-            flushResize(state);
-            return;
-          }
-          if (state.resizeTimeout !== null) return;
-          state.resizeTimeout = root2.setTimeout(() => flushResize(state), RESIZE_INTERVAL_MS - elapsed);
-        }
-        function flushResize(state) {
-          state.resizeTimeout = null;
-          if (state.disposed) return;
-          state.lastResizeTime = now();
-          refresh(state);
+          AelluxJs2.waitLayout.sequence(state.resizeLayoutId, {
+            update: () => refresh(state),
+            maxFPS: AelluxJs2.layoutMaxFPS(state.element),
+            abort: () => state.disposed
+          });
         }
         function now() {
           return root2.performance && typeof root2.performance.now === "function" ? root2.performance.now() : Date.now();
@@ -3882,6 +3842,8 @@
         const dimensionProperties = ["--ae-width", "--ae-height"];
         const pendingResizeEntries = /* @__PURE__ */ new Map();
         const pendingResizeElements = /* @__PURE__ */ new Set();
+        const layoutIds = /* @__PURE__ */ new WeakMap();
+        let nextLayoutId = 1e6;
         const adaptiveParams = {
           experienceScale: { near: 1, far: 1.5 },
           ratioShapes: { vertical: 0.8, horizontal: 1.25 },
@@ -3894,12 +3856,9 @@
             xxl: 1600
           }
         };
-        const UPDATE_INTERVAL_MS = 100;
         const ariaHandlers = /* @__PURE__ */ new WeakMap();
         let managedClasses;
         let sizeThresholds = [];
-        let updateTimeout = null;
-        let lastUpdateTime = -UPDATE_INTERVAL_MS;
         const resizeObserver = typeof root2.ResizeObserver === "function" ? new root2.ResizeObserver(onResize) : null;
         AelluxJs2.extAttach(extensionName, { init, destroy, adaptiveParams });
         function init(options = {}) {
@@ -3939,13 +3898,8 @@
           return classes;
         }
         function destroy() {
-          if (updateTimeout !== null) {
-            clearTimeout(updateTimeout);
-            updateTimeout = null;
-          }
           pendingResizeEntries.clear();
           pendingResizeElements.clear();
-          lastUpdateTime = -UPDATE_INTERVAL_MS;
           for (const element of adaptiveElements) unmountAdaptive(element);
           if (resizeObserver) resizeObserver.disconnect();
           AelluxJs2.mountManager.remove({ extensionName });
@@ -3959,9 +3913,10 @@
           ));
           ariaHandlers.set(element, AelluxJs2.aria.register(element));
           adaptiveElements.add(element);
+          layoutIds.set(element, nextLayoutId++);
           if (resizeObserver) resizeObserver.observe(element);
           else {
-            AelluxJs2.waitLayout.read(readBounds, [element]);
+            scheduleElement(element, null);
             if (adaptiveElements.size === 1) AelluxJs2.onTarget(root2, "$resize", onWindowResize);
           }
         }
@@ -3970,6 +3925,9 @@
           if (!adaptiveElements.delete(element)) return;
           pendingResizeEntries.delete(element);
           pendingResizeElements.delete(element);
+          const id = layoutIds.get(element);
+          if (id !== void 0) AelluxJs2.waitLayout.cancel(id);
+          layoutIds.delete(element);
           if (resizeObserver) resizeObserver.unobserve(element);
           else if (adaptiveElements.size === 0) AelluxJs2.offTarget(root2, "$resize", onWindowResize);
           for (const name of managedClasses) {
@@ -3995,45 +3953,36 @@
           scheduleUpdate();
         }
         function scheduleUpdate() {
-          const elapsed = now() - lastUpdateTime;
-          if (elapsed >= UPDATE_INTERVAL_MS) {
-            if (updateTimeout !== null) {
-              clearTimeout(updateTimeout);
-              updateTimeout = null;
-            }
-            flushPendingUpdate();
-            return;
-          }
-          if (updateTimeout !== null) return;
-          updateTimeout = setTimeout(
-            flushPendingUpdate,
-            UPDATE_INTERVAL_MS - elapsed
-          );
+          flushPendingUpdate();
         }
         function flushPendingUpdate() {
-          updateTimeout = null;
           if (!pendingResizeEntries.size && !pendingResizeElements.size) return;
-          lastUpdateTime = now();
-          const entries = Array.from(pendingResizeEntries.values());
+          const entries = Array.from(pendingResizeEntries.entries());
           pendingResizeEntries.clear();
-          for (const entry of entries) {
-            updateAdaptive(entry.target, entry.contentRect.width, entry.contentRect.height);
-          }
+          for (const [element, entry] of entries) scheduleElement(element, entry.contentRect);
           const elements = Array.from(pendingResizeElements);
           pendingResizeElements.clear();
-          for (const element of elements) {
-            AelluxJs2.waitLayout.read(readBounds, [element]);
+          for (const element of elements) scheduleElement(element, null);
+        }
+        function scheduleElement(element, contentRect) {
+          const id = layoutIds.get(element);
+          if (id === void 0) return;
+          const maxFPS = AelluxJs2.layoutMaxFPS(element);
+          const abort = () => !adaptiveElements.has(element);
+          if (contentRect) {
+            AelluxJs2.waitLayout.sequence(id, {
+              update: () => updateAdaptive(element, contentRect.width, contentRect.height),
+              maxFPS,
+              abort
+            });
+            return;
           }
-        }
-        function now() {
-          return root2.performance && typeof root2.performance.now === "function" ? root2.performance.now() : Date.now();
-        }
-        function readBounds(entry) {
-          const { width, height } = entry.getBoundingClientRect();
-          AelluxJs2.waitLayout.update(
-            updateAdaptive,
-            [entry, width, height]
-          );
+          AelluxJs2.waitLayout.sequence(id, {
+            read: () => element.getBoundingClientRect(),
+            update: (rect) => updateAdaptive(element, rect.width, rect.height),
+            maxFPS,
+            abort
+          });
         }
         function updateAdaptive(element, width, height) {
           var _a;
@@ -4776,6 +4725,7 @@
     const queues = { read: [], update: [] };
     const groups = /* @__PURE__ */ new Map();
     const tasks = /* @__PURE__ */ new Set();
+    const sequenceStarts = /* @__PURE__ */ new Map();
     let frameRequest = null;
     let phase = "idle";
     let waitingForVisibility = false;
@@ -5149,6 +5099,15 @@
     function startIteration(owner) {
       if (!owner.active) return;
       const config = owner.configs[owner.index];
+      const previousStart = sequenceStarts.get(owner.group.id);
+      const minimumStart = config.maxFPS === void 0 || !previousStart || previousStart.owner === owner ? 0 : previousStart.time + 1e3 / config.maxFPS;
+      if (minimumStart > now()) {
+        owner.timer = setTimeout(() => {
+          owner.timer = null;
+          startIteration(owner);
+        }, Math.max(0, minimumStart - now() - 1));
+        return;
+      }
       try {
         if (checkAbort(owner, config)) return;
       } catch (error) {
@@ -5156,6 +5115,7 @@
         return;
       }
       owner.lastStart = now();
+      sequenceStarts.set(owner.group.id, { owner, time: owner.lastStart });
       const read = config.read ? queueTask("read", () => {
         if (checkAbort(owner, config)) return;
         return config.read();
@@ -5214,6 +5174,7 @@
       phase = "idle";
       idleSince = null;
       resetMeasurements(true);
+      sequenceStarts.clear();
     }
     function cancel(id) {
       validId(id);
