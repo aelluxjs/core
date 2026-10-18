@@ -70,6 +70,7 @@ export function createAelluxConstants() {
       verboseLevel: 0,
       forceLegacy: false,
       skipGlobalMount: false,
+      cssMotionController: true,
       autoViewportMeta: true,
       basePath: null,
       crossOrigin: null,

@@ -32,6 +32,7 @@ export function createAelluxApi(root, constants) {
     options: options,
     minified: false,
     waitLayout: null,
+    motion: null,
     mountManager: null,
     init: function () { throw diagnostics.create(diagnostics.ERROR_NOT_INITIALIZED); },
     persist: {

@@ -496,6 +496,7 @@ function createAelluxApi(root2, constants) {
     options,
     minified: false,
     waitLayout: null,
+    motion: null,
     mountManager: null,
     init: function() {
       throw diagnostics.create(diagnostics.ERROR_NOT_INITIALIZED);
@@ -875,6 +876,7 @@ function createAelluxConstants() {
       verboseLevel: 0,
       forceLegacy: false,
       skipGlobalMount: false,
+      cssMotionController: true,
       autoViewportMeta: true,
       basePath: null,
       crossOrigin: null,

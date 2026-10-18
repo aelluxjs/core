@@ -614,11 +614,11 @@ feedback.progress(&quot;Uploading…&quot;, field, 0.5);
 &lt;/section&gt;
 </code></pre>
 <p><code>data-ae-target-message</code> and <code>data-ae-target-transform</code> accept an element ID, with or without <code>#</code>. If omitted, each target is the boundary itself. The message updates the first direct text node of the message target, or appends a text node if none exists. Child elements are preserved. A missing or invalid target ID records <code>WARN_INVALID_ELEMENT_OR_ID</code> (<code>2011</code>) and skips that target. Boundaries are mounted and unmounted with the normal DOM lifecycle.</p>
-<p>The transform target receives <code>ae--feedback-motion-{motion}</code> for one second. A new event replaces its previous motion class and restarts the timer. The generated Feedback stylesheet provides <code>shake</code>, <code>yes</code>, <code>no</code>, <code>breathe</code>, <code>tremble</code>, <code>pulse</code>, and <code>alert</code>; it disables these animations when the document root has <code>data-ae-reduced-motion=&quot;reduced&quot;</code>. A custom motion name can be used with an application stylesheet and records an informational diagnostic.</p>
+<p>The transform target receives <code>ae--feedback-motion-{motion}</code> for the duration declared by CSS. A new event cancels the previous owned motion and replaces its class. The shared <a href="../runtime/css-motion.htm">CSS Motion Controller</a> controls compatible animations through <code>waitLayout</code>; custom keyframes remain browser-interpolated. Set <code>--ae-feedback-aellux-ease</code> to an <code>$ae.ease()</code> name for optional advanced controlled easing. The generated stylesheet provides <code>shake</code>, <code>yes</code>, <code>no</code>, <code>breathe</code>, <code>tremble</code>, <code>pulse</code>, and <code>alert</code>; reduced motion disables them. A custom motion name can be supplied by application CSS and records an informational diagnostic.</p>
 <h2>Accessibility profile</h2>
 <ul>
 <li><strong>Capabilities:</strong> event distribution, boundary text updates, and optional motion classes.</li>
-<li><strong>Owned state:</strong> subscriptions, mounted listeners, and motion timers.</li>
+<li><strong>Owned state:</strong> subscriptions, mounted listeners, motion classes, and CSS Motion operations.</li>
 <li><strong>Consumer responsibility:</strong> choose suitable semantics, live region priority, and focus behavior. <code>announce()</code> publishes an event but does not create a live region.</li>
 <li><strong>Motion:</strong> the generated styles respect the AelluxJs reduced-motion attribute. Application supplied motion styles must handle reduced motion themselves.</li>
 </ul>

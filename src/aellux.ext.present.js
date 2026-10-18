@@ -78,6 +78,7 @@
   const TRANSITION_PREPARE_TIME = 100;
   const presentElements = new Map();
   const openPresentElements = new Set();
+  let fallbackMotionId = 5000000;
   const triggerElementsSet = new Set();
   const triggerTargets = new Map();
   const triggersByTargetId = new Map();
@@ -170,6 +171,7 @@
       measuredHeight,
       measuredWidth,
       motionEnabled: (element.getAttribute(attr.present) || "").trim() !== "",
+      motionId: AelluxJs.motion ? AelluxJs.motion.id() : fallbackMotionId++,
       transition: null,
       autoUnpopTimeout: null,
       direction: null,
@@ -186,6 +188,7 @@
         const transition = this.transition;
         if (transition) {
           transition.replacement = replacement;
+          if (AelluxJs.motion) AelluxJs.motion.cancel(this.motionId);
           if (transition.timeout !== null) {
             clearTimeout(transition.timeout);
             transition.timeout = null;
@@ -521,21 +524,19 @@
           }
         }
       };
-      if (size && !waitForPreparation)
-        await AelluxJs.waitLayout.update(activateTransition);
-      else activateTransition();
-      if (controller.transition !== transition) return;
-      const completed = new Promise(completeTransition => {
-        transition.timeout = setTimeout(
-          finishTransition,
-          timeMs,
-          element,
-          controller,
-          transition,
-          gotoVisible,
-          completeTransition
-        );
-      });
+      const advancedEase = root.getComputedStyle(element)
+        .getPropertyValue(`--ae-${newDirection}-aellux-ease`.toLowerCase()).trim() || undefined;
+      const motionOptions = {
+        id: controller.motionId,
+        apply: activateTransition,
+        easing: advancedEase,
+        nativeDuration: timeMs,
+        maxFPS: AelluxJs.layoutMaxFPS ? AelluxJs.layoutMaxFPS(element) : undefined,
+        abort: () => controller.transition !== transition || !element.isConnected
+      };
+      const completed = AelluxJs.motion
+        ? AelluxJs.motion.run(element, motionOptions)
+        : legacyMotionRun(motionOptions);
 
       AelluxJs.dispatchFrom(element, "Layout", {
         detail: {
@@ -545,7 +546,10 @@
         bubbles: true
       });
       AelluxJs.dispatchFrom(element, `${newDirection}${PING}`, { bubbles: true });
-      await Promise.race([completed, interrupted]);
+      const motionResult = await Promise.race([completed, interrupted]);
+      if (controller.transition !== transition ||
+        (motionResult && motionResult.status !== "completed")) return;
+      finishTransition(element, controller, transition, gotoVisible);
 
       if (gotoVisible && !element.hidden) {
         autoUnpopSchedule(element, controller);
@@ -594,7 +598,14 @@
     }
   }
 
-  function finishTransition(element, controller, transition, gotoVisible, completeTransition) {
+  function legacyMotionRun(options) {
+    options.apply();
+    return new Promise(resolve => setTimeout(() => resolve({
+      id: options.id, status: "completed", mode: "native"
+    }), Math.max(0, Number(options.nativeDuration) || 0)));
+  }
+
+  function finishTransition(element, controller, transition, gotoVisible) {
     controller.classList.remove(transition.className);
     restoreMeasuredStyles(element, controller);
     const focused = !gotoVisible && element.contains(document.activeElement)
@@ -609,7 +620,6 @@
       });
     }
     transition.timeout = null;
-    completeTransition();
   }
 
   function autoUnpopSchedule(element, controller) {

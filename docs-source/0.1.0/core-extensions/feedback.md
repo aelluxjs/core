@@ -40,11 +40,11 @@ Add `data-ae-feedback` to an element to handle feedback events that reach it. An
 
 `data-ae-target-message` and `data-ae-target-transform` accept an element ID, with or without `#`. If omitted, each target is the boundary itself. The message updates the first direct text node of the message target, or appends a text node if none exists. Child elements are preserved. A missing or invalid target ID records `WARN_INVALID_ELEMENT_OR_ID` (`2011`) and skips that target. Boundaries are mounted and unmounted with the normal DOM lifecycle.
 
-The transform target receives `ae--feedback-motion-{motion}` for one second. A new event replaces its previous motion class and restarts the timer. The generated Feedback stylesheet provides `shake`, `yes`, `no`, `breathe`, `tremble`, `pulse`, and `alert`; it disables these animations when the document root has `data-ae-reduced-motion="reduced"`. A custom motion name can be used with an application stylesheet and records an informational diagnostic.
+The transform target receives `ae--feedback-motion-{motion}` for the duration declared by CSS. A new event cancels the previous owned motion and replaces its class. The shared [CSS Motion Controller](../runtime/css-motion.md) controls compatible animations through `waitLayout`; custom keyframes remain browser-interpolated. Set `--ae-feedback-aellux-ease` to an `$ae.ease()` name for optional advanced controlled easing. The generated stylesheet provides `shake`, `yes`, `no`, `breathe`, `tremble`, `pulse`, and `alert`; reduced motion disables them. A custom motion name can be supplied by application CSS and records an informational diagnostic.
 
 ## Accessibility profile
 
 - **Capabilities:** event distribution, boundary text updates, and optional motion classes.
-- **Owned state:** subscriptions, mounted listeners, and motion timers.
+- **Owned state:** subscriptions, mounted listeners, motion classes, and CSS Motion operations.
 - **Consumer responsibility:** choose suitable semantics, live region priority, and focus behavior. `announce()` publishes an event but does not create a live region.
 - **Motion:** the generated styles respect the AelluxJs reduced-motion attribute. Application supplied motion styles must handle reduced motion themselves.

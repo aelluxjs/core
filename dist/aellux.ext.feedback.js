@@ -25,7 +25,8 @@
     const motionOptions = ["shake", "yes", "no", "breathe", "tremble", "pulse", "alert"];
     const feedbackTypes = ["warning", "error", "success", "announce", "busy", "progress", "validate"];
     const handlers = /* @__PURE__ */ new Map();
-    const motionTimers = /* @__PURE__ */ new Map();
+    const motionOperations = /* @__PURE__ */ new Map();
+    const motionIds = /* @__PURE__ */ new WeakMap();
     const feedbackAttribute = AelluxJs.attr(extensionName);
     const targetMessageAttribute = AelluxJs.attr("targetMessage");
     const targetTransformAttribute = AelluxJs.attr("targetTransform");
@@ -40,8 +41,8 @@
     }
     async function destroy() {
       AelluxJs.mountManager.remove({ extensionName });
-      for (const timer of motionTimers.values()) root.clearTimeout(timer);
-      motionTimers.clear();
+      for (const operation of motionOperations.values()) AelluxJs.motion.cancel(operation.id);
+      motionOperations.clear();
       handlers.clear();
     }
     function mountFeedback(element) {
@@ -91,16 +92,34 @@
         for (const className of Array.from(transformElement.classList)) {
           if (className.startsWith(motionPrefix)) transformElement.classList.remove(className);
         }
-        const previousTimer = motionTimers.get(transformElement);
-        if (previousTimer) root.clearTimeout(previousTimer);
-        motionTimers.delete(transformElement);
+        const previous = motionOperations.get(transformElement);
+        if (previous) AelluxJs.motion.cancel(previous.id);
+        motionOperations.delete(transformElement);
         if (typeof motion === "string") {
           const motionClass = AelluxJs.className(`feedback-motion-${motion}`);
-          transformElement.classList.add(motionClass);
-          motionTimers.set(transformElement, root.setTimeout(() => {
+          let id = motionIds.get(transformElement);
+          if (id === void 0) {
+            id = AelluxJs.motion.id();
+            motionIds.set(transformElement, id);
+          }
+          const operation = { id, className: motionClass };
+          motionOperations.set(transformElement, operation);
+          const advancedEase = root.getComputedStyle(transformElement).getPropertyValue("--ae-feedback-aellux-ease").trim() || void 0;
+          AelluxJs.motion.run(transformElement, {
+            id,
+            apply: () => transformElement.classList.add(motionClass),
+            easing: advancedEase,
+            abort: () => !transformElement.isConnected
+          }).catch((cause) => {
+            AelluxJs.diagnostics.error(
+              AelluxJs.diagnostics.ERROR_EXTENSION_TRANSITION,
+              { cause, extension: extensionName, element: transformElement }
+            );
+          }).finally(() => {
+            if (motionOperations.get(transformElement) !== operation) return;
             transformElement.classList.remove(motionClass);
-            motionTimers.delete(transformElement);
-          }, 1e3));
+            motionOperations.delete(transformElement);
+          });
         }
       }
     }

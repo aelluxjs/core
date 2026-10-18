@@ -226,6 +226,7 @@
     var TRANSITION_PREPARE_TIME = 100;
     var presentElements = /* @__PURE__ */ new Map();
     var openPresentElements = /* @__PURE__ */ new Set();
+    var fallbackMotionId = 5e6;
     var triggerElementsSet = /* @__PURE__ */ new Set();
     var triggerTargets = /* @__PURE__ */ new Map();
     var triggersByTargetId = /* @__PURE__ */ new Map();
@@ -316,6 +317,7 @@
         measuredHeight: measuredHeight,
         measuredWidth: measuredWidth,
         motionEnabled: (element.getAttribute(attr.present) || "").trim() !== "",
+        motionId: AelluxJs.motion ? AelluxJs.motion.id() : fallbackMotionId++,
         transition: null,
         autoUnpopTimeout: null,
         direction: null,
@@ -335,6 +337,7 @@
           var transition = this.transition;
           if (transition) {
             transition.replacement = replacement;
+            if (AelluxJs.motion) AelluxJs.motion.cancel(this.motionId);
             if (transition.timeout !== null) {
               clearTimeout(transition.timeout);
               transition.timeout = null;
@@ -597,7 +600,7 @@
     }
     function _presentTransition() {
       _presentTransition = _asyncToGenerator(/* @__PURE__ */ _regenerator().m(function _callee2(element, gotoVisible) {
-        var forceRepop, controller, newDirection, transition, allowEvent, reusePreparation, waitForPreparation, previousSize, computed, interrupted, size, prepared, duration, timeMs, activateTransition, completed, ownsTransition, _args2 = arguments, _t, _t2;
+        var forceRepop, controller, newDirection, transition, allowEvent, reusePreparation, waitForPreparation, previousSize, computed, interrupted, size, prepared, duration, timeMs, activateTransition, advancedEase, motionOptions, completed, motionResult, ownsTransition, _args2 = arguments, _t, _t2;
         return _regenerator().w(function(_context2) {
           while (1) switch (_context2.p = _context2.n) {
             case 0:
@@ -716,27 +719,18 @@
                   }
                 }
               };
-              if (!(size && !waitForPreparation)) {
-                _context2.n = 10;
-                break;
-              }
-              _context2.n = 9;
-              return AelluxJs.waitLayout.update(activateTransition);
-            case 9:
-              _context2.n = 11;
-              break;
-            case 10:
-              activateTransition();
-            case 11:
-              if (!(controller.transition !== transition)) {
-                _context2.n = 12;
-                break;
-              }
-              return _context2.a(2);
-            case 12:
-              completed = new Promise(function(completeTransition) {
-                transition.timeout = setTimeout(finishTransition, timeMs, element, controller, transition, gotoVisible, completeTransition);
-              });
+              advancedEase = root.getComputedStyle(element).getPropertyValue("--ae-".concat(newDirection, "-aellux-ease").toLowerCase()).trim() || void 0;
+              motionOptions = {
+                id: controller.motionId,
+                apply: activateTransition,
+                easing: advancedEase,
+                nativeDuration: timeMs,
+                maxFPS: AelluxJs.layoutMaxFPS ? AelluxJs.layoutMaxFPS(element) : void 0,
+                abort: function abort() {
+                  return controller.transition !== transition || !element.isConnected;
+                }
+              };
+              completed = AelluxJs.motion ? AelluxJs.motion.run(element, motionOptions) : legacyMotionRun(motionOptions);
               AelluxJs.dispatchFrom(element, "Layout", {
                 detail: {
                   origin: "present.".concat(newDirection).toLowerCase(),
@@ -747,9 +741,17 @@
               AelluxJs.dispatchFrom(element, "".concat(newDirection).concat(PING), {
                 bubbles: true
               });
-              _context2.n = 13;
+              _context2.n = 9;
               return Promise.race([completed, interrupted]);
-            case 13:
+            case 9:
+              motionResult = _context2.v;
+              if (!(controller.transition !== transition || motionResult && motionResult.status !== "completed")) {
+                _context2.n = 10;
+                break;
+              }
+              return _context2.a(2);
+            case 10:
+              finishTransition(element, controller, transition, gotoVisible);
               if (gotoVisible && !element.hidden) {
                 autoUnpopSchedule(element, controller);
                 controller.classList.add(className.pop);
@@ -764,10 +766,10 @@
                   bubbles: true
                 });
               }
-              _context2.n = 17;
+              _context2.n = 14;
               break;
-            case 14:
-              _context2.p = 14;
+            case 11:
+              _context2.p = 11;
               _t = _context2.v;
               ownsTransition = transition && controller.transition === transition;
               if (ownsTransition && transition.timeout !== null) {
@@ -779,38 +781,50 @@
               }
               if (ownsTransition) restoreMeasuredStyles(element, controller);
               _t2 = _t && _t.code;
-              _context2.n = _t2 === AelluxJs.diagnostics.WARN_INTERRUPTION.code ? 15 : 16;
+              _context2.n = _t2 === AelluxJs.diagnostics.WARN_INTERRUPTION.code ? 12 : 13;
               break;
-            case 15:
+            case 12:
               AelluxJs.diagnostics.warn(AelluxJs.diagnostics.WARN_INTERRUPTION, {
                 cause: _t,
                 extension: extensionName,
                 element: element,
                 replacement: transition && transition.replacement === true
               });
-              return _context2.a(3, 17);
-            case 16:
+              return _context2.a(3, 14);
+            case 13:
               AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_EXTENSION_TRANSITION, {
                 cause: _t,
                 extension: extensionName,
                 element: element
               });
-              return _context2.a(3, 17);
-            case 17:
-              _context2.p = 17;
+              return _context2.a(3, 14);
+            case 14:
+              _context2.p = 14;
               if (transition && controller.transition === transition) {
                 controller.transition = null;
                 controller.classList.remove(className.willChange);
               }
-              return _context2.f(17);
-            case 18:
+              return _context2.f(14);
+            case 15:
               return _context2.a(2);
           }
-        }, _callee2, null, [[3, 14, 17, 18]]);
+        }, _callee2, null, [[3, 11, 14, 15]]);
       }));
       return _presentTransition.apply(this, arguments);
     }
-    function finishTransition(element, controller, transition, gotoVisible, completeTransition) {
+    function legacyMotionRun(options) {
+      options.apply();
+      return new Promise(function(resolve) {
+        return setTimeout(function() {
+          return resolve({
+            id: options.id,
+            status: "completed",
+            mode: "native"
+          });
+        }, Math.max(0, Number(options.nativeDuration) || 0));
+      });
+    }
+    function finishTransition(element, controller, transition, gotoVisible) {
       controller.classList.remove(transition.className);
       restoreMeasuredStyles(element, controller);
       var focused = !gotoVisible && element.contains(document.activeElement) ? document.activeElement : null;
@@ -827,7 +841,6 @@
         });
       }
       transition.timeout = null;
-      completeTransition();
     }
     function autoUnpopSchedule(element, controller) {
       var autoUnpopValue = element.getAttribute(attr.autoUnpop);

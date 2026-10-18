@@ -23381,7 +23381,7 @@
     }
   });
 
-  // src/internal/ease.js
+  // src/internal/create-css-motion-controller.js
   function _createForOfIteratorHelper5(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
@@ -23421,6 +23421,368 @@
     }
   }
   function _arrayLikeToArray6(r, a) {
+    (null == a || a > r.length) && (a = r.length);
+    for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
+    return n;
+  }
+  function createCssMotionController(root, getAelluxJs) {
+    var operations = /* @__PURE__ */ new Map();
+    var nextId = 4e6;
+    function id() {
+      return nextId++;
+    }
+    function supported(element) {
+      if (getAelluxJs().options.cssMotionController === false) return false;
+      var Animation = root.Animation;
+      return !!(element && typeof element.getAnimations === "function" && Animation && Animation.prototype && typeof Animation.prototype.pause === "function" && "currentTime" in Animation.prototype);
+    }
+    function cancel(operationId) {
+      var operation = operations.get(operationId);
+      if (!operation) return false;
+      operation.cancelled = true;
+      getAelluxJs().waitLayout.cancel(operationId);
+      var nativeResolve = operation.nativeResolve;
+      release(operation, false);
+      if (nativeResolve) nativeResolve({
+        id: operationId,
+        status: "aborted",
+        mode: "native"
+      });
+      return true;
+    }
+    function run(element) {
+      var options = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : {};
+      var AelluxJs2 = getAelluxJs();
+      var operationId = options.id;
+      if (!Number.isSafeInteger(operationId)) return Promise.reject(new TypeError("motion.run() requires a safe integer ID"));
+      if (!element || element.nodeType !== 1 || typeof options.apply !== "function") return Promise.reject(new TypeError("motion.run() requires an Element and apply callback"));
+      cancel(operationId);
+      var operation = {
+        id: operationId,
+        element: element,
+        options: options,
+        animations: [],
+        before: /* @__PURE__ */ new Set(),
+        start: 0,
+        endTime: 0,
+        done: false,
+        cancelled: false,
+        controlled: false,
+        captureFailed: false,
+        nativeTimer: null,
+        nativeResolve: null
+      };
+      operations.set(operationId, operation);
+      if (AelluxJs2.currentPreference("reduced-motion") === "reduced") {
+        options.apply();
+        operations.delete(operationId);
+        return Promise.resolve({
+          id: operationId,
+          status: "completed",
+          mode: "reduced"
+        });
+      }
+      if (!supported(element)) return nativeRun(operation);
+      try {
+        var _iterator = _createForOfIteratorHelper5(element.getAnimations()), _step;
+        try {
+          for (_iterator.s(); !(_step = _iterator.n()).done; ) {
+            var animation = _step.value;
+            operation.before.add(animation);
+          }
+        } catch (err) {
+          _iterator.e(err);
+        } finally {
+          _iterator.f();
+        }
+        options.apply();
+      } catch (error) {
+        operations.delete(operationId);
+        return Promise.reject(error);
+      }
+      var maxFPS = options.maxFPS === void 0 ? AelluxJs2.layoutMaxFPS(element) : options.maxFPS;
+      var externalAbort = typeof options.abort === "function" ? options.abort : null;
+      var shouldAbort = function shouldAbort2() {
+        return operation.cancelled || !element.isConnected || (externalAbort ? externalAbort() : false);
+      };
+      var result = AelluxJs2.waitLayout.sequence(operationId, {
+        read: function read() {
+          return capture(operation);
+        },
+        update: function update(animations) {
+          return prepare(operation, animations);
+        },
+        abort: shouldAbort
+      }, {
+        update: function update() {
+          return advance(operation);
+        },
+        repeat: {
+          ms: 0
+        },
+        maxFPS: maxFPS,
+        abort: function abort() {
+          return operation.done || shouldAbort();
+        }
+      });
+      return result.then(function(sequenceResult) {
+        if (operation.captureFailed && !operation.cancelled) {
+          release(operation, false);
+          operations.set(operationId, operation);
+          return nativeWait(operation);
+        }
+        var completed = operation.done && !operation.cancelled;
+        release(operation, completed);
+        return {
+          id: operationId,
+          status: completed ? "completed" : sequenceResult.status,
+          mode: operation.controlled ? "controlled" : "native"
+        };
+      }, function(error) {
+        release(operation, false, true);
+        throw error;
+      });
+    }
+    function capture(operation) {
+      operation.element.getBoundingClientRect();
+      return operation.element.getAnimations().filter(function(animation) {
+        return !operation.before.has(animation) && controllable(animation);
+      });
+    }
+    function controllable(animation) {
+      try {
+        var effect = animation && animation.effect;
+        return !!(effect && typeof effect.getComputedTiming === "function" && typeof animation.pause === "function");
+      } catch (_) {
+        return false;
+      }
+    }
+    function prepare(operation, animations) {
+      if (!animations.length) {
+        operation.captureFailed = true;
+        operation.done = true;
+        return;
+      }
+      var endTime = 0;
+      var _iterator2 = _createForOfIteratorHelper5(animations), _step2;
+      try {
+        for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
+          var animation = _step2.value;
+          animation.pause();
+          animation.currentTime = 0;
+          var timing = animation.effect.getComputedTiming();
+          var end = Number(timing.endTime);
+          if (Number.isFinite(end)) endTime = Math.max(endTime, end);
+          applyAelluxEasing(operation, animation);
+        }
+      } catch (err) {
+        _iterator2.e(err);
+      } finally {
+        _iterator2.f();
+      }
+      operation.animations = animations;
+      operation.endTime = endTime;
+      operation.start = now();
+      operation.controlled = true;
+      if (!(endTime > 0)) operation.done = true;
+    }
+    function advance(operation) {
+      if (!operation.controlled || operation.done) return;
+      var elapsed = Math.max(0, now() - operation.start);
+      var time = Math.min(elapsed, operation.endTime);
+      var _iterator3 = _createForOfIteratorHelper5(operation.animations), _step3;
+      try {
+        for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
+          var animation = _step3.value;
+          animation.currentTime = time;
+        }
+      } catch (err) {
+        _iterator3.e(err);
+      } finally {
+        _iterator3.f();
+      }
+      if (elapsed >= operation.endTime) operation.done = true;
+    }
+    function applyAelluxEasing(operation, animation) {
+      var name = operation.options.easing;
+      if (!name || !root.CSS || typeof root.CSS.supports !== "function" || !animation.effect || typeof animation.effect.updateTiming !== "function") return;
+      var easing = sampledLinear(name);
+      if (!easing || !root.CSS.supports("animation-timing-function", easing)) return;
+      animation.effect.updateTiming({
+        easing: easing
+      });
+    }
+    function sampledLinear(name) {
+      var AelluxJs2 = getAelluxJs();
+      var points = [];
+      try {
+        for (var index = 0; index <= 60; index++) {
+          var progress = index / 60;
+          var value = AelluxJs2.ease(name, progress);
+          if (!Number.isFinite(value)) return null;
+          points.push("".concat(round(value), " ").concat(round(progress * 100), "%"));
+        }
+      } catch (_) {
+        return null;
+      }
+      return "linear(".concat(points.join(", "), ")");
+    }
+    function nativeRun(operation) {
+      operation.options.apply();
+      return nativeWait(operation);
+    }
+    function nativeWait(operation) {
+      var animations = typeof operation.element.getAnimations === "function" ? operation.element.getAnimations().filter(function(animation) {
+        return !operation.before.has(animation);
+      }) : [];
+      if (animations.length && animations.every(function(animation) {
+        return animation.finished && typeof animation.finished.then === "function";
+      })) {
+        return Promise.all(animations.map(function(animation) {
+          return animation.finished.catch(function() {
+            return void 0;
+          });
+        })).then(function() {
+          if (operations.get(operation.id) === operation) operations.delete(operation.id);
+          return {
+            id: operation.id,
+            status: operation.cancelled ? "aborted" : "completed",
+            mode: "native"
+          };
+        });
+      }
+      var explicit = Number(operation.options.nativeDuration);
+      var duration = Number.isFinite(explicit) ? explicit : cssMotionTime(operation.element);
+      return new Promise(function(resolve) {
+        operation.nativeResolve = resolve;
+        var complete = function complete2() {
+          if (operations.get(operation.id) !== operation) return;
+          operations.delete(operation.id);
+          operation.nativeResolve = null;
+          resolve({
+            id: operation.id,
+            status: "completed",
+            mode: "native"
+          });
+        };
+        if (Number.isFinite(duration) && duration > 0) {
+          operation.nativeTimer = root.setTimeout(complete, duration);
+        } else {
+          Promise.resolve().then(complete);
+        }
+      });
+    }
+    function cssMotionTime(element) {
+      try {
+        var style = root.getComputedStyle(element);
+        return Math.max(listTime(style.animationDuration, style.animationDelay, style.animationIterationCount), listTime(style.transitionDuration, style.transitionDelay));
+      } catch (_) {
+        return 0;
+      }
+    }
+    function listTime(durations, delays, iterations) {
+      var durationList = String(durations || "0s").split(",");
+      var delayList = String(delays || "0s").split(",");
+      var iterationList = String(iterations || "1").split(",");
+      var count = Math.max(durationList.length, delayList.length, iterationList.length);
+      var maximum = 0;
+      for (var index = 0; index < count; index++) {
+        var duration = cssTime(durationList[index % durationList.length]);
+        var delay = cssTime(delayList[index % delayList.length]);
+        var rawIterations = iterationList[index % iterationList.length].trim();
+        var iterationCount = rawIterations === "infinite" ? 1 : Number(rawIterations);
+        maximum = Math.max(maximum, Math.max(0, delay) + duration * (Number.isFinite(iterationCount) ? Math.max(0, iterationCount) : 1));
+      }
+      return maximum;
+    }
+    function cssTime(value) {
+      var text = String(value || "0s").trim().toLowerCase();
+      var number = parseFloat(text);
+      if (!Number.isFinite(number)) return 0;
+      return text.endsWith("ms") ? number : number * 1e3;
+    }
+    function release(operation, finish) {
+      var resume = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : false;
+      if (operation.nativeTimer !== null) root.clearTimeout(operation.nativeTimer);
+      operation.nativeTimer = null;
+      var _iterator4 = _createForOfIteratorHelper5(operation.animations), _step4;
+      try {
+        for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
+          var animation = _step4.value;
+          try {
+            if (finish) animation.finish();
+            else if (resume) animation.play();
+            else animation.cancel();
+          } catch (_) {
+          }
+        }
+      } catch (err) {
+        _iterator4.e(err);
+      } finally {
+        _iterator4.f();
+      }
+      operation.animations.length = 0;
+      if (operations.get(operation.id) === operation) operations.delete(operation.id);
+    }
+    function now() {
+      return root.performance && typeof root.performance.now === "function" ? root.performance.now() : Date.now();
+    }
+    function round(value) {
+      return Math.round(value * 1e5) / 1e5;
+    }
+    return Object.freeze({
+      run: run,
+      cancel: cancel,
+      id: id,
+      supported: supported
+    });
+  }
+  var init_create_css_motion_controller = __esm({
+    "src/internal/create-css-motion-controller.js": function() {
+      /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+    }
+  });
+
+  // src/internal/ease.js
+  function _createForOfIteratorHelper6(r, e) {
+    var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
+    if (!t) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray7(r)) || e && r && "number" == typeof r.length) {
+        t && (r = t);
+        var _n = 0, F = function F2() {
+        };
+        return { s: F, n: function n() {
+          return _n >= r.length ? { done: true } : { done: false, value: r[_n++] };
+        }, e: function e2(r2) {
+          throw r2;
+        }, f: F };
+      }
+      throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+    }
+    var o, a = true, u = false;
+    return { s: function s() {
+      t = t.call(r);
+    }, n: function n() {
+      var r2 = t.next();
+      return a = r2.done, r2;
+    }, e: function e2(r2) {
+      u = true, o = r2;
+    }, f: function f() {
+      try {
+        a || null == t.return || t.return();
+      } finally {
+        if (u) throw o;
+      }
+    } };
+  }
+  function _unsupportedIterableToArray7(r, a) {
+    if (r) {
+      if ("string" == typeof r) return _arrayLikeToArray7(r, a);
+      var t = {}.toString.call(r).slice(8, -1);
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray7(r, a) : void 0;
+    }
+  }
+  function _arrayLikeToArray7(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
@@ -23478,7 +23840,7 @@
     if (key === "smootherstep") return t * t * t * (t * (6 * t - 15) + 10);
     var family = "";
     var direction = "";
-    var _iterator = _createForOfIteratorHelper5(DIRECTIONS), _step;
+    var _iterator = _createForOfIteratorHelper6(DIRECTIONS), _step;
     try {
       for (_iterator.s(); !(_step = _iterator.n()).done; ) {
         var candidate = _step.value;
@@ -23547,10 +23909,10 @@
 
   // src/aellux.orchestrator.js
   var aellux_orchestrator_exports = {};
-  function _createForOfIteratorHelper6(r, e) {
+  function _createForOfIteratorHelper7(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
-      if (Array.isArray(r) || (t = _unsupportedIterableToArray7(r)) || e && r && "number" == typeof r.length) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray8(r)) || e && r && "number" == typeof r.length) {
         t && (r = t);
         var _n = 0, F = function F2() {
         };
@@ -23578,14 +23940,14 @@
       }
     } };
   }
-  function _unsupportedIterableToArray7(r, a) {
+  function _unsupportedIterableToArray8(r, a) {
     if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray7(r, a);
+      if ("string" == typeof r) return _arrayLikeToArray8(r, a);
       var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray7(r, a) : void 0;
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray8(r, a) : void 0;
     }
   }
-  function _arrayLikeToArray7(r, a) {
+  function _arrayLikeToArray8(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
@@ -23697,6 +24059,7 @@
       init_build_layout_scheduler();
       init_build_mount_map_manager();
       init_create_aria_helper();
+      init_create_css_motion_controller();
       init_ease();
       init_utils_name_case();
       /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
@@ -23707,6 +24070,9 @@
         var aria = createAriaHelper();
         var mountManager = buildMountMapManager(root);
         var layoutScheduler = buildLayoutScheduler();
+        var motion = createCssMotionController(root, function() {
+          return root.AelluxJs;
+        });
         root.AelluxJs = Object.assign(root.AelluxJs, {
           startAelluxJs: function startAelluxJs() {
             return _asyncToGenerator2(/* @__PURE__ */ _regenerator2().m(function _callee() {
@@ -23810,7 +24176,7 @@
                       extensions: extensionNames
                     });
                   case 4:
-                    _iterator = _createForOfIteratorHelper6(extensionNames);
+                    _iterator = _createForOfIteratorHelper7(extensionNames);
                     _context5.p = 5;
                     _iterator.s();
                   case 6:
@@ -23896,6 +24262,7 @@
           request: defaultRequest,
           ease: ease,
           aria: aria,
+          motion: motion,
           waitLayout: layoutScheduler,
           mountManager: mountManager
         });

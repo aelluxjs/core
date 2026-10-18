@@ -169,7 +169,8 @@
     var motionOptions = ["shake", "yes", "no", "breathe", "tremble", "pulse", "alert"];
     var feedbackTypes = ["warning", "error", "success", "announce", "busy", "progress", "validate"];
     var handlers = /* @__PURE__ */ new Map();
-    var motionTimers = /* @__PURE__ */ new Map();
+    var motionOperations = /* @__PURE__ */ new Map();
+    var motionIds = /* @__PURE__ */ new WeakMap();
     var feedbackAttribute = AelluxJs.attr(extensionName);
     var targetMessageAttribute = AelluxJs.attr("targetMessage");
     var targetTransformAttribute = AelluxJs.attr("targetTransform");
@@ -187,25 +188,25 @@
     }
     function _destroy() {
       _destroy = _asyncToGenerator(/* @__PURE__ */ _regenerator().m(function _callee() {
-        var _iterator2, _step2, timer;
+        var _iterator2, _step2, operation;
         return _regenerator().w(function(_context) {
           while (1) switch (_context.n) {
             case 0:
               AelluxJs.mountManager.remove({
                 extensionName: extensionName
               });
-              _iterator2 = _createForOfIteratorHelper(motionTimers.values());
+              _iterator2 = _createForOfIteratorHelper(motionOperations.values());
               try {
                 for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
-                  timer = _step2.value;
-                  root.clearTimeout(timer);
+                  operation = _step2.value;
+                  AelluxJs.motion.cancel(operation.id);
                 }
               } catch (err) {
                 _iterator2.e(err);
               } finally {
                 _iterator2.f();
               }
-              motionTimers.clear();
+              motionOperations.clear();
               handlers.clear();
             case 1:
               return _context.a(2);
@@ -275,16 +276,42 @@
           var className = _Array$from[_i2];
           if (className.startsWith(motionPrefix)) transformElement.classList.remove(className);
         }
-        var previousTimer = motionTimers.get(transformElement);
-        if (previousTimer) root.clearTimeout(previousTimer);
-        motionTimers.delete(transformElement);
+        var previous = motionOperations.get(transformElement);
+        if (previous) AelluxJs.motion.cancel(previous.id);
+        motionOperations.delete(transformElement);
         if (typeof motion === "string") {
           var motionClass = AelluxJs.className("feedback-motion-".concat(motion));
-          transformElement.classList.add(motionClass);
-          motionTimers.set(transformElement, root.setTimeout(function() {
+          var id = motionIds.get(transformElement);
+          if (id === void 0) {
+            id = AelluxJs.motion.id();
+            motionIds.set(transformElement, id);
+          }
+          var operation = {
+            id: id,
+            className: motionClass
+          };
+          motionOperations.set(transformElement, operation);
+          var advancedEase = root.getComputedStyle(transformElement).getPropertyValue("--ae-feedback-aellux-ease").trim() || void 0;
+          AelluxJs.motion.run(transformElement, {
+            id: id,
+            apply: function apply() {
+              return transformElement.classList.add(motionClass);
+            },
+            easing: advancedEase,
+            abort: function abort() {
+              return !transformElement.isConnected;
+            }
+          }).catch(function(cause) {
+            AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_EXTENSION_TRANSITION, {
+              cause: cause,
+              extension: extensionName,
+              element: transformElement
+            });
+          }).finally(function() {
+            if (motionOperations.get(transformElement) !== operation) return;
             transformElement.classList.remove(motionClass);
-            motionTimers.delete(transformElement);
-          }, 1e3));
+            motionOperations.delete(transformElement);
+          });
         }
       }
     }

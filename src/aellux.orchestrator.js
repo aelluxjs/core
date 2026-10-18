@@ -14,6 +14,7 @@ import { assetLoadHelper } from "./internal/asset-load-helper.js";
 import { buildLayoutScheduler } from "./internal/build-layout-scheduler.js";
 import { buildMountMapManager } from "./internal/build-mount-map-manager.js";
 import { createAriaHelper } from "./internal/create-aria-helper.js";
+import { createCssMotionController } from "./internal/create-css-motion-controller.js";
 import { ease } from "./internal/ease.js";
 import utilsNameCase from "./internal/utils-name-case.js";
 
@@ -26,6 +27,7 @@ import utilsNameCase from "./internal/utils-name-case.js";
   const aria = createAriaHelper();
   const mountManager = buildMountMapManager(root);
   const layoutScheduler = buildLayoutScheduler();
+  const motion = createCssMotionController(root, () => root.AelluxJs);
 
   // Keep the boot API function: its methods close over the same instance.
   root.AelluxJs = Object.assign(
@@ -135,6 +137,7 @@ import utilsNameCase from "./internal/utils-name-case.js";
       ease,
 
       aria,
+      motion,
       waitLayout: layoutScheduler,
       mountManager,
     });

@@ -531,7 +531,8 @@
         const motionOptions = ["shake", "yes", "no", "breathe", "tremble", "pulse", "alert"];
         const feedbackTypes = ["warning", "error", "success", "announce", "busy", "progress", "validate"];
         const handlers = /* @__PURE__ */ new Map();
-        const motionTimers = /* @__PURE__ */ new Map();
+        const motionOperations = /* @__PURE__ */ new Map();
+        const motionIds = /* @__PURE__ */ new WeakMap();
         const feedbackAttribute = AelluxJs2.attr(extensionName);
         const targetMessageAttribute = AelluxJs2.attr("targetMessage");
         const targetTransformAttribute = AelluxJs2.attr("targetTransform");
@@ -546,8 +547,8 @@
         }
         async function destroy() {
           AelluxJs2.mountManager.remove({ extensionName });
-          for (const timer of motionTimers.values()) root2.clearTimeout(timer);
-          motionTimers.clear();
+          for (const operation of motionOperations.values()) AelluxJs2.motion.cancel(operation.id);
+          motionOperations.clear();
           handlers.clear();
         }
         function mountFeedback(element) {
@@ -597,16 +598,34 @@
             for (const className of Array.from(transformElement.classList)) {
               if (className.startsWith(motionPrefix)) transformElement.classList.remove(className);
             }
-            const previousTimer = motionTimers.get(transformElement);
-            if (previousTimer) root2.clearTimeout(previousTimer);
-            motionTimers.delete(transformElement);
+            const previous = motionOperations.get(transformElement);
+            if (previous) AelluxJs2.motion.cancel(previous.id);
+            motionOperations.delete(transformElement);
             if (typeof motion === "string") {
               const motionClass = AelluxJs2.className(`feedback-motion-${motion}`);
-              transformElement.classList.add(motionClass);
-              motionTimers.set(transformElement, root2.setTimeout(() => {
+              let id = motionIds.get(transformElement);
+              if (id === void 0) {
+                id = AelluxJs2.motion.id();
+                motionIds.set(transformElement, id);
+              }
+              const operation = { id, className: motionClass };
+              motionOperations.set(transformElement, operation);
+              const advancedEase = root2.getComputedStyle(transformElement).getPropertyValue("--ae-feedback-aellux-ease").trim() || void 0;
+              AelluxJs2.motion.run(transformElement, {
+                id,
+                apply: () => transformElement.classList.add(motionClass),
+                easing: advancedEase,
+                abort: () => !transformElement.isConnected
+              }).catch((cause) => {
+                AelluxJs2.diagnostics.error(
+                  AelluxJs2.diagnostics.ERROR_EXTENSION_TRANSITION,
+                  { cause, extension: extensionName, element: transformElement }
+                );
+              }).finally(() => {
+                if (motionOperations.get(transformElement) !== operation) return;
                 transformElement.classList.remove(motionClass);
-                motionTimers.delete(transformElement);
-              }, 1e3));
+                motionOperations.delete(transformElement);
+              });
             }
           }
         }
@@ -4089,6 +4108,7 @@
         const TRANSITION_PREPARE_TIME = 100;
         const presentElements = /* @__PURE__ */ new Map();
         const openPresentElements = /* @__PURE__ */ new Set();
+        let fallbackMotionId = 5e6;
         const triggerElementsSet = /* @__PURE__ */ new Set();
         const triggerTargets = /* @__PURE__ */ new Map();
         const triggersByTargetId = /* @__PURE__ */ new Map();
@@ -4183,6 +4203,7 @@
             measuredHeight,
             measuredWidth,
             motionEnabled: (element.getAttribute(attr.present) || "").trim() !== "",
+            motionId: AelluxJs2.motion ? AelluxJs2.motion.id() : fallbackMotionId++,
             transition: null,
             autoUnpopTimeout: null,
             direction: null,
@@ -4199,6 +4220,7 @@
               const transition = this.transition;
               if (transition) {
                 transition.replacement = replacement;
+                if (AelluxJs2.motion) AelluxJs2.motion.cancel(this.motionId);
                 if (transition.timeout !== null) {
                   clearTimeout(transition.timeout);
                   transition.timeout = null;
@@ -4520,21 +4542,16 @@
                 }
               }
             };
-            if (size && !waitForPreparation)
-              await AelluxJs2.waitLayout.update(activateTransition);
-            else activateTransition();
-            if (controller.transition !== transition) return;
-            const completed = new Promise((completeTransition) => {
-              transition.timeout = setTimeout(
-                finishTransition,
-                timeMs,
-                element,
-                controller,
-                transition,
-                gotoVisible,
-                completeTransition
-              );
-            });
+            const advancedEase = root2.getComputedStyle(element).getPropertyValue(`--ae-${newDirection}-aellux-ease`.toLowerCase()).trim() || void 0;
+            const motionOptions = {
+              id: controller.motionId,
+              apply: activateTransition,
+              easing: advancedEase,
+              nativeDuration: timeMs,
+              maxFPS: AelluxJs2.layoutMaxFPS ? AelluxJs2.layoutMaxFPS(element) : void 0,
+              abort: () => controller.transition !== transition || !element.isConnected
+            };
+            const completed = AelluxJs2.motion ? AelluxJs2.motion.run(element, motionOptions) : legacyMotionRun(motionOptions);
             AelluxJs2.dispatchFrom(element, "Layout", {
               detail: {
                 origin: `present.${newDirection}`.toLowerCase(),
@@ -4543,7 +4560,9 @@
               bubbles: true
             });
             AelluxJs2.dispatchFrom(element, `${newDirection}${PING}`, { bubbles: true });
-            await Promise.race([completed, interrupted]);
+            const motionResult = await Promise.race([completed, interrupted]);
+            if (controller.transition !== transition || motionResult && motionResult.status !== "completed") return;
+            finishTransition(element, controller, transition, gotoVisible);
             if (gotoVisible && !element.hidden) {
               autoUnpopSchedule(element, controller);
               controller.classList.add(className.pop);
@@ -4590,7 +4609,15 @@
             }
           }
         }
-        function finishTransition(element, controller, transition, gotoVisible, completeTransition) {
+        function legacyMotionRun(options) {
+          options.apply();
+          return new Promise((resolve) => setTimeout(() => resolve({
+            id: options.id,
+            status: "completed",
+            mode: "native"
+          }), Math.max(0, Number(options.nativeDuration) || 0)));
+        }
+        function finishTransition(element, controller, transition, gotoVisible) {
           controller.classList.remove(transition.className);
           restoreMeasuredStyles(element, controller);
           const focused = !gotoVisible && element.contains(document.activeElement) ? document.activeElement : null;
@@ -4604,7 +4631,6 @@
             });
           }
           transition.timeout = null;
-          completeTransition();
         }
         function autoUnpopSchedule(element, controller) {
           const autoUnpopValue = element.getAttribute(attr.autoUnpop);
@@ -6040,6 +6066,247 @@
     return { register };
   }
 
+  // src/internal/create-css-motion-controller.js
+  /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+  function createCssMotionController(root2, getAelluxJs) {
+    const operations = /* @__PURE__ */ new Map();
+    let nextId = 4e6;
+    function id() {
+      return nextId++;
+    }
+    function supported(element) {
+      if (getAelluxJs().options.cssMotionController === false) return false;
+      const Animation = root2.Animation;
+      return !!(element && typeof element.getAnimations === "function" && Animation && Animation.prototype && typeof Animation.prototype.pause === "function" && "currentTime" in Animation.prototype);
+    }
+    function cancel(operationId) {
+      const operation = operations.get(operationId);
+      if (!operation) return false;
+      operation.cancelled = true;
+      getAelluxJs().waitLayout.cancel(operationId);
+      const nativeResolve = operation.nativeResolve;
+      release(operation, false);
+      if (nativeResolve) nativeResolve({ id: operationId, status: "aborted", mode: "native" });
+      return true;
+    }
+    function run(element, options = {}) {
+      const AelluxJs2 = getAelluxJs();
+      const operationId = options.id;
+      if (!Number.isSafeInteger(operationId))
+        return Promise.reject(new TypeError("motion.run() requires a safe integer ID"));
+      if (!element || element.nodeType !== 1 || typeof options.apply !== "function")
+        return Promise.reject(new TypeError("motion.run() requires an Element and apply callback"));
+      cancel(operationId);
+      const operation = {
+        id: operationId,
+        element,
+        options,
+        animations: [],
+        before: /* @__PURE__ */ new Set(),
+        start: 0,
+        endTime: 0,
+        done: false,
+        cancelled: false,
+        controlled: false,
+        captureFailed: false,
+        nativeTimer: null,
+        nativeResolve: null
+      };
+      operations.set(operationId, operation);
+      if (AelluxJs2.currentPreference("reduced-motion") === "reduced") {
+        options.apply();
+        operations.delete(operationId);
+        return Promise.resolve({ id: operationId, status: "completed", mode: "reduced" });
+      }
+      if (!supported(element)) return nativeRun(operation);
+      try {
+        for (const animation of element.getAnimations()) operation.before.add(animation);
+        options.apply();
+      } catch (error) {
+        operations.delete(operationId);
+        return Promise.reject(error);
+      }
+      const maxFPS = options.maxFPS === void 0 ? AelluxJs2.layoutMaxFPS(element) : options.maxFPS;
+      const externalAbort = typeof options.abort === "function" ? options.abort : null;
+      const shouldAbort = () => operation.cancelled || !element.isConnected || (externalAbort ? externalAbort() : false);
+      const result = AelluxJs2.waitLayout.sequence(
+        operationId,
+        {
+          read: () => capture(operation),
+          update: (animations) => prepare(operation, animations),
+          abort: shouldAbort
+        },
+        {
+          update: () => advance(operation),
+          repeat: { ms: 0 },
+          maxFPS,
+          abort: () => operation.done || shouldAbort()
+        }
+      );
+      return result.then((sequenceResult) => {
+        if (operation.captureFailed && !operation.cancelled) {
+          release(operation, false);
+          operations.set(operationId, operation);
+          return nativeWait(operation);
+        }
+        const completed = operation.done && !operation.cancelled;
+        release(operation, completed);
+        return {
+          id: operationId,
+          status: completed ? "completed" : sequenceResult.status,
+          mode: operation.controlled ? "controlled" : "native"
+        };
+      }, (error) => {
+        release(operation, false, true);
+        throw error;
+      });
+    }
+    function capture(operation) {
+      operation.element.getBoundingClientRect();
+      return operation.element.getAnimations().filter((animation) => !operation.before.has(animation) && controllable(animation));
+    }
+    function controllable(animation) {
+      try {
+        const effect = animation && animation.effect;
+        return !!(effect && typeof effect.getComputedTiming === "function" && typeof animation.pause === "function");
+      } catch (_) {
+        return false;
+      }
+    }
+    function prepare(operation, animations) {
+      if (!animations.length) {
+        operation.captureFailed = true;
+        operation.done = true;
+        return;
+      }
+      let endTime = 0;
+      for (const animation of animations) {
+        animation.pause();
+        animation.currentTime = 0;
+        const timing = animation.effect.getComputedTiming();
+        const end = Number(timing.endTime);
+        if (Number.isFinite(end)) endTime = Math.max(endTime, end);
+        applyAelluxEasing(operation, animation);
+      }
+      operation.animations = animations;
+      operation.endTime = endTime;
+      operation.start = now();
+      operation.controlled = true;
+      if (!(endTime > 0)) operation.done = true;
+    }
+    function advance(operation) {
+      if (!operation.controlled || operation.done) return;
+      const elapsed = Math.max(0, now() - operation.start);
+      const time = Math.min(elapsed, operation.endTime);
+      for (const animation of operation.animations) animation.currentTime = time;
+      if (elapsed >= operation.endTime) operation.done = true;
+    }
+    function applyAelluxEasing(operation, animation) {
+      const name = operation.options.easing;
+      if (!name || !root2.CSS || typeof root2.CSS.supports !== "function" || !animation.effect || typeof animation.effect.updateTiming !== "function") return;
+      const easing = sampledLinear(name);
+      if (!easing || !root2.CSS.supports("animation-timing-function", easing)) return;
+      animation.effect.updateTiming({ easing });
+    }
+    function sampledLinear(name) {
+      const AelluxJs2 = getAelluxJs();
+      const points = [];
+      try {
+        for (let index = 0; index <= 60; index++) {
+          const progress = index / 60;
+          const value = AelluxJs2.ease(name, progress);
+          if (!Number.isFinite(value)) return null;
+          points.push(`${round(value)} ${round(progress * 100)}%`);
+        }
+      } catch (_) {
+        return null;
+      }
+      return `linear(${points.join(", ")})`;
+    }
+    function nativeRun(operation) {
+      operation.options.apply();
+      return nativeWait(operation);
+    }
+    function nativeWait(operation) {
+      const animations = typeof operation.element.getAnimations === "function" ? operation.element.getAnimations().filter((animation) => !operation.before.has(animation)) : [];
+      if (animations.length && animations.every((animation) => animation.finished && typeof animation.finished.then === "function")) {
+        return Promise.all(animations.map((animation) => animation.finished.catch(() => void 0))).then(() => {
+          if (operations.get(operation.id) === operation) operations.delete(operation.id);
+          return { id: operation.id, status: operation.cancelled ? "aborted" : "completed", mode: "native" };
+        });
+      }
+      const explicit = Number(operation.options.nativeDuration);
+      const duration = Number.isFinite(explicit) ? explicit : cssMotionTime(operation.element);
+      return new Promise((resolve) => {
+        operation.nativeResolve = resolve;
+        const complete = () => {
+          if (operations.get(operation.id) !== operation) return;
+          operations.delete(operation.id);
+          operation.nativeResolve = null;
+          resolve({ id: operation.id, status: "completed", mode: "native" });
+        };
+        if (Number.isFinite(duration) && duration > 0) {
+          operation.nativeTimer = root2.setTimeout(complete, duration);
+        } else {
+          Promise.resolve().then(complete);
+        }
+      });
+    }
+    function cssMotionTime(element) {
+      try {
+        const style = root2.getComputedStyle(element);
+        return Math.max(
+          listTime(style.animationDuration, style.animationDelay, style.animationIterationCount),
+          listTime(style.transitionDuration, style.transitionDelay)
+        );
+      } catch (_) {
+        return 0;
+      }
+    }
+    function listTime(durations, delays, iterations) {
+      const durationList = String(durations || "0s").split(",");
+      const delayList = String(delays || "0s").split(",");
+      const iterationList = String(iterations || "1").split(",");
+      const count = Math.max(durationList.length, delayList.length, iterationList.length);
+      let maximum = 0;
+      for (let index = 0; index < count; index++) {
+        const duration = cssTime(durationList[index % durationList.length]);
+        const delay = cssTime(delayList[index % delayList.length]);
+        const rawIterations = iterationList[index % iterationList.length].trim();
+        const iterationCount = rawIterations === "infinite" ? 1 : Number(rawIterations);
+        maximum = Math.max(maximum, Math.max(0, delay) + duration * (Number.isFinite(iterationCount) ? Math.max(0, iterationCount) : 1));
+      }
+      return maximum;
+    }
+    function cssTime(value) {
+      const text = String(value || "0s").trim().toLowerCase();
+      const number = parseFloat(text);
+      if (!Number.isFinite(number)) return 0;
+      return text.endsWith("ms") ? number : number * 1e3;
+    }
+    function release(operation, finish, resume = false) {
+      if (operation.nativeTimer !== null) root2.clearTimeout(operation.nativeTimer);
+      operation.nativeTimer = null;
+      for (const animation of operation.animations) {
+        try {
+          if (finish) animation.finish();
+          else if (resume) animation.play();
+          else animation.cancel();
+        } catch (_) {
+        }
+      }
+      operation.animations.length = 0;
+      if (operations.get(operation.id) === operation) operations.delete(operation.id);
+    }
+    function now() {
+      return root2.performance && typeof root2.performance.now === "function" ? root2.performance.now() : Date.now();
+    }
+    function round(value) {
+      return Math.round(value * 1e5) / 1e5;
+    }
+    return Object.freeze({ run, cancel, id, supported });
+  }
+
   // src/internal/ease.js
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   var EASE_PREFIX = "ease";
@@ -6158,6 +6425,7 @@
     const aria = createAriaHelper();
     const mountManager = buildMountMapManager(root2);
     const layoutScheduler = buildLayoutScheduler();
+    const motion = createCssMotionController(root2, () => root2.AelluxJs);
     root2.AelluxJs = Object.assign(
       root2.AelluxJs,
       {
@@ -6258,6 +6526,7 @@
         request: defaultRequest,
         ease,
         aria,
+        motion,
         waitLayout: layoutScheduler,
         mountManager
       }

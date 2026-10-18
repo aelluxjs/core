@@ -151,6 +151,7 @@ var bootstrapProperties = Object.freeze({
       }),
       forceLegacy: flag,
       skipGlobalMount: flag,
+      cssMotionController: flag,
       autoViewportMeta: flag,
       basePath: Object.freeze({ type: ["string", "null"] }),
       crossOrigin: Object.freeze({ type: ["string", "null"] }),
@@ -159,6 +160,7 @@ var bootstrapProperties = Object.freeze({
   }),
   minified: flag,
   waitLayout: Object.freeze({ type: "null" }),
+  motion: Object.freeze({ type: "null" }),
   mountManager: Object.freeze({ type: "null" }),
   init: method,
   persist: Object.freeze({
@@ -222,6 +224,10 @@ for (var property in bootstrapProperties) {
   }
 }
 runtimeProperties.waitLayout = layoutScheduler;
+runtimeProperties.motion = Object.freeze({
+  type: "object",
+  properties: Object.freeze({ run: method, cancel: method, id: method, supported: method })
+});
 runtimeProperties.aria = Object.freeze({
   type: "object",
   properties: Object.freeze({ register: method })
