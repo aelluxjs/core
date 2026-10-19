@@ -33,7 +33,7 @@
   var define_AELLUX_OFFICIAL_EXTENSION_MANIFEST_default;
   var init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST = __esm({
     "<define:__AELLUX_OFFICIAL_EXTENSION_MANIFEST__>": function() {
-      define_AELLUX_OFFICIAL_EXTENSION_MANIFEST_default = { schemaVersion: 1, coreVersion: "0.1.0-beta.10", extensions: { preference: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.preference.min.js", integrity: "sha384-mSOgb0DekFTRXXZAgyNrPjamdlSqzL4SSGZYVWgVg+WlG+pBj11xT81v/6Xk43yO", regular: { url: "./aellux.ext.preference.js", integrity: "sha384-MlikpdHSzHzF6kz5+oJGtq3eoFsKTsx/g+FTrf+dFOU8iQGHsCpn4fP1jLlbNrj7" } }, legacy: { url: "./aellux.ext.preference.legacy.min.js", integrity: "sha384-1LMsK0W9J/PoM4tXhFgkYLRY4yWdzVoYmFy4OMDGd8lRdtptKoEb1sI9L1kzNaBu", regular: { url: "./aellux.ext.preference.legacy.js", integrity: "sha384-pozuz43OyfXrnkmuBu6KTM2lqRSqcI5LMgwAtqnzXq8xZGdVqpnmOtrBcYcMskWk" } } }, dependencies: [] }, "state-navigation": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.state-navigation.min.js", integrity: "sha384-wAbgAqjAA6wauuG+iuUtfRwxChd6fTJ0fS22fqnu2r00kouoXJWZ0f7AoTYlqBC6", regular: { url: "./aellux.ext.state-navigation.js", integrity: "sha384-PKJ8HTD7eIYDEg2hOaAJjpMYzLr2fBjBRGmIGG7XzGTzVK0yTjt5HYPO55VbWfdS" } }, legacy: { url: "./aellux.ext.state-navigation.legacy.min.js", integrity: "sha384-YkhfU15Mpk8KiO6TyoVU6z1yCiYWwnsOGE0xVaQ8NrE7IGrxOSUL005g5JeUDdJu", regular: { url: "./aellux.ext.state-navigation.legacy.js", integrity: "sha384-kaEUY0Zpw8K6pcwjm+INA5feXftLK2/N1aFpPr2LCTcetX2uoe2GGd1MJyy7u8rZ" } } }, dependencies: [] }, feedback: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.feedback.min.js", integrity: "sha384-3VP3W84ekK4MIVBQuy5+5P3bGrwOj7bBDfJnjyexZ+yDADf1jQoHEpP2J1OMUgod", regular: { url: "./aellux.ext.feedback.js", integrity: "sha384-RrPf0bRGxf68f/Rjas5MF5zC1GAubWyndCcuiYbgZsPSHGLFsQtQaUgeFX4SQz+h" } }, legacy: { url: "./aellux.ext.feedback.legacy.min.js", integrity: "sha384-zXuZEv63sd3fwaAygmyk9KazQ46KOelsvAtM+0vJ7phDwemVh1FhOjAcbhWVQM/N", regular: { url: "./aellux.ext.feedback.legacy.js", integrity: "sha384-UW1JZ1+liVWV/w3PJdhfIMztOU7zyTw/1rOyyxoxj4YJIHb1xFl8U0xeIBh8jYV7" } } }, dependencies: [], style: { url: "./aellux.ext.feedback.min.css", integrity: "sha384-OBguCYqF+dMD0Pl84C3FlY/+ohUGfW0OyynmXb/PSDEGOyuI/TQJ3EZAoCeJx+Jk", regular: { url: "./aellux.ext.feedback.css", integrity: "sha384-yk4cW+r/Mc1FRS1ZauBHC6KsKb7sxuJ0E9mmt/+AYASAdZXXMK6iuFBR+TOEh/r4" } } }, focus: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.focus.min.js", integrity: "sha384-AXpUv/Ur2Z4cKvO9EqIFqfxxdSQR5j75q0okOAWPvHhSneQ5LPjrOzk6Sl9MOo4a", regular: { url: "./aellux.ext.focus.js", integrity: "sha384-VjQzcnhLRrvRlbVQ0X4/tO0+8gqJXAmIFoeIVimjOud1wRNuBXNnSQHHW9XQPzTe" } }, legacy: { url: "./aellux.ext.focus.legacy.min.js", integrity: "sha384-I5QpUmKsA1T8NiKfKXQgbdG19Ld1ZGCWSmosygO3yGj43tdxp5zCfLyfBuFoHlKu", regular: { url: "./aellux.ext.focus.legacy.js", integrity: "sha384-5/y3J1NC/qMyV9myEj29+wGbqCVI8ICPafSebtJVfl15Qmup6vMiJzveShd3CLnw" } } }, dependencies: [] }, point: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.point.min.js", integrity: "sha384-n540II5oWbHJRt/a8i+Rgb9A3b9dm7hamg1kd3Nz7KdPQDcaa8S823t9fCrgxBWF", regular: { url: "./aellux.ext.point.js", integrity: "sha384-aDj7I5QEH/0+52E3e6yPZ/D0MEsNBdxeET3G5ToVvgczHtksMh3p8S/KOoAapRRN" } }, legacy: { url: "./aellux.ext.point.legacy.min.js", integrity: "sha384-5UmWvQHfmvttz9yeXbilawGCZH20UdR8yNBOE9kRV34wpfWASl8plzgKtLVQGO9M", regular: { url: "./aellux.ext.point.legacy.js", integrity: "sha384-gG/XONYEC1tchBcJ6bUtKYmWFHz0E+50LmMaXDAiqWBKPuwdHZeYm1uXA22lMZuN" } } }, dependencies: [] }, anchor: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.anchor.min.js", integrity: "sha384-LhnN0vAiakKLKDhSalMCh8HMs9EwdZ9cYo+8rgRF5a6b5qHzJNBi9NbZK+oV7PQm", regular: { url: "./aellux.ext.anchor.js", integrity: "sha384-r7o3VYzny6AgHW8EivvVCdFVNNIGRfXeQ63x2z4WW2g5MujpZi24+RlpRSszERlU" } }, legacy: { url: "./aellux.ext.anchor.legacy.min.js", integrity: "sha384-1qaoGlmbZ/Yk2m1GBBVeHQk05w66V8GA3hlLtyIwxHZO//r/GMprmgD7w9GQ5Ib7", regular: { url: "./aellux.ext.anchor.legacy.js", integrity: "sha384-AKxMx8gPEHllem340el/rdIP5hAldqQWrWVwzw2NMGbEA8AfkWXagmoCNquGE82s" } } }, dependencies: [] }, scrollbox: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.scrollbox.min.js", integrity: "sha384-5+NxzYUnUmNr5t9G4ViIvepKMfGxpTBSsVA13HmqeUozZWnuLeTcfoFqOy4KjgVW", regular: { url: "./aellux.ext.scrollbox.js", integrity: "sha384-2WTj4eb4j75cTL/v5nqzjkd5spSg4Fa2M/YsxMC/AIzsD7b34mCfTkbnMyOit6B1" } }, legacy: { url: "./aellux.ext.scrollbox.legacy.min.js", integrity: "sha384-IHTh67ZmMZAI77aC/Z52CzLr1D3L07UCucYlE3mcHP3mqUAovhP85JxLvWb87Ksp", regular: { url: "./aellux.ext.scrollbox.legacy.js", integrity: "sha384-xZUa+AU+AFtcYQm1u61HqQE+FB19QcLbVB9WqbwBiIEoFOcznkd1xYZZ9yl3CW/h" } } }, dependencies: [] }, "scrollbox-snap": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.scrollbox-snap.min.js", integrity: "sha384-VM615dZlx9t73CE3tXyH9Z7Vcr8VmqbSW2U8Pt6yc4Lti1hhH1Cg55Qy8SX+mksY", regular: { url: "./aellux.ext.scrollbox-snap.js", integrity: "sha384-DfDuXMGHMc8ajfcPSv90rz9MA3PMO+CSLG0QmHZGrnIQk4urAYw+gawRM5Yo3laB" } }, legacy: { url: "./aellux.ext.scrollbox-snap.legacy.min.js", integrity: "sha384-MAfgV2ca2VRxzCod1SO/Hg93Y9RbvOAjSPEWhCw7hgLm6RjNecGmEWRPVpVzy7z9", regular: { url: "./aellux.ext.scrollbox-snap.legacy.js", integrity: "sha384-dm3VvgRXDJ8axdiSuP6ZUVxZIdVgbmYra/wUVKL2dl+E8aNPS93dn1LwvHHaaYnx" } } }, dependencies: [] }, adaptive: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.adaptive.min.js", integrity: "sha384-lEWjA/UxxRXYoyXAXqiKXpfBf6e/RxQOc8+0ukbJG0NwHP3SVJ2nICYgvXsepP5p", regular: { url: "./aellux.ext.adaptive.js", integrity: "sha384-kVnL6EnCtYQJ6mtIt/3G7pQOVahqW2+v0wsTmLJapxIycJZL9/KswKmo5MiiT+8Z" } }, legacy: { url: "./aellux.ext.adaptive.legacy.min.js", integrity: "sha384-7Rdi4ldWEimm3xDyG8U1eCOsBJJ69RGIAfYsc/OakUnyspXYAceRzOoIu24oaNio", regular: { url: "./aellux.ext.adaptive.legacy.js", integrity: "sha384-sBBWTr6+7T/xrfVHzG9NPKVyQdZrLukEcJ7eCFDtH5wTJT0vODUSedq3Y1HTu0Sp" } } }, dependencies: [], style: { url: "./aellux.ext.adaptive.min.css", integrity: "sha384-8yUP1PStfDqBCyCskP3k9WLIKgv/yl1nyDhmPz7hsX5NZ4z3ZT3ajolA+RhYlUiG", regular: { url: "./aellux.ext.adaptive.css", integrity: "sha384-HfIjX9Zk0VFRimzPvUaTS5AtwuHJHjXKoM/xbNJXj5vE7bSdBGEzbrBHfbNmYah0" } } }, present: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.present.min.js", integrity: "sha384-4j7Z/u9cOOUfTZ3atFxNMaQvLlJKU7HbBF0yX7sKH6PaZQBSninpNa/UirKH7dGA", regular: { url: "./aellux.ext.present.js", integrity: "sha384-0y5bxbVI3vBm3KY5ZSxjfx3LtreZu/24QIcAMV4mwKaZOGvxr01f/UpbyLwb3x/W" } }, legacy: { url: "./aellux.ext.present.legacy.min.js", integrity: "sha384-1bm3asyvI9hVjvenNFHVEvtwR9zoaaJ+pD1Dmm1htid02kNzeFzgVcxQRbqL9pBJ", regular: { url: "./aellux.ext.present.legacy.js", integrity: "sha384-WGKvUR25VP82yXmjLzDfKiJb2+yJ6mFUPMQsZ7XE3Hx3HhYaZHphdV91EtYjr5D2" } } }, dependencies: [], style: { url: "./aellux.ext.present.min.css", integrity: "sha384-LR069uhIDdnx0X7oeoRxevC/+dD5gA6d4B2dHAJKPgnqLYDGs4GgW9quKNq+1G5b", regular: { url: "./aellux.ext.present.css", integrity: "sha384-9GTFJ0OxBj6ta/iiV07BLGTdfe9pbmBMYXFn9kT+wB4KwiLO8zxJ39XzLYOGgfui" } } } } };
+      define_AELLUX_OFFICIAL_EXTENSION_MANIFEST_default = { schemaVersion: 1, coreVersion: "0.1.0-beta.10", extensions: { preference: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.preference.min.js", integrity: "sha384-mSOgb0DekFTRXXZAgyNrPjamdlSqzL4SSGZYVWgVg+WlG+pBj11xT81v/6Xk43yO", regular: { url: "./aellux.ext.preference.js", integrity: "sha384-MlikpdHSzHzF6kz5+oJGtq3eoFsKTsx/g+FTrf+dFOU8iQGHsCpn4fP1jLlbNrj7" } }, legacy: { url: "./aellux.ext.preference.legacy.min.js", integrity: "sha384-1LMsK0W9J/PoM4tXhFgkYLRY4yWdzVoYmFy4OMDGd8lRdtptKoEb1sI9L1kzNaBu", regular: { url: "./aellux.ext.preference.legacy.js", integrity: "sha384-pozuz43OyfXrnkmuBu6KTM2lqRSqcI5LMgwAtqnzXq8xZGdVqpnmOtrBcYcMskWk" } } }, dependencies: [] }, "state-navigation": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.state-navigation.min.js", integrity: "sha384-wAbgAqjAA6wauuG+iuUtfRwxChd6fTJ0fS22fqnu2r00kouoXJWZ0f7AoTYlqBC6", regular: { url: "./aellux.ext.state-navigation.js", integrity: "sha384-PKJ8HTD7eIYDEg2hOaAJjpMYzLr2fBjBRGmIGG7XzGTzVK0yTjt5HYPO55VbWfdS" } }, legacy: { url: "./aellux.ext.state-navigation.legacy.min.js", integrity: "sha384-YkhfU15Mpk8KiO6TyoVU6z1yCiYWwnsOGE0xVaQ8NrE7IGrxOSUL005g5JeUDdJu", regular: { url: "./aellux.ext.state-navigation.legacy.js", integrity: "sha384-kaEUY0Zpw8K6pcwjm+INA5feXftLK2/N1aFpPr2LCTcetX2uoe2GGd1MJyy7u8rZ" } } }, dependencies: [] }, feedback: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.feedback.min.js", integrity: "sha384-3VP3W84ekK4MIVBQuy5+5P3bGrwOj7bBDfJnjyexZ+yDADf1jQoHEpP2J1OMUgod", regular: { url: "./aellux.ext.feedback.js", integrity: "sha384-RrPf0bRGxf68f/Rjas5MF5zC1GAubWyndCcuiYbgZsPSHGLFsQtQaUgeFX4SQz+h" } }, legacy: { url: "./aellux.ext.feedback.legacy.min.js", integrity: "sha384-zXuZEv63sd3fwaAygmyk9KazQ46KOelsvAtM+0vJ7phDwemVh1FhOjAcbhWVQM/N", regular: { url: "./aellux.ext.feedback.legacy.js", integrity: "sha384-UW1JZ1+liVWV/w3PJdhfIMztOU7zyTw/1rOyyxoxj4YJIHb1xFl8U0xeIBh8jYV7" } } }, dependencies: [], style: { url: "./aellux.ext.feedback.min.css", integrity: "sha384-OBguCYqF+dMD0Pl84C3FlY/+ohUGfW0OyynmXb/PSDEGOyuI/TQJ3EZAoCeJx+Jk", regular: { url: "./aellux.ext.feedback.css", integrity: "sha384-yk4cW+r/Mc1FRS1ZauBHC6KsKb7sxuJ0E9mmt/+AYASAdZXXMK6iuFBR+TOEh/r4" } } }, focus: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.focus.min.js", integrity: "sha384-AXpUv/Ur2Z4cKvO9EqIFqfxxdSQR5j75q0okOAWPvHhSneQ5LPjrOzk6Sl9MOo4a", regular: { url: "./aellux.ext.focus.js", integrity: "sha384-VjQzcnhLRrvRlbVQ0X4/tO0+8gqJXAmIFoeIVimjOud1wRNuBXNnSQHHW9XQPzTe" } }, legacy: { url: "./aellux.ext.focus.legacy.min.js", integrity: "sha384-I5QpUmKsA1T8NiKfKXQgbdG19Ld1ZGCWSmosygO3yGj43tdxp5zCfLyfBuFoHlKu", regular: { url: "./aellux.ext.focus.legacy.js", integrity: "sha384-5/y3J1NC/qMyV9myEj29+wGbqCVI8ICPafSebtJVfl15Qmup6vMiJzveShd3CLnw" } } }, dependencies: [] }, point: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.point.min.js", integrity: "sha384-n540II5oWbHJRt/a8i+Rgb9A3b9dm7hamg1kd3Nz7KdPQDcaa8S823t9fCrgxBWF", regular: { url: "./aellux.ext.point.js", integrity: "sha384-aDj7I5QEH/0+52E3e6yPZ/D0MEsNBdxeET3G5ToVvgczHtksMh3p8S/KOoAapRRN" } }, legacy: { url: "./aellux.ext.point.legacy.min.js", integrity: "sha384-5UmWvQHfmvttz9yeXbilawGCZH20UdR8yNBOE9kRV34wpfWASl8plzgKtLVQGO9M", regular: { url: "./aellux.ext.point.legacy.js", integrity: "sha384-gG/XONYEC1tchBcJ6bUtKYmWFHz0E+50LmMaXDAiqWBKPuwdHZeYm1uXA22lMZuN" } } }, dependencies: [] }, anchor: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.anchor.min.js", integrity: "sha384-LhnN0vAiakKLKDhSalMCh8HMs9EwdZ9cYo+8rgRF5a6b5qHzJNBi9NbZK+oV7PQm", regular: { url: "./aellux.ext.anchor.js", integrity: "sha384-r7o3VYzny6AgHW8EivvVCdFVNNIGRfXeQ63x2z4WW2g5MujpZi24+RlpRSszERlU" } }, legacy: { url: "./aellux.ext.anchor.legacy.min.js", integrity: "sha384-1qaoGlmbZ/Yk2m1GBBVeHQk05w66V8GA3hlLtyIwxHZO//r/GMprmgD7w9GQ5Ib7", regular: { url: "./aellux.ext.anchor.legacy.js", integrity: "sha384-AKxMx8gPEHllem340el/rdIP5hAldqQWrWVwzw2NMGbEA8AfkWXagmoCNquGE82s" } } }, dependencies: [] }, scrollbox: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.scrollbox.min.js", integrity: "sha384-nRuge7XHqXPjB4KXrTu5h/FKp11f62jU5BRJ9Oi6uNaY97tGsT+xAjFOB3w1NKau", regular: { url: "./aellux.ext.scrollbox.js", integrity: "sha384-PSi0yFKzkWpgDb3MiA66F7G9t/BiatBgbmHlQgk195V/iIA9yR2Eg82NaBgn1sJN" } }, legacy: { url: "./aellux.ext.scrollbox.legacy.min.js", integrity: "sha384-YZiUj3X5mlRaVoGnrs5BdmPQGqj93xKZ0ZwjlC5BJDoCpBfb4IoxYNMlBiiuMU6x", regular: { url: "./aellux.ext.scrollbox.legacy.js", integrity: "sha384-kO4zw0fFBsUnboHkyw7dFY8Y/NJnDs8oQu9cyGi6KOAPioKrTcgALnosRDaPSLsc" } } }, dependencies: [] }, "scrollbox-snap": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.scrollbox-snap.min.js", integrity: "sha384-dMb7YfshByWZSHV9n5WPTuKHYA+BptI1jk1R6tPYdxtGCbvLo0WapARDjRsyWMbx", regular: { url: "./aellux.ext.scrollbox-snap.js", integrity: "sha384-zwE2e7iBBMn5Dom1yxLoteUdD8KiXhH9KXgAEQc/lK5ntvo7sZFcOqjEhVmIK1BA" } }, legacy: { url: "./aellux.ext.scrollbox-snap.legacy.min.js", integrity: "sha384-cgbBgyMI11xeGlG/PaJrvGMa9QcjWdfcIQTh+L71WV3IvFW6Aj+IDG7Q2qJADV3o", regular: { url: "./aellux.ext.scrollbox-snap.legacy.js", integrity: "sha384-aAdJjZqCtkhzoZ0lI4/F44CBCuA7Br7VhFCbjugqrsFvbl/J4lAwCEivW2w//gHI" } } }, dependencies: [] }, adaptive: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.adaptive.min.js", integrity: "sha384-lEWjA/UxxRXYoyXAXqiKXpfBf6e/RxQOc8+0ukbJG0NwHP3SVJ2nICYgvXsepP5p", regular: { url: "./aellux.ext.adaptive.js", integrity: "sha384-kVnL6EnCtYQJ6mtIt/3G7pQOVahqW2+v0wsTmLJapxIycJZL9/KswKmo5MiiT+8Z" } }, legacy: { url: "./aellux.ext.adaptive.legacy.min.js", integrity: "sha384-7Rdi4ldWEimm3xDyG8U1eCOsBJJ69RGIAfYsc/OakUnyspXYAceRzOoIu24oaNio", regular: { url: "./aellux.ext.adaptive.legacy.js", integrity: "sha384-sBBWTr6+7T/xrfVHzG9NPKVyQdZrLukEcJ7eCFDtH5wTJT0vODUSedq3Y1HTu0Sp" } } }, dependencies: [], style: { url: "./aellux.ext.adaptive.min.css", integrity: "sha384-8yUP1PStfDqBCyCskP3k9WLIKgv/yl1nyDhmPz7hsX5NZ4z3ZT3ajolA+RhYlUiG", regular: { url: "./aellux.ext.adaptive.css", integrity: "sha384-HfIjX9Zk0VFRimzPvUaTS5AtwuHJHjXKoM/xbNJXj5vE7bSdBGEzbrBHfbNmYah0" } } }, present: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.present.min.js", integrity: "sha384-4j7Z/u9cOOUfTZ3atFxNMaQvLlJKU7HbBF0yX7sKH6PaZQBSninpNa/UirKH7dGA", regular: { url: "./aellux.ext.present.js", integrity: "sha384-0y5bxbVI3vBm3KY5ZSxjfx3LtreZu/24QIcAMV4mwKaZOGvxr01f/UpbyLwb3x/W" } }, legacy: { url: "./aellux.ext.present.legacy.min.js", integrity: "sha384-1bm3asyvI9hVjvenNFHVEvtwR9zoaaJ+pD1Dmm1htid02kNzeFzgVcxQRbqL9pBJ", regular: { url: "./aellux.ext.present.legacy.js", integrity: "sha384-WGKvUR25VP82yXmjLzDfKiJb2+yJ6mFUPMQsZ7XE3Hx3HhYaZHphdV91EtYjr5D2" } } }, dependencies: [], style: { url: "./aellux.ext.present.min.css", integrity: "sha384-LR069uhIDdnx0X7oeoRxevC/+dD5gA6d4B2dHAJKPgnqLYDGs4GgW9quKNq+1G5b", regular: { url: "./aellux.ext.present.css", integrity: "sha384-9GTFJ0OxBj6ta/iiV07BLGTdfe9pbmBMYXFn9kT+wB4KwiLO8zxJ39XzLYOGgfui" } } } } };
     }
   });
 
@@ -21588,6 +21588,12 @@
       }
     } };
   }
+  function _toConsumableArray(r) {
+    return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread();
+  }
+  function _nonIterableSpread() {
+    throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+  }
   function _unsupportedIterableToArray(r, a) {
     if (r) {
       if ("string" == typeof r) return _arrayLikeToArray(r, a);
@@ -21595,12 +21601,20 @@
       return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0;
     }
   }
+  function _iterableToArray(r) {
+    if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
+  }
+  function _arrayWithoutHoles(r) {
+    if (Array.isArray(r)) return _arrayLikeToArray(r);
+  }
   function _arrayLikeToArray(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
   }
   function buildLayoutScheduler() {
+    var MIN_FPS = 5;
+    var FPS_STEP = 15;
     var queues = {
       read: [],
       update: []
@@ -21703,17 +21717,19 @@
           var ordered = initialDeltas.slice().sort(function(a, b) {
             return a - b;
           });
-          nativeFPS = Math.max(15, Math.round(1e3 / ordered[4]));
+          nativeFPS = Math.max(MIN_FPS, Math.round(1e3 / ordered[4]));
           limitFPS = nativeFPS;
           initialDeltas = [];
         }
       } else {
-        var expected = 1e3 / Math.max(15, limitFPS);
+        var expected = 1e3 / Math.max(MIN_FPS, limitFPS);
         var slow = delta > expected * 1.23;
         slowStreak = slow ? slowStreak + 1 : 0;
         samples.push({
           time: time,
-          slow: slow
+          slow: slow,
+          delay: delta,
+          cost: 0
         });
         while (samples.length && time - samples[0].time > 1e3) samples.shift();
         adjustLimit(time);
@@ -21732,9 +21748,14 @@
       }, 0);
       if (slowStreak >= 4 || slowCount / samples.length >= 0.35) {
         stableSince = null;
-        if (time - lastAdjustment >= 1e3 && limitFPS > 15) {
+        if (time - lastAdjustment >= 1e3 && limitFPS > MIN_FPS) {
           var previous = limitFPS;
-          limitFPS = Math.max(15, limitFPS - 15);
+          var delay = Math.max.apply(Math, _toConsumableArray(samples.filter(function(sample) {
+            return sample.slow;
+          }).map(function(sample) {
+            return Math.max(sample.delay, sample.cost);
+          })));
+          limitFPS = Math.min(limitFPS, adaptiveLimit(1e3 / delay));
           publishLimit();
           if (trialLimit === previous) recoveryDelay = Math.min(3e4, recoveryDelay * 2);
           trialLimit = null;
@@ -21746,7 +21767,7 @@
       } else {
         if (stableSince === null) stableSince = time;
         if (limitFPS < nativeFPS && time - stableSince >= recoveryDelay && time - lastAdjustment >= recoveryDelay) {
-          limitFPS = Math.min(nativeFPS, limitFPS + 15);
+          limitFPS = Math.min(nativeFPS, limitFPS + FPS_STEP);
           publishLimit();
           trialLimit = limitFPS;
           lastAdjustment = time;
@@ -21755,6 +21776,13 @@
           frameCredit = 0;
         }
       }
+    }
+    function adaptiveLimit(observedFPS) {
+      var candidate = nativeFPS;
+      while (candidate > MIN_FPS && candidate > observedFPS) {
+        candidate = Math.max(MIN_FPS, candidate - FPS_STEP);
+      }
+      return candidate;
     }
     function flushFrame(time) {
       frameRequest = null;
@@ -21795,8 +21823,11 @@
         } finally {
           _iterator2.f();
         }
-        if (nativeFPS !== null && samples.length && now() - start > 1e3 / Math.max(15, limitFPS) * 0.8) {
-          samples[samples.length - 1].slow = true;
+        if (nativeFPS !== null && samples.length) {
+          var cost = now() - start;
+          var sample = samples[samples.length - 1];
+          sample.cost = cost;
+          if (cost > 1e3 / Math.max(MIN_FPS, limitFPS) * 0.8) sample.slow = true;
         }
         phase = "idle";
         if (hasWork()) scheduleFrame();
@@ -23586,16 +23617,16 @@
   });
 
   // src/internal/build-mount-map-manager.js
-  function _toConsumableArray(r) {
-    return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray4(r) || _nonIterableSpread();
+  function _toConsumableArray2(r) {
+    return _arrayWithoutHoles2(r) || _iterableToArray2(r) || _unsupportedIterableToArray4(r) || _nonIterableSpread2();
   }
-  function _nonIterableSpread() {
+  function _nonIterableSpread2() {
     throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
-  function _iterableToArray(r) {
+  function _iterableToArray2(r) {
     if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
   }
-  function _arrayWithoutHoles(r) {
+  function _arrayWithoutHoles2(r) {
     if (Array.isArray(r)) return _arrayLikeToArray4(r);
   }
   function _typeof2(o) {
@@ -23806,7 +23837,7 @@
         controllers: controllers,
         priority: priority
       });
-      root2.AelluxJs.registry.extMounters[key] = _toConsumableArray(map.keys()).join(",");
+      root2.AelluxJs.registry.extMounters[key] = _toConsumableArray2(map.keys()).join(",");
       return manager;
     }
     function remove() {
@@ -23828,7 +23859,7 @@
         maps.delete(key);
         delete root2.AelluxJs.registry.extMounters[key];
       } else if (removed) {
-        root2.AelluxJs.registry.extMounters[key] = _toConsumableArray(map.keys()).join(",");
+        root2.AelluxJs.registry.extMounters[key] = _toConsumableArray2(map.keys()).join(",");
       }
       return removed;
     }
@@ -24049,16 +24080,16 @@
   });
 
   // src/internal/create-css-motion-controller.js
-  function _toConsumableArray2(r) {
-    return _arrayWithoutHoles2(r) || _iterableToArray2(r) || _unsupportedIterableToArray6(r) || _nonIterableSpread2();
+  function _toConsumableArray3(r) {
+    return _arrayWithoutHoles3(r) || _iterableToArray3(r) || _unsupportedIterableToArray6(r) || _nonIterableSpread3();
   }
-  function _nonIterableSpread2() {
+  function _nonIterableSpread3() {
     throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
-  function _iterableToArray2(r) {
+  function _iterableToArray3(r) {
     if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
   }
-  function _arrayWithoutHoles2(r) {
+  function _arrayWithoutHoles3(r) {
     if (Array.isArray(r)) return _arrayLikeToArray6(r);
   }
   function _createForOfIteratorHelper5(r, e) {
@@ -24330,7 +24361,7 @@
       var values = [first, second].filter(function(value) {
         return Number.isFinite(value) && value > 0;
       });
-      return values.length ? Math.min.apply(Math, _toConsumableArray2(values)) : void 0;
+      return values.length ? Math.min.apply(Math, _toConsumableArray3(values)) : void 0;
     }
     function advance(operation) {
       if (!operation.controlled || operation.done) return;
@@ -28921,10 +28952,10 @@
   function _arrayWithHoles8(r) {
     if (Array.isArray(r)) return r;
   }
-  function _toConsumableArray3(r) {
-    return _arrayWithoutHoles3(r) || _iterableToArray3(r) || _unsupportedIterableToArray15(r) || _nonIterableSpread3();
+  function _toConsumableArray4(r) {
+    return _arrayWithoutHoles4(r) || _iterableToArray4(r) || _unsupportedIterableToArray15(r) || _nonIterableSpread4();
   }
-  function _nonIterableSpread3() {
+  function _nonIterableSpread4() {
     throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
   function _unsupportedIterableToArray15(r, a) {
@@ -28934,10 +28965,10 @@
       return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray15(r, a) : void 0;
     }
   }
-  function _iterableToArray3(r) {
+  function _iterableToArray4(r) {
     if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
   }
-  function _arrayWithoutHoles3(r) {
+  function _arrayWithoutHoles4(r) {
     if (Array.isArray(r)) return _arrayLikeToArray15(r);
   }
   function _arrayLikeToArray15(r, a) {
@@ -28999,7 +29030,7 @@
         var measuredMemories = /* @__PURE__ */ new WeakMap();
         var cssProperties = [["from-opacity", OPACITY_SYNTAX, "0"], ["pop-opacity", OPACITY_SYNTAX, "1"], ["unpop-opacity", OPACITY_SYNTAX, "0"], ["from-transform", TRANSFORM_SYNTAX, "scale(0.5)"], ["pop-transform", TRANSFORM_SYNTAX, "scale(1)"], ["unpop-transform", TRANSFORM_SYNTAX, "scale(1.2)"], ["from-height", "*", "0fr"], ["pop-height", "*", "1fr"], ["unpop-height", "*", "0fr"], ["from-width", "*", "0fr"], ["pop-width", "*", "1fr"], ["unpop-width", "*", "0fr"], ["pop-ease", "*", "ease-out"], ["unpop-ease", "*", "ease-in"], ["pop-duration", "<time>", "250ms"], ["unpop-duration", "<time>", "250ms"], ["pop-low-steps", "<integer>", "4"], ["unpop-low-steps", "<integer>", "4"]];
         function init(options) {
-          AelluxJs2.registerCssProperty.apply(AelluxJs2, _toConsumableArray3(cssProperties.map(function(_ref) {
+          AelluxJs2.registerCssProperty.apply(AelluxJs2, _toConsumableArray4(cssProperties.map(function(_ref) {
             var _ref2 = _slicedToArray8(_ref, 3), name = _ref2[0], syntax = _ref2[1], initialValue = _ref2[2];
             return {
               name: "--ae-".concat(name),
@@ -29271,7 +29302,7 @@
           }
           updateTriggerAriaExpanded(triggerElement);
           triggerAriaHandlers.get(triggerElement).set({
-            controls: _toConsumableArray3(targetIds)
+            controls: _toConsumableArray4(targetIds)
           });
         }
         function updateTriggerAriaExpanded(triggerElement) {

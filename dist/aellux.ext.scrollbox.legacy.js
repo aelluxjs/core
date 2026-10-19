@@ -277,7 +277,7 @@
     }
     function dispatchSnapGesture(state, phase, pointerScroll) {
       return AelluxJs.dispatchFrom(state.element, "ScrollboxSnapGesture", {
-        cancelable: phase === "end",
+        cancelable: phase !== "start",
         detail: {
           phase: phase,
           axis: pointerScroll.axis,
@@ -288,6 +288,14 @@
           lastY: pointerScroll.lastY,
           startTime: pointerScroll.startTime,
           endTime: pointerScroll.endTime
+        }
+      });
+    }
+    function dispatchWheel(state, event) {
+      return AelluxJs.dispatchFrom(state.element, "ScrollboxWheel", {
+        cancelable: true,
+        detail: {
+          event: event
         }
       });
     }
@@ -829,7 +837,7 @@
       if (Number.parseFloat(style.opacity) <= 0) return false;
       var color = style.backgroundColor;
       if (!color || color === "transparent") return false;
-      var rgba = color.match(/^rgba\\((.+)\\)$/);
+      var rgba = color.match(/^rgba\((.+)\)$/);
       return !rgba || Number.parseFloat(rgba[1].split(",").at(-1)) > 0;
     }
     function startScrollbarDrag(state, record, event) {
@@ -1217,9 +1225,12 @@
         endPointerScroll(state);
         return;
       }
-      var threshold = POINTER_SCROLL_THRESHOLD_PX;
-      if (!pointerScroll.moved && dx * dx + dy * dy < threshold * threshold) return;
       if (!pointerScroll.axis) pointerScroll.axis = Math.abs(dx) >= Math.abs(dy) ? "x" : "y";
+      var chain = pointerScroll.chains[pointerScroll.axis];
+      var threshold = chain.some(function(member2) {
+        return !member2.disposed && pointerAxisMaximum(member2, pointerScroll.axis, pointerScroll) > 0 && !dispatchSnapGesture(member2, "probe", pointerScroll);
+      }) ? 1 : POINTER_SCROLL_THRESHOLD_PX;
+      if (!pointerScroll.moved && dx * dx + dy * dy < threshold * threshold) return;
       var verticalTextDrag = pointerScroll.verticalOnly && pointerScroll.axis === "y" && Math.abs(dy) > VERTICAL_TEXT_DRAG_PX;
       if (!pointerScroll.moved && now() < pointerScroll.selectionReadyTime && !verticalTextDrag) {
         pointerScroll.pendingMove = {
@@ -1244,7 +1255,6 @@
       }
       if (!pointerScroll.moved) {
         var _axis = pointerScroll.axis;
-        var chain = pointerScroll.chains[_axis];
         if (!chain.some(function(member2) {
           return pointerAxisMaximum(member2, _axis, pointerScroll) > 0;
         })) {
@@ -1459,8 +1469,9 @@
         stopPointerScrollMouseEvents(state);
       }
       var snapHandled = false;
-      if (event && event.type === POINTER_UP && pointerScroll.moved) {
-        var _iterator14 = _createForOfIteratorHelper(pointerScroll.chain), _step14;
+      if (event && event.type === POINTER_UP && pointerScroll.axis) {
+        var snapChain = pointerScroll.moved ? pointerScroll.chain : pointerScroll.chains[pointerScroll.axis];
+        var _iterator14 = _createForOfIteratorHelper(snapChain), _step14;
         try {
           for (_iterator14.s(); !(_step14 = _iterator14.n()).done; ) {
             var member = _step14.value;
@@ -2046,6 +2057,7 @@
       cancelMomentum(state);
       if (event.defaultPrevented) return;
       if (event.target.closest("[".concat(attribute, "]")) !== state.element) return;
+      if (!dispatchWheel(state, event)) return;
       var metrics = nativeMetrics(state.element);
       if (!metrics) return;
       var axes = wheelAxes(state, metrics);

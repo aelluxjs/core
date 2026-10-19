@@ -610,7 +610,7 @@ $ae.init({ mode: &quot;basic&quot; });
 &lt;/div&gt;
 </code></pre>
 <p>An empty <code>data-ae-scrollbox-snap</code> value selects the horizontal axis. Use <code>vertical</code> for a vertical list. An empty <code>data-ae-snap-item</code> aligns its center; <code>start</code>, <code>left</code>, and <code>top</code> align its start, while <code>end</code>, <code>right</code>, and <code>bottom</code> align its end. Snap items inside a nested Scrollbox are excluded. A missing eligible item reports diagnostic 1121.</p>
-<p>The extension applies the native CSS Scroll Snap rules, aligns the first item at mount, and publishes <code>--ae-snap-viewport</code> and <code>--ae-snap-focus</code> on each item. It preserves and restores pre-existing inline values when unmounted.</p>
+<p>The extension applies the native CSS Scroll Snap rules, aligns the first item at mount, and publishes <code>--ae-snap-viewport</code> and <code>--ae-snap-focus</code> on each item. It preserves and restores pre-existing inline values when unmounted. On a cancelable desktop wheel event targeted at the snap box, it advances one item in the dominant direction; repeated events in 120 ms stay within that one navigation. A nested Scrollbox under the cursor owns its wheel event, so an enclosing snap box does not navigate from it.</p>
 <p><code>AelluxJsScrollboxSnapChange</code> fires when scrolling settles on a new item. Its <code>detail</code> is <code>{ item, index, previousIndex, axis }</code>; the initial item has <code>previousIndex: null</code>.</p>
 <pre><code class="language-js">document.getElementById(&quot;gallery&quot;).addEventListener(&quot;AelluxJsScrollboxSnapChange&quot;, event =&gt; {
   console.log(event.detail.index, event.detail.item);
@@ -625,7 +625,7 @@ gallery.previous();
 <p>The index is zero based. Each method returns <code>true</code> when a snap item is available.</p>
 <h2>Interaction hooks</h2>
 <p>Scrollbox emits <code>AelluxJsScrollboxInteraction</code> from its element while a custom scrollbar thumb, Pointer Drag Scroll, or elastic edge interaction is active. Its <code>detail</code> is <code>{ reason, active }</code>, where <code>reason</code> is <code>&quot;scrollbar&quot;</code>, <code>&quot;pointer&quot;</code>, or <code>&quot;elastic&quot;</code>. Scrollbox Snap uses this event to suspend native snap alignment during those interactions and resume it afterward. Other Extensions can consume the same event without accessing Scrollbox state.</p>
-<p>Desktop Pointer Drag Scroll also emits <code>AelluxJsScrollboxSnapGesture</code> with <code>detail</code> containing <code>phase</code> (<code>&quot;start&quot;</code> or <code>&quot;end&quot;</code>), <code>axis</code>, <code>moved</code>, coordinates, and timestamps. The end event is cancelable. Scrollbox Snap cancels it for an eligible snap axis, which prevents PDS momentum and lets snap settle the gesture, including its one-item flick behavior.</p>
+<p>Desktop Pointer Drag Scroll also emits <code>AelluxJsScrollboxSnapGesture</code> with <code>detail</code> containing <code>phase</code> (<code>&quot;probe&quot;</code>, <code>&quot;start&quot;</code>, or <code>&quot;end&quot;</code>), <code>axis</code>, <code>moved</code>, coordinates, and timestamps. Probe and end are cancelable. Scrollbox Snap accepts an eligible short flick at probe and cancels end for the snap axis, which prevents PDS momentum and lets snap settle the gesture, including its one-item flick behavior.</p>
         </div>
 
         <div id="doc-navlinks2" ajax-load="doc-navlinks2">

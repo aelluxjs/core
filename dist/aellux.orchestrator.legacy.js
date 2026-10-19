@@ -20940,6 +20940,12 @@
       }
     } };
   }
+  function _toConsumableArray(r) {
+    return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread();
+  }
+  function _nonIterableSpread() {
+    throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+  }
   function _unsupportedIterableToArray(r, a) {
     if (r) {
       if ("string" == typeof r) return _arrayLikeToArray(r, a);
@@ -20947,12 +20953,20 @@
       return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0;
     }
   }
+  function _iterableToArray(r) {
+    if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
+  }
+  function _arrayWithoutHoles(r) {
+    if (Array.isArray(r)) return _arrayLikeToArray(r);
+  }
   function _arrayLikeToArray(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
   }
   function buildLayoutScheduler() {
+    var MIN_FPS = 5;
+    var FPS_STEP = 15;
     var queues = {
       read: [],
       update: []
@@ -21055,17 +21069,19 @@
           var ordered = initialDeltas.slice().sort(function(a, b) {
             return a - b;
           });
-          nativeFPS = Math.max(15, Math.round(1e3 / ordered[4]));
+          nativeFPS = Math.max(MIN_FPS, Math.round(1e3 / ordered[4]));
           limitFPS = nativeFPS;
           initialDeltas = [];
         }
       } else {
-        var expected = 1e3 / Math.max(15, limitFPS);
+        var expected = 1e3 / Math.max(MIN_FPS, limitFPS);
         var slow = delta > expected * 1.23;
         slowStreak = slow ? slowStreak + 1 : 0;
         samples.push({
           time: time,
-          slow: slow
+          slow: slow,
+          delay: delta,
+          cost: 0
         });
         while (samples.length && time - samples[0].time > 1e3) samples.shift();
         adjustLimit(time);
@@ -21084,9 +21100,14 @@
       }, 0);
       if (slowStreak >= 4 || slowCount / samples.length >= 0.35) {
         stableSince = null;
-        if (time - lastAdjustment >= 1e3 && limitFPS > 15) {
+        if (time - lastAdjustment >= 1e3 && limitFPS > MIN_FPS) {
           var previous = limitFPS;
-          limitFPS = Math.max(15, limitFPS - 15);
+          var delay = Math.max.apply(Math, _toConsumableArray(samples.filter(function(sample) {
+            return sample.slow;
+          }).map(function(sample) {
+            return Math.max(sample.delay, sample.cost);
+          })));
+          limitFPS = Math.min(limitFPS, adaptiveLimit(1e3 / delay));
           publishLimit();
           if (trialLimit === previous) recoveryDelay = Math.min(3e4, recoveryDelay * 2);
           trialLimit = null;
@@ -21098,7 +21119,7 @@
       } else {
         if (stableSince === null) stableSince = time;
         if (limitFPS < nativeFPS && time - stableSince >= recoveryDelay && time - lastAdjustment >= recoveryDelay) {
-          limitFPS = Math.min(nativeFPS, limitFPS + 15);
+          limitFPS = Math.min(nativeFPS, limitFPS + FPS_STEP);
           publishLimit();
           trialLimit = limitFPS;
           lastAdjustment = time;
@@ -21107,6 +21128,13 @@
           frameCredit = 0;
         }
       }
+    }
+    function adaptiveLimit(observedFPS) {
+      var candidate = nativeFPS;
+      while (candidate > MIN_FPS && candidate > observedFPS) {
+        candidate = Math.max(MIN_FPS, candidate - FPS_STEP);
+      }
+      return candidate;
     }
     function flushFrame(time) {
       frameRequest = null;
@@ -21147,8 +21175,11 @@
         } finally {
           _iterator2.f();
         }
-        if (nativeFPS !== null && samples.length && now() - start > 1e3 / Math.max(15, limitFPS) * 0.8) {
-          samples[samples.length - 1].slow = true;
+        if (nativeFPS !== null && samples.length) {
+          var cost = now() - start;
+          var sample = samples[samples.length - 1];
+          sample.cost = cost;
+          if (cost > 1e3 / Math.max(MIN_FPS, limitFPS) * 0.8) sample.slow = true;
         }
         phase = "idle";
         if (hasWork()) scheduleFrame();
@@ -22933,16 +22964,16 @@
   });
 
   // src/internal/build-mount-map-manager.js
-  function _toConsumableArray(r) {
-    return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray4(r) || _nonIterableSpread();
+  function _toConsumableArray2(r) {
+    return _arrayWithoutHoles2(r) || _iterableToArray2(r) || _unsupportedIterableToArray4(r) || _nonIterableSpread2();
   }
-  function _nonIterableSpread() {
+  function _nonIterableSpread2() {
     throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
-  function _iterableToArray(r) {
+  function _iterableToArray2(r) {
     if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
   }
-  function _arrayWithoutHoles(r) {
+  function _arrayWithoutHoles2(r) {
     if (Array.isArray(r)) return _arrayLikeToArray4(r);
   }
   function _typeof2(o) {
@@ -23153,7 +23184,7 @@
         controllers: controllers,
         priority: priority
       });
-      root.AelluxJs.registry.extMounters[key] = _toConsumableArray(map.keys()).join(",");
+      root.AelluxJs.registry.extMounters[key] = _toConsumableArray2(map.keys()).join(",");
       return manager;
     }
     function remove() {
@@ -23175,7 +23206,7 @@
         maps.delete(key);
         delete root.AelluxJs.registry.extMounters[key];
       } else if (removed) {
-        root.AelluxJs.registry.extMounters[key] = _toConsumableArray(map.keys()).join(",");
+        root.AelluxJs.registry.extMounters[key] = _toConsumableArray2(map.keys()).join(",");
       }
       return removed;
     }
@@ -23394,16 +23425,16 @@
   });
 
   // src/internal/create-css-motion-controller.js
-  function _toConsumableArray2(r) {
-    return _arrayWithoutHoles2(r) || _iterableToArray2(r) || _unsupportedIterableToArray6(r) || _nonIterableSpread2();
+  function _toConsumableArray3(r) {
+    return _arrayWithoutHoles3(r) || _iterableToArray3(r) || _unsupportedIterableToArray6(r) || _nonIterableSpread3();
   }
-  function _nonIterableSpread2() {
+  function _nonIterableSpread3() {
     throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
-  function _iterableToArray2(r) {
+  function _iterableToArray3(r) {
     if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
   }
-  function _arrayWithoutHoles2(r) {
+  function _arrayWithoutHoles3(r) {
     if (Array.isArray(r)) return _arrayLikeToArray6(r);
   }
   function _createForOfIteratorHelper5(r, e) {
@@ -23675,7 +23706,7 @@
       var values = [first, second].filter(function(value) {
         return Number.isFinite(value) && value > 0;
       });
-      return values.length ? Math.min.apply(Math, _toConsumableArray2(values)) : void 0;
+      return values.length ? Math.min.apply(Math, _toConsumableArray3(values)) : void 0;
     }
     function advance(operation) {
       if (!operation.controlled || operation.done) return;

@@ -162,7 +162,7 @@
     var AelluxJs = root.AelluxJs;
     var extensionName = "scrollbox-snap";
     if (!AelluxJs) throw new Error("[aellux.js] Load the boot script before the scrollbox-snap extension.");
-    var POINTER = "pointer", TOUCH = "touch", HORIZONTAL = "x", VERTICAL = "y", FALSE = "false", INSTANT = "instant", SMOOTH = "smooth", START = "start", END = "end", CENTER = "center", SCROLL_EVENT = "$scroll", SCROLL_END_EVENT = "$scrollend", WHEEL_EVENT = "$wheel", INTERACTION_EVENT = "$AelluxJsScrollboxInteraction", SNAP_GESTURE_EVENT = "$AelluxJsScrollboxSnapGesture", POINTER_DOWN_EVENT = "$pointerdown", POINTER_UP_EVENT = "$pointerup", POINTER_CANCEL_EVENT = "$pointercancel", TOUCH_START_EVENT = "$touchstart", TOUCH_END_EVENT = "$touchend", TOUCH_CANCEL_EVENT = "$touchcancel";
+    var POINTER = "pointer", TOUCH = "touch", HORIZONTAL = "x", VERTICAL = "y", FALSE = "false", INSTANT = "instant", SMOOTH = "smooth", START = "start", END = "end", CENTER = "center", SCROLL_EVENT = "$scroll", SCROLL_END_EVENT = "$scrollend", INTERACTION_EVENT = "$AelluxJsScrollboxInteraction", SNAP_GESTURE_EVENT = "$AelluxJsScrollboxSnapGesture", SCROLLBOX_WHEEL_EVENT = "$AelluxJsScrollboxWheel", POINTER_DOWN_EVENT = "$pointerdown", POINTER_UP_EVENT = "$pointerup", POINTER_CANCEL_EVENT = "$pointercancel", TOUCH_START_EVENT = "$touchstart", TOUCH_END_EVENT = "$touchend", TOUCH_CANCEL_EVENT = "$touchcancel";
     var SNAP_SCROLL_IDLE_MS = 120;
     var SNAP_TARGET_IDLE_MS = 500;
     var SNAP_SWIPE_SPEED_PX_MS = 0.5;
@@ -171,6 +171,7 @@
     var SNAP_FLICK_MAX_DISTANCE_PX = 100;
     var SNAP_FLICK_MIN_DISTANCE_PX = 1;
     var scrollboxAttribute = AelluxJs.attr("scrollbox");
+    var wheelAttribute = AelluxJs.attr("scrollbox-wheel-horizontal");
     var snapAttribute = AelluxJs.attr("scrollbox-snap");
     var itemAttribute = AelluxJs.attr("snap-item");
     var elasticAttribute = AelluxJs.attr("scrollbox-elastic");
@@ -297,8 +298,9 @@
       state.onTouchEnd = function(event) {
         return endGesture(state, TOUCH, event);
       };
-      state.onWheel = function(event) {
-        return handleWheel(state, event);
+      state.onScrollboxWheel = function(event) {
+        var _event$detail;
+        if (handleWheel(state, (_event$detail = event.detail) === null || _event$detail === void 0 ? void 0 : _event$detail.event)) event.preventDefault();
       };
       state.onInteraction = function(event) {
         return setSuspension(state, event.detail);
@@ -318,12 +320,9 @@
         passive: true,
         capture: true
       });
-      AelluxJs.onEvent(element, WHEEL_EVENT, state.onWheel, {
-        passive: false,
-        capture: true
-      });
       AelluxJs.onEvent(element, INTERACTION_EVENT, state.onInteraction);
       AelluxJs.onEvent(element, SNAP_GESTURE_EVENT, state.onSnapGesture);
+      AelluxJs.onEvent(element, SCROLLBOX_WHEEL_EVENT, state.onScrollboxWheel);
       AelluxJs.onEvent(root, POINTER_UP_EVENT, state.onPointerEnd, true);
       AelluxJs.onEvent(root, POINTER_CANCEL_EVENT, state.onPointerEnd, true);
       AelluxJs.onEvent(root, TOUCH_END_EVENT, state.onTouchEnd, true);
@@ -348,9 +347,9 @@
       AelluxJs.offEvent(element, SCROLL_END_EVENT, state.onScrollEnd);
       AelluxJs.offEvent(element, POINTER_DOWN_EVENT, state.onPointerDown, true);
       AelluxJs.offEvent(element, TOUCH_START_EVENT, state.onTouchStart, true);
-      AelluxJs.offEvent(element, WHEEL_EVENT, state.onWheel, true);
       AelluxJs.offEvent(element, INTERACTION_EVENT, state.onInteraction);
       AelluxJs.offEvent(element, SNAP_GESTURE_EVENT, state.onSnapGesture);
+      AelluxJs.offEvent(element, SCROLLBOX_WHEEL_EVENT, state.onScrollboxWheel);
       AelluxJs.offEvent(root, POINTER_UP_EVENT, state.onPointerEnd, true);
       AelluxJs.offEvent(root, POINTER_CANCEL_EVENT, state.onPointerEnd, true);
       AelluxJs.offEvent(root, TOUCH_END_EVENT, state.onTouchEnd, true);
@@ -510,19 +509,21 @@
       return nearest;
     }
     function handleWheel(state, event) {
-      if (event.ctrlKey || !event.cancelable || event.defaultPrevented) return;
+      if (!event || event.ctrlKey || !event.cancelable || event.defaultPrevented || event.target.closest("[".concat(scrollboxAttribute, "]")) !== state.element) return false;
       var axis = axisFor(state), horizontal = Math.abs(event.deltaX) > Math.abs(event.deltaY);
+      if (axis === HORIZONTAL && !horizontal && state.element.getAttribute(wheelAttribute) === FALSE) return false;
       var delta = axis === HORIZONTAL ? horizontal ? event.deltaX : event.deltaY : horizontal ? 0 : event.deltaY;
-      if (!delta) return;
+      if (!delta) return false;
       var items = itemsFor(state), index = state.target !== null ? state.index : selectedIndex(state);
       var nextIndex = index + Math.sign(delta);
-      if (nextIndex < 0 || nextIndex >= items.length) return;
+      if (nextIndex < 0 || nextIndex >= items.length) return false;
       event.preventDefault();
-      if (state.wheelTimeout !== null) return;
+      if (state.wheelTimeout !== null) return true;
       state.wheelTimeout = root.setTimeout(function() {
         state.wheelTimeout = null;
       }, SNAP_SCROLL_IDLE_MS);
       goto(state.element, nextIndex);
+      return true;
     }
     function setSuspension(state, detail) {
       if (!detail || !detail.reason) return;
@@ -535,19 +536,23 @@
       var _state$pointerScroll;
       var detail = event.detail;
       if (!detail || detail.axis !== axisFor(state)) return;
-      if (detail.phase === "start") {
+      if (detail.phase === "start" || detail.phase === "probe") {
+        if (!itemsFor(state).length) return;
         state.pointerScroll = {
           axis: detail.axis,
           index: selectedIndex(state)
         };
-        state.flick = null;
+        if (detail.phase === "start") state.flick = null;
+        else event.preventDefault();
         return;
       }
-      if (detail.phase !== "end" || !detail.moved || !itemsFor(state).length) return;
-      event.preventDefault();
+      if (detail.phase !== "end" || !itemsFor(state).length) return;
       var start = ((_state$pointerScroll = state.pointerScroll) === null || _state$pointerScroll === void 0 ? void 0 : _state$pointerScroll.axis) === detail.axis ? state.pointerScroll.index : selectedIndex(state);
       state.pointerScroll = null;
-      if (!isFlick(detail)) return;
+      var flick = isFlick(detail);
+      if (!detail.moved && !flick) return;
+      event.preventDefault();
+      if (!flick) return;
       var distance = detail.axis === HORIZONTAL ? detail.startX - detail.lastX : detail.startY - detail.lastY;
       var index = Math.max(0, Math.min(itemsFor(state).length - 1, start + Math.sign(distance)));
       if (index !== start) state.flick = {

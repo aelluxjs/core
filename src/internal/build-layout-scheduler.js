@@ -1,6 +1,8 @@
 /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
 
 export function buildLayoutScheduler() {
+  const MIN_FPS = 5;
+  const FPS_STEP = 15;
   const queues = { read: [], update: [] };
   const groups = new Map();
   const tasks = new Set();
@@ -105,15 +107,15 @@ export function buildLayoutScheduler() {
       initialDeltas.push(delta);
       if (initialDeltas.length >= 8) {
         const ordered = initialDeltas.slice().sort((a, b) => a - b);
-        nativeFPS = Math.max(15, Math.round(1000 / ordered[4]));
+        nativeFPS = Math.max(MIN_FPS, Math.round(1000 / ordered[4]));
         limitFPS = nativeFPS;
         initialDeltas = [];
       }
     } else {
-      const expected = 1000 / Math.max(15, limitFPS);
+      const expected = 1000 / Math.max(MIN_FPS, limitFPS);
       const slow = delta > expected * 1.23;
       slowStreak = slow ? slowStreak + 1 : 0;
-      samples.push({ time, slow });
+      samples.push({ time, slow, delay: delta, cost: 0 });
       while (samples.length && time - samples[0].time > 1000) samples.shift();
       adjustLimit(time);
     }
@@ -130,9 +132,11 @@ export function buildLayoutScheduler() {
     const slowCount = samples.reduce((n, item) => n + (item.slow ? 1 : 0), 0);
     if (slowStreak >= 4 || slowCount / samples.length >= 0.35) {
       stableSince = null;
-      if (time - lastAdjustment >= 1000 && limitFPS > 15) {
+      if (time - lastAdjustment >= 1000 && limitFPS > MIN_FPS) {
         const previous = limitFPS;
-        limitFPS = Math.max(15, limitFPS - 15);
+        const delay = Math.max(...samples.filter(sample => sample.slow)
+          .map(sample => Math.max(sample.delay, sample.cost)));
+        limitFPS = Math.min(limitFPS, adaptiveLimit(1000 / delay));
         publishLimit();
         if (trialLimit === previous) recoveryDelay = Math.min(30000, recoveryDelay * 2);
         trialLimit = null;
@@ -145,7 +149,7 @@ export function buildLayoutScheduler() {
       if (stableSince === null) stableSince = time;
       if (limitFPS < nativeFPS && time - stableSince >= recoveryDelay &&
           time - lastAdjustment >= recoveryDelay) {
-        limitFPS = Math.min(nativeFPS, limitFPS + 15);
+        limitFPS = Math.min(nativeFPS, limitFPS + FPS_STEP);
         publishLimit();
         trialLimit = limitFPS;
         lastAdjustment = time;
@@ -154,6 +158,14 @@ export function buildLayoutScheduler() {
         frameCredit = 0;
       }
     }
+  }
+
+  function adaptiveLimit(observedFPS) {
+    let candidate = nativeFPS;
+    while (candidate > MIN_FPS && candidate > observedFPS) {
+      candidate = Math.max(MIN_FPS, candidate - FPS_STEP);
+    }
+    return candidate;
   }
 
   function flushFrame(time) {
@@ -175,9 +187,11 @@ export function buildLayoutScheduler() {
       phase = "update";
       const updates = queues.update.splice(0);
       for (const task of updates) runTask(task);
-      if (nativeFPS !== null && samples.length &&
-          now() - start > (1000 / Math.max(15, limitFPS)) * 0.8) {
-        samples[samples.length - 1].slow = true;
+      if (nativeFPS !== null && samples.length) {
+        const cost = now() - start;
+        const sample = samples[samples.length - 1];
+        sample.cost = cost;
+        if (cost > (1000 / Math.max(MIN_FPS, limitFPS)) * 0.8) sample.slow = true;
       }
       phase = "idle";
       if (hasWork()) scheduleFrame();

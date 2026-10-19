@@ -20,7 +20,7 @@ No bundle `full`, `data-ae-scrollbox-snap` carrega a extensão sob demanda. O at
 
 An empty `data-ae-scrollbox-snap` value selects the horizontal axis. Use `vertical` for a vertical list. An empty `data-ae-snap-item` aligns its center; `start`, `left`, and `top` align its start, while `end`, `right`, and `bottom` align its end. Snap items inside a nested Scrollbox are excluded. A missing eligible item reports diagnostic 1121.
 
-The extension applies the native CSS Scroll Snap rules, aligns the first item at mount, and publishes `--ae-snap-viewport` and `--ae-snap-focus` on each item. It preserves and restores pre-existing inline values when unmounted.
+The extension applies the native CSS Scroll Snap rules, aligns the first item at mount, and publishes `--ae-snap-viewport` and `--ae-snap-focus` on each item. It preserves and restores pre-existing inline values when unmounted. On a cancelable desktop wheel event targeted at the snap box, it advances one item in the dominant direction; repeated events in 120 ms stay within that one navigation. A nested Scrollbox under the cursor owns its wheel event, so an enclosing snap box does not navigate from it.
 
 `AelluxJsScrollboxSnapChange` fires when scrolling settles on a new item. Its `detail` is `{ item, index, previousIndex, axis }`; the initial item has `previousIndex: null`.
 
@@ -45,4 +45,4 @@ The index is zero based. Each method returns `true` when a snap item is availabl
 
 Scrollbox emits `AelluxJsScrollboxInteraction` from its element while a custom scrollbar thumb, Pointer Drag Scroll, or elastic edge interaction is active. Its `detail` is `{ reason, active }`, where `reason` is `"scrollbar"`, `"pointer"`, or `"elastic"`. Scrollbox Snap uses this event to suspend native snap alignment during those interactions and resume it afterward. Other Extensions can consume the same event without accessing Scrollbox state.
 
-Desktop Pointer Drag Scroll also emits `AelluxJsScrollboxSnapGesture` with `detail` containing `phase` (`"start"` or `"end"`), `axis`, `moved`, coordinates, and timestamps. The end event is cancelable. Scrollbox Snap cancels it for an eligible snap axis, which prevents PDS momentum and lets snap settle the gesture, including its one-item flick behavior.
+Desktop Pointer Drag Scroll also emits `AelluxJsScrollboxSnapGesture` with `detail` containing `phase` (`"probe"`, `"start"`, or `"end"`), `axis`, `moved`, coordinates, and timestamps. Probe and end are cancelable. Scrollbox Snap accepts an eligible short flick at probe and cancels end for the snap axis, which prevents PDS momentum and lets snap settle the gesture, including its one-item flick behavior.

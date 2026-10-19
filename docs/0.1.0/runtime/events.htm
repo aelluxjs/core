@@ -711,7 +711,12 @@ await $ae.mountManager.update(document.getElementById(&quot;panel&quot;));
 <tr>
 <td>Scrollbox</td>
 <td><code>AelluxJsScrollboxSnapGesture</code></td>
-<td>Scrollbox element; desktop PDS integration event. <code>detail</code> includes <code>phase</code> (<code>&quot;start&quot;</code> or <code>&quot;end&quot;</code>), <code>axis</code>, <code>moved</code>, start and final coordinates, and timestamps. The end event is cancelable; Scrollbox Snap cancels it to prevent PDS momentum before snap settles the gesture.</td>
+<td>Scrollbox element; desktop PDS integration event. <code>detail</code> includes <code>phase</code> (<code>&quot;probe&quot;</code>, <code>&quot;start&quot;</code>, or <code>&quot;end&quot;</code>), <code>axis</code>, <code>moved</code>, start and final coordinates, and timestamps. Probe and end are cancelable; Scrollbox Snap accepts a short eligible flick at probe, then cancels end to prevent PDS momentum before snap settles the gesture.</td>
+</tr>
+<tr>
+<td>Scrollbox</td>
+<td><code>AelluxJsScrollboxWheel</code></td>
+<td>Scrollbox element; cancelable before Scrollbox handles a cancelable wheel event targeted at that box. <code>detail.event</code> is the native wheel event. Scrollbox Snap cancels it when it advances an item.</td>
 </tr>
 <tr>
 <td>Scrollbox</td>

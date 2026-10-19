@@ -23,7 +23,7 @@ The optional `parameters` argument is an array passed as the callback's argument
 
 ## Adaptive frame rate
 
-`waitLayout` samples `requestAnimationFrame()` timestamps while it has frame work. It starts at the browser's measured frame rate and, after sustained slow frames or expensive callbacks, reduces the rate of scheduled layout work in 15 FPS steps, down to 15 FPS. It tries to recover one step after a longer stable period. The limiter skips work on selected browser frames; it never runs catch-up frames. It pauses work while the page is hidden and resumes from a fresh measurement when visible. CSS animations and native rendering remain under browser control. There is no ongoing frame monitor when the queue is idle.
+`waitLayout` samples `requestAnimationFrame()` timestamps while it has frame work. It starts at the browser's measured frame rate and, after sustained slow frames or expensive callbacks, selects the nearest 15-FPS budget at or below the observed cadence, down to 5 FPS. A severe drop therefore reaches the fitting low budget in one adjustment; for example, a 60 FPS budget observed at 10 FPS falls directly to 5 FPS. When every budget is above the observed cadence, it uses the 5 FPS floor. It tries to recover one step after a longer stable period. The limiter skips work on selected browser frames; it never runs catch-up frames. It pauses work while the page is hidden and resumes from a fresh measurement when visible. CSS animations and native rendering remain under browser control. There is no ongoing frame monitor when the queue is idle.
 
 ## Identify and replace related work
 

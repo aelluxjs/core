@@ -481,28 +481,23 @@ test("without maxFPS, read/update and update-only cycles use every eligible fram
   });
 });
 
-test("adaptive pressure descends in steps to 15 FPS without catch-up frames", async () => {
+test("severe adaptive pressure drops directly to the matching FPS budget without catch-up frames", async () => {
   await withClock(async clock => {
     const scheduler = buildLayoutScheduler();
     let calls = 0;
     const running = scheduler.sequence(70, {
       read: () => {
         calls++;
-        clock.busy(50);
+        clock.busy(100);
       },
       repeat: { ms: 0 }
     });
     await clock.frames(12);
-    const blocks = [];
-    for (let i = 0; i < 5; i++) {
-      const before = calls;
-      await clock.frames(60);
-      blocks.push(calls - before);
-    }
-    assert.ok(blocks[0] > blocks[1] && blocks[1] > blocks[2],
-      "successive pressure should reduce the frame budget");
-    assert.ok(blocks[4] >= 14 && blocks[4] <= 16,
-      "the minimum should be about 15 tasks per 60 browser frames");
+    await clock.frames(60);
+    const beforeLowBudget = calls;
+    await clock.frames(60);
+    assert.ok(calls - beforeLowBudget >= 4 && calls - beforeLowBudget <= 6,
+      "a 10 FPS workload should drop directly to the 5 FPS budget");
     const beforePause = calls;
     await clock.step(1000);
     assert.equal(calls, beforePause + 1);

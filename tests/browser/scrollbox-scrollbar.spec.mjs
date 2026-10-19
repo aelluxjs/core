@@ -14,7 +14,8 @@ async function setup(page, markup) {
 
 test("custom scrollbar stays over the viewport and supports track click and thumb drag", async ({ page }) => {
   await setup(page, `<div id="box" data-ae-scrollbox data-ae-scrollbar="vertical"
-    style="width:120px;height:120px;overflow-y:auto;overflow-x:hidden">
+    style="width:120px;height:120px;overflow-y:auto;overflow-x:hidden;
+      --ae-scrollbar-track-color:rgb(70, 80, 90);--ae-scrollbar-opacity-fade:1">
     <div style="height:600px;width:100px"></div>
   </div>`);
   const box = page.locator("#box");
@@ -52,8 +53,31 @@ test("custom scrollbar stays over the viewport and supports track click and thum
   await page.mouse.up();
   await expect.poll(() => box.evaluate(element => element.scrollTop)).toBeGreaterThan(300);
   await expect(track).toHaveCSS("opacity", "1");
+  await box.evaluate(element => element.style.setProperty("--ae-scrollbar-opacity-fade", "0"));
   await page.mouse.move(rect.x + 140, rect.y + 140);
   await expect(track).toHaveCSS("opacity", "0");
+});
+
+test("transparent or invisible scrollbar tracks ignore track clicks", async ({ page }) => {
+  await setup(page, `<div id="transparent" data-ae-scrollbox data-ae-scrollbar="vertical"
+    style="width:120px;height:120px;overflow-y:auto;overflow-x:hidden;
+      --ae-scrollbar-opacity-fade:1">
+    <div style="height:600px;width:100px"></div>
+  </div>
+  <div id="invisible" data-ae-scrollbox data-ae-scrollbar="vertical"
+    style="width:120px;height:120px;overflow-y:auto;overflow-x:hidden;
+      --ae-scrollbar-track-color:rgb(70, 80, 90);--ae-scrollbar-opacity-fade:0;
+      --ae-scrollbar-opacity-visible:0">
+    <div style="height:600px;width:100px"></div>
+  </div>`);
+  for (const id of ["transparent", "invisible"]) {
+    const box = page.locator(`#${id}`);
+    const track = box.locator(":scope > [data-ae-scrollbar-vertical]");
+    const rect = await track.boundingBox();
+    await page.mouse.click(rect.x + 4, rect.y + 90);
+    await page.waitForTimeout(50);
+    expect(await box.evaluate(element => element.scrollTop)).toBe(0);
+  }
 });
 
 test("sticky scrollbar tracks remain fixed without changing the scroll area", async ({ page }) => {

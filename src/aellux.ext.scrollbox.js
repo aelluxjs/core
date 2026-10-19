@@ -217,13 +217,19 @@
 
   function dispatchSnapGesture(state, phase, pointerScroll) {
     return AelluxJs.dispatchFrom(state.element, "ScrollboxSnapGesture", {
-      cancelable: phase === "end",
+      cancelable: phase !== "start",
       detail: {
         phase, axis: pointerScroll.axis, moved: pointerScroll.moved,
         startX: pointerScroll.startX, startY: pointerScroll.startY,
         lastX: pointerScroll.lastX, lastY: pointerScroll.lastY,
         startTime: pointerScroll.startTime, endTime: pointerScroll.endTime
       }
+    });
+  }
+
+  function dispatchWheel(state, event) {
+    return AelluxJs.dispatchFrom(state.element, "ScrollboxWheel", {
+      cancelable: true, detail: { event }
     });
   }
 
@@ -717,7 +723,7 @@
     if (Number.parseFloat(style.opacity) <= 0) return false;
     const color = style.backgroundColor;
     if (!color || color === "transparent") return false;
-    const rgba = color.match(/^rgba\\((.+)\\)$/);
+    const rgba = color.match(/^rgba\((.+)\)$/);
     return !rgba || Number.parseFloat(rgba[1].split(",").at(-1)) > 0;
   }
 
@@ -1068,10 +1074,13 @@
       return;
     }
 
-    const threshold = POINTER_SCROLL_THRESHOLD_PX;
-    if (!pointerScroll.moved && dx * dx + dy * dy < threshold * threshold) return;
     if (!pointerScroll.axis)
       pointerScroll.axis = Math.abs(dx) >= Math.abs(dy) ? "x" : "y";
+    const chain = pointerScroll.chains[pointerScroll.axis];
+    const threshold = chain.some(member => !member.disposed &&
+      pointerAxisMaximum(member, pointerScroll.axis, pointerScroll) > 0 &&
+      !dispatchSnapGesture(member, "probe", pointerScroll)) ? 1 : POINTER_SCROLL_THRESHOLD_PX;
+    if (!pointerScroll.moved && dx * dx + dy * dy < threshold * threshold) return;
     const verticalTextDrag = pointerScroll.verticalOnly && pointerScroll.axis === "y" &&
       Math.abs(dy) > VERTICAL_TEXT_DRAG_PX;
 
@@ -1093,7 +1102,6 @@
 
     if (!pointerScroll.moved) {
       const axis = pointerScroll.axis;
-      const chain = pointerScroll.chains[axis];
       if (!chain.some(member => pointerAxisMaximum(member, axis, pointerScroll) > 0)) {
         endPointerScroll(state);
         return;
@@ -1286,8 +1294,10 @@
     }
 
     let snapHandled = false;
-    if (event && event.type === POINTER_UP && pointerScroll.moved) {
-      for (const member of pointerScroll.chain) {
+    if (event && event.type === POINTER_UP && pointerScroll.axis) {
+      const snapChain = pointerScroll.moved ? pointerScroll.chain :
+        pointerScroll.chains[pointerScroll.axis];
+      for (const member of snapChain) {
         if (!member.disposed && !dispatchSnapGesture(member, "end", pointerScroll))
           snapHandled = true;
       }
@@ -1828,6 +1838,7 @@
     cancelMomentum(state);
     if (event.defaultPrevented) return;
     if (event.target.closest(`[${attribute}]`) !== state.element) return;
+    if (!dispatchWheel(state, event)) return;
     const metrics = nativeMetrics(state.element);
     if (!metrics) return;
     const axes = wheelAxes(state, metrics);

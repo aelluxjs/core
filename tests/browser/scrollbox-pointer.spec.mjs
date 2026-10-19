@@ -755,6 +755,34 @@ test("snap wheel advances one item per gesture, including inverted wheel", async
     .toBe(100);
 });
 
+test("a nested vertical Scrollbox owns wheel input before an enclosing horizontal snap box", async ({ page }) => {
+  await setup(page, `<div id="outer" data-ae-scrollbox="native" data-ae-scrollbox-snap
+    style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden">
+    <div style="display:flex;width:200px;height:100px">
+      <div data-ae-snap-item style="flex:none;width:100px;height:100px">
+        <div id="inner" data-ae-scrollbox="native"
+          style="width:100px;height:80px;overflow-x:hidden;overflow-y:auto">
+          <div style="height:300px"></div>
+        </div>
+      </div>
+      <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+    </div>
+  </div>`);
+  const result = await page.evaluate(() => {
+    const outer = document.getElementById("outer");
+    const inner = document.getElementById("inner");
+    const wheel = element => {
+      const event = new WheelEvent("wheel", { deltaY: 120, bubbles: true, cancelable: true });
+      element.dispatchEvent(event);
+      return event.defaultPrevented;
+    };
+    return { inner: wheel(inner), outer: wheel(outer), left: outer.scrollLeft };
+  });
+  expect(result).toEqual({ inner: false, outer: true, left: 0 });
+  await expect.poll(() => page.evaluate(() => document.getElementById("outer").scrollLeft))
+    .toBe(100);
+});
+
 for (const behavior of ["auto", "contain"]) {
   test(`snap wheel at both list ends respects overscroll-behavior ${behavior}`, async ({ page }) => {
     if (behavior === "contain") {
