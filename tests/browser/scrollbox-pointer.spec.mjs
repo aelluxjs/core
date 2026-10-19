@@ -3336,6 +3336,43 @@ test("elastic native wheel moves its wrapper at bottom and right limits", async 
   expect(result.scrollTop).toBe(result.maxY);
 });
 
+test("elastic transform compensates scrollable extent with opposite negative margins", async ({ page }) => {
+  await setup(page, `<div id="start" data-ae-scrollbox="native"
+    style="width:100px;height:100px;overflow:auto">
+    <div data-ae-scrollbox-elastic style="width:300px;height:300px"></div></div>
+  <div id="end" data-ae-scrollbox="native"
+    style="width:100px;height:100px;overflow:auto">
+    <div data-ae-scrollbox-elastic style="width:300px;height:300px"></div></div>`);
+  const result = await page.evaluate(() => {
+    const read = (id, deltaX, deltaY, atEnd) => {
+      const element = document.getElementById(id);
+      const wrapper = element.firstElementChild;
+      if (atEnd) element.scrollTo({ left: element.scrollWidth, top: element.scrollHeight,
+        behavior: "instant" });
+      const before = { width: element.scrollWidth, height: element.scrollHeight };
+      element.dispatchEvent(new WheelEvent("wheel", {
+        deltaX, deltaY, bubbles: true, cancelable: true
+      }));
+      return {
+        before, width: element.scrollWidth, height: element.scrollHeight,
+        margins: {
+          top: wrapper.style.marginTop, right: wrapper.style.marginRight,
+          bottom: wrapper.style.marginBottom, left: wrapper.style.marginLeft
+        }
+      };
+    };
+    return { start: read("start", -600, -600, false), end: read("end", 600, 600, true) };
+  });
+  expect(result.start.width).toBe(result.start.before.width);
+  expect(result.start.height).toBe(result.start.before.height);
+  expect(result.end.width).toBe(result.end.before.width);
+  expect(result.end.height).toBe(result.end.before.height);
+  expect(result.start.margins.top).toMatch(/^calc\(-[\d.]+px\)$/);
+  expect(result.start.margins.left).toMatch(/^calc\(-[\d.]+px\)$/);
+  expect(result.end.margins.bottom).toBe("");
+  expect(result.end.margins.right).toBe("");
+});
+
 test("elastic limits accept fractions and pixel values per axis", async ({ page }) => {
   const cases = [
     { value: "", y: 25, x: 25 },

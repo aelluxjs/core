@@ -239,6 +239,7 @@
     cursorMemories.set(element, AelluxJs.persist.element.save(element, [], ["cursor"]));
     const elastic = {
       wrapper: null, baseTransform: "", baseOrigin: "",
+      baseMargins: null,
       dimensions: null,
 
       invalidReported: false, invalidLimit: null,
@@ -871,8 +872,13 @@
       state.elastic.dimensions = null;
       state.elastic.baseTransform = computed.transform === "none" ? "" : computed.transform;
       state.elastic.baseOrigin = computed.transformOrigin;
+      state.elastic.baseMargins = {
+        top: computed.marginTop, right: computed.marginRight,
+        bottom: computed.marginBottom, left: computed.marginLeft
+      };
       elasticMemories.set(wrapper, AelluxJs.persist.element.save(
-        wrapper, [], ["transform", "transform-origin"]
+        wrapper, [], ["transform", "transform-origin",
+          "margin-top", "margin-right", "margin-bottom", "margin-left"]
       ));
     }
     state.elasticEnabled = true;
@@ -1613,6 +1619,34 @@
     wrapper.style.setProperty("transform",
       [scale, translate, elastic.baseTransform].filter(Boolean).join(" ") || "none",
       elasticMemories.get(wrapper).cssProperties.transform.priority);
+
+    setElasticCompensation(state, scaleX, scaleY);
+  }
+
+  function setElasticCompensation(state, scaleX, scaleY) {
+    const elastic = state.elastic;
+    const wrapper = elastic.wrapper;
+    const memory = elasticMemories.get(wrapper).cssProperties;
+    // A transform escaping from the leading top/left edge expands the native
+    // scrollable extent.  The trailing bottom/right transform escapes toward
+    // negative coordinates instead, so it does not grow that extent and must
+    // not receive a negative margin that would shrink it.
+    const compensated = {
+      top: elastic.amounts[0] * (2 + scaleY),
+      right: 0,
+      bottom: 0,
+      left: elastic.amounts[3] * (2 + scaleX)
+    };
+    for (const side of ["top", "right", "bottom", "left"]) {
+      const base = elastic.baseMargins?.[side] || "0px";
+      const property = `margin-${side}`;
+      if (compensated[side]) {
+        wrapper.style.setProperty(property, `calc(${base} - ${compensated[side]}px)`,
+          memory[property].priority);
+      } else if (memory[property].present) {
+        wrapper.style.setProperty(property, memory[property].value, memory[property].priority);
+      } else wrapper.style.removeProperty(property);
+    }
   }
 
   function scrollWithinElasticBounds(state, desiredX, desiredY) {

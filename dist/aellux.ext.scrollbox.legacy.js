@@ -307,6 +307,7 @@
         wrapper: null,
         baseTransform: "",
         baseOrigin: "",
+        baseMargins: null,
         dimensions: null,
         invalidReported: false,
         invalidLimit: null,
@@ -976,7 +977,13 @@
         state.elastic.dimensions = null;
         state.elastic.baseTransform = computed.transform === "none" ? "" : computed.transform;
         state.elastic.baseOrigin = computed.transformOrigin;
-        elasticMemories.set(wrapper, AelluxJs.persist.element.save(wrapper, [], ["transform", "transform-origin"]));
+        state.elastic.baseMargins = {
+          top: computed.marginTop,
+          right: computed.marginRight,
+          bottom: computed.marginBottom,
+          left: computed.marginLeft
+        };
+        elasticMemories.set(wrapper, AelluxJs.persist.element.save(wrapper, [], ["transform", "transform-origin", "margin-top", "margin-right", "margin-bottom", "margin-left"]));
       }
       state.elasticEnabled = true;
       var value = wrapper.getAttribute(elasticAttribute).trim();
@@ -1814,6 +1821,29 @@
         wrapper.style.setProperty("transform-origin", "".concat(originX, " ").concat(originY), elasticMemories.get(wrapper).cssProperties["transform-origin"].priority);
       }
       wrapper.style.setProperty("transform", [scale, translate, elastic.baseTransform].filter(Boolean).join(" ") || "none", elasticMemories.get(wrapper).cssProperties.transform.priority);
+      setElasticCompensation(state, scaleX, scaleY);
+    }
+    function setElasticCompensation(state, scaleX, scaleY) {
+      var elastic = state.elastic;
+      var wrapper = elastic.wrapper;
+      var memory = elasticMemories.get(wrapper).cssProperties;
+      var compensated = {
+        top: elastic.amounts[0] * (2 + scaleY),
+        right: 0,
+        bottom: 0,
+        left: elastic.amounts[3] * (2 + scaleX)
+      };
+      for (var _i2 = 0, _arr2 = ["top", "right", "bottom", "left"]; _i2 < _arr2.length; _i2++) {
+        var _elastic$baseMargins;
+        var side = _arr2[_i2];
+        var base = ((_elastic$baseMargins = elastic.baseMargins) === null || _elastic$baseMargins === void 0 ? void 0 : _elastic$baseMargins[side]) || "0px";
+        var property = "margin-".concat(side);
+        if (compensated[side]) {
+          wrapper.style.setProperty(property, "calc(".concat(base, " - ").concat(compensated[side], "px)"), memory[property].priority);
+        } else if (memory[property].present) {
+          wrapper.style.setProperty(property, memory[property].value, memory[property].priority);
+        } else wrapper.style.removeProperty(property);
+      }
     }
     function scrollWithinElasticBounds(state, desiredX, desiredY) {
       var element = state.element;
