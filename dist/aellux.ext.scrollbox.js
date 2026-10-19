@@ -880,6 +880,24 @@
         snapSuspendedClass,
         snap.suspensions.pointer || snap.suspensions.elastic || snap.suspensions.scrollbar || snap.suspensions.wheel
       );
+      diagnoseSnapTransforms(state);
+    }
+    function diagnoseSnapTransforms(state) {
+      const wrapper = state.elastic.wrapper;
+      if (!wrapper) return;
+      for (const item of collectSnapItems(state, state.snap.root)) {
+        if (!wrapper.contains(item)) continue;
+        const transform = root.getComputedStyle(item).transform;
+        if (transform && transform !== "none") {
+          AelluxJs.diagnostics.warn(AelluxJs.diagnostics.WARN_SCROLLBOX_SNAP_TRANSFORM, {
+            element: item,
+            attribute: snapItemAttribute,
+            value: transform,
+            scrollbox: state.element,
+            recommendation: "Apply transform to a child of the snap item."
+          });
+        }
+      }
     }
     function suspendSnapStyles(state, reason, suspended) {
       if (!state.snapEnabled || !state.snap.root || state.snap.suspensions[reason] === suspended) return;

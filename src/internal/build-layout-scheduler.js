@@ -29,6 +29,18 @@ export function buildLayoutScheduler() {
   const hidden = () => typeof document !== "undefined" && document.hidden;
   const hasWork = () => queues.read.length > 0 || queues.update.length > 0;
 
+  function publishLimit() {
+    if (typeof document === "undefined" || !document.documentElement) return;
+    const value = nativeFPS !== null && limitFPS !== null && limitFPS < nativeFPS
+      ? String(limitFPS) : null;
+    if (value === null) {
+      if (document.documentElement.hasAttribute("data-ae-fps"))
+        document.documentElement.removeAttribute("data-ae-fps");
+    } else if (document.documentElement.getAttribute("data-ae-fps") !== value) {
+      document.documentElement.setAttribute("data-ae-fps", value);
+    }
+  }
+
   function resetMeasurements(resetLimit) {
     lastFrameTime = null;
     frameCredit = 0;
@@ -41,6 +53,7 @@ export function buildLayoutScheduler() {
       limitFPS = null;
       lastAdjustment = -Infinity;
     }
+    publishLimit();
     trialLimit = null;
     recoveryDelay = 3000;
   }
@@ -120,6 +133,7 @@ export function buildLayoutScheduler() {
       if (time - lastAdjustment >= 1000 && limitFPS > 15) {
         const previous = limitFPS;
         limitFPS = Math.max(15, limitFPS - 15);
+        publishLimit();
         if (trialLimit === previous) recoveryDelay = Math.min(30000, recoveryDelay * 2);
         trialLimit = null;
         lastAdjustment = time;
@@ -132,6 +146,7 @@ export function buildLayoutScheduler() {
       if (limitFPS < nativeFPS && time - stableSince >= recoveryDelay &&
           time - lastAdjustment >= recoveryDelay) {
         limitFPS = Math.min(nativeFPS, limitFPS + 15);
+        publishLimit();
         trialLimit = limitFPS;
         lastAdjustment = time;
         stableSince = null;

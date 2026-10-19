@@ -1014,6 +1014,32 @@
       snap.axis = axis;
       state.element.classList.add(snapReadyClass);
       state.element.classList.toggle(snapSuspendedClass, snap.suspensions.pointer || snap.suspensions.elastic || snap.suspensions.scrollbar || snap.suspensions.wheel);
+      diagnoseSnapTransforms(state);
+    }
+    function diagnoseSnapTransforms(state) {
+      var wrapper = state.elastic.wrapper;
+      if (!wrapper) return;
+      var _iterator6 = _createForOfIteratorHelper(collectSnapItems(state, state.snap.root)), _step6;
+      try {
+        for (_iterator6.s(); !(_step6 = _iterator6.n()).done; ) {
+          var item = _step6.value;
+          if (!wrapper.contains(item)) continue;
+          var transform = root.getComputedStyle(item).transform;
+          if (transform && transform !== "none") {
+            AelluxJs.diagnostics.warn(AelluxJs.diagnostics.WARN_SCROLLBOX_SNAP_TRANSFORM, {
+              element: item,
+              attribute: snapItemAttribute,
+              value: transform,
+              scrollbox: state.element,
+              recommendation: "Apply transform to a child of the snap item."
+            });
+          }
+        }
+      } catch (err) {
+        _iterator6.e(err);
+      } finally {
+        _iterator6.f();
+      }
     }
     function suspendSnapStyles(state, reason, suspended) {
       if (!state.snapEnabled || !state.snap.root || state.snap.suspensions[reason] === suspended) return;
@@ -1052,18 +1078,18 @@
       clearSnapWheelTimeout(state);
       if (snap.edgeWheelTimeout !== null) root.clearTimeout(snap.edgeWheelTimeout);
       snap.edgeWheelTimeout = null;
-      var _iterator6 = _createForOfIteratorHelper(snap.savedItems), _step6;
+      var _iterator7 = _createForOfIteratorHelper(snap.savedItems), _step7;
       try {
-        for (_iterator6.s(); !(_step6 = _iterator6.n()).done; ) {
+        for (_iterator7.s(); !(_step7 = _iterator7.n()).done; ) {
           var _snapItemMemories$get;
-          var item = _step6.value;
+          var item = _step7.value;
           (_snapItemMemories$get = snapItemMemories.get(item)) === null || _snapItemMemories$get === void 0 || _snapItemMemories$get.restore();
           snapItemMemories.delete(item);
         }
       } catch (err) {
-        _iterator6.e(err);
+        _iterator7.e(err);
       } finally {
-        _iterator6.f();
+        _iterator7.f();
       }
       snap.savedItems.clear();
       state.element.classList.remove(snapReadyClass, snapSuspendedClass);
@@ -1162,16 +1188,16 @@
       var active = kind === POINTER ? snap.activePointers : snap.activeTouches;
       if (kind === POINTER) active.add(event.pointerId);
       else {
-        var _iterator7 = _createForOfIteratorHelper(event.changedTouches), _step7;
+        var _iterator8 = _createForOfIteratorHelper(event.changedTouches), _step8;
         try {
-          for (_iterator7.s(); !(_step7 = _iterator7.n()).done; ) {
-            var touch = _step7.value;
+          for (_iterator8.s(); !(_step8 = _iterator8.n()).done; ) {
+            var touch = _step8.value;
             active.add(touch.identifier);
           }
         } catch (err) {
-          _iterator7.e(err);
+          _iterator8.e(err);
         } finally {
-          _iterator7.f();
+          _iterator8.f();
         }
       }
       if (!active.size) return;
@@ -1185,16 +1211,16 @@
       var snap = state.snap;
       if (kind === POINTER) snap.activePointers.delete(event.pointerId);
       else if (kind === "touch") {
-        var _iterator8 = _createForOfIteratorHelper(event.changedTouches), _step8;
+        var _iterator9 = _createForOfIteratorHelper(event.changedTouches), _step9;
         try {
-          for (_iterator8.s(); !(_step8 = _iterator8.n()).done; ) {
-            var touch = _step8.value;
+          for (_iterator9.s(); !(_step9 = _iterator9.n()).done; ) {
+            var touch = _step9.value;
             snap.activeTouches.delete(touch.identifier);
           }
         } catch (err) {
-          _iterator8.e(err);
+          _iterator9.e(err);
         } finally {
-          _iterator8.f();
+          _iterator9.f();
         }
       } else {
         snap.activePointers.clear();
@@ -1447,28 +1473,28 @@
     function isTextAtPoint(element, x, y) {
       if (root.getComputedStyle(element).userSelect === "none") return false;
       var range = document.createRange();
-      var _iterator9 = _createForOfIteratorHelper(element.childNodes), _step9;
+      var _iterator0 = _createForOfIteratorHelper(element.childNodes), _step0;
       try {
-        for (_iterator9.s(); !(_step9 = _iterator9.n()).done; ) {
-          var node = _step9.value;
+        for (_iterator0.s(); !(_step0 = _iterator0.n()).done; ) {
+          var node = _step0.value;
           if (node.nodeType !== 3 || !node.textContent.trim()) continue;
           range.selectNodeContents(node);
-          var _iterator0 = _createForOfIteratorHelper(range.getClientRects()), _step0;
+          var _iterator1 = _createForOfIteratorHelper(range.getClientRects()), _step1;
           try {
-            for (_iterator0.s(); !(_step0 = _iterator0.n()).done; ) {
-              var rect = _step0.value;
+            for (_iterator1.s(); !(_step1 = _iterator1.n()).done; ) {
+              var rect = _step1.value;
               if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) return true;
             }
           } catch (err) {
-            _iterator0.e(err);
+            _iterator1.e(err);
           } finally {
-            _iterator0.f();
+            _iterator1.f();
           }
         }
       } catch (err) {
-        _iterator9.e(err);
+        _iterator0.e(err);
       } finally {
-        _iterator9.f();
+        _iterator0.f();
       }
       return false;
     }
@@ -1532,10 +1558,10 @@
         return axes.get(member2).x;
       });
       if (!textOrigin && event.cancelable) event.preventDefault();
-      var _iterator1 = _createForOfIteratorHelper(new Set([].concat(_toConsumableArray(chains.x), _toConsumableArray(chains.y)))), _step1;
+      var _iterator10 = _createForOfIteratorHelper(new Set([].concat(_toConsumableArray(chains.x), _toConsumableArray(chains.y)))), _step10;
       try {
-        for (_iterator1.s(); !(_step1 = _iterator1.n()).done; ) {
-          var _member = _step1.value;
+        for (_iterator10.s(); !(_step10 = _iterator10.n()).done; ) {
+          var _member = _step10.value;
           cancelMomentum(_member);
           _member.snap.flick = null;
           clearSnapTarget(_member);
@@ -1545,9 +1571,9 @@
           }
         }
       } catch (err) {
-        _iterator1.e(err);
+        _iterator10.e(err);
       } finally {
-        _iterator1.f();
+        _iterator10.f();
       }
       if (state.mouseReleaseTimeout !== null) root.clearTimeout(state.mouseReleaseTimeout);
       state.mouseReleaseTimeout = null;
@@ -1594,31 +1620,31 @@
         passive: false,
         capture: true
       });
-      var _iterator10 = _createForOfIteratorHelper(pointerScrollDragEvents), _step10;
+      var _iterator11 = _createForOfIteratorHelper(pointerScrollDragEvents), _step11;
       try {
-        for (_iterator10.s(); !(_step10 = _iterator10.n()).done; ) {
-          var name = _step10.value;
+        for (_iterator11.s(); !(_step11 = _iterator11.n()).done; ) {
+          var name = _step11.value;
           onTarget(root, "$" + name, state.onPointerScrollNativeEvent, true);
         }
       } catch (err) {
-        _iterator10.e(err);
+        _iterator11.e(err);
       } finally {
-        _iterator10.f();
+        _iterator11.f();
       }
       onTarget(root, "$selectstart", state.onPointerScrollNativeEvent, true);
-      var _iterator11 = _createForOfIteratorHelper(pointerScrollMouseEvents), _step11;
+      var _iterator12 = _createForOfIteratorHelper(pointerScrollMouseEvents), _step12;
       try {
-        for (_iterator11.s(); !(_step11 = _iterator11.n()).done; ) {
-          var _name = _step11.value;
+        for (_iterator12.s(); !(_step12 = _iterator12.n()).done; ) {
+          var _name = _step12.value;
           onTarget(root, "$" + _name, state.onMouseEvent, {
             passive: false,
             capture: true
           });
         }
       } catch (err) {
-        _iterator11.e(err);
+        _iterator12.e(err);
       } finally {
-        _iterator11.f();
+        _iterator12.f();
       }
       onTarget(root, POINTER_UP_TARGET, state.onPointerEnd, true);
       onTarget(root, POINTER_CANCEL_TARGET, state.onPointerEnd, true);
@@ -1684,16 +1710,16 @@
       if (event.cancelable) event.preventDefault();
       if (!remaining) return;
       var outermost = null;
-      var _iterator12 = _createForOfIteratorHelper(pointerScroll.chain), _step12;
+      var _iterator13 = _createForOfIteratorHelper(pointerScroll.chain), _step13;
       try {
-        for (_iterator12.s(); !(_step12 = _iterator12.n()).done; ) {
-          var member = _step12.value;
+        for (_iterator13.s(); !(_step13 = _iterator13.n()).done; ) {
+          var member = _step13.value;
           if (!member.disposed && member.pointerListening && pointerAxisMaximum(member, axis, pointerScroll) > 0) outermost = member;
         }
       } catch (err) {
-        _iterator12.e(err);
+        _iterator13.e(err);
       } finally {
-        _iterator12.f();
+        _iterator13.f();
       }
       var allowed = outermost && outermost.elasticEnabled ? elasticAxes(outermost) : null;
       var canStretch = allowed && allowed[axis];
@@ -1709,10 +1735,10 @@
       }
       var lastUsed = null;
       var lastStartX = 0, lastStartY = 0;
-      var _iterator13 = _createForOfIteratorHelper(pointerScroll.chain), _step13;
+      var _iterator14 = _createForOfIteratorHelper(pointerScroll.chain), _step14;
       try {
-        for (_iterator13.s(); !(_step13 = _iterator13.n()).done; ) {
-          var _member2 = _step13.value;
+        for (_iterator14.s(); !(_step14 = _iterator14.n()).done; ) {
+          var _member2 = _step14.value;
           if (_member2.disposed || !_member2.pointerListening || pointerAxisMaximum(_member2, axis, pointerScroll) <= 0) continue;
           if (Math.abs(remaining) < 1e-3) continue;
           var _element = _member2.element;
@@ -1733,9 +1759,9 @@
           lastStartY = previousY;
         }
       } catch (err) {
-        _iterator13.e(err);
+        _iterator14.e(err);
       } finally {
-        _iterator13.f();
+        _iterator14.f();
       }
       if (canStretch) {
         pointerScroll.elasticForce += remaining;
@@ -1788,17 +1814,17 @@
     }
     function pointerAxisChain(chain, axes, axis) {
       var result = [];
-      var _iterator14 = _createForOfIteratorHelper(chain), _step14;
+      var _iterator15 = _createForOfIteratorHelper(chain), _step15;
       try {
-        for (_iterator14.s(); !(_step14 = _iterator14.n()).done; ) {
-          var member = _step14.value;
+        for (_iterator15.s(); !(_step15 = _iterator15.n()).done; ) {
+          var member = _step15.value;
           result.push(member);
           if (axes.get(member)[axis === "x" ? "stopX" : "stopY"]) break;
         }
       } catch (err) {
-        _iterator14.e(err);
+        _iterator15.e(err);
       } finally {
-        _iterator14.f();
+        _iterator15.f();
       }
       return result;
     }
@@ -1807,10 +1833,10 @@
       pointerScroll.moved = true;
       pointerScroll.started = true;
       restorePointerScrollCursor(state);
-      var _iterator15 = _createForOfIteratorHelper(pointerScroll.chain), _step15;
+      var _iterator16 = _createForOfIteratorHelper(pointerScroll.chain), _step16;
       try {
-        for (_iterator15.s(); !(_step15 = _iterator15.n()).done; ) {
-          var member = _step15.value;
+        for (_iterator16.s(); !(_step16 = _iterator16.n()).done; ) {
+          var member = _step16.value;
           if (pointerAxisMaximum(member, axis, pointerScroll) <= 0) continue;
           var element = member.element;
           pointerScrollMemories.set(element, AelluxJs.persist.element.save(element, [], ["scroll-behavior"]));
@@ -1824,9 +1850,9 @@
           startScrollbarInteractionVisibility(member);
         }
       } catch (err) {
-        _iterator15.e(err);
+        _iterator16.e(err);
       } finally {
-        _iterator15.f();
+        _iterator16.f();
       }
       dispatchPointerScroll(state, pointerScroll, "PointerScrollStart");
     }
@@ -1868,16 +1894,16 @@
       if (pointerScroll.selectionWaitTimeout !== null) root.clearTimeout(pointerScroll.selectionWaitTimeout);
       offTarget(root, POINTER_MOVE_TARGET, state.onPointerMove, true);
       offTarget(root, "$touchmove", state.onPointerScrollTouchMove, true);
-      var _iterator16 = _createForOfIteratorHelper(pointerScrollDragEvents), _step16;
+      var _iterator17 = _createForOfIteratorHelper(pointerScrollDragEvents), _step17;
       try {
-        for (_iterator16.s(); !(_step16 = _iterator16.n()).done; ) {
-          var name = _step16.value;
+        for (_iterator17.s(); !(_step17 = _iterator17.n()).done; ) {
+          var name = _step17.value;
           offTarget(root, "$" + name, state.onPointerScrollNativeEvent, true);
         }
       } catch (err) {
-        _iterator16.e(err);
+        _iterator17.e(err);
       } finally {
-        _iterator16.f();
+        _iterator17.f();
       }
       offTarget(root, "$selectstart", state.onPointerScrollNativeEvent, true);
       offTarget(root, POINTER_UP_TARGET, state.onPointerEnd, true);
@@ -1892,11 +1918,11 @@
       } else {
         stopPointerScrollMouseEvents(state);
       }
-      var _iterator17 = _createForOfIteratorHelper(pointerScroll.styles), _step17;
+      var _iterator18 = _createForOfIteratorHelper(pointerScroll.styles), _step18;
       try {
-        for (_iterator17.s(); !(_step17 = _iterator17.n()).done; ) {
+        for (_iterator18.s(); !(_step18 = _iterator18.n()).done; ) {
           var _pointerScrollMemorie;
-          var saved = _step17.value;
+          var saved = _step18.value;
           if (saved.classOwned) saved.element.classList.remove(pointerScrollingClass);
           (_pointerScrollMemorie = pointerScrollMemories.get(saved.element)) === null || _pointerScrollMemorie === void 0 || _pointerScrollMemorie.restore();
           pointerScrollMemories.delete(saved.element);
@@ -1907,9 +1933,9 @@
           }
         }
       } catch (err) {
-        _iterator17.e(err);
+        _iterator18.e(err);
       } finally {
-        _iterator17.f();
+        _iterator18.f();
       }
       if (event && event.type === POINTER_UP && state.pointerListening) {
         updatePointerScrollCursor(state, document.elementFromPoint(event.clientX, event.clientY), event.clientX, event.clientY);
@@ -1927,16 +1953,16 @@
         recordSnapFlick(snapState, pointerScroll, pointerScroll.axis, pointerScroll.snapStarts.get(snapState));
         scheduleScrollEnd(snapState);
       }
-      var _iterator18 = _createForOfIteratorHelper(pointerScroll.chain), _step18;
+      var _iterator19 = _createForOfIteratorHelper(pointerScroll.chain), _step19;
       try {
-        for (_iterator18.s(); !(_step18 = _iterator18.n()).done; ) {
-          var _member3 = _step18.value;
+        for (_iterator19.s(); !(_step19 = _iterator19.n()).done; ) {
+          var _member3 = _step19.value;
           releaseElastic(_member3);
         }
       } catch (err) {
-        _iterator18.e(err);
+        _iterator19.e(err);
       } finally {
-        _iterator18.f();
+        _iterator19.f();
       }
       if (!shouldSnap && event && event.type === POINTER_UP && pointerScroll.moved && momentumState && momentumState.momentumEnabled && !hadElastic && !momentumState.disposed && now() - pointerScroll.momentumStartTime < MOMENTUM_LIMIT_TIME_MS) {
         startMomentum(momentumState, pointerScroll);
@@ -1978,16 +2004,16 @@
       if (state.mouseReleaseTimeout !== null) root.clearTimeout(state.mouseReleaseTimeout);
       state.mouseReleaseTimeout = null;
       state.mouseReleaseButton = null;
-      var _iterator19 = _createForOfIteratorHelper(pointerScrollMouseEvents), _step19;
+      var _iterator20 = _createForOfIteratorHelper(pointerScrollMouseEvents), _step20;
       try {
-        for (_iterator19.s(); !(_step19 = _iterator19.n()).done; ) {
-          var name = _step19.value;
+        for (_iterator20.s(); !(_step20 = _iterator20.n()).done; ) {
+          var name = _step20.value;
           offTarget(root, "$" + name, state.onMouseEvent, true);
         }
       } catch (err) {
-        _iterator19.e(err);
+        _iterator20.e(err);
       } finally {
-        _iterator19.f();
+        _iterator20.f();
       }
     }
     function startMomentum(state, pointerScroll) {
@@ -2053,17 +2079,17 @@
     function restoreTouchOverflow(state) {
       var touch = state.elastic.touch;
       if (!touch) return;
-      var _iterator20 = _createForOfIteratorHelper(touch.scrollBehaviors), _step20;
+      var _iterator21 = _createForOfIteratorHelper(touch.scrollBehaviors), _step21;
       try {
-        for (_iterator20.s(); !(_step20 = _iterator20.n()).done; ) {
-          var _step20$value = _slicedToArray(_step20.value, 2), element = _step20$value[0], _step20$value$ = _step20$value[1], value = _step20$value$.value, priority = _step20$value$.priority;
+        for (_iterator21.s(); !(_step21 = _iterator21.n()).done; ) {
+          var _step21$value = _slicedToArray(_step21.value, 2), element = _step21$value[0], _step21$value$ = _step21$value[1], value = _step21$value$.value, priority = _step21$value$.priority;
           if (value) element.style.setProperty("scroll-behavior", value, priority);
           else element.style.removeProperty("scroll-behavior");
         }
       } catch (err) {
-        _iterator20.e(err);
+        _iterator21.e(err);
       } finally {
-        _iterator20.f();
+        _iterator21.f();
       }
       touch.scrollBehaviors.clear();
     }
@@ -2098,19 +2124,19 @@
       var start = state.elastic.touch;
       if (!start) return;
       var touch = null;
-      var _iterator21 = _createForOfIteratorHelper(event.touches), _step21;
+      var _iterator22 = _createForOfIteratorHelper(event.touches), _step22;
       try {
-        for (_iterator21.s(); !(_step21 = _iterator21.n()).done; ) {
-          var item = _step21.value;
+        for (_iterator22.s(); !(_step22 = _iterator22.n()).done; ) {
+          var item = _step22.value;
           if (item.identifier === start.identifier) {
             touch = item;
             break;
           }
         }
       } catch (err) {
-        _iterator21.e(err);
+        _iterator22.e(err);
       } finally {
-        _iterator21.f();
+        _iterator22.f();
       }
       if (!touch) return;
       var desiredX = start.scrollLeft + start.x - touch.clientX;
@@ -2163,16 +2189,16 @@
     function endTouch(state, event) {
       var touch = state.elastic.touch;
       if (!touch) return;
-      var _iterator22 = _createForOfIteratorHelper(event.touches), _step22;
+      var _iterator23 = _createForOfIteratorHelper(event.touches), _step23;
       try {
-        for (_iterator22.s(); !(_step22 = _iterator22.n()).done; ) {
-          var item = _step22.value;
+        for (_iterator23.s(); !(_step23 = _iterator23.n()).done; ) {
+          var item = _step23.value;
           if (item.identifier === touch.identifier) return;
         }
       } catch (err) {
-        _iterator22.e(err);
+        _iterator23.e(err);
       } finally {
-        _iterator22.f();
+        _iterator23.f();
       }
       restoreTouchOverflow(state);
       state.elastic.touch = null;
@@ -2352,16 +2378,16 @@
           return scheduleResize(state);
         });
         state.resizeObserver.observe(state.element);
-        var _iterator23 = _createForOfIteratorHelper(state.element.children), _step23;
+        var _iterator24 = _createForOfIteratorHelper(state.element.children), _step24;
         try {
-          for (_iterator23.s(); !(_step23 = _iterator23.n()).done; ) {
-            var child = _step23.value;
+          for (_iterator24.s(); !(_step24 = _iterator24.n()).done; ) {
+            var child = _step24.value;
             state.resizeObserver.observe(child);
           }
         } catch (err) {
-          _iterator23.e(err);
+          _iterator24.e(err);
         } finally {
-          _iterator23.f();
+          _iterator24.f();
         }
       }
       if (root.MutationObserver) {
@@ -2369,16 +2395,16 @@
           if (state.resizeObserver) {
             state.resizeObserver.disconnect();
             state.resizeObserver.observe(state.element);
-            var _iterator24 = _createForOfIteratorHelper(state.element.children), _step24;
+            var _iterator25 = _createForOfIteratorHelper(state.element.children), _step25;
             try {
-              for (_iterator24.s(); !(_step24 = _iterator24.n()).done; ) {
-                var _child = _step24.value;
+              for (_iterator25.s(); !(_step25 = _iterator25.n()).done; ) {
+                var _child = _step25.value;
                 state.resizeObserver.observe(_child);
               }
             } catch (err) {
-              _iterator24.e(err);
+              _iterator25.e(err);
             } finally {
-              _iterator24.f();
+              _iterator25.f();
             }
           }
           if (records.some(function(record) {
@@ -2483,10 +2509,10 @@
             });
           }
           if (values.snapAxis && state.snap.axis !== values.snapAxis) syncSnapStyles(state, values.snapAxis);
-          var _iterator25 = _createForOfIteratorHelper(values.snapValues), _step25;
+          var _iterator26 = _createForOfIteratorHelper(values.snapValues), _step26;
           try {
-            for (_iterator25.s(); !(_step25 = _iterator25.n()).done; ) {
-              var _step25$value = _step25.value, item = _step25$value.item, viewport = _step25$value.viewport, focus = _step25$value.focus;
+            for (_iterator26.s(); !(_step26 = _iterator26.n()).done; ) {
+              var _step26$value = _step26.value, item = _step26$value.item, viewport = _step26$value.viewport, focus = _step26$value.focus;
               if (!state.snap.savedItems.has(item)) {
                 snapItemMemories.set(item, AelluxJs.persist.element.save(item, [], snapProperties));
                 state.snap.savedItems.add(item);
@@ -2495,9 +2521,9 @@
               item.style.setProperty(snapProperties[1], focus);
             }
           } catch (err) {
-            _iterator25.e(err);
+            _iterator26.e(err);
           } finally {
-            _iterator25.f();
+            _iterator26.f();
           }
           updateScrollbars(state, values.scrollbars);
         });

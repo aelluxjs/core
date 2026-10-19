@@ -584,6 +584,9 @@ Home                  </li>
   cssMotionPropertyMaxFPS: 40
 });
 </code></pre>
+<p>Use <code>0</code> or <code>null</code> to disable this special property ceiling. This does not disable
+the adaptive <code>waitLayout</code> scheduler or an element&#39;s <code>data-ae-maxfps</code> limit.
+Omitting the option (or passing <code>undefined</code>) retains the 40 FPS default.</p>
 <pre><code class="language-js">const motionId = $ae.motion.id();
 await $ae.motion.run(panel, {
   id: motionId,

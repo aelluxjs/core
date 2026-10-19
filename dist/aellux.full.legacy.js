@@ -13771,11 +13771,11 @@
         var state = getInternalState(this);
         var string = state.string;
         var index = state.index;
-        var point2;
+        var point;
         if (index >= string.length) return createIterResultObject(void 0, true);
-        point2 = charAt(string, index);
-        state.index += point2.length;
-        return createIterResultObject(point2, false);
+        point = charAt(string, index);
+        state.index += point.length;
+        return createIterResultObject(point, false);
       });
     }
   });
@@ -14723,7 +14723,7 @@
       var createHTML = require_create_html();
       var forcedStringHTMLMethod = require_string_html_forced();
       $({ target: "String", proto: true, forced: forcedStringHTMLMethod("anchor") }, {
-        anchor: function anchor2(name) {
+        anchor: function anchor(name) {
           return createHTML(this, "a", "name", name);
         }
       });
@@ -20984,6 +20984,15 @@
     var hasWork = function hasWork2() {
       return queues.read.length > 0 || queues.update.length > 0;
     };
+    function publishLimit() {
+      if (typeof document === "undefined" || !document.documentElement) return;
+      var value = nativeFPS !== null && limitFPS !== null && limitFPS < nativeFPS ? String(limitFPS) : null;
+      if (value === null) {
+        if (document.documentElement.hasAttribute("data-ae-fps")) document.documentElement.removeAttribute("data-ae-fps");
+      } else if (document.documentElement.getAttribute("data-ae-fps") !== value) {
+        document.documentElement.setAttribute("data-ae-fps", value);
+      }
+    }
     function resetMeasurements(resetLimit) {
       lastFrameTime = null;
       frameCredit = 0;
@@ -20996,6 +21005,7 @@
         limitFPS = null;
         lastAdjustment = -Infinity;
       }
+      publishLimit();
       trialLimit = null;
       recoveryDelay = 3e3;
     }
@@ -21077,6 +21087,7 @@
         if (time - lastAdjustment >= 1e3 && limitFPS > 15) {
           var previous = limitFPS;
           limitFPS = Math.max(15, limitFPS - 15);
+          publishLimit();
           if (trialLimit === previous) recoveryDelay = Math.min(3e4, recoveryDelay * 2);
           trialLimit = null;
           lastAdjustment = time;
@@ -21088,6 +21099,7 @@
         if (stableSince === null) stableSince = time;
         if (limitFPS < nativeFPS && time - stableSince >= recoveryDelay && time - lastAdjustment >= recoveryDelay) {
           limitFPS = Math.min(nativeFPS, limitFPS + 15);
+          publishLimit();
           trialLimit = limitFPS;
           lastAdjustment = time;
           stableSince = null;
@@ -21912,7 +21924,7 @@
       return this;
     }), _regeneratorDefine2(u, "toString", function() {
       return "[object Generator]";
-    }), (_regenerator = function _regenerator7() {
+    }), (_regenerator = function _regenerator4() {
       return { w: i, m: f };
     })();
   }
@@ -23541,7 +23553,7 @@
           operations.set(operationId, operation);
           return nativeWait(operation);
         }
-        var policyFPS = operation.conservative ? positiveFPS(AelluxJs2.options.cssMotionPropertyMaxFPS, 40) : void 0;
+        var policyFPS = operation.conservative ? propertyPolicyFPS(AelluxJs2.options.cssMotionPropertyMaxFPS, AelluxJs2) : void 0;
         var maxFPS = minimumFPS(requestedMaxFPS, policyFPS);
         return AelluxJs2.waitLayout.sequence(operationId, {
           update: function update() {
@@ -23645,6 +23657,19 @@
     function positiveFPS(value, fallback) {
       var number = Number(value);
       return Number.isFinite(number) && number > 0 ? number : fallback;
+    }
+    function propertyPolicyFPS(value, AelluxJs2) {
+      if (value === null || value === 0) return void 0;
+      var number = Number(value);
+      if (Number.isFinite(number) && number > 0) return number;
+      if (value !== void 0) {
+        AelluxJs2.diagnostics.warn(AelluxJs2.diagnostics.WARN_CSS_MOTION_PROPERTY_MAX_FPS_INVALID, {
+          option: "cssMotionPropertyMaxFPS",
+          value: value,
+          fallback: 40
+        });
+      }
+      return 40;
     }
     function minimumFPS(first, second) {
       var values = [first, second].filter(function(value) {
@@ -24151,7 +24176,7 @@
       return this;
     }), _regeneratorDefine22(u, "toString", function() {
       return "[object Generator]";
-    }), (_regenerator2 = function _regenerator7() {
+    }), (_regenerator2 = function _regenerator4() {
       return { w: i, m: f };
     })();
   }
@@ -25466,7 +25491,7 @@
       return this;
     }), _regeneratorDefine23(u, "toString", function() {
       return "[object Generator]";
-    }), (_regenerator3 = function _regenerator7() {
+    }), (_regenerator3 = function _regenerator4() {
       return { w: i, m: f };
     })();
   }
@@ -25778,85 +25803,49 @@
     }
   });
 
-  // src/aellux.ext.feedback.js
-  var aellux_ext_feedback_exports = {};
-  function _regenerator4() {
-    /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/babel/babel/blob/main/packages/babel-helpers/LICENSE */
-    var e, t, r = "function" == typeof Symbol ? Symbol : {}, n = r.iterator || "@@iterator", o = r.toStringTag || "@@toStringTag";
-    function i(r2, n2, o2, i2) {
-      var c2 = n2 && n2.prototype instanceof Generator ? n2 : Generator, u2 = Object.create(c2.prototype);
-      return _regeneratorDefine24(u2, "_invoke", (function(r3, n3, o3) {
-        var i3, c3, u3, f2 = 0, p = o3 || [], y = false, G = { p: 0, n: 0, v: e, a: d, f: d.bind(e, 4), d: function d2(t2, r4) {
-          return i3 = t2, c3 = 0, u3 = e, G.n = r4, a;
-        } };
-        function d(r4, n4) {
-          for (c3 = r4, u3 = n4, t = 0; !y && f2 && !o4 && t < p.length; t++) {
-            var o4, i4 = p[t], d2 = G.p, l = i4[2];
-            r4 > 3 ? (o4 = l === n4) && (u3 = i4[(c3 = i4[4]) ? 5 : (c3 = 3, 3)], i4[4] = i4[5] = e) : i4[0] <= d2 && ((o4 = r4 < 2 && d2 < i4[1]) ? (c3 = 0, G.v = n4, G.n = i4[1]) : d2 < l && (o4 = r4 < 3 || i4[0] > n4 || n4 > l) && (i4[4] = r4, i4[5] = n4, G.n = l, c3 = 0));
-          }
-          if (o4 || r4 > 1) return a;
-          throw y = true, n4;
-        }
-        return function(o4, p2, l) {
-          if (f2 > 1) throw TypeError("Generator is already running");
-          for (y && 1 === p2 && d(p2, l), c3 = p2, u3 = l; (t = c3 < 2 ? e : u3) || !y; ) {
-            i3 || (c3 ? c3 < 3 ? (c3 > 1 && (G.n = -1), d(c3, u3)) : G.n = u3 : G.v = u3);
-            try {
-              if (f2 = 2, i3) {
-                if (c3 || (o4 = "next"), t = i3[o4]) {
-                  if (!(t = t.call(i3, u3))) throw TypeError("iterator result is not an object");
-                  if (!t.done) return t;
-                  u3 = t.value, c3 < 2 && (c3 = 0);
-                } else 1 === c3 && (t = i3.return) && t.call(i3), c3 < 2 && (u3 = TypeError("The iterator does not provide a '" + o4 + "' method"), c3 = 1);
-                i3 = e;
-              } else if ((t = (y = G.n < 0) ? u3 : r3.call(n3, G)) !== a) break;
-            } catch (t2) {
-              i3 = e, c3 = 1, u3 = t2;
-            } finally {
-              f2 = 1;
-            }
-          }
-          return { value: t, done: y };
-        };
-      })(r2, o2, i2), true), u2;
-    }
-    var a = {};
-    function Generator() {
-    }
-    function GeneratorFunction() {
-    }
-    function GeneratorFunctionPrototype() {
-    }
-    t = Object.getPrototypeOf;
-    var c = [][n] ? t(t([][n]())) : (_regeneratorDefine24(t = {}, n, function() {
-      return this;
-    }), t), u = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(c);
-    function f(e2) {
-      return Object.setPrototypeOf ? Object.setPrototypeOf(e2, GeneratorFunctionPrototype) : (e2.__proto__ = GeneratorFunctionPrototype, _regeneratorDefine24(e2, o, "GeneratorFunction")), e2.prototype = Object.create(u), e2;
-    }
-    return GeneratorFunction.prototype = GeneratorFunctionPrototype, _regeneratorDefine24(u, "constructor", GeneratorFunctionPrototype), _regeneratorDefine24(GeneratorFunctionPrototype, "constructor", GeneratorFunction), GeneratorFunction.displayName = "GeneratorFunction", _regeneratorDefine24(GeneratorFunctionPrototype, o, "GeneratorFunction"), _regeneratorDefine24(u), _regeneratorDefine24(u, o, "Generator"), _regeneratorDefine24(u, n, function() {
-      return this;
-    }), _regeneratorDefine24(u, "toString", function() {
-      return "[object Generator]";
-    }), (_regenerator4 = function _regenerator7() {
-      return { w: i, m: f };
-    })();
+  // src/aellux.ext.scrollbox.js
+  var aellux_ext_scrollbox_exports = {};
+  function _toConsumableArray3(r) {
+    return _arrayWithoutHoles3(r) || _iterableToArray3(r) || _unsupportedIterableToArray10(r) || _nonIterableSpread3();
   }
-  function _regeneratorDefine24(e, r, n, t) {
-    var i = Object.defineProperty;
-    try {
-      i({}, "", {});
-    } catch (e2) {
-      i = 0;
-    }
-    _regeneratorDefine24 = function _regeneratorDefine(e2, r2, n2, t2) {
-      function o(r3, n3) {
-        _regeneratorDefine24(e2, r3, function(e3) {
-          return this._invoke(r3, n3, e3);
-        });
+  function _nonIterableSpread3() {
+    throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+  }
+  function _iterableToArray3(r) {
+    if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
+  }
+  function _arrayWithoutHoles3(r) {
+    if (Array.isArray(r)) return _arrayLikeToArray10(r);
+  }
+  function _slicedToArray5(r, e) {
+    return _arrayWithHoles5(r) || _iterableToArrayLimit5(r, e) || _unsupportedIterableToArray10(r, e) || _nonIterableRest5();
+  }
+  function _nonIterableRest5() {
+    throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+  }
+  function _iterableToArrayLimit5(r, l) {
+    var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
+    if (null != t) {
+      var e, n, i, u, a = [], f = true, o = false;
+      try {
+        if (i = (t = t.call(r)).next, 0 === l) {
+          if (Object(t) !== t) return;
+          f = false;
+        } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = true) ;
+      } catch (r2) {
+        o = true, n = r2;
+      } finally {
+        try {
+          if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return;
+        } finally {
+          if (o) throw n;
+        }
       }
-      r2 ? i ? i(e2, r2, { value: n2, enumerable: !t2, configurable: !t2, writable: !t2 }) : e2[r2] = n2 : (o("next", 0), o("throw", 1), o("return", 2));
-    }, _regeneratorDefine24(e, r, n, t);
+      return a;
+    }
+  }
+  function _arrayWithHoles5(r) {
+    if (Array.isArray(r)) return r;
   }
   function _createForOfIteratorHelper9(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
@@ -25897,1908 +25886,6 @@
     }
   }
   function _arrayLikeToArray10(r, a) {
-    (null == a || a > r.length) && (a = r.length);
-    for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
-    return n;
-  }
-  function asyncGeneratorStep4(n, t, e, r, o, a, c) {
-    try {
-      var i = n[a](c), u = i.value;
-    } catch (n2) {
-      return void e(n2);
-    }
-    i.done ? t(u) : Promise.resolve(u).then(r, o);
-  }
-  function _asyncToGenerator4(n) {
-    return function() {
-      var t = this, e = arguments;
-      return new Promise(function(r, o) {
-        var a = n.apply(t, e);
-        function _next(n2) {
-          asyncGeneratorStep4(a, r, o, _next, _throw, "next", n2);
-        }
-        function _throw(n2) {
-          asyncGeneratorStep4(a, r, o, _next, _throw, "throw", n2);
-        }
-        _next(void 0);
-      });
-    };
-  }
-  var init_aellux_ext_feedback = __esm({
-    "src/aellux.ext.feedback.js": function() {
-      /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
-      (function(root2) {
-        "use strict";
-        var AelluxJs2 = root2.AelluxJs;
-        var extensionName = "feedback";
-        if (!AelluxJs2) {
-          throw new Error('[aellux.js] Cannot attach the "'.concat(extensionName, '" extension: root.AelluxJs is not defined. Load the aellux.js boot script before this extension.'));
-        }
-        AelluxJs2.extAttach(extensionName, {
-          init: init,
-          destroy: destroy,
-          warning: warning,
-          error: error,
-          success: success,
-          announce: announce,
-          busy: busy,
-          validate: validate,
-          progress: progress,
-          on: on,
-          off: off,
-          send: send
-        });
-        var motionOptions = ["shake", "yes", "no", "breathe", "tremble", "pulse", "alert"];
-        var feedbackTypes = ["warning", "error", "success", "announce", "busy", "progress", "validate"];
-        var handlers = /* @__PURE__ */ new Map();
-        var motionOperations = /* @__PURE__ */ new Map();
-        var motionIds = /* @__PURE__ */ new WeakMap();
-        var feedbackAttribute = AelluxJs2.attr(extensionName);
-        var targetMessageAttribute = AelluxJs2.attr("targetMessage");
-        var targetTransformAttribute = AelluxJs2.attr("targetTransform");
-        function init() {
-          AelluxJs2.mountManager.add({
-            extensionName: extensionName,
-            selector: "[".concat(feedbackAttribute, "]"),
-            priority: 0,
-            mount: mountFeedback,
-            unmount: unmountFeedback
-          });
-        }
-        function destroy() {
-          return _destroy.apply(this, arguments);
-        }
-        function _destroy() {
-          _destroy = _asyncToGenerator4(/* @__PURE__ */ _regenerator4().m(function _callee() {
-            var _iterator2, _step2, operation;
-            return _regenerator4().w(function(_context) {
-              while (1) switch (_context.n) {
-                case 0:
-                  AelluxJs2.mountManager.remove({
-                    extensionName: extensionName
-                  });
-                  _iterator2 = _createForOfIteratorHelper9(motionOperations.values());
-                  try {
-                    for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
-                      operation = _step2.value;
-                      AelluxJs2.motion.cancel(operation.id);
-                    }
-                  } catch (err) {
-                    _iterator2.e(err);
-                  } finally {
-                    _iterator2.f();
-                  }
-                  motionOperations.clear();
-                  handlers.clear();
-                case 1:
-                  return _context.a(2);
-              }
-            }, _callee);
-          }));
-          return _destroy.apply(this, arguments);
-        }
-        function mountFeedback(element) {
-          AelluxJs2.onTarget(element, "Feedback", onFeedback);
-        }
-        function unmountFeedback(element) {
-          AelluxJs2.offTarget(element, "Feedback", onFeedback);
-        }
-        function onFeedback(event) {
-          var element = event.currentTarget;
-          var value = element.getAttribute(feedbackAttribute);
-          if (value === null) return;
-          var list = value.trim();
-          if (list) {
-            var _type = event.detail && event.detail.type;
-            var names = list.split(/\s+/);
-            if (!names.includes(_type)) {
-              return;
-            }
-          }
-          event.stopPropagation();
-          if (!event.detail) return;
-          var _event$detail = event.detail, message = _event$detail.message, type = _event$detail.type, motion = _event$detail.motion;
-          var messageTarget = element.getAttribute(targetMessageAttribute);
-          var transformTarget = element.getAttribute(targetTransformAttribute);
-          var messageElement = AelluxJs2.elementOrId(messageTarget, {
-            defaultElement: element
-          });
-          var transformElement = AelluxJs2.elementOrId(transformTarget, {
-            defaultElement: element
-          });
-          if (messageElement && typeof message === "string") {
-            var textNode = null;
-            var _iterator = _createForOfIteratorHelper9(messageElement.childNodes), _step;
-            try {
-              for (_iterator.s(); !(_step = _iterator.n()).done; ) {
-                var child = _step.value;
-                if (child.nodeType === 3) {
-                  textNode = child;
-                  break;
-                }
-              }
-            } catch (err) {
-              _iterator.e(err);
-            } finally {
-              _iterator.f();
-            }
-            if (textNode) textNode.nodeValue = message;
-            else messageElement.appendChild(messageElement.ownerDocument.createTextNode(message));
-          }
-          if (feedbackTypes.includes(type)) {
-            var typeClass = AelluxJs2.className("feedback-".concat(type));
-            for (var _i = 0, _arr = [element, messageElement, transformElement]; _i < _arr.length; _i++) {
-              var target = _arr[_i];
-              if (target) target.classList.add(typeClass);
-            }
-          }
-          if (transformElement) {
-            var motionPrefix = AelluxJs2.className("feedback-motion-");
-            for (var _i2 = 0, _Array$from = Array.from(transformElement.classList); _i2 < _Array$from.length; _i2++) {
-              var className = _Array$from[_i2];
-              if (className.startsWith(motionPrefix)) transformElement.classList.remove(className);
-            }
-            var previous = motionOperations.get(transformElement);
-            if (previous) AelluxJs2.motion.cancel(previous.id);
-            motionOperations.delete(transformElement);
-            if (typeof motion === "string") {
-              var motionClass = AelluxJs2.className("feedback-motion-".concat(motion));
-              var id = motionIds.get(transformElement);
-              if (id === void 0) {
-                id = AelluxJs2.motion.id();
-                motionIds.set(transformElement, id);
-              }
-              var operation = {
-                id: id,
-                className: motionClass
-              };
-              motionOperations.set(transformElement, operation);
-              var advancedEase = root2.getComputedStyle(transformElement).getPropertyValue("--ae-feedback-aellux-ease").trim() || void 0;
-              AelluxJs2.motion.run(transformElement, {
-                id: id,
-                apply: function apply() {
-                  return transformElement.classList.add(motionClass);
-                },
-                easing: advancedEase,
-                abort: function abort() {
-                  return !transformElement.isConnected;
-                }
-              }).catch(function(cause) {
-                AelluxJs2.diagnostics.error(AelluxJs2.diagnostics.ERROR_EXTENSION_TRANSITION, {
-                  cause: cause,
-                  extension: extensionName,
-                  element: transformElement
-                });
-              }).finally(function() {
-                if (motionOperations.get(transformElement) !== operation) return;
-                transformElement.classList.remove(motionClass);
-                motionOperations.delete(transformElement);
-              });
-            }
-          }
-        }
-        function on(type, handler) {
-          if (!handlers.has(type)) {
-            handlers.set(type, /* @__PURE__ */ new Set());
-          }
-          handlers.get(type).add(handler);
-          return {
-            off: function off2() {
-              removeHandler(type, handler);
-            }
-          };
-        }
-        function off(type, handler) {
-          return removeHandler(type, handler);
-        }
-        function warning(message, target, value, motion) {
-          send({
-            type: "warning",
-            message: message,
-            value: value,
-            target: target,
-            motion: motion
-          });
-        }
-        function error(message, target, value, motion) {
-          send({
-            type: "error",
-            message: message,
-            value: value,
-            target: target,
-            motion: motion
-          });
-        }
-        function success(message, target, value, motion) {
-          send({
-            type: "success",
-            message: message,
-            value: value,
-            target: target,
-            motion: motion
-          });
-        }
-        function announce(message, target, value, motion) {
-          send({
-            type: "announce",
-            message: message,
-            value: value,
-            target: target,
-            motion: motion
-          });
-        }
-        function busy(message, target, value, motion) {
-          send({
-            type: "busy",
-            message: message,
-            value: value,
-            target: target,
-            motion: motion
-          });
-        }
-        function validate(message, target, value, motion) {
-          send({
-            type: "validate",
-            message: message,
-            value: value,
-            target: target,
-            motion: motion
-          });
-        }
-        function progress(message, target, value, motion) {
-          send({
-            type: "progress",
-            message: message,
-            value: value,
-            target: target,
-            motion: motion
-          });
-        }
-        function send(_ref) {
-          var type = _ref.type, message = _ref.message, value = _ref.value, target = _ref.target, motion = _ref.motion;
-          if (typeof message !== "string") {
-            reportInvalidArgument("message", message);
-            return;
-          }
-          if (!feedbackTypes.includes(type)) {
-            reportInvalidArgument("type", type);
-            return;
-          }
-          if (typeof motion !== "undefined" && typeof motion !== "string") {
-            reportInvalidArgument("motion", motion);
-            return;
-          }
-          if (typeof target === "undefined") target = root2.document;
-          else if (!target || target.nodeType !== 1 || typeof target.dispatchEvent !== "function") {
-            reportInvalidArgument("target", target);
-            return;
-          }
-          if (typeof motion === "string" && !motionOptions.includes(motion)) {
-            AelluxJs2.diagnostics.info(AelluxJs2.diagnostics.INFO_FEEDBACK_MOTION_CUSTOM, {
-              extension: extensionName,
-              motion: motion,
-              standardMotions: motionOptions.slice()
-            });
-          }
-          var feedback2 = {
-            type: type,
-            message: message,
-            value: value,
-            target: target,
-            motion: motion
-          };
-          var options = {
-            detail: feedback2,
-            bubbles: true,
-            cancelable: true
-          };
-          AelluxJs2.dispatchFrom(target, "Feedback", options);
-          notifyHandlers(type, feedback2);
-          notifyHandlers("*", feedback2);
-        }
-        function reportInvalidArgument(argument, value) {
-          AelluxJs2.diagnostics.error(AelluxJs2.diagnostics.ERROR_FEEDBACK_ARGUMENT, {
-            extension: extensionName,
-            argument: argument,
-            value: value
-          });
-        }
-        function notifyHandlers(type, feedback2) {
-          if (!handlers.has(type)) return;
-          handlers.get(type).forEach(function(call) {
-            try {
-              var result = call(feedback2);
-              if (result && typeof result.then === "function") {
-                Promise.resolve(result).catch(function(error2) {
-                  return reportCallbackError(error2, type);
-                });
-              }
-            } catch (error2) {
-              reportCallbackError(error2, type);
-            }
-          });
-        }
-        function reportCallbackError(error2, type) {
-          AelluxJs2.diagnostics.error(AelluxJs2.diagnostics.ERROR_CALLBACK, {
-            cause: error2,
-            extension: extensionName,
-            type: type
-          });
-        }
-        function removeHandler(type, handler) {
-          var typeHandlers = handlers.get(type);
-          if (!typeHandlers) return false;
-          var removed = typeHandlers.delete(handler);
-          if (typeHandlers.size === 0) handlers.delete(type);
-          return removed;
-        }
-      })(typeof globalThis !== "undefined" ? globalThis : window);
-    }
-  });
-
-  // src/aellux.ext.focus.js
-  var aellux_ext_focus_exports = {};
-  function _createForOfIteratorHelper10(r, e) {
-    var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
-    if (!t) {
-      if (Array.isArray(r) || (t = _unsupportedIterableToArray11(r)) || e && r && "number" == typeof r.length) {
-        t && (r = t);
-        var _n = 0, F = function F2() {
-        };
-        return { s: F, n: function n() {
-          return _n >= r.length ? { done: true } : { done: false, value: r[_n++] };
-        }, e: function e2(r2) {
-          throw r2;
-        }, f: F };
-      }
-      throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
-    }
-    var o, a = true, u = false;
-    return { s: function s() {
-      t = t.call(r);
-    }, n: function n() {
-      var r2 = t.next();
-      return a = r2.done, r2;
-    }, e: function e2(r2) {
-      u = true, o = r2;
-    }, f: function f() {
-      try {
-        a || null == t.return || t.return();
-      } finally {
-        if (u) throw o;
-      }
-    } };
-  }
-  function _unsupportedIterableToArray11(r, a) {
-    if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray11(r, a);
-      var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray11(r, a) : void 0;
-    }
-  }
-  function _arrayLikeToArray11(r, a) {
-    (null == a || a > r.length) && (a = r.length);
-    for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
-    return n;
-  }
-  var init_aellux_ext_focus = __esm({
-    "src/aellux.ext.focus.js": function() {
-      /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
-      (function(root2) {
-        "use strict";
-        var AelluxJs2 = root2.AelluxJs;
-        var extensionName = "focus";
-        if (!AelluxJs2) {
-          throw new Error('[aellux.js] Cannot attach the "'.concat(extensionName, '" extension: root.AelluxJs is not defined. Load the aellux.js boot script before this extension.'));
-        }
-        AelluxJs2.extAttach(extensionName, {
-          init: init,
-          destroy: destroy,
-          restoreLastFocus: restoreLastFocus
-        });
-        var attribute = AelluxJs2.attr(extensionName);
-        var snapshotKey = "ae-focus";
-        var entries = [];
-        var hintMemories = /* @__PURE__ */ new WeakMap();
-        var nextElements = /* @__PURE__ */ new WeakSet();
-        var textEntrySelector = "input:not([type]), input[type=text], input[type=search], input[type=email], input[type=url], input[type=tel], input[type=password], input[type=number], textarea, [contenteditable]:not([contenteditable=false])";
-        var focusableSelector = "a[href], area[href], button, input, select, textarea, [tabindex], [contenteditable]:not([contenteditable=false])";
-        var current = null, restoring = false;
-        function init() {
-          AelluxJs2.mountManager.add({
-            extensionName: extensionName,
-            selector: "[".concat(attribute, "]"),
-            priority: 0,
-            mount: mountFocusElement,
-            unmount: unmountFocusElement
-          });
-          AelluxJs2.on("$focusin", onFocusIn, true);
-          AelluxJs2.on("$focus", onFocusChange, true);
-          AelluxJs2.on("$blur", onBlur, true);
-          AelluxJs2.onTarget(root2, "$focus", onWindowFocus);
-          AelluxJs2.onTarget(root2, "$blur", onWindowBlur);
-          AelluxJs2.on("SnapshotRestore", onSnapshotRestore);
-          AelluxJs2.on("UnpopFocusLost", onUnpopFocusLost);
-          remember(document.activeElement, false);
-        }
-        function destroy() {
-          AelluxJs2.off("$focusin", onFocusIn, true);
-          AelluxJs2.off("$focus", onFocusChange, true);
-          AelluxJs2.off("$blur", onBlur, true);
-          AelluxJs2.offTarget(root2, "$focus", onWindowFocus);
-          AelluxJs2.offTarget(root2, "$blur", onWindowBlur);
-          AelluxJs2.off("SnapshotRestore", onSnapshotRestore);
-          AelluxJs2.off("UnpopFocusLost", onUnpopFocusLost);
-          AelluxJs2.mountManager.remove({
-            extensionName: extensionName
-          });
-          entries.length = 0;
-          current = null;
-        }
-        function mountFocusElement(element) {
-          var type = element.getAttribute(attribute);
-          switch (type) {
-            case "next":
-              AelluxJs2.onTarget(element, "$keydown", onNextKeyDown);
-              nextElements.add(element);
-              if (!element.hasAttribute("enterkeyhint") && element.matches(textEntrySelector)) {
-                hintMemories.set(element, AelluxJs2.persist.element.save(element, ["enterkeyhint"], []));
-                element.setAttribute("enterkeyhint", "next");
-              }
-              break;
-          }
-        }
-        function unmountFocusElement(element) {
-          var _hintMemories$get;
-          if (nextElements.delete(element)) AelluxJs2.offTarget(element, "$keydown", onNextKeyDown);
-          (_hintMemories$get = hintMemories.get(element)) === null || _hintMemories$get === void 0 || _hintMemories$get.restore();
-          hintMemories.delete(element);
-        }
-        function onNextKeyDown(event) {
-          if (event.key !== "Enter" || event.isComposing || event.repeat || event.defaultPrevented || event.target !== event.currentTarget && event.target.closest(focusableSelector) !== event.currentTarget) return;
-          var elements = document.querySelectorAll(focusableSelector);
-          var foundCurrent = false;
-          var _iterator = _createForOfIteratorHelper10(elements), _step;
-          try {
-            for (_iterator.s(); !(_step = _iterator.n()).done; ) {
-              var element = _step.value;
-              if (element === event.currentTarget) {
-                foundCurrent = true;
-              } else if (foundCurrent && element.tabIndex >= 0 && isValid(element)) {
-                event.preventDefault();
-                element.focus();
-                return;
-              }
-            }
-          } catch (err) {
-            _iterator.e(err);
-          } finally {
-            _iterator.f();
-          }
-        }
-        function isValid(element) {
-          if (!element || element === document.body || element === document.documentElement || !element.isConnected || typeof element.focus !== "function" || element.matches(":disabled, [hidden], [inert]")) return false;
-          for (var node = element; node && node.nodeType === 1; node = node.parentElement) {
-            if (node.hidden || node.hasAttribute("inert")) return false;
-            var style = root2.getComputedStyle(node);
-            if (style.display === "none" || style.visibility === "hidden" || style.visibility === "collapse") return false;
-          }
-          return element.getClientRects().length > 0;
-        }
-        function remember(element, push) {
-          if (!isValid(element) || current && current.element === element) return;
-          var entry = {
-            element: element
-          };
-          entries.push(entry);
-          if (entries.length > 100) entries.shift();
-          current = entry;
-          if (!push || !element.id || !element.id.trim()) return;
-          AelluxJs2.dispatch("PushState", {
-            detail: {
-              key: snapshotKey,
-              value: element.id
-            }
-          });
-        }
-        function onFocusIn(event) {
-          if (!restoring) remember(event.target, true);
-        }
-        function onFocusChange(event) {
-          if (!restoring) remember(event.target, true);
-        }
-        function onBlur(event) {
-          if (!restoring) remember(event.target, false);
-        }
-        function onWindowFocus() {
-          if (!restoring) remember(document.activeElement, true);
-        }
-        function onWindowBlur() {
-          if (!restoring) remember(document.activeElement, false);
-        }
-        function restore(entry) {
-          if (!entry || !isValid(entry.element)) return false;
-          restoring = true;
-          try {
-            entry.element.focus();
-          } finally {
-            restoring = false;
-          }
-          if (document.activeElement !== entry.element) return false;
-          current = entry;
-          return true;
-        }
-        function restoreLastFocus() {
-          var index = entries.indexOf(current);
-          var start = (index < 0 ? entries.length : index) - 1;
-          for (var i = start; i >= 0; i--) {
-            if (restore(entries[i])) return true;
-          }
-          return false;
-        }
-        function onUnpopFocusLost() {
-          restoreLastFocus();
-        }
-        function onSnapshotRestore(event) {
-          var snapshot = event.detail && event.detail.snapshot;
-          if (!snapshot || !Object.prototype.hasOwnProperty.call(snapshot, snapshotKey)) return;
-          var target = document.getElementById(snapshot[snapshotKey]);
-          if (target) {
-            for (var i = entries.length - 1; i >= 0; i--) {
-              if (entries[i].element === target) {
-                if (!restore(entries[i])) restoreLastFocus();
-                return;
-              }
-            }
-            if (restore({
-              element: target
-            })) return;
-          }
-          restoreLastFocus();
-        }
-      })(typeof globalThis !== "undefined" ? globalThis : window);
-    }
-  });
-
-  // src/aellux.ext.point.js
-  var aellux_ext_point_exports = {};
-  function _typeof6(o) {
-    "@babel/helpers - typeof";
-    return _typeof6 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
-      return typeof o2;
-    } : function(o2) {
-      return o2 && "function" == typeof Symbol && o2.constructor === Symbol && o2 !== Symbol.prototype ? "symbol" : typeof o2;
-    }, _typeof6(o);
-  }
-  function _classCallCheck(a, n) {
-    if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function");
-  }
-  function _defineProperties(e, r) {
-    for (var t = 0; t < r.length; t++) {
-      var o = r[t];
-      o.enumerable = o.enumerable || false, o.configurable = true, "value" in o && (o.writable = true), Object.defineProperty(e, _toPropertyKey2(o.key), o);
-    }
-  }
-  function _createClass(e, r, t) {
-    return r && _defineProperties(e.prototype, r), t && _defineProperties(e, t), Object.defineProperty(e, "prototype", { writable: false }), e;
-  }
-  function _toPropertyKey2(t) {
-    var i = _toPrimitive2(t, "string");
-    return "symbol" == _typeof6(i) ? i : i + "";
-  }
-  function _toPrimitive2(t, r) {
-    if ("object" != _typeof6(t) || !t) return t;
-    var e = t[Symbol.toPrimitive];
-    if (void 0 !== e) {
-      var i = e.call(t, r || "default");
-      if ("object" != _typeof6(i)) return i;
-      throw new TypeError("@@toPrimitive must return a primitive value.");
-    }
-    return ("string" === r ? String : Number)(t);
-  }
-  function _slicedToArray5(r, e) {
-    return _arrayWithHoles5(r) || _iterableToArrayLimit5(r, e) || _unsupportedIterableToArray12(r, e) || _nonIterableRest5();
-  }
-  function _nonIterableRest5() {
-    throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
-  }
-  function _iterableToArrayLimit5(r, l) {
-    var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
-    if (null != t) {
-      var e, n, i, u, a = [], f = true, o = false;
-      try {
-        if (i = (t = t.call(r)).next, 0 === l) {
-          if (Object(t) !== t) return;
-          f = false;
-        } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = true) ;
-      } catch (r2) {
-        o = true, n = r2;
-      } finally {
-        try {
-          if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return;
-        } finally {
-          if (o) throw n;
-        }
-      }
-      return a;
-    }
-  }
-  function _arrayWithHoles5(r) {
-    if (Array.isArray(r)) return r;
-  }
-  function _createForOfIteratorHelper11(r, e) {
-    var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
-    if (!t) {
-      if (Array.isArray(r) || (t = _unsupportedIterableToArray12(r)) || e && r && "number" == typeof r.length) {
-        t && (r = t);
-        var _n = 0, F = function F2() {
-        };
-        return { s: F, n: function n() {
-          return _n >= r.length ? { done: true } : { done: false, value: r[_n++] };
-        }, e: function e2(r2) {
-          throw r2;
-        }, f: F };
-      }
-      throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
-    }
-    var o, a = true, u = false;
-    return { s: function s() {
-      t = t.call(r);
-    }, n: function n() {
-      var r2 = t.next();
-      return a = r2.done, r2;
-    }, e: function e2(r2) {
-      u = true, o = r2;
-    }, f: function f() {
-      try {
-        a || null == t.return || t.return();
-      } finally {
-        if (u) throw o;
-      }
-    } };
-  }
-  function _unsupportedIterableToArray12(r, a) {
-    if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray12(r, a);
-      var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray12(r, a) : void 0;
-    }
-  }
-  function _arrayLikeToArray12(r, a) {
-    (null == a || a > r.length) && (a = r.length);
-    for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
-    return n;
-  }
-  var init_aellux_ext_point = __esm({
-    "src/aellux.ext.point.js": function() {
-      /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
-      (function(root2) {
-        "use strict";
-        var AelluxJs2 = root2.AelluxJs;
-        var extensionName = "point";
-        if (!AelluxJs2) {
-          throw new Error('[aellux.js] Cannot attach the "'.concat(extensionName, '" extension: root.AelluxJs is not defined. Load the aellux.js boot script before this extension.'));
-        }
-        var POINTER = "pointer";
-        var trackedPointers = /* @__PURE__ */ new Map();
-        var pointableElements = /* @__PURE__ */ new Set();
-        var pointableAttribute = AelluxJs2.attr("point");
-        var pointableSelector = "[".concat(pointableAttribute, "]");
-        var pointerEvents = [["down", onPointerDown], ["move", onPointerMove], ["up", onPointerUp], ["cancel", onPointerCancel], ["over", onPointerOver], ["out", onPointerOut]];
-        AelluxJs2.extAttach(extensionName, {
-          init: init,
-          destroy: destroy,
-          pointers: pointers
-        });
-        function init() {
-          AelluxJs2.mountManager.add({
-            extensionName: extensionName,
-            selector: pointableSelector,
-            priority: 0,
-            mount: mountPointable,
-            unmount: unmountPointable,
-            controllers: ["pointers"]
-          });
-          var _iterator = _createForOfIteratorHelper11(pointerEvents), _step;
-          try {
-            for (_iterator.s(); !(_step = _iterator.n()).done; ) {
-              var _step$value = _slicedToArray5(_step.value, 2), suffix = _step$value[0], handler = _step$value[1];
-              AelluxJs2.on("$".concat(POINTER).concat(suffix), handler, true);
-            }
-          } catch (err) {
-            _iterator.e(err);
-          } finally {
-            _iterator.f();
-          }
-        }
-        function destroy() {
-          AelluxJs2.mountManager.remove({
-            extensionName: extensionName
-          });
-          var _iterator2 = _createForOfIteratorHelper11(pointerEvents), _step2;
-          try {
-            for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
-              var _step2$value = _slicedToArray5(_step2.value, 2), suffix = _step2$value[0], handler = _step2$value[1];
-              AelluxJs2.off("$".concat(POINTER).concat(suffix), handler, true);
-            }
-          } catch (err) {
-            _iterator2.e(err);
-          } finally {
-            _iterator2.f();
-          }
-          trackedPointers.clear();
-          pointableElements.clear();
-        }
-        function mountPointable(element) {
-          pointableElements.add(element);
-        }
-        function unmountPointable(element) {
-          pointableElements.delete(element);
-          var _iterator3 = _createForOfIteratorHelper11(trackedPointers.values()), _step3;
-          try {
-            for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
-              var pointer = _step3.value;
-              if (pointer.target === element) pointer.target = null;
-              if (pointer.pressStart === element) pointer.pressStart = null;
-            }
-          } catch (err) {
-            _iterator3.e(err);
-          } finally {
-            _iterator3.f();
-          }
-        }
-        function pointers(element) {
-          var result = [];
-          var _iterator4 = _createForOfIteratorHelper11(trackedPointers.values()), _step4;
-          try {
-            for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
-              var pointer = _step4.value;
-              if (pointer.target === element) result.push(pointer);
-            }
-          } catch (err) {
-            _iterator4.e(err);
-          } finally {
-            _iterator4.f();
-          }
-          return result;
-        }
-        function limitFor(element) {
-          var value = element.getAttribute(pointableAttribute);
-          if (value === null || !value.trim()) return 1;
-          var trimmed = value.trim();
-          var limit = Number(trimmed);
-          return /^\d+$/.test(trimmed) && Number.isSafeInteger(limit) ? limit : 1;
-        }
-        function targetFor(target, pointer) {
-          var element = target && target.nodeType === 1 ? target : target && target.parentElement;
-          while (element) {
-            if (pointableElements.has(element) && element.hasAttribute(pointableAttribute)) {
-              var occupied = 0;
-              var _iterator5 = _createForOfIteratorHelper11(trackedPointers.values()), _step5;
-              try {
-                for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
-                  var other = _step5.value;
-                  if (other !== pointer && other.target === element) occupied++;
-                }
-              } catch (err) {
-                _iterator5.e(err);
-              } finally {
-                _iterator5.f();
-              }
-              if (occupied < limitFor(element)) return element;
-            }
-            element = element.parentElement;
-          }
-          return null;
-        }
-        function dispatchPointer(name, pointer, originalEvent, recipient, hover) {
-          var target = arguments.length > 5 && arguments[5] !== void 0 ? arguments[5] : pointer.target;
-          var pressStart = arguments.length > 6 && arguments[6] !== void 0 ? arguments[6] : pointer.pressStart;
-          if (!recipient) return;
-          AelluxJs2.dispatchFrom(recipient, name, {
-            bubbles: false,
-            detail: {
-              pointer: pointer,
-              target: target,
-              pressStart: pressStart,
-              originalEvent: originalEvent,
-              hover: hover
-            }
-          });
-        }
-        function dispatchToTarget(name, pointer, originalEvent) {
-          if (!pointer.target) return;
-          pointer.beforeDispatch();
-          dispatchPointer(name, pointer, originalEvent, pointer.target);
-        }
-        function dispatchRelease(name, pointer, originalEvent) {
-          var target = pointer.target;
-          var pressStart = pointer.pressStart;
-          if (!target && !pressStart) return;
-          pointer.beforeDispatch();
-          dispatchPointer(name, pointer, originalEvent, target, void 0, target, pressStart);
-          if (pressStart !== target) dispatchPointer(name, pointer, originalEvent, pressStart, void 0, target, pressStart);
-        }
-        function updateHoverTarget(pointer, event, nextTarget) {
-          var previousTarget = pointer.target;
-          if (previousTarget === nextTarget) return;
-          if (previousTarget || nextTarget) pointer.beforeDispatch();
-          dispatchPointer("PointerHover", pointer, event, previousTarget, false);
-          pointer.target = nextTarget;
-          dispatchPointer("PointerHover", pointer, event, nextTarget, true);
-        }
-        function canHover(event) {
-          return event.pointerType === "mouse" || event.pointerType === "pen";
-        }
-        function addPointer(event, pressed, hover) {
-          var pointer = new AePointer(event, pressed, hover);
-          trackedPointers.set(event.pointerId, pointer);
-          return pointer;
-        }
-        function onPointerDown(event) {
-          var pointer = trackedPointers.get(event.pointerId) || addPointer(event, true, canHover(event));
-          pointer.initial.x = event.clientX;
-          pointer.initial.y = event.clientY;
-          pointer.pointerType = event.pointerType;
-          pointer.pressed = true;
-          pointer.startPress();
-          pointer.hover = canHover(event);
-          pointer.update(event);
-          pointer.target = targetFor(event.target, pointer);
-          pointer.pressStart = pointer.target;
-          dispatchToTarget("PointerDown", pointer, event);
-        }
-        function onPointerMove(event) {
-          var pointer = trackedPointers.get(event.pointerId);
-          if (!pointer) {
-            if (!canHover(event)) return;
-            pointer = addPointer(event, false, true);
-          }
-          pointer.update(event);
-          pointer.target = targetFor(event.target, pointer);
-          dispatchToTarget("PointerMove", pointer, event);
-        }
-        function onPointerUp(event) {
-          var pointer = trackedPointers.get(event.pointerId);
-          if (!pointer) return;
-          pointer.update(event);
-          pointer.pressed = false;
-          pointer.endPress();
-          pointer.target = targetFor(event.target, pointer);
-          dispatchRelease("PointerUp", pointer, event);
-          if (!pointer.hover) trackedPointers.delete(event.pointerId);
-        }
-        function onPointerCancel(event) {
-          var pointer = trackedPointers.get(event.pointerId);
-          if (pointer) {
-            pointer.update(event);
-            pointer.pressed = false;
-            pointer.endPress();
-            pointer.target = targetFor(event.target, pointer);
-            dispatchRelease("PointerCancel", pointer, event);
-          }
-          trackedPointers.delete(event.pointerId);
-        }
-        function onPointerOver(event) {
-          if (!canHover(event)) return;
-          var pointer = trackedPointers.get(event.pointerId) || addPointer(event, false, true);
-          pointer.update(event);
-          pointer.hover = true;
-          updateHoverTarget(pointer, event, targetFor(event.target, pointer));
-        }
-        function onPointerOut(event) {
-          var pointer = trackedPointers.get(event.pointerId);
-          if (!pointer) return;
-          var relatedTarget = event.relatedTarget;
-          pointer.update(event);
-          updateHoverTarget(pointer, event, targetFor(relatedTarget, pointer));
-          if (!relatedTarget || !relatedTarget.nodeType || !document.contains(relatedTarget)) {
-            pointer.hover = false;
-            pointer.target = null;
-          }
-          if (!pointer.pressed && !pointer.hover) trackedPointers.delete(event.pointerId);
-        }
-        var AePointer = /* @__PURE__ */ (function() {
-          function AePointer2(event, pressed, hover) {
-            _classCallCheck(this, AePointer2);
-            var x = event.clientX;
-            var y = event.clientY;
-            this.pointerId = event.pointerId;
-            this.pointerType = event.pointerType;
-            this.initial = {
-              x: x,
-              y: y
-            };
-            this.current = {
-              x: x,
-              y: y
-            };
-            this.delta = {
-              x: 0,
-              y: 0
-            };
-            this.movement = {
-              x: 0,
-              y: 0
-            };
-            this.lastDispatched = {
-              x: x,
-              y: y
-            };
-            this.time = {
-              pressStart: null,
-              pressEnd: null
-            };
-            this.buttons = event.buttons;
-            this.pressed = pressed;
-            this.hover = hover;
-            this.target = null;
-            this.pressStart = null;
-          }
-          return _createClass(AePointer2, [{
-            key: "deltaTime",
-            get: function get() {
-              var _this$time$pressEnd;
-              if (this.time.pressStart === null) return 0;
-              return ((_this$time$pressEnd = this.time.pressEnd) !== null && _this$time$pressEnd !== void 0 ? _this$time$pressEnd : root2.performance.now()) - this.time.pressStart;
-            }
-          }, {
-            key: "startPress",
-            value: function startPress() {
-              this.time.pressStart = root2.performance.now();
-              this.time.pressEnd = null;
-            }
-          }, {
-            key: "endPress",
-            value: function endPress() {
-              if (this.time.pressStart !== null && this.time.pressEnd === null) this.time.pressEnd = root2.performance.now();
-            }
-          }, {
-            key: "update",
-            value: function update(event) {
-              this.current.x = event.clientX;
-              this.current.y = event.clientY;
-              this.delta.x = this.current.x - this.initial.x;
-              this.delta.y = this.current.y - this.initial.y;
-              this.buttons = event.buttons;
-            }
-          }, {
-            key: "beforeDispatch",
-            value: function beforeDispatch() {
-              this.movement.x = this.current.x - this.lastDispatched.x;
-              this.movement.y = this.current.y - this.lastDispatched.y;
-              this.lastDispatched.x = this.current.x;
-              this.lastDispatched.y = this.current.y;
-            }
-          }]);
-        })();
-      })(typeof globalThis !== "undefined" ? globalThis : window);
-    }
-  });
-
-  // src/aellux.ext.anchor.js
-  var aellux_ext_anchor_exports = {};
-  function _regenerator5() {
-    /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/babel/babel/blob/main/packages/babel-helpers/LICENSE */
-    var e, t, r = "function" == typeof Symbol ? Symbol : {}, n = r.iterator || "@@iterator", o = r.toStringTag || "@@toStringTag";
-    function i(r2, n2, o2, i2) {
-      var c2 = n2 && n2.prototype instanceof Generator ? n2 : Generator, u2 = Object.create(c2.prototype);
-      return _regeneratorDefine25(u2, "_invoke", (function(r3, n3, o3) {
-        var i3, c3, u3, f2 = 0, p = o3 || [], y = false, G = { p: 0, n: 0, v: e, a: d, f: d.bind(e, 4), d: function d2(t2, r4) {
-          return i3 = t2, c3 = 0, u3 = e, G.n = r4, a;
-        } };
-        function d(r4, n4) {
-          for (c3 = r4, u3 = n4, t = 0; !y && f2 && !o4 && t < p.length; t++) {
-            var o4, i4 = p[t], d2 = G.p, l = i4[2];
-            r4 > 3 ? (o4 = l === n4) && (u3 = i4[(c3 = i4[4]) ? 5 : (c3 = 3, 3)], i4[4] = i4[5] = e) : i4[0] <= d2 && ((o4 = r4 < 2 && d2 < i4[1]) ? (c3 = 0, G.v = n4, G.n = i4[1]) : d2 < l && (o4 = r4 < 3 || i4[0] > n4 || n4 > l) && (i4[4] = r4, i4[5] = n4, G.n = l, c3 = 0));
-          }
-          if (o4 || r4 > 1) return a;
-          throw y = true, n4;
-        }
-        return function(o4, p2, l) {
-          if (f2 > 1) throw TypeError("Generator is already running");
-          for (y && 1 === p2 && d(p2, l), c3 = p2, u3 = l; (t = c3 < 2 ? e : u3) || !y; ) {
-            i3 || (c3 ? c3 < 3 ? (c3 > 1 && (G.n = -1), d(c3, u3)) : G.n = u3 : G.v = u3);
-            try {
-              if (f2 = 2, i3) {
-                if (c3 || (o4 = "next"), t = i3[o4]) {
-                  if (!(t = t.call(i3, u3))) throw TypeError("iterator result is not an object");
-                  if (!t.done) return t;
-                  u3 = t.value, c3 < 2 && (c3 = 0);
-                } else 1 === c3 && (t = i3.return) && t.call(i3), c3 < 2 && (u3 = TypeError("The iterator does not provide a '" + o4 + "' method"), c3 = 1);
-                i3 = e;
-              } else if ((t = (y = G.n < 0) ? u3 : r3.call(n3, G)) !== a) break;
-            } catch (t2) {
-              i3 = e, c3 = 1, u3 = t2;
-            } finally {
-              f2 = 1;
-            }
-          }
-          return { value: t, done: y };
-        };
-      })(r2, o2, i2), true), u2;
-    }
-    var a = {};
-    function Generator() {
-    }
-    function GeneratorFunction() {
-    }
-    function GeneratorFunctionPrototype() {
-    }
-    t = Object.getPrototypeOf;
-    var c = [][n] ? t(t([][n]())) : (_regeneratorDefine25(t = {}, n, function() {
-      return this;
-    }), t), u = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(c);
-    function f(e2) {
-      return Object.setPrototypeOf ? Object.setPrototypeOf(e2, GeneratorFunctionPrototype) : (e2.__proto__ = GeneratorFunctionPrototype, _regeneratorDefine25(e2, o, "GeneratorFunction")), e2.prototype = Object.create(u), e2;
-    }
-    return GeneratorFunction.prototype = GeneratorFunctionPrototype, _regeneratorDefine25(u, "constructor", GeneratorFunctionPrototype), _regeneratorDefine25(GeneratorFunctionPrototype, "constructor", GeneratorFunction), GeneratorFunction.displayName = "GeneratorFunction", _regeneratorDefine25(GeneratorFunctionPrototype, o, "GeneratorFunction"), _regeneratorDefine25(u), _regeneratorDefine25(u, o, "Generator"), _regeneratorDefine25(u, n, function() {
-      return this;
-    }), _regeneratorDefine25(u, "toString", function() {
-      return "[object Generator]";
-    }), (_regenerator5 = function _regenerator7() {
-      return { w: i, m: f };
-    })();
-  }
-  function _regeneratorDefine25(e, r, n, t) {
-    var i = Object.defineProperty;
-    try {
-      i({}, "", {});
-    } catch (e2) {
-      i = 0;
-    }
-    _regeneratorDefine25 = function _regeneratorDefine(e2, r2, n2, t2) {
-      function o(r3, n3) {
-        _regeneratorDefine25(e2, r3, function(e3) {
-          return this._invoke(r3, n3, e3);
-        });
-      }
-      r2 ? i ? i(e2, r2, { value: n2, enumerable: !t2, configurable: !t2, writable: !t2 }) : e2[r2] = n2 : (o("next", 0), o("throw", 1), o("return", 2));
-    }, _regeneratorDefine25(e, r, n, t);
-  }
-  function _slicedToArray6(r, e) {
-    return _arrayWithHoles6(r) || _iterableToArrayLimit6(r, e) || _unsupportedIterableToArray13(r, e) || _nonIterableRest6();
-  }
-  function _nonIterableRest6() {
-    throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
-  }
-  function _iterableToArrayLimit6(r, l) {
-    var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
-    if (null != t) {
-      var e, n, i, u, a = [], f = true, o = false;
-      try {
-        if (i = (t = t.call(r)).next, 0 === l) {
-          if (Object(t) !== t) return;
-          f = false;
-        } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = true) ;
-      } catch (r2) {
-        o = true, n = r2;
-      } finally {
-        try {
-          if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return;
-        } finally {
-          if (o) throw n;
-        }
-      }
-      return a;
-    }
-  }
-  function _arrayWithHoles6(r) {
-    if (Array.isArray(r)) return r;
-  }
-  function _createForOfIteratorHelper12(r, e) {
-    var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
-    if (!t) {
-      if (Array.isArray(r) || (t = _unsupportedIterableToArray13(r)) || e && r && "number" == typeof r.length) {
-        t && (r = t);
-        var _n = 0, F = function F2() {
-        };
-        return { s: F, n: function n() {
-          return _n >= r.length ? { done: true } : { done: false, value: r[_n++] };
-        }, e: function e2(r2) {
-          throw r2;
-        }, f: F };
-      }
-      throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
-    }
-    var o, a = true, u = false;
-    return { s: function s() {
-      t = t.call(r);
-    }, n: function n() {
-      var r2 = t.next();
-      return a = r2.done, r2;
-    }, e: function e2(r2) {
-      u = true, o = r2;
-    }, f: function f() {
-      try {
-        a || null == t.return || t.return();
-      } finally {
-        if (u) throw o;
-      }
-    } };
-  }
-  function _unsupportedIterableToArray13(r, a) {
-    if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray13(r, a);
-      var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray13(r, a) : void 0;
-    }
-  }
-  function _arrayLikeToArray13(r, a) {
-    (null == a || a > r.length) && (a = r.length);
-    for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
-    return n;
-  }
-  function asyncGeneratorStep5(n, t, e, r, o, a, c) {
-    try {
-      var i = n[a](c), u = i.value;
-    } catch (n2) {
-      return void e(n2);
-    }
-    i.done ? t(u) : Promise.resolve(u).then(r, o);
-  }
-  function _asyncToGenerator5(n) {
-    return function() {
-      var t = this, e = arguments;
-      return new Promise(function(r, o) {
-        var a = n.apply(t, e);
-        function _next(n2) {
-          asyncGeneratorStep5(a, r, o, _next, _throw, "next", n2);
-        }
-        function _throw(n2) {
-          asyncGeneratorStep5(a, r, o, _next, _throw, "throw", n2);
-        }
-        _next(void 0);
-      });
-    };
-  }
-  var init_aellux_ext_anchor = __esm({
-    "src/aellux.ext.anchor.js": function() {
-      /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
-      (function(root2) {
-        "use strict";
-        var AelluxJs2 = root2.AelluxJs;
-        var extensionName = "anchor";
-        if (!AelluxJs2) {
-          throw new Error('[aellux.js] Cannot attach the "'.concat(extensionName, '" extension: root.AelluxJs is not defined. Load the aellux.js boot script before this extension.'));
-        }
-        var ORIGIN_X = "--ae-anchor-origin-x", ORIGIN_Y = "--ae-anchor-origin-y", ANCHOR_OPACITY = "--anchor-opacity";
-        var attribute = AelluxJs2.attr(extensionName);
-        var presentAttribute = AelluxJs2.attr("present");
-        var targetAttribute = AelluxJs2.attr("anchor-target");
-        var layoutEvent = AelluxJs2.eventName("Layout");
-        var anchoredClass = AelluxJs2.className("anchored");
-        var baseProperties = ["position", "left", "top", "transform", "transform-origin"];
-        var ownedProperties = [].concat(baseProperties, ["--ae-anchor-x", "--ae-anchor-y", ORIGIN_X, ORIGIN_Y, ANCHOR_OPACITY]);
-        var pivots = {
-          "top-left": [0, 0],
-          "top-center": [0.5, 0],
-          "top-right": [1, 0],
-          "center-left": [0, 0.5],
-          center: [0.5, 0.5],
-          "center-right": [1, 0.5],
-          "bottom-left": [0, 1],
-          "bottom-center": [0.5, 1],
-          "bottom-right": [1, 1]
-        };
-        var anchors = /* @__PURE__ */ new Map();
-        var elementMemories = /* @__PURE__ */ new WeakMap();
-        var nextLayoutId = 2e6;
-        AelluxJs2.extAttach(extensionName, {
-          init: init,
-          destroy: destroy
-        });
-        function init() {
-          AelluxJs2.registerCssProperty({
-            name: "--ae-anchor-x",
-            syntax: "<length>",
-            initialValue: "0px"
-          }, {
-            name: "--ae-anchor-y",
-            syntax: "<length>",
-            initialValue: "0px"
-          }, {
-            name: ORIGIN_X,
-            syntax: "<percentage>",
-            initialValue: "50%"
-          }, {
-            name: ORIGIN_Y,
-            syntax: "<percentage>",
-            initialValue: "0%"
-          }, {
-            name: ANCHOR_OPACITY,
-            syntax: "<number>",
-            initialValue: "1"
-          });
-          AelluxJs2.mountManager.add({
-            extensionName: extensionName,
-            selector: "[".concat(attribute, "]"),
-            priority: 0,
-            mount: mountAnchor,
-            unmount: unmountAnchor,
-            update: updateAnchor
-          });
-        }
-        function destroy() {
-          return _destroy.apply(this, arguments);
-        }
-        function _destroy() {
-          _destroy = _asyncToGenerator5(/* @__PURE__ */ _regenerator5().m(function _callee() {
-            return _regenerator5().w(function(_context) {
-              while (1) switch (_context.n) {
-                case 0:
-                  _context.n = 1;
-                  return Promise.all(Array.from(anchors.keys(), unmountAnchor));
-                case 1:
-                  AelluxJs2.mountManager.remove({
-                    extensionName: extensionName
-                  });
-                case 2:
-                  return _context.a(2);
-              }
-            }, _callee);
-          }));
-          return _destroy.apply(this, arguments);
-        }
-        function mountAnchor(element) {
-          if (anchors.has(element)) return;
-          elementMemories.set(element, AelluxJs2.persist.element.save(element, [], ownedProperties));
-          var state = {
-            invalidContext: false,
-            active: false,
-            revision: 0,
-            target: null,
-            reference: null,
-            layoutId: nextLayoutId++,
-            layoutUntil: 0,
-            layoutSingle: false,
-            layoutFinalPending: false,
-            layoutPolling: false,
-            updatePending: false,
-            updateDirty: false,
-            repeatPending: false,
-            lastUpdateAt: -Infinity,
-            updateTimer: null,
-            updateTimerDue: false,
-            layoutListener: function layoutListener(event) {
-              return scheduleLayoutUpdate(event);
-            },
-            observer: null,
-            intersectionObserver: null
-          };
-          anchors.set(element, state);
-          if (element.offsetParent) listenForLayout(state, element.offsetParent);
-          if (anchors.size === 1) {
-            AelluxJs2.onTarget(root2, "$scroll", scheduleUpdate, {
-              capture: true,
-              passive: true
-            });
-            AelluxJs2.onTarget(root2, "$resize", scheduleUpdate);
-          }
-          if (typeof root2.ResizeObserver === "function") {
-            state.observer = new root2.ResizeObserver(scheduleUpdate);
-          }
-          if (typeof root2.IntersectionObserver === "function") {
-            state.intersectionObserver = new root2.IntersectionObserver(scheduleUpdate);
-          }
-          return updateAnchor(element);
-        }
-        function unmountAnchor(_x) {
-          return _unmountAnchor.apply(this, arguments);
-        }
-        function _unmountAnchor() {
-          _unmountAnchor = _asyncToGenerator5(/* @__PURE__ */ _regenerator5().m(function _callee2(element) {
-            var state, memory;
-            return _regenerator5().w(function(_context2) {
-              while (1) switch (_context2.n) {
-                case 0:
-                  state = anchors.get(element);
-                  if (state) {
-                    _context2.n = 1;
-                    break;
-                  }
-                  return _context2.a(2);
-                case 1:
-                  memory = elementMemories.get(element);
-                  elementMemories.delete(element);
-                  state.revision++;
-                  if (state.reference) AelluxJs2.offTarget(state.reference, layoutEvent, state.layoutListener);
-                  if (state.observer) state.observer.disconnect();
-                  if (state.intersectionObserver) state.intersectionObserver.disconnect();
-                  if (state.updateTimer !== null) root2.clearTimeout(state.updateTimer);
-                  anchors.delete(element);
-                  if (!anchors.size) {
-                    AelluxJs2.offTarget(root2, "$scroll", scheduleUpdate, true);
-                    AelluxJs2.offTarget(root2, "$resize", scheduleUpdate);
-                  }
-                  AelluxJs2.waitLayout.cancel(state.layoutId);
-                  _context2.n = 2;
-                  return AelluxJs2.waitLayout.update(deactivate, [element, state, memory]);
-                case 2:
-                  return _context2.a(2);
-              }
-            }, _callee2);
-          }));
-          return _unmountAnchor.apply(this, arguments);
-        }
-        function scheduleUpdate() {
-          if (!anchors.size) return;
-          var _iterator = _createForOfIteratorHelper12(anchors.keys()), _step;
-          try {
-            for (_iterator.s(); !(_step = _iterator.n()).done; ) {
-              var element = _step.value;
-              scheduleAnchor(element);
-            }
-          } catch (err) {
-            _iterator.e(err);
-          } finally {
-            _iterator.f();
-          }
-        }
-        function scheduleLayoutUpdate(event) {
-          var durationMs = Number(event && event.detail ? event.detail.durationMs : NaN);
-          if (!Number.isFinite(durationMs) || durationMs < 0) {
-            scheduleUpdate();
-            return;
-          }
-          if (durationMs === 0) {
-            var _iterator2 = _createForOfIteratorHelper12(anchors), _step2;
-            try {
-              for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
-                var _step2$value = _slicedToArray6(_step2.value, 2), element = _step2$value[0], state = _step2$value[1];
-                var maxFPS = AelluxJs2.layoutMaxFPS(element);
-                state.layoutUntil = now() + 1e3 / (maxFPS || 60);
-                state.layoutSingle = true;
-                state.layoutFinalPending = true;
-                scheduleAnchor(element, true);
-              }
-            } catch (err) {
-              _iterator2.e(err);
-            } finally {
-              _iterator2.f();
-            }
-            return;
-          }
-          var _iterator3 = _createForOfIteratorHelper12(anchors), _step3;
-          try {
-            for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
-              var _step3$value = _slicedToArray6(_step3.value, 2), _element = _step3$value[0], _state = _step3$value[1];
-              _state.layoutUntil = Math.max(_state.layoutUntil, now() + durationMs);
-              _state.layoutSingle = false;
-              _state.layoutFinalPending = true;
-              scheduleAnchor(_element, durationMs > 0);
-            }
-          } catch (err) {
-            _iterator3.e(err);
-          } finally {
-            _iterator3.f();
-          }
-        }
-        function scheduleAnchor(element) {
-          var repeat = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : false;
-          var state = anchors.get(element);
-          if (!state) return;
-          if (state.updatePending) {
-            state.updateDirty = true;
-            state.repeatPending = state.repeatPending || repeat;
-            return;
-          }
-          var maxFPS = AelluxJs2.layoutMaxFPS(element);
-          if (maxFPS && !repeat && !state.updateTimerDue) {
-            if (state.updateTimer === null) {
-              state.updateTimer = root2.setTimeout(function() {
-                state.updateTimer = null;
-                state.updateTimerDue = true;
-                scheduleAnchor(element);
-              }, 1e3 / maxFPS);
-            }
-            return;
-          }
-          state.updateTimerDue = false;
-          var due = maxFPS ? state.lastUpdateAt + 1e3 / maxFPS : -Infinity;
-          if (due > now()) {
-            if (state.updateTimer === null) {
-              state.updateTimer = root2.setTimeout(function() {
-                state.updateTimer = null;
-                scheduleAnchor(element, repeat);
-              }, Math.max(0, due - now()));
-            }
-            return;
-          }
-          if (state.layoutPolling) {
-            state.updateDirty = true;
-            return;
-          }
-          var run = function run2() {
-            if (state.layoutSingle && now() < state.layoutUntil) return;
-            state.layoutSingle = false;
-            if (repeat && now() >= state.layoutUntil) state.layoutFinalPending = false;
-            requestAnchorUpdate(element, state);
-          };
-          if (repeat) state.layoutPolling = true;
-          var sequence = AelluxJs2.waitLayout.sequence(state.layoutId, {
-            update: run,
-            repeat: repeat ? {
-              ms: 0
-            } : void 0,
-            maxFPS: maxFPS,
-            abort: function abort() {
-              return !anchors.has(element) || repeat && now() >= state.layoutUntil && !state.layoutSingle && !state.layoutFinalPending;
-            }
-          });
-          if (repeat) sequence.finally(function() {
-            if (anchors.get(element) !== state) return;
-            state.layoutPolling = false;
-            if (state.updateDirty) scheduleAnchor(element);
-          });
-        }
-        function requestAnchorUpdate(element, state) {
-          if (state.updatePending) {
-            state.updateDirty = true;
-            return;
-          }
-          state.updatePending = true;
-          state.updateDirty = false;
-          updateAnchor(element).catch(function(cause) {
-            AelluxJs2.diagnostics.error(AelluxJs2.diagnostics.ERROR_EXTENSION_MOUNT, {
-              cause: cause,
-              extension: extensionName,
-              element: element,
-              method: "update"
-            });
-          }).finally(function() {
-            if (anchors.get(element) !== state) return;
-            state.updatePending = false;
-            if (state.updateDirty && !state.layoutPolling) {
-              var repeat = state.repeatPending;
-              state.repeatPending = false;
-              scheduleAnchor(element, repeat);
-            }
-          });
-        }
-        function now() {
-          return root2.performance && typeof root2.performance.now === "function" ? root2.performance.now() : Date.now();
-        }
-        function updateAnchor(_x2) {
-          return _updateAnchor.apply(this, arguments);
-        }
-        function _updateAnchor() {
-          _updateAnchor = _asyncToGenerator5(/* @__PURE__ */ _regenerator5().m(function _callee3(element) {
-            var state, revision, current, targetValue, useReference, target, candidates, placement, applied;
-            return _regenerator5().w(function(_context3) {
-              while (1) switch (_context3.n) {
-                case 0:
-                  state = anchors.get(element);
-                  if (state) {
-                    _context3.n = 1;
-                    break;
-                  }
-                  return _context3.a(2);
-                case 1:
-                  revision = ++state.revision;
-                  current = function current2() {
-                    return anchors.get(element) === state && state.revision === revision;
-                  };
-                  targetValue = element.getAttribute(targetAttribute);
-                  useReference = !targetValue || !targetValue.trim();
-                  target = useReference ? null : resolveElement(targetValue);
-                  candidates = parseCandidates(element.getAttribute(attribute));
-                  if (!(!target && !useReference || !candidates.length)) {
-                    _context3.n = 3;
-                    break;
-                  }
-                  _context3.n = 2;
-                  return AelluxJs2.waitLayout.update(function() {
-                    if (current()) deactivate(element, state);
-                  });
-                case 2:
-                  return _context3.a(2);
-                case 3:
-                  _context3.n = 4;
-                  return AelluxJs2.waitLayout.read(function() {
-                    return current() ? readPlacement(element, target, candidates, state.active) : null;
-                  });
-                case 4:
-                  placement = _context3.v;
-                  if (!(!current() || !placement)) {
-                    _context3.n = 5;
-                    break;
-                  }
-                  return _context3.a(2);
-                case 5:
-                  if (!placement.hidden) {
-                    _context3.n = 7;
-                    break;
-                  }
-                  _context3.n = 6;
-                  return AelluxJs2.waitLayout.update(function() {
-                    if (current()) hideForTarget(element, state, placement);
-                  });
-                case 6:
-                  return _context3.a(2);
-                case 7:
-                  if (placement.valid) {
-                    _context3.n = 9;
-                    break;
-                  }
-                  _context3.n = 8;
-                  return AelluxJs2.waitLayout.update(function() {
-                    if (current()) invalidContext(element, state, placement);
-                  });
-                case 8:
-                  return _context3.a(2);
-                case 9:
-                  if (state.active) {
-                    _context3.n = 17;
-                    break;
-                  }
-                  _context3.n = 10;
-                  return AelluxJs2.waitLayout.update(function() {
-                    if (!current()) return;
-                    applyBaseStyles(element);
-                    state.active = true;
-                  });
-                case 10:
-                  if (current()) {
-                    _context3.n = 11;
-                    break;
-                  }
-                  return _context3.a(2);
-                case 11:
-                  _context3.n = 12;
-                  return AelluxJs2.waitLayout.read(function() {
-                    return current() ? readPlacement(element, useReference ? null : target, candidates, true) : null;
-                  });
-                case 12:
-                  placement = _context3.v;
-                  if (!(!current() || !placement)) {
-                    _context3.n = 13;
-                    break;
-                  }
-                  return _context3.a(2);
-                case 13:
-                  if (!placement.hidden) {
-                    _context3.n = 15;
-                    break;
-                  }
-                  _context3.n = 14;
-                  return AelluxJs2.waitLayout.update(function() {
-                    if (current()) hideForTarget(element, state, placement);
-                  });
-                case 14:
-                  return _context3.a(2);
-                case 15:
-                  if (placement.valid) {
-                    _context3.n = 17;
-                    break;
-                  }
-                  _context3.n = 16;
-                  return AelluxJs2.waitLayout.update(function() {
-                    if (current()) invalidContext(element, state, placement);
-                  });
-                case 16:
-                  return _context3.a(2);
-                case 17:
-                  applied = false;
-                  _context3.n = 18;
-                  return AelluxJs2.waitLayout.update(function() {
-                    if (!current()) return;
-                    state.invalidContext = false;
-                    observe(state, element, placement.target, placement.reference);
-                    var selected = placement.selected;
-                    element.style.setProperty("--ae-anchor-x", "".concat(selected.x, "px"));
-                    element.style.setProperty("--ae-anchor-y", "".concat(selected.y, "px"));
-                    element.style.setProperty(ORIGIN_X, "".concat(selected.self[0] * 100, "%"));
-                    element.style.setProperty(ORIGIN_Y, "".concat(selected.self[1] * 100, "%"));
-                    element.style.setProperty(ANCHOR_OPACITY, placement.opacity);
-                    var _iterator7 = _createForOfIteratorHelper12(baseProperties), _step7;
-                    try {
-                      for (_iterator7.s(); !(_step7 = _iterator7.n()).done; ) {
-                        var name = _step7.value;
-                        element.style.removeProperty(name);
-                      }
-                    } catch (err) {
-                      _iterator7.e(err);
-                    } finally {
-                      _iterator7.f();
-                    }
-                    element.classList.add(anchoredClass);
-                    state.lastUpdateAt = now();
-                    applied = true;
-                  });
-                case 18:
-                  if (!(!applied && anchors.get(element) === state)) {
-                    _context3.n = 19;
-                    break;
-                  }
-                  return _context3.a(2, updateAnchor(element));
-                case 19:
-                  return _context3.a(2);
-              }
-            }, _callee3);
-          }));
-          return _updateAnchor.apply(this, arguments);
-        }
-        function readPlacement(element, target, candidates, measure) {
-          var reference = element.offsetParent;
-          target = target || reference;
-          if (target && isInvisible(target)) return {
-            hidden: true,
-            target: target,
-            reference: reference
-          };
-          if (!reference || target !== reference && target.offsetParent !== reference) {
-            return {
-              valid: false,
-              target: target,
-              reference: reference
-            };
-          }
-          if (!measure) return {
-            valid: true,
-            target: target
-          };
-          var referenceRect = reference.getBoundingClientRect();
-          var scaleX = reference.offsetWidth ? referenceRect.width / reference.offsetWidth : 1;
-          var scaleY = reference.offsetHeight ? referenceRect.height / reference.offsetHeight : 1;
-          var targetRect = toReference(target.getBoundingClientRect(), reference, referenceRect, scaleX, scaleY);
-          var selfRect = element.getBoundingClientRect();
-          var selfWidth = selfRect.width / scaleX;
-          var selfHeight = selfRect.height / scaleY;
-          var boundaryRect = toReference({
-            left: 0,
-            top: 0,
-            width: root2.innerWidth,
-            height: root2.innerHeight
-          }, reference, referenceRect, scaleX, scaleY);
-          var selected = null;
-          var _iterator4 = _createForOfIteratorHelper12(candidates), _step4;
-          try {
-            for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
-              var candidate = _step4.value;
-              var x = targetRect.left + targetRect.width * candidate.target[0] - selfWidth * candidate.self[0];
-              var y = targetRect.top + targetRect.height * candidate.target[1] - selfHeight * candidate.self[1];
-              var result = {
-                x: x,
-                y: y,
-                self: candidate.self
-              };
-              if (!selected) selected = result;
-              if (x >= boundaryRect.left && y >= boundaryRect.top && x + selfWidth <= boundaryRect.left + boundaryRect.width && y + selfHeight <= boundaryRect.top + boundaryRect.height) {
-                selected = result;
-                break;
-              }
-            }
-          } catch (err) {
-            _iterator4.e(err);
-          } finally {
-            _iterator4.f();
-          }
-          var present2 = target.closest("[".concat(presentAttribute, "]"));
-          var opacity = present2 ? root2.getComputedStyle(present2).opacity : "1";
-          return {
-            valid: true,
-            target: target,
-            reference: reference,
-            selected: selected,
-            opacity: opacity
-          };
-        }
-        function isInvisible(element) {
-          var visibility = root2.getComputedStyle(element).visibility;
-          if (visibility === "hidden" || visibility === "collapse") return true;
-          for (var current = element; current && current.nodeType === 1; current = current.parentElement) {
-            var style = root2.getComputedStyle(current);
-            if (current.hidden || style.display === "none" || style.contentVisibility === "hidden" || Number(style.opacity) === 0) return true;
-          }
-          return false;
-        }
-        function hideForTarget(element, state, placement) {
-          deactivate(element, state);
-          state.invalidContext = false;
-          if (placement.reference) listenForLayout(state, placement.reference);
-        }
-        function invalidContext(element, state, placement) {
-          deactivate(element, state);
-          if (placement.reference) listenForLayout(state, placement.reference);
-          if (state.invalidContext) return;
-          AelluxJs2.diagnostics.error(AelluxJs2.diagnostics.ERROR_ANCHOR_REFERENCE_CONTEXT, {
-            extension: extensionName,
-            element: element,
-            target: placement.target
-          });
-          state.invalidContext = true;
-        }
-        function observe(state, element, target, reference) {
-          if (state.target === target && state.reference === reference) return;
-          listenForLayout(state, reference);
-          state.target = target;
-          if (state.observer) state.observer.disconnect();
-          if (state.intersectionObserver) state.intersectionObserver.disconnect();
-          var _iterator5 = _createForOfIteratorHelper12(/* @__PURE__ */ new Set([element, target, reference])), _step5;
-          try {
-            for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
-              var observed = _step5.value;
-              if (!observed) continue;
-              if (state.observer) state.observer.observe(observed);
-              if (state.intersectionObserver) state.intersectionObserver.observe(observed);
-            }
-          } catch (err) {
-            _iterator5.e(err);
-          } finally {
-            _iterator5.f();
-          }
-        }
-        function listenForLayout(state, reference) {
-          if (state.reference === reference) return;
-          if (state.reference) AelluxJs2.offTarget(state.reference, layoutEvent, state.layoutListener);
-          state.reference = reference;
-          if (reference) AelluxJs2.onTarget(reference, layoutEvent, state.layoutListener);
-        }
-        function applyBaseStyles(element) {
-          element.style.setProperty("position", "absolute");
-          element.style.setProperty("left", "0px");
-          element.style.setProperty("top", "0px");
-          element.style.setProperty("transform", "translate3d(var(--ae-anchor-x, 0px), var(--ae-anchor-y, 0px), 0)");
-          element.style.setProperty("transform-origin", "var(--ae-anchor-origin-x, 50%) var(--ae-anchor-origin-y, 0%)");
-        }
-        function deactivate(element, state) {
-          var memory = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : elementMemories.get(element);
-          if (state.reference) AelluxJs2.offTarget(state.reference, layoutEvent, state.layoutListener);
-          if (state.observer) state.observer.disconnect();
-          if (state.intersectionObserver) state.intersectionObserver.disconnect();
-          state.target = state.reference = null;
-          element.classList.remove(anchoredClass);
-          if (state.active && memory) memory.restore();
-          state.active = false;
-        }
-        function resolveElement(value) {
-          if (!value || !value.trim()) return null;
-          var selector = value.trim();
-          var id = selector[0] === "#" ? selector.slice(1) : selector;
-          var byId = document.getElementById(id);
-          if (byId) return byId;
-          try {
-            return document.querySelector(selector);
-          } catch (_) {
-            return null;
-          }
-        }
-        function parseCandidates(value) {
-          var result = [];
-          var _iterator6 = _createForOfIteratorHelper12((value || "").split(",")), _step6;
-          try {
-            for (_iterator6.s(); !(_step6 = _iterator6.n()).done; ) {
-              var token = _step6.value;
-              var pair = token.trim().toLowerCase().split(":");
-              if (pair.length !== 2 || !pivots[pair[0].trim()] || !pivots[pair[1].trim()]) continue;
-              result.push({
-                target: pivots[pair[0].trim()],
-                self: pivots[pair[1].trim()]
-              });
-            }
-          } catch (err) {
-            _iterator6.e(err);
-          } finally {
-            _iterator6.f();
-          }
-          return result;
-        }
-        function toReference(rect, reference, referenceRect, scaleX, scaleY) {
-          return {
-            left: (rect.left - referenceRect.left) / scaleX - reference.clientLeft + reference.scrollLeft,
-            top: (rect.top - referenceRect.top) / scaleY - reference.clientTop + reference.scrollTop,
-            width: rect.width / scaleX,
-            height: rect.height / scaleY
-          };
-        }
-      })(typeof globalThis !== "undefined" ? globalThis : window);
-    }
-  });
-
-  // src/aellux.ext.scrollbox.js
-  var aellux_ext_scrollbox_exports = {};
-  function _toConsumableArray3(r) {
-    return _arrayWithoutHoles3(r) || _iterableToArray3(r) || _unsupportedIterableToArray14(r) || _nonIterableSpread3();
-  }
-  function _nonIterableSpread3() {
-    throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
-  }
-  function _iterableToArray3(r) {
-    if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
-  }
-  function _arrayWithoutHoles3(r) {
-    if (Array.isArray(r)) return _arrayLikeToArray14(r);
-  }
-  function _slicedToArray7(r, e) {
-    return _arrayWithHoles7(r) || _iterableToArrayLimit7(r, e) || _unsupportedIterableToArray14(r, e) || _nonIterableRest7();
-  }
-  function _nonIterableRest7() {
-    throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
-  }
-  function _iterableToArrayLimit7(r, l) {
-    var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
-    if (null != t) {
-      var e, n, i, u, a = [], f = true, o = false;
-      try {
-        if (i = (t = t.call(r)).next, 0 === l) {
-          if (Object(t) !== t) return;
-          f = false;
-        } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = true) ;
-      } catch (r2) {
-        o = true, n = r2;
-      } finally {
-        try {
-          if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return;
-        } finally {
-          if (o) throw n;
-        }
-      }
-      return a;
-    }
-  }
-  function _arrayWithHoles7(r) {
-    if (Array.isArray(r)) return r;
-  }
-  function _createForOfIteratorHelper13(r, e) {
-    var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
-    if (!t) {
-      if (Array.isArray(r) || (t = _unsupportedIterableToArray14(r)) || e && r && "number" == typeof r.length) {
-        t && (r = t);
-        var _n = 0, F = function F2() {
-        };
-        return { s: F, n: function n() {
-          return _n >= r.length ? { done: true } : { done: false, value: r[_n++] };
-        }, e: function e2(r2) {
-          throw r2;
-        }, f: F };
-      }
-      throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
-    }
-    var o, a = true, u = false;
-    return { s: function s() {
-      t = t.call(r);
-    }, n: function n() {
-      var r2 = t.next();
-      return a = r2.done, r2;
-    }, e: function e2(r2) {
-      u = true, o = r2;
-    }, f: function f() {
-      try {
-        a || null == t.return || t.return();
-      } finally {
-        if (u) throw o;
-      }
-    } };
-  }
-  function _unsupportedIterableToArray14(r, a) {
-    if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray14(r, a);
-      var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray14(r, a) : void 0;
-    }
-  }
-  function _arrayLikeToArray14(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
@@ -27875,10 +25962,10 @@
         }]];
         function setListeners(target, owner, entries, active) {
           var method = active ? onTarget : offTarget;
-          var _iterator = _createForOfIteratorHelper13(entries), _step;
+          var _iterator = _createForOfIteratorHelper9(entries), _step;
           try {
             for (_iterator.s(); !(_step = _iterator.n()).done; ) {
-              var _step$value = _slicedToArray7(_step.value, 3), event = _step$value[0], handler = _step$value[1], options = _step$value[2];
+              var _step$value = _slicedToArray5(_step.value, 3), event = _step$value[0], handler = _step$value[1], options = _step$value[2];
               method(target, "$".concat(event), owner[handler], active ? options : options === true || !!(options !== null && options !== void 0 && options.capture));
             }
           } catch (err) {
@@ -27966,7 +26053,7 @@
           });
         }
         function destroy() {
-          var _iterator2 = _createForOfIteratorHelper13(scrollboxes.keys()), _step2;
+          var _iterator2 = _createForOfIteratorHelper9(scrollboxes.keys()), _step2;
           try {
             for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
               var element = _step2.value;
@@ -28259,7 +26346,7 @@
           (_elementMemories$get = elementMemories.get(element)) === null || _elementMemories$get === void 0 || _elementMemories$get.restore();
           elementMemories.delete(element);
           cursorMemories.delete(element);
-          var _iterator3 = _createForOfIteratorHelper13(scrollEdgeClasses), _step3;
+          var _iterator3 = _createForOfIteratorHelper9(scrollEdgeClasses), _step3;
           try {
             for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
               var name = _step3.value;
@@ -28332,7 +26419,7 @@
             x: false,
             y: false
           };
-          var _iterator4 = _createForOfIteratorHelper13(tokens), _step4;
+          var _iterator4 = _createForOfIteratorHelper9(tokens), _step4;
           try {
             for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
               var token = _step4.value;
@@ -28556,7 +26643,7 @@
           return values;
         }
         function updateScrollbars(state, values) {
-          var _iterator5 = _createForOfIteratorHelper13(values), _step5;
+          var _iterator5 = _createForOfIteratorHelper9(values), _step5;
           try {
             for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
               var _step5$value = _step5.value, record = _step5$value.record, trackSize = _step5$value.trackSize, thumbSize = _step5$value.thumbSize, thumbPosition = _step5$value.thumbPosition, max = _step5$value.max, display = _step5$value.display;
@@ -28734,6 +26821,32 @@
           snap.axis = axis;
           state.element.classList.add(snapReadyClass);
           state.element.classList.toggle(snapSuspendedClass, snap.suspensions.pointer || snap.suspensions.elastic || snap.suspensions.scrollbar || snap.suspensions.wheel);
+          diagnoseSnapTransforms(state);
+        }
+        function diagnoseSnapTransforms(state) {
+          var wrapper = state.elastic.wrapper;
+          if (!wrapper) return;
+          var _iterator6 = _createForOfIteratorHelper9(collectSnapItems(state, state.snap.root)), _step6;
+          try {
+            for (_iterator6.s(); !(_step6 = _iterator6.n()).done; ) {
+              var item = _step6.value;
+              if (!wrapper.contains(item)) continue;
+              var transform = root2.getComputedStyle(item).transform;
+              if (transform && transform !== "none") {
+                AelluxJs2.diagnostics.warn(AelluxJs2.diagnostics.WARN_SCROLLBOX_SNAP_TRANSFORM, {
+                  element: item,
+                  attribute: snapItemAttribute,
+                  value: transform,
+                  scrollbox: state.element,
+                  recommendation: "Apply transform to a child of the snap item."
+                });
+              }
+            }
+          } catch (err) {
+            _iterator6.e(err);
+          } finally {
+            _iterator6.f();
+          }
         }
         function suspendSnapStyles(state, reason, suspended) {
           if (!state.snapEnabled || !state.snap.root || state.snap.suspensions[reason] === suspended) return;
@@ -28772,18 +26885,18 @@
           clearSnapWheelTimeout(state);
           if (snap.edgeWheelTimeout !== null) root2.clearTimeout(snap.edgeWheelTimeout);
           snap.edgeWheelTimeout = null;
-          var _iterator6 = _createForOfIteratorHelper13(snap.savedItems), _step6;
+          var _iterator7 = _createForOfIteratorHelper9(snap.savedItems), _step7;
           try {
-            for (_iterator6.s(); !(_step6 = _iterator6.n()).done; ) {
+            for (_iterator7.s(); !(_step7 = _iterator7.n()).done; ) {
               var _snapItemMemories$get;
-              var item = _step6.value;
+              var item = _step7.value;
               (_snapItemMemories$get = snapItemMemories.get(item)) === null || _snapItemMemories$get === void 0 || _snapItemMemories$get.restore();
               snapItemMemories.delete(item);
             }
           } catch (err) {
-            _iterator6.e(err);
+            _iterator7.e(err);
           } finally {
-            _iterator6.f();
+            _iterator7.f();
           }
           snap.savedItems.clear();
           state.element.classList.remove(snapReadyClass, snapSuspendedClass);
@@ -28882,16 +26995,16 @@
           var active = kind === POINTER ? snap.activePointers : snap.activeTouches;
           if (kind === POINTER) active.add(event.pointerId);
           else {
-            var _iterator7 = _createForOfIteratorHelper13(event.changedTouches), _step7;
+            var _iterator8 = _createForOfIteratorHelper9(event.changedTouches), _step8;
             try {
-              for (_iterator7.s(); !(_step7 = _iterator7.n()).done; ) {
-                var touch = _step7.value;
+              for (_iterator8.s(); !(_step8 = _iterator8.n()).done; ) {
+                var touch = _step8.value;
                 active.add(touch.identifier);
               }
             } catch (err) {
-              _iterator7.e(err);
+              _iterator8.e(err);
             } finally {
-              _iterator7.f();
+              _iterator8.f();
             }
           }
           if (!active.size) return;
@@ -28905,16 +27018,16 @@
           var snap = state.snap;
           if (kind === POINTER) snap.activePointers.delete(event.pointerId);
           else if (kind === "touch") {
-            var _iterator8 = _createForOfIteratorHelper13(event.changedTouches), _step8;
+            var _iterator9 = _createForOfIteratorHelper9(event.changedTouches), _step9;
             try {
-              for (_iterator8.s(); !(_step8 = _iterator8.n()).done; ) {
-                var touch = _step8.value;
+              for (_iterator9.s(); !(_step9 = _iterator9.n()).done; ) {
+                var touch = _step9.value;
                 snap.activeTouches.delete(touch.identifier);
               }
             } catch (err) {
-              _iterator8.e(err);
+              _iterator9.e(err);
             } finally {
-              _iterator8.f();
+              _iterator9.f();
             }
           } else {
             snap.activePointers.clear();
@@ -29167,28 +27280,28 @@
         function isTextAtPoint(element, x, y) {
           if (root2.getComputedStyle(element).userSelect === "none") return false;
           var range = document.createRange();
-          var _iterator9 = _createForOfIteratorHelper13(element.childNodes), _step9;
+          var _iterator0 = _createForOfIteratorHelper9(element.childNodes), _step0;
           try {
-            for (_iterator9.s(); !(_step9 = _iterator9.n()).done; ) {
-              var node = _step9.value;
+            for (_iterator0.s(); !(_step0 = _iterator0.n()).done; ) {
+              var node = _step0.value;
               if (node.nodeType !== 3 || !node.textContent.trim()) continue;
               range.selectNodeContents(node);
-              var _iterator0 = _createForOfIteratorHelper13(range.getClientRects()), _step0;
+              var _iterator1 = _createForOfIteratorHelper9(range.getClientRects()), _step1;
               try {
-                for (_iterator0.s(); !(_step0 = _iterator0.n()).done; ) {
-                  var rect = _step0.value;
+                for (_iterator1.s(); !(_step1 = _iterator1.n()).done; ) {
+                  var rect = _step1.value;
                   if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) return true;
                 }
               } catch (err) {
-                _iterator0.e(err);
+                _iterator1.e(err);
               } finally {
-                _iterator0.f();
+                _iterator1.f();
               }
             }
           } catch (err) {
-            _iterator9.e(err);
+            _iterator0.e(err);
           } finally {
-            _iterator9.f();
+            _iterator0.f();
           }
           return false;
         }
@@ -29252,10 +27365,10 @@
             return axes.get(member2).x;
           });
           if (!textOrigin && event.cancelable) event.preventDefault();
-          var _iterator1 = _createForOfIteratorHelper13(new Set([].concat(_toConsumableArray3(chains.x), _toConsumableArray3(chains.y)))), _step1;
+          var _iterator10 = _createForOfIteratorHelper9(new Set([].concat(_toConsumableArray3(chains.x), _toConsumableArray3(chains.y)))), _step10;
           try {
-            for (_iterator1.s(); !(_step1 = _iterator1.n()).done; ) {
-              var _member = _step1.value;
+            for (_iterator10.s(); !(_step10 = _iterator10.n()).done; ) {
+              var _member = _step10.value;
               cancelMomentum(_member);
               _member.snap.flick = null;
               clearSnapTarget(_member);
@@ -29265,9 +27378,9 @@
               }
             }
           } catch (err) {
-            _iterator1.e(err);
+            _iterator10.e(err);
           } finally {
-            _iterator1.f();
+            _iterator10.f();
           }
           if (state.mouseReleaseTimeout !== null) root2.clearTimeout(state.mouseReleaseTimeout);
           state.mouseReleaseTimeout = null;
@@ -29314,31 +27427,31 @@
             passive: false,
             capture: true
           });
-          var _iterator10 = _createForOfIteratorHelper13(pointerScrollDragEvents), _step10;
+          var _iterator11 = _createForOfIteratorHelper9(pointerScrollDragEvents), _step11;
           try {
-            for (_iterator10.s(); !(_step10 = _iterator10.n()).done; ) {
-              var name = _step10.value;
+            for (_iterator11.s(); !(_step11 = _iterator11.n()).done; ) {
+              var name = _step11.value;
               onTarget(root2, "$" + name, state.onPointerScrollNativeEvent, true);
             }
           } catch (err) {
-            _iterator10.e(err);
+            _iterator11.e(err);
           } finally {
-            _iterator10.f();
+            _iterator11.f();
           }
           onTarget(root2, "$selectstart", state.onPointerScrollNativeEvent, true);
-          var _iterator11 = _createForOfIteratorHelper13(pointerScrollMouseEvents), _step11;
+          var _iterator12 = _createForOfIteratorHelper9(pointerScrollMouseEvents), _step12;
           try {
-            for (_iterator11.s(); !(_step11 = _iterator11.n()).done; ) {
-              var _name = _step11.value;
+            for (_iterator12.s(); !(_step12 = _iterator12.n()).done; ) {
+              var _name = _step12.value;
               onTarget(root2, "$" + _name, state.onMouseEvent, {
                 passive: false,
                 capture: true
               });
             }
           } catch (err) {
-            _iterator11.e(err);
+            _iterator12.e(err);
           } finally {
-            _iterator11.f();
+            _iterator12.f();
           }
           onTarget(root2, POINTER_UP_TARGET, state.onPointerEnd, true);
           onTarget(root2, POINTER_CANCEL_TARGET, state.onPointerEnd, true);
@@ -29404,16 +27517,16 @@
           if (event.cancelable) event.preventDefault();
           if (!remaining) return;
           var outermost = null;
-          var _iterator12 = _createForOfIteratorHelper13(pointerScroll.chain), _step12;
+          var _iterator13 = _createForOfIteratorHelper9(pointerScroll.chain), _step13;
           try {
-            for (_iterator12.s(); !(_step12 = _iterator12.n()).done; ) {
-              var member = _step12.value;
+            for (_iterator13.s(); !(_step13 = _iterator13.n()).done; ) {
+              var member = _step13.value;
               if (!member.disposed && member.pointerListening && pointerAxisMaximum(member, axis, pointerScroll) > 0) outermost = member;
             }
           } catch (err) {
-            _iterator12.e(err);
+            _iterator13.e(err);
           } finally {
-            _iterator12.f();
+            _iterator13.f();
           }
           var allowed = outermost && outermost.elasticEnabled ? elasticAxes(outermost) : null;
           var canStretch = allowed && allowed[axis];
@@ -29429,10 +27542,10 @@
           }
           var lastUsed = null;
           var lastStartX = 0, lastStartY = 0;
-          var _iterator13 = _createForOfIteratorHelper13(pointerScroll.chain), _step13;
+          var _iterator14 = _createForOfIteratorHelper9(pointerScroll.chain), _step14;
           try {
-            for (_iterator13.s(); !(_step13 = _iterator13.n()).done; ) {
-              var _member2 = _step13.value;
+            for (_iterator14.s(); !(_step14 = _iterator14.n()).done; ) {
+              var _member2 = _step14.value;
               if (_member2.disposed || !_member2.pointerListening || pointerAxisMaximum(_member2, axis, pointerScroll) <= 0) continue;
               if (Math.abs(remaining) < 1e-3) continue;
               var _element = _member2.element;
@@ -29453,9 +27566,9 @@
               lastStartY = previousY;
             }
           } catch (err) {
-            _iterator13.e(err);
+            _iterator14.e(err);
           } finally {
-            _iterator13.f();
+            _iterator14.f();
           }
           if (canStretch) {
             pointerScroll.elasticForce += remaining;
@@ -29508,17 +27621,17 @@
         }
         function pointerAxisChain(chain, axes, axis) {
           var result = [];
-          var _iterator14 = _createForOfIteratorHelper13(chain), _step14;
+          var _iterator15 = _createForOfIteratorHelper9(chain), _step15;
           try {
-            for (_iterator14.s(); !(_step14 = _iterator14.n()).done; ) {
-              var member = _step14.value;
+            for (_iterator15.s(); !(_step15 = _iterator15.n()).done; ) {
+              var member = _step15.value;
               result.push(member);
               if (axes.get(member)[axis === "x" ? "stopX" : "stopY"]) break;
             }
           } catch (err) {
-            _iterator14.e(err);
+            _iterator15.e(err);
           } finally {
-            _iterator14.f();
+            _iterator15.f();
           }
           return result;
         }
@@ -29527,10 +27640,10 @@
           pointerScroll.moved = true;
           pointerScroll.started = true;
           restorePointerScrollCursor(state);
-          var _iterator15 = _createForOfIteratorHelper13(pointerScroll.chain), _step15;
+          var _iterator16 = _createForOfIteratorHelper9(pointerScroll.chain), _step16;
           try {
-            for (_iterator15.s(); !(_step15 = _iterator15.n()).done; ) {
-              var member = _step15.value;
+            for (_iterator16.s(); !(_step16 = _iterator16.n()).done; ) {
+              var member = _step16.value;
               if (pointerAxisMaximum(member, axis, pointerScroll) <= 0) continue;
               var element = member.element;
               pointerScrollMemories.set(element, AelluxJs2.persist.element.save(element, [], ["scroll-behavior"]));
@@ -29544,9 +27657,9 @@
               startScrollbarInteractionVisibility(member);
             }
           } catch (err) {
-            _iterator15.e(err);
+            _iterator16.e(err);
           } finally {
-            _iterator15.f();
+            _iterator16.f();
           }
           dispatchPointerScroll(state, pointerScroll, "PointerScrollStart");
         }
@@ -29588,16 +27701,16 @@
           if (pointerScroll.selectionWaitTimeout !== null) root2.clearTimeout(pointerScroll.selectionWaitTimeout);
           offTarget(root2, POINTER_MOVE_TARGET, state.onPointerMove, true);
           offTarget(root2, "$touchmove", state.onPointerScrollTouchMove, true);
-          var _iterator16 = _createForOfIteratorHelper13(pointerScrollDragEvents), _step16;
+          var _iterator17 = _createForOfIteratorHelper9(pointerScrollDragEvents), _step17;
           try {
-            for (_iterator16.s(); !(_step16 = _iterator16.n()).done; ) {
-              var name = _step16.value;
+            for (_iterator17.s(); !(_step17 = _iterator17.n()).done; ) {
+              var name = _step17.value;
               offTarget(root2, "$" + name, state.onPointerScrollNativeEvent, true);
             }
           } catch (err) {
-            _iterator16.e(err);
+            _iterator17.e(err);
           } finally {
-            _iterator16.f();
+            _iterator17.f();
           }
           offTarget(root2, "$selectstart", state.onPointerScrollNativeEvent, true);
           offTarget(root2, POINTER_UP_TARGET, state.onPointerEnd, true);
@@ -29612,11 +27725,11 @@
           } else {
             stopPointerScrollMouseEvents(state);
           }
-          var _iterator17 = _createForOfIteratorHelper13(pointerScroll.styles), _step17;
+          var _iterator18 = _createForOfIteratorHelper9(pointerScroll.styles), _step18;
           try {
-            for (_iterator17.s(); !(_step17 = _iterator17.n()).done; ) {
+            for (_iterator18.s(); !(_step18 = _iterator18.n()).done; ) {
               var _pointerScrollMemorie;
-              var saved = _step17.value;
+              var saved = _step18.value;
               if (saved.classOwned) saved.element.classList.remove(pointerScrollingClass);
               (_pointerScrollMemorie = pointerScrollMemories.get(saved.element)) === null || _pointerScrollMemorie === void 0 || _pointerScrollMemorie.restore();
               pointerScrollMemories.delete(saved.element);
@@ -29627,9 +27740,9 @@
               }
             }
           } catch (err) {
-            _iterator17.e(err);
+            _iterator18.e(err);
           } finally {
-            _iterator17.f();
+            _iterator18.f();
           }
           if (event && event.type === POINTER_UP && state.pointerListening) {
             updatePointerScrollCursor(state, document.elementFromPoint(event.clientX, event.clientY), event.clientX, event.clientY);
@@ -29647,16 +27760,16 @@
             recordSnapFlick(snapState, pointerScroll, pointerScroll.axis, pointerScroll.snapStarts.get(snapState));
             scheduleScrollEnd(snapState);
           }
-          var _iterator18 = _createForOfIteratorHelper13(pointerScroll.chain), _step18;
+          var _iterator19 = _createForOfIteratorHelper9(pointerScroll.chain), _step19;
           try {
-            for (_iterator18.s(); !(_step18 = _iterator18.n()).done; ) {
-              var _member3 = _step18.value;
+            for (_iterator19.s(); !(_step19 = _iterator19.n()).done; ) {
+              var _member3 = _step19.value;
               releaseElastic(_member3);
             }
           } catch (err) {
-            _iterator18.e(err);
+            _iterator19.e(err);
           } finally {
-            _iterator18.f();
+            _iterator19.f();
           }
           if (!shouldSnap && event && event.type === POINTER_UP && pointerScroll.moved && momentumState && momentumState.momentumEnabled && !hadElastic && !momentumState.disposed && now() - pointerScroll.momentumStartTime < MOMENTUM_LIMIT_TIME_MS) {
             startMomentum(momentumState, pointerScroll);
@@ -29698,16 +27811,16 @@
           if (state.mouseReleaseTimeout !== null) root2.clearTimeout(state.mouseReleaseTimeout);
           state.mouseReleaseTimeout = null;
           state.mouseReleaseButton = null;
-          var _iterator19 = _createForOfIteratorHelper13(pointerScrollMouseEvents), _step19;
+          var _iterator20 = _createForOfIteratorHelper9(pointerScrollMouseEvents), _step20;
           try {
-            for (_iterator19.s(); !(_step19 = _iterator19.n()).done; ) {
-              var name = _step19.value;
+            for (_iterator20.s(); !(_step20 = _iterator20.n()).done; ) {
+              var name = _step20.value;
               offTarget(root2, "$" + name, state.onMouseEvent, true);
             }
           } catch (err) {
-            _iterator19.e(err);
+            _iterator20.e(err);
           } finally {
-            _iterator19.f();
+            _iterator20.f();
           }
         }
         function startMomentum(state, pointerScroll) {
@@ -29773,17 +27886,17 @@
         function restoreTouchOverflow(state) {
           var touch = state.elastic.touch;
           if (!touch) return;
-          var _iterator20 = _createForOfIteratorHelper13(touch.scrollBehaviors), _step20;
+          var _iterator21 = _createForOfIteratorHelper9(touch.scrollBehaviors), _step21;
           try {
-            for (_iterator20.s(); !(_step20 = _iterator20.n()).done; ) {
-              var _step20$value = _slicedToArray7(_step20.value, 2), element = _step20$value[0], _step20$value$ = _step20$value[1], value = _step20$value$.value, priority = _step20$value$.priority;
+            for (_iterator21.s(); !(_step21 = _iterator21.n()).done; ) {
+              var _step21$value = _slicedToArray5(_step21.value, 2), element = _step21$value[0], _step21$value$ = _step21$value[1], value = _step21$value$.value, priority = _step21$value$.priority;
               if (value) element.style.setProperty("scroll-behavior", value, priority);
               else element.style.removeProperty("scroll-behavior");
             }
           } catch (err) {
-            _iterator20.e(err);
+            _iterator21.e(err);
           } finally {
-            _iterator20.f();
+            _iterator21.f();
           }
           touch.scrollBehaviors.clear();
         }
@@ -29818,19 +27931,19 @@
           var start = state.elastic.touch;
           if (!start) return;
           var touch = null;
-          var _iterator21 = _createForOfIteratorHelper13(event.touches), _step21;
+          var _iterator22 = _createForOfIteratorHelper9(event.touches), _step22;
           try {
-            for (_iterator21.s(); !(_step21 = _iterator21.n()).done; ) {
-              var item = _step21.value;
+            for (_iterator22.s(); !(_step22 = _iterator22.n()).done; ) {
+              var item = _step22.value;
               if (item.identifier === start.identifier) {
                 touch = item;
                 break;
               }
             }
           } catch (err) {
-            _iterator21.e(err);
+            _iterator22.e(err);
           } finally {
-            _iterator21.f();
+            _iterator22.f();
           }
           if (!touch) return;
           var desiredX = start.scrollLeft + start.x - touch.clientX;
@@ -29883,16 +27996,16 @@
         function endTouch(state, event) {
           var touch = state.elastic.touch;
           if (!touch) return;
-          var _iterator22 = _createForOfIteratorHelper13(event.touches), _step22;
+          var _iterator23 = _createForOfIteratorHelper9(event.touches), _step23;
           try {
-            for (_iterator22.s(); !(_step22 = _iterator22.n()).done; ) {
-              var item = _step22.value;
+            for (_iterator23.s(); !(_step23 = _iterator23.n()).done; ) {
+              var item = _step23.value;
               if (item.identifier === touch.identifier) return;
             }
           } catch (err) {
-            _iterator22.e(err);
+            _iterator23.e(err);
           } finally {
-            _iterator22.f();
+            _iterator23.f();
           }
           restoreTouchOverflow(state);
           state.elastic.touch = null;
@@ -30072,16 +28185,16 @@
               return scheduleResize(state);
             });
             state.resizeObserver.observe(state.element);
-            var _iterator23 = _createForOfIteratorHelper13(state.element.children), _step23;
+            var _iterator24 = _createForOfIteratorHelper9(state.element.children), _step24;
             try {
-              for (_iterator23.s(); !(_step23 = _iterator23.n()).done; ) {
-                var child = _step23.value;
+              for (_iterator24.s(); !(_step24 = _iterator24.n()).done; ) {
+                var child = _step24.value;
                 state.resizeObserver.observe(child);
               }
             } catch (err) {
-              _iterator23.e(err);
+              _iterator24.e(err);
             } finally {
-              _iterator23.f();
+              _iterator24.f();
             }
           }
           if (root2.MutationObserver) {
@@ -30089,16 +28202,16 @@
               if (state.resizeObserver) {
                 state.resizeObserver.disconnect();
                 state.resizeObserver.observe(state.element);
-                var _iterator24 = _createForOfIteratorHelper13(state.element.children), _step24;
+                var _iterator25 = _createForOfIteratorHelper9(state.element.children), _step25;
                 try {
-                  for (_iterator24.s(); !(_step24 = _iterator24.n()).done; ) {
-                    var _child = _step24.value;
+                  for (_iterator25.s(); !(_step25 = _iterator25.n()).done; ) {
+                    var _child = _step25.value;
                     state.resizeObserver.observe(_child);
                   }
                 } catch (err) {
-                  _iterator24.e(err);
+                  _iterator25.e(err);
                 } finally {
-                  _iterator24.f();
+                  _iterator25.f();
                 }
               }
               if (records.some(function(record) {
@@ -30203,21 +28316,21 @@
                 });
               }
               if (values.snapAxis && state.snap.axis !== values.snapAxis) syncSnapStyles(state, values.snapAxis);
-              var _iterator25 = _createForOfIteratorHelper13(values.snapValues), _step25;
+              var _iterator26 = _createForOfIteratorHelper9(values.snapValues), _step26;
               try {
-                for (_iterator25.s(); !(_step25 = _iterator25.n()).done; ) {
-                  var _step25$value = _step25.value, item = _step25$value.item, viewport = _step25$value.viewport, focus2 = _step25$value.focus;
+                for (_iterator26.s(); !(_step26 = _iterator26.n()).done; ) {
+                  var _step26$value = _step26.value, item = _step26$value.item, viewport = _step26$value.viewport, focus = _step26$value.focus;
                   if (!state.snap.savedItems.has(item)) {
                     snapItemMemories.set(item, AelluxJs2.persist.element.save(item, [], snapProperties));
                     state.snap.savedItems.add(item);
                   }
                   item.style.setProperty(snapProperties[0], viewport);
-                  item.style.setProperty(snapProperties[1], focus2);
+                  item.style.setProperty(snapProperties[1], focus);
                 }
               } catch (err) {
-                _iterator25.e(err);
+                _iterator26.e(err);
               } finally {
-                _iterator25.f();
+                _iterator26.f();
               }
               updateScrollbars(state, values.scrollbars);
             });
@@ -30244,11 +28357,11 @@
             var box = item.getBoundingClientRect();
             var itemCenter = axis === "x" ? box.left + box.width / 2 : box.top + box.height / 2;
             var viewport = Math.max(-2, Math.min(2, (itemCenter - center) * 2 / size));
-            var focus2 = Math.max(0, 1 - Math.abs(snapAlignmentOffset(state, item, axis, rect, box)) / size);
+            var focus = Math.max(0, 1 - Math.abs(snapAlignmentOffset(state, item, axis, rect, box)) / size);
             return {
               item: item,
               viewport: viewport,
-              focus: focus2
+              focus: focus
             };
           });
         }
@@ -30368,1322 +28481,6 @@
     }
   });
 
-  // src/aellux.ext.adaptive.js
-  var aellux_ext_adaptive_exports = {};
-  function _createForOfIteratorHelper14(r, e) {
-    var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
-    if (!t) {
-      if (Array.isArray(r) || (t = _unsupportedIterableToArray15(r)) || e && r && "number" == typeof r.length) {
-        t && (r = t);
-        var _n = 0, F = function F2() {
-        };
-        return { s: F, n: function n() {
-          return _n >= r.length ? { done: true } : { done: false, value: r[_n++] };
-        }, e: function e2(r2) {
-          throw r2;
-        }, f: F };
-      }
-      throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
-    }
-    var o, a = true, u = false;
-    return { s: function s() {
-      t = t.call(r);
-    }, n: function n() {
-      var r2 = t.next();
-      return a = r2.done, r2;
-    }, e: function e2(r2) {
-      u = true, o = r2;
-    }, f: function f() {
-      try {
-        a || null == t.return || t.return();
-      } finally {
-        if (u) throw o;
-      }
-    } };
-  }
-  function _slicedToArray8(r, e) {
-    return _arrayWithHoles8(r) || _iterableToArrayLimit8(r, e) || _unsupportedIterableToArray15(r, e) || _nonIterableRest8();
-  }
-  function _nonIterableRest8() {
-    throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
-  }
-  function _unsupportedIterableToArray15(r, a) {
-    if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray15(r, a);
-      var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray15(r, a) : void 0;
-    }
-  }
-  function _arrayLikeToArray15(r, a) {
-    (null == a || a > r.length) && (a = r.length);
-    for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
-    return n;
-  }
-  function _iterableToArrayLimit8(r, l) {
-    var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
-    if (null != t) {
-      var e, n, i, u, a = [], f = true, o = false;
-      try {
-        if (i = (t = t.call(r)).next, 0 === l) {
-          if (Object(t) !== t) return;
-          f = false;
-        } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = true) ;
-      } catch (r2) {
-        o = true, n = r2;
-      } finally {
-        try {
-          if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return;
-        } finally {
-          if (o) throw n;
-        }
-      }
-      return a;
-    }
-  }
-  function _arrayWithHoles8(r) {
-    if (Array.isArray(r)) return r;
-  }
-  function _typeof7(o) {
-    "@babel/helpers - typeof";
-    return _typeof7 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
-      return typeof o2;
-    } : function(o2) {
-      return o2 && "function" == typeof Symbol && o2.constructor === Symbol && o2 !== Symbol.prototype ? "symbol" : typeof o2;
-    }, _typeof7(o);
-  }
-  var init_aellux_ext_adaptive = __esm({
-    "src/aellux.ext.adaptive.js": function() {
-      /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
-      (function(root2) {
-        "use strict";
-        var AelluxJs2 = root2.AelluxJs;
-        var extensionName = "adaptive";
-        if (!AelluxJs2) {
-          throw new Error('[aellux.js] Cannot attach the "'.concat(extensionName, '" extension: root.AelluxJs is not defined. Load the aellux.js boot script before this extension.'));
-        }
-        var attr = {
-          adaptive: AelluxJs2.attr(extensionName)
-        };
-        var modifier = {
-          shapeHorizontal: AelluxJs2.className("shape-horizontal"),
-          shapeVertical: AelluxJs2.className("shape-vertical"),
-          shapeSquare: AelluxJs2.className("shape-square")
-        };
-        var adaptiveElements = /* @__PURE__ */ new Set();
-        var elementMemories = /* @__PURE__ */ new WeakMap();
-        var dimensionProperties = ["--ae-width", "--ae-height"];
-        var pendingResizeEntries = /* @__PURE__ */ new Map();
-        var pendingResizeElements = /* @__PURE__ */ new Set();
-        var layoutIds = /* @__PURE__ */ new WeakMap();
-        var nextLayoutId = 1e6;
-        var adaptiveParams = {
-          experienceScale: {
-            near: 1,
-            far: 1.5
-          },
-          ratioShapes: {
-            vertical: 0.8,
-            horizontal: 1.25
-          },
-          minSizes: {
-            compact: 0,
-            small: 480,
-            medium: 768,
-            large: 1024,
-            xl: 1280,
-            xxl: 1600
-          }
-        };
-        var ariaHandlers = /* @__PURE__ */ new WeakMap();
-        var managedClasses;
-        var sizeThresholds = [];
-        var resizeObserver = typeof root2.ResizeObserver === "function" ? new root2.ResizeObserver(onResize) : null;
-        AelluxJs2.extAttach(extensionName, {
-          init: init,
-          destroy: destroy,
-          adaptiveParams: adaptiveParams
-        });
-        function init() {
-          var options = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : {};
-          AelluxJs2.registerCssProperty({
-            name: "--ae-width",
-            syntax: "<number>",
-            initialValue: "0"
-          }, {
-            name: "--ae-height",
-            syntax: "<number>",
-            initialValue: "0"
-          });
-          var overrides = options.adaptiveParams || {};
-          for (var _i = 0, _Object$keys = Object.keys(adaptiveParams); _i < _Object$keys.length; _i++) {
-            var group = _Object$keys[_i];
-            if (overrides[group] && _typeof7(overrides[group]) === "object") {
-              Object.assign(adaptiveParams[group], overrides[group]);
-            }
-          }
-          managedClasses = getManagedClasses();
-          for (var _i2 = 0, _Object$keys2 = Object.keys(adaptiveParams); _i2 < _Object$keys2.length; _i2++) {
-            var _group = _Object$keys2[_i2];
-            Object.freeze(adaptiveParams[_group]);
-          }
-          Object.freeze(adaptiveParams);
-          AelluxJs2.mountManager.add({
-            extensionName: extensionName,
-            selector: "[".concat(attr.adaptive, "]"),
-            priority: 0,
-            mount: mountAdaptive,
-            unmount: unmountAdaptive
-          });
-        }
-        function getManagedClasses() {
-          var classes = [modifier.shapeHorizontal, modifier.shapeVertical, modifier.shapeSquare];
-          sizeThresholds = [];
-          for (var _i3 = 0, _Object$entries = Object.entries(adaptiveParams.minSizes); _i3 < _Object$entries.length; _i3++) {
-            var _Object$entries$_i = _slicedToArray8(_Object$entries[_i3], 2), size = _Object$entries$_i[0], minimum = _Object$entries$_i[1];
-            var className = AelluxJs2.className("fits-" + size);
-            sizeThresholds.push({
-              className: className,
-              minimum: minimum
-            });
-            classes.push(className);
-          }
-          return classes;
-        }
-        function destroy() {
-          pendingResizeEntries.clear();
-          pendingResizeElements.clear();
-          var _iterator = _createForOfIteratorHelper14(adaptiveElements), _step;
-          try {
-            for (_iterator.s(); !(_step = _iterator.n()).done; ) {
-              var element = _step.value;
-              unmountAdaptive(element);
-            }
-          } catch (err) {
-            _iterator.e(err);
-          } finally {
-            _iterator.f();
-          }
-          if (resizeObserver) resizeObserver.disconnect();
-          AelluxJs2.mountManager.remove({
-            extensionName: extensionName
-          });
-        }
-        function mountAdaptive(element) {
-          if (adaptiveElements.has(element)) return;
-          elementMemories.set(element, AelluxJs2.persist.element.save(element, [], dimensionProperties));
-          ariaHandlers.set(element, AelluxJs2.aria.register(element));
-          adaptiveElements.add(element);
-          layoutIds.set(element, nextLayoutId++);
-          if (resizeObserver) resizeObserver.observe(element);
-          else {
-            scheduleElement(element, null);
-            if (adaptiveElements.size === 1) AelluxJs2.onTarget(root2, "$resize", onWindowResize);
-          }
-        }
-        function unmountAdaptive(element) {
-          var _ariaHandlers$get, _elementMemories$get;
-          if (!adaptiveElements.delete(element)) return;
-          pendingResizeEntries.delete(element);
-          pendingResizeElements.delete(element);
-          var id = layoutIds.get(element);
-          if (id !== void 0) AelluxJs2.waitLayout.cancel(id);
-          layoutIds.delete(element);
-          if (resizeObserver) resizeObserver.unobserve(element);
-          else if (adaptiveElements.size === 0) AelluxJs2.offTarget(root2, "$resize", onWindowResize);
-          var _iterator2 = _createForOfIteratorHelper14(managedClasses), _step2;
-          try {
-            for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
-              var name = _step2.value;
-              element.classList.remove(name);
-            }
-          } catch (err) {
-            _iterator2.e(err);
-          } finally {
-            _iterator2.f();
-          }
-          (_ariaHandlers$get = ariaHandlers.get(element)) === null || _ariaHandlers$get === void 0 || _ariaHandlers$get.release();
-          ariaHandlers.delete(element);
-          (_elementMemories$get = elementMemories.get(element)) === null || _elementMemories$get === void 0 || _elementMemories$get.restore();
-          elementMemories.delete(element);
-        }
-        function onResize(entries) {
-          var _iterator3 = _createForOfIteratorHelper14(entries), _step3;
-          try {
-            for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
-              var entry = _step3.value;
-              if (adaptiveElements.has(entry.target)) {
-                pendingResizeEntries.set(entry.target, entry);
-              }
-            }
-          } catch (err) {
-            _iterator3.e(err);
-          } finally {
-            _iterator3.f();
-          }
-          scheduleUpdate();
-        }
-        function onWindowResize() {
-          var _iterator4 = _createForOfIteratorHelper14(adaptiveElements), _step4;
-          try {
-            for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
-              var element = _step4.value;
-              pendingResizeElements.add(element);
-            }
-          } catch (err) {
-            _iterator4.e(err);
-          } finally {
-            _iterator4.f();
-          }
-          scheduleUpdate();
-        }
-        function scheduleUpdate() {
-          flushPendingUpdate();
-        }
-        function flushPendingUpdate() {
-          if (!pendingResizeEntries.size && !pendingResizeElements.size) return;
-          var entries = Array.from(pendingResizeEntries.entries());
-          pendingResizeEntries.clear();
-          for (var _i4 = 0, _entries = entries; _i4 < _entries.length; _i4++) {
-            var _entries$_i = _slicedToArray8(_entries[_i4], 2), element = _entries$_i[0], entry = _entries$_i[1];
-            scheduleElement(element, entry.contentRect);
-          }
-          var elements = Array.from(pendingResizeElements);
-          pendingResizeElements.clear();
-          for (var _i5 = 0, _elements = elements; _i5 < _elements.length; _i5++) {
-            var _element = _elements[_i5];
-            scheduleElement(_element, null);
-          }
-        }
-        function scheduleElement(element, contentRect) {
-          var id = layoutIds.get(element);
-          if (id === void 0) return;
-          var maxFPS = AelluxJs2.layoutMaxFPS(element);
-          var abort = function abort2() {
-            return !adaptiveElements.has(element);
-          };
-          if (contentRect) {
-            AelluxJs2.waitLayout.sequence(id, {
-              update: function update() {
-                return updateAdaptive(element, contentRect.width, contentRect.height);
-              },
-              maxFPS: maxFPS,
-              abort: abort
-            });
-            return;
-          }
-          AelluxJs2.waitLayout.sequence(id, {
-            read: function read() {
-              return element.getBoundingClientRect();
-            },
-            update: function update(rect) {
-              return updateAdaptive(element, rect.width, rect.height);
-            },
-            maxFPS: maxFPS,
-            abort: abort
-          });
-        }
-        function updateAdaptive(element, width, height) {
-          var _ariaHandlers$get2;
-          if (!adaptiveElements.has(element)) return;
-          var ratio = height > 0 ? width / height : 0;
-          (_ariaHandlers$get2 = ariaHandlers.get(element)) === null || _ariaHandlers$get2 === void 0 || _ariaHandlers$get2.set({
-            orientation: height > width ? "vertical" : "horizontal"
-          });
-          element.classList.toggle(modifier.shapeVertical, ratio < adaptiveParams.ratioShapes.vertical);
-          element.classList.toggle(modifier.shapeHorizontal, ratio > adaptiveParams.ratioShapes.horizontal);
-          element.classList.toggle(modifier.shapeSquare, ratio >= adaptiveParams.ratioShapes.vertical && ratio <= adaptiveParams.ratioShapes.horizontal);
-          var space = Math.sqrt(width * height);
-          for (var i = 0; i < sizeThresholds.length; i++) {
-            var threshold = sizeThresholds[i];
-            element.classList.toggle(threshold.className, space >= threshold.minimum);
-          }
-          var _iterator5 = _createForOfIteratorHelper14(dimensionProperties), _step5;
-          try {
-            for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
-              var name = _step5.value;
-              if (element.style.getPropertyPriority(name)) element.style.removeProperty(name);
-            }
-          } catch (err) {
-            _iterator5.e(err);
-          } finally {
-            _iterator5.f();
-          }
-          element.style.setProperty("--ae-width", width);
-          element.style.setProperty("--ae-height", height);
-          AelluxJs2.dispatchFrom(element, "AdaptiveUpdate", {
-            detail: {
-              width: width,
-              height: height,
-              ratio: ratio
-            }
-          });
-        }
-        function inferOrientation(flexBox) {
-          var selector = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : "*";
-          return AelluxJs2.waitLayout.read(function() {
-            var fallback = "horizontal";
-            var style = getComputedStyle(flexBox);
-            if (style.display === "flex" || style.display === "inline-flex") {
-              return style.flexDirection.indexOf("column") === 0 ? "vertical" : "horizontal";
-            }
-            if (!selector || selector.length === 0) return fallback;
-            var children = flexBox.querySelectorAll(selector);
-            if (children.length < 2) return fallback;
-            var first = children[0].getBoundingClientRect();
-            var second = children[1].getBoundingClientRect();
-            var deltaX = Math.abs(second.left + second.width / 2 - (first.left + first.width / 2));
-            var deltaY = Math.abs(second.top + second.height / 2 - (first.top + first.height / 2));
-            return deltaY > deltaX ? "vertical" : "horizontal";
-          });
-        }
-      })(typeof globalThis !== "undefined" ? globalThis : window);
-    }
-  });
-
-  // src/aellux.ext.present.js
-  var aellux_ext_present_exports = {};
-  function _regenerator6() {
-    /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/babel/babel/blob/main/packages/babel-helpers/LICENSE */
-    var e, t, r = "function" == typeof Symbol ? Symbol : {}, n = r.iterator || "@@iterator", o = r.toStringTag || "@@toStringTag";
-    function i(r2, n2, o2, i2) {
-      var c2 = n2 && n2.prototype instanceof Generator ? n2 : Generator, u2 = Object.create(c2.prototype);
-      return _regeneratorDefine26(u2, "_invoke", (function(r3, n3, o3) {
-        var i3, c3, u3, f2 = 0, p = o3 || [], y = false, G = { p: 0, n: 0, v: e, a: d, f: d.bind(e, 4), d: function d2(t2, r4) {
-          return i3 = t2, c3 = 0, u3 = e, G.n = r4, a;
-        } };
-        function d(r4, n4) {
-          for (c3 = r4, u3 = n4, t = 0; !y && f2 && !o4 && t < p.length; t++) {
-            var o4, i4 = p[t], d2 = G.p, l = i4[2];
-            r4 > 3 ? (o4 = l === n4) && (u3 = i4[(c3 = i4[4]) ? 5 : (c3 = 3, 3)], i4[4] = i4[5] = e) : i4[0] <= d2 && ((o4 = r4 < 2 && d2 < i4[1]) ? (c3 = 0, G.v = n4, G.n = i4[1]) : d2 < l && (o4 = r4 < 3 || i4[0] > n4 || n4 > l) && (i4[4] = r4, i4[5] = n4, G.n = l, c3 = 0));
-          }
-          if (o4 || r4 > 1) return a;
-          throw y = true, n4;
-        }
-        return function(o4, p2, l) {
-          if (f2 > 1) throw TypeError("Generator is already running");
-          for (y && 1 === p2 && d(p2, l), c3 = p2, u3 = l; (t = c3 < 2 ? e : u3) || !y; ) {
-            i3 || (c3 ? c3 < 3 ? (c3 > 1 && (G.n = -1), d(c3, u3)) : G.n = u3 : G.v = u3);
-            try {
-              if (f2 = 2, i3) {
-                if (c3 || (o4 = "next"), t = i3[o4]) {
-                  if (!(t = t.call(i3, u3))) throw TypeError("iterator result is not an object");
-                  if (!t.done) return t;
-                  u3 = t.value, c3 < 2 && (c3 = 0);
-                } else 1 === c3 && (t = i3.return) && t.call(i3), c3 < 2 && (u3 = TypeError("The iterator does not provide a '" + o4 + "' method"), c3 = 1);
-                i3 = e;
-              } else if ((t = (y = G.n < 0) ? u3 : r3.call(n3, G)) !== a) break;
-            } catch (t2) {
-              i3 = e, c3 = 1, u3 = t2;
-            } finally {
-              f2 = 1;
-            }
-          }
-          return { value: t, done: y };
-        };
-      })(r2, o2, i2), true), u2;
-    }
-    var a = {};
-    function Generator() {
-    }
-    function GeneratorFunction() {
-    }
-    function GeneratorFunctionPrototype() {
-    }
-    t = Object.getPrototypeOf;
-    var c = [][n] ? t(t([][n]())) : (_regeneratorDefine26(t = {}, n, function() {
-      return this;
-    }), t), u = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(c);
-    function f(e2) {
-      return Object.setPrototypeOf ? Object.setPrototypeOf(e2, GeneratorFunctionPrototype) : (e2.__proto__ = GeneratorFunctionPrototype, _regeneratorDefine26(e2, o, "GeneratorFunction")), e2.prototype = Object.create(u), e2;
-    }
-    return GeneratorFunction.prototype = GeneratorFunctionPrototype, _regeneratorDefine26(u, "constructor", GeneratorFunctionPrototype), _regeneratorDefine26(GeneratorFunctionPrototype, "constructor", GeneratorFunction), GeneratorFunction.displayName = "GeneratorFunction", _regeneratorDefine26(GeneratorFunctionPrototype, o, "GeneratorFunction"), _regeneratorDefine26(u), _regeneratorDefine26(u, o, "Generator"), _regeneratorDefine26(u, n, function() {
-      return this;
-    }), _regeneratorDefine26(u, "toString", function() {
-      return "[object Generator]";
-    }), (_regenerator6 = function _regenerator7() {
-      return { w: i, m: f };
-    })();
-  }
-  function _regeneratorDefine26(e, r, n, t) {
-    var i = Object.defineProperty;
-    try {
-      i({}, "", {});
-    } catch (e2) {
-      i = 0;
-    }
-    _regeneratorDefine26 = function _regeneratorDefine(e2, r2, n2, t2) {
-      function o(r3, n3) {
-        _regeneratorDefine26(e2, r3, function(e3) {
-          return this._invoke(r3, n3, e3);
-        });
-      }
-      r2 ? i ? i(e2, r2, { value: n2, enumerable: !t2, configurable: !t2, writable: !t2 }) : e2[r2] = n2 : (o("next", 0), o("throw", 1), o("return", 2));
-    }, _regeneratorDefine26(e, r, n, t);
-  }
-  function asyncGeneratorStep6(n, t, e, r, o, a, c) {
-    try {
-      var i = n[a](c), u = i.value;
-    } catch (n2) {
-      return void e(n2);
-    }
-    i.done ? t(u) : Promise.resolve(u).then(r, o);
-  }
-  function _asyncToGenerator6(n) {
-    return function() {
-      var t = this, e = arguments;
-      return new Promise(function(r, o) {
-        var a = n.apply(t, e);
-        function _next(n2) {
-          asyncGeneratorStep6(a, r, o, _next, _throw, "next", n2);
-        }
-        function _throw(n2) {
-          asyncGeneratorStep6(a, r, o, _next, _throw, "throw", n2);
-        }
-        _next(void 0);
-      });
-    };
-  }
-  function _createForOfIteratorHelper15(r, e) {
-    var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
-    if (!t) {
-      if (Array.isArray(r) || (t = _unsupportedIterableToArray16(r)) || e && r && "number" == typeof r.length) {
-        t && (r = t);
-        var _n = 0, F = function F2() {
-        };
-        return { s: F, n: function n() {
-          return _n >= r.length ? { done: true } : { done: false, value: r[_n++] };
-        }, e: function e2(r2) {
-          throw r2;
-        }, f: F };
-      }
-      throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
-    }
-    var o, a = true, u = false;
-    return { s: function s() {
-      t = t.call(r);
-    }, n: function n() {
-      var r2 = t.next();
-      return a = r2.done, r2;
-    }, e: function e2(r2) {
-      u = true, o = r2;
-    }, f: function f() {
-      try {
-        a || null == t.return || t.return();
-      } finally {
-        if (u) throw o;
-      }
-    } };
-  }
-  function _slicedToArray9(r, e) {
-    return _arrayWithHoles9(r) || _iterableToArrayLimit9(r, e) || _unsupportedIterableToArray16(r, e) || _nonIterableRest9();
-  }
-  function _nonIterableRest9() {
-    throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
-  }
-  function _iterableToArrayLimit9(r, l) {
-    var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
-    if (null != t) {
-      var e, n, i, u, a = [], f = true, o = false;
-      try {
-        if (i = (t = t.call(r)).next, 0 === l) {
-          if (Object(t) !== t) return;
-          f = false;
-        } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = true) ;
-      } catch (r2) {
-        o = true, n = r2;
-      } finally {
-        try {
-          if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return;
-        } finally {
-          if (o) throw n;
-        }
-      }
-      return a;
-    }
-  }
-  function _arrayWithHoles9(r) {
-    if (Array.isArray(r)) return r;
-  }
-  function _toConsumableArray4(r) {
-    return _arrayWithoutHoles4(r) || _iterableToArray4(r) || _unsupportedIterableToArray16(r) || _nonIterableSpread4();
-  }
-  function _nonIterableSpread4() {
-    throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
-  }
-  function _unsupportedIterableToArray16(r, a) {
-    if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray16(r, a);
-      var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray16(r, a) : void 0;
-    }
-  }
-  function _iterableToArray4(r) {
-    if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
-  }
-  function _arrayWithoutHoles4(r) {
-    if (Array.isArray(r)) return _arrayLikeToArray16(r);
-  }
-  function _arrayLikeToArray16(r, a) {
-    (null == a || a > r.length) && (a = r.length);
-    for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
-    return n;
-  }
-  var init_aellux_ext_present = __esm({
-    "src/aellux.ext.present.js": function() {
-      /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
-      (function(root2) {
-        "use strict";
-        var AelluxJs2 = root2.AelluxJs;
-        var extensionName = "present";
-        if (!AelluxJs2) {
-          throw new Error('[aellux.js] Cannot attach the "'.concat(extensionName, '" extension: root.AelluxJs is not defined. Load the aellux.js boot script before this extension.'));
-        }
-        var attr = {
-          present: AelluxJs2.attr(extensionName),
-          autoUnpop: AelluxJs2.attr("auto-unpop"),
-          presentMotion: AelluxJs2.attr("present-motion"),
-          unpopOnOutside: AelluxJs2.attr("unpop-on-outside"),
-          trigger: AelluxJs2.attr("trigger"),
-          //toggle,pop,unpop
-          dismiss: AelluxJs2.attr("dismiss"),
-          //target ID
-          target: AelluxJs2.attr("target"),
-          //target ID
-          lowHardware: AelluxJs2.attr("low-hardware")
-        };
-        var className = {
-          pop: AelluxJs2.className("pop"),
-          popping: AelluxJs2.className("popping"),
-          unpopping: AelluxJs2.className("unpopping"),
-          willChange: AelluxJs2.className("will-change"),
-          grid: AelluxJs2.className("present-grid")
-        };
-        AelluxJs2.extAttach(extensionName, {
-          init: init,
-          destroy: destroy,
-          pop: pop,
-          unpop: unpop,
-          toggle: toggle,
-          trigger: trigger
-        });
-        var POP = "Pop", UNPOP = "Unpop", BEFORE = "Before", PING = "ping", MILLISECOND = "ms", SECOND = "s", DEFAULT_PRESENT = "opacity transform height width", OPACITY_SYNTAX = "<number> | <percentage>", TRANSFORM_SYNTAX = "<transform-list> | none";
-        var TRANSITION_PREPARE_TIME = 100;
-        var presentElements = /* @__PURE__ */ new Map();
-        var openPresentElements = /* @__PURE__ */ new Set();
-        var fallbackMotionId = 5e6;
-        var triggerElementsSet = /* @__PURE__ */ new Set();
-        var triggerTargets = /* @__PURE__ */ new Map();
-        var triggersByTargetId = /* @__PURE__ */ new Map();
-        var indexedTriggerValues = /* @__PURE__ */ new Map();
-        var elementMemories = /* @__PURE__ */ new WeakMap();
-        var containerAriaHandlers = /* @__PURE__ */ new WeakMap();
-        var triggerAriaHandlers = /* @__PURE__ */ new WeakMap();
-        var measuredMemories = /* @__PURE__ */ new WeakMap();
-        var cssProperties = [["from-opacity", OPACITY_SYNTAX, "0"], ["pop-opacity", OPACITY_SYNTAX, "1"], ["unpop-opacity", OPACITY_SYNTAX, "0"], ["from-transform", TRANSFORM_SYNTAX, "scale(0.5)"], ["pop-transform", TRANSFORM_SYNTAX, "scale(1)"], ["unpop-transform", TRANSFORM_SYNTAX, "scale(1.2)"], ["from-height", "*", "0fr"], ["pop-height", "*", "1fr"], ["unpop-height", "*", "0fr"], ["from-width", "*", "0fr"], ["pop-width", "*", "1fr"], ["unpop-width", "*", "0fr"], ["pop-ease", "*", "ease-out"], ["unpop-ease", "*", "ease-in"], ["pop-duration", "<time>", "250ms"], ["unpop-duration", "<time>", "250ms"], ["pop-low-steps", "<integer>", "4"], ["unpop-low-steps", "<integer>", "4"]];
-        function init(options) {
-          AelluxJs2.registerCssProperty.apply(AelluxJs2, _toConsumableArray4(cssProperties.map(function(_ref) {
-            var _ref2 = _slicedToArray9(_ref, 3), name = _ref2[0], syntax = _ref2[1], initialValue = _ref2[2];
-            return {
-              name: "--ae-".concat(name),
-              syntax: syntax,
-              initialValue: initialValue
-            };
-          })));
-          AelluxJs2.mountManager.add({
-            extensionName: extensionName,
-            selector: "[".concat(attr.present, "]"),
-            priority: 0,
-            mount: mountPresentContainer,
-            unmount: unmountPresentContainer,
-            controllers: ["pop", "unpop", "trigger", "toggle"]
-          });
-          AelluxJs2.mountManager.add({
-            extensionName: extensionName,
-            priority: 0,
-            selector: "[".concat([attr.trigger, attr.dismiss, attr.target].join("],["), "]"),
-            mount: mountTriggerElement,
-            unmount: unmountTriggerElement
-          });
-          AelluxJs2.on("$click", OnClick);
-        }
-        function destroy() {
-          AelluxJs2.mountManager.remove({
-            extensionName: extensionName
-          });
-          AelluxJs2.off("$click", OnClick);
-          var _iterator = _createForOfIteratorHelper15(triggerElementsSet), _step;
-          try {
-            for (_iterator.s(); !(_step = _iterator.n()).done; ) {
-              var triggerElement = _step.value;
-              unmountTriggerElement(triggerElement);
-            }
-          } catch (err) {
-            _iterator.e(err);
-          } finally {
-            _iterator.f();
-          }
-          var _iterator2 = _createForOfIteratorHelper15(presentElements.keys()), _step2;
-          try {
-            for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
-              var element = _step2.value;
-              unmountPresentContainer(element);
-            }
-          } catch (err) {
-            _iterator2.e(err);
-          } finally {
-            _iterator2.f();
-          }
-          openPresentElements.clear();
-        }
-        function mountPresentContainer(element) {
-          if (presentElements.has(element)) return;
-          elementMemories.set(element, AelluxJs2.persist.element.save(element, [attr.present, attr.presentMotion, "hidden"], ["--ae-pop-low-steps", "--ae-unpop-low-steps"]));
-          containerAriaHandlers.set(element, AelluxJs2.aria.register(element));
-          if ((element.getAttribute(attr.present) || "").trim().toLowerCase() === "all") {
-            element.setAttribute(attr.present, DEFAULT_PRESENT);
-          }
-          if (element.hasAttribute(attr.presentMotion)) {
-            element.removeAttribute(attr.presentMotion);
-          }
-          var presentMotion = element.querySelector(":scope>[".concat(attr.presentMotion, "]"));
-          var tokens = (element.getAttribute(attr.present) || "").split(/\s+/);
-          var measuredHeight = !presentMotion && tokens.includes("height");
-          var measuredWidth = !presentMotion && tokens.includes("width");
-          if (presentMotion) element.classList.add(className.grid);
-          else if (measuredHeight || measuredWidth) {
-            AelluxJs2.diagnostics.info(AelluxJs2.diagnostics.INFO_PRESENT_MEASURED_LAYOUT, {
-              extension: extensionName,
-              element: element
-            });
-          }
-          var presentController = {
-            presentMotion: presentMotion,
-            measuredHeight: measuredHeight,
-            measuredWidth: measuredWidth,
-            motionEnabled: (element.getAttribute(attr.present) || "").trim() !== "",
-            motionId: AelluxJs2.motion ? AelluxJs2.motion.id() : fallbackMotionId++,
-            transition: null,
-            autoUnpopTimeout: null,
-            direction: null,
-            classList: element.classList,
-            triggers: /* @__PURE__ */ new Set(),
-            setAriaExpanded: function setAriaExpanded(value) {
-              this.expanded = value === "true";
-              containerAriaHandlers.get(element).set({
-                expanded: this.expanded
-              });
-              this.triggers.forEach(updateTriggerAriaExpanded);
-            },
-            stop: function stop() {
-              var options = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : {};
-              var replacement = options.replacement === true;
-              var transitionStart = options.transitionStart === true;
-              var transition = this.transition;
-              if (transition) {
-                transition.replacement = replacement;
-                if (AelluxJs2.motion) AelluxJs2.motion.cancel(this.motionId);
-                if (transition.timeout !== null) {
-                  clearTimeout(transition.timeout);
-                  transition.timeout = null;
-                }
-                if (!transitionStart && transition.className) {
-                  this.classList.remove(transition.className);
-                }
-                this.transition = null;
-                transition.interrupt(AelluxJs2.diagnostics.create(AelluxJs2.diagnostics.WARN_INTERRUPTION, {
-                  extensionName: extensionName,
-                  replacement: replacement
-                }));
-              }
-              if (this.autoUnpopTimeout !== null) {
-                clearTimeout(this.autoUnpopTimeout);
-                this.autoUnpopTimeout = null;
-              }
-              if (transitionStart) {
-                this.classList.remove(className.unpopping);
-              } else {
-                this.classList.remove(className.pop, className.popping, className.unpopping, className.willChange);
-              }
-              if (!replacement) restoreMeasuredStyles(element, this);
-            }
-          };
-          presentController.setAriaExpanded(element.hidden ? "false" : "true");
-          if (!element.hidden) {
-            presentController.classList.add(className.pop);
-            openPresentElements.add(element);
-          }
-          presentElements.set(element, presentController);
-          var _iterator3 = _createForOfIteratorHelper15(element.querySelectorAll("[".concat(attr.trigger, "],[").concat(attr.dismiss, "],[").concat(attr.target, "]"))), _step3;
-          try {
-            for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
-              var _triggerElement = _step3.value;
-              if (triggerTargets.get(_triggerElement) === element) {
-                presentController.triggers.add(_triggerElement);
-                updateTriggerAriaExpanded(_triggerElement);
-              }
-            }
-          } catch (err) {
-            _iterator3.e(err);
-          } finally {
-            _iterator3.f();
-          }
-          var idTriggers = triggersByTargetId.get(element.id);
-          if (idTriggers) {
-            var _iterator4 = _createForOfIteratorHelper15(idTriggers), _step4;
-            try {
-              for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
-                var triggerElement = _step4.value;
-                refreshTriggerTargets(triggerElement);
-              }
-            } catch (err) {
-              _iterator4.e(err);
-            } finally {
-              _iterator4.f();
-            }
-          }
-          autoUnpopSchedule(element, presentController);
-        }
-        function unmountPresentContainer(element) {
-          var _containerAriaHandler, _elementMemories$get;
-          if (!presentElements.has(element)) return;
-          var controller = presentElements.get(element);
-          controller.stop();
-          element.classList.remove(className.grid);
-          presentElements.delete(element);
-          openPresentElements.delete(element);
-          (_containerAriaHandler = containerAriaHandlers.get(element)) === null || _containerAriaHandler === void 0 || _containerAriaHandler.release();
-          containerAriaHandlers.delete(element);
-          (_elementMemories$get = elementMemories.get(element)) === null || _elementMemories$get === void 0 || _elementMemories$get.restore();
-          elementMemories.delete(element);
-          controller.triggers.forEach(updateTriggerAriaExpanded);
-        }
-        function mountTriggerElement(triggerElement) {
-          if (triggerElementsSet.has(triggerElement)) return;
-          triggerAriaHandlers.set(triggerElement, AelluxJs2.aria.register(triggerElement));
-          triggerElementsSet.add(triggerElement);
-          refreshTriggerTargets(triggerElement);
-        }
-        function unmountTriggerElement(triggerElement) {
-          var _triggerAriaHandlers$;
-          if (!triggerElementsSet.has(triggerElement)) return;
-          var target = triggerTargets.get(triggerElement);
-          if (target) {
-            var _presentElements$get;
-            (_presentElements$get = presentElements.get(target)) === null || _presentElements$get === void 0 || _presentElements$get.triggers.delete(triggerElement);
-            triggerTargets.delete(triggerElement);
-          }
-          unindexTriggerTarget(triggerElement);
-          triggerElementsSet.delete(triggerElement);
-          (_triggerAriaHandlers$ = triggerAriaHandlers.get(triggerElement)) === null || _triggerAriaHandlers$ === void 0 || _triggerAriaHandlers$.release();
-          triggerAriaHandlers.delete(triggerElement);
-        }
-        function targetIdFor(value) {
-          if (!value) return null;
-          var id = value.charAt(0) === "#" ? value.slice(1) : value;
-          return id && !/[\s#]/.test(id) ? id : null;
-        }
-        function targetById(value) {
-          var id = targetIdFor(value);
-          if (!id) {
-            AelluxJs2.diagnostics.error(AelluxJs2.diagnostics.ERROR_EXTENSION_SELECTOR, {
-              cause: new SyntaxError(),
-              extension: extensionName,
-              selector: value
-            });
-            return null;
-          }
-          return document.getElementById(id);
-        }
-        function unindexTriggerTarget(triggerElement) {
-          var previous = indexedTriggerValues.get(triggerElement);
-          var id = targetIdFor(previous);
-          if (id) {
-            var triggers = triggersByTargetId.get(id);
-            triggers.delete(triggerElement);
-            if (!triggers.size) triggersByTargetId.delete(id);
-          }
-          indexedTriggerValues.delete(triggerElement);
-        }
-        function indexTriggerTarget(triggerElement, value) {
-          if (indexedTriggerValues.get(triggerElement) === value) return;
-          unindexTriggerTarget(triggerElement);
-          indexedTriggerValues.set(triggerElement, value);
-          var id = targetIdFor(value);
-          if (id) {
-            var triggers = triggersByTargetId.get(id);
-            if (!triggers) {
-              triggers = /* @__PURE__ */ new Set();
-              triggersByTargetId.set(id, triggers);
-            }
-            triggers.add(triggerElement);
-          }
-        }
-        function refreshTriggerTargets(triggerElement) {
-          var _presentElements$get3, _triggerAriaHandlers$4;
-          var previousTarget = triggerTargets.get(triggerElement);
-          var targetSelector = triggerElement.getAttribute(attr.target);
-          var dismiss = triggerElement.getAttribute(attr.dismiss);
-          indexTriggerTarget(triggerElement, dismiss || targetSelector);
-          var container = triggerElement.closest("[".concat(attr.present, "]"));
-          if (previousTarget) {
-            var _presentElements$get2;
-            (_presentElements$get2 = presentElements.get(previousTarget)) === null || _presentElements$get2 === void 0 || _presentElements$get2.triggers.delete(triggerElement);
-          }
-          var target = null;
-          if (dismiss || targetSelector) {
-            target = targetById(dismiss || targetSelector);
-          } else if (container && container.id) {
-            target = container;
-          }
-          if (!target || !target.id) {
-            var _triggerAriaHandlers$2, _triggerAriaHandlers$3;
-            triggerTargets.delete(triggerElement);
-            (_triggerAriaHandlers$2 = triggerAriaHandlers.get(triggerElement)) === null || _triggerAriaHandlers$2 === void 0 || _triggerAriaHandlers$2.unset("expanded");
-            (_triggerAriaHandlers$3 = triggerAriaHandlers.get(triggerElement)) === null || _triggerAriaHandlers$3 === void 0 || _triggerAriaHandlers$3.unset("controls");
-            return;
-          }
-          triggerTargets.set(triggerElement, target);
-          (_presentElements$get3 = presentElements.get(target)) === null || _presentElements$get3 === void 0 || _presentElements$get3.triggers.add(triggerElement);
-          var targetIds = /* @__PURE__ */ new Set([target.id]);
-          var initial = (_triggerAriaHandlers$4 = triggerAriaHandlers.get(triggerElement)) === null || _triggerAriaHandlers$4 === void 0 ? void 0 : _triggerAriaHandlers$4.initial("controls");
-          if (initial) {
-            initial.trim().split(/\s+/).forEach(function(x) {
-              return targetIds.add(x);
-            });
-          }
-          updateTriggerAriaExpanded(triggerElement);
-          triggerAriaHandlers.get(triggerElement).set({
-            controls: _toConsumableArray4(targetIds)
-          });
-        }
-        function updateTriggerAriaExpanded(triggerElement) {
-          var _presentElements$get4, _triggerAriaHandlers$5;
-          var target = triggerTargets.get(triggerElement);
-          if (!target) return;
-          var expanded = ((_presentElements$get4 = presentElements.get(target)) === null || _presentElements$get4 === void 0 ? void 0 : _presentElements$get4.expanded) === true;
-          (_triggerAriaHandlers$5 = triggerAriaHandlers.get(triggerElement)) === null || _triggerAriaHandlers$5 === void 0 || _triggerAriaHandlers$5.set({
-            expanded: expanded
-          });
-        }
-        function pop(element) {
-          return presentTransition(element, true, true);
-        }
-        function unpop(element) {
-          return presentTransition(element, false);
-        }
-        function toggle(element, goto) {
-          return presentTransition(element, goto);
-        }
-        function trigger(element, trigger2) {
-          trigger2 = typeof trigger2 === "string" ? (trigger2 || "toggle").toLowerCase() : "toggle";
-          var method = AelluxJs2.ext.present[trigger2];
-          return method && typeof method === "function" ? method(element) : toggle(element);
-        }
-        function restoreMeasuredStyles(element, controller) {
-          var memory = measuredMemories.get(element);
-          if (!memory) return;
-          memory.restore();
-          measuredMemories.delete(element);
-        }
-        function prepareMeasuredSize(_x, _x2, _x3, _x4, _x5) {
-          return _prepareMeasuredSize.apply(this, arguments);
-        }
-        function _prepareMeasuredSize() {
-          _prepareMeasuredSize = _asyncToGenerator6(/* @__PURE__ */ _regenerator6().m(function _callee(element, controller, gotoVisible, previousSize, waitForPreparation) {
-            var size, computed, height, width, start;
-            return _regenerator6().w(function(_context) {
-              while (1) switch (_context.n) {
-                case 0:
-                  if (!(!controller.measuredHeight && !controller.measuredWidth)) {
-                    _context.n = 1;
-                    break;
-                  }
-                  return _context.a(2, null);
-                case 1:
-                  if (!measuredMemories.has(element)) {
-                    measuredMemories.set(element, AelluxJs2.persist.element.save(element, [], ["max-height", "max-width"]));
-                  }
-                  measuredMemories.get(element).restore();
-                  size = previousSize;
-                  if (gotoVisible || !size) {
-                    computed = root2.getComputedStyle(element);
-                    height = parseFloat(computed.height);
-                    width = parseFloat(computed.width);
-                    size = {
-                      height: Number.isFinite(height) ? height : element.scrollHeight,
-                      width: Number.isFinite(width) ? width : element.scrollWidth
-                    };
-                  }
-                  start = previousSize || (gotoVisible ? {
-                    height: 0,
-                    width: 0
-                  } : size);
-                  if (controller.measuredHeight) {
-                    element.style.setProperty("max-height", "".concat(Math.max(0, start.height), "px"), "important");
-                  }
-                  if (controller.measuredWidth) {
-                    element.style.setProperty("max-width", "".concat(Math.max(0, start.width), "px"), "important");
-                  }
-                  if (waitForPreparation) {
-                    _context.n = 2;
-                    break;
-                  }
-                  _context.n = 2;
-                  return AelluxJs2.waitLayout.read(function() {
-                    return element.getBoundingClientRect();
-                  });
-                case 2:
-                  return _context.a(2, size);
-              }
-            }, _callee);
-          }));
-          return _prepareMeasuredSize.apply(this, arguments);
-        }
-        function presentTransition(_x6, _x7) {
-          return _presentTransition.apply(this, arguments);
-        }
-        function _presentTransition() {
-          _presentTransition = _asyncToGenerator6(/* @__PURE__ */ _regenerator6().m(function _callee2(element, gotoVisible) {
-            var forceRepop, controller, newDirection, transition, allowEvent, reusePreparation, waitForPreparation, previousSize, computed, interrupted, size, prepared, duration, timeMs, activateTransition, advancedEase, motionOptions, completed, motionResult, ownsTransition, _args2 = arguments, _t, _t2;
-            return _regenerator6().w(function(_context2) {
-              while (1) switch (_context2.p = _context2.n) {
-                case 0:
-                  forceRepop = _args2.length > 2 && _args2[2] !== void 0 ? _args2[2] : false;
-                  controller = presentElements.get(element);
-                  if (controller) {
-                    _context2.n = 1;
-                    break;
-                  }
-                  return _context2.a(2);
-                case 1:
-                  if (controller.direction === null) controller.direction = element.hidden ? UNPOP : POP;
-                  if (typeof gotoVisible === "undefined" || gotoVisible === null) gotoVisible = controller.direction === POP ? false : true;
-                  newDirection = gotoVisible ? POP : UNPOP;
-                  if (!(element.hidden && !gotoVisible || newDirection === controller.direction && !forceRepop)) {
-                    _context2.n = 2;
-                    break;
-                  }
-                  return _context2.a(2);
-                case 2:
-                  transition = null;
-                  _context2.p = 3;
-                  allowEvent = AelluxJs2.dispatchFrom(element, "".concat(BEFORE).concat(newDirection), {
-                    bubbles: true,
-                    cancelable: true
-                  });
-                  if (allowEvent) {
-                    _context2.n = 4;
-                    break;
-                  }
-                  return _context2.a(2);
-                case 4:
-                  if (forceRepop && (!element.hidden || controller.transition)) {
-                    controller.stop();
-                    element.hidden = true;
-                    openPresentElements.delete(element);
-                    controller.setAriaExpanded("false");
-                    element.getBoundingClientRect();
-                  }
-                  reusePreparation = !forceRepop && controller.motionEnabled && controller.transition !== null && controller.classList.contains(className.willChange);
-                  waitForPreparation = controller.motionEnabled && !reusePreparation;
-                  previousSize = null;
-                  if (reusePreparation && (controller.measuredHeight || controller.measuredWidth)) {
-                    computed = root2.getComputedStyle(element);
-                    previousSize = {
-                      height: parseFloat(computed.maxHeight),
-                      width: parseFloat(computed.maxWidth)
-                    };
-                  }
-                  if (!forceRepop) {
-                    controller.stop({
-                      replacement: reusePreparation,
-                      transitionStart: true
-                    });
-                  }
-                  controller.direction = newDirection;
-                  interrupted = new Promise(function(_, interruptTransition) {
-                    transition = {
-                      className: null,
-                      timeout: null,
-                      interrupt: interruptTransition,
-                      replacement: false
-                    };
-                    controller.transition = transition;
-                  });
-                  interrupted.catch(function() {
-                  });
-                  element.hidden = false;
-                  openPresentElements.add(element);
-                  size = null;
-                  if (!(controller.measuredHeight || controller.measuredWidth)) {
-                    _context2.n = 6;
-                    break;
-                  }
-                  _context2.n = 5;
-                  return prepareMeasuredSize(element, controller, gotoVisible, previousSize, waitForPreparation);
-                case 5:
-                  size = _context2.v;
-                case 6:
-                  if (!(controller.transition !== transition)) {
-                    _context2.n = 7;
-                    break;
-                  }
-                  return _context2.a(2);
-                case 7:
-                  if (controller.motionEnabled) {
-                    controller.classList.add(className.willChange);
-                  }
-                  if (!waitForPreparation) {
-                    _context2.n = 8;
-                    break;
-                  }
-                  prepared = new Promise(function(resolve) {
-                    transition.timeout = setTimeout(function() {
-                      transition.timeout = null;
-                      resolve();
-                    }, TRANSITION_PREPARE_TIME);
-                  });
-                  _context2.n = 8;
-                  return Promise.race([prepared, interrupted]);
-                case 8:
-                  transition.className = className["".concat(newDirection).concat(PING).toLowerCase()];
-                  duration = root2.getComputedStyle(element).getPropertyValue("--ae-".concat(newDirection, "-duration").toLowerCase()).trim();
-                  timeMs = getString2Time(duration);
-                  activateTransition = function activateTransition2() {
-                    if (controller.transition !== transition) return;
-                    element.style.setProperty("--ae-".concat(newDirection, "-low-steps").toLowerCase(), Math.max(1, parseInt(timeMs / 62.5)));
-                    controller.classList.remove(className.pop, className.popping, className.unpopping);
-                    controller.classList.add(transition.className);
-                    if (size) {
-                      if (controller.measuredHeight) {
-                        element.style.setProperty("max-height", "".concat(gotoVisible ? size.height : 0, "px"), "important");
-                      }
-                      if (controller.measuredWidth) {
-                        element.style.setProperty("max-width", "".concat(gotoVisible ? size.width : 0, "px"), "important");
-                      }
-                    }
-                  };
-                  advancedEase = root2.getComputedStyle(element).getPropertyValue("--ae-".concat(newDirection, "-aellux-ease").toLowerCase()).trim() || void 0;
-                  motionOptions = {
-                    id: controller.motionId,
-                    apply: activateTransition,
-                    easing: advancedEase,
-                    nativeDuration: timeMs,
-                    maxFPS: AelluxJs2.layoutMaxFPS ? AelluxJs2.layoutMaxFPS(element) : void 0,
-                    abort: function abort() {
-                      return controller.transition !== transition || !element.isConnected;
-                    }
-                  };
-                  completed = AelluxJs2.motion ? AelluxJs2.motion.run(element, motionOptions) : legacyMotionRun(motionOptions);
-                  AelluxJs2.dispatchFrom(element, "Layout", {
-                    detail: {
-                      origin: "present.".concat(newDirection).toLowerCase(),
-                      durationMs: Number.isFinite(timeMs) ? Math.max(0, timeMs) : 0
-                    },
-                    bubbles: true
-                  });
-                  AelluxJs2.dispatchFrom(element, "".concat(newDirection).concat(PING), {
-                    bubbles: true
-                  });
-                  _context2.n = 9;
-                  return Promise.race([completed, interrupted]);
-                case 9:
-                  motionResult = _context2.v;
-                  if (!(controller.transition !== transition || motionResult && motionResult.status !== "completed")) {
-                    _context2.n = 10;
-                    break;
-                  }
-                  return _context2.a(2);
-                case 10:
-                  finishTransition(element, controller, transition, gotoVisible);
-                  if (gotoVisible && !element.hidden) {
-                    autoUnpopSchedule(element, controller);
-                    controller.classList.add(className.pop);
-                    controller.setAriaExpanded("true");
-                    AelluxJs2.dispatchFrom(element, POP, {
-                      bubbles: true
-                    });
-                  }
-                  if (!gotoVisible && element.hidden) {
-                    controller.setAriaExpanded("false");
-                    AelluxJs2.dispatchFrom(element, UNPOP, {
-                      bubbles: true
-                    });
-                  }
-                  _context2.n = 14;
-                  break;
-                case 11:
-                  _context2.p = 11;
-                  _t = _context2.v;
-                  ownsTransition = transition && controller.transition === transition;
-                  if (ownsTransition && transition.timeout !== null) {
-                    clearTimeout(transition.timeout);
-                    transition.timeout = null;
-                  }
-                  if (ownsTransition && transition.className) {
-                    controller.classList.remove(transition.className);
-                  }
-                  if (ownsTransition) restoreMeasuredStyles(element, controller);
-                  _t2 = _t && _t.code;
-                  _context2.n = _t2 === AelluxJs2.diagnostics.WARN_INTERRUPTION.code ? 12 : 13;
-                  break;
-                case 12:
-                  AelluxJs2.diagnostics.warn(AelluxJs2.diagnostics.WARN_INTERRUPTION, {
-                    cause: _t,
-                    extension: extensionName,
-                    element: element,
-                    replacement: transition && transition.replacement === true
-                  });
-                  return _context2.a(3, 14);
-                case 13:
-                  AelluxJs2.diagnostics.error(AelluxJs2.diagnostics.ERROR_EXTENSION_TRANSITION, {
-                    cause: _t,
-                    extension: extensionName,
-                    element: element
-                  });
-                  return _context2.a(3, 14);
-                case 14:
-                  _context2.p = 14;
-                  if (transition && controller.transition === transition) {
-                    controller.transition = null;
-                    controller.classList.remove(className.willChange);
-                  }
-                  return _context2.f(14);
-                case 15:
-                  return _context2.a(2);
-              }
-            }, _callee2, null, [[3, 11, 14, 15]]);
-          }));
-          return _presentTransition.apply(this, arguments);
-        }
-        function legacyMotionRun(options) {
-          options.apply();
-          return new Promise(function(resolve) {
-            return setTimeout(function() {
-              return resolve({
-                id: options.id,
-                status: "completed",
-                mode: "native"
-              });
-            }, Math.max(0, Number(options.nativeDuration) || 0));
-          });
-        }
-        function finishTransition(element, controller, transition, gotoVisible) {
-          controller.classList.remove(transition.className);
-          restoreMeasuredStyles(element, controller);
-          var focused = !gotoVisible && element.contains(document.activeElement) ? document.activeElement : null;
-          element.hidden = gotoVisible ? false : true;
-          if (element.hidden) openPresentElements.delete(element);
-          else openPresentElements.add(element);
-          if (focused) {
-            if (document.activeElement === focused) focused.blur();
-            if (document.activeElement !== focused) AelluxJs2.dispatch("UnpopFocusLost", {
-              detail: {
-                element: element,
-                focused: focused
-              }
-            });
-          }
-          transition.timeout = null;
-        }
-        function autoUnpopSchedule(element, controller) {
-          var autoUnpopValue = element.getAttribute(attr.autoUnpop);
-          if (!element.hidden && autoUnpopValue) {
-            var autoTime = getString2Time(autoUnpopValue);
-            controller.autoUnpopTimeout = setTimeout(autoUnpop, autoTime, element, controller);
-          }
-        }
-        function autoUnpop(element, controller) {
-          controller.autoUnpopTimeout = null;
-          unpop(element);
-        }
-        function outsideClickAutoUnpop(currentExceptions) {
-          var _iterator5 = _createForOfIteratorHelper15(openPresentElements), _step5;
-          try {
-            var _loop = function _loop2() {
-              var pContainer = _step5.value;
-              if (pContainer.hidden === true || pContainer.getAttribute(attr.unpopOnOutside) === "false" || currentExceptions.some(function(e) {
-                return pContainer.contains(e);
-              })) {
-                return 1;
-              }
-              unpop(pContainer);
-            };
-            for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
-              if (_loop()) continue;
-            }
-          } catch (err) {
-            _iterator5.e(err);
-          } finally {
-            _iterator5.f();
-          }
-        }
-        function refreshChangedTrigger(button) {
-          if (!triggerElementsSet.has(button)) return;
-          var value = button.getAttribute(attr.dismiss) || button.getAttribute(attr.target);
-          if (value !== indexedTriggerValues.get(button)) refreshTriggerTargets(button);
-        }
-        function OnClick(event) {
-          if (!event.target) return;
-          var container = event.target.closest("[".concat(attr.present, "]"));
-          var exceptions = [event.target];
-          var button;
-          button = event.target.closest("[".concat(attr.trigger, "]"));
-          if (button) {
-            refreshChangedTrigger(button);
-            var triggerAttr = button.getAttribute(attr.trigger);
-            var targetSelector = button.getAttribute(attr.target);
-            if (targetSelector) {
-              var target = targetById(targetSelector);
-              if (target) {
-                exceptions.push(target);
-                trigger(target, triggerAttr);
-              }
-            } else if (container) {
-              exceptions.push(container);
-              trigger(container, triggerAttr);
-            } else {
-              AelluxJs2.diagnostics.error(AelluxJs2.diagnostics.ERROR_PRESENT_CONTROL_TARGET_MISSING, {
-                extension: extensionName,
-                element: button,
-                action: "trigger"
-              });
-            }
-          }
-          button = event.target.closest("[".concat(attr.dismiss, "]"));
-          if (button) {
-            refreshChangedTrigger(button);
-            var dismiss = button.getAttribute(attr.dismiss);
-            var _targetSelector = button.getAttribute(attr.target);
-            if (dismiss || _targetSelector) {
-              var _target = targetById(dismiss || _targetSelector);
-              if (_target) {
-                exceptions.push(_target);
-                unpop(_target);
-              }
-            } else if (container) {
-              exceptions.push(container);
-              unpop(container);
-            } else {
-              AelluxJs2.diagnostics.error(AelluxJs2.diagnostics.ERROR_PRESENT_CONTROL_TARGET_MISSING, {
-                extension: extensionName,
-                element: button,
-                action: "dismiss"
-              });
-            }
-          }
-          outsideClickAutoUnpop(exceptions);
-        }
-        function getString2Time(string) {
-          return string ? parseFloat(string) * getMillisecondsMulti(string) : 0;
-        }
-        function getMillisecondsMulti(value) {
-          return !value.endsWith(MILLISECOND) && value.endsWith(SECOND) ? 1e3 : 1;
-        }
-      })(typeof globalThis !== "undefined" ? globalThis : window);
-    }
-  });
-
   // src/aellux.full.js
   var aellux_full_exports = {};
   var root;
@@ -31704,39 +28501,9 @@
             return init_aellux_ext_state_navigation(), aellux_ext_state_navigation_exports;
           });
         },
-        "feedback": function feedback() {
-          return Promise.resolve().then(function() {
-            return init_aellux_ext_feedback(), aellux_ext_feedback_exports;
-          });
-        },
-        "focus": function focus() {
-          return Promise.resolve().then(function() {
-            return init_aellux_ext_focus(), aellux_ext_focus_exports;
-          });
-        },
-        "point": function point() {
-          return Promise.resolve().then(function() {
-            return init_aellux_ext_point(), aellux_ext_point_exports;
-          });
-        },
-        "anchor": function anchor() {
-          return Promise.resolve().then(function() {
-            return init_aellux_ext_anchor(), aellux_ext_anchor_exports;
-          });
-        },
         "scrollbox": function scrollbox() {
           return Promise.resolve().then(function() {
             return init_aellux_ext_scrollbox(), aellux_ext_scrollbox_exports;
-          });
-        },
-        "adaptive": function adaptive() {
-          return Promise.resolve().then(function() {
-            return init_aellux_ext_adaptive(), aellux_ext_adaptive_exports;
-          });
-        },
-        "present": function present() {
-          return Promise.resolve().then(function() {
-            return init_aellux_ext_present(), aellux_ext_present_exports;
           });
         }
       });
@@ -31753,13 +28520,25 @@
           return extensions;
         }, {}))
       });
-      root.AelluxJs.ext("adaptive", {
+      root.AelluxJs.ext("./aellux.ext.adaptive.js", {
+        loadWhen: "[data-ae-adaptive]",
         loadStyle: true
       });
-      root.AelluxJs.ext("feedback", {
+      root.AelluxJs.ext("./aellux.ext.anchor.js", {
+        loadWhen: "[data-ae-anchor]"
+      });
+      root.AelluxJs.ext("./aellux.ext.feedback.js", {
+        loadWhen: "[data-ae-feedback]",
         loadStyle: true
       });
-      root.AelluxJs.ext("present", {
+      root.AelluxJs.ext("./aellux.ext.focus.js", {
+        loadWhen: "[data-ae-focus]"
+      });
+      root.AelluxJs.ext("./aellux.ext.point.js", {
+        loadWhen: "[data-ae-point]"
+      });
+      root.AelluxJs.ext("./aellux.ext.present.js", {
+        loadWhen: "[data-ae-present],[data-ae-present-trigger],[data-ae-present-dismiss],[data-ae-present-target]",
         loadStyle: true
       });
     }

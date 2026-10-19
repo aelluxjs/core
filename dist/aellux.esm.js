@@ -6,6 +6,9 @@ function buildDiagnostics(catalog) {
   var historyLimit = 100;
   var history = [];
   var historyStart = 0;
+  var identities = [];
+  var resourceIds = typeof WeakMap === "function" ? /* @__PURE__ */ new WeakMap() : null;
+  var nextResourceId = 1;
   var diagnostics = {
     legacy: false,
     supported: false,
@@ -64,6 +67,8 @@ function buildDiagnostics(catalog) {
     return diagnostics.verboseLevel;
   }
   function emit(level, definition, context) {
+    var identity = diagnosticIdentity(definition, context);
+    if (identities.indexOf(identity) !== -1) return diagnostics.create(definition, context);
     var diagnostic = diagnostics.create(definition, context);
     var entry = {
       timestamp: (/* @__PURE__ */ new Date()).toISOString(),
@@ -74,7 +79,9 @@ function buildDiagnostics(catalog) {
     };
     if (history.length < historyLimit) {
       history.push(entry);
+      identities.push(identity);
     } else {
+      identities[historyStart] = identity;
       history[historyStart] = entry;
       historyStart = (historyStart + 1) % historyLimit;
     }
@@ -87,6 +94,39 @@ function buildDiagnostics(catalog) {
       );
     }
     return diagnostic;
+  }
+  function diagnosticIdentity(definition, context) {
+    return String(definition.code) + "|" + identityValue(context, []);
+  }
+  function identityValue(value, seen) {
+    if (value === null) return "null";
+    var type = typeof value;
+    if (type !== "object" && type !== "function") return type + ":" + String(value);
+    if (value && value.nodeType) return "element:" + resourceId(value);
+    if (seen.indexOf(value) !== -1) return "circular";
+    seen.push(value);
+    var result;
+    if (Array.isArray(value)) {
+      result = "[" + value.map(function(item) {
+        return identityValue(item, seen);
+      }).join(",") + "]";
+    } else {
+      var keys = Object.keys(value).sort();
+      result = "{" + keys.map(function(key) {
+        return key + ":" + identityValue(value[key], seen);
+      }).join(",") + "}";
+    }
+    seen.pop();
+    return result;
+  }
+  function resourceId(resource) {
+    if (!resourceIds) return String(resource);
+    var id = resourceIds.get(resource);
+    if (!id) {
+      id = nextResourceId++;
+      resourceIds.set(resource, id);
+    }
+    return id;
   }
   for (var name in catalog) {
     if (Object.prototype.hasOwnProperty.call(catalog, name)) {
@@ -901,6 +941,8 @@ function createAelluxConstants() {
       WARN_SCROLLBOX_WRAPPER_DISPLAY: { code: 2016, message: "Scrollbox elastic wrappers require an inline display; converting to an inline counterpart when available." },
       WARN_LAYOUT_MAX_FPS_INVALID: { code: 2017, message: "data-ae-maxfps must be a finite number greater than zero; the limit was ignored." },
       WARN_EXTENSION_COMPATIBILITY_SKIPPED: { code: 2018, message: "Extension compatibility verification was explicitly skipped." },
+      WARN_CSS_MOTION_PROPERTY_MAX_FPS_INVALID: { code: 2019, message: "cssMotionPropertyMaxFPS is invalid; using 40 FPS." },
+      WARN_SCROLLBOX_SNAP_TRANSFORM: { code: 2020, message: "A transformed snap item can invalidate Scrollbox snap geometry; apply the visual transform to a child element instead." },
       INFO_LEGACY_FALLBACK: { code: 3e3, message: "aellux.js is starting the Legacy runtime." },
       INFO_PRESENT_MEASURED_LAYOUT: { code: 3001, message: "Present measures size transitions without a direct present-motion child; add one to use the grid layout strategy." },
       INFO_FEEDBACK_MOTION_CUSTOM: { code: 3002, message: "The requested feedback motion is not standard. Standard motions are listed in the diagnostic context." },

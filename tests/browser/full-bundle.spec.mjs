@@ -18,24 +18,27 @@ for (const { boot, forceLegacy } of [
   { boot: "aellux.js", forceLegacy: true },
   { boot: "aellux.min.js", forceLegacy: true }
 ]) {
-  test(`full ${boot} initializes every core Extension with forceLegacy=${forceLegacy}`, async ({ page }) => {
+  test(`full ${boot} keeps only foundational extensions eager with forceLegacy=${forceLegacy}`, async ({ page }) => {
     await page.goto("/tests/index.htm");
     await page.addScriptTag({ url: `/dist/${boot}` });
     await page.evaluate(forceLegacy => AelluxJs.init({ mode: "full", forceLegacy }), forceLegacy);
-    await expect.poll(() => page.evaluate(names =>
-      names.filter(name => AelluxJs.ext[name]?.initialized !== true), coreExtensions
+    await expect.poll(() => page.evaluate(() =>
+      ["preference", "stateNavigation", "scrollbox"].filter(name =>
+        AelluxJs.ext[name]?.initialized !== true)
     )).toEqual([]);
 
     const state = await page.evaluate(() => ({
       bundled: Object.keys(AelluxJs.bundledExtensions).sort(),
       registered: Object.keys(AelluxJs.registry.ext).sort(),
+      lazy: Object.keys(AelluxJs.registry.lazyExtSelectors).sort(),
       externalScripts: [...document.querySelectorAll(`script[${AelluxJs.attr("ext")}]`)]
         .map(script => script.getAttribute(AelluxJs.attr("ext"))),
       legacy: AelluxJs.diagnostics.legacy
     }));
     expect(state).toEqual({
-      bundled: coreExtensions,
+      bundled: ["preference", "scrollbox", "stateNavigation"],
       registered: coreExtensions,
+      lazy: ["adaptive", "anchor", "feedback", "focus", "point", "present"],
       externalScripts: [],
       legacy: forceLegacy
     });

@@ -25,8 +25,8 @@ export default function createWeakCss() {
       scroll-behavior: smooth;
     }
 
-    html[?reduced-motion='reduced'],
-    html[?reduced-motion='reduced'] * {
+    :where(html[?reduced-motion='reduced'],
+    html[?reduced-motion='reduced'] *) {
       scroll-behavior: initial !important;
     }
 
@@ -35,6 +35,7 @@ export default function createWeakCss() {
     }
 
     :where(button, a[href], [role='button'], [role='tab']) {
+      user-select: none;
       touch-action: manipulation;
       cursor: pointer;
     }

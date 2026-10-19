@@ -13,6 +13,10 @@ $ae.init({
 });
 ```
 
+Use `0` or `null` to disable this special property ceiling. This does not disable
+the adaptive `waitLayout` scheduler or an element's `data-ae-maxfps` limit.
+Omitting the option (or passing `undefined`) retains the 40 FPS default.
+
 ```js
 const motionId = $ae.motion.id();
 await $ae.motion.run(panel, {

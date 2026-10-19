@@ -85,7 +85,7 @@ export function createCssMotionController(root, getAelluxJs) {
         return nativeWait(operation);
       }
       const policyFPS = operation.conservative
-        ? positiveFPS(AelluxJs.options.cssMotionPropertyMaxFPS, 40) : undefined;
+        ? propertyPolicyFPS(AelluxJs.options.cssMotionPropertyMaxFPS, AelluxJs) : undefined;
       const maxFPS = minimumFPS(requestedMaxFPS, policyFPS);
       return AelluxJs.waitLayout.sequence(operationId, {
         update: () => advance(operation),
@@ -176,6 +176,19 @@ export function createCssMotionController(root, getAelluxJs) {
   function positiveFPS(value, fallback) {
     const number = Number(value);
     return Number.isFinite(number) && number > 0 ? number : fallback;
+  }
+
+  function propertyPolicyFPS(value, AelluxJs) {
+    // null and zero intentionally mean no *special* property policy. The
+    // element maxFPS and adaptive scheduler remain in effect.
+    if (value === null || value === 0) return undefined;
+    const number = Number(value);
+    if (Number.isFinite(number) && number > 0) return number;
+    if (value !== undefined) {
+      AelluxJs.diagnostics.warn(AelluxJs.diagnostics.WARN_CSS_MOTION_PROPERTY_MAX_FPS_INVALID,
+        { option: "cssMotionPropertyMaxFPS", value, fallback: 40 });
+    }
+    return 40;
   }
 
   function minimumFPS(first, second) {

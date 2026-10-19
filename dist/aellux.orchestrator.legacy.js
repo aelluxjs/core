@@ -20984,6 +20984,15 @@
     var hasWork = function hasWork2() {
       return queues.read.length > 0 || queues.update.length > 0;
     };
+    function publishLimit() {
+      if (typeof document === "undefined" || !document.documentElement) return;
+      var value = nativeFPS !== null && limitFPS !== null && limitFPS < nativeFPS ? String(limitFPS) : null;
+      if (value === null) {
+        if (document.documentElement.hasAttribute("data-ae-fps")) document.documentElement.removeAttribute("data-ae-fps");
+      } else if (document.documentElement.getAttribute("data-ae-fps") !== value) {
+        document.documentElement.setAttribute("data-ae-fps", value);
+      }
+    }
     function resetMeasurements(resetLimit) {
       lastFrameTime = null;
       frameCredit = 0;
@@ -20996,6 +21005,7 @@
         limitFPS = null;
         lastAdjustment = -Infinity;
       }
+      publishLimit();
       trialLimit = null;
       recoveryDelay = 3e3;
     }
@@ -21077,6 +21087,7 @@
         if (time - lastAdjustment >= 1e3 && limitFPS > 15) {
           var previous = limitFPS;
           limitFPS = Math.max(15, limitFPS - 15);
+          publishLimit();
           if (trialLimit === previous) recoveryDelay = Math.min(3e4, recoveryDelay * 2);
           trialLimit = null;
           lastAdjustment = time;
@@ -21088,6 +21099,7 @@
         if (stableSince === null) stableSince = time;
         if (limitFPS < nativeFPS && time - stableSince >= recoveryDelay && time - lastAdjustment >= recoveryDelay) {
           limitFPS = Math.min(nativeFPS, limitFPS + 15);
+          publishLimit();
           trialLimit = limitFPS;
           lastAdjustment = time;
           stableSince = null;
@@ -23541,7 +23553,7 @@
           operations.set(operationId, operation);
           return nativeWait(operation);
         }
-        var policyFPS = operation.conservative ? positiveFPS(AelluxJs2.options.cssMotionPropertyMaxFPS, 40) : void 0;
+        var policyFPS = operation.conservative ? propertyPolicyFPS(AelluxJs2.options.cssMotionPropertyMaxFPS, AelluxJs2) : void 0;
         var maxFPS = minimumFPS(requestedMaxFPS, policyFPS);
         return AelluxJs2.waitLayout.sequence(operationId, {
           update: function update() {
@@ -23645,6 +23657,19 @@
     function positiveFPS(value, fallback) {
       var number = Number(value);
       return Number.isFinite(number) && number > 0 ? number : fallback;
+    }
+    function propertyPolicyFPS(value, AelluxJs2) {
+      if (value === null || value === 0) return void 0;
+      var number = Number(value);
+      if (Number.isFinite(number) && number > 0) return number;
+      if (value !== void 0) {
+        AelluxJs2.diagnostics.warn(AelluxJs2.diagnostics.WARN_CSS_MOTION_PROPERTY_MAX_FPS_INVALID, {
+          option: "cssMotionPropertyMaxFPS",
+          value: value,
+          fallback: 40
+        });
+      }
+      return 40;
     }
     function minimumFPS(first, second) {
       var values = [first, second].filter(function(value) {

@@ -674,6 +674,7 @@ $ae.diagnostics.info($ae.diagnostics.INFO_LEGACY_FALLBACK);
 $ae.init({ environment: &quot;production&quot;, verboseLevel: &quot;warn&quot; });
 </code></pre>
 <p><code>error()</code>, <code>warn()</code>, and <code>info()</code> are recorded even when the selected level hides them from the console. The history retains the 100 most recent entries; older entries and their context references are released as new diagnostics arrive. Call <code>$ae.diagnostics.showHistory(10)</code> to print the last 10 retained entries with timestamps; omit the argument to print all retained entries. The method also returns the selected entries, including their timestamp, level, code, message, and context. Passing <code>0</code> prints and returns no entries. Replaying history does not record new diagnostics.</p>
+<p>Equivalent diagnostics are deduplicated while their original entry remains in this circular history. Identity includes the code plus the relevant context (including element identity), so separate elements are not collapsed. Once an entry ages out, the same condition can be reported again.</p>
 <h2>Code Ranges</h2>
 <ul>
 <li><code>1000-1099</code>: boot and Core usage errors.</li>

@@ -98,10 +98,17 @@
       entries.push(entry);
       if (entries.length > 100) entries.shift();
       current = entry;
-      if (!push || !element.id || !element.id.trim()) return;
+      if (!push || !stateNavigationEligible(element) || !element.id || !element.id.trim()) return;
       AelluxJs.dispatch("PushState", {
         detail: { key: snapshotKey, value: element.id }
       });
+    }
+    function stateNavigationEligible(element) {
+      if (element.hasAttribute(attribute)) return true;
+      const name = element.tagName && element.tagName.toLowerCase();
+      if (name === "textarea" || name === "select") return true;
+      if (name === "input") return String(element.type || "text").toLowerCase() !== "hidden";
+      return element.isContentEditable || element.hasAttribute("contenteditable") && element.getAttribute("contenteditable") !== "false";
     }
     function onFocusIn(event) {
       if (!restoring) remember(event.target, true);
@@ -145,7 +152,7 @@
       const snapshot = event.detail && event.detail.snapshot;
       if (!snapshot || !Object.prototype.hasOwnProperty.call(snapshot, snapshotKey)) return;
       const target = document.getElementById(snapshot[snapshotKey]);
-      if (target) {
+      if (target && stateNavigationEligible(target)) {
         for (let i = entries.length - 1; i >= 0; i--) {
           if (entries[i].element === target) {
             if (!restore(entries[i])) restoreLastFocus();
