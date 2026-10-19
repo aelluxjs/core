@@ -79,8 +79,9 @@ export function buildLayoutScheduler() {
     }
     // A gap between scheduled batches must not discard an adaptive limit: the
     // next batch would otherwise relearn native FPS and jump straight from a
-    // reduced budget to full speed.  Keep the limit and restart observation.
-    if (idleSince !== null && now() - idleSince > 250) resetMeasurements(false);
+    // reduced budget to full speed.  Treat the quiet interval as stable time,
+    // so timer-driven batches can recover one budget at a time.
+    if (idleSince !== null && now() - idleSince > 250) resumeAfterIdle(now());
     idleSince = null;
     frameRequest = requestAnimationFrame(flushFrame);
   }
@@ -150,20 +151,35 @@ export function buildLayoutScheduler() {
       }
     } else {
       if (stableSince === null) stableSince = time;
-      if (limitFPS < nativeFPS && time - stableSince >= recoveryDelay &&
-          time - lastAdjustment >= recoveryDelay) {
-        // Use the same budgets used when pressure reduces the limit.  Adding
-        // FPS_STEP directly would recover 5 FPS as 20 FPS (rather than 15),
-        // skipping the first observed budget after the minimum.
-        limitFPS = recoveryLimit(limitFPS);
-        publishLimit();
-        trialLimit = limitFPS;
-        lastAdjustment = time;
-        stableSince = null;
-        samples = [];
-        frameCredit = 0;
-      }
+      recoverLimitAfterStablePeriod(time);
     }
+  }
+
+  function resumeAfterIdle(time) {
+    lastFrameTime = null;
+    frameCredit = 0;
+    samples = [];
+    slowStreak = 0;
+    initialDeltas = [];
+    if (nativeFPS === null || limitFPS >= nativeFPS) return;
+    if (stableSince === null) stableSince = idleSince;
+    recoverLimitAfterStablePeriod(time);
+  }
+
+  function recoverLimitAfterStablePeriod(time) {
+    if (limitFPS >= nativeFPS || stableSince === null ||
+        time - stableSince < recoveryDelay || time - lastAdjustment < recoveryDelay) return false;
+    // Use the same budgets used when pressure reduces the limit.  Adding
+    // FPS_STEP directly would recover 5 FPS as 20 FPS (rather than 15),
+    // skipping the first observed budget after the minimum.
+    limitFPS = recoveryLimit(limitFPS);
+    publishLimit();
+    trialLimit = limitFPS;
+    lastAdjustment = time;
+    stableSince = null;
+    samples = [];
+    frameCredit = 0;
+    return true;
   }
 
   function adaptiveLimit(observedFPS) {

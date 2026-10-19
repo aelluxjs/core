@@ -1627,15 +1627,13 @@
     const elastic = state.elastic;
     const wrapper = elastic.wrapper;
     const memory = elasticMemories.get(wrapper).cssProperties;
-    // A transform escaping from the leading top/left edge expands the native
-    // scrollable extent.  The trailing bottom/right transform escapes toward
-    // negative coordinates instead, so it does not grow that extent and must
-    // not receive a negative margin that would shrink it.
+    // Offset each transformed edge with the negative margin on its opposite
+    // side: top -> bottom, left -> right, and vice versa.
     const compensated = {
-      top: elastic.amounts[0] * (2 + scaleY),
-      right: 0,
-      bottom: 0,
-      left: elastic.amounts[3] * (2 + scaleX)
+      top: elastic.amounts[2] * (2 + scaleY),
+      right: elastic.amounts[3] * (2 + scaleX),
+      bottom: elastic.amounts[0] * (2 + scaleY),
+      left: elastic.amounts[1] * (2 + scaleX)
     };
     for (const side of ["top", "right", "bottom", "left"]) {
       const base = elastic.baseMargins?.[side] || "0px";

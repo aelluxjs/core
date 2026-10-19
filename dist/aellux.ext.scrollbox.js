@@ -1582,10 +1582,10 @@
       const wrapper = elastic.wrapper;
       const memory = elasticMemories.get(wrapper).cssProperties;
       const compensated = {
-        top: elastic.amounts[0] * (2 + scaleY),
-        right: 0,
-        bottom: 0,
-        left: elastic.amounts[3] * (2 + scaleX)
+        top: elastic.amounts[2] * (2 + scaleY),
+        right: elastic.amounts[3] * (2 + scaleX),
+        bottom: elastic.amounts[0] * (2 + scaleY),
+        left: elastic.amounts[1] * (2 + scaleX)
       };
       for (const side of ["top", "right", "bottom", "left"]) {
         const base = ((_a = elastic.baseMargins) == null ? void 0 : _a[side]) || "0px";

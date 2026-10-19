@@ -1828,10 +1828,10 @@
       var wrapper = elastic.wrapper;
       var memory = elasticMemories.get(wrapper).cssProperties;
       var compensated = {
-        top: elastic.amounts[0] * (2 + scaleY),
-        right: 0,
-        bottom: 0,
-        left: elastic.amounts[3] * (2 + scaleX)
+        top: elastic.amounts[2] * (2 + scaleY),
+        right: elastic.amounts[3] * (2 + scaleX),
+        bottom: elastic.amounts[0] * (2 + scaleY),
+        left: elastic.amounts[1] * (2 + scaleX)
       };
       for (var _i2 = 0, _arr2 = ["top", "right", "bottom", "left"]; _i2 < _arr2.length; _i2++) {
         var _elastic$baseMargins;

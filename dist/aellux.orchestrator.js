@@ -113,7 +113,7 @@
         }
         return;
       }
-      if (idleSince !== null && now() - idleSince > 250) resetMeasurements(false);
+      if (idleSince !== null && now() - idleSince > 250) resumeAfterIdle(now());
       idleSince = null;
       frameRequest = requestAnimationFrame(flushFrame);
     }
@@ -179,16 +179,29 @@
         }
       } else {
         if (stableSince === null) stableSince = time;
-        if (limitFPS < nativeFPS && time - stableSince >= recoveryDelay && time - lastAdjustment >= recoveryDelay) {
-          limitFPS = recoveryLimit(limitFPS);
-          publishLimit();
-          trialLimit = limitFPS;
-          lastAdjustment = time;
-          stableSince = null;
-          samples = [];
-          frameCredit = 0;
-        }
+        recoverLimitAfterStablePeriod(time);
       }
+    }
+    function resumeAfterIdle(time) {
+      lastFrameTime = null;
+      frameCredit = 0;
+      samples = [];
+      slowStreak = 0;
+      initialDeltas = [];
+      if (nativeFPS === null || limitFPS >= nativeFPS) return;
+      if (stableSince === null) stableSince = idleSince;
+      recoverLimitAfterStablePeriod(time);
+    }
+    function recoverLimitAfterStablePeriod(time) {
+      if (limitFPS >= nativeFPS || stableSince === null || time - stableSince < recoveryDelay || time - lastAdjustment < recoveryDelay) return false;
+      limitFPS = recoveryLimit(limitFPS);
+      publishLimit();
+      trialLimit = limitFPS;
+      lastAdjustment = time;
+      stableSince = null;
+      samples = [];
+      frameCredit = 0;
+      return true;
     }
     function adaptiveLimit(observedFPS) {
       let candidate = nativeFPS;

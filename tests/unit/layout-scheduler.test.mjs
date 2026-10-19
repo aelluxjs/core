@@ -17,8 +17,15 @@ async function withClock(run) {
   const frames = new Map();
   const timers = new Map();
   const listeners = new Set();
+  const documentAttributes = new Map();
   const document = {
     hidden: false,
+    documentElement: {
+      hasAttribute(name) { return documentAttributes.has(name); },
+      getAttribute(name) { return documentAttributes.get(name) || null; },
+      setAttribute(name, value) { documentAttributes.set(name, String(value)); },
+      removeAttribute(name) { documentAttributes.delete(name); }
+    },
     addEventListener(type, callback) {
       if (type === "visibilitychange") listeners.add(callback);
     },
@@ -530,5 +537,27 @@ test("an idle gap preserves the adaptive FPS budget for gradual recovery", async
     assert.ok(calls <= 7, `the 5 FPS budget should survive the idle gap (got ${calls})`);
     scheduler.clear();
     assert.equal((await recovered).status, "cleared");
+  });
+});
+
+test("timer-driven idle batches recover one FPS budget and publish it on html", async () => {
+  await withClock(async clock => {
+    const scheduler = buildLayoutScheduler();
+    const pressured = scheduler.sequence(73, {
+      read: () => clock.busy(100), repeat: { ms: 0 }
+    });
+    await clock.frames(72);
+    assert.equal(clock.document.documentElement.getAttribute("data-ae-fps"), "5");
+    scheduler.cancel(73);
+    await pressured;
+
+    for (const expected of ["15", "30", "45", null]) {
+      await clock.step(3000);
+      const batch = scheduler.sequence(74, { read() {}, repeat: { ms: 0 } });
+      await clock.step();
+      assert.equal(clock.document.documentElement.getAttribute("data-ae-fps"), expected);
+      scheduler.cancel(74);
+      await batch;
+    }
   });
 });
