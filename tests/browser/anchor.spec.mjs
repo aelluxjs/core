@@ -417,19 +417,24 @@ test("Anchor follows intermediate Present frames under CSS Motion control", asyn
     const panel = document.getElementById("panel");
     const anchor = document.getElementById("anchor");
     let layoutDetail = null;
+    const positions = [];
+    const observer = new MutationObserver(() => {
+      const position = parseFloat(anchor.style.getPropertyValue("--ae-anchor-x"));
+      if (Number.isFinite(position)) positions.push(position);
+    });
+    observer.observe(anchor, { attributes: true, attributeFilter: ["style"] });
     panel.addEventListener("AelluxJsLayout", event => { layoutDetail = event.detail; }, { once: true });
     const started = new Promise(resolve =>
       panel.addEventListener("AelluxJsPopping", resolve, { once: true }));
     const completed = AelluxJs(panel).present.pop();
     await started;
-    await new Promise(resolve => setTimeout(resolve, 180));
-    const intermediate = parseFloat(anchor.style.getPropertyValue("--ae-anchor-x"));
     await completed;
     while (Math.abs(parseFloat(anchor.style.getPropertyValue("--ae-anchor-x")) - 140) > 0.5) {
       await new Promise(resolve => setTimeout(resolve, 16));
     }
+    observer.disconnect();
     return {
-      intermediate,
+      intermediate: positions.find(position => position > 20 && position < 140),
       final: parseFloat(anchor.style.getPropertyValue("--ae-anchor-x")),
       durationMs: layoutDetail && layoutDetail.durationMs
     };

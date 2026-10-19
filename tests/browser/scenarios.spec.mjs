@@ -32,6 +32,20 @@ async function openScenario(page, name) {
   }).toBe("passed");
 }
 
+async function initialize(page, options = { mode: "basic" }) {
+  await page.evaluate(initOptions => new Promise((resolve, reject) => {
+    const eventName = AelluxJs.eventName("Ready");
+    const ready = () => resolve();
+    document.addEventListener(eventName, ready, { once: true });
+    try {
+      AelluxJs.init(initOptions);
+    } catch (error) {
+      document.removeEventListener(eventName, ready);
+      reject(error);
+    }
+  }), options);
+}
+
 for (const scenario of scenarios) {
   test(`${scenario} completes`, async ({ page }) => {
     const externalRequests = [];
@@ -288,7 +302,7 @@ test("mount and unmount run in opposite priority order across extensions and sel
 test("equal-priority unmount reverses mount order across elements", async ({ page }) => {
   await page.goto("/tests/index.htm");
   await page.addScriptTag({ url: "/dist/aellux.js" });
-  await page.evaluate(() => AelluxJs.init({ mode: "basic" }));
+  await initialize(page);
 
   const calls = await page.evaluate(async () => {
     document.body.innerHTML = '<div id="first" data-order-probe></div><div id="second" data-order-probe></div>';
@@ -313,7 +327,7 @@ test("equal-priority unmount reverses mount order across elements", async ({ pag
 test("mount lifecycle events report the resolved root and distinct affected elements", async ({ page }) => {
   await page.goto("/tests/index.htm");
   await page.addScriptTag({ url: "/dist/aellux.js" });
-  await page.evaluate(() => AelluxJs.init({ mode: "basic" }));
+  await initialize(page);
 
   const result = await page.evaluate(async () => {
     document.body.innerHTML = '<div id="lifecycle-detail" data-lifecycle-detail></div>';

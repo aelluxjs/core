@@ -968,14 +968,23 @@ test("vertical snap wheel at its last item stretches elastic and scrolls the par
   await expect.poll(() => page.evaluate(() => document.getElementById("gallery").scrollTop))
     .toBe(200);
 
+  await page.evaluate(() => {
+    const wrapper = document.getElementById("wrapper");
+    window.__elasticTransforms = [];
+    const observer = new MutationObserver(() => {
+      window.__elasticTransforms.push(wrapper.style.transform);
+    });
+    observer.observe(wrapper, { attributes: true, attributeFilter: ["style"] });
+  });
+
   const box = await page.locator("#gallery").boundingBox();
   await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
   await page.mouse.wheel(0, 120);
 
   await expect.poll(() => page.evaluate(() => document.getElementById("parent").scrollTop))
     .toBeGreaterThan(0);
-  expect(await page.evaluate(() => document.getElementById("wrapper")
-    .style.transform)).toMatch(/^scale\(1, [^,]+\) translate3d\(0px, -[^,]+, 0px\)/);
+  expect(await page.evaluate(() => window.__elasticTransforms)).toContainEqual(
+    expect.stringMatching(/^scale\(1, [^,]+\) translate3d\(0px, -[^,]+, 0px\)/));
 });
 
 test("ctrl+wheel remains untouched by snap and elastic", async ({ page }) => {
@@ -2760,20 +2769,23 @@ test("a pause before release does not start momentum", async ({ page }) => {
   })).toEqual([40, 0]);
 });
 
-test("weak CSS makes scrolling smooth and honors reduced motion on every element", async ({ page }) => {
+test("weak CSS makes scrolling smooth and honors reduced motion on every element",
+  async ({ page, browserName }) => {
+  test.skip(browserName === "webkit",
+    "Playwright WebKit does not emulate prefers-reduced-motion in this environment.");
   await setup(page, box("box", "native"));
   const behaviors = () => page.evaluate(() => [
     document.documentElement, document.body, document.getElementById("box")
   ].map(element => getComputedStyle(element).scrollBehavior));
-  expect(await behaviors()).toEqual(["smooth", "smooth", "smooth"]);
+  await expect.poll(behaviors).toEqual(["smooth", "smooth", "smooth"]);
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.evaluate(() => AelluxJs.updatePreferenceAttributesHTML({ reducedMotion: "auto" }));
-  expect(await behaviors()).toEqual(["auto", "auto", "auto"]);
+  await expect.poll(behaviors).toEqual(["auto", "auto", "auto"]);
   await page.evaluate(() => AelluxJs.updatePreferenceAttributesHTML({ reducedMotion: "no-preference" }));
-  expect(await behaviors()).toEqual(["smooth", "smooth", "smooth"]);
+  await expect.poll(behaviors).toEqual(["smooth", "smooth", "smooth"]);
   await page.emulateMedia({ reducedMotion: "no-preference" });
   await page.evaluate(() => AelluxJs.updatePreferenceAttributesHTML({ reducedMotion: "reduced" }));
-  expect(await behaviors()).toEqual(["auto", "auto", "auto"]);
+  await expect.poll(behaviors).toEqual(["auto", "auto", "auto"]);
 });
 
 test("local reduced-motion preference removes custom scrollbar transitions", async ({ page }) => {
