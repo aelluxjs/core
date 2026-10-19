@@ -490,6 +490,11 @@ Scrollbox                            </a>
                           </li>
                           <li class="nav-item small-md rounded-1 ps-md-1"
                             style="flex:0">
+                            <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/core-extensions/scrollbox-snap.htm">
+Scrollbox Snap                            </a>
+                          </li>
+                          <li class="nav-item small-md rounded-1 ps-md-1"
+                            style="flex:0">
                             <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/core-extensions/state-navigation.htm">
 State Navigation                            </a>
                           </li>
@@ -620,6 +625,20 @@ Registration                  </li>
 <pre><code class="language-js">$ae.ext(&quot;feedback&quot;);
 $ae.init({ mode: &quot;basic&quot; });
 </code></pre>
+<h2>Extension dependencies</h2>
+<p>When an Extension needs another aellux.js Extension, declare and await that Extension from its own <code>init()</code>. This is required before using the dependency&#39;s public API, controllers, or events. Do not add the Extension name to <code>$ae.dep()</code> or to a manifest <code>dependencies</code> list; those APIs describe third-party script assets, not aellux.js Extensions.</p>
+<pre><code class="language-js">async function init() {
+  if (!AelluxJs.registry.ext.point)
+    AelluxJs.ext(&quot;point&quot;);
+
+  const point = await AelluxJs.wait(&quot;point&quot;);
+  if (!point) throw new Error(&quot;The Point extension could not initialize.&quot;);
+
+  // Point is loaded and initialized here.
+  // It is safe to use point.pointers(...) or subscribe to its events.
+}
+</code></pre>
+<p><code>$ae.ext(&quot;point&quot;)</code> records the dependency only when the host has not already declared it. <code>$ae.wait(&quot;point&quot;)</code> shares any pending load, selects the compatible Modern or Legacy artifact, runs the dependency&#39;s <code>init()</code>, and resolves to its attached API. The dependent Extension&#39;s <code>init()</code> remains pending until that Promise settles. This same pattern works with official registry entries, bundled Extensions, and custom registrations.</p>
 <h2>Shared script dependencies</h2>
 <p>Call <code>$ae.dep(label, url)</code> before or after <code>$ae.init()</code>, including from an Extension&#39;s <code>init()</code>, to load a classic script immediately. It returns a Promise that resolves to the script element only after the browser&#39;s <code>load</code> event. Await it before using a global supplied by the dependency:</p>
 <pre><code class="language-js">async function init() {

@@ -70,6 +70,7 @@ Add aellux.js to a page and enable the Extensions it needs. The library coordina
 - [Preference](core-extensions/preference.md)
 - [Present](core-extensions/present.md)
 - [Scrollbox](core-extensions/scrollbox.md)
+- [Scrollbox Snap](core-extensions/scrollbox-snap.md)
 - [State navigation](core-extensions/state-navigation.md)
 
 ## Project Documents

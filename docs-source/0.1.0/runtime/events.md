@@ -1,6 +1,6 @@
 # Events
 
-AelluxJs names its DOM events with the `AelluxJs` prefix. The main API listens on `document`; `onTarget` and `offTarget` listen on an explicit target; a mounted element controller listens on its element. A document listener also receives bubbling events from elements:
+AelluxJs names its DOM events with the `AelluxJs` prefix. The main API listens on `document`; `onEvent` and `offEvent` listen on an explicit target; a mounted element controller listens on its element. A document listener also receives bubbling events from elements:
 
 ```js
 const onUpdate = event => console.log(event.type);
@@ -51,6 +51,7 @@ These events are available when the corresponding Extension is loaded. Events fr
 | Present | `AelluxJsLayout` | Present element; bubbles when a Pop or Unpop transition starts. `detail` contains `origin` (`"present.pop"` or `"present.unpop"`) and `durationMs`, the maximum expected layout change time in milliseconds. Anchor listens on the shared positioning parent. |
 | Present | `AelluxJsUnpopFocusLost` | `document`; `detail` is `{ element, focused }`, identifying the closed Present region and the element that lost focus. |
 | Scrollbox | `AelluxJsScrollboxSnapChange` | Scrollbox element; `detail` is `{ item, index, previousIndex, axis }` after a new snap item is selected and scrolling settles. The initial item uses `previousIndex: null`. |
+| Scrollbox | `AelluxJsScrollboxInteraction` | Scrollbox element; `detail` is `{ reason, active }` for `scrollbar`, `pointer`, or `elastic`. It is the integration hook used by Scrollbox Snap to suspend and resume native snap alignment. |
 | Scrollbox | `AelluxJsPointerScrollStart`, `AelluxJsPointerScrollEnd` | Pointer gesture's originating scrollbox; `detail` is `{ axis, pointerId, pointerType, elements }`. `elements` lists the scrollboxes activated for that gesture. A short flick that never activates PDS does not emit them. |
 | State Navigation | `AelluxJsSnapshotChange`, `AelluxJsSnapshotRestore` | `document`; `detail` contains copies of `snapshot`, `removeSnapshot`, and `popState`. |
 

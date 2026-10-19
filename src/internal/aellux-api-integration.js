@@ -47,15 +47,15 @@ export function createAelluxApi(root, constants) {
     currentPreference: preferenceHtml.currentPreference,
     elementOrId: (elementOrId, options) => resolveElementOrId(root, elementOrId, options),
     on: function (event, handler, options) {
-      api.onTarget(document, event, handler, options);
+      api.onEvent(document, event, handler, options);
     },
     off: function (event, handler, options) {
-      api.offTarget(document, event, handler, options);
+      api.offEvent(document, event, handler, options);
     },
-    onTarget: function (target, event, handler, options) {
+    onEvent: function (target, event, handler, options) {
       target.addEventListener(api.eventName(event), handler, options);
     },
-    offTarget: function (target, event, handler, options) {
+    offEvent: function (target, event, handler, options) {
       target.removeEventListener(api.eventName(event), handler, options);
     },
     attr: namingNormalization.attr,

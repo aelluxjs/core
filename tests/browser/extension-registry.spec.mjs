@@ -68,6 +68,29 @@ test("full resolves an unbundled official extension from its manifest", async ({
   expect(artifact.integrity).toMatch(/^sha384-/);
 });
 
+test("scrollbox-snap registers and awaits Scrollbox before mounting", async ({ page }) => {
+  await startBasic(page);
+  const result = await page.evaluate(async () => {
+    document.body.innerHTML = `<div id="gallery" data-ae-scrollbox data-ae-scrollbox-snap
+      style="width:100px;height:100px;overflow:auto"><div style="display:flex;width:300px">
+      <div data-ae-snap-item style="width:100px;flex:none"></div>
+      <div data-ae-snap-item style="width:100px;flex:none"></div>
+      <div data-ae-snap-item style="width:100px;flex:none"></div>
+    </div></div>`;
+    AelluxJs.ext("scrollbox-snap");
+    await AelluxJs.wait("scrollbox-snap");
+    await AelluxJs.mountManager.mount(document.body);
+    const controller = AelluxJs.mountManager.controller("gallery").scrollbox;
+    return {
+      scrollbox: AelluxJs.ext.scrollbox?.initialized,
+      snap: AelluxJs.ext.scrollboxSnap?.initialized,
+      mounted: !!controller,
+      navigated: controller.goto(1)
+    };
+  });
+  expect(result).toEqual({ scrollbox: true, snap: true, mounted: true, navigated: true });
+});
+
 test("the official manifest selects the Legacy artifact for a Legacy runtime", async ({ page }) => {
   await startBasic(page, { forceLegacy: true });
   const artifact = await page.evaluate(async () => {

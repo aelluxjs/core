@@ -9,6 +9,7 @@ const box = (id, mode = "pointer", extra = "", content = "", momentum = "false")
     <div style="width:300px;height:300px">${content}</div></div>`;
 
 async function setup(page, html, { coarse = false } = {}) {
+  const usesSnap = html.includes("data-ae-scrollbox-snap");
   await page.goto("/tests/index.htm");
   if (coarse) await page.evaluate(() => {
     const matchMedia = window.matchMedia.bind(window);
@@ -16,13 +17,17 @@ async function setup(page, html, { coarse = false } = {}) {
       ? { matches: false } : matchMedia(query);
   });
   await page.addScriptTag({ url: "/dist/aellux.js" });
-  await page.evaluate(markup => {
+  await page.evaluate(({ markup, usesSnap }) => {
     document.body.innerHTML = markup;
     AelluxJs.ext("scrollbox");
-  }, html);
+    if (usesSnap) AelluxJs.ext("scrollbox-snap");
+  }, { markup: html, usesSnap });
   await page.addScriptTag({ url: "/src/aellux.ext.scrollbox.js" });
+  if (usesSnap) await page.addScriptTag({ url: "/src/aellux.ext.scrollbox-snap.js" });
   await page.evaluate(() => AelluxJs.init({ mode: "basic" }));
   await expect.poll(() => page.evaluate(() => AelluxJs.ext.scrollbox?.initialized)).toBe(true);
+  if (usesSnap)
+    await expect.poll(() => page.evaluate(() => AelluxJs.ext.scrollboxSnap?.initialized)).toBe(true);
 }
 
 async function drag(page, id, pointerType = "mouse") {

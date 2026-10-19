@@ -39,6 +39,11 @@
       "artifacts": 2
     },
     {
+      "name": "scrollbox-snap",
+      "status": "valid",
+      "artifacts": 2
+    },
+    {
       "name": "adaptive",
       "status": "valid",
       "artifacts": 3

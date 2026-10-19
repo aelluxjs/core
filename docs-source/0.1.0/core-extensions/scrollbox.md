@@ -118,6 +118,8 @@ Scrollbox updates measurements after content mutations, box resize, or window re
 
 ## Snap points
 
+Snap points are provided by the optional [Scrollbox Snap](scrollbox-snap.md) Extension. Register `scrollbox-snap`; it registers and waits for Scrollbox before mounting. Its API, events, and interaction hooks are documented on that page.
+
 `AelluxJsScrollboxSnapChange` fires on the scrollbox when a newly selected snap point finishes settling. Its `detail` contains `{ item, index, previousIndex, axis }`; the initial selection uses `previousIndex: null`. Selecting the same item again does not emit another change.
 
 ```js

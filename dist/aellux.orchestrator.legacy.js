@@ -21619,10 +21619,10 @@
       despawn: despawn,
       hasMounts: hasMounts,
       on: function on(event, handler, options) {
-        root.AelluxJs.onTarget(element, event, handler, options);
+        root.AelluxJs.onEvent(element, event, handler, options);
       },
       off: function off(event, handler, options) {
-        root.AelluxJs.offTarget(element, event, handler, options);
+        root.AelluxJs.offEvent(element, event, handler, options);
       },
       dispatch: function dispatch(event, options) {
         return root.AelluxJs.dispatchFrom(element, event, options);

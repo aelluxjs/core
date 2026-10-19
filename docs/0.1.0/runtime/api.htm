@@ -490,6 +490,11 @@ Scrollbox                            </a>
                           </li>
                           <li class="nav-item small-md rounded-1 ps-md-1"
                             style="flex:0">
+                            <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/core-extensions/scrollbox-snap.htm">
+Scrollbox Snap                            </a>
+                          </li>
+                          <li class="nav-item small-md rounded-1 ps-md-1"
+                            style="flex:0">
                             <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/core-extensions/state-navigation.htm">
 State Navigation                            </a>
                           </li>
@@ -601,12 +606,12 @@ Runtime API                  </li>
 <p>The naming helpers use the configured AelluxJs prefixes and convert camelCase names to kebab-case. For example, <code>$ae.attr(&quot;targetMessage&quot;)</code> returns <code>data-ae-target-message</code>, <code>$ae.className(&quot;feedbackError&quot;)</code> returns <code>ae--feedback-error</code>, and <code>$ae.cssVar(&quot;panelWidth&quot;)</code> returns <code>--ae-panel-width</code>. <code>extFilename(name)</code> returns the matching Extension script filename for the current minified setting; <code>extName(filename)</code> extracts an Extension name from that filename.</p>
 <p><code>$ae.elementOrId(value, options?)</code> resolves a DOM element or an element ID, with or without a leading <code>#</code>. By default, only element nodes are accepted. Pass <code>{ defaultElement: element }</code> to use a fallback when <code>value</code> is <code>null</code> or <code>undefined</code>, or <code>{ allowedNodeTypes: [...] }</code> to accept other node types. Invalid values and missing IDs record <code>WARN_INVALID_ELEMENT_OR_ID</code> (<code>2011</code>) and return <code>null</code>; <code>options.method</code> can identify the caller in that diagnostic. This helper is available before runtime initialization.</p>
 <h2>Events</h2>
-<p><code>$ae.eventName(name)</code> applies the <code>AelluxJs</code> prefix and capitalizes an unformatted name. It returns names already beginning with <code>AelluxJs</code> unchanged. To use an exact DOM event name with <code>$ae.on()</code>, <code>$ae.off()</code>, <code>$ae.onTarget()</code>, <code>$ae.offTarget()</code>, <code>$ae.dispatch()</code>, or <code>$ae.dispatchFrom()</code>, start it with <code>$</code>, <code>#</code>, <code>_</code>, or <code>!</code>; the marker is removed without changing the remaining name. For example, <code>$ae.dispatch(&quot;_pointerdown&quot;)</code> dispatches <code>pointerdown</code>.</p>
-<p><code>on(event, handler, options)</code> and <code>off(event, handler, options)</code> listen on <code>document</code>. Use <code>onTarget(target, event, handler, options)</code> and <code>offTarget(target, event, handler, options)</code> for any other <code>EventTarget</code>, including <code>window</code>, an element, or a media query. The optional <code>options</code> argument is passed to the native listener methods; use the same <code>capture</code> value when removing a listener.</p>
+<p><code>$ae.eventName(name)</code> applies the <code>AelluxJs</code> prefix and capitalizes an unformatted name. It returns names already beginning with <code>AelluxJs</code> unchanged. To use an exact DOM event name with <code>$ae.on()</code>, <code>$ae.off()</code>, <code>$ae.onEvent()</code>, <code>$ae.offEvent()</code>, <code>$ae.dispatch()</code>, or <code>$ae.dispatchFrom()</code>, start it with <code>$</code>, <code>#</code>, <code>_</code>, or <code>!</code>; the marker is removed without changing the remaining name. For example, <code>$ae.dispatch(&quot;_pointerdown&quot;)</code> dispatches <code>pointerdown</code>.</p>
+<p><code>on(event, handler, options)</code> and <code>off(event, handler, options)</code> listen on <code>document</code>. Use <code>onEvent(target, event, handler, options)</code> and <code>offEvent(target, event, handler, options)</code> for any other <code>EventTarget</code>, including <code>window</code>, an element, or a media query. The optional <code>options</code> argument is passed to the native listener methods; use the same <code>capture</code> value when removing a listener.</p>
 <p><code>dispatch(event, options?)</code> dispatches from <code>document</code>, and <code>dispatchFrom(target, event, options?)</code> dispatches from another event target. Both return the native <code>dispatchEvent()</code> boolean. Events bubble by default and are not cancelable unless requested; pass <code>detail</code>, <code>bubbles</code>, or <code>cancelable</code> in <code>options</code>. The boot API includes <code>detail</code> on its regular <code>Event</code> objects before the orchestrator replaces this method with <code>CustomEvent</code> dispatch.</p>
 <pre><code class="language-js">const onResize = event =&gt; console.log(event.type);
-$ae.onTarget(window, &quot;$resize&quot;, onResize, { passive: true });
-$ae.offTarget(window, &quot;$resize&quot;, onResize);
+$ae.onEvent(window, &quot;$resize&quot;, onResize, { passive: true });
+$ae.offEvent(window, &quot;$resize&quot;, onResize);
 </code></pre>
 <h2>Initialization</h2>
 <pre><code class="language-js">$ae.init({ mode: &quot;full&quot; });

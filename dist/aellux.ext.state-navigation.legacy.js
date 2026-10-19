@@ -132,8 +132,8 @@
     var baseTitle = "";
     var useHash = true;
     function init(options) {
-      AelluxJs.onTarget(window, "$popstate", onPopState);
-      AelluxJs.onTarget(window, "$hashchange", onHashChange);
+      AelluxJs.onEvent(window, "$popstate", onPopState);
+      AelluxJs.onEvent(window, "$hashchange", onHashChange);
       AelluxJs.on("PushState", OnPushState);
       AelluxJs.on(PUSH_AJAX_REPLACE, OnPushAjaxReplace);
       AelluxJs.on(UPDATE_BASE_TITLE, OnUpdateBaseTitle);
@@ -153,8 +153,8 @@
         return _regenerator().w(function(_context) {
           while (1) switch (_context.n) {
             case 0:
-              AelluxJs.offTarget(window, "$popstate", onPopState);
-              AelluxJs.offTarget(window, "$hashchange", onHashChange);
+              AelluxJs.offEvent(window, "$popstate", onPopState);
+              AelluxJs.offEvent(window, "$hashchange", onHashChange);
               AelluxJs.off("PushState", OnPushState);
               AelluxJs.off(PUSH_AJAX_REPLACE, OnPushAjaxReplace);
               AelluxJs.off(UPDATE_BASE_TITLE, OnUpdateBaseTitle);

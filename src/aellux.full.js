@@ -31,3 +31,4 @@ root.AelluxJs.ext("present", {
   loadStyle: true
 });
 root.AelluxJs.ext("scrollbox", { loadWhen: "[data-ae-scrollbox]" });
+root.AelluxJs.ext("scrollbox-snap", { loadWhen: "[data-ae-scrollbox-snap]" });

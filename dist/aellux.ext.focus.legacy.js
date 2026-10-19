@@ -75,8 +75,8 @@
       AelluxJs.on("$focusin", onFocusIn, true);
       AelluxJs.on("$focus", onFocusChange, true);
       AelluxJs.on("$blur", onBlur, true);
-      AelluxJs.onTarget(root, "$focus", onWindowFocus);
-      AelluxJs.onTarget(root, "$blur", onWindowBlur);
+      AelluxJs.onEvent(root, "$focus", onWindowFocus);
+      AelluxJs.onEvent(root, "$blur", onWindowBlur);
       AelluxJs.on("SnapshotRestore", onSnapshotRestore);
       AelluxJs.on("UnpopFocusLost", onUnpopFocusLost);
       remember(document.activeElement, false);
@@ -85,8 +85,8 @@
       AelluxJs.off("$focusin", onFocusIn, true);
       AelluxJs.off("$focus", onFocusChange, true);
       AelluxJs.off("$blur", onBlur, true);
-      AelluxJs.offTarget(root, "$focus", onWindowFocus);
-      AelluxJs.offTarget(root, "$blur", onWindowBlur);
+      AelluxJs.offEvent(root, "$focus", onWindowFocus);
+      AelluxJs.offEvent(root, "$blur", onWindowBlur);
       AelluxJs.off("SnapshotRestore", onSnapshotRestore);
       AelluxJs.off("UnpopFocusLost", onUnpopFocusLost);
       AelluxJs.mountManager.remove({
@@ -99,7 +99,7 @@
       var type = element.getAttribute(attribute);
       switch (type) {
         case "next":
-          AelluxJs.onTarget(element, "$keydown", onNextKeyDown);
+          AelluxJs.onEvent(element, "$keydown", onNextKeyDown);
           nextElements.add(element);
           if (!element.hasAttribute("enterkeyhint") && element.matches(textEntrySelector)) {
             hintMemories.set(element, AelluxJs.persist.element.save(element, ["enterkeyhint"], []));
@@ -110,7 +110,7 @@
     }
     function unmountFocusElement(element) {
       var _hintMemories$get;
-      if (nextElements.delete(element)) AelluxJs.offTarget(element, "$keydown", onNextKeyDown);
+      if (nextElements.delete(element)) AelluxJs.offEvent(element, "$keydown", onNextKeyDown);
       (_hintMemories$get = hintMemories.get(element)) === null || _hintMemories$get === void 0 || _hintMemories$get.restore();
       hintMemories.delete(element);
     }

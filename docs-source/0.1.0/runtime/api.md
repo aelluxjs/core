@@ -18,16 +18,16 @@ The naming helpers use the configured AelluxJs prefixes and convert camelCase na
 
 ## Events
 
-`$ae.eventName(name)` applies the `AelluxJs` prefix and capitalizes an unformatted name. It returns names already beginning with `AelluxJs` unchanged. To use an exact DOM event name with `$ae.on()`, `$ae.off()`, `$ae.onTarget()`, `$ae.offTarget()`, `$ae.dispatch()`, or `$ae.dispatchFrom()`, start it with `$`, `#`, `_`, or `!`; the marker is removed without changing the remaining name. For example, `$ae.dispatch("_pointerdown")` dispatches `pointerdown`.
+`$ae.eventName(name)` applies the `AelluxJs` prefix and capitalizes an unformatted name. It returns names already beginning with `AelluxJs` unchanged. To use an exact DOM event name with `$ae.on()`, `$ae.off()`, `$ae.onEvent()`, `$ae.offEvent()`, `$ae.dispatch()`, or `$ae.dispatchFrom()`, start it with `$`, `#`, `_`, or `!`; the marker is removed without changing the remaining name. For example, `$ae.dispatch("_pointerdown")` dispatches `pointerdown`.
 
-`on(event, handler, options)` and `off(event, handler, options)` listen on `document`. Use `onTarget(target, event, handler, options)` and `offTarget(target, event, handler, options)` for any other `EventTarget`, including `window`, an element, or a media query. The optional `options` argument is passed to the native listener methods; use the same `capture` value when removing a listener.
+`on(event, handler, options)` and `off(event, handler, options)` listen on `document`. Use `onEvent(target, event, handler, options)` and `offEvent(target, event, handler, options)` for any other `EventTarget`, including `window`, an element, or a media query. The optional `options` argument is passed to the native listener methods; use the same `capture` value when removing a listener.
 
 `dispatch(event, options?)` dispatches from `document`, and `dispatchFrom(target, event, options?)` dispatches from another event target. Both return the native `dispatchEvent()` boolean. Events bubble by default and are not cancelable unless requested; pass `detail`, `bubbles`, or `cancelable` in `options`. The boot API includes `detail` on its regular `Event` objects before the orchestrator replaces this method with `CustomEvent` dispatch.
 
 ```js
 const onResize = event => console.log(event.type);
-$ae.onTarget(window, "$resize", onResize, { passive: true });
-$ae.offTarget(window, "$resize", onResize);
+$ae.onEvent(window, "$resize", onResize, { passive: true });
+$ae.offEvent(window, "$resize", onResize);
 ```
 
 ## Initialization

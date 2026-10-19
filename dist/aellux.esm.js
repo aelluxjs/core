@@ -553,15 +553,15 @@ function createAelluxApi(root2, constants) {
     currentPreference: preferenceHtml.currentPreference,
     elementOrId: (elementOrId, options2) => resolveElementOrId(root2, elementOrId, options2),
     on: function(event, handler, options2) {
-      api.onTarget(document2, event, handler, options2);
+      api.onEvent(document2, event, handler, options2);
     },
     off: function(event, handler, options2) {
-      api.offTarget(document2, event, handler, options2);
+      api.offEvent(document2, event, handler, options2);
     },
-    onTarget: function(target, event, handler, options2) {
+    onEvent: function(target, event, handler, options2) {
       target.addEventListener(api.eventName(event), handler, options2);
     },
-    offTarget: function(target, event, handler, options2) {
+    offEvent: function(target, event, handler, options2) {
       target.removeEventListener(api.eventName(event), handler, options2);
     },
     attr: namingNormalization.attr,

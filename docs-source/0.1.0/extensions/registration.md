@@ -43,6 +43,25 @@ $ae.ext("feedback");
 $ae.init({ mode: "basic" });
 ```
 
+## Extension dependencies
+
+When an Extension needs another aellux.js Extension, declare and await that Extension from its own `init()`. This is required before using the dependency's public API, controllers, or events. Do not add the Extension name to `$ae.dep()` or to a manifest `dependencies` list; those APIs describe third-party script assets, not aellux.js Extensions.
+
+```js
+async function init() {
+  if (!AelluxJs.registry.ext.point)
+    AelluxJs.ext("point");
+
+  const point = await AelluxJs.wait("point");
+  if (!point) throw new Error("The Point extension could not initialize.");
+
+  // Point is loaded and initialized here.
+  // It is safe to use point.pointers(...) or subscribe to its events.
+}
+```
+
+`$ae.ext("point")` records the dependency only when the host has not already declared it. `$ae.wait("point")` shares any pending load, selects the compatible Modern or Legacy artifact, runs the dependency's `init()`, and resolves to its attached API. The dependent Extension's `init()` remains pending until that Promise settles. This same pattern works with official registry entries, bundled Extensions, and custom registrations.
+
 ## Shared script dependencies
 
 Call `$ae.dep(label, url)` before or after `$ae.init()`, including from an Extension's `init()`, to load a classic script immediately. It returns a Promise that resolves to the script element only after the browser's `load` event. Await it before using a global supplied by the dependency:

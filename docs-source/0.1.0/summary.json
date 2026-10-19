@@ -53,6 +53,7 @@
         { "label": "Preference", "href": "core-extensions/preference.md" },
         { "label": "Present", "href": "core-extensions/present.md" },
         { "label": "Scrollbox", "href": "core-extensions/scrollbox.md" },
+        { "label": "Scrollbox Snap", "href": "core-extensions/scrollbox-snap.md" },
         { "label": "State Navigation", "href": "core-extensions/state-navigation.md" }
       ]
     },

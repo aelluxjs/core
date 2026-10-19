@@ -96,7 +96,7 @@
       if (resizeObserver) resizeObserver.observe(element);
       else {
         scheduleElement(element, null);
-        if (adaptiveElements.size === 1) AelluxJs.onTarget(root, "$resize", onWindowResize);
+        if (adaptiveElements.size === 1) AelluxJs.onEvent(root, "$resize", onWindowResize);
       }
     }
     function unmountAdaptive(element) {
@@ -108,7 +108,7 @@
       if (id !== void 0) AelluxJs.waitLayout.cancel(id);
       layoutIds.delete(element);
       if (resizeObserver) resizeObserver.unobserve(element);
-      else if (adaptiveElements.size === 0) AelluxJs.offTarget(root, "$resize", onWindowResize);
+      else if (adaptiveElements.size === 0) AelluxJs.offEvent(root, "$resize", onWindowResize);
       for (const name of managedClasses) {
         element.classList.remove(name);
       }

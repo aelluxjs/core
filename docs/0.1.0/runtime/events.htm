@@ -490,6 +490,11 @@ Scrollbox                            </a>
                           </li>
                           <li class="nav-item small-md rounded-1 ps-md-1"
                             style="flex:0">
+                            <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/core-extensions/scrollbox-snap.htm">
+Scrollbox Snap                            </a>
+                          </li>
+                          <li class="nav-item small-md rounded-1 ps-md-1"
+                            style="flex:0">
                             <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/core-extensions/state-navigation.htm">
 State Navigation                            </a>
                           </li>
@@ -592,7 +597,7 @@ Events                  </li>
 
         <div id="doc-content" style="min-height: calc(100vh - 200px);" class="js-toc-content" ajax-load="doc-content">
 <h1>Events</h1>
-<p>AelluxJs names its DOM events with the <code>AelluxJs</code> prefix. The main API listens on <code>document</code>; <code>onTarget</code> and <code>offTarget</code> listen on an explicit target; a mounted element controller listens on its element. A document listener also receives bubbling events from elements:</p>
+<p>AelluxJs names its DOM events with the <code>AelluxJs</code> prefix. The main API listens on <code>document</code>; <code>onEvent</code> and <code>offEvent</code> listen on an explicit target; a mounted element controller listens on its element. A document listener also receives bubbling events from elements:</p>
 <pre><code class="language-js">const onUpdate = event =&gt; console.log(event.type);
 $ae.on(&quot;Update&quot;, onUpdate);
 $ae.off(&quot;Update&quot;, onUpdate);
@@ -697,6 +702,11 @@ await $ae.mountManager.update(document.getElementById(&quot;panel&quot;));
 <td>Scrollbox</td>
 <td><code>AelluxJsScrollboxSnapChange</code></td>
 <td>Scrollbox element; <code>detail</code> is <code>{ item, index, previousIndex, axis }</code> after a new snap item is selected and scrolling settles. The initial item uses <code>previousIndex: null</code>.</td>
+</tr>
+<tr>
+<td>Scrollbox</td>
+<td><code>AelluxJsScrollboxInteraction</code></td>
+<td>Scrollbox element; <code>detail</code> is <code>{ reason, active }</code> for <code>scrollbar</code>, <code>pointer</code>, or <code>elastic</code>. It is the integration hook used by Scrollbox Snap to suspend and resume native snap alignment.</td>
 </tr>
 <tr>
 <td>Scrollbox</td>

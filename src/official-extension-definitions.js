@@ -10,6 +10,7 @@ export const officialExtensionDefinitions = Object.freeze([
   Object.freeze({ name: "point", style: false, dependencies: Object.freeze([]) }),
   Object.freeze({ name: "anchor", style: false, dependencies: Object.freeze([]) }),
   Object.freeze({ name: "scrollbox", style: false, dependencies: Object.freeze([]) }),
+  Object.freeze({ name: "scrollbox-snap", style: false, dependencies: Object.freeze([]) }),
   Object.freeze({ name: "adaptive", style: true, dependencies: Object.freeze([]) }),
   Object.freeze({ name: "present", style: true, dependencies: Object.freeze([]) })
 ]);

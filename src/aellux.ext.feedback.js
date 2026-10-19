@@ -62,11 +62,11 @@
   }
 
   function mountFeedback(element) {
-    AelluxJs.onTarget(element, "Feedback", onFeedback);
+    AelluxJs.onEvent(element, "Feedback", onFeedback);
   }
 
   function unmountFeedback(element) {
-    AelluxJs.offTarget(element, "Feedback", onFeedback);
+    AelluxJs.offEvent(element, "Feedback", onFeedback);
   }
 
   function onFeedback(event) {

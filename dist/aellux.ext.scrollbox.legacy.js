@@ -91,14 +91,12 @@
     var AelluxJs = root.AelluxJs;
     var extensionName = "scrollbox";
     if (!AelluxJs) throw new Error("[aellux.js] Load the boot script before the scrollbox extension.");
-    var onTarget = AelluxJs.onTarget, offTarget = AelluxJs.offTarget;
+    var onEvent = AelluxJs.onEvent, offEvent = AelluxJs.offEvent;
     var POINTER = "pointer", POINTER_DOWN = "".concat(POINTER, "down"), POINTER_MOVE = "".concat(POINTER, "move"), POINTER_UP = "".concat(POINTER, "up"), POINTER_CANCEL = "".concat(POINTER, "cancel"), POINTER_OVER = "".concat(POINTER, "over"), POINTER_OUT = "".concat(POINTER, "out"), POINTER_ENTER = "".concat(POINTER, "enter"), POINTER_LEAVE = "".concat(POINTER, "leave"), POINTER_DOWN_TARGET = "$".concat(POINTER_DOWN), POINTER_MOVE_TARGET = "$".concat(POINTER_MOVE), POINTER_UP_TARGET = "$".concat(POINTER_UP), POINTER_CANCEL_TARGET = "$".concat(POINTER_CANCEL);
     var attribute = AelluxJs.attr(extensionName);
     var wheelAttribute = AelluxJs.attr("scrollbox-wheel-horizontal");
     var momentumAttribute = AelluxJs.attr("scrollbox-momentum");
     var elasticAttribute = AelluxJs.attr("scrollbox-elastic");
-    var snapAttribute = AelluxJs.attr("scrollbox-snap");
-    var snapItemAttribute = AelluxJs.attr("snap-item");
     var scrollbarAttribute = AelluxJs.attr("scrollbar");
     var scrollbarVerticalAttribute = AelluxJs.attr("scrollbar-vertical");
     var scrollbarHorizontalAttribute = AelluxJs.attr("scrollbar-horizontal");
@@ -106,8 +104,6 @@
     var pointerScrollingClass = AelluxJs.className("pointerscrolling");
     var nativeScrollbarHideClass = AelluxJs.className("native-sb-hide");
     var scrollbarVisibleClass = AelluxJs.className("scrollbar-visible");
-    var snapReadyClass = AelluxJs.className("snap-ready");
-    var snapSuspendedClass = AelluxJs.className("snap-suspended");
     var scrollEdgeClasses = [AelluxJs.className("scroll-v-start"), AelluxJs.className("scroll-v-end"), AelluxJs.className("scroll-h-start"), AelluxJs.className("scroll-h-end")];
     var pointerScrollExceptionSelector = "a, button, input, select, textarea, [contenteditable], [draggable='true'], " + "[".concat(scrollbarVerticalAttribute, "], [").concat(scrollbarHorizontalAttribute, "]");
     var SCROLL_EDGE_MARGIN_PX = 5;
@@ -120,14 +116,6 @@
     var MOMENTUM_LIMIT_TIME_MS = 300;
     var MOMENTUM_LIMIT_DISTANCE_PX = 15;
     var MOMENTUM_DECELERATION = 15e-4;
-    var SNAP_SWIPE_SPEED_PX_MS = 0.5;
-    var SNAP_FLICK_WINDOW_MS = 100;
-    var SNAP_FLICK_FAST_TIME_MS = 50;
-    var SNAP_FLICK_MAX_DISTANCE_PX = 100;
-    var SNAP_FLICK_MIN_DISTANCE_PX = 1;
-    var SNAP_SCROLL_IDLE_MS = 120;
-    var SNAP_TARGET_IDLE_MS = 500;
-    var SNAP_EDGE_DISTANCE_PX = 10;
     var ELASTIC_DAMPING = 1 / 3;
     var DEFAULT_ELASTIC_LIMIT = {
       unit: "ratio",
@@ -143,7 +131,6 @@
     var pointerListeners = [[POINTER_DOWN, "onPointerDown"], [POINTER_OVER, "onPointerOver"], [POINTER_OUT, "onPointerOut"], ["mousedown", "onMouseDown"]];
     var scrollbarHoverListeners = [[POINTER_DOWN, "onScrollbarPointerDown"], [POINTER_ENTER, "onScrollbarPointerEnter"], [POINTER_LEAVE, "onScrollbarPointerLeave"], [POINTER_OVER, "onScrollbarPointerOver"], [POINTER_OUT, "onScrollbarPointerOut"], [POINTER_MOVE, "onScrollbarPointerMove"], [POINTER_UP, "onScrollbarPointerEnd"], [POINTER_CANCEL, "onScrollbarPointerEnd"], ["mouseenter", "onScrollbarMouseEnter"], ["mouseleave", "onScrollbarMouseLeave"], ["mouseover", "onScrollbarMouseOver"], ["mouseout", "onScrollbarMouseOut"]];
     var scrollbarAxisListeners = [[POINTER_DOWN, "onPointerDown"], [POINTER_MOVE, "onPointerMove"], [POINTER_UP, "onPointerEnd"], [POINTER_CANCEL, "onPointerEnd"]];
-    var snapEndListeners = [[POINTER_UP, "onSnapPointerEnd", true], [POINTER_CANCEL, "onSnapPointerEnd", true], ["touchend", "onSnapTouchEnd", true], ["touchcancel", "onSnapTouchEnd", true], ["blur", "onSnapBlur"]];
     var touchListeners = [["touchstart", "onTouchStart", {
       passive: true
     }], ["touchmove", "onTouchMove", {
@@ -154,7 +141,7 @@
       passive: true
     }]];
     function setListeners(target, owner, entries, active) {
-      var method = active ? onTarget : offTarget;
+      var method = active ? onEvent : offEvent;
       var _iterator = _createForOfIteratorHelper(entries), _step;
       try {
         for (_iterator.s(); !(_step = _iterator.n()).done; ) {
@@ -179,7 +166,6 @@
     var mouseHoldEvents = /* @__PURE__ */ new Set(["mousemove", "mouseover", "mouseout", "mouseenter", "mouseleave"]);
     var mouseReleaseEvents = /* @__PURE__ */ new Set(["mouseup", "click", "dblclick", "auxclick", "contextmenu"]);
     var properties = ["--ae-scroll-y-progress", "--ae-scroll-x-progress"];
-    var snapProperties = ["--ae-snap-viewport", "--ae-snap-focus"];
     var scrollboxes = /* @__PURE__ */ new Map();
     var elementMemories = /* @__PURE__ */ new WeakMap();
     var cursorMemories = /* @__PURE__ */ new WeakMap();
@@ -187,17 +173,19 @@
     var inlineMemories = /* @__PURE__ */ new WeakMap();
     var elasticMemories = /* @__PURE__ */ new WeakMap();
     var pointerScrollMemories = /* @__PURE__ */ new WeakMap();
-    var snapItemMemories = /* @__PURE__ */ new WeakMap();
+    var snapController = null;
     var activePointerScrollState = null;
     AelluxJs.extAttach(extensionName, {
       init: init,
       destroy: destroy,
       next: next,
       previous: previous,
-      goto: goto
+      goto: goto,
+      registerSnapController: registerSnapController,
+      unregisterSnapController: unregisterSnapController
     });
     function init() {
-      AelluxJs.registerCssProperty.apply(AelluxJs, _toConsumableArray([].concat(properties, snapProperties).map(function(name) {
+      AelluxJs.registerCssProperty.apply(AelluxJs, _toConsumableArray(properties.map(function(name) {
         return {
           name: name,
           syntax: "<number>",
@@ -261,6 +249,32 @@
         extensionName: extensionName
       });
     }
+    function registerSnapController(controller) {
+      snapController = controller;
+    }
+    function unregisterSnapController(controller) {
+      if (snapController === controller) snapController = null;
+    }
+    function goto(element, index, behavior) {
+      var _snapController;
+      return ((_snapController = snapController) === null || _snapController === void 0 ? void 0 : _snapController.goto(element, index, behavior)) || false;
+    }
+    function next(element) {
+      var _snapController2;
+      return ((_snapController2 = snapController) === null || _snapController2 === void 0 ? void 0 : _snapController2.next(element)) || false;
+    }
+    function previous(element) {
+      var _snapController3;
+      return ((_snapController3 = snapController) === null || _snapController3 === void 0 ? void 0 : _snapController3.previous(element)) || false;
+    }
+    function dispatchInteraction(state, reason, active) {
+      AelluxJs.dispatchFrom(state.element, "ScrollboxInteraction", {
+        detail: {
+          reason: reason,
+          active: !!active
+        }
+      });
+    }
     function mountScrollbox(element) {
       if (scrollboxes.has(element)) return;
       elementMemories.set(element, AelluxJs.persist.element.save(element, [], properties));
@@ -279,34 +293,6 @@
         touch: null,
         releaseFrame: null,
         wheelTimeout: null
-      };
-      var snap = {
-        root: null,
-        initialized: false,
-        invalidReported: false,
-        index: 0,
-        flick: null,
-        axis: null,
-        deferredIndex: null,
-        suspensions: {
-          pointer: false,
-          elastic: false,
-          scrollbar: false,
-          wheel: false
-        },
-        notifiedItem: null,
-        notifiedIndex: null,
-        scrollEndTimeout: null,
-        scrollingToTarget: -1,
-        scrollingToAxis: null,
-        wheelTimeout: null,
-        edgeWheelTimeout: null,
-        activePointers: /* @__PURE__ */ new Set(),
-        activeTouches: /* @__PURE__ */ new Set(),
-        savedItems: /* @__PURE__ */ new Set(),
-        gestureListening: false,
-        endListening: false,
-        waitingForGestureEnd: false
       };
       var inlineWrapper = {
         element: null,
@@ -340,7 +326,6 @@
         wheelEnabled: true,
         momentumEnabled: true,
         elasticEnabled: false,
-        snapEnabled: false,
         wheelListening: false,
         pointerListening: false,
         touchListening: false,
@@ -350,7 +335,6 @@
         mouseReleaseTimeout: null,
         momentum: null,
         elastic: elastic,
-        snap: snap,
         inlineWrapper: inlineWrapper,
         scrollbar: scrollbar,
         resizeObserver: null,
@@ -372,23 +356,9 @@
         }
         publish(state);
         if (!state.desktop && state.scrollbar.listening) scheduleScrollbarInteractionHide(state);
-        if (!state.snapEnabled) return;
-        if (state.snap.scrollingToTarget !== -1) {
-          if (!snapTargetReached(state)) {
-            scheduleSnapTargetIdle(state);
-            return;
-          }
-          clearSnapTarget(state);
-          scheduleScrollEnd(state);
-        } else if (!("onscrollend" in element) || state.snap.scrollEndTimeout !== null) {
-          scheduleScrollEnd(state);
-        }
       };
       state.onScrollEnd = function(event) {
         if (event.target !== element) return;
-        clearSnapTarget(state);
-        clearScrollEnd(state);
-        finishNativeScroll(state);
       };
       state.onWheel = function(event) {
         return handleWheel(state, event);
@@ -433,21 +403,6 @@
       state.onTouchEnd = function(event) {
         return endTouch(state, event);
       };
-      state.onSnapPointerDown = function(event) {
-        return beginSnapGesture(state, POINTER, event);
-      };
-      state.onSnapPointerEnd = function(event) {
-        return endSnapGesture(state, POINTER, event);
-      };
-      state.onSnapTouchStart = function(event) {
-        return beginSnapGesture(state, "touch", event);
-      };
-      state.onSnapTouchEnd = function(event) {
-        return endSnapGesture(state, "touch", event);
-      };
-      state.onSnapBlur = function() {
-        return endSnapGesture(state);
-      };
       state.onScrollbarPointerDown = isTouch(function() {
         return startScrollbarInteractionVisibility(state);
       });
@@ -490,10 +445,10 @@
         }
       };
       scrollboxes.set(element, state);
-      onTarget(element, "$scroll", state.onScroll, {
+      onEvent(element, "$scroll", state.onScroll, {
         passive: true
       });
-      onTarget(element, "$scrollend", state.onScrollEnd, {
+      onEvent(element, "$scrollend", state.onScrollEnd, {
         passive: true
       });
       observe(state);
@@ -513,19 +468,13 @@
       stopPointerScrollMouseEvents(state);
       restorePointerScrollCursor(state);
       cancelMomentum(state);
-      state.snap.flick = null;
-      state.snap.deferredIndex = null;
-      clearSnapTarget(state);
-      clearScrollEnd(state);
-      removeSnapGestureListeners(state);
-      restoreSnapStyles(state);
       resetElastic(state);
       if (state.elastic.wrapper) elasticMemories.delete(state.elastic.wrapper);
       restoreInlineWrapper(state);
       resetScrollbars(state);
-      offTarget(element, "$scroll", state.onScroll);
-      offTarget(element, "$scrollend", state.onScrollEnd);
-      if (state.wheelListening) offTarget(element, "$wheel", state.onWheel, true);
+      offEvent(element, "$scroll", state.onScroll);
+      offEvent(element, "$scrollend", state.onScrollEnd);
+      if (state.wheelListening) offEvent(element, "$wheel", state.onWheel, true);
       if (state.pointerListening) setListeners(element, state, pointerListeners, false);
       if (state.touchListening) removeTouchListeners(state);
       if (state.resizeObserver) state.resizeObserver.disconnect();
@@ -535,7 +484,7 @@
         else if (state.desktopMedia.removeListener) state.desktopMedia.removeListener(state.onDesktopMediaChange);
       }
       AelluxJs.waitLayout.cancel(state.resizeLayoutId);
-      offTarget(root, "$resize", state.onResize);
+      offEvent(root, "$resize", state.onResize);
       (_elementMemories$get = elementMemories.get(element)) === null || _elementMemories$get === void 0 || _elementMemories$get.restore();
       elementMemories.delete(element);
       cursorMemories.delete(element);
@@ -559,18 +508,17 @@
       state.wheelEnabled = element.getAttribute(wheelAttribute) !== "false";
       state.momentumEnabled = element.getAttribute(momentumAttribute) !== "false";
       configureElastic(state);
-      configureSnap(state);
       configureInlineWrapper(state);
       configureScrollbars(state);
       state.desktop = isDesktop();
-      if ((state.desktop || state.elasticEnabled || state.snapEnabled) && !state.wheelListening) {
-        onTarget(element, "$wheel", state.onWheel, {
+      if ((state.desktop || state.elasticEnabled) && !state.wheelListening) {
+        onEvent(element, "$wheel", state.onWheel, {
           passive: false,
           capture: true
         });
         state.wheelListening = true;
-      } else if (!state.desktop && !state.elasticEnabled && !state.snapEnabled && state.wheelListening) {
-        offTarget(element, "$wheel", state.onWheel, true);
+      } else if (!state.desktop && !state.elasticEnabled && state.wheelListening) {
+        offEvent(element, "$wheel", state.onWheel, true);
         state.wheelListening = false;
       }
       if (state.elasticEnabled && !state.touchListening) addTouchListeners(state);
@@ -589,9 +537,7 @@
         state.lastPointerDown = null;
         restorePointerScrollCursor(state);
       }
-      if (state.snapEnabled) syncSnapStyles(state);
       refresh(state);
-      if (state.snapEnabled && !state.snap.initialized) initializeSnap(state);
     }
     function contentChildren(element) {
       return Array.from(element.children).filter(function(child) {
@@ -887,7 +833,7 @@
         pointerId: event.pointerId,
         offset: position - record.thumbPosition
       };
-      suspendSnapStyles(state, "scrollbar", true);
+      dispatchInteraction(state, "scrollbar", true);
       if (record.element.setPointerCapture) record.element.setPointerCapture(event.pointerId);
     }
     function moveScrollbarDrag(state, record, event) {
@@ -927,47 +873,7 @@
       state.scrollbar.drag = null;
       if (record.element.hasPointerCapture && record.element.hasPointerCapture(drag.pointerId)) record.element.releasePointerCapture(drag.pointerId);
       syncScrollbarVisibility(state);
-      suspendSnapStyles(state, "scrollbar", false);
-    }
-    function configureSnap(state) {
-      var element = state.element;
-      var requested = element.hasAttribute(snapAttribute) && element.getAttribute(snapAttribute) !== "false";
-      var root2 = state.elastic.wrapper || element;
-      var items = collectSnapItems(state, root2);
-      if (!requested || !items.length) {
-        state.snapEnabled = false;
-        removeSnapGestureListeners(state);
-        restoreSnapStyles(state);
-        state.snap.root = null;
-        state.snap.initialized = false;
-        state.snap.index = 0;
-        state.snap.flick = null;
-        state.snap.deferredIndex = null;
-        clearSnapTarget(state);
-        state.snap.notifiedItem = null;
-        state.snap.notifiedIndex = null;
-        clearScrollEnd(state);
-        var missingItems = requested && !items.length;
-        if (missingItems && !state.snap.invalidReported) AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_SCROLLBOX_SNAP_ITEMS, {
-          element: element
-        });
-        state.snap.invalidReported = missingItems;
-        return;
-      }
-      state.snap.invalidReported = false;
-      if (state.snap.root !== root2) {
-        restoreSnapStyles(state);
-        state.snap.root = root2;
-        state.snap.initialized = false;
-        state.snap.index = 0;
-        state.snap.flick = null;
-        state.snap.deferredIndex = null;
-        clearSnapTarget(state);
-        state.snap.notifiedItem = null;
-        state.snap.notifiedIndex = null;
-      }
-      state.snapEnabled = true;
-      addSnapGestureListeners(state);
+      dispatchInteraction(state, "scrollbar", false);
     }
     function configureInlineWrapper(state) {
       var inline = state.inlineWrapper;
@@ -1006,376 +912,6 @@
       inline.element = null;
       inline.owned = false;
       inline.reportedDisplay = null;
-    }
-    function syncSnapStyles(state) {
-      var axis = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : snapAxis(state);
-      var snap = state.snap;
-      if (!state.snapEnabled || !snap.root) return;
-      snap.axis = axis;
-      state.element.classList.add(snapReadyClass);
-      state.element.classList.toggle(snapSuspendedClass, snap.suspensions.pointer || snap.suspensions.elastic || snap.suspensions.scrollbar || snap.suspensions.wheel);
-      diagnoseSnapTransforms(state);
-    }
-    function diagnoseSnapTransforms(state) {
-      var wrapper = state.elastic.wrapper;
-      if (!wrapper) return;
-      var _iterator6 = _createForOfIteratorHelper(collectSnapItems(state, state.snap.root)), _step6;
-      try {
-        for (_iterator6.s(); !(_step6 = _iterator6.n()).done; ) {
-          var item = _step6.value;
-          if (!wrapper.contains(item)) continue;
-          var transform = root.getComputedStyle(item).transform;
-          if (transform && transform !== "none") {
-            AelluxJs.diagnostics.warn(AelluxJs.diagnostics.WARN_SCROLLBOX_SNAP_TRANSFORM, {
-              element: item,
-              attribute: snapItemAttribute,
-              value: transform,
-              scrollbox: state.element,
-              recommendation: "Apply transform to a child of the snap item."
-            });
-          }
-        }
-      } catch (err) {
-        _iterator6.e(err);
-      } finally {
-        _iterator6.f();
-      }
-    }
-    function suspendSnapStyles(state, reason, suspended) {
-      if (!state.snapEnabled || !state.snap.root || state.snap.suspensions[reason] === suspended) return;
-      state.snap.suspensions[reason] = suspended;
-      syncSnapStyles(state, state.snap.axis || snapAxis(state));
-      if (!suspended && !Object.values(state.snap.suspensions).some(Boolean)) scheduleScrollEnd(state);
-    }
-    function scheduleSnapWheelIdle(state) {
-      clearSnapWheelTimeout(state);
-      state.snap.wheelTimeout = root.setTimeout(function() {
-        state.snap.wheelTimeout = null;
-      }, SNAP_SCROLL_IDLE_MS);
-    }
-    function clearSnapWheelTimeout(state) {
-      var snap = state.snap;
-      if (snap.wheelTimeout !== null) root.clearTimeout(snap.wheelTimeout);
-      snap.wheelTimeout = null;
-    }
-    function suspendSnapForEdgeWheel(state) {
-      var snap = state.snap;
-      if (snap.edgeWheelTimeout !== null) root.clearTimeout(snap.edgeWheelTimeout);
-      suspendSnapStyles(state, "wheel", true);
-      snap.edgeWheelTimeout = root.setTimeout(function() {
-        snap.edgeWheelTimeout = null;
-        suspendSnapStyles(state, "wheel", false);
-      }, SNAP_SCROLL_IDLE_MS);
-    }
-    function clearEdgeWheelSuspension(state) {
-      var snap = state.snap;
-      if (snap.edgeWheelTimeout !== null) root.clearTimeout(snap.edgeWheelTimeout);
-      snap.edgeWheelTimeout = null;
-      suspendSnapStyles(state, "wheel", false);
-    }
-    function restoreSnapStyles(state) {
-      var snap = state.snap;
-      clearSnapWheelTimeout(state);
-      if (snap.edgeWheelTimeout !== null) root.clearTimeout(snap.edgeWheelTimeout);
-      snap.edgeWheelTimeout = null;
-      var _iterator7 = _createForOfIteratorHelper(snap.savedItems), _step7;
-      try {
-        for (_iterator7.s(); !(_step7 = _iterator7.n()).done; ) {
-          var _snapItemMemories$get;
-          var item = _step7.value;
-          (_snapItemMemories$get = snapItemMemories.get(item)) === null || _snapItemMemories$get === void 0 || _snapItemMemories$get.restore();
-          snapItemMemories.delete(item);
-        }
-      } catch (err) {
-        _iterator7.e(err);
-      } finally {
-        _iterator7.f();
-      }
-      snap.savedItems.clear();
-      state.element.classList.remove(snapReadyClass, snapSuspendedClass);
-      snap.axis = null;
-      snap.suspensions.pointer = false;
-      snap.suspensions.elastic = false;
-      snap.suspensions.scrollbar = false;
-      snap.suspensions.wheel = false;
-    }
-    function collectSnapItems(state, root2) {
-      return Array.from(root2.querySelectorAll("[".concat(snapItemAttribute, "]"))).filter(function(item) {
-        return item.closest("[".concat(attribute, "]")) === state.element;
-      });
-    }
-    function snapItems(state) {
-      return state.snapEnabled && state.snap.root ? collectSnapItems(state, state.snap.root) : [];
-    }
-    function snapAxis(state) {
-      return state.element.getAttribute(snapAttribute) === "vertical" ? "y" : "x";
-    }
-    function snapAlignment(item) {
-      var value = item.getAttribute(snapItemAttribute);
-      if (value === "start" || value === "left" || value === "top") return "start";
-      if (value === "end" || value === "right" || value === "bottom") return "end";
-      return "center";
-    }
-    function snapAlignmentOffset(state, item, axis) {
-      var box = arguments.length > 3 && arguments[3] !== void 0 ? arguments[3] : state.element.getBoundingClientRect();
-      var target = arguments.length > 4 && arguments[4] !== void 0 ? arguments[4] : item.getBoundingClientRect();
-      var horizontal = axis === "x";
-      var start = horizontal ? box.left + state.element.clientLeft : box.top + state.element.clientTop;
-      var size = horizontal ? state.element.clientWidth : state.element.clientHeight;
-      var itemStart = horizontal ? target.left : target.top;
-      var itemSize = horizontal ? target.width : target.height;
-      var alignment = snapAlignment(item);
-      if (alignment === "start") return itemStart - start;
-      if (alignment === "end") return itemStart + itemSize - start - size;
-      return itemStart + itemSize / 2 - start - size / 2;
-    }
-    function edgeSnapIndex(state, items, axis, metrics) {
-      var element = state.element;
-      var horizontal = axis === "x";
-      var maximum = horizontal ? metrics.maxX : metrics.maxY;
-      var position = horizontal ? element.scrollLeft : element.scrollTop;
-      var startDistance = position;
-      var endDistance = maximum - position;
-      if (startDistance <= SNAP_EDGE_DISTANCE_PX && startDistance <= endDistance) return 0;
-      if (endDistance <= SNAP_EDGE_DISTANCE_PX) return items.length - 1;
-      return null;
-    }
-    function nearestSnapIndex(state, items, axis) {
-      var box = state.element.getBoundingClientRect();
-      var nearest = 0, distance = Infinity;
-      for (var index = 0; index < items.length; index++) {
-        var candidate = Math.abs(snapAlignmentOffset(state, items[index], axis, box));
-        if (candidate < distance) {
-          nearest = index;
-          distance = candidate;
-        }
-      }
-      return nearest;
-    }
-    function addSnapGestureListeners(state) {
-      if (state.snap.gestureListening) return;
-      onTarget(state.element, POINTER_DOWN_TARGET, state.onSnapPointerDown, true);
-      onTarget(state.element, "$touchstart", state.onSnapTouchStart, {
-        passive: true,
-        capture: true
-      });
-      state.snap.gestureListening = true;
-    }
-    function removeSnapGestureListeners(state) {
-      if (state.snap.gestureListening) {
-        offTarget(state.element, POINTER_DOWN_TARGET, state.onSnapPointerDown, true);
-        offTarget(state.element, "$touchstart", state.onSnapTouchStart, true);
-        state.snap.gestureListening = false;
-      }
-      stopSnapGestureEndListeners(state);
-      state.snap.activePointers.clear();
-      state.snap.activeTouches.clear();
-      state.snap.waitingForGestureEnd = false;
-    }
-    function listenSnapGestureEnd(state) {
-      if (state.snap.endListening) return;
-      setListeners(root, state, snapEndListeners, true);
-      state.snap.endListening = true;
-    }
-    function stopSnapGestureEndListeners(state) {
-      if (!state.snap.endListening) return;
-      setListeners(root, state, snapEndListeners, false);
-      state.snap.endListening = false;
-    }
-    function beginSnapGesture(state, kind, event) {
-      if (!state.snapEnabled || event.target.closest("[".concat(scrollbarVerticalAttribute, "], [").concat(scrollbarHorizontalAttribute, "]"))) return;
-      var snap = state.snap;
-      var active = kind === POINTER ? snap.activePointers : snap.activeTouches;
-      if (kind === POINTER) active.add(event.pointerId);
-      else {
-        var _iterator8 = _createForOfIteratorHelper(event.changedTouches), _step8;
-        try {
-          for (_iterator8.s(); !(_step8 = _iterator8.n()).done; ) {
-            var touch = _step8.value;
-            active.add(touch.identifier);
-          }
-        } catch (err) {
-          _iterator8.e(err);
-        } finally {
-          _iterator8.f();
-        }
-      }
-      if (!active.size) return;
-      snap.flick = null;
-      if (snap.scrollEndTimeout !== null || snap.scrollingToTarget !== -1) snap.waitingForGestureEnd = true;
-      clearSnapTarget(state);
-      clearScrollEnd(state);
-      listenSnapGestureEnd(state);
-    }
-    function endSnapGesture(state, kind, event) {
-      var snap = state.snap;
-      if (kind === POINTER) snap.activePointers.delete(event.pointerId);
-      else if (kind === "touch") {
-        var _iterator9 = _createForOfIteratorHelper(event.changedTouches), _step9;
-        try {
-          for (_iterator9.s(); !(_step9 = _iterator9.n()).done; ) {
-            var touch = _step9.value;
-            snap.activeTouches.delete(touch.identifier);
-          }
-        } catch (err) {
-          _iterator9.e(err);
-        } finally {
-          _iterator9.f();
-        }
-      } else {
-        snap.activePointers.clear();
-        snap.activeTouches.clear();
-      }
-      if (snap.activePointers.size || snap.activeTouches.size) return;
-      stopSnapGestureEndListeners(state);
-      if ((snap.waitingForGestureEnd || snap.flick) && snap.gestureListening && !state.disposed) {
-        snap.waitingForGestureEnd = false;
-        scheduleScrollEnd(state);
-      }
-    }
-    function scheduleScrollEnd(state) {
-      if (state.snap.scrollingToTarget !== -1) return;
-      clearScrollEnd(state);
-      if (state.snap.activePointers.size || state.snap.activeTouches.size) {
-        state.snap.waitingForGestureEnd = true;
-        return;
-      }
-      state.snap.waitingForGestureEnd = false;
-      state.snap.scrollEndTimeout = root.setTimeout(function() {
-        state.snap.scrollEndTimeout = null;
-        finishNativeScroll(state);
-      }, SNAP_SCROLL_IDLE_MS);
-    }
-    function scheduleSnapTargetIdle(state) {
-      clearScrollEnd(state);
-      state.snap.scrollEndTimeout = root.setTimeout(function() {
-        state.snap.scrollEndTimeout = null;
-        if (state.snap.scrollingToTarget === -1) return;
-        clearSnapTarget(state);
-        finishNativeScroll(state);
-      }, SNAP_TARGET_IDLE_MS);
-    }
-    function clearScrollEnd(state) {
-      if (state.snap.scrollEndTimeout !== null) root.clearTimeout(state.snap.scrollEndTimeout);
-      state.snap.scrollEndTimeout = null;
-    }
-    function snapTargetReached(state) {
-      var snap = state.snap;
-      if (snap.scrollingToTarget === -1) return false;
-      var position = snap.scrollingToAxis === "x" ? state.element.scrollLeft : state.element.scrollTop;
-      return Math.abs(position - snap.scrollingToTarget) <= 1;
-    }
-    function clearSnapTarget(state) {
-      state.snap.scrollingToTarget = -1;
-      state.snap.scrollingToAxis = null;
-    }
-    function finishNativeScroll(state) {
-      if (state.disposed || !state.snapEnabled) return;
-      if (state.snap.activePointers.size || state.snap.activeTouches.size) {
-        state.snap.waitingForGestureEnd = true;
-        return;
-      }
-      if (state.snap.suspensions.pointer || state.snap.suspensions.elastic || state.snap.suspensions.wheel || state.momentum || state.scrollbar.drag || activePointerScrollState && activePointerScrollState.pointerScroll && activePointerScrollState.pointerScroll.chain.includes(state)) return;
-      var items = snapItems(state);
-      if (!items.length) return;
-      var metrics = nativeMetrics(state.element);
-      var axis = snapAxis(state);
-      var edgeIndex = edgeSnapIndex(state, items, axis, metrics);
-      var index = edgeIndex === null ? nearestSnapIndex(state, items, axis) : edgeIndex;
-      var flick = state.snap.flick;
-      state.snap.flick = null;
-      if (flick && flick.axis === axis && flick.index !== index && flick.index >= 0 && flick.index < items.length) {
-        scrollToSnap(state, flick.index, axis);
-        return;
-      }
-      notifySnapChange(state, items[index], axis);
-    }
-    function initializeSnap(state) {
-      var first = snapItems(state)[0];
-      if (!first) return;
-      state.snap.initialized = true;
-      state.snap.index = 0;
-      var axis = snapAxis(state);
-      scrollToSnap(state, 0, axis, "instant");
-      notifySnapChange(state, first, axis);
-      refresh(state);
-    }
-    function notifySnapChange(state, item, axis) {
-      var index = snapItems(state).indexOf(item);
-      if (index < 0 || state.snap.notifiedItem === item && state.snap.notifiedIndex === index) return;
-      var previousIndex = state.snap.notifiedIndex;
-      state.snap.index = index;
-      state.snap.notifiedItem = item;
-      state.snap.notifiedIndex = index;
-      AelluxJs.dispatchFrom(state.element, "ScrollboxSnapChange", {
-        detail: {
-          item: item,
-          index: index,
-          previousIndex: previousIndex,
-          axis: axis
-        }
-      });
-    }
-    function scrollToSnap(state, index) {
-      var axis = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : snapAxis(state);
-      var behavior = arguments.length > 3 && arguments[3] !== void 0 ? arguments[3] : "smooth";
-      var items = snapItems(state);
-      if (!items.length || !Number.isInteger(index) || index < 0 || index >= items.length) return false;
-      if (state.snap.activeTouches.size) return false;
-      if (state.snap.suspensions.elastic) {
-        clearSnapTarget(state);
-        clearScrollEnd(state);
-        state.snap.deferredIndex = index;
-        return true;
-      }
-      cancelMomentum(state);
-      clearScrollEnd(state);
-      state.snap.flick = null;
-      state.snap.deferredIndex = null;
-      state.snap.index = index;
-      var element = state.element;
-      var offset = snapAlignmentOffset(state, items[index], axis);
-      var metrics = nativeMetrics(element);
-      var destination = axis === "x" ? Math.max(0, Math.min(metrics.maxX, element.scrollLeft + offset)) : Math.max(0, Math.min(metrics.maxY, element.scrollTop + offset));
-      state.snap.scrollingToTarget = destination;
-      state.snap.scrollingToAxis = axis;
-      if (axis === "x") element.scrollTo({
-        left: destination,
-        behavior: behavior
-      });
-      else element.scrollTo({
-        top: destination,
-        behavior: behavior
-      });
-      if (snapTargetReached(state)) {
-        clearSnapTarget(state);
-        scheduleScrollEnd(state);
-      }
-      return true;
-    }
-    function selectedSnapIndex(state) {
-      var items = snapItems(state);
-      if (!items.length) return 0;
-      var metrics = nativeMetrics(state.element);
-      var axis = snapAxis(state);
-      var edge = edgeSnapIndex(state, items, axis, metrics);
-      return edge === null ? nearestSnapIndex(state, items, axis) : edge;
-    }
-    function goto(element, index) {
-      var state = scrollboxes.get(element);
-      return state && !state.disposed ? scrollToSnap(state, index) : false;
-    }
-    function next(element) {
-      var state = scrollboxes.get(element);
-      if (!state || state.disposed) return false;
-      var items = snapItems(state);
-      return items.length ? scrollToSnap(state, Math.min(items.length - 1, state.snap.index + 1)) : false;
-    }
-    function previous(element) {
-      var state = scrollboxes.get(element);
-      if (!state || state.disposed) return false;
-      var items = snapItems(state);
-      return items.length ? scrollToSnap(state, Math.max(0, state.snap.index - 1)) : false;
     }
     function configureElastic(state) {
       var element = state.element;
@@ -1473,28 +1009,28 @@
     function isTextAtPoint(element, x, y) {
       if (root.getComputedStyle(element).userSelect === "none") return false;
       var range = document.createRange();
-      var _iterator0 = _createForOfIteratorHelper(element.childNodes), _step0;
+      var _iterator6 = _createForOfIteratorHelper(element.childNodes), _step6;
       try {
-        for (_iterator0.s(); !(_step0 = _iterator0.n()).done; ) {
-          var node = _step0.value;
+        for (_iterator6.s(); !(_step6 = _iterator6.n()).done; ) {
+          var node = _step6.value;
           if (node.nodeType !== 3 || !node.textContent.trim()) continue;
           range.selectNodeContents(node);
-          var _iterator1 = _createForOfIteratorHelper(range.getClientRects()), _step1;
+          var _iterator7 = _createForOfIteratorHelper(range.getClientRects()), _step7;
           try {
-            for (_iterator1.s(); !(_step1 = _iterator1.n()).done; ) {
-              var rect = _step1.value;
+            for (_iterator7.s(); !(_step7 = _iterator7.n()).done; ) {
+              var rect = _step7.value;
               if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) return true;
             }
           } catch (err) {
-            _iterator1.e(err);
+            _iterator7.e(err);
           } finally {
-            _iterator1.f();
+            _iterator7.f();
           }
         }
       } catch (err) {
-        _iterator0.e(err);
+        _iterator6.e(err);
       } finally {
-        _iterator0.f();
+        _iterator6.f();
       }
       return false;
     }
@@ -1558,22 +1094,20 @@
         return axes.get(member2).x;
       });
       if (!textOrigin && event.cancelable) event.preventDefault();
-      var _iterator10 = _createForOfIteratorHelper(new Set([].concat(_toConsumableArray(chains.x), _toConsumableArray(chains.y)))), _step10;
+      var _iterator8 = _createForOfIteratorHelper(new Set([].concat(_toConsumableArray(chains.x), _toConsumableArray(chains.y)))), _step8;
       try {
-        for (_iterator10.s(); !(_step10 = _iterator10.n()).done; ) {
-          var _member = _step10.value;
+        for (_iterator8.s(); !(_step8 = _iterator8.n()).done; ) {
+          var _member = _step8.value;
           cancelMomentum(_member);
-          _member.snap.flick = null;
-          clearSnapTarget(_member);
           if (_member.elastic.owned) {
             resetElastic(_member);
             refresh(_member);
           }
         }
       } catch (err) {
-        _iterator10.e(err);
+        _iterator8.e(err);
       } finally {
-        _iterator10.f();
+        _iterator8.f();
       }
       if (state.mouseReleaseTimeout !== null) root.clearTimeout(state.mouseReleaseTimeout);
       state.mouseReleaseTimeout = null;
@@ -1599,11 +1133,6 @@
         elasticForce: 0,
         startTime: time,
         endTime: null,
-        snapStarts: new Map(chain.filter(function(member2) {
-          return member2.snapEnabled && (chains.x.includes(member2) || chains.y.includes(member2));
-        }).map(function(member2) {
-          return [member2, selectedSnapIndex(member2)];
-        })),
         selectionAtDown: selectionAtDown,
         verticalOnly: verticalOnly,
         selectionReadyTime: textOrigin ? time + TEXT_SELECTION_WAIT_MS : 0,
@@ -1612,43 +1141,43 @@
         momentumStartTime: time
       };
       activePointerScrollState = state;
-      onTarget(root, POINTER_MOVE_TARGET, state.onPointerMove, {
+      onEvent(root, POINTER_MOVE_TARGET, state.onPointerMove, {
         passive: false,
         capture: true
       });
-      onTarget(root, "$touchmove", state.onPointerScrollTouchMove, {
+      onEvent(root, "$touchmove", state.onPointerScrollTouchMove, {
         passive: false,
         capture: true
       });
-      var _iterator11 = _createForOfIteratorHelper(pointerScrollDragEvents), _step11;
+      var _iterator9 = _createForOfIteratorHelper(pointerScrollDragEvents), _step9;
       try {
-        for (_iterator11.s(); !(_step11 = _iterator11.n()).done; ) {
-          var name = _step11.value;
-          onTarget(root, "$" + name, state.onPointerScrollNativeEvent, true);
+        for (_iterator9.s(); !(_step9 = _iterator9.n()).done; ) {
+          var name = _step9.value;
+          onEvent(root, "$" + name, state.onPointerScrollNativeEvent, true);
         }
       } catch (err) {
-        _iterator11.e(err);
+        _iterator9.e(err);
       } finally {
-        _iterator11.f();
+        _iterator9.f();
       }
-      onTarget(root, "$selectstart", state.onPointerScrollNativeEvent, true);
-      var _iterator12 = _createForOfIteratorHelper(pointerScrollMouseEvents), _step12;
+      onEvent(root, "$selectstart", state.onPointerScrollNativeEvent, true);
+      var _iterator0 = _createForOfIteratorHelper(pointerScrollMouseEvents), _step0;
       try {
-        for (_iterator12.s(); !(_step12 = _iterator12.n()).done; ) {
-          var _name = _step12.value;
-          onTarget(root, "$" + _name, state.onMouseEvent, {
+        for (_iterator0.s(); !(_step0 = _iterator0.n()).done; ) {
+          var _name = _step0.value;
+          onEvent(root, "$" + _name, state.onMouseEvent, {
             passive: false,
             capture: true
           });
         }
       } catch (err) {
-        _iterator12.e(err);
+        _iterator0.e(err);
       } finally {
-        _iterator12.f();
+        _iterator0.f();
       }
-      onTarget(root, POINTER_UP_TARGET, state.onPointerEnd, true);
-      onTarget(root, POINTER_CANCEL_TARGET, state.onPointerEnd, true);
-      onTarget(root, "$blur", state.onBlur);
+      onEvent(root, POINTER_UP_TARGET, state.onPointerEnd, true);
+      onEvent(root, POINTER_CANCEL_TARGET, state.onPointerEnd, true);
+      onEvent(root, "$blur", state.onBlur);
     }
     function movePointerScroll(state, event) {
       var pointerScroll = state.pointerScroll;
@@ -1663,9 +1192,7 @@
         endPointerScroll(state);
         return;
       }
-      var threshold = pointerScroll.chain.some(function(member2) {
-        return member2.snapEnabled;
-      }) ? SNAP_FLICK_MIN_DISTANCE_PX : POINTER_SCROLL_THRESHOLD_PX;
+      var threshold = POINTER_SCROLL_THRESHOLD_PX;
       if (!pointerScroll.moved && dx * dx + dy * dy < threshold * threshold) return;
       if (!pointerScroll.axis) pointerScroll.axis = Math.abs(dx) >= Math.abs(dy) ? "x" : "y";
       var verticalTextDrag = pointerScroll.verticalOnly && pointerScroll.axis === "y" && Math.abs(dy) > VERTICAL_TEXT_DRAG_PX;
@@ -1710,16 +1237,16 @@
       if (event.cancelable) event.preventDefault();
       if (!remaining) return;
       var outermost = null;
-      var _iterator13 = _createForOfIteratorHelper(pointerScroll.chain), _step13;
+      var _iterator1 = _createForOfIteratorHelper(pointerScroll.chain), _step1;
       try {
-        for (_iterator13.s(); !(_step13 = _iterator13.n()).done; ) {
-          var member = _step13.value;
+        for (_iterator1.s(); !(_step1 = _iterator1.n()).done; ) {
+          var member = _step1.value;
           if (!member.disposed && member.pointerListening && pointerAxisMaximum(member, axis, pointerScroll) > 0) outermost = member;
         }
       } catch (err) {
-        _iterator13.e(err);
+        _iterator1.e(err);
       } finally {
-        _iterator13.f();
+        _iterator1.f();
       }
       var allowed = outermost && outermost.elasticEnabled ? elasticAxes(outermost) : null;
       var canStretch = allowed && allowed[axis];
@@ -1735,10 +1262,10 @@
       }
       var lastUsed = null;
       var lastStartX = 0, lastStartY = 0;
-      var _iterator14 = _createForOfIteratorHelper(pointerScroll.chain), _step14;
+      var _iterator10 = _createForOfIteratorHelper(pointerScroll.chain), _step10;
       try {
-        for (_iterator14.s(); !(_step14 = _iterator14.n()).done; ) {
-          var _member2 = _step14.value;
+        for (_iterator10.s(); !(_step10 = _iterator10.n()).done; ) {
+          var _member2 = _step10.value;
           if (_member2.disposed || !_member2.pointerListening || pointerAxisMaximum(_member2, axis, pointerScroll) <= 0) continue;
           if (Math.abs(remaining) < 1e-3) continue;
           var _element = _member2.element;
@@ -1759,9 +1286,9 @@
           lastStartY = previousY;
         }
       } catch (err) {
-        _iterator14.e(err);
+        _iterator10.e(err);
       } finally {
-        _iterator14.f();
+        _iterator10.f();
       }
       if (canStretch) {
         pointerScroll.elasticForce += remaining;
@@ -1814,17 +1341,17 @@
     }
     function pointerAxisChain(chain, axes, axis) {
       var result = [];
-      var _iterator15 = _createForOfIteratorHelper(chain), _step15;
+      var _iterator11 = _createForOfIteratorHelper(chain), _step11;
       try {
-        for (_iterator15.s(); !(_step15 = _iterator15.n()).done; ) {
-          var member = _step15.value;
+        for (_iterator11.s(); !(_step11 = _iterator11.n()).done; ) {
+          var member = _step11.value;
           result.push(member);
           if (axes.get(member)[axis === "x" ? "stopX" : "stopY"]) break;
         }
       } catch (err) {
-        _iterator15.e(err);
+        _iterator11.e(err);
       } finally {
-        _iterator15.f();
+        _iterator11.f();
       }
       return result;
     }
@@ -1833,10 +1360,10 @@
       pointerScroll.moved = true;
       pointerScroll.started = true;
       restorePointerScrollCursor(state);
-      var _iterator16 = _createForOfIteratorHelper(pointerScroll.chain), _step16;
+      var _iterator12 = _createForOfIteratorHelper(pointerScroll.chain), _step12;
       try {
-        for (_iterator16.s(); !(_step16 = _iterator16.n()).done; ) {
-          var member = _step16.value;
+        for (_iterator12.s(); !(_step12 = _iterator12.n()).done; ) {
+          var member = _step12.value;
           if (pointerAxisMaximum(member, axis, pointerScroll) <= 0) continue;
           var element = member.element;
           pointerScrollMemories.set(element, AelluxJs.persist.element.save(element, [], ["scroll-behavior"]));
@@ -1846,13 +1373,13 @@
           });
           element.style.setProperty("scroll-behavior", "auto", "important");
           element.classList.add(pointerScrollingClass);
-          if (member.snapEnabled) suspendSnapStyles(member, POINTER, true);
+          dispatchInteraction(member, POINTER, true);
           startScrollbarInteractionVisibility(member);
         }
       } catch (err) {
-        _iterator16.e(err);
+        _iterator12.e(err);
       } finally {
-        _iterator16.f();
+        _iterator12.f();
       }
       dispatchPointerScroll(state, pointerScroll, "PointerScrollStart");
     }
@@ -1876,39 +1403,26 @@
         pointerScroll.lastX = event.clientX;
         pointerScroll.lastY = event.clientY;
       }
-      if (event && event.type === POINTER_UP && !pointerScroll.moved && pointerScroll.endTime < pointerScroll.selectionReadyTime && !selectionHasChanged(pointerScroll.selectionAtDown)) {
-        var dx = pointerScroll.startX - event.clientX;
-        var dy = pointerScroll.startY - event.clientY;
-        var axis = pointerScroll.axis || (Math.abs(dx) >= Math.abs(dy) ? "x" : "y");
-        var chain = pointerScroll.chains[axis];
-        if (chain.some(function(member2) {
-          return member2.snapEnabled && snapAxis(member2) === axis && pointerAxisMaximum(member2, axis, pointerScroll) > 0;
-        }) && isSnapFlick(pointerScroll, axis)) {
-          pointerScroll.chain = chain;
-          pointerScroll.axis = axis;
-          pointerScroll.moved = true;
-        }
-      }
       state.pointerScroll = null;
       if (activePointerScrollState === state) activePointerScrollState = null;
       if (pointerScroll.selectionWaitTimeout !== null) root.clearTimeout(pointerScroll.selectionWaitTimeout);
-      offTarget(root, POINTER_MOVE_TARGET, state.onPointerMove, true);
-      offTarget(root, "$touchmove", state.onPointerScrollTouchMove, true);
-      var _iterator17 = _createForOfIteratorHelper(pointerScrollDragEvents), _step17;
+      offEvent(root, POINTER_MOVE_TARGET, state.onPointerMove, true);
+      offEvent(root, "$touchmove", state.onPointerScrollTouchMove, true);
+      var _iterator13 = _createForOfIteratorHelper(pointerScrollDragEvents), _step13;
       try {
-        for (_iterator17.s(); !(_step17 = _iterator17.n()).done; ) {
-          var name = _step17.value;
-          offTarget(root, "$" + name, state.onPointerScrollNativeEvent, true);
+        for (_iterator13.s(); !(_step13 = _iterator13.n()).done; ) {
+          var name = _step13.value;
+          offEvent(root, "$" + name, state.onPointerScrollNativeEvent, true);
         }
       } catch (err) {
-        _iterator17.e(err);
+        _iterator13.e(err);
       } finally {
-        _iterator17.f();
+        _iterator13.f();
       }
-      offTarget(root, "$selectstart", state.onPointerScrollNativeEvent, true);
-      offTarget(root, POINTER_UP_TARGET, state.onPointerEnd, true);
-      offTarget(root, POINTER_CANCEL_TARGET, state.onPointerEnd, true);
-      offTarget(root, "$blur", state.onBlur);
+      offEvent(root, "$selectstart", state.onPointerScrollNativeEvent, true);
+      offEvent(root, POINTER_UP_TARGET, state.onPointerEnd, true);
+      offEvent(root, POINTER_CANCEL_TARGET, state.onPointerEnd, true);
+      offEvent(root, "$blur", state.onBlur);
       if (pointerScroll.moved && !state.disposed) {
         state.mouseReleaseButton = pointerScroll.button;
         if (state.mouseReleaseTimeout !== null) root.clearTimeout(state.mouseReleaseTimeout);
@@ -1918,24 +1432,24 @@
       } else {
         stopPointerScrollMouseEvents(state);
       }
-      var _iterator18 = _createForOfIteratorHelper(pointerScroll.styles), _step18;
+      var _iterator14 = _createForOfIteratorHelper(pointerScroll.styles), _step14;
       try {
-        for (_iterator18.s(); !(_step18 = _iterator18.n()).done; ) {
+        for (_iterator14.s(); !(_step14 = _iterator14.n()).done; ) {
           var _pointerScrollMemorie;
-          var saved = _step18.value;
+          var saved = _step14.value;
           if (saved.classOwned) saved.element.classList.remove(pointerScrollingClass);
           (_pointerScrollMemorie = pointerScrollMemories.get(saved.element)) === null || _pointerScrollMemorie === void 0 || _pointerScrollMemorie.restore();
           pointerScrollMemories.delete(saved.element);
           var member = scrollboxes.get(saved.element);
           if (member) {
-            suspendSnapStyles(member, POINTER, false);
+            dispatchInteraction(member, POINTER, false);
             scheduleScrollbarInteractionHide(member);
           }
         }
       } catch (err) {
-        _iterator18.e(err);
+        _iterator14.e(err);
       } finally {
-        _iterator18.f();
+        _iterator14.f();
       }
       if (event && event.type === POINTER_UP && state.pointerListening) {
         updatePointerScrollCursor(state, document.elementFromPoint(event.clientX, event.clientY), event.clientX, event.clientY);
@@ -1945,48 +1459,20 @@
         return member2.elastic.active;
       });
       var momentumState = pointerScroll.momentumState;
-      var snapState = momentumState ? momentumState.snapEnabled ? momentumState : null : pointerScroll.chain.find(function(member2) {
-        return member2.snapEnabled && pointerAxisMaximum(member2, pointerScroll.axis, pointerScroll) > 0;
-      });
-      var shouldSnap = event && event.type === POINTER_UP && pointerScroll.moved && snapState && !snapState.disposed && snapItems(snapState).length;
-      if (shouldSnap) {
-        recordSnapFlick(snapState, pointerScroll, pointerScroll.axis, pointerScroll.snapStarts.get(snapState));
-        scheduleScrollEnd(snapState);
-      }
-      var _iterator19 = _createForOfIteratorHelper(pointerScroll.chain), _step19;
+      var _iterator15 = _createForOfIteratorHelper(pointerScroll.chain), _step15;
       try {
-        for (_iterator19.s(); !(_step19 = _iterator19.n()).done; ) {
-          var _member3 = _step19.value;
+        for (_iterator15.s(); !(_step15 = _iterator15.n()).done; ) {
+          var _member3 = _step15.value;
           releaseElastic(_member3);
         }
       } catch (err) {
-        _iterator19.e(err);
+        _iterator15.e(err);
       } finally {
-        _iterator19.f();
+        _iterator15.f();
       }
-      if (!shouldSnap && event && event.type === POINTER_UP && pointerScroll.moved && momentumState && momentumState.momentumEnabled && !hadElastic && !momentumState.disposed && now() - pointerScroll.momentumStartTime < MOMENTUM_LIMIT_TIME_MS) {
+      if (event && event.type === POINTER_UP && pointerScroll.moved && momentumState && momentumState.momentumEnabled && !hadElastic && !momentumState.disposed && now() - pointerScroll.momentumStartTime < MOMENTUM_LIMIT_TIME_MS) {
         startMomentum(momentumState, pointerScroll);
       }
-    }
-    function recordSnapFlick(state, gesture, axis, startIndex) {
-      if (!state.snapEnabled || snapAxis(state) !== axis || !Number.isInteger(startIndex) || !isSnapFlick(gesture, axis)) return;
-      var distance = axis === "x" ? gesture.startX - gesture.lastX : gesture.startY - gesture.lastY;
-      var items = snapItems(state);
-      var index = Math.max(0, Math.min(items.length - 1, startIndex + Math.sign(distance)));
-      if (index !== startIndex) {
-        state.snap.flick = {
-          axis: axis,
-          index: index
-        };
-      }
-    }
-    function isSnapFlick(pointerScroll, axis) {
-      var distance = axis === "x" ? pointerScroll.startX - pointerScroll.lastX : pointerScroll.startY - pointerScroll.lastY;
-      var elapsed = Math.max(1, pointerScroll.endTime - pointerScroll.startTime);
-      return elapsed <= SNAP_FLICK_WINDOW_MS && Math.abs(distance) > SNAP_FLICK_MIN_DISTANCE_PX && Math.abs(distance) < SNAP_FLICK_MAX_DISTANCE_PX && (elapsed <= SNAP_FLICK_FAST_TIME_MS || Math.abs(distance) / elapsed >= SNAP_SWIPE_SPEED_PX_MS);
-    }
-    function flushPendingSnap(state) {
-      if (state.snapEnabled && !state.disposed) scheduleScrollEnd(state);
     }
     function cancelPointerScrollMouseEvent(state, event) {
       var active = state.pointerScroll && state.pointerScroll.moved;
@@ -2004,16 +1490,16 @@
       if (state.mouseReleaseTimeout !== null) root.clearTimeout(state.mouseReleaseTimeout);
       state.mouseReleaseTimeout = null;
       state.mouseReleaseButton = null;
-      var _iterator20 = _createForOfIteratorHelper(pointerScrollMouseEvents), _step20;
+      var _iterator16 = _createForOfIteratorHelper(pointerScrollMouseEvents), _step16;
       try {
-        for (_iterator20.s(); !(_step20 = _iterator20.n()).done; ) {
-          var name = _step20.value;
-          offTarget(root, "$" + name, state.onMouseEvent, true);
+        for (_iterator16.s(); !(_step16 = _iterator16.n()).done; ) {
+          var name = _step16.value;
+          offEvent(root, "$" + name, state.onMouseEvent, true);
         }
       } catch (err) {
-        _iterator20.e(err);
+        _iterator16.e(err);
       } finally {
-        _iterator20.f();
+        _iterator16.f();
       }
     }
     function startMomentum(state, pointerScroll) {
@@ -2079,17 +1565,17 @@
     function restoreTouchOverflow(state) {
       var touch = state.elastic.touch;
       if (!touch) return;
-      var _iterator21 = _createForOfIteratorHelper(touch.scrollBehaviors), _step21;
+      var _iterator17 = _createForOfIteratorHelper(touch.scrollBehaviors), _step17;
       try {
-        for (_iterator21.s(); !(_step21 = _iterator21.n()).done; ) {
-          var _step21$value = _slicedToArray(_step21.value, 2), element = _step21$value[0], _step21$value$ = _step21$value[1], value = _step21$value$.value, priority = _step21$value$.priority;
+        for (_iterator17.s(); !(_step17 = _iterator17.n()).done; ) {
+          var _step17$value = _slicedToArray(_step17.value, 2), element = _step17$value[0], _step17$value$ = _step17$value[1], value = _step17$value$.value, priority = _step17$value$.priority;
           if (value) element.style.setProperty("scroll-behavior", value, priority);
           else element.style.removeProperty("scroll-behavior");
         }
       } catch (err) {
-        _iterator21.e(err);
+        _iterator17.e(err);
       } finally {
-        _iterator21.f();
+        _iterator17.f();
       }
       touch.scrollBehaviors.clear();
     }
@@ -2124,19 +1610,19 @@
       var start = state.elastic.touch;
       if (!start) return;
       var touch = null;
-      var _iterator22 = _createForOfIteratorHelper(event.touches), _step22;
+      var _iterator18 = _createForOfIteratorHelper(event.touches), _step18;
       try {
-        for (_iterator22.s(); !(_step22 = _iterator22.n()).done; ) {
-          var item = _step22.value;
+        for (_iterator18.s(); !(_step18 = _iterator18.n()).done; ) {
+          var item = _step18.value;
           if (item.identifier === start.identifier) {
             touch = item;
             break;
           }
         }
       } catch (err) {
-        _iterator22.e(err);
+        _iterator18.e(err);
       } finally {
-        _iterator22.f();
+        _iterator18.f();
       }
       if (!touch) return;
       var desiredX = start.scrollLeft + start.x - touch.clientX;
@@ -2189,16 +1675,16 @@
     function endTouch(state, event) {
       var touch = state.elastic.touch;
       if (!touch) return;
-      var _iterator23 = _createForOfIteratorHelper(event.touches), _step23;
+      var _iterator19 = _createForOfIteratorHelper(event.touches), _step19;
       try {
-        for (_iterator23.s(); !(_step23 = _iterator23.n()).done; ) {
-          var item = _step23.value;
+        for (_iterator19.s(); !(_step19 = _iterator19.n()).done; ) {
+          var item = _step19.value;
           if (item.identifier === touch.identifier) return;
         }
       } catch (err) {
-        _iterator23.e(err);
+        _iterator19.e(err);
       } finally {
-        _iterator23.f();
+        _iterator19.f();
       }
       restoreTouchOverflow(state);
       state.elastic.touch = null;
@@ -2244,7 +1730,7 @@
       elastic.amounts = amounts;
       elastic.active = active;
       elastic.owned = true;
-      if (active) suspendSnapStyles(state, "elastic", true);
+      if (active) dispatchInteraction(state, "elastic", true);
       setElasticTransform(state, dimensions);
       return active;
     }
@@ -2289,21 +1775,16 @@
     }
     function releaseElastic(state) {
       var elastic = state.elastic;
-      if (!elastic.owned) {
-        flushPendingSnap(state);
-        return;
-      }
+      if (!elastic.owned) return;
       if (elastic.wheelTimeout !== null) root.clearTimeout(elastic.wheelTimeout);
       elastic.wheelTimeout = null;
       if (!elastic.active) {
         resetElastic(state);
-        flushPendingSnap(state);
         return;
       }
       if (AelluxJs.currentPreference("reduced-motion") === "reduced") {
         resetElastic(state);
         refresh(state);
-        flushPendingSnap(state);
         return;
       }
       elastic.wrapper.classList.add(elasticReleaseClass);
@@ -2324,7 +1805,6 @@
       })) {
         resetElastic(state);
         refresh(state);
-        flushPendingSnap(state);
         return;
       }
       setElasticTransform(state);
@@ -2349,12 +1829,7 @@
       elastic.active = false;
       elastic.owned = false;
       if (wasOwned && !state.disposed) {
-        suspendSnapStyles(state, "elastic", false);
-        if (state.snap.deferredIndex !== null) {
-          var index = state.snap.deferredIndex;
-          state.snap.deferredIndex = null;
-          scrollToSnap(state, index);
-        }
+        dispatchInteraction(state, "elastic", false);
       }
       if (wasOwned && !state.disposed) publish(state);
     }
@@ -2362,7 +1837,7 @@
       state.onResize = function() {
         return scheduleResize(state);
       };
-      onTarget(root, "$resize", state.onResize, {
+      onEvent(root, "$resize", state.onResize, {
         passive: true
       });
       if (root.matchMedia) {
@@ -2378,16 +1853,16 @@
           return scheduleResize(state);
         });
         state.resizeObserver.observe(state.element);
-        var _iterator24 = _createForOfIteratorHelper(state.element.children), _step24;
+        var _iterator20 = _createForOfIteratorHelper(state.element.children), _step20;
         try {
-          for (_iterator24.s(); !(_step24 = _iterator24.n()).done; ) {
-            var child = _step24.value;
+          for (_iterator20.s(); !(_step20 = _iterator20.n()).done; ) {
+            var child = _step20.value;
             state.resizeObserver.observe(child);
           }
         } catch (err) {
-          _iterator24.e(err);
+          _iterator20.e(err);
         } finally {
-          _iterator24.f();
+          _iterator20.f();
         }
       }
       if (root.MutationObserver) {
@@ -2395,22 +1870,20 @@
           if (state.resizeObserver) {
             state.resizeObserver.disconnect();
             state.resizeObserver.observe(state.element);
-            var _iterator25 = _createForOfIteratorHelper(state.element.children), _step25;
+            var _iterator21 = _createForOfIteratorHelper(state.element.children), _step21;
             try {
-              for (_iterator25.s(); !(_step25 = _iterator25.n()).done; ) {
-                var _child = _step25.value;
+              for (_iterator21.s(); !(_step21 = _iterator21.n()).done; ) {
+                var _child = _step21.value;
                 state.resizeObserver.observe(_child);
               }
             } catch (err) {
-              _iterator25.e(err);
+              _iterator21.e(err);
             } finally {
-              _iterator25.f();
+              _iterator21.f();
             }
           }
           if (records.some(function(record) {
-            return record.type === "attributes" || record.target === state.element || record.target === state.elastic.wrapper || [].concat(_toConsumableArray(record.addedNodes), _toConsumableArray(record.removedNodes)).some(function(node) {
-              return node.nodeType === 1 && (node.hasAttribute(snapItemAttribute) || node.querySelector("[".concat(snapItemAttribute, "]")));
-            });
+            return record.type === "attributes" || record.target === state.element || record.target === state.elastic.wrapper;
           })) configure(state);
           else refresh(state);
         });
@@ -2419,7 +1892,7 @@
           subtree: true,
           characterData: true,
           attributes: true,
-          attributeFilter: [snapAttribute, snapItemAttribute, elasticAttribute, scrollbarAttribute]
+          attributeFilter: [elasticAttribute, scrollbarAttribute]
         });
       }
     }
@@ -2486,8 +1959,6 @@
           y: progress(scrollTop, metrics.maxY),
           x: progress(scrollLeft, metrics.maxX),
           edges: state.elastic.owned ? null : [scrollTop < SCROLL_EDGE_MARGIN_PX, scrollTop >= metrics.maxY - SCROLL_EDGE_MARGIN_PX, scrollLeft < SCROLL_EDGE_MARGIN_PX, scrollLeft >= metrics.maxX - SCROLL_EDGE_MARGIN_PX],
-          snapAxis: state.snapEnabled ? snapAxis(state) : null,
-          snapValues: state.snapEnabled ? measureSnapValues(state) : [],
           scrollbars: bars ? readScrollbars(state, metrics, axes) : []
         };
       }).then(function(values) {
@@ -2508,23 +1979,6 @@
               return state.element.classList.toggle(name, values.edges[index]);
             });
           }
-          if (values.snapAxis && state.snap.axis !== values.snapAxis) syncSnapStyles(state, values.snapAxis);
-          var _iterator26 = _createForOfIteratorHelper(values.snapValues), _step26;
-          try {
-            for (_iterator26.s(); !(_step26 = _iterator26.n()).done; ) {
-              var _step26$value = _step26.value, item = _step26$value.item, viewport = _step26$value.viewport, focus = _step26$value.focus;
-              if (!state.snap.savedItems.has(item)) {
-                snapItemMemories.set(item, AelluxJs.persist.element.save(item, [], snapProperties));
-                state.snap.savedItems.add(item);
-              }
-              item.style.setProperty(snapProperties[0], viewport);
-              item.style.setProperty(snapProperties[1], focus);
-            }
-          } catch (err) {
-            _iterator26.e(err);
-          } finally {
-            _iterator26.f();
-          }
           updateScrollbars(state, values.scrollbars);
         });
       }).catch(function(cause) {
@@ -2539,70 +1993,11 @@
         if (state.publishDirty && !state.disposed) publish(state);
       });
     }
-    function measureSnapValues(state) {
-      var element = state.element;
-      var rect = element.getBoundingClientRect();
-      var axis = snapAxis(state);
-      var size = axis === "x" ? element.clientWidth : element.clientHeight;
-      if (!size) return [];
-      var center = axis === "x" ? rect.left + element.clientLeft + size / 2 : rect.top + element.clientTop + size / 2;
-      return snapItems(state).map(function(item) {
-        var box = item.getBoundingClientRect();
-        var itemCenter = axis === "x" ? box.left + box.width / 2 : box.top + box.height / 2;
-        var viewport = Math.max(-2, Math.min(2, (itemCenter - center) * 2 / size));
-        var focus = Math.max(0, 1 - Math.abs(snapAlignmentOffset(state, item, axis, rect, box)) / size);
-        return {
-          item: item,
-          viewport: viewport,
-          focus: focus
-        };
-      });
-    }
     function progress(position, distance) {
       return distance > 0 ? Math.min(1, Math.max(0, position / distance)) : 0;
     }
-    function handleSnapWheel(state, event) {
-      if (!state.snapEnabled) return false;
-      var axis = snapAxis(state);
-      var horizontal = Math.abs(event.deltaX) > Math.abs(event.deltaY);
-      var delta = axis === "x" ? horizontal ? event.deltaX : state.wheelEnabled ? event.deltaY : 0 : horizontal ? 0 : event.deltaY;
-      if (!delta) return false;
-      var items = snapItems(state);
-      if (!items.length) {
-        if (event.cancelable) event.preventDefault();
-        return true;
-      }
-      var metrics = nativeMetrics(state.element);
-      var edge = edgeSnapIndex(state, items, axis, metrics);
-      var index = edge !== null ? edge : state.snap.scrollingToTarget !== -1 ? state.snap.index : selectedSnapIndex(state);
-      var next2 = index + Math.sign(delta);
-      if (next2 < 0 || next2 >= items.length) {
-        if (state.snap.scrollingToTarget !== -1) {
-          if (event.cancelable) event.preventDefault();
-          return true;
-        }
-        suspendSnapForEdgeWheel(state);
-        var position = axis === "x" ? state.element.scrollLeft : state.element.scrollTop;
-        var maximum = axis === "x" ? metrics.maxX : metrics.maxY;
-        if (delta < 0 ? position <= 1 : position >= maximum - 1) {
-          var style = root.getComputedStyle(state.element);
-          var behavior = horizontal ? style.overscrollBehaviorX : style.overscrollBehaviorY;
-          if (behavior === "contain" || behavior === "none") event.preventDefault();
-        }
-        return false;
-      }
-      clearEdgeWheelSuspension(state);
-      if (event.cancelable) event.preventDefault();
-      if (state.scrollbar.drag || state.snap.suspensions.elastic) return true;
-      var busy = state.snap.wheelTimeout !== null;
-      scheduleSnapWheelIdle(state);
-      if (busy) return true;
-      scrollToSnap(state, next2, axis);
-      return true;
-    }
     function handleWheel(state, event) {
       if (event.ctrlKey || !event.cancelable) return;
-      state.snap.flick = null;
       if (state.desktop && state.mode === POINTER && state.element.classList.contains(pointerScrollingClass)) {
         if (event.cancelable) event.preventDefault();
         event.stopPropagation();
@@ -2611,11 +2006,6 @@
       cancelMomentum(state);
       if (event.defaultPrevented) return;
       if (event.target.closest("[".concat(attribute, "]")) !== state.element) return;
-      if (handleSnapWheel(state, event)) return;
-      var interruptedSnap = state.snap.scrollingToTarget !== -1;
-      clearSnapTarget(state);
-      clearScrollEnd(state);
-      if (interruptedSnap && state.snapEnabled) scheduleScrollEnd(state);
       var metrics = nativeMetrics(state.element);
       if (!metrics) return;
       var axes = wheelAxes(state, metrics);
@@ -2655,7 +2045,7 @@
         var desiredY = state.element.scrollTop + (axes.y ? deltaY : 0);
         var axis = axes.x && axes.y ? null : axes.x ? "x" : "y";
         if (applyElasticFromDesired(state, _desiredX, desiredY, true, axis)) {
-          if (!state.snapEnabled) event.preventDefault();
+          event.preventDefault();
           scrollWithinElasticBounds(state, _desiredX, desiredY);
           publish(state);
           if (state.elastic.wheelTimeout !== null) root.clearTimeout(state.elastic.wheelTimeout);

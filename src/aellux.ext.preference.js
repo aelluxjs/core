@@ -84,7 +84,7 @@ import utilsNameCase from "./internal/utils-name-case.js";
       mount: mountPreferenceContainer, unmount: unmountPreferenceContainer
     });
 
-    AelluxJs.onTarget(window, "$storage", storageEvent);
+    AelluxJs.onEvent(window, "$storage", storageEvent);
 
     //Watch device changes
     const allQueries = AelluxJs.registry.preferenceMediaQueries;
@@ -92,7 +92,7 @@ import utilsNameCase from "./internal/utils-name-case.js";
       Object.values(queries).forEach((query) => {
         if (!query) return;
         if (query.addEventListener) {
-          AelluxJs.onTarget(query, "$change", update);
+          AelluxJs.onEvent(query, "$change", update);
         } else if (query.addListener) {
           query.addListener(update);
         }
@@ -115,7 +115,7 @@ import utilsNameCase from "./internal/utils-name-case.js";
     AelluxJs.mountManager.remove({ extensionName });
     containersByPreference.clear();
     containerPreferences.clear();
-    AelluxJs.offTarget(window, "$storage", storageEvent);
+    AelluxJs.offEvent(window, "$storage", storageEvent);
     AelluxJs.off('$DOMContentLoaded', update);
 
     const allQueries = AelluxJs.registry.preferenceMediaQueries;
@@ -123,7 +123,7 @@ import utilsNameCase from "./internal/utils-name-case.js";
       Object.values(queries).forEach((query) => {
         if (!query) return;
         if (query.removeEventListener) {
-          AelluxJs.offTarget(query, "$change", update);
+          AelluxJs.offEvent(query, "$change", update);
         } else if (query.removeListener) {
           query.removeListener(update);
         }
@@ -247,11 +247,11 @@ import utilsNameCase from "./internal/utils-name-case.js";
   function mountPreferenceContainer(container) {
     indexContainer(container);
     updateContainer(container);
-    AelluxJs.onTarget(container, "$click", onContainerClick);
+    AelluxJs.onEvent(container, "$click", onContainerClick);
   }
 
   function unmountPreferenceContainer(container) {
-    AelluxJs.offTarget(container, "$click", onContainerClick);
+    AelluxJs.offEvent(container, "$click", onContainerClick);
     const labels = containerLabels.get(container);
     if (labels) for (const label of labels) {
       labelMemories.get(label)?.restore();

@@ -2213,12 +2213,12 @@ test("target listeners handle native and Aellux events with matching removal", a
     const events = [];
     const onClick = event => events.push(event.type);
     const onLayout = event => events.push(event.type);
-    AelluxJs.onTarget(target, "$click", onClick, { capture: true });
-    AelluxJs.onTarget(target, "Layout", onLayout);
+    AelluxJs.onEvent(target, "$click", onClick, { capture: true });
+    AelluxJs.onEvent(target, "Layout", onLayout);
     AelluxJs.dispatchFrom(target, "$click");
     AelluxJs.dispatchFrom(target, "Layout");
-    AelluxJs.offTarget(target, "$click", onClick, true);
-    AelluxJs.offTarget(target, "Layout", onLayout);
+    AelluxJs.offEvent(target, "$click", onClick, true);
+    AelluxJs.offEvent(target, "Layout", onLayout);
     AelluxJs.dispatchFrom(target, "$click");
     AelluxJs.dispatchFrom(target, "Layout");
     return events;

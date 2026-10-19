@@ -490,6 +490,11 @@ Scrollbox                            </a>
                           </li>
                           <li class="nav-item small-md rounded-1 ps-md-1"
                             style="flex:0">
+                            <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/core-extensions/scrollbox-snap.htm">
+Scrollbox Snap                            </a>
+                          </li>
+                          <li class="nav-item small-md rounded-1 ps-md-1"
+                            style="flex:0">
                             <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/core-extensions/state-navigation.htm">
 State Navigation                            </a>
                           </li>
@@ -582,10 +587,10 @@ Scrollbox                  </li>
       style="max-width:200px">Present</span>
   </a>
   
-    <a href="/core/docs/0.1.0/core-extensions/state-navigation.htm" class="text-decoration-none d-inline-flex flex-row justify-content-end gap-2"
+    <a href="/core/docs/0.1.0/core-extensions/scrollbox-snap.htm" class="text-decoration-none d-inline-flex flex-row justify-content-end gap-2"
     style="width: 40%;">
     <span class="text-truncate overflow-hidden d-inline-block align-middle flex-fill text-end"
-      style="max-width:200px">State Navigation</span> →
+      style="max-width:200px">Scrollbox Snap</span> →
   </a>
   </div>
         </div>
@@ -679,6 +684,7 @@ Scrollbox                  </li>
 </code></pre>
 <p>Scrollbox updates measurements after content mutations, box resize, or window resize. Resize updates use a 100 ms throttle.</p>
 <h2>Snap points</h2>
+<p>Snap points are provided by the optional <a href="scrollbox-snap.htm">Scrollbox Snap</a> Extension. Register <code>scrollbox-snap</code>; it registers and waits for Scrollbox before mounting. Its API, events, and interaction hooks are documented on that page.</p>
 <p><code>AelluxJsScrollboxSnapChange</code> fires on the scrollbox when a newly selected snap point finishes settling. Its <code>detail</code> contains <code>{ item, index, previousIndex, axis }</code>; the initial selection uses <code>previousIndex: null</code>. Selecting the same item again does not emit another change.</p>
 <pre><code class="language-js">document.getElementById(&quot;gallery&quot;).addEventListener(&quot;AelluxJsScrollboxSnapChange&quot;, event =&gt; {
   const { item, index } = event.detail;
@@ -730,10 +736,10 @@ gallery.previous();  // Move to the preceding point.
       style="max-width:200px">Present</span>
   </a>
   
-    <a href="/core/docs/0.1.0/core-extensions/state-navigation.htm" class="text-decoration-none d-inline-flex flex-row justify-content-end gap-2"
+    <a href="/core/docs/0.1.0/core-extensions/scrollbox-snap.htm" class="text-decoration-none d-inline-flex flex-row justify-content-end gap-2"
     style="width: 40%;">
     <span class="text-truncate overflow-hidden d-inline-block align-middle flex-fill text-end"
-      style="max-width:200px">State Navigation</span> →
+      style="max-width:200px">Scrollbox Snap</span> →
   </a>
   </div>
         </div>

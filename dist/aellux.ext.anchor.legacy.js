@@ -289,11 +289,11 @@
       anchors.set(element, state);
       if (element.offsetParent) listenForLayout(state, element.offsetParent);
       if (anchors.size === 1) {
-        AelluxJs.onTarget(root, "$scroll", scheduleUpdate, {
+        AelluxJs.onEvent(root, "$scroll", scheduleUpdate, {
           capture: true,
           passive: true
         });
-        AelluxJs.onTarget(root, "$resize", scheduleUpdate);
+        AelluxJs.onEvent(root, "$resize", scheduleUpdate);
       }
       if (typeof root.ResizeObserver === "function") {
         state.observer = new root.ResizeObserver(scheduleUpdate);
@@ -322,14 +322,14 @@
               memory = elementMemories.get(element);
               elementMemories.delete(element);
               state.revision++;
-              if (state.reference) AelluxJs.offTarget(state.reference, layoutEvent, state.layoutListener);
+              if (state.reference) AelluxJs.offEvent(state.reference, layoutEvent, state.layoutListener);
               if (state.observer) state.observer.disconnect();
               if (state.intersectionObserver) state.intersectionObserver.disconnect();
               if (state.updateTimer !== null) root.clearTimeout(state.updateTimer);
               anchors.delete(element);
               if (!anchors.size) {
-                AelluxJs.offTarget(root, "$scroll", scheduleUpdate, true);
-                AelluxJs.offTarget(root, "$resize", scheduleUpdate);
+                AelluxJs.offEvent(root, "$scroll", scheduleUpdate, true);
+                AelluxJs.offEvent(root, "$resize", scheduleUpdate);
               }
               AelluxJs.waitLayout.cancel(state.layoutId);
               _context2.n = 2;
@@ -751,9 +751,9 @@
     }
     function listenForLayout(state, reference) {
       if (state.reference === reference) return;
-      if (state.reference) AelluxJs.offTarget(state.reference, layoutEvent, state.layoutListener);
+      if (state.reference) AelluxJs.offEvent(state.reference, layoutEvent, state.layoutListener);
       state.reference = reference;
-      if (reference) AelluxJs.onTarget(reference, layoutEvent, state.layoutListener);
+      if (reference) AelluxJs.onEvent(reference, layoutEvent, state.layoutListener);
     }
     function applyBaseStyles(element) {
       element.style.setProperty("position", "absolute");
@@ -764,7 +764,7 @@
     }
     function deactivate(element, state) {
       var memory = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : elementMemories.get(element);
-      if (state.reference) AelluxJs.offTarget(state.reference, layoutEvent, state.layoutListener);
+      if (state.reference) AelluxJs.offEvent(state.reference, layoutEvent, state.layoutListener);
       if (state.observer) state.observer.disconnect();
       if (state.intersectionObserver) state.intersectionObserver.disconnect();
       state.target = state.reference = null;
