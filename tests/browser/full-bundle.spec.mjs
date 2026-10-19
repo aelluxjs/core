@@ -23,7 +23,7 @@ for (const { boot, forceLegacy } of [
     await page.addScriptTag({ url: `/dist/${boot}` });
     await page.evaluate(forceLegacy => AelluxJs.init({ mode: "full", forceLegacy }), forceLegacy);
     await expect.poll(() => page.evaluate(() =>
-      ["preference", "stateNavigation", "scrollbox"].filter(name =>
+      ["preference", "stateNavigation"].filter(name =>
         AelluxJs.ext[name]?.initialized !== true)
     )).toEqual([]);
 
@@ -36,9 +36,9 @@ for (const { boot, forceLegacy } of [
       legacy: AelluxJs.diagnostics.legacy
     }));
     expect(state).toEqual({
-      bundled: ["preference", "scrollbox", "stateNavigation"],
+      bundled: coreExtensions.filter(name => name !== "scrollbox"),
       registered: coreExtensions,
-      lazy: ["adaptive", "anchor", "feedback", "focus", "point", "present"],
+      lazy: ["adaptive", "anchor", "feedback", "focus", "point", "present", "scrollbox"],
       externalScripts: [],
       legacy: forceLegacy
     });

@@ -8,7 +8,12 @@ const root = typeof globalThis !== "undefined" ? globalThis : window;
 root.AelluxJs.bundledExtensions = Object.freeze({
   "preference": () => import("./aellux.ext.preference.js"),
   "stateNavigation": () => import("./aellux.ext.state-navigation.js"),
-  "scrollbox": () => import("./aellux.ext.scrollbox.js")
+  "feedback": () => import("./aellux.ext.feedback.js"),
+  "focus": () => import("./aellux.ext.focus.js"),
+  "point": () => import("./aellux.ext.point.js"),
+  "anchor": () => import("./aellux.ext.anchor.js"),
+  "adaptive": () => import("./aellux.ext.adaptive.js"),
+  "present": () => import("./aellux.ext.present.js")
 });
 
 root.AelluxJs.extIndex.official = Object.freeze({
@@ -25,15 +30,15 @@ root.AelluxJs.extIndex.official = Object.freeze({
   }, {}))
 });
 
-// Full keeps only its foundational extensions in the entry bundle. The rest
-// stay official, but load their normal Core artifact only when matching DOM
-// appears during mount (or when the application explicitly waits for one).
-root.AelluxJs.ext("./aellux.ext.adaptive.js", { loadWhen: "[data-ae-adaptive]", loadStyle: true });
-root.AelluxJs.ext("./aellux.ext.anchor.js", { loadWhen: "[data-ae-anchor]" });
-root.AelluxJs.ext("./aellux.ext.feedback.js", { loadWhen: "[data-ae-feedback]", loadStyle: true });
-root.AelluxJs.ext("./aellux.ext.focus.js", { loadWhen: "[data-ae-focus]" });
-root.AelluxJs.ext("./aellux.ext.point.js", { loadWhen: "[data-ae-point]" });
-root.AelluxJs.ext("./aellux.ext.present.js", {
+// The code is bundled, while initialization remains demand-driven. This avoids
+// network fetches yet does not attach extension listeners without matching DOM.
+root.AelluxJs.ext("adaptive", { loadWhen: "[data-ae-adaptive]", loadStyle: true });
+root.AelluxJs.ext("anchor", { loadWhen: "[data-ae-anchor]" });
+root.AelluxJs.ext("feedback", { loadWhen: "[data-ae-feedback]", loadStyle: true });
+root.AelluxJs.ext("focus", { loadWhen: "[data-ae-focus]" });
+root.AelluxJs.ext("point", { loadWhen: "[data-ae-point]" });
+root.AelluxJs.ext("present", {
   loadWhen: "[data-ae-present],[data-ae-present-trigger],[data-ae-present-dismiss],[data-ae-present-target]",
   loadStyle: true
 });
+root.AelluxJs.ext("./aellux.ext.scrollbox.js", { loadWhen: "[data-ae-scrollbox]" });

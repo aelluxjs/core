@@ -31,7 +31,7 @@ test("official manifest is fetched lazily once and supplies integrity metadata",
   expect(result.point.coreCompatibility).toBe("0.1.0-beta.10");
 });
 
-test("full uses embedded official metadata and loads a lazy extension on demand", async ({ page }) => {
+test("full initializes a lazy bundled extension on demand without a network request", async ({ page }) => {
   let manifestRequests = 0;
   let extensionRequests = 0;
   page.on("request", request => {
@@ -45,7 +45,7 @@ test("full uses embedded official metadata and loads a lazy extension on demand"
   await expect.poll(() => page.evaluate(() => AelluxJs.orchestratorVersion)).toBe("0.1.0-beta.10");
   expect(await page.evaluate(async () => !!(await AelluxJs.wait("present")))).toBe(true);
   expect(manifestRequests).toBe(0);
-  expect(extensionRequests).toBe(1);
+  expect(extensionRequests).toBe(0);
 });
 
 test("the official manifest selects the Legacy artifact for a Legacy runtime", async ({ page }) => {
