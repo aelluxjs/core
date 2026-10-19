@@ -13,7 +13,8 @@ root.AelluxJs.bundledExtensions = Object.freeze({
   "point": () => import("./aellux.ext.point.js"),
   "anchor": () => import("./aellux.ext.anchor.js"),
   "adaptive": () => import("./aellux.ext.adaptive.js"),
-  "present": () => import("./aellux.ext.present.js")
+  "present": () => import("./aellux.ext.present.js"),
+  "scrollbox": () => import("./aellux.ext.scrollbox.js")
 });
 
 root.AelluxJs.extIndex.official = Object.freeze({
@@ -41,4 +42,4 @@ root.AelluxJs.ext("present", {
   loadWhen: "[data-ae-present],[data-ae-present-trigger],[data-ae-present-dismiss],[data-ae-present-target]",
   loadStyle: true
 });
-root.AelluxJs.ext("./aellux.ext.scrollbox.js", { loadWhen: "[data-ae-scrollbox]" });
+root.AelluxJs.ext("scrollbox", { loadWhen: "[data-ae-scrollbox]" });
