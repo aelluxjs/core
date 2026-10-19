@@ -36,7 +36,7 @@ for (const { boot, forceLegacy } of [
       legacy: AelluxJs.diagnostics.legacy
     }));
     expect(state).toEqual({
-      bundled: coreExtensions,
+      bundled: coreExtensions.filter(name => name !== "scrollbox"),
       registered: coreExtensions,
       lazy: ["adaptive", "anchor", "feedback", "focus", "point", "present", "scrollbox"],
       externalScripts: [],

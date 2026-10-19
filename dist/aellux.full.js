@@ -23,6 +23,14 @@
     return fn && (res = (0, fn[__getOwnPropNames(fn)[0]])(fn = 0)), res;
   };
 
+  // <define:__AELLUX_OFFICIAL_EXTENSION_MANIFEST__>
+  var define_AELLUX_OFFICIAL_EXTENSION_MANIFEST_default;
+  var init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST = __esm({
+    "<define:__AELLUX_OFFICIAL_EXTENSION_MANIFEST__>"() {
+      define_AELLUX_OFFICIAL_EXTENSION_MANIFEST_default = { schemaVersion: 1, coreVersion: "0.1.0-beta.10", extensions: { preference: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.preference.min.js", integrity: "sha384-K8SBgR4YoYaIN8nN0XMXXE9Q77jFGjTfrfqCxP4HEFp47unQdquaRAXt9yXrL3kr", regular: { url: "./aellux.ext.preference.js", integrity: "sha384-kH3bIgUBycuvulVeU0qdOn+WezhAWK2lv4bFRBDP24EijtlE78cGhau48w+GV4M+" } }, legacy: { url: "./aellux.ext.preference.legacy.min.js", integrity: "sha384-DL8nXONkckzzRB5H7E0JDyuHJC0OpAS8dZu5BEg/fyg8ck5JAzvHVOZIKjiFfIFF", regular: { url: "./aellux.ext.preference.legacy.js", integrity: "sha384-I2fpqPdE7bIgQcTMtdEUFnNWor1FhixnKPUCoE88LJP0FewUmGKUUwbmKNbwhL8C" } } }, dependencies: [] }, "state-navigation": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.state-navigation.min.js", integrity: "sha384-oFVEFmTL0VluwzOanmLoMrURDQ54DY34qJNYBWgsXNWx7bU5zzUv5+H0r/6CUg0H", regular: { url: "./aellux.ext.state-navigation.js", integrity: "sha384-MlqDzSzZwzDYS522sw8iontz17JCjyXELEs3S7OWOXK56B76mZze5Y9QFWDrQylV" } }, legacy: { url: "./aellux.ext.state-navigation.legacy.min.js", integrity: "sha384-A2Bn+avaysqH6QyDbV2VUtF/4W97N+DYOHqN84w5IowiDMheDh5s90x5l4uRtMB+", regular: { url: "./aellux.ext.state-navigation.legacy.js", integrity: "sha384-45OQBJFlqOcoCG5lYgk8oqH1wX1eHVgpR4ThCo2JffDvjaZMKGWNRm7gGfDBRKVv" } } }, dependencies: [] }, feedback: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.feedback.min.js", integrity: "sha384-Uf9g4vp0GX7YMY3G43RoKxsykS0Vx2wW2Q2uY5/pyjXbZCpZ6BNDvGm67IPmMwxK", regular: { url: "./aellux.ext.feedback.js", integrity: "sha384-12dCamILDTasnHgQpwVw8LsT8US7p/xI82RHsl2O2N6c+d08uy/5QEIdAMonzVuS" } }, legacy: { url: "./aellux.ext.feedback.legacy.min.js", integrity: "sha384-Ds6ZnrzwltgqGdvTZxn1Z6qnbV6pV60Q4KA4IOP5m9i33mbcwNA9gNZX+ailPCtC", regular: { url: "./aellux.ext.feedback.legacy.js", integrity: "sha384-noCcjXcwaKQb8IAVF0DicDFW81iqxbRu4VF5ULkdgoxarPCFQ/tZsCqviU6Z1DmK" } } }, dependencies: [], style: { url: "./aellux.ext.feedback.min.css", integrity: "sha384-OBguCYqF+dMD0Pl84C3FlY/+ohUGfW0OyynmXb/PSDEGOyuI/TQJ3EZAoCeJx+Jk", regular: { url: "./aellux.ext.feedback.css", integrity: "sha384-yk4cW+r/Mc1FRS1ZauBHC6KsKb7sxuJ0E9mmt/+AYASAdZXXMK6iuFBR+TOEh/r4" } } }, focus: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.focus.min.js", integrity: "sha384-/3+se0cWZVcgfkR1h/BVDefRBcALR5Yc23OG95r1xwm0xZ3llBqWc18dj/T7WA3E", regular: { url: "./aellux.ext.focus.js", integrity: "sha384-TfHhZLe3DxN1mglXwGUEGSGG3zl8n+MpBLrFa3f/Hv7sJFRyW/hoE3xqXDVhxHI3" } }, legacy: { url: "./aellux.ext.focus.legacy.min.js", integrity: "sha384-e/BhFLDrQx4RxUR6SDpFC+wS0bT9zH81jlqMsQ6laeA5axOjCra/o94LTWqQb0kk", regular: { url: "./aellux.ext.focus.legacy.js", integrity: "sha384-6N89GXoF048whmU8Zw/Qm3QUwwgXLuP+9BIEohkiyDF42Z81vmgi2gk0JEp+bkCU" } } }, dependencies: [] }, point: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.point.min.js", integrity: "sha384-n540II5oWbHJRt/a8i+Rgb9A3b9dm7hamg1kd3Nz7KdPQDcaa8S823t9fCrgxBWF", regular: { url: "./aellux.ext.point.js", integrity: "sha384-aDj7I5QEH/0+52E3e6yPZ/D0MEsNBdxeET3G5ToVvgczHtksMh3p8S/KOoAapRRN" } }, legacy: { url: "./aellux.ext.point.legacy.min.js", integrity: "sha384-5UmWvQHfmvttz9yeXbilawGCZH20UdR8yNBOE9kRV34wpfWASl8plzgKtLVQGO9M", regular: { url: "./aellux.ext.point.legacy.js", integrity: "sha384-gG/XONYEC1tchBcJ6bUtKYmWFHz0E+50LmMaXDAiqWBKPuwdHZeYm1uXA22lMZuN" } } }, dependencies: [] }, anchor: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.anchor.min.js", integrity: "sha384-1AWEjItoxrDJIbLjq+mu2EurihNAIXIhxXy6dSCHkIY+BQGCm5XRpRerD71Vbx70", regular: { url: "./aellux.ext.anchor.js", integrity: "sha384-4vudH72+WSsMhCKVJVdnOdhzZQyYQdfUQeZrmVfRD4HUNP1+4JNz6h0WPcDxRE8D" } }, legacy: { url: "./aellux.ext.anchor.legacy.min.js", integrity: "sha384-vmyZEHFdey1oh1gnaAAJ/G0AQAhNgsiCFY9NT7aldyTdOFAqBJW760/jIuBd48je", regular: { url: "./aellux.ext.anchor.legacy.js", integrity: "sha384-prcDe0MLzJ3Nm7Q8MFTm7X/0JYHfUN+BsZurYl3/iUMCDLk1xVnKLep1ppIw01YX" } } }, dependencies: [] }, scrollbox: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.scrollbox.min.js", integrity: "sha384-fgHkU3XRU/yF/2pk5uKAO7SSYJrjhFuFvfqrh5ZIAnHAzcjRzADWIMbu3u0wvk79", regular: { url: "./aellux.ext.scrollbox.js", integrity: "sha384-OFwMY2pyIY7jKxl2q0PTJ8Zq+0M2z+/4OzqRQTMIkGHUVaXXxPNeu2I6EKEZvg0w" } }, legacy: { url: "./aellux.ext.scrollbox.legacy.min.js", integrity: "sha384-ZH9e6dv7WadB5zflRjZ8AFynm1ECvemGFzofNgZCcGdWD2UvhtrsSEZMYRbYdkpn", regular: { url: "./aellux.ext.scrollbox.legacy.js", integrity: "sha384-rnRN+ws427qK6rTAh6cnqbEs3G3na7uAbvpX7prt8X6YWoNhOG0vMDSU289t+srb" } } }, dependencies: [] }, adaptive: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.adaptive.min.js", integrity: "sha384-VQHnwXFQeVJdHlGHR6PX+gD0wFQfpo1s02WQhutpvS555LmJTKmD3wsPZ3jPSykS", regular: { url: "./aellux.ext.adaptive.js", integrity: "sha384-2M8mnZa3u+Fsd5SO9AmKPE1fr3jD/cirOEhErIpONXsl9LjjsyEePSclZ8pBjajo" } }, legacy: { url: "./aellux.ext.adaptive.legacy.min.js", integrity: "sha384-JgcfyKVPjqFiT1cjKfi0P4+WtXPZeH9asReYKFHbcDUAG5xUwy65pso9KTSnuBaj", regular: { url: "./aellux.ext.adaptive.legacy.js", integrity: "sha384-AWjFa+CpzIDDoijx3lRMOlH7/EO6Qj9yoHbqw2sXGD4rnGpR8+zWS9mwL8n+M1j8" } } }, dependencies: [], style: { url: "./aellux.ext.adaptive.min.css", integrity: "sha384-8yUP1PStfDqBCyCskP3k9WLIKgv/yl1nyDhmPz7hsX5NZ4z3ZT3ajolA+RhYlUiG", regular: { url: "./aellux.ext.adaptive.css", integrity: "sha384-HfIjX9Zk0VFRimzPvUaTS5AtwuHJHjXKoM/xbNJXj5vE7bSdBGEzbrBHfbNmYah0" } } }, present: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.present.min.js", integrity: "sha384-4j7Z/u9cOOUfTZ3atFxNMaQvLlJKU7HbBF0yX7sKH6PaZQBSninpNa/UirKH7dGA", regular: { url: "./aellux.ext.present.js", integrity: "sha384-0y5bxbVI3vBm3KY5ZSxjfx3LtreZu/24QIcAMV4mwKaZOGvxr01f/UpbyLwb3x/W" } }, legacy: { url: "./aellux.ext.present.legacy.min.js", integrity: "sha384-1bm3asyvI9hVjvenNFHVEvtwR9zoaaJ+pD1Dmm1htid02kNzeFzgVcxQRbqL9pBJ", regular: { url: "./aellux.ext.present.legacy.js", integrity: "sha384-WGKvUR25VP82yXmjLzDfKiJb2+yJ6mFUPMQsZ7XE3Hx3HhYaZHphdV91EtYjr5D2" } } }, dependencies: [], style: { url: "./aellux.ext.present.min.css", integrity: "sha384-LR069uhIDdnx0X7oeoRxevC/+dD5gA6d4B2dHAJKPgnqLYDGs4GgW9quKNq+1G5b", regular: { url: "./aellux.ext.present.css", integrity: "sha384-9GTFJ0OxBj6ta/iiV07BLGTdfe9pbmBMYXFn9kT+wB4KwiLO8zxJ39XzLYOGgfui" } } } } };
+    }
+  });
+
   // src/internal/utils-name-case.js
   function toCapitalized(name) {
     return name.replace(/^([a-z])|-([a-z])/g, function(_, first, afterHyphen) {
@@ -40,6 +48,7 @@
   var utils_name_case_default;
   var init_utils_name_case = __esm({
     "src/internal/utils-name-case.js"() {
+      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
       utils_name_case_default = {
         toCapitalized,
@@ -53,6 +62,7 @@
   var aellux_ext_preference_exports = {};
   var init_aellux_ext_preference = __esm({
     "src/aellux.ext.preference.js"() {
+      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       init_utils_name_case();
       /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
       (function(root2) {
@@ -304,6 +314,7 @@
   var aellux_ext_state_navigation_exports = {};
   var init_aellux_ext_state_navigation = __esm({
     "src/aellux.ext.state-navigation.js"() {
+      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
       (function(root2) {
         "use strict";
@@ -525,6 +536,7 @@
   var aellux_ext_feedback_exports = {};
   var init_aellux_ext_feedback = __esm({
     "src/aellux.ext.feedback.js"() {
+      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
       (function(root2) {
         "use strict";
@@ -758,6 +770,7 @@
   var aellux_ext_focus_exports = {};
   var init_aellux_ext_focus = __esm({
     "src/aellux.ext.focus.js"() {
+      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
       (function(root2) {
         "use strict";
@@ -929,6 +942,7 @@
   var aellux_ext_point_exports = {};
   var init_aellux_ext_point = __esm({
     "src/aellux.ext.point.js"() {
+      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
       (function(root2) {
         "use strict";
@@ -1171,6 +1185,7 @@
   var aellux_ext_anchor_exports = {};
   var init_aellux_ext_anchor = __esm({
     "src/aellux.ext.anchor.js"() {
+      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
       (function(root2) {
         "use strict";
@@ -1603,6 +1618,7 @@
   var aellux_ext_adaptive_exports = {};
   var init_aellux_ext_adaptive = __esm({
     "src/aellux.ext.adaptive.js"() {
+      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
       (function(root2) {
         "use strict";
@@ -1831,6 +1847,7 @@
   var aellux_ext_present_exports = {};
   var init_aellux_ext_present = __esm({
     "src/aellux.ext.present.js"() {
+      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
       (function(root2) {
         "use strict";
@@ -2483,7 +2500,14 @@
     }
   });
 
+  // src/aellux.full.js
+  init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
+
+  // src/aellux.orchestrator.js
+  init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
+
   // src/internal/asset-load-helper.js
+  init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   function assetLoadHelper(asset, options) {
     var loadCallback = options.loadCallback;
@@ -2509,6 +2533,7 @@
   }
 
   // src/internal/build-layout-scheduler.js
+  init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   function buildLayoutScheduler() {
     const queues = { read: [], update: [] };
@@ -2994,10 +3019,15 @@
     });
   }
 
+  // src/internal/build-mount-map-manager.js
+  init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
+
   // src/internal/create-mount-helper.js
+  init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
   init_utils_name_case();
 
   // src/internal/create-controller-helper.js
+  init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
   init_utils_name_case();
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   function createControllerHelper(root2, element) {
@@ -3095,6 +3125,7 @@
   }
 
   // src/internal/resolve-element-or-id.js
+  init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   function resolveElementOrId(root2, elementOrId, options) {
     options = options || {};
@@ -3737,6 +3768,7 @@
   }
 
   // src/internal/create-aria-helper.js
+  init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   function createAriaHelper() {
     const elements = /* @__PURE__ */ new WeakMap();
@@ -3843,6 +3875,7 @@
   }
 
   // src/internal/create-css-motion-controller.js
+  init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   function createCssMotionController(root2, getAelluxJs) {
     const operations = /* @__PURE__ */ new Map();
@@ -4131,6 +4164,7 @@
   }
 
   // src/internal/ease.js
+  init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   var EASE_PREFIX = "ease";
   var IN = "in";
@@ -4244,6 +4278,7 @@
   (function(root2) {
     "use strict";
     const { toCamelCase: toCamelCase2, fromCamelCase: fromCamelCase2 } = utils_name_case_default;
+    const officialPackage = "@aelluxjs/core";
     const orchestratorVersion = true ? "0.1.0-beta.10" : "0.1.0-beta.10";
     if (root2.AelluxJs.version !== orchestratorVersion) {
       const error = root2.AelluxJs.diagnostics.error(
@@ -4373,7 +4408,8 @@
     );
     root2[root2.AelluxJs.shortJSName] = root2.AelluxJs;
     function getExtension(extensionName) {
-      extensionName = fromCamelCase2(extensionName);
+      const request = parseExtensionRequest(extensionName);
+      extensionName = request.name;
       const key = toCamelCase2(extensionName);
       if (extensionPromises[key])
         return extensionPromises[key];
@@ -4403,7 +4439,7 @@
       const bundledLoader = AelluxJs.bundledExtensions ? AelluxJs.bundledExtensions[key] : null;
       extensionPromises[key] = Promise.resolve().then(() => {
         const registration = AelluxJs.registry.ext[key];
-        return registration.implicit && !bundledLoader && !AelluxJs.ext[key] ? resolveImplicitRegistration(extensionName, registration) : registration;
+        return (registration.implicit || request.version) && !bundledLoader && !AelluxJs.ext[key] ? resolveImplicitRegistration(extensionName, registration, request.version) : registration;
       }).then(async (data) => {
         if (!hasCompatibleBuild(data)) {
           AelluxJs.diagnostics.error(
@@ -4438,6 +4474,11 @@
         return null;
       });
       return extensionPromises[key];
+    }
+    function parseExtensionRequest(value) {
+      const text = String(value || "").trim();
+      const match = /^([a-z][a-z0-9-]*)(?:@([0-9]+(?:\.[0-9]+){0,2}(?:-[0-9A-Za-z.-]+)?))?$/i.exec(text);
+      return { name: fromCamelCase2(match ? match[1] : text), version: match && match[2] || null };
     }
     async function extensionInitialize(extensionName) {
       extensionName = fromCamelCase2(extensionName);
@@ -4562,17 +4603,18 @@
         }
       });
     }
-    async function resolveImplicitRegistration(extensionName, registration) {
+    async function resolveImplicitRegistration(extensionName, registration, requestedVersion = null) {
       const officialURL = AelluxJs.extIndex.officialURL || AelluxJs.aelluxBasePath + "aellux.extensions.min.json";
+      const requestedURL = requestedVersion && requestedVersion !== AelluxJs.version ? `https://cdn.jsdelivr.net/npm/${officialPackage}@${encodeURIComponent(requestedVersion)}/dist/aellux.extensions.min.json` : officialURL;
       let entry = null;
-      let sourceURL = officialURL;
+      let sourceURL = requestedURL;
       try {
-        const embeddedOfficial = AelluxJs.extIndex.official;
+        const embeddedOfficial = requestedVersion ? null : AelluxJs.extIndex.official;
         const embeddedEntry = embeddedOfficial && embeddedOfficial.extensions[extensionName];
-        const official = embeddedEntry && embeddedEntry.builds ? embeddedOfficial : await loadExtensionIndex("official", officialURL);
+        const official = embeddedEntry && embeddedEntry.builds ? embeddedOfficial : await loadExtensionIndex(requestedVersion ? `official@${requestedVersion}` : "official", requestedURL);
         entry = official.extensions[extensionName] || null;
       } catch (error) {
-        reportIndexFailure(error, "official", officialURL);
+        reportIndexFailure(error, "official", requestedURL);
       }
       if (!entry && AelluxJs.extIndex.fallbackURL) {
         sourceURL = AelluxJs.extIndex.fallbackURL;
@@ -4793,20 +4835,6 @@
     ;
   })(typeof globalThis !== "undefined" ? globalThis : window);
 
-  // src/official-extension-definitions.js
-  /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
-  var officialExtensionDefinitions = Object.freeze([
-    Object.freeze({ name: "preference", style: false, dependencies: Object.freeze([]) }),
-    Object.freeze({ name: "state-navigation", style: false, dependencies: Object.freeze([]) }),
-    Object.freeze({ name: "feedback", style: true, dependencies: Object.freeze([]) }),
-    Object.freeze({ name: "focus", style: false, dependencies: Object.freeze([]) }),
-    Object.freeze({ name: "point", style: false, dependencies: Object.freeze([]) }),
-    Object.freeze({ name: "anchor", style: false, dependencies: Object.freeze([]) }),
-    Object.freeze({ name: "scrollbox", style: false, dependencies: Object.freeze([]) }),
-    Object.freeze({ name: "adaptive", style: true, dependencies: Object.freeze([]) }),
-    Object.freeze({ name: "present", style: true, dependencies: Object.freeze([]) })
-  ]);
-
   // src/aellux.full.js
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   var root = typeof globalThis !== "undefined" ? globalThis : window;
@@ -4821,19 +4849,7 @@
     "present": () => Promise.resolve().then(() => (init_aellux_ext_present(), aellux_ext_present_exports))
     //"scrollbox": () => import("./aellux.ext.scrollbox.js")
   });
-  root.AelluxJs.extIndex.official = Object.freeze({
-    schemaVersion: 1,
-    coreVersion: root.AelluxJs.version,
-    embedded: true,
-    extensions: Object.freeze(officialExtensionDefinitions.reduce((extensions, definition) => {
-      extensions[definition.name] = Object.freeze({
-        coreCompatibility: root.AelluxJs.version,
-        bundled: true,
-        dependencies: definition.dependencies
-      });
-      return extensions;
-    }, {}))
-  });
+  root.AelluxJs.extIndex.official = typeof define_AELLUX_OFFICIAL_EXTENSION_MANIFEST_default !== "undefined" ? define_AELLUX_OFFICIAL_EXTENSION_MANIFEST_default : null;
   root.AelluxJs.ext("adaptive", { loadWhen: "[data-ae-adaptive]", loadStyle: true });
   root.AelluxJs.ext("anchor", { loadWhen: "[data-ae-anchor]" });
   root.AelluxJs.ext("feedback", { loadWhen: "[data-ae-feedback]", loadStyle: true });

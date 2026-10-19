@@ -1795,6 +1795,7 @@
   (function(root) {
     "use strict";
     const { toCamelCase: toCamelCase2, fromCamelCase: fromCamelCase2 } = utils_name_case_default;
+    const officialPackage = "@aelluxjs/core";
     const orchestratorVersion = true ? "0.1.0-beta.10" : "0.1.0-beta.10";
     if (root.AelluxJs.version !== orchestratorVersion) {
       const error = root.AelluxJs.diagnostics.error(
@@ -1924,7 +1925,8 @@
     );
     root[root.AelluxJs.shortJSName] = root.AelluxJs;
     function getExtension(extensionName) {
-      extensionName = fromCamelCase2(extensionName);
+      const request = parseExtensionRequest(extensionName);
+      extensionName = request.name;
       const key = toCamelCase2(extensionName);
       if (extensionPromises[key])
         return extensionPromises[key];
@@ -1954,7 +1956,7 @@
       const bundledLoader = AelluxJs.bundledExtensions ? AelluxJs.bundledExtensions[key] : null;
       extensionPromises[key] = Promise.resolve().then(() => {
         const registration = AelluxJs.registry.ext[key];
-        return registration.implicit && !bundledLoader && !AelluxJs.ext[key] ? resolveImplicitRegistration(extensionName, registration) : registration;
+        return (registration.implicit || request.version) && !bundledLoader && !AelluxJs.ext[key] ? resolveImplicitRegistration(extensionName, registration, request.version) : registration;
       }).then(async (data) => {
         if (!hasCompatibleBuild(data)) {
           AelluxJs.diagnostics.error(
@@ -1989,6 +1991,11 @@
         return null;
       });
       return extensionPromises[key];
+    }
+    function parseExtensionRequest(value) {
+      const text = String(value || "").trim();
+      const match = /^([a-z][a-z0-9-]*)(?:@([0-9]+(?:\.[0-9]+){0,2}(?:-[0-9A-Za-z.-]+)?))?$/i.exec(text);
+      return { name: fromCamelCase2(match ? match[1] : text), version: match && match[2] || null };
     }
     async function extensionInitialize(extensionName) {
       extensionName = fromCamelCase2(extensionName);
@@ -2113,17 +2120,18 @@
         }
       });
     }
-    async function resolveImplicitRegistration(extensionName, registration) {
+    async function resolveImplicitRegistration(extensionName, registration, requestedVersion = null) {
       const officialURL = AelluxJs.extIndex.officialURL || AelluxJs.aelluxBasePath + "aellux.extensions.min.json";
+      const requestedURL = requestedVersion && requestedVersion !== AelluxJs.version ? `https://cdn.jsdelivr.net/npm/${officialPackage}@${encodeURIComponent(requestedVersion)}/dist/aellux.extensions.min.json` : officialURL;
       let entry = null;
-      let sourceURL = officialURL;
+      let sourceURL = requestedURL;
       try {
-        const embeddedOfficial = AelluxJs.extIndex.official;
+        const embeddedOfficial = requestedVersion ? null : AelluxJs.extIndex.official;
         const embeddedEntry = embeddedOfficial && embeddedOfficial.extensions[extensionName];
-        const official = embeddedEntry && embeddedEntry.builds ? embeddedOfficial : await loadExtensionIndex("official", officialURL);
+        const official = embeddedEntry && embeddedEntry.builds ? embeddedOfficial : await loadExtensionIndex(requestedVersion ? `official@${requestedVersion}` : "official", requestedURL);
         entry = official.extensions[extensionName] || null;
       } catch (error) {
-        reportIndexFailure(error, "official", officialURL);
+        reportIndexFailure(error, "official", requestedURL);
       }
       if (!entry && AelluxJs.extIndex.fallbackURL) {
         sourceURL = AelluxJs.extIndex.fallbackURL;

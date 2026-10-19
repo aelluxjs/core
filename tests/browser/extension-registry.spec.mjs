@@ -9,7 +9,7 @@ async function startBasic(page, options = {}) {
   await expect.poll(() => page.evaluate(() => AelluxJs.orchestratorVersion)).toBe("0.1.0-beta.10");
 }
 
-test("official manifest is fetched lazily once and supplies integrity metadata", async ({ page }) => {
+test("basic uses the embedded official manifest and supplies integrity metadata", async ({ page }) => {
   let manifestRequests = 0;
   page.on("request", request => {
     if (request.url().endsWith("/dist/aellux.extensions.min.json")) manifestRequests++;
@@ -25,7 +25,7 @@ test("official manifest is fetched lazily once and supplies integrity metadata",
       point: AelluxJs.registry.ext.point
     };
   });
-  expect(manifestRequests).toBe(1);
+  expect(manifestRequests).toBe(0);
   expect(result.preference.official).toBe(true);
   expect(result.preference.artifacts.modern.integrity).toMatch(/^sha384-/);
   expect(result.point.coreCompatibility).toBe("0.1.0-beta.10");
@@ -63,7 +63,7 @@ test("full resolves an unbundled official extension from its manifest", async ({
     return AelluxJs.registry.ext.scrollbox.artifacts.modern;
   });
 
-  expect(manifestRequests).toBe(1);
+  expect(manifestRequests).toBe(0);
   expect(artifact.url).toMatch(/aellux\.ext\.scrollbox\.min\.js$/);
   expect(artifact.integrity).toMatch(/^sha384-/);
 });

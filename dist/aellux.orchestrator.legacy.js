@@ -24233,6 +24233,7 @@
       (function(root) {
         "use strict";
         var toCamelCase2 = utils_name_case_default.toCamelCase, fromCamelCase2 = utils_name_case_default.fromCamelCase;
+        var officialPackage = "@aelluxjs/core";
         var orchestratorVersion = true ? "0.1.0-beta.10" : "0.1.0-beta.10";
         if (root.AelluxJs.version !== orchestratorVersion) {
           var error = root.AelluxJs.diagnostics.error(root.AelluxJs.diagnostics.ERROR_RUNTIME_VERSION_MISMATCH, {
@@ -24454,7 +24455,8 @@
         });
         root[root.AelluxJs.shortJSName] = root.AelluxJs;
         function getExtension(extensionName) {
-          extensionName = fromCamelCase2(extensionName);
+          var request = parseExtensionRequest(extensionName);
+          extensionName = request.name;
           var key = toCamelCase2(extensionName);
           if (extensionPromises[key]) return extensionPromises[key];
           if (!(key in AelluxJs.registry.ext)) {
@@ -24484,7 +24486,7 @@
           var bundledLoader = AelluxJs.bundledExtensions ? AelluxJs.bundledExtensions[key] : null;
           extensionPromises[key] = Promise.resolve().then(function() {
             var registration = AelluxJs.registry.ext[key];
-            return registration.implicit && !bundledLoader && !AelluxJs.ext[key] ? resolveImplicitRegistration(extensionName, registration) : registration;
+            return (registration.implicit || request.version) && !bundledLoader && !AelluxJs.ext[key] ? resolveImplicitRegistration(extensionName, registration, request.version) : registration;
           }).then(/* @__PURE__ */ (function() {
             var _ref = _asyncToGenerator2(/* @__PURE__ */ _regenerator2().m(function _callee6(data) {
               return _regenerator2().w(function(_context6) {
@@ -24539,6 +24541,14 @@
             return null;
           });
           return extensionPromises[key];
+        }
+        function parseExtensionRequest(value) {
+          var text = String(value || "").trim();
+          var match = /^([a-z][a-z0-9-]*)(?:@([0-9]+(?:\.[0-9]+){0,2}(?:-[0-9A-Za-z.-]+)?))?$/i.exec(text);
+          return {
+            name: fromCamelCase2(match ? match[1] : text),
+            version: match && match[2] || null
+          };
         }
         function extensionInitialize(_x2) {
           return _extensionInitialize.apply(this, arguments);
@@ -24719,15 +24729,17 @@
         }
         function _resolveImplicitRegistration() {
           _resolveImplicitRegistration = _asyncToGenerator2(/* @__PURE__ */ _regenerator2().m(function _callee9(extensionName, registration) {
-            var officialURL, entry, sourceURL, embeddedOfficial, embeddedEntry, official, fallback, _t5, _t6, _t7, _t8;
+            var requestedVersion, officialURL, requestedURL, entry, sourceURL, embeddedOfficial, embeddedEntry, official, fallback, _args9 = arguments, _t5, _t6, _t7, _t8;
             return _regenerator2().w(function(_context9) {
               while (1) switch (_context9.p = _context9.n) {
                 case 0:
+                  requestedVersion = _args9.length > 2 && _args9[2] !== void 0 ? _args9[2] : null;
                   officialURL = AelluxJs.extIndex.officialURL || AelluxJs.aelluxBasePath + "aellux.extensions.min.json";
+                  requestedURL = requestedVersion && requestedVersion !== AelluxJs.version ? "https://cdn.jsdelivr.net/npm/".concat(officialPackage, "@").concat(encodeURIComponent(requestedVersion), "/dist/aellux.extensions.min.json") : officialURL;
                   entry = null;
-                  sourceURL = officialURL;
+                  sourceURL = requestedURL;
                   _context9.p = 1;
-                  embeddedOfficial = AelluxJs.extIndex.official;
+                  embeddedOfficial = requestedVersion ? null : AelluxJs.extIndex.official;
                   embeddedEntry = embeddedOfficial && embeddedOfficial.extensions[extensionName];
                   if (!(embeddedEntry && embeddedEntry.builds)) {
                     _context9.n = 2;
@@ -24738,7 +24750,7 @@
                   break;
                 case 2:
                   _context9.n = 3;
-                  return loadExtensionIndex("official", officialURL);
+                  return loadExtensionIndex(requestedVersion ? "official@".concat(requestedVersion) : "official", requestedURL);
                 case 3:
                   _t5 = _context9.v;
                 case 4:
@@ -24749,7 +24761,7 @@
                 case 5:
                   _context9.p = 5;
                   _t6 = _context9.v;
-                  reportIndexFailure(_t6, "official", officialURL);
+                  reportIndexFailure(_t6, "official", requestedURL);
                 case 6:
                   if (!(!entry && AelluxJs.extIndex.fallbackURL)) {
                     _context9.n = 11;

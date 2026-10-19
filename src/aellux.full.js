@@ -1,7 +1,6 @@
 /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
 
 import "./aellux.orchestrator.js";
-import { officialExtensionDefinitions } from "./official-extension-definitions.js";
 
 const root = typeof globalThis !== "undefined" ? globalThis : window;
 
@@ -17,19 +16,8 @@ root.AelluxJs.bundledExtensions = Object.freeze({
   //"scrollbox": () => import("./aellux.ext.scrollbox.js")
 });
 
-root.AelluxJs.extIndex.official = Object.freeze({
-  schemaVersion: 1,
-  coreVersion: root.AelluxJs.version,
-  embedded: true,
-  extensions: Object.freeze(officialExtensionDefinitions.reduce((extensions, definition) => {
-    extensions[definition.name] = Object.freeze({
-      coreCompatibility: root.AelluxJs.version,
-      bundled: true,
-      dependencies: definition.dependencies
-    });
-    return extensions;
-  }, {}))
-});
+root.AelluxJs.extIndex.official = typeof __AELLUX_OFFICIAL_EXTENSION_MANIFEST__ !== "undefined"
+  ? __AELLUX_OFFICIAL_EXTENSION_MANIFEST__ : null;
 
 // The code is bundled, while initialization remains demand-driven. This avoids
 // network fetches yet does not attach extension listeners without matching DOM.

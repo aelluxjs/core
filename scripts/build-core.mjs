@@ -272,6 +272,45 @@ await writeFile(
   "utf8"
 );
 
+// The boot script is built after extension hashes are known. Rebuild Full here
+// as well so both modes carry the same signed official index without making a
+// runtime manifest request for the current Core version.
+const embeddedManifestDefine = JSON.stringify(extensionManifestResult.manifest);
+for (const minify of [false, true]) {
+  const outputFilename = minify ? "aellux.full.min.js" : "aellux.full.js";
+  await build({
+    absWorkingDir: projectRoot,
+    entryPoints: [join(sourceDirectory, "aellux.full.js")],
+    outfile: join(outputDirectory, outputFilename),
+    bundle: true, platform: "browser", format: "iife", target: "es2017",
+    minify, sourcemap: true, legalComments: "inline",
+    define: { ...versionDefine, __AELLUX_OFFICIAL_EXTENSION_MANIFEST__: embeddedManifestDefine }
+  });
+  generatedFiles.add(outputFilename);
+  generatedFiles.add(outputFilename + ".map");
+  if (minify) await compressJavaScript(outputFilename);
+}
+for (const minify of [false, true]) {
+  const outputFilename = minify ? "aellux.full.legacy.min.js" : "aellux.full.legacy.js";
+  await build({
+    absWorkingDir: projectRoot,
+    stdin: { contents: legacyFullEntry, loader: "js", resolveDir: projectRoot,
+      sourcefile: "aellux.full.legacy.entry.js" },
+    outfile: join(outputDirectory, outputFilename), bundle: true, platform: "browser",
+    format: "iife", target: "es5", minify, sourcemap: true, legalComments: "inline",
+    banner: { js: legacyThirdPartyBanner }, plugins: [legacyBundlePlugin()],
+    define: { ...versionDefine, __AELLUX_OFFICIAL_EXTENSION_MANIFEST__: embeddedManifestDefine }
+  });
+  generatedFiles.add(outputFilename);
+  generatedFiles.add(outputFilename + ".map");
+  if (minify) await compressJavaScript(outputFilename);
+}
+for (const filename of ["aellux.full.js", "aellux.full.min.js", "aellux.full.legacy.js", "aellux.full.legacy.min.js"]) {
+  const variant = filename.includes(".min.") ? "minified" : "regular";
+  coreAssetIntegrity[variant][filename] = "sha384-" +
+    createHash("sha384").update(await readFile(join(outputDirectory, filename))).digest("base64");
+}
+
 for (const minify of [false, true]) {
   const outputFilename = minify ? "aellux.min.js" : "aellux.js";
   await build({
@@ -287,6 +326,7 @@ for (const minify of [false, true]) {
     legalComments: "inline",
     define: {
       ...versionDefine,
+      __AELLUX_OFFICIAL_EXTENSION_MANIFEST__: embeddedManifestDefine,
       __AELLUX_CORE_ASSET_INTEGRITY__: JSON.stringify(
         coreAssetIntegrity[minify ? "minified" : "regular"])
     }

@@ -22,6 +22,8 @@ import createWeakCss from "./internal/create-weak-css.js";
   var coreAssetIntegrity = __AELLUX_CORE_ASSET_INTEGRITY__;
 
   var CONSTANTS = createAelluxConstants();
+  var embeddedOfficialManifest = typeof __AELLUX_OFFICIAL_EXTENSION_MANIFEST__ !== "undefined"
+    ? __AELLUX_OFFICIAL_EXTENSION_MANIFEST__ : null;
 
   var scriptExtension = ".js";
   var existingApi = root.AelluxJs;
@@ -54,6 +56,7 @@ import createWeakCss from "./internal/create-weak-css.js";
   api.minified = aelluxBootstrapSrc.indexOf(".min.js") !== -1;
   api.coreAssetIntegrity = coreAssetIntegrity;
   root.AelluxJs = api;
+  if (embeddedOfficialManifest) api.extIndex.official = embeddedOfficialManifest;
   root[api.shortJSName] = api;
   api.aelluxBasePath = aelluxBasePath;
   api.init = function (options) {
