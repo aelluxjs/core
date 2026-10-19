@@ -48,6 +48,26 @@ test("full initializes a lazy bundled extension on demand without a network requ
   expect(extensionRequests).toBe(0);
 });
 
+test("full resolves an unbundled official extension from its manifest", async ({ page }) => {
+  let manifestRequests = 0;
+  page.on("request", request => {
+    if (request.url().endsWith("/dist/aellux.extensions.min.json")) manifestRequests++;
+  });
+  await page.goto("/tests/index.htm");
+  await page.addScriptTag({ url: "/dist/aellux.min.js" });
+  await page.evaluate(() => AelluxJs.init({ mode: "full", skipGlobalMount: true }));
+  await expect.poll(() => page.evaluate(() => AelluxJs.orchestratorVersion)).toBe("0.1.0-beta.10");
+
+  const artifact = await page.evaluate(async () => {
+    await AelluxJs.wait("scrollbox");
+    return AelluxJs.registry.ext.scrollbox.artifacts.modern;
+  });
+
+  expect(manifestRequests).toBe(1);
+  expect(artifact.url).toMatch(/aellux\.ext\.scrollbox\.min\.js$/);
+  expect(artifact.integrity).toMatch(/^sha384-/);
+});
+
 test("the official manifest selects the Legacy artifact for a Legacy runtime", async ({ page }) => {
   await startBasic(page, { forceLegacy: true });
   const artifact = await page.evaluate(async () => {

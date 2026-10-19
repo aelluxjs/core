@@ -4567,7 +4567,9 @@
       let entry = null;
       let sourceURL = officialURL;
       try {
-        const official = AelluxJs.extIndex.official || await loadExtensionIndex("official", officialURL);
+        const embeddedOfficial = AelluxJs.extIndex.official;
+        const embeddedEntry = embeddedOfficial && embeddedOfficial.extensions[extensionName];
+        const official = embeddedEntry && embeddedEntry.builds ? embeddedOfficial : await loadExtensionIndex("official", officialURL);
         entry = official.extensions[extensionName] || null;
       } catch (error) {
         reportIndexFailure(error, "official", officialURL);

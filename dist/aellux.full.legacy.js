@@ -24718,7 +24718,7 @@
         }
         function _resolveImplicitRegistration() {
           _resolveImplicitRegistration = _asyncToGenerator2(/* @__PURE__ */ _regenerator2().m(function _callee9(extensionName, registration) {
-            var officialURL, entry, sourceURL, official, fallback, _t5, _t6, _t7, _t8;
+            var officialURL, entry, sourceURL, embeddedOfficial, embeddedEntry, official, fallback, _t5, _t6, _t7, _t8;
             return _regenerator2().w(function(_context9) {
               while (1) switch (_context9.p = _context9.n) {
                 case 0:
@@ -24726,60 +24726,65 @@
                   entry = null;
                   sourceURL = officialURL;
                   _context9.p = 1;
-                  _t5 = AelluxJs.extIndex.official;
-                  if (_t5) {
-                    _context9.n = 3;
+                  embeddedOfficial = AelluxJs.extIndex.official;
+                  embeddedEntry = embeddedOfficial && embeddedOfficial.extensions[extensionName];
+                  if (!(embeddedEntry && embeddedEntry.builds)) {
+                    _context9.n = 2;
                     break;
                   }
-                  _context9.n = 2;
-                  return loadExtensionIndex("official", officialURL);
+                  _t5 = embeddedOfficial;
+                  _context9.n = 4;
+                  break;
                 case 2:
-                  _t5 = _context9.v;
+                  _context9.n = 3;
+                  return loadExtensionIndex("official", officialURL);
                 case 3:
+                  _t5 = _context9.v;
+                case 4:
                   official = _t5;
                   entry = official.extensions[extensionName] || null;
-                  _context9.n = 5;
+                  _context9.n = 6;
                   break;
-                case 4:
-                  _context9.p = 4;
+                case 5:
+                  _context9.p = 5;
                   _t6 = _context9.v;
                   reportIndexFailure(_t6, "official", officialURL);
-                case 5:
+                case 6:
                   if (!(!entry && AelluxJs.extIndex.fallbackURL)) {
-                    _context9.n = 10;
-                    break;
-                  }
-                  sourceURL = AelluxJs.extIndex.fallbackURL;
-                  _context9.p = 6;
-                  _t7 = AelluxJs.extIndex.fallback;
-                  if (_t7) {
-                    _context9.n = 8;
-                    break;
-                  }
-                  _context9.n = 7;
-                  return loadExtensionIndex("fallback", sourceURL);
-                case 7:
-                  _t7 = _context9.v;
-                case 8:
-                  fallback = _t7;
-                  entry = fallback.extensions[extensionName] || null;
-                  _context9.n = 10;
-                  break;
-                case 9:
-                  _context9.p = 9;
-                  _t8 = _context9.v;
-                  reportIndexFailure(_t8, "custom", sourceURL);
-                case 10:
-                  if (entry) {
                     _context9.n = 11;
                     break;
                   }
-                  return _context9.a(2, registration);
+                  sourceURL = AelluxJs.extIndex.fallbackURL;
+                  _context9.p = 7;
+                  _t7 = AelluxJs.extIndex.fallback;
+                  if (_t7) {
+                    _context9.n = 9;
+                    break;
+                  }
+                  _context9.n = 8;
+                  return loadExtensionIndex("fallback", sourceURL);
+                case 8:
+                  _t7 = _context9.v;
+                case 9:
+                  fallback = _t7;
+                  entry = fallback.extensions[extensionName] || null;
+                  _context9.n = 11;
+                  break;
+                case 10:
+                  _context9.p = 10;
+                  _t8 = _context9.v;
+                  reportIndexFailure(_t8, "custom", sourceURL);
                 case 11:
+                  if (entry) {
+                    _context9.n = 12;
+                    break;
+                  }
+                  return _context9.a(2, registration);
+                case 12:
                   applyManifestEntry(registration, entry, sourceURL, extensionName);
                   return _context9.a(2, registration);
               }
-            }, _callee9, null, [[6, 9], [1, 4]]);
+            }, _callee9, null, [[7, 10], [1, 5]]);
           }));
           return _resolveImplicitRegistration.apply(this, arguments);
         }

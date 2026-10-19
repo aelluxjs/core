@@ -406,8 +406,15 @@ import utilsNameCase from "./internal/utils-name-case.js";
     let sourceURL = officialURL;
 
     try {
-      const official = AelluxJs.extIndex.official ||
-        await loadExtensionIndex("official", officialURL);
+      const embeddedOfficial = AelluxJs.extIndex.official;
+      const embeddedEntry = embeddedOfficial &&
+        embeddedOfficial.extensions[extensionName];
+      // The full bundle embeds compatibility metadata for bundled loaders.
+      // An implicit extension without a bundled loader still needs its signed
+      // artifact URLs, which only the distributable manifest supplies.
+      const official = embeddedEntry && embeddedEntry.builds
+        ? embeddedOfficial
+        : await loadExtensionIndex("official", officialURL);
       entry = official.extensions[extensionName] || null;
     } catch (error) {
       reportIndexFailure(error, "official", officialURL);
