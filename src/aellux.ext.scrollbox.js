@@ -878,7 +878,7 @@
       };
       elasticMemories.set(wrapper, AelluxJs.persist.element.save(
         wrapper, [], ["transform", "transform-origin",
-          "margin-top", "margin-right", "margin-bottom", "margin-left"]
+        "margin-top", "margin-right", "margin-bottom", "margin-left"]
       ));
     }
     state.elasticEnabled = true;
@@ -1630,10 +1630,10 @@
     // Offset each transformed edge with the negative margin on its opposite
     // side: top -> bottom, left -> right, and vice versa.
     const compensated = {
-      top: elastic.amounts[2] * (2 + scaleY),
+      top: 0 * elastic.amounts[2] * (2 + scaleY),
       right: elastic.amounts[3] * (2 + scaleX),
       bottom: elastic.amounts[0] * (2 + scaleY),
-      left: elastic.amounts[1] * (2 + scaleX)
+      left: 0 * elastic.amounts[1] * (2 + scaleX)
     };
     for (const side of ["top", "right", "bottom", "left"]) {
       const base = elastic.baseMargins?.[side] || "0px";
