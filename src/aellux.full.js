@@ -14,7 +14,7 @@ root.AelluxJs.bundledExtensions = Object.freeze({
   "anchor": () => import("./aellux.ext.anchor.js"),
   "adaptive": () => import("./aellux.ext.adaptive.js"),
   "present": () => import("./aellux.ext.present.js"),
-  "scrollbox": () => import("./aellux.ext.scrollbox.js")
+  //"scrollbox": () => import("./aellux.ext.scrollbox.js")
 });
 
 root.AelluxJs.extIndex.official = Object.freeze({
