@@ -21039,7 +21039,7 @@
         }
         return;
       }
-      if (idleSince !== null && now() - idleSince > 250) resetMeasurements(true);
+      if (idleSince !== null && now() - idleSince > 250) resetMeasurements(false);
       idleSince = null;
       frameRequest = requestAnimationFrame(flushFrame);
     }
@@ -21119,7 +21119,7 @@
       } else {
         if (stableSince === null) stableSince = time;
         if (limitFPS < nativeFPS && time - stableSince >= recoveryDelay && time - lastAdjustment >= recoveryDelay) {
-          limitFPS = Math.min(nativeFPS, limitFPS + FPS_STEP);
+          limitFPS = recoveryLimit(limitFPS);
           publishLimit();
           trialLimit = limitFPS;
           lastAdjustment = time;
@@ -21135,6 +21135,16 @@
         candidate = Math.max(MIN_FPS, candidate - FPS_STEP);
       }
       return candidate;
+    }
+    function recoveryLimit(current) {
+      var levels = [nativeFPS];
+      while (levels[levels.length - 1] > MIN_FPS) {
+        levels.push(Math.max(MIN_FPS, levels[levels.length - 1] - FPS_STEP));
+      }
+      for (var index = levels.length - 1; index >= 0; index--) {
+        if (levels[index] > current) return levels[index];
+      }
+      return nativeFPS;
     }
     function flushFrame(time) {
       frameRequest = null;

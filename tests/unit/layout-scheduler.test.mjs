@@ -505,3 +505,30 @@ test("severe adaptive pressure drops directly to the matching FPS budget without
     assert.equal((await running).status, "cleared");
   });
 });
+
+test("an idle gap preserves the adaptive FPS budget for gradual recovery", async () => {
+  await withClock(async clock => {
+    const scheduler = buildLayoutScheduler();
+    const pressured = scheduler.sequence(71, {
+      read: () => clock.busy(100),
+      repeat: { ms: 0 }
+    });
+    await clock.frames(72);
+    assert.equal(scheduler.cancel(71), true);
+    assert.equal((await pressured).status, "aborted");
+
+    // This exceeds the scheduler's idle-measurement reset threshold.  The next
+    // batch must retain its reduced budget rather than immediately relearning
+    // the browser cadence as its effective limit.
+    await clock.step(1000);
+    let calls = 0;
+    const recovered = scheduler.sequence(72, {
+      read: () => { calls++; },
+      repeat: { ms: 0 }
+    });
+    await clock.frames(60);
+    assert.ok(calls <= 7, `the 5 FPS budget should survive the idle gap (got ${calls})`);
+    scheduler.clear();
+    assert.equal((await recovered).status, "cleared");
+  });
+});

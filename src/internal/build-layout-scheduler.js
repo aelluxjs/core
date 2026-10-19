@@ -77,7 +77,10 @@ export function buildLayoutScheduler() {
       }
       return;
     }
-    if (idleSince !== null && now() - idleSince > 250) resetMeasurements(true);
+    // A gap between scheduled batches must not discard an adaptive limit: the
+    // next batch would otherwise relearn native FPS and jump straight from a
+    // reduced budget to full speed.  Keep the limit and restart observation.
+    if (idleSince !== null && now() - idleSince > 250) resetMeasurements(false);
     idleSince = null;
     frameRequest = requestAnimationFrame(flushFrame);
   }
@@ -149,7 +152,10 @@ export function buildLayoutScheduler() {
       if (stableSince === null) stableSince = time;
       if (limitFPS < nativeFPS && time - stableSince >= recoveryDelay &&
           time - lastAdjustment >= recoveryDelay) {
-        limitFPS = Math.min(nativeFPS, limitFPS + FPS_STEP);
+        // Use the same budgets used when pressure reduces the limit.  Adding
+        // FPS_STEP directly would recover 5 FPS as 20 FPS (rather than 15),
+        // skipping the first observed budget after the minimum.
+        limitFPS = recoveryLimit(limitFPS);
         publishLimit();
         trialLimit = limitFPS;
         lastAdjustment = time;
@@ -166,6 +172,17 @@ export function buildLayoutScheduler() {
       candidate = Math.max(MIN_FPS, candidate - FPS_STEP);
     }
     return candidate;
+  }
+
+  function recoveryLimit(current) {
+    const levels = [nativeFPS];
+    while (levels[levels.length - 1] > MIN_FPS) {
+      levels.push(Math.max(MIN_FPS, levels[levels.length - 1] - FPS_STEP));
+    }
+    for (let index = levels.length - 1; index >= 0; index--) {
+      if (levels[index] > current) return levels[index];
+    }
+    return nativeFPS;
   }
 
   function flushFrame(time) {

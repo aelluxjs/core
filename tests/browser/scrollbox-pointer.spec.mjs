@@ -2613,6 +2613,77 @@ test("vertical wheel converts for horizontal-only native boxes and releases at a
   expect(await wheel(120)).toEqual({ prevented: false, x: 200 });
 });
 
+test("vertical wheel overflow is handed to eligible horizontal Scrollbox parents", async ({ page }) => {
+  await setup(page, `<div id="outer" data-ae-scrollbox="native"
+    style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden">
+    <div style="width:300px;height:100px">
+      <div id="inner" data-ae-scrollbox="native"
+        style="width:100px;height:100px;overflow-x:hidden;overflow-y:auto">
+        <div style="height:300px"></div>
+      </div>
+    </div>
+  </div>`);
+  const result = await page.evaluate(() => {
+    const inner = document.getElementById("inner");
+    const outer = document.getElementById("outer");
+    inner.scrollTo({ top: 200, behavior: "instant" });
+    const event = new WheelEvent("wheel", { deltaY: 120, bubbles: true, cancelable: true });
+    inner.dispatchEvent(event);
+    return { prevented: event.defaultPrevented, inner: inner.scrollTop, outer: outer.scrollLeft };
+  });
+  expect(result).toEqual({ prevented: true, inner: 200, outer: 120 });
+});
+
+test("horizontal wheel handoff restores the vertical delta at each horizontal edge", async ({ page }) => {
+  await setup(page, `<div id="outer" data-ae-scrollbox="native"
+    style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden">
+    <div style="width:300px;height:100px">
+      <div id="middle" data-ae-scrollbox="native"
+        style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden">
+        <div style="width:300px;height:100px">
+          <div id="inner" data-ae-scrollbox="native"
+            style="width:100px;height:100px;overflow-x:hidden;overflow-y:auto">
+            <div style="height:300px"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>`);
+  const result = await page.evaluate(() => {
+    const inner = document.getElementById("inner");
+    const middle = document.getElementById("middle");
+    const outer = document.getElementById("outer");
+    inner.scrollTo({ top: 200, behavior: "instant" });
+    middle.scrollTo({ left: 200, behavior: "instant" });
+    const event = new WheelEvent("wheel", { deltaY: 120, bubbles: true, cancelable: true });
+    inner.dispatchEvent(event);
+    return { prevented: event.defaultPrevented, middle: middle.scrollLeft, outer: outer.scrollLeft };
+  });
+  expect(result).toEqual({ prevented: true, middle: 200, outer: 120 });
+});
+
+test("wheel overflow does not convert through a horizontally-disabled parent", async ({ page }) => {
+  await setup(page, `<div id="outer" data-ae-scrollbox="native"
+    data-ae-scrollbox-wheel-horizontal="false"
+    style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden">
+    <div style="width:300px;height:100px">
+      <div id="inner" data-ae-scrollbox="native"
+        style="width:100px;height:100px;overflow-x:hidden;overflow-y:auto">
+        <div style="height:300px"></div>
+      </div>
+    </div>
+  </div>`);
+  const result = await page.evaluate(() => {
+    const inner = document.getElementById("inner");
+    const outer = document.getElementById("outer");
+    inner.scrollTo({ top: 200, behavior: "instant" });
+    const event = new WheelEvent("wheel", { deltaY: 120, bubbles: true, cancelable: true });
+    inner.dispatchEvent(event);
+    return { prevented: event.defaultPrevented, outer: outer.scrollLeft };
+  });
+  expect(result).toEqual({ prevented: false, outer: 0 });
+});
+
 test("vertical wheel stops converting when vertical scrolling becomes available", async ({ page }) => {
   await setup(page, `<div id="box" data-ae-scrollbox="native"
     style="width:100px;height:100px;overflow:auto">

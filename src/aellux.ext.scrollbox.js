@@ -1825,6 +1825,98 @@
     return distance > 0 ? Math.min(1, Math.max(0, position / distance)) : 0;
   }
 
+  function scrollAxis(element, axis, delta, maximum) {
+    const property = axis === "x" ? "scrollLeft" : "scrollTop";
+    const current = element[property];
+    const desired = current + delta;
+    const next = Math.max(0, Math.min(maximum, desired));
+    if (next !== current) {
+      element.scrollTo(axis === "x" ? { left: next, behavior: "instant" } :
+        { top: next, behavior: "instant" });
+    }
+    return desired - next;
+  }
+
+  function inheritedWheelAxes(element, metrics) {
+    const style = root.getComputedStyle(element);
+    const available = value => value === "auto" || value === "scroll";
+    return {
+      x: metrics.maxX > 1 && available(style.overflowX),
+      y: metrics.maxY > 1 && available(style.overflowY)
+    };
+  }
+
+  function nextWheelTarget(element) {
+    for (let parent = element.parentElement; parent; parent = parent.parentElement) {
+      const state = scrollboxes.get(parent);
+      const metrics = nativeMetrics(parent);
+      const axes = state ? wheelAxes(state, metrics) : inheritedWheelAxes(parent, metrics);
+      if (axes.x || axes.y) return { element: parent, state, metrics, axes };
+    }
+    return null;
+  }
+
+  function receivesVerticalWheelAsHorizontal(target) {
+    return !!target.state && target.state.desktop && target.state.wheelEnabled &&
+      target.axes.x && !target.axes.y;
+  }
+
+  function handoffWheelEvent(event, target, deltaY) {
+    const handed = {
+      ctrlKey: event.ctrlKey,
+      cancelable: event.cancelable,
+      deltaX: 0,
+      deltaY,
+      target: target.element,
+      get defaultPrevented() { return event.defaultPrevented; },
+      preventDefault() { event.preventDefault(); }
+    };
+    return dispatchWheel(target.state, handed);
+  }
+
+  // Native wheel chaining cannot turn a vertical delta into a horizontal one.
+  // At a vertical edge, hand only its unconsumed portion to horizontal Aellux
+  // parents.  Once such a parent reaches its own edge, `remaining` is still a
+  // vertical delta, so a following parent only converts it when it explicitly
+  // opts into the same wheel-horizontal behavior.
+  function handoffVerticalWheel(state, event, metrics, axes, deltaY, factor) {
+    if (!state.desktop || state.elasticEnabled || !axes.y || !deltaY) return false;
+    const current = state.element.scrollTop;
+    const desired = current + deltaY;
+    if (desired >= 0 && desired <= metrics.maxY) return false;
+
+    let target = nextWheelTarget(state.element);
+    // Do not take over the native chain until its next scrollable parent is a
+    // horizontal Scrollbox that permits conversion.  This preserves ordinary
+    // vertical chaining and horizontally-disabled boxes.
+    while (target && !target.axes.y && !receivesVerticalWheelAsHorizontal(target))
+      target = nextWheelTarget(target.element);
+    if (!target || target.axes.y) return false;
+
+    let remaining = scrollAxis(state.element, "y", deltaY, metrics.maxY);
+    if (remaining !== deltaY) publish(state);
+
+    while (target && remaining) {
+      if (receivesVerticalWheelAsHorizontal(target)) {
+        // Give Snap first refusal, as it normally receives this same converted
+        // wheel on a direct horizontal target.
+        if (!handoffWheelEvent(event, target, remaining / factor)) return true;
+        remaining = scrollAxis(target.element, "x", remaining, target.metrics.maxX);
+        publish(target.state);
+      } else if (target.axes.y) {
+        remaining = scrollAxis(target.element, "y", remaining, target.metrics.maxY);
+        if (target.state) publish(target.state);
+      }
+      if (!remaining) {
+        event.preventDefault();
+        return true;
+      }
+      target = nextWheelTarget(target.element);
+    }
+    event.preventDefault();
+    return true;
+  }
+
   function handleWheel(state, event) {
     if (event.ctrlKey || !event.cancelable) return;
 
@@ -1847,6 +1939,9 @@
       Math.abs(event.deltaX) <= Math.abs(event.deltaY);
     const deltaX = (converted ? event.deltaY : event.deltaX) * factor;
     const deltaY = (converted ? 0 : event.deltaY) * factor;
+
+    if (!converted && handoffVerticalWheel(state, event, metrics, axes, deltaY, factor))
+      return;
 
     if (converted && deltaX) {
       const current = state.element.scrollLeft;

@@ -2047,6 +2047,93 @@
     function progress(position, distance) {
       return distance > 0 ? Math.min(1, Math.max(0, position / distance)) : 0;
     }
+    function scrollAxis(element, axis, delta, maximum) {
+      var property = axis === "x" ? "scrollLeft" : "scrollTop";
+      var current = element[property];
+      var desired = current + delta;
+      var next2 = Math.max(0, Math.min(maximum, desired));
+      if (next2 !== current) {
+        element.scrollTo(axis === "x" ? {
+          left: next2,
+          behavior: "instant"
+        } : {
+          top: next2,
+          behavior: "instant"
+        });
+      }
+      return desired - next2;
+    }
+    function inheritedWheelAxes(element, metrics) {
+      var style = root.getComputedStyle(element);
+      var available = function available2(value) {
+        return value === "auto" || value === "scroll";
+      };
+      return {
+        x: metrics.maxX > 1 && available(style.overflowX),
+        y: metrics.maxY > 1 && available(style.overflowY)
+      };
+    }
+    function nextWheelTarget(element) {
+      for (var parent = element.parentElement; parent; parent = parent.parentElement) {
+        var state = scrollboxes.get(parent);
+        var metrics = nativeMetrics(parent);
+        var axes = state ? wheelAxes(state, metrics) : inheritedWheelAxes(parent, metrics);
+        if (axes.x || axes.y) return {
+          element: parent,
+          state: state,
+          metrics: metrics,
+          axes: axes
+        };
+      }
+      return null;
+    }
+    function receivesVerticalWheelAsHorizontal(target) {
+      return !!target.state && target.state.desktop && target.state.wheelEnabled && target.axes.x && !target.axes.y;
+    }
+    function handoffWheelEvent(event, target, deltaY) {
+      var handed = {
+        ctrlKey: event.ctrlKey,
+        cancelable: event.cancelable,
+        deltaX: 0,
+        deltaY: deltaY,
+        target: target.element,
+        get defaultPrevented() {
+          return event.defaultPrevented;
+        },
+        preventDefault: function preventDefault() {
+          event.preventDefault();
+        }
+      };
+      return dispatchWheel(target.state, handed);
+    }
+    function handoffVerticalWheel(state, event, metrics, axes, deltaY, factor) {
+      if (!state.desktop || state.elasticEnabled || !axes.y || !deltaY) return false;
+      var current = state.element.scrollTop;
+      var desired = current + deltaY;
+      if (desired >= 0 && desired <= metrics.maxY) return false;
+      var target = nextWheelTarget(state.element);
+      while (target && !target.axes.y && !receivesVerticalWheelAsHorizontal(target)) target = nextWheelTarget(target.element);
+      if (!target || target.axes.y) return false;
+      var remaining = scrollAxis(state.element, "y", deltaY, metrics.maxY);
+      if (remaining !== deltaY) publish(state);
+      while (target && remaining) {
+        if (receivesVerticalWheelAsHorizontal(target)) {
+          if (!handoffWheelEvent(event, target, remaining / factor)) return true;
+          remaining = scrollAxis(target.element, "x", remaining, target.metrics.maxX);
+          publish(target.state);
+        } else if (target.axes.y) {
+          remaining = scrollAxis(target.element, "y", remaining, target.metrics.maxY);
+          if (target.state) publish(target.state);
+        }
+        if (!remaining) {
+          event.preventDefault();
+          return true;
+        }
+        target = nextWheelTarget(target.element);
+      }
+      event.preventDefault();
+      return true;
+    }
     function handleWheel(state, event) {
       if (event.ctrlKey || !event.cancelable) return;
       if (state.desktop && state.mode === POINTER && state.element.classList.contains(pointerScrollingClass)) {
@@ -2065,6 +2152,7 @@
       var converted = state.desktop && state.wheelEnabled && axes.x && !axes.y && Math.abs(event.deltaX) <= Math.abs(event.deltaY);
       var deltaX = (converted ? event.deltaY : event.deltaX) * factor;
       var deltaY = (converted ? 0 : event.deltaY) * factor;
+      if (!converted && handoffVerticalWheel(state, event, metrics, axes, deltaY, factor)) return;
       if (converted && deltaX) {
         var current = state.element.scrollLeft;
         var desiredX = current + deltaX;
