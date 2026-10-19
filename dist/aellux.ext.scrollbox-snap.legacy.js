@@ -162,9 +162,14 @@
     var AelluxJs = root.AelluxJs;
     var extensionName = "scrollbox-snap";
     if (!AelluxJs) throw new Error("[aellux.js] Load the boot script before the scrollbox-snap extension.");
-    var POINTER = "pointer", TOUCH = "touch", HORIZONTAL = "x", VERTICAL = "y", FALSE = "false", INSTANT = "instant", SMOOTH = "smooth", START = "start", END = "end", CENTER = "center", SCROLL_EVENT = "$scroll", SCROLL_END_EVENT = "$scrollend", WHEEL_EVENT = "$wheel", INTERACTION_EVENT = "$AelluxJsScrollboxInteraction", POINTER_DOWN_EVENT = "$pointerdown", POINTER_UP_EVENT = "$pointerup", POINTER_CANCEL_EVENT = "$pointercancel", TOUCH_START_EVENT = "$touchstart", TOUCH_END_EVENT = "$touchend", TOUCH_CANCEL_EVENT = "$touchcancel";
+    var POINTER = "pointer", TOUCH = "touch", HORIZONTAL = "x", VERTICAL = "y", FALSE = "false", INSTANT = "instant", SMOOTH = "smooth", START = "start", END = "end", CENTER = "center", SCROLL_EVENT = "$scroll", SCROLL_END_EVENT = "$scrollend", WHEEL_EVENT = "$wheel", INTERACTION_EVENT = "$AelluxJsScrollboxInteraction", SNAP_GESTURE_EVENT = "$AelluxJsScrollboxSnapGesture", POINTER_DOWN_EVENT = "$pointerdown", POINTER_UP_EVENT = "$pointerup", POINTER_CANCEL_EVENT = "$pointercancel", TOUCH_START_EVENT = "$touchstart", TOUCH_END_EVENT = "$touchend", TOUCH_CANCEL_EVENT = "$touchcancel";
     var SNAP_SCROLL_IDLE_MS = 120;
     var SNAP_TARGET_IDLE_MS = 500;
+    var SNAP_SWIPE_SPEED_PX_MS = 0.5;
+    var SNAP_FLICK_WINDOW_MS = 100;
+    var SNAP_FLICK_FAST_TIME_MS = 50;
+    var SNAP_FLICK_MAX_DISTANCE_PX = 100;
+    var SNAP_FLICK_MIN_DISTANCE_PX = 1;
     var scrollboxAttribute = AelluxJs.attr("scrollbox");
     var snapAttribute = AelluxJs.attr("scrollbox-snap");
     var itemAttribute = AelluxJs.attr("snap-item");
@@ -266,6 +271,8 @@
         activeTouches: /* @__PURE__ */ new Set(),
         savedItems: /* @__PURE__ */ new Map(),
         suspensions: /* @__PURE__ */ new Set(),
+        pointerScroll: null,
+        flick: null,
         observer: null,
         resizeObserver: null,
         disposed: false
@@ -296,6 +303,9 @@
       state.onInteraction = function(event) {
         return setSuspension(state, event.detail);
       };
+      state.onSnapGesture = function(event) {
+        return handlePointerScroll(state, event);
+      };
       states.set(element, state);
       AelluxJs.onEvent(element, SCROLL_EVENT, state.onScroll, {
         passive: true
@@ -313,6 +323,7 @@
         capture: true
       });
       AelluxJs.onEvent(element, INTERACTION_EVENT, state.onInteraction);
+      AelluxJs.onEvent(element, SNAP_GESTURE_EVENT, state.onSnapGesture);
       AelluxJs.onEvent(root, POINTER_UP_EVENT, state.onPointerEnd, true);
       AelluxJs.onEvent(root, POINTER_CANCEL_EVENT, state.onPointerEnd, true);
       AelluxJs.onEvent(root, TOUCH_END_EVENT, state.onTouchEnd, true);
@@ -339,6 +350,7 @@
       AelluxJs.offEvent(element, TOUCH_START_EVENT, state.onTouchStart, true);
       AelluxJs.offEvent(element, WHEEL_EVENT, state.onWheel, true);
       AelluxJs.offEvent(element, INTERACTION_EVENT, state.onInteraction);
+      AelluxJs.offEvent(element, SNAP_GESTURE_EVENT, state.onSnapGesture);
       AelluxJs.offEvent(root, POINTER_UP_EVENT, state.onPointerEnd, true);
       AelluxJs.offEvent(root, POINTER_CANCEL_EVENT, state.onPointerEnd, true);
       AelluxJs.offEvent(root, TOUCH_END_EVENT, state.onTouchEnd, true);
@@ -519,6 +531,35 @@
       state.element.classList.toggle(suspendedClass, state.suspensions.size > 0);
       if (!detail.active && state.suspensions.size === 0) scheduleSettle(state);
     }
+    function handlePointerScroll(state, event) {
+      var _state$pointerScroll;
+      var detail = event.detail;
+      if (!detail || detail.axis !== axisFor(state)) return;
+      if (detail.phase === "start") {
+        state.pointerScroll = {
+          axis: detail.axis,
+          index: selectedIndex(state)
+        };
+        state.flick = null;
+        return;
+      }
+      if (detail.phase !== "end" || !detail.moved || !itemsFor(state).length) return;
+      event.preventDefault();
+      var start = ((_state$pointerScroll = state.pointerScroll) === null || _state$pointerScroll === void 0 ? void 0 : _state$pointerScroll.axis) === detail.axis ? state.pointerScroll.index : selectedIndex(state);
+      state.pointerScroll = null;
+      if (!isFlick(detail)) return;
+      var distance = detail.axis === HORIZONTAL ? detail.startX - detail.lastX : detail.startY - detail.lastY;
+      var index = Math.max(0, Math.min(itemsFor(state).length - 1, start + Math.sign(distance)));
+      if (index !== start) state.flick = {
+        axis: detail.axis,
+        index: index
+      };
+    }
+    function isFlick(detail) {
+      var distance = detail.axis === HORIZONTAL ? detail.startX - detail.lastX : detail.startY - detail.lastY;
+      var elapsed = Math.max(1, detail.endTime - detail.startTime);
+      return elapsed <= SNAP_FLICK_WINDOW_MS && Math.abs(distance) > SNAP_FLICK_MIN_DISTANCE_PX && Math.abs(distance) < SNAP_FLICK_MAX_DISTANCE_PX && (elapsed <= SNAP_FLICK_FAST_TIME_MS || Math.abs(distance) / elapsed >= SNAP_SWIPE_SPEED_PX_MS);
+    }
     function beginGesture(state, kind, event) {
       var active = kind === POINTER ? state.activePointers : state.activeTouches;
       if (kind === POINTER) active.add(event.pointerId);
@@ -557,7 +598,7 @@
       if (!state.activePointers.size && !state.activeTouches.size) scheduleSettle(state);
     }
     function scheduleSettle(state) {
-      if (state.activePointers.size || state.activeTouches.size) return;
+      if (state.activePointers.size || state.activeTouches.size || state.suspensions.size) return;
       clearTimer(state, "timeout");
       state.timeout = root.setTimeout(function() {
         return finish(state);
@@ -570,10 +611,16 @@
       }, SNAP_TARGET_IDLE_MS);
     }
     function finish(state) {
-      if (state.disposed) return;
+      if (state.disposed || state.suspensions.size || state.activePointers.size || state.activeTouches.size) return;
       clearTimer(state, "timeout");
       state.target = null;
       var items = itemsFor(state), index = selectedIndex(state), item = items[index];
+      var flick = state.flick;
+      state.flick = null;
+      if (flick && flick.axis === axisFor(state) && flick.index !== index) {
+        goto(state.element, flick.index);
+        return;
+      }
       if (!item || state.notifiedItem === item && state.notifiedIndex === index) return;
       var previousIndex = state.notifiedIndex;
       state.index = index;

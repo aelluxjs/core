@@ -44,3 +44,5 @@ The index is zero based. Each method returns `true` when a snap item is availabl
 ## Interaction hooks
 
 Scrollbox emits `AelluxJsScrollboxInteraction` from its element while a custom scrollbar thumb, Pointer Drag Scroll, or elastic edge interaction is active. Its `detail` is `{ reason, active }`, where `reason` is `"scrollbar"`, `"pointer"`, or `"elastic"`. Scrollbox Snap uses this event to suspend native snap alignment during those interactions and resume it afterward. Other Extensions can consume the same event without accessing Scrollbox state.
+
+Desktop Pointer Drag Scroll also emits `AelluxJsScrollboxSnapGesture` with `detail` containing `phase` (`"start"` or `"end"`), `axis`, `moved`, coordinates, and timestamps. The end event is cancelable. Scrollbox Snap cancels it for an eligible snap axis, which prevents PDS momentum and lets snap settle the gesture, including its one-item flick behavior.

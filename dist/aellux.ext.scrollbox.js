@@ -206,6 +206,22 @@
         detail: { reason, active: !!active }
       });
     }
+    function dispatchSnapGesture(state, phase, pointerScroll) {
+      return AelluxJs.dispatchFrom(state.element, "ScrollboxSnapGesture", {
+        cancelable: phase === "end",
+        detail: {
+          phase,
+          axis: pointerScroll.axis,
+          moved: pointerScroll.moved,
+          startX: pointerScroll.startX,
+          startY: pointerScroll.startY,
+          lastX: pointerScroll.lastX,
+          lastY: pointerScroll.lastY,
+          startTime: pointerScroll.startTime,
+          endTime: pointerScroll.endTime
+        }
+      });
+    }
     function mountScrollbox(element) {
       if (scrollboxes.has(element)) return;
       elementMemories.set(element, AelluxJs.persist.element.save(element, [], properties));
@@ -682,6 +698,14 @@
       const rect = record.element.getBoundingClientRect();
       return record.axis === "y" ? event.clientY - rect.top : event.clientX - rect.left;
     }
+    function visibleScrollbarTrack(record) {
+      const style = root.getComputedStyle(record.element);
+      if (Number.parseFloat(style.opacity) <= 0) return false;
+      const color = style.backgroundColor;
+      if (!color || color === "transparent") return false;
+      const rgba = color.match(/^rgba\\((.+)\\)$/);
+      return !rgba || Number.parseFloat(rgba[1].split(",").at(-1)) > 0;
+    }
     function startScrollbarDrag(state, record, event) {
       if (state.disposed || event.button !== 0 || !record.max) return;
       if (activePointerScrollState && activePointerScrollState.pointerScroll && activePointerScrollState.pointerScroll.chain.includes(state))
@@ -692,6 +716,7 @@
       if (event.pointerType !== "touch") state.scrollbar.pointerHover = true;
       showScrollbars(state);
       if (position < record.thumbPosition || position > record.thumbPosition + record.thumbSize) {
+        if (!visibleScrollbarTrack(record)) return;
         const travel = record.trackSize - record.thumbSize;
         const thumbStart = Math.max(0, Math.min(travel, position - record.thumbSize / 2));
         const destination = travel > 0 ? thumbStart / travel * record.max : 0;
@@ -1158,6 +1183,7 @@
         element.style.setProperty("scroll-behavior", "auto", "important");
         element.classList.add(pointerScrollingClass);
         dispatchInteraction(member, POINTER, true);
+        dispatchSnapGesture(member, "start", pointerScroll);
         startScrollbarInteractionVisibility(member);
       }
       dispatchPointerScroll(state, pointerScroll, "PointerScrollStart");
@@ -1201,6 +1227,13 @@
       } else {
         stopPointerScrollMouseEvents(state);
       }
+      let snapHandled = false;
+      if (event && event.type === POINTER_UP && pointerScroll.moved) {
+        for (const member of pointerScroll.chain) {
+          if (!member.disposed && !dispatchSnapGesture(member, "end", pointerScroll))
+            snapHandled = true;
+        }
+      }
       for (const saved of pointerScroll.styles) {
         if (saved.classOwned) saved.element.classList.remove(pointerScrollingClass);
         (_a = pointerScrollMemories.get(saved.element)) == null ? void 0 : _a.restore();
@@ -1224,7 +1257,7 @@
       const hadElastic = pointerScroll.chain.some((member) => member.elastic.active);
       const momentumState = pointerScroll.momentumState;
       for (const member of pointerScroll.chain) releaseElastic(member);
-      if (event && event.type === POINTER_UP && pointerScroll.moved && momentumState && momentumState.momentumEnabled && !hadElastic && !momentumState.disposed && now() - pointerScroll.momentumStartTime < MOMENTUM_LIMIT_TIME_MS) {
+      if (!snapHandled && event && event.type === POINTER_UP && pointerScroll.moved && momentumState && momentumState.momentumEnabled && !hadElastic && !momentumState.disposed && now() - pointerScroll.momentumStartTime < MOMENTUM_LIMIT_TIME_MS) {
         startMomentum(momentumState, pointerScroll);
       }
     }

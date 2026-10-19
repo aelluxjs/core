@@ -710,6 +710,11 @@ await $ae.mountManager.update(document.getElementById(&quot;panel&quot;));
 </tr>
 <tr>
 <td>Scrollbox</td>
+<td><code>AelluxJsScrollboxSnapGesture</code></td>
+<td>Scrollbox element; desktop PDS integration event. <code>detail</code> includes <code>phase</code> (<code>&quot;start&quot;</code> or <code>&quot;end&quot;</code>), <code>axis</code>, <code>moved</code>, start and final coordinates, and timestamps. The end event is cancelable; Scrollbox Snap cancels it to prevent PDS momentum before snap settles the gesture.</td>
+</tr>
+<tr>
+<td>Scrollbox</td>
 <td><code>AelluxJsPointerScrollStart</code>, <code>AelluxJsPointerScrollEnd</code></td>
 <td>Pointer gesture&#39;s originating scrollbox; <code>detail</code> is <code>{ axis, pointerId, pointerType, elements }</code>. <code>elements</code> lists the scrollboxes activated for that gesture. A short flick that never activates PDS does not emit them.</td>
 </tr>
