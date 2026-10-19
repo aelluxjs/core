@@ -52,6 +52,7 @@
     const queues = { read: [], update: [] };
     const groups = /* @__PURE__ */ new Map();
     const tasks = /* @__PURE__ */ new Set();
+    const visualFPSLimits = /* @__PURE__ */ new Map();
     const sequenceStarts = /* @__PURE__ */ new Map();
     let frameRequest = null;
     let phase = "idle";
@@ -71,6 +72,20 @@
     const now = () => performance.now();
     const hidden = () => typeof document !== "undefined" && document.hidden;
     const hasWork = () => queues.read.length > 0 || queues.update.length > 0;
+    function visualFPSLimit() {
+      let result = Infinity;
+      for (const value of visualFPSLimits.values()) result = Math.min(result, value);
+      return result;
+    }
+    function setVisualFPSLimit(owner, value) {
+      validId(owner);
+      if (value === void 0 || value === null) visualFPSLimits.delete(owner);
+      else {
+        if (!Number.isFinite(value) || value <= 0) throw new RangeError("visual FPS must be positive");
+        visualFPSLimits.set(owner, value);
+      }
+      if (hasWork()) scheduleFrame();
+    }
     function publishLimit() {
       if (typeof document === "undefined" || !document.documentElement) return;
       const value = nativeFPS !== null && limitFPS !== null && limitFPS < nativeFPS ? String(limitFPS) : null;
@@ -153,8 +168,9 @@
         while (samples.length && time - samples[0].time > 1e3) samples.shift();
         adjustLimit(time);
       }
-      if (limitFPS === null || limitFPS >= nativeFPS) return true;
-      const period = 1e3 / limitFPS;
+      const effectiveFPS = Math.min(limitFPS === null ? Infinity : limitFPS, visualFPSLimit());
+      if (effectiveFPS >= nativeFPS) return true;
+      const period = 1e3 / effectiveFPS;
       frameCredit += delta;
       if (frameCredit + 1e-3 < period) return false;
       frameCredit = Math.min(period, frameCredit - period);
@@ -328,6 +344,11 @@
           group = null;
         }
         if (!group) group = makeGroup(id);
+      }
+      if (id === void 0 && visualFPSLimit() !== Infinity) {
+        for (const pending of queues[kind].slice()) {
+          if (!pending.group) cancelTask(pending);
+        }
       }
       let task;
       const promise = new Promise((resolve, reject) => {
@@ -562,7 +583,8 @@
       update: (first, second, third) => request("update", first, second, third),
       sequence,
       cancel,
-      clear
+      clear,
+      setVisualFPSLimit
     });
   }
 
@@ -1511,6 +1533,8 @@
         }
         const policyFPS = operation.conservative ? propertyPolicyFPS(AelluxJs2.options.cssMotionPropertyMaxFPS, AelluxJs2) : void 0;
         const maxFPS = minimumFPS(requestedMaxFPS, policyFPS);
+        operation.visualFPS = maxFPS;
+        AelluxJs2.waitLayout.setVisualFPSLimit(operation.id, maxFPS);
         return AelluxJs2.waitLayout.sequence(operationId, {
           update: () => advance(operation),
           repeat: { ms: 0 },
@@ -1696,6 +1720,7 @@
       return text.endsWith("ms") ? number : number * 1e3;
     }
     function release(operation, finish, resume = false) {
+      getAelluxJs().waitLayout.setVisualFPSLimit(operation.id, null);
       if (operation.nativeTimer !== null) root.clearTimeout(operation.nativeTimer);
       operation.nativeTimer = null;
       for (const animation of operation.animations) {

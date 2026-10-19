@@ -20909,6 +20909,18 @@
       return o2 && "function" == typeof Symbol && o2.constructor === Symbol && o2 !== Symbol.prototype ? "symbol" : typeof o2;
     }, _typeof(o);
   }
+  function _toConsumableArray(r) {
+    return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread();
+  }
+  function _nonIterableSpread() {
+    throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+  }
+  function _iterableToArray(r) {
+    if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
+  }
+  function _arrayWithoutHoles(r) {
+    if (Array.isArray(r)) return _arrayLikeToArray(r);
+  }
   function _createForOfIteratorHelper(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
@@ -20940,24 +20952,12 @@
       }
     } };
   }
-  function _toConsumableArray(r) {
-    return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread();
-  }
-  function _nonIterableSpread() {
-    throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
-  }
   function _unsupportedIterableToArray(r, a) {
     if (r) {
       if ("string" == typeof r) return _arrayLikeToArray(r, a);
       var t = {}.toString.call(r).slice(8, -1);
       return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0;
     }
-  }
-  function _iterableToArray(r) {
-    if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
-  }
-  function _arrayWithoutHoles(r) {
-    if (Array.isArray(r)) return _arrayLikeToArray(r);
   }
   function _arrayLikeToArray(r, a) {
     (null == a || a > r.length) && (a = r.length);
@@ -20973,6 +20973,7 @@
     };
     var groups = /* @__PURE__ */ new Map();
     var tasks = /* @__PURE__ */ new Set();
+    var visualFPSLimits = /* @__PURE__ */ new Map();
     var sequenceStarts = /* @__PURE__ */ new Map();
     var frameRequest = null;
     var phase = "idle";
@@ -20998,6 +20999,30 @@
     var hasWork = function hasWork2() {
       return queues.read.length > 0 || queues.update.length > 0;
     };
+    function visualFPSLimit() {
+      var result = Infinity;
+      var _iterator = _createForOfIteratorHelper(visualFPSLimits.values()), _step;
+      try {
+        for (_iterator.s(); !(_step = _iterator.n()).done; ) {
+          var value = _step.value;
+          result = Math.min(result, value);
+        }
+      } catch (err) {
+        _iterator.e(err);
+      } finally {
+        _iterator.f();
+      }
+      return result;
+    }
+    function setVisualFPSLimit(owner, value) {
+      validId(owner);
+      if (value === void 0 || value === null) visualFPSLimits.delete(owner);
+      else {
+        if (!Number.isFinite(value) || value <= 0) throw new RangeError("visual FPS must be positive");
+        visualFPSLimits.set(owner, value);
+      }
+      if (hasWork()) scheduleFrame();
+    }
     function publishLimit() {
       if (typeof document === "undefined" || !document.documentElement) return;
       var value = nativeFPS !== null && limitFPS !== null && limitFPS < nativeFPS ? String(limitFPS) : null;
@@ -21086,8 +21111,9 @@
         while (samples.length && time - samples[0].time > 1e3) samples.shift();
         adjustLimit(time);
       }
-      if (limitFPS === null || limitFPS >= nativeFPS) return true;
-      var period = 1e3 / limitFPS;
+      var effectiveFPS = Math.min(limitFPS === null ? Infinity : limitFPS, visualFPSLimit());
+      if (effectiveFPS >= nativeFPS) return true;
+      var period = 1e3 / effectiveFPS;
       frameCredit += delta;
       if (frameCredit + 1e-3 < period) return false;
       frameCredit = Math.min(period, frameCredit - period);
@@ -21173,30 +21199,30 @@
       var start = now();
       phase = "read";
       var reads = queues.read.splice(0);
-      var _iterator = _createForOfIteratorHelper(reads), _step;
+      var _iterator2 = _createForOfIteratorHelper(reads), _step2;
       try {
-        for (_iterator.s(); !(_step = _iterator.n()).done; ) {
-          var task = _step.value;
+        for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
+          var task = _step2.value;
           runTask(task);
         }
       } catch (err) {
-        _iterator.e(err);
+        _iterator2.e(err);
       } finally {
-        _iterator.f();
+        _iterator2.f();
       }
       Promise.resolve().then(function() {
         phase = "update";
         var updates = queues.update.splice(0);
-        var _iterator2 = _createForOfIteratorHelper(updates), _step2;
+        var _iterator3 = _createForOfIteratorHelper(updates), _step3;
         try {
-          for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
-            var task2 = _step2.value;
+          for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
+            var task2 = _step3.value;
             runTask(task2);
           }
         } catch (err) {
-          _iterator2.e(err);
+          _iterator3.e(err);
         } finally {
-          _iterator2.f();
+          _iterator3.f();
         }
         if (nativeFPS !== null && samples.length) {
           var cost = now() - start;
@@ -21301,6 +21327,19 @@
         }
         if (!group) group = makeGroup(id);
       }
+      if (id === void 0 && visualFPSLimit() !== Infinity) {
+        var _iterator4 = _createForOfIteratorHelper(queues[kind].slice()), _step4;
+        try {
+          for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
+            var pending = _step4.value;
+            if (!pending.group) cancelTask(pending);
+          }
+        } catch (err) {
+          _iterator4.e(err);
+        } finally {
+          _iterator4.f();
+        }
+      }
       var task;
       var promise = new Promise(function(resolve, reject) {
         task = {
@@ -21380,16 +21419,16 @@
       });
     }
     function detachAbortSignals(owner) {
-      var _iterator3 = _createForOfIteratorHelper(owner.abortSignals), _step3;
+      var _iterator5 = _createForOfIteratorHelper(owner.abortSignals), _step5;
       try {
-        for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
-          var signal = _step3.value;
+        for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
+          var signal = _step5.value;
           signal.removeEventListener("abort", owner.abortHandler);
         }
       } catch (err) {
-        _iterator3.e(err);
+        _iterator5.e(err);
       } finally {
-        _iterator3.f();
+        _iterator5.f();
       }
       owner.abortSignals.length = 0;
     }
@@ -21426,19 +21465,19 @@
         return finishSequence(owner, "aborted");
       };
       try {
-        var _iterator4 = _createForOfIteratorHelper(configs), _step4;
+        var _iterator6 = _createForOfIteratorHelper(configs), _step6;
         try {
-          for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
-            var config = _step4.value;
+          for (_iterator6.s(); !(_step6 = _iterator6.n()).done; ) {
+            var config = _step6.value;
             if (config.signal && !owner.abortSignals.includes(config.signal)) {
               config.signal.addEventListener("abort", owner.abortHandler);
               owner.abortSignals.push(config.signal);
             }
           }
         } catch (err) {
-          _iterator4.e(err);
+          _iterator6.e(err);
         } finally {
-          _iterator4.f();
+          _iterator6.f();
         }
         if (owner.abortSignals.some(function(signal) {
           return signal.aborted;
@@ -21586,7 +21625,8 @@
       },
       sequence: sequence,
       cancel: cancel,
-      clear: clear
+      clear: clear,
+      setVisualFPSLimit: setVisualFPSLimit
     });
   }
   var init_build_layout_scheduler = __esm({
@@ -23609,6 +23649,8 @@
         }
         var policyFPS = operation.conservative ? propertyPolicyFPS(AelluxJs2.options.cssMotionPropertyMaxFPS, AelluxJs2) : void 0;
         var maxFPS = minimumFPS(requestedMaxFPS, policyFPS);
+        operation.visualFPS = maxFPS;
+        AelluxJs2.waitLayout.setVisualFPSLimit(operation.id, maxFPS);
         return AelluxJs2.waitLayout.sequence(operationId, {
           update: function update() {
             return advance(operation);
@@ -23848,6 +23890,7 @@
     }
     function release(operation, finish) {
       var resume = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : false;
+      getAelluxJs().waitLayout.setVisualFPSLimit(operation.id, null);
       if (operation.nativeTimer !== null) root.clearTimeout(operation.nativeTimer);
       operation.nativeTimer = null;
       var _iterator5 = _createForOfIteratorHelper5(operation.animations), _step5;

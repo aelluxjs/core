@@ -87,6 +87,8 @@ export function createCssMotionController(root, getAelluxJs) {
       const policyFPS = operation.conservative
         ? propertyPolicyFPS(AelluxJs.options.cssMotionPropertyMaxFPS, AelluxJs) : undefined;
       const maxFPS = minimumFPS(requestedMaxFPS, policyFPS);
+      operation.visualFPS = maxFPS;
+      AelluxJs.waitLayout.setVisualFPSLimit(operation.id, maxFPS);
       return AelluxJs.waitLayout.sequence(operationId, {
         update: () => advance(operation),
         repeat: { ms: 0 },
@@ -302,6 +304,7 @@ export function createCssMotionController(root, getAelluxJs) {
   }
 
   function release(operation, finish, resume = false) {
+    getAelluxJs().waitLayout.setVisualFPSLimit(operation.id, null);
     if (operation.nativeTimer !== null) root.clearTimeout(operation.nativeTimer);
     operation.nativeTimer = null;
     for (const animation of operation.animations) {

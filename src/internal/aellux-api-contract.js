@@ -232,7 +232,9 @@ var bootstrapProperties = Object.freeze({
 
 var layoutScheduler = Object.freeze({
   type: "object",
-  properties: Object.freeze({ read: method, update: method, clear: method })
+  properties: Object.freeze({
+    read: method, update: method, clear: method, setVisualFPSLimit: method
+  })
 });
 
 var runtimeProperties = {};

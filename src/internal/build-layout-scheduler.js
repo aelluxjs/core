@@ -6,6 +6,10 @@ export function buildLayoutScheduler() {
   const queues = { read: [], update: [] };
   const groups = new Map();
   const tasks = new Set();
+  // Active CSS Motion operations publish their visual cadence here.  The
+  // scheduler applies the most conservative one to every consumer, including
+  // third-party code using waitLayout.read()/update().
+  const visualFPSLimits = new Map();
   // Survives replacement of a sequence so event coalescing cannot bypass an
   // element's FPS limit.
   const sequenceStarts = new Map();
@@ -30,6 +34,22 @@ export function buildLayoutScheduler() {
   const now = () => performance.now();
   const hidden = () => typeof document !== "undefined" && document.hidden;
   const hasWork = () => queues.read.length > 0 || queues.update.length > 0;
+
+  function visualFPSLimit() {
+    let result = Infinity;
+    for (const value of visualFPSLimits.values()) result = Math.min(result, value);
+    return result;
+  }
+
+  function setVisualFPSLimit(owner, value) {
+    validId(owner);
+    if (value === undefined || value === null) visualFPSLimits.delete(owner);
+    else {
+      if (!Number.isFinite(value) || value <= 0) throw new RangeError("visual FPS must be positive");
+      visualFPSLimits.set(owner, value);
+    }
+    if (hasWork()) scheduleFrame();
+  }
 
   function publishLimit() {
     if (typeof document === "undefined" || !document.documentElement) return;
@@ -123,8 +143,9 @@ export function buildLayoutScheduler() {
       while (samples.length && time - samples[0].time > 1000) samples.shift();
       adjustLimit(time);
     }
-    if (limitFPS === null || limitFPS >= nativeFPS) return true;
-    const period = 1000 / limitFPS;
+    const effectiveFPS = Math.min(limitFPS === null ? Infinity : limitFPS, visualFPSLimit());
+    if (effectiveFPS >= nativeFPS) return true;
+    const period = 1000 / effectiveFPS;
     frameCredit += delta;
     if (frameCredit + 0.001 < period) return false;
     frameCredit = Math.min(period, frameCredit - period);
@@ -319,6 +340,14 @@ export function buildLayoutScheduler() {
         group = null;
       }
       if (!group) group = makeGroup(id);
+    }
+    // At a controlled visual cadence, direct calls often arrive many times
+    // before the next eligible frame.  Keep only the newest one per phase;
+    // keyed sequences retain their own replacement semantics.
+    if (id === undefined && visualFPSLimit() !== Infinity) {
+      for (const pending of queues[kind].slice()) {
+        if (!pending.group) cancelTask(pending);
+      }
     }
     let task;
     const promise = new Promise((resolve, reject) => {
@@ -560,6 +589,7 @@ export function buildLayoutScheduler() {
     update: (first, second, third) => request("update", first, second, third),
     sequence,
     cancel,
-    clear
+    clear,
+    setVisualFPSLimit
   });
 }

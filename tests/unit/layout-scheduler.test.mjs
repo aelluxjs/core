@@ -561,3 +561,26 @@ test("timer-driven idle batches recover one FPS budget and publish it on html", 
     }
   });
 });
+
+test("a CSS Motion visual ceiling clamps and coalesces direct read/update work", async () => {
+  await withClock(async clock => {
+    const scheduler = buildLayoutScheduler();
+    const cadence = scheduler.sequence(75, { read() {}, repeat: { ms: 0 } });
+    await clock.frames(10); // establish the native frame cadence
+    scheduler.setVisualFPSLimit(900, 5);
+
+    const calls = [];
+    const first = scheduler.update(() => calls.push("first"));
+    const latest = scheduler.update(() => calls.push("latest"));
+    assert.equal(await first, undefined);
+    await clock.frames(11);
+    assert.deepEqual(calls, []);
+    await clock.frames(1);
+    assert.deepEqual(calls, ["latest"]);
+    await latest;
+
+    scheduler.setVisualFPSLimit(900, null);
+    scheduler.clear();
+    assert.equal((await cadence).status, "cleared");
+  });
+});
