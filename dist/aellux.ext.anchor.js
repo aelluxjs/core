@@ -69,6 +69,7 @@
         target: null,
         reference: null,
         layoutId: nextLayoutId++,
+        styleLayoutId: nextLayoutId++,
         layoutUntil: 0,
         layoutSingle: false,
         layoutFinalPending: false,
@@ -113,7 +114,8 @@
         AelluxJs.offEvent(root, "$resize", scheduleUpdate);
       }
       AelluxJs.waitLayout.cancel(state.layoutId);
-      await AelluxJs.waitLayout.update(deactivate, [element, state, memory]);
+      AelluxJs.waitLayout.cancel(state.styleLayoutId);
+      await AelluxJs.waitLayout.update(state.styleLayoutId, deactivate, [element, state, memory]);
     }
     function scheduleUpdate() {
       if (!anchors.size) return;
@@ -231,52 +233,54 @@
       const target = useReference ? null : resolveElement(targetValue);
       const candidates = parseCandidates(element.getAttribute(attribute));
       if (!target && !useReference || !candidates.length) {
-        await AelluxJs.waitLayout.update(() => {
+        await AelluxJs.waitLayout.update(state.styleLayoutId, () => {
           if (current()) deactivate(element, state);
         });
         if (!current()) return retry();
         return;
       }
       let placement = await AelluxJs.waitLayout.read(
+        state.styleLayoutId,
         () => current() ? readPlacement(element, target, candidates, state.active) : null
       );
       if (!current()) return retry();
       if (!placement) return;
       if (placement.hidden) {
-        await AelluxJs.waitLayout.update(() => {
+        await AelluxJs.waitLayout.update(state.styleLayoutId, () => {
           if (current()) hideForTarget(element, state, placement);
         });
         if (!current()) return retry();
         return;
       }
       if (!placement.valid) {
-        await AelluxJs.waitLayout.update(() => {
+        await AelluxJs.waitLayout.update(state.styleLayoutId, () => {
           if (current()) invalidContext(element, state, placement);
         });
         if (!current()) return retry();
         return;
       }
       if (!state.active) {
-        await AelluxJs.waitLayout.update(() => {
+        await AelluxJs.waitLayout.update(state.styleLayoutId, () => {
           if (!current()) return;
           applyBaseStyles(element);
           state.active = true;
         });
         if (!current()) return retry();
         placement = await AelluxJs.waitLayout.read(
+          state.styleLayoutId,
           () => current() ? readPlacement(element, useReference ? null : target, candidates, true) : null
         );
         if (!current()) return retry();
         if (!placement) return;
         if (placement.hidden) {
-          await AelluxJs.waitLayout.update(() => {
+          await AelluxJs.waitLayout.update(state.styleLayoutId, () => {
             if (current()) hideForTarget(element, state, placement);
           });
           if (!current()) return retry();
           return;
         }
         if (!placement.valid) {
-          await AelluxJs.waitLayout.update(() => {
+          await AelluxJs.waitLayout.update(state.styleLayoutId, () => {
             if (current()) invalidContext(element, state, placement);
           });
           if (!current()) return retry();
@@ -284,7 +288,7 @@
         }
       }
       let applied = false;
-      await AelluxJs.waitLayout.update(() => {
+      await AelluxJs.waitLayout.update(state.styleLayoutId, () => {
         if (!current()) return;
         state.invalidContext = false;
         observe(state, element, placement.target, placement.reference);

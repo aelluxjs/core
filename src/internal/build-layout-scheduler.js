@@ -3,6 +3,8 @@
 export function buildLayoutScheduler() {
   const MIN_FPS = 5;
   const FPS_STEP = 15;
+  const BASE_RECOVERY_DELAY = 1000;
+  const MAX_RECOVERY_DELAY = 8000;
   const queues = { read: [], update: [] };
   const groups = new Map();
   const tasks = new Set();
@@ -28,7 +30,7 @@ export function buildLayoutScheduler() {
   let slowStreak = 0;
   let lastAdjustment = -Infinity;
   let stableSince = null;
-  let recoveryDelay = 3000;
+  let recoveryDelay = BASE_RECOVERY_DELAY;
   let trialLimit = null;
 
   const now = () => performance.now();
@@ -77,7 +79,7 @@ export function buildLayoutScheduler() {
     }
     publishLimit();
     trialLimit = null;
-    recoveryDelay = 3000;
+    recoveryDelay = BASE_RECOVERY_DELAY;
   }
 
   function onVisible() {
@@ -163,7 +165,7 @@ export function buildLayoutScheduler() {
           .map(sample => Math.max(sample.delay, sample.cost)));
         limitFPS = Math.min(limitFPS, adaptiveLimit(1000 / delay));
         publishLimit();
-        if (trialLimit === previous) recoveryDelay = Math.min(30000, recoveryDelay * 2);
+        if (trialLimit === previous) recoveryDelay = Math.min(MAX_RECOVERY_DELAY, recoveryDelay * 2);
         trialLimit = null;
         lastAdjustment = time;
         samples = [];
@@ -188,8 +190,14 @@ export function buildLayoutScheduler() {
   }
 
   function recoverLimitAfterStablePeriod(time) {
-    if (limitFPS >= nativeFPS || stableSince === null ||
-        time - stableSince < recoveryDelay || time - lastAdjustment < recoveryDelay) return false;
+    if (stableSince === null || time - stableSince < recoveryDelay ||
+        time - lastAdjustment < recoveryDelay) return false;
+    // A trial that stayed stable has earned the short recovery interval again.
+    if (trialLimit === limitFPS) {
+      trialLimit = null;
+      recoveryDelay = BASE_RECOVERY_DELAY;
+    }
+    if (limitFPS >= nativeFPS) return false;
     // Use the same budgets used when pressure reduces the limit.  Adding
     // FPS_STEP directly would recover 5 FPS as 20 FPS (rather than 15),
     // skipping the first observed budget after the minimum.

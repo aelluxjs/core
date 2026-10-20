@@ -47,6 +47,7 @@
   const pendingResizeEntries = new Map();
   const pendingResizeElements = new Set();
   const layoutIds = new WeakMap();
+  const orientationLayoutIds = new WeakMap();
   let nextLayoutId = 1000000;
 
   const adaptiveParams = {
@@ -230,7 +231,12 @@
   }
 
   function inferOrientation(flexBox, selector = "*") {
-    return AelluxJs.waitLayout.read(() => {
+    let id = orientationLayoutIds.get(flexBox);
+    if (id === undefined) {
+      id = nextLayoutId++;
+      orientationLayoutIds.set(flexBox, id);
+    }
+    return AelluxJs.waitLayout.read(id, () => {
       const fallback = "horizontal";
       var style = getComputedStyle(flexBox);
 

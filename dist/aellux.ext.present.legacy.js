@@ -400,10 +400,11 @@
       autoUnpopSchedule(element, presentController);
     }
     function unmountPresentContainer(element) {
-      var _containerAriaHandler, _elementMemories$get;
+      var _AelluxJs$waitLayout, _containerAriaHandler, _elementMemories$get;
       if (!presentElements.has(element)) return;
       var controller = presentElements.get(element);
       controller.stop();
+      (_AelluxJs$waitLayout = AelluxJs.waitLayout) === null || _AelluxJs$waitLayout === void 0 || _AelluxJs$waitLayout.cancel(controller.motionId);
       element.classList.remove(className.grid);
       presentElements.delete(element);
       openPresentElements.delete(element);
@@ -585,7 +586,7 @@
                 break;
               }
               _context.n = 2;
-              return AelluxJs.waitLayout.read(function() {
+              return AelluxJs.waitLayout.read(controller.motionId, function() {
                 return element.getBoundingClientRect();
               });
             case 2:

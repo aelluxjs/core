@@ -103,6 +103,7 @@
     var pendingResizeEntries = /* @__PURE__ */ new Map();
     var pendingResizeElements = /* @__PURE__ */ new Set();
     var layoutIds = /* @__PURE__ */ new WeakMap();
+    var orientationLayoutIds = /* @__PURE__ */ new WeakMap();
     var nextLayoutId = 1e6;
     var adaptiveParams = {
       experienceScale: {
@@ -348,7 +349,12 @@
     }
     function inferOrientation(flexBox) {
       var selector = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : "*";
-      return AelluxJs.waitLayout.read(function() {
+      var id = orientationLayoutIds.get(flexBox);
+      if (id === void 0) {
+        id = nextLayoutId++;
+        orientationLayoutIds.set(flexBox, id);
+      }
+      return AelluxJs.waitLayout.read(id, function() {
         var fallback = "horizontal";
         var style = getComputedStyle(flexBox);
         if (style.display === "flex" || style.display === "inline-flex") {

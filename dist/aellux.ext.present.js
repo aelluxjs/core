@@ -210,16 +210,17 @@
       autoUnpopSchedule(element, presentController);
     }
     function unmountPresentContainer(element) {
-      var _a, _b;
+      var _a, _b, _c;
       if (!presentElements.has(element)) return;
       const controller = presentElements.get(element);
       controller.stop();
+      (_a = AelluxJs.waitLayout) == null ? void 0 : _a.cancel(controller.motionId);
       element.classList.remove(className.grid);
       presentElements.delete(element);
       openPresentElements.delete(element);
-      (_a = containerAriaHandlers.get(element)) == null ? void 0 : _a.release();
+      (_b = containerAriaHandlers.get(element)) == null ? void 0 : _b.release();
       containerAriaHandlers.delete(element);
-      (_b = elementMemories.get(element)) == null ? void 0 : _b.restore();
+      (_c = elementMemories.get(element)) == null ? void 0 : _c.restore();
       elementMemories.delete(element);
       controller.triggers.forEach(updateTriggerAriaExpanded);
     }
@@ -370,7 +371,10 @@
         element.style.setProperty("max-width", `${Math.max(0, start.width)}px`, "important");
       }
       if (!waitForPreparation)
-        await AelluxJs.waitLayout.read(() => element.getBoundingClientRect());
+        await AelluxJs.waitLayout.read(
+          controller.motionId,
+          () => element.getBoundingClientRect()
+        );
       return size;
     }
     async function presentTransition(element, gotoVisible, forceRepop = false) {

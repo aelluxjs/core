@@ -272,6 +272,7 @@
         target: null,
         reference: null,
         layoutId: nextLayoutId++,
+        styleLayoutId: nextLayoutId++,
         layoutUntil: 0,
         layoutSingle: false,
         layoutFinalPending: false,
@@ -334,8 +335,9 @@
                 AelluxJs.offEvent(root, "$resize", scheduleUpdate);
               }
               AelluxJs.waitLayout.cancel(state.layoutId);
+              AelluxJs.waitLayout.cancel(state.styleLayoutId);
               _context2.n = 2;
-              return AelluxJs.waitLayout.update(deactivate, [element, state, memory]);
+              return AelluxJs.waitLayout.update(state.styleLayoutId, deactivate, [element, state, memory]);
             case 2:
               return _context2.a(2);
           }
@@ -514,7 +516,7 @@
                 break;
               }
               _context3.n = 2;
-              return AelluxJs.waitLayout.update(function() {
+              return AelluxJs.waitLayout.update(state.styleLayoutId, function() {
                 if (current()) deactivate(element, state);
               });
             case 2:
@@ -527,7 +529,7 @@
               return _context3.a(2);
             case 4:
               _context3.n = 5;
-              return AelluxJs.waitLayout.read(function() {
+              return AelluxJs.waitLayout.read(state.styleLayoutId, function() {
                 return current() ? readPlacement(element, target, candidates, state.active) : null;
               });
             case 5:
@@ -549,7 +551,7 @@
                 break;
               }
               _context3.n = 8;
-              return AelluxJs.waitLayout.update(function() {
+              return AelluxJs.waitLayout.update(state.styleLayoutId, function() {
                 if (current()) hideForTarget(element, state, placement);
               });
             case 8:
@@ -566,7 +568,7 @@
                 break;
               }
               _context3.n = 11;
-              return AelluxJs.waitLayout.update(function() {
+              return AelluxJs.waitLayout.update(state.styleLayoutId, function() {
                 if (current()) invalidContext(element, state, placement);
               });
             case 11:
@@ -583,7 +585,7 @@
                 break;
               }
               _context3.n = 14;
-              return AelluxJs.waitLayout.update(function() {
+              return AelluxJs.waitLayout.update(state.styleLayoutId, function() {
                 if (!current()) return;
                 applyBaseStyles(element);
                 state.active = true;
@@ -596,7 +598,7 @@
               return _context3.a(2, retry());
             case 15:
               _context3.n = 16;
-              return AelluxJs.waitLayout.read(function() {
+              return AelluxJs.waitLayout.read(state.styleLayoutId, function() {
                 return current() ? readPlacement(element, useReference ? null : target, candidates, true) : null;
               });
             case 16:
@@ -618,7 +620,7 @@
                 break;
               }
               _context3.n = 19;
-              return AelluxJs.waitLayout.update(function() {
+              return AelluxJs.waitLayout.update(state.styleLayoutId, function() {
                 if (current()) hideForTarget(element, state, placement);
               });
             case 19:
@@ -635,7 +637,7 @@
                 break;
               }
               _context3.n = 22;
-              return AelluxJs.waitLayout.update(function() {
+              return AelluxJs.waitLayout.update(state.styleLayoutId, function() {
                 if (current()) invalidContext(element, state, placement);
               });
             case 22:
@@ -649,7 +651,7 @@
             case 24:
               applied = false;
               _context3.n = 25;
-              return AelluxJs.waitLayout.update(function() {
+              return AelluxJs.waitLayout.update(state.styleLayoutId, function() {
                 if (!current()) return;
                 state.invalidContext = false;
                 observe(state, element, placement.target, placement.reference);

@@ -49,6 +49,8 @@
   function buildLayoutScheduler() {
     const MIN_FPS = 5;
     const FPS_STEP = 15;
+    const BASE_RECOVERY_DELAY = 1e3;
+    const MAX_RECOVERY_DELAY = 8e3;
     const queues = { read: [], update: [] };
     const groups = /* @__PURE__ */ new Map();
     const tasks = /* @__PURE__ */ new Set();
@@ -67,7 +69,7 @@
     let slowStreak = 0;
     let lastAdjustment = -Infinity;
     let stableSince = null;
-    let recoveryDelay = 3e3;
+    let recoveryDelay = BASE_RECOVERY_DELAY;
     let trialLimit = null;
     const now = () => performance.now();
     const hidden = () => typeof document !== "undefined" && document.hidden;
@@ -110,7 +112,7 @@
       }
       publishLimit();
       trialLimit = null;
-      recoveryDelay = 3e3;
+      recoveryDelay = BASE_RECOVERY_DELAY;
     }
     function onVisible() {
       if (hidden()) return;
@@ -186,7 +188,7 @@
           const delay = Math.max(...samples.filter((sample) => sample.slow).map((sample) => Math.max(sample.delay, sample.cost)));
           limitFPS = Math.min(limitFPS, adaptiveLimit(1e3 / delay));
           publishLimit();
-          if (trialLimit === previous) recoveryDelay = Math.min(3e4, recoveryDelay * 2);
+          if (trialLimit === previous) recoveryDelay = Math.min(MAX_RECOVERY_DELAY, recoveryDelay * 2);
           trialLimit = null;
           lastAdjustment = time;
           samples = [];
@@ -209,7 +211,12 @@
       recoverLimitAfterStablePeriod(time);
     }
     function recoverLimitAfterStablePeriod(time) {
-      if (limitFPS >= nativeFPS || stableSince === null || time - stableSince < recoveryDelay || time - lastAdjustment < recoveryDelay) return false;
+      if (stableSince === null || time - stableSince < recoveryDelay || time - lastAdjustment < recoveryDelay) return false;
+      if (trialLimit === limitFPS) {
+        trialLimit = null;
+        recoveryDelay = BASE_RECOVERY_DELAY;
+      }
+      if (limitFPS >= nativeFPS) return false;
       limitFPS = recoveryLimit(limitFPS);
       publishLimit();
       trialLimit = limitFPS;

@@ -20967,6 +20967,8 @@
   function buildLayoutScheduler() {
     var MIN_FPS = 5;
     var FPS_STEP = 15;
+    var BASE_RECOVERY_DELAY = 1e3;
+    var MAX_RECOVERY_DELAY = 8e3;
     var queues = {
       read: [],
       update: []
@@ -20988,7 +20990,7 @@
     var slowStreak = 0;
     var lastAdjustment = -Infinity;
     var stableSince = null;
-    var recoveryDelay = 3e3;
+    var recoveryDelay = BASE_RECOVERY_DELAY;
     var trialLimit = null;
     var now = function now2() {
       return performance.now();
@@ -21046,7 +21048,7 @@
       }
       publishLimit();
       trialLimit = null;
-      recoveryDelay = 3e3;
+      recoveryDelay = BASE_RECOVERY_DELAY;
     }
     function onVisible() {
       if (hidden()) return;
@@ -21135,7 +21137,7 @@
           })));
           limitFPS = Math.min(limitFPS, adaptiveLimit(1e3 / delay));
           publishLimit();
-          if (trialLimit === previous) recoveryDelay = Math.min(3e4, recoveryDelay * 2);
+          if (trialLimit === previous) recoveryDelay = Math.min(MAX_RECOVERY_DELAY, recoveryDelay * 2);
           trialLimit = null;
           lastAdjustment = time;
           samples = [];
@@ -21158,7 +21160,12 @@
       recoverLimitAfterStablePeriod(time);
     }
     function recoverLimitAfterStablePeriod(time) {
-      if (limitFPS >= nativeFPS || stableSince === null || time - stableSince < recoveryDelay || time - lastAdjustment < recoveryDelay) return false;
+      if (stableSince === null || time - stableSince < recoveryDelay || time - lastAdjustment < recoveryDelay) return false;
+      if (trialLimit === limitFPS) {
+        trialLimit = null;
+        recoveryDelay = BASE_RECOVERY_DELAY;
+      }
+      if (limitFPS >= nativeFPS) return false;
       limitFPS = recoveryLimit(limitFPS);
       publishLimit();
       trialLimit = limitFPS;

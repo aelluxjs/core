@@ -369,6 +369,7 @@
         publishDirty: false,
         layoutRevision: 0,
         resizeLayoutId: nextLayoutId++,
+        publishLayoutId: nextLayoutId++,
         disposed: false
       };
       state.onScroll = function(event) {
@@ -509,6 +510,7 @@
         else if (state.desktopMedia.removeListener) state.desktopMedia.removeListener(state.onDesktopMediaChange);
       }
       AelluxJs.waitLayout.cancel(state.resizeLayoutId);
+      AelluxJs.waitLayout.cancel(state.publishLayoutId);
       offEvent(root, "$resize", state.onResize);
       (_elementMemories$get = elementMemories.get(element)) === null || _elementMemories$get === void 0 || _elementMemories$get.restore();
       elementMemories.delete(element);
@@ -2023,7 +2025,7 @@
       state.publishDirty = true;
       if (state.publishPending) return;
       state.publishPending = true;
-      AelluxJs.waitLayout.read(function() {
+      AelluxJs.waitLayout.read(state.publishLayoutId, function() {
         if (state.disposed) return null;
         state.publishDirty = false;
         var metrics = nativeMetrics(state.element);
@@ -2047,7 +2049,7 @@
           state.publishDirty = false;
           return;
         }
-        return AelluxJs.waitLayout.update(function() {
+        return AelluxJs.waitLayout.update(state.publishLayoutId, function() {
           if (state.disposed || state.layoutRevision !== values.revision) return;
           if (state.element.scrollTop !== values.scrollTop || state.element.scrollLeft !== values.scrollLeft) {
             state.publishDirty = true;

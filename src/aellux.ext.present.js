@@ -250,6 +250,7 @@
     if (!presentElements.has(element)) return;
     const controller = presentElements.get(element);
     controller.stop();
+    AelluxJs.waitLayout?.cancel(controller.motionId);
     element.classList.remove(className.grid);
     presentElements.delete(element);
     openPresentElements.delete(element);
@@ -412,7 +413,8 @@
       element.style.setProperty("max-width", `${Math.max(0, start.width)}px`, "important");
     }
     if (!waitForPreparation)
-      await AelluxJs.waitLayout.read(() => element.getBoundingClientRect());
+      await AelluxJs.waitLayout.read(controller.motionId,
+        () => element.getBoundingClientRect());
     return size;
   }
 
