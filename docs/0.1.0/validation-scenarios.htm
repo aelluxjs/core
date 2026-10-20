@@ -600,7 +600,7 @@ Validation Scenarios                  </li>
 npm run test:browser
 </code></pre>
 <p><code>test:browser</code> builds <code>dist/</code> before testing. Use <code>npm run test:browser -- --project=chromium</code> to run only Chromium. To use an installed Chrome or Edge instead of Playwright&#39;s Chromium, set <code>AELLUXJS_TEST_BROWSER_CHANNEL</code> to <code>chrome</code> or <code>msedge</code> and select the Chromium project. The Bootstrap scenario uses the versioned local fixture <code>tests/fixtures/bootstrap-5.3.8.min.css</code> and requires no CDN or network access.</p>
-<p>To run one spec after a build, use <code>npx playwright test tests/browser/full-bundle.spec.mjs --project=chromium</code>. For a Scrollbox change, replace that path with <code>tests/browser/scrollbox-pointer.spec.mjs</code> or <code>tests/browser/scrollbox-scrollbar.spec.mjs</code>. Direct <code>npx playwright test</code> commands use the current <code>dist/</code> files; run <code>npm run build:core</code> first after changing runtime or Extension source. The full bundle spec compares bundled and initialized Extensions with every <code>src/aellux.ext.*.js</code> source file that calls <code>extAttach</code> in the normal and minified Modern and Legacy runtimes. Run <code>npm run test:budget</code> after a build to check raw and gzip artifact limits.</p>
+<p>To run one spec after a build, use <code>npx playwright test tests/browser/full-bundle.spec.mjs --project=chromium</code>. For a Scrollbox change, replace that path with <code>tests/browser/scrollbox-pointer.spec.mjs</code> or <code>tests/browser/scrollbox-scrollbar.spec.mjs</code>. Direct <code>npx playwright test</code> commands use the current <code>dist/</code> files; run <code>npm run build:core</code> first after changing runtime or Extension source. The full bundle spec compares the bundled, registered, and lazy Core Extensions with every <code>src/aellux.ext.*.js</code> source file that calls <code>extAttach</code> in the normal and minified Modern and Legacy runtimes. Extension registry tests verify that separate Scrollbox and Snap files load when needed. Run <code>npm run test:budget</code> after a build to check raw and gzip artifact limits.</p>
 <h2>Browser Matrix</h2>
 <p>The Playwright configuration runs Chromium, Firefox, and WebKit. The suite covers both normal Modern selection and forced Legacy execution. Forced Legacy validates the ES5 distribution path in these current engines; it does not establish support for historical versions of those browsers.</p>
 <p>Run the complete matrix with one worker when recording a release result:</p>
@@ -699,8 +699,8 @@ npm run test:browser
 <td>Global and ESM identity, camelCase Extension keys and options, compound filenames, Modern and Legacy selection, minified files, optional styles, and incompatible builds.</td>
 </tr>
 <tr>
-<td>Full bundle completeness</td>
-<td>Every Core Extension is bundled, registered, and initialized in Modern, Legacy, normal, and minified full runtimes, without a separate Extension script request.</td>
+<td>Full distribution coverage</td>
+<td>Bundled Core Extensions initialize from the Full runtime; Scrollbox and Scrollbox Snap load separate compatible files on demand, without a duplicate script request or a manifest fetch for the current Core version. Modern, Legacy, normal, and minified paths are checked.</td>
 </tr>
 <tr>
 <td>Diagnostics</td>

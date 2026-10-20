@@ -47,6 +47,8 @@ test("feedback rejects invalid arguments before dispatch", async ({ page }) => {
   await page.goto("/tests/index.htm");
   await page.addScriptTag({ url: "/dist/aellux.js" });
   await page.evaluate(() => AelluxJs.init({ mode: "full" }));
+  await expect.poll(() => page.evaluate(() => AelluxJs.orchestratorVersion)).toBe("0.1.0-beta.10");
+  await page.evaluate(() => AelluxJs.wait("feedback"));
   await expect.poll(() => page.evaluate(() => AelluxJs.ext.feedback?.initialized)).toBe(true);
 
   const result = await page.evaluate(() => {

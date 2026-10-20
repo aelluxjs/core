@@ -75,8 +75,12 @@ test("extensions register the CSS properties they publish during init", async ({
   await page.goto("/tests/index.htm");
   await page.addScriptTag({ url: "/dist/aellux.js" });
   await page.evaluate(() => AelluxJs.init({ mode: "full" }));
+  await expect.poll(() => page.evaluate(() => AelluxJs.orchestratorVersion)).toBe("0.1.0-beta.10");
+  await page.evaluate(() => Promise.all([
+    "adaptive", "anchor", "present", "scrollbox", "scrollbox-snap"
+  ].map(name => AelluxJs.wait(name))));
   await expect.poll(() => page.evaluate(() =>
-    ["adaptive", "anchor", "present", "scrollbox"].every(name =>
+    ["adaptive", "anchor", "present", "scrollbox", "scrollboxSnap"].every(name =>
       AelluxJs.ext[name]?.initialized)
   )).toBe(true);
 

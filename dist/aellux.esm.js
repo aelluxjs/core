@@ -67,7 +67,7 @@ function buildDiagnostics(catalog) {
     return diagnostics.verboseLevel;
   }
   function emit(level, definition, context) {
-    var identity = diagnosticIdentity(definition, context);
+    var identity = String(level) + "|" + diagnosticIdentity(definition, context);
     if (identities.indexOf(identity) !== -1) return diagnostics.create(definition, context);
     var diagnostic = diagnostics.create(definition, context);
     var entry = {
@@ -103,6 +103,9 @@ function buildDiagnostics(catalog) {
     var type = typeof value;
     if (type !== "object" && type !== "function") return type + ":" + String(value);
     if (value && value.nodeType) return "element:" + resourceId(value);
+    if (value instanceof Error) {
+      return "error:" + value.name + ":" + value.message + ":" + String(value.code || "");
+    }
     if (seen.indexOf(value) !== -1) return "circular";
     seen.push(value);
     var result;

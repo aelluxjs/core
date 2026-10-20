@@ -11,7 +11,7 @@
       script.src = local ? "../dist/aellux" + min + ".js" :
         "https://cdn.jsdelivr.net/gh/aelluxjs/core@" +
         encodeURIComponent(version) + "/dist/aellux" + min + ".js";
-      script.onload = function () { $ae.init(); };
+      script.onload = function () { $ae.init({ mode: "full" }); };
       document.head.appendChild(script);
     })();
   </script>

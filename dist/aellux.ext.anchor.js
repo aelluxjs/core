@@ -52,7 +52,7 @@
         priority: 0,
         mount: mountAnchor,
         unmount: unmountAnchor,
-        update: updateAnchor
+        update: (element) => updateAnchor(element, true)
       });
     }
     async function destroy() {
@@ -220,11 +220,12 @@
     function now() {
       return root.performance && typeof root.performance.now === "function" ? root.performance.now() : Date.now();
     }
-    async function updateAnchor(element) {
+    async function updateAnchor(element, ensureLatest = false) {
       const state = anchors.get(element);
       if (!state) return;
       const revision = ++state.revision;
       const current = () => anchors.get(element) === state && state.revision === revision;
+      const retry = () => ensureLatest && anchors.get(element) === state ? updateAnchor(element, true) : void 0;
       const targetValue = element.getAttribute(targetAttribute);
       const useReference = !targetValue || !targetValue.trim();
       const target = useReference ? null : resolveElement(targetValue);
@@ -233,22 +234,26 @@
         await AelluxJs.waitLayout.update(() => {
           if (current()) deactivate(element, state);
         });
+        if (!current()) return retry();
         return;
       }
       let placement = await AelluxJs.waitLayout.read(
         () => current() ? readPlacement(element, target, candidates, state.active) : null
       );
-      if (!current() || !placement) return;
+      if (!current()) return retry();
+      if (!placement) return;
       if (placement.hidden) {
         await AelluxJs.waitLayout.update(() => {
           if (current()) hideForTarget(element, state, placement);
         });
+        if (!current()) return retry();
         return;
       }
       if (!placement.valid) {
         await AelluxJs.waitLayout.update(() => {
           if (current()) invalidContext(element, state, placement);
         });
+        if (!current()) return retry();
         return;
       }
       if (!state.active) {
@@ -257,21 +262,24 @@
           applyBaseStyles(element);
           state.active = true;
         });
-        if (!current()) return;
+        if (!current()) return retry();
         placement = await AelluxJs.waitLayout.read(
           () => current() ? readPlacement(element, useReference ? null : target, candidates, true) : null
         );
-        if (!current() || !placement) return;
+        if (!current()) return retry();
+        if (!placement) return;
         if (placement.hidden) {
           await AelluxJs.waitLayout.update(() => {
             if (current()) hideForTarget(element, state, placement);
           });
+          if (!current()) return retry();
           return;
         }
         if (!placement.valid) {
           await AelluxJs.waitLayout.update(() => {
             if (current()) invalidContext(element, state, placement);
           });
+          if (!current()) return retry();
           return;
         }
       }
@@ -291,7 +299,7 @@
         state.lastUpdateAt = now();
         applied = true;
       });
-      if (!applied && anchors.get(element) === state) return updateAnchor(element);
+      if (!applied && anchors.get(element) === state) return updateAnchor(element, ensureLatest);
     }
     function readPlacement(element, target, candidates, measure) {
       const reference = element.offsetParent;
@@ -335,7 +343,8 @@
       if (visibility === "hidden" || visibility === "collapse") return true;
       for (let current = element; current && current.nodeType === 1; current = current.parentElement) {
         const style = root.getComputedStyle(current);
-        if (current.hidden || style.display === "none" || style.contentVisibility === "hidden" || Number(style.opacity) === 0) return true;
+        const inline = current.style;
+        if (current.hidden || inline.display === "none" || inline.visibility === "hidden" || inline.visibility === "collapse" || inline.opacity === "0" || style.display === "none" || style.contentVisibility === "hidden" || Number(style.opacity) === 0) return true;
       }
       return false;
     }

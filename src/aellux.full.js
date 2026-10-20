@@ -12,22 +12,22 @@ root.AelluxJs.bundledExtensions = Object.freeze({
   "point": () => import("./aellux.ext.point.js"),
   "anchor": () => import("./aellux.ext.anchor.js"),
   "adaptive": () => import("./aellux.ext.adaptive.js"),
-  "present": () => import("./aellux.ext.present.js"),
-  //"scrollbox": () => import("./aellux.ext.scrollbox.js")
+  "present": () => import("./aellux.ext.present.js")
 });
 
 root.AelluxJs.extIndex.official = typeof __AELLUX_OFFICIAL_EXTENSION_MANIFEST__ !== "undefined"
   ? __AELLUX_OFFICIAL_EXTENSION_MANIFEST__ : null;
 
-// The code is bundled, while initialization remains demand-driven. This avoids
-// network fetches yet does not attach extension listeners without matching DOM.
+// Bundled Extensions initialize on demand without separate script requests.
+// Scrollbox and Snap use the embedded official manifest to load separate files
+// when their selectors match, keeping their code out of the Full runtime.
 root.AelluxJs.ext("adaptive", { loadWhen: "[data-ae-adaptive]", loadStyle: true });
 root.AelluxJs.ext("anchor", { loadWhen: "[data-ae-anchor]" });
 root.AelluxJs.ext("feedback", { loadWhen: "[data-ae-feedback]", loadStyle: true });
 root.AelluxJs.ext("focus", { loadWhen: "[data-ae-focus]" });
 root.AelluxJs.ext("point", { loadWhen: "[data-ae-point]" });
 root.AelluxJs.ext("present", {
-  loadWhen: "[data-ae-present],[data-ae-present-trigger],[data-ae-present-dismiss],[data-ae-present-target]",
+  loadWhen: "[data-ae-present],[data-ae-trigger],[data-ae-dismiss],[data-ae-target]",
   loadStyle: true
 });
 root.AelluxJs.ext("scrollbox", { loadWhen: "[data-ae-scrollbox]" });

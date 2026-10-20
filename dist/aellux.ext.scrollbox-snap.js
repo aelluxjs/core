@@ -58,6 +58,7 @@
         targetAxis: null,
         timeout: null,
         wheelTimeout: null,
+        edgeWheelTimeout: null,
         activePointers: /* @__PURE__ */ new Set(),
         activeTouches: /* @__PURE__ */ new Set(),
         savedItems: /* @__PURE__ */ new Map(),
@@ -73,7 +74,10 @@
         if (state.target !== null && !targetReached(state)) scheduleTargetIdle(state);
         else scheduleSettle(state);
       };
-      state.onScrollEnd = () => finish(state);
+      state.onScrollEnd = (event) => {
+        if (event.target !== state.element || state.target !== null && !targetReached(state)) return;
+        finish(state);
+      };
       state.onPointerDown = (event) => beginGesture(state, POINTER, event);
       state.onPointerEnd = (event) => endGesture(state, POINTER, event);
       state.onTouchStart = (event) => beginGesture(state, TOUCH, event);
@@ -110,6 +114,7 @@
       state.disposed = true;
       clearTimer(state, "timeout");
       clearTimer(state, "wheelTimeout");
+      clearTimer(state, "edgeWheelTimeout");
       (_a = state.observer) == null ? void 0 : _a.disconnect();
       (_b = state.resizeObserver) == null ? void 0 : _b.disconnect();
       AelluxJs.offEvent(element, SCROLL_EVENT, state.onScroll);
@@ -211,7 +216,7 @@
     }
     function goto(element, index, behavior = SMOOTH) {
       const state = states.get(element), items = state && itemsFor(state);
-      if (!state || !Number.isInteger(index) || index < 0 || index >= items.length) return false;
+      if (!state || state.activeTouches.size || !Number.isInteger(index) || index < 0 || index >= items.length) return false;
       const axis = axisFor(state), metrics = metricsFor(element);
       const destination = axis === HORIZONTAL ? Math.max(0, Math.min(metrics.x, element.scrollLeft + offset(state, items[index], axis))) : Math.max(0, Math.min(metrics.y, element.scrollTop + offset(state, items[index], axis)));
       state.index = index;
@@ -232,6 +237,13 @@
     }
     function selectedIndex(state) {
       const items = itemsFor(state);
+      if (items.length > 1) {
+        const axis = axisFor(state), metrics = metricsFor(state.element);
+        const maximum = axis === HORIZONTAL ? metrics.x : metrics.y;
+        const position = axis === HORIZONTAL ? state.element.scrollLeft : state.element.scrollTop;
+        if (position <= 1) return 0;
+        if (maximum > 0 && position >= maximum - 1) return items.length - 1;
+      }
       let nearest = 0, distance = Infinity;
       for (let index = 0; index < items.length; index++) {
         const candidate = Math.abs(offset(state, items[index]));
@@ -249,8 +261,26 @@
       const delta = axis === HORIZONTAL ? horizontal ? event.deltaX : event.deltaY : horizontal ? 0 : event.deltaY;
       if (!delta) return false;
       const items = itemsFor(state), index = state.target !== null ? state.index : selectedIndex(state);
+      if (!items.length) return false;
       const nextIndex = index + Math.sign(delta);
-      if (nextIndex < 0 || nextIndex >= items.length) return false;
+      if (nextIndex < 0 || nextIndex >= items.length) {
+        if (state.target !== null && !targetReached(state)) {
+          event.preventDefault();
+          return true;
+        }
+        const behavior = root.getComputedStyle(state.element)[axis === HORIZONTAL ? "overscrollBehaviorX" : "overscrollBehaviorY"];
+        if (behavior === "contain" || behavior === "none") {
+          event.preventDefault();
+          return true;
+        }
+        setSuspension(state, { reason: "wheel-edge", active: true });
+        clearTimer(state, "edgeWheelTimeout");
+        state.edgeWheelTimeout = root.setTimeout(() => {
+          state.edgeWheelTimeout = null;
+          setSuspension(state, { reason: "wheel-edge", active: false });
+        }, SNAP_SCROLL_IDLE_MS);
+        return false;
+      }
       event.preventDefault();
       if (state.wheelTimeout !== null) return true;
       state.wheelTimeout = root.setTimeout(() => {

@@ -13,7 +13,7 @@ Core sources live in `src/`, build tooling in `scripts/`, browser validation pag
 
 ## Full Mode
 
-Full mode loads the orchestrator and the complete core Extension bundle:
+Full mode makes the supported Core Extensions available through the boot script and the Full runtime:
 
 ```html
 <script src="./dist/aellux.js"></script>
@@ -22,8 +22,9 @@ Full mode loads the orchestrator and the complete core Extension bundle:
 </script>
 ```
 
-The full bundle is a runtime loaded by the aellux.js boot script; it is not a standalone entry point.
-It includes and initializes Adaptive, Anchor, Feedback, Focus, Point, Preference, Present, Scrollbox, Scrollbox Snap, and State Navigation. Adaptive, Feedback, and Present also load their generated stylesheets. No separate registration is needed for these core Extensions in `full` mode.
+The Full runtime is loaded by the aellux.js boot script; it is not a standalone entry point. **Full means integrated availability, not physical inclusion in one file.** It incorporates Adaptive, Anchor, Feedback, Focus, Point, Preference, Present, and State Navigation. Adaptive, Anchor, Feedback, Focus, Point, and Present initialize when matching markup is mounted; Preference and State Navigation initialize at startup.
+
+Full also registers Scrollbox and Scrollbox Snap for on-demand loading, but keeps their implementations in separate distribution files. Mounting an element with `data-ae-scrollbox` requests the compatible Scrollbox script. Mounting one with both `data-ae-scrollbox` and `data-ae-scrollbox-snap` also requests Snap, which waits for Scrollbox before mounting. The Full runtime embeds official artifact metadata, so these requests do not require a separate manifest download for the current Core version. Modern or Legacy and normal or minified files follow the boot selection. Adaptive, Feedback, and Present may request their generated stylesheets. No separate registration is needed for these Core Extensions in `full` mode.
 
 ## Basic Mode
 

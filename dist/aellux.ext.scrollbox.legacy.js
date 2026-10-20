@@ -1476,7 +1476,7 @@
         stopPointerScrollMouseEvents(state);
       }
       var snapHandled = false;
-      if (event && event.type === POINTER_UP && pointerScroll.axis) {
+      if (event && event.type === POINTER_UP && pointerScroll.axis && !selectionHasChanged(pointerScroll.selectionAtDown)) {
         var snapChain = pointerScroll.moved ? pointerScroll.chain : pointerScroll.chains[pointerScroll.axis];
         var _iterator14 = _createForOfIteratorHelper(snapChain), _step14;
         try {
@@ -1828,10 +1828,10 @@
       var wrapper = elastic.wrapper;
       var memory = elasticMemories.get(wrapper).cssProperties;
       var compensated = {
-        top: 0 * elastic.amounts[2] * (2 + scaleY),
+        top: 0,
         right: elastic.amounts[3] * (2 + scaleX),
         bottom: elastic.amounts[0] * (2 + scaleY),
-        left: 0 * elastic.amounts[1] * (2 + scaleX)
+        left: 0
       };
       for (var _i2 = 0, _arr2 = ["top", "right", "bottom", "left"]; _i2 < _arr2.length; _i2++) {
         var _elastic$baseMargins;
@@ -2215,7 +2215,21 @@
         var desiredY = state.element.scrollTop + (axes.y ? deltaY : 0);
         var axis = axes.x && axes.y ? null : axes.x ? "x" : "y";
         if (applyElasticFromDesired(state, _desiredX, desiredY, true, axis)) {
+          var parent = nextWheelTarget(state.element);
+          var overscroll = root.getComputedStyle(state.element).overscrollBehaviorY;
+          var verticalChain = axes.y && deltaY && (parent === null || parent === void 0 ? void 0 : parent.axes.y) && (!overscroll || overscroll === "auto") && (desiredY < 0 || desiredY > metrics.maxY);
           event.preventDefault();
+          if (verticalChain) {
+            var remaining = desiredY < 0 ? desiredY : desiredY - metrics.maxY;
+            for (var target = parent; target && remaining; target = nextWheelTarget(target.element)) {
+              if (target.axes.y) {
+                remaining = scrollAxis(target.element, "y", remaining, target.metrics.maxY);
+                if (target.state) publish(target.state);
+              }
+              var parentOverscroll = root.getComputedStyle(target.element).overscrollBehaviorY;
+              if (parentOverscroll && parentOverscroll !== "auto") break;
+            }
+          }
           scrollWithinElasticBounds(state, _desiredX, desiredY);
           publish(state);
           if (state.elastic.wheelTimeout !== null) root.clearTimeout(state.elastic.wheelTimeout);

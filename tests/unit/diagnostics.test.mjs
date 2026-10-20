@@ -14,3 +14,15 @@ test("diagnostics deduplicate retained equivalent contexts without collapsing el
   assert.equal(diagnostics.showHistory(0).length, 0);
   assert.equal(diagnostics.showHistory().length, 3);
 });
+
+test("diagnostics keep distinct levels and error causes", () => {
+  const definition = { code: 2, message: "callback failed" };
+  const diagnostics = buildDiagnostics({ CALLBACK: definition });
+  diagnostics.error(definition, { cause: new Error("first") });
+  diagnostics.error(definition, { cause: new Error("second") });
+  diagnostics.error(definition, { cause: new Error("first") });
+  diagnostics.warn(definition, { cause: new Error("first") });
+  assert.deepEqual(diagnostics.showHistory().map(entry =>
+    [entry.level, entry.context.cause.message]),
+  [[0, "first"], [0, "second"], [1, "first"]]);
+});

@@ -1300,7 +1300,8 @@
     }
 
     let snapHandled = false;
-    if (event && event.type === POINTER_UP && pointerScroll.axis) {
+    if (event && event.type === POINTER_UP && pointerScroll.axis &&
+        !selectionHasChanged(pointerScroll.selectionAtDown)) {
       const snapChain = pointerScroll.moved ? pointerScroll.chain :
         pointerScroll.chains[pointerScroll.axis];
       for (const member of snapChain) {
@@ -1627,13 +1628,13 @@
     const elastic = state.elastic;
     const wrapper = elastic.wrapper;
     const memory = elasticMemories.get(wrapper).cssProperties;
-    // Offset each transformed edge with the negative margin on its opposite
-    // side: top -> bottom, left -> right, and vice versa.
+    // Offset leading-edge stretch on the opposite margin. Negative top/left
+    // margins at the trailing edges would shrink the scrollable range.
     const compensated = {
-      top: 0 * elastic.amounts[2] * (2 + scaleY),
+      top: 0,
       right: elastic.amounts[3] * (2 + scaleX),
       bottom: elastic.amounts[0] * (2 + scaleY),
-      left: 0 * elastic.amounts[1] * (2 + scaleX)
+      left: 0
     };
     for (const side of ["top", "right", "bottom", "left"]) {
       const base = elastic.baseMargins?.[side] || "0px";
@@ -2010,7 +2011,23 @@
       const axis = axes.x && axes.y ? null : axes.x ? "x" : "y";
 
       if (applyElasticFromDesired(state, desiredX, desiredY, true, axis)) {
+        const parent = nextWheelTarget(state.element);
+        const overscroll = root.getComputedStyle(state.element).overscrollBehaviorY;
+        const verticalChain = axes.y && deltaY && parent?.axes.y &&
+          (!overscroll || overscroll === "auto") &&
+          (desiredY < 0 || desiredY > metrics.maxY);
         event.preventDefault();
+        if (verticalChain) {
+          let remaining = desiredY < 0 ? desiredY : desiredY - metrics.maxY;
+          for (let target = parent; target && remaining; target = nextWheelTarget(target.element)) {
+            if (target.axes.y) {
+              remaining = scrollAxis(target.element, "y", remaining, target.metrics.maxY);
+              if (target.state) publish(target.state);
+            }
+            const parentOverscroll = root.getComputedStyle(target.element).overscrollBehaviorY;
+            if (parentOverscroll && parentOverscroll !== "auto") break;
+          }
+        }
         scrollWithinElasticBounds(state, desiredX, desiredY);
         publish(state);
         if (state.elastic.wheelTimeout !== null) root.clearTimeout(state.elastic.wheelTimeout);

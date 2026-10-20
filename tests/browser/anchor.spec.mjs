@@ -474,7 +474,7 @@ test("hidden Present targets hide their anchors without a reference context diag
       panel.style[property] = property === "display" ? "none" :
         property === "visibility" ? "hidden" : "0";
     }, property);
-    expect(await update()).toEqual({ anchored: false, diagnostics: 0 });
+    expect(await update(), property).toEqual({ anchored: false, diagnostics: 0 });
     await page.evaluate(property => {
       document.getElementById("panel").style[property] = "";
     }, property);

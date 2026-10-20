@@ -161,20 +161,13 @@ export function createMountHelper(root, mountMaps, mountedElements, elementContr
     for (let index = 0; index < extensions.length; index++) {
       if (!loaded[index].value) continue;
 
-      const [extensionName, candidates] = extensions[index];
+      const [extensionName] = extensions[index];
       const mounter = mountMaps.get(toCamelCase(extensionName));
       if (!mounter) continue;
 
-      const searchRoots = [];
-      for (const candidate of candidates) {
-        let ancestor = candidate.parentNode;
-        while (ancestor && !candidates.has(ancestor)) ancestor = ancestor.parentNode;
-        if (!ancestor) searchRoots.push(candidate);
-      }
-
       for (const [selector, controller] of mounter) {
         registrations.push({
-          extensionName, selector, controller, searchRoots,
+          extensionName, selector, controller,
           priority: controller.priority,
           order: registrations.length
         });
@@ -185,58 +178,56 @@ export function createMountHelper(root, mountMaps, mountedElements, elementContr
       left.priority - right.priority || left.order - right.order);
 
     const elementsAffected = new Set();
-    for (const { extensionName, selector, controller, searchRoots } of registrations) {
+    for (const { extensionName, selector, controller } of registrations) {
       try {
         if (!controller.mount) { continue; }
-        for (const searchRoot of searchRoots) {
-          const mountableElements = findElements(searchRoot, selector);
-          for (const mountable of mountableElements) {
-            const mountId = `${extensionName}@${selector}`;
-            if (isMounted(mountable, mountId)) {
-              const pendingMount = getPendingMount(mountable, mountId);
-              if (pendingMount) await pendingMount;
-              continue;
+        const mountableElements = findElements(rootElement, selector);
+        for (const mountable of mountableElements) {
+          const mountId = `${extensionName}@${selector}`;
+          if (isMounted(mountable, mountId)) {
+            const pendingMount = getPendingMount(mountable, mountId);
+            if (pendingMount) await pendingMount;
+            continue;
+          }
+          if (!isMounted(mountable)) {
+            for (const name of Array.from(mountable.classList)) {
+              if (name.startsWith(classPrefix)) mountable.classList.remove(name);
             }
-            if (!isMounted(mountable)) {
-              for (const name of Array.from(mountable.classList)) {
-                if (name.startsWith(classPrefix)) mountable.classList.remove(name);
-              }
+          }
+          setMounted(mountable, mountId, true, controller.priority);
+          const finishPendingMount = beginPendingMount(mountable, mountId);
+          try {
+            await controller.mount(mountable);
+            let elementController = elementControllers.get(mountable);
+            if (!elementController) {
+              elementController = createControllerHelper(root, mountable);
+              elementControllers.set(mountable, elementController);
             }
-            setMounted(mountable, mountId, true, controller.priority);
-            const finishPendingMount = beginPendingMount(mountable, mountId);
-            try {
-              await controller.mount(mountable);
-              let elementController = elementControllers.get(mountable);
-              if (!elementController) {
-                elementController = createControllerHelper(root, mountable);
-                elementControllers.set(mountable, elementController);
-              }
-              elementController.spawn(
-                extensionName, mountId, controller.controllers,
-                typeof controller.update === "function"
-              );
-              elementsAffected.add(mountable);
-              newlyMounted.add(mountable);
-            } catch (error) {
-              setMounted(mountable, mountId, false);
-              const elementController = elementControllers.get(mountable);
-              if (elementController) {
-                elementController.despawn(mountId);
-                if (!elementController.hasMounts()) elementControllers.delete(mountable);
-              }
-              AelluxJs.diagnostics.error(
-                AelluxJs.diagnostics.ERROR_EXTENSION_MOUNT,
-                {
-                  cause: error,
-                  extension: extensionName,
-                  method: "mount",
-                  selector,
-                  element: mountable
-                }
-              );
-            } finally {
-              finishPendingMount();
+            elementController.spawn(
+              extensionName, mountId, controller.controllers,
+              typeof controller.update === "function"
+            );
+            elementsAffected.add(mountable);
+            newlyMounted.add(mountable);
+          } catch (error) {
+            setMounted(mountable, mountId, false);
+            const elementController = elementControllers.get(mountable);
+            if (elementController) {
+              elementController.despawn(mountId);
+              if (!elementController.hasMounts()) elementControllers.delete(mountable);
             }
+            AelluxJs.diagnostics.error(
+              AelluxJs.diagnostics.ERROR_EXTENSION_MOUNT,
+              {
+                cause: error,
+                extension: extensionName,
+                method: "mount",
+                selector,
+                element: mountable
+              }
+            );
+          } finally {
+            finishPendingMount();
           }
         }
       } catch (error) {

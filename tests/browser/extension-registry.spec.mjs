@@ -91,6 +91,41 @@ test("scrollbox-snap registers and awaits Scrollbox before mounting", async ({ p
   expect(result).toEqual({ scrollbox: true, snap: true, mounted: true, navigated: true });
 });
 
+for (const boot of ["aellux.js", "aellux.min.js"]) {
+  for (const forceLegacy of [false, true]) {
+    test(`full ${boot} loads Snap and Scrollbox on demand with forceLegacy=${forceLegacy}`, async ({ page }) => {
+      const requests = [];
+      page.on("request", request => requests.push(new URL(request.url()).pathname.split("/").pop()));
+      await page.goto("/tests/index.htm");
+      await page.addScriptTag({ url: `/dist/${boot}` });
+      await page.evaluate(forceLegacy => AelluxJs.init({
+        mode: "full", forceLegacy, skipGlobalMount: true
+      }), forceLegacy);
+      await expect.poll(() => page.evaluate(() => AelluxJs.orchestratorVersion))
+        .toBe("0.1.0-beta.10");
+      const result = await page.evaluate(async () => {
+        document.body.innerHTML = `<div id="gallery" data-ae-scrollbox data-ae-scrollbox-snap
+          style="width:100px;height:100px;overflow-x:auto;display:flex">
+          <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+          <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+        </div>`;
+        await AelluxJs.mountManager.mount(document.body);
+        return {
+          base: AelluxJs.ext.scrollbox?.initialized,
+          snap: AelluxJs.ext.scrollboxSnap?.initialized,
+          navigated: AelluxJs.mountManager.controller("gallery").scrollbox.goto(1),
+          legacy: AelluxJs.diagnostics.legacy
+        };
+      });
+      expect(result).toEqual({ base: true, snap: true, navigated: true, legacy: forceLegacy });
+      const variant = `${forceLegacy ? ".legacy" : ""}${boot === "aellux.min.js" ? ".min" : ""}.js`;
+      expect(requests.filter(file => /^aellux\.ext\.scrollbox(?:-snap)?(?:\.legacy)?(?:\.min)?\.js$/.test(file)).sort())
+        .toEqual([`aellux.ext.scrollbox${variant}`, `aellux.ext.scrollbox-snap${variant}`].sort());
+      expect(requests).not.toContain("aellux.extensions.min.json");
+    });
+  }
+}
+
 test("the official manifest selects the Legacy artifact for a Legacy runtime", async ({ page }) => {
   await startBasic(page, { forceLegacy: true });
   const artifact = await page.evaluate(async () => {

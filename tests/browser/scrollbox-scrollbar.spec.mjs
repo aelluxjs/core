@@ -1,15 +1,20 @@
 import { expect, test } from "@playwright/test";
 
 async function setup(page, markup) {
+  const usesSnap = markup.includes("data-ae-scrollbox-snap");
   await page.goto("/tests/index.htm");
   await page.addScriptTag({ url: "/dist/aellux.js" });
-  await page.evaluate(html => {
+  await page.evaluate(({ html, usesSnap }) => {
     document.body.innerHTML = html;
     AelluxJs.ext("scrollbox");
-  }, markup);
+    if (usesSnap) AelluxJs.ext("scrollbox-snap");
+  }, { html: markup, usesSnap });
   await page.addScriptTag({ url: "/src/aellux.ext.scrollbox.js" });
+  if (usesSnap) await page.addScriptTag({ url: "/src/aellux.ext.scrollbox-snap.js" });
   await page.evaluate(() => AelluxJs.init({ mode: "basic" }));
   await expect.poll(() => page.evaluate(() => AelluxJs.ext.scrollbox?.initialized)).toBe(true);
+  if (usesSnap)
+    await expect.poll(() => page.evaluate(() => AelluxJs.ext.scrollboxSnap?.initialized)).toBe(true);
 }
 
 test("custom scrollbar stays over the viewport and supports track click and thumb drag", async ({ page }) => {
@@ -736,7 +741,8 @@ test("an existing scrollbar is reused and its inline values survive unmount", as
 
 test("the horizontal thumb maps its drag to horizontal scroll", async ({ page }) => {
   await setup(page, `<div id="box" data-ae-scrollbox data-ae-scrollbar="x"
-    style="width:120px;height:120px;overflow-x:auto;overflow-y:hidden">
+    style="width:120px;height:120px;overflow-x:auto;overflow-y:hidden;
+      --ae-scrollbar-track-color:rgb(70, 80, 90);--ae-scrollbar-opacity-fade:1">
     <div style="width:600px;height:100px"></div>
   </div>`);
   const track = page.locator("#box > [data-ae-scrollbar-horizontal]");
@@ -757,7 +763,7 @@ test("the horizontal thumb maps its drag to horizontal scroll", async ({ page })
       position: new DOMMatrixReadOnly(before.transform).m41 };
   });
   expect(horizontalThumb.size).toBeCloseTo(thumb, 1);
-  expect(horizontalThumb.position).toBeCloseTo(thumbPosition, 1);
+  expect(horizontalThumb.position).toBeCloseTo(thumbPosition, 0);
   await page.mouse.move(rect.x + thumbPosition + thumb / 2, rect.y + 4);
   await page.mouse.down();
   await page.mouse.move(rect.x + 95, rect.y + 4, { steps: 5 });

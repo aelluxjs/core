@@ -27,7 +27,7 @@
   var define_AELLUX_OFFICIAL_EXTENSION_MANIFEST_default;
   var init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST = __esm({
     "<define:__AELLUX_OFFICIAL_EXTENSION_MANIFEST__>"() {
-      define_AELLUX_OFFICIAL_EXTENSION_MANIFEST_default = { schemaVersion: 1, coreVersion: "0.1.0-beta.10", extensions: { preference: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.preference.min.js", integrity: "sha384-mSOgb0DekFTRXXZAgyNrPjamdlSqzL4SSGZYVWgVg+WlG+pBj11xT81v/6Xk43yO", regular: { url: "./aellux.ext.preference.js", integrity: "sha384-MlikpdHSzHzF6kz5+oJGtq3eoFsKTsx/g+FTrf+dFOU8iQGHsCpn4fP1jLlbNrj7" } }, legacy: { url: "./aellux.ext.preference.legacy.min.js", integrity: "sha384-1LMsK0W9J/PoM4tXhFgkYLRY4yWdzVoYmFy4OMDGd8lRdtptKoEb1sI9L1kzNaBu", regular: { url: "./aellux.ext.preference.legacy.js", integrity: "sha384-pozuz43OyfXrnkmuBu6KTM2lqRSqcI5LMgwAtqnzXq8xZGdVqpnmOtrBcYcMskWk" } } }, dependencies: [] }, "state-navigation": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.state-navigation.min.js", integrity: "sha384-wAbgAqjAA6wauuG+iuUtfRwxChd6fTJ0fS22fqnu2r00kouoXJWZ0f7AoTYlqBC6", regular: { url: "./aellux.ext.state-navigation.js", integrity: "sha384-PKJ8HTD7eIYDEg2hOaAJjpMYzLr2fBjBRGmIGG7XzGTzVK0yTjt5HYPO55VbWfdS" } }, legacy: { url: "./aellux.ext.state-navigation.legacy.min.js", integrity: "sha384-YkhfU15Mpk8KiO6TyoVU6z1yCiYWwnsOGE0xVaQ8NrE7IGrxOSUL005g5JeUDdJu", regular: { url: "./aellux.ext.state-navigation.legacy.js", integrity: "sha384-kaEUY0Zpw8K6pcwjm+INA5feXftLK2/N1aFpPr2LCTcetX2uoe2GGd1MJyy7u8rZ" } } }, dependencies: [] }, feedback: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.feedback.min.js", integrity: "sha384-3VP3W84ekK4MIVBQuy5+5P3bGrwOj7bBDfJnjyexZ+yDADf1jQoHEpP2J1OMUgod", regular: { url: "./aellux.ext.feedback.js", integrity: "sha384-RrPf0bRGxf68f/Rjas5MF5zC1GAubWyndCcuiYbgZsPSHGLFsQtQaUgeFX4SQz+h" } }, legacy: { url: "./aellux.ext.feedback.legacy.min.js", integrity: "sha384-zXuZEv63sd3fwaAygmyk9KazQ46KOelsvAtM+0vJ7phDwemVh1FhOjAcbhWVQM/N", regular: { url: "./aellux.ext.feedback.legacy.js", integrity: "sha384-UW1JZ1+liVWV/w3PJdhfIMztOU7zyTw/1rOyyxoxj4YJIHb1xFl8U0xeIBh8jYV7" } } }, dependencies: [], style: { url: "./aellux.ext.feedback.min.css", integrity: "sha384-OBguCYqF+dMD0Pl84C3FlY/+ohUGfW0OyynmXb/PSDEGOyuI/TQJ3EZAoCeJx+Jk", regular: { url: "./aellux.ext.feedback.css", integrity: "sha384-yk4cW+r/Mc1FRS1ZauBHC6KsKb7sxuJ0E9mmt/+AYASAdZXXMK6iuFBR+TOEh/r4" } } }, focus: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.focus.min.js", integrity: "sha384-AXpUv/Ur2Z4cKvO9EqIFqfxxdSQR5j75q0okOAWPvHhSneQ5LPjrOzk6Sl9MOo4a", regular: { url: "./aellux.ext.focus.js", integrity: "sha384-VjQzcnhLRrvRlbVQ0X4/tO0+8gqJXAmIFoeIVimjOud1wRNuBXNnSQHHW9XQPzTe" } }, legacy: { url: "./aellux.ext.focus.legacy.min.js", integrity: "sha384-I5QpUmKsA1T8NiKfKXQgbdG19Ld1ZGCWSmosygO3yGj43tdxp5zCfLyfBuFoHlKu", regular: { url: "./aellux.ext.focus.legacy.js", integrity: "sha384-5/y3J1NC/qMyV9myEj29+wGbqCVI8ICPafSebtJVfl15Qmup6vMiJzveShd3CLnw" } } }, dependencies: [] }, point: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.point.min.js", integrity: "sha384-n540II5oWbHJRt/a8i+Rgb9A3b9dm7hamg1kd3Nz7KdPQDcaa8S823t9fCrgxBWF", regular: { url: "./aellux.ext.point.js", integrity: "sha384-aDj7I5QEH/0+52E3e6yPZ/D0MEsNBdxeET3G5ToVvgczHtksMh3p8S/KOoAapRRN" } }, legacy: { url: "./aellux.ext.point.legacy.min.js", integrity: "sha384-5UmWvQHfmvttz9yeXbilawGCZH20UdR8yNBOE9kRV34wpfWASl8plzgKtLVQGO9M", regular: { url: "./aellux.ext.point.legacy.js", integrity: "sha384-gG/XONYEC1tchBcJ6bUtKYmWFHz0E+50LmMaXDAiqWBKPuwdHZeYm1uXA22lMZuN" } } }, dependencies: [] }, anchor: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.anchor.min.js", integrity: "sha384-LhnN0vAiakKLKDhSalMCh8HMs9EwdZ9cYo+8rgRF5a6b5qHzJNBi9NbZK+oV7PQm", regular: { url: "./aellux.ext.anchor.js", integrity: "sha384-r7o3VYzny6AgHW8EivvVCdFVNNIGRfXeQ63x2z4WW2g5MujpZi24+RlpRSszERlU" } }, legacy: { url: "./aellux.ext.anchor.legacy.min.js", integrity: "sha384-1qaoGlmbZ/Yk2m1GBBVeHQk05w66V8GA3hlLtyIwxHZO//r/GMprmgD7w9GQ5Ib7", regular: { url: "./aellux.ext.anchor.legacy.js", integrity: "sha384-AKxMx8gPEHllem340el/rdIP5hAldqQWrWVwzw2NMGbEA8AfkWXagmoCNquGE82s" } } }, dependencies: [] }, scrollbox: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.scrollbox.min.js", integrity: "sha384-N7vWjIaeyr5DxG4JQo+DvHTmzsB1RCkAFlkxLQjNbRvmkG8hDOZEPmtMAtqR/KuQ", regular: { url: "./aellux.ext.scrollbox.js", integrity: "sha384-Bwtxdz7z1U6FSz8g7qJyxI3AHeEbOf9VYLPBGzccdUusWFBDJHPUEVW1Att5gWbD" } }, legacy: { url: "./aellux.ext.scrollbox.legacy.min.js", integrity: "sha384-garvYtJCa+1kFFeqqCG6k8lyh9HkorCth8ELA3CGuM9MO56WUdKmxZwe8SyS7LDC", regular: { url: "./aellux.ext.scrollbox.legacy.js", integrity: "sha384-D9IKUyF6AMpW78TY6r8sK4vSQTVngjFqACqXMCz+WZI3UnqRhYfgBeIUSS7mUCj4" } } }, dependencies: [] }, "scrollbox-snap": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.scrollbox-snap.min.js", integrity: "sha384-dMb7YfshByWZSHV9n5WPTuKHYA+BptI1jk1R6tPYdxtGCbvLo0WapARDjRsyWMbx", regular: { url: "./aellux.ext.scrollbox-snap.js", integrity: "sha384-zwE2e7iBBMn5Dom1yxLoteUdD8KiXhH9KXgAEQc/lK5ntvo7sZFcOqjEhVmIK1BA" } }, legacy: { url: "./aellux.ext.scrollbox-snap.legacy.min.js", integrity: "sha384-cgbBgyMI11xeGlG/PaJrvGMa9QcjWdfcIQTh+L71WV3IvFW6Aj+IDG7Q2qJADV3o", regular: { url: "./aellux.ext.scrollbox-snap.legacy.js", integrity: "sha384-aAdJjZqCtkhzoZ0lI4/F44CBCuA7Br7VhFCbjugqrsFvbl/J4lAwCEivW2w//gHI" } } }, dependencies: [] }, adaptive: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.adaptive.min.js", integrity: "sha384-lEWjA/UxxRXYoyXAXqiKXpfBf6e/RxQOc8+0ukbJG0NwHP3SVJ2nICYgvXsepP5p", regular: { url: "./aellux.ext.adaptive.js", integrity: "sha384-kVnL6EnCtYQJ6mtIt/3G7pQOVahqW2+v0wsTmLJapxIycJZL9/KswKmo5MiiT+8Z" } }, legacy: { url: "./aellux.ext.adaptive.legacy.min.js", integrity: "sha384-7Rdi4ldWEimm3xDyG8U1eCOsBJJ69RGIAfYsc/OakUnyspXYAceRzOoIu24oaNio", regular: { url: "./aellux.ext.adaptive.legacy.js", integrity: "sha384-sBBWTr6+7T/xrfVHzG9NPKVyQdZrLukEcJ7eCFDtH5wTJT0vODUSedq3Y1HTu0Sp" } } }, dependencies: [], style: { url: "./aellux.ext.adaptive.min.css", integrity: "sha384-8yUP1PStfDqBCyCskP3k9WLIKgv/yl1nyDhmPz7hsX5NZ4z3ZT3ajolA+RhYlUiG", regular: { url: "./aellux.ext.adaptive.css", integrity: "sha384-HfIjX9Zk0VFRimzPvUaTS5AtwuHJHjXKoM/xbNJXj5vE7bSdBGEzbrBHfbNmYah0" } } }, present: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.present.min.js", integrity: "sha384-4j7Z/u9cOOUfTZ3atFxNMaQvLlJKU7HbBF0yX7sKH6PaZQBSninpNa/UirKH7dGA", regular: { url: "./aellux.ext.present.js", integrity: "sha384-0y5bxbVI3vBm3KY5ZSxjfx3LtreZu/24QIcAMV4mwKaZOGvxr01f/UpbyLwb3x/W" } }, legacy: { url: "./aellux.ext.present.legacy.min.js", integrity: "sha384-1bm3asyvI9hVjvenNFHVEvtwR9zoaaJ+pD1Dmm1htid02kNzeFzgVcxQRbqL9pBJ", regular: { url: "./aellux.ext.present.legacy.js", integrity: "sha384-WGKvUR25VP82yXmjLzDfKiJb2+yJ6mFUPMQsZ7XE3Hx3HhYaZHphdV91EtYjr5D2" } } }, dependencies: [], style: { url: "./aellux.ext.present.min.css", integrity: "sha384-LR069uhIDdnx0X7oeoRxevC/+dD5gA6d4B2dHAJKPgnqLYDGs4GgW9quKNq+1G5b", regular: { url: "./aellux.ext.present.css", integrity: "sha384-9GTFJ0OxBj6ta/iiV07BLGTdfe9pbmBMYXFn9kT+wB4KwiLO8zxJ39XzLYOGgfui" } } } } };
+      define_AELLUX_OFFICIAL_EXTENSION_MANIFEST_default = { schemaVersion: 1, coreVersion: "0.1.0-beta.10", extensions: { preference: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.preference.min.js", integrity: "sha384-mSOgb0DekFTRXXZAgyNrPjamdlSqzL4SSGZYVWgVg+WlG+pBj11xT81v/6Xk43yO", regular: { url: "./aellux.ext.preference.js", integrity: "sha384-MlikpdHSzHzF6kz5+oJGtq3eoFsKTsx/g+FTrf+dFOU8iQGHsCpn4fP1jLlbNrj7" } }, legacy: { url: "./aellux.ext.preference.legacy.min.js", integrity: "sha384-1LMsK0W9J/PoM4tXhFgkYLRY4yWdzVoYmFy4OMDGd8lRdtptKoEb1sI9L1kzNaBu", regular: { url: "./aellux.ext.preference.legacy.js", integrity: "sha384-pozuz43OyfXrnkmuBu6KTM2lqRSqcI5LMgwAtqnzXq8xZGdVqpnmOtrBcYcMskWk" } } }, dependencies: [] }, "state-navigation": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.state-navigation.min.js", integrity: "sha384-wAbgAqjAA6wauuG+iuUtfRwxChd6fTJ0fS22fqnu2r00kouoXJWZ0f7AoTYlqBC6", regular: { url: "./aellux.ext.state-navigation.js", integrity: "sha384-PKJ8HTD7eIYDEg2hOaAJjpMYzLr2fBjBRGmIGG7XzGTzVK0yTjt5HYPO55VbWfdS" } }, legacy: { url: "./aellux.ext.state-navigation.legacy.min.js", integrity: "sha384-YkhfU15Mpk8KiO6TyoVU6z1yCiYWwnsOGE0xVaQ8NrE7IGrxOSUL005g5JeUDdJu", regular: { url: "./aellux.ext.state-navigation.legacy.js", integrity: "sha384-kaEUY0Zpw8K6pcwjm+INA5feXftLK2/N1aFpPr2LCTcetX2uoe2GGd1MJyy7u8rZ" } } }, dependencies: [] }, feedback: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.feedback.min.js", integrity: "sha384-3VP3W84ekK4MIVBQuy5+5P3bGrwOj7bBDfJnjyexZ+yDADf1jQoHEpP2J1OMUgod", regular: { url: "./aellux.ext.feedback.js", integrity: "sha384-RrPf0bRGxf68f/Rjas5MF5zC1GAubWyndCcuiYbgZsPSHGLFsQtQaUgeFX4SQz+h" } }, legacy: { url: "./aellux.ext.feedback.legacy.min.js", integrity: "sha384-zXuZEv63sd3fwaAygmyk9KazQ46KOelsvAtM+0vJ7phDwemVh1FhOjAcbhWVQM/N", regular: { url: "./aellux.ext.feedback.legacy.js", integrity: "sha384-UW1JZ1+liVWV/w3PJdhfIMztOU7zyTw/1rOyyxoxj4YJIHb1xFl8U0xeIBh8jYV7" } } }, dependencies: [], style: { url: "./aellux.ext.feedback.min.css", integrity: "sha384-OBguCYqF+dMD0Pl84C3FlY/+ohUGfW0OyynmXb/PSDEGOyuI/TQJ3EZAoCeJx+Jk", regular: { url: "./aellux.ext.feedback.css", integrity: "sha384-yk4cW+r/Mc1FRS1ZauBHC6KsKb7sxuJ0E9mmt/+AYASAdZXXMK6iuFBR+TOEh/r4" } } }, focus: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.focus.min.js", integrity: "sha384-AXpUv/Ur2Z4cKvO9EqIFqfxxdSQR5j75q0okOAWPvHhSneQ5LPjrOzk6Sl9MOo4a", regular: { url: "./aellux.ext.focus.js", integrity: "sha384-VjQzcnhLRrvRlbVQ0X4/tO0+8gqJXAmIFoeIVimjOud1wRNuBXNnSQHHW9XQPzTe" } }, legacy: { url: "./aellux.ext.focus.legacy.min.js", integrity: "sha384-I5QpUmKsA1T8NiKfKXQgbdG19Ld1ZGCWSmosygO3yGj43tdxp5zCfLyfBuFoHlKu", regular: { url: "./aellux.ext.focus.legacy.js", integrity: "sha384-5/y3J1NC/qMyV9myEj29+wGbqCVI8ICPafSebtJVfl15Qmup6vMiJzveShd3CLnw" } } }, dependencies: [] }, point: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.point.min.js", integrity: "sha384-n540II5oWbHJRt/a8i+Rgb9A3b9dm7hamg1kd3Nz7KdPQDcaa8S823t9fCrgxBWF", regular: { url: "./aellux.ext.point.js", integrity: "sha384-aDj7I5QEH/0+52E3e6yPZ/D0MEsNBdxeET3G5ToVvgczHtksMh3p8S/KOoAapRRN" } }, legacy: { url: "./aellux.ext.point.legacy.min.js", integrity: "sha384-5UmWvQHfmvttz9yeXbilawGCZH20UdR8yNBOE9kRV34wpfWASl8plzgKtLVQGO9M", regular: { url: "./aellux.ext.point.legacy.js", integrity: "sha384-gG/XONYEC1tchBcJ6bUtKYmWFHz0E+50LmMaXDAiqWBKPuwdHZeYm1uXA22lMZuN" } } }, dependencies: [] }, anchor: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.anchor.min.js", integrity: "sha384-bB5tuUkEsP6Y7YPkD9dd8TYe0aDsxGuHsrPwJnxZNLczzdhRWJMWfmwa4qtze90w", regular: { url: "./aellux.ext.anchor.js", integrity: "sha384-uZL5mGNXCf9vA4Yz+cfnSxD9KhoC9n0zhHIGX201RyK9LG1Gylbe8vHw37ZVG9Xr" } }, legacy: { url: "./aellux.ext.anchor.legacy.min.js", integrity: "sha384-xV6iQN/F+LG2TA5wvn7/JeiWeD5O5FhCsC5mKBL/T32SVyFzHC+NpbvkpMnI+c5g", regular: { url: "./aellux.ext.anchor.legacy.js", integrity: "sha384-JDyJkxgeEaQywXmqqcL5B293ChnFaoHs8L7UJemtcDuLMBHfo2YIauk8Yj+2BgXN" } } }, dependencies: [] }, scrollbox: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.scrollbox.min.js", integrity: "sha384-kC9PdCaaCWUbeswIJMW/BEcYblK4PTmxG/GI/BJBmij7FAieBJUNFRA3NDsmI5PH", regular: { url: "./aellux.ext.scrollbox.js", integrity: "sha384-zFA40wwhXkWBCZTMoCQjnE+Z4536tUsrJ/sEMR88RqlCBuYgNEdqnoE1Pl/j9sVa" } }, legacy: { url: "./aellux.ext.scrollbox.legacy.min.js", integrity: "sha384-7N68vqa/CN5vqVdLQIiJG8HDfRU9cgU45G4VKuREP9iQlIKcFrgjGL6siX5/FOf1", regular: { url: "./aellux.ext.scrollbox.legacy.js", integrity: "sha384-VwwYiUWTw/N8dIAX59b+QObAWvaDNwgTPlrXYERM9bsGCbP162DLdt704IcxzL7s" } } }, dependencies: [] }, "scrollbox-snap": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.scrollbox-snap.min.js", integrity: "sha384-fwr6geiwmDDl/bU88Z8ldI9tIyojBehplcqMI8vn9YC2Y35T8Ko6+inwARkChd6y", regular: { url: "./aellux.ext.scrollbox-snap.js", integrity: "sha384-qjNY5x+ua2KPbtXH3SuITr6N3dLfhUQy1qk487pJUPN/iRe06hIbY5oldYSPcXp2" } }, legacy: { url: "./aellux.ext.scrollbox-snap.legacy.min.js", integrity: "sha384-7SyRprm808E+xN3HarZjNIqewKIyFvTFBG+b7nUbjBPTD5arFdhZzQXzqz/Jxdtd", regular: { url: "./aellux.ext.scrollbox-snap.legacy.js", integrity: "sha384-zMpMGOiRT1bKYrrdNiHPcLkFmvMf52JbQyOq9TW0X+I518FgIrRTjq6Fta6Itfg2" } } }, dependencies: [] }, adaptive: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.adaptive.min.js", integrity: "sha384-lEWjA/UxxRXYoyXAXqiKXpfBf6e/RxQOc8+0ukbJG0NwHP3SVJ2nICYgvXsepP5p", regular: { url: "./aellux.ext.adaptive.js", integrity: "sha384-kVnL6EnCtYQJ6mtIt/3G7pQOVahqW2+v0wsTmLJapxIycJZL9/KswKmo5MiiT+8Z" } }, legacy: { url: "./aellux.ext.adaptive.legacy.min.js", integrity: "sha384-7Rdi4ldWEimm3xDyG8U1eCOsBJJ69RGIAfYsc/OakUnyspXYAceRzOoIu24oaNio", regular: { url: "./aellux.ext.adaptive.legacy.js", integrity: "sha384-sBBWTr6+7T/xrfVHzG9NPKVyQdZrLukEcJ7eCFDtH5wTJT0vODUSedq3Y1HTu0Sp" } } }, dependencies: [], style: { url: "./aellux.ext.adaptive.min.css", integrity: "sha384-8yUP1PStfDqBCyCskP3k9WLIKgv/yl1nyDhmPz7hsX5NZ4z3ZT3ajolA+RhYlUiG", regular: { url: "./aellux.ext.adaptive.css", integrity: "sha384-HfIjX9Zk0VFRimzPvUaTS5AtwuHJHjXKoM/xbNJXj5vE7bSdBGEzbrBHfbNmYah0" } } }, present: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.present.min.js", integrity: "sha384-4j7Z/u9cOOUfTZ3atFxNMaQvLlJKU7HbBF0yX7sKH6PaZQBSninpNa/UirKH7dGA", regular: { url: "./aellux.ext.present.js", integrity: "sha384-0y5bxbVI3vBm3KY5ZSxjfx3LtreZu/24QIcAMV4mwKaZOGvxr01f/UpbyLwb3x/W" } }, legacy: { url: "./aellux.ext.present.legacy.min.js", integrity: "sha384-1bm3asyvI9hVjvenNFHVEvtwR9zoaaJ+pD1Dmm1htid02kNzeFzgVcxQRbqL9pBJ", regular: { url: "./aellux.ext.present.legacy.js", integrity: "sha384-WGKvUR25VP82yXmjLzDfKiJb2+yJ6mFUPMQsZ7XE3Hx3HhYaZHphdV91EtYjr5D2" } } }, dependencies: [], style: { url: "./aellux.ext.present.min.css", integrity: "sha384-LR069uhIDdnx0X7oeoRxevC/+dD5gA6d4B2dHAJKPgnqLYDGs4GgW9quKNq+1G5b", regular: { url: "./aellux.ext.present.css", integrity: "sha384-9GTFJ0OxBj6ta/iiV07BLGTdfe9pbmBMYXFn9kT+wB4KwiLO8zxJ39XzLYOGgfui" } } } } };
     }
   });
 
@@ -1238,7 +1238,7 @@
             priority: 0,
             mount: mountAnchor,
             unmount: unmountAnchor,
-            update: updateAnchor
+            update: (element) => updateAnchor(element, true)
           });
         }
         async function destroy() {
@@ -1406,11 +1406,12 @@
         function now() {
           return root2.performance && typeof root2.performance.now === "function" ? root2.performance.now() : Date.now();
         }
-        async function updateAnchor(element) {
+        async function updateAnchor(element, ensureLatest = false) {
           const state = anchors.get(element);
           if (!state) return;
           const revision = ++state.revision;
           const current = () => anchors.get(element) === state && state.revision === revision;
+          const retry = () => ensureLatest && anchors.get(element) === state ? updateAnchor(element, true) : void 0;
           const targetValue = element.getAttribute(targetAttribute);
           const useReference = !targetValue || !targetValue.trim();
           const target = useReference ? null : resolveElement(targetValue);
@@ -1419,22 +1420,26 @@
             await AelluxJs2.waitLayout.update(() => {
               if (current()) deactivate(element, state);
             });
+            if (!current()) return retry();
             return;
           }
           let placement = await AelluxJs2.waitLayout.read(
             () => current() ? readPlacement(element, target, candidates, state.active) : null
           );
-          if (!current() || !placement) return;
+          if (!current()) return retry();
+          if (!placement) return;
           if (placement.hidden) {
             await AelluxJs2.waitLayout.update(() => {
               if (current()) hideForTarget(element, state, placement);
             });
+            if (!current()) return retry();
             return;
           }
           if (!placement.valid) {
             await AelluxJs2.waitLayout.update(() => {
               if (current()) invalidContext(element, state, placement);
             });
+            if (!current()) return retry();
             return;
           }
           if (!state.active) {
@@ -1443,21 +1448,24 @@
               applyBaseStyles(element);
               state.active = true;
             });
-            if (!current()) return;
+            if (!current()) return retry();
             placement = await AelluxJs2.waitLayout.read(
               () => current() ? readPlacement(element, useReference ? null : target, candidates, true) : null
             );
-            if (!current() || !placement) return;
+            if (!current()) return retry();
+            if (!placement) return;
             if (placement.hidden) {
               await AelluxJs2.waitLayout.update(() => {
                 if (current()) hideForTarget(element, state, placement);
               });
+              if (!current()) return retry();
               return;
             }
             if (!placement.valid) {
               await AelluxJs2.waitLayout.update(() => {
                 if (current()) invalidContext(element, state, placement);
               });
+              if (!current()) return retry();
               return;
             }
           }
@@ -1477,7 +1485,7 @@
             state.lastUpdateAt = now();
             applied = true;
           });
-          if (!applied && anchors.get(element) === state) return updateAnchor(element);
+          if (!applied && anchors.get(element) === state) return updateAnchor(element, ensureLatest);
         }
         function readPlacement(element, target, candidates, measure) {
           const reference = element.offsetParent;
@@ -1521,7 +1529,8 @@
           if (visibility === "hidden" || visibility === "collapse") return true;
           for (let current = element; current && current.nodeType === 1; current = current.parentElement) {
             const style = root2.getComputedStyle(current);
-            if (current.hidden || style.display === "none" || style.contentVisibility === "hidden" || Number(style.opacity) === 0) return true;
+            const inline = current.style;
+            if (current.hidden || inline.display === "none" || inline.visibility === "hidden" || inline.visibility === "collapse" || inline.opacity === "0" || style.display === "none" || style.contentVisibility === "hidden" || Number(style.opacity) === 0) return true;
           }
           return false;
         }
@@ -2834,11 +2843,6 @@
         }
         if (!group) group = makeGroup(id);
       }
-      if (id === void 0 && visualFPSLimit() !== Infinity) {
-        for (const pending of queues[kind].slice()) {
-          if (!pending.group) cancelTask(pending);
-        }
-      }
       let task;
       const promise = new Promise((resolve, reject) => {
         task = { phase: kind, callback, parameters, group, resolve, reject, state: "pending" };
@@ -3342,21 +3346,14 @@
       const registrations = [];
       for (let index = 0; index < extensions.length; index++) {
         if (!loaded[index].value) continue;
-        const [extensionName, candidates] = extensions[index];
+        const [extensionName] = extensions[index];
         const mounter = mountMaps.get(toCamelCase2(extensionName));
         if (!mounter) continue;
-        const searchRoots = [];
-        for (const candidate of candidates) {
-          let ancestor = candidate.parentNode;
-          while (ancestor && !candidates.has(ancestor)) ancestor = ancestor.parentNode;
-          if (!ancestor) searchRoots.push(candidate);
-        }
         for (const [selector, controller] of mounter) {
           registrations.push({
             extensionName,
             selector,
             controller,
-            searchRoots,
             priority: controller.priority,
             order: registrations.length
           });
@@ -3364,62 +3361,60 @@
       }
       registrations.sort((left, right) => left.priority - right.priority || left.order - right.order);
       const elementsAffected = /* @__PURE__ */ new Set();
-      for (const { extensionName, selector, controller, searchRoots } of registrations) {
+      for (const { extensionName, selector, controller } of registrations) {
         try {
           if (!controller.mount) {
             continue;
           }
-          for (const searchRoot of searchRoots) {
-            const mountableElements = findElements(searchRoot, selector);
-            for (const mountable of mountableElements) {
-              const mountId = `${extensionName}@${selector}`;
-              if (isMounted(mountable, mountId)) {
-                const pendingMount = getPendingMount(mountable, mountId);
-                if (pendingMount) await pendingMount;
-                continue;
+          const mountableElements = findElements(rootElement, selector);
+          for (const mountable of mountableElements) {
+            const mountId = `${extensionName}@${selector}`;
+            if (isMounted(mountable, mountId)) {
+              const pendingMount = getPendingMount(mountable, mountId);
+              if (pendingMount) await pendingMount;
+              continue;
+            }
+            if (!isMounted(mountable)) {
+              for (const name of Array.from(mountable.classList)) {
+                if (name.startsWith(classPrefix)) mountable.classList.remove(name);
               }
-              if (!isMounted(mountable)) {
-                for (const name of Array.from(mountable.classList)) {
-                  if (name.startsWith(classPrefix)) mountable.classList.remove(name);
-                }
+            }
+            setMounted(mountable, mountId, true, controller.priority);
+            const finishPendingMount = beginPendingMount(mountable, mountId);
+            try {
+              await controller.mount(mountable);
+              let elementController = elementControllers.get(mountable);
+              if (!elementController) {
+                elementController = createControllerHelper(root2, mountable);
+                elementControllers.set(mountable, elementController);
               }
-              setMounted(mountable, mountId, true, controller.priority);
-              const finishPendingMount = beginPendingMount(mountable, mountId);
-              try {
-                await controller.mount(mountable);
-                let elementController = elementControllers.get(mountable);
-                if (!elementController) {
-                  elementController = createControllerHelper(root2, mountable);
-                  elementControllers.set(mountable, elementController);
-                }
-                elementController.spawn(
-                  extensionName,
-                  mountId,
-                  controller.controllers,
-                  typeof controller.update === "function"
-                );
-                elementsAffected.add(mountable);
-                newlyMounted.add(mountable);
-              } catch (error) {
-                setMounted(mountable, mountId, false);
-                const elementController = elementControllers.get(mountable);
-                if (elementController) {
-                  elementController.despawn(mountId);
-                  if (!elementController.hasMounts()) elementControllers.delete(mountable);
-                }
-                AelluxJs2.diagnostics.error(
-                  AelluxJs2.diagnostics.ERROR_EXTENSION_MOUNT,
-                  {
-                    cause: error,
-                    extension: extensionName,
-                    method: "mount",
-                    selector,
-                    element: mountable
-                  }
-                );
-              } finally {
-                finishPendingMount();
+              elementController.spawn(
+                extensionName,
+                mountId,
+                controller.controllers,
+                typeof controller.update === "function"
+              );
+              elementsAffected.add(mountable);
+              newlyMounted.add(mountable);
+            } catch (error) {
+              setMounted(mountable, mountId, false);
+              const elementController = elementControllers.get(mountable);
+              if (elementController) {
+                elementController.despawn(mountId);
+                if (!elementController.hasMounts()) elementControllers.delete(mountable);
               }
+              AelluxJs2.diagnostics.error(
+                AelluxJs2.diagnostics.ERROR_EXTENSION_MOUNT,
+                {
+                  cause: error,
+                  extension: extensionName,
+                  method: "mount",
+                  selector,
+                  element: mountable
+                }
+              );
+            } finally {
+              finishPendingMount();
             }
           }
         } catch (error) {
@@ -4908,7 +4903,6 @@
     "anchor": () => Promise.resolve().then(() => (init_aellux_ext_anchor(), aellux_ext_anchor_exports)),
     "adaptive": () => Promise.resolve().then(() => (init_aellux_ext_adaptive(), aellux_ext_adaptive_exports)),
     "present": () => Promise.resolve().then(() => (init_aellux_ext_present(), aellux_ext_present_exports))
-    //"scrollbox": () => import("./aellux.ext.scrollbox.js")
   });
   root.AelluxJs.extIndex.official = typeof define_AELLUX_OFFICIAL_EXTENSION_MANIFEST_default !== "undefined" ? define_AELLUX_OFFICIAL_EXTENSION_MANIFEST_default : null;
   root.AelluxJs.ext("adaptive", { loadWhen: "[data-ae-adaptive]", loadStyle: true });
@@ -4917,7 +4911,7 @@
   root.AelluxJs.ext("focus", { loadWhen: "[data-ae-focus]" });
   root.AelluxJs.ext("point", { loadWhen: "[data-ae-point]" });
   root.AelluxJs.ext("present", {
-    loadWhen: "[data-ae-present],[data-ae-present-trigger],[data-ae-present-dismiss],[data-ae-present-target]",
+    loadWhen: "[data-ae-present],[data-ae-trigger],[data-ae-dismiss],[data-ae-target]",
     loadStyle: true
   });
   root.AelluxJs.ext("scrollbox", { loadWhen: "[data-ae-scrollbox]" });

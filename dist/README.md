@@ -22,7 +22,7 @@ aellux.js does not require or bundle Bootstrap. Its `data-ae-*` and `ae--*` name
 </script>
 ```
 
-Use `full` to load Adaptive, Anchor, Feedback, Focus, Point, Preference, Present, Scrollbox, and State Navigation. Use `basic` to register only what the page needs:
+Use `full` to make Adaptive, Anchor, Feedback, Focus, Point, Preference, Present, Scrollbox, Scrollbox Snap, and State Navigation available without separate registration. Full does not mean one physical file: Scrollbox and Scrollbox Snap are requested as separate Extension scripts when matching elements are mounted. See [Getting Started](docs-source/0.1.0/getting-started.md) for the loading details. Use `basic` to register only what the page needs:
 
 ```html
 <script src="./dist/aellux.js"></script>
@@ -88,11 +88,14 @@ Node.js 20 or newer is required for build tooling:
 npm install
 npx playwright install
 npm run build
+npm run test:unit
 npm run test:budget
 npm run test:browser
 ```
 
 `test:budget` checks the built files against raw and gzip size limits. `test:browser` rebuilds the distribution and runs the browser scenarios with Playwright in Chromium, Firefox, and WebKit. Use `npm run test:browser -- --project=chromium` to run one browser. See [Browser validation scenarios](docs-source/0.1.0/validation-scenarios.md) for focused runs and coverage.
+
+The CI workflow reports build, unit tests, bundle budget, and browser tests as named steps in its verification job. A successful GitHub Pages publication is a separate result and does not establish that verification passed.
 
 Generated browser files are written to `dist/`. The boot, runtimes, and Extensions are classic scripts isolated in IIFEs. `aellux.esm.js` and `aellux.esm.min.js` are separate module entries that export the shared Core API as their default; the browser boot script still starts the runtime through `$ae.init()`.
 

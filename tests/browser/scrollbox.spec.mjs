@@ -15,6 +15,7 @@ test("scrollbox exposes progress in both axes and restores styles on unmount", a
   await page.addScriptTag({ url: "/src/aellux.ext.scrollbox.js" });
   await page.evaluate(() => AelluxJs.init({ mode: "basic" }));
   await expect.poll(() => page.evaluate(() => AelluxJs.ext.scrollbox?.initialized)).toBe(true);
+  expect(await page.evaluate(() => AelluxJs.ext.scrollboxSnap?.initialized ?? false)).toBe(false);
 
   const progress = () => page.evaluate(() => {
     const element = document.getElementById("scrollbox");
@@ -48,9 +49,13 @@ test("snap focus reaches content nested inside a snap item", async ({ page }) =>
       <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
     </div>`;
     AelluxJs.ext("scrollbox");
+    AelluxJs.ext("scrollbox-snap");
   });
   await page.addScriptTag({ url: "/src/aellux.ext.scrollbox.js" });
+  await page.addScriptTag({ url: "/src/aellux.ext.scrollbox-snap.js" });
   await page.evaluate(() => AelluxJs.init({ mode: "basic" }));
+  await expect.poll(() => page.evaluate(() => AelluxJs.ext.scrollbox?.initialized)).toBe(true);
+  await expect.poll(() => page.evaluate(() => AelluxJs.ext.scrollboxSnap?.initialized)).toBe(true);
   await expect.poll(() => page.locator("#nested").evaluate(element =>
     Number(getComputedStyle(element).getPropertyValue("--ae-snap-focus")))).toBe(1);
 });
@@ -65,9 +70,13 @@ test("native touch drag rejects programmatic snap navigation", async ({ page }) 
       <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
     </div>`;
     AelluxJs.ext("scrollbox");
+    AelluxJs.ext("scrollbox-snap");
   });
   await page.addScriptTag({ url: "/src/aellux.ext.scrollbox.js" });
+  await page.addScriptTag({ url: "/src/aellux.ext.scrollbox-snap.js" });
   await page.evaluate(() => AelluxJs.init({ mode: "basic" }));
+  await expect.poll(() => page.evaluate(() => AelluxJs.ext.scrollbox?.initialized)).toBe(true);
+  await expect.poll(() => page.evaluate(() => AelluxJs.ext.scrollboxSnap?.initialized)).toBe(true);
   await expect.poll(() => page.evaluate(() =>
     !!AelluxJs.mountManager?.controller(document.getElementById("box"))?.scrollbox
   )).toBe(true);
@@ -93,4 +102,35 @@ test("native touch drag rejects programmatic snap navigation", async ({ page }) 
   });
   expect(result).toEqual({ during: [false, false, false], duringCalls: 0,
     after: true, afterCalls: 1 });
+});
+
+test("destroying Snap leaves Scrollbox scrolling and releases navigation", async ({ page }) => {
+  await page.goto("/tests/index.htm");
+  await page.addScriptTag({ url: "/dist/aellux.js" });
+  await page.evaluate(() => {
+    document.body.innerHTML = `<div id="box" data-ae-scrollbox="native" data-ae-scrollbox-snap
+      style="width:100px;height:100px;overflow-x:auto;display:flex">
+      <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+      <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+    </div>`;
+    AelluxJs.ext("scrollbox");
+    AelluxJs.ext("scrollbox-snap");
+  });
+  await page.addScriptTag({ url: "/src/aellux.ext.scrollbox.js" });
+  await page.addScriptTag({ url: "/src/aellux.ext.scrollbox-snap.js" });
+  await page.evaluate(() => AelluxJs.init({ mode: "basic" }));
+  await expect.poll(() => page.evaluate(() => AelluxJs.ext.scrollboxSnap?.initialized)).toBe(true);
+  const result = await page.evaluate(async () => {
+    const element = document.getElementById("box");
+    await AelluxJs.destroyExtensions("scrollbox-snap");
+    element.scrollTo({ left: 100, behavior: "instant" });
+    await new Promise(resolve => requestAnimationFrame(resolve));
+    return {
+      base: AelluxJs.ext.scrollbox.initialized,
+      ready: element.classList.contains("ae--snap-ready"),
+      navigation: AelluxJs.mountManager.controller(element).scrollbox.goto(0),
+      left: element.scrollLeft
+    };
+  });
+  expect(result).toEqual({ base: true, ready: false, navigation: false, left: 100 });
 });

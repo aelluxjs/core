@@ -236,7 +236,9 @@
         priority: 0,
         mount: mountAnchor,
         unmount: unmountAnchor,
-        update: updateAnchor
+        update: function update(element) {
+          return updateAnchor(element, true);
+        }
       });
     }
     function destroy() {
@@ -484,10 +486,11 @@
     }
     function _updateAnchor() {
       _updateAnchor = _asyncToGenerator(/* @__PURE__ */ _regenerator().m(function _callee3(element) {
-        var state, revision, current, targetValue, useReference, target, candidates, placement, applied;
+        var ensureLatest, state, revision, current, retry, targetValue, useReference, target, candidates, placement, applied, _args3 = arguments;
         return _regenerator().w(function(_context3) {
           while (1) switch (_context3.n) {
             case 0:
+              ensureLatest = _args3.length > 1 && _args3[1] !== void 0 ? _args3[1] : false;
               state = anchors.get(element);
               if (state) {
                 _context3.n = 1;
@@ -499,12 +502,15 @@
               current = function current2() {
                 return anchors.get(element) === state && state.revision === revision;
               };
+              retry = function retry2() {
+                return ensureLatest && anchors.get(element) === state ? updateAnchor(element, true) : void 0;
+              };
               targetValue = element.getAttribute(targetAttribute);
               useReference = !targetValue || !targetValue.trim();
               target = useReference ? null : resolveElement(targetValue);
               candidates = parseCandidates(element.getAttribute(attribute));
               if (!(!target && !useReference || !candidates.length)) {
-                _context3.n = 3;
+                _context3.n = 4;
                 break;
               }
               _context3.n = 2;
@@ -512,95 +518,137 @@
                 if (current()) deactivate(element, state);
               });
             case 2:
-              return _context3.a(2);
+              if (current()) {
+                _context3.n = 3;
+                break;
+              }
+              return _context3.a(2, retry());
             case 3:
-              _context3.n = 4;
+              return _context3.a(2);
+            case 4:
+              _context3.n = 5;
               return AelluxJs.waitLayout.read(function() {
                 return current() ? readPlacement(element, target, candidates, state.active) : null;
               });
-            case 4:
+            case 5:
               placement = _context3.v;
-              if (!(!current() || !placement)) {
-                _context3.n = 5;
+              if (current()) {
+                _context3.n = 6;
                 break;
               }
-              return _context3.a(2);
-            case 5:
-              if (!placement.hidden) {
+              return _context3.a(2, retry());
+            case 6:
+              if (placement) {
                 _context3.n = 7;
                 break;
               }
-              _context3.n = 6;
-              return AelluxJs.waitLayout.update(function() {
-                if (current()) hideForTarget(element, state, placement);
-              });
-            case 6:
               return _context3.a(2);
             case 7:
-              if (placement.valid) {
-                _context3.n = 9;
+              if (!placement.hidden) {
+                _context3.n = 10;
                 break;
               }
               _context3.n = 8;
               return AelluxJs.waitLayout.update(function() {
-                if (current()) invalidContext(element, state, placement);
+                if (current()) hideForTarget(element, state, placement);
               });
             case 8:
-              return _context3.a(2);
-            case 9:
-              if (state.active) {
-                _context3.n = 17;
+              if (current()) {
+                _context3.n = 9;
                 break;
               }
-              _context3.n = 10;
+              return _context3.a(2, retry());
+            case 9:
+              return _context3.a(2);
+            case 10:
+              if (placement.valid) {
+                _context3.n = 13;
+                break;
+              }
+              _context3.n = 11;
+              return AelluxJs.waitLayout.update(function() {
+                if (current()) invalidContext(element, state, placement);
+              });
+            case 11:
+              if (current()) {
+                _context3.n = 12;
+                break;
+              }
+              return _context3.a(2, retry());
+            case 12:
+              return _context3.a(2);
+            case 13:
+              if (state.active) {
+                _context3.n = 24;
+                break;
+              }
+              _context3.n = 14;
               return AelluxJs.waitLayout.update(function() {
                 if (!current()) return;
                 applyBaseStyles(element);
                 state.active = true;
               });
-            case 10:
+            case 14:
               if (current()) {
-                _context3.n = 11;
-                break;
-              }
-              return _context3.a(2);
-            case 11:
-              _context3.n = 12;
-              return AelluxJs.waitLayout.read(function() {
-                return current() ? readPlacement(element, useReference ? null : target, candidates, true) : null;
-              });
-            case 12:
-              placement = _context3.v;
-              if (!(!current() || !placement)) {
-                _context3.n = 13;
-                break;
-              }
-              return _context3.a(2);
-            case 13:
-              if (!placement.hidden) {
                 _context3.n = 15;
                 break;
               }
-              _context3.n = 14;
-              return AelluxJs.waitLayout.update(function() {
-                if (current()) hideForTarget(element, state, placement);
-              });
-            case 14:
-              return _context3.a(2);
+              return _context3.a(2, retry());
             case 15:
-              if (placement.valid) {
+              _context3.n = 16;
+              return AelluxJs.waitLayout.read(function() {
+                return current() ? readPlacement(element, useReference ? null : target, candidates, true) : null;
+              });
+            case 16:
+              placement = _context3.v;
+              if (current()) {
                 _context3.n = 17;
                 break;
               }
-              _context3.n = 16;
+              return _context3.a(2, retry());
+            case 17:
+              if (placement) {
+                _context3.n = 18;
+                break;
+              }
+              return _context3.a(2);
+            case 18:
+              if (!placement.hidden) {
+                _context3.n = 21;
+                break;
+              }
+              _context3.n = 19;
+              return AelluxJs.waitLayout.update(function() {
+                if (current()) hideForTarget(element, state, placement);
+              });
+            case 19:
+              if (current()) {
+                _context3.n = 20;
+                break;
+              }
+              return _context3.a(2, retry());
+            case 20:
+              return _context3.a(2);
+            case 21:
+              if (placement.valid) {
+                _context3.n = 24;
+                break;
+              }
+              _context3.n = 22;
               return AelluxJs.waitLayout.update(function() {
                 if (current()) invalidContext(element, state, placement);
               });
-            case 16:
+            case 22:
+              if (current()) {
+                _context3.n = 23;
+                break;
+              }
+              return _context3.a(2, retry());
+            case 23:
               return _context3.a(2);
-            case 17:
+            case 24:
               applied = false;
-              _context3.n = 18;
+              _context3.n = 25;
               return AelluxJs.waitLayout.update(function() {
                 if (!current()) return;
                 state.invalidContext = false;
@@ -626,13 +674,13 @@
                 state.lastUpdateAt = now();
                 applied = true;
               });
-            case 18:
+            case 25:
               if (!(!applied && anchors.get(element) === state)) {
-                _context3.n = 19;
+                _context3.n = 26;
                 break;
               }
-              return _context3.a(2, updateAnchor(element));
-            case 19:
+              return _context3.a(2, updateAnchor(element, ensureLatest));
+            case 26:
               return _context3.a(2);
           }
         }, _callee3);
@@ -709,7 +757,8 @@
       if (visibility === "hidden" || visibility === "collapse") return true;
       for (var current = element; current && current.nodeType === 1; current = current.parentElement) {
         var style = root.getComputedStyle(current);
-        if (current.hidden || style.display === "none" || style.contentVisibility === "hidden" || Number(style.opacity) === 0) return true;
+        var inline = current.style;
+        if (current.hidden || inline.display === "none" || inline.visibility === "hidden" || inline.visibility === "collapse" || inline.opacity === "0" || style.display === "none" || style.contentVisibility === "hidden" || Number(style.opacity) === 0) return true;
       }
       return false;
     }

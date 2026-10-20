@@ -562,7 +562,7 @@ test("timer-driven idle batches recover one FPS budget and publish it on html", 
   });
 });
 
-test("a CSS Motion visual ceiling clamps and coalesces direct read/update work", async () => {
+test("a CSS Motion visual ceiling delays but preserves independent layout work", async () => {
   await withClock(async clock => {
     const scheduler = buildLayoutScheduler();
     const cadence = scheduler.sequence(75, { read() {}, repeat: { ms: 0 } });
@@ -570,14 +570,31 @@ test("a CSS Motion visual ceiling clamps and coalesces direct read/update work",
     scheduler.setVisualFPSLimit(900, 5);
 
     const calls = [];
-    const first = scheduler.update(() => calls.push("first"));
-    const latest = scheduler.update(() => calls.push("latest"));
-    assert.equal(await first, undefined);
+    const work = [
+      scheduler.read(() => { calls.push("anchor read"); return "anchor"; }),
+      scheduler.read(() => { calls.push("scrollbox read"); return "scrollbox"; }),
+      scheduler.update(() => { calls.push("anchor update"); return "anchor update"; }),
+      scheduler.update(() => { calls.push("scrollbox update"); return "scrollbox update"; }),
+      scheduler.read(76, () => { calls.push("id 76"); return 76; }),
+      scheduler.read(77, () => { calls.push("id 77"); return 77; })
+    ];
     await clock.frames(11);
     assert.deepEqual(calls, []);
     await clock.frames(1);
-    assert.deepEqual(calls, ["latest"]);
-    await latest;
+    assert.deepEqual(calls, ["anchor read", "scrollbox read", "id 76", "id 77",
+      "anchor update", "scrollbox update"]);
+    assert.deepEqual(await Promise.all(work),
+      ["anchor", "scrollbox", "anchor update", "scrollbox update", 76, 77]);
+
+    const old = scheduler.update(78, () => calls.push("superseded"));
+    const replacement = scheduler.update(78, () => calls.push("replacement"));
+    assert.equal(await old, undefined);
+    const canceled = scheduler.read(79, () => calls.push("canceled"));
+    assert.equal(scheduler.cancel(79), true);
+    assert.equal(await canceled, undefined);
+    await clock.frames(12);
+    await replacement;
+    assert.equal(calls.at(-1), "replacement");
 
     scheduler.setVisualFPSLimit(900, null);
     scheduler.clear();

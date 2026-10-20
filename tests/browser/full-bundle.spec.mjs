@@ -44,3 +44,15 @@ for (const { boot, forceLegacy } of [
     });
   });
 }
+
+test("a Present trigger alone loads its lazy extension in full mode", async ({ page }) => {
+  await page.goto("/tests/index.htm");
+  await page.addScriptTag({ url: "/dist/aellux.js" });
+  await page.evaluate(() => {
+    document.body.innerHTML = '<button id="trigger" data-ae-trigger="toggle" data-ae-target="#later"></button>';
+    AelluxJs.init({ mode: "full" });
+  });
+  await expect.poll(() => page.evaluate(() => AelluxJs.ext.present?.initialized)).toBe(true);
+  await expect.poll(() => page.evaluate(() =>
+    !!AelluxJs.mountManager.controller("trigger")?.present)).toBe(true);
+});

@@ -600,14 +600,14 @@ npm run build
 </code></pre>
 <p>Core sources live in <code>src/</code>, build tooling in <code>scripts/</code>, browser validation pages in <code>tests/browser/</code>, and generated browser files in <code>dist/</code>.</p>
 <h2>Full Mode</h2>
-<p>Full mode loads the orchestrator and the complete core Extension bundle:</p>
+<p>Full mode makes the supported Core Extensions available through the boot script and the Full runtime:</p>
 <pre><code class="language-html">&lt;script src=&quot;./dist/aellux.js&quot;&gt;&lt;/script&gt;
 &lt;script&gt;
   AelluxJs.init({ mode: &quot;full&quot; });
 &lt;/script&gt;
 </code></pre>
-<p>The full bundle is a runtime loaded by the aellux.js boot script; it is not a standalone entry point.
-It includes and initializes Adaptive, Anchor, Feedback, Focus, Point, Preference, Present, Scrollbox, Scrollbox Snap, and State Navigation. Adaptive, Feedback, and Present also load their generated stylesheets. No separate registration is needed for these core Extensions in <code>full</code> mode.</p>
+<p>The Full runtime is loaded by the aellux.js boot script; it is not a standalone entry point. <strong>Full means integrated availability, not physical inclusion in one file.</strong> It incorporates Adaptive, Anchor, Feedback, Focus, Point, Preference, Present, and State Navigation. Adaptive, Anchor, Feedback, Focus, Point, and Present initialize when matching markup is mounted; Preference and State Navigation initialize at startup.</p>
+<p>Full also registers Scrollbox and Scrollbox Snap for on-demand loading, but keeps their implementations in separate distribution files. Mounting an element with <code>data-ae-scrollbox</code> requests the compatible Scrollbox script. Mounting one with both <code>data-ae-scrollbox</code> and <code>data-ae-scrollbox-snap</code> also requests Snap, which waits for Scrollbox before mounting. The Full runtime embeds official artifact metadata, so these requests do not require a separate manifest download for the current Core version. Modern or Legacy and normal or minified files follow the boot selection. Adaptive, Feedback, and Present may request their generated stylesheets. No separate registration is needed for these Core Extensions in <code>full</code> mode.</p>
 <h2>Basic Mode</h2>
 <p>Basic mode loads the orchestrator and only the Extensions registered by the page:</p>
 <pre><code class="language-html">&lt;script src=&quot;./dist/aellux.js&quot;&gt;&lt;/script&gt;

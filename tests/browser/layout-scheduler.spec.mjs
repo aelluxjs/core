@@ -97,3 +97,46 @@ test("legacy runtime executes identified layout sequences", async ({ page }) => 
     legacy: true
   });
 });
+
+test("active CSS Motion FPS limit preserves anonymous work from separate extensions", async ({ page, browserName }) => {
+  test.skip(browserName !== "chromium", "Controlled CSS Motion is verified in Chromium.");
+  await page.goto("/tests/index.htm");
+  await page.addStyleTag({ content: `
+    #motion { opacity: 0; transition: opacity 900ms linear; }
+    #motion.active { opacity: 1; }
+  ` });
+  await page.evaluate(() => {
+    document.body.innerHTML = '<div id="motion" data-ae-maxfps="5"></div>';
+  });
+  await page.addScriptTag({ url: "/dist/aellux.js" });
+  await page.evaluate(() => AelluxJs.init({ mode: "basic", skipGlobalMount: true }));
+  await expect.poll(() => page.evaluate(() => typeof AelluxJs.motion?.run)).toBe("function");
+  await page.evaluate(() => {
+    const element = document.getElementById("motion");
+    getComputedStyle(element).opacity;
+    window.motionResult = AelluxJs.motion.run(element, {
+      id: AelluxJs.motion.id(),
+      apply: () => element.classList.add("active")
+    });
+  });
+  await expect.poll(() => page.locator("#motion").evaluate(element =>
+    element.getAnimations()[0]?.playState)).toBe("paused");
+
+  const result = await page.evaluate(async () => {
+    const scheduler = AelluxJs.waitLayout;
+    const events = [];
+    const work = [
+      scheduler.read(() => { events.push("anchor read"); return 1; }),
+      scheduler.read(() => { events.push("scrollbox read"); return 2; }),
+      scheduler.update(() => { events.push("anchor update"); return 3; }),
+      scheduler.update(() => { events.push("scrollbox update"); return 4; }),
+      scheduler.read(3001, () => { events.push("id 3001"); return 5; }),
+      scheduler.read(3002, () => { events.push("id 3002"); return 6; })
+    ];
+    return { values: await Promise.all(work), events, motion: await window.motionResult };
+  });
+  expect(result.motion).toMatchObject({ status: "completed", mode: "controlled" });
+  expect(result.values).toEqual([1, 2, 3, 4, 5, 6]);
+  expect(result.events).toEqual(["anchor read", "scrollbox read", "id 3001", "id 3002",
+    "anchor update", "scrollbox update"]);
+});

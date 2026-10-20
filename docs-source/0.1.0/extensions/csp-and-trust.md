@@ -4,7 +4,7 @@ Content Security Policy (CSP) is set by the application serving the page. Review
 
 ## Script and stylesheet sources
 
-The boot script adds a `<script src>` for the selected `basic` or `full` runtime, including its Legacy fallback when needed. In `basic` mode, the orchestrator also adds a `<script src>` for each registered Extension when it is needed. `loadWhen` delays that request until a matching element is found; it does not bypass CSP. The `full` bundle contains the bundled Core Extensions, but separately registered Extensions can still require their own files.
+The boot script adds a `<script src>` for the selected `basic` or `full` runtime, including its Legacy fallback when needed. In `basic` mode, the orchestrator also adds a `<script src>` for each registered Extension when it is needed. `loadWhen` delays that request until a matching element is found; it does not bypass CSP. Full incorporates eight Core Extensions; Scrollbox and Scrollbox Snap remain separate scripts loaded when matching elements are mounted. Separately registered third-party Extensions can also require their own files.
 
 Allow the actual runtime and Extension script origins in the page's `script-src` policy. A same-origin deployment may use `script-src 'self'` for these external files; a cross-origin Extension requires its specific origin to be allowed by the application's policy. Account for the Modern, Legacy, and minified artifact URLs that the page can request. A browser that blocks a script with CSP cannot initialize the corresponding runtime or Extension.
 

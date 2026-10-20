@@ -268,6 +268,7 @@
         targetAxis: null,
         timeout: null,
         wheelTimeout: null,
+        edgeWheelTimeout: null,
         activePointers: /* @__PURE__ */ new Set(),
         activeTouches: /* @__PURE__ */ new Set(),
         savedItems: /* @__PURE__ */ new Map(),
@@ -283,8 +284,9 @@
         if (state.target !== null && !targetReached(state)) scheduleTargetIdle(state);
         else scheduleSettle(state);
       };
-      state.onScrollEnd = function() {
-        return finish(state);
+      state.onScrollEnd = function(event) {
+        if (event.target !== state.element || state.target !== null && !targetReached(state)) return;
+        finish(state);
       };
       state.onPointerDown = function(event) {
         return beginGesture(state, POINTER, event);
@@ -341,6 +343,7 @@
       state.disposed = true;
       clearTimer(state, "timeout");
       clearTimer(state, "wheelTimeout");
+      clearTimer(state, "edgeWheelTimeout");
       (_state$observer = state.observer) === null || _state$observer === void 0 || _state$observer.disconnect();
       (_state$resizeObserver = state.resizeObserver) === null || _state$resizeObserver === void 0 || _state$resizeObserver.disconnect();
       AelluxJs.offEvent(element, SCROLL_EVENT, state.onScroll);
@@ -471,7 +474,7 @@
     function goto(element, index) {
       var behavior = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : SMOOTH;
       var state = states.get(element), items = state && itemsFor(state);
-      if (!state || !Number.isInteger(index) || index < 0 || index >= items.length) return false;
+      if (!state || state.activeTouches.size || !Number.isInteger(index) || index < 0 || index >= items.length) return false;
       var axis = axisFor(state), metrics = metricsFor(element);
       var destination = axis === HORIZONTAL ? Math.max(0, Math.min(metrics.x, element.scrollLeft + offset(state, items[index], axis))) : Math.max(0, Math.min(metrics.y, element.scrollTop + offset(state, items[index], axis)));
       state.index = index;
@@ -498,6 +501,13 @@
     }
     function selectedIndex(state) {
       var items = itemsFor(state);
+      if (items.length > 1) {
+        var axis = axisFor(state), metrics = metricsFor(state.element);
+        var maximum = axis === HORIZONTAL ? metrics.x : metrics.y;
+        var position = axis === HORIZONTAL ? state.element.scrollLeft : state.element.scrollTop;
+        if (position <= 1) return 0;
+        if (maximum > 0 && position >= maximum - 1) return items.length - 1;
+      }
       var nearest = 0, distance = Infinity;
       for (var index = 0; index < items.length; index++) {
         var candidate = Math.abs(offset(state, items[index]));
@@ -515,8 +525,32 @@
       var delta = axis === HORIZONTAL ? horizontal ? event.deltaX : event.deltaY : horizontal ? 0 : event.deltaY;
       if (!delta) return false;
       var items = itemsFor(state), index = state.target !== null ? state.index : selectedIndex(state);
+      if (!items.length) return false;
       var nextIndex = index + Math.sign(delta);
-      if (nextIndex < 0 || nextIndex >= items.length) return false;
+      if (nextIndex < 0 || nextIndex >= items.length) {
+        if (state.target !== null && !targetReached(state)) {
+          event.preventDefault();
+          return true;
+        }
+        var behavior = root.getComputedStyle(state.element)[axis === HORIZONTAL ? "overscrollBehaviorX" : "overscrollBehaviorY"];
+        if (behavior === "contain" || behavior === "none") {
+          event.preventDefault();
+          return true;
+        }
+        setSuspension(state, {
+          reason: "wheel-edge",
+          active: true
+        });
+        clearTimer(state, "edgeWheelTimeout");
+        state.edgeWheelTimeout = root.setTimeout(function() {
+          state.edgeWheelTimeout = null;
+          setSuspension(state, {
+            reason: "wheel-edge",
+            active: false
+          });
+        }, SNAP_SCROLL_IDLE_MS);
+        return false;
+      }
       event.preventDefault();
       if (state.wheelTimeout !== null) return true;
       state.wheelTimeout = root.setTimeout(function() {

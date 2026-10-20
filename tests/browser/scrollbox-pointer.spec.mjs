@@ -489,12 +489,13 @@ test("snap restores the box and child inline rules on unmount", async ({ page })
     const child = element.firstElementChild.firstElementChild;
     const during = [getComputedStyle(element).scrollSnapType,
       getComputedStyle(child).scrollSnapAlign];
-    await AelluxJs.mountManager.unmount(element, "scrollbox");
+    await AelluxJs.mountManager.unmount(element, "scrollbox-snap");
     return { during, after: [element.style.scrollSnapType, child.style.scrollSnapAlign],
-      ready: element.classList.contains("ae--snap-ready") };
+      ready: element.classList.contains("ae--snap-ready"),
+      scrollbox: !!AelluxJs.mountManager.controller(element)?.scrollbox };
   });
   expect(styles).toEqual({ during: ["x mandatory", "center"],
-    after: ["x", "start"], ready: false });
+    after: ["x", "start"], ready: false, scrollbox: true });
 });
 
 test("snap children publish viewport and focus values through native scrolling", async ({ page }) => {
@@ -521,7 +522,7 @@ test("snap children publish viewport and focus values through native scrolling",
   await expect.poll(values).toEqual([[0, 1], [2, 0], [2, 0]]);
   expect(await values(50)).toEqual([[-1, 0.5], [1, 0.5], [2, 0]]);
   expect(await values(100)).toEqual([[-2, 0], [0, 1], [2, 0]]);
-  await page.evaluate(() => AelluxJs.mountManager.unmount(document.body, "scrollbox"));
+  await page.evaluate(() => AelluxJs.mountManager.unmount(document.body, "scrollbox-snap"));
   expect(await page.evaluate(() => Array.from(
     document.querySelectorAll("[data-ae-snap-item]"), item => [
       item.style.getPropertyValue("--ae-snap-viewport"),
@@ -3336,7 +3337,7 @@ test("elastic native wheel moves its wrapper at bottom and right limits", async 
   expect(result.scrollTop).toBe(result.maxY);
 });
 
-test("elastic transform applies negative margins on the opposite edge", async ({ page }) => {
+test("elastic margins preserve the scroll range at trailing edges", async ({ page }) => {
   await setup(page, `<div id="start" data-ae-scrollbox="native"
     style="width:100px;height:100px;overflow:auto">
     <div data-ae-scrollbox-elastic style="width:300px;height:300px"></div></div>
@@ -3355,6 +3356,9 @@ test("elastic transform applies negative margins on the opposite edge", async ({
       }));
       return {
         before, width: element.scrollWidth, height: element.scrollHeight,
+        left: element.scrollLeft, top: element.scrollTop,
+        maxX: element.scrollWidth - element.clientWidth,
+        maxY: element.scrollHeight - element.clientHeight,
         margins: {
           top: wrapper.style.marginTop, right: wrapper.style.marginRight,
           bottom: wrapper.style.marginBottom, left: wrapper.style.marginLeft
@@ -3367,10 +3371,12 @@ test("elastic transform applies negative margins on the opposite edge", async ({
   expect(result.start.margins.right).toMatch(/^calc\(-[\d.]+px\)$/);
   expect(result.start.margins.top).toBe("");
   expect(result.start.margins.left).toBe("");
-  expect(result.end.margins.top).toMatch(/^calc\(-[\d.]+px\)$/);
-  expect(result.end.margins.left).toMatch(/^calc\(-[\d.]+px\)$/);
+  expect(result.end.margins.top).toBe("");
+  expect(result.end.margins.left).toBe("");
   expect(result.end.margins.bottom).toBe("");
   expect(result.end.margins.right).toBe("");
+  expect(result.end.left).toBe(result.end.maxX);
+  expect(result.end.top).toBe(result.end.maxY);
 });
 
 test("elastic limits accept fractions and pixel values per axis", async ({ page }) => {

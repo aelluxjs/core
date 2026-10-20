@@ -6,7 +6,7 @@ Set `AELLUX_OFFICIAL_CDN_BASE` to an immutable HTTPS distribution base while bui
 
 ## Resolution and caching
 
-`basic` fetches the official index only when a name-only registration must be resolved. One cached Promise is shared by concurrent requests. `full` embeds the official compatibility metadata and uses its bundled Extension implementation without fetching either the index or duplicate scripts.
+`basic` fetches the official index only when a name-only registration must be resolved. One cached Promise is shared by concurrent requests. `full` embeds the official metadata for the current Core version, so its Core Extensions do not need an index request. It uses bundled implementations for Adaptive, Anchor, Feedback, Focus, Point, Preference, Present, and State Navigation. Scrollbox and Scrollbox Snap are registered in Full but load their separate, signed Extension scripts on demand.
 
 Resolution order is: an explicit URL/registration, a bundled implementation, official metadata, the configured custom fallback, and finally the historical local filename convention. A custom index cannot silently replace an official entry.
 

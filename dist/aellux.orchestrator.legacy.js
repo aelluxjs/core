@@ -21327,19 +21327,6 @@
         }
         if (!group) group = makeGroup(id);
       }
-      if (id === void 0 && visualFPSLimit() !== Infinity) {
-        var _iterator4 = _createForOfIteratorHelper(queues[kind].slice()), _step4;
-        try {
-          for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
-            var pending = _step4.value;
-            if (!pending.group) cancelTask(pending);
-          }
-        } catch (err) {
-          _iterator4.e(err);
-        } finally {
-          _iterator4.f();
-        }
-      }
       var task;
       var promise = new Promise(function(resolve, reject) {
         task = {
@@ -21419,16 +21406,16 @@
       });
     }
     function detachAbortSignals(owner) {
-      var _iterator5 = _createForOfIteratorHelper(owner.abortSignals), _step5;
+      var _iterator4 = _createForOfIteratorHelper(owner.abortSignals), _step4;
       try {
-        for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
-          var signal = _step5.value;
+        for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
+          var signal = _step4.value;
           signal.removeEventListener("abort", owner.abortHandler);
         }
       } catch (err) {
-        _iterator5.e(err);
+        _iterator4.e(err);
       } finally {
-        _iterator5.f();
+        _iterator4.f();
       }
       owner.abortSignals.length = 0;
     }
@@ -21465,19 +21452,19 @@
         return finishSequence(owner, "aborted");
       };
       try {
-        var _iterator6 = _createForOfIteratorHelper(configs), _step6;
+        var _iterator5 = _createForOfIteratorHelper(configs), _step5;
         try {
-          for (_iterator6.s(); !(_step6 = _iterator6.n()).done; ) {
-            var config = _step6.value;
+          for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
+            var config = _step5.value;
             if (config.signal && !owner.abortSignals.includes(config.signal)) {
               config.signal.addEventListener("abort", owner.abortHandler);
               owner.abortSignals.push(config.signal);
             }
           }
         } catch (err) {
-          _iterator6.e(err);
+          _iterator5.e(err);
         } finally {
-          _iterator6.f();
+          _iterator5.f();
         }
         if (owner.abortSignals.some(function(signal) {
           return signal.aborted;
@@ -22283,7 +22270,7 @@
     }
     function _AelluxJsMount() {
       _AelluxJsMount = _asyncToGenerator(/* @__PURE__ */ _regenerator().m(function _callee5(rootElement, extensionNames, newlyMounted) {
-        var AelluxJs2, filter, mounterSelectors, lazySelectors, _i2, _Object$entries2, _Object$entries2$_i, key, selectorString, _i3, _Object$entries3, _Object$entries3$_i, _key, _selectorString, candidatesByExtension, allElements, _iterator3, _step3, element, localExtensionNames, _i6, _Object$entries4, _Object$entries4$_i, _key2, _selector2, _i7, _Object$entries5, _Object$entries5$_i, _key3, _selector3, _iterator0, _step0, _extensionName2, _candidates, extensions, loaded, _iterator4, _step4, result, registrations, index, _extensions$index, extensionName, candidates, mounter, searchRoots, _iterator5, _step5, candidate, ancestor, _iterator6, _step6, _step6$value, selector, controller, elementsAffected, _i4, _registrations, _registrations$_i, _extensionName, _selector, _controller, _searchRoots, _iterator7, _step7, searchRoot, mountableElements, _iterator8, _step8, mountable, mountId, pendingMount, _i5, _Array$from, name, finishPendingMount, elementController, _elementController, _iterator9, _step9, affected, _t3, _t4, _t5, _t6, _t7, _t8;
+        var AelluxJs2, filter, mounterSelectors, lazySelectors, _i2, _Object$entries2, _Object$entries2$_i, key, selectorString, _i3, _Object$entries3, _Object$entries3$_i, _key, _selectorString, candidatesByExtension, allElements, _iterator3, _step3, element, localExtensionNames, _i6, _Object$entries4, _Object$entries4$_i, _key2, _selector2, _i7, _Object$entries5, _Object$entries5$_i, _key3, _selector3, _iterator8, _step8, _extensionName2, candidates, extensions, loaded, _iterator4, _step4, result, registrations, index, _extensions$index, extensionName, mounter, _iterator5, _step5, _step5$value, selector, controller, elementsAffected, _i4, _registrations, _registrations$_i, _extensionName, _selector, _controller, mountableElements, _iterator6, _step6, mountable, mountId, pendingMount, _i5, _Array$from, name, finishPendingMount, elementController, _elementController, _iterator7, _step7, affected, _t3, _t4, _t5, _t6, _t7;
         return _regenerator().w(function(_context5) {
           while (1) switch (_context5.p = _context5.n) {
             case 0:
@@ -22340,21 +22327,21 @@
                       if (element.matches(_selector3) && filter.indexOf(_selector3) !== -1) localExtensionNames.add(fromCamelCase2(_key3));
                     }
                   }
-                  _iterator0 = _createForOfIteratorHelper3(localExtensionNames);
+                  _iterator8 = _createForOfIteratorHelper3(localExtensionNames);
                   try {
-                    for (_iterator0.s(); !(_step0 = _iterator0.n()).done; ) {
-                      _extensionName2 = _step0.value;
-                      _candidates = candidatesByExtension.get(_extensionName2);
-                      if (!_candidates) {
-                        _candidates = /* @__PURE__ */ new Set();
-                        candidatesByExtension.set(_extensionName2, _candidates);
+                    for (_iterator8.s(); !(_step8 = _iterator8.n()).done; ) {
+                      _extensionName2 = _step8.value;
+                      candidates = candidatesByExtension.get(_extensionName2);
+                      if (!candidates) {
+                        candidates = /* @__PURE__ */ new Set();
+                        candidatesByExtension.set(_extensionName2, candidates);
                       }
-                      _candidates.add(element);
+                      candidates.add(element);
                     }
                   } catch (err) {
-                    _iterator0.e(err);
+                    _iterator8.e(err);
                   } finally {
-                    _iterator0.f();
+                    _iterator8.f();
                   }
                 }
               } catch (err) {
@@ -22420,7 +22407,7 @@
               }
               return _context5.a(3, 13);
             case 11:
-              _extensions$index = _slicedToArray(extensions[index], 2), extensionName = _extensions$index[0], candidates = _extensions$index[1];
+              _extensions$index = _slicedToArray(extensions[index], 1), extensionName = _extensions$index[0];
               mounter = mountMaps.get(toCamelCase2(extensionName));
               if (mounter) {
                 _context5.n = 12;
@@ -22428,37 +22415,22 @@
               }
               return _context5.a(3, 13);
             case 12:
-              searchRoots = [];
-              _iterator5 = _createForOfIteratorHelper3(candidates);
+              _iterator5 = _createForOfIteratorHelper3(mounter);
               try {
                 for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
-                  candidate = _step5.value;
-                  ancestor = candidate.parentNode;
-                  while (ancestor && !candidates.has(ancestor)) ancestor = ancestor.parentNode;
-                  if (!ancestor) searchRoots.push(candidate);
-                }
-              } catch (err) {
-                _iterator5.e(err);
-              } finally {
-                _iterator5.f();
-              }
-              _iterator6 = _createForOfIteratorHelper3(mounter);
-              try {
-                for (_iterator6.s(); !(_step6 = _iterator6.n()).done; ) {
-                  _step6$value = _slicedToArray(_step6.value, 2), selector = _step6$value[0], controller = _step6$value[1];
+                  _step5$value = _slicedToArray(_step5.value, 2), selector = _step5$value[0], controller = _step5$value[1];
                   registrations.push({
                     extensionName: extensionName,
                     selector: selector,
                     controller: controller,
-                    searchRoots: searchRoots,
                     priority: controller.priority,
                     order: registrations.length
                   });
                 }
               } catch (err) {
-                _iterator6.e(err);
+                _iterator5.e(err);
               } finally {
-                _iterator6.f();
+                _iterator5.f();
               }
             case 13:
               index++;
@@ -22472,51 +22444,42 @@
               _i4 = 0, _registrations = registrations;
             case 15:
               if (!(_i4 < _registrations.length)) {
-                _context5.n = 39;
+                _context5.n = 33;
                 break;
               }
-              _registrations$_i = _registrations[_i4], _extensionName = _registrations$_i.extensionName, _selector = _registrations$_i.selector, _controller = _registrations$_i.controller, _searchRoots = _registrations$_i.searchRoots;
+              _registrations$_i = _registrations[_i4], _extensionName = _registrations$_i.extensionName, _selector = _registrations$_i.selector, _controller = _registrations$_i.controller;
               _context5.p = 16;
               if (_controller.mount) {
                 _context5.n = 17;
                 break;
               }
-              return _context5.a(3, 38);
+              return _context5.a(3, 32);
             case 17:
-              _iterator7 = _createForOfIteratorHelper3(_searchRoots);
+              mountableElements = findElements(rootElement, _selector);
+              _iterator6 = _createForOfIteratorHelper3(mountableElements);
               _context5.p = 18;
-              _iterator7.s();
+              _iterator6.s();
             case 19:
-              if ((_step7 = _iterator7.n()).done) {
-                _context5.n = 33;
+              if ((_step6 = _iterator6.n()).done) {
+                _context5.n = 27;
                 break;
               }
-              searchRoot = _step7.value;
-              mountableElements = findElements(searchRoot, _selector);
-              _iterator8 = _createForOfIteratorHelper3(mountableElements);
-              _context5.p = 20;
-              _iterator8.s();
-            case 21:
-              if ((_step8 = _iterator8.n()).done) {
-                _context5.n = 29;
-                break;
-              }
-              mountable = _step8.value;
+              mountable = _step6.value;
               mountId = "".concat(_extensionName, "@").concat(_selector);
               if (!isMounted(mountable, mountId)) {
-                _context5.n = 23;
+                _context5.n = 21;
                 break;
               }
               pendingMount = getPendingMount(mountable, mountId);
               if (!pendingMount) {
-                _context5.n = 22;
+                _context5.n = 20;
                 break;
               }
-              _context5.n = 22;
+              _context5.n = 20;
               return pendingMount;
-            case 22:
-              return _context5.a(3, 28);
-            case 23:
+            case 20:
+              return _context5.a(3, 26);
+            case 21:
               if (!isMounted(mountable)) {
                 for (_i5 = 0, _Array$from = Array.from(mountable.classList); _i5 < _Array$from.length; _i5++) {
                   name = _Array$from[_i5];
@@ -22525,10 +22488,10 @@
               }
               setMounted(mountable, mountId, true, _controller.priority);
               finishPendingMount = beginPendingMount(mountable, mountId);
-              _context5.p = 24;
-              _context5.n = 25;
+              _context5.p = 22;
+              _context5.n = 23;
               return _controller.mount(mountable);
-            case 25:
+            case 23:
               elementController = elementControllers.get(mountable);
               if (!elementController) {
                 elementController = createControllerHelper(root, mountable);
@@ -22537,10 +22500,10 @@
               elementController.spawn(_extensionName, mountId, _controller.controllers, typeof _controller.update === "function");
               elementsAffected.add(mountable);
               newlyMounted.add(mountable);
-              _context5.n = 27;
+              _context5.n = 25;
               break;
-            case 26:
-              _context5.p = 26;
+            case 24:
+              _context5.p = 24;
               _t4 = _context5.v;
               setMounted(mountable, mountId, false);
               _elementController = elementControllers.get(mountable);
@@ -22555,94 +22518,80 @@
                 selector: _selector,
                 element: mountable
               });
-            case 27:
-              _context5.p = 27;
+            case 25:
+              _context5.p = 25;
               finishPendingMount();
-              return _context5.f(27);
-            case 28:
-              _context5.n = 21;
-              break;
-            case 29:
-              _context5.n = 31;
-              break;
-            case 30:
-              _context5.p = 30;
-              _t5 = _context5.v;
-              _iterator8.e(_t5);
-            case 31:
-              _context5.p = 31;
-              _iterator8.f();
-              return _context5.f(31);
-            case 32:
+              return _context5.f(25);
+            case 26:
               _context5.n = 19;
               break;
-            case 33:
-              _context5.n = 35;
+            case 27:
+              _context5.n = 29;
               break;
-            case 34:
-              _context5.p = 34;
+            case 28:
+              _context5.p = 28;
+              _t5 = _context5.v;
+              _iterator6.e(_t5);
+            case 29:
+              _context5.p = 29;
+              _iterator6.f();
+              return _context5.f(29);
+            case 30:
+              _context5.n = 32;
+              break;
+            case 31:
+              _context5.p = 31;
               _t6 = _context5.v;
-              _iterator7.e(_t6);
-            case 35:
-              _context5.p = 35;
-              _iterator7.f();
-              return _context5.f(35);
-            case 36:
-              _context5.n = 38;
-              break;
-            case 37:
-              _context5.p = 37;
-              _t7 = _context5.v;
               AelluxJs2.diagnostics.error(AelluxJs2.diagnostics.ERROR_EXTENSION_MOUNT, {
-                cause: _t7,
+                cause: _t6,
                 extension: _extensionName,
                 method: "mount",
                 selector: _selector
               });
-            case 38:
+            case 32:
               _i4++;
               _context5.n = 15;
               break;
-            case 39:
-              _iterator9 = _createForOfIteratorHelper3(elementsAffected);
-              _context5.p = 40;
-              _iterator9.s();
-            case 41:
-              if ((_step9 = _iterator9.n()).done) {
-                _context5.n = 45;
+            case 33:
+              _iterator7 = _createForOfIteratorHelper3(elementsAffected);
+              _context5.p = 34;
+              _iterator7.s();
+            case 35:
+              if ((_step7 = _iterator7.n()).done) {
+                _context5.n = 39;
                 break;
               }
-              affected = _step9.value;
+              affected = _step7.value;
               if (!(!affected.isConnected || !isMounted(affected))) {
-                _context5.n = 43;
+                _context5.n = 37;
                 break;
               }
               if (affected.isConnected) {
-                _context5.n = 42;
+                _context5.n = 36;
                 break;
               }
-              _context5.n = 42;
+              _context5.n = 36;
               return unmountElementRegistrations(affected);
-            case 42:
+            case 36:
               newlyMounted.delete(affected);
-              return _context5.a(3, 44);
-            case 43:
+              return _context5.a(3, 38);
+            case 37:
               affected.classList.toggle(AelluxJs2.className("mounted"), true);
-            case 44:
+            case 38:
+              _context5.n = 35;
+              break;
+            case 39:
               _context5.n = 41;
               break;
-            case 45:
-              _context5.n = 47;
-              break;
-            case 46:
-              _context5.p = 46;
-              _t8 = _context5.v;
-              _iterator9.e(_t8);
-            case 47:
-              _context5.p = 47;
-              _iterator9.f();
-              return _context5.f(47);
-            case 48:
+            case 40:
+              _context5.p = 40;
+              _t7 = _context5.v;
+              _iterator7.e(_t7);
+            case 41:
+              _context5.p = 41;
+              _iterator7.f();
+              return _context5.f(41);
+            case 42:
               AelluxJs2.dispatch("Mount", {
                 detail: {
                   root: rootElement,
@@ -22650,10 +22599,10 @@
                   elements: Array.from(newlyMounted)
                 }
               });
-            case 49:
+            case 43:
               return _context5.a(2);
           }
-        }, _callee5, null, [[40, 46, 47, 48], [24, 26, 27, 28], [20, 30, 31, 32], [18, 34, 35, 36], [16, 37], [3, 7, 8, 9]]);
+        }, _callee5, null, [[34, 40, 41, 42], [22, 24, 25, 26], [18, 28, 29, 30], [16, 31], [3, 7, 8, 9]]);
       }));
       return _AelluxJsMount.apply(this, arguments);
     }
@@ -22662,7 +22611,7 @@
     }
     function _AelluxJsMounted() {
       _AelluxJsMounted = _asyncToGenerator(/* @__PURE__ */ _regenerator().m(function _callee6(rootElement, method) {
-        var extensionNames, detachedOnly, AelluxJs2, selectedNames, affected, registrations, _i8, _Array$from2, _Array$from2$_i, element, mountIds, inRoot, detachedInGlobalUnmount, _i9, _Array$from3, mountId, separator, extensionName, selector, extensionKey, mounter, controller, _iterator1, _step1, _step1$value, _element, _mountId, _controller2, _extensionName3, _selector4, _args6 = arguments, _t9, _t0;
+        var extensionNames, detachedOnly, AelluxJs2, selectedNames, affected, registrations, _i8, _Array$from2, _Array$from2$_i, element, mountIds, inRoot, detachedInGlobalUnmount, _i9, _Array$from3, mountId, separator, extensionName, selector, extensionKey, mounter, controller, _iterator9, _step9, _step9$value, _element, _mountId, _controller2, _extensionName3, _selector4, _args6 = arguments, _t8, _t9;
         return _regenerator().w(function(_context6) {
           while (1) switch (_context6.p = _context6.n) {
             case 0:
@@ -22734,9 +22683,9 @@
               break;
             case 7:
               _context6.p = 7;
-              _t9 = _context6.v;
+              _t8 = _context6.v;
               AelluxJs2.diagnostics.error(AelluxJs2.diagnostics.ERROR_EXTENSION_MOUNT, {
-                cause: _t9,
+                cause: _t8,
                 extension: extensionName,
                 method: method,
                 selector: selector
@@ -22755,15 +22704,15 @@
                 break;
               }
               registrations.sort(compareUnmountOrder);
-              _iterator1 = _createForOfIteratorHelper3(registrations);
+              _iterator9 = _createForOfIteratorHelper3(registrations);
               _context6.p = 11;
-              _iterator1.s();
+              _iterator9.s();
             case 12:
-              if ((_step1 = _iterator1.n()).done) {
+              if ((_step9 = _iterator9.n()).done) {
                 _context6.n = 15;
                 break;
               }
-              _step1$value = _step1.value, _element = _step1$value.element, _mountId = _step1$value.mountId, _controller2 = _step1$value.controller, _extensionName3 = _step1$value.extensionName, _selector4 = _step1$value.selector;
+              _step9$value = _step9.value, _element = _step9$value.element, _mountId = _step9$value.mountId, _controller2 = _step9$value.controller, _extensionName3 = _step9$value.extensionName, _selector4 = _step9$value.selector;
               _context6.n = 13;
               return unmountRegistration(_element, _mountId, _controller2, _extensionName3, _selector4);
             case 13:
@@ -22780,11 +22729,11 @@
               break;
             case 16:
               _context6.p = 16;
-              _t0 = _context6.v;
-              _iterator1.e(_t0);
+              _t9 = _context6.v;
+              _iterator9.e(_t9);
             case 17:
               _context6.p = 17;
-              _iterator1.f();
+              _iterator9.f();
               return _context6.f(17);
             case 18:
               AelluxJs2.dispatch(toCapitalized2(method), {
@@ -22806,7 +22755,7 @@
     }
     function _unmountRegistration() {
       _unmountRegistration = _asyncToGenerator(/* @__PURE__ */ _regenerator().m(function _callee7(element, mountId, controller, extensionName, selector) {
-        var pendingMount, tasks, finish, AelluxJs2, diagnostics, elementController, _t1;
+        var pendingMount, tasks, finish, AelluxJs2, diagnostics, elementController, _t0;
         return _regenerator().w(function(_context7) {
           while (1) switch (_context7.p = _context7.n) {
             case 0:
@@ -22856,9 +22805,9 @@
               break;
             case 8:
               _context7.p = 8;
-              _t1 = _context7.v;
+              _t0 = _context7.v;
               diagnostics.error(diagnostics.ERROR_EXTENSION_MOUNT, {
-                cause: _t1,
+                cause: _t0,
                 extension: extensionName,
                 method: UNMOUNT,
                 selector: selector

@@ -264,7 +264,7 @@ test("mount resolves plain and hashed IDs to one root", async ({ page }) => {
 test("mount and unmount run in opposite priority order across extensions and selectors", async ({ page }) => {
   await page.goto("/tests/index.htm");
   await page.addScriptTag({ url: "/dist/aellux.js" });
-  await page.evaluate(() => AelluxJs.init({ mode: "basic" }));
+  await initialize(page);
 
   const result = await page.evaluate(async () => {
     document.body.innerHTML = '<div id="priority-target" data-priority-probe></div>';
@@ -917,7 +917,8 @@ test("extAttach diagnoses invalid arguments without attaching the Extension", as
   });
 
   expect(result).toEqual({
-    arguments: ["name", "name", "name", "api", "api", "api"],
+    // Repeated invalid API shapes share one diagnostic identity.
+    arguments: ["name", "name", "name", "api"],
     registrationCodes: [1110, 1110, 1110, 1101],
     unregisteredAttachMethod: "extAttach",
     invalidSelectors: ["[", 123, " ", false, "["],
@@ -1032,7 +1033,7 @@ test("mountManager.add diagnoses invalid registrations without changing the moun
     accepted: true,
     allRejected: true,
     arguments: ["options", "extensionName", "extensionName", "extensionName", "selector", "selector",
-      "mount", "unmount", "update", "controllers", "controllers",
+      "mount", "unmount", "update", "controllers",
       "initialAttributes", "mout"],
     mountCalls: 1,
     selectorIndex: "[data-mount-probe]"
@@ -1983,11 +1984,7 @@ test("navigation warns for malformed command events without changing history or 
     return { warnings, titleUnchanged: document.title === title, stateUnchanged: history.state === state };
   });
   expect(result).toEqual({
-    warnings: [
-      "PushState", "PushState", "PushState",
-      "PushAjaxReplace", "PushAjaxReplace",
-      "UpdateBaseTitle", "UpdateBaseTitle"
-    ],
+    warnings: ["PushState", "PushAjaxReplace", "UpdateBaseTitle"],
     titleUnchanged: true,
     stateUnchanged: true
   });
@@ -1997,6 +1994,8 @@ test("feedback reports callback failures and continues notifying subscribers", a
   await page.goto("/tests/index.htm");
   await page.addScriptTag({ url: "/dist/aellux.js" });
   await page.evaluate(() => AelluxJs.init({ mode: "full" }));
+  await expect.poll(() => page.evaluate(() => AelluxJs.orchestratorVersion)).toBe("0.1.0-beta.10");
+  await page.evaluate(() => AelluxJs.wait("feedback"));
   await expect.poll(() => page.evaluate(() => AelluxJs.ext.feedback?.initialized)).toBe(true);
 
   const result = await page.evaluate(async () => {
@@ -2396,19 +2395,19 @@ test("full runtime writes the renamed history state marker", async ({ page }) =>
     oldBundled: Object.hasOwn(AelluxJs.bundledExtensions, "state-navigation")
   }))).toEqual({ registered: true, bundled: true, oldRegistered: false, oldBundled: false });
   expect(await page.evaluate(() => ({
-    initialized: AelluxJs.ext.adaptive?.initialized,
+    initialized: AelluxJs.ext.adaptive?.initialized === true,
     registered: Object.hasOwn(AelluxJs.registry.ext, "adaptive"),
     bundled: Object.hasOwn(AelluxJs.bundledExtensions, "adaptive"),
     style: AelluxJs.registry.ext.adaptive?.loadStyle,
-    presentInitialized: AelluxJs.ext.present?.initialized,
+    presentInitialized: AelluxJs.ext.present?.initialized === true,
     presentStyle: AelluxJs.registry.ext.present?.loadStyle,
     ajaxHrefBundled: Object.hasOwn(AelluxJs.bundledExtensions, "ajaxHref")
   }))).toEqual({
-    initialized: true,
+    initialized: false,
     registered: true,
     bundled: true,
     style: true,
-    presentInitialized: true,
+    presentInitialized: false,
     presentStyle: true,
     ajaxHrefBundled: false
   });
@@ -2421,6 +2420,7 @@ test("minified distribution exposes the renamed global", async ({ page }) => {
   await page.addScriptTag({ url: "/dist/aellux.min.js" });
   await page.evaluate(() => AelluxJs.init({ mode: "full" }));
   await expect.poll(() => page.evaluate(() => window.AelluxJs.diagnostics.supported)).toBe(true);
+  await page.evaluate(() => Promise.all([AelluxJs.wait("adaptive"), AelluxJs.wait("present")]));
   await expect.poll(() => page.evaluate(() => AelluxJs.ext.adaptive?.initialized)).toBe(true);
   await expect(page.locator('link[data-ae-ext-style="adaptive"]')).toHaveAttribute(
     "href", /aellux\.ext\.adaptive\.min\.css$/
@@ -2436,6 +2436,8 @@ test("legacy full runtime loads generated Extension stylesheets", async ({ page 
   await page.goto("/tests/index.htm");
   await page.addScriptTag({ url: "/dist/aellux.js" });
   await page.evaluate(() => AelluxJs.init({ mode: "full", forceLegacy: true }));
+  await expect.poll(() => page.evaluate(() => AelluxJs.orchestratorVersion)).toBe("0.1.0-beta.10");
+  await page.evaluate(() => Promise.all([AelluxJs.wait("adaptive"), AelluxJs.wait("present")]));
   await expect.poll(() => page.evaluate(() => AelluxJs.ext.adaptive?.initialized)).toBe(true);
   await expect(page.locator('link[data-ae-ext-style="adaptive"]')).toHaveAttribute(
     "href", /aellux\.ext\.adaptive\.css$/
@@ -2698,6 +2700,8 @@ test("full runtime loads generated adaptive styles", async ({ page }) => {
   });
   await page.addScriptTag({ url: "/dist/aellux.js" });
   await page.evaluate(() => AelluxJs.init({ mode: "full" }));
+  await expect.poll(() => page.evaluate(() => AelluxJs.orchestratorVersion)).toBe("0.1.0-beta.10");
+  await page.evaluate(() => AelluxJs.wait("adaptive"));
   await expect.poll(() => page.evaluate(() => AelluxJs.ext.adaptive?.initialized)).toBe(true);
   await expect(page.locator('link[data-ae-ext-style="adaptive"]')).toHaveAttribute(
     "href", /aellux\.ext\.adaptive\.css$/

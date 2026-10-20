@@ -341,14 +341,6 @@ export function buildLayoutScheduler() {
       }
       if (!group) group = makeGroup(id);
     }
-    // At a controlled visual cadence, direct calls often arrive many times
-    // before the next eligible frame.  Keep only the newest one per phase;
-    // keyed sequences retain their own replacement semantics.
-    if (id === undefined && visualFPSLimit() !== Infinity) {
-      for (const pending of queues[kind].slice()) {
-        if (!pending.group) cancelTask(pending);
-      }
-    }
     let task;
     const promise = new Promise((resolve, reject) => {
       task = { phase: kind, callback, parameters, group, resolve, reject, state: "pending" };

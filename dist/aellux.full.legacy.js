@@ -33,7 +33,7 @@
   var define_AELLUX_OFFICIAL_EXTENSION_MANIFEST_default;
   var init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST = __esm({
     "<define:__AELLUX_OFFICIAL_EXTENSION_MANIFEST__>": function() {
-      define_AELLUX_OFFICIAL_EXTENSION_MANIFEST_default = { schemaVersion: 1, coreVersion: "0.1.0-beta.10", extensions: { preference: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.preference.min.js", integrity: "sha384-mSOgb0DekFTRXXZAgyNrPjamdlSqzL4SSGZYVWgVg+WlG+pBj11xT81v/6Xk43yO", regular: { url: "./aellux.ext.preference.js", integrity: "sha384-MlikpdHSzHzF6kz5+oJGtq3eoFsKTsx/g+FTrf+dFOU8iQGHsCpn4fP1jLlbNrj7" } }, legacy: { url: "./aellux.ext.preference.legacy.min.js", integrity: "sha384-1LMsK0W9J/PoM4tXhFgkYLRY4yWdzVoYmFy4OMDGd8lRdtptKoEb1sI9L1kzNaBu", regular: { url: "./aellux.ext.preference.legacy.js", integrity: "sha384-pozuz43OyfXrnkmuBu6KTM2lqRSqcI5LMgwAtqnzXq8xZGdVqpnmOtrBcYcMskWk" } } }, dependencies: [] }, "state-navigation": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.state-navigation.min.js", integrity: "sha384-wAbgAqjAA6wauuG+iuUtfRwxChd6fTJ0fS22fqnu2r00kouoXJWZ0f7AoTYlqBC6", regular: { url: "./aellux.ext.state-navigation.js", integrity: "sha384-PKJ8HTD7eIYDEg2hOaAJjpMYzLr2fBjBRGmIGG7XzGTzVK0yTjt5HYPO55VbWfdS" } }, legacy: { url: "./aellux.ext.state-navigation.legacy.min.js", integrity: "sha384-YkhfU15Mpk8KiO6TyoVU6z1yCiYWwnsOGE0xVaQ8NrE7IGrxOSUL005g5JeUDdJu", regular: { url: "./aellux.ext.state-navigation.legacy.js", integrity: "sha384-kaEUY0Zpw8K6pcwjm+INA5feXftLK2/N1aFpPr2LCTcetX2uoe2GGd1MJyy7u8rZ" } } }, dependencies: [] }, feedback: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.feedback.min.js", integrity: "sha384-3VP3W84ekK4MIVBQuy5+5P3bGrwOj7bBDfJnjyexZ+yDADf1jQoHEpP2J1OMUgod", regular: { url: "./aellux.ext.feedback.js", integrity: "sha384-RrPf0bRGxf68f/Rjas5MF5zC1GAubWyndCcuiYbgZsPSHGLFsQtQaUgeFX4SQz+h" } }, legacy: { url: "./aellux.ext.feedback.legacy.min.js", integrity: "sha384-zXuZEv63sd3fwaAygmyk9KazQ46KOelsvAtM+0vJ7phDwemVh1FhOjAcbhWVQM/N", regular: { url: "./aellux.ext.feedback.legacy.js", integrity: "sha384-UW1JZ1+liVWV/w3PJdhfIMztOU7zyTw/1rOyyxoxj4YJIHb1xFl8U0xeIBh8jYV7" } } }, dependencies: [], style: { url: "./aellux.ext.feedback.min.css", integrity: "sha384-OBguCYqF+dMD0Pl84C3FlY/+ohUGfW0OyynmXb/PSDEGOyuI/TQJ3EZAoCeJx+Jk", regular: { url: "./aellux.ext.feedback.css", integrity: "sha384-yk4cW+r/Mc1FRS1ZauBHC6KsKb7sxuJ0E9mmt/+AYASAdZXXMK6iuFBR+TOEh/r4" } } }, focus: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.focus.min.js", integrity: "sha384-AXpUv/Ur2Z4cKvO9EqIFqfxxdSQR5j75q0okOAWPvHhSneQ5LPjrOzk6Sl9MOo4a", regular: { url: "./aellux.ext.focus.js", integrity: "sha384-VjQzcnhLRrvRlbVQ0X4/tO0+8gqJXAmIFoeIVimjOud1wRNuBXNnSQHHW9XQPzTe" } }, legacy: { url: "./aellux.ext.focus.legacy.min.js", integrity: "sha384-I5QpUmKsA1T8NiKfKXQgbdG19Ld1ZGCWSmosygO3yGj43tdxp5zCfLyfBuFoHlKu", regular: { url: "./aellux.ext.focus.legacy.js", integrity: "sha384-5/y3J1NC/qMyV9myEj29+wGbqCVI8ICPafSebtJVfl15Qmup6vMiJzveShd3CLnw" } } }, dependencies: [] }, point: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.point.min.js", integrity: "sha384-n540II5oWbHJRt/a8i+Rgb9A3b9dm7hamg1kd3Nz7KdPQDcaa8S823t9fCrgxBWF", regular: { url: "./aellux.ext.point.js", integrity: "sha384-aDj7I5QEH/0+52E3e6yPZ/D0MEsNBdxeET3G5ToVvgczHtksMh3p8S/KOoAapRRN" } }, legacy: { url: "./aellux.ext.point.legacy.min.js", integrity: "sha384-5UmWvQHfmvttz9yeXbilawGCZH20UdR8yNBOE9kRV34wpfWASl8plzgKtLVQGO9M", regular: { url: "./aellux.ext.point.legacy.js", integrity: "sha384-gG/XONYEC1tchBcJ6bUtKYmWFHz0E+50LmMaXDAiqWBKPuwdHZeYm1uXA22lMZuN" } } }, dependencies: [] }, anchor: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.anchor.min.js", integrity: "sha384-LhnN0vAiakKLKDhSalMCh8HMs9EwdZ9cYo+8rgRF5a6b5qHzJNBi9NbZK+oV7PQm", regular: { url: "./aellux.ext.anchor.js", integrity: "sha384-r7o3VYzny6AgHW8EivvVCdFVNNIGRfXeQ63x2z4WW2g5MujpZi24+RlpRSszERlU" } }, legacy: { url: "./aellux.ext.anchor.legacy.min.js", integrity: "sha384-1qaoGlmbZ/Yk2m1GBBVeHQk05w66V8GA3hlLtyIwxHZO//r/GMprmgD7w9GQ5Ib7", regular: { url: "./aellux.ext.anchor.legacy.js", integrity: "sha384-AKxMx8gPEHllem340el/rdIP5hAldqQWrWVwzw2NMGbEA8AfkWXagmoCNquGE82s" } } }, dependencies: [] }, scrollbox: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.scrollbox.min.js", integrity: "sha384-N7vWjIaeyr5DxG4JQo+DvHTmzsB1RCkAFlkxLQjNbRvmkG8hDOZEPmtMAtqR/KuQ", regular: { url: "./aellux.ext.scrollbox.js", integrity: "sha384-Bwtxdz7z1U6FSz8g7qJyxI3AHeEbOf9VYLPBGzccdUusWFBDJHPUEVW1Att5gWbD" } }, legacy: { url: "./aellux.ext.scrollbox.legacy.min.js", integrity: "sha384-garvYtJCa+1kFFeqqCG6k8lyh9HkorCth8ELA3CGuM9MO56WUdKmxZwe8SyS7LDC", regular: { url: "./aellux.ext.scrollbox.legacy.js", integrity: "sha384-D9IKUyF6AMpW78TY6r8sK4vSQTVngjFqACqXMCz+WZI3UnqRhYfgBeIUSS7mUCj4" } } }, dependencies: [] }, "scrollbox-snap": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.scrollbox-snap.min.js", integrity: "sha384-dMb7YfshByWZSHV9n5WPTuKHYA+BptI1jk1R6tPYdxtGCbvLo0WapARDjRsyWMbx", regular: { url: "./aellux.ext.scrollbox-snap.js", integrity: "sha384-zwE2e7iBBMn5Dom1yxLoteUdD8KiXhH9KXgAEQc/lK5ntvo7sZFcOqjEhVmIK1BA" } }, legacy: { url: "./aellux.ext.scrollbox-snap.legacy.min.js", integrity: "sha384-cgbBgyMI11xeGlG/PaJrvGMa9QcjWdfcIQTh+L71WV3IvFW6Aj+IDG7Q2qJADV3o", regular: { url: "./aellux.ext.scrollbox-snap.legacy.js", integrity: "sha384-aAdJjZqCtkhzoZ0lI4/F44CBCuA7Br7VhFCbjugqrsFvbl/J4lAwCEivW2w//gHI" } } }, dependencies: [] }, adaptive: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.adaptive.min.js", integrity: "sha384-lEWjA/UxxRXYoyXAXqiKXpfBf6e/RxQOc8+0ukbJG0NwHP3SVJ2nICYgvXsepP5p", regular: { url: "./aellux.ext.adaptive.js", integrity: "sha384-kVnL6EnCtYQJ6mtIt/3G7pQOVahqW2+v0wsTmLJapxIycJZL9/KswKmo5MiiT+8Z" } }, legacy: { url: "./aellux.ext.adaptive.legacy.min.js", integrity: "sha384-7Rdi4ldWEimm3xDyG8U1eCOsBJJ69RGIAfYsc/OakUnyspXYAceRzOoIu24oaNio", regular: { url: "./aellux.ext.adaptive.legacy.js", integrity: "sha384-sBBWTr6+7T/xrfVHzG9NPKVyQdZrLukEcJ7eCFDtH5wTJT0vODUSedq3Y1HTu0Sp" } } }, dependencies: [], style: { url: "./aellux.ext.adaptive.min.css", integrity: "sha384-8yUP1PStfDqBCyCskP3k9WLIKgv/yl1nyDhmPz7hsX5NZ4z3ZT3ajolA+RhYlUiG", regular: { url: "./aellux.ext.adaptive.css", integrity: "sha384-HfIjX9Zk0VFRimzPvUaTS5AtwuHJHjXKoM/xbNJXj5vE7bSdBGEzbrBHfbNmYah0" } } }, present: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.present.min.js", integrity: "sha384-4j7Z/u9cOOUfTZ3atFxNMaQvLlJKU7HbBF0yX7sKH6PaZQBSninpNa/UirKH7dGA", regular: { url: "./aellux.ext.present.js", integrity: "sha384-0y5bxbVI3vBm3KY5ZSxjfx3LtreZu/24QIcAMV4mwKaZOGvxr01f/UpbyLwb3x/W" } }, legacy: { url: "./aellux.ext.present.legacy.min.js", integrity: "sha384-1bm3asyvI9hVjvenNFHVEvtwR9zoaaJ+pD1Dmm1htid02kNzeFzgVcxQRbqL9pBJ", regular: { url: "./aellux.ext.present.legacy.js", integrity: "sha384-WGKvUR25VP82yXmjLzDfKiJb2+yJ6mFUPMQsZ7XE3Hx3HhYaZHphdV91EtYjr5D2" } } }, dependencies: [], style: { url: "./aellux.ext.present.min.css", integrity: "sha384-LR069uhIDdnx0X7oeoRxevC/+dD5gA6d4B2dHAJKPgnqLYDGs4GgW9quKNq+1G5b", regular: { url: "./aellux.ext.present.css", integrity: "sha384-9GTFJ0OxBj6ta/iiV07BLGTdfe9pbmBMYXFn9kT+wB4KwiLO8zxJ39XzLYOGgfui" } } } } };
+      define_AELLUX_OFFICIAL_EXTENSION_MANIFEST_default = { schemaVersion: 1, coreVersion: "0.1.0-beta.10", extensions: { preference: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.preference.min.js", integrity: "sha384-mSOgb0DekFTRXXZAgyNrPjamdlSqzL4SSGZYVWgVg+WlG+pBj11xT81v/6Xk43yO", regular: { url: "./aellux.ext.preference.js", integrity: "sha384-MlikpdHSzHzF6kz5+oJGtq3eoFsKTsx/g+FTrf+dFOU8iQGHsCpn4fP1jLlbNrj7" } }, legacy: { url: "./aellux.ext.preference.legacy.min.js", integrity: "sha384-1LMsK0W9J/PoM4tXhFgkYLRY4yWdzVoYmFy4OMDGd8lRdtptKoEb1sI9L1kzNaBu", regular: { url: "./aellux.ext.preference.legacy.js", integrity: "sha384-pozuz43OyfXrnkmuBu6KTM2lqRSqcI5LMgwAtqnzXq8xZGdVqpnmOtrBcYcMskWk" } } }, dependencies: [] }, "state-navigation": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.state-navigation.min.js", integrity: "sha384-wAbgAqjAA6wauuG+iuUtfRwxChd6fTJ0fS22fqnu2r00kouoXJWZ0f7AoTYlqBC6", regular: { url: "./aellux.ext.state-navigation.js", integrity: "sha384-PKJ8HTD7eIYDEg2hOaAJjpMYzLr2fBjBRGmIGG7XzGTzVK0yTjt5HYPO55VbWfdS" } }, legacy: { url: "./aellux.ext.state-navigation.legacy.min.js", integrity: "sha384-YkhfU15Mpk8KiO6TyoVU6z1yCiYWwnsOGE0xVaQ8NrE7IGrxOSUL005g5JeUDdJu", regular: { url: "./aellux.ext.state-navigation.legacy.js", integrity: "sha384-kaEUY0Zpw8K6pcwjm+INA5feXftLK2/N1aFpPr2LCTcetX2uoe2GGd1MJyy7u8rZ" } } }, dependencies: [] }, feedback: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.feedback.min.js", integrity: "sha384-3VP3W84ekK4MIVBQuy5+5P3bGrwOj7bBDfJnjyexZ+yDADf1jQoHEpP2J1OMUgod", regular: { url: "./aellux.ext.feedback.js", integrity: "sha384-RrPf0bRGxf68f/Rjas5MF5zC1GAubWyndCcuiYbgZsPSHGLFsQtQaUgeFX4SQz+h" } }, legacy: { url: "./aellux.ext.feedback.legacy.min.js", integrity: "sha384-zXuZEv63sd3fwaAygmyk9KazQ46KOelsvAtM+0vJ7phDwemVh1FhOjAcbhWVQM/N", regular: { url: "./aellux.ext.feedback.legacy.js", integrity: "sha384-UW1JZ1+liVWV/w3PJdhfIMztOU7zyTw/1rOyyxoxj4YJIHb1xFl8U0xeIBh8jYV7" } } }, dependencies: [], style: { url: "./aellux.ext.feedback.min.css", integrity: "sha384-OBguCYqF+dMD0Pl84C3FlY/+ohUGfW0OyynmXb/PSDEGOyuI/TQJ3EZAoCeJx+Jk", regular: { url: "./aellux.ext.feedback.css", integrity: "sha384-yk4cW+r/Mc1FRS1ZauBHC6KsKb7sxuJ0E9mmt/+AYASAdZXXMK6iuFBR+TOEh/r4" } } }, focus: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.focus.min.js", integrity: "sha384-AXpUv/Ur2Z4cKvO9EqIFqfxxdSQR5j75q0okOAWPvHhSneQ5LPjrOzk6Sl9MOo4a", regular: { url: "./aellux.ext.focus.js", integrity: "sha384-VjQzcnhLRrvRlbVQ0X4/tO0+8gqJXAmIFoeIVimjOud1wRNuBXNnSQHHW9XQPzTe" } }, legacy: { url: "./aellux.ext.focus.legacy.min.js", integrity: "sha384-I5QpUmKsA1T8NiKfKXQgbdG19Ld1ZGCWSmosygO3yGj43tdxp5zCfLyfBuFoHlKu", regular: { url: "./aellux.ext.focus.legacy.js", integrity: "sha384-5/y3J1NC/qMyV9myEj29+wGbqCVI8ICPafSebtJVfl15Qmup6vMiJzveShd3CLnw" } } }, dependencies: [] }, point: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.point.min.js", integrity: "sha384-n540II5oWbHJRt/a8i+Rgb9A3b9dm7hamg1kd3Nz7KdPQDcaa8S823t9fCrgxBWF", regular: { url: "./aellux.ext.point.js", integrity: "sha384-aDj7I5QEH/0+52E3e6yPZ/D0MEsNBdxeET3G5ToVvgczHtksMh3p8S/KOoAapRRN" } }, legacy: { url: "./aellux.ext.point.legacy.min.js", integrity: "sha384-5UmWvQHfmvttz9yeXbilawGCZH20UdR8yNBOE9kRV34wpfWASl8plzgKtLVQGO9M", regular: { url: "./aellux.ext.point.legacy.js", integrity: "sha384-gG/XONYEC1tchBcJ6bUtKYmWFHz0E+50LmMaXDAiqWBKPuwdHZeYm1uXA22lMZuN" } } }, dependencies: [] }, anchor: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.anchor.min.js", integrity: "sha384-bB5tuUkEsP6Y7YPkD9dd8TYe0aDsxGuHsrPwJnxZNLczzdhRWJMWfmwa4qtze90w", regular: { url: "./aellux.ext.anchor.js", integrity: "sha384-uZL5mGNXCf9vA4Yz+cfnSxD9KhoC9n0zhHIGX201RyK9LG1Gylbe8vHw37ZVG9Xr" } }, legacy: { url: "./aellux.ext.anchor.legacy.min.js", integrity: "sha384-xV6iQN/F+LG2TA5wvn7/JeiWeD5O5FhCsC5mKBL/T32SVyFzHC+NpbvkpMnI+c5g", regular: { url: "./aellux.ext.anchor.legacy.js", integrity: "sha384-JDyJkxgeEaQywXmqqcL5B293ChnFaoHs8L7UJemtcDuLMBHfo2YIauk8Yj+2BgXN" } } }, dependencies: [] }, scrollbox: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.scrollbox.min.js", integrity: "sha384-kC9PdCaaCWUbeswIJMW/BEcYblK4PTmxG/GI/BJBmij7FAieBJUNFRA3NDsmI5PH", regular: { url: "./aellux.ext.scrollbox.js", integrity: "sha384-zFA40wwhXkWBCZTMoCQjnE+Z4536tUsrJ/sEMR88RqlCBuYgNEdqnoE1Pl/j9sVa" } }, legacy: { url: "./aellux.ext.scrollbox.legacy.min.js", integrity: "sha384-7N68vqa/CN5vqVdLQIiJG8HDfRU9cgU45G4VKuREP9iQlIKcFrgjGL6siX5/FOf1", regular: { url: "./aellux.ext.scrollbox.legacy.js", integrity: "sha384-VwwYiUWTw/N8dIAX59b+QObAWvaDNwgTPlrXYERM9bsGCbP162DLdt704IcxzL7s" } } }, dependencies: [] }, "scrollbox-snap": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.scrollbox-snap.min.js", integrity: "sha384-fwr6geiwmDDl/bU88Z8ldI9tIyojBehplcqMI8vn9YC2Y35T8Ko6+inwARkChd6y", regular: { url: "./aellux.ext.scrollbox-snap.js", integrity: "sha384-qjNY5x+ua2KPbtXH3SuITr6N3dLfhUQy1qk487pJUPN/iRe06hIbY5oldYSPcXp2" } }, legacy: { url: "./aellux.ext.scrollbox-snap.legacy.min.js", integrity: "sha384-7SyRprm808E+xN3HarZjNIqewKIyFvTFBG+b7nUbjBPTD5arFdhZzQXzqz/Jxdtd", regular: { url: "./aellux.ext.scrollbox-snap.legacy.js", integrity: "sha384-zMpMGOiRT1bKYrrdNiHPcLkFmvMf52JbQyOq9TW0X+I518FgIrRTjq6Fta6Itfg2" } } }, dependencies: [] }, adaptive: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.adaptive.min.js", integrity: "sha384-lEWjA/UxxRXYoyXAXqiKXpfBf6e/RxQOc8+0ukbJG0NwHP3SVJ2nICYgvXsepP5p", regular: { url: "./aellux.ext.adaptive.js", integrity: "sha384-kVnL6EnCtYQJ6mtIt/3G7pQOVahqW2+v0wsTmLJapxIycJZL9/KswKmo5MiiT+8Z" } }, legacy: { url: "./aellux.ext.adaptive.legacy.min.js", integrity: "sha384-7Rdi4ldWEimm3xDyG8U1eCOsBJJ69RGIAfYsc/OakUnyspXYAceRzOoIu24oaNio", regular: { url: "./aellux.ext.adaptive.legacy.js", integrity: "sha384-sBBWTr6+7T/xrfVHzG9NPKVyQdZrLukEcJ7eCFDtH5wTJT0vODUSedq3Y1HTu0Sp" } } }, dependencies: [], style: { url: "./aellux.ext.adaptive.min.css", integrity: "sha384-8yUP1PStfDqBCyCskP3k9WLIKgv/yl1nyDhmPz7hsX5NZ4z3ZT3ajolA+RhYlUiG", regular: { url: "./aellux.ext.adaptive.css", integrity: "sha384-HfIjX9Zk0VFRimzPvUaTS5AtwuHJHjXKoM/xbNJXj5vE7bSdBGEzbrBHfbNmYah0" } } }, present: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.present.min.js", integrity: "sha384-4j7Z/u9cOOUfTZ3atFxNMaQvLlJKU7HbBF0yX7sKH6PaZQBSninpNa/UirKH7dGA", regular: { url: "./aellux.ext.present.js", integrity: "sha384-0y5bxbVI3vBm3KY5ZSxjfx3LtreZu/24QIcAMV4mwKaZOGvxr01f/UpbyLwb3x/W" } }, legacy: { url: "./aellux.ext.present.legacy.min.js", integrity: "sha384-1bm3asyvI9hVjvenNFHVEvtwR9zoaaJ+pD1Dmm1htid02kNzeFzgVcxQRbqL9pBJ", regular: { url: "./aellux.ext.present.legacy.js", integrity: "sha384-WGKvUR25VP82yXmjLzDfKiJb2+yJ6mFUPMQsZ7XE3Hx3HhYaZHphdV91EtYjr5D2" } } }, dependencies: [], style: { url: "./aellux.ext.present.min.css", integrity: "sha384-LR069uhIDdnx0X7oeoRxevC/+dD5gA6d4B2dHAJKPgnqLYDGs4GgW9quKNq+1G5b", regular: { url: "./aellux.ext.present.css", integrity: "sha384-9GTFJ0OxBj6ta/iiV07BLGTdfe9pbmBMYXFn9kT+wB4KwiLO8zxJ39XzLYOGgfui" } } } } };
     }
   });
 
@@ -21975,19 +21975,6 @@
         }
         if (!group) group = makeGroup(id);
       }
-      if (id === void 0 && visualFPSLimit() !== Infinity) {
-        var _iterator4 = _createForOfIteratorHelper(queues[kind].slice()), _step4;
-        try {
-          for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
-            var pending = _step4.value;
-            if (!pending.group) cancelTask(pending);
-          }
-        } catch (err) {
-          _iterator4.e(err);
-        } finally {
-          _iterator4.f();
-        }
-      }
       var task;
       var promise = new Promise(function(resolve, reject) {
         task = {
@@ -22067,16 +22054,16 @@
       });
     }
     function detachAbortSignals(owner) {
-      var _iterator5 = _createForOfIteratorHelper(owner.abortSignals), _step5;
+      var _iterator4 = _createForOfIteratorHelper(owner.abortSignals), _step4;
       try {
-        for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
-          var signal = _step5.value;
+        for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
+          var signal = _step4.value;
           signal.removeEventListener("abort", owner.abortHandler);
         }
       } catch (err) {
-        _iterator5.e(err);
+        _iterator4.e(err);
       } finally {
-        _iterator5.f();
+        _iterator4.f();
       }
       owner.abortSignals.length = 0;
     }
@@ -22113,19 +22100,19 @@
         return finishSequence(owner, "aborted");
       };
       try {
-        var _iterator6 = _createForOfIteratorHelper(configs), _step6;
+        var _iterator5 = _createForOfIteratorHelper(configs), _step5;
         try {
-          for (_iterator6.s(); !(_step6 = _iterator6.n()).done; ) {
-            var config = _step6.value;
+          for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
+            var config = _step5.value;
             if (config.signal && !owner.abortSignals.includes(config.signal)) {
               config.signal.addEventListener("abort", owner.abortHandler);
               owner.abortSignals.push(config.signal);
             }
           }
         } catch (err) {
-          _iterator6.e(err);
+          _iterator5.e(err);
         } finally {
-          _iterator6.f();
+          _iterator5.f();
         }
         if (owner.abortSignals.some(function(signal) {
           return signal.aborted;
@@ -22935,7 +22922,7 @@
     }
     function _AelluxJsMount() {
       _AelluxJsMount = _asyncToGenerator(/* @__PURE__ */ _regenerator().m(function _callee5(rootElement, extensionNames, newlyMounted) {
-        var AelluxJs2, filter, mounterSelectors, lazySelectors, _i2, _Object$entries2, _Object$entries2$_i, key, selectorString, _i3, _Object$entries3, _Object$entries3$_i, _key, _selectorString, candidatesByExtension, allElements, _iterator3, _step3, element, localExtensionNames, _i6, _Object$entries4, _Object$entries4$_i, _key2, _selector2, _i7, _Object$entries5, _Object$entries5$_i, _key3, _selector3, _iterator0, _step0, _extensionName2, _candidates, extensions, loaded, _iterator4, _step4, result, registrations, index, _extensions$index, extensionName, candidates, mounter, searchRoots, _iterator5, _step5, candidate, ancestor, _iterator6, _step6, _step6$value, selector, controller, elementsAffected, _i4, _registrations, _registrations$_i, _extensionName, _selector, _controller, _searchRoots, _iterator7, _step7, searchRoot, mountableElements, _iterator8, _step8, mountable, mountId, pendingMount, _i5, _Array$from, name, finishPendingMount, elementController, _elementController, _iterator9, _step9, affected, _t3, _t4, _t5, _t6, _t7, _t8;
+        var AelluxJs2, filter, mounterSelectors, lazySelectors, _i2, _Object$entries2, _Object$entries2$_i, key, selectorString, _i3, _Object$entries3, _Object$entries3$_i, _key, _selectorString, candidatesByExtension, allElements, _iterator3, _step3, element, localExtensionNames, _i6, _Object$entries4, _Object$entries4$_i, _key2, _selector2, _i7, _Object$entries5, _Object$entries5$_i, _key3, _selector3, _iterator8, _step8, _extensionName2, candidates, extensions, loaded, _iterator4, _step4, result, registrations, index, _extensions$index, extensionName, mounter, _iterator5, _step5, _step5$value, selector, controller, elementsAffected, _i4, _registrations, _registrations$_i, _extensionName, _selector, _controller, mountableElements, _iterator6, _step6, mountable, mountId, pendingMount, _i5, _Array$from, name, finishPendingMount, elementController, _elementController, _iterator7, _step7, affected, _t3, _t4, _t5, _t6, _t7;
         return _regenerator().w(function(_context5) {
           while (1) switch (_context5.p = _context5.n) {
             case 0:
@@ -22992,21 +22979,21 @@
                       if (element.matches(_selector3) && filter.indexOf(_selector3) !== -1) localExtensionNames.add(fromCamelCase2(_key3));
                     }
                   }
-                  _iterator0 = _createForOfIteratorHelper3(localExtensionNames);
+                  _iterator8 = _createForOfIteratorHelper3(localExtensionNames);
                   try {
-                    for (_iterator0.s(); !(_step0 = _iterator0.n()).done; ) {
-                      _extensionName2 = _step0.value;
-                      _candidates = candidatesByExtension.get(_extensionName2);
-                      if (!_candidates) {
-                        _candidates = /* @__PURE__ */ new Set();
-                        candidatesByExtension.set(_extensionName2, _candidates);
+                    for (_iterator8.s(); !(_step8 = _iterator8.n()).done; ) {
+                      _extensionName2 = _step8.value;
+                      candidates = candidatesByExtension.get(_extensionName2);
+                      if (!candidates) {
+                        candidates = /* @__PURE__ */ new Set();
+                        candidatesByExtension.set(_extensionName2, candidates);
                       }
-                      _candidates.add(element);
+                      candidates.add(element);
                     }
                   } catch (err) {
-                    _iterator0.e(err);
+                    _iterator8.e(err);
                   } finally {
-                    _iterator0.f();
+                    _iterator8.f();
                   }
                 }
               } catch (err) {
@@ -23072,7 +23059,7 @@
               }
               return _context5.a(3, 13);
             case 11:
-              _extensions$index = _slicedToArray(extensions[index], 2), extensionName = _extensions$index[0], candidates = _extensions$index[1];
+              _extensions$index = _slicedToArray(extensions[index], 1), extensionName = _extensions$index[0];
               mounter = mountMaps.get(toCamelCase2(extensionName));
               if (mounter) {
                 _context5.n = 12;
@@ -23080,37 +23067,22 @@
               }
               return _context5.a(3, 13);
             case 12:
-              searchRoots = [];
-              _iterator5 = _createForOfIteratorHelper3(candidates);
+              _iterator5 = _createForOfIteratorHelper3(mounter);
               try {
                 for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
-                  candidate = _step5.value;
-                  ancestor = candidate.parentNode;
-                  while (ancestor && !candidates.has(ancestor)) ancestor = ancestor.parentNode;
-                  if (!ancestor) searchRoots.push(candidate);
-                }
-              } catch (err) {
-                _iterator5.e(err);
-              } finally {
-                _iterator5.f();
-              }
-              _iterator6 = _createForOfIteratorHelper3(mounter);
-              try {
-                for (_iterator6.s(); !(_step6 = _iterator6.n()).done; ) {
-                  _step6$value = _slicedToArray(_step6.value, 2), selector = _step6$value[0], controller = _step6$value[1];
+                  _step5$value = _slicedToArray(_step5.value, 2), selector = _step5$value[0], controller = _step5$value[1];
                   registrations.push({
                     extensionName: extensionName,
                     selector: selector,
                     controller: controller,
-                    searchRoots: searchRoots,
                     priority: controller.priority,
                     order: registrations.length
                   });
                 }
               } catch (err) {
-                _iterator6.e(err);
+                _iterator5.e(err);
               } finally {
-                _iterator6.f();
+                _iterator5.f();
               }
             case 13:
               index++;
@@ -23124,51 +23096,42 @@
               _i4 = 0, _registrations = registrations;
             case 15:
               if (!(_i4 < _registrations.length)) {
-                _context5.n = 39;
+                _context5.n = 33;
                 break;
               }
-              _registrations$_i = _registrations[_i4], _extensionName = _registrations$_i.extensionName, _selector = _registrations$_i.selector, _controller = _registrations$_i.controller, _searchRoots = _registrations$_i.searchRoots;
+              _registrations$_i = _registrations[_i4], _extensionName = _registrations$_i.extensionName, _selector = _registrations$_i.selector, _controller = _registrations$_i.controller;
               _context5.p = 16;
               if (_controller.mount) {
                 _context5.n = 17;
                 break;
               }
-              return _context5.a(3, 38);
+              return _context5.a(3, 32);
             case 17:
-              _iterator7 = _createForOfIteratorHelper3(_searchRoots);
+              mountableElements = findElements(rootElement, _selector);
+              _iterator6 = _createForOfIteratorHelper3(mountableElements);
               _context5.p = 18;
-              _iterator7.s();
+              _iterator6.s();
             case 19:
-              if ((_step7 = _iterator7.n()).done) {
-                _context5.n = 33;
+              if ((_step6 = _iterator6.n()).done) {
+                _context5.n = 27;
                 break;
               }
-              searchRoot = _step7.value;
-              mountableElements = findElements(searchRoot, _selector);
-              _iterator8 = _createForOfIteratorHelper3(mountableElements);
-              _context5.p = 20;
-              _iterator8.s();
-            case 21:
-              if ((_step8 = _iterator8.n()).done) {
-                _context5.n = 29;
-                break;
-              }
-              mountable = _step8.value;
+              mountable = _step6.value;
               mountId = "".concat(_extensionName, "@").concat(_selector);
               if (!isMounted(mountable, mountId)) {
-                _context5.n = 23;
+                _context5.n = 21;
                 break;
               }
               pendingMount = getPendingMount(mountable, mountId);
               if (!pendingMount) {
-                _context5.n = 22;
+                _context5.n = 20;
                 break;
               }
-              _context5.n = 22;
+              _context5.n = 20;
               return pendingMount;
-            case 22:
-              return _context5.a(3, 28);
-            case 23:
+            case 20:
+              return _context5.a(3, 26);
+            case 21:
               if (!isMounted(mountable)) {
                 for (_i5 = 0, _Array$from = Array.from(mountable.classList); _i5 < _Array$from.length; _i5++) {
                   name = _Array$from[_i5];
@@ -23177,10 +23140,10 @@
               }
               setMounted(mountable, mountId, true, _controller.priority);
               finishPendingMount = beginPendingMount(mountable, mountId);
-              _context5.p = 24;
-              _context5.n = 25;
+              _context5.p = 22;
+              _context5.n = 23;
               return _controller.mount(mountable);
-            case 25:
+            case 23:
               elementController = elementControllers.get(mountable);
               if (!elementController) {
                 elementController = createControllerHelper(root2, mountable);
@@ -23189,10 +23152,10 @@
               elementController.spawn(_extensionName, mountId, _controller.controllers, typeof _controller.update === "function");
               elementsAffected.add(mountable);
               newlyMounted.add(mountable);
-              _context5.n = 27;
+              _context5.n = 25;
               break;
-            case 26:
-              _context5.p = 26;
+            case 24:
+              _context5.p = 24;
               _t4 = _context5.v;
               setMounted(mountable, mountId, false);
               _elementController = elementControllers.get(mountable);
@@ -23207,94 +23170,80 @@
                 selector: _selector,
                 element: mountable
               });
-            case 27:
-              _context5.p = 27;
+            case 25:
+              _context5.p = 25;
               finishPendingMount();
-              return _context5.f(27);
-            case 28:
-              _context5.n = 21;
-              break;
-            case 29:
-              _context5.n = 31;
-              break;
-            case 30:
-              _context5.p = 30;
-              _t5 = _context5.v;
-              _iterator8.e(_t5);
-            case 31:
-              _context5.p = 31;
-              _iterator8.f();
-              return _context5.f(31);
-            case 32:
+              return _context5.f(25);
+            case 26:
               _context5.n = 19;
               break;
-            case 33:
-              _context5.n = 35;
+            case 27:
+              _context5.n = 29;
               break;
-            case 34:
-              _context5.p = 34;
+            case 28:
+              _context5.p = 28;
+              _t5 = _context5.v;
+              _iterator6.e(_t5);
+            case 29:
+              _context5.p = 29;
+              _iterator6.f();
+              return _context5.f(29);
+            case 30:
+              _context5.n = 32;
+              break;
+            case 31:
+              _context5.p = 31;
               _t6 = _context5.v;
-              _iterator7.e(_t6);
-            case 35:
-              _context5.p = 35;
-              _iterator7.f();
-              return _context5.f(35);
-            case 36:
-              _context5.n = 38;
-              break;
-            case 37:
-              _context5.p = 37;
-              _t7 = _context5.v;
               AelluxJs2.diagnostics.error(AelluxJs2.diagnostics.ERROR_EXTENSION_MOUNT, {
-                cause: _t7,
+                cause: _t6,
                 extension: _extensionName,
                 method: "mount",
                 selector: _selector
               });
-            case 38:
+            case 32:
               _i4++;
               _context5.n = 15;
               break;
-            case 39:
-              _iterator9 = _createForOfIteratorHelper3(elementsAffected);
-              _context5.p = 40;
-              _iterator9.s();
-            case 41:
-              if ((_step9 = _iterator9.n()).done) {
-                _context5.n = 45;
+            case 33:
+              _iterator7 = _createForOfIteratorHelper3(elementsAffected);
+              _context5.p = 34;
+              _iterator7.s();
+            case 35:
+              if ((_step7 = _iterator7.n()).done) {
+                _context5.n = 39;
                 break;
               }
-              affected = _step9.value;
+              affected = _step7.value;
               if (!(!affected.isConnected || !isMounted(affected))) {
-                _context5.n = 43;
+                _context5.n = 37;
                 break;
               }
               if (affected.isConnected) {
-                _context5.n = 42;
+                _context5.n = 36;
                 break;
               }
-              _context5.n = 42;
+              _context5.n = 36;
               return unmountElementRegistrations(affected);
-            case 42:
+            case 36:
               newlyMounted.delete(affected);
-              return _context5.a(3, 44);
-            case 43:
+              return _context5.a(3, 38);
+            case 37:
               affected.classList.toggle(AelluxJs2.className("mounted"), true);
-            case 44:
+            case 38:
+              _context5.n = 35;
+              break;
+            case 39:
               _context5.n = 41;
               break;
-            case 45:
-              _context5.n = 47;
-              break;
-            case 46:
-              _context5.p = 46;
-              _t8 = _context5.v;
-              _iterator9.e(_t8);
-            case 47:
-              _context5.p = 47;
-              _iterator9.f();
-              return _context5.f(47);
-            case 48:
+            case 40:
+              _context5.p = 40;
+              _t7 = _context5.v;
+              _iterator7.e(_t7);
+            case 41:
+              _context5.p = 41;
+              _iterator7.f();
+              return _context5.f(41);
+            case 42:
               AelluxJs2.dispatch("Mount", {
                 detail: {
                   root: rootElement,
@@ -23302,10 +23251,10 @@
                   elements: Array.from(newlyMounted)
                 }
               });
-            case 49:
+            case 43:
               return _context5.a(2);
           }
-        }, _callee5, null, [[40, 46, 47, 48], [24, 26, 27, 28], [20, 30, 31, 32], [18, 34, 35, 36], [16, 37], [3, 7, 8, 9]]);
+        }, _callee5, null, [[34, 40, 41, 42], [22, 24, 25, 26], [18, 28, 29, 30], [16, 31], [3, 7, 8, 9]]);
       }));
       return _AelluxJsMount.apply(this, arguments);
     }
@@ -23314,7 +23263,7 @@
     }
     function _AelluxJsMounted() {
       _AelluxJsMounted = _asyncToGenerator(/* @__PURE__ */ _regenerator().m(function _callee6(rootElement, method) {
-        var extensionNames, detachedOnly, AelluxJs2, selectedNames, affected, registrations, _i8, _Array$from2, _Array$from2$_i, element, mountIds, inRoot, detachedInGlobalUnmount, _i9, _Array$from3, mountId, separator, extensionName, selector, extensionKey, mounter, controller, _iterator1, _step1, _step1$value, _element, _mountId, _controller2, _extensionName3, _selector4, _args6 = arguments, _t9, _t0;
+        var extensionNames, detachedOnly, AelluxJs2, selectedNames, affected, registrations, _i8, _Array$from2, _Array$from2$_i, element, mountIds, inRoot, detachedInGlobalUnmount, _i9, _Array$from3, mountId, separator, extensionName, selector, extensionKey, mounter, controller, _iterator9, _step9, _step9$value, _element, _mountId, _controller2, _extensionName3, _selector4, _args6 = arguments, _t8, _t9;
         return _regenerator().w(function(_context6) {
           while (1) switch (_context6.p = _context6.n) {
             case 0:
@@ -23386,9 +23335,9 @@
               break;
             case 7:
               _context6.p = 7;
-              _t9 = _context6.v;
+              _t8 = _context6.v;
               AelluxJs2.diagnostics.error(AelluxJs2.diagnostics.ERROR_EXTENSION_MOUNT, {
-                cause: _t9,
+                cause: _t8,
                 extension: extensionName,
                 method: method,
                 selector: selector
@@ -23407,15 +23356,15 @@
                 break;
               }
               registrations.sort(compareUnmountOrder);
-              _iterator1 = _createForOfIteratorHelper3(registrations);
+              _iterator9 = _createForOfIteratorHelper3(registrations);
               _context6.p = 11;
-              _iterator1.s();
+              _iterator9.s();
             case 12:
-              if ((_step1 = _iterator1.n()).done) {
+              if ((_step9 = _iterator9.n()).done) {
                 _context6.n = 15;
                 break;
               }
-              _step1$value = _step1.value, _element = _step1$value.element, _mountId = _step1$value.mountId, _controller2 = _step1$value.controller, _extensionName3 = _step1$value.extensionName, _selector4 = _step1$value.selector;
+              _step9$value = _step9.value, _element = _step9$value.element, _mountId = _step9$value.mountId, _controller2 = _step9$value.controller, _extensionName3 = _step9$value.extensionName, _selector4 = _step9$value.selector;
               _context6.n = 13;
               return unmountRegistration(_element, _mountId, _controller2, _extensionName3, _selector4);
             case 13:
@@ -23432,11 +23381,11 @@
               break;
             case 16:
               _context6.p = 16;
-              _t0 = _context6.v;
-              _iterator1.e(_t0);
+              _t9 = _context6.v;
+              _iterator9.e(_t9);
             case 17:
               _context6.p = 17;
-              _iterator1.f();
+              _iterator9.f();
               return _context6.f(17);
             case 18:
               AelluxJs2.dispatch(toCapitalized2(method), {
@@ -23458,7 +23407,7 @@
     }
     function _unmountRegistration() {
       _unmountRegistration = _asyncToGenerator(/* @__PURE__ */ _regenerator().m(function _callee7(element, mountId, controller, extensionName, selector) {
-        var pendingMount, tasks, finish, AelluxJs2, diagnostics, elementController, _t1;
+        var pendingMount, tasks, finish, AelluxJs2, diagnostics, elementController, _t0;
         return _regenerator().w(function(_context7) {
           while (1) switch (_context7.p = _context7.n) {
             case 0:
@@ -23508,9 +23457,9 @@
               break;
             case 8:
               _context7.p = 8;
-              _t1 = _context7.v;
+              _t0 = _context7.v;
               diagnostics.error(diagnostics.ERROR_EXTENSION_MOUNT, {
-                cause: _t1,
+                cause: _t0,
                 extension: extensionName,
                 method: UNMOUNT,
                 selector: selector
@@ -27901,7 +27850,9 @@
             priority: 0,
             mount: mountAnchor,
             unmount: unmountAnchor,
-            update: updateAnchor
+            update: function update(element) {
+              return updateAnchor(element, true);
+            }
           });
         }
         function destroy() {
@@ -28149,10 +28100,11 @@
         }
         function _updateAnchor() {
           _updateAnchor = _asyncToGenerator5(/* @__PURE__ */ _regenerator5().m(function _callee3(element) {
-            var state, revision, current, targetValue, useReference, target, candidates, placement, applied;
+            var ensureLatest, state, revision, current, retry, targetValue, useReference, target, candidates, placement, applied, _args3 = arguments;
             return _regenerator5().w(function(_context3) {
               while (1) switch (_context3.n) {
                 case 0:
+                  ensureLatest = _args3.length > 1 && _args3[1] !== void 0 ? _args3[1] : false;
                   state = anchors.get(element);
                   if (state) {
                     _context3.n = 1;
@@ -28164,12 +28116,15 @@
                   current = function current2() {
                     return anchors.get(element) === state && state.revision === revision;
                   };
+                  retry = function retry2() {
+                    return ensureLatest && anchors.get(element) === state ? updateAnchor(element, true) : void 0;
+                  };
                   targetValue = element.getAttribute(targetAttribute);
                   useReference = !targetValue || !targetValue.trim();
                   target = useReference ? null : resolveElement(targetValue);
                   candidates = parseCandidates(element.getAttribute(attribute));
                   if (!(!target && !useReference || !candidates.length)) {
-                    _context3.n = 3;
+                    _context3.n = 4;
                     break;
                   }
                   _context3.n = 2;
@@ -28177,95 +28132,137 @@
                     if (current()) deactivate(element, state);
                   });
                 case 2:
-                  return _context3.a(2);
+                  if (current()) {
+                    _context3.n = 3;
+                    break;
+                  }
+                  return _context3.a(2, retry());
                 case 3:
-                  _context3.n = 4;
+                  return _context3.a(2);
+                case 4:
+                  _context3.n = 5;
                   return AelluxJs2.waitLayout.read(function() {
                     return current() ? readPlacement(element, target, candidates, state.active) : null;
                   });
-                case 4:
+                case 5:
                   placement = _context3.v;
-                  if (!(!current() || !placement)) {
-                    _context3.n = 5;
+                  if (current()) {
+                    _context3.n = 6;
                     break;
                   }
-                  return _context3.a(2);
-                case 5:
-                  if (!placement.hidden) {
+                  return _context3.a(2, retry());
+                case 6:
+                  if (placement) {
                     _context3.n = 7;
                     break;
                   }
-                  _context3.n = 6;
-                  return AelluxJs2.waitLayout.update(function() {
-                    if (current()) hideForTarget(element, state, placement);
-                  });
-                case 6:
                   return _context3.a(2);
                 case 7:
-                  if (placement.valid) {
-                    _context3.n = 9;
+                  if (!placement.hidden) {
+                    _context3.n = 10;
                     break;
                   }
                   _context3.n = 8;
                   return AelluxJs2.waitLayout.update(function() {
-                    if (current()) invalidContext(element, state, placement);
+                    if (current()) hideForTarget(element, state, placement);
                   });
                 case 8:
-                  return _context3.a(2);
-                case 9:
-                  if (state.active) {
-                    _context3.n = 17;
+                  if (current()) {
+                    _context3.n = 9;
                     break;
                   }
-                  _context3.n = 10;
+                  return _context3.a(2, retry());
+                case 9:
+                  return _context3.a(2);
+                case 10:
+                  if (placement.valid) {
+                    _context3.n = 13;
+                    break;
+                  }
+                  _context3.n = 11;
+                  return AelluxJs2.waitLayout.update(function() {
+                    if (current()) invalidContext(element, state, placement);
+                  });
+                case 11:
+                  if (current()) {
+                    _context3.n = 12;
+                    break;
+                  }
+                  return _context3.a(2, retry());
+                case 12:
+                  return _context3.a(2);
+                case 13:
+                  if (state.active) {
+                    _context3.n = 24;
+                    break;
+                  }
+                  _context3.n = 14;
                   return AelluxJs2.waitLayout.update(function() {
                     if (!current()) return;
                     applyBaseStyles(element);
                     state.active = true;
                   });
-                case 10:
+                case 14:
                   if (current()) {
-                    _context3.n = 11;
-                    break;
-                  }
-                  return _context3.a(2);
-                case 11:
-                  _context3.n = 12;
-                  return AelluxJs2.waitLayout.read(function() {
-                    return current() ? readPlacement(element, useReference ? null : target, candidates, true) : null;
-                  });
-                case 12:
-                  placement = _context3.v;
-                  if (!(!current() || !placement)) {
-                    _context3.n = 13;
-                    break;
-                  }
-                  return _context3.a(2);
-                case 13:
-                  if (!placement.hidden) {
                     _context3.n = 15;
                     break;
                   }
-                  _context3.n = 14;
-                  return AelluxJs2.waitLayout.update(function() {
-                    if (current()) hideForTarget(element, state, placement);
-                  });
-                case 14:
-                  return _context3.a(2);
+                  return _context3.a(2, retry());
                 case 15:
-                  if (placement.valid) {
+                  _context3.n = 16;
+                  return AelluxJs2.waitLayout.read(function() {
+                    return current() ? readPlacement(element, useReference ? null : target, candidates, true) : null;
+                  });
+                case 16:
+                  placement = _context3.v;
+                  if (current()) {
                     _context3.n = 17;
                     break;
                   }
-                  _context3.n = 16;
+                  return _context3.a(2, retry());
+                case 17:
+                  if (placement) {
+                    _context3.n = 18;
+                    break;
+                  }
+                  return _context3.a(2);
+                case 18:
+                  if (!placement.hidden) {
+                    _context3.n = 21;
+                    break;
+                  }
+                  _context3.n = 19;
+                  return AelluxJs2.waitLayout.update(function() {
+                    if (current()) hideForTarget(element, state, placement);
+                  });
+                case 19:
+                  if (current()) {
+                    _context3.n = 20;
+                    break;
+                  }
+                  return _context3.a(2, retry());
+                case 20:
+                  return _context3.a(2);
+                case 21:
+                  if (placement.valid) {
+                    _context3.n = 24;
+                    break;
+                  }
+                  _context3.n = 22;
                   return AelluxJs2.waitLayout.update(function() {
                     if (current()) invalidContext(element, state, placement);
                   });
-                case 16:
+                case 22:
+                  if (current()) {
+                    _context3.n = 23;
+                    break;
+                  }
+                  return _context3.a(2, retry());
+                case 23:
                   return _context3.a(2);
-                case 17:
+                case 24:
                   applied = false;
-                  _context3.n = 18;
+                  _context3.n = 25;
                   return AelluxJs2.waitLayout.update(function() {
                     if (!current()) return;
                     state.invalidContext = false;
@@ -28291,13 +28288,13 @@
                     state.lastUpdateAt = now();
                     applied = true;
                   });
-                case 18:
+                case 25:
                   if (!(!applied && anchors.get(element) === state)) {
-                    _context3.n = 19;
+                    _context3.n = 26;
                     break;
                   }
-                  return _context3.a(2, updateAnchor(element));
-                case 19:
+                  return _context3.a(2, updateAnchor(element, ensureLatest));
+                case 26:
                   return _context3.a(2);
               }
             }, _callee3);
@@ -28374,7 +28371,8 @@
           if (visibility === "hidden" || visibility === "collapse") return true;
           for (var current = element; current && current.nodeType === 1; current = current.parentElement) {
             var style = root2.getComputedStyle(current);
-            if (current.hidden || style.display === "none" || style.contentVisibility === "hidden" || Number(style.opacity) === 0) return true;
+            var inline = current.style;
+            if (current.hidden || inline.display === "none" || inline.visibility === "hidden" || inline.visibility === "collapse" || inline.opacity === "0" || style.display === "none" || style.contentVisibility === "hidden" || Number(style.opacity) === 0) return true;
           }
           return false;
         }
@@ -29849,7 +29847,6 @@
             return init_aellux_ext_present(), aellux_ext_present_exports;
           });
         }
-        //"scrollbox": () => import("./aellux.ext.scrollbox.js")
       });
       root.AelluxJs.extIndex.official = typeof define_AELLUX_OFFICIAL_EXTENSION_MANIFEST_default !== "undefined" ? define_AELLUX_OFFICIAL_EXTENSION_MANIFEST_default : null;
       root.AelluxJs.ext("adaptive", {
@@ -29870,7 +29867,7 @@
         loadWhen: "[data-ae-point]"
       });
       root.AelluxJs.ext("present", {
-        loadWhen: "[data-ae-present],[data-ae-present-trigger],[data-ae-present-dismiss],[data-ae-present-target]",
+        loadWhen: "[data-ae-present],[data-ae-trigger],[data-ae-dismiss],[data-ae-target]",
         loadStyle: true
       });
       root.AelluxJs.ext("scrollbox", {
