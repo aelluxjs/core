@@ -20,7 +20,7 @@ Legacy orchestrator and full bundles carry a short third-party banner. The packa
 ## Repository and documentation site only
 
 - `tests/fixtures/bootstrap-5.3.8.min.css` is a test fixture, not part of the npm package. Its header retains Bootstrap's MIT attribution. The complete upstream text is in `tests/fixtures/bootstrap-5.3.8.LICENSE`.
-- The documentation build uses `@wolimp/docweaver` 0.1.0-beta.8, pinned to commit `fcad3db8b8195a0c61852ce71b3129a502a79354`. Its theme assets are copied to `docs/assets/docweaver/`, and its templates contribute to generated pages. The generated asset directory contains its Apache-2.0 `LICENSE` and a short attribution file. The upstream package has no `NOTICE` file.
+- The documentation build uses `@wolimp/docweaver` 0.1.0-beta.8, pinned to commit `141bb1a9c76155341fb4d9b13e09f8f284798fdf`. Its default theme is cloned in `templates/docweaver/`, including its Apache-2.0 `LICENSE`. The build uses this local theme to render pages and copies its assets to `docs/assets/docweaver/`. The generated asset directory contains the theme's `LICENSE` and a short attribution file. The upstream package has no `NOTICE` file.
 - Other build and test packages, including esbuild, Babel, Playwright, Eta and Marked, execute during development. Their package code is not copied into the published runtime bundles. The lockfile records their versions and license identifiers. It currently contains 418 non-root package entries: 405 MIT, 5 Apache-2.0, 5 ISC, 2 BSD-2-Clause and 1 CC-BY-4.0 (`caniuse-lite`, build data only).
 
 ## Notice decision

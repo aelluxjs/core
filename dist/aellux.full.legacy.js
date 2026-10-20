@@ -33,7 +33,7 @@
   var define_AELLUX_OFFICIAL_EXTENSION_MANIFEST_default;
   var init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST = __esm({
     "<define:__AELLUX_OFFICIAL_EXTENSION_MANIFEST__>": function() {
-      define_AELLUX_OFFICIAL_EXTENSION_MANIFEST_default = { schemaVersion: 1, coreVersion: "0.1.0-beta.10", extensions: { preference: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.preference.min.js", integrity: "sha384-mSOgb0DekFTRXXZAgyNrPjamdlSqzL4SSGZYVWgVg+WlG+pBj11xT81v/6Xk43yO", regular: { url: "./aellux.ext.preference.js", integrity: "sha384-MlikpdHSzHzF6kz5+oJGtq3eoFsKTsx/g+FTrf+dFOU8iQGHsCpn4fP1jLlbNrj7" } }, legacy: { url: "./aellux.ext.preference.legacy.min.js", integrity: "sha384-1LMsK0W9J/PoM4tXhFgkYLRY4yWdzVoYmFy4OMDGd8lRdtptKoEb1sI9L1kzNaBu", regular: { url: "./aellux.ext.preference.legacy.js", integrity: "sha384-pozuz43OyfXrnkmuBu6KTM2lqRSqcI5LMgwAtqnzXq8xZGdVqpnmOtrBcYcMskWk" } } }, dependencies: [] }, "state-navigation": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.state-navigation.min.js", integrity: "sha384-wAbgAqjAA6wauuG+iuUtfRwxChd6fTJ0fS22fqnu2r00kouoXJWZ0f7AoTYlqBC6", regular: { url: "./aellux.ext.state-navigation.js", integrity: "sha384-PKJ8HTD7eIYDEg2hOaAJjpMYzLr2fBjBRGmIGG7XzGTzVK0yTjt5HYPO55VbWfdS" } }, legacy: { url: "./aellux.ext.state-navigation.legacy.min.js", integrity: "sha384-YkhfU15Mpk8KiO6TyoVU6z1yCiYWwnsOGE0xVaQ8NrE7IGrxOSUL005g5JeUDdJu", regular: { url: "./aellux.ext.state-navigation.legacy.js", integrity: "sha384-kaEUY0Zpw8K6pcwjm+INA5feXftLK2/N1aFpPr2LCTcetX2uoe2GGd1MJyy7u8rZ" } } }, dependencies: [] }, feedback: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.feedback.min.js", integrity: "sha384-3VP3W84ekK4MIVBQuy5+5P3bGrwOj7bBDfJnjyexZ+yDADf1jQoHEpP2J1OMUgod", regular: { url: "./aellux.ext.feedback.js", integrity: "sha384-RrPf0bRGxf68f/Rjas5MF5zC1GAubWyndCcuiYbgZsPSHGLFsQtQaUgeFX4SQz+h" } }, legacy: { url: "./aellux.ext.feedback.legacy.min.js", integrity: "sha384-zXuZEv63sd3fwaAygmyk9KazQ46KOelsvAtM+0vJ7phDwemVh1FhOjAcbhWVQM/N", regular: { url: "./aellux.ext.feedback.legacy.js", integrity: "sha384-UW1JZ1+liVWV/w3PJdhfIMztOU7zyTw/1rOyyxoxj4YJIHb1xFl8U0xeIBh8jYV7" } } }, dependencies: [], style: { url: "./aellux.ext.feedback.min.css", integrity: "sha384-OBguCYqF+dMD0Pl84C3FlY/+ohUGfW0OyynmXb/PSDEGOyuI/TQJ3EZAoCeJx+Jk", regular: { url: "./aellux.ext.feedback.css", integrity: "sha384-yk4cW+r/Mc1FRS1ZauBHC6KsKb7sxuJ0E9mmt/+AYASAdZXXMK6iuFBR+TOEh/r4" } } }, focus: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.focus.min.js", integrity: "sha384-AXpUv/Ur2Z4cKvO9EqIFqfxxdSQR5j75q0okOAWPvHhSneQ5LPjrOzk6Sl9MOo4a", regular: { url: "./aellux.ext.focus.js", integrity: "sha384-VjQzcnhLRrvRlbVQ0X4/tO0+8gqJXAmIFoeIVimjOud1wRNuBXNnSQHHW9XQPzTe" } }, legacy: { url: "./aellux.ext.focus.legacy.min.js", integrity: "sha384-I5QpUmKsA1T8NiKfKXQgbdG19Ld1ZGCWSmosygO3yGj43tdxp5zCfLyfBuFoHlKu", regular: { url: "./aellux.ext.focus.legacy.js", integrity: "sha384-5/y3J1NC/qMyV9myEj29+wGbqCVI8ICPafSebtJVfl15Qmup6vMiJzveShd3CLnw" } } }, dependencies: [] }, point: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.point.min.js", integrity: "sha384-n540II5oWbHJRt/a8i+Rgb9A3b9dm7hamg1kd3Nz7KdPQDcaa8S823t9fCrgxBWF", regular: { url: "./aellux.ext.point.js", integrity: "sha384-aDj7I5QEH/0+52E3e6yPZ/D0MEsNBdxeET3G5ToVvgczHtksMh3p8S/KOoAapRRN" } }, legacy: { url: "./aellux.ext.point.legacy.min.js", integrity: "sha384-5UmWvQHfmvttz9yeXbilawGCZH20UdR8yNBOE9kRV34wpfWASl8plzgKtLVQGO9M", regular: { url: "./aellux.ext.point.legacy.js", integrity: "sha384-gG/XONYEC1tchBcJ6bUtKYmWFHz0E+50LmMaXDAiqWBKPuwdHZeYm1uXA22lMZuN" } } }, dependencies: [] }, anchor: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.anchor.min.js", integrity: "sha384-u+UZrSLASzx0afCVYvDFD6QYylZKX3yLY7bFRtp/JMkhoh58qEkTYykOnRD4WY+b", regular: { url: "./aellux.ext.anchor.js", integrity: "sha384-ujBu0j713TBuWD+Ff+jBvdxMFcOq/fYDEWk8uTj0CAa6isc1+rdbiCmxTwo0zQ4J" } }, legacy: { url: "./aellux.ext.anchor.legacy.min.js", integrity: "sha384-MVe+yb6RpxDJTcr2lw4bqQUOroyj5V2BZAnm353Y0z5V9CEgRxOuG5EzxKYZMw/i", regular: { url: "./aellux.ext.anchor.legacy.js", integrity: "sha384-IP4rghxYVUkWmvyG7RS0bXDoCg4jEFJOAHn3B2Ympbh2psIJmKK0CCRUQ9Qyz6nO" } } }, dependencies: [] }, scrollbox: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.scrollbox.min.js", integrity: "sha384-MbsMMRhyNfXp50eIj6ybMu3dcxXnbLcM6xK8BAPI1aAJzG3TbCAUCcjKr1SHpSaa", regular: { url: "./aellux.ext.scrollbox.js", integrity: "sha384-Nn4620lov+xo0w32p+rdpQsVas3rPr0OW2NJnYASSruy2gb8ujeRk27pLQM2Gobv" } }, legacy: { url: "./aellux.ext.scrollbox.legacy.min.js", integrity: "sha384-m+v8D6nbzGMHyPhNhbT3urBAy3Nza5CtLGK0vGQtiwPGwtsLvJB9sVuafO3kXdxB", regular: { url: "./aellux.ext.scrollbox.legacy.js", integrity: "sha384-ZIFUP8YDdvLufnr2pZKh12xcW9WV28zeUk9uBtXRKLgsLvzQ3VuU1tMyuKQmZbf9" } } }, dependencies: [] }, "scrollbox-snap": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.scrollbox-snap.min.js", integrity: "sha384-fwr6geiwmDDl/bU88Z8ldI9tIyojBehplcqMI8vn9YC2Y35T8Ko6+inwARkChd6y", regular: { url: "./aellux.ext.scrollbox-snap.js", integrity: "sha384-qjNY5x+ua2KPbtXH3SuITr6N3dLfhUQy1qk487pJUPN/iRe06hIbY5oldYSPcXp2" } }, legacy: { url: "./aellux.ext.scrollbox-snap.legacy.min.js", integrity: "sha384-7SyRprm808E+xN3HarZjNIqewKIyFvTFBG+b7nUbjBPTD5arFdhZzQXzqz/Jxdtd", regular: { url: "./aellux.ext.scrollbox-snap.legacy.js", integrity: "sha384-zMpMGOiRT1bKYrrdNiHPcLkFmvMf52JbQyOq9TW0X+I518FgIrRTjq6Fta6Itfg2" } } }, dependencies: [] }, adaptive: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.adaptive.min.js", integrity: "sha384-UfDhSymI78IbudB2vel0GOI+z4C8m6JCG4Egl6WK9mHvZyOltXgawIbn2iFJH2+w", regular: { url: "./aellux.ext.adaptive.js", integrity: "sha384-AXSW7WI4ZEykJgerhjuscp7u99DkKkTYFD13o1HAnVH1tJYz2u5f9VjsBGca7kSU" } }, legacy: { url: "./aellux.ext.adaptive.legacy.min.js", integrity: "sha384-yOyWKIJaWddRJrbYwriE1lpeuiB2WbeF2fII29R4vIBGMfXi6b6m2IXUHvFqaQTB", regular: { url: "./aellux.ext.adaptive.legacy.js", integrity: "sha384-oRSPNCmFGYjwsrmeBT7r7un76fwNEODcJNmo1ifLgHbWEmoGT07OtdqsyxvfnWeN" } } }, dependencies: [], style: { url: "./aellux.ext.adaptive.min.css", integrity: "sha384-8yUP1PStfDqBCyCskP3k9WLIKgv/yl1nyDhmPz7hsX5NZ4z3ZT3ajolA+RhYlUiG", regular: { url: "./aellux.ext.adaptive.css", integrity: "sha384-HfIjX9Zk0VFRimzPvUaTS5AtwuHJHjXKoM/xbNJXj5vE7bSdBGEzbrBHfbNmYah0" } } }, present: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.present.min.js", integrity: "sha384-BL8DgeMmdYO5YiZpsKSRWltYo/QuxRyo2zPdFOAVwCWS9kctutJGWgtOy5VotTG0", regular: { url: "./aellux.ext.present.js", integrity: "sha384-X0YL/EltZBkqKQOtrSYecUOzMPfXCCUTfR09ZWpH9ZVONmq+wZxO75qBr4t87uRi" } }, legacy: { url: "./aellux.ext.present.legacy.min.js", integrity: "sha384-VRWsybKW1jflXKM2eFUc4euG1fcwVjGZ1KwRF0tHca4+n0vpB3/H/yYDQsWvMZ9t", regular: { url: "./aellux.ext.present.legacy.js", integrity: "sha384-n/Dd633AhBdZSjL3WlKxiAp5S8EcdzOU4b+7ah1iukgf2L38fQkACEVIMX8xC23v" } } }, dependencies: [], style: { url: "./aellux.ext.present.min.css", integrity: "sha384-LR069uhIDdnx0X7oeoRxevC/+dD5gA6d4B2dHAJKPgnqLYDGs4GgW9quKNq+1G5b", regular: { url: "./aellux.ext.present.css", integrity: "sha384-9GTFJ0OxBj6ta/iiV07BLGTdfe9pbmBMYXFn9kT+wB4KwiLO8zxJ39XzLYOGgfui" } } } } };
+      define_AELLUX_OFFICIAL_EXTENSION_MANIFEST_default = { schemaVersion: 1, coreVersion: "0.1.0-beta.10", extensions: { preference: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.preference.min.js", integrity: "sha384-mSOgb0DekFTRXXZAgyNrPjamdlSqzL4SSGZYVWgVg+WlG+pBj11xT81v/6Xk43yO", regular: { url: "./aellux.ext.preference.js", integrity: "sha384-MlikpdHSzHzF6kz5+oJGtq3eoFsKTsx/g+FTrf+dFOU8iQGHsCpn4fP1jLlbNrj7" } }, legacy: { url: "./aellux.ext.preference.legacy.min.js", integrity: "sha384-1LMsK0W9J/PoM4tXhFgkYLRY4yWdzVoYmFy4OMDGd8lRdtptKoEb1sI9L1kzNaBu", regular: { url: "./aellux.ext.preference.legacy.js", integrity: "sha384-pozuz43OyfXrnkmuBu6KTM2lqRSqcI5LMgwAtqnzXq8xZGdVqpnmOtrBcYcMskWk" } } }, dependencies: [] }, "state-navigation": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.state-navigation.min.js", integrity: "sha384-wAbgAqjAA6wauuG+iuUtfRwxChd6fTJ0fS22fqnu2r00kouoXJWZ0f7AoTYlqBC6", regular: { url: "./aellux.ext.state-navigation.js", integrity: "sha384-PKJ8HTD7eIYDEg2hOaAJjpMYzLr2fBjBRGmIGG7XzGTzVK0yTjt5HYPO55VbWfdS" } }, legacy: { url: "./aellux.ext.state-navigation.legacy.min.js", integrity: "sha384-YkhfU15Mpk8KiO6TyoVU6z1yCiYWwnsOGE0xVaQ8NrE7IGrxOSUL005g5JeUDdJu", regular: { url: "./aellux.ext.state-navigation.legacy.js", integrity: "sha384-kaEUY0Zpw8K6pcwjm+INA5feXftLK2/N1aFpPr2LCTcetX2uoe2GGd1MJyy7u8rZ" } } }, dependencies: [] }, feedback: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.feedback.min.js", integrity: "sha384-3VP3W84ekK4MIVBQuy5+5P3bGrwOj7bBDfJnjyexZ+yDADf1jQoHEpP2J1OMUgod", regular: { url: "./aellux.ext.feedback.js", integrity: "sha384-RrPf0bRGxf68f/Rjas5MF5zC1GAubWyndCcuiYbgZsPSHGLFsQtQaUgeFX4SQz+h" } }, legacy: { url: "./aellux.ext.feedback.legacy.min.js", integrity: "sha384-zXuZEv63sd3fwaAygmyk9KazQ46KOelsvAtM+0vJ7phDwemVh1FhOjAcbhWVQM/N", regular: { url: "./aellux.ext.feedback.legacy.js", integrity: "sha384-UW1JZ1+liVWV/w3PJdhfIMztOU7zyTw/1rOyyxoxj4YJIHb1xFl8U0xeIBh8jYV7" } } }, dependencies: [], style: { url: "./aellux.ext.feedback.min.css", integrity: "sha384-OBguCYqF+dMD0Pl84C3FlY/+ohUGfW0OyynmXb/PSDEGOyuI/TQJ3EZAoCeJx+Jk", regular: { url: "./aellux.ext.feedback.css", integrity: "sha384-yk4cW+r/Mc1FRS1ZauBHC6KsKb7sxuJ0E9mmt/+AYASAdZXXMK6iuFBR+TOEh/r4" } } }, focus: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.focus.min.js", integrity: "sha384-AXpUv/Ur2Z4cKvO9EqIFqfxxdSQR5j75q0okOAWPvHhSneQ5LPjrOzk6Sl9MOo4a", regular: { url: "./aellux.ext.focus.js", integrity: "sha384-VjQzcnhLRrvRlbVQ0X4/tO0+8gqJXAmIFoeIVimjOud1wRNuBXNnSQHHW9XQPzTe" } }, legacy: { url: "./aellux.ext.focus.legacy.min.js", integrity: "sha384-I5QpUmKsA1T8NiKfKXQgbdG19Ld1ZGCWSmosygO3yGj43tdxp5zCfLyfBuFoHlKu", regular: { url: "./aellux.ext.focus.legacy.js", integrity: "sha384-5/y3J1NC/qMyV9myEj29+wGbqCVI8ICPafSebtJVfl15Qmup6vMiJzveShd3CLnw" } } }, dependencies: [] }, point: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.point.min.js", integrity: "sha384-n540II5oWbHJRt/a8i+Rgb9A3b9dm7hamg1kd3Nz7KdPQDcaa8S823t9fCrgxBWF", regular: { url: "./aellux.ext.point.js", integrity: "sha384-aDj7I5QEH/0+52E3e6yPZ/D0MEsNBdxeET3G5ToVvgczHtksMh3p8S/KOoAapRRN" } }, legacy: { url: "./aellux.ext.point.legacy.min.js", integrity: "sha384-5UmWvQHfmvttz9yeXbilawGCZH20UdR8yNBOE9kRV34wpfWASl8plzgKtLVQGO9M", regular: { url: "./aellux.ext.point.legacy.js", integrity: "sha384-gG/XONYEC1tchBcJ6bUtKYmWFHz0E+50LmMaXDAiqWBKPuwdHZeYm1uXA22lMZuN" } } }, dependencies: [] }, anchor: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.anchor.min.js", integrity: "sha384-u+UZrSLASzx0afCVYvDFD6QYylZKX3yLY7bFRtp/JMkhoh58qEkTYykOnRD4WY+b", regular: { url: "./aellux.ext.anchor.js", integrity: "sha384-ujBu0j713TBuWD+Ff+jBvdxMFcOq/fYDEWk8uTj0CAa6isc1+rdbiCmxTwo0zQ4J" } }, legacy: { url: "./aellux.ext.anchor.legacy.min.js", integrity: "sha384-MVe+yb6RpxDJTcr2lw4bqQUOroyj5V2BZAnm353Y0z5V9CEgRxOuG5EzxKYZMw/i", regular: { url: "./aellux.ext.anchor.legacy.js", integrity: "sha384-IP4rghxYVUkWmvyG7RS0bXDoCg4jEFJOAHn3B2Ympbh2psIJmKK0CCRUQ9Qyz6nO" } } }, dependencies: [] }, "ajax-href": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.ajax-href.min.js", integrity: "sha384-VCvADGjweS3kvW0s226GuUqgTuiLz9zMhPU61ZrkYfbDX42l3dbvB4jm1QvC8xio", regular: { url: "./aellux.ext.ajax-href.js", integrity: "sha384-EcFz52TbeSPurZxIukNU/WiujOPlF0E4FvnoR1Y44axiHLzd2+LpSBnBMfwIZ3Ip" } }, legacy: { url: "./aellux.ext.ajax-href.legacy.min.js", integrity: "sha384-me6plEKmddDwM9w625RpMTaa8kCZYsbQU/2dwWKmZSktJ3k6gd08iDLmiQPEQLl4", regular: { url: "./aellux.ext.ajax-href.legacy.js", integrity: "sha384-HaI+joZDWxyoZtD4QrAMJ+W1VjfdpyHcV4tt/hlFoP9SznAAxHO6iDErzOO8LIAz" } } }, dependencies: [] }, scrollbox: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.scrollbox.min.js", integrity: "sha384-MbsMMRhyNfXp50eIj6ybMu3dcxXnbLcM6xK8BAPI1aAJzG3TbCAUCcjKr1SHpSaa", regular: { url: "./aellux.ext.scrollbox.js", integrity: "sha384-Nn4620lov+xo0w32p+rdpQsVas3rPr0OW2NJnYASSruy2gb8ujeRk27pLQM2Gobv" } }, legacy: { url: "./aellux.ext.scrollbox.legacy.min.js", integrity: "sha384-m+v8D6nbzGMHyPhNhbT3urBAy3Nza5CtLGK0vGQtiwPGwtsLvJB9sVuafO3kXdxB", regular: { url: "./aellux.ext.scrollbox.legacy.js", integrity: "sha384-ZIFUP8YDdvLufnr2pZKh12xcW9WV28zeUk9uBtXRKLgsLvzQ3VuU1tMyuKQmZbf9" } } }, dependencies: [] }, "scrollbox-snap": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.scrollbox-snap.min.js", integrity: "sha384-fwr6geiwmDDl/bU88Z8ldI9tIyojBehplcqMI8vn9YC2Y35T8Ko6+inwARkChd6y", regular: { url: "./aellux.ext.scrollbox-snap.js", integrity: "sha384-qjNY5x+ua2KPbtXH3SuITr6N3dLfhUQy1qk487pJUPN/iRe06hIbY5oldYSPcXp2" } }, legacy: { url: "./aellux.ext.scrollbox-snap.legacy.min.js", integrity: "sha384-7SyRprm808E+xN3HarZjNIqewKIyFvTFBG+b7nUbjBPTD5arFdhZzQXzqz/Jxdtd", regular: { url: "./aellux.ext.scrollbox-snap.legacy.js", integrity: "sha384-zMpMGOiRT1bKYrrdNiHPcLkFmvMf52JbQyOq9TW0X+I518FgIrRTjq6Fta6Itfg2" } } }, dependencies: [] }, adaptive: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.adaptive.min.js", integrity: "sha384-UfDhSymI78IbudB2vel0GOI+z4C8m6JCG4Egl6WK9mHvZyOltXgawIbn2iFJH2+w", regular: { url: "./aellux.ext.adaptive.js", integrity: "sha384-AXSW7WI4ZEykJgerhjuscp7u99DkKkTYFD13o1HAnVH1tJYz2u5f9VjsBGca7kSU" } }, legacy: { url: "./aellux.ext.adaptive.legacy.min.js", integrity: "sha384-yOyWKIJaWddRJrbYwriE1lpeuiB2WbeF2fII29R4vIBGMfXi6b6m2IXUHvFqaQTB", regular: { url: "./aellux.ext.adaptive.legacy.js", integrity: "sha384-oRSPNCmFGYjwsrmeBT7r7un76fwNEODcJNmo1ifLgHbWEmoGT07OtdqsyxvfnWeN" } } }, dependencies: [], style: { url: "./aellux.ext.adaptive.min.css", integrity: "sha384-8yUP1PStfDqBCyCskP3k9WLIKgv/yl1nyDhmPz7hsX5NZ4z3ZT3ajolA+RhYlUiG", regular: { url: "./aellux.ext.adaptive.css", integrity: "sha384-HfIjX9Zk0VFRimzPvUaTS5AtwuHJHjXKoM/xbNJXj5vE7bSdBGEzbrBHfbNmYah0" } } }, present: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.present.min.js", integrity: "sha384-BL8DgeMmdYO5YiZpsKSRWltYo/QuxRyo2zPdFOAVwCWS9kctutJGWgtOy5VotTG0", regular: { url: "./aellux.ext.present.js", integrity: "sha384-X0YL/EltZBkqKQOtrSYecUOzMPfXCCUTfR09ZWpH9ZVONmq+wZxO75qBr4t87uRi" } }, legacy: { url: "./aellux.ext.present.legacy.min.js", integrity: "sha384-VRWsybKW1jflXKM2eFUc4euG1fcwVjGZ1KwRF0tHca4+n0vpB3/H/yYDQsWvMZ9t", regular: { url: "./aellux.ext.present.legacy.js", integrity: "sha384-n/Dd633AhBdZSjL3WlKxiAp5S8EcdzOU4b+7ah1iukgf2L38fQkACEVIMX8xC23v" } } }, dependencies: [], style: { url: "./aellux.ext.present.min.css", integrity: "sha384-LR069uhIDdnx0X7oeoRxevC/+dD5gA6d4B2dHAJKPgnqLYDGs4GgW9quKNq+1G5b", regular: { url: "./aellux.ext.present.css", integrity: "sha384-9GTFJ0OxBj6ta/iiV07BLGTdfe9pbmBMYXFn9kT+wB4KwiLO8zxJ39XzLYOGgfui" } } } } };
     }
   });
 
@@ -22664,7 +22664,7 @@
       return this;
     }), _regeneratorDefine2(u, "toString", function() {
       return "[object Generator]";
-    }), (_regenerator = function _regenerator7() {
+    }), (_regenerator = function _regenerator8() {
       return { w: i, m: f };
     })();
   }
@@ -24886,7 +24886,7 @@
       return this;
     }), _regeneratorDefine22(u, "toString", function() {
       return "[object Generator]";
-    }), (_regenerator2 = function _regenerator7() {
+    }), (_regenerator2 = function _regenerator8() {
       return { w: i, m: f };
     })();
   }
@@ -26175,7 +26175,7 @@
       return this;
     }), _regeneratorDefine23(u, "toString", function() {
       return "[object Generator]";
-    }), (_regenerator3 = function _regenerator7() {
+    }), (_regenerator3 = function _regenerator8() {
       return { w: i, m: f };
     })();
   }
@@ -26548,7 +26548,7 @@
       return this;
     }), _regeneratorDefine24(u, "toString", function() {
       return "[object Generator]";
-    }), (_regenerator4 = function _regenerator7() {
+    }), (_regenerator4 = function _regenerator8() {
       return { w: i, m: f };
     })();
   }
@@ -27676,7 +27676,7 @@
       return this;
     }), _regeneratorDefine25(u, "toString", function() {
       return "[object Generator]";
-    }), (_regenerator5 = function _regenerator7() {
+    }), (_regenerator5 = function _regenerator8() {
       return { w: i, m: f };
     })();
   }
@@ -28488,8 +28488,86 @@
     }
   });
 
-  // src/aellux.ext.adaptive.js
-  var aellux_ext_adaptive_exports = {};
+  // src/aellux.ext.ajax-href.js
+  var aellux_ext_ajax_href_exports = {};
+  function _regenerator6() {
+    /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/babel/babel/blob/main/packages/babel-helpers/LICENSE */
+    var e, t, r = "function" == typeof Symbol ? Symbol : {}, n = r.iterator || "@@iterator", o = r.toStringTag || "@@toStringTag";
+    function i(r2, n2, o2, i2) {
+      var c2 = n2 && n2.prototype instanceof Generator ? n2 : Generator, u2 = Object.create(c2.prototype);
+      return _regeneratorDefine26(u2, "_invoke", (function(r3, n3, o3) {
+        var i3, c3, u3, f2 = 0, p = o3 || [], y = false, G = { p: 0, n: 0, v: e, a: d, f: d.bind(e, 4), d: function d2(t2, r4) {
+          return i3 = t2, c3 = 0, u3 = e, G.n = r4, a;
+        } };
+        function d(r4, n4) {
+          for (c3 = r4, u3 = n4, t = 0; !y && f2 && !o4 && t < p.length; t++) {
+            var o4, i4 = p[t], d2 = G.p, l = i4[2];
+            r4 > 3 ? (o4 = l === n4) && (u3 = i4[(c3 = i4[4]) ? 5 : (c3 = 3, 3)], i4[4] = i4[5] = e) : i4[0] <= d2 && ((o4 = r4 < 2 && d2 < i4[1]) ? (c3 = 0, G.v = n4, G.n = i4[1]) : d2 < l && (o4 = r4 < 3 || i4[0] > n4 || n4 > l) && (i4[4] = r4, i4[5] = n4, G.n = l, c3 = 0));
+          }
+          if (o4 || r4 > 1) return a;
+          throw y = true, n4;
+        }
+        return function(o4, p2, l) {
+          if (f2 > 1) throw TypeError("Generator is already running");
+          for (y && 1 === p2 && d(p2, l), c3 = p2, u3 = l; (t = c3 < 2 ? e : u3) || !y; ) {
+            i3 || (c3 ? c3 < 3 ? (c3 > 1 && (G.n = -1), d(c3, u3)) : G.n = u3 : G.v = u3);
+            try {
+              if (f2 = 2, i3) {
+                if (c3 || (o4 = "next"), t = i3[o4]) {
+                  if (!(t = t.call(i3, u3))) throw TypeError("iterator result is not an object");
+                  if (!t.done) return t;
+                  u3 = t.value, c3 < 2 && (c3 = 0);
+                } else 1 === c3 && (t = i3.return) && t.call(i3), c3 < 2 && (u3 = TypeError("The iterator does not provide a '" + o4 + "' method"), c3 = 1);
+                i3 = e;
+              } else if ((t = (y = G.n < 0) ? u3 : r3.call(n3, G)) !== a) break;
+            } catch (t2) {
+              i3 = e, c3 = 1, u3 = t2;
+            } finally {
+              f2 = 1;
+            }
+          }
+          return { value: t, done: y };
+        };
+      })(r2, o2, i2), true), u2;
+    }
+    var a = {};
+    function Generator() {
+    }
+    function GeneratorFunction() {
+    }
+    function GeneratorFunctionPrototype() {
+    }
+    t = Object.getPrototypeOf;
+    var c = [][n] ? t(t([][n]())) : (_regeneratorDefine26(t = {}, n, function() {
+      return this;
+    }), t), u = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(c);
+    function f(e2) {
+      return Object.setPrototypeOf ? Object.setPrototypeOf(e2, GeneratorFunctionPrototype) : (e2.__proto__ = GeneratorFunctionPrototype, _regeneratorDefine26(e2, o, "GeneratorFunction")), e2.prototype = Object.create(u), e2;
+    }
+    return GeneratorFunction.prototype = GeneratorFunctionPrototype, _regeneratorDefine26(u, "constructor", GeneratorFunctionPrototype), _regeneratorDefine26(GeneratorFunctionPrototype, "constructor", GeneratorFunction), GeneratorFunction.displayName = "GeneratorFunction", _regeneratorDefine26(GeneratorFunctionPrototype, o, "GeneratorFunction"), _regeneratorDefine26(u), _regeneratorDefine26(u, o, "Generator"), _regeneratorDefine26(u, n, function() {
+      return this;
+    }), _regeneratorDefine26(u, "toString", function() {
+      return "[object Generator]";
+    }), (_regenerator6 = function _regenerator8() {
+      return { w: i, m: f };
+    })();
+  }
+  function _regeneratorDefine26(e, r, n, t) {
+    var i = Object.defineProperty;
+    try {
+      i({}, "", {});
+    } catch (e2) {
+      i = 0;
+    }
+    _regeneratorDefine26 = function _regeneratorDefine(e2, r2, n2, t2) {
+      function o(r3, n3) {
+        _regeneratorDefine26(e2, r3, function(e3) {
+          return this._invoke(r3, n3, e3);
+        });
+      }
+      r2 ? i ? i(e2, r2, { value: n2, enumerable: !t2, configurable: !t2, writable: !t2 }) : e2[r2] = n2 : (o("next", 0), o("throw", 1), o("return", 2));
+    }, _regeneratorDefine26(e, r, n, t);
+  }
   function _createForOfIteratorHelper13(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
@@ -28521,12 +28599,6 @@
       }
     } };
   }
-  function _slicedToArray7(r, e) {
-    return _arrayWithHoles7(r) || _iterableToArrayLimit7(r, e) || _unsupportedIterableToArray14(r, e) || _nonIterableRest7();
-  }
-  function _nonIterableRest7() {
-    throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
-  }
   function _unsupportedIterableToArray14(r, a) {
     if (r) {
       if ("string" == typeof r) return _arrayLikeToArray14(r, a);
@@ -28535,6 +28607,310 @@
     }
   }
   function _arrayLikeToArray14(r, a) {
+    (null == a || a > r.length) && (a = r.length);
+    for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
+    return n;
+  }
+  function asyncGeneratorStep6(n, t, e, r, o, a, c) {
+    try {
+      var i = n[a](c), u = i.value;
+    } catch (n2) {
+      return void e(n2);
+    }
+    i.done ? t(u) : Promise.resolve(u).then(r, o);
+  }
+  function _asyncToGenerator6(n) {
+    return function() {
+      var t = this, e = arguments;
+      return new Promise(function(r, o) {
+        var a = n.apply(t, e);
+        function _next(n2) {
+          asyncGeneratorStep6(a, r, o, _next, _throw, "next", n2);
+        }
+        function _throw(n2) {
+          asyncGeneratorStep6(a, r, o, _next, _throw, "throw", n2);
+        }
+        _next(void 0);
+      });
+    };
+  }
+  var init_aellux_ext_ajax_href = __esm({
+    "src/aellux.ext.ajax-href.js": function() {
+      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
+      /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+      (function(root2) {
+        "use strict";
+        var AelluxJs2 = root2.AelluxJs;
+        var extensionName = "ajax-href";
+        if (!AelluxJs2) {
+          throw new Error('[aellux.js] Cannot attach the "'.concat(extensionName, '" extension: root.AelluxJs is not defined. Load the aellux.js boot script before this extension.'));
+        }
+        AelluxJs2.extAttach(extensionName, {
+          init: init,
+          destroy: destroy,
+          load: load
+        });
+        var attr = {
+          ajaxHref: AelluxJs2.attr(extensionName)
+        };
+        function init() {
+          document.addEventListener("click", onClick);
+          AelluxJs2.on("SnapshotRestore", OnSnapshotRestoreAjax);
+        }
+        function destroy() {
+          document.removeEventListener("click", onClick);
+          AelluxJs2.off("SnapshotRestore", OnSnapshotRestoreAjax);
+          if (previousController) {
+            previousController.abort();
+          }
+        }
+        var previousController = null;
+        function load(_x, _x2) {
+          return _load.apply(this, arguments);
+        }
+        function _load() {
+          _load = _asyncToGenerator6(/* @__PURE__ */ _regenerator6().m(function _callee(url, selectors) {
+            var options, controller, selectorList, elements, response, html, loadedDocument, _iterator, _step, selector, currentElement, loadedElement, replacement, _args = arguments, _t, _t2;
+            return _regenerator6().w(function(_context) {
+              while (1) switch (_context.p = _context.n) {
+                case 0:
+                  options = _args.length > 2 && _args[2] !== void 0 ? _args[2] : {};
+                  options = options || {};
+                  if (previousController) {
+                    previousController.abort();
+                  }
+                  controller = "AbortController" in window ? new AbortController() : {
+                    signal: null,
+                    abort: function abort() {
+                      return null;
+                    }
+                  };
+                  previousController = controller;
+                  selectorList = (Array.isArray(selectors) ? selectors : selectors.split(",")).map(function(selector2) {
+                    return selector2.trim();
+                  }).filter(Boolean);
+                  elements = /* @__PURE__ */ new Map();
+                  selectorList.forEach(function(selector2) {
+                    var currentElement2 = document.querySelector(selector2);
+                    if (!currentElement2) return;
+                    elements.set(selector2, currentElement2);
+                    if (AelluxJs2.ext.feedback) {
+                      AelluxJs2.ext.feedback.busy(currentElement2, "Ajax loading", true);
+                      AelluxJs2.ext.feedback.progress(currentElement2, "Ajax loading", 0);
+                    }
+                  });
+                  if (!("ignoreHistory" in options) || !options.ignoreHistory) {
+                    AelluxJs2.dispatch("PushAjaxReplace", {
+                      detail: {
+                        url: url,
+                        selectors: selectors
+                      }
+                    });
+                  }
+                  AelluxJs2.dispatch("AjaxHrefStart");
+                  _context.p = 1;
+                  _context.n = 2;
+                  return AelluxJs2.request(url, {
+                    signal: controller.signal
+                  });
+                case 2:
+                  response = _context.v;
+                  _context.n = 3;
+                  return response.text();
+                case 3:
+                  html = _context.v;
+                  loadedDocument = new DOMParser().parseFromString(html, "text/html");
+                  _iterator = _createForOfIteratorHelper13(selectorList);
+                  _context.p = 4;
+                  _iterator.s();
+                case 5:
+                  if ((_step = _iterator.n()).done) {
+                    _context.n = 11;
+                    break;
+                  }
+                  selector = _step.value;
+                  currentElement = elements.get(selector);
+                  if (currentElement) {
+                    _context.n = 6;
+                    break;
+                  }
+                  return _context.a(3, 10);
+                case 6:
+                  loadedElement = loadedDocument.querySelector(selector);
+                  if (loadedElement) {
+                    _context.n = 7;
+                    break;
+                  }
+                  return _context.a(3, 10);
+                case 7:
+                  _context.n = 8;
+                  return AelluxJs2.unmount(currentElement);
+                case 8:
+                  replacement = document.importNode(loadedElement, true);
+                  currentElement.parentNode.replaceChild(replacement, currentElement);
+                  if (selector === "title") {
+                    AelluxJs2.dispatch("UpdateBaseTitle", {
+                      detail: {
+                        title: replacement.textContent
+                      }
+                    });
+                  }
+                  _context.n = 9;
+                  return AelluxJs2.mount(replacement);
+                case 9:
+                  if (AelluxJs2.ext.feedback) {
+                    AelluxJs2.ext.feedback.busy(replacement, "Ajax loaded", false);
+                    AelluxJs2.ext.feedback.progress(replacement, "Ajax loaded", 1);
+                  }
+                case 10:
+                  _context.n = 5;
+                  break;
+                case 11:
+                  _context.n = 13;
+                  break;
+                case 12:
+                  _context.p = 12;
+                  _t = _context.v;
+                  _iterator.e(_t);
+                case 13:
+                  _context.p = 13;
+                  _iterator.f();
+                  return _context.f(13);
+                case 14:
+                  AelluxJs2.dispatch("AjaxHrefLoaded");
+                  _context.n = 17;
+                  break;
+                case 15:
+                  _context.p = 15;
+                  _t2 = _context.v;
+                  selectorList.forEach(function(selector2) {
+                    var currentElement2 = elements.get(selector2);
+                    if (!currentElement2) return;
+                    if (AelluxJs2.ext.feedback) {
+                      AelluxJs2.ext.feedback.busy(currentElement2, "Ajax loading", false);
+                      AelluxJs2.ext.feedback.progress(currentElement2, "Ajax loading", 1);
+                    }
+                  });
+                  AelluxJs2.dispatch("AjaxHrefError");
+                  if (!(_t2.name === "AbortError")) {
+                    _context.n = 16;
+                    break;
+                  }
+                  return _context.a(2, null);
+                case 16:
+                  throw _t2;
+                case 17:
+                  _context.p = 17;
+                  if (previousController === controller) previousController = null;
+                  AelluxJs2.dispatch("AjaxHrefComplete");
+                  return _context.f(17);
+                case 18:
+                  return _context.a(2);
+              }
+            }, _callee, null, [[4, 12, 13, 14], [1, 15, 17, 18]]);
+          }));
+          return _load.apply(this, arguments);
+        }
+        function onClick(event) {
+          if (event.defaultPrevented) return;
+          if (event.button !== 0) return;
+          if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+          var target = event.target && event.target.nodeType === 1 ? event.target : event.target && event.target.parentElement;
+          var link = target && target.closest("a[".concat(attr.ajaxHref, "]"));
+          if (!link || !link.href || link.tagName !== "A") return;
+          var rawHref = link.getAttribute("href");
+          if (link.target && link.target !== "_self") return;
+          if (rawHref && rawHref.startsWith("#")) return;
+          if (link.hasAttribute("download") || link.hasAttribute("data-no-ajax")) return;
+          var selectors = link.getAttribute(attr.ajaxHref);
+          if (!selectors) return;
+          var destinyUrl = comparableUrl(link.href);
+          var currentUrl = comparableUrl(window.location.href);
+          if (destinyUrl.origin !== currentUrl.origin) {
+            AelluxJs2.dispatch("AjaxHrefDropOrigin");
+            return;
+          }
+          if (destinyUrl.href === currentUrl.href) {
+            if (destinyUrl.hash && destinyUrl.hash !== currentUrl.hash) return;
+            event.preventDefault();
+            AelluxJs2.dispatch("AjaxHrefStart");
+            AelluxJs2.dispatch("AjaxHrefLoaded");
+            AelluxJs2.dispatch("AjaxHrefComplete");
+            return;
+          }
+          event.preventDefault();
+          load(link.href, selectors);
+        }
+        function OnSnapshotRestoreAjax(event) {
+          if (!event.detail || !event.detail.popState) return;
+          var state = event.detail.popState;
+          if (state.ajaxReplace) {
+            var url = state.ajaxReplace.url;
+            var selectors = state.ajaxReplace.selectors;
+            load(url, selectors, {
+              ignoreHistory: true
+            });
+          }
+        }
+        function comparableUrl(value) {
+          var url = new URL(value, window.location.href);
+          return {
+            origin: url.origin,
+            href: "".concat(url.origin).concat(url.pathname).concat(url.search),
+            hash: url.hash
+          };
+        }
+      })(typeof globalThis !== "undefined" ? globalThis : window);
+    }
+  });
+
+  // src/aellux.ext.adaptive.js
+  var aellux_ext_adaptive_exports = {};
+  function _createForOfIteratorHelper14(r, e) {
+    var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
+    if (!t) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray15(r)) || e && r && "number" == typeof r.length) {
+        t && (r = t);
+        var _n = 0, F = function F2() {
+        };
+        return { s: F, n: function n() {
+          return _n >= r.length ? { done: true } : { done: false, value: r[_n++] };
+        }, e: function e2(r2) {
+          throw r2;
+        }, f: F };
+      }
+      throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+    }
+    var o, a = true, u = false;
+    return { s: function s() {
+      t = t.call(r);
+    }, n: function n() {
+      var r2 = t.next();
+      return a = r2.done, r2;
+    }, e: function e2(r2) {
+      u = true, o = r2;
+    }, f: function f() {
+      try {
+        a || null == t.return || t.return();
+      } finally {
+        if (u) throw o;
+      }
+    } };
+  }
+  function _slicedToArray7(r, e) {
+    return _arrayWithHoles7(r) || _iterableToArrayLimit7(r, e) || _unsupportedIterableToArray15(r, e) || _nonIterableRest7();
+  }
+  function _nonIterableRest7() {
+    throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+  }
+  function _unsupportedIterableToArray15(r, a) {
+    if (r) {
+      if ("string" == typeof r) return _arrayLikeToArray15(r, a);
+      var t = {}.toString.call(r).slice(8, -1);
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray15(r, a) : void 0;
+    }
+  }
+  function _arrayLikeToArray15(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
@@ -28674,7 +29050,7 @@
         function destroy() {
           pendingResizeEntries.clear();
           pendingResizeElements.clear();
-          var _iterator = _createForOfIteratorHelper13(adaptiveElements), _step;
+          var _iterator = _createForOfIteratorHelper14(adaptiveElements), _step;
           try {
             for (_iterator.s(); !(_step = _iterator.n()).done; ) {
               var element = _step.value;
@@ -28712,7 +29088,7 @@
           layoutIds.delete(element);
           if (resizeObserver) resizeObserver.unobserve(element);
           else if (adaptiveElements.size === 0) AelluxJs2.offEvent(root2, "$resize", onWindowResize);
-          var _iterator2 = _createForOfIteratorHelper13(managedClasses), _step2;
+          var _iterator2 = _createForOfIteratorHelper14(managedClasses), _step2;
           try {
             for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
               var name = _step2.value;
@@ -28729,7 +29105,7 @@
           elementMemories.delete(element);
         }
         function onResize(entries) {
-          var _iterator3 = _createForOfIteratorHelper13(entries), _step3;
+          var _iterator3 = _createForOfIteratorHelper14(entries), _step3;
           try {
             for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
               var entry = _step3.value;
@@ -28745,7 +29121,7 @@
           scheduleUpdate();
         }
         function onWindowResize() {
-          var _iterator4 = _createForOfIteratorHelper13(adaptiveElements), _step4;
+          var _iterator4 = _createForOfIteratorHelper14(adaptiveElements), _step4;
           try {
             for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
               var element = _step4.value;
@@ -28819,7 +29195,7 @@
             var threshold = sizeThresholds[i];
             element.classList.toggle(threshold.className, space >= threshold.minimum);
           }
-          var _iterator5 = _createForOfIteratorHelper13(dimensionProperties), _step5;
+          var _iterator5 = _createForOfIteratorHelper14(dimensionProperties), _step5;
           try {
             for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
               var name = _step5.value;
@@ -28869,12 +29245,12 @@
 
   // src/aellux.ext.present.js
   var aellux_ext_present_exports = {};
-  function _regenerator6() {
+  function _regenerator7() {
     /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/babel/babel/blob/main/packages/babel-helpers/LICENSE */
     var e, t, r = "function" == typeof Symbol ? Symbol : {}, n = r.iterator || "@@iterator", o = r.toStringTag || "@@toStringTag";
     function i(r2, n2, o2, i2) {
       var c2 = n2 && n2.prototype instanceof Generator ? n2 : Generator, u2 = Object.create(c2.prototype);
-      return _regeneratorDefine26(u2, "_invoke", (function(r3, n3, o3) {
+      return _regeneratorDefine27(u2, "_invoke", (function(r3, n3, o3) {
         var i3, c3, u3, f2 = 0, p = o3 || [], y = false, G = { p: 0, n: 0, v: e, a: d, f: d.bind(e, 4), d: function d2(t2, r4) {
           return i3 = t2, c3 = 0, u3 = e, G.n = r4, a;
         } };
@@ -28917,37 +29293,37 @@
     function GeneratorFunctionPrototype() {
     }
     t = Object.getPrototypeOf;
-    var c = [][n] ? t(t([][n]())) : (_regeneratorDefine26(t = {}, n, function() {
+    var c = [][n] ? t(t([][n]())) : (_regeneratorDefine27(t = {}, n, function() {
       return this;
     }), t), u = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(c);
     function f(e2) {
-      return Object.setPrototypeOf ? Object.setPrototypeOf(e2, GeneratorFunctionPrototype) : (e2.__proto__ = GeneratorFunctionPrototype, _regeneratorDefine26(e2, o, "GeneratorFunction")), e2.prototype = Object.create(u), e2;
+      return Object.setPrototypeOf ? Object.setPrototypeOf(e2, GeneratorFunctionPrototype) : (e2.__proto__ = GeneratorFunctionPrototype, _regeneratorDefine27(e2, o, "GeneratorFunction")), e2.prototype = Object.create(u), e2;
     }
-    return GeneratorFunction.prototype = GeneratorFunctionPrototype, _regeneratorDefine26(u, "constructor", GeneratorFunctionPrototype), _regeneratorDefine26(GeneratorFunctionPrototype, "constructor", GeneratorFunction), GeneratorFunction.displayName = "GeneratorFunction", _regeneratorDefine26(GeneratorFunctionPrototype, o, "GeneratorFunction"), _regeneratorDefine26(u), _regeneratorDefine26(u, o, "Generator"), _regeneratorDefine26(u, n, function() {
+    return GeneratorFunction.prototype = GeneratorFunctionPrototype, _regeneratorDefine27(u, "constructor", GeneratorFunctionPrototype), _regeneratorDefine27(GeneratorFunctionPrototype, "constructor", GeneratorFunction), GeneratorFunction.displayName = "GeneratorFunction", _regeneratorDefine27(GeneratorFunctionPrototype, o, "GeneratorFunction"), _regeneratorDefine27(u), _regeneratorDefine27(u, o, "Generator"), _regeneratorDefine27(u, n, function() {
       return this;
-    }), _regeneratorDefine26(u, "toString", function() {
+    }), _regeneratorDefine27(u, "toString", function() {
       return "[object Generator]";
-    }), (_regenerator6 = function _regenerator7() {
+    }), (_regenerator7 = function _regenerator8() {
       return { w: i, m: f };
     })();
   }
-  function _regeneratorDefine26(e, r, n, t) {
+  function _regeneratorDefine27(e, r, n, t) {
     var i = Object.defineProperty;
     try {
       i({}, "", {});
     } catch (e2) {
       i = 0;
     }
-    _regeneratorDefine26 = function _regeneratorDefine(e2, r2, n2, t2) {
+    _regeneratorDefine27 = function _regeneratorDefine(e2, r2, n2, t2) {
       function o(r3, n3) {
-        _regeneratorDefine26(e2, r3, function(e3) {
+        _regeneratorDefine27(e2, r3, function(e3) {
           return this._invoke(r3, n3, e3);
         });
       }
       r2 ? i ? i(e2, r2, { value: n2, enumerable: !t2, configurable: !t2, writable: !t2 }) : e2[r2] = n2 : (o("next", 0), o("throw", 1), o("return", 2));
-    }, _regeneratorDefine26(e, r, n, t);
+    }, _regeneratorDefine27(e, r, n, t);
   }
-  function asyncGeneratorStep6(n, t, e, r, o, a, c) {
+  function asyncGeneratorStep7(n, t, e, r, o, a, c) {
     try {
       var i = n[a](c), u = i.value;
     } catch (n2) {
@@ -28955,25 +29331,25 @@
     }
     i.done ? t(u) : Promise.resolve(u).then(r, o);
   }
-  function _asyncToGenerator6(n) {
+  function _asyncToGenerator7(n) {
     return function() {
       var t = this, e = arguments;
       return new Promise(function(r, o) {
         var a = n.apply(t, e);
         function _next(n2) {
-          asyncGeneratorStep6(a, r, o, _next, _throw, "next", n2);
+          asyncGeneratorStep7(a, r, o, _next, _throw, "next", n2);
         }
         function _throw(n2) {
-          asyncGeneratorStep6(a, r, o, _next, _throw, "throw", n2);
+          asyncGeneratorStep7(a, r, o, _next, _throw, "throw", n2);
         }
         _next(void 0);
       });
     };
   }
-  function _createForOfIteratorHelper14(r, e) {
+  function _createForOfIteratorHelper15(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
-      if (Array.isArray(r) || (t = _unsupportedIterableToArray15(r)) || e && r && "number" == typeof r.length) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray16(r)) || e && r && "number" == typeof r.length) {
         t && (r = t);
         var _n = 0, F = function F2() {
         };
@@ -29002,7 +29378,7 @@
     } };
   }
   function _slicedToArray8(r, e) {
-    return _arrayWithHoles8(r) || _iterableToArrayLimit8(r, e) || _unsupportedIterableToArray15(r, e) || _nonIterableRest8();
+    return _arrayWithHoles8(r) || _iterableToArrayLimit8(r, e) || _unsupportedIterableToArray16(r, e) || _nonIterableRest8();
   }
   function _nonIterableRest8() {
     throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
@@ -29032,25 +29408,25 @@
     if (Array.isArray(r)) return r;
   }
   function _toConsumableArray4(r) {
-    return _arrayWithoutHoles4(r) || _iterableToArray4(r) || _unsupportedIterableToArray15(r) || _nonIterableSpread4();
+    return _arrayWithoutHoles4(r) || _iterableToArray4(r) || _unsupportedIterableToArray16(r) || _nonIterableSpread4();
   }
   function _nonIterableSpread4() {
     throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
-  function _unsupportedIterableToArray15(r, a) {
+  function _unsupportedIterableToArray16(r, a) {
     if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray15(r, a);
+      if ("string" == typeof r) return _arrayLikeToArray16(r, a);
       var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray15(r, a) : void 0;
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray16(r, a) : void 0;
     }
   }
   function _iterableToArray4(r) {
     if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
   }
   function _arrayWithoutHoles4(r) {
-    if (Array.isArray(r)) return _arrayLikeToArray15(r);
+    if (Array.isArray(r)) return _arrayLikeToArray16(r);
   }
-  function _arrayLikeToArray15(r, a) {
+  function _arrayLikeToArray16(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
@@ -29139,7 +29515,7 @@
             extensionName: extensionName
           });
           AelluxJs2.off("$click", OnClick);
-          var _iterator = _createForOfIteratorHelper14(triggerElementsSet), _step;
+          var _iterator = _createForOfIteratorHelper15(triggerElementsSet), _step;
           try {
             for (_iterator.s(); !(_step = _iterator.n()).done; ) {
               var triggerElement = _step.value;
@@ -29150,7 +29526,7 @@
           } finally {
             _iterator.f();
           }
-          var _iterator2 = _createForOfIteratorHelper14(presentElements.keys()), _step2;
+          var _iterator2 = _createForOfIteratorHelper15(presentElements.keys()), _step2;
           try {
             for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
               var element = _step2.value;
@@ -29241,7 +29617,7 @@
             openPresentElements.add(element);
           }
           presentElements.set(element, presentController);
-          var _iterator3 = _createForOfIteratorHelper14(element.querySelectorAll("[".concat(attr.trigger, "],[").concat(attr.dismiss, "],[").concat(attr.target, "]"))), _step3;
+          var _iterator3 = _createForOfIteratorHelper15(element.querySelectorAll("[".concat(attr.trigger, "],[").concat(attr.dismiss, "],[").concat(attr.target, "]"))), _step3;
           try {
             for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
               var _triggerElement = _step3.value;
@@ -29257,7 +29633,7 @@
           }
           var idTriggers = triggersByTargetId.get(element.id);
           if (idTriggers) {
-            var _iterator4 = _createForOfIteratorHelper14(idTriggers), _step4;
+            var _iterator4 = _createForOfIteratorHelper15(idTriggers), _step4;
             try {
               for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
                 var triggerElement = _step4.value;
@@ -29418,9 +29794,9 @@
           return _prepareMeasuredSize.apply(this, arguments);
         }
         function _prepareMeasuredSize() {
-          _prepareMeasuredSize = _asyncToGenerator6(/* @__PURE__ */ _regenerator6().m(function _callee(element, controller, gotoVisible, previousSize, waitForPreparation) {
+          _prepareMeasuredSize = _asyncToGenerator7(/* @__PURE__ */ _regenerator7().m(function _callee(element, controller, gotoVisible, previousSize, waitForPreparation) {
             var size, computed, height, width, start;
-            return _regenerator6().w(function(_context) {
+            return _regenerator7().w(function(_context) {
               while (1) switch (_context.n) {
                 case 0:
                   if (!(!controller.measuredHeight && !controller.measuredWidth)) {
@@ -29472,9 +29848,9 @@
           return _presentTransition.apply(this, arguments);
         }
         function _presentTransition() {
-          _presentTransition = _asyncToGenerator6(/* @__PURE__ */ _regenerator6().m(function _callee2(element, gotoVisible) {
+          _presentTransition = _asyncToGenerator7(/* @__PURE__ */ _regenerator7().m(function _callee2(element, gotoVisible) {
             var forceRepop, controller, newDirection, transition, allowEvent, reusePreparation, waitForPreparation, previousSize, computed, interrupted, size, prepared, duration, timeMs, activateTransition, advancedEase, motionOptions, completed, motionResult, ownsTransition, _args2 = arguments, _t, _t2;
-            return _regenerator6().w(function(_context2) {
+            return _regenerator7().w(function(_context2) {
               while (1) switch (_context2.p = _context2.n) {
                 case 0:
                   forceRepop = _args2.length > 2 && _args2[2] !== void 0 ? _args2[2] : false;
@@ -29727,7 +30103,7 @@
           unpop(element);
         }
         function outsideClickAutoUnpop(currentExceptions) {
-          var _iterator5 = _createForOfIteratorHelper14(openPresentElements), _step5;
+          var _iterator5 = _createForOfIteratorHelper15(openPresentElements), _step5;
           try {
             var _loop = function _loop2() {
               var pContainer = _step5.value;
@@ -29853,6 +30229,11 @@
             return init_aellux_ext_anchor(), aellux_ext_anchor_exports;
           });
         },
+        "ajaxHref": function ajaxHref() {
+          return Promise.resolve().then(function() {
+            return init_aellux_ext_ajax_href(), aellux_ext_ajax_href_exports;
+          });
+        },
         "adaptive": function adaptive() {
           return Promise.resolve().then(function() {
             return init_aellux_ext_adaptive(), aellux_ext_adaptive_exports;
@@ -29871,6 +30252,9 @@
       });
       root.AelluxJs.ext("anchor", {
         loadWhen: "[data-ae-anchor]"
+      });
+      root.AelluxJs.ext("ajax-href", {
+        loadWhen: "a[data-ae-ajax-href]"
       });
       root.AelluxJs.ext("feedback", {
         loadWhen: "[data-ae-feedback]",

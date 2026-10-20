@@ -13,7 +13,7 @@
     ajaxHref: AelluxJs.attr(extensionName)
   };
 
-  function init(options) {
+  function init() {
     document.addEventListener("click", onClick);
     AelluxJs.on("SnapshotRestore", OnSnapshotRestoreAjax);
   }
@@ -80,11 +80,11 @@
         await AelluxJs.unmount(currentElement);
 
         const replacement = document.importNode(loadedElement, true);
-        currentElement.replaceWith(replacement);
+        currentElement.parentNode.replaceChild(replacement, currentElement);
 
         if (selector === "title") {
           AelluxJs.dispatch("UpdateBaseTitle", {
-            detail: { title: replacement.innerText }
+            detail: { title: replacement.textContent }
           });
         }
 
@@ -123,10 +123,13 @@
   }
 
   function onClick(event) {
+    if (event.defaultPrevented) return;
     if (event.button !== 0) return;
     if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
 
-    const link = event.target.closest(`[${attr.ajaxHref}]`);
+    const target = event.target && event.target.nodeType === 1
+      ? event.target : event.target && event.target.parentElement;
+    const link = target && target.closest(`a[${attr.ajaxHref}]`);
     if (!link || !link.href || link.tagName !== "A") return;
     const rawHref = link.getAttribute("href");
     if (link.target && link.target !== "_self") return;

@@ -14,19 +14,19 @@
 
 <meta name="description" content="aellux.js Docs">
   <link rel="canonical" href="https://aelluxjs.github.io/core/docs/0.1.0/extensions/declarative-loading.htm">
-  
+
     <meta property="og:title" content="Declarative Loading | 0.1.0 | aellux.js Docs" />
     <meta property="og:type" content="website" />
-          <meta property="og:url" content="https://aelluxjs.github.io/core/docs/0.1.0/extensions/declarative-loading.htm" />
-              <meta property="og:description" content="aellux.js Docs" />
+      <meta property="og:url" content="https://aelluxjs.github.io/core/docs/0.1.0/extensions/declarative-loading.htm" />
+        <meta property="og:description" content="aellux.js Docs" />
         <meta property="og:site_name" content="aellux.js Docs" />
 
         <meta name="twitter:card" content="summary_large_image">
         <meta name="twitter:title" content="Declarative Loading | 0.1.0 | aellux.js Docs">
         <meta name="twitter:description" content="aellux.js Docs">
 
-                  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Declarative Loading | 0.1.0 | aellux.js Docs","description":"aellux.js Docs","url":"https://aelluxjs.github.io/core/docs/0.1.0/extensions/declarative-loading.htm"}</script>
-          
+          <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Declarative Loading | 0.1.0 | aellux.js Docs","description":"aellux.js Docs","url":"https://aelluxjs.github.io/core/docs/0.1.0/extensions/declarative-loading.htm"}</script>
+
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -42,7 +42,6 @@
 <link rel="stylesheet" href="/core/docs/assets/docweaver/css/inline-style.css">
 
 <script src="https://cdn.jsdelivr.net/npm/tocbot@4.32/dist/tocbot.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.12/highlight.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.12/languages/html.min.js"></script>
@@ -52,10 +51,21 @@
 
 <script src="/core/docs/assets/docweaver/js/toc-init.js?t=1"></script>
 
-<script src="https://cdn.jsdelivr.net/npm/@aelluxjs/core@0.1.0-beta.10/dist/aellux.min.js"></script>
+<script src="/core/dist/aellux.min.js"></script>
 <script>
-  AelluxJs.ext("/core/docs/assets/docweaver/js/aellux.ext.ajax-href.js");
-  AelluxJs.init({ mode: "full" });
+  document.addEventListener("DOMContentLoaded", () => {
+    prepareAjaxLinks();
+    AelluxJs.init({ mode: "full", environment: "development" });
+  }, { once: true });
+
+  function prepareAjaxLinks() {
+    const ajaxAttr = AelluxJs.attr("ajax-href");
+    document.querySelectorAll(`.article a[href]:not([${ajaxAttr}]),nav a[href]:not([${ajaxAttr}])`)
+      .forEach((link) => {
+        if (link.getAttribute("href")?.startsWith("#")) return;
+        link.setAttribute(ajaxAttr, "title,#doc-content,#doc-navlinks,#doc-navlinks2,#doc-breadcrumb");
+      });
+  }
 
   AelluxJs.on("Mount",
     (event) => {
@@ -66,19 +76,8 @@
           hljs.highlightElement(block);
         });
 
-      const ajaxAttr = AelluxJs.attr("ajax-href");
-      const linksToUpdate = [
-        `.article [href]:not([${ajaxAttr}])`,
-        `nav [href]:not([${ajaxAttr}])`
-      ];
-      document.querySelectorAll(linksToUpdate.join(","))
-      .forEach((link)=>{
-        if(link.getAttribute("href")?.startsWith("#")) return;
-        link.setAttribute(
-          ajaxAttr,
-          "title,#doc-content,#doc-navlinks,#doc-navlinks2,#doc-breadcrumb"
-          );
-      });
+      prepareAjaxLinks();
+
       document.querySelectorAll("table").forEach((table) => {
         if (table.parentElement &&
           table.parentElement.classList.contains("table-scroll-wrapper")) {
@@ -163,47 +162,46 @@
   }
 
   document.addEventListener("DOMContentLoaded",
-  function(){
-    let currentRequest = null;
+    function () {
+      let currentRequest = null;
 
-    const progressBar = document.querySelector("#page-progress");
-    let progressTimer = null, progressTimer1 = null, progressTimer2 = null;
+      const progressBar = document.querySelector("#page-progress");
+      let progressTimer = null, progressTimer1 = null, progressTimer2 = null;
 
-    AelluxJs.on("AjaxHrefStart",startProgress);
-    AelluxJs.on("AjaxHrefComplete",finishProgress);
+      AelluxJs.on("AjaxHrefStart", startProgress);
+      AelluxJs.on("AjaxHrefComplete", finishProgress);
 
-    function startProgress() {
-      if (!progressBar) return;
+      function startProgress() {
+        if (!progressBar) return;
 
-      clearInterval(progressTimer);
-      clearInterval(progressTimer1);
-      clearInterval(progressTimer2);
-      progressBar.style.transition = "none";
-      progressBar.style.opacity = "1";
-      progressBar.style.width = "10%";
+        clearInterval(progressTimer);
+        clearInterval(progressTimer1);
+        clearInterval(progressTimer2);
+        progressBar.style.transition = "none";
+        progressBar.style.opacity = "1";
+        progressBar.style.width = "10%";
 
-      let progress = 10;
-      progressTimer = setInterval(() => {
-        progress += Math.random() * 12;
-        if (progress > 85) progress = 85;
-        progressBar.style.transition = null;
-        progressBar.style.width = `${progress}%`;
-      }, 200);
-    }
+        let progress = 10;
+        progressTimer = setInterval(() => {
+          progress += Math.random() * 12;
+          if (progress > 85) progress = 85;
+          progressBar.style.transition = null;
+          progressBar.style.width = `${progress}%`;
+        }, 200);
+      }
 
-    function finishProgress() {
-      if (!progressBar) return;
+      function finishProgress() {
+        if (!progressBar) return;
 
-      clearInterval(progressTimer);
-      clearInterval(progressTimer1);
-      clearInterval(progressTimer2);
-      progressBar.style.width = "100%";
-      progressTimer1 = setTimeout(() => progressBar.style.opacity = "0", 200);
-      progressTimer2 = setTimeout(() => progressBar.style.width = "0%", 450);
-    }
-  });
+        clearInterval(progressTimer);
+        clearInterval(progressTimer1);
+        clearInterval(progressTimer2);
+        progressBar.style.width = "100%";
+        progressTimer1 = setTimeout(() => progressBar.style.opacity = "0", 200);
+        progressTimer2 = setTimeout(() => progressBar.style.width = "0%", 450);
+      }
+    });
 </script>
-
 </head>
 
 <body>
@@ -455,6 +453,11 @@ Adaptive                            </a>
                           </li>
                           <li class="nav-item small-md rounded-1 ps-md-1"
                             style="flex:0">
+                            <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/core-extensions/ajax-href.htm">
+Ajax Href                            </a>
+                          </li>
+                          <li class="nav-item small-md rounded-1 ps-md-1"
+                            style="flex:0">
                             <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/core-extensions/anchor.htm">
 Anchor                            </a>
                           </li>
@@ -582,17 +585,17 @@ Declarative Loading                  </li>
 
         <div id="doc-navlinks" ajax-load="doc-navlinks">
 <div class="d-flex justify-content-between flex-row gap-2 p-2 pb-4 px-0">
-    <a href="/core/docs/0.1.0/extensions/official-registry.htm" class="text-decoration-none d-inline-flex flex-row gap-2" style="max-width: 45%;">
+  <a href="/core/docs/0.1.0/extensions/official-registry.htm" class="text-decoration-none d-inline-flex flex-row gap-2" style="max-width: 45%;">
     ← <span class="text-truncate overflow-hidden d-inline-block align-middle flex-fill"
       style="max-width:200px">Official Registry</span>
   </a>
-  
-    <a href="/core/docs/0.1.0/extensions/lazy-loading.htm" class="text-decoration-none d-inline-flex flex-row justify-content-end gap-2"
+
+  <a href="/core/docs/0.1.0/extensions/lazy-loading.htm" class="text-decoration-none d-inline-flex flex-row justify-content-end gap-2"
     style="width: 40%;">
     <span class="text-truncate overflow-hidden d-inline-block align-middle flex-fill text-end"
       style="max-width:200px">Lazy Loading</span> →
   </a>
-  </div>
+</div>
         </div>
 
         <div id="doc-content" style="min-height: calc(100vh - 200px);" class="js-toc-content" ajax-load="doc-content">
@@ -616,17 +619,17 @@ Declarative Loading                  </li>
 
         <div id="doc-navlinks2" ajax-load="doc-navlinks2">
 <div class="d-flex justify-content-between flex-row gap-2 p-2 pb-4 px-0">
-    <a href="/core/docs/0.1.0/extensions/official-registry.htm" class="text-decoration-none d-inline-flex flex-row gap-2" style="max-width: 45%;">
+  <a href="/core/docs/0.1.0/extensions/official-registry.htm" class="text-decoration-none d-inline-flex flex-row gap-2" style="max-width: 45%;">
     ← <span class="text-truncate overflow-hidden d-inline-block align-middle flex-fill"
       style="max-width:200px">Official Registry</span>
   </a>
-  
-    <a href="/core/docs/0.1.0/extensions/lazy-loading.htm" class="text-decoration-none d-inline-flex flex-row justify-content-end gap-2"
+
+  <a href="/core/docs/0.1.0/extensions/lazy-loading.htm" class="text-decoration-none d-inline-flex flex-row justify-content-end gap-2"
     style="width: 40%;">
     <span class="text-truncate overflow-hidden d-inline-block align-middle flex-fill text-end"
       style="max-width:200px">Lazy Loading</span> →
   </a>
-  </div>
+</div>
         </div>
 
         <div class="section bg-transparent" style="margin: 50vh 0;">

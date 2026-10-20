@@ -34,6 +34,11 @@
       "artifacts": 2
     },
     {
+      "name": "ajax-href",
+      "status": "valid",
+      "artifacts": 2
+    },
+    {
       "name": "scrollbox",
       "status": "valid",
       "artifacts": 2

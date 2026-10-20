@@ -22,7 +22,7 @@ aellux.js does not require or bundle Bootstrap. Its `data-ae-*` and `ae--*` name
 </script>
 ```
 
-Use `full` to make Adaptive, Anchor, Feedback, Focus, Point, Preference, Present, Scrollbox, Scrollbox Snap, and State Navigation available without separate registration. Full does not mean one physical file: Scrollbox and Scrollbox Snap are requested as separate Extension scripts when matching elements are mounted. See [Getting Started](docs-source/0.1.0/getting-started.md) for the loading details. Use `basic` to register only what the page needs:
+Use `full` to make Adaptive, Ajax Href, Anchor, Feedback, Focus, Point, Preference, Present, Scrollbox, Scrollbox Snap, and State Navigation available without separate registration. Full does not mean one physical file: Scrollbox and Scrollbox Snap are requested as separate Extension scripts when matching elements are mounted. See [Getting Started](docs-source/0.1.0/getting-started.md) for the loading details. Use `basic` to register only what the page needs:
 
 ```html
 <script src="./dist/aellux.js"></script>

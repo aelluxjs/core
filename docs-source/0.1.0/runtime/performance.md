@@ -13,7 +13,7 @@ The CI workflow runs the same command after `npm run build`. A pull request fail
 
 ## Limits
 
-[`scripts/bundle-budget.config.mjs`](https://github.com/aelluxjs/core/blob/main/scripts/bundle-budget.config.mjs) is the source of truth for every raw and gzip limit. It covers the minified boot, ESM entry, Modern and Legacy orchestrators, Full runtimes, Core Extensions (including separate Scrollbox Snap files), and generated Extension stylesheets. The `test:budget` command prints each artifact's measured size beside its current limit and fails if a new minified JavaScript or CSS file has no budget. Full incorporates eight Core Extensions and makes Scrollbox and Scrollbox Snap available through separate on-demand files.
+[`scripts/bundle-budget.config.mjs`](https://github.com/aelluxjs/core/blob/main/scripts/bundle-budget.config.mjs) is the source of truth for every raw and gzip limit. It covers the minified boot, ESM entry, Modern and Legacy orchestrators, Full runtimes, Core Extensions (including separate Scrollbox Snap files), and generated Extension stylesheets. The `test:budget` command prints each artifact's measured size beside its current limit and fails if a new minified JavaScript or CSS file has no budget. Full incorporates nine Core Extensions and makes Scrollbox and Scrollbox Snap available through separate on-demand files.
 
 ## Scope and Limitations
 

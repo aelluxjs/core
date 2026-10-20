@@ -38,7 +38,7 @@ for (const { boot, forceLegacy } of [
     expect(state).toEqual({
       bundled: coreExtensions.filter(name => name !== "scrollbox" && name !== "scrollboxSnap"),
       registered: coreExtensions,
-      lazy: ["adaptive", "anchor", "feedback", "focus", "point", "present", "scrollbox", "scrollboxSnap"],
+      lazy: ["adaptive", "ajaxHref", "anchor", "feedback", "focus", "point", "present", "scrollbox", "scrollboxSnap"],
       externalScripts: [],
       legacy: forceLegacy
     });

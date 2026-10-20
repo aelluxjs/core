@@ -11,6 +11,7 @@ root.AelluxJs.bundledExtensions = Object.freeze({
   "focus": () => import("./aellux.ext.focus.js"),
   "point": () => import("./aellux.ext.point.js"),
   "anchor": () => import("./aellux.ext.anchor.js"),
+  "ajaxHref": () => import("./aellux.ext.ajax-href.js"),
   "adaptive": () => import("./aellux.ext.adaptive.js"),
   "present": () => import("./aellux.ext.present.js")
 });
@@ -23,6 +24,7 @@ root.AelluxJs.extIndex.official = typeof __AELLUX_OFFICIAL_EXTENSION_MANIFEST__ 
 // when their selectors match, keeping their code out of the Full runtime.
 root.AelluxJs.ext("adaptive", { loadWhen: "[data-ae-adaptive]", loadStyle: true });
 root.AelluxJs.ext("anchor", { loadWhen: "[data-ae-anchor]" });
+root.AelluxJs.ext("ajax-href", { loadWhen: "a[data-ae-ajax-href]" });
 root.AelluxJs.ext("feedback", { loadWhen: "[data-ae-feedback]", loadStyle: true });
 root.AelluxJs.ext("focus", { loadWhen: "[data-ae-focus]" });
 root.AelluxJs.ext("point", { loadWhen: "[data-ae-point]" });
