@@ -254,6 +254,8 @@ test("layout event on the shared positioning parent replaces position polling", 
   await page.goto("/tests/index.htm");
   await page.addScriptTag({ url: "/dist/aellux.js" });
   await page.evaluate(() => {
+    // Exercise Layout independently of automatic DOM/size observation.
+    window.MutationObserver = undefined;
     window.ResizeObserver = class {
       observe() {}
       disconnect() {}
@@ -562,7 +564,8 @@ test("unmount restores owned inline values and priorities", async ({ page }) => 
           --anchor-opacity: .8"></div>
     </div>`);
   await expect(page.locator("#anchor")).toHaveClass(/ae--anchored/);
-  await expect(page.locator("#anchor")).toHaveCSS("position", "absolute");
+  // Application positioning overrides the weak defaults while mounted too.
+  await expect(page.locator("#anchor")).toHaveCSS("position", "relative");
   await page.evaluate(() => AelluxJs.unmount(document.getElementById("anchor"), "anchor"));
   await expect(page.locator("#anchor")).not.toHaveClass(/ae--anchored/);
   const restored = await page.locator("#anchor").evaluate((element, names) =>

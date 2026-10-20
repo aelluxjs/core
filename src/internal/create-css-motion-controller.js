@@ -142,6 +142,8 @@ export function createCssMotionController(root, getAelluxJs) {
       return;
     }
     let endTime = 0;
+    // Retain ownership before pausing: a later effect can reject control.
+    operation.animations = animations;
     for (const animation of animations) {
       animation.pause();
       animation.currentTime = 0;
@@ -151,7 +153,6 @@ export function createCssMotionController(root, getAelluxJs) {
       applyAelluxEasing(operation, animation);
       if (!onlyTransformAndOpacity(animation)) operation.conservative = true;
     }
-    operation.animations = animations;
     operation.endTime = endTime;
     operation.start = now();
     operation.controlled = true;
@@ -247,16 +248,6 @@ export function createCssMotionController(root, getAelluxJs) {
   function nativeWait(operation) {
     const animations = typeof operation.element.getAnimations === "function"
       ? operation.element.getAnimations().filter(animation => !operation.before.has(animation)) : [];
-    if (animations.length && animations.every(animation => animation.finished &&
-      typeof animation.finished.then === "function")) {
-      return Promise.all(animations.map(animation => animation.finished.catch(() => undefined)))
-        .then(() => {
-          if (operations.get(operation.id) === operation) operations.delete(operation.id);
-          return { id: operation.id, status: operation.cancelled ? "aborted" : "completed", mode: "native" };
-        });
-    }
-    const explicit = Number(operation.options.nativeDuration);
-    const duration = Number.isFinite(explicit) ? explicit : cssMotionTime(operation.element);
     return new Promise(resolve => {
       operation.nativeResolve = resolve;
       const complete = () => {
@@ -265,6 +256,13 @@ export function createCssMotionController(root, getAelluxJs) {
         operation.nativeResolve = null;
         resolve({ id: operation.id, status: "completed", mode: "native" });
       };
+      if (animations.length && animations.every(animation => animation.finished &&
+        typeof animation.finished.then === "function")) {
+        Promise.all(animations.map(animation => animation.finished.catch(() => undefined))).then(complete);
+        return;
+      }
+      const explicit = Number(operation.options.nativeDuration);
+      const duration = Number.isFinite(explicit) ? explicit : cssMotionTime(operation.element);
       if (Number.isFinite(duration) && duration > 0) {
         operation.nativeTimer = root.setTimeout(complete, duration);
       } else {

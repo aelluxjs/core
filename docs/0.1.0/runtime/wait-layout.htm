@@ -777,6 +777,7 @@ await $ae.waitLayout.update(() =&gt; panel.style.setProperty(
 ));
 </code></pre>
 <p>Use this extra frame only when the second measurement depends on the first write. Reads required to decide an immediate pointer or wheel response can stay synchronous; batch the resulting visual publication when possible. See <a href="../extensions/authoring.htm#layout-work-in-core-extensions">Extension Authoring</a> for the Core Extension rule.</p>
+<p>Present Group notifications describe accepted logical state before visual completion. Anchor schedules its measurement through WaitLayout and tracks a Present <code>Layout</code> event only for its announced duration, including an eligible final placement. A hidden or unavailable target leaves the Anchor inactive until a relevant mutation, layout or observer notification makes it measurable. This does not add permanent retry polling. Unmount cancels the feature&#39;s layout IDs; global destruction also clears the scheduler.</p>
         </div>
 
         <div id="doc-navlinks2" ajax-load="doc-navlinks2">

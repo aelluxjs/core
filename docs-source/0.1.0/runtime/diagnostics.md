@@ -103,6 +103,8 @@ Waiting for an unregistered Extension records `ERROR_EXTENSION_NOT_REGISTERED` (
 
 Present records `INFO_PRESENT_MEASURED_LAYOUT` (`3001`) when a `height` or `width` transition has no direct `data-ae-present-motion` child. The container remains unchanged structurally; size transitions use measured pixel maximums instead of the grid strategy.
 
+Present's expected replacement, restart and unmount cancellations do not record interruption warnings. An unexpected interruption diagnostic still records `WARN_INTERRUPTION` (`2002`); transition failures retain `ERROR_EXTENSION_TRANSITION` (`1109`). This distinction does not change centralized diagnostic deduplication.
+
 `mountManager.add()` records `ERROR_MOUNT_REGISTRATION` (`1113`) when a registration argument or CSS selector is invalid, or when the same Extension and selector are already registered. Its context identifies the rejected argument; no mount registration is added or replaced. `mountManager.remove()` records `ERROR_MOUNT_MAP_IN_USE` (`1115`) and leaves the map registered when a matching element is still mounted or mounting.
 
 State navigation records `WARN_NAVIGATION_EVENT_INVALID` (`2009`) when `PushAjaxReplace` or `UpdateBaseTitle` receives malformed event details. Exceptions while handling those events record `ERROR_CALLBACK` (`1108`). Feedback subscriber exceptions and rejected promises also record `ERROR_CALLBACK`; other subscribers continue to receive the feedback.

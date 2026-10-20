@@ -1570,6 +1570,7 @@
         return;
       }
       let endTime = 0;
+      operation.animations = animations;
       for (const animation of animations) {
         animation.pause();
         animation.currentTime = 0;
@@ -1579,7 +1580,6 @@
         applyAelluxEasing(operation, animation);
         if (!onlyTransformAndOpacity(animation)) operation.conservative = true;
       }
-      operation.animations = animations;
       operation.endTime = endTime;
       operation.start = now();
       operation.controlled = true;
@@ -1661,14 +1661,6 @@
     }
     function nativeWait(operation) {
       const animations = typeof operation.element.getAnimations === "function" ? operation.element.getAnimations().filter((animation) => !operation.before.has(animation)) : [];
-      if (animations.length && animations.every((animation) => animation.finished && typeof animation.finished.then === "function")) {
-        return Promise.all(animations.map((animation) => animation.finished.catch(() => void 0))).then(() => {
-          if (operations.get(operation.id) === operation) operations.delete(operation.id);
-          return { id: operation.id, status: operation.cancelled ? "aborted" : "completed", mode: "native" };
-        });
-      }
-      const explicit = Number(operation.options.nativeDuration);
-      const duration = Number.isFinite(explicit) ? explicit : cssMotionTime(operation.element);
       return new Promise((resolve) => {
         operation.nativeResolve = resolve;
         const complete = () => {
@@ -1677,6 +1669,12 @@
           operation.nativeResolve = null;
           resolve({ id: operation.id, status: "completed", mode: "native" });
         };
+        if (animations.length && animations.every((animation) => animation.finished && typeof animation.finished.then === "function")) {
+          Promise.all(animations.map((animation) => animation.finished.catch(() => void 0))).then(complete);
+          return;
+        }
+        const explicit = Number(operation.options.nativeDuration);
+        const duration = Number.isFinite(explicit) ? explicit : cssMotionTime(operation.element);
         if (Number.isFinite(duration) && duration > 0) {
           operation.nativeTimer = root.setTimeout(complete, duration);
         } else {

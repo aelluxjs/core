@@ -126,7 +126,7 @@
     elementMemories.set(element, AelluxJs.persist.element.save(element, [], ownedProperties));
     const state = {
       invalidContext: false, active: false, revision: 0,
-      target: null, reference: null,
+      target: null, resolvedTarget: null, reference: null,
       group: null, conflict: false, lastPlacement: null, switchTimer: null,
       interruptSwitch: false,
       layoutId: nextLayoutId++, styleLayoutId: nextLayoutId++,
@@ -148,13 +148,10 @@
       AelluxJs.onEvent(root, "$resize", scheduleUpdate);
       AelluxJs.on("PresentGroupChange", onGroupChange);
       if (typeof root.MutationObserver === "function") {
-        mutations = new root.MutationObserver(() => {
-          refreshAssociations();
-          for (const anchor of anchors.keys()) scheduleAnchor(anchor);
-        });
+        mutations = new root.MutationObserver(onMutations);
         mutations.observe(document, { subtree: true, childList: true, attributes: true,
           attributeFilter: [attribute, targetAttribute, matchAttribute, groupAttribute,
-            groupAnchorAttribute, AelluxJs.attr("reduced-motion"), "id", "hidden"] });
+            groupAnchorAttribute, AelluxJs.attr("reduced-motion"), "id", "hidden", "class", "style"] });
       }
     }
     if (typeof root.ResizeObserver === "function") {
@@ -205,6 +202,41 @@
   function onGroupChange(event) {
     for (const [element, state] of anchors)
       if (state.group === event.detail?.group) scheduleAnchor(element);
+  }
+
+  function onMutations(records) {
+    const affected = new Set();
+    const associationSelector = `[${groupAnchorAttribute}],[${attribute}]`;
+    const containsAssociation = node => node.nodeType === 1 &&
+      (node.matches(associationSelector) || node.querySelector(associationSelector));
+    let associationsChanged = false;
+    for (const record of records) {
+      const node = record.target;
+      const structural = record.type === "childList";
+      const visual = record.attributeName === "class" || record.attributeName === "style";
+      if (structural ? [...record.addedNodes, ...record.removedNodes].some(containsAssociation) :
+        record.attributeName === groupAnchorAttribute || record.attributeName === groupAttribute ||
+        (record.attributeName === "id" || record.attributeName === attribute) &&
+          (anchors.has(node) || node.hasAttribute(attribute))) associationsChanged = true;
+      for (const [element, state] of anchors) {
+        // Present can mount after Anchor's first read, revealing a target by
+        // class alone. Ignore our own visual writes to avoid observer loops.
+        if (visual) {
+          if (node !== element && state.resolvedTarget && node.contains(state.resolvedTarget)) affected.add(element);
+          continue;
+        }
+        if (node === element || node === document.documentElement ||
+          node.contains(element) || state.resolvedTarget && node.contains(state.resolvedTarget) ||
+          structural && state.reference?.contains(node) ||
+          !state.group && element.hasAttribute(targetAttribute) &&
+            resolveElement(element.getAttribute(targetAttribute)) !== state.resolvedTarget) affected.add(element);
+      }
+    }
+    if (associationsChanged) {
+      refreshAssociations();
+      for (const element of anchors.keys()) affected.add(element);
+    }
+    for (const element of affected) scheduleAnchor(element);
   }
 
   function associationDiagnostic(group, reason) {
@@ -368,6 +400,7 @@
     const retry = () => ensureLatest && anchors.get(element) === state ?
       updateAnchor(element, true) : undefined;
     const target = effectiveTarget(element, state);
+    state.resolvedTarget = target;
     const candidates = parseCandidates(element.getAttribute(attribute));
     if (!target || !target.isConnected || !candidates.length || circularTarget(element, target)) {
       if (target && circularTarget(element, target))
@@ -401,7 +434,6 @@
     if (!state.active) {
       await AelluxJs.waitLayout.update(state.styleLayoutId, () => {
         if (!current()) return;
-        applyBaseStyles(element);
         state.active = true;
       });
       if (!current()) return retry();
@@ -448,7 +480,6 @@
       setValue(style, "--ae-anchor-target-height", `${placement.height}px`);
       setValue(style, "--ae-anchor-pivot-x", `${selected.pivotX}px`);
       setValue(style, "--ae-anchor-pivot-y", `${selected.pivotY}px`);
-      for (const name of baseProperties) element.style.removeProperty(name);
       element.classList.add(anchoredClass);
       state.lastUpdateAt = now();
       state.lastPlacement = placement;
@@ -582,16 +613,6 @@
     if (reference) AelluxJs.onEvent(reference, layoutEvent, state.layoutListener);
   }
 
-  function applyBaseStyles(element) {
-    element.style.setProperty("position", "absolute");
-    element.style.setProperty("left", "0px");
-    element.style.setProperty("top", "0px");
-    element.style.setProperty("transform",
-      "translate3d(var(--ae-anchor-x, 0px), var(--ae-anchor-y, 0px), 0)");
-    element.style.setProperty("transform-origin",
-      "var(--ae-anchor-origin-x, 50%) var(--ae-anchor-origin-y, 0%)");
-  }
-
   function deactivate(element, state, memory = elementMemories.get(element)) {
     stopSwitch(element, state);
     if (state.reference) AelluxJs.offEvent(state.reference, layoutEvent, state.layoutListener);
@@ -611,6 +632,7 @@
   }
 
   function setValue(style, name, value) {
+    if (style.getPropertyValue(name) === value && !style.getPropertyPriority(name)) return;
     // WebKit may retain an important registered value when its priority is
     // replaced in one call. Memory retains the original value and priority.
     if (style.getPropertyPriority(name)) style.removeProperty(name);

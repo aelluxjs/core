@@ -25,9 +25,10 @@ export const bundleBudget = Object.freeze([
   { file: "aellux.ext.preference.legacy.min.js", maxRawBytes: 7 * 1024, maxGzipBytes: 3 * 1024 },
   { file: "aellux.ext.present.min.css", maxRawBytes: 4 * 1024, maxGzipBytes: 2 * 1024 },
   // Present adds group reconciliation, delegated hover and bounded CSS progress.
-  // Delivery A measurements and the previous limits are documented in present.md.
-  { file: "aellux.ext.present.min.js", maxRawBytes: 17 * 1024, maxGzipBytes: 6 * 1024 },
-  { file: "aellux.ext.present.legacy.min.js", maxRawBytes: 24 * 1024, maxGzipBytes: 9 * 1024 },
+  // Delivery C's preflight validation and safe registration fallback measure
+  // 17,717/6,262 bytes Modern and 25,112/8,822 Legacy (raw/gzip level 9).
+  { file: "aellux.ext.present.min.js", maxRawBytes: 18 * 1024, maxGzipBytes: 6.25 * 1024 },
+  { file: "aellux.ext.present.legacy.min.js", maxRawBytes: 25 * 1024, maxGzipBytes: 9 * 1024 },
   { file: "aellux.ext.scrollbox.min.js", maxRawBytes: 46 * 1024, maxGzipBytes: 14 * 1024 },
   { file: "aellux.ext.scrollbox.legacy.min.js", maxRawBytes: 44 * 1024, maxGzipBytes: 14 * 1024 },
   { file: "aellux.ext.scrollbox-snap.min.js", maxRawBytes: 10 * 1024, maxGzipBytes: 4 * 1024 },

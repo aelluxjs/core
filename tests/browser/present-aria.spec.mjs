@@ -1073,7 +1073,7 @@ test("present restores a trigger without targets and can mount it again", async 
   expect(state.afterRemount).toEqual({ expanded: "false", controls: "later" });
 });
 
-test("present records interrupted transitions as warnings and failures as errors", async ({ page }) => {
+test("present ignores expected cancellation, reports unexpected interruptions and preserves real errors", async ({ page }) => {
   await page.goto("/tests/index.htm");
   await page.evaluate(async () => {
     const [{ buildDiagnostics }, { createAelluxConstants }] = await Promise.all([
@@ -1096,6 +1096,8 @@ test("present records interrupted transitions as warnings and failures as errors
       },
       extAttach: (_name, extension) => { window.presentExtension = extension; },
       dispatchFrom: (_element, event) => {
+        if (window.failPopping === "interruption" && event === "Popping")
+          throw AelluxJs.diagnostics.create(AelluxJs.diagnostics.WARN_INTERRUPTION);
         if (window.failPopping && event === "Popping") throw new Error("transition probe");
         return true;
       }
@@ -1112,11 +1114,15 @@ test("present records interrupted transitions as warnings and failures as errors
     extension.pop(panel);
     extension.unpop(panel);
     await new Promise(resolve => setTimeout(resolve, 130));
+    window.expectedCancellationHistory = AelluxJs.diagnostics.showHistory().length;
+    window.failPopping = "interruption";
+    await extension.pop(panel);
     window.failPopping = true;
-    extension.pop(panel);
+    await extension.pop(panel);
     await new Promise(resolve => setTimeout(resolve, 130));
     return AelluxJs.diagnostics.showHistory().map(entry => ({ code: entry.code, level: entry.level }));
   });
+  expect(await page.evaluate(() => window.expectedCancellationHistory)).toBe(0);
   expect(entries).toEqual([
     { code: 2002, level: 1 },
     { code: 1109, level: 0 }

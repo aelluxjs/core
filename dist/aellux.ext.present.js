@@ -89,10 +89,10 @@
       ["unpop-low-steps", "<integer>", "4"]
     ];
     function init(options) {
-      interpolatedProgress = !!(root.CSS && typeof root.CSS.registerProperty === "function" && root.CSS.supports && root.CSS.supports("opacity", "clamp(0, 0.5, 1)"));
-      AelluxJs.registerCssProperty(
-        ...cssProperties.map(([name, syntax, initialValue]) => ({ name: `--ae-${name}`, syntax, initialValue }))
-      );
+      const descriptors = cssProperties.map(([name, syntax, initialValue]) => ({ name: `--ae-${name}`, syntax, initialValue }));
+      const progressRegistered = AelluxJs.registerCssProperty(...descriptors.slice(0, 4));
+      interpolatedProgress = !!(progressRegistered && root.CSS.supports && root.CSS.supports("opacity", "clamp(0, 0.5, 1)"));
+      AelluxJs.registerCssProperty(...descriptors.slice(4));
       AelluxJs.mountManager.add({
         extensionName,
         selector: presentSelector,
@@ -193,6 +193,7 @@
           const transitionStart = options.transitionStart === true;
           const transition = this.transition;
           if (transition) {
+            transition.cancelled = true;
             transition.replacement = replacement;
             if (AelluxJs.motion) AelluxJs.motion.cancel(this.motionId);
             if (transition.timeout !== null) {
@@ -586,6 +587,7 @@
         if (ownsTransition) restoreMeasuredStyles(element, controller);
         switch (error && error.code) {
           case AelluxJs.diagnostics.WARN_INTERRUPTION.code:
+            if (transition && transition.cancelled) break;
             AelluxJs.diagnostics.warn(
               AelluxJs.diagnostics.WARN_INTERRUPTION,
               {
@@ -754,6 +756,7 @@
       if (!state) return;
       state.revision++;
       groups.delete(group);
+      state.jobs.clear();
       publishGroup(group, state, null);
       for (const member of groupMembers(group)) {
         const controller = presentElements.get(member);
@@ -856,19 +859,28 @@
       });
       if (state.selected === selected2 && !changes.length) return state.pending;
       const revision = ++state.revision;
+      const active = group.getAttribute(attr.active);
+      const classes = group.getAttribute("class");
+      const keys = members.map((member) => member.getAttribute(attr.key));
+      const conditions = members.map((member) => member.getAttribute(attr.when));
+      const valid = () => groups.get(group) === state && state.revision === revision && group.isConnected && group.hasAttribute(attr.group) && group.getAttribute(attr.active) === active && group.getAttribute("class") === classes && groupMembers(group).length === members.length && members.every((member, index) => presentElements.has(member) && member.isConnected && member.closest(groupSelector) === group && member.getAttribute(attr.key) === keys[index] && member.getAttribute(attr.when) === conditions[index]);
       for (const member of changes) {
-        if (!AelluxJs.dispatchFrom(
+        const allowed = AelluxJs.dispatchFrom(
           member,
           member === selected2 ? "BeforePop" : "BeforeUnpop",
           { bubbles: true, cancelable: true }
-        )) {
+        );
+        if (!valid()) {
+          queueGroups();
+          return false;
+        }
+        if (!allowed) {
           if (state.revision === revision) {
             const key = ((_a = state.selected) == null ? void 0 : _a.getAttribute(attr.key)) || "";
             if (group.getAttribute(attr.active) !== key) group.setAttribute(attr.active, key);
           }
           return false;
         }
-        if (groups.get(group) !== state || state.revision !== revision) return false;
       }
       state.selected = selected2;
       let complete;

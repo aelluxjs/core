@@ -74,6 +74,10 @@ ResizeObserver and existing Layout events keep intermediate target dimensions up
 
 Anchor installs one owned, zero-specificity stylesheet when the Extension initializes. Independent loading still needs only `$ae.ext("anchor")`; no additional stylesheet request is required. Unmount restores previous inline geometry values and priorities. Destruction removes the Extension's additional stylesheet. The boot's original Anchor visibility and positioning rules remain available independently.
 
+Application inline `position`, `left`, `top`, `transform` and `transform-origin` declarations remain intact while mounted. They override the weak positioning rules; overriding transform or offsets makes the application responsible for the resulting placement. Matching still publishes the target's dimensions without writing application width or height. The shared DOM observer filters unrelated mutations before scheduling geometry work; association scans run only when group/Anchor declarations or their DOM membership can change. Stable interfaces have no permanent geometry polling.
+
+Both owned style blocks require permission under the application's CSP. Blocking Anchor's generated stylesheet disables its built-in matching and switching rules; initialization alone does not prove those rules were applied. No nonce or restrictive CSP support is promised. See [CSP and trust](../extensions/csp-and-trust.md).
+
 ## Target Switching Motion
 
 Configure deliberate changes of the effective target separately from normal tracking:

@@ -23661,6 +23661,7 @@
         return;
       }
       var endTime = 0;
+      operation.animations = animations;
       var _iterator2 = _createForOfIteratorHelper5(animations), _step2;
       try {
         for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
@@ -23678,7 +23679,6 @@
       } finally {
         _iterator2.f();
       }
-      operation.animations = animations;
       operation.endTime = endTime;
       operation.start = now();
       operation.controlled = true;
@@ -23786,24 +23786,6 @@
       var animations = typeof operation.element.getAnimations === "function" ? operation.element.getAnimations().filter(function(animation) {
         return !operation.before.has(animation);
       }) : [];
-      if (animations.length && animations.every(function(animation) {
-        return animation.finished && typeof animation.finished.then === "function";
-      })) {
-        return Promise.all(animations.map(function(animation) {
-          return animation.finished.catch(function() {
-            return void 0;
-          });
-        })).then(function() {
-          if (operations.get(operation.id) === operation) operations.delete(operation.id);
-          return {
-            id: operation.id,
-            status: operation.cancelled ? "aborted" : "completed",
-            mode: "native"
-          };
-        });
-      }
-      var explicit = Number(operation.options.nativeDuration);
-      var duration = Number.isFinite(explicit) ? explicit : cssMotionTime(operation.element);
       return new Promise(function(resolve) {
         operation.nativeResolve = resolve;
         var complete = function complete2() {
@@ -23816,6 +23798,18 @@
             mode: "native"
           });
         };
+        if (animations.length && animations.every(function(animation) {
+          return animation.finished && typeof animation.finished.then === "function";
+        })) {
+          Promise.all(animations.map(function(animation) {
+            return animation.finished.catch(function() {
+              return void 0;
+            });
+          })).then(complete);
+          return;
+        }
+        var explicit = Number(operation.options.nativeDuration);
+        var duration = Number.isFinite(explicit) ? explicit : cssMotionTime(operation.element);
         if (Number.isFinite(duration) && duration > 0) {
           operation.nativeTimer = root.setTimeout(complete, duration);
         } else {

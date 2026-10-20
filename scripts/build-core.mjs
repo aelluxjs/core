@@ -14,6 +14,7 @@ import { generatePresentCSS } from "../src/aellux.ext.present.css.js";
 import { generateFeedbackCSS } from "../src/aellux.ext.feedback.css.js";
 import { officialExtensionDefinitions } from "../src/official-extension-definitions.js";
 import { createOfficialExtensionManifest } from "./extension-manifest.mjs";
+import { normalizeSourceMapText } from "./normalize-source-map.mjs";
 
 const projectRoot = fileURLToPath(new URL("../", import.meta.url));
 const sourceDirectory = join(projectRoot, "src");
@@ -342,15 +343,7 @@ for (const filename of generatedFiles) {
   if (!filename.endsWith(".map")) continue;
   const mapPath = join(outputDirectory, filename);
   const mapText = await readFile(mapPath, "utf8");
-  const map = JSON.parse(mapText);
-  if (!Array.isArray(map.sourcesContent)) {
-    throw new Error(`Unexpected source map format: ${filename}`);
-  }
-  const sourcesContent = map.sourcesContent.map(source => source.replace(/\r\n?/g, "\n"));
-  const normalizedText = /^  "sourcesContent": .*,$/m.test(mapText)
-    ? mapText.replace(/^  "sourcesContent": .*,$/m,
-      `  "sourcesContent": ${JSON.stringify(sourcesContent)},`)
-    : JSON.stringify({ ...map, sourcesContent });
+  const normalizedText = normalizeSourceMapText(mapText, filename);
   if (normalizedText !== mapText) await writeFile(mapPath, normalizedText, "utf8");
 }
 

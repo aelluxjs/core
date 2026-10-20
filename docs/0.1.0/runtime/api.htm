@@ -686,6 +686,7 @@ await $ae.mount(document.getElementById(&quot;panel&quot;));
 await $ae.waitLayout.update(() =&gt; panel.style.setProperty(&quot;--panel-width&quot;, `${width}px`));
 </code></pre>
 <p>Use numeric IDs to group and replace pending reads and updates, or <code>sequence(id, ...stages)</code> for ordered and repeated cycles with <code>maxFPS</code> and <code>abort</code> (a boolean callback, <code>AbortSignal</code>, or <code>AbortController</code>). <code>cancel(id)</code> stops one feature&#39;s work; <code>clear()</code> cancels all work during full runtime destruction. The scheduler adapts its task rate to sustained frame pressure. See <a href="wait-layout.htm">waitLayout</a> for frame order, lifecycle guards, and examples.</p>
+<p>Present&#39;s mounted group controller exposes <code>show(key): Promise&lt;boolean&gt;</code> and <code>selected(): Element | null</code>; the extension-level equivalents take the group element first. <code>show()</code> resolves <code>false</code> for refused, invalidated, superseded or unmounted selections. <code>selected()</code> reports accepted logical state without waiting for visual completion. See <a href="../core-extensions/present.htm#programmatic-selection-and-lifecycle">Present</a> for declarative precedence and event timing; <a href="../core-extensions/anchor.htm#present-group-anchor">Anchor</a> consumes that selection through the optional public interface.</p>
 <h2>Destruction</h2>
 <pre><code class="language-js">await $ae.destroyExtensions(&quot;preference&quot;);
 await $ae.destroy();

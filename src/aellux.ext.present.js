@@ -120,12 +120,12 @@
   ];
 
   function init(options) {
-    interpolatedProgress = !!(root.CSS && typeof root.CSS.registerProperty === "function" &&
-      root.CSS.supports && root.CSS.supports("opacity", "clamp(0, 0.5, 1)"));
-    AelluxJs.registerCssProperty(
-      ...cssProperties.map(([name, syntax, initialValue]) =>
-        ({ name: `--ae-${name}`, syntax, initialValue }))
-    );
+    const descriptors = cssProperties.map(([name, syntax, initialValue]) =>
+      ({ name: `--ae-${name}`, syntax, initialValue }));
+    const progressRegistered = AelluxJs.registerCssProperty(...descriptors.slice(0, 4));
+    interpolatedProgress = !!(progressRegistered && root.CSS.supports &&
+      root.CSS.supports("opacity", "clamp(0, 0.5, 1)"));
+    AelluxJs.registerCssProperty(...descriptors.slice(4));
     AelluxJs.mountManager.add({
       extensionName, selector: presentSelector,
       priority: 0,
@@ -218,6 +218,7 @@
         const transitionStart = options.transitionStart === true;
         const transition = this.transition;
         if (transition) {
+          transition.cancelled = true;
           transition.replacement = replacement;
           if (AelluxJs.motion) AelluxJs.motion.cancel(this.motionId);
           if (transition.timeout !== null) {
@@ -632,6 +633,9 @@
       if (ownsTransition) restoreMeasuredStyles(element, controller);
       switch (error && error.code) {
         case AelluxJs.diagnostics.WARN_INTERRUPTION.code:
+          // Replacement and teardown are expected lifecycle operations.
+          // Unexpected interruption diagnostics still reach the reporter.
+          if (transition && transition.cancelled) break;
           AelluxJs.diagnostics.warn(
             AelluxJs.diagnostics.WARN_INTERRUPTION,
             {
@@ -815,6 +819,7 @@
     if (!state) return;
     state.revision++;
     groups.delete(group);
+    state.jobs.clear();
     publishGroup(group, state, null);
     for (const member of groupMembers(group)) {
       const controller = presentElements.get(member);
@@ -922,9 +927,23 @@
     });
     if (state.selected === selected && !changes.length) return state.pending;
     const revision = ++state.revision;
+    // Before listeners can mutate declarative inputs without calling show().
+    // Validate the whole preflight before changing any member's visual state.
+    const active = group.getAttribute(attr.active);
+    const classes = group.getAttribute("class");
+    const keys = members.map(member => member.getAttribute(attr.key));
+    const conditions = members.map(member => member.getAttribute(attr.when));
+    const valid = () => groups.get(group) === state && state.revision === revision &&
+      group.isConnected && group.hasAttribute(attr.group) &&
+      group.getAttribute(attr.active) === active && group.getAttribute("class") === classes &&
+      groupMembers(group).length === members.length && members.every((member, index) =>
+        presentElements.has(member) && member.isConnected && member.closest(groupSelector) === group &&
+        member.getAttribute(attr.key) === keys[index] && member.getAttribute(attr.when) === conditions[index]);
     for (const member of changes) {
-      if (!AelluxJs.dispatchFrom(member, member === selected ? "BeforePop" : "BeforeUnpop",
-        { bubbles: true, cancelable: true })) {
+      const allowed = AelluxJs.dispatchFrom(member, member === selected ? "BeforePop" : "BeforeUnpop",
+        { bubbles: true, cancelable: true });
+      if (!valid()) { queueGroups(); return false; }
+      if (!allowed) {
         // A veto keeps the accepted selection, including the declarative source.
         if (state.revision === revision) {
           const key = state.selected?.getAttribute(attr.key) || "";
@@ -932,8 +951,6 @@
         }
         return false;
       }
-      // Before events can synchronously change the selection or unmount.
-      if (groups.get(group) !== state || state.revision !== revision) return false;
     }
     state.selected = selected;
     let complete;

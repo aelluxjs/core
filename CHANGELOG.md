@@ -83,6 +83,10 @@ All notable changes to aellux.js will be documented in this file.
 
 ### Fixed
 
+- Present Group validates synchronous Before-event declaration and membership changes before applying a swap; progress falls back safely when CSS property registration fails, and expected replacement/unmount cancellations no longer emit interruption warnings.
+- Anchor preserves application inline positioning, filters unrelated DOM mutations, and recovers targets revealed by class or style without permanent polling.
+- CSS Motion cancellation settles native waits even when `Animation.finished` stays pending, and partial capture failures resume effects already paused.
+- Legacy source-map normalization preserves literal replacement tokens in embedded source text instead of corrupting JSON.
 - Desktop pointer Scrollboxes now cancel `mousedown` only during an active drag and stop drag tracking on double and subsequent clicks so native selection works.
 - Scrollbox pointer mode no longer starts a drag when a second or later click is held and moved outside the box.
 - Elastic Scrollbox now keeps trailing scroll extent stable when content overflows the wrapper's own box, so bottom and right pressure remains visible.

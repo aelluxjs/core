@@ -140,6 +140,8 @@ await $ae.waitLayout.update(() => panel.style.setProperty("--panel-width", `${wi
 
 Use numeric IDs to group and replace pending reads and updates, or `sequence(id, ...stages)` for ordered and repeated cycles with `maxFPS` and `abort` (a boolean callback, `AbortSignal`, or `AbortController`). `cancel(id)` stops one feature's work; `clear()` cancels all work during full runtime destruction. The scheduler adapts its task rate to sustained frame pressure. See [waitLayout](wait-layout.md) for frame order, lifecycle guards, and examples.
 
+Present's mounted group controller exposes `show(key): Promise<boolean>` and `selected(): Element | null`; the extension-level equivalents take the group element first. `show()` resolves `false` for refused, invalidated, superseded or unmounted selections. `selected()` reports accepted logical state without waiting for visual completion. See [Present](../core-extensions/present.md#programmatic-selection-and-lifecycle) for declarative precedence and event timing; [Anchor](../core-extensions/anchor.md#present-group-anchor) consumes that selection through the optional public interface.
+
 ## Destruction
 
 ```js

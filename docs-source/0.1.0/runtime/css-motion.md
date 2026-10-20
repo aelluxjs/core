@@ -29,6 +29,8 @@ await $ae.motion.run(panel, {
 
 `run()` returns `{ id, status, mode }`. `mode` is `"controlled"`, `"native"`, or `"reduced"`. A new operation with the same ID replaces the previous operation. `$ae.motion.cancel(id)` cancels owned scheduler work and releases captured animations.
 
+Cancellation also settles a native operation as `status: "aborted"`, even if an underlying `Animation.finished` Promise never settles. A failure partway through capturing multiple effects releases every effect already paused, resuming native playback before reporting the error. Completion or cancellation clears the operation's visual FPS ceiling. Native fallback leaves CSS playback under browser control; canceling the waiting operation does not claim ownership of unrelated native animations.
+
 ## Native fallback and disabling control
 
 Set the global initialization option `cssMotionController` to `false` to disable temporal control completely:

@@ -307,6 +307,7 @@
         active: false,
         revision: 0,
         target: null,
+        resolvedTarget: null,
         reference: null,
         group: null,
         conflict: false,
@@ -341,25 +342,12 @@
         AelluxJs.onEvent(root, "$resize", scheduleUpdate);
         AelluxJs.on("PresentGroupChange", onGroupChange);
         if (typeof root.MutationObserver === "function") {
-          mutations = new root.MutationObserver(function() {
-            refreshAssociations();
-            var _iterator = _createForOfIteratorHelper(anchors.keys()), _step;
-            try {
-              for (_iterator.s(); !(_step = _iterator.n()).done; ) {
-                var anchor = _step.value;
-                scheduleAnchor(anchor);
-              }
-            } catch (err) {
-              _iterator.e(err);
-            } finally {
-              _iterator.f();
-            }
-          });
+          mutations = new root.MutationObserver(onMutations);
           mutations.observe(document, {
             subtree: true,
             childList: true,
             attributes: true,
-            attributeFilter: [attribute, targetAttribute, matchAttribute, groupAttribute, groupAnchorAttribute, AelluxJs.attr("reduced-motion"), "id", "hidden"]
+            attributeFilter: [attribute, targetAttribute, matchAttribute, groupAttribute, groupAnchorAttribute, AelluxJs.attr("reduced-motion"), "id", "hidden", "class", "style"]
           });
         }
       }
@@ -424,12 +412,26 @@
     }
     function scheduleUpdate() {
       if (!anchors.size) return;
+      var _iterator = _createForOfIteratorHelper(anchors), _step;
+      try {
+        for (_iterator.s(); !(_step = _iterator.n()).done; ) {
+          var _step$value = _slicedToArray(_step.value, 2), element = _step$value[0], state = _step$value[1];
+          state.interruptSwitch = true;
+          scheduleAnchor(element);
+        }
+      } catch (err) {
+        _iterator.e(err);
+      } finally {
+        _iterator.f();
+      }
+    }
+    function onGroupChange(event) {
       var _iterator2 = _createForOfIteratorHelper(anchors), _step2;
       try {
         for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
+          var _event$detail;
           var _step2$value = _slicedToArray(_step2.value, 2), element = _step2$value[0], state = _step2$value[1];
-          state.interruptSwitch = true;
-          scheduleAnchor(element);
+          if (state.group === ((_event$detail = event.detail) === null || _event$detail === void 0 ? void 0 : _event$detail.group)) scheduleAnchor(element);
         }
       } catch (err) {
         _iterator2.e(err);
@@ -437,18 +439,67 @@
         _iterator2.f();
       }
     }
-    function onGroupChange(event) {
-      var _iterator3 = _createForOfIteratorHelper(anchors), _step3;
+    function onMutations(records) {
+      var affected = /* @__PURE__ */ new Set();
+      var associationSelector = "[".concat(groupAnchorAttribute, "],[").concat(attribute, "]");
+      var containsAssociation = function containsAssociation2(node2) {
+        return node2.nodeType === 1 && (node2.matches(associationSelector) || node2.querySelector(associationSelector));
+      };
+      var associationsChanged = false;
+      var _iterator3 = _createForOfIteratorHelper(records), _step3;
       try {
         for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
-          var _event$detail;
-          var _step3$value = _slicedToArray(_step3.value, 2), element = _step3$value[0], state = _step3$value[1];
-          if (state.group === ((_event$detail = event.detail) === null || _event$detail === void 0 ? void 0 : _event$detail.group)) scheduleAnchor(element);
+          var record = _step3.value;
+          var node = record.target;
+          var structural = record.type === "childList";
+          var visual = record.attributeName === "class" || record.attributeName === "style";
+          if (structural ? [].concat(_toConsumableArray(record.addedNodes), _toConsumableArray(record.removedNodes)).some(containsAssociation) : record.attributeName === groupAnchorAttribute || record.attributeName === groupAttribute || (record.attributeName === "id" || record.attributeName === attribute) && (anchors.has(node) || node.hasAttribute(attribute))) associationsChanged = true;
+          var _iterator6 = _createForOfIteratorHelper(anchors), _step6;
+          try {
+            for (_iterator6.s(); !(_step6 = _iterator6.n()).done; ) {
+              var _state$reference;
+              var _step6$value = _slicedToArray(_step6.value, 2), _element = _step6$value[0], state = _step6$value[1];
+              if (visual) {
+                if (node !== _element && state.resolvedTarget && node.contains(state.resolvedTarget)) affected.add(_element);
+                continue;
+              }
+              if (node === _element || node === document.documentElement || node.contains(_element) || state.resolvedTarget && node.contains(state.resolvedTarget) || structural && (_state$reference = state.reference) !== null && _state$reference !== void 0 && _state$reference.contains(node) || !state.group && _element.hasAttribute(targetAttribute) && resolveElement(_element.getAttribute(targetAttribute)) !== state.resolvedTarget) affected.add(_element);
+            }
+          } catch (err) {
+            _iterator6.e(err);
+          } finally {
+            _iterator6.f();
+          }
         }
       } catch (err) {
         _iterator3.e(err);
       } finally {
         _iterator3.f();
+      }
+      if (associationsChanged) {
+        refreshAssociations();
+        var _iterator4 = _createForOfIteratorHelper(anchors.keys()), _step4;
+        try {
+          for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
+            var element = _step4.value;
+            affected.add(element);
+          }
+        } catch (err) {
+          _iterator4.e(err);
+        } finally {
+          _iterator4.f();
+        }
+      }
+      var _iterator5 = _createForOfIteratorHelper(affected), _step5;
+      try {
+        for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
+          var _element2 = _step5.value;
+          scheduleAnchor(_element2);
+        }
+      } catch (err) {
+        _iterator5.e(err);
+      } finally {
+        _iterator5.f();
       }
     }
     function associationDiagnostic(group, reason) {
@@ -459,22 +510,22 @@
       });
     }
     function refreshAssociations() {
-      var _iterator4 = _createForOfIteratorHelper(anchors.values()), _step4;
+      var _iterator7 = _createForOfIteratorHelper(anchors.values()), _step7;
       try {
-        for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
-          var state = _step4.value;
+        for (_iterator7.s(); !(_step7 = _iterator7.n()).done; ) {
+          var state = _step7.value;
           state.group = null;
           state.conflict = false;
         }
       } catch (err) {
-        _iterator4.e(err);
+        _iterator7.e(err);
       } finally {
-        _iterator4.f();
+        _iterator7.f();
       }
-      var _iterator5 = _createForOfIteratorHelper(document.querySelectorAll("[".concat(groupAttribute, "][").concat(groupAnchorAttribute, "]"))), _step5;
+      var _iterator8 = _createForOfIteratorHelper(document.querySelectorAll("[".concat(groupAttribute, "][").concat(groupAnchorAttribute, "]"))), _step8;
       try {
-        for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
-          var group = _step5.value;
+        for (_iterator8.s(); !(_step8 = _iterator8.n()).done; ) {
+          var group = _step8.value;
           var id = (group.getAttribute(groupAnchorAttribute) || "").replace(/^#/, "");
           var element = id && !/\s/.test(id) ? document.getElementById(id) : null;
           if (!element || !element.hasAttribute(attribute)) {
@@ -489,9 +540,9 @@
           } else _state.group = group;
         }
       } catch (err) {
-        _iterator5.e(err);
+        _iterator8.e(err);
       } finally {
-        _iterator5.f();
+        _iterator8.f();
       }
     }
     function effectiveTarget(element, state) {
@@ -519,10 +570,10 @@
         return;
       }
       if (durationMs === 0) {
-        var _iterator6 = _createForOfIteratorHelper(anchors), _step6;
+        var _iterator9 = _createForOfIteratorHelper(anchors), _step9;
         try {
-          for (_iterator6.s(); !(_step6 = _iterator6.n()).done; ) {
-            var _step6$value = _slicedToArray(_step6.value, 2), element = _step6$value[0], state = _step6$value[1];
+          for (_iterator9.s(); !(_step9 = _iterator9.n()).done; ) {
+            var _step9$value = _slicedToArray(_step9.value, 2), element = _step9$value[0], state = _step9$value[1];
             var maxFPS = AelluxJs.layoutMaxFPS(element);
             state.layoutUntil = now() + 1e3 / (maxFPS || 60);
             state.layoutSingle = true;
@@ -530,25 +581,25 @@
             scheduleAnchor(element, true);
           }
         } catch (err) {
-          _iterator6.e(err);
+          _iterator9.e(err);
         } finally {
-          _iterator6.f();
+          _iterator9.f();
         }
         return;
       }
-      var _iterator7 = _createForOfIteratorHelper(anchors), _step7;
+      var _iterator0 = _createForOfIteratorHelper(anchors), _step0;
       try {
-        for (_iterator7.s(); !(_step7 = _iterator7.n()).done; ) {
-          var _step7$value = _slicedToArray(_step7.value, 2), _element = _step7$value[0], _state2 = _step7$value[1];
+        for (_iterator0.s(); !(_step0 = _iterator0.n()).done; ) {
+          var _step0$value = _slicedToArray(_step0.value, 2), _element3 = _step0$value[0], _state2 = _step0$value[1];
           _state2.layoutUntil = Math.max(_state2.layoutUntil, now() + durationMs);
           _state2.layoutSingle = false;
           _state2.layoutFinalPending = true;
-          scheduleAnchor(_element, durationMs > 0);
+          scheduleAnchor(_element3, durationMs > 0);
         }
       } catch (err) {
-        _iterator7.e(err);
+        _iterator0.e(err);
       } finally {
-        _iterator7.f();
+        _iterator0.f();
       }
     }
     function scheduleAnchor(element) {
@@ -661,6 +712,7 @@
                 return ensureLatest && anchors.get(element) === state ? updateAnchor(element, true) : void 0;
               };
               target = effectiveTarget(element, state);
+              state.resolvedTarget = target;
               candidates = parseCandidates(element.getAttribute(attribute));
               if (!(!target || !target.isConnected || !candidates.length || circularTarget(element, target))) {
                 _context3.n = 4;
@@ -739,7 +791,6 @@
               _context3.n = 14;
               return AelluxJs.waitLayout.update(state.styleLayoutId, function() {
                 if (!current()) return;
-                applyBaseStyles(element);
                 state.active = true;
               });
             case 14:
@@ -825,17 +876,6 @@
                 setValue(style, "--ae-anchor-target-height", "".concat(placement.height, "px"));
                 setValue(style, "--ae-anchor-pivot-x", "".concat(selected.pivotX, "px"));
                 setValue(style, "--ae-anchor-pivot-y", "".concat(selected.pivotY, "px"));
-                var _iterator1 = _createForOfIteratorHelper(baseProperties), _step1;
-                try {
-                  for (_iterator1.s(); !(_step1 = _iterator1.n()).done; ) {
-                    var name = _step1.value;
-                    element.style.removeProperty(name);
-                  }
-                } catch (err) {
-                  _iterator1.e(err);
-                } finally {
-                  _iterator1.f();
-                }
                 element.classList.add(anchoredClass);
                 state.lastUpdateAt = now();
                 state.lastPlacement = placement;
@@ -921,10 +961,10 @@
         height: root.innerHeight
       }, reference, referenceRect, scaleX, scaleY);
       var selected = null;
-      var _iterator8 = _createForOfIteratorHelper(candidates), _step8;
+      var _iterator1 = _createForOfIteratorHelper(candidates), _step1;
       try {
-        for (_iterator8.s(); !(_step8 = _iterator8.n()).done; ) {
-          var candidate = _step8.value;
+        for (_iterator1.s(); !(_step1 = _iterator1.n()).done; ) {
+          var candidate = _step1.value;
           var x = targetRect.left + targetRect.width * candidate.target[0] - selfWidth * candidate.self[0];
           var y = targetRect.top + targetRect.height * candidate.target[1] - selfHeight * candidate.self[1];
           var result = {
@@ -941,9 +981,9 @@
           }
         }
       } catch (err) {
-        _iterator8.e(err);
+        _iterator1.e(err);
       } finally {
-        _iterator8.f();
+        _iterator1.f();
       }
       var present = target.closest("[".concat(presentAttribute, "]"));
       var opacity = present ? root.getComputedStyle(present).opacity : "1";
@@ -993,18 +1033,18 @@
       state.target = target;
       if (state.observer) state.observer.disconnect();
       if (state.intersectionObserver) state.intersectionObserver.disconnect();
-      var _iterator9 = _createForOfIteratorHelper(/* @__PURE__ */ new Set([element, target, reference])), _step9;
+      var _iterator10 = _createForOfIteratorHelper(/* @__PURE__ */ new Set([element, target, reference])), _step10;
       try {
-        for (_iterator9.s(); !(_step9 = _iterator9.n()).done; ) {
-          var observed = _step9.value;
+        for (_iterator10.s(); !(_step10 = _iterator10.n()).done; ) {
+          var observed = _step10.value;
           if (!observed) continue;
           if (state.observer) state.observer.observe(observed);
           if (state.intersectionObserver) state.intersectionObserver.observe(observed);
         }
       } catch (err) {
-        _iterator9.e(err);
+        _iterator10.e(err);
       } finally {
-        _iterator9.f();
+        _iterator10.f();
       }
     }
     function listenForLayout(state, reference) {
@@ -1012,13 +1052,6 @@
       if (state.reference) AelluxJs.offEvent(state.reference, layoutEvent, state.layoutListener);
       state.reference = reference;
       if (reference) AelluxJs.onEvent(reference, layoutEvent, state.layoutListener);
-    }
-    function applyBaseStyles(element) {
-      element.style.setProperty("position", "absolute");
-      element.style.setProperty("left", "0px");
-      element.style.setProperty("top", "0px");
-      element.style.setProperty("transform", "translate3d(var(--ae-anchor-x, 0px), var(--ae-anchor-y, 0px), 0)");
-      element.style.setProperty("transform-origin", "var(--ae-anchor-origin-x, 50%) var(--ae-anchor-origin-y, 0%)");
     }
     function deactivate(element, state) {
       var memory = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : elementMemories.get(element);
@@ -1038,6 +1071,7 @@
       element.classList.remove(switchingClass);
     }
     function setValue(style, name, value) {
+      if (style.getPropertyValue(name) === value && !style.getPropertyPriority(name)) return;
       if (style.getPropertyPriority(name)) style.removeProperty(name);
       style.setProperty(name, value);
     }
@@ -1064,10 +1098,10 @@
     }
     function parseCandidates(value) {
       var result = [];
-      var _iterator0 = _createForOfIteratorHelper((value || "").split(",")), _step0;
+      var _iterator11 = _createForOfIteratorHelper((value || "").split(",")), _step11;
       try {
-        for (_iterator0.s(); !(_step0 = _iterator0.n()).done; ) {
-          var token = _step0.value;
+        for (_iterator11.s(); !(_step11 = _iterator11.n()).done; ) {
+          var token = _step11.value;
           var pair = token.trim().toLowerCase().split(":");
           if (pair.length !== 2 || !pivots[pair[0].trim()] || !pivots[pair[1].trim()]) continue;
           result.push({
@@ -1076,9 +1110,9 @@
           });
         }
       } catch (err) {
-        _iterator0.e(err);
+        _iterator11.e(err);
       } finally {
-        _iterator0.f();
+        _iterator11.f();
       }
       return result;
     }

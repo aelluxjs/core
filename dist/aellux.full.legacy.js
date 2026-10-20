@@ -33,7 +33,7 @@
   var define_AELLUX_OFFICIAL_EXTENSION_MANIFEST_default;
   var init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST = __esm({
     "<define:__AELLUX_OFFICIAL_EXTENSION_MANIFEST__>": function() {
-      define_AELLUX_OFFICIAL_EXTENSION_MANIFEST_default = { schemaVersion: 1, coreVersion: "0.1.0-beta.10", extensions: { preference: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.preference.min.js", integrity: "sha384-mSOgb0DekFTRXXZAgyNrPjamdlSqzL4SSGZYVWgVg+WlG+pBj11xT81v/6Xk43yO", regular: { url: "./aellux.ext.preference.js", integrity: "sha384-MlikpdHSzHzF6kz5+oJGtq3eoFsKTsx/g+FTrf+dFOU8iQGHsCpn4fP1jLlbNrj7" } }, legacy: { url: "./aellux.ext.preference.legacy.min.js", integrity: "sha384-1LMsK0W9J/PoM4tXhFgkYLRY4yWdzVoYmFy4OMDGd8lRdtptKoEb1sI9L1kzNaBu", regular: { url: "./aellux.ext.preference.legacy.js", integrity: "sha384-pozuz43OyfXrnkmuBu6KTM2lqRSqcI5LMgwAtqnzXq8xZGdVqpnmOtrBcYcMskWk" } } }, dependencies: [] }, "state-navigation": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.state-navigation.min.js", integrity: "sha384-wAbgAqjAA6wauuG+iuUtfRwxChd6fTJ0fS22fqnu2r00kouoXJWZ0f7AoTYlqBC6", regular: { url: "./aellux.ext.state-navigation.js", integrity: "sha384-PKJ8HTD7eIYDEg2hOaAJjpMYzLr2fBjBRGmIGG7XzGTzVK0yTjt5HYPO55VbWfdS" } }, legacy: { url: "./aellux.ext.state-navigation.legacy.min.js", integrity: "sha384-YkhfU15Mpk8KiO6TyoVU6z1yCiYWwnsOGE0xVaQ8NrE7IGrxOSUL005g5JeUDdJu", regular: { url: "./aellux.ext.state-navigation.legacy.js", integrity: "sha384-kaEUY0Zpw8K6pcwjm+INA5feXftLK2/N1aFpPr2LCTcetX2uoe2GGd1MJyy7u8rZ" } } }, dependencies: [] }, feedback: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.feedback.min.js", integrity: "sha384-3VP3W84ekK4MIVBQuy5+5P3bGrwOj7bBDfJnjyexZ+yDADf1jQoHEpP2J1OMUgod", regular: { url: "./aellux.ext.feedback.js", integrity: "sha384-RrPf0bRGxf68f/Rjas5MF5zC1GAubWyndCcuiYbgZsPSHGLFsQtQaUgeFX4SQz+h" } }, legacy: { url: "./aellux.ext.feedback.legacy.min.js", integrity: "sha384-zXuZEv63sd3fwaAygmyk9KazQ46KOelsvAtM+0vJ7phDwemVh1FhOjAcbhWVQM/N", regular: { url: "./aellux.ext.feedback.legacy.js", integrity: "sha384-UW1JZ1+liVWV/w3PJdhfIMztOU7zyTw/1rOyyxoxj4YJIHb1xFl8U0xeIBh8jYV7" } } }, dependencies: [], style: { url: "./aellux.ext.feedback.min.css", integrity: "sha384-OBguCYqF+dMD0Pl84C3FlY/+ohUGfW0OyynmXb/PSDEGOyuI/TQJ3EZAoCeJx+Jk", regular: { url: "./aellux.ext.feedback.css", integrity: "sha384-yk4cW+r/Mc1FRS1ZauBHC6KsKb7sxuJ0E9mmt/+AYASAdZXXMK6iuFBR+TOEh/r4" } } }, focus: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.focus.min.js", integrity: "sha384-AXpUv/Ur2Z4cKvO9EqIFqfxxdSQR5j75q0okOAWPvHhSneQ5LPjrOzk6Sl9MOo4a", regular: { url: "./aellux.ext.focus.js", integrity: "sha384-VjQzcnhLRrvRlbVQ0X4/tO0+8gqJXAmIFoeIVimjOud1wRNuBXNnSQHHW9XQPzTe" } }, legacy: { url: "./aellux.ext.focus.legacy.min.js", integrity: "sha384-I5QpUmKsA1T8NiKfKXQgbdG19Ld1ZGCWSmosygO3yGj43tdxp5zCfLyfBuFoHlKu", regular: { url: "./aellux.ext.focus.legacy.js", integrity: "sha384-5/y3J1NC/qMyV9myEj29+wGbqCVI8ICPafSebtJVfl15Qmup6vMiJzveShd3CLnw" } } }, dependencies: [] }, point: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.point.min.js", integrity: "sha384-n540II5oWbHJRt/a8i+Rgb9A3b9dm7hamg1kd3Nz7KdPQDcaa8S823t9fCrgxBWF", regular: { url: "./aellux.ext.point.js", integrity: "sha384-aDj7I5QEH/0+52E3e6yPZ/D0MEsNBdxeET3G5ToVvgczHtksMh3p8S/KOoAapRRN" } }, legacy: { url: "./aellux.ext.point.legacy.min.js", integrity: "sha384-5UmWvQHfmvttz9yeXbilawGCZH20UdR8yNBOE9kRV34wpfWASl8plzgKtLVQGO9M", regular: { url: "./aellux.ext.point.legacy.js", integrity: "sha384-gG/XONYEC1tchBcJ6bUtKYmWFHz0E+50LmMaXDAiqWBKPuwdHZeYm1uXA22lMZuN" } } }, dependencies: [] }, anchor: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.anchor.min.js", integrity: "sha384-Z1mAeOLL6Uig34Gy59/uFS88xLVv6do5qKaJPQeaUfecPoplVrSoVmwOjoClrhLi", regular: { url: "./aellux.ext.anchor.js", integrity: "sha384-FNXsUmIK7V8PtEYNbcPtCo+fAeaGDtkD0JwK8eZ1DdsHdjdj9LHwPmjdJxNlKc/U" } }, legacy: { url: "./aellux.ext.anchor.legacy.min.js", integrity: "sha384-VBjnwxZs4XDX5764sACe6u206w58h0PAkMM4tu4XJFmZHNjc3o/ChZdk2OPS4NZG", regular: { url: "./aellux.ext.anchor.legacy.js", integrity: "sha384-hhKGhGiyl07ZD2ur6D15dkx5NoPOSERTlfw+5tGmP9YL2sWl3ylj2MTx/Blzjt5K" } } }, dependencies: [] }, "ajax-href": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.ajax-href.min.js", integrity: "sha384-VCvADGjweS3kvW0s226GuUqgTuiLz9zMhPU61ZrkYfbDX42l3dbvB4jm1QvC8xio", regular: { url: "./aellux.ext.ajax-href.js", integrity: "sha384-EcFz52TbeSPurZxIukNU/WiujOPlF0E4FvnoR1Y44axiHLzd2+LpSBnBMfwIZ3Ip" } }, legacy: { url: "./aellux.ext.ajax-href.legacy.min.js", integrity: "sha384-me6plEKmddDwM9w625RpMTaa8kCZYsbQU/2dwWKmZSktJ3k6gd08iDLmiQPEQLl4", regular: { url: "./aellux.ext.ajax-href.legacy.js", integrity: "sha384-HaI+joZDWxyoZtD4QrAMJ+W1VjfdpyHcV4tt/hlFoP9SznAAxHO6iDErzOO8LIAz" } } }, dependencies: [] }, scrollbox: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.scrollbox.min.js", integrity: "sha384-MbsMMRhyNfXp50eIj6ybMu3dcxXnbLcM6xK8BAPI1aAJzG3TbCAUCcjKr1SHpSaa", regular: { url: "./aellux.ext.scrollbox.js", integrity: "sha384-Nn4620lov+xo0w32p+rdpQsVas3rPr0OW2NJnYASSruy2gb8ujeRk27pLQM2Gobv" } }, legacy: { url: "./aellux.ext.scrollbox.legacy.min.js", integrity: "sha384-m+v8D6nbzGMHyPhNhbT3urBAy3Nza5CtLGK0vGQtiwPGwtsLvJB9sVuafO3kXdxB", regular: { url: "./aellux.ext.scrollbox.legacy.js", integrity: "sha384-ZIFUP8YDdvLufnr2pZKh12xcW9WV28zeUk9uBtXRKLgsLvzQ3VuU1tMyuKQmZbf9" } } }, dependencies: [] }, "scrollbox-snap": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.scrollbox-snap.min.js", integrity: "sha384-fwr6geiwmDDl/bU88Z8ldI9tIyojBehplcqMI8vn9YC2Y35T8Ko6+inwARkChd6y", regular: { url: "./aellux.ext.scrollbox-snap.js", integrity: "sha384-qjNY5x+ua2KPbtXH3SuITr6N3dLfhUQy1qk487pJUPN/iRe06hIbY5oldYSPcXp2" } }, legacy: { url: "./aellux.ext.scrollbox-snap.legacy.min.js", integrity: "sha384-7SyRprm808E+xN3HarZjNIqewKIyFvTFBG+b7nUbjBPTD5arFdhZzQXzqz/Jxdtd", regular: { url: "./aellux.ext.scrollbox-snap.legacy.js", integrity: "sha384-zMpMGOiRT1bKYrrdNiHPcLkFmvMf52JbQyOq9TW0X+I518FgIrRTjq6Fta6Itfg2" } } }, dependencies: [] }, adaptive: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.adaptive.min.js", integrity: "sha384-UfDhSymI78IbudB2vel0GOI+z4C8m6JCG4Egl6WK9mHvZyOltXgawIbn2iFJH2+w", regular: { url: "./aellux.ext.adaptive.js", integrity: "sha384-AXSW7WI4ZEykJgerhjuscp7u99DkKkTYFD13o1HAnVH1tJYz2u5f9VjsBGca7kSU" } }, legacy: { url: "./aellux.ext.adaptive.legacy.min.js", integrity: "sha384-yOyWKIJaWddRJrbYwriE1lpeuiB2WbeF2fII29R4vIBGMfXi6b6m2IXUHvFqaQTB", regular: { url: "./aellux.ext.adaptive.legacy.js", integrity: "sha384-oRSPNCmFGYjwsrmeBT7r7un76fwNEODcJNmo1ifLgHbWEmoGT07OtdqsyxvfnWeN" } } }, dependencies: [], style: { url: "./aellux.ext.adaptive.min.css", integrity: "sha384-8yUP1PStfDqBCyCskP3k9WLIKgv/yl1nyDhmPz7hsX5NZ4z3ZT3ajolA+RhYlUiG", regular: { url: "./aellux.ext.adaptive.css", integrity: "sha384-HfIjX9Zk0VFRimzPvUaTS5AtwuHJHjXKoM/xbNJXj5vE7bSdBGEzbrBHfbNmYah0" } } }, present: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.present.min.js", integrity: "sha384-lw916mO9YV3rWp4zmBpDIHCFunKKFVzbRceYl+7+iv0MY1AAngCBnGNnNGJhRXmL", regular: { url: "./aellux.ext.present.js", integrity: "sha384-FrKnceZMsFDji2Xyn1MZyQyGcjO2UkPfsLhJhQtza7jdDXHUsy/xZizpFeU1vtHq" } }, legacy: { url: "./aellux.ext.present.legacy.min.js", integrity: "sha384-Dom33L5W4aBqzAft8fKqqyCJTtcpgLyquK6LZMyla7t9/0XbhN2f4aoCP/rBLxAq", regular: { url: "./aellux.ext.present.legacy.js", integrity: "sha384-NSyzjA+b1GrerzXXpYnw8fan02otzFDHaDpiML3p2PhNVxfHgF5pY7/848hQOvN2" } } }, dependencies: [], style: { url: "./aellux.ext.present.min.css", integrity: "sha384-Xx3MuDirlIsArdiSpQ+nRsyKhGUQeGbGrdYaEANsZMp5aaGudWJLID3Iwq5nhWvj", regular: { url: "./aellux.ext.present.css", integrity: "sha384-vYogCkysGYLRQlY+IXCzVeC/TQeAlm/byVFSVzHJNlZUE4Wr3EYiXcQB6rNppdNP" } } } } };
+      define_AELLUX_OFFICIAL_EXTENSION_MANIFEST_default = { schemaVersion: 1, coreVersion: "0.1.0-beta.10", extensions: { preference: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.preference.min.js", integrity: "sha384-mSOgb0DekFTRXXZAgyNrPjamdlSqzL4SSGZYVWgVg+WlG+pBj11xT81v/6Xk43yO", regular: { url: "./aellux.ext.preference.js", integrity: "sha384-MlikpdHSzHzF6kz5+oJGtq3eoFsKTsx/g+FTrf+dFOU8iQGHsCpn4fP1jLlbNrj7" } }, legacy: { url: "./aellux.ext.preference.legacy.min.js", integrity: "sha384-1LMsK0W9J/PoM4tXhFgkYLRY4yWdzVoYmFy4OMDGd8lRdtptKoEb1sI9L1kzNaBu", regular: { url: "./aellux.ext.preference.legacy.js", integrity: "sha384-pozuz43OyfXrnkmuBu6KTM2lqRSqcI5LMgwAtqnzXq8xZGdVqpnmOtrBcYcMskWk" } } }, dependencies: [] }, "state-navigation": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.state-navigation.min.js", integrity: "sha384-wAbgAqjAA6wauuG+iuUtfRwxChd6fTJ0fS22fqnu2r00kouoXJWZ0f7AoTYlqBC6", regular: { url: "./aellux.ext.state-navigation.js", integrity: "sha384-PKJ8HTD7eIYDEg2hOaAJjpMYzLr2fBjBRGmIGG7XzGTzVK0yTjt5HYPO55VbWfdS" } }, legacy: { url: "./aellux.ext.state-navigation.legacy.min.js", integrity: "sha384-YkhfU15Mpk8KiO6TyoVU6z1yCiYWwnsOGE0xVaQ8NrE7IGrxOSUL005g5JeUDdJu", regular: { url: "./aellux.ext.state-navigation.legacy.js", integrity: "sha384-kaEUY0Zpw8K6pcwjm+INA5feXftLK2/N1aFpPr2LCTcetX2uoe2GGd1MJyy7u8rZ" } } }, dependencies: [] }, feedback: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.feedback.min.js", integrity: "sha384-3VP3W84ekK4MIVBQuy5+5P3bGrwOj7bBDfJnjyexZ+yDADf1jQoHEpP2J1OMUgod", regular: { url: "./aellux.ext.feedback.js", integrity: "sha384-RrPf0bRGxf68f/Rjas5MF5zC1GAubWyndCcuiYbgZsPSHGLFsQtQaUgeFX4SQz+h" } }, legacy: { url: "./aellux.ext.feedback.legacy.min.js", integrity: "sha384-zXuZEv63sd3fwaAygmyk9KazQ46KOelsvAtM+0vJ7phDwemVh1FhOjAcbhWVQM/N", regular: { url: "./aellux.ext.feedback.legacy.js", integrity: "sha384-UW1JZ1+liVWV/w3PJdhfIMztOU7zyTw/1rOyyxoxj4YJIHb1xFl8U0xeIBh8jYV7" } } }, dependencies: [], style: { url: "./aellux.ext.feedback.min.css", integrity: "sha384-OBguCYqF+dMD0Pl84C3FlY/+ohUGfW0OyynmXb/PSDEGOyuI/TQJ3EZAoCeJx+Jk", regular: { url: "./aellux.ext.feedback.css", integrity: "sha384-yk4cW+r/Mc1FRS1ZauBHC6KsKb7sxuJ0E9mmt/+AYASAdZXXMK6iuFBR+TOEh/r4" } } }, focus: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.focus.min.js", integrity: "sha384-AXpUv/Ur2Z4cKvO9EqIFqfxxdSQR5j75q0okOAWPvHhSneQ5LPjrOzk6Sl9MOo4a", regular: { url: "./aellux.ext.focus.js", integrity: "sha384-VjQzcnhLRrvRlbVQ0X4/tO0+8gqJXAmIFoeIVimjOud1wRNuBXNnSQHHW9XQPzTe" } }, legacy: { url: "./aellux.ext.focus.legacy.min.js", integrity: "sha384-I5QpUmKsA1T8NiKfKXQgbdG19Ld1ZGCWSmosygO3yGj43tdxp5zCfLyfBuFoHlKu", regular: { url: "./aellux.ext.focus.legacy.js", integrity: "sha384-5/y3J1NC/qMyV9myEj29+wGbqCVI8ICPafSebtJVfl15Qmup6vMiJzveShd3CLnw" } } }, dependencies: [] }, point: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.point.min.js", integrity: "sha384-n540II5oWbHJRt/a8i+Rgb9A3b9dm7hamg1kd3Nz7KdPQDcaa8S823t9fCrgxBWF", regular: { url: "./aellux.ext.point.js", integrity: "sha384-aDj7I5QEH/0+52E3e6yPZ/D0MEsNBdxeET3G5ToVvgczHtksMh3p8S/KOoAapRRN" } }, legacy: { url: "./aellux.ext.point.legacy.min.js", integrity: "sha384-5UmWvQHfmvttz9yeXbilawGCZH20UdR8yNBOE9kRV34wpfWASl8plzgKtLVQGO9M", regular: { url: "./aellux.ext.point.legacy.js", integrity: "sha384-gG/XONYEC1tchBcJ6bUtKYmWFHz0E+50LmMaXDAiqWBKPuwdHZeYm1uXA22lMZuN" } } }, dependencies: [] }, anchor: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.anchor.min.js", integrity: "sha384-6nlcBmIvZ4P04uT+M7N2Jk/PTK8OGnCPnTOaTh1rfVJBkxgIwhocG9KeALHJBAMJ", regular: { url: "./aellux.ext.anchor.js", integrity: "sha384-ApVZhvYt5l7ewrdGL3/ovLglz3WR8HryXe4p4qUIKypko4hOyniMX3jMfWC8qOgl" } }, legacy: { url: "./aellux.ext.anchor.legacy.min.js", integrity: "sha384-IRELgHShZqO2j1cfMmpq2qce9I5hIO0/TrXp2on2I7MsMBecKG28F20/459tInQX", regular: { url: "./aellux.ext.anchor.legacy.js", integrity: "sha384-Lrkb8hqknnuGgYmbx0IwU97gU05PYKqFqbW0b0UQ0TovDkQq+PXpDQRsOTczHgW8" } } }, dependencies: [] }, "ajax-href": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.ajax-href.min.js", integrity: "sha384-VCvADGjweS3kvW0s226GuUqgTuiLz9zMhPU61ZrkYfbDX42l3dbvB4jm1QvC8xio", regular: { url: "./aellux.ext.ajax-href.js", integrity: "sha384-EcFz52TbeSPurZxIukNU/WiujOPlF0E4FvnoR1Y44axiHLzd2+LpSBnBMfwIZ3Ip" } }, legacy: { url: "./aellux.ext.ajax-href.legacy.min.js", integrity: "sha384-me6plEKmddDwM9w625RpMTaa8kCZYsbQU/2dwWKmZSktJ3k6gd08iDLmiQPEQLl4", regular: { url: "./aellux.ext.ajax-href.legacy.js", integrity: "sha384-HaI+joZDWxyoZtD4QrAMJ+W1VjfdpyHcV4tt/hlFoP9SznAAxHO6iDErzOO8LIAz" } } }, dependencies: [] }, scrollbox: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.scrollbox.min.js", integrity: "sha384-MbsMMRhyNfXp50eIj6ybMu3dcxXnbLcM6xK8BAPI1aAJzG3TbCAUCcjKr1SHpSaa", regular: { url: "./aellux.ext.scrollbox.js", integrity: "sha384-Nn4620lov+xo0w32p+rdpQsVas3rPr0OW2NJnYASSruy2gb8ujeRk27pLQM2Gobv" } }, legacy: { url: "./aellux.ext.scrollbox.legacy.min.js", integrity: "sha384-m+v8D6nbzGMHyPhNhbT3urBAy3Nza5CtLGK0vGQtiwPGwtsLvJB9sVuafO3kXdxB", regular: { url: "./aellux.ext.scrollbox.legacy.js", integrity: "sha384-ZIFUP8YDdvLufnr2pZKh12xcW9WV28zeUk9uBtXRKLgsLvzQ3VuU1tMyuKQmZbf9" } } }, dependencies: [] }, "scrollbox-snap": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.scrollbox-snap.min.js", integrity: "sha384-fwr6geiwmDDl/bU88Z8ldI9tIyojBehplcqMI8vn9YC2Y35T8Ko6+inwARkChd6y", regular: { url: "./aellux.ext.scrollbox-snap.js", integrity: "sha384-qjNY5x+ua2KPbtXH3SuITr6N3dLfhUQy1qk487pJUPN/iRe06hIbY5oldYSPcXp2" } }, legacy: { url: "./aellux.ext.scrollbox-snap.legacy.min.js", integrity: "sha384-7SyRprm808E+xN3HarZjNIqewKIyFvTFBG+b7nUbjBPTD5arFdhZzQXzqz/Jxdtd", regular: { url: "./aellux.ext.scrollbox-snap.legacy.js", integrity: "sha384-zMpMGOiRT1bKYrrdNiHPcLkFmvMf52JbQyOq9TW0X+I518FgIrRTjq6Fta6Itfg2" } } }, dependencies: [] }, adaptive: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.adaptive.min.js", integrity: "sha384-UfDhSymI78IbudB2vel0GOI+z4C8m6JCG4Egl6WK9mHvZyOltXgawIbn2iFJH2+w", regular: { url: "./aellux.ext.adaptive.js", integrity: "sha384-AXSW7WI4ZEykJgerhjuscp7u99DkKkTYFD13o1HAnVH1tJYz2u5f9VjsBGca7kSU" } }, legacy: { url: "./aellux.ext.adaptive.legacy.min.js", integrity: "sha384-yOyWKIJaWddRJrbYwriE1lpeuiB2WbeF2fII29R4vIBGMfXi6b6m2IXUHvFqaQTB", regular: { url: "./aellux.ext.adaptive.legacy.js", integrity: "sha384-oRSPNCmFGYjwsrmeBT7r7un76fwNEODcJNmo1ifLgHbWEmoGT07OtdqsyxvfnWeN" } } }, dependencies: [], style: { url: "./aellux.ext.adaptive.min.css", integrity: "sha384-8yUP1PStfDqBCyCskP3k9WLIKgv/yl1nyDhmPz7hsX5NZ4z3ZT3ajolA+RhYlUiG", regular: { url: "./aellux.ext.adaptive.css", integrity: "sha384-HfIjX9Zk0VFRimzPvUaTS5AtwuHJHjXKoM/xbNJXj5vE7bSdBGEzbrBHfbNmYah0" } } }, present: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.present.min.js", integrity: "sha384-3s2v8Jf4LgXrXj2S00lspOT3+7K9RfZt8HARTc0yv67Dw++abzDLnelJw8dWFJfB", regular: { url: "./aellux.ext.present.js", integrity: "sha384-4OM9HKTiSweGq37rRjdAKlFccImCIYMiJ5+2e5wQSRlS4u5VSlUmzdkj0JSdWi43" } }, legacy: { url: "./aellux.ext.present.legacy.min.js", integrity: "sha384-4ELNAMs4Y295Zxb3rXKBnCYgJdHqlJjBMxutNvokDPXFmPjN8R+TAs9z2u7undfT", regular: { url: "./aellux.ext.present.legacy.js", integrity: "sha384-ZSViyggG+nVnCnn9LjJt/651loG3IJ9qwo2bKoi2/iUPdS+rXirtqWDLShtbA2ui" } } }, dependencies: [], style: { url: "./aellux.ext.present.min.css", integrity: "sha384-Xx3MuDirlIsArdiSpQ+nRsyKhGUQeGbGrdYaEANsZMp5aaGudWJLID3Iwq5nhWvj", regular: { url: "./aellux.ext.present.css", integrity: "sha384-vYogCkysGYLRQlY+IXCzVeC/TQeAlm/byVFSVzHJNlZUE4Wr3EYiXcQB6rNppdNP" } } } } };
     }
   });
 
@@ -24316,6 +24316,7 @@
         return;
       }
       var endTime = 0;
+      operation.animations = animations;
       var _iterator2 = _createForOfIteratorHelper5(animations), _step2;
       try {
         for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
@@ -24333,7 +24334,6 @@
       } finally {
         _iterator2.f();
       }
-      operation.animations = animations;
       operation.endTime = endTime;
       operation.start = now();
       operation.controlled = true;
@@ -24441,24 +24441,6 @@
       var animations = typeof operation.element.getAnimations === "function" ? operation.element.getAnimations().filter(function(animation) {
         return !operation.before.has(animation);
       }) : [];
-      if (animations.length && animations.every(function(animation) {
-        return animation.finished && typeof animation.finished.then === "function";
-      })) {
-        return Promise.all(animations.map(function(animation) {
-          return animation.finished.catch(function() {
-            return void 0;
-          });
-        })).then(function() {
-          if (operations.get(operation.id) === operation) operations.delete(operation.id);
-          return {
-            id: operation.id,
-            status: operation.cancelled ? "aborted" : "completed",
-            mode: "native"
-          };
-        });
-      }
-      var explicit = Number(operation.options.nativeDuration);
-      var duration = Number.isFinite(explicit) ? explicit : cssMotionTime(operation.element);
       return new Promise(function(resolve) {
         operation.nativeResolve = resolve;
         var complete = function complete2() {
@@ -24471,6 +24453,18 @@
             mode: "native"
           });
         };
+        if (animations.length && animations.every(function(animation) {
+          return animation.finished && typeof animation.finished.then === "function";
+        })) {
+          Promise.all(animations.map(function(animation) {
+            return animation.finished.catch(function() {
+              return void 0;
+            });
+          })).then(complete);
+          return;
+        }
+        var explicit = Number(operation.options.nativeDuration);
+        var duration = Number.isFinite(explicit) ? explicit : cssMotionTime(operation.element);
         if (Number.isFinite(duration) && duration > 0) {
           operation.nativeTimer = root2.setTimeout(complete, duration);
         } else {
@@ -27991,6 +27985,7 @@
             active: false,
             revision: 0,
             target: null,
+            resolvedTarget: null,
             reference: null,
             group: null,
             conflict: false,
@@ -28025,25 +28020,12 @@
             AelluxJs2.onEvent(root2, "$resize", scheduleUpdate);
             AelluxJs2.on("PresentGroupChange", onGroupChange);
             if (typeof root2.MutationObserver === "function") {
-              mutations = new root2.MutationObserver(function() {
-                refreshAssociations();
-                var _iterator = _createForOfIteratorHelper12(anchors.keys()), _step;
-                try {
-                  for (_iterator.s(); !(_step = _iterator.n()).done; ) {
-                    var anchor2 = _step.value;
-                    scheduleAnchor(anchor2);
-                  }
-                } catch (err) {
-                  _iterator.e(err);
-                } finally {
-                  _iterator.f();
-                }
-              });
+              mutations = new root2.MutationObserver(onMutations);
               mutations.observe(document, {
                 subtree: true,
                 childList: true,
                 attributes: true,
-                attributeFilter: [attribute, targetAttribute, matchAttribute, groupAttribute, groupAnchorAttribute, AelluxJs2.attr("reduced-motion"), "id", "hidden"]
+                attributeFilter: [attribute, targetAttribute, matchAttribute, groupAttribute, groupAnchorAttribute, AelluxJs2.attr("reduced-motion"), "id", "hidden", "class", "style"]
               });
             }
           }
@@ -28108,12 +28090,26 @@
         }
         function scheduleUpdate() {
           if (!anchors.size) return;
+          var _iterator = _createForOfIteratorHelper12(anchors), _step;
+          try {
+            for (_iterator.s(); !(_step = _iterator.n()).done; ) {
+              var _step$value = _slicedToArray6(_step.value, 2), element = _step$value[0], state = _step$value[1];
+              state.interruptSwitch = true;
+              scheduleAnchor(element);
+            }
+          } catch (err) {
+            _iterator.e(err);
+          } finally {
+            _iterator.f();
+          }
+        }
+        function onGroupChange(event) {
           var _iterator2 = _createForOfIteratorHelper12(anchors), _step2;
           try {
             for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
+              var _event$detail;
               var _step2$value = _slicedToArray6(_step2.value, 2), element = _step2$value[0], state = _step2$value[1];
-              state.interruptSwitch = true;
-              scheduleAnchor(element);
+              if (state.group === ((_event$detail = event.detail) === null || _event$detail === void 0 ? void 0 : _event$detail.group)) scheduleAnchor(element);
             }
           } catch (err) {
             _iterator2.e(err);
@@ -28121,18 +28117,67 @@
             _iterator2.f();
           }
         }
-        function onGroupChange(event) {
-          var _iterator3 = _createForOfIteratorHelper12(anchors), _step3;
+        function onMutations(records) {
+          var affected = /* @__PURE__ */ new Set();
+          var associationSelector = "[".concat(groupAnchorAttribute, "],[").concat(attribute, "]");
+          var containsAssociation = function containsAssociation2(node2) {
+            return node2.nodeType === 1 && (node2.matches(associationSelector) || node2.querySelector(associationSelector));
+          };
+          var associationsChanged = false;
+          var _iterator3 = _createForOfIteratorHelper12(records), _step3;
           try {
             for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
-              var _event$detail;
-              var _step3$value = _slicedToArray6(_step3.value, 2), element = _step3$value[0], state = _step3$value[1];
-              if (state.group === ((_event$detail = event.detail) === null || _event$detail === void 0 ? void 0 : _event$detail.group)) scheduleAnchor(element);
+              var record = _step3.value;
+              var node = record.target;
+              var structural = record.type === "childList";
+              var visual = record.attributeName === "class" || record.attributeName === "style";
+              if (structural ? [].concat(_toConsumableArray5(record.addedNodes), _toConsumableArray5(record.removedNodes)).some(containsAssociation) : record.attributeName === groupAnchorAttribute || record.attributeName === groupAttribute || (record.attributeName === "id" || record.attributeName === attribute) && (anchors.has(node) || node.hasAttribute(attribute))) associationsChanged = true;
+              var _iterator6 = _createForOfIteratorHelper12(anchors), _step6;
+              try {
+                for (_iterator6.s(); !(_step6 = _iterator6.n()).done; ) {
+                  var _state$reference;
+                  var _step6$value = _slicedToArray6(_step6.value, 2), _element = _step6$value[0], state = _step6$value[1];
+                  if (visual) {
+                    if (node !== _element && state.resolvedTarget && node.contains(state.resolvedTarget)) affected.add(_element);
+                    continue;
+                  }
+                  if (node === _element || node === document.documentElement || node.contains(_element) || state.resolvedTarget && node.contains(state.resolvedTarget) || structural && (_state$reference = state.reference) !== null && _state$reference !== void 0 && _state$reference.contains(node) || !state.group && _element.hasAttribute(targetAttribute) && resolveElement(_element.getAttribute(targetAttribute)) !== state.resolvedTarget) affected.add(_element);
+                }
+              } catch (err) {
+                _iterator6.e(err);
+              } finally {
+                _iterator6.f();
+              }
             }
           } catch (err) {
             _iterator3.e(err);
           } finally {
             _iterator3.f();
+          }
+          if (associationsChanged) {
+            refreshAssociations();
+            var _iterator4 = _createForOfIteratorHelper12(anchors.keys()), _step4;
+            try {
+              for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
+                var element = _step4.value;
+                affected.add(element);
+              }
+            } catch (err) {
+              _iterator4.e(err);
+            } finally {
+              _iterator4.f();
+            }
+          }
+          var _iterator5 = _createForOfIteratorHelper12(affected), _step5;
+          try {
+            for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
+              var _element2 = _step5.value;
+              scheduleAnchor(_element2);
+            }
+          } catch (err) {
+            _iterator5.e(err);
+          } finally {
+            _iterator5.f();
           }
         }
         function associationDiagnostic(group, reason) {
@@ -28143,22 +28188,22 @@
           });
         }
         function refreshAssociations() {
-          var _iterator4 = _createForOfIteratorHelper12(anchors.values()), _step4;
+          var _iterator7 = _createForOfIteratorHelper12(anchors.values()), _step7;
           try {
-            for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
-              var state = _step4.value;
+            for (_iterator7.s(); !(_step7 = _iterator7.n()).done; ) {
+              var state = _step7.value;
               state.group = null;
               state.conflict = false;
             }
           } catch (err) {
-            _iterator4.e(err);
+            _iterator7.e(err);
           } finally {
-            _iterator4.f();
+            _iterator7.f();
           }
-          var _iterator5 = _createForOfIteratorHelper12(document.querySelectorAll("[".concat(groupAttribute, "][").concat(groupAnchorAttribute, "]"))), _step5;
+          var _iterator8 = _createForOfIteratorHelper12(document.querySelectorAll("[".concat(groupAttribute, "][").concat(groupAnchorAttribute, "]"))), _step8;
           try {
-            for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
-              var group = _step5.value;
+            for (_iterator8.s(); !(_step8 = _iterator8.n()).done; ) {
+              var group = _step8.value;
               var id = (group.getAttribute(groupAnchorAttribute) || "").replace(/^#/, "");
               var element = id && !/\s/.test(id) ? document.getElementById(id) : null;
               if (!element || !element.hasAttribute(attribute)) {
@@ -28173,9 +28218,9 @@
               } else _state.group = group;
             }
           } catch (err) {
-            _iterator5.e(err);
+            _iterator8.e(err);
           } finally {
-            _iterator5.f();
+            _iterator8.f();
           }
         }
         function effectiveTarget(element, state) {
@@ -28203,10 +28248,10 @@
             return;
           }
           if (durationMs === 0) {
-            var _iterator6 = _createForOfIteratorHelper12(anchors), _step6;
+            var _iterator9 = _createForOfIteratorHelper12(anchors), _step9;
             try {
-              for (_iterator6.s(); !(_step6 = _iterator6.n()).done; ) {
-                var _step6$value = _slicedToArray6(_step6.value, 2), element = _step6$value[0], state = _step6$value[1];
+              for (_iterator9.s(); !(_step9 = _iterator9.n()).done; ) {
+                var _step9$value = _slicedToArray6(_step9.value, 2), element = _step9$value[0], state = _step9$value[1];
                 var maxFPS = AelluxJs2.layoutMaxFPS(element);
                 state.layoutUntil = now() + 1e3 / (maxFPS || 60);
                 state.layoutSingle = true;
@@ -28214,25 +28259,25 @@
                 scheduleAnchor(element, true);
               }
             } catch (err) {
-              _iterator6.e(err);
+              _iterator9.e(err);
             } finally {
-              _iterator6.f();
+              _iterator9.f();
             }
             return;
           }
-          var _iterator7 = _createForOfIteratorHelper12(anchors), _step7;
+          var _iterator0 = _createForOfIteratorHelper12(anchors), _step0;
           try {
-            for (_iterator7.s(); !(_step7 = _iterator7.n()).done; ) {
-              var _step7$value = _slicedToArray6(_step7.value, 2), _element = _step7$value[0], _state2 = _step7$value[1];
+            for (_iterator0.s(); !(_step0 = _iterator0.n()).done; ) {
+              var _step0$value = _slicedToArray6(_step0.value, 2), _element3 = _step0$value[0], _state2 = _step0$value[1];
               _state2.layoutUntil = Math.max(_state2.layoutUntil, now() + durationMs);
               _state2.layoutSingle = false;
               _state2.layoutFinalPending = true;
-              scheduleAnchor(_element, durationMs > 0);
+              scheduleAnchor(_element3, durationMs > 0);
             }
           } catch (err) {
-            _iterator7.e(err);
+            _iterator0.e(err);
           } finally {
-            _iterator7.f();
+            _iterator0.f();
           }
         }
         function scheduleAnchor(element) {
@@ -28345,6 +28390,7 @@
                     return ensureLatest && anchors.get(element) === state ? updateAnchor(element, true) : void 0;
                   };
                   target = effectiveTarget(element, state);
+                  state.resolvedTarget = target;
                   candidates = parseCandidates(element.getAttribute(attribute));
                   if (!(!target || !target.isConnected || !candidates.length || circularTarget(element, target))) {
                     _context3.n = 4;
@@ -28423,7 +28469,6 @@
                   _context3.n = 14;
                   return AelluxJs2.waitLayout.update(state.styleLayoutId, function() {
                     if (!current()) return;
-                    applyBaseStyles(element);
                     state.active = true;
                   });
                 case 14:
@@ -28509,17 +28554,6 @@
                     setValue(style, "--ae-anchor-target-height", "".concat(placement.height, "px"));
                     setValue(style, "--ae-anchor-pivot-x", "".concat(selected.pivotX, "px"));
                     setValue(style, "--ae-anchor-pivot-y", "".concat(selected.pivotY, "px"));
-                    var _iterator1 = _createForOfIteratorHelper12(baseProperties), _step1;
-                    try {
-                      for (_iterator1.s(); !(_step1 = _iterator1.n()).done; ) {
-                        var name = _step1.value;
-                        element.style.removeProperty(name);
-                      }
-                    } catch (err) {
-                      _iterator1.e(err);
-                    } finally {
-                      _iterator1.f();
-                    }
                     element.classList.add(anchoredClass);
                     state.lastUpdateAt = now();
                     state.lastPlacement = placement;
@@ -28605,10 +28639,10 @@
             height: root2.innerHeight
           }, reference, referenceRect, scaleX, scaleY);
           var selected = null;
-          var _iterator8 = _createForOfIteratorHelper12(candidates), _step8;
+          var _iterator1 = _createForOfIteratorHelper12(candidates), _step1;
           try {
-            for (_iterator8.s(); !(_step8 = _iterator8.n()).done; ) {
-              var candidate = _step8.value;
+            for (_iterator1.s(); !(_step1 = _iterator1.n()).done; ) {
+              var candidate = _step1.value;
               var x = targetRect.left + targetRect.width * candidate.target[0] - selfWidth * candidate.self[0];
               var y = targetRect.top + targetRect.height * candidate.target[1] - selfHeight * candidate.self[1];
               var result = {
@@ -28625,9 +28659,9 @@
               }
             }
           } catch (err) {
-            _iterator8.e(err);
+            _iterator1.e(err);
           } finally {
-            _iterator8.f();
+            _iterator1.f();
           }
           var present2 = target.closest("[".concat(presentAttribute, "]"));
           var opacity = present2 ? root2.getComputedStyle(present2).opacity : "1";
@@ -28677,18 +28711,18 @@
           state.target = target;
           if (state.observer) state.observer.disconnect();
           if (state.intersectionObserver) state.intersectionObserver.disconnect();
-          var _iterator9 = _createForOfIteratorHelper12(/* @__PURE__ */ new Set([element, target, reference])), _step9;
+          var _iterator10 = _createForOfIteratorHelper12(/* @__PURE__ */ new Set([element, target, reference])), _step10;
           try {
-            for (_iterator9.s(); !(_step9 = _iterator9.n()).done; ) {
-              var observed = _step9.value;
+            for (_iterator10.s(); !(_step10 = _iterator10.n()).done; ) {
+              var observed = _step10.value;
               if (!observed) continue;
               if (state.observer) state.observer.observe(observed);
               if (state.intersectionObserver) state.intersectionObserver.observe(observed);
             }
           } catch (err) {
-            _iterator9.e(err);
+            _iterator10.e(err);
           } finally {
-            _iterator9.f();
+            _iterator10.f();
           }
         }
         function listenForLayout(state, reference) {
@@ -28696,13 +28730,6 @@
           if (state.reference) AelluxJs2.offEvent(state.reference, layoutEvent, state.layoutListener);
           state.reference = reference;
           if (reference) AelluxJs2.onEvent(reference, layoutEvent, state.layoutListener);
-        }
-        function applyBaseStyles(element) {
-          element.style.setProperty("position", "absolute");
-          element.style.setProperty("left", "0px");
-          element.style.setProperty("top", "0px");
-          element.style.setProperty("transform", "translate3d(var(--ae-anchor-x, 0px), var(--ae-anchor-y, 0px), 0)");
-          element.style.setProperty("transform-origin", "var(--ae-anchor-origin-x, 50%) var(--ae-anchor-origin-y, 0%)");
         }
         function deactivate(element, state) {
           var memory = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : elementMemories.get(element);
@@ -28722,6 +28749,7 @@
           element.classList.remove(switchingClass);
         }
         function setValue(style, name, value) {
+          if (style.getPropertyValue(name) === value && !style.getPropertyPriority(name)) return;
           if (style.getPropertyPriority(name)) style.removeProperty(name);
           style.setProperty(name, value);
         }
@@ -28748,10 +28776,10 @@
         }
         function parseCandidates(value) {
           var result = [];
-          var _iterator0 = _createForOfIteratorHelper12((value || "").split(",")), _step0;
+          var _iterator11 = _createForOfIteratorHelper12((value || "").split(",")), _step11;
           try {
-            for (_iterator0.s(); !(_step0 = _iterator0.n()).done; ) {
-              var token = _step0.value;
+            for (_iterator11.s(); !(_step11 = _iterator11.n()).done; ) {
+              var token = _step11.value;
               var pair = token.trim().toLowerCase().split(":");
               if (pair.length !== 2 || !pivots[pair[0].trim()] || !pivots[pair[1].trim()]) continue;
               result.push({
@@ -28760,9 +28788,9 @@
               });
             }
           } catch (err) {
-            _iterator0.e(err);
+            _iterator11.e(err);
           } finally {
-            _iterator0.f();
+            _iterator11.f();
           }
           return result;
         }
@@ -29667,11 +29695,35 @@
       }
     } };
   }
+  function _toConsumableArray6(r) {
+    return _arrayWithoutHoles6(r) || _iterableToArray6(r) || _unsupportedIterableToArray16(r) || _nonIterableSpread6();
+  }
+  function _nonIterableSpread6() {
+    throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+  }
+  function _iterableToArray6(r) {
+    if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
+  }
+  function _arrayWithoutHoles6(r) {
+    if (Array.isArray(r)) return _arrayLikeToArray16(r);
+  }
   function _slicedToArray8(r, e) {
     return _arrayWithHoles8(r) || _iterableToArrayLimit8(r, e) || _unsupportedIterableToArray16(r, e) || _nonIterableRest8();
   }
   function _nonIterableRest8() {
     throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+  }
+  function _unsupportedIterableToArray16(r, a) {
+    if (r) {
+      if ("string" == typeof r) return _arrayLikeToArray16(r, a);
+      var t = {}.toString.call(r).slice(8, -1);
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray16(r, a) : void 0;
+    }
+  }
+  function _arrayLikeToArray16(r, a) {
+    (null == a || a > r.length) && (a = r.length);
+    for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
+    return n;
   }
   function _iterableToArrayLimit8(r, l) {
     var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
@@ -29696,30 +29748,6 @@
   }
   function _arrayWithHoles8(r) {
     if (Array.isArray(r)) return r;
-  }
-  function _toConsumableArray6(r) {
-    return _arrayWithoutHoles6(r) || _iterableToArray6(r) || _unsupportedIterableToArray16(r) || _nonIterableSpread6();
-  }
-  function _nonIterableSpread6() {
-    throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
-  }
-  function _unsupportedIterableToArray16(r, a) {
-    if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray16(r, a);
-      var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray16(r, a) : void 0;
-    }
-  }
-  function _iterableToArray6(r) {
-    if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
-  }
-  function _arrayWithoutHoles6(r) {
-    if (Array.isArray(r)) return _arrayLikeToArray16(r);
-  }
-  function _arrayLikeToArray16(r, a) {
-    (null == a || a > r.length) && (a = r.length);
-    for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
-    return n;
   }
   var init_aellux_ext_present = __esm({
     "src/aellux.ext.present.js": function() {
@@ -29790,15 +29818,17 @@
         var interpolatedProgress = false;
         var cssProperties = [["pop-progress", "<number>", "0"], ["unpop-progress", "<number>", "1"], ["present-pop-phase", "<number>", "0"], ["present-unpop-phase", "<number>", "1"], ["from-opacity", OPACITY_SYNTAX, "0"], ["pop-opacity", OPACITY_SYNTAX, "1"], ["unpop-opacity", OPACITY_SYNTAX, "0"], ["from-transform", TRANSFORM_SYNTAX, "scale(0.5)"], ["pop-transform", TRANSFORM_SYNTAX, "scale(1)"], ["unpop-transform", TRANSFORM_SYNTAX, "scale(1.2)"], ["from-height", "*", "0fr"], ["pop-height", "*", "1fr"], ["unpop-height", "*", "0fr"], ["from-width", "*", "0fr"], ["pop-width", "*", "1fr"], ["unpop-width", "*", "0fr"], ["pop-ease", "*", "ease-out"], ["unpop-ease", "*", "ease-in"], ["pop-duration", "<time>", "250ms"], ["unpop-duration", "<time>", "250ms"], ["pop-low-steps", "<integer>", "4"], ["unpop-low-steps", "<integer>", "4"]];
         function init(options) {
-          interpolatedProgress = !!(root2.CSS && typeof root2.CSS.registerProperty === "function" && root2.CSS.supports && root2.CSS.supports("opacity", "clamp(0, 0.5, 1)"));
-          AelluxJs2.registerCssProperty.apply(AelluxJs2, _toConsumableArray6(cssProperties.map(function(_ref) {
+          var descriptors = cssProperties.map(function(_ref) {
             var _ref2 = _slicedToArray8(_ref, 3), name = _ref2[0], syntax = _ref2[1], initialValue = _ref2[2];
             return {
               name: "--ae-".concat(name),
               syntax: syntax,
               initialValue: initialValue
             };
-          })));
+          });
+          var progressRegistered = AelluxJs2.registerCssProperty.apply(AelluxJs2, _toConsumableArray6(descriptors.slice(0, 4)));
+          interpolatedProgress = !!(progressRegistered && root2.CSS.supports && root2.CSS.supports("opacity", "clamp(0, 0.5, 1)"));
+          AelluxJs2.registerCssProperty.apply(AelluxJs2, _toConsumableArray6(descriptors.slice(4)));
           AelluxJs2.mountManager.add({
             extensionName: extensionName,
             selector: presentSelector,
@@ -29925,6 +29955,7 @@
               var transitionStart = options.transitionStart === true;
               var transition = this.transition;
               if (transition) {
+                transition.cancelled = true;
                 transition.replacement = replacement;
                 if (AelluxJs2.motion) AelluxJs2.motion.cancel(this.motionId);
                 if (transition.timeout !== null) {
@@ -30402,7 +30433,7 @@
                       bubbles: true
                     });
                   }
-                  _context2.n = 16;
+                  _context2.n = 17;
                   break;
                 case 13:
                   _context2.p = 13;
@@ -30417,34 +30448,40 @@
                   }
                   if (ownsTransition) restoreMeasuredStyles(element, controller);
                   _t2 = _t && _t.code;
-                  _context2.n = _t2 === AelluxJs2.diagnostics.WARN_INTERRUPTION.code ? 14 : 15;
+                  _context2.n = _t2 === AelluxJs2.diagnostics.WARN_INTERRUPTION.code ? 14 : 16;
                   break;
                 case 14:
+                  if (!(transition && transition.cancelled)) {
+                    _context2.n = 15;
+                    break;
+                  }
+                  return _context2.a(3, 17);
+                case 15:
                   AelluxJs2.diagnostics.warn(AelluxJs2.diagnostics.WARN_INTERRUPTION, {
                     cause: _t,
                     extension: extensionName,
                     element: element,
                     replacement: transition && transition.replacement === true
                   });
-                  return _context2.a(3, 16);
-                case 15:
+                  return _context2.a(3, 17);
+                case 16:
                   AelluxJs2.diagnostics.error(AelluxJs2.diagnostics.ERROR_EXTENSION_TRANSITION, {
                     cause: _t,
                     extension: extensionName,
                     element: element
                   });
-                  return _context2.a(3, 16);
-                case 16:
-                  _context2.p = 16;
+                  return _context2.a(3, 17);
+                case 17:
+                  _context2.p = 17;
                   if (transition && controller.transition === transition) {
                     controller.transition = null;
                     controller.classList.remove(className.willChange);
                   }
-                  return _context2.f(16);
-                case 17:
+                  return _context2.f(17);
+                case 18:
                   return _context2.a(2);
               }
-            }, _callee2, null, [[5, 13, 16, 17]]);
+            }, _callee2, null, [[5, 13, 17, 18]]);
           }));
           return _presentTransition.apply(this, arguments);
         }
@@ -30615,6 +30652,7 @@
           if (!state) return;
           state.revision++;
           groups.delete(group);
+          state.jobs.clear();
           publishGroup(group, state, null);
           var _iterator9 = _createForOfIteratorHelper15(groupMembers(group)), _step9;
           try {
@@ -30736,14 +30774,32 @@
           });
           if (state.selected === selected2 && !changes.length) return state.pending;
           var revision = ++state.revision;
+          var active = group.getAttribute(attr.active);
+          var classes = group.getAttribute("class");
+          var keys = members.map(function(member2) {
+            return member2.getAttribute(attr.key);
+          });
+          var conditions = members.map(function(member2) {
+            return member2.getAttribute(attr.when);
+          });
+          var valid = function valid2() {
+            return groups.get(group) === state && state.revision === revision && group.isConnected && group.hasAttribute(attr.group) && group.getAttribute(attr.active) === active && group.getAttribute("class") === classes && groupMembers(group).length === members.length && members.every(function(member2, index) {
+              return presentElements.has(member2) && member2.isConnected && member2.closest(groupSelector) === group && member2.getAttribute(attr.key) === keys[index] && member2.getAttribute(attr.when) === conditions[index];
+            });
+          };
           var _iterator0 = _createForOfIteratorHelper15(changes), _step0;
           try {
             for (_iterator0.s(); !(_step0 = _iterator0.n()).done; ) {
               var member = _step0.value;
-              if (!AelluxJs2.dispatchFrom(member, member === selected2 ? "BeforePop" : "BeforeUnpop", {
+              var allowed = AelluxJs2.dispatchFrom(member, member === selected2 ? "BeforePop" : "BeforeUnpop", {
                 bubbles: true,
                 cancelable: true
-              })) {
+              });
+              if (!valid()) {
+                queueGroups();
+                return false;
+              }
+              if (!allowed) {
                 if (state.revision === revision) {
                   var _state$selected;
                   var key = ((_state$selected = state.selected) === null || _state$selected === void 0 ? void 0 : _state$selected.getAttribute(attr.key)) || "";
@@ -30751,7 +30807,6 @@
                 }
                 return false;
               }
-              if (groups.get(group) !== state || state.revision !== revision) return false;
             }
           } catch (err) {
             _iterator0.e(err);

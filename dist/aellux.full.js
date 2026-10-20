@@ -27,7 +27,7 @@
   var define_AELLUX_OFFICIAL_EXTENSION_MANIFEST_default;
   var init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST = __esm({
     "<define:__AELLUX_OFFICIAL_EXTENSION_MANIFEST__>"() {
-      define_AELLUX_OFFICIAL_EXTENSION_MANIFEST_default = { schemaVersion: 1, coreVersion: "0.1.0-beta.10", extensions: { preference: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.preference.min.js", integrity: "sha384-mSOgb0DekFTRXXZAgyNrPjamdlSqzL4SSGZYVWgVg+WlG+pBj11xT81v/6Xk43yO", regular: { url: "./aellux.ext.preference.js", integrity: "sha384-MlikpdHSzHzF6kz5+oJGtq3eoFsKTsx/g+FTrf+dFOU8iQGHsCpn4fP1jLlbNrj7" } }, legacy: { url: "./aellux.ext.preference.legacy.min.js", integrity: "sha384-1LMsK0W9J/PoM4tXhFgkYLRY4yWdzVoYmFy4OMDGd8lRdtptKoEb1sI9L1kzNaBu", regular: { url: "./aellux.ext.preference.legacy.js", integrity: "sha384-pozuz43OyfXrnkmuBu6KTM2lqRSqcI5LMgwAtqnzXq8xZGdVqpnmOtrBcYcMskWk" } } }, dependencies: [] }, "state-navigation": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.state-navigation.min.js", integrity: "sha384-wAbgAqjAA6wauuG+iuUtfRwxChd6fTJ0fS22fqnu2r00kouoXJWZ0f7AoTYlqBC6", regular: { url: "./aellux.ext.state-navigation.js", integrity: "sha384-PKJ8HTD7eIYDEg2hOaAJjpMYzLr2fBjBRGmIGG7XzGTzVK0yTjt5HYPO55VbWfdS" } }, legacy: { url: "./aellux.ext.state-navigation.legacy.min.js", integrity: "sha384-YkhfU15Mpk8KiO6TyoVU6z1yCiYWwnsOGE0xVaQ8NrE7IGrxOSUL005g5JeUDdJu", regular: { url: "./aellux.ext.state-navigation.legacy.js", integrity: "sha384-kaEUY0Zpw8K6pcwjm+INA5feXftLK2/N1aFpPr2LCTcetX2uoe2GGd1MJyy7u8rZ" } } }, dependencies: [] }, feedback: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.feedback.min.js", integrity: "sha384-3VP3W84ekK4MIVBQuy5+5P3bGrwOj7bBDfJnjyexZ+yDADf1jQoHEpP2J1OMUgod", regular: { url: "./aellux.ext.feedback.js", integrity: "sha384-RrPf0bRGxf68f/Rjas5MF5zC1GAubWyndCcuiYbgZsPSHGLFsQtQaUgeFX4SQz+h" } }, legacy: { url: "./aellux.ext.feedback.legacy.min.js", integrity: "sha384-zXuZEv63sd3fwaAygmyk9KazQ46KOelsvAtM+0vJ7phDwemVh1FhOjAcbhWVQM/N", regular: { url: "./aellux.ext.feedback.legacy.js", integrity: "sha384-UW1JZ1+liVWV/w3PJdhfIMztOU7zyTw/1rOyyxoxj4YJIHb1xFl8U0xeIBh8jYV7" } } }, dependencies: [], style: { url: "./aellux.ext.feedback.min.css", integrity: "sha384-OBguCYqF+dMD0Pl84C3FlY/+ohUGfW0OyynmXb/PSDEGOyuI/TQJ3EZAoCeJx+Jk", regular: { url: "./aellux.ext.feedback.css", integrity: "sha384-yk4cW+r/Mc1FRS1ZauBHC6KsKb7sxuJ0E9mmt/+AYASAdZXXMK6iuFBR+TOEh/r4" } } }, focus: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.focus.min.js", integrity: "sha384-AXpUv/Ur2Z4cKvO9EqIFqfxxdSQR5j75q0okOAWPvHhSneQ5LPjrOzk6Sl9MOo4a", regular: { url: "./aellux.ext.focus.js", integrity: "sha384-VjQzcnhLRrvRlbVQ0X4/tO0+8gqJXAmIFoeIVimjOud1wRNuBXNnSQHHW9XQPzTe" } }, legacy: { url: "./aellux.ext.focus.legacy.min.js", integrity: "sha384-I5QpUmKsA1T8NiKfKXQgbdG19Ld1ZGCWSmosygO3yGj43tdxp5zCfLyfBuFoHlKu", regular: { url: "./aellux.ext.focus.legacy.js", integrity: "sha384-5/y3J1NC/qMyV9myEj29+wGbqCVI8ICPafSebtJVfl15Qmup6vMiJzveShd3CLnw" } } }, dependencies: [] }, point: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.point.min.js", integrity: "sha384-n540II5oWbHJRt/a8i+Rgb9A3b9dm7hamg1kd3Nz7KdPQDcaa8S823t9fCrgxBWF", regular: { url: "./aellux.ext.point.js", integrity: "sha384-aDj7I5QEH/0+52E3e6yPZ/D0MEsNBdxeET3G5ToVvgczHtksMh3p8S/KOoAapRRN" } }, legacy: { url: "./aellux.ext.point.legacy.min.js", integrity: "sha384-5UmWvQHfmvttz9yeXbilawGCZH20UdR8yNBOE9kRV34wpfWASl8plzgKtLVQGO9M", regular: { url: "./aellux.ext.point.legacy.js", integrity: "sha384-gG/XONYEC1tchBcJ6bUtKYmWFHz0E+50LmMaXDAiqWBKPuwdHZeYm1uXA22lMZuN" } } }, dependencies: [] }, anchor: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.anchor.min.js", integrity: "sha384-Z1mAeOLL6Uig34Gy59/uFS88xLVv6do5qKaJPQeaUfecPoplVrSoVmwOjoClrhLi", regular: { url: "./aellux.ext.anchor.js", integrity: "sha384-FNXsUmIK7V8PtEYNbcPtCo+fAeaGDtkD0JwK8eZ1DdsHdjdj9LHwPmjdJxNlKc/U" } }, legacy: { url: "./aellux.ext.anchor.legacy.min.js", integrity: "sha384-VBjnwxZs4XDX5764sACe6u206w58h0PAkMM4tu4XJFmZHNjc3o/ChZdk2OPS4NZG", regular: { url: "./aellux.ext.anchor.legacy.js", integrity: "sha384-hhKGhGiyl07ZD2ur6D15dkx5NoPOSERTlfw+5tGmP9YL2sWl3ylj2MTx/Blzjt5K" } } }, dependencies: [] }, "ajax-href": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.ajax-href.min.js", integrity: "sha384-VCvADGjweS3kvW0s226GuUqgTuiLz9zMhPU61ZrkYfbDX42l3dbvB4jm1QvC8xio", regular: { url: "./aellux.ext.ajax-href.js", integrity: "sha384-EcFz52TbeSPurZxIukNU/WiujOPlF0E4FvnoR1Y44axiHLzd2+LpSBnBMfwIZ3Ip" } }, legacy: { url: "./aellux.ext.ajax-href.legacy.min.js", integrity: "sha384-me6plEKmddDwM9w625RpMTaa8kCZYsbQU/2dwWKmZSktJ3k6gd08iDLmiQPEQLl4", regular: { url: "./aellux.ext.ajax-href.legacy.js", integrity: "sha384-HaI+joZDWxyoZtD4QrAMJ+W1VjfdpyHcV4tt/hlFoP9SznAAxHO6iDErzOO8LIAz" } } }, dependencies: [] }, scrollbox: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.scrollbox.min.js", integrity: "sha384-MbsMMRhyNfXp50eIj6ybMu3dcxXnbLcM6xK8BAPI1aAJzG3TbCAUCcjKr1SHpSaa", regular: { url: "./aellux.ext.scrollbox.js", integrity: "sha384-Nn4620lov+xo0w32p+rdpQsVas3rPr0OW2NJnYASSruy2gb8ujeRk27pLQM2Gobv" } }, legacy: { url: "./aellux.ext.scrollbox.legacy.min.js", integrity: "sha384-m+v8D6nbzGMHyPhNhbT3urBAy3Nza5CtLGK0vGQtiwPGwtsLvJB9sVuafO3kXdxB", regular: { url: "./aellux.ext.scrollbox.legacy.js", integrity: "sha384-ZIFUP8YDdvLufnr2pZKh12xcW9WV28zeUk9uBtXRKLgsLvzQ3VuU1tMyuKQmZbf9" } } }, dependencies: [] }, "scrollbox-snap": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.scrollbox-snap.min.js", integrity: "sha384-fwr6geiwmDDl/bU88Z8ldI9tIyojBehplcqMI8vn9YC2Y35T8Ko6+inwARkChd6y", regular: { url: "./aellux.ext.scrollbox-snap.js", integrity: "sha384-qjNY5x+ua2KPbtXH3SuITr6N3dLfhUQy1qk487pJUPN/iRe06hIbY5oldYSPcXp2" } }, legacy: { url: "./aellux.ext.scrollbox-snap.legacy.min.js", integrity: "sha384-7SyRprm808E+xN3HarZjNIqewKIyFvTFBG+b7nUbjBPTD5arFdhZzQXzqz/Jxdtd", regular: { url: "./aellux.ext.scrollbox-snap.legacy.js", integrity: "sha384-zMpMGOiRT1bKYrrdNiHPcLkFmvMf52JbQyOq9TW0X+I518FgIrRTjq6Fta6Itfg2" } } }, dependencies: [] }, adaptive: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.adaptive.min.js", integrity: "sha384-UfDhSymI78IbudB2vel0GOI+z4C8m6JCG4Egl6WK9mHvZyOltXgawIbn2iFJH2+w", regular: { url: "./aellux.ext.adaptive.js", integrity: "sha384-AXSW7WI4ZEykJgerhjuscp7u99DkKkTYFD13o1HAnVH1tJYz2u5f9VjsBGca7kSU" } }, legacy: { url: "./aellux.ext.adaptive.legacy.min.js", integrity: "sha384-yOyWKIJaWddRJrbYwriE1lpeuiB2WbeF2fII29R4vIBGMfXi6b6m2IXUHvFqaQTB", regular: { url: "./aellux.ext.adaptive.legacy.js", integrity: "sha384-oRSPNCmFGYjwsrmeBT7r7un76fwNEODcJNmo1ifLgHbWEmoGT07OtdqsyxvfnWeN" } } }, dependencies: [], style: { url: "./aellux.ext.adaptive.min.css", integrity: "sha384-8yUP1PStfDqBCyCskP3k9WLIKgv/yl1nyDhmPz7hsX5NZ4z3ZT3ajolA+RhYlUiG", regular: { url: "./aellux.ext.adaptive.css", integrity: "sha384-HfIjX9Zk0VFRimzPvUaTS5AtwuHJHjXKoM/xbNJXj5vE7bSdBGEzbrBHfbNmYah0" } } }, present: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.present.min.js", integrity: "sha384-lw916mO9YV3rWp4zmBpDIHCFunKKFVzbRceYl+7+iv0MY1AAngCBnGNnNGJhRXmL", regular: { url: "./aellux.ext.present.js", integrity: "sha384-FrKnceZMsFDji2Xyn1MZyQyGcjO2UkPfsLhJhQtza7jdDXHUsy/xZizpFeU1vtHq" } }, legacy: { url: "./aellux.ext.present.legacy.min.js", integrity: "sha384-Dom33L5W4aBqzAft8fKqqyCJTtcpgLyquK6LZMyla7t9/0XbhN2f4aoCP/rBLxAq", regular: { url: "./aellux.ext.present.legacy.js", integrity: "sha384-NSyzjA+b1GrerzXXpYnw8fan02otzFDHaDpiML3p2PhNVxfHgF5pY7/848hQOvN2" } } }, dependencies: [], style: { url: "./aellux.ext.present.min.css", integrity: "sha384-Xx3MuDirlIsArdiSpQ+nRsyKhGUQeGbGrdYaEANsZMp5aaGudWJLID3Iwq5nhWvj", regular: { url: "./aellux.ext.present.css", integrity: "sha384-vYogCkysGYLRQlY+IXCzVeC/TQeAlm/byVFSVzHJNlZUE4Wr3EYiXcQB6rNppdNP" } } } } };
+      define_AELLUX_OFFICIAL_EXTENSION_MANIFEST_default = { schemaVersion: 1, coreVersion: "0.1.0-beta.10", extensions: { preference: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.preference.min.js", integrity: "sha384-mSOgb0DekFTRXXZAgyNrPjamdlSqzL4SSGZYVWgVg+WlG+pBj11xT81v/6Xk43yO", regular: { url: "./aellux.ext.preference.js", integrity: "sha384-MlikpdHSzHzF6kz5+oJGtq3eoFsKTsx/g+FTrf+dFOU8iQGHsCpn4fP1jLlbNrj7" } }, legacy: { url: "./aellux.ext.preference.legacy.min.js", integrity: "sha384-1LMsK0W9J/PoM4tXhFgkYLRY4yWdzVoYmFy4OMDGd8lRdtptKoEb1sI9L1kzNaBu", regular: { url: "./aellux.ext.preference.legacy.js", integrity: "sha384-pozuz43OyfXrnkmuBu6KTM2lqRSqcI5LMgwAtqnzXq8xZGdVqpnmOtrBcYcMskWk" } } }, dependencies: [] }, "state-navigation": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.state-navigation.min.js", integrity: "sha384-wAbgAqjAA6wauuG+iuUtfRwxChd6fTJ0fS22fqnu2r00kouoXJWZ0f7AoTYlqBC6", regular: { url: "./aellux.ext.state-navigation.js", integrity: "sha384-PKJ8HTD7eIYDEg2hOaAJjpMYzLr2fBjBRGmIGG7XzGTzVK0yTjt5HYPO55VbWfdS" } }, legacy: { url: "./aellux.ext.state-navigation.legacy.min.js", integrity: "sha384-YkhfU15Mpk8KiO6TyoVU6z1yCiYWwnsOGE0xVaQ8NrE7IGrxOSUL005g5JeUDdJu", regular: { url: "./aellux.ext.state-navigation.legacy.js", integrity: "sha384-kaEUY0Zpw8K6pcwjm+INA5feXftLK2/N1aFpPr2LCTcetX2uoe2GGd1MJyy7u8rZ" } } }, dependencies: [] }, feedback: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.feedback.min.js", integrity: "sha384-3VP3W84ekK4MIVBQuy5+5P3bGrwOj7bBDfJnjyexZ+yDADf1jQoHEpP2J1OMUgod", regular: { url: "./aellux.ext.feedback.js", integrity: "sha384-RrPf0bRGxf68f/Rjas5MF5zC1GAubWyndCcuiYbgZsPSHGLFsQtQaUgeFX4SQz+h" } }, legacy: { url: "./aellux.ext.feedback.legacy.min.js", integrity: "sha384-zXuZEv63sd3fwaAygmyk9KazQ46KOelsvAtM+0vJ7phDwemVh1FhOjAcbhWVQM/N", regular: { url: "./aellux.ext.feedback.legacy.js", integrity: "sha384-UW1JZ1+liVWV/w3PJdhfIMztOU7zyTw/1rOyyxoxj4YJIHb1xFl8U0xeIBh8jYV7" } } }, dependencies: [], style: { url: "./aellux.ext.feedback.min.css", integrity: "sha384-OBguCYqF+dMD0Pl84C3FlY/+ohUGfW0OyynmXb/PSDEGOyuI/TQJ3EZAoCeJx+Jk", regular: { url: "./aellux.ext.feedback.css", integrity: "sha384-yk4cW+r/Mc1FRS1ZauBHC6KsKb7sxuJ0E9mmt/+AYASAdZXXMK6iuFBR+TOEh/r4" } } }, focus: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.focus.min.js", integrity: "sha384-AXpUv/Ur2Z4cKvO9EqIFqfxxdSQR5j75q0okOAWPvHhSneQ5LPjrOzk6Sl9MOo4a", regular: { url: "./aellux.ext.focus.js", integrity: "sha384-VjQzcnhLRrvRlbVQ0X4/tO0+8gqJXAmIFoeIVimjOud1wRNuBXNnSQHHW9XQPzTe" } }, legacy: { url: "./aellux.ext.focus.legacy.min.js", integrity: "sha384-I5QpUmKsA1T8NiKfKXQgbdG19Ld1ZGCWSmosygO3yGj43tdxp5zCfLyfBuFoHlKu", regular: { url: "./aellux.ext.focus.legacy.js", integrity: "sha384-5/y3J1NC/qMyV9myEj29+wGbqCVI8ICPafSebtJVfl15Qmup6vMiJzveShd3CLnw" } } }, dependencies: [] }, point: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.point.min.js", integrity: "sha384-n540II5oWbHJRt/a8i+Rgb9A3b9dm7hamg1kd3Nz7KdPQDcaa8S823t9fCrgxBWF", regular: { url: "./aellux.ext.point.js", integrity: "sha384-aDj7I5QEH/0+52E3e6yPZ/D0MEsNBdxeET3G5ToVvgczHtksMh3p8S/KOoAapRRN" } }, legacy: { url: "./aellux.ext.point.legacy.min.js", integrity: "sha384-5UmWvQHfmvttz9yeXbilawGCZH20UdR8yNBOE9kRV34wpfWASl8plzgKtLVQGO9M", regular: { url: "./aellux.ext.point.legacy.js", integrity: "sha384-gG/XONYEC1tchBcJ6bUtKYmWFHz0E+50LmMaXDAiqWBKPuwdHZeYm1uXA22lMZuN" } } }, dependencies: [] }, anchor: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.anchor.min.js", integrity: "sha384-6nlcBmIvZ4P04uT+M7N2Jk/PTK8OGnCPnTOaTh1rfVJBkxgIwhocG9KeALHJBAMJ", regular: { url: "./aellux.ext.anchor.js", integrity: "sha384-ApVZhvYt5l7ewrdGL3/ovLglz3WR8HryXe4p4qUIKypko4hOyniMX3jMfWC8qOgl" } }, legacy: { url: "./aellux.ext.anchor.legacy.min.js", integrity: "sha384-IRELgHShZqO2j1cfMmpq2qce9I5hIO0/TrXp2on2I7MsMBecKG28F20/459tInQX", regular: { url: "./aellux.ext.anchor.legacy.js", integrity: "sha384-Lrkb8hqknnuGgYmbx0IwU97gU05PYKqFqbW0b0UQ0TovDkQq+PXpDQRsOTczHgW8" } } }, dependencies: [] }, "ajax-href": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.ajax-href.min.js", integrity: "sha384-VCvADGjweS3kvW0s226GuUqgTuiLz9zMhPU61ZrkYfbDX42l3dbvB4jm1QvC8xio", regular: { url: "./aellux.ext.ajax-href.js", integrity: "sha384-EcFz52TbeSPurZxIukNU/WiujOPlF0E4FvnoR1Y44axiHLzd2+LpSBnBMfwIZ3Ip" } }, legacy: { url: "./aellux.ext.ajax-href.legacy.min.js", integrity: "sha384-me6plEKmddDwM9w625RpMTaa8kCZYsbQU/2dwWKmZSktJ3k6gd08iDLmiQPEQLl4", regular: { url: "./aellux.ext.ajax-href.legacy.js", integrity: "sha384-HaI+joZDWxyoZtD4QrAMJ+W1VjfdpyHcV4tt/hlFoP9SznAAxHO6iDErzOO8LIAz" } } }, dependencies: [] }, scrollbox: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.scrollbox.min.js", integrity: "sha384-MbsMMRhyNfXp50eIj6ybMu3dcxXnbLcM6xK8BAPI1aAJzG3TbCAUCcjKr1SHpSaa", regular: { url: "./aellux.ext.scrollbox.js", integrity: "sha384-Nn4620lov+xo0w32p+rdpQsVas3rPr0OW2NJnYASSruy2gb8ujeRk27pLQM2Gobv" } }, legacy: { url: "./aellux.ext.scrollbox.legacy.min.js", integrity: "sha384-m+v8D6nbzGMHyPhNhbT3urBAy3Nza5CtLGK0vGQtiwPGwtsLvJB9sVuafO3kXdxB", regular: { url: "./aellux.ext.scrollbox.legacy.js", integrity: "sha384-ZIFUP8YDdvLufnr2pZKh12xcW9WV28zeUk9uBtXRKLgsLvzQ3VuU1tMyuKQmZbf9" } } }, dependencies: [] }, "scrollbox-snap": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.scrollbox-snap.min.js", integrity: "sha384-fwr6geiwmDDl/bU88Z8ldI9tIyojBehplcqMI8vn9YC2Y35T8Ko6+inwARkChd6y", regular: { url: "./aellux.ext.scrollbox-snap.js", integrity: "sha384-qjNY5x+ua2KPbtXH3SuITr6N3dLfhUQy1qk487pJUPN/iRe06hIbY5oldYSPcXp2" } }, legacy: { url: "./aellux.ext.scrollbox-snap.legacy.min.js", integrity: "sha384-7SyRprm808E+xN3HarZjNIqewKIyFvTFBG+b7nUbjBPTD5arFdhZzQXzqz/Jxdtd", regular: { url: "./aellux.ext.scrollbox-snap.legacy.js", integrity: "sha384-zMpMGOiRT1bKYrrdNiHPcLkFmvMf52JbQyOq9TW0X+I518FgIrRTjq6Fta6Itfg2" } } }, dependencies: [] }, adaptive: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.adaptive.min.js", integrity: "sha384-UfDhSymI78IbudB2vel0GOI+z4C8m6JCG4Egl6WK9mHvZyOltXgawIbn2iFJH2+w", regular: { url: "./aellux.ext.adaptive.js", integrity: "sha384-AXSW7WI4ZEykJgerhjuscp7u99DkKkTYFD13o1HAnVH1tJYz2u5f9VjsBGca7kSU" } }, legacy: { url: "./aellux.ext.adaptive.legacy.min.js", integrity: "sha384-yOyWKIJaWddRJrbYwriE1lpeuiB2WbeF2fII29R4vIBGMfXi6b6m2IXUHvFqaQTB", regular: { url: "./aellux.ext.adaptive.legacy.js", integrity: "sha384-oRSPNCmFGYjwsrmeBT7r7un76fwNEODcJNmo1ifLgHbWEmoGT07OtdqsyxvfnWeN" } } }, dependencies: [], style: { url: "./aellux.ext.adaptive.min.css", integrity: "sha384-8yUP1PStfDqBCyCskP3k9WLIKgv/yl1nyDhmPz7hsX5NZ4z3ZT3ajolA+RhYlUiG", regular: { url: "./aellux.ext.adaptive.css", integrity: "sha384-HfIjX9Zk0VFRimzPvUaTS5AtwuHJHjXKoM/xbNJXj5vE7bSdBGEzbrBHfbNmYah0" } } }, present: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.present.min.js", integrity: "sha384-3s2v8Jf4LgXrXj2S00lspOT3+7K9RfZt8HARTc0yv67Dw++abzDLnelJw8dWFJfB", regular: { url: "./aellux.ext.present.js", integrity: "sha384-4OM9HKTiSweGq37rRjdAKlFccImCIYMiJ5+2e5wQSRlS4u5VSlUmzdkj0JSdWi43" } }, legacy: { url: "./aellux.ext.present.legacy.min.js", integrity: "sha384-4ELNAMs4Y295Zxb3rXKBnCYgJdHqlJjBMxutNvokDPXFmPjN8R+TAs9z2u7undfT", regular: { url: "./aellux.ext.present.legacy.js", integrity: "sha384-ZSViyggG+nVnCnn9LjJt/651loG3IJ9qwo2bKoi2/iUPdS+rXirtqWDLShtbA2ui" } } }, dependencies: [], style: { url: "./aellux.ext.present.min.css", integrity: "sha384-Xx3MuDirlIsArdiSpQ+nRsyKhGUQeGbGrdYaEANsZMp5aaGudWJLID3Iwq5nhWvj", regular: { url: "./aellux.ext.present.css", integrity: "sha384-vYogCkysGYLRQlY+IXCzVeC/TQeAlm/byVFSVzHJNlZUE4Wr3EYiXcQB6rNppdNP" } } } } };
     }
   });
 
@@ -1289,6 +1289,7 @@
             active: false,
             revision: 0,
             target: null,
+            resolvedTarget: null,
             reference: null,
             group: null,
             conflict: false,
@@ -1318,10 +1319,7 @@
             AelluxJs2.onEvent(root2, "$resize", scheduleUpdate);
             AelluxJs2.on("PresentGroupChange", onGroupChange);
             if (typeof root2.MutationObserver === "function") {
-              mutations = new root2.MutationObserver(() => {
-                refreshAssociations();
-                for (const anchor of anchors.keys()) scheduleAnchor(anchor);
-              });
+              mutations = new root2.MutationObserver(onMutations);
               mutations.observe(document, {
                 subtree: true,
                 childList: true,
@@ -1334,7 +1332,9 @@
                   groupAnchorAttribute,
                   AelluxJs2.attr("reduced-motion"),
                   "id",
-                  "hidden"
+                  "hidden",
+                  "class",
+                  "style"
                 ]
               });
             }
@@ -1385,6 +1385,31 @@
           var _a;
           for (const [element, state] of anchors)
             if (state.group === ((_a = event.detail) == null ? void 0 : _a.group)) scheduleAnchor(element);
+        }
+        function onMutations(records) {
+          var _a;
+          const affected = /* @__PURE__ */ new Set();
+          const associationSelector = `[${groupAnchorAttribute}],[${attribute}]`;
+          const containsAssociation = (node) => node.nodeType === 1 && (node.matches(associationSelector) || node.querySelector(associationSelector));
+          let associationsChanged = false;
+          for (const record of records) {
+            const node = record.target;
+            const structural = record.type === "childList";
+            const visual = record.attributeName === "class" || record.attributeName === "style";
+            if (structural ? [...record.addedNodes, ...record.removedNodes].some(containsAssociation) : record.attributeName === groupAnchorAttribute || record.attributeName === groupAttribute || (record.attributeName === "id" || record.attributeName === attribute) && (anchors.has(node) || node.hasAttribute(attribute))) associationsChanged = true;
+            for (const [element, state] of anchors) {
+              if (visual) {
+                if (node !== element && state.resolvedTarget && node.contains(state.resolvedTarget)) affected.add(element);
+                continue;
+              }
+              if (node === element || node === document.documentElement || node.contains(element) || state.resolvedTarget && node.contains(state.resolvedTarget) || structural && ((_a = state.reference) == null ? void 0 : _a.contains(node)) || !state.group && element.hasAttribute(targetAttribute) && resolveElement(element.getAttribute(targetAttribute)) !== state.resolvedTarget) affected.add(element);
+            }
+          }
+          if (associationsChanged) {
+            refreshAssociations();
+            for (const element of anchors.keys()) affected.add(element);
+          }
+          for (const element of affected) scheduleAnchor(element);
         }
         function associationDiagnostic(group, reason) {
           AelluxJs2.diagnostics.warn(
@@ -1538,6 +1563,7 @@
           const current = () => anchors.get(element) === state && state.revision === revision;
           const retry = () => ensureLatest && anchors.get(element) === state ? updateAnchor(element, true) : void 0;
           const target = effectiveTarget(element, state);
+          state.resolvedTarget = target;
           const candidates = parseCandidates(element.getAttribute(attribute));
           if (!target || !target.isConnected || !candidates.length || circularTarget(element, target)) {
             if (target && circularTarget(element, target))
@@ -1571,7 +1597,6 @@
           if (!state.active) {
             await AelluxJs2.waitLayout.update(state.styleLayoutId, () => {
               if (!current()) return;
-              applyBaseStyles(element);
               state.active = true;
             });
             if (!current()) return retry();
@@ -1619,7 +1644,6 @@
             setValue(style, "--ae-anchor-target-height", `${placement.height}px`);
             setValue(style, "--ae-anchor-pivot-x", `${selected.pivotX}px`);
             setValue(style, "--ae-anchor-pivot-y", `${selected.pivotY}px`);
-            for (const name of baseProperties) element.style.removeProperty(name);
             element.classList.add(anchoredClass);
             state.lastUpdateAt = now();
             state.lastPlacement = placement;
@@ -1749,19 +1773,6 @@
           state.reference = reference;
           if (reference) AelluxJs2.onEvent(reference, layoutEvent, state.layoutListener);
         }
-        function applyBaseStyles(element) {
-          element.style.setProperty("position", "absolute");
-          element.style.setProperty("left", "0px");
-          element.style.setProperty("top", "0px");
-          element.style.setProperty(
-            "transform",
-            "translate3d(var(--ae-anchor-x, 0px), var(--ae-anchor-y, 0px), 0)"
-          );
-          element.style.setProperty(
-            "transform-origin",
-            "var(--ae-anchor-origin-x, 50%) var(--ae-anchor-origin-y, 0%)"
-          );
-        }
         function deactivate(element, state, memory = elementMemories.get(element)) {
           stopSwitch(element, state);
           if (state.reference) AelluxJs2.offEvent(state.reference, layoutEvent, state.layoutListener);
@@ -1779,6 +1790,7 @@
           element.classList.remove(switchingClass);
         }
         function setValue(style, name, value) {
+          if (style.getPropertyValue(name) === value && !style.getPropertyPriority(name)) return;
           if (style.getPropertyPriority(name)) style.removeProperty(name);
           style.setProperty(name, value);
         }
@@ -2300,10 +2312,10 @@
           ["unpop-low-steps", "<integer>", "4"]
         ];
         function init(options) {
-          interpolatedProgress = !!(root2.CSS && typeof root2.CSS.registerProperty === "function" && root2.CSS.supports && root2.CSS.supports("opacity", "clamp(0, 0.5, 1)"));
-          AelluxJs2.registerCssProperty(
-            ...cssProperties.map(([name, syntax, initialValue]) => ({ name: `--ae-${name}`, syntax, initialValue }))
-          );
+          const descriptors = cssProperties.map(([name, syntax, initialValue]) => ({ name: `--ae-${name}`, syntax, initialValue }));
+          const progressRegistered = AelluxJs2.registerCssProperty(...descriptors.slice(0, 4));
+          interpolatedProgress = !!(progressRegistered && root2.CSS.supports && root2.CSS.supports("opacity", "clamp(0, 0.5, 1)"));
+          AelluxJs2.registerCssProperty(...descriptors.slice(4));
           AelluxJs2.mountManager.add({
             extensionName,
             selector: presentSelector,
@@ -2404,6 +2416,7 @@
               const transitionStart = options.transitionStart === true;
               const transition = this.transition;
               if (transition) {
+                transition.cancelled = true;
                 transition.replacement = replacement;
                 if (AelluxJs2.motion) AelluxJs2.motion.cancel(this.motionId);
                 if (transition.timeout !== null) {
@@ -2797,6 +2810,7 @@
             if (ownsTransition) restoreMeasuredStyles(element, controller);
             switch (error && error.code) {
               case AelluxJs2.diagnostics.WARN_INTERRUPTION.code:
+                if (transition && transition.cancelled) break;
                 AelluxJs2.diagnostics.warn(
                   AelluxJs2.diagnostics.WARN_INTERRUPTION,
                   {
@@ -2965,6 +2979,7 @@
           if (!state) return;
           state.revision++;
           groups.delete(group);
+          state.jobs.clear();
           publishGroup(group, state, null);
           for (const member of groupMembers(group)) {
             const controller = presentElements.get(member);
@@ -3067,19 +3082,28 @@
           });
           if (state.selected === selected2 && !changes.length) return state.pending;
           const revision = ++state.revision;
+          const active = group.getAttribute(attr.active);
+          const classes = group.getAttribute("class");
+          const keys = members.map((member) => member.getAttribute(attr.key));
+          const conditions = members.map((member) => member.getAttribute(attr.when));
+          const valid = () => groups.get(group) === state && state.revision === revision && group.isConnected && group.hasAttribute(attr.group) && group.getAttribute(attr.active) === active && group.getAttribute("class") === classes && groupMembers(group).length === members.length && members.every((member, index) => presentElements.has(member) && member.isConnected && member.closest(groupSelector) === group && member.getAttribute(attr.key) === keys[index] && member.getAttribute(attr.when) === conditions[index]);
           for (const member of changes) {
-            if (!AelluxJs2.dispatchFrom(
+            const allowed = AelluxJs2.dispatchFrom(
               member,
               member === selected2 ? "BeforePop" : "BeforeUnpop",
               { bubbles: true, cancelable: true }
-            )) {
+            );
+            if (!valid()) {
+              queueGroups();
+              return false;
+            }
+            if (!allowed) {
               if (state.revision === revision) {
                 const key = ((_a = state.selected) == null ? void 0 : _a.getAttribute(attr.key)) || "";
                 if (group.getAttribute(attr.active) !== key) group.setAttribute(attr.active, key);
               }
               return false;
             }
-            if (groups.get(group) !== state || state.revision !== revision) return false;
           }
           state.selected = selected2;
           let complete;
@@ -4711,6 +4735,7 @@
         return;
       }
       let endTime = 0;
+      operation.animations = animations;
       for (const animation of animations) {
         animation.pause();
         animation.currentTime = 0;
@@ -4720,7 +4745,6 @@
         applyAelluxEasing(operation, animation);
         if (!onlyTransformAndOpacity(animation)) operation.conservative = true;
       }
-      operation.animations = animations;
       operation.endTime = endTime;
       operation.start = now();
       operation.controlled = true;
@@ -4802,14 +4826,6 @@
     }
     function nativeWait(operation) {
       const animations = typeof operation.element.getAnimations === "function" ? operation.element.getAnimations().filter((animation) => !operation.before.has(animation)) : [];
-      if (animations.length && animations.every((animation) => animation.finished && typeof animation.finished.then === "function")) {
-        return Promise.all(animations.map((animation) => animation.finished.catch(() => void 0))).then(() => {
-          if (operations.get(operation.id) === operation) operations.delete(operation.id);
-          return { id: operation.id, status: operation.cancelled ? "aborted" : "completed", mode: "native" };
-        });
-      }
-      const explicit = Number(operation.options.nativeDuration);
-      const duration = Number.isFinite(explicit) ? explicit : cssMotionTime(operation.element);
       return new Promise((resolve) => {
         operation.nativeResolve = resolve;
         const complete = () => {
@@ -4818,6 +4834,12 @@
           operation.nativeResolve = null;
           resolve({ id: operation.id, status: "completed", mode: "native" });
         };
+        if (animations.length && animations.every((animation) => animation.finished && typeof animation.finished.then === "function")) {
+          Promise.all(animations.map((animation) => animation.finished.catch(() => void 0))).then(complete);
+          return;
+        }
+        const explicit = Number(operation.options.nativeDuration);
+        const duration = Number.isFinite(explicit) ? explicit : cssMotionTime(operation.element);
         if (Number.isFinite(duration) && duration > 0) {
           operation.nativeTimer = root2.setTimeout(complete, duration);
         } else {

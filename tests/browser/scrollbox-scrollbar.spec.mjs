@@ -791,7 +791,7 @@ test("hidden overflow hides only the scrollbar on that axis", async ({ page }) =
   await expect(vertical).toHaveCSS("display", "block");
 });
 
-test("scrollbox batches repeated scroll measurements into one frame", async ({ page }) => {
+test("scrollbox batches scroll measurements per frame, including a later scroll event", async ({ page }) => {
   await setup(page, `<div id="box" data-ae-scrollbox data-ae-scrollbar="vertical"
     style="width:120px;height:120px;overflow-y:auto">
     <div style="height:600px"></div>
@@ -801,18 +801,27 @@ test("scrollbox batches repeated scroll measurements into one frame", async ({ p
   const result = await page.evaluate(async () => {
     const element = document.getElementById("box");
     const original = window.getComputedStyle;
-    let reads = 0;
+    const readsByFrame = new Map();
     window.getComputedStyle = function (target, ...args) {
-      if (target === element) reads++;
+      if (target === element) {
+        const frame = document.timeline.currentTime;
+        readsByFrame.set(frame, (readsByFrame.get(frame) || 0) + 1);
+      }
       return original.call(this, target, ...args);
     };
     element.scrollTo({ top: 240, behavior: "instant" });
     for (let index = 0; index < 40; index++)
       element.dispatchEvent(new Event("scroll"));
-    await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    // A native scroll may arrive after the first batched read. Reproduce that
+    // boundary explicitly and measure batching per frame, not across frames.
+    await new Promise(resolve => requestAnimationFrame(() => {
+      element.dispatchEvent(new Event("scroll"));
+      requestAnimationFrame(() => requestAnimationFrame(resolve));
+    }));
     window.getComputedStyle = original;
-    return { reads, progress: Number(element.style.getPropertyValue("--ae-scroll-y-progress")) };
+    return { reads: [...readsByFrame.values()], progress: Number(element.style.getPropertyValue("--ae-scroll-y-progress")) };
   });
-  expect(result.reads).toBeLessThanOrEqual(2);
+  expect(result.reads.length).toBeGreaterThan(0);
+  expect(Math.max(...result.reads)).toBeLessThanOrEqual(2);
   expect(result.progress).toBeCloseTo(0.5, 2);
 });
