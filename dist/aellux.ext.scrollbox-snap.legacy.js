@@ -300,6 +300,17 @@
       state.onTouchEnd = function(event) {
         return endGesture(state, TOUCH, event);
       };
+      state.onBlur = function() {
+        if (!state.activePointers.size && !state.activeTouches.size) return;
+        state.activePointers.clear();
+        state.activeTouches.clear();
+        state.pointerScroll = null;
+        state.flick = null;
+        setSuspension(state, {
+          reason: "gesture",
+          active: false
+        });
+      };
       state.onScrollboxWheel = function(event) {
         var _event$detail;
         if (handleWheel(state, (_event$detail = event.detail) === null || _event$detail === void 0 ? void 0 : _event$detail.event)) event.preventDefault();
@@ -329,6 +340,7 @@
       AelluxJs.onEvent(root, POINTER_CANCEL_EVENT, state.onPointerEnd, true);
       AelluxJs.onEvent(root, TOUCH_END_EVENT, state.onTouchEnd, true);
       AelluxJs.onEvent(root, TOUCH_CANCEL_EVENT, state.onTouchEnd, true);
+      AelluxJs.onEvent(root, "$blur", state.onBlur);
       observe(state);
       configure(state);
     }
@@ -357,6 +369,7 @@
       AelluxJs.offEvent(root, POINTER_CANCEL_EVENT, state.onPointerEnd, true);
       AelluxJs.offEvent(root, TOUCH_END_EVENT, state.onTouchEnd, true);
       AelluxJs.offEvent(root, TOUCH_CANCEL_EVENT, state.onTouchEnd, true);
+      AelluxJs.offEvent(root, "$blur", state.onBlur);
       restoreItems(state);
       element.classList.remove(readyClass, suspendedClass);
       states.delete(element);
@@ -616,7 +629,26 @@
         }
       }
       state.target = null;
+      state.pointerScroll = null;
+      state.flick = null;
       clearTimer(state, "timeout");
+      if (kind === POINTER && event.pointerType !== TOUCH) {
+        var element = state.element, left = element.scrollLeft, top = element.scrollTop;
+        setSuspension(state, {
+          reason: "gesture",
+          active: true
+        });
+        element.scrollTo({
+          left: left > 0 ? left - 1 : 1,
+          top: top > 0 ? top - 1 : 1,
+          behavior: INSTANT
+        });
+        element.scrollTo({
+          left: left,
+          top: top,
+          behavior: INSTANT
+        });
+      }
     }
     function endGesture(state, kind, event) {
       var active = kind === POINTER ? state.activePointers : state.activeTouches;
@@ -634,7 +666,10 @@
           _iterator5.f();
         }
       }
-      if (!state.activePointers.size && !state.activeTouches.size) scheduleSettle(state);
+      if (!state.activePointers.size && !state.activeTouches.size) setSuspension(state, {
+        reason: "gesture",
+        active: false
+      });
     }
     function scheduleSettle(state) {
       if (state.activePointers.size || state.activeTouches.size || state.suspensions.size) return;

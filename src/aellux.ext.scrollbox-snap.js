@@ -104,6 +104,14 @@
     state.onPointerEnd = event => endGesture(state, POINTER, event);
     state.onTouchStart = event => beginGesture(state, TOUCH, event);
     state.onTouchEnd = event => endGesture(state, TOUCH, event);
+    state.onBlur = () => {
+      if (!state.activePointers.size && !state.activeTouches.size) return;
+      state.activePointers.clear();
+      state.activeTouches.clear();
+      state.pointerScroll = null;
+      state.flick = null;
+      setSuspension(state, { reason: "gesture", active: false });
+    };
     state.onScrollboxWheel = event => {
       if (handleWheel(state, event.detail?.event)) event.preventDefault();
     };
@@ -122,6 +130,7 @@
     AelluxJs.onEvent(root, POINTER_CANCEL_EVENT, state.onPointerEnd, true);
     AelluxJs.onEvent(root, TOUCH_END_EVENT, state.onTouchEnd, true);
     AelluxJs.onEvent(root, TOUCH_CANCEL_EVENT, state.onTouchEnd, true);
+    AelluxJs.onEvent(root, "$blur", state.onBlur);
     observe(state);
     configure(state);
   }
@@ -151,6 +160,7 @@
     AelluxJs.offEvent(root, POINTER_CANCEL_EVENT, state.onPointerEnd, true);
     AelluxJs.offEvent(root, TOUCH_END_EVENT, state.onTouchEnd, true);
     AelluxJs.offEvent(root, TOUCH_CANCEL_EVENT, state.onTouchEnd, true);
+    AelluxJs.offEvent(root, "$blur", state.onBlur);
     restoreItems(state);
     element.classList.remove(readyClass, suspendedClass);
     states.delete(element);
@@ -378,14 +388,28 @@
     if (kind === POINTER) active.add(event.pointerId);
     else for (const touch of event.changedTouches) active.add(touch.identifier);
     state.target = null;
+    state.pointerScroll = null;
+    state.flick = null;
     clearTimer(state, "timeout");
+    if (kind === POINTER && event.pointerType !== TOUCH) {
+      const element = state.element, left = element.scrollLeft, top = element.scrollTop;
+      // Suspend CSS snap before stopping smooth scrolling so the current
+      // position stays fixed until PDS starts or the pointer is released.
+      setSuspension(state, { reason: "gesture", active: true });
+      // A same-position scroll does not cancel smooth motion in every engine.
+      // Take a one-pixel step and restore the position within the same task.
+      element.scrollTo({ left: left > 0 ? left - 1 : 1,
+        top: top > 0 ? top - 1 : 1, behavior: INSTANT });
+      element.scrollTo({ left, top, behavior: INSTANT });
+    }
   }
 
   function endGesture(state, kind, event) {
     const active = kind === POINTER ? state.activePointers : state.activeTouches;
     if (kind === POINTER) active.delete(event.pointerId);
     else for (const touch of event.changedTouches) active.delete(touch.identifier);
-    if (!state.activePointers.size && !state.activeTouches.size) scheduleSettle(state);
+    if (!state.activePointers.size && !state.activeTouches.size)
+      setSuspension(state, { reason: "gesture", active: false });
   }
 
   function scheduleSettle(state) {

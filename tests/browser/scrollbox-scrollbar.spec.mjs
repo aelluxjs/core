@@ -755,15 +755,15 @@ test("the horizontal thumb maps its drag to horizontal scroll", async ({ page })
     const size = Number.parseFloat(element.style.getPropertyValue("--ae-scrollbar-thumb-size"));
     return Math.abs(position + size / 2 - 80);
   })).toBeLessThan(1.5);
-  const thumbPosition = await track.evaluate(element =>
-    Number.parseFloat(element.style.getPropertyValue("--ae-scrollbar-thumb-position")));
   const horizontalThumb = await track.evaluate(element => {
     const before = getComputedStyle(element, "::before");
     return { size: Number.parseFloat(before.width),
-      position: new DOMMatrixReadOnly(before.transform).m41 };
+      position: new DOMMatrixReadOnly(before.transform).m41,
+      expectedPosition: Number.parseFloat(element.style.getPropertyValue("--ae-scrollbar-thumb-position")) };
   });
   expect(horizontalThumb.size).toBeCloseTo(thumb, 1);
-  expect(horizontalThumb.position).toBeCloseTo(thumbPosition, 0);
+  expect(horizontalThumb.position).toBeCloseTo(horizontalThumb.expectedPosition, 0);
+  const thumbPosition = horizontalThumb.expectedPosition;
   await page.mouse.move(rect.x + thumbPosition + thumb / 2, rect.y + 4);
   await page.mouse.down();
   await page.mouse.move(rect.x + 95, rect.y + 4, { steps: 5 });

@@ -1193,6 +1193,217 @@ for (const axis of ["x", "y"]) {
   });
 }
 
+for (const axis of ["x", "y"]) {
+  for (const textOrigin of [false, true]) {
+    for (const trigger of ["controller", "wheel", "flick"]) {
+      test(`new ${axis} pointer press stops ${trigger} snap ${textOrigin ? "during the text selection wait" : "before the drag threshold"}`,
+        async ({ page }) => {
+          await setup(page, `<div id="gallery" data-ae-scrollbox="pointer"
+            data-ae-scrollbox-snap="${axis === "x" ? "horizontal" : "vertical"}"
+            style="width:100px;height:100px;overflow-${axis}:auto;overflow-${axis === "x" ? "y" : "x"}:hidden;font:12px/16px monospace">
+            <div style="display:flex;flex-direction:${axis === "x" ? "row" : "column"};width:${axis === "x" ? 3000 : 300}px">
+              ${Array.from({ length: 10 }, () => `<div data-ae-snap-item
+                style="flex:none;width:300px;height:300px;user-select:${textOrigin ? "text" : "none"}">${"selectable words ".repeat(60)}</div>`).join("")}
+            </div>
+          </div>`);
+          const result = await page.evaluate(async ({ axis, textOrigin, trigger }) => {
+            const element = document.getElementById("gallery");
+            const position = () => axis === "x" ? element.scrollLeft : element.scrollTop;
+            const point = await new Promise((resolve, reject) => {
+              const interrupt = () => {
+                if (position() <= 110) return;
+                element.removeEventListener("scroll", interrupt);
+                const box = element.getBoundingClientRect();
+                let x = box.left + 20, y = box.top + 20, target = element;
+                if (textOrigin) {
+                  for (const item of element.querySelectorAll("[data-ae-snap-item]")) {
+                    const range = document.createRange();
+                    range.selectNodeContents(item);
+                    const rect = Array.from(range.getClientRects()).find(rect =>
+                      rect.right > box.left + 8 && rect.left < box.left + 90 &&
+                      rect.bottom > box.top + 8 && rect.top < box.top + 90);
+                    if (!rect) continue;
+                    target = item;
+                    x = Math.max(box.left + 8, rect.left + 2);
+                    y = Math.max(box.top + 8, rect.top + 2);
+                    break;
+                  }
+                  if (target === element) {
+                    reject(new Error("No visible text for the selection wait"));
+                    return;
+                  }
+                }
+                const send = (type, distance) => new PointerEvent(type, {
+                  bubbles: true, cancelable: true, isPrimary: true, pointerId: 308,
+                  pointerType: "mouse", button: 0, buttons: type === "pointerup" ? 0 : 1,
+                  clientX: x - (axis === "x" ? distance : 0),
+                  clientY: y - (axis === "y" ? distance : 0)
+                });
+                const before = position();
+                target.dispatchEvent(send("pointerdown", 0));
+                window.dispatchEvent(send("pointermove", textOrigin ? 2 : 0.5));
+                resolve({ before, immediate: position(), send });
+              };
+              element.addEventListener("scroll", interrupt);
+              if (trigger === "controller") {
+                AelluxJs.mountManager.controller("gallery").scrollbox.goto(8);
+              } else if (trigger === "wheel") {
+                element.dispatchEvent(new WheelEvent("wheel", {
+                  bubbles: true, cancelable: true, [axis === "x" ? "deltaX" : "deltaY"]: 80
+                }));
+              } else {
+                const rect = element.getBoundingClientRect();
+                const send = (type, distance) => new PointerEvent(type, {
+                  bubbles: true, cancelable: true, isPrimary: true, pointerId: 307,
+                  pointerType: "mouse", button: 0, buttons: type === "pointerup" ? 0 : 1,
+                  clientX: rect.left + 70 - (axis === "x" ? distance : 0),
+                  clientY: rect.top + 70 - (axis === "y" ? distance : 0)
+                });
+                element.dispatchEvent(send("pointerdown", 0));
+                window.dispatchEvent(send("pointermove", 2));
+                window.dispatchEvent(send("pointerup", 2));
+              }
+            });
+            await new Promise(resolve => setTimeout(resolve, 60));
+            const duringWait = position();
+            await new Promise(resolve => setTimeout(resolve, 120));
+            const held = position();
+            const active = element.classList.contains("ae--pointerscrolling");
+            if (!textOrigin) window.dispatchEvent(point.send("pointermove", 2));
+            const moved = position();
+            window.dispatchEvent(point.send("pointerup", 2));
+            return { before: point.before, immediate: point.immediate, duringWait,
+              held, active, moved };
+          }, { axis, textOrigin, trigger });
+          expect(result.immediate).toBe(result.before);
+          expect(result.duringWait).toBeGreaterThanOrEqual(result.before);
+          expect(result.duringWait).toBeLessThanOrEqual(result.before + (textOrigin ? 2 : 0));
+          expect(result.held).toBe(result.before + (textOrigin ? 2 : 0));
+          expect(result.active).toBe(textOrigin);
+          expect(result.moved).toBe(result.before + 2);
+          await expect.poll(() => page.evaluate(() => {
+            const element = document.getElementById("gallery");
+            return getComputedStyle(element).scrollSnapType;
+          })).toBe(`${axis} mandatory`);
+        });
+    }
+  }
+}
+
+for (const ending of ["pointercancel", "blur"]) {
+  test(`${ending} restores snap after a pointer press without dragging`, async ({ page }) => {
+    await setup(page, `<div id="gallery" data-ae-scrollbox="pointer" data-ae-scrollbox-snap
+      style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden">
+      <div style="display:flex;width:300px">
+        ${'<div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>'.repeat(3)}
+      </div>
+    </div>`);
+    const during = await page.evaluate(ending => {
+      const element = document.getElementById("gallery"), rect = element.getBoundingClientRect();
+      element.dispatchEvent(new PointerEvent("pointerdown", {
+        bubbles: true, cancelable: true, isPrimary: true, pointerId: 309,
+        pointerType: "mouse", button: 0, buttons: 1,
+        clientX: rect.left + 50, clientY: rect.top + 50
+      }));
+      const during = getComputedStyle(element).scrollSnapType;
+      window.dispatchEvent(ending === "blur" ? new Event("blur") :
+        new PointerEvent("pointercancel", { pointerId: 309, pointerType: "mouse" }));
+      return during;
+    }, ending);
+    expect(during).toBe("none");
+    await expect.poll(() => page.evaluate(() => getComputedStyle(
+      document.getElementById("gallery")).scrollSnapType)).toBe("x mandatory");
+  });
+}
+
+test("real mouse interrupts a flick and only the new drag moves the held box", async ({ page }) => {
+  await setup(page, `<div id="gallery" data-ae-scrollbox="pointer" data-ae-scrollbox-snap
+    style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden">
+    <div style="display:flex;width:1500px">
+      ${'<div data-ae-snap-item style="flex:none;width:300px;height:100px"></div>'.repeat(5)}
+    </div>
+  </div>`);
+  const rect = await page.locator("#gallery").boundingBox();
+  await page.evaluate(() => {
+    const element = document.getElementById("gallery"), rect = element.getBoundingClientRect();
+    const send = (type, distance) => new PointerEvent(type, {
+      bubbles: true, cancelable: true, isPrimary: true, pointerId: 313, pointerType: "mouse",
+      button: 0, buttons: type === "pointerup" ? 0 : 1,
+      clientX: rect.left + 70 - distance, clientY: rect.top + 50
+    });
+    element.dispatchEvent(send("pointerdown", 0));
+    window.dispatchEvent(send("pointermove", 2));
+    window.dispatchEvent(send("pointerup", 2));
+  });
+  await page.waitForFunction(() => {
+    const left = document.getElementById("gallery").scrollLeft;
+    return left > 110 && left < 400;
+  });
+  await page.mouse.move(rect.x + 30, rect.y + 50);
+  await page.mouse.down();
+  const position = () => page.evaluate(() => document.getElementById("gallery").scrollLeft);
+  const stopped = await position();
+  await page.waitForTimeout(150);
+  expect(await position()).toBe(stopped);
+  await page.mouse.move(rect.x + 32, rect.y + 50);
+  expect(await position()).toBe(stopped - 2);
+  await page.waitForTimeout(150);
+  expect(await position()).toBe(stopped - 2);
+  await page.mouse.move(rect.x + 34, rect.y + 50);
+  expect(await position()).toBe(stopped - 4);
+  await page.mouse.up();
+  await expect.poll(() => page.evaluate(() => getComputedStyle(
+    document.getElementById("gallery")).scrollSnapType)).toBe("x mandatory");
+  await page.evaluate(() => AelluxJs.mountManager.controller("gallery").scrollbox.goto(2));
+  await expect.poll(position).toBe(700);
+});
+
+test("a new press discards the previous pending flick", async ({ page }) => {
+  await setup(page, `<div id="gallery" data-ae-scrollbox="pointer" data-ae-scrollbox-snap
+    style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden">
+    <div style="display:flex;width:900px">
+      ${'<div data-ae-snap-item style="flex:none;width:300px;height:100px"></div>'.repeat(3)}
+    </div>
+  </div>`);
+  const held = await page.evaluate(async () => {
+    const element = document.getElementById("gallery"), rect = element.getBoundingClientRect();
+    const send = (type, pointerId, x) => new PointerEvent(type, {
+      bubbles: true, cancelable: true, isPrimary: true, pointerId, pointerType: "mouse",
+      button: 0, buttons: type === "pointerup" ? 0 : 1,
+      clientX: rect.left + x, clientY: rect.top + 50
+    });
+    element.dispatchEvent(send("pointerdown", 310, 70));
+    window.dispatchEvent(send("pointermove", 310, 68));
+    window.dispatchEvent(send("pointerup", 310, 68));
+    element.dispatchEvent(send("pointerdown", 311, 30));
+    const stopped = element.scrollLeft;
+    await new Promise(resolve => setTimeout(resolve, 160));
+    const held = element.scrollLeft;
+    window.dispatchEvent(send("pointerup", 311, 30));
+    return { stopped, held };
+  });
+  expect(held.held).toBe(held.stopped);
+  await page.waitForTimeout(500);
+  expect(await page.evaluate(() => document.getElementById("gallery").scrollLeft)).toBe(held.stopped);
+});
+
+test("a native touch press keeps CSS snap enabled", async ({ page }) => {
+  await setup(page, `<div id="gallery" data-ae-scrollbox data-ae-scrollbox-snap
+    style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden;display:flex">
+    ${'<div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>'.repeat(3)}
+  </div>`, { coarse: true });
+  const result = await page.evaluate(() => {
+    const element = document.getElementById("gallery");
+    element.dispatchEvent(new PointerEvent("pointerdown", {
+      bubbles: true, pointerId: 312, pointerType: "touch", isPrimary: true, buttons: 1
+    }));
+    const type = getComputedStyle(element).scrollSnapType;
+    window.dispatchEvent(new PointerEvent("pointercancel", { pointerId: 312, pointerType: "touch" }));
+    return { type, active: element.classList.contains("ae--pointerscrolling") };
+  });
+  expect(result).toEqual({ type: "x mandatory", active: false });
+});
+
 test("pointer snap advances one point on a fast horizontal swipe", async ({ page }) => {
   await setup(page, `<div id="gallery" data-ae-scrollbox="pointer" data-ae-scrollbox-snap
     style="width:100px;height:100px;overflow:auto">
@@ -1265,7 +1476,9 @@ test("CSS snap flick advances wide items while a slow drag stays within one poin
     page.evaluate(({ distance, pointerId, immediateRelease }) => {
     const element = document.getElementById("gallery");
     const rect = element.getBoundingClientRect();
-    const x = rect.left + 70, y = rect.top + 50;
+    // Distinct press positions keep these drags outside the multi-click guard.
+    const x = rect.left + (pointerId === 301 ? 70 : pointerId === 302 ? 45 : 20);
+    const y = rect.top + 50;
     element.dispatchEvent(new PointerEvent("pointerdown", {
       bubbles: true, cancelable: true, isPrimary: true, pointerId,
       pointerType: "mouse", button: 0, buttons: 1, clientX: x, clientY: y
@@ -1300,6 +1513,7 @@ test("CSS snap flick advances wide items while a slow drag stays within one poin
   await reset();
   const drag = await move(35, 302);
   await page.waitForTimeout(150);
+  expect(await page.evaluate(() => document.getElementById("gallery").scrollLeft)).toBe(135);
   await release(drag, 302);
   await expect.poll(() => page.evaluate(() => document.getElementById("gallery").scrollLeft))
     .toBeGreaterThan(125);
@@ -1307,6 +1521,7 @@ test("CSS snap flick advances wide items while a slow drag stays within one poin
   await reset();
   const small = await move(2, 303);
   await page.waitForTimeout(250);
+  expect(await page.evaluate(() => document.getElementById("gallery").scrollLeft)).toBe(102);
   await release(small, 303);
   await expect.poll(() => page.evaluate(() => document.getElementById("gallery").scrollLeft))
     .toBeLessThan(110);
@@ -1345,6 +1560,7 @@ test("a longer drag lets CSS snap choose the nearest point", async ({ page }) =>
   expect(result.nearest).toBe(1);
   expect(result.left).toBe(90);
   await page.waitForTimeout(250);
+  expect(await page.evaluate(() => document.getElementById("gallery").scrollLeft)).toBe(90);
   await page.evaluate(point => window.dispatchEvent(new PointerEvent("pointerup", {
     bubbles: true, isPrimary: true, pointerId: 304, pointerType: "mouse",
     button: 0, buttons: 0, clientX: point.x, clientY: point.y

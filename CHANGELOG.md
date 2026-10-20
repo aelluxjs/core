@@ -83,6 +83,7 @@ All notable changes to aellux.js will be documented in this file.
 
 ### Fixed
 
+- A new mouse or pen press stops smooth Scrollbox snap motion, clears pending flicks, and suspends snap until the last pointer ends or window focus is lost; native touch keeps its snap behavior.
 - Scrollbox snap keeps the starting item fixed throughout a pointer drag and disables PDS momentum on both axes while snap is enabled.
 - New pointer and wheel input finishes elastic recovery before measuring or processing the interaction, including presses on controls and custom scrollbars.
 - Present Group validates synchronous Before-event declaration and membership changes before applying a swap; progress falls back safely when CSS property registration fails, and expected replacement/unmount cancellations no longer emit interruption warnings.
