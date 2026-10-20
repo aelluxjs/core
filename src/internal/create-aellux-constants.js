@@ -80,6 +80,9 @@ export function createAelluxConstants() {
       WARN_EXTENSION_COMPATIBILITY_SKIPPED: { code: 2018, message: "Extension compatibility verification was explicitly skipped." },
       WARN_CSS_MOTION_PROPERTY_MAX_FPS_INVALID: { code: 2019, message: "cssMotionPropertyMaxFPS is invalid; using 40 FPS." },
       WARN_SCROLLBOX_SNAP_TRANSFORM: { code: 2020, message: "A transformed snap item can invalidate Scrollbox snap geometry; apply the visual transform to a child element instead." },
+      WARN_PRESENT_GROUP_SELECTION: { code: 2021, message: "Present Group selection is invalid or ambiguous; the previous selection is preserved." },
+      WARN_ANCHOR_MATCH: { code: 2022, message: "Anchor match accepts width and/or height." },
+      WARN_ANCHOR_GROUP: { code: 2023, message: "Anchor association or geometry is invalid." },
       INFO_LEGACY_FALLBACK: { code: 3000, message: AELLUX + "is starting the Legacy runtime." },
       INFO_PRESENT_MEASURED_LAYOUT: { code: 3001, message: "Present measures size transitions without a direct present-motion child; add one to use the grid layout strategy." },
       INFO_FEEDBACK_MOTION_CUSTOM: { code: 3002, message: "The requested feedback motion is not standard. Standard motions are listed in the diagnostic context." }

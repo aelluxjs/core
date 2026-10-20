@@ -196,6 +196,11 @@
     }
     var attr = {
       present: AelluxJs.attr(extensionName),
+      group: AelluxJs.attr("present-group"),
+      key: AelluxJs.attr("present-key"),
+      active: AelluxJs.attr("present-active"),
+      when: AelluxJs.attr("present-when"),
+      triggerOn: AelluxJs.attr("trigger-on"),
       autoUnpop: AelluxJs.attr("auto-unpop"),
       presentMotion: AelluxJs.attr("present-motion"),
       unpopOnOutside: AelluxJs.attr("unpop-on-outside"),
@@ -214,13 +219,17 @@
       willChange: AelluxJs.className("will-change"),
       grid: AelluxJs.className("present-grid")
     };
+    var presentSelector = "[".concat(attr.present, "]");
+    var groupSelector = "[".concat(attr.group, "]");
     AelluxJs.extAttach(extensionName, {
       init: init,
       destroy: destroy,
       pop: pop,
       unpop: unpop,
       toggle: toggle,
-      trigger: trigger
+      trigger: trigger,
+      show: show,
+      selected: selected
     });
     var POP = "Pop", UNPOP = "Unpop", BEFORE = "Before", PING = "ping", MILLISECOND = "ms", SECOND = "s", DEFAULT_PRESENT = "opacity transform height width", OPACITY_SYNTAX = "<number> | <percentage>", TRANSFORM_SYNTAX = "<transform-list> | none";
     var TRANSITION_PREPARE_TIME = 100;
@@ -235,8 +244,15 @@
     var containerAriaHandlers = /* @__PURE__ */ new WeakMap();
     var triggerAriaHandlers = /* @__PURE__ */ new WeakMap();
     var measuredMemories = /* @__PURE__ */ new WeakMap();
-    var cssProperties = [["from-opacity", OPACITY_SYNTAX, "0"], ["pop-opacity", OPACITY_SYNTAX, "1"], ["unpop-opacity", OPACITY_SYNTAX, "0"], ["from-transform", TRANSFORM_SYNTAX, "scale(0.5)"], ["pop-transform", TRANSFORM_SYNTAX, "scale(1)"], ["unpop-transform", TRANSFORM_SYNTAX, "scale(1.2)"], ["from-height", "*", "0fr"], ["pop-height", "*", "1fr"], ["unpop-height", "*", "0fr"], ["from-width", "*", "0fr"], ["pop-width", "*", "1fr"], ["unpop-width", "*", "0fr"], ["pop-ease", "*", "ease-out"], ["unpop-ease", "*", "ease-in"], ["pop-duration", "<time>", "250ms"], ["unpop-duration", "<time>", "250ms"], ["pop-low-steps", "<integer>", "4"], ["unpop-low-steps", "<integer>", "4"]];
+    var groups = /* @__PURE__ */ new Map();
+    var hoverTimers = /* @__PURE__ */ new Map();
+    var hoveredTriggers = /* @__PURE__ */ new Set();
+    var groupObserver = null;
+    var groupsQueued = false;
+    var interpolatedProgress = false;
+    var cssProperties = [["pop-progress", "<number>", "0"], ["unpop-progress", "<number>", "1"], ["present-pop-phase", "<number>", "0"], ["present-unpop-phase", "<number>", "1"], ["from-opacity", OPACITY_SYNTAX, "0"], ["pop-opacity", OPACITY_SYNTAX, "1"], ["unpop-opacity", OPACITY_SYNTAX, "0"], ["from-transform", TRANSFORM_SYNTAX, "scale(0.5)"], ["pop-transform", TRANSFORM_SYNTAX, "scale(1)"], ["unpop-transform", TRANSFORM_SYNTAX, "scale(1.2)"], ["from-height", "*", "0fr"], ["pop-height", "*", "1fr"], ["unpop-height", "*", "0fr"], ["from-width", "*", "0fr"], ["pop-width", "*", "1fr"], ["unpop-width", "*", "0fr"], ["pop-ease", "*", "ease-out"], ["unpop-ease", "*", "ease-in"], ["pop-duration", "<time>", "250ms"], ["unpop-duration", "<time>", "250ms"], ["pop-low-steps", "<integer>", "4"], ["unpop-low-steps", "<integer>", "4"]];
     function init(options) {
+      interpolatedProgress = !!(root.CSS && typeof root.CSS.registerProperty === "function" && root.CSS.supports && root.CSS.supports("opacity", "clamp(0, 0.5, 1)"));
       AelluxJs.registerCssProperty.apply(AelluxJs, _toConsumableArray(cssProperties.map(function(_ref) {
         var _ref2 = _slicedToArray(_ref, 3), name = _ref2[0], syntax = _ref2[1], initialValue = _ref2[2];
         return {
@@ -247,7 +263,7 @@
       })));
       AelluxJs.mountManager.add({
         extensionName: extensionName,
-        selector: "[".concat(attr.present, "]"),
+        selector: presentSelector,
         priority: 0,
         mount: mountPresentContainer,
         unmount: unmountPresentContainer,
@@ -260,6 +276,16 @@
         mount: mountTriggerElement,
         unmount: unmountTriggerElement
       });
+      AelluxJs.mountManager.add({
+        extensionName: extensionName,
+        selector: groupSelector,
+        priority: 1,
+        mount: mountGroup,
+        unmount: unmountGroup,
+        controllers: ["show", "selected"]
+      });
+      document.addEventListener("pointerover", onHover);
+      document.addEventListener("pointerout", onHover);
       AelluxJs.on("$click", OnClick);
     }
     function destroy() {
@@ -267,33 +293,58 @@
         extensionName: extensionName
       });
       AelluxJs.off("$click", OnClick);
-      var _iterator = _createForOfIteratorHelper(triggerElementsSet), _step;
+      document.removeEventListener("pointerover", onHover);
+      document.removeEventListener("pointerout", onHover);
+      var _iterator = _createForOfIteratorHelper(groups.keys()), _step;
       try {
         for (_iterator.s(); !(_step = _iterator.n()).done; ) {
-          var triggerElement = _step.value;
-          unmountTriggerElement(triggerElement);
+          var group = _step.value;
+          unmountGroup(group);
         }
       } catch (err) {
         _iterator.e(err);
       } finally {
         _iterator.f();
       }
-      var _iterator2 = _createForOfIteratorHelper(presentElements.keys()), _step2;
+      var _iterator2 = _createForOfIteratorHelper(hoverTimers.keys()), _step2;
       try {
         for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
-          var element = _step2.value;
-          unmountPresentContainer(element);
+          var target = _step2.value;
+          cancelHoverClose(target);
         }
       } catch (err) {
         _iterator2.e(err);
       } finally {
         _iterator2.f();
       }
+      hoveredTriggers.clear();
+      var _iterator3 = _createForOfIteratorHelper(triggerElementsSet), _step3;
+      try {
+        for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
+          var triggerElement = _step3.value;
+          unmountTriggerElement(triggerElement);
+        }
+      } catch (err) {
+        _iterator3.e(err);
+      } finally {
+        _iterator3.f();
+      }
+      var _iterator4 = _createForOfIteratorHelper(presentElements.keys()), _step4;
+      try {
+        for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
+          var element = _step4.value;
+          unmountPresentContainer(element);
+        }
+      } catch (err) {
+        _iterator4.e(err);
+      } finally {
+        _iterator4.f();
+      }
       openPresentElements.clear();
     }
     function mountPresentContainer(element) {
       if (presentElements.has(element)) return;
-      elementMemories.set(element, AelluxJs.persist.element.save(element, [attr.present, attr.presentMotion, "hidden"], ["--ae-pop-low-steps", "--ae-unpop-low-steps"]));
+      elementMemories.set(element, AelluxJs.persist.element.save(element, [attr.present, attr.presentMotion, "hidden"], ["--ae-pop-low-steps", "--ae-unpop-low-steps", "--ae-pop-progress", "--ae-unpop-progress", "--ae-present-pop-phase", "--ae-present-unpop-phase"]));
       containerAriaHandlers.set(element, AelluxJs.aria.register(element));
       if ((element.getAttribute(attr.present) || "").trim().toLowerCase() === "all") {
         element.setAttribute(attr.present, DEFAULT_PRESENT);
@@ -369,40 +420,54 @@
         openPresentElements.add(element);
       }
       presentElements.set(element, presentController);
-      var _iterator3 = _createForOfIteratorHelper(element.querySelectorAll("[".concat(attr.trigger, "],[").concat(attr.dismiss, "],[").concat(attr.target, "]"))), _step3;
+      var _iterator5 = _createForOfIteratorHelper(element.querySelectorAll("[".concat(attr.trigger, "],[").concat(attr.dismiss, "],[").concat(attr.target, "]"))), _step5;
       try {
-        for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
-          var _triggerElement = _step3.value;
+        for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
+          var _triggerElement = _step5.value;
           if (triggerTargets.get(_triggerElement) === element) {
             presentController.triggers.add(_triggerElement);
             updateTriggerAriaExpanded(_triggerElement);
           }
         }
       } catch (err) {
-        _iterator3.e(err);
+        _iterator5.e(err);
       } finally {
-        _iterator3.f();
+        _iterator5.f();
       }
       var idTriggers = triggersByTargetId.get(element.id);
       if (idTriggers) {
-        var _iterator4 = _createForOfIteratorHelper(idTriggers), _step4;
+        var _iterator6 = _createForOfIteratorHelper(idTriggers), _step6;
         try {
-          for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
-            var triggerElement = _step4.value;
+          for (_iterator6.s(); !(_step6 = _iterator6.n()).done; ) {
+            var triggerElement = _step6.value;
             refreshTriggerTargets(triggerElement);
           }
         } catch (err) {
-          _iterator4.e(err);
+          _iterator6.e(err);
         } finally {
-          _iterator4.f();
+          _iterator6.f();
         }
       }
+      setProgress(element, !element.hidden);
+      queueGroups();
       autoUnpopSchedule(element, presentController);
     }
     function unmountPresentContainer(element) {
       var _AelluxJs$waitLayout, _containerAriaHandler, _elementMemories$get;
       if (!presentElements.has(element)) return;
       var controller = presentElements.get(element);
+      cancelHoverClose(element);
+      var _iterator7 = _createForOfIteratorHelper(controller.triggers), _step7;
+      try {
+        for (_iterator7.s(); !(_step7 = _iterator7.n()).done; ) {
+          var button = _step7.value;
+          hoveredTriggers.delete(button);
+        }
+      } catch (err) {
+        _iterator7.e(err);
+      } finally {
+        _iterator7.f();
+      }
       controller.stop();
       (_AelluxJs$waitLayout = AelluxJs.waitLayout) === null || _AelluxJs$waitLayout === void 0 || _AelluxJs$waitLayout.cancel(controller.motionId);
       element.classList.remove(className.grid);
@@ -413,6 +478,7 @@
       (_elementMemories$get = elementMemories.get(element)) === null || _elementMemories$get === void 0 || _elementMemories$get.restore();
       elementMemories.delete(element);
       controller.triggers.forEach(updateTriggerAriaExpanded);
+      queueGroups();
     }
     function mountTriggerElement(triggerElement) {
       if (triggerElementsSet.has(triggerElement)) return;
@@ -423,9 +489,11 @@
     function unmountTriggerElement(triggerElement) {
       var _triggerAriaHandlers$;
       if (!triggerElementsSet.has(triggerElement)) return;
+      hoveredTriggers.delete(triggerElement);
       var target = triggerTargets.get(triggerElement);
       if (target) {
         var _presentElements$get;
+        cancelHoverClose(target);
         (_presentElements$get = presentElements.get(target)) === null || _presentElements$get === void 0 || _presentElements$get.triggers.delete(triggerElement);
         triggerTargets.delete(triggerElement);
       }
@@ -481,7 +549,7 @@
       var targetSelector = triggerElement.getAttribute(attr.target);
       var dismiss = triggerElement.getAttribute(attr.dismiss);
       indexTriggerTarget(triggerElement, dismiss || targetSelector);
-      var container = triggerElement.closest("[".concat(attr.present, "]"));
+      var container = triggerElement.closest(presentSelector);
       if (previousTarget) {
         var _presentElements$get2;
         (_presentElements$get2 = presentElements.get(previousTarget)) === null || _presentElements$get2 === void 0 || _presentElements$get2.triggers.delete(triggerElement);
@@ -492,6 +560,7 @@
       } else if (container && container.id) {
         target = container;
       }
+      if (previousTarget !== target) hoveredTriggers.delete(triggerElement);
       if (!target || !target.id) {
         var _triggerAriaHandlers$2, _triggerAriaHandlers$3;
         triggerTargets.delete(triggerElement);
@@ -533,8 +602,8 @@
     }
     function trigger(element, trigger2) {
       trigger2 = typeof trigger2 === "string" ? (trigger2 || "toggle").toLowerCase() : "toggle";
-      var method = AelluxJs.ext.present[trigger2];
-      return method && typeof method === "function" ? method(element) : toggle(element);
+      var method = trigger2 === "pop" ? pop : trigger2 === "unpop" ? unpop : toggle;
+      return method(element);
     }
     function restoreMeasuredStyles(element, controller) {
       var memory = measuredMemories.get(element);
@@ -601,11 +670,12 @@
     }
     function _presentTransition() {
       _presentTransition = _asyncToGenerator(/* @__PURE__ */ _regenerator().m(function _callee2(element, gotoVisible) {
-        var forceRepop, controller, newDirection, transition, allowEvent, reusePreparation, waitForPreparation, previousSize, computed, interrupted, size, prepared, duration, timeMs, activateTransition, advancedEase, motionOptions, completed, motionResult, ownsTransition, _args2 = arguments, _t, _t2;
+        var forceRepop, groupOperation, controller, group, newDirection, transition, allowEvent, reusePreparation, waitForPreparation, previousSize, computed, interrupted, size, prepared, duration, timeMs, activateTransition, advancedEase, motionOptions, completed, motionResult, ownsTransition, _args2 = arguments, _t, _t2;
         return _regenerator().w(function(_context2) {
           while (1) switch (_context2.p = _context2.n) {
             case 0:
               forceRepop = _args2.length > 2 && _args2[2] !== void 0 ? _args2[2] : false;
+              groupOperation = _args2.length > 3 && _args2[3] !== void 0 ? _args2[3] : false;
               controller = presentElements.get(element);
               if (controller) {
                 _context2.n = 1;
@@ -615,25 +685,42 @@
             case 1:
               if (controller.direction === null) controller.direction = element.hidden ? UNPOP : POP;
               if (typeof gotoVisible === "undefined" || gotoVisible === null) gotoVisible = controller.direction === POP ? false : true;
-              newDirection = gotoVisible ? POP : UNPOP;
-              if (!(element.hidden && !gotoVisible || newDirection === controller.direction && !forceRepop)) {
+              group = element.closest(groupSelector);
+              if (!(!groupOperation && groups.has(group) && element.hasAttribute(attr.key))) {
+                _context2.n = 3;
+                break;
+              }
+              if (!gotoVisible) {
                 _context2.n = 2;
                 break;
               }
-              return _context2.a(2);
+              return _context2.a(2, show(group, element.getAttribute(attr.key)));
             case 2:
-              transition = null;
-              _context2.p = 3;
-              allowEvent = AelluxJs.dispatchFrom(element, "".concat(BEFORE).concat(newDirection), {
-                bubbles: true,
-                cancelable: true
-              });
-              if (allowEvent) {
+              if (!(groups.get(group).selected === element)) {
+                _context2.n = 3;
+                break;
+              }
+              return _context2.a(2, show(group, ""));
+            case 3:
+              newDirection = gotoVisible ? POP : UNPOP;
+              if (!(element.hidden && !gotoVisible || newDirection === controller.direction && !forceRepop)) {
                 _context2.n = 4;
                 break;
               }
               return _context2.a(2);
             case 4:
+              transition = null;
+              _context2.p = 5;
+              allowEvent = groupOperation || AelluxJs.dispatchFrom(element, "".concat(BEFORE).concat(newDirection), {
+                bubbles: true,
+                cancelable: true
+              });
+              if (allowEvent) {
+                _context2.n = 6;
+                break;
+              }
+              return _context2.a(2);
+            case 6:
               if (forceRepop && (!element.hidden || controller.transition)) {
                 controller.stop();
                 element.hidden = true;
@@ -658,6 +745,11 @@
                 });
               }
               controller.direction = newDirection;
+              setPhase(element, "pop", "0");
+              setPhase(element, "unpop", "0");
+              element.style.setProperty("--ae-pop-progress", "0");
+              element.style.setProperty("--ae-unpop-progress", "0");
+              root.getComputedStyle(element).getPropertyValue("--ae-pop-progress");
               interrupted = new Promise(function(_, interruptTransition) {
                 transition = {
                   className: null,
@@ -673,25 +765,25 @@
               openPresentElements.add(element);
               size = null;
               if (!(controller.measuredHeight || controller.measuredWidth)) {
-                _context2.n = 6;
+                _context2.n = 8;
                 break;
               }
-              _context2.n = 5;
+              _context2.n = 7;
               return prepareMeasuredSize(element, controller, gotoVisible, previousSize, waitForPreparation);
-            case 5:
+            case 7:
               size = _context2.v;
-            case 6:
+            case 8:
               if (!(controller.transition !== transition)) {
-                _context2.n = 7;
+                _context2.n = 9;
                 break;
               }
               return _context2.a(2);
-            case 7:
+            case 9:
               if (controller.motionEnabled) {
                 controller.classList.add(className.willChange);
               }
               if (!waitForPreparation) {
-                _context2.n = 8;
+                _context2.n = 10;
                 break;
               }
               prepared = new Promise(function(resolve) {
@@ -700,9 +792,9 @@
                   resolve();
                 }, TRANSITION_PREPARE_TIME);
               });
-              _context2.n = 8;
+              _context2.n = 10;
               return Promise.race([prepared, interrupted]);
-            case 8:
+            case 10:
               transition.className = className["".concat(newDirection).concat(PING).toLowerCase()];
               duration = root.getComputedStyle(element).getPropertyValue("--ae-".concat(newDirection, "-duration").toLowerCase()).trim();
               timeMs = getString2Time(duration);
@@ -711,6 +803,11 @@
                 element.style.setProperty("--ae-".concat(newDirection, "-low-steps").toLowerCase(), Math.max(1, parseInt(timeMs / 62.5)));
                 controller.classList.remove(className.pop, className.popping, className.unpopping);
                 controller.classList.add(transition.className);
+                if (interpolatedProgress) {
+                  element.style.setProperty("--ae-pop-progress", "clamp(0, var(--ae-present-pop-phase), 1)");
+                  element.style.setProperty("--ae-unpop-progress", "clamp(0, var(--ae-present-unpop-phase), 1)");
+                }
+                setPhase(element, gotoVisible ? "pop" : "unpop", "1");
                 if (size) {
                   if (controller.measuredHeight) {
                     element.style.setProperty("max-height", "".concat(gotoVisible ? size.height : 0, "px"), "important");
@@ -731,7 +828,7 @@
                   return controller.transition !== transition || !element.isConnected;
                 }
               };
-              completed = AelluxJs.motion ? AelluxJs.motion.run(element, motionOptions) : legacyMotionRun(motionOptions);
+              completed = AelluxJs.motion ? AelluxJs.motion.run(element, motionOptions) : legacyMotionRun(motionOptions, transition);
               AelluxJs.dispatchFrom(element, "Layout", {
                 detail: {
                   origin: "present.".concat(newDirection).toLowerCase(),
@@ -742,16 +839,16 @@
               AelluxJs.dispatchFrom(element, "".concat(newDirection).concat(PING), {
                 bubbles: true
               });
-              _context2.n = 9;
+              _context2.n = 11;
               return Promise.race([completed, interrupted]);
-            case 9:
+            case 11:
               motionResult = _context2.v;
               if (!(controller.transition !== transition || motionResult && motionResult.status !== "completed")) {
-                _context2.n = 10;
+                _context2.n = 12;
                 break;
               }
               return _context2.a(2);
-            case 10:
+            case 12:
               finishTransition(element, controller, transition, gotoVisible);
               if (gotoVisible && !element.hidden) {
                 autoUnpopSchedule(element, controller);
@@ -767,10 +864,10 @@
                   bubbles: true
                 });
               }
-              _context2.n = 14;
+              _context2.n = 16;
               break;
-            case 11:
-              _context2.p = 11;
+            case 13:
+              _context2.p = 13;
               _t = _context2.v;
               ownsTransition = transition && controller.transition === transition;
               if (ownsTransition && transition.timeout !== null) {
@@ -782,42 +879,43 @@
               }
               if (ownsTransition) restoreMeasuredStyles(element, controller);
               _t2 = _t && _t.code;
-              _context2.n = _t2 === AelluxJs.diagnostics.WARN_INTERRUPTION.code ? 12 : 13;
+              _context2.n = _t2 === AelluxJs.diagnostics.WARN_INTERRUPTION.code ? 14 : 15;
               break;
-            case 12:
+            case 14:
               AelluxJs.diagnostics.warn(AelluxJs.diagnostics.WARN_INTERRUPTION, {
                 cause: _t,
                 extension: extensionName,
                 element: element,
                 replacement: transition && transition.replacement === true
               });
-              return _context2.a(3, 14);
-            case 13:
+              return _context2.a(3, 16);
+            case 15:
               AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_EXTENSION_TRANSITION, {
                 cause: _t,
                 extension: extensionName,
                 element: element
               });
-              return _context2.a(3, 14);
-            case 14:
-              _context2.p = 14;
+              return _context2.a(3, 16);
+            case 16:
+              _context2.p = 16;
               if (transition && controller.transition === transition) {
                 controller.transition = null;
                 controller.classList.remove(className.willChange);
               }
-              return _context2.f(14);
-            case 15:
+              return _context2.f(16);
+            case 17:
               return _context2.a(2);
           }
-        }, _callee2, null, [[3, 11, 14, 15]]);
+        }, _callee2, null, [[5, 13, 16, 17]]);
       }));
       return _presentTransition.apply(this, arguments);
     }
-    function legacyMotionRun(options) {
+    function legacyMotionRun(options, transition) {
       options.apply();
       return new Promise(function(resolve) {
-        return setTimeout(function() {
-          return resolve({
+        transition.timeout = setTimeout(function() {
+          transition.timeout = null;
+          resolve({
             id: options.id,
             status: "completed",
             mode: "native"
@@ -830,6 +928,7 @@
       restoreMeasuredStyles(element, controller);
       var focused = !gotoVisible && element.contains(document.activeElement) ? document.activeElement : null;
       element.hidden = gotoVisible ? false : true;
+      setProgress(element, gotoVisible);
       if (element.hidden) openPresentElements.delete(element);
       else openPresentElements.add(element);
       if (focused) {
@@ -855,10 +954,10 @@
       unpop(element);
     }
     function outsideClickAutoUnpop(currentExceptions) {
-      var _iterator5 = _createForOfIteratorHelper(openPresentElements), _step5;
+      var _iterator8 = _createForOfIteratorHelper(openPresentElements), _step8;
       try {
         var _loop = function _loop2() {
-          var pContainer = _step5.value;
+          var pContainer = _step8.value;
           if (pContainer.hidden === true || pContainer.getAttribute(attr.unpopOnOutside) === "false" || currentExceptions.some(function(e) {
             return pContainer.contains(e);
           })) {
@@ -866,13 +965,13 @@
           }
           unpop(pContainer);
         };
-        for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
+        for (_iterator8.s(); !(_step8 = _iterator8.n()).done; ) {
           if (_loop()) continue;
         }
       } catch (err) {
-        _iterator5.e(err);
+        _iterator8.e(err);
       } finally {
-        _iterator5.f();
+        _iterator8.f();
       }
     }
     function refreshChangedTrigger(button) {
@@ -882,7 +981,7 @@
     }
     function OnClick(event) {
       if (!event.target) return;
-      var container = event.target.closest("[".concat(attr.present, "]"));
+      var container = event.target.closest(presentSelector);
       var exceptions = [event.target];
       var button;
       button = event.target.closest("[".concat(attr.trigger, "]"));
@@ -894,11 +993,11 @@
           var target = targetById(targetSelector);
           if (target) {
             exceptions.push(target);
-            trigger(target, triggerAttr);
+            if (!suppressHoverClick(button, event)) trigger(target, triggerAttr);
           }
         } else if (container) {
           exceptions.push(container);
-          trigger(container, triggerAttr);
+          if (!suppressHoverClick(button, event)) trigger(container, triggerAttr);
         } else {
           AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_PRESENT_CONTROL_TARGET_MISSING, {
             extension: extensionName,
@@ -930,6 +1029,304 @@
         }
       }
       outsideClickAutoUnpop(exceptions);
+    }
+    function setProgress(element, visible) {
+      setPhase(element, "pop", visible ? "1" : "0");
+      setPhase(element, "unpop", visible ? "0" : "1");
+      element.style.setProperty("--ae-pop-progress", visible ? "1" : "0");
+      element.style.setProperty("--ae-unpop-progress", visible ? "0" : "1");
+    }
+    function setPhase(element, direction, value) {
+      element.style.setProperty("--ae-present-".concat(direction, "-phase"), value);
+      if (!interpolatedProgress) element.style.setProperty("--ae-".concat(direction, "-progress"), value);
+    }
+    function groupMembers(group) {
+      return _toConsumableArray(presentElements.keys()).filter(function(element) {
+        return element.isConnected && element.hasAttribute(attr.key) && element.closest(groupSelector) === group;
+      });
+    }
+    function mountGroup(group) {
+      if (groups.has(group)) return;
+      var visible = groupMembers(group).filter(function(member) {
+        return !member.hidden;
+      });
+      groups.set(group, {
+        selected: visible.length === 1 ? visible[0] : null,
+        revision: 0,
+        pending: Promise.resolve(true),
+        jobs: /* @__PURE__ */ new Map(),
+        memory: AelluxJs.persist.element.save(group, [attr.active])
+      });
+      if (!groupObserver && typeof root.MutationObserver === "function") {
+        groupObserver = new root.MutationObserver(function(records) {
+          if (records.some(function(record) {
+            return record.type === "childList" || record.attributeName !== "class" || groups.has(record.target);
+          })) queueGroups();
+        });
+        groupObserver.observe(document, {
+          subtree: true,
+          childList: true,
+          attributes: true,
+          attributeFilter: ["class", attr.active, attr.key, attr.when, attr.group]
+        });
+      }
+      queueGroups();
+    }
+    function unmountGroup(group) {
+      var state = groups.get(group);
+      if (!state) return;
+      state.revision++;
+      groups.delete(group);
+      publishGroup(group, state, null);
+      var _iterator9 = _createForOfIteratorHelper(groupMembers(group)), _step9;
+      try {
+        for (_iterator9.s(); !(_step9 = _iterator9.n()).done; ) {
+          var member = _step9.value;
+          var controller = presentElements.get(member);
+          if (controller.transition) {
+            var visible = controller.direction === POP;
+            controller.stop();
+            member.hidden = !visible;
+            controller.classList.toggle(className.pop, visible);
+            controller.setAriaExpanded(String(visible));
+            setProgress(member, visible);
+            if (!visible) openPresentElements.delete(member);
+          }
+        }
+      } catch (err) {
+        _iterator9.e(err);
+      } finally {
+        _iterator9.f();
+      }
+      state.memory.restore();
+      if (!groups.size && groupObserver) {
+        groupObserver.disconnect();
+        groupObserver = null;
+      }
+    }
+    function queueGroups() {
+      if (groupsQueued || !groups.size) return;
+      groupsQueued = true;
+      Promise.resolve().then(function() {
+        groupsQueued = false;
+        groups.forEach(function(state, group) {
+          reconcileGroup(group);
+          if (groups.get(group) === state) publishGroup(group, state, state.selected);
+        });
+      });
+    }
+    function groupDiagnostic(group, reason) {
+      AelluxJs.diagnostics.warn(AelluxJs.diagnostics.WARN_PRESENT_GROUP_SELECTION, {
+        extension: extensionName,
+        element: group,
+        reason: reason
+      });
+    }
+    function reconcileGroup(group) {
+      if (!group.isConnected || !group.hasAttribute(attr.group)) return;
+      var members = groupMembers(group);
+      var state = groups.get(group);
+      if (!members.includes(state.selected)) state.selected = null;
+      var matches;
+      if (group.hasAttribute(attr.active)) {
+        var key = group.getAttribute(attr.active);
+        matches = key === "" ? [] : members.filter(function(member) {
+          return member.getAttribute(attr.key) === key;
+        });
+        if (key && matches.length !== 1) {
+          groupDiagnostic(group, "Active key must match one mounted member.");
+          return;
+        }
+      } else {
+        matches = members.filter(function(member) {
+          var token = member.getAttribute(attr.when);
+          return token && !/\s/.test(token) && group.classList.contains(token);
+        });
+        if (!matches.length) {
+          var visible = members.filter(function(member) {
+            return !member.hidden && presentElements.get(member).direction !== UNPOP;
+          });
+          if (visible.length > 1) groupDiagnostic(group, "Multiple initially visible members.");
+          else if (!state.selected) state.selected = visible[0] || null;
+          return;
+        }
+      }
+      if (matches.length > 1) {
+        groupDiagnostic(group, "Multiple members match the container classes.");
+        return;
+      }
+      return selectGroup(group, matches[0] || null, members);
+    }
+    function show(group, key) {
+      var state = groups.get(group);
+      if (!state || typeof key !== "string") return Promise.resolve(false);
+      var matches = groupMembers(group).filter(function(member) {
+        return member.getAttribute(attr.key) === key;
+      });
+      if (key && matches.length !== 1) {
+        groupDiagnostic(group, "Active key must match one mounted member.");
+        return Promise.resolve(false);
+      }
+      if (group.getAttribute(attr.active) !== key) group.setAttribute(attr.active, key);
+      var result = reconcileGroup(group);
+      return Promise.resolve(result === void 0 ? state.pending : result);
+    }
+    function selected(group) {
+      var state = groups.get(group);
+      var member = state && state.selected;
+      return member && presentElements.has(member) && member.isConnected && member.hasAttribute(attr.key) && member.closest(groupSelector) === group ? member : null;
+    }
+    function publishGroup(group, state, current) {
+      if (state.announced === current) return;
+      var previous = state.announced || null;
+      state.announced = current;
+      AelluxJs.dispatchFrom(group, "PresentGroupChange", {
+        bubbles: true,
+        detail: {
+          group: group,
+          previous: previous,
+          current: current,
+          key: current && current.getAttribute(attr.key)
+        }
+      });
+    }
+    function selectGroup(group, selected2, members) {
+      var state = groups.get(group);
+      var changes = members.filter(function(member2) {
+        var controller = presentElements.get(member2);
+        return member2 === selected2 ? member2.hidden || controller.direction === UNPOP : !member2.hidden && controller.direction !== UNPOP;
+      });
+      if (state.selected === selected2 && !changes.length) return state.pending;
+      var revision = ++state.revision;
+      var _iterator0 = _createForOfIteratorHelper(changes), _step0;
+      try {
+        for (_iterator0.s(); !(_step0 = _iterator0.n()).done; ) {
+          var member = _step0.value;
+          if (!AelluxJs.dispatchFrom(member, member === selected2 ? "BeforePop" : "BeforeUnpop", {
+            bubbles: true,
+            cancelable: true
+          })) {
+            if (state.revision === revision) {
+              var _state$selected;
+              var key = ((_state$selected = state.selected) === null || _state$selected === void 0 ? void 0 : _state$selected.getAttribute(attr.key)) || "";
+              if (group.getAttribute(attr.active) !== key) group.setAttribute(attr.active, key);
+            }
+            return false;
+          }
+          if (groups.get(group) !== state || state.revision !== revision) return false;
+        }
+      } catch (err) {
+        _iterator0.e(err);
+      } finally {
+        _iterator0.f();
+      }
+      state.selected = selected2;
+      var complete;
+      var pending = new Promise(function(resolve) {
+        complete = resolve;
+      });
+      state.pending = pending;
+      var _iterator1 = _createForOfIteratorHelper(changes), _step1;
+      try {
+        var _loop2 = function _loop22() {
+          var member2 = _step1.value;
+          var job = presentTransition(member2, member2 === selected2, false, true);
+          if (groups.get(group) !== state || state.revision !== revision) {
+            complete(false);
+            return {
+              v: pending
+            };
+          }
+          state.jobs.set(member2, job);
+          job.then(function() {
+            if (state.jobs.get(member2) === job) state.jobs.delete(member2);
+          });
+        }, _ret;
+        for (_iterator1.s(); !(_step1 = _iterator1.n()).done; ) {
+          _ret = _loop2();
+          if (_ret) return _ret.v;
+        }
+      } catch (err) {
+        _iterator1.e(err);
+      } finally {
+        _iterator1.f();
+      }
+      publishGroup(group, state, selected2);
+      Promise.all(members.map(function(member2) {
+        return state.jobs.get(member2);
+      })).then(function() {
+        var current = groupMembers(group);
+        complete(groups.get(group) === state && state.revision === revision && (!selected2 || current.includes(selected2)) && current.every(function(member2) {
+          return member2 === selected2 ? !member2.hidden : member2.hidden;
+        }));
+      });
+      return pending;
+    }
+    function cancelHoverClose(target) {
+      clearTimeout(hoverTimers.get(target));
+      hoverTimers.delete(target);
+    }
+    function inHoverRegion(target, node) {
+      if (!node || !node.nodeType) return false;
+      if (target.contains(node)) return true;
+      var _iterator10 = _createForOfIteratorHelper(triggerElementsSet), _step10;
+      try {
+        for (_iterator10.s(); !(_step10 = _iterator10.n()).done; ) {
+          var button = _step10.value;
+          if (button.getAttribute(attr.triggerOn) === "hover" && triggerTargets.get(button) === target && button.contains(node)) return true;
+        }
+      } catch (err) {
+        _iterator10.e(err);
+      } finally {
+        _iterator10.f();
+      }
+      return false;
+    }
+    function suppressHoverClick(button, event) {
+      return button.getAttribute(attr.triggerOn) === "hover" && event.detail > 0 && event.pointerType !== "touch" && hoveredTriggers.has(button);
+    }
+    function onHover(event) {
+      var _event$target;
+      if (event.pointerType === "touch" || !((_event$target = event.target) !== null && _event$target !== void 0 && _event$target.closest)) return;
+      var entering = event.type === "pointerover";
+      var button = event.target.closest("[".concat(attr.trigger, "][").concat(attr.triggerOn, '="hover"]'));
+      if (button && triggerElementsSet.has(button) && !button.contains(event.relatedTarget)) {
+        refreshChangedTrigger(button);
+        var target = triggerTargets.get(button);
+        if (target && presentElements.has(target)) {
+          if (entering) {
+            cancelHoverClose(target);
+            hoveredTriggers.add(button);
+            var action = button.getAttribute(attr.trigger);
+            if (action === "pop") toggle(target, true);
+            else trigger(target, action);
+          } else hoveredTriggers.delete(button);
+        }
+      }
+      var _iterator11 = _createForOfIteratorHelper(openPresentElements), _step11;
+      try {
+        var _loop3 = function _loop32() {
+          var target2 = _step11.value;
+          if (!inHoverRegion(target2, event.target)) return 1;
+          if (entering || inHoverRegion(target2, event.relatedTarget)) cancelHoverClose(target2);
+          else if (_toConsumableArray(triggerElementsSet).some(function(control) {
+            return triggerTargets.get(control) === target2 && control.getAttribute(attr.triggerOn) === "hover" && control.getAttribute(attr.trigger) !== "unpop";
+          })) {
+            cancelHoverClose(target2);
+            hoverTimers.set(target2, setTimeout(function() {
+              hoverTimers.delete(target2);
+              if (presentElements.has(target2) && target2.isConnected && !inHoverRegion(target2, document.activeElement)) unpop(target2);
+            }, 120));
+          }
+        };
+        for (_iterator11.s(); !(_step11 = _iterator11.n()).done; ) {
+          if (_loop3()) continue;
+        }
+      } catch (err) {
+        _iterator11.e(err);
+      } finally {
+        _iterator11.f();
+      }
     }
     function getString2Time(string) {
       return string ? parseFloat(string) * getMillisecondsMulti(string) : 0;

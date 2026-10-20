@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { ease } from "../../src/internal/ease.js";
+import { cubicBezier, ease } from "../../src/internal/ease.js";
 
 function near(actual, expected, tolerance = 1e-10) {
   assert.ok(Math.abs(actual - expected) <= tolerance,
@@ -47,4 +47,38 @@ test("Core clamps progress and preserves curve overshoot", () => {
   near(ease("backIn", -0.2), 0);
   assert.throws(() => ease("unknownOut", 0.5), RangeError);
   assert.throws(() => ease("backOut", NaN), TypeError);
+});
+
+test("CSS cubic bezier resolves X before evaluating Y", () => {
+  near(ease("cubic-bezier(0.25, 0.1, 0.25, 1)", 0.5), 0.802403387584857, 1e-10);
+  near(cubicBezier(0.5, 0.42, 0, 1, 1), 0.3153568125725393);
+  near(ease("  CUBIC-BEZIER(.42, +0, 1e0, 1)  ", 0.5), 0.3153568125725393);
+  near(ease("cubic-bezier(0, 0, 1, 1)", 0.27), 0.27);
+  assert.ok(ease("cubic-bezier(.3, -1, .7, 2)", 0.1) < 0);
+  assert.ok(ease("cubic-bezier(.3, -1, .7, 2)", 0.9) > 1);
+});
+
+test("Cubic bezier handles flat derivatives, endpoints and clamped input", () => {
+  // With X(u) = u^3 and Y(u) = u, the answer is the cube root of t.
+  for (const t of [1e-9, 0.001, 0.5, 0.999]) {
+    near(cubicBezier(t, 0, 1 / 3, 0, 2 / 3), Math.cbrt(t));
+    near(cubicBezier(1 - t, 1, 1 / 3, 1, 2 / 3), 1 - Math.cbrt(t), 1e-8);
+  }
+  near(cubicBezier(0.5, 1, 0, 0, 1), 0.5);
+  near(ease("cubic-bezier(.25, -2, .75, 3)", -1), 0);
+  near(ease("cubic-bezier(.25, -2, .75, 3)", 2), 1);
+});
+
+test("CSS cubic bezier rejects malformed numbers and invalid control points", () => {
+  for (const name of [
+    "cubic-bezier(0, 0, 1)", "cubic-bezier(0, 0, 1, 1, 1)",
+    "cubic-bezier(0, , 1, 1)", "cubic-bezier(0, 0px, 1, 1)",
+    "cubic-bezier(0, 0, 1., 1)", "cubic-bezier(0, 0, 0x1, 1)",
+    "cubic-bezier(0, 0, 1, 1) junk", "cubic-bezier(0, 0, 1, --1)",
+    "cubic-bezier(-.1, 0, 1, 1)", "cubic-bezier(0, 0, 1.1, 1)"
+  ]) assert.throws(() => ease(name, 0.5), RangeError, name);
+  assert.throws(() => ease("cubic-bezier(0, 1e999, 1, 1)", 0.5), TypeError);
+  assert.throws(() => cubicBezier(0.5, 0, NaN, 1, 1), TypeError);
+  assert.throws(() => cubicBezier("0.5", 0, 0, 1, 1), TypeError);
+  assert.throws(() => cubicBezier(0.5, 0, 0, -1, 1), RangeError);
 });

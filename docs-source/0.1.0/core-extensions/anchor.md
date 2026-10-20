@@ -35,7 +35,7 @@ $ae.dispatchFrom(document.getElementById("menu"), "Layout", {
 });
 ```
 
-After changing the target or pivot attributes, request an immediate update:
+Changes to the target, pivot and matching attributes are observed automatically. To await an explicit placement update:
 
 ```js
 const anchor = document.getElementById("menu");
@@ -44,3 +44,94 @@ await $ae.mountManager.update(anchor, "anchor");
 ```
 
 Anchor reads geometry through `$ae.waitLayout.read()` and writes CSS through `$ae.waitLayout.update()`.
+
+## Dimension Matching
+
+`data-ae-anchor-match="width"`, `"height"` or `"width height"` applies the target's corresponding dimensions through weak CSS. Without the attribute, Anchor retains its original sizing behavior. Empty values and unknown tokens report `WARN_ANCHOR_MATCH` (2022); recognized tokens still work.
+
+```html
+<div style="position:relative">
+  <button id="menu-trigger">Open menu</button>
+  <div data-ae-anchor="bottom-right:top-right"
+       data-ae-anchor-target="menu-trigger"
+       data-ae-anchor-match="width">Menu content</div>
+</div>
+```
+
+Every valid placement publishes `--ae-anchor-target-width` and `--ae-anchor-target-height`, even when matching is disabled. Their pixel values describe the target's bounding rectangle in the positioning reference's coordinate system, compensating for the reference's axis-aligned scale. Target transforms contribute to that bounding rectangle. Arbitrary rotation or skew of the shared positioning reference is outside this coordinate model.
+
+```css
+.menu-decoration {
+  max-width: var(--ae-anchor-target-width);
+}
+/* Application declarations override the zero-specificity matching rules. */
+.menu { width: 20rem; max-height: 15rem; }
+```
+
+The matching rules use `box-sizing: border-box`; application CSS may override that too. Anchor projects the matching dimensions while evaluating viewport candidates, then writes dimensions and position together. The matching transform uses a percentage self-pivot, so the actual CSS box remains aligned without positioning against its previous width or height. Normal width/height declarations, padding, borders and size constraints remain the browser's responsibility. Applications overriding `transform` also take responsibility for the resulting positioning.
+
+ResizeObserver and existing Layout events keep intermediate target dimensions updated. A known-duration `AelluxJsLayout` event also works without ResizeObserver. There is no permanent geometry polling: finite layout tracking ends after its announced duration. The global adaptive scheduler and `data-ae-maxfps` limit geometry measurements and updates. As with existing Anchor tracking, a measured position can lag a moving target by the eligible read/update cadence; a low FPS ceiling trades tracking frequency for less work.
+
+Anchor installs one owned, zero-specificity stylesheet when the Extension initializes. Independent loading still needs only `$ae.ext("anchor")`; no additional stylesheet request is required. Unmount restores previous inline geometry values and priorities. Destruction removes the Extension's additional stylesheet. The boot's original Anchor visibility and positioning rules remain available independently.
+
+## Target Switching Motion
+
+Configure deliberate changes of the effective target separately from normal tracking:
+
+```css
+.selection-anchor {
+  --ae-anchor-switch-duration: 250ms;
+  --ae-anchor-switch-ease: ease-in-out;
+}
+```
+
+The default duration is `0ms`. CSS easing values such as `linear`, `ease`, `cubic-bezier(...)` and `steps(...)` are supported. Initial placement does not animate. A different valid target adds the internal `ae--anchor-switching` class, and native CSS transitions interpolate transform, width and height with one duration and easing. Matching dimensions therefore animate along with the target change. An equivalent target spelling, such as `panel` versus `#panel`, does not restart motion. Rapid replacements use native retargeting from the current visual position.
+
+Scroll or window resize interrupts the temporary transition and immediately applies the next eligible placement. A geometry change of the current target also interrupts switching to prioritize tracking; opacity-only changes do not. CSS transitions supplied independently by application styles remain under application control. Hidden or removed targets deactivate the Anchor, and reduced motion disables switching. Unmount cancels pending placement and transition cleanup.
+
+Switch interpolation deliberately uses native CSS rather than taking ownership through CSS Motion Controller. This preserves native retargeting and keeps ordinary tracking independent of a paused motion timeline. Geometry still follows WaitLayout's adaptive FPS and `data-ae-maxfps`; the native visual transition runs at the browser's cadence. `cssMotionPropertyMaxFPS` and advanced `$ae.ease()` curves do not control Anchor switching. The finite cleanup timer only removes the temporary state; it does not calculate animation progress.
+
+## Present Group Anchor
+
+`data-ae-present-group-anchor` names one Anchor by ID, with or without `#`. Present owns the accepted selection and publishes its changes; Anchor resolves the selected element through the optional public Present interface. Neither Extension imports the other's implementation.
+
+```html
+<div id="views" data-ae-present-group data-ae-present-active="first"
+     data-ae-present-group-anchor="indicator"
+     style="position:relative;min-height:12rem">
+  <section id="first" data-ae-present="opacity" data-ae-present-key="first"
+           style="width:12rem">First content</section>
+  <section id="second" data-ae-present="opacity" data-ae-present-key="second"
+           style="width:18rem" hidden>Second content</section>
+  <div id="indicator" class="selection-anchor"
+       data-ae-anchor="bottom-left:bottom-left" data-ae-anchor-match="width height"
+       style="--ae-anchor-switch-duration:250ms;--ae-anchor-switch-ease:ease-in-out;
+              opacity:1;pointer-events:none;background:color-mix(in srgb,Highlight 15%,transparent)"></div>
+</div>
+<button type="button" data-ae-trigger="pop" data-ae-target="second">Second view</button>
+```
+
+Or select with `await $ae("views").present.show("second")`. Attribute changes, class selection and triggers all use the same accepted selection. The associated Anchor changes target as soon as that selection is confirmed and the member is available for presentation, including during Pop preparation; it does not wait for Pop completion. A canceled BeforePop/BeforeUnpop does not publish a new selection. The normal Present opacity-copying behavior remains; the example overrides opacity to keep its decorative marker visible throughout opening.
+
+Target precedence is:
+
+1. A declared, valid Present Group association uses that group's mounted selection.
+2. Without an association, `data-ae-anchor-target` applies.
+3. Without either, the positioning reference remains the target.
+
+An associated group with no selection, or whose Present controller has not mounted yet, leaves the Anchor inactive. Removing the association restores normal target resolution. Present does not rewrite `data-ae-anchor-target`. Late loading, remount and dynamically inserted members use the existing selection; Anchor does not scan keys or maintain another selection registry. An Anchor may sit outside the group if it shares the selected member's positioning reference.
+
+`WARN_ANCHOR_GROUP` (2023) reports missing/non-Anchor association IDs, multiple groups controlling one Anchor, circular target chains and matching configurations involving an in-flow Anchor. Conflicting and circular targets remain inactive. Invalid member selection is diagnosed by Present (2021). Incompatible positioning references retain `ERROR_ANCHOR_REFERENCE_CONTEXT` (1119). Dimension matching requires an out-of-flow Anchor; application CSS that places a matched Anchor back in normal flow can create a size dependency and is rejected before matching begins.
+
+## Delivery B distribution cost
+
+The matching geometry, native switching lifecycle, shared association observer, validation and owned weak stylesheet add the following standalone distribution cost. Values are bytes; gzip uses level 9.
+
+| Artifact | Before raw / gzip | Delivery B raw / gzip | Approved limit raw / gzip |
+| --- | ---: | ---: | ---: |
+| `aellux.ext.anchor.min.js` | 8,913 / 3,296 | 13,959 / 5,070 | 15 / 6 KiB |
+| `aellux.ext.anchor.legacy.min.js` | 15,241 / 5,600 | 21,339 / 7,525 | 23 / 8 KiB |
+
+The compressed increases are 1,774 and 1,925 bytes respectively. No dependency or animation scheduler is added. The new weak rules ship with Anchor rather than enlarging the boot's weak stylesheet. Boot, Full and Present remain within their existing limits.
+
+The approved limits are 15/6 KiB for Modern and 23/8 KiB for Legacy (raw/gzip), increased from 9/4 and 16/6 KiB respectively. These limits cover the Delivery B output with modest room for maintenance, and both Anchor artifacts pass `test:budget`.

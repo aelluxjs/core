@@ -1515,6 +1515,10 @@
         abort: shouldAbort
       });
       return captureResult.then((sequenceResult) => {
+        if (operation.cancelled || operations.get(operationId) !== operation) {
+          release(operation, false);
+          return { id: operationId, status: "aborted", mode: "native" };
+        }
         if (sequenceResult.status !== "completed") {
           release(operation, false);
           return { id: operationId, status: sequenceResult.status, mode: "native" };
@@ -1713,13 +1717,17 @@
       return text.endsWith("ms") ? number : number * 1e3;
     }
     function release(operation, finish, resume = false) {
-      getAelluxJs().waitLayout.setVisualFPSLimit(operation.id, null);
+      if (operations.get(operation.id) === operation)
+        getAelluxJs().waitLayout.setVisualFPSLimit(operation.id, null);
       if (operation.nativeTimer !== null) root.clearTimeout(operation.nativeTimer);
       operation.nativeTimer = null;
       for (const animation of operation.animations) {
         try {
-          if (finish) animation.finish();
-          else if (resume) animation.play();
+          if (finish) {
+            animation.finish();
+            if (typeof root.CSSTransition === "function" && animation instanceof root.CSSTransition)
+              animation.cancel();
+          } else if (resume) animation.play();
           else animation.cancel();
         } catch (_) {
         }
@@ -1762,6 +1770,33 @@
     exponential: EXPO,
     circular: CIRC
   };
+  var CSS_NUMBER = /^[+-]?(?:\d*\.\d+|\d+)(?:e[+-]?\d+)?$/i;
+  function bezierCoordinate(u, p1, p2) {
+    const v = 1 - u;
+    return 3 * v * v * u * p1 + 3 * v * u * u * p2 + u * u * u;
+  }
+  function cubicBezier(t, x1, y1, x2, y2) {
+    if (![t, x1, y1, x2, y2].every((value) => typeof value === "number" && Number.isFinite(value))) {
+      throw new TypeError("cubicBezier(t, x1, y1, x2, y2) requires finite numbers");
+    }
+    if (x1 < 0 || x1 > 1 || x2 < 0 || x2 > 1) {
+      throw new RangeError("Cubic bezier x coordinates must be between 0 and 1");
+    }
+    t = Math.min(1, Math.max(0, t));
+    if (t === 0 || t === 1) return t;
+    if (x1 === y1 && x2 === y2) return t;
+    let low = 0;
+    let high = 1;
+    let u = t;
+    for (let i = 0; i < 40; i++) {
+      const x = bezierCoordinate(u, x1, x2);
+      if (x === t) break;
+      if (x < t) low = u;
+      else high = u;
+      u = (low + high) / 2;
+    }
+    return bezierCoordinate(u, y1, y2);
+  }
   function bounceOut(t) {
     const n = 7.5625;
     const d = 2.75;
@@ -1808,6 +1843,14 @@
       throw new TypeError("ease(name, t) requires a name and a finite number");
     }
     t = Math.min(1, Math.max(0, t));
+    const bezier = /^cubic-bezier\(([^()]*)\)$/i.exec(name.trim());
+    if (bezier) {
+      const points = bezier[1].split(",").map((value) => value.trim());
+      if (points.length !== 4 || !points.every((value) => CSS_NUMBER.test(value))) {
+        throw new RangeError(`Invalid cubic bezier: ${name}`);
+      }
+      return cubicBezier(t, ...points.map(Number));
+    }
     let key = name.replace(/[\s_-]/g, "").toLowerCase();
     if (key.startsWith(EASE_PREFIX)) key = key.slice(EASE_PREFIX.length);
     if (key === "linear") return t;

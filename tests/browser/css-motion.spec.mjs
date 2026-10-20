@@ -54,6 +54,22 @@ test("cssMotionController false leaves CSS motion native", async ({ page }) => {
   expect(result.result).toMatchObject({ status: "completed", mode: "native" });
 });
 
+test("rapid replacements cannot schedule an obsolete capture over the current operation", async ({ page }) => {
+  await start(page);
+  const results = await page.evaluate(async () => {
+    const element = document.getElementById("motion-box");
+    const id = AelluxJs.motion.id();
+    getComputedStyle(element).opacity;
+    const run = visible => AelluxJs.motion.run(element, {
+      id, apply: () => element.classList.toggle("active", visible), nativeDuration: 240
+    });
+    return Promise.all([run(true), run(false), run(true)]);
+  });
+  expect(results.slice(0, 2).map(result => result.status)).toEqual(["aborted", "aborted"]);
+  expect(results[2].status).toBe("completed");
+  await expect(page.locator("#motion-box")).toHaveCSS("opacity", "1");
+});
+
 test("advanced Aellux easing is represented as native linear samples", async ({ page }) => {
   await start(page);
   await page.evaluate(() => {

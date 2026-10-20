@@ -43,6 +43,11 @@
   }
   const attr = {
     present: AelluxJs.attr(extensionName),
+    group: AelluxJs.attr("present-group"),
+    key: AelluxJs.attr("present-key"),
+    active: AelluxJs.attr("present-active"),
+    when: AelluxJs.attr("present-when"),
+    triggerOn: AelluxJs.attr("trigger-on"),
     autoUnpop: AelluxJs.attr("auto-unpop"),
     presentMotion: AelluxJs.attr("present-motion"),
     unpopOnOutside: AelluxJs.attr("unpop-on-outside"),
@@ -58,10 +63,12 @@
     willChange: AelluxJs.className("will-change"),
     grid: AelluxJs.className("present-grid")
   };
+  const presentSelector = `[${attr.present}]`;
+  const groupSelector = `[${attr.group}]`;
 
   AelluxJs.extAttach(extensionName, {
     init, destroy,
-    pop, unpop, toggle, trigger
+    pop, unpop, toggle, trigger, show, selected
   });
 
   const
@@ -87,7 +94,17 @@
   const containerAriaHandlers = new WeakMap();
   const triggerAriaHandlers = new WeakMap();
   const measuredMemories = new WeakMap();
+  const groups = new Map();
+  const hoverTimers = new Map();
+  const hoveredTriggers = new Set();
+  let groupObserver = null;
+  let groupsQueued = false;
+  let interpolatedProgress = false;
   const cssProperties = [
+    ["pop-progress", "<number>", "0"],
+    ["unpop-progress", "<number>", "1"],
+    ["present-pop-phase", "<number>", "0"],
+    ["present-unpop-phase", "<number>", "1"],
     ["from-opacity", OPACITY_SYNTAX, "0"],
     ["pop-opacity", OPACITY_SYNTAX, "1"],
     ["unpop-opacity", OPACITY_SYNTAX, "0"],
@@ -103,12 +120,14 @@
   ];
 
   function init(options) {
+    interpolatedProgress = !!(root.CSS && typeof root.CSS.registerProperty === "function" &&
+      root.CSS.supports && root.CSS.supports("opacity", "clamp(0, 0.5, 1)"));
     AelluxJs.registerCssProperty(
       ...cssProperties.map(([name, syntax, initialValue]) =>
         ({ name: `--ae-${name}`, syntax, initialValue }))
     );
     AelluxJs.mountManager.add({
-      extensionName, selector: `[${attr.present}]`,
+      extensionName, selector: presentSelector,
       priority: 0,
       mount: mountPresentContainer, unmount: unmountPresentContainer,
       controllers: ["pop", "unpop", "trigger", "toggle"]
@@ -125,12 +144,23 @@
       mount: mountTriggerElement, unmount: unmountTriggerElement
     });
 
+    AelluxJs.mountManager.add({
+      extensionName, selector: groupSelector, priority: 1,
+      mount: mountGroup, unmount: unmountGroup, controllers: ["show", "selected"]
+    });
+    document.addEventListener("pointerover", onHover);
+    document.addEventListener("pointerout", onHover);
     AelluxJs.on("$click", OnClick);
   }
 
   function destroy() {
     AelluxJs.mountManager.remove({ extensionName });
     AelluxJs.off("$click", OnClick);
+    document.removeEventListener("pointerover", onHover);
+    document.removeEventListener("pointerout", onHover);
+    for (const group of groups.keys()) unmountGroup(group);
+    for (const target of hoverTimers.keys()) cancelHoverClose(target);
+    hoveredTriggers.clear();
 
     for (const triggerElement of triggerElementsSet) {
       unmountTriggerElement(triggerElement);
@@ -146,7 +176,8 @@
     elementMemories.set(element, AelluxJs.persist.element.save(
       element,
       [attr.present, attr.presentMotion, "hidden"],
-      ["--ae-pop-low-steps", "--ae-unpop-low-steps"]
+      ["--ae-pop-low-steps", "--ae-unpop-low-steps", "--ae-pop-progress", "--ae-unpop-progress",
+        "--ae-present-pop-phase", "--ae-present-unpop-phase"]
     ));
     containerAriaHandlers.set(element, AelluxJs.aria.register(element));
     if ((element.getAttribute(attr.present) || "").trim().toLowerCase() === "all") {
@@ -243,12 +274,16 @@
         refreshTriggerTargets(triggerElement);
       }
     }
+    setProgress(element, !element.hidden);
+    queueGroups();
     autoUnpopSchedule(element, presentController);
   }
 
   function unmountPresentContainer(element) {
     if (!presentElements.has(element)) return;
     const controller = presentElements.get(element);
+    cancelHoverClose(element);
+    for (const button of controller.triggers) hoveredTriggers.delete(button);
     controller.stop();
     AelluxJs.waitLayout?.cancel(controller.motionId);
     element.classList.remove(className.grid);
@@ -259,6 +294,7 @@
     elementMemories.get(element)?.restore();
     elementMemories.delete(element);
     controller.triggers.forEach(updateTriggerAriaExpanded);
+    queueGroups();
   }
 
   function mountTriggerElement(triggerElement) {
@@ -270,8 +306,10 @@
 
   function unmountTriggerElement(triggerElement) {
     if (!triggerElementsSet.has(triggerElement)) return;
+    hoveredTriggers.delete(triggerElement);
     const target = triggerTargets.get(triggerElement);
     if (target) {
+      cancelHoverClose(target);
       presentElements.get(target)?.triggers.delete(triggerElement);
       triggerTargets.delete(triggerElement);
     }
@@ -331,7 +369,7 @@
     const targetSelector = triggerElement.getAttribute(attr.target);
     const dismiss = triggerElement.getAttribute(attr.dismiss);
     indexTriggerTarget(triggerElement, dismiss || targetSelector);
-    const container = triggerElement.closest(`[${attr.present}]`);
+    const container = triggerElement.closest(presentSelector);
 
     if (previousTarget) {
       presentElements.get(previousTarget)?.triggers.delete(triggerElement);
@@ -343,6 +381,8 @@
     } else if (container && container.id) {
       target = container;
     }
+
+    if (previousTarget !== target) hoveredTriggers.delete(triggerElement);
 
     if (!target || !target.id) {
       triggerTargets.delete(triggerElement);
@@ -373,10 +413,8 @@
     trigger = typeof trigger === "string" ?
       (trigger || "toggle").toLowerCase() :
       "toggle";
-    const method = AelluxJs.ext.present[trigger];
-    return method && typeof method === "function" ?
-      method(element) :
-      toggle(element);
+    const method = trigger === "pop" ? pop : trigger === "unpop" ? unpop : toggle;
+    return method(element);
   }
 
   function restoreMeasuredStyles(element, controller) {
@@ -418,7 +456,7 @@
     return size;
   }
 
-  async function presentTransition(element, gotoVisible, forceRepop = false) {
+  async function presentTransition(element, gotoVisible, forceRepop = false, groupOperation = false) {
     const controller = presentElements.get(element);
     if (!controller) return;
 
@@ -427,6 +465,11 @@
     if (typeof gotoVisible === "undefined" || gotoVisible === null)
       gotoVisible = (controller.direction === POP) ? false : true;
 
+    const group = element.closest(groupSelector);
+    if (!groupOperation && groups.has(group) && element.hasAttribute(attr.key)) {
+      if (gotoVisible) return show(group, element.getAttribute(attr.key));
+      if (groups.get(group).selected === element) return show(group, "");
+    }
     const newDirection = gotoVisible ? POP : UNPOP;
 
     if ((element.hidden && !gotoVisible)
@@ -435,7 +478,7 @@
     let transition = null;
 
     try {
-      const allowEvent = AelluxJs.dispatchFrom(
+      const allowEvent = groupOperation || AelluxJs.dispatchFrom(
         element, `${BEFORE}${newDirection}`,
         { bubbles: true, cancelable: true }
       );
@@ -465,6 +508,12 @@
         controller.stop({ replacement: reusePreparation, transitionStart: true });
       }
       controller.direction = newDirection;
+      // Neither channel animates backwards when the direction changes.
+      setPhase(element, "pop", "0");
+      setPhase(element, "unpop", "0");
+      element.style.setProperty("--ae-pop-progress", "0");
+      element.style.setProperty("--ae-unpop-progress", "0");
+      root.getComputedStyle(element).getPropertyValue("--ae-pop-progress");
 
       const interrupted = new Promise((_, interruptTransition) => {
         transition = {
@@ -517,6 +566,14 @@
           className.unpopping
         );
         controller.classList.add(transition.className);
+        // Clamp private CSS interpolation without adding an animation loop.
+        // Stable states use literal endpoints to avoid stale computed-value
+        // dependencies after Firefox releases a controlled custom-property effect.
+        if (interpolatedProgress) {
+          element.style.setProperty("--ae-pop-progress", "clamp(0, var(--ae-present-pop-phase), 1)");
+          element.style.setProperty("--ae-unpop-progress", "clamp(0, var(--ae-present-unpop-phase), 1)");
+        }
+        setPhase(element, gotoVisible ? "pop" : "unpop", "1");
         if (size) {
           if (controller.measuredHeight) {
             element.style.setProperty("max-height", `${gotoVisible ? size.height : 0}px`, "important");
@@ -538,7 +595,7 @@
       };
       const completed = AelluxJs.motion
         ? AelluxJs.motion.run(element, motionOptions)
-        : legacyMotionRun(motionOptions);
+        : legacyMotionRun(motionOptions, transition);
 
       AelluxJs.dispatchFrom(element, "Layout", {
         detail: {
@@ -600,11 +657,14 @@
     }
   }
 
-  function legacyMotionRun(options) {
+  function legacyMotionRun(options, transition) {
     options.apply();
-    return new Promise(resolve => setTimeout(() => resolve({
-      id: options.id, status: "completed", mode: "native"
-    }), Math.max(0, Number(options.nativeDuration) || 0)));
+    return new Promise(resolve => {
+      transition.timeout = setTimeout(() => {
+        transition.timeout = null;
+        resolve({ id: options.id, status: "completed", mode: "native" });
+      }, Math.max(0, Number(options.nativeDuration) || 0));
+    });
   }
 
   function finishTransition(element, controller, transition, gotoVisible) {
@@ -613,6 +673,7 @@
     const focused = !gotoVisible && element.contains(document.activeElement)
       ? document.activeElement : null;
     element.hidden = gotoVisible ? false : true;
+    setProgress(element, gotoVisible);
     if (element.hidden) openPresentElements.delete(element);
     else openPresentElements.add(element);
     if (focused) {
@@ -663,7 +724,7 @@
 
   function OnClick(event) {
     if (!event.target) return;
-    const container = event.target.closest(`[${attr.present}]`);
+    const container = event.target.closest(presentSelector);
     const exceptions = [event.target];
 
     var button;
@@ -676,11 +737,11 @@
         const target = targetById(targetSelector);
         if (target) {
           exceptions.push(target);
-          trigger(target, triggerAttr);
+          if (!suppressHoverClick(button, event)) trigger(target, triggerAttr);
         }
       } else if (container) {
         exceptions.push(container);
-        trigger(container, triggerAttr);
+        if (!suppressHoverClick(button, event)) trigger(container, triggerAttr);
       } else {
         AelluxJs.diagnostics.error(
           AelluxJs.diagnostics.ERROR_PRESENT_CONTROL_TARGET_MISSING,
@@ -711,6 +772,247 @@
     }
 
     outsideClickAutoUnpop(exceptions);
+  }
+
+  function setProgress(element, visible) {
+    setPhase(element, "pop", visible ? "1" : "0");
+    setPhase(element, "unpop", visible ? "0" : "1");
+    element.style.setProperty("--ae-pop-progress", visible ? "1" : "0");
+    element.style.setProperty("--ae-unpop-progress", visible ? "0" : "1");
+  }
+
+  function setPhase(element, direction, value) {
+    element.style.setProperty(`--ae-present-${direction}-phase`, value);
+    if (!interpolatedProgress) element.style.setProperty(`--ae-${direction}-progress`, value);
+  }
+
+  function groupMembers(group) {
+    return [...presentElements.keys()].filter(element => element.isConnected &&
+      element.hasAttribute(attr.key) && element.closest(groupSelector) === group);
+  }
+
+  function mountGroup(group) {
+    if (groups.has(group)) return;
+    const visible = groupMembers(group).filter(member => !member.hidden);
+    groups.set(group, {
+      selected: visible.length === 1 ? visible[0] : null,
+      revision: 0, pending: Promise.resolve(true), jobs: new Map(),
+      memory: AelluxJs.persist.element.save(group, [attr.active])
+    });
+    if (!groupObserver && typeof root.MutationObserver === "function") {
+      groupObserver = new root.MutationObserver(records => {
+        if (records.some(record => record.type === "childList" ||
+          record.attributeName !== "class" || groups.has(record.target))) queueGroups();
+      });
+      groupObserver.observe(document, { subtree: true, childList: true, attributes: true,
+        attributeFilter: ["class", attr.active, attr.key, attr.when, attr.group] });
+    }
+    queueGroups();
+  }
+
+  function unmountGroup(group) {
+    const state = groups.get(group);
+    if (!state) return;
+    state.revision++;
+    groups.delete(group);
+    publishGroup(group, state, null);
+    for (const member of groupMembers(group)) {
+      const controller = presentElements.get(member);
+      if (controller.transition) {
+        const visible = controller.direction === POP;
+        controller.stop();
+        member.hidden = !visible;
+        controller.classList.toggle(className.pop, visible);
+        controller.setAriaExpanded(String(visible));
+        setProgress(member, visible);
+        if (!visible) openPresentElements.delete(member);
+      }
+    }
+    state.memory.restore();
+    if (!groups.size && groupObserver) {
+      groupObserver.disconnect();
+      groupObserver = null;
+    }
+  }
+
+  function queueGroups() {
+    if (groupsQueued || !groups.size) return;
+    groupsQueued = true;
+    Promise.resolve().then(() => {
+      groupsQueued = false;
+      groups.forEach((state, group) => {
+        reconcileGroup(group);
+        if (groups.get(group) === state) publishGroup(group, state, state.selected);
+      });
+    });
+  }
+
+  function groupDiagnostic(group, reason) {
+    AelluxJs.diagnostics.warn(AelluxJs.diagnostics.WARN_PRESENT_GROUP_SELECTION,
+      { extension: extensionName, element: group, reason });
+  }
+
+  function reconcileGroup(group) {
+    if (!group.isConnected || !group.hasAttribute(attr.group)) return;
+    const members = groupMembers(group);
+    const state = groups.get(group);
+    if (!members.includes(state.selected)) state.selected = null;
+    let matches;
+    if (group.hasAttribute(attr.active)) {
+      const key = group.getAttribute(attr.active);
+      matches = key === "" ? [] : members.filter(member => member.getAttribute(attr.key) === key);
+      if (key && matches.length !== 1) {
+        groupDiagnostic(group, "Active key must match one mounted member.");
+        return;
+      }
+    } else {
+      matches = members.filter(member => {
+        const token = member.getAttribute(attr.when);
+        return token && !/\s/.test(token) && group.classList.contains(token);
+      });
+      if (!matches.length) {
+        const visible = members.filter(member => !member.hidden &&
+          presentElements.get(member).direction !== UNPOP);
+        if (visible.length > 1) groupDiagnostic(group, "Multiple initially visible members.");
+        else if (!state.selected) state.selected = visible[0] || null;
+        return;
+      }
+    }
+    if (matches.length > 1) {
+      groupDiagnostic(group, "Multiple members match the container classes.");
+      return;
+    }
+    return selectGroup(group, matches[0] || null, members);
+  }
+
+  function show(group, key) {
+    const state = groups.get(group);
+    if (!state || typeof key !== "string") return Promise.resolve(false);
+    const matches = groupMembers(group).filter(member => member.getAttribute(attr.key) === key);
+    if (key && matches.length !== 1) {
+      groupDiagnostic(group, "Active key must match one mounted member.");
+      return Promise.resolve(false);
+    }
+    if (group.getAttribute(attr.active) !== key) group.setAttribute(attr.active, key);
+    const result = reconcileGroup(group);
+    return Promise.resolve(result === undefined ? state.pending : result);
+  }
+
+  function selected(group) {
+    const state = groups.get(group);
+    const member = state && state.selected;
+    return member && presentElements.has(member) && member.isConnected && member.hasAttribute(attr.key) &&
+      member.closest(groupSelector) === group ? member : null;
+  }
+
+  function publishGroup(group, state, current) {
+    if (state.announced === current) return;
+    const previous = state.announced || null;
+    state.announced = current;
+    AelluxJs.dispatchFrom(group, "PresentGroupChange", { bubbles: true,
+      detail: { group, previous, current, key: current && current.getAttribute(attr.key) } });
+  }
+
+  function selectGroup(group, selected, members) {
+    const state = groups.get(group);
+    const changes = members.filter(member => {
+      const controller = presentElements.get(member);
+      return member === selected ? member.hidden || controller.direction === UNPOP :
+        !member.hidden && controller.direction !== UNPOP;
+    });
+    if (state.selected === selected && !changes.length) return state.pending;
+    const revision = ++state.revision;
+    for (const member of changes) {
+      if (!AelluxJs.dispatchFrom(member, member === selected ? "BeforePop" : "BeforeUnpop",
+        { bubbles: true, cancelable: true })) {
+        // A veto keeps the accepted selection, including the declarative source.
+        if (state.revision === revision) {
+          const key = state.selected?.getAttribute(attr.key) || "";
+          if (group.getAttribute(attr.active) !== key) group.setAttribute(attr.active, key);
+        }
+        return false;
+      }
+      // Before events can synchronously change the selection or unmount.
+      if (groups.get(group) !== state || state.revision !== revision) return false;
+    }
+    state.selected = selected;
+    let complete;
+    const pending = new Promise(resolve => { complete = resolve; });
+    state.pending = pending;
+    for (const member of changes) {
+      const job = presentTransition(member, member === selected, false, true);
+      if (groups.get(group) !== state || state.revision !== revision) {
+        complete(false);
+        return pending;
+      }
+      state.jobs.set(member, job);
+      job.then(() => {
+        if (state.jobs.get(member) === job) state.jobs.delete(member);
+      });
+    }
+    publishGroup(group, state, selected);
+    // An unchanged outgoing member can still be animating from an earlier
+    // selection. The latest request includes its completion too.
+    Promise.all(members.map(member => state.jobs.get(member))).then(() => {
+        const current = groupMembers(group);
+        complete(groups.get(group) === state && state.revision === revision &&
+          (!selected || current.includes(selected)) &&
+          current.every(member => member === selected ? !member.hidden : member.hidden));
+      });
+    return pending;
+  }
+
+  function cancelHoverClose(target) {
+    clearTimeout(hoverTimers.get(target));
+    hoverTimers.delete(target);
+  }
+
+  function inHoverRegion(target, node) {
+    if (!node || !node.nodeType) return false;
+    if (target.contains(node)) return true;
+    for (const button of triggerElementsSet) {
+      if (button.getAttribute(attr.triggerOn) === "hover" &&
+        triggerTargets.get(button) === target && button.contains(node)) return true;
+    }
+    return false;
+  }
+
+  function suppressHoverClick(button, event) {
+    return button.getAttribute(attr.triggerOn) === "hover" && event.detail > 0 &&
+      event.pointerType !== "touch" && hoveredTriggers.has(button);
+  }
+
+  function onHover(event) {
+    if (event.pointerType === "touch" || !event.target?.closest) return;
+    const entering = event.type === "pointerover";
+    const button = event.target.closest(`[${attr.trigger}][${attr.triggerOn}="hover"]`);
+    if (button && triggerElementsSet.has(button) && !button.contains(event.relatedTarget)) {
+      refreshChangedTrigger(button);
+      const target = triggerTargets.get(button);
+      if (target && presentElements.has(target)) {
+        if (entering) {
+          cancelHoverClose(target);
+          hoveredTriggers.add(button);
+          const action = button.getAttribute(attr.trigger);
+          if (action === "pop") toggle(target, true);
+          else trigger(target, action);
+        } else hoveredTriggers.delete(button);
+      }
+    }
+    for (const target of openPresentElements) {
+      if (!inHoverRegion(target, event.target)) continue;
+      if (entering || inHoverRegion(target, event.relatedTarget)) cancelHoverClose(target);
+      else if ([...triggerElementsSet].some(control =>
+        triggerTargets.get(control) === target && control.getAttribute(attr.triggerOn) === "hover" &&
+        control.getAttribute(attr.trigger) !== "unpop")) {
+        cancelHoverClose(target);
+        hoverTimers.set(target, setTimeout(() => {
+          hoverTimers.delete(target);
+          if (presentElements.has(target) && target.isConnected &&
+            !inHoverRegion(target, document.activeElement)) unpop(target);
+        }, 120));
+      }
+    }
   }
 
   function getString2Time(string) {

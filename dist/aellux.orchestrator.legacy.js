@@ -23590,6 +23590,14 @@
         abort: shouldAbort
       });
       return captureResult.then(function(sequenceResult) {
+        if (operation.cancelled || operations.get(operationId) !== operation) {
+          release(operation, false);
+          return {
+            id: operationId,
+            status: "aborted",
+            mode: "native"
+          };
+        }
         if (sequenceResult.status !== "completed") {
           release(operation, false);
           return {
@@ -23846,7 +23854,7 @@
     }
     function release(operation, finish) {
       var resume = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : false;
-      getAelluxJs().waitLayout.setVisualFPSLimit(operation.id, null);
+      if (operations.get(operation.id) === operation) getAelluxJs().waitLayout.setVisualFPSLimit(operation.id, null);
       if (operation.nativeTimer !== null) root.clearTimeout(operation.nativeTimer);
       operation.nativeTimer = null;
       var _iterator5 = _createForOfIteratorHelper5(operation.animations), _step5;
@@ -23854,8 +23862,10 @@
         for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
           var animation = _step5.value;
           try {
-            if (finish) animation.finish();
-            else if (resume) animation.play();
+            if (finish) {
+              animation.finish();
+              if (typeof root.CSSTransition === "function" && animation instanceof root.CSSTransition) animation.cancel();
+            } else if (resume) animation.play();
             else animation.cancel();
           } catch (_) {
           }
@@ -23919,6 +23929,12 @@
       }
     } };
   }
+  function _toConsumableArray4(r) {
+    return _arrayWithoutHoles4(r) || _iterableToArray4(r) || _unsupportedIterableToArray7(r) || _nonIterableSpread4();
+  }
+  function _nonIterableSpread4() {
+    throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+  }
   function _unsupportedIterableToArray7(r, a) {
     if (r) {
       if ("string" == typeof r) return _arrayLikeToArray7(r, a);
@@ -23926,10 +23942,44 @@
       return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray7(r, a) : void 0;
     }
   }
+  function _iterableToArray4(r) {
+    if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
+  }
+  function _arrayWithoutHoles4(r) {
+    if (Array.isArray(r)) return _arrayLikeToArray7(r);
+  }
   function _arrayLikeToArray7(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
+  }
+  function bezierCoordinate(u, p1, p2) {
+    var v = 1 - u;
+    return 3 * v * v * u * p1 + 3 * v * u * u * p2 + u * u * u;
+  }
+  function cubicBezier(t, x1, y1, x2, y2) {
+    if (![t, x1, y1, x2, y2].every(function(value) {
+      return typeof value === "number" && Number.isFinite(value);
+    })) {
+      throw new TypeError("cubicBezier(t, x1, y1, x2, y2) requires finite numbers");
+    }
+    if (x1 < 0 || x1 > 1 || x2 < 0 || x2 > 1) {
+      throw new RangeError("Cubic bezier x coordinates must be between 0 and 1");
+    }
+    t = Math.min(1, Math.max(0, t));
+    if (t === 0 || t === 1) return t;
+    if (x1 === y1 && x2 === y2) return t;
+    var low = 0;
+    var high = 1;
+    var u = t;
+    for (var i = 0; i < 40; i++) {
+      var x = bezierCoordinate(u, x1, x2);
+      if (x === t) break;
+      if (x < t) low = u;
+      else high = u;
+      u = (low + high) / 2;
+    }
+    return bezierCoordinate(u, y1, y2);
   }
   function bounceOut(t) {
     var n = 7.5625;
@@ -23977,6 +24027,18 @@
       throw new TypeError("ease(name, t) requires a name and a finite number");
     }
     t = Math.min(1, Math.max(0, t));
+    var bezier = /^cubic-bezier\(([^()]*)\)$/i.exec(name.trim());
+    if (bezier) {
+      var points = bezier[1].split(",").map(function(value) {
+        return value.trim();
+      });
+      if (points.length !== 4 || !points.every(function(value) {
+        return CSS_NUMBER.test(value);
+      })) {
+        throw new RangeError("Invalid cubic bezier: ".concat(name));
+      }
+      return cubicBezier.apply(void 0, [t].concat(_toConsumableArray4(points.map(Number))));
+    }
     var key = name.replace(/[\s_-]/g, "").toLowerCase();
     if (key.startsWith(EASE_PREFIX)) key = key.slice(EASE_PREFIX.length);
     if (key === "linear") return t;
@@ -24020,7 +24082,7 @@
     }
     return t < 0.5 ? easeIn(family, 2 * t) / 2 : 1 - easeIn(family, 2 - 2 * t) / 2;
   }
-  var EASE_PREFIX, IN, OUT, IN_OUT, DIRECTIONS, QUAD, CUBIC, QUART, QUINT, SINE, EXPO, CIRC, BACK, ELASTIC, BOUNCE, FAMILIES, ALIASES;
+  var EASE_PREFIX, IN, OUT, IN_OUT, DIRECTIONS, QUAD, CUBIC, QUART, QUINT, SINE, EXPO, CIRC, BACK, ELASTIC, BOUNCE, FAMILIES, ALIASES, CSS_NUMBER;
   var init_ease = __esm({
     "src/internal/ease.js": function() {
       /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
@@ -24048,6 +24110,7 @@
         exponential: EXPO,
         circular: CIRC
       };
+      CSS_NUMBER = /^[+-]?(?:\d*\.\d+|\d+)(?:e[+-]?\d+)?$/i;
     }
   });
 

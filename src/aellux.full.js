@@ -29,7 +29,7 @@ root.AelluxJs.ext("feedback", { loadWhen: "[data-ae-feedback]", loadStyle: true 
 root.AelluxJs.ext("focus", { loadWhen: "[data-ae-focus]" });
 root.AelluxJs.ext("point", { loadWhen: "[data-ae-point]" });
 root.AelluxJs.ext("present", {
-  loadWhen: "[data-ae-present],[data-ae-trigger],[data-ae-dismiss],[data-ae-target]",
+  loadWhen: "[data-ae-present],[data-ae-present-group],[data-ae-trigger],[data-ae-dismiss],[data-ae-target]",
   loadStyle: true
 });
 root.AelluxJs.ext("scrollbox", { loadWhen: "[data-ae-scrollbox]" });

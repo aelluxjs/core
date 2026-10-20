@@ -20,14 +20,14 @@
   --ae-pop-low-steps: 4;
   --ae-unpop-low-steps: 4;
 
-  transition-property: opacity, transform;
+  transition-property: var(--ae-present-properties);
 }
 [data-ae-present].ae--present-grid {
   display: inline-grid;
-  transition-property: opacity, transform, grid-template-rows, grid-template-columns;
+  --ae-present-properties: opacity, transform, grid-template-rows, grid-template-columns;
 }
 [data-ae-present]:not(.ae--present-grid) {
-  transition-property: opacity, transform, max-height, max-width;
+  --ae-present-properties: opacity, transform, max-height, max-width;
 }
 [data-ae-present]>[data-ae-present-motion] {
   place-self: stretch;
@@ -113,4 +113,10 @@ html[data-ae-low-hardware] [data-ae-present] {
 }
 [data-ae-present].ae--present-grid[data-ae-present~="width"].ae--unpopping { grid-template-columns: var(--ae-unpop-width); }
 [data-ae-present].ae--present-grid[data-ae-present~="height"].ae--unpopping { grid-template-rows: var(--ae-unpop-height); }
+[data-ae-present].ae--popping {
+  transition-property: var(--ae-present-properties), --ae-present-pop-phase;
+}
+[data-ae-present].ae--unpopping {
+  transition-property: var(--ae-present-properties), --ae-present-unpop-phase;
+}
 [data-ae-present][hidden] { display: none; }

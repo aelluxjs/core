@@ -126,7 +126,7 @@ test("changed orchestrator bytes are rejected before Legacy fallback", async ({ 
   await page.addScriptTag({ url: "/dist/aellux.js" });
   await page.evaluate(() => AelluxJs.init({ mode: "basic" }));
   await expect.poll(() => page.evaluate(() => typeof AelluxJs.wait)).toBe("function");
-  expect(await page.evaluate(() => ({
+  await expect.poll(() => page.evaluate(() => ({
     changedExecuted: Boolean(window.changedOrchestratorExecuted),
     legacy: AelluxJs.diagnostics.legacy
   }))).toEqual({ changedExecuted: false, legacy: true });

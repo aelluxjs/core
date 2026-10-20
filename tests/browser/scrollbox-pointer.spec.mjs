@@ -2514,16 +2514,24 @@ test("pointer mode follows touch emulation changes without reloading", async ({ 
   expect(await drag(page, "box")).toMatchObject({ x: 50, y: 0 });
 
   const session = await page.context().newCDPSession(page);
-  await session.send("Emulation.setTouchEmulationEnabled", { enabled: true, maxTouchPoints: 1 });
-  await expect.poll(() => page.evaluate(() => matchMedia(
-    "(hover: hover) and (pointer: fine)").matches)).toBe(false);
+  const emulateTouch = async enabled => {
+    // matches changes before the change event reconfigures Scrollbox listeners.
+    // Observe the event before CDP toggles the media feature.
+    await page.evaluate(() => {
+      const media = matchMedia("(hover: hover) and (pointer: fine)");
+      window.scrollboxMediaChanged = new Promise(resolve =>
+        media.addEventListener("change", () => resolve(media.matches), { once: true }));
+    });
+    await session.send("Emulation.setTouchEmulationEnabled", enabled
+      ? { enabled: true, maxTouchPoints: 1 } : { enabled: false });
+    return page.evaluate(() => window.scrollboxMediaChanged);
+  };
+  expect(await emulateTouch(true)).toBe(false);
   await page.evaluate(() => document.getElementById("box")
     .scrollTo({ left: 0, top: 0, behavior: "instant" }));
   expect(await drag(page, "box")).toMatchObject({ x: 0, y: 0 });
 
-  await session.send("Emulation.setTouchEmulationEnabled", { enabled: false });
-  await expect.poll(() => page.evaluate(() => matchMedia(
-    "(hover: hover) and (pointer: fine)").matches)).toBe(true);
+  expect(await emulateTouch(false)).toBe(true);
   expect(await drag(page, "box")).toMatchObject({ x: 50, y: 0 });
 });
 

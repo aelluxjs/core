@@ -48,3 +48,99 @@ The `--ae-from-height`, `--ae-pop-height`, and `--ae-unpop-height` properties de
 When an `unpop` hides a region containing the active element, Present releases focus if the browser has not already done so, then dispatches `UnpopFocusLost` through `AelluxJs.dispatch`. If the active element is outside the region at the time it becomes hidden, no focus event is dispatched.
 
 `data-ae-auto-unpop` specifies a delay before closing an open container. Outside clicks also close open containers unless `data-ae-unpop-on-outside="false"` is set. On unmount, Present restores the attributes it changes on each container and trigger control, including `data-ae-present`, `data-ae-present-motion`, `aria-expanded`, `aria-controls`, and `hidden` where applicable.
+
+## Present Progress
+
+Present registers two inheritable numeric CSS properties on each mounted region. `--ae-pop-progress` advances from 0 to 1 during opening; `--ae-unpop-progress` advances from 0 to 1 during closing. Initially hidden regions have values `0, 1`; initially visible regions have `1, 0`. Both channels reset to zero when a transition starts. Opening finishes at `1, 0`, and closing finishes at `0, 1`. Repeated standalone `pop()` calls restart progress along with the existing visual transition. Reversals reset the previous channel immediately rather than animating it backwards. Unmount restores the original inline values and priorities.
+
+```css
+.panel-content {
+  opacity: var(--ae-pop-progress, 0);
+  transform: translateY(calc(20px * (1 - var(--ae-pop-progress, 0))));
+}
+```
+
+Put `.panel-content` inside a `data-ae-present="opacity"` region to consume its inherited progress. The properties use the region's existing duration and CSS easing. Registered properties interpolate natively; captured transitions use the same CSS Motion Controller timeline as the other visual properties, including advanced Aellux easing and adaptive WaitLayout scheduling. These custom properties count as conservative properties: even an opacity-only Present may now use `cssMotionPropertyMaxFPS` (40 by default), further limited by `data-ae-maxfps` and adaptive FPS. Elapsed time determines duration, independently of the number of updates. Private registered phase properties carry interpolation; the public properties clamp those phases to 0–1, including with overshooting CSS and advanced Aellux easings. Only the active phase is transitioned, so resetting the opposite channel does not animate backwards.
+
+Without registered custom-property interpolation, progress changes discretely but its stable endpoints and the existing visual transitions remain available. Web Animations is optional: disabling the controller or missing its APIs keeps native CSS motion. Reduced motion disables transitions. There is no progress polyfill or independent animation loop.
+
+## Present Group
+
+A `data-ae-present-group` container coordinates mounted Present descendants with `data-ae-present-key` values. Membership belongs to the nearest group, so nested groups are independent. Keys must uniquely identify one mounted member.
+
+```html
+<div id="views" data-ae-present-group data-ae-present-active="home">
+  <section data-ae-present="opacity" data-ae-present-key="home">Home</section>
+  <section id="settings" data-ae-present="opacity" data-ae-present-key="settings" hidden>
+    <button data-ae-dismiss>Close settings</button>
+    Settings
+  </section>
+</div>
+```
+
+Changing `data-ae-present-active` starts outgoing and incoming transitions together. One member is selected logically; both may remain visible until the outgoing transition completes. An empty active value clears the selection and closes members. Invalid or duplicate keys preserve the previous selection and report `WARN_PRESENT_GROUP_SELECTION` (2021). With no declared selection, a valid initial visible member is preserved; an all-hidden group stays closed. Multiple initially visible members are diagnosed rather than choosing an arbitrary winner.
+
+### Selection by container class
+
+```html
+<div data-ae-present-group class="view-home">
+  <section data-ae-present="opacity" data-ae-present-key="home"
+    data-ae-present-when="view-home">Home</section>
+  <section data-ae-present="opacity" data-ae-present-key="settings"
+    data-ae-present-when="view-settings" hidden>Settings</section>
+</div>
+```
+
+`data-ae-present-when` names one container class, without a leading dot. It is not a CSS selector. When the active attribute exists, it takes precedence over all classes. Removing the attribute re-enables class selection. No matching class preserves the current state; multiple matching members report diagnostic 2021 and preserve the current selection. A shared MutationObserver watches changes; there is no polling or per-frame group evaluation. Unrelated class changes that keep the selected member do not restart its transition.
+
+### Programmatic selection and lifecycle
+
+```js
+await $ae.ext.present.show(document.getElementById("views"), "settings");
+// The mounted controller binds the same operation to its container:
+await $ae("views").present.show("home");
+```
+
+`show()` sets `data-ae-present-active` and uses the same reconciliation as direct attribute changes. Its Promise resolves to `true` for a completed current selection and `false` for invalid, refused or superseded requests. Member `pop()`, `toggle()`, triggers and dismissals also respect the group selection; opening an already selected member is idempotent in a group. Standalone `pop()` retains its restart behavior.
+
+All required `BeforePop`/`BeforeUnpop` events are checked before a group swap starts. Canceling either refuses the swap, preserves the accepted selection and updates the active attribute to that selection. This also establishes explicit attribute precedence if a class-based swap is refused. Individual transition and completion events, focus release, `hidden` and trigger ARIA continue to belong to Present. The group adds no tabs, dialog or other ARIA roles. Rapid changes replace obsolete transitions; old completion Promises cannot select an earlier member. Dynamically inserted members join after `AelluxJs.mount()`, and removed or moved members no longer participate in the former group. Unmount releases shared observation when the last group leaves and restores the group's original active attribute.
+
+## Hover Triggers
+
+```html
+<button type="button" data-ae-trigger="pop" data-ae-trigger-on="hover"
+  data-ae-target="settings">Settings</button>
+```
+
+`data-ae-trigger-on="click"` is the default. `hover` changes how `pop`, `unpop` or `toggle` is invoked. Pointer entry activates the trigger once, ignoring movements between its descendants and touch pointer events. Hover `pop` keeps an already open region open. Triggers targeting group members select those members through the group.
+
+Opening controls and their target form one shared hover region, including multiple triggers for the same target. Moving into the target keeps it open. Leaving the region schedules close after 120 ms; returning cancels it. Focus inside the shared region prevents hover dismissal. Outside clicks still close according to `data-ae-unpop-on-outside`; hover close is independent of that outside-click option. Dismiss and auto-unpop retain their normal behavior.
+
+Keep native buttons or links: keyboard activation continues to invoke the configured action, and ordinary click/tap remains available on devices without hover. A mouse click on a currently hovered trigger does not invoke its action a second time. Touch pointer entry is ignored so a tap is handled once by conventional activation. Listeners are delegated and removed on extension destruction; pending target close timers are canceled when the target is unmounted.
+
+## Group selection notifications and Anchor
+
+`$ae.ext.present.selected(groupElement)` and `$ae("views").present.selected()` return the accepted mounted member, or `null`. This is a read-only query of the same selection used by `show()`; it does not select a key or wait for the opening animation. Existing `show()`, trigger and transition contracts are preserved.
+
+Present emits the bubbling `AelluxJsPresentGroupChange` event when an accepted logical selection changes, including initial confirmation, removal of the selected member and group teardown. Its detail is `{ group, previous, current, key }`, using element references and a nullable key. It is emitted after cancelable Before events have accepted the swap and the incoming member has been made available for presentation. A refused swap emits no change. Reentrant or superseded operations cannot publish an obsolete selection. Consumers that load after the event can query `selected()`.
+
+```html
+<div id="views" data-ae-present-group data-ae-present-active="home"
+     data-ae-present-group-anchor="selection-indicator" style="position:relative">
+  <section id="home-panel" data-ae-present="opacity" data-ae-present-key="home">Home</section>
+  <section id="settings-panel" data-ae-present="opacity" data-ae-present-key="settings" hidden>Settings</section>
+  <div id="selection-indicator" data-ae-anchor="bottom-left:bottom-left"
+       data-ae-anchor-match="width"
+       style="--ae-anchor-switch-duration:250ms;--ae-anchor-switch-ease:ease-in-out"></div>
+</div>
+```
+
+`data-ae-present-group-anchor` accepts one Anchor ID, optionally prefixed with `#`. Anchor owns resolution, geometry, matching, switching, association diagnostics and fallback to its ordinary target when the association is removed. Present performs no geometry calculations and does not require Anchor to be loaded. See [Anchor](anchor.md#present-group-anchor) for precedence, compatible positioning references, conflicts and an integrated example. A group may remain temporarily without a selected member; its associated Anchor then remains inactive.
+
+Delivery B adds the query and notification bridge without increasing Present's existing limits. Its minified Modern script is 17,240 bytes (gzip: 6,106), compared with Delivery A's 16,914 / 5,971 bytes. Legacy is 24,552 / 8,662 bytes, compared with 24,334 / 8,528. Shared selector strings avoid repeated construction and keep both artifacts inside the 17/6 and 24/9 KiB limits respectively.
+
+## Delivery A distribution cost
+
+Group reconciliation and cancelable selection, shared observation, delegated hover cleanup, and bounded progress increase the standalone minified Modern script from 11,034 to 16,914 bytes (gzip level 9: 4,098 to 5,971). Legacy grows from 17,363 to 24,334 bytes (gzip: 6,459 to 8,528), including transpilation of the new behavior. This is an increase of 1,873 and 2,069 compressed bytes respectively. Full continues to fit its existing budget.
+
+The Modern budget changes explicitly from 11/5 KiB raw/gzip to 17/6 KiB; Legacy changes from 18/7 KiB to 24/9 KiB. These limits cover the three requested capabilities with a small margin for fixes. The stylesheet retains its existing 4/2 KiB budget. No new dependency, animation service or permanent scheduling loop is added.

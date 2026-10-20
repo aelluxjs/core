@@ -70,6 +70,8 @@ element.style.transform = `scale(${scale})`;
 
 The families `quad`, `cubic`, `quart`, `quint`, `sine`, `expo`, `circ`, `back`, `elastic`, and `bounce` each have `In`, `Out`, and `InOut` variants. `linear`, `smoothStep`, and `smootherStep` are also available. Names ignore case, spaces, underscores, and hyphens. An optional `ease` prefix and direction-first names are accepted: `backOut`, `easeBackOut`, `back-out`, `ease-back-out`, and `easeOutBack` evaluate the same curve. Long family names such as `quadratic`, `quartic`, `quintic`, `sinusoidal`, `exponential`, and `circular` are aliases. Invalid names or nonfinite `t` values throw.
 
+CSS `cubic-bezier(x1, y1, x2, y2)` strings are also accepted, for example `$ae.ease("cubic-bezier(0.25, 0.1, 0.25, 1)", 0.5)`, which returns approximately `0.802403`. The evaluator solves the curve's X coordinate for `t` before returning Y. Both X control coordinates must be in `0..1`; Y may lie outside that range for overshoot. Decimal and exponent notation are supported. Input progress remains clamped to `0..1`, as with named curves; malformed strings and invalid control points throw.
+
 ## DOM Lifecycle
 
 ```js

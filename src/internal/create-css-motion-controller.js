@@ -75,6 +75,12 @@ export function createCssMotionController(root, getAelluxJs) {
     });
 
     return captureResult.then(sequenceResult => {
+      // A completed capture can still have its continuation queued when the
+      // same ID is replaced. It must not schedule over the new operation.
+      if (operation.cancelled || operations.get(operationId) !== operation) {
+        release(operation, false);
+        return { id: operationId, status: "aborted", mode: "native" };
+      }
       if (sequenceResult.status !== "completed") {
         release(operation, false);
         return { id: operationId, status: sequenceResult.status, mode: "native" };
@@ -304,12 +310,21 @@ export function createCssMotionController(root, getAelluxJs) {
   }
 
   function release(operation, finish, resume = false) {
-    getAelluxJs().waitLayout.setVisualFPSLimit(operation.id, null);
+    if (operations.get(operation.id) === operation)
+      getAelluxJs().waitLayout.setVisualFPSLimit(operation.id, null);
     if (operation.nativeTimer !== null) root.clearTimeout(operation.nativeTimer);
     operation.nativeTimer = null;
     for (const animation of operation.animations) {
       try {
-        if (finish) animation.finish();
+        if (finish) {
+          animation.finish();
+          // CSS transitions already have their final value in the stylesheet.
+          // Release the finished effect too: Firefox can otherwise retain stale
+          // registered-property values across hide/restart cycles. CSS keyframe
+          // animations keep their fill behavior.
+          if (typeof root.CSSTransition === "function" && animation instanceof root.CSSTransition)
+            animation.cancel();
+        }
         else if (resume) animation.play();
         else animation.cancel();
       } catch (_) { /* Animation may already have been replaced by CSS. */ }

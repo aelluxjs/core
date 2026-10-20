@@ -42,14 +42,14 @@ ${present} {
   --ae-pop-low-steps: 4;
   --ae-unpop-low-steps: 4;
 
-  transition-property: opacity, transform;
+  transition-property: var(--ae-present-properties);
 }
 ${gridPresent} {
   display: inline-grid;
-  transition-property: opacity, transform, grid-template-rows, grid-template-columns;
+  --ae-present-properties: opacity, transform, grid-template-rows, grid-template-columns;
 }
 ${measuredPresent} {
-  transition-property: opacity, transform, max-height, max-width;
+  --ae-present-properties: opacity, transform, max-height, max-width;
 }
 ${present}>${motion} {
   place-self: stretch;
@@ -135,6 +135,12 @@ ${gridPresent}${presentHeight}.${popping}, ${gridPresent}${presentHeight}.${pop}
 }
 ${gridPresent}${presentWidth}.${unpopping} { grid-template-columns: var(--ae-unpop-width); }
 ${gridPresent}${presentHeight}.${unpopping} { grid-template-rows: var(--ae-unpop-height); }
+${present}.${popping} {
+  transition-property: var(--ae-present-properties), --ae-present-pop-phase;
+}
+${present}.${unpopping} {
+  transition-property: var(--ae-present-properties), --ae-present-unpop-phase;
+}
 ${present}[hidden] { display: none; }
 `;
 }

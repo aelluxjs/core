@@ -6,6 +6,9 @@ All notable changes to aellux.js will be documented in this file.
 
 ### Added
 
+- Core now exposes `$ae.cubicBezier(t, x1, y1, x2, y2)` and accepts CSS `cubic-bezier(...)` easing strings.
+- Present adds group selection, delegated hover behavior, bounded CSS progress, and an optional selection bridge to Anchor.
+- Anchor adds target dimension matching and native target-switch transitions.
 - Core now exposes numeric easing through `$ae.ease(name, t)` in Modern and Legacy runtimes.
 - `waitLayout` now supports identified work, ordered sequences, repetition, cancellation, and adaptive frame pacing.
 - Feedback boundaries now update message text, apply type and motion classes, and ship a generated stylesheet for standard motions.
@@ -32,6 +35,8 @@ All notable changes to aellux.js will be documented in this file.
 
 ### Changed
 
+- Raised Anchor and Present bundle limits for the new capabilities, and the Modern Orchestrator gzip limit from 14 to 15 KiB for cubic bezier easing and CSS Motion lifecycle fixes (14.2 KiB measured).
+- CSS Motion ignores stale capture continuations after replacement and releases finished native CSS transitions to avoid retained values in Firefox.
 - Feedback methods now share the `(message, target, value, motion)` argument order and validate their payloads before dispatch.
 - Full mode now loads the generated Feedback stylesheet.
 - Updated raw bundle limits for the current boot, ESM, full, Anchor, Feedback, and Present artifacts, and added a Feedback CSS limit.

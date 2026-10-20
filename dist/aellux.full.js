@@ -27,7 +27,7 @@
   var define_AELLUX_OFFICIAL_EXTENSION_MANIFEST_default;
   var init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST = __esm({
     "<define:__AELLUX_OFFICIAL_EXTENSION_MANIFEST__>"() {
-      define_AELLUX_OFFICIAL_EXTENSION_MANIFEST_default = { schemaVersion: 1, coreVersion: "0.1.0-beta.10", extensions: { preference: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.preference.min.js", integrity: "sha384-mSOgb0DekFTRXXZAgyNrPjamdlSqzL4SSGZYVWgVg+WlG+pBj11xT81v/6Xk43yO", regular: { url: "./aellux.ext.preference.js", integrity: "sha384-MlikpdHSzHzF6kz5+oJGtq3eoFsKTsx/g+FTrf+dFOU8iQGHsCpn4fP1jLlbNrj7" } }, legacy: { url: "./aellux.ext.preference.legacy.min.js", integrity: "sha384-1LMsK0W9J/PoM4tXhFgkYLRY4yWdzVoYmFy4OMDGd8lRdtptKoEb1sI9L1kzNaBu", regular: { url: "./aellux.ext.preference.legacy.js", integrity: "sha384-pozuz43OyfXrnkmuBu6KTM2lqRSqcI5LMgwAtqnzXq8xZGdVqpnmOtrBcYcMskWk" } } }, dependencies: [] }, "state-navigation": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.state-navigation.min.js", integrity: "sha384-wAbgAqjAA6wauuG+iuUtfRwxChd6fTJ0fS22fqnu2r00kouoXJWZ0f7AoTYlqBC6", regular: { url: "./aellux.ext.state-navigation.js", integrity: "sha384-PKJ8HTD7eIYDEg2hOaAJjpMYzLr2fBjBRGmIGG7XzGTzVK0yTjt5HYPO55VbWfdS" } }, legacy: { url: "./aellux.ext.state-navigation.legacy.min.js", integrity: "sha384-YkhfU15Mpk8KiO6TyoVU6z1yCiYWwnsOGE0xVaQ8NrE7IGrxOSUL005g5JeUDdJu", regular: { url: "./aellux.ext.state-navigation.legacy.js", integrity: "sha384-kaEUY0Zpw8K6pcwjm+INA5feXftLK2/N1aFpPr2LCTcetX2uoe2GGd1MJyy7u8rZ" } } }, dependencies: [] }, feedback: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.feedback.min.js", integrity: "sha384-3VP3W84ekK4MIVBQuy5+5P3bGrwOj7bBDfJnjyexZ+yDADf1jQoHEpP2J1OMUgod", regular: { url: "./aellux.ext.feedback.js", integrity: "sha384-RrPf0bRGxf68f/Rjas5MF5zC1GAubWyndCcuiYbgZsPSHGLFsQtQaUgeFX4SQz+h" } }, legacy: { url: "./aellux.ext.feedback.legacy.min.js", integrity: "sha384-zXuZEv63sd3fwaAygmyk9KazQ46KOelsvAtM+0vJ7phDwemVh1FhOjAcbhWVQM/N", regular: { url: "./aellux.ext.feedback.legacy.js", integrity: "sha384-UW1JZ1+liVWV/w3PJdhfIMztOU7zyTw/1rOyyxoxj4YJIHb1xFl8U0xeIBh8jYV7" } } }, dependencies: [], style: { url: "./aellux.ext.feedback.min.css", integrity: "sha384-OBguCYqF+dMD0Pl84C3FlY/+ohUGfW0OyynmXb/PSDEGOyuI/TQJ3EZAoCeJx+Jk", regular: { url: "./aellux.ext.feedback.css", integrity: "sha384-yk4cW+r/Mc1FRS1ZauBHC6KsKb7sxuJ0E9mmt/+AYASAdZXXMK6iuFBR+TOEh/r4" } } }, focus: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.focus.min.js", integrity: "sha384-AXpUv/Ur2Z4cKvO9EqIFqfxxdSQR5j75q0okOAWPvHhSneQ5LPjrOzk6Sl9MOo4a", regular: { url: "./aellux.ext.focus.js", integrity: "sha384-VjQzcnhLRrvRlbVQ0X4/tO0+8gqJXAmIFoeIVimjOud1wRNuBXNnSQHHW9XQPzTe" } }, legacy: { url: "./aellux.ext.focus.legacy.min.js", integrity: "sha384-I5QpUmKsA1T8NiKfKXQgbdG19Ld1ZGCWSmosygO3yGj43tdxp5zCfLyfBuFoHlKu", regular: { url: "./aellux.ext.focus.legacy.js", integrity: "sha384-5/y3J1NC/qMyV9myEj29+wGbqCVI8ICPafSebtJVfl15Qmup6vMiJzveShd3CLnw" } } }, dependencies: [] }, point: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.point.min.js", integrity: "sha384-n540II5oWbHJRt/a8i+Rgb9A3b9dm7hamg1kd3Nz7KdPQDcaa8S823t9fCrgxBWF", regular: { url: "./aellux.ext.point.js", integrity: "sha384-aDj7I5QEH/0+52E3e6yPZ/D0MEsNBdxeET3G5ToVvgczHtksMh3p8S/KOoAapRRN" } }, legacy: { url: "./aellux.ext.point.legacy.min.js", integrity: "sha384-5UmWvQHfmvttz9yeXbilawGCZH20UdR8yNBOE9kRV34wpfWASl8plzgKtLVQGO9M", regular: { url: "./aellux.ext.point.legacy.js", integrity: "sha384-gG/XONYEC1tchBcJ6bUtKYmWFHz0E+50LmMaXDAiqWBKPuwdHZeYm1uXA22lMZuN" } } }, dependencies: [] }, anchor: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.anchor.min.js", integrity: "sha384-u+UZrSLASzx0afCVYvDFD6QYylZKX3yLY7bFRtp/JMkhoh58qEkTYykOnRD4WY+b", regular: { url: "./aellux.ext.anchor.js", integrity: "sha384-ujBu0j713TBuWD+Ff+jBvdxMFcOq/fYDEWk8uTj0CAa6isc1+rdbiCmxTwo0zQ4J" } }, legacy: { url: "./aellux.ext.anchor.legacy.min.js", integrity: "sha384-MVe+yb6RpxDJTcr2lw4bqQUOroyj5V2BZAnm353Y0z5V9CEgRxOuG5EzxKYZMw/i", regular: { url: "./aellux.ext.anchor.legacy.js", integrity: "sha384-IP4rghxYVUkWmvyG7RS0bXDoCg4jEFJOAHn3B2Ympbh2psIJmKK0CCRUQ9Qyz6nO" } } }, dependencies: [] }, "ajax-href": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.ajax-href.min.js", integrity: "sha384-VCvADGjweS3kvW0s226GuUqgTuiLz9zMhPU61ZrkYfbDX42l3dbvB4jm1QvC8xio", regular: { url: "./aellux.ext.ajax-href.js", integrity: "sha384-EcFz52TbeSPurZxIukNU/WiujOPlF0E4FvnoR1Y44axiHLzd2+LpSBnBMfwIZ3Ip" } }, legacy: { url: "./aellux.ext.ajax-href.legacy.min.js", integrity: "sha384-me6plEKmddDwM9w625RpMTaa8kCZYsbQU/2dwWKmZSktJ3k6gd08iDLmiQPEQLl4", regular: { url: "./aellux.ext.ajax-href.legacy.js", integrity: "sha384-HaI+joZDWxyoZtD4QrAMJ+W1VjfdpyHcV4tt/hlFoP9SznAAxHO6iDErzOO8LIAz" } } }, dependencies: [] }, scrollbox: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.scrollbox.min.js", integrity: "sha384-MbsMMRhyNfXp50eIj6ybMu3dcxXnbLcM6xK8BAPI1aAJzG3TbCAUCcjKr1SHpSaa", regular: { url: "./aellux.ext.scrollbox.js", integrity: "sha384-Nn4620lov+xo0w32p+rdpQsVas3rPr0OW2NJnYASSruy2gb8ujeRk27pLQM2Gobv" } }, legacy: { url: "./aellux.ext.scrollbox.legacy.min.js", integrity: "sha384-m+v8D6nbzGMHyPhNhbT3urBAy3Nza5CtLGK0vGQtiwPGwtsLvJB9sVuafO3kXdxB", regular: { url: "./aellux.ext.scrollbox.legacy.js", integrity: "sha384-ZIFUP8YDdvLufnr2pZKh12xcW9WV28zeUk9uBtXRKLgsLvzQ3VuU1tMyuKQmZbf9" } } }, dependencies: [] }, "scrollbox-snap": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.scrollbox-snap.min.js", integrity: "sha384-fwr6geiwmDDl/bU88Z8ldI9tIyojBehplcqMI8vn9YC2Y35T8Ko6+inwARkChd6y", regular: { url: "./aellux.ext.scrollbox-snap.js", integrity: "sha384-qjNY5x+ua2KPbtXH3SuITr6N3dLfhUQy1qk487pJUPN/iRe06hIbY5oldYSPcXp2" } }, legacy: { url: "./aellux.ext.scrollbox-snap.legacy.min.js", integrity: "sha384-7SyRprm808E+xN3HarZjNIqewKIyFvTFBG+b7nUbjBPTD5arFdhZzQXzqz/Jxdtd", regular: { url: "./aellux.ext.scrollbox-snap.legacy.js", integrity: "sha384-zMpMGOiRT1bKYrrdNiHPcLkFmvMf52JbQyOq9TW0X+I518FgIrRTjq6Fta6Itfg2" } } }, dependencies: [] }, adaptive: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.adaptive.min.js", integrity: "sha384-UfDhSymI78IbudB2vel0GOI+z4C8m6JCG4Egl6WK9mHvZyOltXgawIbn2iFJH2+w", regular: { url: "./aellux.ext.adaptive.js", integrity: "sha384-AXSW7WI4ZEykJgerhjuscp7u99DkKkTYFD13o1HAnVH1tJYz2u5f9VjsBGca7kSU" } }, legacy: { url: "./aellux.ext.adaptive.legacy.min.js", integrity: "sha384-yOyWKIJaWddRJrbYwriE1lpeuiB2WbeF2fII29R4vIBGMfXi6b6m2IXUHvFqaQTB", regular: { url: "./aellux.ext.adaptive.legacy.js", integrity: "sha384-oRSPNCmFGYjwsrmeBT7r7un76fwNEODcJNmo1ifLgHbWEmoGT07OtdqsyxvfnWeN" } } }, dependencies: [], style: { url: "./aellux.ext.adaptive.min.css", integrity: "sha384-8yUP1PStfDqBCyCskP3k9WLIKgv/yl1nyDhmPz7hsX5NZ4z3ZT3ajolA+RhYlUiG", regular: { url: "./aellux.ext.adaptive.css", integrity: "sha384-HfIjX9Zk0VFRimzPvUaTS5AtwuHJHjXKoM/xbNJXj5vE7bSdBGEzbrBHfbNmYah0" } } }, present: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.present.min.js", integrity: "sha384-BL8DgeMmdYO5YiZpsKSRWltYo/QuxRyo2zPdFOAVwCWS9kctutJGWgtOy5VotTG0", regular: { url: "./aellux.ext.present.js", integrity: "sha384-X0YL/EltZBkqKQOtrSYecUOzMPfXCCUTfR09ZWpH9ZVONmq+wZxO75qBr4t87uRi" } }, legacy: { url: "./aellux.ext.present.legacy.min.js", integrity: "sha384-VRWsybKW1jflXKM2eFUc4euG1fcwVjGZ1KwRF0tHca4+n0vpB3/H/yYDQsWvMZ9t", regular: { url: "./aellux.ext.present.legacy.js", integrity: "sha384-n/Dd633AhBdZSjL3WlKxiAp5S8EcdzOU4b+7ah1iukgf2L38fQkACEVIMX8xC23v" } } }, dependencies: [], style: { url: "./aellux.ext.present.min.css", integrity: "sha384-LR069uhIDdnx0X7oeoRxevC/+dD5gA6d4B2dHAJKPgnqLYDGs4GgW9quKNq+1G5b", regular: { url: "./aellux.ext.present.css", integrity: "sha384-9GTFJ0OxBj6ta/iiV07BLGTdfe9pbmBMYXFn9kT+wB4KwiLO8zxJ39XzLYOGgfui" } } } } };
+      define_AELLUX_OFFICIAL_EXTENSION_MANIFEST_default = { schemaVersion: 1, coreVersion: "0.1.0-beta.10", extensions: { preference: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.preference.min.js", integrity: "sha384-mSOgb0DekFTRXXZAgyNrPjamdlSqzL4SSGZYVWgVg+WlG+pBj11xT81v/6Xk43yO", regular: { url: "./aellux.ext.preference.js", integrity: "sha384-MlikpdHSzHzF6kz5+oJGtq3eoFsKTsx/g+FTrf+dFOU8iQGHsCpn4fP1jLlbNrj7" } }, legacy: { url: "./aellux.ext.preference.legacy.min.js", integrity: "sha384-1LMsK0W9J/PoM4tXhFgkYLRY4yWdzVoYmFy4OMDGd8lRdtptKoEb1sI9L1kzNaBu", regular: { url: "./aellux.ext.preference.legacy.js", integrity: "sha384-pozuz43OyfXrnkmuBu6KTM2lqRSqcI5LMgwAtqnzXq8xZGdVqpnmOtrBcYcMskWk" } } }, dependencies: [] }, "state-navigation": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.state-navigation.min.js", integrity: "sha384-wAbgAqjAA6wauuG+iuUtfRwxChd6fTJ0fS22fqnu2r00kouoXJWZ0f7AoTYlqBC6", regular: { url: "./aellux.ext.state-navigation.js", integrity: "sha384-PKJ8HTD7eIYDEg2hOaAJjpMYzLr2fBjBRGmIGG7XzGTzVK0yTjt5HYPO55VbWfdS" } }, legacy: { url: "./aellux.ext.state-navigation.legacy.min.js", integrity: "sha384-YkhfU15Mpk8KiO6TyoVU6z1yCiYWwnsOGE0xVaQ8NrE7IGrxOSUL005g5JeUDdJu", regular: { url: "./aellux.ext.state-navigation.legacy.js", integrity: "sha384-kaEUY0Zpw8K6pcwjm+INA5feXftLK2/N1aFpPr2LCTcetX2uoe2GGd1MJyy7u8rZ" } } }, dependencies: [] }, feedback: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.feedback.min.js", integrity: "sha384-3VP3W84ekK4MIVBQuy5+5P3bGrwOj7bBDfJnjyexZ+yDADf1jQoHEpP2J1OMUgod", regular: { url: "./aellux.ext.feedback.js", integrity: "sha384-RrPf0bRGxf68f/Rjas5MF5zC1GAubWyndCcuiYbgZsPSHGLFsQtQaUgeFX4SQz+h" } }, legacy: { url: "./aellux.ext.feedback.legacy.min.js", integrity: "sha384-zXuZEv63sd3fwaAygmyk9KazQ46KOelsvAtM+0vJ7phDwemVh1FhOjAcbhWVQM/N", regular: { url: "./aellux.ext.feedback.legacy.js", integrity: "sha384-UW1JZ1+liVWV/w3PJdhfIMztOU7zyTw/1rOyyxoxj4YJIHb1xFl8U0xeIBh8jYV7" } } }, dependencies: [], style: { url: "./aellux.ext.feedback.min.css", integrity: "sha384-OBguCYqF+dMD0Pl84C3FlY/+ohUGfW0OyynmXb/PSDEGOyuI/TQJ3EZAoCeJx+Jk", regular: { url: "./aellux.ext.feedback.css", integrity: "sha384-yk4cW+r/Mc1FRS1ZauBHC6KsKb7sxuJ0E9mmt/+AYASAdZXXMK6iuFBR+TOEh/r4" } } }, focus: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.focus.min.js", integrity: "sha384-AXpUv/Ur2Z4cKvO9EqIFqfxxdSQR5j75q0okOAWPvHhSneQ5LPjrOzk6Sl9MOo4a", regular: { url: "./aellux.ext.focus.js", integrity: "sha384-VjQzcnhLRrvRlbVQ0X4/tO0+8gqJXAmIFoeIVimjOud1wRNuBXNnSQHHW9XQPzTe" } }, legacy: { url: "./aellux.ext.focus.legacy.min.js", integrity: "sha384-I5QpUmKsA1T8NiKfKXQgbdG19Ld1ZGCWSmosygO3yGj43tdxp5zCfLyfBuFoHlKu", regular: { url: "./aellux.ext.focus.legacy.js", integrity: "sha384-5/y3J1NC/qMyV9myEj29+wGbqCVI8ICPafSebtJVfl15Qmup6vMiJzveShd3CLnw" } } }, dependencies: [] }, point: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.point.min.js", integrity: "sha384-n540II5oWbHJRt/a8i+Rgb9A3b9dm7hamg1kd3Nz7KdPQDcaa8S823t9fCrgxBWF", regular: { url: "./aellux.ext.point.js", integrity: "sha384-aDj7I5QEH/0+52E3e6yPZ/D0MEsNBdxeET3G5ToVvgczHtksMh3p8S/KOoAapRRN" } }, legacy: { url: "./aellux.ext.point.legacy.min.js", integrity: "sha384-5UmWvQHfmvttz9yeXbilawGCZH20UdR8yNBOE9kRV34wpfWASl8plzgKtLVQGO9M", regular: { url: "./aellux.ext.point.legacy.js", integrity: "sha384-gG/XONYEC1tchBcJ6bUtKYmWFHz0E+50LmMaXDAiqWBKPuwdHZeYm1uXA22lMZuN" } } }, dependencies: [] }, anchor: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.anchor.min.js", integrity: "sha384-Z1mAeOLL6Uig34Gy59/uFS88xLVv6do5qKaJPQeaUfecPoplVrSoVmwOjoClrhLi", regular: { url: "./aellux.ext.anchor.js", integrity: "sha384-FNXsUmIK7V8PtEYNbcPtCo+fAeaGDtkD0JwK8eZ1DdsHdjdj9LHwPmjdJxNlKc/U" } }, legacy: { url: "./aellux.ext.anchor.legacy.min.js", integrity: "sha384-VBjnwxZs4XDX5764sACe6u206w58h0PAkMM4tu4XJFmZHNjc3o/ChZdk2OPS4NZG", regular: { url: "./aellux.ext.anchor.legacy.js", integrity: "sha384-hhKGhGiyl07ZD2ur6D15dkx5NoPOSERTlfw+5tGmP9YL2sWl3ylj2MTx/Blzjt5K" } } }, dependencies: [] }, "ajax-href": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.ajax-href.min.js", integrity: "sha384-VCvADGjweS3kvW0s226GuUqgTuiLz9zMhPU61ZrkYfbDX42l3dbvB4jm1QvC8xio", regular: { url: "./aellux.ext.ajax-href.js", integrity: "sha384-EcFz52TbeSPurZxIukNU/WiujOPlF0E4FvnoR1Y44axiHLzd2+LpSBnBMfwIZ3Ip" } }, legacy: { url: "./aellux.ext.ajax-href.legacy.min.js", integrity: "sha384-me6plEKmddDwM9w625RpMTaa8kCZYsbQU/2dwWKmZSktJ3k6gd08iDLmiQPEQLl4", regular: { url: "./aellux.ext.ajax-href.legacy.js", integrity: "sha384-HaI+joZDWxyoZtD4QrAMJ+W1VjfdpyHcV4tt/hlFoP9SznAAxHO6iDErzOO8LIAz" } } }, dependencies: [] }, scrollbox: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.scrollbox.min.js", integrity: "sha384-MbsMMRhyNfXp50eIj6ybMu3dcxXnbLcM6xK8BAPI1aAJzG3TbCAUCcjKr1SHpSaa", regular: { url: "./aellux.ext.scrollbox.js", integrity: "sha384-Nn4620lov+xo0w32p+rdpQsVas3rPr0OW2NJnYASSruy2gb8ujeRk27pLQM2Gobv" } }, legacy: { url: "./aellux.ext.scrollbox.legacy.min.js", integrity: "sha384-m+v8D6nbzGMHyPhNhbT3urBAy3Nza5CtLGK0vGQtiwPGwtsLvJB9sVuafO3kXdxB", regular: { url: "./aellux.ext.scrollbox.legacy.js", integrity: "sha384-ZIFUP8YDdvLufnr2pZKh12xcW9WV28zeUk9uBtXRKLgsLvzQ3VuU1tMyuKQmZbf9" } } }, dependencies: [] }, "scrollbox-snap": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.scrollbox-snap.min.js", integrity: "sha384-fwr6geiwmDDl/bU88Z8ldI9tIyojBehplcqMI8vn9YC2Y35T8Ko6+inwARkChd6y", regular: { url: "./aellux.ext.scrollbox-snap.js", integrity: "sha384-qjNY5x+ua2KPbtXH3SuITr6N3dLfhUQy1qk487pJUPN/iRe06hIbY5oldYSPcXp2" } }, legacy: { url: "./aellux.ext.scrollbox-snap.legacy.min.js", integrity: "sha384-7SyRprm808E+xN3HarZjNIqewKIyFvTFBG+b7nUbjBPTD5arFdhZzQXzqz/Jxdtd", regular: { url: "./aellux.ext.scrollbox-snap.legacy.js", integrity: "sha384-zMpMGOiRT1bKYrrdNiHPcLkFmvMf52JbQyOq9TW0X+I518FgIrRTjq6Fta6Itfg2" } } }, dependencies: [] }, adaptive: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.adaptive.min.js", integrity: "sha384-UfDhSymI78IbudB2vel0GOI+z4C8m6JCG4Egl6WK9mHvZyOltXgawIbn2iFJH2+w", regular: { url: "./aellux.ext.adaptive.js", integrity: "sha384-AXSW7WI4ZEykJgerhjuscp7u99DkKkTYFD13o1HAnVH1tJYz2u5f9VjsBGca7kSU" } }, legacy: { url: "./aellux.ext.adaptive.legacy.min.js", integrity: "sha384-yOyWKIJaWddRJrbYwriE1lpeuiB2WbeF2fII29R4vIBGMfXi6b6m2IXUHvFqaQTB", regular: { url: "./aellux.ext.adaptive.legacy.js", integrity: "sha384-oRSPNCmFGYjwsrmeBT7r7un76fwNEODcJNmo1ifLgHbWEmoGT07OtdqsyxvfnWeN" } } }, dependencies: [], style: { url: "./aellux.ext.adaptive.min.css", integrity: "sha384-8yUP1PStfDqBCyCskP3k9WLIKgv/yl1nyDhmPz7hsX5NZ4z3ZT3ajolA+RhYlUiG", regular: { url: "./aellux.ext.adaptive.css", integrity: "sha384-HfIjX9Zk0VFRimzPvUaTS5AtwuHJHjXKoM/xbNJXj5vE7bSdBGEzbrBHfbNmYah0" } } }, present: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.present.min.js", integrity: "sha384-lw916mO9YV3rWp4zmBpDIHCFunKKFVzbRceYl+7+iv0MY1AAngCBnGNnNGJhRXmL", regular: { url: "./aellux.ext.present.js", integrity: "sha384-FrKnceZMsFDji2Xyn1MZyQyGcjO2UkPfsLhJhQtza7jdDXHUsy/xZizpFeU1vtHq" } }, legacy: { url: "./aellux.ext.present.legacy.min.js", integrity: "sha384-Dom33L5W4aBqzAft8fKqqyCJTtcpgLyquK6LZMyla7t9/0XbhN2f4aoCP/rBLxAq", regular: { url: "./aellux.ext.present.legacy.js", integrity: "sha384-NSyzjA+b1GrerzXXpYnw8fan02otzFDHaDpiML3p2PhNVxfHgF5pY7/848hQOvN2" } } }, dependencies: [], style: { url: "./aellux.ext.present.min.css", integrity: "sha384-Xx3MuDirlIsArdiSpQ+nRsyKhGUQeGbGrdYaEANsZMp5aaGudWJLID3Iwq5nhWvj", regular: { url: "./aellux.ext.present.css", integrity: "sha384-vYogCkysGYLRQlY+IXCzVeC/TQeAlm/byVFSVzHJNlZUE4Wr3EYiXcQB6rNppdNP" } } } } };
     }
   });
 
@@ -1198,8 +1198,12 @@
         const attribute = AelluxJs2.attr(extensionName);
         const presentAttribute = AelluxJs2.attr("present");
         const targetAttribute = AelluxJs2.attr("anchor-target");
+        const matchAttribute = AelluxJs2.attr("anchor-match");
+        const groupAttribute = AelluxJs2.attr("present-group");
+        const groupAnchorAttribute = AelluxJs2.attr("present-group-anchor");
         const layoutEvent = AelluxJs2.eventName("Layout");
         const anchoredClass = AelluxJs2.className("anchored");
+        const switchingClass = AelluxJs2.className("anchor-switching");
         const baseProperties = ["position", "left", "top", "transform", "transform-origin"];
         const ownedProperties = [
           ...baseProperties,
@@ -1207,7 +1211,11 @@
           "--ae-anchor-y",
           ORIGIN_X,
           ORIGIN_Y,
-          ANCHOR_OPACITY
+          ANCHOR_OPACITY,
+          "--ae-anchor-target-width",
+          "--ae-anchor-target-height",
+          "--ae-anchor-pivot-x",
+          "--ae-anchor-pivot-y"
         ];
         const pivots = {
           "top-left": [0, 0],
@@ -1223,11 +1231,37 @@
         const anchors = /* @__PURE__ */ new Map();
         const elementMemories = /* @__PURE__ */ new WeakMap();
         let nextLayoutId = 2e6;
+        let mutations = null;
+        let weakStyle = null;
         AelluxJs2.extAttach(extensionName, { init, destroy });
         function init() {
+          weakStyle = document.createElement("style");
+          weakStyle.setAttribute(AelluxJs2.attr("anchor-style"), "");
+          weakStyle.textContent = `
+      :where([${attribute}][${matchAttribute}~="width"]) {
+        width:var(--ae-anchor-target-width,0px);box-sizing:border-box;
+      }
+      :where([${attribute}][${matchAttribute}~="height"]) {
+        height:var(--ae-anchor-target-height,0px);box-sizing:border-box;
+      }
+      :where([${attribute}][${matchAttribute}].${anchoredClass}) {
+        transform:translate3d(var(--ae-anchor-pivot-x),var(--ae-anchor-pivot-y),0)
+          translate(calc(0% - var(--ae-anchor-origin-x)),calc(0% - var(--ae-anchor-origin-y)));
+      }
+      :where([${attribute}].${switchingClass}) {
+        transition-property:transform,width,height;
+        transition-duration:var(--ae-anchor-switch-duration,0ms);
+        transition-timing-function:var(--ae-anchor-switch-ease,ease-in-out);transition-delay:0s;
+      }
+      :where(html[${AelluxJs2.attr("reduced-motion")}="reduced"] [${attribute}].${switchingClass}) {transition:none;}
+    `.replace(/\s*([{};:,])\s*/g, "$1").replace(/;}/g, "}").trim();
+          document.head.appendChild(weakStyle);
           AelluxJs2.registerCssProperty(
             { name: "--ae-anchor-x", syntax: "<length>", initialValue: "0px" },
             { name: "--ae-anchor-y", syntax: "<length>", initialValue: "0px" },
+            { name: "--ae-anchor-target-width", syntax: "<length>", initialValue: "0px" },
+            { name: "--ae-anchor-target-height", syntax: "<length>", initialValue: "0px" },
+            { name: "--ae-anchor-switch-duration", syntax: "<time>", initialValue: "0ms" },
             { name: ORIGIN_X, syntax: "<percentage>", initialValue: "50%" },
             { name: ORIGIN_Y, syntax: "<percentage>", initialValue: "0%" },
             { name: ANCHOR_OPACITY, syntax: "<number>", initialValue: "1" }
@@ -1244,6 +1278,8 @@
         async function destroy() {
           await Promise.all(Array.from(anchors.keys(), unmountAnchor));
           AelluxJs2.mountManager.remove({ extensionName });
+          weakStyle == null ? void 0 : weakStyle.remove();
+          weakStyle = null;
         }
         function mountAnchor(element) {
           if (anchors.has(element)) return;
@@ -1254,6 +1290,11 @@
             revision: 0,
             target: null,
             reference: null,
+            group: null,
+            conflict: false,
+            lastPlacement: null,
+            switchTimer: null,
+            interruptSwitch: false,
             layoutId: nextLayoutId++,
             styleLayoutId: nextLayoutId++,
             layoutUntil: 0,
@@ -1275,13 +1316,39 @@
           if (anchors.size === 1) {
             AelluxJs2.onEvent(root2, "$scroll", scheduleUpdate, { capture: true, passive: true });
             AelluxJs2.onEvent(root2, "$resize", scheduleUpdate);
+            AelluxJs2.on("PresentGroupChange", onGroupChange);
+            if (typeof root2.MutationObserver === "function") {
+              mutations = new root2.MutationObserver(() => {
+                refreshAssociations();
+                for (const anchor of anchors.keys()) scheduleAnchor(anchor);
+              });
+              mutations.observe(document, {
+                subtree: true,
+                childList: true,
+                attributes: true,
+                attributeFilter: [
+                  attribute,
+                  targetAttribute,
+                  matchAttribute,
+                  groupAttribute,
+                  groupAnchorAttribute,
+                  AelluxJs2.attr("reduced-motion"),
+                  "id",
+                  "hidden"
+                ]
+              });
+            }
           }
           if (typeof root2.ResizeObserver === "function") {
-            state.observer = new root2.ResizeObserver(scheduleUpdate);
+            state.observer = new root2.ResizeObserver((entries) => {
+              if (state.switchTimer !== null && entries.every((entry) => entry.target === element)) return;
+              scheduleAnchor(element);
+            });
           }
           if (typeof root2.IntersectionObserver === "function") {
-            state.intersectionObserver = new root2.IntersectionObserver(scheduleUpdate);
+            state.intersectionObserver = new root2.IntersectionObserver(() => scheduleAnchor(element));
           }
+          refreshAssociations();
           return updateAnchor(element);
         }
         async function unmountAnchor(element) {
@@ -1290,6 +1357,7 @@
           const memory = elementMemories.get(element);
           elementMemories.delete(element);
           state.revision++;
+          stopSwitch(element, state);
           if (state.reference) AelluxJs2.offEvent(state.reference, layoutEvent, state.layoutListener);
           if (state.observer) state.observer.disconnect();
           if (state.intersectionObserver) state.intersectionObserver.disconnect();
@@ -1298,6 +1366,9 @@
           if (!anchors.size) {
             AelluxJs2.offEvent(root2, "$scroll", scheduleUpdate, true);
             AelluxJs2.offEvent(root2, "$resize", scheduleUpdate);
+            AelluxJs2.off("PresentGroupChange", onGroupChange);
+            if (mutations) mutations.disconnect();
+            mutations = null;
           }
           AelluxJs2.waitLayout.cancel(state.layoutId);
           AelluxJs2.waitLayout.cancel(state.styleLayoutId);
@@ -1305,7 +1376,59 @@
         }
         function scheduleUpdate() {
           if (!anchors.size) return;
-          for (const element of anchors.keys()) scheduleAnchor(element);
+          for (const [element, state] of anchors) {
+            state.interruptSwitch = true;
+            scheduleAnchor(element);
+          }
+        }
+        function onGroupChange(event) {
+          var _a;
+          for (const [element, state] of anchors)
+            if (state.group === ((_a = event.detail) == null ? void 0 : _a.group)) scheduleAnchor(element);
+        }
+        function associationDiagnostic(group, reason) {
+          AelluxJs2.diagnostics.warn(
+            AelluxJs2.diagnostics.WARN_ANCHOR_GROUP,
+            { extension: extensionName, element: group, reason }
+          );
+        }
+        function refreshAssociations() {
+          for (const state of anchors.values()) {
+            state.group = null;
+            state.conflict = false;
+          }
+          for (const group of document.querySelectorAll(`[${groupAttribute}][${groupAnchorAttribute}]`)) {
+            const id = (group.getAttribute(groupAnchorAttribute) || "").replace(/^#/, "");
+            const element = id && !/\s/.test(id) ? document.getElementById(id) : null;
+            if (!element || !element.hasAttribute(attribute)) {
+              associationDiagnostic(group, "Expected an existing Anchor ID.");
+              continue;
+            }
+            const state = anchors.get(element);
+            if (!state) continue;
+            if (state.group) {
+              state.conflict = true;
+              associationDiagnostic(group, "Multiple groups reference the same Anchor.");
+            } else state.group = group;
+          }
+        }
+        function effectiveTarget(element, state) {
+          var _a, _b;
+          if (state.conflict) return null;
+          if (state.group) return ((_b = (_a = AelluxJs2.ext.present) == null ? void 0 : _a.selected) == null ? void 0 : _b.call(_a, state.group)) || null;
+          const value = element.getAttribute(targetAttribute);
+          return value && value.trim() ? resolveElement(value) : element.offsetParent;
+        }
+        function circularTarget(element, target) {
+          const visited = /* @__PURE__ */ new Set([element]);
+          while (target) {
+            if (visited.has(target)) return true;
+            visited.add(target);
+            const state = anchors.get(target);
+            if (!state) return false;
+            target = effectiveTarget(target, state);
+          }
+          return false;
         }
         function scheduleLayoutUpdate(event) {
           const durationMs = Number(event && event.detail ? event.detail.durationMs : NaN);
@@ -1414,11 +1537,11 @@
           const revision = ++state.revision;
           const current = () => anchors.get(element) === state && state.revision === revision;
           const retry = () => ensureLatest && anchors.get(element) === state ? updateAnchor(element, true) : void 0;
-          const targetValue = element.getAttribute(targetAttribute);
-          const useReference = !targetValue || !targetValue.trim();
-          const target = useReference ? null : resolveElement(targetValue);
+          const target = effectiveTarget(element, state);
           const candidates = parseCandidates(element.getAttribute(attribute));
-          if (!target && !useReference || !candidates.length) {
+          if (!target || !target.isConnected || !candidates.length || circularTarget(element, target)) {
+            if (target && circularTarget(element, target))
+              associationDiagnostic(element, "Circular target reference.");
             await AelluxJs2.waitLayout.update(state.styleLayoutId, () => {
               if (current()) deactivate(element, state);
             });
@@ -1454,7 +1577,7 @@
             if (!current()) return retry();
             placement = await AelluxJs2.waitLayout.read(
               state.styleLayoutId,
-              () => current() ? readPlacement(element, useReference ? null : target, candidates, true) : null
+              () => current() ? readPlacement(element, target, candidates, true) : null
             );
             if (!current()) return retry();
             if (!placement) return;
@@ -1478,15 +1601,28 @@
             if (!current()) return;
             state.invalidContext = false;
             observe(state, element, placement.target, placement.reference);
+            const previous = state.lastPlacement;
+            const switching = previous && previous.target !== placement.target;
+            const moved = !previous || previous.signature !== placement.signature;
+            if (switching && placement.duration > 0 && !state.interruptSwitch) {
+              startSwitch(element, state, placement.duration);
+            } else if (moved || state.interruptSwitch || !placement.duration) stopSwitch(element, state);
+            state.interruptSwitch = false;
             const selected = placement.selected;
-            element.style.setProperty("--ae-anchor-x", `${selected.x}px`);
-            element.style.setProperty("--ae-anchor-y", `${selected.y}px`);
-            element.style.setProperty(ORIGIN_X, `${selected.self[0] * 100}%`);
-            element.style.setProperty(ORIGIN_Y, `${selected.self[1] * 100}%`);
-            element.style.setProperty(ANCHOR_OPACITY, placement.opacity);
+            const style = element.style;
+            setValue(style, "--ae-anchor-x", `${selected.x}px`);
+            setValue(style, "--ae-anchor-y", `${selected.y}px`);
+            setValue(style, ORIGIN_X, `${selected.self[0] * 100}%`);
+            setValue(style, ORIGIN_Y, `${selected.self[1] * 100}%`);
+            setValue(style, ANCHOR_OPACITY, placement.opacity);
+            setValue(style, "--ae-anchor-target-width", `${placement.width}px`);
+            setValue(style, "--ae-anchor-target-height", `${placement.height}px`);
+            setValue(style, "--ae-anchor-pivot-x", `${selected.pivotX}px`);
+            setValue(style, "--ae-anchor-pivot-y", `${selected.pivotY}px`);
             for (const name of baseProperties) element.style.removeProperty(name);
             element.classList.add(anchoredClass);
             state.lastUpdateAt = now();
+            state.lastPlacement = placement;
             applied = true;
           });
           if (!applied && anchors.get(element) === state) return updateAnchor(element, ensureLatest);
@@ -1494,9 +1630,21 @@
         function readPlacement(element, target, candidates, measure) {
           const reference = element.offsetParent;
           target = target || reference;
-          if (target && isInvisible(target)) return { hidden: true, target, reference };
+          const presenting = anchors.get(element).group && (target == null ? void 0 : target.hasAttribute(presentAttribute)) ? target : null;
+          if (target && isInvisible(target, presenting)) return { hidden: true, target, reference };
           if (!reference || target !== reference && target.offsetParent !== reference) {
             return { valid: false, target, reference };
+          }
+          const style = root2.getComputedStyle(element);
+          const tokens = (element.getAttribute(matchAttribute) || "").trim().split(/\s+/).filter(Boolean);
+          if (element.hasAttribute(matchAttribute) && (!tokens.length || tokens.some((token) => token !== "width" && token !== "height")))
+            AelluxJs2.diagnostics.warn(
+              AelluxJs2.diagnostics.WARN_ANCHOR_MATCH,
+              { extension: extensionName, element, value: element.getAttribute(matchAttribute) }
+            );
+          if ((tokens.includes("width") || tokens.includes("height")) && style.position !== "absolute" && style.position !== "fixed") {
+            associationDiagnostic(element, "Dimension matching requires an out-of-flow Anchor.");
+            return { hidden: true, target, reference };
           }
           if (!measure) return { valid: true, target };
           const referenceRect = reference.getBoundingClientRect();
@@ -1504,8 +1652,19 @@
           const scaleY = reference.offsetHeight ? referenceRect.height / reference.offsetHeight : 1;
           const targetRect = toReference(target.getBoundingClientRect(), reference, referenceRect, scaleX, scaleY);
           const selfRect = element.getBoundingClientRect();
-          const selfWidth = selfRect.width / scaleX;
-          const selfHeight = selfRect.height / scaleY;
+          const projectSize = (axis, actual, desired) => {
+            if (!tokens.includes(axis) || element.style[axis]) return actual;
+            const previous = parseFloat(element.style.getPropertyValue(`--ae-anchor-target-${axis}`)) || 0;
+            const sides = axis === "width" ? ["Left", "Right"] : ["Top", "Bottom"];
+            const extra = sides.reduce((sum, side) => sum + (parseFloat(style[`padding${side}`]) || 0) + (parseFloat(style[`border${side}Width`]) || 0), 0);
+            const borderBox = style.boxSizing === "border-box";
+            const minimum = Math.max(borderBox ? extra : 0, parseFloat(style.getPropertyValue(`min-${axis}`)) || 0);
+            const maximum = parseFloat(style.getPropertyValue(`max-${axis}`));
+            const constrain = (value) => Math.max(minimum, Math.min(Number.isFinite(maximum) ? maximum : Infinity, value));
+            return anchors.get(element).switchTimer === null && Math.abs(parseFloat(style[axis]) - constrain(previous)) > 0.5 ? actual : constrain(desired) + (borderBox ? 0 : extra);
+          };
+          const selfWidth = projectSize("width", selfRect.width / scaleX, targetRect.width);
+          const selfHeight = projectSize("height", selfRect.height / scaleY, targetRect.height);
           const boundaryRect = toReference(
             { left: 0, top: 0, width: root2.innerWidth, height: root2.innerHeight },
             reference,
@@ -1517,7 +1676,13 @@
           for (const candidate of candidates) {
             const x = targetRect.left + targetRect.width * candidate.target[0] - selfWidth * candidate.self[0];
             const y = targetRect.top + targetRect.height * candidate.target[1] - selfHeight * candidate.self[1];
-            const result = { x, y, self: candidate.self };
+            const result = {
+              x,
+              y,
+              self: candidate.self,
+              pivotX: targetRect.left + targetRect.width * candidate.target[0],
+              pivotY: targetRect.top + targetRect.height * candidate.target[1]
+            };
             if (!selected) selected = result;
             if (x >= boundaryRect.left && y >= boundaryRect.top && x + selfWidth <= boundaryRect.left + boundaryRect.width && y + selfHeight <= boundaryRect.top + boundaryRect.height) {
               selected = result;
@@ -1526,15 +1691,27 @@
           }
           const present = target.closest(`[${presentAttribute}]`);
           const opacity = present ? root2.getComputedStyle(present).opacity : "1";
-          return { valid: true, target, reference, selected, opacity };
+          const rawDuration = style.getPropertyValue("--ae-anchor-switch-duration").trim();
+          const duration = AelluxJs2.currentPreference("reduced-motion") === "reduced" ? 0 : Math.max(0, (parseFloat(rawDuration) || 0) * (rawDuration.endsWith("ms") ? 1 : 1e3));
+          return {
+            valid: true,
+            target,
+            reference,
+            selected,
+            opacity,
+            duration,
+            width: targetRect.width,
+            height: targetRect.height,
+            signature: [selected.x, selected.y, targetRect.width, targetRect.height, ...selected.self].join("/")
+          };
         }
-        function isInvisible(element) {
+        function isInvisible(element, presenting) {
           const visibility = root2.getComputedStyle(element).visibility;
           if (visibility === "hidden" || visibility === "collapse") return true;
           for (let current = element; current && current.nodeType === 1; current = current.parentElement) {
             const style = root2.getComputedStyle(current);
             const inline = current.style;
-            if (current.hidden || inline.display === "none" || inline.visibility === "hidden" || inline.visibility === "collapse" || inline.opacity === "0" || style.display === "none" || style.contentVisibility === "hidden" || Number(style.opacity) === 0) return true;
+            if (current.hidden || inline.display === "none" || inline.visibility === "hidden" || inline.visibility === "collapse" || current !== presenting && inline.opacity === "0" || style.display === "none" || style.contentVisibility === "hidden" || current !== presenting && Number(style.opacity) === 0) return true;
           }
           return false;
         }
@@ -1586,6 +1763,7 @@
           );
         }
         function deactivate(element, state, memory = elementMemories.get(element)) {
+          stopSwitch(element, state);
           if (state.reference) AelluxJs2.offEvent(state.reference, layoutEvent, state.layoutListener);
           if (state.observer) state.observer.disconnect();
           if (state.intersectionObserver) state.intersectionObserver.disconnect();
@@ -1593,6 +1771,25 @@
           element.classList.remove(anchoredClass);
           if (state.active && memory) memory.restore();
           state.active = false;
+          state.lastPlacement = null;
+        }
+        function stopSwitch(element, state) {
+          if (state.switchTimer !== null) root2.clearTimeout(state.switchTimer);
+          state.switchTimer = null;
+          element.classList.remove(switchingClass);
+        }
+        function setValue(style, name, value) {
+          if (style.getPropertyPriority(name)) style.removeProperty(name);
+          style.setProperty(name, value);
+        }
+        function startSwitch(element, state, duration) {
+          if (state.switchTimer !== null) root2.clearTimeout(state.switchTimer);
+          element.classList.add(switchingClass);
+          state.switchTimer = root2.setTimeout(() => {
+            if (anchors.get(element) !== state) return;
+            stopSwitch(element, state);
+            scheduleAnchor(element);
+          }, duration + 100);
         }
         function resolveElement(value) {
           if (!value || !value.trim()) return null;
@@ -2024,6 +2221,11 @@
         }
         const attr = {
           present: AelluxJs2.attr(extensionName),
+          group: AelluxJs2.attr("present-group"),
+          key: AelluxJs2.attr("present-key"),
+          active: AelluxJs2.attr("present-active"),
+          when: AelluxJs2.attr("present-when"),
+          triggerOn: AelluxJs2.attr("trigger-on"),
           autoUnpop: AelluxJs2.attr("auto-unpop"),
           presentMotion: AelluxJs2.attr("present-motion"),
           unpopOnOutside: AelluxJs2.attr("unpop-on-outside"),
@@ -2042,13 +2244,17 @@
           willChange: AelluxJs2.className("will-change"),
           grid: AelluxJs2.className("present-grid")
         };
+        const presentSelector = `[${attr.present}]`;
+        const groupSelector = `[${attr.group}]`;
         AelluxJs2.extAttach(extensionName, {
           init,
           destroy,
           pop,
           unpop,
           toggle,
-          trigger
+          trigger,
+          show,
+          selected
         });
         const POP = "Pop", UNPOP = "Unpop", BEFORE = "Before", PING = "ping", MILLISECOND = "ms", SECOND = "s", DEFAULT_PRESENT = "opacity transform height width", OPACITY_SYNTAX = "<number> | <percentage>", TRANSFORM_SYNTAX = "<transform-list> | none";
         const TRANSITION_PREPARE_TIME = 100;
@@ -2063,7 +2269,17 @@
         const containerAriaHandlers = /* @__PURE__ */ new WeakMap();
         const triggerAriaHandlers = /* @__PURE__ */ new WeakMap();
         const measuredMemories = /* @__PURE__ */ new WeakMap();
+        const groups = /* @__PURE__ */ new Map();
+        const hoverTimers = /* @__PURE__ */ new Map();
+        const hoveredTriggers = /* @__PURE__ */ new Set();
+        let groupObserver = null;
+        let groupsQueued = false;
+        let interpolatedProgress = false;
         const cssProperties = [
+          ["pop-progress", "<number>", "0"],
+          ["unpop-progress", "<number>", "1"],
+          ["present-pop-phase", "<number>", "0"],
+          ["present-unpop-phase", "<number>", "1"],
           ["from-opacity", OPACITY_SYNTAX, "0"],
           ["pop-opacity", OPACITY_SYNTAX, "1"],
           ["unpop-opacity", OPACITY_SYNTAX, "0"],
@@ -2084,12 +2300,13 @@
           ["unpop-low-steps", "<integer>", "4"]
         ];
         function init(options) {
+          interpolatedProgress = !!(root2.CSS && typeof root2.CSS.registerProperty === "function" && root2.CSS.supports && root2.CSS.supports("opacity", "clamp(0, 0.5, 1)"));
           AelluxJs2.registerCssProperty(
             ...cssProperties.map(([name, syntax, initialValue]) => ({ name: `--ae-${name}`, syntax, initialValue }))
           );
           AelluxJs2.mountManager.add({
             extensionName,
-            selector: `[${attr.present}]`,
+            selector: presentSelector,
             priority: 0,
             mount: mountPresentContainer,
             unmount: unmountPresentContainer,
@@ -2106,11 +2323,26 @@
             mount: mountTriggerElement,
             unmount: unmountTriggerElement
           });
+          AelluxJs2.mountManager.add({
+            extensionName,
+            selector: groupSelector,
+            priority: 1,
+            mount: mountGroup,
+            unmount: unmountGroup,
+            controllers: ["show", "selected"]
+          });
+          document.addEventListener("pointerover", onHover);
+          document.addEventListener("pointerout", onHover);
           AelluxJs2.on("$click", OnClick);
         }
         function destroy() {
           AelluxJs2.mountManager.remove({ extensionName });
           AelluxJs2.off("$click", OnClick);
+          document.removeEventListener("pointerover", onHover);
+          document.removeEventListener("pointerout", onHover);
+          for (const group of groups.keys()) unmountGroup(group);
+          for (const target of hoverTimers.keys()) cancelHoverClose(target);
+          hoveredTriggers.clear();
           for (const triggerElement of triggerElementsSet) {
             unmountTriggerElement(triggerElement);
           }
@@ -2124,7 +2356,14 @@
           elementMemories.set(element, AelluxJs2.persist.element.save(
             element,
             [attr.present, attr.presentMotion, "hidden"],
-            ["--ae-pop-low-steps", "--ae-unpop-low-steps"]
+            [
+              "--ae-pop-low-steps",
+              "--ae-unpop-low-steps",
+              "--ae-pop-progress",
+              "--ae-unpop-progress",
+              "--ae-present-pop-phase",
+              "--ae-present-unpop-phase"
+            ]
           ));
           containerAriaHandlers.set(element, AelluxJs2.aria.register(element));
           if ((element.getAttribute(attr.present) || "").trim().toLowerCase() === "all") {
@@ -2221,12 +2460,16 @@
               refreshTriggerTargets(triggerElement);
             }
           }
+          setProgress(element, !element.hidden);
+          queueGroups();
           autoUnpopSchedule(element, presentController);
         }
         function unmountPresentContainer(element) {
           var _a, _b, _c;
           if (!presentElements.has(element)) return;
           const controller = presentElements.get(element);
+          cancelHoverClose(element);
+          for (const button of controller.triggers) hoveredTriggers.delete(button);
           controller.stop();
           (_a = AelluxJs2.waitLayout) == null ? void 0 : _a.cancel(controller.motionId);
           element.classList.remove(className.grid);
@@ -2237,6 +2480,7 @@
           (_c = elementMemories.get(element)) == null ? void 0 : _c.restore();
           elementMemories.delete(element);
           controller.triggers.forEach(updateTriggerAriaExpanded);
+          queueGroups();
         }
         function mountTriggerElement(triggerElement) {
           if (triggerElementsSet.has(triggerElement)) return;
@@ -2247,8 +2491,10 @@
         function unmountTriggerElement(triggerElement) {
           var _a, _b;
           if (!triggerElementsSet.has(triggerElement)) return;
+          hoveredTriggers.delete(triggerElement);
           const target = triggerTargets.get(triggerElement);
           if (target) {
+            cancelHoverClose(target);
             (_a = presentElements.get(target)) == null ? void 0 : _a.triggers.delete(triggerElement);
             triggerTargets.delete(triggerElement);
           }
@@ -2304,7 +2550,7 @@
           const targetSelector = triggerElement.getAttribute(attr.target);
           const dismiss = triggerElement.getAttribute(attr.dismiss);
           indexTriggerTarget(triggerElement, dismiss || targetSelector);
-          const container = triggerElement.closest(`[${attr.present}]`);
+          const container = triggerElement.closest(presentSelector);
           if (previousTarget) {
             (_a = presentElements.get(previousTarget)) == null ? void 0 : _a.triggers.delete(triggerElement);
           }
@@ -2314,6 +2560,7 @@
           } else if (container && container.id) {
             target = container;
           }
+          if (previousTarget !== target) hoveredTriggers.delete(triggerElement);
           if (!target || !target.id) {
             triggerTargets.delete(triggerElement);
             (_b = triggerAriaHandlers.get(triggerElement)) == null ? void 0 : _b.unset("expanded");
@@ -2348,8 +2595,8 @@
         }
         function trigger(element, trigger2) {
           trigger2 = typeof trigger2 === "string" ? (trigger2 || "toggle").toLowerCase() : "toggle";
-          const method = AelluxJs2.ext.present[trigger2];
-          return method && typeof method === "function" ? method(element) : toggle(element);
+          const method = trigger2 === "pop" ? pop : trigger2 === "unpop" ? unpop : toggle;
+          return method(element);
         }
         function restoreMeasuredStyles(element, controller) {
           const memory = measuredMemories.get(element);
@@ -2391,20 +2638,25 @@
             );
           return size;
         }
-        async function presentTransition(element, gotoVisible, forceRepop = false) {
+        async function presentTransition(element, gotoVisible, forceRepop = false, groupOperation = false) {
           const controller = presentElements.get(element);
           if (!controller) return;
           if (controller.direction === null)
             controller.direction = element.hidden ? UNPOP : POP;
           if (typeof gotoVisible === "undefined" || gotoVisible === null)
             gotoVisible = controller.direction === POP ? false : true;
+          const group = element.closest(groupSelector);
+          if (!groupOperation && groups.has(group) && element.hasAttribute(attr.key)) {
+            if (gotoVisible) return show(group, element.getAttribute(attr.key));
+            if (groups.get(group).selected === element) return show(group, "");
+          }
           const newDirection = gotoVisible ? POP : UNPOP;
           if (element.hidden && !gotoVisible || newDirection === controller.direction && !forceRepop) {
             return;
           }
           let transition = null;
           try {
-            const allowEvent = AelluxJs2.dispatchFrom(
+            const allowEvent = groupOperation || AelluxJs2.dispatchFrom(
               element,
               `${BEFORE}${newDirection}`,
               { bubbles: true, cancelable: true }
@@ -2433,6 +2685,11 @@
               controller.stop({ replacement: reusePreparation, transitionStart: true });
             }
             controller.direction = newDirection;
+            setPhase(element, "pop", "0");
+            setPhase(element, "unpop", "0");
+            element.style.setProperty("--ae-pop-progress", "0");
+            element.style.setProperty("--ae-unpop-progress", "0");
+            root2.getComputedStyle(element).getPropertyValue("--ae-pop-progress");
             const interrupted = new Promise((_, interruptTransition) => {
               transition = {
                 className: null,
@@ -2483,6 +2740,11 @@
                 className.unpopping
               );
               controller.classList.add(transition.className);
+              if (interpolatedProgress) {
+                element.style.setProperty("--ae-pop-progress", "clamp(0, var(--ae-present-pop-phase), 1)");
+                element.style.setProperty("--ae-unpop-progress", "clamp(0, var(--ae-present-unpop-phase), 1)");
+              }
+              setPhase(element, gotoVisible ? "pop" : "unpop", "1");
               if (size) {
                 if (controller.measuredHeight) {
                   element.style.setProperty("max-height", `${gotoVisible ? size.height : 0}px`, "important");
@@ -2501,7 +2763,7 @@
               maxFPS: AelluxJs2.layoutMaxFPS ? AelluxJs2.layoutMaxFPS(element) : void 0,
               abort: () => controller.transition !== transition || !element.isConnected
             };
-            const completed = AelluxJs2.motion ? AelluxJs2.motion.run(element, motionOptions) : legacyMotionRun(motionOptions);
+            const completed = AelluxJs2.motion ? AelluxJs2.motion.run(element, motionOptions) : legacyMotionRun(motionOptions, transition);
             AelluxJs2.dispatchFrom(element, "Layout", {
               detail: {
                 origin: `present.${newDirection}`.toLowerCase(),
@@ -2559,19 +2821,21 @@
             }
           }
         }
-        function legacyMotionRun(options) {
+        function legacyMotionRun(options, transition) {
           options.apply();
-          return new Promise((resolve) => setTimeout(() => resolve({
-            id: options.id,
-            status: "completed",
-            mode: "native"
-          }), Math.max(0, Number(options.nativeDuration) || 0)));
+          return new Promise((resolve) => {
+            transition.timeout = setTimeout(() => {
+              transition.timeout = null;
+              resolve({ id: options.id, status: "completed", mode: "native" });
+            }, Math.max(0, Number(options.nativeDuration) || 0));
+          });
         }
         function finishTransition(element, controller, transition, gotoVisible) {
           controller.classList.remove(transition.className);
           restoreMeasuredStyles(element, controller);
           const focused = !gotoVisible && element.contains(document.activeElement) ? document.activeElement : null;
           element.hidden = gotoVisible ? false : true;
+          setProgress(element, gotoVisible);
           if (element.hidden) openPresentElements.delete(element);
           else openPresentElements.add(element);
           if (focused) {
@@ -2613,7 +2877,7 @@
         }
         function OnClick(event) {
           if (!event.target) return;
-          const container = event.target.closest(`[${attr.present}]`);
+          const container = event.target.closest(presentSelector);
           const exceptions = [event.target];
           var button;
           button = event.target.closest(`[${attr.trigger}]`);
@@ -2625,11 +2889,11 @@
               const target = targetById(targetSelector);
               if (target) {
                 exceptions.push(target);
-                trigger(target, triggerAttr);
+                if (!suppressHoverClick(button, event)) trigger(target, triggerAttr);
               }
             } else if (container) {
               exceptions.push(container);
-              trigger(container, triggerAttr);
+              if (!suppressHoverClick(button, event)) trigger(container, triggerAttr);
             } else {
               AelluxJs2.diagnostics.error(
                 AelluxJs2.diagnostics.ERROR_PRESENT_CONTROL_TARGET_MISSING,
@@ -2659,6 +2923,232 @@
             }
           }
           outsideClickAutoUnpop(exceptions);
+        }
+        function setProgress(element, visible) {
+          setPhase(element, "pop", visible ? "1" : "0");
+          setPhase(element, "unpop", visible ? "0" : "1");
+          element.style.setProperty("--ae-pop-progress", visible ? "1" : "0");
+          element.style.setProperty("--ae-unpop-progress", visible ? "0" : "1");
+        }
+        function setPhase(element, direction, value) {
+          element.style.setProperty(`--ae-present-${direction}-phase`, value);
+          if (!interpolatedProgress) element.style.setProperty(`--ae-${direction}-progress`, value);
+        }
+        function groupMembers(group) {
+          return [...presentElements.keys()].filter((element) => element.isConnected && element.hasAttribute(attr.key) && element.closest(groupSelector) === group);
+        }
+        function mountGroup(group) {
+          if (groups.has(group)) return;
+          const visible = groupMembers(group).filter((member) => !member.hidden);
+          groups.set(group, {
+            selected: visible.length === 1 ? visible[0] : null,
+            revision: 0,
+            pending: Promise.resolve(true),
+            jobs: /* @__PURE__ */ new Map(),
+            memory: AelluxJs2.persist.element.save(group, [attr.active])
+          });
+          if (!groupObserver && typeof root2.MutationObserver === "function") {
+            groupObserver = new root2.MutationObserver((records) => {
+              if (records.some((record) => record.type === "childList" || record.attributeName !== "class" || groups.has(record.target))) queueGroups();
+            });
+            groupObserver.observe(document, {
+              subtree: true,
+              childList: true,
+              attributes: true,
+              attributeFilter: ["class", attr.active, attr.key, attr.when, attr.group]
+            });
+          }
+          queueGroups();
+        }
+        function unmountGroup(group) {
+          const state = groups.get(group);
+          if (!state) return;
+          state.revision++;
+          groups.delete(group);
+          publishGroup(group, state, null);
+          for (const member of groupMembers(group)) {
+            const controller = presentElements.get(member);
+            if (controller.transition) {
+              const visible = controller.direction === POP;
+              controller.stop();
+              member.hidden = !visible;
+              controller.classList.toggle(className.pop, visible);
+              controller.setAriaExpanded(String(visible));
+              setProgress(member, visible);
+              if (!visible) openPresentElements.delete(member);
+            }
+          }
+          state.memory.restore();
+          if (!groups.size && groupObserver) {
+            groupObserver.disconnect();
+            groupObserver = null;
+          }
+        }
+        function queueGroups() {
+          if (groupsQueued || !groups.size) return;
+          groupsQueued = true;
+          Promise.resolve().then(() => {
+            groupsQueued = false;
+            groups.forEach((state, group) => {
+              reconcileGroup(group);
+              if (groups.get(group) === state) publishGroup(group, state, state.selected);
+            });
+          });
+        }
+        function groupDiagnostic(group, reason) {
+          AelluxJs2.diagnostics.warn(
+            AelluxJs2.diagnostics.WARN_PRESENT_GROUP_SELECTION,
+            { extension: extensionName, element: group, reason }
+          );
+        }
+        function reconcileGroup(group) {
+          if (!group.isConnected || !group.hasAttribute(attr.group)) return;
+          const members = groupMembers(group);
+          const state = groups.get(group);
+          if (!members.includes(state.selected)) state.selected = null;
+          let matches;
+          if (group.hasAttribute(attr.active)) {
+            const key = group.getAttribute(attr.active);
+            matches = key === "" ? [] : members.filter((member) => member.getAttribute(attr.key) === key);
+            if (key && matches.length !== 1) {
+              groupDiagnostic(group, "Active key must match one mounted member.");
+              return;
+            }
+          } else {
+            matches = members.filter((member) => {
+              const token = member.getAttribute(attr.when);
+              return token && !/\s/.test(token) && group.classList.contains(token);
+            });
+            if (!matches.length) {
+              const visible = members.filter((member) => !member.hidden && presentElements.get(member).direction !== UNPOP);
+              if (visible.length > 1) groupDiagnostic(group, "Multiple initially visible members.");
+              else if (!state.selected) state.selected = visible[0] || null;
+              return;
+            }
+          }
+          if (matches.length > 1) {
+            groupDiagnostic(group, "Multiple members match the container classes.");
+            return;
+          }
+          return selectGroup(group, matches[0] || null, members);
+        }
+        function show(group, key) {
+          const state = groups.get(group);
+          if (!state || typeof key !== "string") return Promise.resolve(false);
+          const matches = groupMembers(group).filter((member) => member.getAttribute(attr.key) === key);
+          if (key && matches.length !== 1) {
+            groupDiagnostic(group, "Active key must match one mounted member.");
+            return Promise.resolve(false);
+          }
+          if (group.getAttribute(attr.active) !== key) group.setAttribute(attr.active, key);
+          const result = reconcileGroup(group);
+          return Promise.resolve(result === void 0 ? state.pending : result);
+        }
+        function selected(group) {
+          const state = groups.get(group);
+          const member = state && state.selected;
+          return member && presentElements.has(member) && member.isConnected && member.hasAttribute(attr.key) && member.closest(groupSelector) === group ? member : null;
+        }
+        function publishGroup(group, state, current) {
+          if (state.announced === current) return;
+          const previous = state.announced || null;
+          state.announced = current;
+          AelluxJs2.dispatchFrom(group, "PresentGroupChange", {
+            bubbles: true,
+            detail: { group, previous, current, key: current && current.getAttribute(attr.key) }
+          });
+        }
+        function selectGroup(group, selected2, members) {
+          var _a;
+          const state = groups.get(group);
+          const changes = members.filter((member) => {
+            const controller = presentElements.get(member);
+            return member === selected2 ? member.hidden || controller.direction === UNPOP : !member.hidden && controller.direction !== UNPOP;
+          });
+          if (state.selected === selected2 && !changes.length) return state.pending;
+          const revision = ++state.revision;
+          for (const member of changes) {
+            if (!AelluxJs2.dispatchFrom(
+              member,
+              member === selected2 ? "BeforePop" : "BeforeUnpop",
+              { bubbles: true, cancelable: true }
+            )) {
+              if (state.revision === revision) {
+                const key = ((_a = state.selected) == null ? void 0 : _a.getAttribute(attr.key)) || "";
+                if (group.getAttribute(attr.active) !== key) group.setAttribute(attr.active, key);
+              }
+              return false;
+            }
+            if (groups.get(group) !== state || state.revision !== revision) return false;
+          }
+          state.selected = selected2;
+          let complete;
+          const pending = new Promise((resolve) => {
+            complete = resolve;
+          });
+          state.pending = pending;
+          for (const member of changes) {
+            const job = presentTransition(member, member === selected2, false, true);
+            if (groups.get(group) !== state || state.revision !== revision) {
+              complete(false);
+              return pending;
+            }
+            state.jobs.set(member, job);
+            job.then(() => {
+              if (state.jobs.get(member) === job) state.jobs.delete(member);
+            });
+          }
+          publishGroup(group, state, selected2);
+          Promise.all(members.map((member) => state.jobs.get(member))).then(() => {
+            const current = groupMembers(group);
+            complete(groups.get(group) === state && state.revision === revision && (!selected2 || current.includes(selected2)) && current.every((member) => member === selected2 ? !member.hidden : member.hidden));
+          });
+          return pending;
+        }
+        function cancelHoverClose(target) {
+          clearTimeout(hoverTimers.get(target));
+          hoverTimers.delete(target);
+        }
+        function inHoverRegion(target, node) {
+          if (!node || !node.nodeType) return false;
+          if (target.contains(node)) return true;
+          for (const button of triggerElementsSet) {
+            if (button.getAttribute(attr.triggerOn) === "hover" && triggerTargets.get(button) === target && button.contains(node)) return true;
+          }
+          return false;
+        }
+        function suppressHoverClick(button, event) {
+          return button.getAttribute(attr.triggerOn) === "hover" && event.detail > 0 && event.pointerType !== "touch" && hoveredTriggers.has(button);
+        }
+        function onHover(event) {
+          var _a;
+          if (event.pointerType === "touch" || !((_a = event.target) == null ? void 0 : _a.closest)) return;
+          const entering = event.type === "pointerover";
+          const button = event.target.closest(`[${attr.trigger}][${attr.triggerOn}="hover"]`);
+          if (button && triggerElementsSet.has(button) && !button.contains(event.relatedTarget)) {
+            refreshChangedTrigger(button);
+            const target = triggerTargets.get(button);
+            if (target && presentElements.has(target)) {
+              if (entering) {
+                cancelHoverClose(target);
+                hoveredTriggers.add(button);
+                const action = button.getAttribute(attr.trigger);
+                if (action === "pop") toggle(target, true);
+                else trigger(target, action);
+              } else hoveredTriggers.delete(button);
+            }
+          }
+          for (const target of openPresentElements) {
+            if (!inHoverRegion(target, event.target)) continue;
+            if (entering || inHoverRegion(target, event.relatedTarget)) cancelHoverClose(target);
+            else if ([...triggerElementsSet].some((control) => triggerTargets.get(control) === target && control.getAttribute(attr.triggerOn) === "hover" && control.getAttribute(attr.trigger) !== "unpop")) {
+              cancelHoverClose(target);
+              hoverTimers.set(target, setTimeout(() => {
+                hoverTimers.delete(target);
+                if (presentElements.has(target) && target.isConnected && !inHoverRegion(target, document.activeElement)) unpop(target);
+              }, 120));
+            }
+          }
         }
         function getString2Time(string) {
           return string ? parseFloat(string) * getMillisecondsMulti(string) : 0;
@@ -4166,6 +4656,10 @@
         abort: shouldAbort
       });
       return captureResult.then((sequenceResult) => {
+        if (operation.cancelled || operations.get(operationId) !== operation) {
+          release(operation, false);
+          return { id: operationId, status: "aborted", mode: "native" };
+        }
         if (sequenceResult.status !== "completed") {
           release(operation, false);
           return { id: operationId, status: sequenceResult.status, mode: "native" };
@@ -4364,13 +4858,17 @@
       return text.endsWith("ms") ? number : number * 1e3;
     }
     function release(operation, finish, resume = false) {
-      getAelluxJs().waitLayout.setVisualFPSLimit(operation.id, null);
+      if (operations.get(operation.id) === operation)
+        getAelluxJs().waitLayout.setVisualFPSLimit(operation.id, null);
       if (operation.nativeTimer !== null) root2.clearTimeout(operation.nativeTimer);
       operation.nativeTimer = null;
       for (const animation of operation.animations) {
         try {
-          if (finish) animation.finish();
-          else if (resume) animation.play();
+          if (finish) {
+            animation.finish();
+            if (typeof root2.CSSTransition === "function" && animation instanceof root2.CSSTransition)
+              animation.cancel();
+          } else if (resume) animation.play();
           else animation.cancel();
         } catch (_) {
         }
@@ -4414,6 +4912,33 @@
     exponential: EXPO,
     circular: CIRC
   };
+  var CSS_NUMBER = /^[+-]?(?:\d*\.\d+|\d+)(?:e[+-]?\d+)?$/i;
+  function bezierCoordinate(u, p1, p2) {
+    const v = 1 - u;
+    return 3 * v * v * u * p1 + 3 * v * u * u * p2 + u * u * u;
+  }
+  function cubicBezier(t, x1, y1, x2, y2) {
+    if (![t, x1, y1, x2, y2].every((value) => typeof value === "number" && Number.isFinite(value))) {
+      throw new TypeError("cubicBezier(t, x1, y1, x2, y2) requires finite numbers");
+    }
+    if (x1 < 0 || x1 > 1 || x2 < 0 || x2 > 1) {
+      throw new RangeError("Cubic bezier x coordinates must be between 0 and 1");
+    }
+    t = Math.min(1, Math.max(0, t));
+    if (t === 0 || t === 1) return t;
+    if (x1 === y1 && x2 === y2) return t;
+    let low = 0;
+    let high = 1;
+    let u = t;
+    for (let i = 0; i < 40; i++) {
+      const x = bezierCoordinate(u, x1, x2);
+      if (x === t) break;
+      if (x < t) low = u;
+      else high = u;
+      u = (low + high) / 2;
+    }
+    return bezierCoordinate(u, y1, y2);
+  }
   function bounceOut(t) {
     const n = 7.5625;
     const d = 2.75;
@@ -4460,6 +4985,14 @@
       throw new TypeError("ease(name, t) requires a name and a finite number");
     }
     t = Math.min(1, Math.max(0, t));
+    const bezier = /^cubic-bezier\(([^()]*)\)$/i.exec(name.trim());
+    if (bezier) {
+      const points = bezier[1].split(",").map((value) => value.trim());
+      if (points.length !== 4 || !points.every((value) => CSS_NUMBER.test(value))) {
+        throw new RangeError(`Invalid cubic bezier: ${name}`);
+      }
+      return cubicBezier(t, ...points.map(Number));
+    }
     let key = name.replace(/[\s_-]/g, "").toLowerCase();
     if (key.startsWith(EASE_PREFIX)) key = key.slice(EASE_PREFIX.length);
     if (key === "linear") return t;
@@ -5081,7 +5614,7 @@
   root.AelluxJs.ext("focus", { loadWhen: "[data-ae-focus]" });
   root.AelluxJs.ext("point", { loadWhen: "[data-ae-point]" });
   root.AelluxJs.ext("present", {
-    loadWhen: "[data-ae-present],[data-ae-trigger],[data-ae-dismiss],[data-ae-target]",
+    loadWhen: "[data-ae-present],[data-ae-present-group],[data-ae-trigger],[data-ae-dismiss],[data-ae-target]",
     loadStyle: true
   });
   root.AelluxJs.ext("scrollbox", { loadWhen: "[data-ae-scrollbox]" });

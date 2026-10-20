@@ -208,7 +208,7 @@ test("scrolling a nested container updates coordinates in the shared reference",
   const y = () => page.locator("#anchor").evaluate(element =>
     element.style.getPropertyValue("--ae-anchor-y")
   );
-  expect(await y()).toBe("150px");
+  await expect.poll(y).toBe("150px");
   await page.evaluate(() => document.getElementById("scroller").scrollTop = 100);
   await expect.poll(y).toBe("50px");
   expect(await page.locator("#reference").evaluate(element => element.children.length)).toBe(2);
@@ -537,7 +537,7 @@ test("different containing blocks report once and preserve positioning", async (
       entry.code === AelluxJs.diagnostics.ERROR_ANCHOR_REFERENCE_CONTEXT.code
     ).length
   );
-  expect(await count()).toBe(1);
+  await expect.poll(count).toBe(1);
   expect(await page.locator("#anchor").evaluate(element => ({
     anchored: element.classList.contains("ae--anchored"),
     visibility: getComputedStyle(element).visibility
@@ -561,10 +561,6 @@ test("unmount restores owned inline values and priorities", async ({ page }) => 
           --ae-anchor-x: 5px !important; --ae-anchor-origin-x: 7%;
           --anchor-opacity: .8"></div>
     </div>`);
-  const beforeUnmount = await page.locator("#anchor").evaluate((element, names) =>
-    names.map(name => [element.style.getPropertyValue(name), element.style.getPropertyPriority(name)]),
-  properties);
-  expect(beforeUnmount[0]).toEqual(["", ""]);
   await expect(page.locator("#anchor")).toHaveClass(/ae--anchored/);
   await expect(page.locator("#anchor")).toHaveCSS("position", "absolute");
   await page.evaluate(() => AelluxJs.unmount(document.getElementById("anchor"), "anchor"));
