@@ -83,6 +83,8 @@ All notable changes to aellux.js will be documented in this file.
 
 ### Fixed
 
+- Scrollbox snap keeps the starting item fixed throughout a pointer drag and disables PDS momentum on both axes while snap is enabled.
+- New pointer and wheel input finishes elastic recovery before measuring or processing the interaction, including presses on controls and custom scrollbars.
 - Present Group validates synchronous Before-event declaration and membership changes before applying a swap; progress falls back safely when CSS property registration fails, and expected replacement/unmount cancellations no longer emit interruption warnings.
 - Anchor preserves application inline positioning, filters unrelated DOM mutations, and recovers targets revealed by class or style without permanent polling.
 - CSS Motion cancellation settles native waits even when `Animation.finished` stays pending, and partial capture failures resume effects already paused.

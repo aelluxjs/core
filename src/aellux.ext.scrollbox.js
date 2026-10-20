@@ -50,6 +50,7 @@
   const attribute = AelluxJs.attr(extensionName);
   const wheelAttribute = AelluxJs.attr("scrollbox-wheel-horizontal");
   const momentumAttribute = AelluxJs.attr("scrollbox-momentum");
+  const snapAttribute = AelluxJs.attr("scrollbox-snap");
   const elasticAttribute = AelluxJs.attr("scrollbox-elastic");
 
   const scrollbarAttribute = AelluxJs.attr("scrollbar");
@@ -294,6 +295,7 @@
       if (event.target !== element) return;
     };
     state.onWheel = event => handleWheel(state, event);
+    state.onInteractionStart = () => finishElasticRelease(state);
 
     state.onPointerDown = event => startPointerScroll(state, event);
     state.onPointerOver = event => updatePointerScrollCursor(state, event.target,
@@ -360,6 +362,7 @@
     scrollboxes.set(element, state);
     onEvent(element, "$scroll", state.onScroll, { passive: true });
     onEvent(element, "$scrollend", state.onScrollEnd, { passive: true });
+    onEvent(element, POINTER_DOWN_TARGET, state.onInteractionStart, true);
     observe(state);
     configure(state);
   }
@@ -386,6 +389,7 @@
     resetScrollbars(state);
     offEvent(element, "$scroll", state.onScroll);
     offEvent(element, "$scrollend", state.onScrollEnd);
+    offEvent(element, POINTER_DOWN_TARGET, state.onInteractionStart, true);
     if (state.wheelListening) offEvent(element, "$wheel", state.onWheel, true);
     if (state.pointerListening) setListeners(element, state, pointerListeners, false);
     if (state.touchListening) removeTouchListeners(state);
@@ -413,7 +417,8 @@
     state.layoutRevision++;
     state.mode = readMode(element);
     state.wheelEnabled = element.getAttribute(wheelAttribute) !== "false";
-    state.momentumEnabled = element.getAttribute(momentumAttribute) !== "false";
+    state.momentumEnabled = element.getAttribute(momentumAttribute) !== "false" &&
+      !hasSnap(element);
 
     configureElastic(state);
     configureInlineWrapper(state);
@@ -450,6 +455,11 @@
     }
 
     refresh(state);
+  }
+
+  function hasSnap(element) {
+    return element.hasAttribute(snapAttribute) &&
+      element.getAttribute(snapAttribute) !== "false";
   }
 
   function contentChildren(element) {
@@ -989,6 +999,11 @@
 
     if (chain.some(member => member.scrollbar.drag)) return;
 
+    for (const member of chain) {
+      cancelMomentum(member);
+      if (member.elastic.owned) resetElastic(member);
+    }
+
     const axes = new Map(chain.map(member => {
       const metrics = nativeMetrics(member.element);
       member.metrics = metrics;
@@ -1018,14 +1033,6 @@
       !chains.x.some(member => axes.get(member).x);
 
     if (!textOrigin && event.cancelable) event.preventDefault();
-
-    for (const member of new Set([...chains.x, ...chains.y])) {
-      cancelMomentum(member);
-      if (member.elastic.owned) {
-        resetElastic(member);
-        refresh(member);
-      }
-    }
 
     if (state.mouseReleaseTimeout !== null) root.clearTimeout(state.mouseReleaseTimeout);
     state.mouseReleaseTimeout = null;
@@ -1084,7 +1091,7 @@
     if (!pointerScroll.axis)
       pointerScroll.axis = Math.abs(dx) >= Math.abs(dy) ? "x" : "y";
     const chain = pointerScroll.chains[pointerScroll.axis];
-    const threshold = chain.some(member => !member.disposed &&
+    const threshold = !pointerScroll.moved && chain.some(member => !member.disposed &&
       pointerAxisMaximum(member, pointerScroll.axis, pointerScroll) > 0 &&
       !dispatchSnapGesture(member, "probe", pointerScroll)) ? 1 : POINTER_SCROLL_THRESHOLD_PX;
     if (!pointerScroll.moved && dx * dx + dy * dy < threshold * threshold) return;
@@ -1364,6 +1371,7 @@
 
   function startMomentum(state, pointerScroll) {
     const element = state.element;
+    if (hasSnap(element)) return;
     const elapsed = Math.max(1, now() - pointerScroll.momentumStartTime);
     const x = pointerScroll.axis === "x" ? momentumAxis(element.scrollLeft,
       pointerScroll.momentumStartX, elapsed,
@@ -1391,6 +1399,10 @@
 
   function stepMomentum(state, momentum) {
     if (state.momentum !== momentum || state.disposed) return;
+    if (hasSnap(state.element)) {
+      cancelMomentum(state);
+      return;
+    }
     momentum.currentX += (momentum.toX - momentum.currentX) * 0.1;
     momentum.currentY += (momentum.toY - momentum.currentY) * 0.1;
     const done = momentum.currentX.toFixed(3) === momentum.toX.toFixed(3) &&
@@ -1694,6 +1706,12 @@
     elastic.releaseFrame = root.requestAnimationFrame(() => stepElasticRelease(state));
   }
 
+  function finishElasticRelease(state) {
+    if (state.elastic.releaseFrame === null) return;
+    resetElastic(state);
+    refresh(state);
+  }
+
   function resetElastic(state) {
     const elastic = state.elastic;
     const wasOwned = elastic.owned;
@@ -1710,6 +1728,7 @@
     elastic.owned = false;
 
     if (wasOwned && !state.disposed) {
+      state.metrics = nativeMetrics(state.element);
       dispatchInteraction(state, "elastic", false);
     }
     if (wasOwned && !state.disposed) publish(state);
@@ -1747,7 +1766,7 @@
         {
           childList: true, subtree: true, characterData: true,
           attributes: true,
-          attributeFilter: [elasticAttribute, scrollbarAttribute]
+          attributeFilter: [elasticAttribute, scrollbarAttribute, snapAttribute]
         });
     }
   }
@@ -1964,6 +1983,7 @@
     cancelMomentum(state);
     if (event.defaultPrevented) return;
     if (event.target.closest(`[${attribute}]`) !== state.element) return;
+    finishElasticRelease(state);
     if (!dispatchWheel(state, event)) return;
     const metrics = nativeMetrics(state.element);
     if (!metrics) return;
