@@ -2470,6 +2470,92 @@ test("mouse release and click are canceled only for the drag button", async ({ p
   });
 });
 
+for (const axis of ["x", "y"]) {
+  for (const snap of [false, true]) {
+    test(`rapid ${axis} drags can restart at the same position${snap ? " with snap" : ""}`, async ({ page }) => {
+      await setup(page, `<div id="box" data-ae-scrollbox="pointer" data-ae-scrollbox-momentum="false"
+        ${snap ? `data-ae-scrollbox-snap="${axis === "x" ? "horizontal" : "vertical"}"` : ""}
+        style="width:100px;height:100px;overflow:auto;user-select:none">
+        <div style="display:flex;flex-direction:${axis === "x" ? "row" : "column"};width:${axis === "x" ? 1000 : 100}px">
+          ${'<div data-ae-snap-item style="width:100px;height:100px;flex:none"></div>'.repeat(10)}
+        </div></div>`);
+      await page.locator("#box").evaluate((element, axis) => {
+        if (element.hasAttribute("data-ae-scrollbox-snap")) AelluxJs.ext.scrollboxSnap.goto(element, 3, "instant");
+        else element.scrollTo({ left: axis === "x" ? 300 : 0, top: axis === "y" ? 300 : 0, behavior: "instant" });
+      }, axis);
+      const rect = await page.locator("#box").boundingBox();
+      const position = () => page.locator("#box").evaluate((element, axis) => element[axis === "x" ? "scrollLeft" : "scrollTop"], axis);
+      for (let gesture = 0; gesture < 8; gesture++) {
+        await page.mouse.move(rect.x + 50, rect.y + 50);
+        await page.mouse.down();
+        const start = await position();
+        const distance = gesture % 2 ? 20 : -20;
+        await page.mouse.move(rect.x + 50 + (axis === "x" ? distance : 0),
+          rect.y + 50 + (axis === "y" ? distance : 0));
+        expect(await position(), `gesture ${gesture}: immediate re-grab follows the pointer`).toBe(start - distance);
+        expect(await page.locator("#box").evaluate(element => getComputedStyle(element).cursor)).toBe("grabbing");
+        await page.mouse.up();
+      }
+    });
+  }
+}
+
+test("a snap flick during the text wait does not block the next nearby press", async ({ page }) => {
+  await setup(page, `<div id="box" data-ae-scrollbox="pointer" data-ae-scrollbox-snap
+    style="width:100px;height:100px;overflow:auto">
+    <div style="display:flex;width:900px">
+      <div data-ae-snap-item style="width:300px;height:100px;flex:none"><span id="text">MMMMMMMMMMMMMMMMMMMM</span></div>
+      ${'<div data-ae-snap-item style="width:300px;height:100px;flex:none"></div>'.repeat(2)}
+    </div></div>`);
+  const result = await page.evaluate(async () => {
+    const element = document.getElementById("box"), text = document.getElementById("text");
+    const rect = element.getBoundingClientRect();
+    let consumed = false, moved = null;
+    element.addEventListener("AelluxJsScrollboxSnapGesture", event => {
+      if (event.detail.phase === "end" && moved === null) {
+        consumed = event.defaultPrevented;
+        moved = event.detail.moved;
+      }
+    });
+    const send = (type, pointerId, distance = 0) => {
+      (type === "pointerdown" ? text : window).dispatchEvent(new PointerEvent(type, {
+        bubbles: true, cancelable: true, isPrimary: true, pointerType: "mouse", pointerId,
+        button: 0, buttons: type === "pointerup" ? 0 : 1,
+        clientX: rect.left + 70 - distance, clientY: rect.top + 10
+      }));
+    };
+    send("pointerdown", 751);
+    send("pointermove", 751, 2);
+    send("pointerup", 751, 2);
+    send("pointerdown", 752);
+    const start = element.scrollLeft;
+    send("pointermove", 752, 10);
+    await new Promise(resolve => setTimeout(resolve, 150));
+    const position = element.scrollLeft, cursor = getComputedStyle(element).cursor;
+    send("pointerup", 752, 10);
+    return { consumed, moved, start, position, cursor };
+  });
+  expect(result).toEqual({ consumed: true, moved: false, start: 100, position: 110, cursor: "grabbing" });
+});
+
+for (const clickCount of [2, 3]) {
+  test(`native click count ${clickCount} after a completed drag does not cancel the next drag`, async ({ page }) => {
+    await setup(page, box("box"));
+    const rect = await page.locator("#box").boundingBox();
+    const x = rect.x + 70, y = rect.y + 50;
+    await page.mouse.move(x, y);
+    await page.mouse.down();
+    await page.mouse.move(x - 40, y);
+    await page.mouse.up();
+    expect(await page.locator("#box").evaluate(element => element.scrollLeft)).toBe(40);
+    await page.mouse.down({ clickCount });
+    await page.mouse.move(x - 50, y);
+    expect(await page.locator("#box").evaluate(element => element.scrollLeft)).toBe(50);
+    expect(await page.locator("#box").evaluate(element => getComputedStyle(element).cursor)).toBe("grabbing");
+    await page.mouse.up();
+  });
+}
+
 for (const elastic of [false, true]) {
   test(`second click dragged outside does not start pointer scrolling${elastic ? " with elastic" : ""}`,
     async ({ page }) => {

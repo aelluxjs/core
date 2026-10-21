@@ -48,7 +48,9 @@ for (const [index, scenario] of ["with elastic", "without elastic", "with nested
       const position = () => gallery.evaluate(element => element.scrollLeft);
       for (let gesture = 0; gesture < 24; gesture++) {
         const distance = [-250, 250, -180, 160, -20, 20, -2, 2][gesture % 8];
-        const x = rect.x + (distance < 0 ? 320 : 140), y = rect.y + 80;
+        // Re-grab the same location in the final eight gestures. Alternating
+        // distant origins alone misses accidental multi-click suppression.
+        const x = rect.x + (gesture >= 16 ? 240 : distance < 0 ? 320 : 140), y = rect.y + 80;
         await page.mouse.move(x, y);
         await page.mouse.down();
         const start = await position();

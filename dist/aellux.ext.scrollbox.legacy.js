@@ -404,7 +404,8 @@
         if (!event.relatedTarget || !element.contains(event.relatedTarget)) restorePointerScrollCursor(state);
       };
       state.onMouseDown = function(event) {
-        if (event.button === 0 && event.detail > 1) endPointerScroll(state);
+        var _state$pointerScroll;
+        if (event.button === 0 && event.detail > 1 && !((_state$pointerScroll = state.pointerScroll) !== null && _state$pointerScroll !== void 0 && _state$pointerScroll.afterDrag)) endPointerScroll(state);
       };
       state.onPointerMove = function(event) {
         return movePointerScroll(state, event);
@@ -1098,7 +1099,8 @@
       syncScrollbarVisibility(state);
     }
     function startPointerScroll(state, event) {
-      if (event.detail > 1) return;
+      var _state$lastPointerDow;
+      if (event.detail > 1 && !((_state$lastPointerDow = state.lastPointerDown) !== null && _state$lastPointerDow !== void 0 && _state$lastPointerDow.dragged)) return;
       if (activePointerScrollState || state.pointerScroll || state.scrollbar.drag || event.defaultPrevented || event.button !== 0 || !event.isPrimary || event.pointerType === "touch" || (event.buttons & 1) === 0) return;
       var element = state.element;
       var nested = event.target.closest("[".concat(attribute, "]"));
@@ -1141,7 +1143,7 @@
         y: event.clientY,
         time: time
       };
-      if (previousDown && time - previousDown.time <= POINTER_SCROLL_MULTICLICK_MS && Math.abs(event.clientX - previousDown.x) <= POINTER_SCROLL_MULTICLICK_DISTANCE_PX && Math.abs(event.clientY - previousDown.y) <= POINTER_SCROLL_MULTICLICK_DISTANCE_PX) return;
+      if (previousDown && !previousDown.dragged && time - previousDown.time <= POINTER_SCROLL_MULTICLICK_MS && Math.abs(event.clientX - previousDown.x) <= POINTER_SCROLL_MULTICLICK_DISTANCE_PX && Math.abs(event.clientY - previousDown.y) <= POINTER_SCROLL_MULTICLICK_DISTANCE_PX) return;
       var textOrigin = isTextAtPoint(event.target, event.clientX, event.clientY);
       var selectionAtDown = readSelection();
       var verticalOnly = chains.y.some(function(member2) {
@@ -1167,6 +1169,7 @@
         chain: chain,
         chains: chains,
         axes: axes,
+        afterDrag: !!(previousDown !== null && previousDown !== void 0 && previousDown.dragged),
         styles: [],
         fractions: /* @__PURE__ */ new Map(),
         momentumState: null,
@@ -1496,6 +1499,7 @@
           _iterator13.f();
         }
       }
+      if ((pointerScroll.moved || snapHandled) && state.lastPointerDown) state.lastPointerDown.dragged = true;
       var _iterator14 = _createForOfIteratorHelper(pointerScroll.styles), _step14;
       try {
         for (_iterator14.s(); !(_step14 = _iterator14.n()).done; ) {

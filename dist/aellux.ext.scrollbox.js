@@ -329,7 +329,9 @@
           restorePointerScrollCursor(state);
       };
       state.onMouseDown = (event) => {
-        if (event.button === 0 && event.detail > 1) endPointerScroll(state);
+        var _a;
+        if (event.button === 0 && event.detail > 1 && !((_a = state.pointerScroll) == null ? void 0 : _a.afterDrag))
+          endPointerScroll(state);
       };
       state.onPointerMove = (event) => movePointerScroll(state, event);
       state.onMouseEvent = (event) => cancelPointerScrollMouseEvent(state, event);
@@ -952,7 +954,8 @@
       syncScrollbarVisibility(state);
     }
     function startPointerScroll(state, event) {
-      if (event.detail > 1) return;
+      var _a;
+      if (event.detail > 1 && !((_a = state.lastPointerDown) == null ? void 0 : _a.dragged)) return;
       if (activePointerScrollState || state.pointerScroll || state.scrollbar.drag || event.defaultPrevented || event.button !== 0 || !event.isPrimary || event.pointerType === "touch" || (event.buttons & 1) === 0) return;
       const element = state.element;
       const nested = event.target.closest(`[${attribute}]`);
@@ -984,7 +987,7 @@
       const previousDown = state.lastPointerDown;
       const time = now();
       state.lastPointerDown = { x: event.clientX, y: event.clientY, time };
-      if (previousDown && time - previousDown.time <= POINTER_SCROLL_MULTICLICK_MS && Math.abs(event.clientX - previousDown.x) <= POINTER_SCROLL_MULTICLICK_DISTANCE_PX && Math.abs(event.clientY - previousDown.y) <= POINTER_SCROLL_MULTICLICK_DISTANCE_PX) return;
+      if (previousDown && !previousDown.dragged && time - previousDown.time <= POINTER_SCROLL_MULTICLICK_MS && Math.abs(event.clientX - previousDown.x) <= POINTER_SCROLL_MULTICLICK_DISTANCE_PX && Math.abs(event.clientY - previousDown.y) <= POINTER_SCROLL_MULTICLICK_DISTANCE_PX) return;
       const textOrigin = isTextAtPoint(event.target, event.clientX, event.clientY);
       const selectionAtDown = readSelection();
       const verticalOnly = chains.y.some((member) => axes.get(member).y) && !chains.x.some((member) => axes.get(member).x);
@@ -1006,6 +1009,7 @@
         chain,
         chains,
         axes,
+        afterDrag: !!(previousDown == null ? void 0 : previousDown.dragged),
         styles: [],
         fractions: /* @__PURE__ */ new Map(),
         momentumState: null,
@@ -1266,6 +1270,8 @@
             snapHandled = true;
         }
       }
+      if ((pointerScroll.moved || snapHandled) && state.lastPointerDown)
+        state.lastPointerDown.dragged = true;
       for (const saved of pointerScroll.styles) {
         if (saved.classOwned) saved.element.classList.remove(pointerScrollingClass);
         (_a = pointerScrollMemories.get(saved.element)) == null ? void 0 : _a.restore();
