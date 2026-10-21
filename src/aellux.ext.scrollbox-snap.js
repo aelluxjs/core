@@ -17,6 +17,7 @@
 
   const
     POINTER = "pointer",
+    GESTURE = "gesture",
     TOUCH = "touch",
     HORIZONTAL = "x",
     VERTICAL = "y",
@@ -40,6 +41,7 @@
 
   const SNAP_SCROLL_IDLE_MS = 120;
   const SNAP_TARGET_IDLE_MS = 500;
+  const SNAP_RELEASE_MS = 300;
   const SNAP_SWIPE_SPEED_PX_MS = 0.5;
   const SNAP_FLICK_WINDOW_MS = 100;
   const SNAP_FLICK_FAST_TIME_MS = 50;
@@ -57,20 +59,21 @@
 
   AelluxJs.extAttach(extensionName, { init, destroy, next, previous, goto });
 
-  async function init() {
+  function init() {
     if (!AelluxJs.registry.ext.scrollbox) AelluxJs.ext("scrollbox");
-    const scrollbox = await AelluxJs.wait("scrollbox");
-    if (!scrollbox) throw new Error("[aellux.js] Scrollbox Snap requires the Scrollbox extension.");
+    return AelluxJs.wait("scrollbox").then(scrollbox => {
+      if (!scrollbox) throw new Error("[aellux.js] Scrollbox Snap requires the Scrollbox extension.");
 
-    AelluxJs.registerCssProperty(...properties.map(name =>
-      ({ name, syntax: "<number>", initialValue: "0" })));
-    scrollbox.registerSnapController({ next, previous, goto });
-    AelluxJs.mountManager.add({
-      extensionName,
-      selector: `[${scrollboxAttribute}][${snapAttribute}]:not([${snapAttribute}="${FALSE}"])`,
-      priority: 1,
-      mount, update: update, unmount,
-      controllers: []
+      AelluxJs.registerCssProperty(...properties.map(name =>
+        ({ name, syntax: "<number>", initialValue: "0" })));
+      scrollbox.registerSnapController({ next, previous, goto });
+      AelluxJs.mountManager.add({
+        extensionName,
+        selector: `[${scrollboxAttribute}][${snapAttribute}]:not([${snapAttribute}="${FALSE}"])`,
+        priority: 1,
+        mount, update: update, unmount,
+        controllers: []
+      });
     });
   }
 
@@ -85,15 +88,14 @@
     const state = {
       element, root: null, index: 0, notifiedItem: null, notifiedIndex: null,
       target: null, targetAxis: null, timeout: null, wheelTimeout: null,
-      edgeWheelTimeout: null,
+      edgeWheelTimeout: null, frame: null,
       activePointers: new Set(), activeTouches: new Set(), savedItems: new Map(),
-      suspensions: new Set(), pointerScroll: null, flick: null,
+      suspensions: new Set(), pointerScroll: null, flick: null, release: false,
       observer: null, resizeObserver: null, disposed: false
     };
     state.onScroll = () => {
       updateValues(state);
-      if (state.target !== null && !targetReached(state)) scheduleTargetIdle(state);
-      else scheduleSettle(state);
+      scheduleSettle(state, state.target !== null && !targetReached(state));
     };
     state.onScrollEnd = event => {
       if (event.target !== state.element ||
@@ -105,12 +107,12 @@
     state.onTouchStart = event => beginGesture(state, TOUCH, event);
     state.onTouchEnd = event => endGesture(state, TOUCH, event);
     state.onBlur = () => {
-      if (!state.activePointers.size && !state.activeTouches.size) return;
+      if (!hasActiveGesture(state)) return;
       state.activePointers.clear();
       state.activeTouches.clear();
       state.pointerScroll = null;
       state.flick = null;
-      setSuspension(state, { reason: "gesture", active: false });
+      endDesktopGesture(state);
     };
     state.onScrollboxWheel = event => {
       if (handleWheel(state, event.detail?.event)) event.preventDefault();
@@ -144,6 +146,7 @@
     const state = states.get(element);
     if (!state) return;
     state.disposed = true;
+    cancelRelease(state);
     clearTimer(state, "timeout");
     clearTimer(state, "wheelTimeout");
     clearTimer(state, "edgeWheelTimeout");
@@ -221,12 +224,15 @@
     return CENTER;
   }
 
-  function offset(state, item, axis = axisFor(state), box = state.element.getBoundingClientRect(), target = item.getBoundingClientRect()) {
+  function offset(state, item, axis = axisFor(state), free, box = state.element.getBoundingClientRect(), target = item.getBoundingClientRect()) {
     const horizontal = axis === HORIZONTAL;
     const start = horizontal ? box.left + state.element.clientLeft : box.top + state.element.clientTop;
     const size = horizontal ? state.element.clientWidth : state.element.clientHeight;
     const itemStart = horizontal ? target.left : target.top;
     const itemSize = horizontal ? target.width : target.height;
+    // Oversized snap areas allow scrolling freely while they cover the viewport.
+    if (free && itemSize > size)
+      return Math.max(itemStart - start, Math.min(itemStart + itemSize - start - size, 0));
     if (alignment(item) === START) return itemStart - start;
     if (alignment(item) === END) return itemStart + itemSize - (start + size);
     return itemStart + itemSize / 2 - (start + size / 2);
@@ -247,7 +253,7 @@
       const box = item.getBoundingClientRect();
       const itemCenter = axis === HORIZONTAL ? box.left + box.width / 2 : box.top + box.height / 2;
       item.style.setProperty(properties[0], Math.max(-2, Math.min(2, (itemCenter - center) * 2 / size)));
-      item.style.setProperty(properties[1], Math.max(0, 1 - Math.abs(offset(state, item, axis, rect, box)) / size));
+      item.style.setProperty(properties[1], Math.max(0, 1 - Math.abs(offset(state, item, axis, false, rect, box)) / size));
     }
   }
 
@@ -256,21 +262,50 @@
     state.savedItems.clear();
   }
 
-  function goto(element, index, behavior = SMOOTH) {
+  function goto(element, index, behavior = SMOOTH, free) {
     const state = states.get(element), items = state && itemsFor(state);
     if (!state || state.activeTouches.size || !Number.isInteger(index) ||
         index < 0 || index >= items.length) return false;
     const axis = axisFor(state), metrics = metricsFor(element);
-    const destination = axis === HORIZONTAL ?
-      Math.max(0, Math.min(metrics.x, element.scrollLeft + offset(state, items[index], axis))) :
-      Math.max(0, Math.min(metrics.y, element.scrollTop + offset(state, items[index], axis)));
+    const position = axis === HORIZONTAL ? element.scrollLeft : element.scrollTop;
+    const destination = Math.max(0, Math.min(metrics[axis],
+      position + offset(state, items[index], axis, free)));
     state.index = index;
     state.target = destination;
     state.targetAxis = axis;
-    if (axis === HORIZONTAL) element.scrollTo({ left: destination, behavior });
-    else element.scrollTo({ top: destination, behavior });
-    if (targetReached(state)) finish(state);
+    cancelRelease(state);
+    if (state.release && behavior === SMOOTH) animateRelease(state, position, destination, axis);
+    else scrollTo(state, destination, axis, behavior);
+    if (targetReached(state)) {
+      cancelRelease(state);
+      finish(state);
+    }
     return true;
+  }
+
+  function scrollTo(state, position, axis, behavior) {
+    state.element.scrollTo(axis === HORIZONTAL ? { left: position, behavior } : { top: position, behavior });
+  }
+
+  function cancelRelease(state) {
+    if (state.frame !== null) root.cancelAnimationFrame(state.frame);
+    state.frame = null;
+  }
+
+  function animateRelease(state, from, to, axis) {
+    // Native smooth scrolling can deliver a queued compositor step after an
+    // immediate re-grab. Own these frames so pointerdown cancels every step.
+    const start = root.performance.now();
+    const step = time => {
+      const progress = Math.max(0, Math.min(1, (time - start) / SNAP_RELEASE_MS));
+      scrollTo(state, from + (to - from) * (1 - Math.pow(1 - progress, 3)), axis, INSTANT);
+      if (progress < 1) state.frame = root.requestAnimationFrame(step);
+      else {
+        cancelRelease(state);
+        finish(state);
+      }
+    };
+    state.frame = root.requestAnimationFrame(step);
   }
 
   function next(element) {
@@ -283,18 +318,18 @@
     return state ? goto(element, Math.max(0, selectedIndex(state) - 1)) : false;
   }
 
-  function selectedIndex(state) {
+  function selectedIndex(state, free) {
     const items = itemsFor(state);
+    const axis = axisFor(state), maximum = metricsFor(state.element)[axis];
+    const position = axis === HORIZONTAL ? state.element.scrollLeft : state.element.scrollTop;
     if (items.length > 1) {
-      const axis = axisFor(state), metrics = metricsFor(state.element);
-      const maximum = axis === HORIZONTAL ? metrics.x : metrics.y;
-      const position = axis === HORIZONTAL ? state.element.scrollLeft : state.element.scrollTop;
       if (position <= 1) return 0;
       if (maximum > 0 && position >= maximum - 1) return items.length - 1;
     }
     let nearest = 0, distance = Infinity;
     for (let index = 0; index < items.length; index++) {
-      const candidate = Math.abs(offset(state, items[index]));
+      const candidate = Math.abs(Math.max(0, Math.min(maximum,
+        position + offset(state, items[index], axis, free))) - position);
       if (candidate < distance) { nearest = index; distance = candidate; }
     }
     return nearest;
@@ -343,20 +378,24 @@
     if (detail.active) state.suspensions.add(detail.reason);
     else state.suspensions.delete(detail.reason);
     state.element.classList.toggle(suspendedClass, state.suspensions.size > 0);
-    if (!detail.active && state.suspensions.size === 0) scheduleSettle(state);
+    if (!detail.active) {
+      settlePointer(state);
+      if (!state.suspensions.size) scheduleSettle(state);
+    }
   }
 
   function handlePointerScroll(state, event) {
     const detail = event.detail;
     if (!detail || detail.axis !== axisFor(state)) return;
+    const items = itemsFor(state);
+    if (!items.length) return;
     if (detail.phase === "start" || detail.phase === "probe") {
-      if (!itemsFor(state).length) return;
       state.pointerScroll = { axis: detail.axis, index: selectedIndex(state) };
       if (detail.phase === "start") state.flick = null;
       else event.preventDefault();
       return;
     }
-    if (detail.phase !== "end" || !itemsFor(state).length) return;
+    if (detail.phase !== "end") return;
 
     const start = state.pointerScroll?.axis === detail.axis ?
       state.pointerScroll.index : selectedIndex(state);
@@ -367,9 +406,9 @@
     if (!flick) return;
     const distance = detail.axis === HORIZONTAL ? detail.startX - detail.lastX :
       detail.startY - detail.lastY;
-    const index = Math.max(0, Math.min(itemsFor(state).length - 1,
+    const index = Math.max(0, Math.min(items.length - 1,
       start + Math.sign(distance)));
-    if (index !== start) state.flick = { axis: detail.axis, index };
+    if (index !== start) state.flick = index;
   }
 
   function isFlick(detail) {
@@ -388,6 +427,8 @@
     if (kind === POINTER) active.add(event.pointerId);
     else for (const touch of event.changedTouches) active.add(touch.identifier);
     state.target = null;
+    state.release = false;
+    cancelRelease(state);
     state.pointerScroll = null;
     state.flick = null;
     clearTimer(state, "timeout");
@@ -395,45 +436,69 @@
       const element = state.element, left = element.scrollLeft, top = element.scrollTop;
       // Suspend CSS snap before stopping smooth scrolling so the current
       // position stays fixed until PDS starts or the pointer is released.
-      setSuspension(state, { reason: "gesture", active: true });
+      setSuspension(state, { reason: GESTURE, active: true });
       // A same-position scroll does not cancel smooth motion in every engine.
       // Take a one-pixel step and restore the position within the same task.
       element.scrollTo({ left: left > 0 ? left - 1 : 1,
         top: top > 0 ? top - 1 : 1, behavior: INSTANT });
       element.scrollTo({ left, top, behavior: INSTANT });
-    }
+    } else setSuspension(state, { reason: GESTURE, active: false });
   }
 
   function endGesture(state, kind, event) {
     const active = kind === POINTER ? state.activePointers : state.activeTouches;
     if (kind === POINTER) active.delete(event.pointerId);
     else for (const touch of event.changedTouches) active.delete(touch.identifier);
-    if (!state.activePointers.size && !state.activeTouches.size)
-      setSuspension(state, { reason: "gesture", active: false });
+    if (!hasActiveGesture(state)) endDesktopGesture(state);
   }
 
-  function scheduleSettle(state) {
-    if (state.activePointers.size || state.activeTouches.size || state.suspensions.size) return;
-    clearTimer(state, "timeout");
-    state.timeout = root.setTimeout(() => finish(state), SNAP_SCROLL_IDLE_MS);
+  function hasActiveGesture(state) {
+    return state.activePointers.size || state.activeTouches.size;
   }
 
-  function scheduleTargetIdle(state) {
+  function endDesktopGesture(state) {
+    if (!state.suspensions.has(GESTURE)) {
+      scheduleSettle(state);
+      return;
+    }
+    state.release = true;
+    // Root pointerup runs before PDS publishes its final gesture and restores
+    // its styles. Keep CSS snap suspended until the controlled settle finishes.
+    // Trusted input can run microtasks between listeners, so defer with a task.
+    root.setTimeout(() => settlePointer(state), 0);
+  }
+
+  function settlePointer(state) {
+    if (state.disposed || !releaseReady(state) || state.target !== null || hasActiveGesture(state)) return;
+    const flick = state.flick;
+    state.flick = null;
+    goto(state.element, flick !== null ? flick : selectedIndex(state, true),
+      AelluxJs.currentPreference("reduced-motion") === "reduced" ? INSTANT : SMOOTH, flick === null);
+  }
+
+  function releaseReady(state) {
+    // release is set only while the gesture suspension is retained.
+    return state.release && state.suspensions.size === 1;
+  }
+
+  function scheduleSettle(state, target) {
+    if (!target && (hasActiveGesture(state) ||
+        state.suspensions.size && !state.release)) return;
     clearTimer(state, "timeout");
-    state.timeout = root.setTimeout(() => finish(state), SNAP_TARGET_IDLE_MS);
+    state.timeout = root.setTimeout(() => finish(state), target ? SNAP_TARGET_IDLE_MS : SNAP_SCROLL_IDLE_MS);
   }
 
   function finish(state) {
-    if (state.disposed || state.suspensions.size || state.activePointers.size || state.activeTouches.size) return;
+    if (state.disposed || state.frame !== null || hasActiveGesture(state)) return;
+    if (state.suspensions.size) {
+      if (!releaseReady(state) || !targetReached(state)) return;
+      state.release = false;
+      setSuspension(state, { reason: GESTURE, active: false });
+    }
     clearTimer(state, "timeout");
+    cancelRelease(state);
     state.target = null;
     const items = itemsFor(state), index = selectedIndex(state), item = items[index];
-    const flick = state.flick;
-    state.flick = null;
-    if (flick && flick.axis === axisFor(state) && flick.index !== index) {
-      goto(state.element, flick.index);
-      return;
-    }
     if (!item || state.notifiedItem === item && state.notifiedIndex === index) return;
     const previousIndex = state.notifiedIndex;
     state.index = index;

@@ -83,6 +83,7 @@ All notable changes to aellux.js will be documented in this file.
 
 ### Fixed
 
+- Desktop PDS release eases into its snap destination while keeping native snap suspended; a new press cancels all remaining animation frames, and reduced motion settles immediately.
 - Scrollbox preserves fractional pointer movement across events so browser rounding does not create elastic pressure or send movement to a parent before reaching an edge.
 - Snap boxes use automatic native scroll positioning while controller, wheel and scripted flick navigation retain their explicit smooth behavior.
 - A new mouse or pen press stops smooth Scrollbox snap motion, clears pending flicks, and suspends snap until the last pointer ends or window focus is lost; native touch keeps its snap behavior.

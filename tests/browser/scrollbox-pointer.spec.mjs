@@ -1620,7 +1620,7 @@ test("CSS snap flick advances wide items while a slow drag stays within one poin
     .toBeLessThan(110);
 });
 
-test("a longer drag lets CSS snap choose the nearest point", async ({ page }) => {
+test("a longer drag settles at the nearest snap point", async ({ page }) => {
   await setup(page, `<div id="gallery" data-ae-scrollbox="pointer" data-ae-scrollbox-snap
     style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden">
     <div style="display:flex;width:300px">
@@ -1660,6 +1660,52 @@ test("a longer drag lets CSS snap choose the nearest point", async ({ page }) =>
   })), result);
   await expect.poll(() => page.evaluate(() => document.getElementById("gallery").scrollLeft))
     .toBe(100);
+});
+
+test("real mouse text-origin flick waits for all pointerup handlers before settling", async ({ page }) => {
+  await setup(page, `<div id="gallery" data-ae-scrollbox="pointer" data-ae-scrollbox-snap
+    style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden">
+    <div style="display:flex;width:900px">
+      <div data-ae-snap-item style="flex:none;width:300px;height:100px"><span id="text">MMMMMMMMMMMMMMMMMMMM</span></div>
+      ${'<div data-ae-snap-item style="flex:none;width:300px;height:100px"></div>'.repeat(2)}
+    </div>
+  </div>`);
+  // Pick a visible glyph explicitly: platform fonts place the end of a short
+  // phrase at different positions inside an initially centered wide item.
+  const point = await page.evaluate(() => {
+    const viewport = document.getElementById("gallery").getBoundingClientRect();
+    const text = document.getElementById("text").firstChild;
+    const range = document.createRange();
+    let point;
+    for (let index = 0; index < text.length; index++) {
+      range.setStart(text, index);
+      range.setEnd(text, index + 1);
+      const rect = range.getBoundingClientRect();
+      if (rect.width >= 8 && rect.left >= viewport.left + 4 && rect.right <= viewport.right - 4)
+        point = { x: rect.left + rect.width * .8, y: rect.top + rect.height / 2 };
+    }
+    if (point) return point;
+    throw new Error("No visible text glyph for the flick");
+  });
+  await page.evaluate(() => {
+    // Keep selection unchanged while exercising trusted pointer events over
+    // text. A 60 px flick remains eligible throughout the 100 ms text wait.
+    document.getElementById("text").addEventListener("mousedown", event => event.preventDefault());
+    document.getElementById("gallery").addEventListener("AelluxJsScrollboxSnapGesture", event => {
+      if (event.detail.phase === "end") window.endedGesture = event.detail;
+    });
+  });
+  await page.mouse.move(point.x, point.y);
+  await page.mouse.down();
+  await page.mouse.move(point.x - 60, point.y);
+  await page.mouse.up();
+  const gesture = await page.evaluate(() => ({ moved: window.endedGesture?.moved,
+    elapsed: window.endedGesture?.endTime - window.endedGesture?.startTime,
+    selection: String(getSelection()) }));
+  expect(gesture.moved).toBe(false);
+  expect(gesture.selection).toBe("");
+  expect(gesture.elapsed).toBeLessThan(100);
+  await expect.poll(() => page.locator("#gallery").evaluate(element => element.scrollLeft)).toBe(400);
 });
 
 test("text-origin snap flick works before the 100 ms selection wait ends", async ({ page }) => {

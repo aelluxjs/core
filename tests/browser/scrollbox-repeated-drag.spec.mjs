@@ -1,6 +1,39 @@
 import { expect, test } from "@playwright/test";
 
 for (const [index, scenario] of ["with elastic", "without elastic", "with nested vertical Scrollboxes"].entries()) {
+  test(`teste.htm PDS release visibly eases into snap ${scenario}`, async ({ page }) => {
+    await page.goto("/docs/teste.htm");
+    await page.waitForFunction(() => window.AelluxJs?.ext.scrollboxSnap?.initialized);
+    const gallery = page.locator("[data-ae-scrollbox-snap]").nth(index);
+    await expect(gallery).toHaveClass(/ae--snap-ready/);
+    await gallery.scrollIntoViewIfNeeded();
+    const rect = await gallery.boundingBox();
+    await page.mouse.move(rect.x + 350, rect.y + 80);
+    await page.mouse.down();
+    await page.mouse.move(rect.x + 100, rect.y + 80, { steps: 3 });
+    await gallery.evaluate(element => {
+      window.releaseSamples = { held: element.scrollLeft, positions: [], done: false };
+      window.addEventListener("pointerup", () => queueMicrotask(() => {
+        window.releaseSamples.released = element.scrollLeft;
+        const record = () => {
+          window.releaseSamples.positions.push(element.scrollLeft);
+          if (element.classList.contains("ae--snap-suspended")) requestAnimationFrame(record);
+          else window.releaseSamples.done = true;
+        };
+        requestAnimationFrame(record);
+      }), { once: true });
+    });
+    await page.mouse.up();
+    await expect.poll(() => page.evaluate(() => window.releaseSamples.done)).toBe(true);
+    const { held, released, positions } = await page.evaluate(() => window.releaseSamples);
+    const destination = positions.at(-1);
+    expect(released).toBe(held);
+    expect(positions.some(position => position > Math.min(held, destination) + 1 &&
+      position < Math.max(held, destination) - 1)).toBe(true);
+    await expect.poll(() => gallery.evaluate(element => getComputedStyle(element).scrollSnapType))
+      .toBe("x mandatory");
+  });
+
   test(`teste.htm rapid alternating drags stay proportional ${scenario}`,
     async ({ page }) => {
       test.setTimeout(60_000);
