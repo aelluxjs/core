@@ -795,6 +795,7 @@
               return AelluxJs.waitLayout.update(state.styleLayoutId, function() {
                 if (!current()) return;
                 state.active = true;
+                if (state.lastPlacement) writePlacement(element, state.lastPlacement);
               });
             case 14:
               if (current()) {
@@ -868,18 +869,7 @@
                   startSwitch(element, state, placement.duration);
                 } else if (moved || state.interruptSwitch || !placement.duration) stopSwitch(element, state);
                 state.interruptSwitch = false;
-                var selected = placement.selected;
-                var style = element.style;
-                setValue(style, "--ae-anchor-x", "".concat(selected.x, "px"));
-                setValue(style, "--ae-anchor-y", "".concat(selected.y, "px"));
-                setValue(style, ORIGIN_X, "".concat(selected.self[0] * 100, "%"));
-                setValue(style, ORIGIN_Y, "".concat(selected.self[1] * 100, "%"));
-                setValue(style, ANCHOR_OPACITY, placement.opacity);
-                setValue(style, "--ae-anchor-target-width", "".concat(placement.width, "px"));
-                setValue(style, "--ae-anchor-target-height", "".concat(placement.height, "px"));
-                setValue(style, "--ae-anchor-pivot-x", "".concat(selected.pivotX, "px"));
-                setValue(style, "--ae-anchor-pivot-y", "".concat(selected.pivotY, "px"));
-                element.classList.add(anchoredClass);
+                writePlacement(element, placement);
                 state.lastUpdateAt = now();
                 state.lastPlacement = placement;
                 applied = true;
@@ -898,11 +888,9 @@
       return _updateAnchor.apply(this, arguments);
     }
     function readPlacement(element, target, candidates, measure) {
-      var _target;
       var reference = element.offsetParent;
       target = target || reference;
-      var presenting = anchors.get(element).group && (_target = target) !== null && _target !== void 0 && _target.hasAttribute(presentAttribute) ? target : null;
-      if (target && isInvisible(target, presenting)) return {
+      if (target && isInvisible(target)) return {
         hidden: true,
         target: target,
         reference: reference
@@ -1004,18 +992,34 @@
         signature: [selected.x, selected.y, targetRect.width, targetRect.height].concat(_toConsumableArray(selected.self)).join("/")
       };
     }
-    function isInvisible(element, presenting) {
+    function writePlacement(element, placement) {
+      var selected = placement.selected;
+      var style = element.style;
+      setValue(style, "--ae-anchor-x", "".concat(selected.x, "px"));
+      setValue(style, "--ae-anchor-y", "".concat(selected.y, "px"));
+      setValue(style, ORIGIN_X, "".concat(selected.self[0] * 100, "%"));
+      setValue(style, ORIGIN_Y, "".concat(selected.self[1] * 100, "%"));
+      setValue(style, ANCHOR_OPACITY, placement.opacity);
+      setValue(style, "--ae-anchor-target-width", "".concat(placement.width, "px"));
+      setValue(style, "--ae-anchor-target-height", "".concat(placement.height, "px"));
+      setValue(style, "--ae-anchor-pivot-x", "".concat(selected.pivotX, "px"));
+      setValue(style, "--ae-anchor-pivot-y", "".concat(selected.pivotY, "px"));
+      element.classList.add(anchoredClass);
+    }
+    function isInvisible(element) {
       var visibility = root.getComputedStyle(element).visibility;
       if (visibility === "hidden" || visibility === "collapse") return true;
       for (var current = element; current && current.nodeType === 1; current = current.parentElement) {
         var style = root.getComputedStyle(current);
-        var inline = current.style;
-        if (current.hidden || inline.display === "none" || inline.visibility === "hidden" || inline.visibility === "collapse" || current !== presenting && inline.opacity === "0" || style.display === "none" || style.contentVisibility === "hidden" || current !== presenting && Number(style.opacity) === 0) return true;
+        if (style.display === "none" || style.contentVisibility === "hidden" || Number(style.opacity) === 0) return true;
       }
       return false;
     }
     function hideForTarget(element, state, placement) {
+      var _state$lastPlacement;
+      var previous = state.group && ((_state$lastPlacement = state.lastPlacement) === null || _state$lastPlacement === void 0 ? void 0 : _state$lastPlacement.target) !== placement.target ? state.lastPlacement : null;
       deactivate(element, state);
+      state.lastPlacement = previous;
       state.invalidContext = false;
       if (placement.reference) listenForLayout(state, placement.reference);
     }

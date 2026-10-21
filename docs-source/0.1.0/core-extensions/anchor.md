@@ -45,6 +45,12 @@ await $ae.mountManager.update(anchor, "anchor");
 
 Anchor reads geometry through `$ae.waitLayout.read()` and writes CSS through `$ae.waitLayout.update()`.
 
+## Target Visibility
+
+Anchor uses computed CSS to decide whether its target is visible. A `hidden` attribute or an inline declaration does not suppress anchoring when the cascade overrides it. For example, a Present container with `hidden` remains an eligible target if its effective display, visibility and opacity make it visible.
+
+Computed `visibility:hidden` or `collapse` on the target deactivates the Anchor. A descendant may restore inherited visibility with `visibility:visible`. Effective `display:none`, `content-visibility:hidden` or zero opacity on the target or any ancestor also deactivates the Anchor; descendants cannot override an ancestor's zero opacity or absent display. The same checks apply to a selected Present Group member, including during transitions. These checks concern CSS visibility rather than viewport intersection or occlusion by another element.
+
 ## Dimension Matching
 
 `data-ae-anchor-match="width"`, `"height"` or `"width height"` applies the target's corresponding dimensions through weak CSS. Without the attribute, Anchor retains its original sizing behavior. Empty values and unknown tokens report `WARN_ANCHOR_MATCH` (2022); recognized tokens still work.
@@ -115,7 +121,7 @@ Switch interpolation deliberately uses native CSS rather than taking ownership t
 <button type="button" data-ae-trigger="pop" data-ae-target="second">Second view</button>
 ```
 
-Or select with `await $ae("views").present.show("second")`. Attribute changes, class selection and triggers all use the same accepted selection. The associated Anchor changes target as soon as that selection is confirmed and the member is available for presentation, including during Pop preparation; it does not wait for Pop completion. A canceled BeforePop/BeforeUnpop does not publish a new selection. The normal Present opacity-copying behavior remains; the example overrides opacity to keep its decorative marker visible throughout opening.
+Or select with `await $ae("views").present.show("second")`. Attribute changes, class selection and triggers all use the same accepted selection. The associated Anchor resolves the target as soon as that selection is confirmed and positions against it once its computed CSS passes the visibility checks; it does not wait for Pop completion. A canceled BeforePop/BeforeUnpop does not publish a new selection. The normal Present opacity-copying behavior remains; the example overrides opacity to keep its decorative marker opaque while the target fades in, once the target's opacity is greater than zero.
 
 Target precedence is:
 

@@ -43,6 +43,54 @@ async function aligned(page, target) {
   }).toBeLessThan(1);
 }
 
+for (const forceLegacy of [false, true]) {
+  test(`target visibility follows computed CSS overrides on the target and its ancestors (legacy=${forceLegacy})`, async ({ page }) => {
+    await start(page, `${stage}<style>
+      .rendered { display:block!important; visibility:visible!important; opacity:1!important }
+      .concealed { display:none!important }
+    </style><div id="ref"><div id="panel" data-ae-present="" hidden class="rendered"
+      style="display:none;visibility:hidden;opacity:0">
+      <div id="a" class="target rendered" data-ae-present="" hidden
+        style="display:none;visibility:hidden;opacity:0">Target</div>
+    </div>${indicator}</div>`, { forceLegacy });
+    await aligned(page, "a");
+    await expect(page.locator("#a")).toBeVisible();
+    await expect(page.locator("#indicator")).toHaveClass(/ae--anchored/);
+    for (const id of ["a", "panel"]) {
+      await page.locator(`#${id}`).evaluate(element => element.classList.remove("rendered"));
+      await expect(page.locator("#indicator")).not.toHaveClass(/ae--anchored/);
+      await page.locator(`#${id}`).evaluate(element => element.classList.add("rendered"));
+      await aligned(page, "a");
+      await expect(page.locator("#indicator")).toHaveClass(/ae--anchored/);
+    }
+    await page.locator("#panel").evaluate(element => element.classList.add("concealed"));
+    await expect(page.locator("#indicator")).not.toHaveClass(/ae--anchored/);
+    await page.locator("#panel").evaluate(element => element.classList.remove("concealed"));
+    await aligned(page, "a");
+    expect(await page.evaluate(() => AelluxJs.diagnostics.showHistory().filter(entry => entry.code === 1119))).toEqual([]);
+  });
+
+  test(`target can restore inherited visibility but cannot escape ancestor opacity (legacy=${forceLegacy})`, async ({ page }) => {
+    await start(page, `${stage}<div id="ref"><div id="panel" style="visibility:hidden">
+      <div id="a" class="target" style="visibility:visible">Target</div>
+    </div>${indicator}</div>`, { forceLegacy });
+    await aligned(page, "a");
+    await expect(page.locator("#indicator")).toHaveClass(/ae--anchored/);
+    await page.locator("#a").evaluate(element => { element.style.visibility = ""; });
+    await expect(page.locator("#indicator")).not.toHaveClass(/ae--anchored/);
+    await page.locator("#a").evaluate(element => { element.style.visibility = "visible"; });
+    await aligned(page, "a");
+    for (const property of ["opacity", "contentVisibility"]) {
+      await page.locator("#panel").evaluate((element, property) => {
+        element.style[property] = property === "opacity" ? "0" : "hidden";
+      }, property);
+      await expect(page.locator("#indicator")).not.toHaveClass(/ae--anchored/);
+      await page.locator("#panel").evaluate((element, property) => { element.style[property] = ""; }, property);
+      await aligned(page, "a");
+    }
+  });
+}
+
 for (const mode of ["basic", "full"]) for (const forceLegacy of [false, true]) {
   test(`matching geometry, override, invalid tokens and restoration (${mode}, legacy=${forceLegacy})`, async ({ page }) => {
     await start(page, `${stage}<div id="ref" style="transform:scale(1.2);transform-origin:0 0">${targets}
@@ -173,6 +221,18 @@ const group = `<div id="group" data-ae-present-group data-ae-present-active="a"
   <section id="b" class="target" data-ae-present="opacity" data-ae-present-when="view-b" hidden
     style="--ae-pop-duration:700ms">B</section>
   <section id="c" class="target" data-ae-present="opacity" hidden>C</section></div>`;
+
+for (const forceLegacy of [false, true]) test(`group-selected target still requires effective visibility (legacy=${forceLegacy})`, async ({ page }) => {
+  await start(page, `${stage}<style>#a{transition:none!important}#a.transparent{opacity:0!important}</style>
+    <div id="ref">${group}${indicator}</div>`, { forceLegacy });
+  await aligned(page, "a");
+  await page.locator("#a").evaluate(element => element.classList.add("transparent"));
+  await expect(page.locator("#indicator")).not.toHaveClass(/ae--anchored/);
+  expect(await page.evaluate(() => $ae("group").present.selected()?.id)).toBe("a");
+  await page.locator("#a").evaluate(element => element.classList.remove("transparent"));
+  await expect(page.locator("#indicator")).toHaveClass(/ae--anchored/);
+  await aligned(page, "a");
+});
 
 for (const mode of ["basic", "full"]) for (const forceLegacy of [false, true]) {
   test(`group association, selection event, veto, precedence and remount (${mode}, legacy=${forceLegacy})`, async ({ page }) => {

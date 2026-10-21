@@ -589,7 +589,7 @@
         <div id="doc-navlinks" ajax-load="doc-navlinks">
           <div class="d-flex justify-content-between flex-row gap-2 p-2 pb-4 px-0">
       <a href="/core/docs/0.1.0/core-extensions/ajax-href.htm" class="text-decoration-none d-inline-flex flex-row gap-2" style="max-width: 45%;">
-      ← <span class="text-underline text-truncate overflow-hidden d-inline-block align-middle flex-fill"
+      ← <span class="text-decoration-underline text-truncate overflow-hidden d-inline-block align-middle flex-fill"
         style="max-width:200px">
         Ajax Href      </span>
     </a>
@@ -634,6 +634,9 @@ anchor.setAttribute(&quot;data-ae-anchor-target&quot;, &quot;new-trigger&quot;);
 await $ae.mountManager.update(anchor, &quot;anchor&quot;);
 </code></pre>
 <p>Anchor reads geometry through <code>$ae.waitLayout.read()</code> and writes CSS through <code>$ae.waitLayout.update()</code>.</p>
+<h2>Target Visibility</h2>
+<p>Anchor uses computed CSS to decide whether its target is visible. A <code>hidden</code> attribute or an inline declaration does not suppress anchoring when the cascade overrides it. For example, a Present container with <code>hidden</code> remains an eligible target if its effective display, visibility and opacity make it visible.</p>
+<p>Computed <code>visibility:hidden</code> or <code>collapse</code> on the target deactivates the Anchor. A descendant may restore inherited visibility with <code>visibility:visible</code>. Effective <code>display:none</code>, <code>content-visibility:hidden</code> or zero opacity on the target or any ancestor also deactivates the Anchor; descendants cannot override an ancestor&#39;s zero opacity or absent display. The same checks apply to a selected Present Group member, including during transitions. These checks concern CSS visibility rather than viewport intersection or occlusion by another element.</p>
 <h2>Dimension Matching</h2>
 <p><code>data-ae-anchor-match=&quot;width&quot;</code>, <code>&quot;height&quot;</code> or <code>&quot;width height&quot;</code> applies the target&#39;s corresponding dimensions through weak CSS. Without the attribute, Anchor retains its original sizing behavior. Empty values and unknown tokens report <code>WARN_ANCHOR_MATCH</code> (2022); recognized tokens still work.</p>
 <pre><code class="language-html">&lt;div style=&quot;position:relative&quot;&gt;
@@ -681,7 +684,7 @@ await $ae.mountManager.update(anchor, &quot;anchor&quot;);
 &lt;/div&gt;
 &lt;button type=&quot;button&quot; data-ae-trigger=&quot;pop&quot; data-ae-target=&quot;second&quot;&gt;Second view&lt;/button&gt;
 </code></pre>
-<p>Or select with <code>await $ae(&quot;views&quot;).present.show(&quot;second&quot;)</code>. Attribute changes, class selection and triggers all use the same accepted selection. The associated Anchor changes target as soon as that selection is confirmed and the member is available for presentation, including during Pop preparation; it does not wait for Pop completion. A canceled BeforePop/BeforeUnpop does not publish a new selection. The normal Present opacity-copying behavior remains; the example overrides opacity to keep its decorative marker visible throughout opening.</p>
+<p>Or select with <code>await $ae(&quot;views&quot;).present.show(&quot;second&quot;)</code>. Attribute changes, class selection and triggers all use the same accepted selection. The associated Anchor resolves the target as soon as that selection is confirmed and positions against it once its computed CSS passes the visibility checks; it does not wait for Pop completion. A canceled BeforePop/BeforeUnpop does not publish a new selection. The normal Present opacity-copying behavior remains; the example overrides opacity to keep its decorative marker opaque while the target fades in, once the target&#39;s opacity is greater than zero.</p>
 <p>Target precedence is:</p>
 <ol>
 <li>A declared, valid Present Group association uses that group&#39;s mounted selection.</li>
@@ -721,7 +724,7 @@ await $ae.mountManager.update(anchor, &quot;anchor&quot;);
         <div id="doc-navlinks2" ajax-load="doc-navlinks2">
           <div class="d-flex justify-content-between flex-row gap-2 p-2 pb-4 px-0">
       <a href="/core/docs/0.1.0/core-extensions/ajax-href.htm" class="text-decoration-none d-inline-flex flex-row gap-2" style="max-width: 45%;">
-      ← <span class="text-underline text-truncate overflow-hidden d-inline-block align-middle flex-fill"
+      ← <span class="text-decoration-underline text-truncate overflow-hidden d-inline-block align-middle flex-fill"
         style="max-width:200px">
         Ajax Href      </span>
     </a>

@@ -437,6 +437,7 @@
       await AelluxJs.waitLayout.update(state.styleLayoutId, () => {
         if (!current()) return;
         state.active = true;
+        if (state.lastPlacement) writePlacement(element, state.lastPlacement);
       });
       if (!current()) return retry();
       placement = await AelluxJs.waitLayout.read(state.styleLayoutId, () =>
@@ -471,18 +472,7 @@
         startSwitch(element, state, placement.duration);
       } else if (moved || state.interruptSwitch || !placement.duration) stopSwitch(element, state);
       state.interruptSwitch = false;
-      const selected = placement.selected;
-      const style = element.style;
-      setValue(style, "--ae-anchor-x", `${selected.x}px`);
-      setValue(style, "--ae-anchor-y", `${selected.y}px`);
-      setValue(style, ORIGIN_X, `${selected.self[0] * 100}%`);
-      setValue(style, ORIGIN_Y, `${selected.self[1] * 100}%`);
-      setValue(style, ANCHOR_OPACITY, placement.opacity);
-      setValue(style, "--ae-anchor-target-width", `${placement.width}px`);
-      setValue(style, "--ae-anchor-target-height", `${placement.height}px`);
-      setValue(style, "--ae-anchor-pivot-x", `${selected.pivotX}px`);
-      setValue(style, "--ae-anchor-pivot-y", `${selected.pivotY}px`);
-      element.classList.add(anchoredClass);
+      writePlacement(element, placement);
       state.lastUpdateAt = now();
       state.lastPlacement = placement;
       applied = true;
@@ -496,8 +486,7 @@
   function readPlacement(element, target, candidates, measure) {
     const reference = element.offsetParent;
     target = target || reference;
-    const presenting = anchors.get(element).group && target?.hasAttribute(presentAttribute) ? target : null;
-    if (target && isInvisible(target, presenting)) return { hidden: true, target, reference };
+    if (target && isInvisible(target)) return { hidden: true, target, reference };
     if (!reference || (target !== reference && target.offsetParent !== reference)) {
       return { valid: false, target, reference };
     }
@@ -565,22 +554,42 @@
       signature: [selected.x, selected.y, targetRect.width, targetRect.height, ...selected.self].join("/") };
   }
 
-  function isInvisible(element, presenting) {
+  function writePlacement(element, placement) {
+    const selected = placement.selected;
+    const style = element.style;
+    setValue(style, "--ae-anchor-x", `${selected.x}px`);
+    setValue(style, "--ae-anchor-y", `${selected.y}px`);
+    setValue(style, ORIGIN_X, `${selected.self[0] * 100}%`);
+    setValue(style, ORIGIN_Y, `${selected.self[1] * 100}%`);
+    setValue(style, ANCHOR_OPACITY, placement.opacity);
+    setValue(style, "--ae-anchor-target-width", `${placement.width}px`);
+    setValue(style, "--ae-anchor-target-height", `${placement.height}px`);
+    setValue(style, "--ae-anchor-pivot-x", `${selected.pivotX}px`);
+    setValue(style, "--ae-anchor-pivot-y", `${selected.pivotY}px`);
+    element.classList.add(anchoredClass);
+  }
+
+  function isInvisible(element) {
     const visibility = root.getComputedStyle(element).visibility;
     if (visibility === "hidden" || visibility === "collapse") return true;
     for (let current = element; current && current.nodeType === 1; current = current.parentElement) {
       const style = root.getComputedStyle(current);
-      const inline = current.style;
-      if (current.hidden || inline.display === "none" ||
-        inline.visibility === "hidden" || inline.visibility === "collapse" ||
-        (current !== presenting && inline.opacity === "0") || style.display === "none" ||
-        style.contentVisibility === "hidden" || (current !== presenting && Number(style.opacity) === 0)) return true;
+      // The cascade can override hidden and inline declarations. Visibility is
+      // inherited and may be restored by the target; display and opacity still
+      // suppress the entire subtree when effective on an ancestor.
+      if (style.display === "none" || style.contentVisibility === "hidden" ||
+        Number(style.opacity) === 0) return true;
     }
     return false;
   }
 
   function hideForTarget(element, state, placement) {
+    // Keep the prior geometry across a group switch's invisible preparation,
+    // so it can seed the native transition once the new target becomes visible.
+    const previous = state.group && state.lastPlacement?.target !== placement.target
+      ? state.lastPlacement : null;
     deactivate(element, state);
+    state.lastPlacement = previous;
     state.invalidContext = false;
     if (placement.reference) listenForLayout(state, placement.reference);
   }
