@@ -1,4 +1,134 @@
 (() => {
+  var __defProp = Object.defineProperty;
+  var __defProps = Object.defineProperties;
+  var __getOwnPropDescs = Object.getOwnPropertyDescriptors;
+  var __getOwnPropSymbols = Object.getOwnPropertySymbols;
+  var __hasOwnProp = Object.prototype.hasOwnProperty;
+  var __propIsEnum = Object.prototype.propertyIsEnumerable;
+  var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+  var __spreadValues = (a, b) => {
+    for (var prop in b || (b = {}))
+      if (__hasOwnProp.call(b, prop))
+        __defNormalProp(a, prop, b[prop]);
+    if (__getOwnPropSymbols)
+      for (var prop of __getOwnPropSymbols(b)) {
+        if (__propIsEnum.call(b, prop))
+          __defNormalProp(a, prop, b[prop]);
+      }
+    return a;
+  };
+  var __spreadProps = (a, b) => __defProps(a, __getOwnPropDescs(b));
+
+  // src/internal/find-duplicate-attributes.js
+  /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+  function findDuplicateAttributes(html) {
+    const duplicates = [];
+    const space = /[\t\n\f\r ]/;
+    const lower = (text) => text.replace(/[A-Z]/g, (char) => char.toLowerCase());
+    let index = 0, lineIndex = 0, line = 1, column = 1;
+    while ((index = html.indexOf("<", index)) !== -1) {
+      if (html.startsWith("<!--", index)) {
+        const end = /--!?>/.exec(html.slice(index + 4));
+        index = end ? index + 4 + end.index + end[0].length : html.length;
+        continue;
+      }
+      if (html.startsWith("<![CDATA[", index)) {
+        const end = html.indexOf("]]>", index + 9);
+        index = end < 0 ? html.length : end + 3;
+        continue;
+      }
+      if (/[!?/]/.test(html[index + 1] || "")) {
+        const end = html.indexOf(">", index + 2);
+        index = end < 0 ? html.length : end + 1;
+        continue;
+      }
+      if (!/[a-z]/i.test(html[index + 1] || "")) {
+        index++;
+        continue;
+      }
+      const tagStart = ++index;
+      while (index < html.length && !space.test(html[index]) && !/[/>]/.test(html[index])) index++;
+      const tagName = lower(html.slice(tagStart, index));
+      const attributes = /* @__PURE__ */ new Map();
+      while (index < html.length && html[index] !== ">") {
+        if (space.test(html[index]) || html[index] === "/") {
+          index++;
+          continue;
+        }
+        const offset = index++;
+        while (index < html.length && !space.test(html[index]) && !/[=/>]/.test(html[index])) index++;
+        const attribute = lower(html.slice(offset, index).replace(/\0/g, "\uFFFD"));
+        while (space.test(html[index] || "")) index++;
+        let value = "";
+        if (html[index] === "=") {
+          index++;
+          while (space.test(html[index] || "")) index++;
+          const quote = html[index];
+          if (quote === '"' || quote === "'") {
+            const start = ++index;
+            while (index < html.length && html[index] !== quote) index++;
+            value = html.slice(start, index);
+            if (index < html.length) index++;
+          } else {
+            const start = index;
+            while (index < html.length && !space.test(html[index]) && html[index] !== ">") index++;
+            value = html.slice(start, index);
+          }
+        }
+        const previous = attributes.get(attribute);
+        if (previous) {
+          previous.values.push(value);
+          if (!previous.duplicate) {
+            while (lineIndex < offset) {
+              const char = html[lineIndex++];
+              if (char === "\r" || char === "\n" && html[lineIndex - 2] !== "\r") {
+                line++;
+                column = 1;
+              } else if (char !== "\n") column++;
+            }
+            previous.duplicate = { tagName, attribute, value: previous.values[0], values: previous.values, offset, line, column };
+          }
+        } else attributes.set(attribute, { values: [value] });
+      }
+      if (index >= html.length) break;
+      for (const attribute of attributes.values())
+        if (attribute.duplicate) duplicates.push(attribute.duplicate);
+      index++;
+      if (tagName === "plaintext") break;
+      if (/^(script|style|textarea|title|xmp|iframe|noembed|noframes|noscript)$/.test(tagName)) {
+        const closing = new RegExp(`</${tagName}(?=[\\t\\n\\f\\r />])`, "ig");
+        closing.lastIndex = index;
+        const end = closing.exec(html);
+        index = end ? end.index : html.length;
+      }
+    }
+    return duplicates;
+  }
+
+  // src/internal/report-configuration.js
+  /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+  function reportConfiguration(api, name, context) {
+    if (context.element && context.attribute && !("value" in context))
+      context.value = context.element.getAttribute(context.attribute);
+    return api.diagnostics.warn(api.diagnostics[name], context);
+  }
+
+  // src/internal/validate-html-source.js
+  /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+  function validateHTMLSource(api, html, source) {
+    if (api.options.environment !== "development") return;
+    for (const duplicate of findDuplicateAttributes(html)) {
+      const { attribute } = duplicate;
+      reportConfiguration(api, "WARN_ATTRIBUTE_DUPLICATE", __spreadProps(__spreadValues({
+        extension: "core",
+        source
+      }, duplicate), {
+        reason: `The ${attribute} attribute occurs more than once on the same start tag; the HTML parser keeps the first value and discards the others.`,
+        suggestion: attribute === "class" ? "Combine all class names in one class attribute, separated by spaces." : attribute === "style" ? "Combine the intended CSS declarations in one style attribute, separated by semicolons." : `Keep one ${attribute} attribute with the intended value.`
+      }));
+    }
+  }
+
   // src/aellux.ext.ajax-href.js
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   (function(root) {
@@ -56,6 +186,7 @@
       try {
         const response = await AelluxJs.request(url, { signal: controller.signal });
         const html = await response.text();
+        validateHTMLSource(AelluxJs, html, response.url || String(url));
         const loadedDocument = new DOMParser().parseFromString(html, "text/html");
         for (const selector of selectorList) {
           const currentElement = elements.get(selector);

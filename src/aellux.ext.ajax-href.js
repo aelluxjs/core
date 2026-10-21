@@ -26,6 +26,8 @@
  * and manage focus and announcements after content replacement.
  */
 
+import { validateHTMLSource } from "./internal/validate-html-source.js";
+
 (function (root) {
   "use strict";
 
@@ -91,6 +93,7 @@
     try {
       const response = await AelluxJs.request(url, { signal: controller.signal });
       const html = await response.text();
+      validateHTMLSource(AelluxJs, html, response.url || String(url));
       const loadedDocument = new DOMParser().parseFromString(html, "text/html");
 
       for (const selector of selectorList) {

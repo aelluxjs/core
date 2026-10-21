@@ -28,7 +28,8 @@ async function updateCoreCdnVersion(directory) {
       await updateCoreCdnVersion(entryPath);
     } else if (entry.name.endsWith(".htm")) {
       const html = await readFile(entryPath, "utf8");
-      const updated = html.replace(
+      // Template conditionals can leave indentation on otherwise blank lines.
+      const updated = html.replace(/^[\t ]+(?=\r?$)/gm, "").replace(
         /(@aelluxjs\/core@)0\.1\.0-beta\.\d+(\/dist\/aellux\.min\.js)/g,
         (_match, prefix, suffix) => `${prefix}${version}${suffix}`
       );

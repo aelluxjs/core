@@ -105,6 +105,13 @@ Configuration diagnostics explain what happened, identify the element/attribute/
 | `2029` | Present trigger/dismiss control is not reachable with the keyboard. |
 | `2030` | Effective CSS blocks requested layout/scrolling, or a motion duration is invalid. |
 | `2031` | Present and Anchor both request transform on one element. Anchor takes priority; remove the Present transform token or animate a child. |
+| `2032` | Duplicate HTML attributes on one start tag; the browser keeps the first value and discards subsequent values. Includes `class`, `style`, native and custom attributes. |
+
+`WARN_ATTRIBUTE_DUPLICATE` (`2032`) inspects original HTML text in development, since duplicate attributes no longer exist in the parsed DOM. After the first unscoped document mount, Core makes one asynchronous GET for the initial document URL with `cache: "force-cache"`, preferring the HTTP cache. This inspection does not delay mounting or `Ready`; unavailable source is skipped without failing the mount. Scoped mounts and explicit updates do not request source. AJAX Href inspects each response text before parsing, using the existing response without an additional request. Production skips both checks, even with warning verbosity enabled.
+
+Duplicate warnings identify `source`, `tagName`, `attribute`, the first raw `value`, all raw `values`, and the one-based `line`/`column` of the first repeated attribute, plus a zero-based character `offset`. These locations refer to the inspected response, so no live `element` is inferred. Repeated `class` attributes should become one space-separated class list; repeated `style` attributes should become one list of intended CSS declarations. Attribute names are compared without ASCII case distinctions. Comments, quoted attribute contents and HTML text elements such as script/style/textarea are skipped. Repeated class tokens and repeated CSS declarations inside one attribute are outside this check.
+
+This is a source start-tag check, not a complete HTML conformance validator. It covers the fetched initial HTML and AJAX responses, including template contents; it cannot recover duplicates discarded earlier by application calls such as `innerHTML`. The initial GET can differ from the navigation response on dynamic pages and remains subject to browser cache and network policies.
 
 Attribute spelling checks follow the configured prefix and accept attributes used by registered custom Extension selectors. They suggest only names within one edit of a known name, including adjacent transpositions; arbitrary application attributes are not rejected. This is a typo check, not an exhaustive HTML schema.
 
@@ -132,6 +139,18 @@ The validator is bundled with the runtime; its production guard avoids DOM scans
 | `aellux.ext.scrollbox-snap.min.js` | 10,388 / 4,020 | 10 / 4 | 10.5 / 4 |
 
 Cancelable mount/unmount preflight and cancellation-aware teardown raise the Modern Orchestrator raw limit from 56 to 56.5 KiB and Full Legacy from 425 to 426 KiB. With the CSS Motion cadence correction and lightweight Present progress classification, Full Legacy measures 435,441 / 130,367 bytes, with its gzip limit retained at 138 KiB. Other limits are unchanged. `npm run test:budget` checks every minified distribution artifact.
+
+Duplicate-attribute source inspection adds the scanner and its development guard to the runtime and AJAX artifacts. The following measurements and limits supersede the affected entries above; all other limits remain unchanged:
+
+| Artifact | Measured raw / gzip bytes | Previous limits | Current limits |
+| --- | --- | --- | --- |
+| `aellux.min.js` | 47,218 / 15,071 | 46 / 15 | 46.5 / 15 |
+| `aellux.orchestrator.min.js` | 60,119 / 20,213 | 56.5 / 19 | 59 / 20 |
+| `aellux.orchestrator.legacy.min.js` | 330,868 / 105,121 | 318 / 102 | 324 / 103 |
+| `aellux.full.min.js` | 130,488 / 42,236 | 130 / 40.5 | 130 / 41.5 |
+| `aellux.full.legacy.min.js` | 441,545 / 131,670 | 426 / 138 | 432 / 138 |
+| `aellux.ext.ajax-href.min.js` | 7,096 / 3,049 | 5 / 3 | 7 / 3 |
+| `aellux.ext.ajax-href.legacy.min.js` | 14,608 / 5,531 | 12 / 5 | 14.5 / 5.5 |
 
 ## Code Ranges
 

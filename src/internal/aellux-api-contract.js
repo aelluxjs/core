@@ -72,6 +72,7 @@ var diagnosticDefinition = Object.freeze({
 
 var diagnosticNames = [
   "WARN_ATTRIBUTE_UNKNOWN",
+  "WARN_ATTRIBUTE_DUPLICATE",
   "WARN_EXTENSION_REQUIRED",
   "WARN_CONFIGURATION_VALUE",
   "WARN_CONFIGURATION_TARGET",

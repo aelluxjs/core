@@ -21,6 +21,111 @@ async function diagnostics(page) {
   })));
 }
 
+for (const forceLegacy of [false, true]) test(`initial HTML source diagnoses duplicate attributes once (${forceLegacy ? "Legacy" : "Modern"})`, async ({ page }) => {
+  let requests = 0;
+  await page.route("**/duplicate-source.html", route => {
+    requests++;
+    return route.fulfill({ contentType: "text/html", body: `<!doctype html>
+<div id="duplicate" class="first" CLASS='discarded' style="color:red" style="display:none">visible</div>
+<template><input disabled DISABLED></template>
+<script>window.example = '<div class=a class=b>';</script>` });
+  });
+  await page.goto("/duplicate-source.html");
+  await page.addScriptTag({ url: "/dist/aellux.js" });
+  await page.evaluate(forceLegacy => AelluxJs.init({
+    mode: "basic", environment: "development", verboseLevel: "error", forceLegacy
+  }), forceLegacy);
+  await expect.poll(() => page.evaluate(() => AelluxJs.diagnostics.showHistory().filter(entry => entry.code === 2032).length)).toBe(3);
+  const entries = await page.evaluate(() => AelluxJs.diagnostics.showHistory()
+    .filter(entry => entry.code === 2032).map(entry => entry.context));
+  expect(entries).toEqual(expect.arrayContaining([
+    expect.objectContaining({ attribute: "class", value: "first", values: ["first", "discarded"], line: 2,
+      source: expect.stringContaining("/duplicate-source.html"), suggestion: expect.stringContaining("class names") }),
+    expect.objectContaining({ attribute: "style", values: ["color:red", "display:none"], suggestion: expect.stringContaining("CSS declarations") }),
+    expect.objectContaining({ attribute: "disabled", tagName: "input", values: ["", ""] })
+  ]));
+  await expect(page.locator("#duplicate")).toHaveClass("first");
+  await expect(page.locator("#duplicate")).toBeVisible();
+  await page.evaluate(async () => {
+    await AelluxJs.mount(document);
+    await AelluxJs.mountManager.update(document);
+  });
+  expect((await diagnostics(page)).filter(entry => entry.code === 2032)).toHaveLength(3);
+  expect(requests).toBe(2); // Initial navigation and one source inspection.
+});
+
+test("source inspection respects mount scope and never blocks a mount on a pending request", async ({ page }) => {
+  await page.goto("/tests/index.htm");
+  await page.addScriptTag({ url: "/dist/aellux.js" });
+  await page.evaluate(() => AelluxJs.init({ mode: "basic", environment: "development", skipGlobalMount: true }));
+  await expect.poll(() => page.evaluate(() => AelluxJs.orchestratorVersion)).toBe("0.1.0-beta.10");
+  const result = await page.evaluate(async () => {
+    let requests = 0;
+    AelluxJs.request = () => { requests++; return new Promise(() => {}); };
+    await AelluxJs.mount(document.body);
+    await AelluxJs.mount(document, []);
+    await AelluxJs.mountManager.update(document);
+    const scopedRequests = requests;
+    await AelluxJs.mount(document);
+    await AelluxJs.mount(document);
+    return { scopedRequests, requests };
+  });
+  expect(result).toEqual({ scopedRequests: 0, requests: 1 });
+});
+
+test("unavailable initial source remains optional and is not requested repeatedly", async ({ page }) => {
+  await page.goto("/tests/index.htm");
+  await page.addScriptTag({ url: "/dist/aellux.js" });
+  await page.evaluate(() => AelluxJs.init({ mode: "basic", environment: "development", skipGlobalMount: true }));
+  await expect.poll(() => page.evaluate(() => AelluxJs.orchestratorVersion)).toBe("0.1.0-beta.10");
+  const result = await page.evaluate(async () => {
+    let requests = 0;
+    AelluxJs.request = () => { requests++; return Promise.reject(new Error("Source unavailable")); };
+    const mounted = await AelluxJs.mount(document);
+    await AelluxJs.mount(document);
+    return { requests, mounted, errors: AelluxJs.diagnostics.showHistory().filter(entry => entry.level === 0) };
+  });
+  expect(result).toEqual({ requests: 1, mounted: [], errors: [] });
+});
+
+for (const forceLegacy of [false, true]) test(`AJAX diagnoses the raw response before duplicate attributes are discarded (${forceLegacy ? "Legacy" : "Modern"})`, async ({ page }) => {
+  await start(page, '<main id="content">old</main>', { forceLegacy });
+  await page.evaluate(async () => { AelluxJs.ext("ajax-href"); await AelluxJs.wait("ajax-href"); });
+  let requests = 0;
+  await page.route("**/duplicate-response", route => {
+    requests++;
+    return route.fulfill({ contentType: "text/html", body: '<main id="content" class="first" class="second" style="color:red" STYLE="display:none">new</main>' });
+  });
+  await page.evaluate(async () => {
+    await AelluxJs.ext.ajaxHref.load("/duplicate-response", "#content", { ignoreHistory: true });
+    await AelluxJs.ext.ajaxHref.load("/duplicate-response", "#content", { ignoreHistory: true });
+  });
+  expect(requests).toBe(2); // No source refetch for either AJAX response.
+  const entries = (await diagnostics(page)).filter(entry => entry.code === 2032);
+  expect(entries).toHaveLength(2);
+  expect(entries.map(entry => entry.attribute)).toEqual(["class", "style"]);
+  await expect(page.locator("#content")).toHaveClass("first");
+  await expect(page.locator("#content")).toBeVisible();
+  await expect(page.locator("#content")).toHaveText("new");
+});
+
+test("production neither refetches initial HTML nor inspects duplicate AJAX attributes", async ({ page }) => {
+  await start(page, '<main id="content">old</main>', { environment: "production", verboseLevel: "warn" });
+  await page.evaluate(async () => { AelluxJs.ext("ajax-href"); await AelluxJs.wait("ajax-href"); });
+  await page.route("**/duplicate-response", route => route.fulfill({ contentType: "text/html", body: '<main id="content" class="a" class="b">new</main>' }));
+  const requests = await page.evaluate(async () => {
+    const original = AelluxJs.request;
+    const requests = [];
+    AelluxJs.request = (...args) => { requests.push(args[0]); return original(...args); };
+    await AelluxJs.mount(document);
+    await AelluxJs.ext.ajaxHref.load("/duplicate-response", "#content", { ignoreHistory: true });
+    return requests;
+  });
+  expect(requests).toEqual(["/duplicate-response"]);
+  expect((await diagnostics(page)).filter(entry => entry.code === 2032)).toEqual([]);
+  await expect(page.locator("#content")).toHaveText("new");
+});
+
 for (const forceLegacy of [false, true]) test(`declarations diagnose typos, targets, values and keyboard access (${forceLegacy ? "Legacy" : "Modern"})`, async ({ page }) => {
   await start(page, `<div id="typo" data-ae-presnt></div>
     <div id="control" data-ae-trigger="open" data-ae-target="missing"></div>

@@ -108,6 +108,17 @@
                 }
               }
             },
+            "WARN_ATTRIBUTE_DUPLICATE": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "number"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            },
             "WARN_EXTENSION_REQUIRED": {
               "type": "object",
               "properties": {
@@ -1171,6 +1182,17 @@
               "type": "array"
             },
             "WARN_ATTRIBUTE_UNKNOWN": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "number"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            },
+            "WARN_ATTRIBUTE_DUPLICATE": {
               "type": "object",
               "properties": {
                 "code": {

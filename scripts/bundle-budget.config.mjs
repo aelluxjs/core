@@ -1,20 +1,20 @@
 export const bundleBudget = Object.freeze([
   // Actionable diagnostic catalog/context plus the development-only semantic
   // mount validator. Measured costs and previous limits: runtime/diagnostics.md.
-  { file: "aellux.min.js", maxRawBytes: 46 * 1024, maxGzipBytes: 15 * 1024 },
+  { file: "aellux.min.js", maxRawBytes: 46.5 * 1024, maxGzipBytes: 15 * 1024 },
   { file: "aellux.esm.min.js", maxRawBytes: 25 * 1024, maxGzipBytes: 8.5 * 1024 },
-  // Cancelable mount/unmount passes and teardown cancellation propagation.
-  { file: "aellux.orchestrator.min.js", maxRawBytes: 56.5 * 1024, maxGzipBytes: 19 * 1024 },
-  { file: "aellux.orchestrator.legacy.min.js", maxRawBytes: 318 * 1024, maxGzipBytes: 102 * 1024 },
-  { file: "aellux.full.min.js", maxRawBytes: 130 * 1024, maxGzipBytes: 40.5 * 1024 },
-  { file: "aellux.full.legacy.min.js", maxRawBytes: 426 * 1024, maxGzipBytes: 138 * 1024 },
+  // Development HTML source inspection for discarded duplicate attributes.
+  { file: "aellux.orchestrator.min.js", maxRawBytes: 59 * 1024, maxGzipBytes: 20 * 1024 },
+  { file: "aellux.orchestrator.legacy.min.js", maxRawBytes: 324 * 1024, maxGzipBytes: 103 * 1024 },
+  { file: "aellux.full.min.js", maxRawBytes: 130 * 1024, maxGzipBytes: 41.5 * 1024 },
+  { file: "aellux.full.legacy.min.js", maxRawBytes: 432 * 1024, maxGzipBytes: 138 * 1024 },
   { file: "aellux.ext.adaptive.min.css", maxRawBytes: 121 * 1024, maxGzipBytes: 11 * 1024 },
   { file: "aellux.ext.adaptive.min.js", maxRawBytes: 5 * 1024, maxGzipBytes: 3 * 1024 },
   { file: "aellux.ext.adaptive.legacy.min.js", maxRawBytes: 8.5 * 1024, maxGzipBytes: 3.5 * 1024 },
   { file: "aellux.ext.anchor.min.js", maxRawBytes: 15 * 1024, maxGzipBytes: 6 * 1024 },
   { file: "aellux.ext.anchor.legacy.min.js", maxRawBytes: 23 * 1024, maxGzipBytes: 8 * 1024 },
-  { file: "aellux.ext.ajax-href.min.js", maxRawBytes: 5 * 1024, maxGzipBytes: 3 * 1024 },
-  { file: "aellux.ext.ajax-href.legacy.min.js", maxRawBytes: 12 * 1024, maxGzipBytes: 5 * 1024 },
+  { file: "aellux.ext.ajax-href.min.js", maxRawBytes: 7 * 1024, maxGzipBytes: 3 * 1024 },
+  { file: "aellux.ext.ajax-href.legacy.min.js", maxRawBytes: 14.5 * 1024, maxGzipBytes: 5.5 * 1024 },
   { file: "aellux.ext.feedback.min.css", maxRawBytes: 3 * 1024, maxGzipBytes: 2 * 1024 },
   { file: "aellux.ext.feedback.min.js", maxRawBytes: 4 * 1024, maxGzipBytes: 2 * 1024 },
   { file: "aellux.ext.feedback.legacy.min.js", maxRawBytes: 9 * 1024, maxGzipBytes: 4 * 1024 },
