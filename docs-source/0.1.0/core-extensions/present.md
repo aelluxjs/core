@@ -19,7 +19,7 @@
 </section>
 ```
 
-`data-ae-trigger` accepts `pop`, `unpop`, or `toggle`; an unrecognized value also toggles. `data-ae-target` and `data-ae-dismiss` each accept one element ID, with or without a leading `#` (for example, `details` or `#details`). Without an ID, a trigger or dismiss control acts on its closest `data-ae-present` container. Invalid IDs are reported through diagnostics.
+`data-ae-trigger` accepts `pop`, `unpop`, or `toggle`; an unrecognized value records a configuration warning and still toggles. `data-ae-target` and `data-ae-dismiss` each accept one element ID, with or without a leading `#` (for example, `details` or `#details`). Without an ID, a trigger or dismiss control acts on its closest `data-ae-present` container. Invalid, missing and incompatible targets are reported through diagnostics.
 
 A trigger or dismiss control with neither an ID nor a containing `data-ae-present` reports `ERROR_PRESENT_CONTROL_TARGET_MISSING` (`1111`).
 
@@ -66,27 +66,27 @@ Interpolation is enabled only when all four progress/phase registrations succeed
 
 ## Present Group
 
-A `data-ae-present-group` container coordinates mounted Present descendants with `data-ae-present-key` values. Membership belongs to the nearest group, so nested groups are independent. Keys must uniquely identify one mounted member.
+A `data-ae-present-group` container coordinates mounted Present descendants by their own HTML `id`. Membership belongs to the nearest group, so nested groups are independent. Each member needs a unique ID; `data-ae-present-active` and `show(id)` use that exact ID, without a leading `#`.
 
 ```html
 <div id="views" data-ae-present-group data-ae-present-active="home">
-  <section data-ae-present="opacity" data-ae-present-key="home">Home</section>
-  <section id="settings" data-ae-present="opacity" data-ae-present-key="settings" hidden>
+  <section id="home" data-ae-present="opacity">Home</section>
+  <section id="settings" data-ae-present="opacity" hidden>
     <button data-ae-dismiss>Close settings</button>
     Settings
   </section>
 </div>
 ```
 
-Changing `data-ae-present-active` starts outgoing and incoming transitions together. One member is selected logically; both may remain visible until the outgoing transition completes. An empty active value clears the selection and closes members. Invalid or duplicate keys preserve the previous selection and report `WARN_PRESENT_GROUP_SELECTION` (2021). With no declared selection, a valid initial visible member is preserved; an all-hidden group stays closed. Multiple initially visible members are diagnosed rather than choosing an arbitrary winner.
+Changing `data-ae-present-active` starts outgoing and incoming transitions together. One member is selected logically; both may remain visible until the outgoing transition completes. An empty active value clears the selection and closes members. Missing or duplicate member IDs preserve the previous selection and report `WARN_PRESENT_GROUP_SELECTION` (2021). An ID outside the group, in another group or inside a nested group is rejected with the same warning, even if that element exists in the document. The target must be a mounted Present member of this group. With no declared selection, a valid initial visible member is preserved; an all-hidden group stays closed. Multiple initially visible members are diagnosed rather than choosing an arbitrary winner.
 
 ### Selection by container class
 
 ```html
 <div data-ae-present-group class="view-home">
-  <section data-ae-present="opacity" data-ae-present-key="home"
+  <section id="home" data-ae-present="opacity"
     data-ae-present-when="view-home">Home</section>
-  <section data-ae-present="opacity" data-ae-present-key="settings"
+  <section id="settings" data-ae-present="opacity"
     data-ae-present-when="view-settings" hidden>Settings</section>
 </div>
 ```
@@ -103,7 +103,7 @@ await $ae("views").present.show("home");
 
 `show()` sets `data-ae-present-active` and uses the same reconciliation as direct attribute changes. Its Promise resolves to `true` for a completed current selection and `false` for invalid, refused or superseded requests. Member `pop()`, `toggle()`, triggers and dismissals also respect the group selection; opening an already selected member is idempotent in a group. Standalone `pop()` retains its restart behavior.
 
-Unmount during a pending selection resolves that request to `false`; a completed request keeps its result. Before listeners that change the active attribute, class selection, membership or keys invalidate the current preflight before any visual change. The observer reconciles the new declaration independently. Calling `show()` from a Before listener likewise supersedes the outer request. A veto without such a replacement preserves the accepted selection, including when it establishes explicit attribute precedence over classes.
+Unmount during a pending selection resolves that request to `false`; a completed request keeps its result. Before listeners that change the active attribute, class selection, membership or member IDs invalidate the current preflight before any visual change. The observer reconciles the new declaration independently. Calling `show()` from a Before listener likewise supersedes the outer request. A veto without such a replacement preserves the accepted selection, including when it establishes explicit attribute precedence over classes.
 
 All required `BeforePop`/`BeforeUnpop` events are checked before a group swap starts. Canceling either refuses the swap, preserves the accepted selection and updates the active attribute to that selection. This also establishes explicit attribute precedence if a class-based swap is refused. Individual transition and completion events, focus release, `hidden` and trigger ARIA continue to belong to Present. The group adds no tabs, dialog or other ARIA roles. Rapid changes replace obsolete transitions; old completion Promises cannot select an earlier member. Dynamically inserted members join after `AelluxJs.mount()`, and removed or moved members no longer participate in the former group. Unmount releases shared observation when the last group leaves and restores the group's original active attribute.
 
@@ -122,17 +122,17 @@ Keep native buttons or links: keyboard activation continues to invoke the config
 
 ## Group selection notifications and Anchor
 
-`$ae.ext.present.selected(groupElement)` and `$ae("views").present.selected()` return the accepted mounted member, or `null`. This is a read-only query of the same selection used by `show()`; it does not select a key or wait for the opening animation. Existing `show()`, trigger and transition contracts are preserved.
+`$ae.ext.present.selected(groupElement)` and `$ae("views").present.selected()` return the accepted mounted member, or `null`. This is a read-only query of the same selection used by `show()`; it does not select an ID or wait for the opening animation. Existing `show()`, trigger and transition contracts are preserved.
 
-Present emits the bubbling `AelluxJsPresentGroupChange` event when an accepted logical selection changes, including initial confirmation, removal of the selected member and group teardown. Its detail is `{ group, previous, current, key }`, using element references and a nullable key. It is emitted after cancelable Before events have accepted the swap and the incoming member has been made available for presentation. A refused swap emits no change. Reentrant or superseded operations cannot publish an obsolete selection. Consumers that load after the event can query `selected()`.
+Present emits the bubbling `AelluxJsPresentGroupChange` event when an accepted logical selection changes, including initial confirmation, removal of the selected member and group teardown. Its detail is `{ group, previous, current, key }`, using element references; `key` is the current member's HTML ID, or `null` when there is no selection. It is emitted after cancelable Before events have accepted the swap and the incoming member has been made available for presentation. A refused swap emits no change. Reentrant or superseded operations cannot publish an obsolete selection. Consumers that load after the event can query `selected()`.
 
 For a swap with motion, all required `BeforePop`/`BeforeUnpop` events run first. The group accepts its logical selection and starts the member transitions, then publishes `PresentGroupChange`. After preparation, each member emits `Layout` with the intended duration and then `Popping` or `Unpopping`. Completion updates `hidden`, progress and ARIA before `Pop` or `Unpop`. Outgoing and incoming members complete independently; there is no ordering guarantee between their completion events. Interruption does not emit a successful completion event for the obsolete transition. With motion disabled, a member may reach its endpoint before the group notification; consumers should query the logical selection and measure through WaitLayout rather than infer selection from completion order.
 
 ```html
-<div id="views" data-ae-present-group data-ae-present-active="home"
+<div id="views" data-ae-present-group data-ae-present-active="home-panel"
      data-ae-present-group-anchor="selection-indicator" style="position:relative">
-  <section id="home-panel" data-ae-present="opacity" data-ae-present-key="home">Home</section>
-  <section id="settings-panel" data-ae-present="opacity" data-ae-present-key="settings" hidden>Settings</section>
+  <section id="home-panel" data-ae-present="opacity">Home</section>
+  <section id="settings-panel" data-ae-present="opacity" hidden>Settings</section>
   <div id="selection-indicator" data-ae-anchor="bottom-left:bottom-left"
        data-ae-anchor-match="width"
        style="--ae-anchor-switch-duration:250ms;--ae-anchor-switch-ease:ease-in-out"></div>
@@ -151,4 +151,4 @@ The Modern budget changes explicitly from 11/5 KiB raw/gzip to 17/6 KiB; Legacy 
 
 ## Delivery C stability cost
 
-Preflight validation of synchronous declaration/membership changes, safe registration fallback, expected-cancellation diagnostics and group job cleanup bring the minified script to 17,717 bytes raw / 6,262 gzip in Modern and 25,112 / 8,822 in Legacy. Relative to Delivery B this adds 477 / 156 bytes and 560 / 160 bytes respectively. The measured output exceeds the former 17 KiB raw / 6 KiB gzip and 24 KiB raw limits; the maintenance limits are now 18 / 6.25 KiB for Modern and 25 / 9 KiB for Legacy. The stylesheet and Full limits are unchanged. The repository's `milestones/0.1.0-delivery-c.md` audit records regressions, compatibility and remaining release work.
+Delivery C's preflight validation of synchronous declaration/membership changes, safe registration fallback, expected-cancellation diagnostics and group job cleanup measured 17,717 bytes raw / 6,262 gzip in Modern and 25,112 / 8,822 in Legacy. Relative to Delivery B this added 477 / 156 bytes and 560 / 160 bytes respectively. Its maintenance limits were 18 / 6.25 KiB for Modern and 25 / 9 KiB for Legacy. Subsequent configuration diagnostics raise those limits to 18.5 / 6.5 KiB and 26 / 9 KiB respectively; see [Diagnostics](../runtime/diagnostics.md) for current measurements and runtime bundle limits. The stylesheet limits are unchanged. The repository's `milestones/0.1.0-delivery-c.md` audit records the earlier regressions, compatibility and remaining release work.

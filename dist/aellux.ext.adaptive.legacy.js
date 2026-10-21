@@ -31,6 +31,44 @@
       }
     } };
   }
+  function ownKeys(e, r) {
+    var t = Object.keys(e);
+    if (Object.getOwnPropertySymbols) {
+      var o = Object.getOwnPropertySymbols(e);
+      r && (o = o.filter(function(r2) {
+        return Object.getOwnPropertyDescriptor(e, r2).enumerable;
+      })), t.push.apply(t, o);
+    }
+    return t;
+  }
+  function _objectSpread(e) {
+    for (var r = 1; r < arguments.length; r++) {
+      var t = null != arguments[r] ? arguments[r] : {};
+      r % 2 ? ownKeys(Object(t), true).forEach(function(r2) {
+        _defineProperty(e, r2, t[r2]);
+      }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function(r2) {
+        Object.defineProperty(e, r2, Object.getOwnPropertyDescriptor(t, r2));
+      });
+    }
+    return e;
+  }
+  function _defineProperty(e, r, t) {
+    return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: true, configurable: true, writable: true }) : e[r] = t, e;
+  }
+  function _toPropertyKey(t) {
+    var i = _toPrimitive(t, "string");
+    return "symbol" == _typeof(i) ? i : i + "";
+  }
+  function _toPrimitive(t, r) {
+    if ("object" != _typeof(t) || !t) return t;
+    var e = t[Symbol.toPrimitive];
+    if (void 0 !== e) {
+      var i = e.call(t, r || "default");
+      if ("object" != _typeof(i)) return i;
+      throw new TypeError("@@toPrimitive must return a primitive value.");
+    }
+    return ("string" === r ? String : Number)(t);
+  }
   function _slicedToArray(r, e) {
     return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest();
   }
@@ -143,17 +181,44 @@
         syntax: "<number>",
         initialValue: "0"
       });
-      var overrides = options.adaptiveParams || {};
+      var overrides = options.adaptiveParams === void 0 ? {} : options.adaptiveParams;
+      if (!overrides || _typeof(overrides) !== "object" || Array.isArray(overrides)) {
+        parameterDiagnostic("", overrides, "Expected an object of Adaptive parameter groups; using defaults.");
+        overrides = {};
+      }
       for (var _i = 0, _Object$keys = Object.keys(adaptiveParams); _i < _Object$keys.length; _i++) {
         var group = _Object$keys[_i];
+        if (group in overrides && (!overrides[group] || _typeof(overrides[group]) !== "object" || Array.isArray(overrides[group]))) {
+          parameterDiagnostic(group, overrides[group], "Expected a parameter group object; using defaults.");
+          continue;
+        }
         if (overrides[group] && _typeof(overrides[group]) === "object") {
-          Object.assign(adaptiveParams[group], overrides[group]);
+          for (var _i2 = 0, _Object$entries = Object.entries(overrides[group]); _i2 < _Object$entries.length; _i2++) {
+            var _Object$entries$_i = _slicedToArray(_Object$entries[_i2], 2), key = _Object$entries$_i[0], value = _Object$entries$_i[1];
+            if (typeof value !== "number" || !Number.isFinite(value) || (group === "minSizes" ? value < 0 : value <= 0)) {
+              parameterDiagnostic("".concat(group, ".").concat(key), value, "Expected a finite positive number (zero is allowed for minimum sizes).");
+              continue;
+            }
+            adaptiveParams[group][key] = value;
+          }
         }
       }
+      for (var _i3 = 0, _arr = [["ratioShapes", "vertical", "horizontal", [0.8, 1.25]], ["experienceScale", "near", "far", [1, 1.5]]]; _i3 < _arr.length; _i3++) {
+        var _arr$_i = _slicedToArray(_arr[_i3], 4), _group = _arr$_i[0], lower = _arr$_i[1], upper = _arr$_i[2], fallback = _arr$_i[3];
+        if (adaptiveParams[_group][lower] >= adaptiveParams[_group][upper]) {
+          parameterDiagnostic(_group, _objectSpread({}, adaptiveParams[_group]), "The lower boundary must be less than the upper boundary; using defaults.");
+          adaptiveParams[_group][lower] = fallback[0];
+          adaptiveParams[_group][upper] = fallback[1];
+        }
+      }
+      var orderedSizes = ["compact", "small", "medium", "large", "xl", "xxl"];
+      if (orderedSizes.some(function(name, index) {
+        return index > 0 && adaptiveParams.minSizes[name] < adaptiveParams.minSizes[orderedSizes[index - 1]];
+      })) parameterDiagnostic("minSizes", _objectSpread({}, adaptiveParams.minSizes), "Named minimum sizes are out of order; the configured thresholds are preserved.");
       managedClasses = getManagedClasses();
-      for (var _i2 = 0, _Object$keys2 = Object.keys(adaptiveParams); _i2 < _Object$keys2.length; _i2++) {
-        var _group = _Object$keys2[_i2];
-        Object.freeze(adaptiveParams[_group]);
+      for (var _i4 = 0, _Object$keys2 = Object.keys(adaptiveParams); _i4 < _Object$keys2.length; _i4++) {
+        var _group2 = _Object$keys2[_i4];
+        Object.freeze(adaptiveParams[_group2]);
       }
       Object.freeze(adaptiveParams);
       AelluxJs.mountManager.add({
@@ -167,8 +232,8 @@
     function getManagedClasses() {
       var classes = [modifier.shapeHorizontal, modifier.shapeVertical, modifier.shapeSquare];
       sizeThresholds = [];
-      for (var _i3 = 0, _Object$entries = Object.entries(adaptiveParams.minSizes); _i3 < _Object$entries.length; _i3++) {
-        var _Object$entries$_i = _slicedToArray(_Object$entries[_i3], 2), size = _Object$entries$_i[0], minimum = _Object$entries$_i[1];
+      for (var _i5 = 0, _Object$entries2 = Object.entries(adaptiveParams.minSizes); _i5 < _Object$entries2.length; _i5++) {
+        var _Object$entries2$_i = _slicedToArray(_Object$entries2[_i5], 2), size = _Object$entries2$_i[0], minimum = _Object$entries2$_i[1];
         var className = AelluxJs.className("fits-" + size);
         sizeThresholds.push({
           className: className,
@@ -177,6 +242,15 @@
         classes.push(className);
       }
       return classes;
+    }
+    function parameterDiagnostic(attribute, value, reason) {
+      AelluxJs.diagnostics.warn(AelluxJs.diagnostics.WARN_CONFIGURATION_VALUE, {
+        extension: extensionName,
+        attribute: "adaptiveParams".concat(attribute ? "." + attribute : ""),
+        value: value,
+        reason: reason,
+        suggestion: "Use finite nonnegative minimum sizes and positive, ordered ratio/experience boundaries."
+      });
     }
     function destroy() {
       pendingResizeEntries.clear();
@@ -272,14 +346,14 @@
       if (!pendingResizeEntries.size && !pendingResizeElements.size) return;
       var entries = Array.from(pendingResizeEntries.entries());
       pendingResizeEntries.clear();
-      for (var _i4 = 0, _entries = entries; _i4 < _entries.length; _i4++) {
-        var _entries$_i = _slicedToArray(_entries[_i4], 2), element = _entries$_i[0], entry = _entries$_i[1];
+      for (var _i6 = 0, _entries = entries; _i6 < _entries.length; _i6++) {
+        var _entries$_i = _slicedToArray(_entries[_i6], 2), element = _entries$_i[0], entry = _entries$_i[1];
         scheduleElement(element, entry.contentRect);
       }
       var elements = Array.from(pendingResizeElements);
       pendingResizeElements.clear();
-      for (var _i5 = 0, _elements = elements; _i5 < _elements.length; _i5++) {
-        var _element = _elements[_i5];
+      for (var _i7 = 0, _elements = elements; _i7 < _elements.length; _i7++) {
+        var _element = _elements[_i7];
         scheduleElement(_element, null);
       }
     }

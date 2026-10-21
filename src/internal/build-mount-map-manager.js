@@ -98,7 +98,11 @@ export function buildMountMapManager(root) {
     const found = elementControllers.get(elementOrId);
     if (found) return found;
 
-    diagnostics.error(diagnostics.ERROR_CONTROLLER_NOT_FOUND, { element: elementOrId });
+    diagnostics.error(diagnostics.ERROR_CONTROLLER_NOT_FOUND, {
+      element: elementOrId, method: "controller",
+      reason: "No completed mount exposes a controller for this element.",
+      suggestion: "Register the required Extension, await $ae.mount(element), and inspect earlier load or mount diagnostics."
+    });
     return null;
   }
 

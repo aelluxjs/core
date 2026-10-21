@@ -103,9 +103,9 @@ Switch interpolation deliberately uses native CSS rather than taking ownership t
 <div id="views" data-ae-present-group data-ae-present-active="first"
      data-ae-present-group-anchor="indicator"
      style="position:relative;min-height:12rem">
-  <section id="first" data-ae-present="opacity" data-ae-present-key="first"
+  <section id="first" data-ae-present="opacity"
            style="width:12rem">First content</section>
-  <section id="second" data-ae-present="opacity" data-ae-present-key="second"
+  <section id="second" data-ae-present="opacity"
            style="width:18rem" hidden>Second content</section>
   <div id="indicator" class="selection-anchor"
        data-ae-anchor="bottom-left:bottom-left" data-ae-anchor-match="width height"
@@ -123,7 +123,7 @@ Target precedence is:
 2. Without an association, `data-ae-anchor-target` applies.
 3. Without either, the positioning reference remains the target.
 
-An associated group with no selection, or whose Present controller has not mounted yet, leaves the Anchor inactive. Removing the association restores normal target resolution. Present does not rewrite `data-ae-anchor-target`. Late loading, remount and dynamically inserted members use the existing selection; Anchor does not scan keys or maintain another selection registry. An Anchor may sit outside the group if it shares the selected member's positioning reference.
+An associated group with no selection, or whose Present controller has not mounted yet, leaves the Anchor inactive. Removing the association restores normal target resolution. Present does not rewrite `data-ae-anchor-target`. Late loading, remount and dynamically inserted members use the existing selection; Anchor does not scan member IDs or maintain another selection registry. An Anchor may sit outside the group if it shares the selected member's positioning reference.
 
 `WARN_ANCHOR_GROUP` (2023) reports missing/non-Anchor association IDs, multiple groups controlling one Anchor, circular target chains and matching configurations involving an in-flow Anchor. Conflicting and circular targets remain inactive. Invalid member selection is diagnosed by Present (2021). Incompatible positioning references retain `ERROR_ANCHOR_REFERENCE_CONTEXT` (1119). Dimension matching requires an out-of-flow Anchor; application CSS that places a matched Anchor back in normal flow can create a size dependency and is rejected before matching begins.
 

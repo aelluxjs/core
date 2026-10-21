@@ -75,6 +75,63 @@ $ae.init({ environment: "production", verboseLevel: "warn" });
 
 Equivalent diagnostics are deduplicated while their original entry remains in this circular history. Identity includes the code plus the relevant context (including element identity), so separate elements are not collapsed. Once an entry ages out, the same condition can be reported again.
 
+## Development configuration checks
+
+With `environment: "development"`, mounting validates declarations after lazy Extensions have loaded and all mount registrations have completed. `mountManager.update()` repeats those checks after updates. Scoped mounts and updates validate only the requested Extensions. The checks use the existing diagnostic history and do not install additional observers. Production skips these DOM scans, independently of `verboseLevel`.
+
+Configuration diagnostics explain what happened, identify the element/attribute/value, and suggest a correction in `context`:
+
+```js
+{
+  code: 2027,
+  context: {
+    extension: "present",
+    element: controlElement,
+    attribute: "data-ae-target",
+    value: "menu",
+    reason: "Target element was not found.",
+    suggestion: "Use one existing Present element ID, optionally prefixed with #, and mount it before interacting."
+  }
+}
+```
+
+| Code | Meaning |
+| --- | --- |
+| `2024` | Likely misspelled Aellux attribute, with a suggested spelling. |
+| `2025` | Declared behavior requires an Extension that is not initialized. |
+| `2026` | Invalid attribute, numeric parameter, pivot or CSS step count. |
+| `2027` | Missing/incompatible target, unmeasurable explicitly updated Anchor target, or invalid/missing AJAX selector. |
+| `2028` | Snap without Scrollbox, an orphan Snap item, or a misplaced Elastic wrapper. |
+| `2029` | Present trigger/dismiss control is not reachable with the keyboard. |
+| `2030` | Effective CSS blocks requested layout/scrolling, or a motion duration is invalid. |
+
+Attribute spelling checks follow the configured prefix and accept attributes used by registered custom Extension selectors. They suggest only names within one edit of a known name, including adjacent transpositions; arbitrary application attributes are not rejected. This is a typo check, not an exhaustive HTML schema.
+
+Present Group reuses `2021` for missing member IDs, groups without identifiable members, and invalid conditions. Selection failures include the active attribute and a corrective suggestion. Anchor keeps `1119`, `2022`, and `2023` for incompatible positioning references, dimension matching, and group associations.
+
+Hidden Present targets and a group-driven Anchor with no selected member are normal states and remain quiet. An explicit Anchor update can report an unmeasurable ordinary target; ordinary observer updates do not run the semantic scan. The validator does not guess whether custom CSS, a transient hidden state, or a focusable custom control with application keyboard handlers is incorrect. CSS warnings require an invalid value or evidence of blocked behavior, such as overflowing Pointer Scrollbox content with disabled overflow, a size-motion Present container without effective grid display, or a hidden container made visible by CSS. Check stylesheet requests, CSP and overriding rules when such a warning appears; reduced motion and custom styling alone are not errors.
+
+Runtime target failures in Present, AJAX selector failures, and Adaptive option validation also use contextual diagnostics in production. Invalid Adaptive numeric values retain defaults, reversed ratio/experience boundaries restore their default pair, and out-of-order named minimum sizes are reported while preserving those thresholds. AJAX validates selectors before starting a request; when no current region matches it returns `null`, and missing response regions preserve current content. Commas within selector functions or quoted attribute values remain part of that selector.
+
+### Distribution cost
+
+The validator is bundled with the runtime; its production guard avoids DOM scans, but its code still contributes to downloads. The diagnostic catalog and richer contexts also add bytes to Boot/ESM and Extension artifacts. Measurements below use minified output and gzip level 9. Limits are in KiB, written as raw/gzip; measured sizes are bytes. These are maintenance limits, not performance guarantees.
+
+| Artifact | Measured raw / gzip bytes | Previous limits | Current limits |
+| --- | --- | --- | --- |
+| `aellux.min.js` | 46,986 / 14,991 | 45 / 15 | 46 / 15 |
+| `aellux.esm.min.js` | 24,801 / 8,450 | 24 / 8 | 25 / 8.5 |
+| `aellux.orchestrator.min.js` | 57,262 / 19,099 | 43 / 15 | 56 / 19 |
+| `aellux.orchestrator.legacy.min.js` | 324,273 / 103,745 | 300 / 97 | 318 / 102 |
+| `aellux.full.min.js` | 127,835 / 41,039 | 130 / 40 | 130 / 40.5 |
+| `aellux.ext.adaptive.min.js` | 4,915 / 2,291 | 4 / 3 | 5 / 3 |
+| `aellux.ext.adaptive.legacy.min.js` | 8,329 / 3,513 | 6 / 3 | 8.5 / 3.5 |
+| `aellux.ext.present.min.js` | 18,596 / 6,624 | 18 / 6.25 | 18.5 / 6.5 |
+| `aellux.ext.present.legacy.min.js` | 26,018 / 9,187 | 25 / 9 | 26 / 9 |
+| `aellux.ext.scrollbox-snap.min.js` | 10,388 / 4,020 | 10 / 4 | 10.5 / 4 |
+
+Full Legacy measures 435,120 / 130,312 bytes and retains its 425 / 138 KiB limits. Other limits are unchanged. `npm run test:budget` checks every minified distribution artifact.
+
 ## Code Ranges
 
 - `1000-1099`: boot and Core usage errors.

@@ -3,6 +3,7 @@
 import utilsNameCase from "./utils-name-case.js";
 import { createControllerHelper } from "./create-controller-helper.js";
 import { resolveElementOrId } from "./resolve-element-or-id.js";
+import { validateDeclarations } from "./validate-declarations.js";
 
 export function createMountHelper(root, mountMaps, mountedElements, elementControllers) {
   const UNMOUNT = "unmount";
@@ -20,6 +21,7 @@ export function createMountHelper(root, mountMaps, mountedElements, elementContr
     const rootElement = resolveMountElement(elementOrId, "update");
     if (!rootElement) return false;
     await AelluxJsMounted(rootElement, "update", extensionNames);
+    validateDeclarations(root, rootElement, extensionNames, "update");
     return true;
   }
 
@@ -74,6 +76,7 @@ export function createMountHelper(root, mountMaps, mountedElements, elementContr
       await Promise.all(waitExtensions);
 
       await AelluxJsMount(rootElement, extensionNames, newlyMounted);
+      validateDeclarations(root, rootElement, extensionNames);
 
     } catch (error) {
       AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_MOUNT, {

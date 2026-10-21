@@ -177,12 +177,39 @@
     }
     function _load() {
       _load = _asyncToGenerator(/* @__PURE__ */ _regenerator().m(function _callee(url, selectors) {
-        var options, controller, selectorList, elements, response, html, loadedDocument, _iterator, _step, selector, currentElement, loadedElement, replacement, _args = arguments, _t, _t2;
+        var options, selectorList, elements, _iterator2, _step2, _selector, _currentElement, controller, response, html, loadedDocument, _iterator3, _step3, selector, currentElement, loadedElement, replacement, _args = arguments, _t, _t2;
         return _regenerator().w(function(_context) {
           while (1) switch (_context.p = _context.n) {
             case 0:
               options = _args.length > 2 && _args[2] !== void 0 ? _args[2] : {};
               options = options || {};
+              selectorList = parseSelectors(selectors);
+              if (selectorList) {
+                _context.n = 1;
+                break;
+              }
+              return _context.a(2, null);
+            case 1:
+              elements = /* @__PURE__ */ new Map();
+              _iterator2 = _createForOfIteratorHelper(selectorList);
+              try {
+                for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
+                  _selector = _step2.value;
+                  _currentElement = document.querySelector(_selector);
+                  if (_currentElement) elements.set(_selector, _currentElement);
+                  else selectorDiagnostic(_selector, "No current element matches the selector.");
+                }
+              } catch (err) {
+                _iterator2.e(err);
+              } finally {
+                _iterator2.f();
+              }
+              if (elements.size) {
+                _context.n = 2;
+                break;
+              }
+              return _context.a(2, null);
+            case 2:
               if (previousController) {
                 previousController.abort();
               }
@@ -193,14 +220,7 @@
                 }
               };
               previousController = controller;
-              selectorList = (Array.isArray(selectors) ? selectors : selectors.split(",")).map(function(selector2) {
-                return selector2.trim();
-              }).filter(Boolean);
-              elements = /* @__PURE__ */ new Map();
-              selectorList.forEach(function(selector2) {
-                var currentElement2 = document.querySelector(selector2);
-                if (!currentElement2) return;
-                elements.set(selector2, currentElement2);
+              elements.forEach(function(currentElement2) {
                 if (AelluxJs.ext.feedback) {
                   AelluxJs.ext.feedback.busy(currentElement2, "Ajax loading", true);
                   AelluxJs.ext.feedback.progress(currentElement2, "Ajax loading", 0);
@@ -215,44 +235,49 @@
                 });
               }
               AelluxJs.dispatch("AjaxHrefStart");
-              _context.p = 1;
-              _context.n = 2;
+              _context.p = 3;
+              _context.n = 4;
               return AelluxJs.request(url, {
                 signal: controller.signal
               });
-            case 2:
+            case 4:
               response = _context.v;
-              _context.n = 3;
+              _context.n = 5;
               return response.text();
-            case 3:
+            case 5:
               html = _context.v;
               loadedDocument = new DOMParser().parseFromString(html, "text/html");
-              _iterator = _createForOfIteratorHelper(selectorList);
-              _context.p = 4;
-              _iterator.s();
-            case 5:
-              if ((_step = _iterator.n()).done) {
-                _context.n = 11;
+              _iterator3 = _createForOfIteratorHelper(selectorList);
+              _context.p = 6;
+              _iterator3.s();
+            case 7:
+              if ((_step3 = _iterator3.n()).done) {
+                _context.n = 13;
                 break;
               }
-              selector = _step.value;
+              selector = _step3.value;
               currentElement = elements.get(selector);
               if (currentElement) {
-                _context.n = 6;
+                _context.n = 8;
                 break;
               }
-              return _context.a(3, 10);
-            case 6:
+              return _context.a(3, 12);
+            case 8:
               loadedElement = loadedDocument.querySelector(selector);
               if (loadedElement) {
-                _context.n = 7;
+                _context.n = 9;
                 break;
               }
-              return _context.a(3, 10);
-            case 7:
-              _context.n = 8;
+              selectorDiagnostic(selector, "No response element matches the selector.", currentElement);
+              if (AelluxJs.ext.feedback) {
+                AelluxJs.ext.feedback.busy(currentElement, "Ajax loading", false);
+                AelluxJs.ext.feedback.progress(currentElement, "Ajax loading", 1);
+              }
+              return _context.a(3, 12);
+            case 9:
+              _context.n = 10;
               return AelluxJs.unmount(currentElement);
-            case 8:
+            case 10:
               replacement = document.importNode(loadedElement, true);
               currentElement.parentNode.replaceChild(replacement, currentElement);
               if (selector === "title") {
@@ -262,33 +287,33 @@
                   }
                 });
               }
-              _context.n = 9;
+              _context.n = 11;
               return AelluxJs.mount(replacement);
-            case 9:
+            case 11:
               if (AelluxJs.ext.feedback) {
                 AelluxJs.ext.feedback.busy(replacement, "Ajax loaded", false);
                 AelluxJs.ext.feedback.progress(replacement, "Ajax loaded", 1);
               }
-            case 10:
-              _context.n = 5;
-              break;
-            case 11:
-              _context.n = 13;
-              break;
             case 12:
-              _context.p = 12;
-              _t = _context.v;
-              _iterator.e(_t);
-            case 13:
-              _context.p = 13;
-              _iterator.f();
-              return _context.f(13);
-            case 14:
-              AelluxJs.dispatch("AjaxHrefLoaded");
-              _context.n = 17;
+              _context.n = 7;
               break;
+            case 13:
+              _context.n = 15;
+              break;
+            case 14:
+              _context.p = 14;
+              _t = _context.v;
+              _iterator3.e(_t);
             case 15:
               _context.p = 15;
+              _iterator3.f();
+              return _context.f(15);
+            case 16:
+              AelluxJs.dispatch("AjaxHrefLoaded");
+              _context.n = 19;
+              break;
+            case 17:
+              _context.p = 17;
               _t2 = _context.v;
               selectorList.forEach(function(selector2) {
                 var currentElement2 = elements.get(selector2);
@@ -300,23 +325,90 @@
               });
               AelluxJs.dispatch("AjaxHrefError");
               if (!(_t2.name === "AbortError")) {
-                _context.n = 16;
+                _context.n = 18;
                 break;
               }
               return _context.a(2, null);
-            case 16:
+            case 18:
               throw _t2;
-            case 17:
-              _context.p = 17;
+            case 19:
+              _context.p = 19;
               if (previousController === controller) previousController = null;
               AelluxJs.dispatch("AjaxHrefComplete");
-              return _context.f(17);
-            case 18:
+              return _context.f(19);
+            case 20:
               return _context.a(2);
           }
-        }, _callee, null, [[4, 12, 13, 14], [1, 15, 17, 18]]);
+        }, _callee, null, [[6, 14, 15, 16], [3, 17, 19, 20]]);
       }));
       return _load.apply(this, arguments);
+    }
+    function selectorDiagnostic(value, reason) {
+      var element = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : null;
+      AelluxJs.diagnostics.warn(AelluxJs.diagnostics.WARN_CONFIGURATION_TARGET, {
+        extension: extensionName,
+        element: element,
+        attribute: attr.ajaxHref,
+        value: value,
+        reason: reason,
+        suggestion: "Use valid CSS selectors identifying content in both the current document and the AJAX response."
+      });
+    }
+    function parseSelectors(selectors) {
+      var list = [];
+      var _iterator = _createForOfIteratorHelper(Array.isArray(selectors) ? selectors : [selectors]), _step;
+      try {
+        for (_iterator.s(); !(_step = _iterator.n()).done; ) {
+          var input = _step.value;
+          if (typeof input !== "string" || !input.trim()) {
+            selectorDiagnostic(input, "Expected a nonempty selector string or array of strings.");
+            return null;
+          }
+          var start = 0, depth = 0, quote = null;
+          for (var index = 0; index <= input.length; index++) {
+            var char = input[index];
+            if (char === "\\") {
+              index++;
+              continue;
+            }
+            if (quote) {
+              if (char === quote) quote = null;
+              continue;
+            }
+            if (char === '"' || char === "'") {
+              quote = char;
+              continue;
+            }
+            if (char === "(" || char === "[") depth++;
+            if (char === ")" || char === "]") depth--;
+            if (index === input.length || char === "," && depth === 0) {
+              var selector = input.slice(start, index).trim();
+              try {
+                if (!selector) throw new SyntaxError("Empty selector");
+                document.querySelector(selector);
+              } catch (_) {
+                selectorDiagnostic(input, "Invalid CSS selector.");
+                return null;
+              }
+              if (!list.includes(selector)) list.push(selector);
+              start = index + 1;
+            }
+          }
+          if (quote || depth !== 0) {
+            selectorDiagnostic(input, "Unbalanced CSS selector.");
+            return null;
+          }
+        }
+      } catch (err) {
+        _iterator.e(err);
+      } finally {
+        _iterator.f();
+      }
+      if (!list.length) {
+        selectorDiagnostic(selectors, "Expected at least one CSS selector.");
+        return null;
+      }
+      return list;
     }
     function onClick(event) {
       if (event.defaultPrevented) return;

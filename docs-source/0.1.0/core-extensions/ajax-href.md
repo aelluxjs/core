@@ -14,7 +14,7 @@ $ae.ext("ajax-href", { loadWhen: "a[data-ae-ajax-href]" });
 $ae.init({ mode: "basic" });
 ```
 
-The attribute holds comma-separated CSS selectors. For each selector, the first current element is unmounted, replaced by the first matching response element, and mounted again. Missing elements are skipped. Modified clicks, download links, fragment-only links, other browsing targets, `data-no-ajax`, and cross-origin destinations retain native navigation.
+The attribute holds comma-separated CSS selectors, preserving commas inside functions such as `:is()` and quoted attribute values. For each selector, the first current element is unmounted, replaced by the first matching response element, and mounted again. Invalid selectors and missing current/response regions record diagnostic `2027` with a correction suggestion. When no current region matches, `load()` returns `null` without starting a request. Missing response regions preserve current content. Modified clicks, download links, fragment-only links, other browsing targets, `data-no-ajax`, and cross-origin destinations retain native navigation.
 
 After activation, `$ae.ext.ajaxHref.load(url, selectors, options)` provides the same replacement operation; `selectors` can also be an array. `{ ignoreHistory: true }` suppresses `PushAjaxReplace`. State Navigation handles that event and restores Ajax replacements through `SnapshotRestore`; it is already initialized in Full. In Basic mode, register `state-navigation` separately if history integration is needed.
 

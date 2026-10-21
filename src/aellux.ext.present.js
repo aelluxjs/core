@@ -44,7 +44,6 @@
   const attr = {
     present: AelluxJs.attr(extensionName),
     group: AelluxJs.attr("present-group"),
-    key: AelluxJs.attr("present-key"),
     active: AelluxJs.attr("present-active"),
     when: AelluxJs.attr("present-when"),
     triggerOn: AelluxJs.attr("trigger-on"),
@@ -332,7 +331,9 @@
       AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_EXTENSION_SELECTOR, {
         cause: new SyntaxError(),
         extension: extensionName,
-        selector: value
+        selector: value,
+        reason: "Present targets accept one element ID, not a CSS selector list.",
+        suggestion: "Use one existing Present ID, optionally prefixed with #."
       });
       return null;
     }
@@ -414,6 +415,12 @@
     trigger = typeof trigger === "string" ?
       (trigger || "toggle").toLowerCase() :
       "toggle";
+    if (!["pop", "unpop", "toggle"].includes(trigger)) AelluxJs.diagnostics.warn(
+      AelluxJs.diagnostics.WARN_CONFIGURATION_VALUE, {
+        extension: extensionName, element, attribute: attr.trigger, value: trigger,
+        reason: "Unknown Present action; using toggle.",
+        suggestion: "Use pop, unpop, or toggle."
+      });
     const method = trigger === "pop" ? pop : trigger === "unpop" ? unpop : toggle;
     return method(element);
   }
@@ -467,8 +474,12 @@
       gotoVisible = (controller.direction === POP) ? false : true;
 
     const group = element.closest(groupSelector);
-    if (!groupOperation && groups.has(group) && element.hasAttribute(attr.key)) {
-      if (gotoVisible) return show(group, element.getAttribute(attr.key));
+    if (!groupOperation && groups.has(group) && element !== group) {
+      if (!element.id) {
+        groupDiagnostic(group, "Present Group members must have an ID.");
+        return false;
+      }
+      if (gotoVisible) return show(group, element.id);
       if (groups.get(group).selected === element) return show(group, "");
     }
     const newDirection = gotoVisible ? POP : UNPOP;
@@ -739,6 +750,7 @@
       const targetSelector = button.getAttribute(attr.target);
       if (targetSelector) {
         const target = targetById(targetSelector);
+        diagnoseTarget(button, target, attr.target, targetSelector);
         if (target) {
           exceptions.push(target);
           if (!suppressHoverClick(button, event)) trigger(target, triggerAttr);
@@ -760,6 +772,7 @@
       const targetSelector = button.getAttribute(attr.target);
       if (dismiss || targetSelector) {
         const target = targetById(dismiss || targetSelector);
+        diagnoseTarget(button, target, dismiss ? attr.dismiss : attr.target, dismiss || targetSelector);
         if (target) {
           exceptions.push(target);
           unpop(target);
@@ -778,6 +791,17 @@
     outsideClickAutoUnpop(exceptions);
   }
 
+  function diagnoseTarget(element, target, attribute, value) {
+    // Invalid ID syntax already has its specific selector diagnostic (1107).
+    if (!targetIdFor(value)) return;
+    if (target && target.hasAttribute(attr.present)) return;
+    AelluxJs.diagnostics.warn(AelluxJs.diagnostics.WARN_CONFIGURATION_TARGET, {
+      extension: extensionName, element, attribute, value,
+      reason: target ? "Target is not a Present container." : "Target element was not found.",
+      suggestion: "Use one existing Present element ID, optionally prefixed with #, and mount it before interacting."
+    });
+  }
+
   function setProgress(element, visible) {
     setPhase(element, "pop", visible ? "1" : "0");
     setPhase(element, "unpop", visible ? "0" : "1");
@@ -792,7 +816,7 @@
 
   function groupMembers(group) {
     return [...presentElements.keys()].filter(element => element.isConnected &&
-      element.hasAttribute(attr.key) && element.closest(groupSelector) === group);
+      element !== group && element.id && element.closest(groupSelector) === group);
   }
 
   function mountGroup(group) {
@@ -809,7 +833,7 @@
           record.attributeName !== "class" || groups.has(record.target))) queueGroups();
       });
       groupObserver.observe(document, { subtree: true, childList: true, attributes: true,
-        attributeFilter: ["class", attr.active, attr.key, attr.when, attr.group] });
+        attributeFilter: ["class", "id", attr.active, attr.when, attr.group] });
     }
     queueGroups();
   }
@@ -854,7 +878,9 @@
 
   function groupDiagnostic(group, reason) {
     AelluxJs.diagnostics.warn(AelluxJs.diagnostics.WARN_PRESENT_GROUP_SELECTION,
-      { extension: extensionName, element: group, reason });
+      { extension: extensionName, element: group, attribute: attr.active,
+        value: group.getAttribute(attr.active), reason,
+        suggestion: "Use unique native IDs on Present members of this group; select one ID or one matching condition." });
   }
 
   function reconcileGroup(group) {
@@ -864,10 +890,10 @@
     if (!members.includes(state.selected)) state.selected = null;
     let matches;
     if (group.hasAttribute(attr.active)) {
-      const key = group.getAttribute(attr.active);
-      matches = key === "" ? [] : members.filter(member => member.getAttribute(attr.key) === key);
-      if (key && matches.length !== 1) {
-        groupDiagnostic(group, "Active key must match one mounted member.");
+      const id = group.getAttribute(attr.active);
+      matches = id === "" ? [] : members.filter(member => member.id === id);
+      if (id && matches.length !== 1) {
+        groupDiagnostic(group, "Active ID must match one mounted Present descendant in this group.");
         return;
       }
     } else {
@@ -890,15 +916,15 @@
     return selectGroup(group, matches[0] || null, members);
   }
 
-  function show(group, key) {
+  function show(group, id) {
     const state = groups.get(group);
-    if (!state || typeof key !== "string") return Promise.resolve(false);
-    const matches = groupMembers(group).filter(member => member.getAttribute(attr.key) === key);
-    if (key && matches.length !== 1) {
-      groupDiagnostic(group, "Active key must match one mounted member.");
+    if (!state || typeof id !== "string") return Promise.resolve(false);
+    const matches = groupMembers(group).filter(member => member.id === id);
+    if (id && matches.length !== 1) {
+      groupDiagnostic(group, "Active ID must match one mounted Present descendant in this group.");
       return Promise.resolve(false);
     }
-    if (group.getAttribute(attr.active) !== key) group.setAttribute(attr.active, key);
+    if (group.getAttribute(attr.active) !== id) group.setAttribute(attr.active, id);
     const result = reconcileGroup(group);
     return Promise.resolve(result === undefined ? state.pending : result);
   }
@@ -906,7 +932,7 @@
   function selected(group) {
     const state = groups.get(group);
     const member = state && state.selected;
-    return member && presentElements.has(member) && member.isConnected && member.hasAttribute(attr.key) &&
+    return member && member !== group && presentElements.has(member) && member.isConnected && member.id &&
       member.closest(groupSelector) === group ? member : null;
   }
 
@@ -915,7 +941,7 @@
     const previous = state.announced || null;
     state.announced = current;
     AelluxJs.dispatchFrom(group, "PresentGroupChange", { bubbles: true,
-      detail: { group, previous, current, key: current && current.getAttribute(attr.key) } });
+      detail: { group, previous, current, key: current && current.id } });
   }
 
   function selectGroup(group, selected, members) {
@@ -931,14 +957,14 @@
     // Validate the whole preflight before changing any member's visual state.
     const active = group.getAttribute(attr.active);
     const classes = group.getAttribute("class");
-    const keys = members.map(member => member.getAttribute(attr.key));
+    const ids = members.map(member => member.id);
     const conditions = members.map(member => member.getAttribute(attr.when));
     const valid = () => groups.get(group) === state && state.revision === revision &&
       group.isConnected && group.hasAttribute(attr.group) &&
       group.getAttribute(attr.active) === active && group.getAttribute("class") === classes &&
       groupMembers(group).length === members.length && members.every((member, index) =>
         presentElements.has(member) && member.isConnected && member.closest(groupSelector) === group &&
-        member.getAttribute(attr.key) === keys[index] && member.getAttribute(attr.when) === conditions[index]);
+        member.id === ids[index] && member.getAttribute(attr.when) === conditions[index]);
     for (const member of changes) {
       const allowed = AelluxJs.dispatchFrom(member, member === selected ? "BeforePop" : "BeforeUnpop",
         { bubbles: true, cancelable: true });
@@ -946,8 +972,8 @@
       if (!allowed) {
         // A veto keeps the accepted selection, including the declarative source.
         if (state.revision === revision) {
-          const key = state.selected?.getAttribute(attr.key) || "";
-          if (group.getAttribute(attr.active) !== key) group.setAttribute(attr.active, key);
+          const id = state.selected?.id || "";
+          if (group.getAttribute(attr.active) !== id) group.setAttribute(attr.active, id);
         }
         return false;
       }

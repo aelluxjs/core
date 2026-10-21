@@ -17,11 +17,97 @@ async function start(page, markup, options = {}) {
   });
 }
 
+async function trackGroupWarnings(page) {
+  await page.evaluate(() => {
+    window.groupWarnings = 0;
+    const warn = AelluxJs.diagnostics.warn;
+    AelluxJs.diagnostics.warn = function (definition, context) {
+      if (definition.code === 2021) window.groupWarnings++;
+      return warn.call(this, definition, context);
+    };
+  });
+}
+
 const panels = `<div id="group" data-ae-present-group data-ae-present-active="a" class="view-a">
-  <section id="a" data-ae-present="opacity" data-ae-present-key="a" data-ae-present-when="view-a">A</section>
-  <section id="b" data-ae-present="opacity" data-ae-present-key="b" data-ae-present-when="view-b" hidden><button id="inside">B</button></section>
-  <section id="c" data-ae-present="opacity" data-ae-present-key="c" hidden>C</section>
+  <section id="a" data-ae-present="opacity" data-ae-present-when="view-a">A</section>
+  <section id="b" data-ae-present="opacity" data-ae-present-when="view-b" hidden><button id="inside">B</button></section>
+  <section id="c" data-ae-present="opacity" hidden>C</section>
 </div>`;
+
+for (const mode of ["basic", "full"]) for (const forceLegacy of [false, true]) {
+  test(`group IDs reject targets outside mounted membership (${mode}, legacy=${forceLegacy})`, async ({ page }) => {
+    await start(page, `<div id="group" data-ae-present-group data-ae-present-active="a">
+      <div id="a" data-ae-present>A</div>
+      <div><div id="wrapped" data-ae-present hidden>Wrapped descendant</div></div>
+      <div id="plain-child" hidden>Not Present</div>
+      <div id="unmounted" data-ae-present hidden>Unmounted</div>
+      <div data-ae-present-group><div id="nested-member" data-ae-present hidden>Nested</div></div>
+    </div>
+    <div id="outside" data-ae-present hidden>Outside</div>
+    <div data-ae-present-group><div id="other-member" data-ae-present hidden>Other group</div></div>`, { mode, forceLegacy });
+    await trackGroupWarnings(page);
+    await page.evaluate(() => AelluxJs.unmount(document.getElementById("unmounted"), "present"));
+    for (const id of ["outside", "other-member", "nested-member", "plain-child", "unmounted", "group", "missing"]) {
+      const result = await page.evaluate(async id => {
+        const controller = $ae("group").present;
+        const before = window.groupWarnings;
+        const accepted = await controller.show(id);
+        return { accepted, warned: window.groupWarnings > before, selected: controller.selected()?.id,
+          active: document.getElementById("group").getAttribute("data-ae-present-active") };
+      }, id);
+      expect(result, id).toEqual({ accepted: false, warned: true, selected: "a", active: "a" });
+      const warningsBefore = await page.evaluate(id => {
+        const count = window.groupWarnings;
+        document.getElementById("group").setAttribute("data-ae-present-active", id);
+        return count;
+      }, id);
+      await expect.poll(() => page.evaluate(() => window.groupWarnings))
+        .toBeGreaterThan(warningsBefore);
+      expect(await page.evaluate(() => $ae("group").present.selected()?.id)).toBe("a");
+      await expect(page.locator("#a")).toHaveJSProperty("hidden", false);
+      for (const target of ["outside", "other-member", "nested-member", "wrapped", "unmounted"]) {
+        await expect(page.locator(`#${target}`)).toHaveJSProperty("hidden", true);
+      }
+      await page.evaluate(() => $ae("group").present.show("a"));
+    }
+    const result = await page.evaluate(async () => {
+      let key;
+      document.getElementById("group").addEventListener("AelluxJsPresentGroupChange", event => {
+        key = event.detail.key;
+      }, { once: true });
+      return { accepted: await $ae("group").present.show("wrapped"), key };
+    });
+    expect(result).toEqual({ accepted: true, key: "wrapped" });
+    await expect(page.locator("#a")).toHaveJSProperty("hidden", true);
+  });
+}
+
+test("group observes member ID changes and rejects duplicate IDs without changing selection", async ({ page }) => {
+  await start(page, `<div id="group" data-ae-present-group data-ae-present-active="renamed">
+    <div id="a" data-ae-present>A</div><div id="b" data-ae-present hidden>B</div></div>`);
+  await expect(page.locator("#a")).toHaveJSProperty("hidden", false);
+  await expect.poll(() => page.evaluate(() => AelluxJs.diagnostics.showHistory().some(e => e.code === 2021))).toBe(true);
+  await page.locator("#b").evaluate(element => { element.id = "renamed"; });
+  await expect(page.locator("#a")).toHaveJSProperty("hidden", true);
+  await expect(page.locator("#renamed")).toHaveJSProperty("hidden", false);
+  expect(await page.evaluate(() => $ae("group").present.selected()?.id)).toBe("renamed");
+  await trackGroupWarnings(page);
+  await page.evaluate(async () => {
+    const group = document.getElementById("group");
+    group.insertAdjacentHTML("beforeend", '<div id="duplicate" data-ae-present hidden>1</div><div id="duplicate" data-ae-present hidden>2</div>');
+    await AelluxJs.mount(group, "present");
+  });
+  const duplicate = await page.evaluate(async () => {
+    const warnings = window.groupWarnings;
+    return { accepted: await $ae("group").present.show("duplicate"),
+      warned: window.groupWarnings > warnings };
+  });
+  expect(duplicate).toEqual({ accepted: false, warned: true });
+  expect(await page.evaluate(() => $ae("group").present.selected()?.id)).toBe("renamed");
+  await expect(page.locator('[id="duplicate"]:visible')).toHaveCount(0);
+  await page.locator("#renamed").evaluate(element => element.removeAttribute("id"));
+  await expect.poll(() => page.evaluate(() => $ae("group").present.selected())).toBe(null);
+});
 
 for (const mode of ["basic", "full"]) for (const forceLegacy of [false, true]) {
   test(`group attribute, classes, API, veto and rapid replacement (${mode}, legacy=${forceLegacy})`, async ({ page }) => {
@@ -116,9 +202,9 @@ test("groups diagnose ambiguity, isolate nested members, mount dynamically and r
   await expect(page.locator("#b")).toHaveJSProperty("hidden", true);
   await page.evaluate(async () => {
     const group = document.getElementById("group");
-    group.insertAdjacentHTML("beforeend", `<div id="nested" data-ae-present-group data-ae-present-active="a">
-      <div id="nested-a" data-ae-present data-ae-present-key="a" hidden>Nested</div></div>
-      <div id="dynamic" data-ae-present data-ae-present-key="dynamic" hidden>Dynamic</div>`);
+    group.insertAdjacentHTML("beforeend", `<div id="nested" data-ae-present-group data-ae-present-active="nested-a">
+      <div id="nested-a" data-ae-present hidden>Nested</div></div>
+      <div id="dynamic" data-ae-present hidden>Dynamic</div>`);
     await AelluxJs.mount(group, "present");
     await $ae("group").present.show("dynamic");
   });
@@ -208,8 +294,8 @@ for (const fallback of ["unregistered", "no-waapi", "reduced"]) {
 
 test("group preserves unspecified initial states and ignores irrelevant classes without duplicate events", async ({ page }) => {
   await start(page, `<div id="group" data-ae-present-group>
-    <div id="a" data-ae-present data-ae-present-key="a" data-ae-present-when="view-a" hidden>A</div>
-    <div id="b" data-ae-present data-ae-present-key="b" data-ae-present-when="view-b" hidden>B</div></div>`);
+    <div id="a" data-ae-present data-ae-present-when="view-a" hidden>A</div>
+    <div id="b" data-ae-present data-ae-present-when="view-b" hidden>B</div></div>`);
   await expect(page.locator("#a")).toHaveJSProperty("hidden", true);
   await expect(page.locator("#b")).toHaveJSProperty("hidden", true);
   await page.evaluate(() => {

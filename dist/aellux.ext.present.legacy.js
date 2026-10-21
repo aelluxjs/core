@@ -197,7 +197,6 @@
     var attr = {
       present: AelluxJs.attr(extensionName),
       group: AelluxJs.attr("present-group"),
-      key: AelluxJs.attr("present-key"),
       active: AelluxJs.attr("present-active"),
       when: AelluxJs.attr("present-when"),
       triggerOn: AelluxJs.attr("trigger-on"),
@@ -516,7 +515,9 @@
         AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_EXTENSION_SELECTOR, {
           cause: new SyntaxError(),
           extension: extensionName,
-          selector: value
+          selector: value,
+          reason: "Present targets accept one element ID, not a CSS selector list.",
+          suggestion: "Use one existing Present ID, optionally prefixed with #."
         });
         return null;
       }
@@ -605,6 +606,14 @@
     }
     function trigger(element, trigger2) {
       trigger2 = typeof trigger2 === "string" ? (trigger2 || "toggle").toLowerCase() : "toggle";
+      if (!["pop", "unpop", "toggle"].includes(trigger2)) AelluxJs.diagnostics.warn(AelluxJs.diagnostics.WARN_CONFIGURATION_VALUE, {
+        extension: extensionName,
+        element: element,
+        attribute: attr.trigger,
+        value: trigger2,
+        reason: "Unknown Present action; using toggle.",
+        suggestion: "Use pop, unpop, or toggle."
+      });
       var method = trigger2 === "pop" ? pop : trigger2 === "unpop" ? unpop : toggle;
       return method(element);
     }
@@ -689,41 +698,48 @@
               if (controller.direction === null) controller.direction = element.hidden ? UNPOP : POP;
               if (typeof gotoVisible === "undefined" || gotoVisible === null) gotoVisible = controller.direction === POP ? false : true;
               group = element.closest(groupSelector);
-              if (!(!groupOperation && groups.has(group) && element.hasAttribute(attr.key))) {
-                _context2.n = 3;
-                break;
-              }
-              if (!gotoVisible) {
-                _context2.n = 2;
-                break;
-              }
-              return _context2.a(2, show(group, element.getAttribute(attr.key)));
-            case 2:
-              if (!(groups.get(group).selected === element)) {
-                _context2.n = 3;
-                break;
-              }
-              return _context2.a(2, show(group, ""));
-            case 3:
-              newDirection = gotoVisible ? POP : UNPOP;
-              if (!(element.hidden && !gotoVisible || newDirection === controller.direction && !forceRepop)) {
+              if (!(!groupOperation && groups.has(group) && element !== group)) {
                 _context2.n = 4;
                 break;
               }
-              return _context2.a(2);
+              if (element.id) {
+                _context2.n = 2;
+                break;
+              }
+              groupDiagnostic(group, "Present Group members must have an ID.");
+              return _context2.a(2, false);
+            case 2:
+              if (!gotoVisible) {
+                _context2.n = 3;
+                break;
+              }
+              return _context2.a(2, show(group, element.id));
+            case 3:
+              if (!(groups.get(group).selected === element)) {
+                _context2.n = 4;
+                break;
+              }
+              return _context2.a(2, show(group, ""));
             case 4:
+              newDirection = gotoVisible ? POP : UNPOP;
+              if (!(element.hidden && !gotoVisible || newDirection === controller.direction && !forceRepop)) {
+                _context2.n = 5;
+                break;
+              }
+              return _context2.a(2);
+            case 5:
               transition = null;
-              _context2.p = 5;
+              _context2.p = 6;
               allowEvent = groupOperation || AelluxJs.dispatchFrom(element, "".concat(BEFORE).concat(newDirection), {
                 bubbles: true,
                 cancelable: true
               });
               if (allowEvent) {
-                _context2.n = 6;
+                _context2.n = 7;
                 break;
               }
               return _context2.a(2);
-            case 6:
+            case 7:
               if (forceRepop && (!element.hidden || controller.transition)) {
                 controller.stop();
                 element.hidden = true;
@@ -768,25 +784,25 @@
               openPresentElements.add(element);
               size = null;
               if (!(controller.measuredHeight || controller.measuredWidth)) {
-                _context2.n = 8;
-                break;
-              }
-              _context2.n = 7;
-              return prepareMeasuredSize(element, controller, gotoVisible, previousSize, waitForPreparation);
-            case 7:
-              size = _context2.v;
-            case 8:
-              if (!(controller.transition !== transition)) {
                 _context2.n = 9;
                 break;
               }
-              return _context2.a(2);
+              _context2.n = 8;
+              return prepareMeasuredSize(element, controller, gotoVisible, previousSize, waitForPreparation);
+            case 8:
+              size = _context2.v;
             case 9:
+              if (!(controller.transition !== transition)) {
+                _context2.n = 10;
+                break;
+              }
+              return _context2.a(2);
+            case 10:
               if (controller.motionEnabled) {
                 controller.classList.add(className.willChange);
               }
               if (!waitForPreparation) {
-                _context2.n = 10;
+                _context2.n = 11;
                 break;
               }
               prepared = new Promise(function(resolve) {
@@ -795,9 +811,9 @@
                   resolve();
                 }, TRANSITION_PREPARE_TIME);
               });
-              _context2.n = 10;
+              _context2.n = 11;
               return Promise.race([prepared, interrupted]);
-            case 10:
+            case 11:
               transition.className = className["".concat(newDirection).concat(PING).toLowerCase()];
               duration = root.getComputedStyle(element).getPropertyValue("--ae-".concat(newDirection, "-duration").toLowerCase()).trim();
               timeMs = getString2Time(duration);
@@ -842,16 +858,16 @@
               AelluxJs.dispatchFrom(element, "".concat(newDirection).concat(PING), {
                 bubbles: true
               });
-              _context2.n = 11;
+              _context2.n = 12;
               return Promise.race([completed, interrupted]);
-            case 11:
+            case 12:
               motionResult = _context2.v;
               if (!(controller.transition !== transition || motionResult && motionResult.status !== "completed")) {
-                _context2.n = 12;
+                _context2.n = 13;
                 break;
               }
               return _context2.a(2);
-            case 12:
+            case 13:
               finishTransition(element, controller, transition, gotoVisible);
               if (gotoVisible && !element.hidden) {
                 autoUnpopSchedule(element, controller);
@@ -867,10 +883,10 @@
                   bubbles: true
                 });
               }
-              _context2.n = 17;
+              _context2.n = 18;
               break;
-            case 13:
-              _context2.p = 13;
+            case 14:
+              _context2.p = 14;
               _t = _context2.v;
               ownsTransition = transition && controller.transition === transition;
               if (ownsTransition && transition.timeout !== null) {
@@ -882,40 +898,40 @@
               }
               if (ownsTransition) restoreMeasuredStyles(element, controller);
               _t2 = _t && _t.code;
-              _context2.n = _t2 === AelluxJs.diagnostics.WARN_INTERRUPTION.code ? 14 : 16;
+              _context2.n = _t2 === AelluxJs.diagnostics.WARN_INTERRUPTION.code ? 15 : 17;
               break;
-            case 14:
+            case 15:
               if (!(transition && transition.cancelled)) {
-                _context2.n = 15;
+                _context2.n = 16;
                 break;
               }
-              return _context2.a(3, 17);
-            case 15:
+              return _context2.a(3, 18);
+            case 16:
               AelluxJs.diagnostics.warn(AelluxJs.diagnostics.WARN_INTERRUPTION, {
                 cause: _t,
                 extension: extensionName,
                 element: element,
                 replacement: transition && transition.replacement === true
               });
-              return _context2.a(3, 17);
-            case 16:
+              return _context2.a(3, 18);
+            case 17:
               AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_EXTENSION_TRANSITION, {
                 cause: _t,
                 extension: extensionName,
                 element: element
               });
-              return _context2.a(3, 17);
-            case 17:
-              _context2.p = 17;
+              return _context2.a(3, 18);
+            case 18:
+              _context2.p = 18;
               if (transition && controller.transition === transition) {
                 controller.transition = null;
                 controller.classList.remove(className.willChange);
               }
-              return _context2.f(17);
-            case 18:
+              return _context2.f(18);
+            case 19:
               return _context2.a(2);
           }
-        }, _callee2, null, [[5, 13, 17, 18]]);
+        }, _callee2, null, [[6, 14, 18, 19]]);
       }));
       return _presentTransition.apply(this, arguments);
     }
@@ -1000,6 +1016,7 @@
         var targetSelector = button.getAttribute(attr.target);
         if (targetSelector) {
           var target = targetById(targetSelector);
+          diagnoseTarget(button, target, attr.target, targetSelector);
           if (target) {
             exceptions.push(target);
             if (!suppressHoverClick(button, event)) trigger(target, triggerAttr);
@@ -1022,6 +1039,7 @@
         var _targetSelector = button.getAttribute(attr.target);
         if (dismiss || _targetSelector) {
           var _target = targetById(dismiss || _targetSelector);
+          diagnoseTarget(button, _target, dismiss ? attr.dismiss : attr.target, dismiss || _targetSelector);
           if (_target) {
             exceptions.push(_target);
             unpop(_target);
@@ -1039,6 +1057,18 @@
       }
       outsideClickAutoUnpop(exceptions);
     }
+    function diagnoseTarget(element, target, attribute, value) {
+      if (!targetIdFor(value)) return;
+      if (target && target.hasAttribute(attr.present)) return;
+      AelluxJs.diagnostics.warn(AelluxJs.diagnostics.WARN_CONFIGURATION_TARGET, {
+        extension: extensionName,
+        element: element,
+        attribute: attribute,
+        value: value,
+        reason: target ? "Target is not a Present container." : "Target element was not found.",
+        suggestion: "Use one existing Present element ID, optionally prefixed with #, and mount it before interacting."
+      });
+    }
     function setProgress(element, visible) {
       setPhase(element, "pop", visible ? "1" : "0");
       setPhase(element, "unpop", visible ? "0" : "1");
@@ -1051,7 +1081,7 @@
     }
     function groupMembers(group) {
       return _toConsumableArray(presentElements.keys()).filter(function(element) {
-        return element.isConnected && element.hasAttribute(attr.key) && element.closest(groupSelector) === group;
+        return element.isConnected && element !== group && element.id && element.closest(groupSelector) === group;
       });
     }
     function mountGroup(group) {
@@ -1076,7 +1106,7 @@
           subtree: true,
           childList: true,
           attributes: true,
-          attributeFilter: ["class", attr.active, attr.key, attr.when, attr.group]
+          attributeFilter: ["class", "id", attr.active, attr.when, attr.group]
         });
       }
       queueGroups();
@@ -1129,7 +1159,10 @@
       AelluxJs.diagnostics.warn(AelluxJs.diagnostics.WARN_PRESENT_GROUP_SELECTION, {
         extension: extensionName,
         element: group,
-        reason: reason
+        attribute: attr.active,
+        value: group.getAttribute(attr.active),
+        reason: reason,
+        suggestion: "Use unique native IDs on Present members of this group; select one ID or one matching condition."
       });
     }
     function reconcileGroup(group) {
@@ -1139,12 +1172,12 @@
       if (!members.includes(state.selected)) state.selected = null;
       var matches;
       if (group.hasAttribute(attr.active)) {
-        var key = group.getAttribute(attr.active);
-        matches = key === "" ? [] : members.filter(function(member) {
-          return member.getAttribute(attr.key) === key;
+        var id = group.getAttribute(attr.active);
+        matches = id === "" ? [] : members.filter(function(member) {
+          return member.id === id;
         });
-        if (key && matches.length !== 1) {
-          groupDiagnostic(group, "Active key must match one mounted member.");
+        if (id && matches.length !== 1) {
+          groupDiagnostic(group, "Active ID must match one mounted Present descendant in this group.");
           return;
         }
       } else {
@@ -1167,24 +1200,24 @@
       }
       return selectGroup(group, matches[0] || null, members);
     }
-    function show(group, key) {
+    function show(group, id) {
       var state = groups.get(group);
-      if (!state || typeof key !== "string") return Promise.resolve(false);
+      if (!state || typeof id !== "string") return Promise.resolve(false);
       var matches = groupMembers(group).filter(function(member) {
-        return member.getAttribute(attr.key) === key;
+        return member.id === id;
       });
-      if (key && matches.length !== 1) {
-        groupDiagnostic(group, "Active key must match one mounted member.");
+      if (id && matches.length !== 1) {
+        groupDiagnostic(group, "Active ID must match one mounted Present descendant in this group.");
         return Promise.resolve(false);
       }
-      if (group.getAttribute(attr.active) !== key) group.setAttribute(attr.active, key);
+      if (group.getAttribute(attr.active) !== id) group.setAttribute(attr.active, id);
       var result = reconcileGroup(group);
       return Promise.resolve(result === void 0 ? state.pending : result);
     }
     function selected(group) {
       var state = groups.get(group);
       var member = state && state.selected;
-      return member && presentElements.has(member) && member.isConnected && member.hasAttribute(attr.key) && member.closest(groupSelector) === group ? member : null;
+      return member && member !== group && presentElements.has(member) && member.isConnected && member.id && member.closest(groupSelector) === group ? member : null;
     }
     function publishGroup(group, state, current) {
       if (state.announced === current) return;
@@ -1196,7 +1229,7 @@
           group: group,
           previous: previous,
           current: current,
-          key: current && current.getAttribute(attr.key)
+          key: current && current.id
         }
       });
     }
@@ -1210,15 +1243,15 @@
       var revision = ++state.revision;
       var active = group.getAttribute(attr.active);
       var classes = group.getAttribute("class");
-      var keys = members.map(function(member2) {
-        return member2.getAttribute(attr.key);
+      var ids = members.map(function(member2) {
+        return member2.id;
       });
       var conditions = members.map(function(member2) {
         return member2.getAttribute(attr.when);
       });
       var valid = function valid2() {
         return groups.get(group) === state && state.revision === revision && group.isConnected && group.hasAttribute(attr.group) && group.getAttribute(attr.active) === active && group.getAttribute("class") === classes && groupMembers(group).length === members.length && members.every(function(member2, index) {
-          return presentElements.has(member2) && member2.isConnected && member2.closest(groupSelector) === group && member2.getAttribute(attr.key) === keys[index] && member2.getAttribute(attr.when) === conditions[index];
+          return presentElements.has(member2) && member2.isConnected && member2.closest(groupSelector) === group && member2.id === ids[index] && member2.getAttribute(attr.when) === conditions[index];
         });
       };
       var _iterator0 = _createForOfIteratorHelper(changes), _step0;
@@ -1236,8 +1269,8 @@
           if (!allowed) {
             if (state.revision === revision) {
               var _state$selected;
-              var key = ((_state$selected = state.selected) === null || _state$selected === void 0 ? void 0 : _state$selected.getAttribute(attr.key)) || "";
-              if (group.getAttribute(attr.active) !== key) group.setAttribute(attr.active, key);
+              var id = ((_state$selected = state.selected) === null || _state$selected === void 0 ? void 0 : _state$selected.id) || "";
+              if (group.getAttribute(attr.active) !== id) group.setAttribute(attr.active, id);
             }
             return false;
           }

@@ -44,4 +44,6 @@ $ae.init({
 
 The default size thresholds are `compact: 0`, `small: 480`, `medium: 768`, `large: 1024`, `xl: 1280`, and `xxl: 1600`. The default shape thresholds are `vertical: 0.8` and `horizontal: 1.25`. `adaptiveParams.experienceScale` also contains `near: 1` and `far: 1.5`, but the current class calculation does not use those values.
 
+Parameter groups must be objects. Minimum sizes must be finite nonnegative numbers; ratio and experience boundaries must be finite positive numbers, with the lower boundary less than the upper boundary. Invalid values record `2026` and retain defaults; reversed boundaries restore the default pair. Standard size names with thresholds out of ascending order also record `2026`, while preserving the configured thresholds. Custom size names remain supported.
+
 The generated `aellux.ext.adaptive.css` supplies state-based utility classes. Load it when using those utilities outside the `full` runtime.

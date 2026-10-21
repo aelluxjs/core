@@ -1105,7 +1105,7 @@
       var getOwnPropertySymbolsModule = require_object_get_own_property_symbols();
       var anObject = require_an_object();
       var concat = uncurryThis([].concat);
-      module.exports = getBuiltIn("Reflect", "ownKeys") || function ownKeys2(it) {
+      module.exports = getBuiltIn("Reflect", "ownKeys") || function ownKeys3(it) {
         var keys = getOwnPropertyNamesModule.f(anObject(it));
         var getOwnPropertySymbols = getOwnPropertySymbolsModule.f;
         return getOwnPropertySymbols ? concat(keys, getOwnPropertySymbols(it)) : keys;
@@ -1118,11 +1118,11 @@
     "node_modules/core-js/internals/copy-constructor-properties.js": function(exports, module) {
       "use strict";
       var hasOwn = require_has_own_property();
-      var ownKeys2 = require_own_keys();
+      var ownKeys3 = require_own_keys();
       var getOwnPropertyDescriptorModule = require_object_get_own_property_descriptor();
       var definePropertyModule = require_object_define_property();
       module.exports = function(target, source, exceptions) {
-        var keys = ownKeys2(source);
+        var keys = ownKeys3(source);
         var defineProperty = definePropertyModule.f;
         var getOwnPropertyDescriptor = getOwnPropertyDescriptorModule.f;
         for (var i = 0; i < keys.length; i++) {
@@ -10021,7 +10021,7 @@
       "use strict";
       var $ = require_export();
       var DESCRIPTORS = require_descriptors();
-      var ownKeys2 = require_own_keys();
+      var ownKeys3 = require_own_keys();
       var toIndexedObject = require_to_indexed_object();
       var getOwnPropertyDescriptorModule = require_object_get_own_property_descriptor();
       var createProperty = require_create_property();
@@ -10029,7 +10029,7 @@
         getOwnPropertyDescriptors: function getOwnPropertyDescriptors(object) {
           var O = toIndexedObject(object);
           var getOwnPropertyDescriptor = getOwnPropertyDescriptorModule.f;
-          var keys = ownKeys2(O);
+          var keys = ownKeys3(O);
           var result = {};
           var index = 0;
           var key, descriptor;
@@ -12201,9 +12201,9 @@
     "node_modules/core-js/modules/es.reflect.own-keys.js": function() {
       "use strict";
       var $ = require_export();
-      var ownKeys2 = require_own_keys();
+      var ownKeys3 = require_own_keys();
       $({ target: "Reflect", stat: true }, {
-        ownKeys: ownKeys2
+        ownKeys: ownKeys3
       });
     }
   });
@@ -21880,36 +21880,88 @@
     }
   });
 
-  // src/internal/create-mount-helper.js
-  function _slicedToArray(r, e) {
-    return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray3(r, e) || _nonIterableRest();
+  // src/internal/report-configuration.js
+  function reportConfiguration(api, name, context) {
+    if (context.element && context.attribute && !("value" in context)) context.value = context.element.getAttribute(context.attribute);
+    return api.diagnostics.warn(api.diagnostics[name], context);
   }
-  function _nonIterableRest() {
-    throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+  function diagnosePresentTarget(api, element, target, attribute, value) {
+    if (!value || /[\s#]/.test(value.replace(/^#/, ""))) return false;
+    if (target && target.hasAttribute(api.attr("present"))) return true;
+    reportConfiguration(api, "WARN_CONFIGURATION_TARGET", {
+      extension: "present",
+      element: element,
+      attribute: attribute,
+      value: value,
+      reason: target ? "Target is not a Present container." : "Target element was not found.",
+      suggestion: "Use one existing Present element ID, optionally prefixed with #, and mount it before interacting."
+    });
+    return false;
   }
-  function _iterableToArrayLimit(r, l) {
-    var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
-    if (null != t) {
-      var e, n, i, u, a = [], f = true, o = false;
-      try {
-        if (i = (t = t.call(r)).next, 0 === l) {
-          if (Object(t) !== t) return;
-          f = false;
-        } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = true) ;
-      } catch (r2) {
-        o = true, n = r2;
-      } finally {
-        try {
-          if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return;
-        } finally {
-          if (o) throw n;
-        }
-      }
-      return a;
+  var init_report_configuration = __esm({
+    "src/internal/report-configuration.js": function() {
+      /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
     }
+  });
+
+  // src/internal/validate-declarations.js
+  function _typeof2(o) {
+    "@babel/helpers - typeof";
+    return _typeof2 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
+      return typeof o2;
+    } : function(o2) {
+      return o2 && "function" == typeof Symbol && o2.constructor === Symbol && o2 !== Symbol.prototype ? "symbol" : typeof o2;
+    }, _typeof2(o);
   }
-  function _arrayWithHoles(r) {
-    if (Array.isArray(r)) return r;
+  function ownKeys(e, r) {
+    var t = Object.keys(e);
+    if (Object.getOwnPropertySymbols) {
+      var o = Object.getOwnPropertySymbols(e);
+      r && (o = o.filter(function(r2) {
+        return Object.getOwnPropertyDescriptor(e, r2).enumerable;
+      })), t.push.apply(t, o);
+    }
+    return t;
+  }
+  function _objectSpread(e) {
+    for (var r = 1; r < arguments.length; r++) {
+      var t = null != arguments[r] ? arguments[r] : {};
+      r % 2 ? ownKeys(Object(t), true).forEach(function(r2) {
+        _defineProperty(e, r2, t[r2]);
+      }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function(r2) {
+        Object.defineProperty(e, r2, Object.getOwnPropertyDescriptor(t, r2));
+      });
+    }
+    return e;
+  }
+  function _defineProperty(e, r, t) {
+    return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: true, configurable: true, writable: true }) : e[r] = t, e;
+  }
+  function _toPropertyKey(t) {
+    var i = _toPrimitive(t, "string");
+    return "symbol" == _typeof2(i) ? i : i + "";
+  }
+  function _toPrimitive(t, r) {
+    if ("object" != _typeof2(t) || !t) return t;
+    var e = t[Symbol.toPrimitive];
+    if (void 0 !== e) {
+      var i = e.call(t, r || "default");
+      if ("object" != _typeof2(i)) return i;
+      throw new TypeError("@@toPrimitive must return a primitive value.");
+    }
+    return ("string" === r ? String : Number)(t);
+  }
+  function _toConsumableArray2(r) {
+    return _arrayWithoutHoles2(r) || _iterableToArray2(r) || _unsupportedIterableToArray3(r) || _nonIterableSpread2();
+  }
+  function _nonIterableSpread2() {
+    throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+  }
+  function _iterableToArray2(r) {
+    if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
+  }
+  function _arrayWithoutHoles2(r) {
+    if (Array.isArray(r)) return _arrayLikeToArray3(r);
   }
   function _createForOfIteratorHelper3(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
@@ -21942,6 +21994,12 @@
       }
     } };
   }
+  function _slicedToArray(r, e) {
+    return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray3(r, e) || _nonIterableRest();
+  }
+  function _nonIterableRest() {
+    throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+  }
   function _unsupportedIterableToArray3(r, a) {
     if (r) {
       if ("string" == typeof r) return _arrayLikeToArray3(r, a);
@@ -21950,6 +22008,455 @@
     }
   }
   function _arrayLikeToArray3(r, a) {
+    (null == a || a > r.length) && (a = r.length);
+    for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
+    return n;
+  }
+  function _iterableToArrayLimit(r, l) {
+    var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
+    if (null != t) {
+      var e, n, i, u, a = [], f = true, o = false;
+      try {
+        if (i = (t = t.call(r)).next, 0 === l) {
+          if (Object(t) !== t) return;
+          f = false;
+        } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = true) ;
+      } catch (r2) {
+        o = true, n = r2;
+      } finally {
+        try {
+          if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return;
+        } finally {
+          if (o) throw n;
+        }
+      }
+      return a;
+    }
+  }
+  function _arrayWithHoles(r) {
+    if (Array.isArray(r)) return r;
+  }
+  function validateDeclarations(root, scope) {
+    var extensionNames = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : null;
+    var method = arguments.length > 3 && arguments[3] !== void 0 ? arguments[3] : "mount";
+    var api = root.AelluxJs;
+    if (api.options.environment !== "development") return;
+    var selected = extensionNames === null ? null : new Set((Array.isArray(extensionNames) ? extensionNames : [extensionNames]).map(utils_name_case_default.fromCamelCase));
+    var attr = function attr2(name2) {
+      return api.attr(name2);
+    };
+    var prefix = attr("");
+    var owners = /* @__PURE__ */ new Map();
+    for (var _i = 0, _Object$entries = Object.entries(attributesByExtension); _i < _Object$entries.length; _i++) {
+      var _Object$entries$_i = _slicedToArray(_Object$entries[_i], 2), extension = _Object$entries$_i[0], names = _Object$entries$_i[1];
+      var _iterator = _createForOfIteratorHelper3(names.split(" ")), _step;
+      try {
+        for (_iterator.s(); !(_step = _iterator.n()).done; ) {
+          var name = _step.value;
+          owners.set(attr(name), extension);
+        }
+      } catch (err) {
+        _iterator.e(err);
+      } finally {
+        _iterator.f();
+      }
+    }
+    var known = new Set([].concat(_toConsumableArray2(owners.keys()), _toConsumableArray2(coreAttributes.split(" ").map(attr)), _toConsumableArray2(Object.keys(api.registry.preferenceMediaQueries).map(function(name2) {
+      return attr(utils_name_case_default.fromCamelCase(name2));
+    }))));
+    for (var _i2 = 0, _arr = [].concat(_toConsumableArray2(Object.values(api.registry.extMounters)), _toConsumableArray2(Object.values(api.registry.lazyExtSelectors))); _i2 < _arr.length; _i2++) {
+      var selector = _arr[_i2];
+      var _iterator2 = _createForOfIteratorHelper3(selector.match(/\[[^\s\]~|^$*!=]+/g) || []), _step2;
+      try {
+        for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
+          var match = _step2.value;
+          known.add(match.slice(1));
+        }
+      } catch (err) {
+        _iterator2.e(err);
+      } finally {
+        _iterator2.f();
+      }
+    }
+    var elements = [].concat(_toConsumableArray2(scope.nodeType === 1 ? [scope] : []), _toConsumableArray2(scope.querySelectorAll("*")));
+    var _iterator3 = _createForOfIteratorHelper3(elements), _step3;
+    try {
+      var _loop = function _loop2() {
+        var _element$parentElemen, _api$ext$anchor;
+        var element = _step3.value;
+        var has = function has2(name2) {
+          return element.hasAttribute(attr(name2));
+        };
+        var value = function value2(name2) {
+          return element.getAttribute(attr(name2));
+        };
+        var report = function report2(name2, extension2, attribute, reason, suggestion) {
+          var extra = arguments.length > 5 && arguments[5] !== void 0 ? arguments[5] : {};
+          return reportConfiguration(api, name2, _objectSpread({
+            extension: extension2,
+            element: element,
+            attribute: attr(attribute),
+            reason: reason,
+            suggestion: suggestion
+          }, extra));
+        };
+        var invalid = function invalid2(extension2, name2, reason, suggestion) {
+          var code = arguments.length > 4 && arguments[4] !== void 0 ? arguments[4] : "WARN_CONFIGURATION_VALUE";
+          return report(code, extension2, name2, reason, suggestion);
+        };
+        var _iterator4 = _createForOfIteratorHelper3(element.attributes), _step4;
+        try {
+          var _loop22 = function _loop23() {
+            var attribute = _step4.value;
+            var owner = owners.get(attribute.name);
+            if (selected && (!owner || !selected.has(owner))) return 1;
+            if (!selected && attribute.name.startsWith(prefix) && !known.has(attribute.name)) {
+              var candidate = _toConsumableArray2(known).find(function(name2) {
+                return oneEditApart(attribute.name, name2);
+              });
+              if (candidate) reportConfiguration(api, "WARN_ATTRIBUTE_UNKNOWN", {
+                extension: owners.get(candidate) || "core",
+                element: element,
+                attribute: attribute.name,
+                value: attribute.value,
+                reason: "Unknown Aellux attribute.",
+                suggestion: "Check the spelling; did you mean ".concat(candidate, "?")
+              });
+            }
+          };
+          for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
+            if (_loop22()) continue;
+          }
+        } catch (err) {
+          _iterator4.e(err);
+        } finally {
+          _iterator4.f();
+        }
+        for (var _i3 = 0, _Object$entries2 = Object.entries(activation); _i3 < _Object$entries2.length; _i3++) {
+          var _api$ext$key;
+          var _Object$entries2$_i = _slicedToArray(_Object$entries2[_i3], 2), _extension = _Object$entries2$_i[0], declarations = _Object$entries2$_i[1];
+          if (selected && !selected.has(_extension)) continue;
+          var declaration = declarations.split(" ").find(function(name2) {
+            return has(name2) && (name2 !== "scrollbox-snap" || value(name2) !== "false");
+          });
+          if (!declaration) continue;
+          if (_extension === "scrollbox-snap" && !has("scrollbox")) invalid(_extension, "scrollbox-snap", "Snap requires Scrollbox on the same element.", "Add data-ae-scrollbox to the Snap container.", "WARN_CONFIGURATION_STRUCTURE");
+          var key = utils_name_case_default.toCamelCase(_extension);
+          if (!((_api$ext$key = api.ext[key]) !== null && _api$ext$key !== void 0 && _api$ext$key.initialized)) {
+            report("WARN_EXTENSION_REQUIRED", _extension, declaration, "The declared behavior's Extension is not initialized.", "Register ".concat(_extension, ' before mounting, await $ae.wait("').concat(_extension, '"), and check earlier load diagnostics.'));
+            continue;
+          }
+          if (_extension === "present") validatePresent();
+          if (_extension === "anchor") validateAnchor();
+          if (_extension === "scrollbox") validateScrollbox();
+          if (_extension === "scrollbox-snap") validateSnap();
+          if (_extension === "focus") {
+            if (value("focus") && value("focus") !== "next") invalid(_extension, "focus", "Unknown Focus mode.", "Use next for Enter navigation, or remove the attribute.");
+            if (value("focus") === "next" && !element.matches("input:not([type]),input[type=text],input[type=search],input[type=email],input[type=url],input[type=tel],input[type=password],input[type=number],textarea,[contenteditable]:not([contenteditable=false])")) invalid(_extension, "focus", "Enter navigation is declared on a non-text-entry element.", "Apply data-ae-focus=next to a text input, textarea or editable element.");
+          }
+          if (_extension === "point" && value("point") !== "" && (!/^\d+$/.test(value("point")) || !Number.isSafeInteger(Number(value("point"))))) invalid(_extension, "point", "Pointer count must be a nonnegative integer.", "Use an integer such as 1; 0 disables pointer association.");
+          if (_extension === "ajax-href") {
+            try {
+              if (!value("ajax-href").trim() || !root.document.querySelector(value("ajax-href"))) invalid(_extension, "ajax-href", "No current content matches the AJAX selector.", "Provide a CSS selector present in both the current page and the response.");
+            } catch (_) {
+              invalid(_extension, "ajax-href", "The AJAX selector is invalid.", "Provide a valid CSS selector such as #content.");
+            }
+          }
+        }
+        if ((!selected || selected.has("scrollbox")) && has("scrollbox-elastic") && value("scrollbox-elastic") !== "false" && !((_element$parentElemen = element.parentElement) !== null && _element$parentElemen !== void 0 && _element$parentElemen.hasAttribute(attr("scrollbox")))) invalid("scrollbox", "scrollbox-elastic", "Elastic wrapper must be a direct child of Scrollbox.", "Place exactly one marked wrapper directly inside data-ae-scrollbox.", "WARN_CONFIGURATION_STRUCTURE");
+        if ((!selected || selected.has("scrollbox-snap")) && has("snap-item") && !element.closest("[".concat(attr("scrollbox"), "]"))) invalid("scrollbox-snap", "snap-item", "Snap item has no Scrollbox ancestor.", "Place snap items inside a Scrollbox with Snap enabled.", "WARN_CONFIGURATION_STRUCTURE");
+        if ((!selected || selected.has("anchor")) && has("present-group-anchor") && !((_api$ext$anchor = api.ext.anchor) !== null && _api$ext$anchor !== void 0 && _api$ext$anchor.initialized)) report("WARN_EXTENSION_REQUIRED", "anchor", "present-group-anchor", "The group association requires Anchor.", "Register and initialize Anchor, and reference an existing Anchor ID.");
+        if (!selected && has("maxfps") && (!value("maxfps").trim() || !Number.isFinite(Number(value("maxfps"))) || Number(value("maxfps")) <= 0)) invalid("core", "maxfps", "Frame rate must be finite and greater than zero.", "Use a positive number or remove the attribute.", "WARN_LAYOUT_MAX_FPS_INVALID");
+        if (!selected || selected.has("present") || selected.has("anchor")) validateCSS();
+        function validatePresent() {
+          if (has("present") && value("present").trim().split(/\s+/).some(function(token) {
+            return token && !["opacity", "transform", "height", "width"].includes(token);
+          })) invalid("present", "present", "Unknown animated Present property.", "Use opacity, transform, height, width, all, or an empty value to disable motion.");
+          if (has("present-when") && /\s/.test(value("present-when"))) invalid("present", "present-when", "A group condition must be one class token.", "Use one class name without spaces or a leading dot.", "WARN_PRESENT_GROUP_SELECTION");
+          for (var _i4 = 0, _arr2 = [["trigger", ["", "toggle", "pop", "unpop"]], ["trigger-on", ["", "click", "hover"]]]; _i4 < _arr2.length; _i4++) {
+            var _arr2$_i = _slicedToArray(_arr2[_i4], 2), _name = _arr2$_i[0], allowed = _arr2$_i[1];
+            if (has(_name) && !allowed.includes(_name === "trigger" ? value(_name).toLowerCase() : value(_name))) invalid("present", _name, "Unknown Present control value.", "Use ".concat(allowed.filter(Boolean).join(", "), "."));
+          }
+          if (has("trigger") || has("dismiss")) {
+            var _name2 = value("dismiss") ? "dismiss" : "target";
+            var reference = value(_name2);
+            if (reference) diagnosePresentTarget(api, element, root.document.getElementById(reference.replace(/^#/, "")), attr(_name2), reference);
+            else if (!element.closest("[".concat(attr("present"), "]"))) invalid("present", has("trigger") ? "trigger" : "dismiss", "Control has no target or enclosing Present container.", "Set data-ae-target to an existing Present ID or place the control inside its Present container.", "WARN_CONFIGURATION_TARGET");
+            if (element.tabIndex < 0 && !element.matches(":disabled,[inert]")) invalid("present", has("trigger") ? "trigger" : "dismiss", "Control is not reachable with the keyboard.", "Prefer a native button; custom controls need focusability and appropriate keyboard activation.", "WARN_CONTROL_ACCESSIBILITY");
+          }
+          if (has("auto-unpop") && value("auto-unpop") && !/^(?:\d+(?:\.\d+)?|\.\d+)(?:ms|s)?$/.test(value("auto-unpop").trim())) invalid("present", "auto-unpop", "Auto-unpop duration is invalid.", "Use a nonnegative duration such as 250ms or 2s.");
+          if (has("present-group")) {
+            var members = _toConsumableArray2(element.querySelectorAll("[".concat(attr("present"), "]"))).filter(function(member2) {
+              return member2.closest("[".concat(attr("present-group"), "]")) === element;
+            });
+            if (!members.some(function(member2) {
+              return member2.id;
+            })) invalid("present", "present-group", "Group has no identifiable Present members.", "Add Present descendants with unique native IDs.", "WARN_PRESENT_GROUP_SELECTION");
+            var _iterator5 = _createForOfIteratorHelper3(members), _step5;
+            try {
+              for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
+                var member = _step5.value;
+                if (!member.id) reportConfiguration(api, "WARN_PRESENT_GROUP_SELECTION", {
+                  extension: "present",
+                  element: member,
+                  attribute: "id",
+                  value: member.id,
+                  reason: "Present Group member has no ID.",
+                  suggestion: "Assign a unique native ID so the group can select this member."
+                });
+              }
+            } catch (err) {
+              _iterator5.e(err);
+            } finally {
+              _iterator5.f();
+            }
+          }
+        }
+        function validateAnchor() {
+          var pivots = new Set("top-left top-center top-right center-left center center-right bottom-left bottom-center bottom-right".split(" "));
+          var pairs = value("anchor").split(",");
+          if (!pairs.every(function(token) {
+            var pair = token.trim().toLowerCase().split(":");
+            return pair.length === 2 && pair.every(function(pivot) {
+              return pivots.has(pivot.trim());
+            });
+          })) invalid("anchor", "anchor", "Anchor pivot pair is invalid.", "Use target:self pairs such as bottom-center:top-center, separated by commas.");
+          if (has("anchor-match") && value("anchor-match").trim().split(/\s+/).some(function(token) {
+            return !["width", "height"].includes(token);
+          })) invalid("anchor", "anchor-match", "Unknown matching dimension.", "Use width, height, or width height.", "WARN_ANCHOR_MATCH");
+          var reference = value("anchor-target");
+          if (!reference) return;
+          if (element.id && _toConsumableArray2(root.document.querySelectorAll("[".concat(attr("present-group-anchor"), "]"))).some(function(group) {
+            return group.getAttribute(attr("present-group-anchor")).replace(/^#/, "") === element.id;
+          })) return;
+          var target;
+          try {
+            target = root.document.getElementById(reference.replace(/^#/, "")) || root.document.querySelector(reference);
+          } catch (_) {
+          }
+          if (!target) invalid("anchor", "anchor-target", "Anchor target does not exist or the selector is invalid.", "Use an existing target ID or a valid CSS selector.", "WARN_CONFIGURATION_TARGET");
+          else if (method === "update" && element.getClientRects().length && !target.getClientRects().length && !target.closest("[".concat(attr("present"), "],[hidden]"))) invalid("anchor", "anchor-target", "The explicitly updated Anchor target cannot currently be measured.", "Reveal the target before requesting placement, or update again after it becomes measurable.", "WARN_CONFIGURATION_TARGET");
+        }
+        function validateScrollbox() {
+          if (value("scrollbox").trim().toLowerCase() !== "pointer" || !element.getClientRects().length) return;
+          var style = root.getComputedStyle(element);
+          var blockedX = element.scrollWidth > element.clientWidth + 1 && !["auto", "scroll"].includes(style.overflowX);
+          var blockedY = element.scrollHeight > element.clientHeight + 1 && !["auto", "scroll"].includes(style.overflowY);
+          var usableX = element.scrollWidth > element.clientWidth + 1 && ["auto", "scroll"].includes(style.overflowX);
+          var usableY = element.scrollHeight > element.clientHeight + 1 && ["auto", "scroll"].includes(style.overflowY);
+          if ((blockedX || blockedY) && !usableX && !usableY) invalid("scrollbox", "scrollbox", "Content overflows but CSS disables the pointer scrolling axes.", "Set overflow:auto or overflow:scroll on the intended axis.", "WARN_CONFIGURATION_STYLE");
+        }
+        function validateSnap() {
+          if (!["", "horizontal", "vertical", "false"].includes(value("scrollbox-snap"))) invalid("scrollbox-snap", "scrollbox-snap", "Unknown snap axis.", "Use horizontal, vertical, or false.");
+          var _iterator6 = _createForOfIteratorHelper3(element.querySelectorAll("[".concat(attr("snap-item"), "]"))), _step6;
+          try {
+            for (_iterator6.s(); !(_step6 = _iterator6.n()).done; ) {
+              var item = _step6.value;
+              if (item.closest("[".concat(attr("scrollbox"), "]")) !== element) continue;
+              var alignment = item.getAttribute(attr("snap-item"));
+              if (!["", "start", "end", "center", "left", "right", "top", "bottom"].includes(alignment)) reportConfiguration(api, "WARN_CONFIGURATION_VALUE", {
+                extension: "scrollbox-snap",
+                element: item,
+                attribute: attr("snap-item"),
+                value: alignment,
+                reason: "Unknown snap item alignment.",
+                suggestion: "Use start, center, or end (left/right/top/bottom are aliases)."
+              });
+            }
+          } catch (err) {
+            _iterator6.e(err);
+          } finally {
+            _iterator6.f();
+          }
+        }
+        function validateCSS() {
+          var checkAnchor = has("anchor") && (!selected || selected.has("anchor"));
+          var checkPresent = (has("present") || has("present-motion")) && (!selected || selected.has("present"));
+          if (!checkAnchor && !checkPresent) return;
+          var extension2 = checkAnchor ? "anchor" : "present";
+          var style = root.getComputedStyle(element);
+          var durations = [].concat(_toConsumableArray2(checkPresent ? ["--ae-pop-duration", "--ae-unpop-duration"] : []), _toConsumableArray2(checkAnchor ? ["--ae-anchor-switch-duration"] : []));
+          var _iterator7 = _createForOfIteratorHelper3(durations), _step7;
+          try {
+            for (_iterator7.s(); !(_step7 = _iterator7.n()).done; ) {
+              var _root$CSS2;
+              var _name4 = _step7.value;
+              var _value2 = (element.style.getPropertyValue(_name4) || style.getPropertyValue(_name4)).trim();
+              if (_value2 && (_root$CSS2 = root.CSS) !== null && _root$CSS2 !== void 0 && _root$CSS2.supports && !root.CSS.supports("transition-duration", _value2)) reportConfiguration(api, "WARN_CONFIGURATION_STYLE", {
+                extension: extension2,
+                element: element,
+                attribute: "style",
+                value: _value2,
+                reason: "Invalid duration in ".concat(_name4, "."),
+                suggestion: "Use a nonnegative CSS time such as 250ms or 0s."
+              });
+            }
+          } catch (err) {
+            _iterator7.e(err);
+          } finally {
+            _iterator7.f();
+          }
+          for (var _i5 = 0, _arr3 = checkPresent ? ["--ae-pop-low-steps", "--ae-unpop-low-steps"] : []; _i5 < _arr3.length; _i5++) {
+            var _root$CSS;
+            var _name3 = _arr3[_i5];
+            var _value = element.style.getPropertyValue(_name3).trim();
+            if (_value && (_root$CSS = root.CSS) !== null && _root$CSS !== void 0 && _root$CSS.supports && !root.CSS.supports("animation-timing-function", "steps(".concat(_value, ")"))) reportConfiguration(api, "WARN_CONFIGURATION_VALUE", {
+              extension: extension2,
+              element: element,
+              attribute: "style",
+              value: _value,
+              reason: "Invalid step count in ".concat(_name3, "."),
+              suggestion: "Use a positive integer step count."
+            });
+          }
+          if (!element.getClientRects().length) return;
+          if (checkPresent && has("present") && element.classList.contains(api.className("present-grid")) && /(?:^|\s)(height|width)(?:\s|$)/.test(value("present")) && !["grid", "inline-grid"].includes(style.display)) invalid(extension2, "present", "Present's size motion requires its grid layout stylesheet.", "Load the Present stylesheet, check CSP, and preserve the container's grid display.", "WARN_CONFIGURATION_STYLE");
+          if (checkAnchor && element.classList.contains(api.className("anchored")) && !["absolute", "fixed"].includes(style.position)) invalid(extension2, "anchor", "Effective CSS prevents Anchor's absolute positioning.", "Check the weak stylesheet, CSP and overriding position rules.", "WARN_CONFIGURATION_STYLE");
+          if (checkPresent && has("present") && element.hidden && style.display !== "none" && !invisible(element)) invalid(extension2, "present", "CSS makes a hidden Present container render.", "Preserve display:none for hidden Present containers; check overriding display rules.", "WARN_CONFIGURATION_STYLE");
+        }
+      };
+      for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
+        _loop();
+      }
+    } catch (err) {
+      _iterator3.e(err);
+    } finally {
+      _iterator3.f();
+    }
+    function invisible(element) {
+      for (var node = element; node; node = node.parentElement) {
+        var style = root.getComputedStyle(node);
+        if (style.visibility !== "visible" || Number(style.opacity) === 0) return true;
+      }
+      return false;
+    }
+  }
+  function oneEditApart(left, right) {
+    if (Math.abs(left.length - right.length) > 1) return false;
+    var i = 0, j = 0, edits = 0;
+    while (i < left.length && j < right.length) {
+      if (left[i] === right[j]) {
+        i++;
+        j++;
+        continue;
+      }
+      if (++edits > 1) return false;
+      if (left[i] === right[j + 1] && left[i + 1] === right[j] && left.length === right.length) {
+        i += 2;
+        j += 2;
+      } else if (left.length > right.length) i++;
+      else if (right.length > left.length) j++;
+      else {
+        i++;
+        j++;
+      }
+    }
+    return edits + Number(i < left.length || j < right.length) === 1;
+  }
+  var attributesByExtension, coreAttributes, activation;
+  var init_validate_declarations = __esm({
+    "src/internal/validate-declarations.js": function() {
+      init_report_configuration();
+      init_utils_name_case();
+      /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+      attributesByExtension = {
+        present: "present present-group present-active present-when present-motion trigger trigger-on dismiss target auto-unpop unpop-on-outside low-hardware present-group-anchor",
+        anchor: "anchor anchor-target anchor-match anchor-style",
+        scrollbox: "scrollbox scrollbox-wheel-horizontal scrollbox-momentum scrollbox-elastic scrollbar scrollbar-vertical scrollbar-horizontal",
+        "scrollbox-snap": "scrollbox-snap snap-item",
+        focus: "focus",
+        point: "point",
+        adaptive: "adaptive",
+        "ajax-href": "ajax-href",
+        preference: "preference option label next prev ready",
+        feedback: "feedback target-message target-transform"
+      };
+      coreAttributes = "maxfps wait-mounted ext ext-style dep load-when builds load-style weak-style legacy esm theme-color";
+      activation = {
+        present: "present present-group trigger dismiss",
+        anchor: "anchor",
+        scrollbox: "scrollbox",
+        "scrollbox-snap": "scrollbox-snap",
+        focus: "focus",
+        point: "point",
+        adaptive: "adaptive",
+        "ajax-href": "ajax-href",
+        preference: "preference",
+        feedback: "feedback"
+      };
+    }
+  });
+
+  // src/internal/create-mount-helper.js
+  function _slicedToArray2(r, e) {
+    return _arrayWithHoles2(r) || _iterableToArrayLimit2(r, e) || _unsupportedIterableToArray4(r, e) || _nonIterableRest2();
+  }
+  function _nonIterableRest2() {
+    throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+  }
+  function _iterableToArrayLimit2(r, l) {
+    var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
+    if (null != t) {
+      var e, n, i, u, a = [], f = true, o = false;
+      try {
+        if (i = (t = t.call(r)).next, 0 === l) {
+          if (Object(t) !== t) return;
+          f = false;
+        } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = true) ;
+      } catch (r2) {
+        o = true, n = r2;
+      } finally {
+        try {
+          if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return;
+        } finally {
+          if (o) throw n;
+        }
+      }
+      return a;
+    }
+  }
+  function _arrayWithHoles2(r) {
+    if (Array.isArray(r)) return r;
+  }
+  function _createForOfIteratorHelper4(r, e) {
+    var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
+    if (!t) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray4(r)) || e && r && "number" == typeof r.length) {
+        t && (r = t);
+        var _n = 0, F = function F2() {
+        };
+        return { s: F, n: function n() {
+          return _n >= r.length ? { done: true } : { done: false, value: r[_n++] };
+        }, e: function e2(r2) {
+          throw r2;
+        }, f: F };
+      }
+      throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+    }
+    var o, a = true, u = false;
+    return { s: function s() {
+      t = t.call(r);
+    }, n: function n() {
+      var r2 = t.next();
+      return a = r2.done, r2;
+    }, e: function e2(r2) {
+      u = true, o = r2;
+    }, f: function f() {
+      try {
+        a || null == t.return || t.return();
+      } finally {
+        if (u) throw o;
+      }
+    } };
+  }
+  function _unsupportedIterableToArray4(r, a) {
+    if (r) {
+      if ("string" == typeof r) return _arrayLikeToArray4(r, a);
+      var t = {}.toString.call(r).slice(8, -1);
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray4(r, a) : void 0;
+    }
+  }
+  function _arrayLikeToArray4(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
@@ -22089,6 +22596,7 @@
               _context.n = 2;
               return AelluxJsMounted(rootElement, "update", extensionNames);
             case 2:
+              validateDeclarations(root, rootElement, extensionNames, "update");
               return _context.a(2, true);
           }
         }, _callee);
@@ -22131,7 +22639,7 @@
           while (1) switch (_context3.p = _context3.n) {
             case 0:
               hasDetachedElement = false;
-              _iterator = _createForOfIteratorHelper3(mountedElements.keys());
+              _iterator = _createForOfIteratorHelper4(mountedElements.keys());
               _context3.p = 1;
               _iterator.s();
             case 2:
@@ -22202,7 +22710,7 @@
               });
               _context4.p = 2;
               allLinks = findElements(rootElement, "link[rel='aelluxjs-ext']");
-              _iterator2 = _createForOfIteratorHelper3(allLinks);
+              _iterator2 = _createForOfIteratorHelper4(allLinks);
               try {
                 for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
                   link = _step2.value;
@@ -22230,7 +22738,7 @@
                 _context4.n = 6;
                 break;
               }
-              _Object$entries$_i = _slicedToArray(_Object$entries[_i], 2), key = _Object$entries$_i[0], options = _Object$entries$_i[1];
+              _Object$entries$_i = _slicedToArray2(_Object$entries[_i], 2), key = _Object$entries$_i[0], options = _Object$entries$_i[1];
               if (!options.loadWhen) {
                 _context4.n = 4;
                 break;
@@ -22249,6 +22757,7 @@
               _context4.n = 8;
               return AelluxJsMount(rootElement, extensionNames, newlyMounted);
             case 8:
+              validateDeclarations(root, rootElement, extensionNames);
               _context4.n = 10;
               break;
             case 9:
@@ -22293,11 +22802,11 @@
                   return fromCamelCase2(_);
                 });
                 for (_i2 = 0, _Object$entries2 = Object.entries(AelluxJs2.registry.extMounters); _i2 < _Object$entries2.length; _i2++) {
-                  _Object$entries2$_i = _slicedToArray(_Object$entries2[_i2], 2), key = _Object$entries2$_i[0], selectorString = _Object$entries2$_i[1];
+                  _Object$entries2$_i = _slicedToArray2(_Object$entries2[_i2], 2), key = _Object$entries2$_i[0], selectorString = _Object$entries2$_i[1];
                   if (extensionNames.indexOf(fromCamelCase2(key)) !== -1) filter.push(selectorString);
                 }
                 for (_i3 = 0, _Object$entries3 = Object.entries(AelluxJs2.registry.lazyExtSelectors); _i3 < _Object$entries3.length; _i3++) {
-                  _Object$entries3$_i = _slicedToArray(_Object$entries3[_i3], 2), _key = _Object$entries3$_i[0], _selectorString = _Object$entries3$_i[1];
+                  _Object$entries3$_i = _slicedToArray2(_Object$entries3[_i3], 2), _key = _Object$entries3$_i[0], _selectorString = _Object$entries3$_i[1];
                   if (extensionNames.indexOf(fromCamelCase2(_key)) !== -1) filter.push(_selectorString);
                 }
               }
@@ -22316,7 +22825,7 @@
             case 1:
               candidatesByExtension = /* @__PURE__ */ new Map();
               allElements = findElements(rootElement, filter.join(","));
-              _iterator3 = _createForOfIteratorHelper3(allElements);
+              _iterator3 = _createForOfIteratorHelper4(allElements);
               try {
                 for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
                   element = _step3.value;
@@ -22326,15 +22835,15 @@
                   } else {
                     localExtensionNames = /* @__PURE__ */ new Set();
                     for (_i6 = 0, _Object$entries4 = Object.entries(AelluxJs2.registry.lazyExtSelectors); _i6 < _Object$entries4.length; _i6++) {
-                      _Object$entries4$_i = _slicedToArray(_Object$entries4[_i6], 2), _key2 = _Object$entries4$_i[0], _selector2 = _Object$entries4$_i[1];
+                      _Object$entries4$_i = _slicedToArray2(_Object$entries4[_i6], 2), _key2 = _Object$entries4$_i[0], _selector2 = _Object$entries4$_i[1];
                       if (element.matches(_selector2) && filter.indexOf(_selector2) !== -1) localExtensionNames.add(fromCamelCase2(_key2));
                     }
                     for (_i7 = 0, _Object$entries5 = Object.entries(AelluxJs2.registry.extMounters); _i7 < _Object$entries5.length; _i7++) {
-                      _Object$entries5$_i = _slicedToArray(_Object$entries5[_i7], 2), _key3 = _Object$entries5$_i[0], _selector3 = _Object$entries5$_i[1];
+                      _Object$entries5$_i = _slicedToArray2(_Object$entries5[_i7], 2), _key3 = _Object$entries5$_i[0], _selector3 = _Object$entries5$_i[1];
                       if (element.matches(_selector3) && filter.indexOf(_selector3) !== -1) localExtensionNames.add(fromCamelCase2(_key3));
                     }
                   }
-                  _iterator8 = _createForOfIteratorHelper3(localExtensionNames);
+                  _iterator8 = _createForOfIteratorHelper4(localExtensionNames);
                   try {
                     for (_iterator8.s(); !(_step8 = _iterator8.n()).done; ) {
                       _extensionName2 = _step8.value;
@@ -22359,7 +22868,7 @@
               extensions = Array.from(candidatesByExtension);
               _context5.n = 2;
               return Promise.all(extensions.map(function(_ref) {
-                var _ref2 = _slicedToArray(_ref, 1), extensionName2 = _ref2[0];
+                var _ref2 = _slicedToArray2(_ref, 1), extensionName2 = _ref2[0];
                 return AelluxJs2.wait(extensionName2).then(function(value) {
                   return {
                     value: value
@@ -22372,7 +22881,7 @@
               }));
             case 2:
               loaded = _context5.v;
-              _iterator4 = _createForOfIteratorHelper3(loaded);
+              _iterator4 = _createForOfIteratorHelper4(loaded);
               _context5.p = 3;
               _iterator4.s();
             case 4:
@@ -22414,7 +22923,7 @@
               }
               return _context5.a(3, 13);
             case 11:
-              _extensions$index = _slicedToArray(extensions[index], 1), extensionName = _extensions$index[0];
+              _extensions$index = _slicedToArray2(extensions[index], 1), extensionName = _extensions$index[0];
               mounter = mountMaps.get(toCamelCase2(extensionName));
               if (mounter) {
                 _context5.n = 12;
@@ -22422,10 +22931,10 @@
               }
               return _context5.a(3, 13);
             case 12:
-              _iterator5 = _createForOfIteratorHelper3(mounter);
+              _iterator5 = _createForOfIteratorHelper4(mounter);
               try {
                 for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
-                  _step5$value = _slicedToArray(_step5.value, 2), selector = _step5$value[0], controller = _step5$value[1];
+                  _step5$value = _slicedToArray2(_step5.value, 2), selector = _step5$value[0], controller = _step5$value[1];
                   registrations.push({
                     extensionName: extensionName,
                     selector: selector,
@@ -22463,7 +22972,7 @@
               return _context5.a(3, 32);
             case 17:
               mountableElements = findElements(rootElement, _selector);
-              _iterator6 = _createForOfIteratorHelper3(mountableElements);
+              _iterator6 = _createForOfIteratorHelper4(mountableElements);
               _context5.p = 18;
               _iterator6.s();
             case 19:
@@ -22560,7 +23069,7 @@
               _context5.n = 15;
               break;
             case 33:
-              _iterator7 = _createForOfIteratorHelper3(elementsAffected);
+              _iterator7 = _createForOfIteratorHelper4(elementsAffected);
               _context5.p = 34;
               _iterator7.s();
             case 35:
@@ -22636,7 +23145,7 @@
                 _context6.n = 10;
                 break;
               }
-              _Array$from2$_i = _slicedToArray(_Array$from2[_i8], 2), element = _Array$from2$_i[0], mountIds = _Array$from2$_i[1];
+              _Array$from2$_i = _slicedToArray2(_Array$from2[_i8], 2), element = _Array$from2$_i[0], mountIds = _Array$from2$_i[1];
               inRoot = element === rootElement || rootElement.contains(element);
               detachedInGlobalUnmount = method === UNMOUNT && rootElement === root.document && !element.isConnected;
               if (!(detachedOnly ? element.isConnected || hasPendingMounts(element) : !inRoot && !detachedInGlobalUnmount)) {
@@ -22711,7 +23220,7 @@
                 break;
               }
               registrations.sort(compareUnmountOrder);
-              _iterator9 = _createForOfIteratorHelper3(registrations);
+              _iterator9 = _createForOfIteratorHelper4(registrations);
               _context6.p = 11;
               _iterator9.s();
             case 12:
@@ -22978,35 +23487,36 @@
       init_utils_name_case();
       init_create_controller_helper();
       init_resolve_element_or_id();
+      init_validate_declarations();
       /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
     }
   });
 
   // src/internal/build-mount-map-manager.js
-  function _toConsumableArray2(r) {
-    return _arrayWithoutHoles2(r) || _iterableToArray2(r) || _unsupportedIterableToArray4(r) || _nonIterableSpread2();
+  function _toConsumableArray3(r) {
+    return _arrayWithoutHoles3(r) || _iterableToArray3(r) || _unsupportedIterableToArray5(r) || _nonIterableSpread3();
   }
-  function _nonIterableSpread2() {
+  function _nonIterableSpread3() {
     throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
-  function _iterableToArray2(r) {
+  function _iterableToArray3(r) {
     if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
   }
-  function _arrayWithoutHoles2(r) {
-    if (Array.isArray(r)) return _arrayLikeToArray4(r);
+  function _arrayWithoutHoles3(r) {
+    if (Array.isArray(r)) return _arrayLikeToArray5(r);
   }
-  function _typeof2(o) {
+  function _typeof3(o) {
     "@babel/helpers - typeof";
-    return _typeof2 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
+    return _typeof3 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
       return typeof o2;
     } : function(o2) {
       return o2 && "function" == typeof Symbol && o2.constructor === Symbol && o2 !== Symbol.prototype ? "symbol" : typeof o2;
-    }, _typeof2(o);
+    }, _typeof3(o);
   }
-  function _createForOfIteratorHelper4(r, e) {
+  function _createForOfIteratorHelper5(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
-      if (Array.isArray(r) || (t = _unsupportedIterableToArray4(r)) || e && r && "number" == typeof r.length) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray5(r)) || e && r && "number" == typeof r.length) {
         t && (r = t);
         var _n = 0, F = function F2() {
         };
@@ -23034,14 +23544,14 @@
       }
     } };
   }
-  function _unsupportedIterableToArray4(r, a) {
+  function _unsupportedIterableToArray5(r, a) {
     if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray4(r, a);
+      if ("string" == typeof r) return _arrayLikeToArray5(r, a);
       var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray4(r, a) : void 0;
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray5(r, a) : void 0;
     }
   }
-  function _arrayLikeToArray4(r, a) {
+  function _arrayLikeToArray5(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
@@ -23089,7 +23599,7 @@
       return task;
     }
     function hasRemovedNodes(records) {
-      var _iterator = _createForOfIteratorHelper4(records), _step;
+      var _iterator = _createForOfIteratorHelper5(records), _step;
       try {
         for (_iterator.s(); !(_step = _iterator.n()).done; ) {
           var record = _step.value;
@@ -23103,7 +23613,7 @@
       return false;
     }
     function hasDetachedMountedElement() {
-      var _iterator2 = _createForOfIteratorHelper4(mountedElements.keys()), _step2;
+      var _iterator2 = _createForOfIteratorHelper5(mountedElements.keys()), _step2;
       try {
         for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
           var element = _step2.value;
@@ -23147,7 +23657,10 @@
       var found = elementControllers.get(elementOrId);
       if (found) return found;
       diagnostics.error(diagnostics.ERROR_CONTROLLER_NOT_FOUND, {
-        element: elementOrId
+        element: elementOrId,
+        method: "controller",
+        reason: "No completed mount exposes a controller for this element.",
+        suggestion: "Register the required Extension, await $ae.mount(element), and inspect earlier load or mount diagnostics."
       });
       return null;
     }
@@ -23165,7 +23678,7 @@
         });
         return false;
       }
-      if (!options || _typeof2(options) !== "object" || Array.isArray(options)) return reject("options");
+      if (!options || _typeof3(options) !== "object" || Array.isArray(options)) return reject("options");
       var extensionName = options.extensionName, selector = options.selector, mount = options.mount, unmount = options.unmount, update = options.update, controllers = options.controllers;
       var priority = options.priority === void 0 ? 0 : options.priority;
       if (typeof extensionName !== "string" || !/^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$|^[a-z][a-zA-Z0-9]*$/.test(extensionName)) return reject("extensionName");
@@ -23203,7 +23716,7 @@
         controllers: controllers,
         priority: priority
       });
-      root.AelluxJs.registry.extMounters[key] = _toConsumableArray2(map.keys()).join(",");
+      root.AelluxJs.registry.extMounters[key] = _toConsumableArray3(map.keys()).join(",");
       return manager;
     }
     function remove() {
@@ -23225,14 +23738,14 @@
         maps.delete(key);
         delete root.AelluxJs.registry.extMounters[key];
       } else if (removed) {
-        root.AelluxJs.registry.extMounters[key] = _toConsumableArray2(map.keys()).join(",");
+        root.AelluxJs.registry.extMounters[key] = _toConsumableArray3(map.keys()).join(",");
       }
       return removed;
     }
     function hasMountedRegistration(extensionName, selector) {
       var prefix = "".concat(fromCamelCase2(extensionName), "@");
       var mountId = selector === void 0 ? null : "".concat(prefix).concat(selector);
-      var _iterator3 = _createForOfIteratorHelper4(mountedElements.values()), _step3;
+      var _iterator3 = _createForOfIteratorHelper5(mountedElements.values()), _step3;
       try {
         for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
           var registrations = _step3.value;
@@ -23240,7 +23753,7 @@
             if (registrations.has(mountId)) return true;
             continue;
           }
-          var _iterator4 = _createForOfIteratorHelper4(registrations), _step4;
+          var _iterator4 = _createForOfIteratorHelper5(registrations), _step4;
           try {
             for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
               var id = _step4.value;
@@ -23270,25 +23783,25 @@
   });
 
   // src/internal/create-aria-helper.js
-  function _slicedToArray2(r, e) {
-    return _arrayWithHoles2(r) || _iterableToArrayLimit2(r, e) || _unsupportedIterableToArray5(r, e) || _nonIterableRest2();
+  function _slicedToArray3(r, e) {
+    return _arrayWithHoles3(r) || _iterableToArrayLimit3(r, e) || _unsupportedIterableToArray6(r, e) || _nonIterableRest3();
   }
-  function _nonIterableRest2() {
+  function _nonIterableRest3() {
     throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
-  function _unsupportedIterableToArray5(r, a) {
+  function _unsupportedIterableToArray6(r, a) {
     if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray5(r, a);
+      if ("string" == typeof r) return _arrayLikeToArray6(r, a);
       var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray5(r, a) : void 0;
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray6(r, a) : void 0;
     }
   }
-  function _arrayLikeToArray5(r, a) {
+  function _arrayLikeToArray6(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
   }
-  function _iterableToArrayLimit2(r, l) {
+  function _iterableToArrayLimit3(r, l) {
     var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (null != t) {
       var e, n, i, u, a = [], f = true, o = false;
@@ -23309,16 +23822,16 @@
       return a;
     }
   }
-  function _arrayWithHoles2(r) {
+  function _arrayWithHoles3(r) {
     if (Array.isArray(r)) return r;
   }
-  function _typeof3(o) {
+  function _typeof4(o) {
     "@babel/helpers - typeof";
-    return _typeof3 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
+    return _typeof4 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
       return typeof o2;
     } : function(o2) {
       return o2 && "function" == typeof Symbol && o2.constructor === Symbol && o2 !== Symbol.prototype ? "symbol" : typeof o2;
-    }, _typeof3(o);
+    }, _typeof4(o);
   }
   function createAriaHelper() {
     var elements = /* @__PURE__ */ new WeakMap();
@@ -23393,16 +23906,16 @@
       return {
         set: function set(values) {
           if (released) return false;
-          if (!values || _typeof3(values) !== "object") {
+          if (!values || _typeof4(values) !== "object") {
             throw new TypeError("Invalid ARIA values");
           }
           var updates = Object.entries(values).map(function(_ref) {
-            var _ref2 = _slicedToArray2(_ref, 2), key = _ref2[0], value = _ref2[1];
+            var _ref2 = _slicedToArray3(_ref, 2), key = _ref2[0], value = _ref2[1];
             var name = attributeName(key);
             return [name, attributeValue(name, value)];
           });
           updates.forEach(function(_ref3) {
-            var _ref4 = _slicedToArray2(_ref3, 2), name = _ref4[0], value = _ref4[1];
+            var _ref4 = _slicedToArray3(_ref3, 2), name = _ref4[0], value = _ref4[1];
             if (!record.baseline.has(name)) record.baseline.set(name, element.getAttribute(name));
             handler.values.set(name, value);
             reconcile(element, record, name);
@@ -23444,22 +23957,22 @@
   });
 
   // src/internal/create-css-motion-controller.js
-  function _toConsumableArray3(r) {
-    return _arrayWithoutHoles3(r) || _iterableToArray3(r) || _unsupportedIterableToArray6(r) || _nonIterableSpread3();
+  function _toConsumableArray4(r) {
+    return _arrayWithoutHoles4(r) || _iterableToArray4(r) || _unsupportedIterableToArray7(r) || _nonIterableSpread4();
   }
-  function _nonIterableSpread3() {
+  function _nonIterableSpread4() {
     throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
-  function _iterableToArray3(r) {
+  function _iterableToArray4(r) {
     if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
   }
-  function _arrayWithoutHoles3(r) {
-    if (Array.isArray(r)) return _arrayLikeToArray6(r);
+  function _arrayWithoutHoles4(r) {
+    if (Array.isArray(r)) return _arrayLikeToArray7(r);
   }
-  function _createForOfIteratorHelper5(r, e) {
+  function _createForOfIteratorHelper6(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
-      if (Array.isArray(r) || (t = _unsupportedIterableToArray6(r)) || e && r && "number" == typeof r.length) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray7(r)) || e && r && "number" == typeof r.length) {
         t && (r = t);
         var _n = 0, F = function F2() {
         };
@@ -23487,14 +24000,14 @@
       }
     } };
   }
-  function _unsupportedIterableToArray6(r, a) {
+  function _unsupportedIterableToArray7(r, a) {
     if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray6(r, a);
+      if ("string" == typeof r) return _arrayLikeToArray7(r, a);
       var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray6(r, a) : void 0;
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray7(r, a) : void 0;
     }
   }
-  function _arrayLikeToArray6(r, a) {
+  function _arrayLikeToArray7(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
@@ -23559,7 +24072,7 @@
       }
       if (!supported(element)) return nativeRun(operation);
       try {
-        var _iterator = _createForOfIteratorHelper5(element.getAnimations()), _step;
+        var _iterator = _createForOfIteratorHelper6(element.getAnimations()), _step;
         try {
           for (_iterator.s(); !(_step = _iterator.n()).done; ) {
             var animation = _step.value;
@@ -23662,7 +24175,7 @@
       }
       var endTime = 0;
       operation.animations = animations;
-      var _iterator2 = _createForOfIteratorHelper5(animations), _step2;
+      var _iterator2 = _createForOfIteratorHelper6(animations), _step2;
       try {
         for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
           var animation = _step2.value;
@@ -23693,7 +24206,7 @@
         if (!frames.length) return false;
         var metadata = /* @__PURE__ */ new Set(["offset", "computedOffset", "easing", "composite"]);
         var found = false;
-        var _iterator3 = _createForOfIteratorHelper5(frames), _step3;
+        var _iterator3 = _createForOfIteratorHelper6(frames), _step3;
         try {
           for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
             var frame = _step3.value;
@@ -23724,9 +24237,13 @@
       if (Number.isFinite(number) && number > 0) return number;
       if (value !== void 0) {
         AelluxJs2.diagnostics.warn(AelluxJs2.diagnostics.WARN_CSS_MOTION_PROPERTY_MAX_FPS_INVALID, {
+          extension: "core",
           option: "cssMotionPropertyMaxFPS",
+          attribute: "cssMotionPropertyMaxFPS",
           value: value,
-          fallback: 40
+          fallback: 40,
+          reason: "CSS Motion frame rate must be finite and greater than zero; using 40 FPS.",
+          suggestion: "Use a positive finite number or omit the option for the default."
         });
       }
       return 40;
@@ -23735,13 +24252,13 @@
       var values = [first, second].filter(function(value) {
         return Number.isFinite(value) && value > 0;
       });
-      return values.length ? Math.min.apply(Math, _toConsumableArray3(values)) : void 0;
+      return values.length ? Math.min.apply(Math, _toConsumableArray4(values)) : void 0;
     }
     function advance(operation) {
       if (!operation.controlled || operation.done) return;
       var elapsed = Math.max(0, now() - operation.start);
       var time = Math.min(elapsed, operation.endTime);
-      var _iterator4 = _createForOfIteratorHelper5(operation.animations), _step4;
+      var _iterator4 = _createForOfIteratorHelper6(operation.animations), _step4;
       try {
         for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
           var animation = _step4.value;
@@ -23851,7 +24368,7 @@
       if (operations.get(operation.id) === operation) getAelluxJs().waitLayout.setVisualFPSLimit(operation.id, null);
       if (operation.nativeTimer !== null) root.clearTimeout(operation.nativeTimer);
       operation.nativeTimer = null;
-      var _iterator5 = _createForOfIteratorHelper5(operation.animations), _step5;
+      var _iterator5 = _createForOfIteratorHelper6(operation.animations), _step5;
       try {
         for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
           var animation = _step5.value;
@@ -23892,10 +24409,10 @@
   });
 
   // src/internal/ease.js
-  function _createForOfIteratorHelper6(r, e) {
+  function _createForOfIteratorHelper7(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
-      if (Array.isArray(r) || (t = _unsupportedIterableToArray7(r)) || e && r && "number" == typeof r.length) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray8(r)) || e && r && "number" == typeof r.length) {
         t && (r = t);
         var _n = 0, F = function F2() {
         };
@@ -23923,26 +24440,26 @@
       }
     } };
   }
-  function _toConsumableArray4(r) {
-    return _arrayWithoutHoles4(r) || _iterableToArray4(r) || _unsupportedIterableToArray7(r) || _nonIterableSpread4();
+  function _toConsumableArray5(r) {
+    return _arrayWithoutHoles5(r) || _iterableToArray5(r) || _unsupportedIterableToArray8(r) || _nonIterableSpread5();
   }
-  function _nonIterableSpread4() {
+  function _nonIterableSpread5() {
     throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
-  function _unsupportedIterableToArray7(r, a) {
+  function _unsupportedIterableToArray8(r, a) {
     if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray7(r, a);
+      if ("string" == typeof r) return _arrayLikeToArray8(r, a);
       var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray7(r, a) : void 0;
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray8(r, a) : void 0;
     }
   }
-  function _iterableToArray4(r) {
+  function _iterableToArray5(r) {
     if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
   }
-  function _arrayWithoutHoles4(r) {
-    if (Array.isArray(r)) return _arrayLikeToArray7(r);
+  function _arrayWithoutHoles5(r) {
+    if (Array.isArray(r)) return _arrayLikeToArray8(r);
   }
-  function _arrayLikeToArray7(r, a) {
+  function _arrayLikeToArray8(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
@@ -24031,7 +24548,7 @@
       })) {
         throw new RangeError("Invalid cubic bezier: ".concat(name));
       }
-      return cubicBezier.apply(void 0, [t].concat(_toConsumableArray4(points.map(Number))));
+      return cubicBezier.apply(void 0, [t].concat(_toConsumableArray5(points.map(Number))));
     }
     var key = name.replace(/[\s_-]/g, "").toLowerCase();
     if (key.startsWith(EASE_PREFIX)) key = key.slice(EASE_PREFIX.length);
@@ -24040,7 +24557,7 @@
     if (key === "smootherstep") return t * t * t * (t * (6 * t - 15) + 10);
     var family = "";
     var direction = "";
-    var _iterator = _createForOfIteratorHelper6(DIRECTIONS), _step;
+    var _iterator = _createForOfIteratorHelper7(DIRECTIONS), _step;
     try {
       for (_iterator.s(); !(_step = _iterator.n()).done; ) {
         var candidate = _step.value;
@@ -24110,7 +24627,7 @@
 
   // src/aellux.orchestrator.js
   var aellux_orchestrator_exports = {};
-  function ownKeys(e, r) {
+  function ownKeys2(e, r) {
     var t = Object.keys(e);
     if (Object.getOwnPropertySymbols) {
       var o = Object.getOwnPropertySymbols(e);
@@ -24120,41 +24637,41 @@
     }
     return t;
   }
-  function _objectSpread(e) {
+  function _objectSpread2(e) {
     for (var r = 1; r < arguments.length; r++) {
       var t = null != arguments[r] ? arguments[r] : {};
-      r % 2 ? ownKeys(Object(t), true).forEach(function(r2) {
-        _defineProperty(e, r2, t[r2]);
-      }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function(r2) {
+      r % 2 ? ownKeys2(Object(t), true).forEach(function(r2) {
+        _defineProperty2(e, r2, t[r2]);
+      }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys2(Object(t)).forEach(function(r2) {
         Object.defineProperty(e, r2, Object.getOwnPropertyDescriptor(t, r2));
       });
     }
     return e;
   }
-  function _defineProperty(e, r, t) {
-    return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: true, configurable: true, writable: true }) : e[r] = t, e;
+  function _defineProperty2(e, r, t) {
+    return (r = _toPropertyKey2(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: true, configurable: true, writable: true }) : e[r] = t, e;
   }
-  function _toPropertyKey(t) {
-    var i = _toPrimitive(t, "string");
-    return "symbol" == _typeof4(i) ? i : i + "";
+  function _toPropertyKey2(t) {
+    var i = _toPrimitive2(t, "string");
+    return "symbol" == _typeof5(i) ? i : i + "";
   }
-  function _toPrimitive(t, r) {
-    if ("object" != _typeof4(t) || !t) return t;
+  function _toPrimitive2(t, r) {
+    if ("object" != _typeof5(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof4(i)) return i;
+      if ("object" != _typeof5(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
   }
-  function _slicedToArray3(r, e) {
-    return _arrayWithHoles3(r) || _iterableToArrayLimit3(r, e) || _unsupportedIterableToArray8(r, e) || _nonIterableRest3();
+  function _slicedToArray4(r, e) {
+    return _arrayWithHoles4(r) || _iterableToArrayLimit4(r, e) || _unsupportedIterableToArray9(r, e) || _nonIterableRest4();
   }
-  function _nonIterableRest3() {
+  function _nonIterableRest4() {
     throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
-  function _iterableToArrayLimit3(r, l) {
+  function _iterableToArrayLimit4(r, l) {
     var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (null != t) {
       var e, n, i, u, a = [], f = true, o = false;
@@ -24175,21 +24692,21 @@
       return a;
     }
   }
-  function _arrayWithHoles3(r) {
+  function _arrayWithHoles4(r) {
     if (Array.isArray(r)) return r;
   }
-  function _typeof4(o) {
+  function _typeof5(o) {
     "@babel/helpers - typeof";
-    return _typeof4 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
+    return _typeof5 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
       return typeof o2;
     } : function(o2) {
       return o2 && "function" == typeof Symbol && o2.constructor === Symbol && o2 !== Symbol.prototype ? "symbol" : typeof o2;
-    }, _typeof4(o);
+    }, _typeof5(o);
   }
-  function _createForOfIteratorHelper7(r, e) {
+  function _createForOfIteratorHelper8(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
-      if (Array.isArray(r) || (t = _unsupportedIterableToArray8(r)) || e && r && "number" == typeof r.length) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray9(r)) || e && r && "number" == typeof r.length) {
         t && (r = t);
         var _n = 0, F = function F2() {
         };
@@ -24217,14 +24734,14 @@
       }
     } };
   }
-  function _unsupportedIterableToArray8(r, a) {
+  function _unsupportedIterableToArray9(r, a) {
     if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray8(r, a);
+      if ("string" == typeof r) return _arrayLikeToArray9(r, a);
       var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray8(r, a) : void 0;
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray9(r, a) : void 0;
     }
   }
-  function _arrayLikeToArray8(r, a) {
+  function _arrayLikeToArray9(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
@@ -24473,7 +24990,7 @@
                       extensions: extensionNames
                     });
                   case 4:
-                    _iterator = _createForOfIteratorHelper7(extensionNames);
+                    _iterator = _createForOfIteratorHelper8(extensionNames);
                     _context5.p = 5;
                     _iterator.s();
                   case 6:
@@ -24685,7 +25202,7 @@
                     _context7.n = 1;
                     break;
                   }
-                  AelluxJs.diagnostics.warn(AelluxJs.diagnostics.WARN_EXTENSION_COMPATIBILITY_SKIPPED, _objectSpread(_objectSpread({}, context), {}, {
+                  AelluxJs.diagnostics.warn(AelluxJs.diagnostics.WARN_EXTENSION_COMPATIBILITY_SKIPPED, _objectSpread2(_objectSpread2({}, context), {}, {
                     explicitlySkipped: true
                   }));
                   _context7.n = 2;
@@ -24727,7 +25244,7 @@
                   minifiedScript = /\.min\.js(?=[?#]|$)/.test(scriptURL);
                   scriptVariant = useLegacyBuild ? minifiedScript ? "legacyMin" : "legacy" : minifiedScript ? "modernMin" : "modern";
                   loadPromises = [];
-                  _iterator3 = _createForOfIteratorHelper7(data.dependencies || []);
+                  _iterator3 = _createForOfIteratorHelper8(data.dependencies || []);
                   _context8.p = 1;
                   _iterator3.s();
                 case 2:
@@ -24793,7 +25310,12 @@
                         errorCallback: function errorCallback() {
                           AelluxJs.diagnostics.warn(AelluxJs.diagnostics.WARN_EXTENSION_STYLE_LOAD, {
                             extension: extensionName,
-                            url: link.href
+                            element: link,
+                            attribute: "href",
+                            value: link.href,
+                            url: link.href,
+                            reason: "The Extension stylesheet could not be loaded.",
+                            suggestion: "Check the stylesheet URL, network response, integrity metadata and CSP style-src policy."
                           });
                           resolve();
                         }
@@ -24945,15 +25467,15 @@
           }
         }
         function validateExtensionIndex(index, kind, url) {
-          if (!index || index.schemaVersion !== 1 || typeof index.coreVersion !== "string" || !index.extensions || _typeof4(index.extensions) !== "object" || Array.isArray(index.extensions)) {
+          if (!index || index.schemaVersion !== 1 || typeof index.coreVersion !== "string" || !index.extensions || _typeof5(index.extensions) !== "object" || Array.isArray(index.extensions)) {
             throw manifestError(kind, url, "schemaVersion 1, coreVersion, and extensions object");
           }
           if (index.coreVersion !== AelluxJs.version) {
             throw manifestError(kind, url, "coreVersion ".concat(AelluxJs.version, " (received ").concat(index.coreVersion, ")"));
           }
           for (var _i = 0, _Object$entries = Object.entries(index.extensions); _i < _Object$entries.length; _i++) {
-            var _Object$entries$_i = _slicedToArray3(_Object$entries[_i], 2), name = _Object$entries$_i[0], entry = _Object$entries$_i[1];
-            if (!/^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/.test(name) || !entry || typeof entry.coreCompatibility !== "string" || !entry.builds || _typeof4(entry.builds) !== "object") {
+            var _Object$entries$_i = _slicedToArray4(_Object$entries[_i], 2), name = _Object$entries$_i[0], entry = _Object$entries$_i[1];
+            if (!/^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/.test(name) || !entry || typeof entry.coreCompatibility !== "string" || !entry.builds || _typeof5(entry.builds) !== "object") {
               throw manifestError(kind, url, "valid metadata for ".concat(name));
             }
             for (var _i2 = 0, _arr = ["modern", "legacy"]; _i2 < _arr.length; _i2++) {
@@ -24987,7 +25509,7 @@
             if (!Array.isArray(entry.dependencies)) {
               throw manifestError(kind, url, "dependencies array for ".concat(name));
             }
-            var _iterator2 = _createForOfIteratorHelper7(entry.dependencies), _step2;
+            var _iterator2 = _createForOfIteratorHelper8(entry.dependencies), _step2;
             try {
               for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
                 var dependency = _step2.value;
@@ -25057,7 +25579,7 @@
           if (selected) registration.url = selected.url;
           registration.coreCompatibility = entry.coreCompatibility;
           registration.dependencies = (entry.dependencies || []).map(function(dependency) {
-            return typeof dependency === "string" ? dependency : _objectSpread(_objectSpread({}, dependency), {}, {
+            return typeof dependency === "string" ? dependency : _objectSpread2(_objectSpread2({}, dependency), {}, {
               url: new URL(dependency.url, base).href
             });
           });

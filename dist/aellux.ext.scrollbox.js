@@ -841,7 +841,13 @@
         if (requested && !state.elastic.invalidReported) {
           AelluxJs.diagnostics.error(
             AelluxJs.diagnostics.ERROR_SCROLLBOX_ELASTIC_WRAPPER,
-            { element }
+            {
+              extension: extensionName,
+              element,
+              attribute: elasticAttribute,
+              reason: "Elastic content wrapper is missing or is not the only direct child.",
+              suggestion: "Wrap all Scrollbox content in exactly one direct child with data-ae-scrollbox-elastic."
+            }
           );
         }
         state.elastic.invalidReported = requested;
@@ -883,7 +889,14 @@
         if (state.elastic.invalidLimit !== value) {
           AelluxJs.diagnostics.warn(
             AelluxJs.diagnostics.WARN_SCROLLBOX_ELASTIC_LIMIT_INVALID,
-            { element, value }
+            {
+              extension: extensionName,
+              element: wrapper,
+              attribute: elasticAttribute,
+              value,
+              reason: "Elastic limits are invalid; using 1/4.",
+              suggestion: "Use one or two nonnegative fractions or pixel values, such as 1/4 or 80px 40px."
+            }
           );
         }
         state.elastic.invalidLimit = value;
@@ -913,7 +926,14 @@
       if (value === "native" || value === POINTER) return value;
       AelluxJs.diagnostics.warn(
         AelluxJs.diagnostics.WARN_SCROLLBOX_MODE_INVALID,
-        { element, value }
+        {
+          extension: extensionName,
+          element,
+          attribute,
+          value,
+          reason: "Unknown Scrollbox mode; using native.",
+          suggestion: "Use native or pointer, or leave the attribute empty for native scrolling."
+        }
       );
       return "native";
     }

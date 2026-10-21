@@ -7,9 +7,9 @@ const fixture = `<style>
   #c{left:500px;top:260px;width:110px;height:60px}
   </style><button id="trigger" data-ae-trigger="pop" data-ae-trigger-on="hover" data-ae-target="b">Open B</button>
   <div id="ref"><div id="group" data-ae-present-group data-ae-present-active="a">
-  <div id="a" class="panel" data-ae-present="opacity" data-ae-present-key="a">A</div>
-  <div id="b" class="panel" data-ae-present="opacity" data-ae-present-key="b" hidden><button id="inside">B</button></div>
-  <div id="c" class="panel" data-ae-present="opacity" data-ae-present-key="c" hidden>C</div></div>
+  <div id="a" class="panel" data-ae-present="opacity">A</div>
+  <div id="b" class="panel" data-ae-present="opacity" hidden><button id="inside">B</button></div>
+  <div id="c" class="panel" data-ae-present="opacity" hidden>C</div></div>
   <div id="indicator" data-ae-anchor="bottom-right:top-right" data-ae-anchor-match="width height"
   style="--ae-anchor-switch-duration:350ms;--ae-anchor-switch-ease:linear"></div></div>`;
 
@@ -53,7 +53,7 @@ async function aligned(page, id) {
   }, id)).toBeLessThan(1);
 }
 
-for (const mutation of ["attribute", "remove", "key"]) {
+for (const mutation of ["attribute", "remove", "id"]) {
   test(`BeforePop ${mutation} invalidates the preflight without publishing a stale selection`, async ({ page }) => {
     await start(page);
     const result = await page.evaluate(async mutation => {
@@ -63,7 +63,7 @@ for (const mutation of ["attribute", "remove", "key"]) {
       b.addEventListener("AelluxJsBeforePop", () => {
         if (mutation === "attribute") group.setAttribute("data-ae-present-active", "c");
         if (mutation === "remove") b.remove();
-        if (mutation === "key") b.setAttribute("data-ae-present-key", "changed");
+        if (mutation === "id") b.id = "changed";
       }, { once: true });
       const accepted = await $ae("group").present.show("b");
       return { accepted, changes };
@@ -176,8 +176,8 @@ test("unrelated DOM mutations do not rescan groups or measure every Anchor", asy
   });
   for (const count of [1, 10, 40]) {
     await start(page, {}, `<div id="unrelated"></div><div style="position:relative;width:800px;height:500px">
-      ${Array.from({ length: count }, (_, i) => `<div data-ae-present-group data-ae-present-active="selected" data-ae-present-group-anchor="anchor${i}">
-        <div id="target${i}" data-ae-present data-ae-present-key="selected" style="position:absolute;width:30px;height:20px"></div></div>
+      ${Array.from({ length: count }, (_, i) => `<div data-ae-present-group data-ae-present-active="target${i}" data-ae-present-group-anchor="anchor${i}">
+        <div id="target${i}" data-ae-present style="position:absolute;width:30px;height:20px"></div></div>
         <div id="anchor${i}" data-ae-anchor="bottom-left:top-left" data-ae-anchor-target="target${i}"></div>`).join("")}</div>`);
     await expect(page.locator(".ae--anchored")).toHaveCount(count);
     await page.waitForTimeout(300);

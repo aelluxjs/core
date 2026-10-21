@@ -353,7 +353,9 @@ import utilsNameCase from "./internal/utils-name-case.js";
             errorCallback: () => {
               AelluxJs.diagnostics.warn(
                 AelluxJs.diagnostics.WARN_EXTENSION_STYLE_LOAD,
-                { extension: extensionName, url: link.href }
+                { extension: extensionName, element: link, attribute: "href", value: link.href, url: link.href,
+                  reason: "The Extension stylesheet could not be loaded.",
+                  suggestion: "Check the stylesheet URL, network response, integrity metadata and CSP style-src policy." }
               );
               resolve();
             }

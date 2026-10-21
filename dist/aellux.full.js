@@ -27,7 +27,7 @@
   var define_AELLUX_OFFICIAL_EXTENSION_MANIFEST_default;
   var init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST = __esm({
     "<define:__AELLUX_OFFICIAL_EXTENSION_MANIFEST__>"() {
-      define_AELLUX_OFFICIAL_EXTENSION_MANIFEST_default = { schemaVersion: 1, coreVersion: "0.1.0-beta.10", extensions: { preference: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.preference.min.js", integrity: "sha384-mSOgb0DekFTRXXZAgyNrPjamdlSqzL4SSGZYVWgVg+WlG+pBj11xT81v/6Xk43yO", regular: { url: "./aellux.ext.preference.js", integrity: "sha384-MlikpdHSzHzF6kz5+oJGtq3eoFsKTsx/g+FTrf+dFOU8iQGHsCpn4fP1jLlbNrj7" } }, legacy: { url: "./aellux.ext.preference.legacy.min.js", integrity: "sha384-1LMsK0W9J/PoM4tXhFgkYLRY4yWdzVoYmFy4OMDGd8lRdtptKoEb1sI9L1kzNaBu", regular: { url: "./aellux.ext.preference.legacy.js", integrity: "sha384-pozuz43OyfXrnkmuBu6KTM2lqRSqcI5LMgwAtqnzXq8xZGdVqpnmOtrBcYcMskWk" } } }, dependencies: [] }, "state-navigation": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.state-navigation.min.js", integrity: "sha384-wAbgAqjAA6wauuG+iuUtfRwxChd6fTJ0fS22fqnu2r00kouoXJWZ0f7AoTYlqBC6", regular: { url: "./aellux.ext.state-navigation.js", integrity: "sha384-PKJ8HTD7eIYDEg2hOaAJjpMYzLr2fBjBRGmIGG7XzGTzVK0yTjt5HYPO55VbWfdS" } }, legacy: { url: "./aellux.ext.state-navigation.legacy.min.js", integrity: "sha384-YkhfU15Mpk8KiO6TyoVU6z1yCiYWwnsOGE0xVaQ8NrE7IGrxOSUL005g5JeUDdJu", regular: { url: "./aellux.ext.state-navigation.legacy.js", integrity: "sha384-kaEUY0Zpw8K6pcwjm+INA5feXftLK2/N1aFpPr2LCTcetX2uoe2GGd1MJyy7u8rZ" } } }, dependencies: [] }, feedback: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.feedback.min.js", integrity: "sha384-3VP3W84ekK4MIVBQuy5+5P3bGrwOj7bBDfJnjyexZ+yDADf1jQoHEpP2J1OMUgod", regular: { url: "./aellux.ext.feedback.js", integrity: "sha384-RrPf0bRGxf68f/Rjas5MF5zC1GAubWyndCcuiYbgZsPSHGLFsQtQaUgeFX4SQz+h" } }, legacy: { url: "./aellux.ext.feedback.legacy.min.js", integrity: "sha384-zXuZEv63sd3fwaAygmyk9KazQ46KOelsvAtM+0vJ7phDwemVh1FhOjAcbhWVQM/N", regular: { url: "./aellux.ext.feedback.legacy.js", integrity: "sha384-UW1JZ1+liVWV/w3PJdhfIMztOU7zyTw/1rOyyxoxj4YJIHb1xFl8U0xeIBh8jYV7" } } }, dependencies: [], style: { url: "./aellux.ext.feedback.min.css", integrity: "sha384-OBguCYqF+dMD0Pl84C3FlY/+ohUGfW0OyynmXb/PSDEGOyuI/TQJ3EZAoCeJx+Jk", regular: { url: "./aellux.ext.feedback.css", integrity: "sha384-yk4cW+r/Mc1FRS1ZauBHC6KsKb7sxuJ0E9mmt/+AYASAdZXXMK6iuFBR+TOEh/r4" } } }, focus: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.focus.min.js", integrity: "sha384-AXpUv/Ur2Z4cKvO9EqIFqfxxdSQR5j75q0okOAWPvHhSneQ5LPjrOzk6Sl9MOo4a", regular: { url: "./aellux.ext.focus.js", integrity: "sha384-VjQzcnhLRrvRlbVQ0X4/tO0+8gqJXAmIFoeIVimjOud1wRNuBXNnSQHHW9XQPzTe" } }, legacy: { url: "./aellux.ext.focus.legacy.min.js", integrity: "sha384-I5QpUmKsA1T8NiKfKXQgbdG19Ld1ZGCWSmosygO3yGj43tdxp5zCfLyfBuFoHlKu", regular: { url: "./aellux.ext.focus.legacy.js", integrity: "sha384-5/y3J1NC/qMyV9myEj29+wGbqCVI8ICPafSebtJVfl15Qmup6vMiJzveShd3CLnw" } } }, dependencies: [] }, point: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.point.min.js", integrity: "sha384-n540II5oWbHJRt/a8i+Rgb9A3b9dm7hamg1kd3Nz7KdPQDcaa8S823t9fCrgxBWF", regular: { url: "./aellux.ext.point.js", integrity: "sha384-aDj7I5QEH/0+52E3e6yPZ/D0MEsNBdxeET3G5ToVvgczHtksMh3p8S/KOoAapRRN" } }, legacy: { url: "./aellux.ext.point.legacy.min.js", integrity: "sha384-5UmWvQHfmvttz9yeXbilawGCZH20UdR8yNBOE9kRV34wpfWASl8plzgKtLVQGO9M", regular: { url: "./aellux.ext.point.legacy.js", integrity: "sha384-gG/XONYEC1tchBcJ6bUtKYmWFHz0E+50LmMaXDAiqWBKPuwdHZeYm1uXA22lMZuN" } } }, dependencies: [] }, anchor: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.anchor.min.js", integrity: "sha384-6nlcBmIvZ4P04uT+M7N2Jk/PTK8OGnCPnTOaTh1rfVJBkxgIwhocG9KeALHJBAMJ", regular: { url: "./aellux.ext.anchor.js", integrity: "sha384-ApVZhvYt5l7ewrdGL3/ovLglz3WR8HryXe4p4qUIKypko4hOyniMX3jMfWC8qOgl" } }, legacy: { url: "./aellux.ext.anchor.legacy.min.js", integrity: "sha384-IRELgHShZqO2j1cfMmpq2qce9I5hIO0/TrXp2on2I7MsMBecKG28F20/459tInQX", regular: { url: "./aellux.ext.anchor.legacy.js", integrity: "sha384-Lrkb8hqknnuGgYmbx0IwU97gU05PYKqFqbW0b0UQ0TovDkQq+PXpDQRsOTczHgW8" } } }, dependencies: [] }, "ajax-href": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.ajax-href.min.js", integrity: "sha384-VCvADGjweS3kvW0s226GuUqgTuiLz9zMhPU61ZrkYfbDX42l3dbvB4jm1QvC8xio", regular: { url: "./aellux.ext.ajax-href.js", integrity: "sha384-EcFz52TbeSPurZxIukNU/WiujOPlF0E4FvnoR1Y44axiHLzd2+LpSBnBMfwIZ3Ip" } }, legacy: { url: "./aellux.ext.ajax-href.legacy.min.js", integrity: "sha384-me6plEKmddDwM9w625RpMTaa8kCZYsbQU/2dwWKmZSktJ3k6gd08iDLmiQPEQLl4", regular: { url: "./aellux.ext.ajax-href.legacy.js", integrity: "sha384-HaI+joZDWxyoZtD4QrAMJ+W1VjfdpyHcV4tt/hlFoP9SznAAxHO6iDErzOO8LIAz" } } }, dependencies: [] }, scrollbox: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.scrollbox.min.js", integrity: "sha384-yp7udUJ22DAK4y75pQh0ZAE50RqXq/pBrJtMmuBfVpOFgEtGl5NBdLTjcFXnyA1q", regular: { url: "./aellux.ext.scrollbox.js", integrity: "sha384-p6kapHb1eSxRRNbEC74Hf/jiFs0rk5xb+O0BdUnegNyhScj0PqoUJhNh7q8LO+Pk" } }, legacy: { url: "./aellux.ext.scrollbox.legacy.min.js", integrity: "sha384-lNAhPABkbt7ZBtBrPVaazpQ2fSLJS23g1DjEzPfm1JCCFiq0+4wXTHSB1tMK6GqF", regular: { url: "./aellux.ext.scrollbox.legacy.js", integrity: "sha384-vLagb5SANL0gYF8A0hp49HhLTdoBa8fuQtesj2yoRS2vMB9o00OyZm/pg0i0mr3g" } } }, dependencies: [] }, "scrollbox-snap": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.scrollbox-snap.min.js", integrity: "sha384-7N2AFiJ83ite+oad69TL6RNp4kjExV3db0G91vCsyn6fwggsEpe5TX+bZPAff2Yr", regular: { url: "./aellux.ext.scrollbox-snap.js", integrity: "sha384-gCj+982AERh2dZdPCZuzlg7gjAxCd47u2/SzWrs2KX9Wom/IeOJcqC13258ymKB0" } }, legacy: { url: "./aellux.ext.scrollbox-snap.legacy.min.js", integrity: "sha384-nB/zV3FEz20YpK48Idh3eAHztkIDktX5+qe1j6f8b02xs++96y6vr8Reb+NZjwoZ", regular: { url: "./aellux.ext.scrollbox-snap.legacy.js", integrity: "sha384-seilbpqRXjgPi9aWgYAv92T5IDkjSr1C/bYamOXdIl4pDmdmyRaRC6pQg13tLmvK" } } }, dependencies: [] }, adaptive: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.adaptive.min.js", integrity: "sha384-UfDhSymI78IbudB2vel0GOI+z4C8m6JCG4Egl6WK9mHvZyOltXgawIbn2iFJH2+w", regular: { url: "./aellux.ext.adaptive.js", integrity: "sha384-AXSW7WI4ZEykJgerhjuscp7u99DkKkTYFD13o1HAnVH1tJYz2u5f9VjsBGca7kSU" } }, legacy: { url: "./aellux.ext.adaptive.legacy.min.js", integrity: "sha384-yOyWKIJaWddRJrbYwriE1lpeuiB2WbeF2fII29R4vIBGMfXi6b6m2IXUHvFqaQTB", regular: { url: "./aellux.ext.adaptive.legacy.js", integrity: "sha384-oRSPNCmFGYjwsrmeBT7r7un76fwNEODcJNmo1ifLgHbWEmoGT07OtdqsyxvfnWeN" } } }, dependencies: [], style: { url: "./aellux.ext.adaptive.min.css", integrity: "sha384-8yUP1PStfDqBCyCskP3k9WLIKgv/yl1nyDhmPz7hsX5NZ4z3ZT3ajolA+RhYlUiG", regular: { url: "./aellux.ext.adaptive.css", integrity: "sha384-HfIjX9Zk0VFRimzPvUaTS5AtwuHJHjXKoM/xbNJXj5vE7bSdBGEzbrBHfbNmYah0" } } }, present: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.present.min.js", integrity: "sha384-3s2v8Jf4LgXrXj2S00lspOT3+7K9RfZt8HARTc0yv67Dw++abzDLnelJw8dWFJfB", regular: { url: "./aellux.ext.present.js", integrity: "sha384-4OM9HKTiSweGq37rRjdAKlFccImCIYMiJ5+2e5wQSRlS4u5VSlUmzdkj0JSdWi43" } }, legacy: { url: "./aellux.ext.present.legacy.min.js", integrity: "sha384-4ELNAMs4Y295Zxb3rXKBnCYgJdHqlJjBMxutNvokDPXFmPjN8R+TAs9z2u7undfT", regular: { url: "./aellux.ext.present.legacy.js", integrity: "sha384-ZSViyggG+nVnCnn9LjJt/651loG3IJ9qwo2bKoi2/iUPdS+rXirtqWDLShtbA2ui" } } }, dependencies: [], style: { url: "./aellux.ext.present.min.css", integrity: "sha384-Xx3MuDirlIsArdiSpQ+nRsyKhGUQeGbGrdYaEANsZMp5aaGudWJLID3Iwq5nhWvj", regular: { url: "./aellux.ext.present.css", integrity: "sha384-vYogCkysGYLRQlY+IXCzVeC/TQeAlm/byVFSVzHJNlZUE4Wr3EYiXcQB6rNppdNP" } } } } };
+      define_AELLUX_OFFICIAL_EXTENSION_MANIFEST_default = { schemaVersion: 1, coreVersion: "0.1.0-beta.10", extensions: { preference: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.preference.min.js", integrity: "sha384-mSOgb0DekFTRXXZAgyNrPjamdlSqzL4SSGZYVWgVg+WlG+pBj11xT81v/6Xk43yO", regular: { url: "./aellux.ext.preference.js", integrity: "sha384-MlikpdHSzHzF6kz5+oJGtq3eoFsKTsx/g+FTrf+dFOU8iQGHsCpn4fP1jLlbNrj7" } }, legacy: { url: "./aellux.ext.preference.legacy.min.js", integrity: "sha384-1LMsK0W9J/PoM4tXhFgkYLRY4yWdzVoYmFy4OMDGd8lRdtptKoEb1sI9L1kzNaBu", regular: { url: "./aellux.ext.preference.legacy.js", integrity: "sha384-pozuz43OyfXrnkmuBu6KTM2lqRSqcI5LMgwAtqnzXq8xZGdVqpnmOtrBcYcMskWk" } } }, dependencies: [] }, "state-navigation": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.state-navigation.min.js", integrity: "sha384-wAbgAqjAA6wauuG+iuUtfRwxChd6fTJ0fS22fqnu2r00kouoXJWZ0f7AoTYlqBC6", regular: { url: "./aellux.ext.state-navigation.js", integrity: "sha384-PKJ8HTD7eIYDEg2hOaAJjpMYzLr2fBjBRGmIGG7XzGTzVK0yTjt5HYPO55VbWfdS" } }, legacy: { url: "./aellux.ext.state-navigation.legacy.min.js", integrity: "sha384-YkhfU15Mpk8KiO6TyoVU6z1yCiYWwnsOGE0xVaQ8NrE7IGrxOSUL005g5JeUDdJu", regular: { url: "./aellux.ext.state-navigation.legacy.js", integrity: "sha384-kaEUY0Zpw8K6pcwjm+INA5feXftLK2/N1aFpPr2LCTcetX2uoe2GGd1MJyy7u8rZ" } } }, dependencies: [] }, feedback: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.feedback.min.js", integrity: "sha384-3VP3W84ekK4MIVBQuy5+5P3bGrwOj7bBDfJnjyexZ+yDADf1jQoHEpP2J1OMUgod", regular: { url: "./aellux.ext.feedback.js", integrity: "sha384-RrPf0bRGxf68f/Rjas5MF5zC1GAubWyndCcuiYbgZsPSHGLFsQtQaUgeFX4SQz+h" } }, legacy: { url: "./aellux.ext.feedback.legacy.min.js", integrity: "sha384-zXuZEv63sd3fwaAygmyk9KazQ46KOelsvAtM+0vJ7phDwemVh1FhOjAcbhWVQM/N", regular: { url: "./aellux.ext.feedback.legacy.js", integrity: "sha384-UW1JZ1+liVWV/w3PJdhfIMztOU7zyTw/1rOyyxoxj4YJIHb1xFl8U0xeIBh8jYV7" } } }, dependencies: [], style: { url: "./aellux.ext.feedback.min.css", integrity: "sha384-OBguCYqF+dMD0Pl84C3FlY/+ohUGfW0OyynmXb/PSDEGOyuI/TQJ3EZAoCeJx+Jk", regular: { url: "./aellux.ext.feedback.css", integrity: "sha384-yk4cW+r/Mc1FRS1ZauBHC6KsKb7sxuJ0E9mmt/+AYASAdZXXMK6iuFBR+TOEh/r4" } } }, focus: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.focus.min.js", integrity: "sha384-AXpUv/Ur2Z4cKvO9EqIFqfxxdSQR5j75q0okOAWPvHhSneQ5LPjrOzk6Sl9MOo4a", regular: { url: "./aellux.ext.focus.js", integrity: "sha384-VjQzcnhLRrvRlbVQ0X4/tO0+8gqJXAmIFoeIVimjOud1wRNuBXNnSQHHW9XQPzTe" } }, legacy: { url: "./aellux.ext.focus.legacy.min.js", integrity: "sha384-I5QpUmKsA1T8NiKfKXQgbdG19Ld1ZGCWSmosygO3yGj43tdxp5zCfLyfBuFoHlKu", regular: { url: "./aellux.ext.focus.legacy.js", integrity: "sha384-5/y3J1NC/qMyV9myEj29+wGbqCVI8ICPafSebtJVfl15Qmup6vMiJzveShd3CLnw" } } }, dependencies: [] }, point: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.point.min.js", integrity: "sha384-n540II5oWbHJRt/a8i+Rgb9A3b9dm7hamg1kd3Nz7KdPQDcaa8S823t9fCrgxBWF", regular: { url: "./aellux.ext.point.js", integrity: "sha384-aDj7I5QEH/0+52E3e6yPZ/D0MEsNBdxeET3G5ToVvgczHtksMh3p8S/KOoAapRRN" } }, legacy: { url: "./aellux.ext.point.legacy.min.js", integrity: "sha384-5UmWvQHfmvttz9yeXbilawGCZH20UdR8yNBOE9kRV34wpfWASl8plzgKtLVQGO9M", regular: { url: "./aellux.ext.point.legacy.js", integrity: "sha384-gG/XONYEC1tchBcJ6bUtKYmWFHz0E+50LmMaXDAiqWBKPuwdHZeYm1uXA22lMZuN" } } }, dependencies: [] }, anchor: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.anchor.min.js", integrity: "sha384-qzKEAgWOM23Rch3bvRqMVp3Vt/oCMnsDi4U6hnUe/3Vm6IwujXuAA09tQUCaDOMS", regular: { url: "./aellux.ext.anchor.js", integrity: "sha384-edsiM2AYIPrpeQ7XQZTIrVCJ3lwWJ+HPsdCnanm1dQJZrt220u14iOTxm2t2RBhk" } }, legacy: { url: "./aellux.ext.anchor.legacy.min.js", integrity: "sha384-Gy7uPY7gVQknkTcdrI06VM1HXO6dUXCIm0KZiKyDwgX8BMGq73OZuPO0al+9VV4A", regular: { url: "./aellux.ext.anchor.legacy.js", integrity: "sha384-bpejLMYob6EdeJApd4vUG1w4pksoug8H+xFQqEjPPc7gt2zYDzPFuGO6j1j30aj0" } } }, dependencies: [] }, "ajax-href": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.ajax-href.min.js", integrity: "sha384-KWPW5FuP+wkEUZ6XoDRk4jxdvsUMbO7WgNaZVRi3mx0gQJbzKdpfmEx3fRmMaZdm", regular: { url: "./aellux.ext.ajax-href.js", integrity: "sha384-t7ceO8CWC6eRq6osy75OIqdvTwXPaVYxjvzZsTNO4UDiHDmpssFbpRUJwY94hP1h" } }, legacy: { url: "./aellux.ext.ajax-href.legacy.min.js", integrity: "sha384-Vbzp0+5zTRAPZCmP8LFRYj3DwuLJNR00t594vrMuyXLDYiFnL67abJMx2MeAobSp", regular: { url: "./aellux.ext.ajax-href.legacy.js", integrity: "sha384-z/S7bFjw6yxPEEZAMf9vDrw/ZmbW3Yuzts13MkZ20e760jVgFmLNSjVoQxZgIqgs" } } }, dependencies: [] }, scrollbox: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.scrollbox.min.js", integrity: "sha384-dTkZzPTHKxMP8CiqQIRiEMIvwP3tzz556/T/RyDgmkfPxN7++2rxTsNrsfpjanvq", regular: { url: "./aellux.ext.scrollbox.js", integrity: "sha384-PyWJCTw7q5yHQzzLUH6C9JdoyZ7VmIhCPMp5ZyaNfRZLvlwWk1XSioju4dcnWRbZ" } }, legacy: { url: "./aellux.ext.scrollbox.legacy.min.js", integrity: "sha384-NAAMuWd9HKGVI8Oa6IMVqZ8dfosUZwReEFcEB9/jSytUGC1UiAiiJC2kNAiuZIwp", regular: { url: "./aellux.ext.scrollbox.legacy.js", integrity: "sha384-JEeKN1Ufe5FnjAF6By4ECLxIFxnyxaPrALgLzvOshH1OmBo77qBA88QksW4taYwE" } } }, dependencies: [] }, "scrollbox-snap": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.scrollbox-snap.min.js", integrity: "sha384-YNetWDUuxONIR41ykMQTu59vXnqcGmN070vqt2gHZxykQM8xVGRgOo4uUjTThbFb", regular: { url: "./aellux.ext.scrollbox-snap.js", integrity: "sha384-KmPblbbcz4OHkc0KTFYw/yuBelRxSL16pDVnLX/7jkb/xGBqPHWFP4x6GFQRIfHx" } }, legacy: { url: "./aellux.ext.scrollbox-snap.legacy.min.js", integrity: "sha384-Kbt2Fjswspgzzeop7aZZ3VYnUmaShTNswZmigPzvNNb4gxb2T6JfL8clidd58EVb", regular: { url: "./aellux.ext.scrollbox-snap.legacy.js", integrity: "sha384-rIlhaybqhGrNHSUVG6vphjZr1IJKF0lNxbYuVOeTvJSOOjTRYzRovU4rArLjJw8q" } } }, dependencies: [] }, adaptive: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.adaptive.min.js", integrity: "sha384-bkeOnTW/3uzbuhLc8fujaWnWGC+pwNAkZwci9M09paKqudp0v/flMrJ49JXw16vv", regular: { url: "./aellux.ext.adaptive.js", integrity: "sha384-Qzf9wU6DSSaaE+8lr96vnYqjKQqYxep8dhCZmjgNdqreuk9fL3qKMn3NW7DGAEaT" } }, legacy: { url: "./aellux.ext.adaptive.legacy.min.js", integrity: "sha384-YVHHWZOvf+65r/CU89nBPZXhj3j5sn4r2ho+CNUCUaYs1WE6pWIeypcq7n5OCBor", regular: { url: "./aellux.ext.adaptive.legacy.js", integrity: "sha384-gBkxqbBpIqdj5ozJm/NsenI/yKOvEGarZBl2SrPjYiiYx6cez2/FGTMf5XyzHrTj" } } }, dependencies: [], style: { url: "./aellux.ext.adaptive.min.css", integrity: "sha384-8yUP1PStfDqBCyCskP3k9WLIKgv/yl1nyDhmPz7hsX5NZ4z3ZT3ajolA+RhYlUiG", regular: { url: "./aellux.ext.adaptive.css", integrity: "sha384-HfIjX9Zk0VFRimzPvUaTS5AtwuHJHjXKoM/xbNJXj5vE7bSdBGEzbrBHfbNmYah0" } } }, present: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.present.min.js", integrity: "sha384-IF+YXaP+eI0KxLPjnokyOSVrBu2DO/Jarh7pBt/7MsKa3/swPNgWpOqqp8HSlQ03", regular: { url: "./aellux.ext.present.js", integrity: "sha384-U4NFtBPLUzexhgbPwHz+tnyMVBmtac1AqdexaYE9dkF0ZAwjXNrpsRsLWnG+pSSl" } }, legacy: { url: "./aellux.ext.present.legacy.min.js", integrity: "sha384-+IiCufWpM6PT+qlVbTXg21KUQMEh9ppCVFYAJEydg1fKeLOAXcUciHIz3lv2d68t", regular: { url: "./aellux.ext.present.legacy.js", integrity: "sha384-edDeJK/mtSoZy/gxHcGKKh7anWXqUaQ7BIMPGSHksmJFuSGWwGToPXk3a2mkgGUK" } } }, dependencies: [], style: { url: "./aellux.ext.present.min.css", integrity: "sha384-Xx3MuDirlIsArdiSpQ+nRsyKhGUQeGbGrdYaEANsZMp5aaGudWJLID3Iwq5nhWvj", regular: { url: "./aellux.ext.present.css", integrity: "sha384-vYogCkysGYLRQlY+IXCzVeC/TQeAlm/byVFSVzHJNlZUE4Wr3EYiXcQB6rNppdNP" } } } } };
     }
   });
 
@@ -1414,7 +1414,14 @@
         function associationDiagnostic(group, reason) {
           AelluxJs2.diagnostics.warn(
             AelluxJs2.diagnostics.WARN_ANCHOR_GROUP,
-            { extension: extensionName, element: group, reason }
+            {
+              extension: extensionName,
+              element: group,
+              reason,
+              attribute: groupAnchorAttribute,
+              value: group.getAttribute(groupAnchorAttribute),
+              suggestion: "Reference one existing Anchor ID from one Present Group and ensure compatible positioning references."
+            }
           );
         }
         function refreshAssociations() {
@@ -1751,7 +1758,15 @@
           if (state.invalidContext) return;
           AelluxJs2.diagnostics.error(
             AelluxJs2.diagnostics.ERROR_ANCHOR_REFERENCE_CONTEXT,
-            { extension: extensionName, element, target: placement.target }
+            {
+              extension: extensionName,
+              element,
+              target: placement.target,
+              attribute: targetAttribute,
+              value: element.getAttribute(targetAttribute),
+              reason: "Anchor and target use incompatible positioning references.",
+              suggestion: "Place both elements in the same containing block, or use that block as the target."
+            }
           );
           state.invalidContext = true;
         }
@@ -1867,17 +1882,21 @@
         let previousController = null;
         async function load(url, selectors, options = {}) {
           options = options || {};
+          const selectorList = parseSelectors(selectors);
+          if (!selectorList) return null;
+          const elements = /* @__PURE__ */ new Map();
+          for (const selector of selectorList) {
+            const currentElement = document.querySelector(selector);
+            if (currentElement) elements.set(selector, currentElement);
+            else selectorDiagnostic(selector, "No current element matches the selector.");
+          }
+          if (!elements.size) return null;
           if (previousController) {
             previousController.abort();
           }
           const controller = "AbortController" in window ? new AbortController() : { signal: null, abort: () => null };
           previousController = controller;
-          const selectorList = (Array.isArray(selectors) ? selectors : selectors.split(",")).map((selector) => selector.trim()).filter(Boolean);
-          const elements = /* @__PURE__ */ new Map();
-          selectorList.forEach(function(selector) {
-            const currentElement = document.querySelector(selector);
-            if (!currentElement) return;
-            elements.set(selector, currentElement);
+          elements.forEach(function(currentElement) {
             if (AelluxJs2.ext.feedback) {
               AelluxJs2.ext.feedback.busy(currentElement, "Ajax loading", true);
               AelluxJs2.ext.feedback.progress(currentElement, "Ajax loading", 0);
@@ -1898,7 +1917,14 @@
               const currentElement = elements.get(selector);
               if (!currentElement) continue;
               const loadedElement = loadedDocument.querySelector(selector);
-              if (!loadedElement) continue;
+              if (!loadedElement) {
+                selectorDiagnostic(selector, "No response element matches the selector.", currentElement);
+                if (AelluxJs2.ext.feedback) {
+                  AelluxJs2.ext.feedback.busy(currentElement, "Ajax loading", false);
+                  AelluxJs2.ext.feedback.progress(currentElement, "Ajax loading", 1);
+                }
+                continue;
+              }
               await AelluxJs2.unmount(currentElement);
               const replacement = document.importNode(loadedElement, true);
               currentElement.parentNode.replaceChild(replacement, currentElement);
@@ -1931,6 +1957,64 @@
               previousController = null;
             AelluxJs2.dispatch("AjaxHrefComplete");
           }
+        }
+        function selectorDiagnostic(value, reason, element = null) {
+          AelluxJs2.diagnostics.warn(AelluxJs2.diagnostics.WARN_CONFIGURATION_TARGET, {
+            extension: extensionName,
+            element,
+            attribute: attr.ajaxHref,
+            value,
+            reason,
+            suggestion: "Use valid CSS selectors identifying content in both the current document and the AJAX response."
+          });
+        }
+        function parseSelectors(selectors) {
+          const list = [];
+          for (const input of Array.isArray(selectors) ? selectors : [selectors]) {
+            if (typeof input !== "string" || !input.trim()) {
+              selectorDiagnostic(input, "Expected a nonempty selector string or array of strings.");
+              return null;
+            }
+            let start = 0, depth = 0, quote = null;
+            for (let index = 0; index <= input.length; index++) {
+              const char = input[index];
+              if (char === "\\") {
+                index++;
+                continue;
+              }
+              if (quote) {
+                if (char === quote) quote = null;
+                continue;
+              }
+              if (char === '"' || char === "'") {
+                quote = char;
+                continue;
+              }
+              if (char === "(" || char === "[") depth++;
+              if (char === ")" || char === "]") depth--;
+              if (index === input.length || char === "," && depth === 0) {
+                const selector = input.slice(start, index).trim();
+                try {
+                  if (!selector) throw new SyntaxError("Empty selector");
+                  document.querySelector(selector);
+                } catch (_) {
+                  selectorDiagnostic(input, "Invalid CSS selector.");
+                  return null;
+                }
+                if (!list.includes(selector)) list.push(selector);
+                start = index + 1;
+              }
+            }
+            if (quote || depth !== 0) {
+              selectorDiagnostic(input, "Unbalanced CSS selector.");
+              return null;
+            }
+          }
+          if (!list.length) {
+            selectorDiagnostic(selectors, "Expected at least one CSS selector.");
+            return null;
+          }
+          return list;
         }
         function onClick(event) {
           if (event.defaultPrevented) return;
@@ -2034,12 +2118,37 @@
             { name: "--ae-width", syntax: "<number>", initialValue: "0" },
             { name: "--ae-height", syntax: "<number>", initialValue: "0" }
           );
-          const overrides = options.adaptiveParams || {};
+          let overrides = options.adaptiveParams === void 0 ? {} : options.adaptiveParams;
+          if (!overrides || typeof overrides !== "object" || Array.isArray(overrides)) {
+            parameterDiagnostic("", overrides, "Expected an object of Adaptive parameter groups; using defaults.");
+            overrides = {};
+          }
           for (const group of Object.keys(adaptiveParams)) {
+            if (group in overrides && (!overrides[group] || typeof overrides[group] !== "object" || Array.isArray(overrides[group]))) {
+              parameterDiagnostic(group, overrides[group], "Expected a parameter group object; using defaults.");
+              continue;
+            }
             if (overrides[group] && typeof overrides[group] === "object") {
-              Object.assign(adaptiveParams[group], overrides[group]);
+              for (const [key, value] of Object.entries(overrides[group])) {
+                if (typeof value !== "number" || !Number.isFinite(value) || (group === "minSizes" ? value < 0 : value <= 0)) {
+                  parameterDiagnostic(`${group}.${key}`, value, "Expected a finite positive number (zero is allowed for minimum sizes).");
+                  continue;
+                }
+                adaptiveParams[group][key] = value;
+              }
             }
           }
+          for (const [group, lower, upper, fallback] of [
+            ["ratioShapes", "vertical", "horizontal", [0.8, 1.25]],
+            ["experienceScale", "near", "far", [1, 1.5]]
+          ]) if (adaptiveParams[group][lower] >= adaptiveParams[group][upper]) {
+            parameterDiagnostic(group, __spreadValues({}, adaptiveParams[group]), "The lower boundary must be less than the upper boundary; using defaults.");
+            adaptiveParams[group][lower] = fallback[0];
+            adaptiveParams[group][upper] = fallback[1];
+          }
+          const orderedSizes = ["compact", "small", "medium", "large", "xl", "xxl"];
+          if (orderedSizes.some((name, index) => index > 0 && adaptiveParams.minSizes[name] < adaptiveParams.minSizes[orderedSizes[index - 1]]))
+            parameterDiagnostic("minSizes", __spreadValues({}, adaptiveParams.minSizes), "Named minimum sizes are out of order; the configured thresholds are preserved.");
           managedClasses = getManagedClasses();
           for (const group of Object.keys(adaptiveParams)) Object.freeze(adaptiveParams[group]);
           Object.freeze(adaptiveParams);
@@ -2064,6 +2173,15 @@
             classes.push(className);
           }
           return classes;
+        }
+        function parameterDiagnostic(attribute, value, reason) {
+          AelluxJs2.diagnostics.warn(AelluxJs2.diagnostics.WARN_CONFIGURATION_VALUE, {
+            extension: extensionName,
+            attribute: `adaptiveParams${attribute ? "." + attribute : ""}`,
+            value,
+            reason,
+            suggestion: "Use finite nonnegative minimum sizes and positive, ordered ratio/experience boundaries."
+          });
         }
         function destroy() {
           pendingResizeEntries.clear();
@@ -2234,7 +2352,6 @@
         const attr = {
           present: AelluxJs2.attr(extensionName),
           group: AelluxJs2.attr("present-group"),
-          key: AelluxJs2.attr("present-key"),
           active: AelluxJs2.attr("present-active"),
           when: AelluxJs2.attr("present-when"),
           triggerOn: AelluxJs2.attr("trigger-on"),
@@ -2527,7 +2644,9 @@
             AelluxJs2.diagnostics.error(AelluxJs2.diagnostics.ERROR_EXTENSION_SELECTOR, {
               cause: new SyntaxError(),
               extension: extensionName,
-              selector: value
+              selector: value,
+              reason: "Present targets accept one element ID, not a CSS selector list.",
+              suggestion: "Use one existing Present ID, optionally prefixed with #."
             });
             return null;
           }
@@ -2608,6 +2727,17 @@
         }
         function trigger(element, trigger2) {
           trigger2 = typeof trigger2 === "string" ? (trigger2 || "toggle").toLowerCase() : "toggle";
+          if (!["pop", "unpop", "toggle"].includes(trigger2)) AelluxJs2.diagnostics.warn(
+            AelluxJs2.diagnostics.WARN_CONFIGURATION_VALUE,
+            {
+              extension: extensionName,
+              element,
+              attribute: attr.trigger,
+              value: trigger2,
+              reason: "Unknown Present action; using toggle.",
+              suggestion: "Use pop, unpop, or toggle."
+            }
+          );
           const method = trigger2 === "pop" ? pop : trigger2 === "unpop" ? unpop : toggle;
           return method(element);
         }
@@ -2659,8 +2789,12 @@
           if (typeof gotoVisible === "undefined" || gotoVisible === null)
             gotoVisible = controller.direction === POP ? false : true;
           const group = element.closest(groupSelector);
-          if (!groupOperation && groups.has(group) && element.hasAttribute(attr.key)) {
-            if (gotoVisible) return show(group, element.getAttribute(attr.key));
+          if (!groupOperation && groups.has(group) && element !== group) {
+            if (!element.id) {
+              groupDiagnostic(group, "Present Group members must have an ID.");
+              return false;
+            }
+            if (gotoVisible) return show(group, element.id);
             if (groups.get(group).selected === element) return show(group, "");
           }
           const newDirection = gotoVisible ? POP : UNPOP;
@@ -2901,6 +3035,7 @@
             const targetSelector = button.getAttribute(attr.target);
             if (targetSelector) {
               const target = targetById(targetSelector);
+              diagnoseTarget(button, target, attr.target, targetSelector);
               if (target) {
                 exceptions.push(target);
                 if (!suppressHoverClick(button, event)) trigger(target, triggerAttr);
@@ -2922,6 +3057,7 @@
             const targetSelector = button.getAttribute(attr.target);
             if (dismiss || targetSelector) {
               const target = targetById(dismiss || targetSelector);
+              diagnoseTarget(button, target, dismiss ? attr.dismiss : attr.target, dismiss || targetSelector);
               if (target) {
                 exceptions.push(target);
                 unpop(target);
@@ -2938,6 +3074,18 @@
           }
           outsideClickAutoUnpop(exceptions);
         }
+        function diagnoseTarget(element, target, attribute, value) {
+          if (!targetIdFor(value)) return;
+          if (target && target.hasAttribute(attr.present)) return;
+          AelluxJs2.diagnostics.warn(AelluxJs2.diagnostics.WARN_CONFIGURATION_TARGET, {
+            extension: extensionName,
+            element,
+            attribute,
+            value,
+            reason: target ? "Target is not a Present container." : "Target element was not found.",
+            suggestion: "Use one existing Present element ID, optionally prefixed with #, and mount it before interacting."
+          });
+        }
         function setProgress(element, visible) {
           setPhase(element, "pop", visible ? "1" : "0");
           setPhase(element, "unpop", visible ? "0" : "1");
@@ -2949,7 +3097,7 @@
           if (!interpolatedProgress) element.style.setProperty(`--ae-${direction}-progress`, value);
         }
         function groupMembers(group) {
-          return [...presentElements.keys()].filter((element) => element.isConnected && element.hasAttribute(attr.key) && element.closest(groupSelector) === group);
+          return [...presentElements.keys()].filter((element) => element.isConnected && element !== group && element.id && element.closest(groupSelector) === group);
         }
         function mountGroup(group) {
           if (groups.has(group)) return;
@@ -2969,7 +3117,7 @@
               subtree: true,
               childList: true,
               attributes: true,
-              attributeFilter: ["class", attr.active, attr.key, attr.when, attr.group]
+              attributeFilter: ["class", "id", attr.active, attr.when, attr.group]
             });
           }
           queueGroups();
@@ -3013,7 +3161,14 @@
         function groupDiagnostic(group, reason) {
           AelluxJs2.diagnostics.warn(
             AelluxJs2.diagnostics.WARN_PRESENT_GROUP_SELECTION,
-            { extension: extensionName, element: group, reason }
+            {
+              extension: extensionName,
+              element: group,
+              attribute: attr.active,
+              value: group.getAttribute(attr.active),
+              reason,
+              suggestion: "Use unique native IDs on Present members of this group; select one ID or one matching condition."
+            }
           );
         }
         function reconcileGroup(group) {
@@ -3023,10 +3178,10 @@
           if (!members.includes(state.selected)) state.selected = null;
           let matches;
           if (group.hasAttribute(attr.active)) {
-            const key = group.getAttribute(attr.active);
-            matches = key === "" ? [] : members.filter((member) => member.getAttribute(attr.key) === key);
-            if (key && matches.length !== 1) {
-              groupDiagnostic(group, "Active key must match one mounted member.");
+            const id = group.getAttribute(attr.active);
+            matches = id === "" ? [] : members.filter((member) => member.id === id);
+            if (id && matches.length !== 1) {
+              groupDiagnostic(group, "Active ID must match one mounted Present descendant in this group.");
               return;
             }
           } else {
@@ -3047,22 +3202,22 @@
           }
           return selectGroup(group, matches[0] || null, members);
         }
-        function show(group, key) {
+        function show(group, id) {
           const state = groups.get(group);
-          if (!state || typeof key !== "string") return Promise.resolve(false);
-          const matches = groupMembers(group).filter((member) => member.getAttribute(attr.key) === key);
-          if (key && matches.length !== 1) {
-            groupDiagnostic(group, "Active key must match one mounted member.");
+          if (!state || typeof id !== "string") return Promise.resolve(false);
+          const matches = groupMembers(group).filter((member) => member.id === id);
+          if (id && matches.length !== 1) {
+            groupDiagnostic(group, "Active ID must match one mounted Present descendant in this group.");
             return Promise.resolve(false);
           }
-          if (group.getAttribute(attr.active) !== key) group.setAttribute(attr.active, key);
+          if (group.getAttribute(attr.active) !== id) group.setAttribute(attr.active, id);
           const result = reconcileGroup(group);
           return Promise.resolve(result === void 0 ? state.pending : result);
         }
         function selected(group) {
           const state = groups.get(group);
           const member = state && state.selected;
-          return member && presentElements.has(member) && member.isConnected && member.hasAttribute(attr.key) && member.closest(groupSelector) === group ? member : null;
+          return member && member !== group && presentElements.has(member) && member.isConnected && member.id && member.closest(groupSelector) === group ? member : null;
         }
         function publishGroup(group, state, current) {
           if (state.announced === current) return;
@@ -3070,7 +3225,7 @@
           state.announced = current;
           AelluxJs2.dispatchFrom(group, "PresentGroupChange", {
             bubbles: true,
-            detail: { group, previous, current, key: current && current.getAttribute(attr.key) }
+            detail: { group, previous, current, key: current && current.id }
           });
         }
         function selectGroup(group, selected2, members) {
@@ -3084,9 +3239,9 @@
           const revision = ++state.revision;
           const active = group.getAttribute(attr.active);
           const classes = group.getAttribute("class");
-          const keys = members.map((member) => member.getAttribute(attr.key));
+          const ids = members.map((member) => member.id);
           const conditions = members.map((member) => member.getAttribute(attr.when));
-          const valid = () => groups.get(group) === state && state.revision === revision && group.isConnected && group.hasAttribute(attr.group) && group.getAttribute(attr.active) === active && group.getAttribute("class") === classes && groupMembers(group).length === members.length && members.every((member, index) => presentElements.has(member) && member.isConnected && member.closest(groupSelector) === group && member.getAttribute(attr.key) === keys[index] && member.getAttribute(attr.when) === conditions[index]);
+          const valid = () => groups.get(group) === state && state.revision === revision && group.isConnected && group.hasAttribute(attr.group) && group.getAttribute(attr.active) === active && group.getAttribute("class") === classes && groupMembers(group).length === members.length && members.every((member, index) => presentElements.has(member) && member.isConnected && member.closest(groupSelector) === group && member.id === ids[index] && member.getAttribute(attr.when) === conditions[index]);
           for (const member of changes) {
             const allowed = AelluxJs2.dispatchFrom(
               member,
@@ -3099,8 +3254,8 @@
             }
             if (!allowed) {
               if (state.revision === revision) {
-                const key = ((_a = state.selected) == null ? void 0 : _a.getAttribute(attr.key)) || "";
-                if (group.getAttribute(attr.active) !== key) group.setAttribute(attr.active, key);
+                const id = ((_a = state.selected) == null ? void 0 : _a.id) || "";
+                if (group.getAttribute(attr.active) !== id) group.setAttribute(attr.active, id);
               }
               return false;
             }
@@ -3894,6 +4049,311 @@
     return null;
   }
 
+  // src/internal/validate-declarations.js
+  init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
+
+  // src/internal/report-configuration.js
+  init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
+  /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+  function reportConfiguration(api, name, context) {
+    if (context.element && context.attribute && !("value" in context))
+      context.value = context.element.getAttribute(context.attribute);
+    return api.diagnostics.warn(api.diagnostics[name], context);
+  }
+  function diagnosePresentTarget(api, element, target, attribute, value) {
+    if (!value || /[\s#]/.test(value.replace(/^#/, ""))) return false;
+    if (target && target.hasAttribute(api.attr("present"))) return true;
+    reportConfiguration(api, "WARN_CONFIGURATION_TARGET", {
+      extension: "present",
+      element,
+      attribute,
+      value,
+      reason: target ? "Target is not a Present container." : "Target element was not found.",
+      suggestion: "Use one existing Present element ID, optionally prefixed with #, and mount it before interacting."
+    });
+    return false;
+  }
+
+  // src/internal/validate-declarations.js
+  init_utils_name_case();
+  /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+  var attributesByExtension = {
+    present: "present present-group present-active present-when present-motion trigger trigger-on dismiss target auto-unpop unpop-on-outside low-hardware present-group-anchor",
+    anchor: "anchor anchor-target anchor-match anchor-style",
+    scrollbox: "scrollbox scrollbox-wheel-horizontal scrollbox-momentum scrollbox-elastic scrollbar scrollbar-vertical scrollbar-horizontal",
+    "scrollbox-snap": "scrollbox-snap snap-item",
+    focus: "focus",
+    point: "point",
+    adaptive: "adaptive",
+    "ajax-href": "ajax-href",
+    preference: "preference option label next prev ready",
+    feedback: "feedback target-message target-transform"
+  };
+  var coreAttributes = "maxfps wait-mounted ext ext-style dep load-when builds load-style weak-style legacy esm theme-color";
+  var activation = {
+    present: "present present-group trigger dismiss",
+    anchor: "anchor",
+    scrollbox: "scrollbox",
+    "scrollbox-snap": "scrollbox-snap",
+    focus: "focus",
+    point: "point",
+    adaptive: "adaptive",
+    "ajax-href": "ajax-href",
+    preference: "preference",
+    feedback: "feedback"
+  };
+  function validateDeclarations(root2, scope, extensionNames = null, method = "mount") {
+    var _a, _b, _c;
+    const api = root2.AelluxJs;
+    if (api.options.environment !== "development") return;
+    const selected = extensionNames === null ? null : new Set(
+      (Array.isArray(extensionNames) ? extensionNames : [extensionNames]).map(utils_name_case_default.fromCamelCase)
+    );
+    const attr = (name) => api.attr(name);
+    const prefix = attr("");
+    const owners = /* @__PURE__ */ new Map();
+    for (const [extension, names] of Object.entries(attributesByExtension))
+      for (const name of names.split(" ")) owners.set(attr(name), extension);
+    const known = /* @__PURE__ */ new Set([
+      ...owners.keys(),
+      ...coreAttributes.split(" ").map(attr),
+      ...Object.keys(api.registry.preferenceMediaQueries).map((name) => attr(utils_name_case_default.fromCamelCase(name)))
+    ]);
+    for (const selector of [...Object.values(api.registry.extMounters), ...Object.values(api.registry.lazyExtSelectors)])
+      for (const match of selector.match(/\[[^\s\]~|^$*!=]+/g) || []) known.add(match.slice(1));
+    const elements = [...scope.nodeType === 1 ? [scope] : [], ...scope.querySelectorAll("*")];
+    for (const element of elements) {
+      let validatePresent = function() {
+        if (has("present") && value("present").trim().split(/\s+/).some((token) => token && !["opacity", "transform", "height", "width"].includes(token)))
+          invalid("present", "present", "Unknown animated Present property.", "Use opacity, transform, height, width, all, or an empty value to disable motion.");
+        if (has("present-when") && /\s/.test(value("present-when")))
+          invalid("present", "present-when", "A group condition must be one class token.", "Use one class name without spaces or a leading dot.", "WARN_PRESENT_GROUP_SELECTION");
+        for (const [name, allowed] of [["trigger", ["", "toggle", "pop", "unpop"]], ["trigger-on", ["", "click", "hover"]]])
+          if (has(name) && !allowed.includes(name === "trigger" ? value(name).toLowerCase() : value(name)))
+            invalid("present", name, "Unknown Present control value.", `Use ${allowed.filter(Boolean).join(", ")}.`);
+        if (has("trigger") || has("dismiss")) {
+          const name = value("dismiss") ? "dismiss" : "target";
+          const reference = value(name);
+          if (reference) diagnosePresentTarget(api, element, root2.document.getElementById(reference.replace(/^#/, "")), attr(name), reference);
+          else if (!element.closest(`[${attr("present")}]`))
+            invalid(
+              "present",
+              has("trigger") ? "trigger" : "dismiss",
+              "Control has no target or enclosing Present container.",
+              "Set data-ae-target to an existing Present ID or place the control inside its Present container.",
+              "WARN_CONFIGURATION_TARGET"
+            );
+          if (element.tabIndex < 0 && !element.matches(":disabled,[inert]"))
+            invalid(
+              "present",
+              has("trigger") ? "trigger" : "dismiss",
+              "Control is not reachable with the keyboard.",
+              "Prefer a native button; custom controls need focusability and appropriate keyboard activation.",
+              "WARN_CONTROL_ACCESSIBILITY"
+            );
+        }
+        if (has("auto-unpop") && value("auto-unpop") && !/^(?:\d+(?:\.\d+)?|\.\d+)(?:ms|s)?$/.test(value("auto-unpop").trim()))
+          invalid("present", "auto-unpop", "Auto-unpop duration is invalid.", "Use a nonnegative duration such as 250ms or 2s.");
+        if (has("present-group")) {
+          const members = [...element.querySelectorAll(`[${attr("present")}]`)].filter((member) => member.closest(`[${attr("present-group")}]`) === element);
+          if (!members.some((member) => member.id))
+            invalid("present", "present-group", "Group has no identifiable Present members.", "Add Present descendants with unique native IDs.", "WARN_PRESENT_GROUP_SELECTION");
+          for (const member of members) if (!member.id) reportConfiguration(api, "WARN_PRESENT_GROUP_SELECTION", {
+            extension: "present",
+            element: member,
+            attribute: "id",
+            value: member.id,
+            reason: "Present Group member has no ID.",
+            suggestion: "Assign a unique native ID so the group can select this member."
+          });
+        }
+      }, validateAnchor = function() {
+        const pivots = new Set("top-left top-center top-right center-left center center-right bottom-left bottom-center bottom-right".split(" "));
+        const pairs = value("anchor").split(",");
+        if (!pairs.every((token) => {
+          const pair = token.trim().toLowerCase().split(":");
+          return pair.length === 2 && pair.every((pivot) => pivots.has(pivot.trim()));
+        }))
+          invalid("anchor", "anchor", "Anchor pivot pair is invalid.", "Use target:self pairs such as bottom-center:top-center, separated by commas.");
+        if (has("anchor-match") && value("anchor-match").trim().split(/\s+/).some((token) => !["width", "height"].includes(token)))
+          invalid("anchor", "anchor-match", "Unknown matching dimension.", "Use width, height, or width height.", "WARN_ANCHOR_MATCH");
+        const reference = value("anchor-target");
+        if (!reference) return;
+        if (element.id && [...root2.document.querySelectorAll(`[${attr("present-group-anchor")}]`)].some((group) => group.getAttribute(attr("present-group-anchor")).replace(/^#/, "") === element.id)) return;
+        let target;
+        try {
+          target = root2.document.getElementById(reference.replace(/^#/, "")) || root2.document.querySelector(reference);
+        } catch (_) {
+        }
+        if (!target) invalid("anchor", "anchor-target", "Anchor target does not exist or the selector is invalid.", "Use an existing target ID or a valid CSS selector.", "WARN_CONFIGURATION_TARGET");
+        else if (method === "update" && element.getClientRects().length && !target.getClientRects().length && !target.closest(`[${attr("present")}],[hidden]`))
+          invalid("anchor", "anchor-target", "The explicitly updated Anchor target cannot currently be measured.", "Reveal the target before requesting placement, or update again after it becomes measurable.", "WARN_CONFIGURATION_TARGET");
+      }, validateScrollbox = function() {
+        if (value("scrollbox").trim().toLowerCase() !== "pointer" || !element.getClientRects().length) return;
+        const style = root2.getComputedStyle(element);
+        const blockedX = element.scrollWidth > element.clientWidth + 1 && !["auto", "scroll"].includes(style.overflowX);
+        const blockedY = element.scrollHeight > element.clientHeight + 1 && !["auto", "scroll"].includes(style.overflowY);
+        const usableX = element.scrollWidth > element.clientWidth + 1 && ["auto", "scroll"].includes(style.overflowX);
+        const usableY = element.scrollHeight > element.clientHeight + 1 && ["auto", "scroll"].includes(style.overflowY);
+        if ((blockedX || blockedY) && !usableX && !usableY)
+          invalid("scrollbox", "scrollbox", "Content overflows but CSS disables the pointer scrolling axes.", "Set overflow:auto or overflow:scroll on the intended axis.", "WARN_CONFIGURATION_STYLE");
+      }, validateSnap = function() {
+        if (!["", "horizontal", "vertical", "false"].includes(value("scrollbox-snap")))
+          invalid("scrollbox-snap", "scrollbox-snap", "Unknown snap axis.", "Use horizontal, vertical, or false.");
+        for (const item of element.querySelectorAll(`[${attr("snap-item")}]`)) {
+          if (item.closest(`[${attr("scrollbox")}]`) !== element) continue;
+          const alignment = item.getAttribute(attr("snap-item"));
+          if (!["", "start", "end", "center", "left", "right", "top", "bottom"].includes(alignment))
+            reportConfiguration(api, "WARN_CONFIGURATION_VALUE", {
+              extension: "scrollbox-snap",
+              element: item,
+              attribute: attr("snap-item"),
+              value: alignment,
+              reason: "Unknown snap item alignment.",
+              suggestion: "Use start, center, or end (left/right/top/bottom are aliases)."
+            });
+        }
+      }, validateCSS = function() {
+        var _a2, _b2;
+        const checkAnchor = has("anchor") && (!selected || selected.has("anchor"));
+        const checkPresent = (has("present") || has("present-motion")) && (!selected || selected.has("present"));
+        if (!checkAnchor && !checkPresent) return;
+        const extension = checkAnchor ? "anchor" : "present";
+        const style = root2.getComputedStyle(element);
+        const durations = [
+          ...checkPresent ? ["--ae-pop-duration", "--ae-unpop-duration"] : [],
+          ...checkAnchor ? ["--ae-anchor-switch-duration"] : []
+        ];
+        for (const name of durations) {
+          const value2 = (element.style.getPropertyValue(name) || style.getPropertyValue(name)).trim();
+          if (value2 && ((_a2 = root2.CSS) == null ? void 0 : _a2.supports) && !root2.CSS.supports("transition-duration", value2))
+            reportConfiguration(api, "WARN_CONFIGURATION_STYLE", {
+              extension,
+              element,
+              attribute: "style",
+              value: value2,
+              reason: `Invalid duration in ${name}.`,
+              suggestion: "Use a nonnegative CSS time such as 250ms or 0s."
+            });
+        }
+        for (const name of checkPresent ? ["--ae-pop-low-steps", "--ae-unpop-low-steps"] : []) {
+          const value2 = element.style.getPropertyValue(name).trim();
+          if (value2 && ((_b2 = root2.CSS) == null ? void 0 : _b2.supports) && !root2.CSS.supports("animation-timing-function", `steps(${value2})`))
+            reportConfiguration(api, "WARN_CONFIGURATION_VALUE", {
+              extension,
+              element,
+              attribute: "style",
+              value: value2,
+              reason: `Invalid step count in ${name}.`,
+              suggestion: "Use a positive integer step count."
+            });
+        }
+        if (!element.getClientRects().length) return;
+        if (checkPresent && has("present") && element.classList.contains(api.className("present-grid")) && /(?:^|\s)(height|width)(?:\s|$)/.test(value("present")) && !["grid", "inline-grid"].includes(style.display))
+          invalid(extension, "present", "Present's size motion requires its grid layout stylesheet.", "Load the Present stylesheet, check CSP, and preserve the container's grid display.", "WARN_CONFIGURATION_STYLE");
+        if (checkAnchor && element.classList.contains(api.className("anchored")) && !["absolute", "fixed"].includes(style.position))
+          invalid(extension, "anchor", "Effective CSS prevents Anchor's absolute positioning.", "Check the weak stylesheet, CSP and overriding position rules.", "WARN_CONFIGURATION_STYLE");
+        if (checkPresent && has("present") && element.hidden && style.display !== "none" && !invisible(element))
+          invalid(extension, "present", "CSS makes a hidden Present container render.", "Preserve display:none for hidden Present containers; check overriding display rules.", "WARN_CONFIGURATION_STYLE");
+      };
+      const has = (name) => element.hasAttribute(attr(name));
+      const value = (name) => element.getAttribute(attr(name));
+      const report = (name, extension, attribute, reason, suggestion, extra = {}) => reportConfiguration(api, name, __spreadValues({ extension, element, attribute: attr(attribute), reason, suggestion }, extra));
+      const invalid = (extension, name, reason, suggestion, code = "WARN_CONFIGURATION_VALUE") => report(code, extension, name, reason, suggestion);
+      for (const attribute of element.attributes) {
+        const owner = owners.get(attribute.name);
+        if (selected && (!owner || !selected.has(owner))) continue;
+        if (!selected && attribute.name.startsWith(prefix) && !known.has(attribute.name)) {
+          const candidate = [...known].find((name) => oneEditApart(attribute.name, name));
+          if (candidate) reportConfiguration(api, "WARN_ATTRIBUTE_UNKNOWN", {
+            extension: owners.get(candidate) || "core",
+            element,
+            attribute: attribute.name,
+            value: attribute.value,
+            reason: "Unknown Aellux attribute.",
+            suggestion: `Check the spelling; did you mean ${candidate}?`
+          });
+        }
+      }
+      for (const [extension, declarations] of Object.entries(activation)) {
+        if (selected && !selected.has(extension)) continue;
+        const declaration = declarations.split(" ").find((name) => has(name) && (name !== "scrollbox-snap" || value(name) !== "false"));
+        if (!declaration) continue;
+        if (extension === "scrollbox-snap" && !has("scrollbox"))
+          invalid(extension, "scrollbox-snap", "Snap requires Scrollbox on the same element.", "Add data-ae-scrollbox to the Snap container.", "WARN_CONFIGURATION_STRUCTURE");
+        const key = utils_name_case_default.toCamelCase(extension);
+        if (!((_a = api.ext[key]) == null ? void 0 : _a.initialized)) {
+          report(
+            "WARN_EXTENSION_REQUIRED",
+            extension,
+            declaration,
+            "The declared behavior's Extension is not initialized.",
+            `Register ${extension} before mounting, await $ae.wait("${extension}"), and check earlier load diagnostics.`
+          );
+          continue;
+        }
+        if (extension === "present") validatePresent();
+        if (extension === "anchor") validateAnchor();
+        if (extension === "scrollbox") validateScrollbox();
+        if (extension === "scrollbox-snap") validateSnap();
+        if (extension === "focus") {
+          if (value("focus") && value("focus") !== "next")
+            invalid(extension, "focus", "Unknown Focus mode.", "Use next for Enter navigation, or remove the attribute.");
+          if (value("focus") === "next" && !element.matches("input:not([type]),input[type=text],input[type=search],input[type=email],input[type=url],input[type=tel],input[type=password],input[type=number],textarea,[contenteditable]:not([contenteditable=false])"))
+            invalid(extension, "focus", "Enter navigation is declared on a non-text-entry element.", "Apply data-ae-focus=next to a text input, textarea or editable element.");
+        }
+        if (extension === "point" && value("point") !== "" && (!/^\d+$/.test(value("point")) || !Number.isSafeInteger(Number(value("point")))))
+          invalid(extension, "point", "Pointer count must be a nonnegative integer.", "Use an integer such as 1; 0 disables pointer association.");
+        if (extension === "ajax-href") {
+          try {
+            if (!value("ajax-href").trim() || !root2.document.querySelector(value("ajax-href")))
+              invalid(extension, "ajax-href", "No current content matches the AJAX selector.", "Provide a CSS selector present in both the current page and the response.");
+          } catch (_) {
+            invalid(extension, "ajax-href", "The AJAX selector is invalid.", "Provide a valid CSS selector such as #content.");
+          }
+        }
+      }
+      if ((!selected || selected.has("scrollbox")) && has("scrollbox-elastic") && value("scrollbox-elastic") !== "false" && !((_b = element.parentElement) == null ? void 0 : _b.hasAttribute(attr("scrollbox"))))
+        invalid("scrollbox", "scrollbox-elastic", "Elastic wrapper must be a direct child of Scrollbox.", "Place exactly one marked wrapper directly inside data-ae-scrollbox.", "WARN_CONFIGURATION_STRUCTURE");
+      if ((!selected || selected.has("scrollbox-snap")) && has("snap-item") && !element.closest(`[${attr("scrollbox")}]`))
+        invalid("scrollbox-snap", "snap-item", "Snap item has no Scrollbox ancestor.", "Place snap items inside a Scrollbox with Snap enabled.", "WARN_CONFIGURATION_STRUCTURE");
+      if ((!selected || selected.has("anchor")) && has("present-group-anchor") && !((_c = api.ext.anchor) == null ? void 0 : _c.initialized))
+        report("WARN_EXTENSION_REQUIRED", "anchor", "present-group-anchor", "The group association requires Anchor.", "Register and initialize Anchor, and reference an existing Anchor ID.");
+      if (!selected && has("maxfps") && (!value("maxfps").trim() || !Number.isFinite(Number(value("maxfps"))) || Number(value("maxfps")) <= 0))
+        invalid("core", "maxfps", "Frame rate must be finite and greater than zero.", "Use a positive number or remove the attribute.", "WARN_LAYOUT_MAX_FPS_INVALID");
+      if (!selected || selected.has("present") || selected.has("anchor")) validateCSS();
+    }
+    function invisible(element) {
+      for (let node = element; node; node = node.parentElement) {
+        const style = root2.getComputedStyle(node);
+        if (style.visibility !== "visible" || Number(style.opacity) === 0) return true;
+      }
+      return false;
+    }
+  }
+  function oneEditApart(left, right) {
+    if (Math.abs(left.length - right.length) > 1) return false;
+    let i = 0, j = 0, edits = 0;
+    while (i < left.length && j < right.length) {
+      if (left[i] === right[j]) {
+        i++;
+        j++;
+        continue;
+      }
+      if (++edits > 1) return false;
+      if (left[i] === right[j + 1] && left[i + 1] === right[j] && left.length === right.length) {
+        i += 2;
+        j += 2;
+      } else if (left.length > right.length) i++;
+      else if (right.length > left.length) j++;
+      else {
+        i++;
+        j++;
+      }
+    }
+    return edits + Number(i < left.length || j < right.length) === 1;
+  }
+
   // src/internal/create-mount-helper.js
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   function createMountHelper(root2, mountMaps, mountedElements, elementControllers) {
@@ -3909,6 +4369,7 @@
       const rootElement = resolveMountElement(elementOrId, "update");
       if (!rootElement) return false;
       await AelluxJsMounted(rootElement, "update", extensionNames);
+      validateDeclarations(root2, rootElement, extensionNames, "update");
       return true;
     }
     async function unmount(elementOrId, extensionNames = null) {
@@ -3955,6 +4416,7 @@
         }
         await Promise.all(waitExtensions);
         await AelluxJsMount(rootElement, extensionNames, newlyMounted);
+        validateDeclarations(root2, rootElement, extensionNames);
       } catch (error) {
         AelluxJs2.diagnostics.error(AelluxJs2.diagnostics.ERROR_MOUNT, {
           cause: error,
@@ -4410,7 +4872,12 @@
       if (!elementOrId) return null;
       const found = elementControllers.get(elementOrId);
       if (found) return found;
-      diagnostics.error(diagnostics.ERROR_CONTROLLER_NOT_FOUND, { element: elementOrId });
+      diagnostics.error(diagnostics.ERROR_CONTROLLER_NOT_FOUND, {
+        element: elementOrId,
+        method: "controller",
+        reason: "No completed mount exposes a controller for this element.",
+        suggestion: "Register the required Extension, await $ae.mount(element), and inspect earlier load or mount diagnostics."
+      });
       return null;
     }
     function keyFor(extensionName) {
@@ -4782,7 +5249,15 @@
       if (value !== void 0) {
         AelluxJs2.diagnostics.warn(
           AelluxJs2.diagnostics.WARN_CSS_MOTION_PROPERTY_MAX_FPS_INVALID,
-          { option: "cssMotionPropertyMaxFPS", value, fallback: 40 }
+          {
+            extension: "core",
+            option: "cssMotionPropertyMaxFPS",
+            attribute: "cssMotionPropertyMaxFPS",
+            value,
+            fallback: 40,
+            reason: "CSS Motion frame rate must be finite and greater than zero; using 40 FPS.",
+            suggestion: "Use a positive finite number or omit the option for the default."
+          }
         );
       }
       return 40;
@@ -5341,7 +5816,15 @@
               errorCallback: () => {
                 AelluxJs.diagnostics.warn(
                   AelluxJs.diagnostics.WARN_EXTENSION_STYLE_LOAD,
-                  { extension: extensionName, url: link.href }
+                  {
+                    extension: extensionName,
+                    element: link,
+                    attribute: "href",
+                    value: link.href,
+                    url: link.href,
+                    reason: "The Extension stylesheet could not be loaded.",
+                    suggestion: "Check the stylesheet URL, network response, integrity metadata and CSP style-src policy."
+                  }
                 );
                 resolve();
               }

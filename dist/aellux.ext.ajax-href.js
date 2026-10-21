@@ -26,17 +26,21 @@
     let previousController = null;
     async function load(url, selectors, options = {}) {
       options = options || {};
+      const selectorList = parseSelectors(selectors);
+      if (!selectorList) return null;
+      const elements = /* @__PURE__ */ new Map();
+      for (const selector of selectorList) {
+        const currentElement = document.querySelector(selector);
+        if (currentElement) elements.set(selector, currentElement);
+        else selectorDiagnostic(selector, "No current element matches the selector.");
+      }
+      if (!elements.size) return null;
       if (previousController) {
         previousController.abort();
       }
       const controller = "AbortController" in window ? new AbortController() : { signal: null, abort: () => null };
       previousController = controller;
-      const selectorList = (Array.isArray(selectors) ? selectors : selectors.split(",")).map((selector) => selector.trim()).filter(Boolean);
-      const elements = /* @__PURE__ */ new Map();
-      selectorList.forEach(function(selector) {
-        const currentElement = document.querySelector(selector);
-        if (!currentElement) return;
-        elements.set(selector, currentElement);
+      elements.forEach(function(currentElement) {
         if (AelluxJs.ext.feedback) {
           AelluxJs.ext.feedback.busy(currentElement, "Ajax loading", true);
           AelluxJs.ext.feedback.progress(currentElement, "Ajax loading", 0);
@@ -57,7 +61,14 @@
           const currentElement = elements.get(selector);
           if (!currentElement) continue;
           const loadedElement = loadedDocument.querySelector(selector);
-          if (!loadedElement) continue;
+          if (!loadedElement) {
+            selectorDiagnostic(selector, "No response element matches the selector.", currentElement);
+            if (AelluxJs.ext.feedback) {
+              AelluxJs.ext.feedback.busy(currentElement, "Ajax loading", false);
+              AelluxJs.ext.feedback.progress(currentElement, "Ajax loading", 1);
+            }
+            continue;
+          }
           await AelluxJs.unmount(currentElement);
           const replacement = document.importNode(loadedElement, true);
           currentElement.parentNode.replaceChild(replacement, currentElement);
@@ -90,6 +101,64 @@
           previousController = null;
         AelluxJs.dispatch("AjaxHrefComplete");
       }
+    }
+    function selectorDiagnostic(value, reason, element = null) {
+      AelluxJs.diagnostics.warn(AelluxJs.diagnostics.WARN_CONFIGURATION_TARGET, {
+        extension: extensionName,
+        element,
+        attribute: attr.ajaxHref,
+        value,
+        reason,
+        suggestion: "Use valid CSS selectors identifying content in both the current document and the AJAX response."
+      });
+    }
+    function parseSelectors(selectors) {
+      const list = [];
+      for (const input of Array.isArray(selectors) ? selectors : [selectors]) {
+        if (typeof input !== "string" || !input.trim()) {
+          selectorDiagnostic(input, "Expected a nonempty selector string or array of strings.");
+          return null;
+        }
+        let start = 0, depth = 0, quote = null;
+        for (let index = 0; index <= input.length; index++) {
+          const char = input[index];
+          if (char === "\\") {
+            index++;
+            continue;
+          }
+          if (quote) {
+            if (char === quote) quote = null;
+            continue;
+          }
+          if (char === '"' || char === "'") {
+            quote = char;
+            continue;
+          }
+          if (char === "(" || char === "[") depth++;
+          if (char === ")" || char === "]") depth--;
+          if (index === input.length || char === "," && depth === 0) {
+            const selector = input.slice(start, index).trim();
+            try {
+              if (!selector) throw new SyntaxError("Empty selector");
+              document.querySelector(selector);
+            } catch (_) {
+              selectorDiagnostic(input, "Invalid CSS selector.");
+              return null;
+            }
+            if (!list.includes(selector)) list.push(selector);
+            start = index + 1;
+          }
+        }
+        if (quote || depth !== 0) {
+          selectorDiagnostic(input, "Unbalanced CSS selector.");
+          return null;
+        }
+      }
+      if (!list.length) {
+        selectorDiagnostic(selectors, "Expected at least one CSS selector.");
+        return null;
+      }
+      return list;
     }
     function onClick(event) {
       if (event.defaultPrevented) return;

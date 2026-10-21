@@ -169,10 +169,10 @@ test("scroll and resize interrupt switching for immediate tracking; hidden, remo
 
 const group = `<div id="group" data-ae-present-group data-ae-present-active="a"
   data-ae-present-group-anchor="indicator" class="view-a">
-  <section id="a" class="target" data-ae-present="opacity" data-ae-present-key="a" data-ae-present-when="view-a">A</section>
-  <section id="b" class="target" data-ae-present="opacity" data-ae-present-key="b" data-ae-present-when="view-b" hidden
+  <section id="a" class="target" data-ae-present="opacity" data-ae-present-when="view-a">A</section>
+  <section id="b" class="target" data-ae-present="opacity" data-ae-present-when="view-b" hidden
     style="--ae-pop-duration:700ms">B</section>
-  <section id="c" class="target" data-ae-present="opacity" data-ae-present-key="c" hidden>C</section></div>`;
+  <section id="c" class="target" data-ae-present="opacity" hidden>C</section></div>`;
 
 for (const mode of ["basic", "full"]) for (const forceLegacy of [false, true]) {
   test(`group association, selection event, veto, precedence and remount (${mode}, legacy=${forceLegacy})`, async ({ page }) => {
@@ -231,7 +231,7 @@ test("association diagnostics, conflicts, dynamic members, replacement Anchor an
   await page.evaluate(() => document.getElementById("a").remove());
   await expect(page.locator("#indicator")).not.toHaveClass(/ae--anchored/);
   await page.evaluate(async () => {
-    document.getElementById("group").insertAdjacentHTML("afterbegin", '<section id="a" class="target" data-ae-present="opacity" data-ae-present-key="a" hidden>A replacement</section>');
+    document.getElementById("group").insertAdjacentHTML("afterbegin", '<section id="a" class="target" data-ae-present="opacity" hidden>A replacement</section>');
     await AelluxJs.mount(document.getElementById("a"));
   });
   await aligned(page, "a");
@@ -247,7 +247,7 @@ test("association diagnostics, conflicts, dynamic members, replacement Anchor an
 
 test("circular associations and incompatible positioning contexts are diagnosed", async ({ page }) => {
   await start(page, `${stage}<div id="ref"><div data-ae-present-group data-ae-present-active="self" data-ae-present-group-anchor="self">
-    <div id="self" data-ae-present data-ae-present-key="self" data-ae-anchor="top-left:top-left"></div></div>
+    <div id="self" data-ae-present data-ae-anchor="top-left:top-left"></div></div>
     <div style="position:relative"><div id="nested" style="width:30px;height:30px"></div></div>
     <div id="indicator" data-ae-anchor="top-left:top-left" data-ae-anchor-target="nested"></div></div>`);
   await expect.poll(() => page.evaluate(() => AelluxJs.diagnostics.showHistory().some(entry => entry.code === 2023))).toBe(true);

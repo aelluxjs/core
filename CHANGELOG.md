@@ -6,6 +6,8 @@ All notable changes to aellux.js will be documented in this file.
 
 ### Added
 
+- Development mounts and explicit updates now diagnose likely attribute typos, missing Extensions, invalid values/targets, incomplete structures, keyboard reachability and blocking CSS. Configuration contexts include the element, attribute, value, reason and suggested correction, with seven shared warning codes (`2024`–`2030`).
+- Present target failures, AJAX selector failures and Adaptive parameter validation now provide actionable runtime diagnostics; AJAX preserves current content when a response region is missing and accepts commas inside selector functions and quoted attribute values.
 - Core now exposes `$ae.cubicBezier(t, x1, y1, x2, y2)` and accepts CSS `cubic-bezier(...)` easing strings.
 - Present adds group selection, delegated hover behavior, bounded CSS progress, and an optional selection bridge to Anchor.
 - Anchor adds target dimension matching and native target-switch transitions.
@@ -35,6 +37,8 @@ All notable changes to aellux.js will be documented in this file.
 
 ### Changed
 
+- Raised the affected Boot, ESM, Orchestrator, Adaptive, Present and Snap bundle limits for the configuration diagnostics; the measured sizes and previous/new limits are documented in the diagnostics guide. Full Modern's gzip limit rises from 40 to 40.5 KiB; its raw limit and Full Legacy limits are unchanged.
+- Present Group selects members by their HTML `id`; removed `data-ae-present-key`. IDs outside the group's mounted membership are rejected with diagnostic 2021.
 - Raised Anchor and Present bundle limits for the new capabilities, and the Modern Orchestrator gzip limit from 14 to 15 KiB for cubic bezier easing and CSS Motion lifecycle fixes (14.2 KiB measured).
 - CSS Motion ignores stale capture continuations after replacement and releases finished native CSS transitions to avoid retained values in Firefox.
 - Feedback methods now share the `(message, target, value, motion)` argument order and validate their payloads before dispatch.

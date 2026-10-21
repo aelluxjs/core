@@ -632,6 +632,7 @@ Adaptive                  </li>
 });
 </code></pre>
 <p>The default size thresholds are <code>compact: 0</code>, <code>small: 480</code>, <code>medium: 768</code>, <code>large: 1024</code>, <code>xl: 1280</code>, and <code>xxl: 1600</code>. The default shape thresholds are <code>vertical: 0.8</code> and <code>horizontal: 1.25</code>. <code>adaptiveParams.experienceScale</code> also contains <code>near: 1</code> and <code>far: 1.5</code>, but the current class calculation does not use those values.</p>
+<p>Parameter groups must be objects. Minimum sizes must be finite nonnegative numbers; ratio and experience boundaries must be finite positive numbers, with the lower boundary less than the upper boundary. Invalid values record <code>2026</code> and retain defaults; reversed boundaries restore the default pair. Standard size names with thresholds out of ascending order also record <code>2026</code>, while preserving the configured thresholds. Custom size names remain supported.</p>
 <p>The generated <code>aellux.ext.adaptive.css</code> supplies state-based utility classes. Load it when using those utilities outside the <code>full</code> runtime.</p>
         </div>
 

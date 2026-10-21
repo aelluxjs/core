@@ -195,7 +195,9 @@ export function createCssMotionController(root, getAelluxJs) {
     if (Number.isFinite(number) && number > 0) return number;
     if (value !== undefined) {
       AelluxJs.diagnostics.warn(AelluxJs.diagnostics.WARN_CSS_MOTION_PROPERTY_MAX_FPS_INVALID,
-        { option: "cssMotionPropertyMaxFPS", value, fallback: 40 });
+        { extension: "core", option: "cssMotionPropertyMaxFPS", attribute: "cssMotionPropertyMaxFPS", value, fallback: 40,
+          reason: "CSS Motion frame rate must be finite and greater than zero; using 40 FPS.",
+          suggestion: "Use a positive finite number or omit the option for the default." });
     }
     return 40;
   }

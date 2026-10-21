@@ -76,12 +76,38 @@
       { name: "--ae-width", syntax: "<number>", initialValue: "0" },
       { name: "--ae-height", syntax: "<number>", initialValue: "0" }
     );
-    const overrides = options.adaptiveParams || {};
+    let overrides = options.adaptiveParams === undefined ? {} : options.adaptiveParams;
+    if (!overrides || typeof overrides !== "object" || Array.isArray(overrides)) {
+      parameterDiagnostic("", overrides, "Expected an object of Adaptive parameter groups; using defaults.");
+      overrides = {};
+    }
     for (const group of Object.keys(adaptiveParams)) {
+      if (group in overrides && (!overrides[group] || typeof overrides[group] !== "object" || Array.isArray(overrides[group]))) {
+        parameterDiagnostic(group, overrides[group], "Expected a parameter group object; using defaults.");
+        continue;
+      }
       if (overrides[group] && typeof overrides[group] === "object") {
-        Object.assign(adaptiveParams[group], overrides[group]);
+        for (const [key, value] of Object.entries(overrides[group])) {
+          if (typeof value !== "number" || !Number.isFinite(value) ||
+              (group === "minSizes" ? value < 0 : value <= 0)) {
+            parameterDiagnostic(`${group}.${key}`, value, "Expected a finite positive number (zero is allowed for minimum sizes).");
+            continue;
+          }
+          adaptiveParams[group][key] = value;
+        }
       }
     }
+    for (const [group, lower, upper, fallback] of [
+      ["ratioShapes", "vertical", "horizontal", [0.8, 1.25]],
+      ["experienceScale", "near", "far", [1, 1.5]]
+    ]) if (adaptiveParams[group][lower] >= adaptiveParams[group][upper]) {
+      parameterDiagnostic(group, { ...adaptiveParams[group] }, "The lower boundary must be less than the upper boundary; using defaults.");
+      adaptiveParams[group][lower] = fallback[0];
+      adaptiveParams[group][upper] = fallback[1];
+    }
+    const orderedSizes = ["compact", "small", "medium", "large", "xl", "xxl"];
+    if (orderedSizes.some((name, index) => index > 0 && adaptiveParams.minSizes[name] < adaptiveParams.minSizes[orderedSizes[index - 1]]))
+      parameterDiagnostic("minSizes", { ...adaptiveParams.minSizes }, "Named minimum sizes are out of order; the configured thresholds are preserved.");
     managedClasses = getManagedClasses();
     for (const group of Object.keys(adaptiveParams)) Object.freeze(adaptiveParams[group]);
     Object.freeze(adaptiveParams);
@@ -105,6 +131,13 @@
       classes.push(className);
     }
     return classes;
+  }
+
+  function parameterDiagnostic(attribute, value, reason) {
+    AelluxJs.diagnostics.warn(AelluxJs.diagnostics.WARN_CONFIGURATION_VALUE, {
+      extension: extensionName, attribute: `adaptiveParams${attribute ? "." + attribute : ""}`, value, reason,
+      suggestion: "Use finite nonnegative minimum sizes and positive, ordered ratio/experience boundaries."
+    });
   }
 
   function destroy() {

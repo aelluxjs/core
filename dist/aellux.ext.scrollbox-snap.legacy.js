@@ -264,7 +264,11 @@
       var items = itemsFor(state);
       if (!items.length) {
         AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_SCROLLBOX_SNAP_ITEMS, {
-          element: state.element
+          extension: extensionName,
+          element: state.element,
+          attribute: itemAttribute,
+          reason: "No eligible snap items belong to this Scrollbox.",
+          suggestion: "Add data-ae-snap-item to content items inside this Scrollbox, outside nested Scrollboxes."
         });
         state.element.classList.remove(readyClass, suspendedClass);
         return;

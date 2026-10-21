@@ -46,9 +46,10 @@ async function wheel(page, { deltaY = 120, deltaX = 0, deltaMode = 0 } = {}) {
   return page.evaluate(options => {
     const event = new WheelEvent("wheel", { bubbles: true, cancelable: true, ...options });
     document.getElementById("level0").dispatchEvent(event);
+    const elements = Array.from(document.querySelectorAll("[data-ae-scrollbox]")).reverse();
     return { prevented: event.defaultPrevented,
-      elastic: Array.from(document.querySelectorAll("[data-ae-scrollbox]")).reverse()
-        .map(element => element.firstElementChild.style.transform.includes("scale(")) };
+      elastic: elements.map(element => element.firstElementChild.style.transform.includes("scale(")),
+      releasing: elements.map(element => element.firstElementChild.classList.contains("ae--scrollbox-elastic-release")) };
   }, { deltaX, deltaY, deltaMode });
 }
 
@@ -157,10 +158,11 @@ test("another wheel during ancestor elastic recovery uses restored bounds", asyn
   await wheel(page);
   await expect.poll(() => page.locator("#content1").evaluate(element =>
     element.classList.contains("ae--scrollbox-elastic-release"))).toBe(true);
-  await wheel(page, { deltaY: 60 });
+  const resumed = await wheel(page, { deltaY: 60 });
   expect(await positions(page, ["y", "x", "y"])).toEqual([300, 300, 180]);
-  expect(await page.locator("#content1").evaluate(element =>
-    element.classList.contains("ae--scrollbox-elastic-release"))).toBe(false);
+  // Check cancellation in the dispatch turn, before the new wheel's 80 ms idle
+  // deadline can legitimately start another release between browser round trips.
+  expect(resumed.releasing[1]).toBe(false);
 });
 
 test("native horizontal intent stays horizontal through vertical ancestors", async ({ page }) => {

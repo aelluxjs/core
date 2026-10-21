@@ -92,7 +92,11 @@ export function createAelluxApi(root, constants) {
       if (value !== null) {
         generic = String(value).trim() === "" ? NaN : Number(value);
         if (!Number.isFinite(generic) || generic <= 0) {
-          diagnostics.warn(diagnostics.WARN_LAYOUT_MAX_FPS_INVALID, { element: element, value: value });
+          diagnostics.warn(diagnostics.WARN_LAYOUT_MAX_FPS_INVALID, {
+            extension: "core", element: element, attribute: api.attr("maxfps"), value: value,
+            reason: "Frame rate must be finite and greater than zero.",
+            suggestion: "Use a positive number or remove the attribute."
+          });
           generic = undefined;
         }
       }

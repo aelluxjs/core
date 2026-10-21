@@ -241,7 +241,9 @@
 
   function associationDiagnostic(group, reason) {
     AelluxJs.diagnostics.warn(AelluxJs.diagnostics.WARN_ANCHOR_GROUP,
-      { extension: extensionName, element: group, reason });
+      { extension: extensionName, element: group, reason,
+        attribute: groupAnchorAttribute, value: group.getAttribute(groupAnchorAttribute),
+        suggestion: "Reference one existing Anchor ID from one Present Group and ensure compatible positioning references." });
   }
 
   function refreshAssociations() {
@@ -589,7 +591,10 @@
       listenForLayout(state, placement.reference);
     if (state.invalidContext) return;
     AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_ANCHOR_REFERENCE_CONTEXT,
-      { extension: extensionName, element, target: placement.target });
+      { extension: extensionName, element, target: placement.target,
+        attribute: targetAttribute, value: element.getAttribute(targetAttribute),
+        reason: "Anchor and target use incompatible positioning references.",
+        suggestion: "Place both elements in the same containing block, or use that block as the target." });
     state.invalidContext = true;
   }
 

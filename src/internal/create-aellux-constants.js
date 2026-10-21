@@ -83,6 +83,13 @@ export function createAelluxConstants() {
       WARN_PRESENT_GROUP_SELECTION: { code: 2021, message: "Present Group selection is invalid or ambiguous; the previous selection is preserved." },
       WARN_ANCHOR_MATCH: { code: 2022, message: "Anchor match accepts width and/or height." },
       WARN_ANCHOR_GROUP: { code: 2023, message: "Anchor association or geometry is invalid." },
+      WARN_ATTRIBUTE_UNKNOWN: { code: 2024, message: "An Aellux attribute may be misspelled; check the suggested name." },
+      WARN_EXTENSION_REQUIRED: { code: 2025, message: "A declared behavior requires an initialized Extension." },
+      WARN_CONFIGURATION_VALUE: { code: 2026, message: "An Aellux configuration value is invalid; check the expected format." },
+      WARN_CONFIGURATION_TARGET: { code: 2027, message: "An Aellux target is missing, incompatible, or cannot be measured." },
+      WARN_CONFIGURATION_STRUCTURE: { code: 2028, message: "An Aellux declaration is missing required HTML structure." },
+      WARN_CONTROL_ACCESSIBILITY: { code: 2029, message: "An Aellux control is not reachable with the keyboard." },
+      WARN_CONFIGURATION_STYLE: { code: 2030, message: "Effective CSS prevents the declared Aellux behavior." },
       INFO_LEGACY_FALLBACK: { code: 3000, message: AELLUX + "is starting the Legacy runtime." },
       INFO_PRESENT_MEASURED_LAYOUT: { code: 3001, message: "Present measures size transitions without a direct present-motion child; add one to use the grid layout strategy." },
       INFO_FEEDBACK_MOTION_CUSTOM: { code: 3002, message: "The requested feedback motion is not standard. Standard motions are listed in the diagnostic context." }
