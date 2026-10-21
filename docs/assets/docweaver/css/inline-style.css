@@ -218,18 +218,18 @@ body:after {
 }
 
 .toc-header .toc-collapse {
+  --ae-from-transform: scaleY(0);
+  --ae-pop-transform: scaleY(1);
+  --ae-unpop-transform: scaleY(0);
   --ae-pop-duration: 200ms;
   --ae-unpop-duration: 200ms;
+  transform-origin: top center;
   position: absolute;
   top: 100%;
   left: 0;
   right: 0;
   border-top: var(--bs-border-width) var(--bs-border-style) var(--bs-border-color) !important;
   border-bottom: var(--bs-border-width) var(--bs-border-style) var(--bs-border-color) !important;
-}
-
-.toc-header .toc-collapse[data-ae-present]:not([hidden]) {
-  display: grid;
 }
 
 @media (min-width:992px) {
@@ -255,8 +255,6 @@ body:after {
     transition: none !important;
     opacity: 1 !important;
     transform: none !important;
-    max-height: none !important;
-    grid-template-rows: 1fr !important;
     position: absolute !important;
     width: 250px;
     top: 0;

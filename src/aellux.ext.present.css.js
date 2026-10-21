@@ -37,8 +37,8 @@ ${present} {
   --ae-unpop-width: 0fr;
   --ae-pop-ease: ease-out;
   --ae-unpop-ease: ease-in;
-  --ae-pop-duration: 250ms;
-  --ae-unpop-duration: 250ms;
+  --ae-pop-duration: 300ms;
+  --ae-unpop-duration: 150ms;
   --ae-pop-low-steps: 4;
   --ae-unpop-low-steps: 4;
 
