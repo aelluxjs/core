@@ -954,7 +954,7 @@ test("horizontal snap honors disabled vertical wheel conversion", async ({ page 
     .toBe(100);
 });
 
-test("snap wheel at the edge stretches the elastic wrapper and remains uncanceled", async ({ page }) => {
+test("snap wheel at the edge stretches the elastic wrapper without scrolling a hidden axis", async ({ page }) => {
   await setup(page, `<div id="gallery" data-ae-scrollbox="native" data-ae-scrollbox-snap
     style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden">
     <div id="wrapper" data-ae-scrollbox-elastic
@@ -978,7 +978,7 @@ test("snap wheel at the edge stretches the elastic wrapper and remains uncancele
       maxY: element.scrollHeight - element.clientHeight,
       transform: document.getElementById("wrapper").style.transform };
   });
-  expect(result.prevented).toBe(false);
+  expect(result.prevented).toBe(true);
   expect(result.overflowY).toBe("hidden");
   expect(result.maxY).toBeGreaterThan(1);
   expect(result.transform).toMatch(/^scale\([^,]+, 1\) translate3d\(-[^,]+, 0px, 0px\)/);
@@ -3073,7 +3073,7 @@ test("mode changes and unmount stop an active drag and restore inline styles", a
   });
 });
 
-test("vertical wheel converts for horizontal-only native boxes and releases at an edge", async ({ page }) => {
+test("vertical wheel converts for horizontal-only native boxes and hands only overflow to its parent", async ({ page }) => {
   await setup(page, `<div id="parent" style="width:180px;height:120px;overflow:auto">
     <div style="height:500px">
       <div id="box" data-ae-scrollbox="pointer" style="width:100px;height:100px;overflow:auto">
@@ -3084,11 +3084,12 @@ test("vertical wheel converts for horizontal-only native boxes and releases at a
     const element = document.getElementById("box");
     const event = new WheelEvent("wheel", { deltaY: value, bubbles: true, cancelable: true });
     element.dispatchEvent(event);
-    return { prevented: event.defaultPrevented, x: element.scrollLeft };
+    return { prevented: event.defaultPrevented, x: element.scrollLeft,
+      parent: document.getElementById("parent").scrollTop };
   }, deltaY);
-  expect(await wheel(120)).toEqual({ prevented: true, x: 120 });
-  expect(await wheel(120)).toEqual({ prevented: false, x: 200 });
-  expect(await wheel(120)).toEqual({ prevented: false, x: 200 });
+  expect(await wheel(120)).toEqual({ prevented: true, x: 120, parent: 0 });
+  expect(await wheel(120)).toEqual({ prevented: true, x: 200, parent: 40 });
+  expect(await wheel(120)).toEqual({ prevented: true, x: 200, parent: 160 });
 });
 
 test("vertical wheel overflow is handed to eligible horizontal Scrollbox parents", async ({ page }) => {
@@ -3195,14 +3196,15 @@ test("converted wheel stretches an elastic child and scrolls its vertical parent
     const event = new WheelEvent("wheel", { deltaY: value, bubbles: true, cancelable: true });
     element.dispatchEvent(event);
     return { prevented: event.defaultPrevented, x: element.scrollLeft,
+      parent: document.getElementById("parent").scrollTop,
       transform: document.getElementById("elastic").style.transform };
   }, deltaY);
-  expect(await wheel(120)).toEqual({ prevented: true, x: 120, transform: "" });
+  expect(await wheel(120)).toEqual({ prevented: true, x: 120, parent: 0, transform: "" });
   const crossing = await wheel(120);
-  expect(crossing).toMatchObject({ prevented: false, x: 200 });
+  expect(crossing).toMatchObject({ prevented: true, x: 200, parent: 40 });
   expect(crossing.transform).toContain("scale(");
   const edge = await wheel(120);
-  expect(edge).toMatchObject({ prevented: false, x: 200 });
+  expect(edge).toMatchObject({ prevented: true, x: 200, parent: 160 });
   expect(edge.transform).toContain("scale(");
   await page.evaluate(() => {
     document.getElementById("parent").scrollTo({ top: 0, behavior: "instant" });
@@ -3218,7 +3220,7 @@ test("converted wheel stretches an elastic child and scrolls its vertical parent
   await page.mouse.move(rect.x + 50, rect.y + 50);
   await page.mouse.wheel(0, 120);
   await expect.poll(() => page.evaluate(() => window.wheelAtParent)).toMatchObject({
-    prevented: false, transform: expect.stringContaining("scale(")
+    prevented: true, transform: expect.stringContaining("scale(")
   });
   await expect.poll(() => page.evaluate(() => document.getElementById("parent").scrollTop))
     .toBeGreaterThan(0);
@@ -3650,7 +3652,7 @@ test("overscroll-behavior none suppresses elastic pressure in its axis", async (
       transform: element.firstElementChild.style.transform };
   }));
 
-  expect(result[0]).toEqual({ id: "none", prevented: false, transform: "" });
+  expect(result[0]).toEqual({ id: "none", prevented: true, transform: "" });
   expect(result[1].prevented).toBe(true);
   expect(result[1].transform).toContain("translate3d");
 });

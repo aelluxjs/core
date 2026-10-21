@@ -1834,10 +1834,13 @@
     }
     function inheritedWheelAxes(element, metrics) {
       const style = root.getComputedStyle(element);
-      const available = (value) => value === "auto" || value === "scroll";
+      const available = (value) => value === "auto" || value === "scroll" || element === document.scrollingElement && value === "visible";
+      const stops = (value) => value === "contain" || value === "none";
       return {
         x: metrics.maxX > 1 && available(style.overflowX),
-        y: metrics.maxY > 1 && available(style.overflowY)
+        y: metrics.maxY > 1 && available(style.overflowY),
+        stopX: available(style.overflowX) && stops(style.overscrollBehaviorX),
+        stopY: available(style.overflowY) && stops(style.overscrollBehaviorY)
       };
     }
     function nextWheelTarget(element) {
@@ -1845,19 +1848,21 @@
         const state = scrollboxes.get(parent);
         const metrics = nativeMetrics(parent);
         const axes = state ? wheelAxes(state, metrics) : inheritedWheelAxes(parent, metrics);
-        if (axes.x || axes.y) return { element: parent, state, metrics, axes };
+        if (axes.x || axes.y || axes.stopX || axes.stopY)
+          return { element: parent, state, metrics, axes };
       }
       return null;
     }
     function receivesVerticalWheelAsHorizontal(target) {
       return !!target.state && target.state.desktop && target.state.wheelEnabled && target.axes.x && !target.axes.y;
     }
-    function handoffWheelEvent(event, target, deltaY) {
+    function handoffWheelEvent(event, target, deltaX, deltaY) {
       const handed = {
         ctrlKey: event.ctrlKey,
         cancelable: event.cancelable,
-        deltaX: 0,
+        deltaX,
         deltaY,
+        deltaMode: 0,
         target: target.element,
         get defaultPrevented() {
           return event.defaultPrevented;
@@ -1868,34 +1873,71 @@
       };
       return dispatchWheel(target.state, handed);
     }
-    function handoffVerticalWheel(state, event, metrics, axes, deltaY, factor) {
-      if (!state.desktop || state.elasticEnabled || !axes.y || !deltaY) return false;
-      const current = state.element.scrollTop;
-      const desired = current + deltaY;
-      if (desired >= 0 && desired <= metrics.maxY) return false;
-      let target = nextWheelTarget(state.element);
-      while (target && !target.axes.y && !receivesVerticalWheelAsHorizontal(target))
-        target = nextWheelTarget(target.element);
-      if (!target || target.axes.y) return false;
-      let remaining = scrollAxis(state.element, "y", deltaY, metrics.maxY);
-      if (remaining !== deltaY) publish(state);
-      while (target && remaining) {
-        if (receivesVerticalWheelAsHorizontal(target)) {
-          if (!handoffWheelEvent(event, target, remaining / factor)) return true;
-          remaining = scrollAxis(target.element, "x", remaining, target.metrics.maxX);
-          publish(target.state);
-        } else if (target.axes.y) {
-          remaining = scrollAxis(target.element, "y", remaining, target.metrics.maxY);
-          if (target.state) publish(target.state);
+    function chainWheel(state, event, metrics, factor) {
+      let deltaX = event.deltaX * factor, deltaY = event.deltaY * factor;
+      let target = { element: state.element, state, metrics, axes: wheelAxes(state, metrics) };
+      let first = true, handled = false;
+      while (target && (deltaX || deltaY)) {
+        const member = target.state, element = target.element;
+        if (!first && member) {
+          if (member.desktop && element.classList.contains(pointerScrollingClass)) {
+            event.preventDefault();
+            return;
+          }
+          cancelMomentum(member);
+          finishElasticRelease(member);
+          target.metrics = nativeMetrics(element);
+          target.axes = wheelAxes(member, target.metrics);
+          if (!handoffWheelEvent(event, target, deltaX, deltaY)) {
+            event.preventDefault();
+            return;
+          }
         }
-        if (!remaining) {
-          event.preventDefault();
-          return true;
+        const bounds = (member == null ? void 0 : member.elastic.active) ? member.metrics : target.metrics;
+        const axes = target.axes;
+        const converted = receivesVerticalWheelAsHorizontal(target) && Math.abs(deltaX) <= Math.abs(deltaY);
+        const x = converted ? deltaY : deltaX, y = converted ? 0 : deltaY;
+        const left = element.scrollLeft, top = element.scrollTop;
+        const desiredX = left + (axes.x ? x : 0), desiredY = top + (axes.y ? y : 0);
+        const nextX = Math.max(0, Math.min(bounds.maxX, desiredX));
+        const nextY = Math.max(0, Math.min(bounds.maxY, desiredY));
+        let remainingX = x - (nextX - left), remainingY = y - (nextY - top);
+        if (first && !converted && !remainingX && !remainingY) {
+          if (member.elastic.owned) resetElastic(member);
+          return;
         }
-        target = nextWheelTarget(target.element);
+        let stretched = false;
+        if ((member == null ? void 0 : member.elasticEnabled) && (axes.x || axes.y)) {
+          if (!member.elastic.active) member.metrics = bounds;
+          stretched = applyElasticFromDesired(
+            member,
+            desiredX,
+            desiredY,
+            true,
+            axes.x && axes.y ? null : axes.x ? "x" : "y"
+          );
+          if (stretched) {
+            scrollWithinElasticBounds(member, desiredX, desiredY);
+            if (member.elastic.wheelTimeout !== null) root.clearTimeout(member.elastic.wheelTimeout);
+            member.elastic.wheelTimeout = root.setTimeout(() => releaseElastic(member), ELASTIC_WHEEL_IDLE_MS);
+          } else if (member.elastic.owned) resetElastic(member);
+        }
+        if (!stretched) {
+          if (axes.x) scrollAxis(element, "x", x, bounds.maxX);
+          if (axes.y) scrollAxis(element, "y", y, bounds.maxY);
+        }
+        const moved = nextX !== left || nextY !== top;
+        if (member && (moved || stretched)) publish(member);
+        const blocked = remainingX && axes.stopX || remainingY && axes.stopY;
+        if (axes.stopX) remainingX = 0;
+        if (axes.stopY) remainingY = 0;
+        handled = handled || moved || stretched || !!blocked;
+        deltaX = converted ? 0 : remainingX;
+        deltaY = converted ? remainingX : remainingY;
+        first = false;
+        target = deltaX || deltaY ? nextWheelTarget(element) : null;
       }
-      event.preventDefault();
-      return true;
+      if (handled) event.preventDefault();
     }
     function handleWheel(state, event) {
       if (event.ctrlKey || !event.cancelable) return;
@@ -1911,77 +1953,8 @@
       if (!dispatchWheel(state, event)) return;
       const metrics = nativeMetrics(state.element);
       if (!metrics) return;
-      const axes = wheelAxes(state, metrics);
       const factor = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? metrics.page : 1;
-      const converted = state.desktop && state.wheelEnabled && axes.x && !axes.y && Math.abs(event.deltaX) <= Math.abs(event.deltaY);
-      const deltaX = (converted ? event.deltaY : event.deltaX) * factor;
-      const deltaY = (converted ? 0 : event.deltaY) * factor;
-      if (!converted && handoffVerticalWheel(state, event, metrics, axes, deltaY, factor))
-        return;
-      if (converted && deltaX) {
-        const current = state.element.scrollLeft;
-        const desiredX = current + deltaX;
-        const next2 = Math.max(0, Math.min(metrics.maxX, desiredX));
-        const overflow = desiredX < 0 || desiredX > metrics.maxX;
-        let stretched = false;
-        if (overflow && state.elasticEnabled) {
-          stretched = applyElasticFromDesired(
-            state,
-            desiredX,
-            state.element.scrollTop,
-            true,
-            "x"
-          );
-          if (stretched) {
-            scrollWithinElasticBounds(state, desiredX, state.element.scrollTop);
-            if (state.elastic.wheelTimeout !== null)
-              root.clearTimeout(state.elastic.wheelTimeout);
-            state.elastic.wheelTimeout = root.setTimeout(
-              () => releaseElastic(state),
-              ELASTIC_WHEEL_IDLE_MS
-            );
-          }
-        } else if (state.elastic.owned) {
-          resetElastic(state);
-          refresh(state);
-        }
-        if (!stretched && next2 !== current)
-          state.element.scrollTo({ left: next2, behavior: "instant" });
-        if (stretched || next2 !== current) publish(state);
-        if (!overflow && next2 !== current) event.preventDefault();
-        return;
-      }
-      if (state.elasticEnabled && (axes.x || axes.y)) {
-        const desiredX = state.element.scrollLeft + (axes.x ? deltaX : 0);
-        const desiredY = state.element.scrollTop + (axes.y ? deltaY : 0);
-        const axis = axes.x && axes.y ? null : axes.x ? "x" : "y";
-        if (applyElasticFromDesired(state, desiredX, desiredY, true, axis)) {
-          const parent = nextWheelTarget(state.element);
-          const overscroll = root.getComputedStyle(state.element).overscrollBehaviorY;
-          const verticalChain = axes.y && deltaY && (parent == null ? void 0 : parent.axes.y) && (!overscroll || overscroll === "auto") && (desiredY < 0 || desiredY > metrics.maxY);
-          event.preventDefault();
-          if (verticalChain) {
-            let remaining = desiredY < 0 ? desiredY : desiredY - metrics.maxY;
-            for (let target = parent; target && remaining; target = nextWheelTarget(target.element)) {
-              if (target.axes.y) {
-                remaining = scrollAxis(target.element, "y", remaining, target.metrics.maxY);
-                if (target.state) publish(target.state);
-              }
-              const parentOverscroll = root.getComputedStyle(target.element).overscrollBehaviorY;
-              if (parentOverscroll && parentOverscroll !== "auto") break;
-            }
-          }
-          scrollWithinElasticBounds(state, desiredX, desiredY);
-          publish(state);
-          if (state.elastic.wheelTimeout !== null) root.clearTimeout(state.elastic.wheelTimeout);
-          state.elastic.wheelTimeout = root.setTimeout(() => releaseElastic(state), ELASTIC_WHEEL_IDLE_MS);
-          return;
-        }
-        if (state.elastic.owned) {
-          resetElastic(state);
-          refresh(state);
-        }
-      }
+      chainWheel(state, event, metrics, factor);
     }
   })(typeof globalThis !== "undefined" ? globalThis : window);
 })();

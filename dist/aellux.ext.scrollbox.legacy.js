@@ -2117,11 +2117,16 @@
     function inheritedWheelAxes(element, metrics) {
       var style = root.getComputedStyle(element);
       var available = function available2(value) {
-        return value === "auto" || value === "scroll";
+        return value === "auto" || value === "scroll" || element === document.scrollingElement && value === "visible";
+      };
+      var stops = function stops2(value) {
+        return value === "contain" || value === "none";
       };
       return {
         x: metrics.maxX > 1 && available(style.overflowX),
-        y: metrics.maxY > 1 && available(style.overflowY)
+        y: metrics.maxY > 1 && available(style.overflowY),
+        stopX: available(style.overflowX) && stops(style.overscrollBehaviorX),
+        stopY: available(style.overflowY) && stops(style.overscrollBehaviorY)
       };
     }
     function nextWheelTarget(element) {
@@ -2129,7 +2134,7 @@
         var state = scrollboxes.get(parent);
         var metrics = nativeMetrics(parent);
         var axes = state ? wheelAxes(state, metrics) : inheritedWheelAxes(parent, metrics);
-        if (axes.x || axes.y) return {
+        if (axes.x || axes.y || axes.stopX || axes.stopY) return {
           element: parent,
           state: state,
           metrics: metrics,
@@ -2141,12 +2146,13 @@
     function receivesVerticalWheelAsHorizontal(target) {
       return !!target.state && target.state.desktop && target.state.wheelEnabled && target.axes.x && !target.axes.y;
     }
-    function handoffWheelEvent(event, target, deltaY) {
+    function handoffWheelEvent(event, target, deltaX, deltaY) {
       var handed = {
         ctrlKey: event.ctrlKey,
         cancelable: event.cancelable,
-        deltaX: 0,
+        deltaX: deltaX,
         deltaY: deltaY,
+        deltaMode: 0,
         target: target.element,
         get defaultPrevented() {
           return event.defaultPrevented;
@@ -2157,33 +2163,82 @@
       };
       return dispatchWheel(target.state, handed);
     }
-    function handoffVerticalWheel(state, event, metrics, axes, deltaY, factor) {
-      if (!state.desktop || state.elasticEnabled || !axes.y || !deltaY) return false;
-      var current = state.element.scrollTop;
-      var desired = current + deltaY;
-      if (desired >= 0 && desired <= metrics.maxY) return false;
-      var target = nextWheelTarget(state.element);
-      while (target && !target.axes.y && !receivesVerticalWheelAsHorizontal(target)) target = nextWheelTarget(target.element);
-      if (!target || target.axes.y) return false;
-      var remaining = scrollAxis(state.element, "y", deltaY, metrics.maxY);
-      if (remaining !== deltaY) publish(state);
-      while (target && remaining) {
-        if (receivesVerticalWheelAsHorizontal(target)) {
-          if (!handoffWheelEvent(event, target, remaining / factor)) return true;
-          remaining = scrollAxis(target.element, "x", remaining, target.metrics.maxX);
-          publish(target.state);
-        } else if (target.axes.y) {
-          remaining = scrollAxis(target.element, "y", remaining, target.metrics.maxY);
-          if (target.state) publish(target.state);
+    function chainWheel(state, event, metrics, factor) {
+      var deltaX = event.deltaX * factor, deltaY = event.deltaY * factor;
+      var target = {
+        element: state.element,
+        state: state,
+        metrics: metrics,
+        axes: wheelAxes(state, metrics)
+      };
+      var first = true, handled = false;
+      var _loop = function _loop2() {
+        var member = target.state, element = target.element;
+        if (!first && member) {
+          if (member.desktop && element.classList.contains(pointerScrollingClass)) {
+            event.preventDefault();
+            return {
+              v: void 0
+            };
+          }
+          cancelMomentum(member);
+          finishElasticRelease(member);
+          target.metrics = nativeMetrics(element);
+          target.axes = wheelAxes(member, target.metrics);
+          if (!handoffWheelEvent(event, target, deltaX, deltaY)) {
+            event.preventDefault();
+            return {
+              v: void 0
+            };
+          }
         }
-        if (!remaining) {
-          event.preventDefault();
-          return true;
+        var bounds = member !== null && member !== void 0 && member.elastic.active ? member.metrics : target.metrics;
+        var axes = target.axes;
+        var converted = receivesVerticalWheelAsHorizontal(target) && Math.abs(deltaX) <= Math.abs(deltaY);
+        var x = converted ? deltaY : deltaX, y = converted ? 0 : deltaY;
+        var left = element.scrollLeft, top = element.scrollTop;
+        var desiredX = left + (axes.x ? x : 0), desiredY = top + (axes.y ? y : 0);
+        var nextX = Math.max(0, Math.min(bounds.maxX, desiredX));
+        var nextY = Math.max(0, Math.min(bounds.maxY, desiredY));
+        var remainingX = x - (nextX - left), remainingY = y - (nextY - top);
+        if (first && !converted && !remainingX && !remainingY) {
+          if (member.elastic.owned) resetElastic(member);
+          return {
+            v: void 0
+          };
         }
-        target = nextWheelTarget(target.element);
+        var stretched = false;
+        if (member !== null && member !== void 0 && member.elasticEnabled && (axes.x || axes.y)) {
+          if (!member.elastic.active) member.metrics = bounds;
+          stretched = applyElasticFromDesired(member, desiredX, desiredY, true, axes.x && axes.y ? null : axes.x ? "x" : "y");
+          if (stretched) {
+            scrollWithinElasticBounds(member, desiredX, desiredY);
+            if (member.elastic.wheelTimeout !== null) root.clearTimeout(member.elastic.wheelTimeout);
+            member.elastic.wheelTimeout = root.setTimeout(function() {
+              return releaseElastic(member);
+            }, ELASTIC_WHEEL_IDLE_MS);
+          } else if (member.elastic.owned) resetElastic(member);
+        }
+        if (!stretched) {
+          if (axes.x) scrollAxis(element, "x", x, bounds.maxX);
+          if (axes.y) scrollAxis(element, "y", y, bounds.maxY);
+        }
+        var moved = nextX !== left || nextY !== top;
+        if (member && (moved || stretched)) publish(member);
+        var blocked = remainingX && axes.stopX || remainingY && axes.stopY;
+        if (axes.stopX) remainingX = 0;
+        if (axes.stopY) remainingY = 0;
+        handled = handled || moved || stretched || !!blocked;
+        deltaX = converted ? 0 : remainingX;
+        deltaY = converted ? remainingX : remainingY;
+        first = false;
+        target = deltaX || deltaY ? nextWheelTarget(element) : null;
+      }, _ret;
+      while (target && (deltaX || deltaY)) {
+        _ret = _loop();
+        if (_ret) return _ret.v;
       }
-      event.preventDefault();
-      return true;
+      if (handled) event.preventDefault();
     }
     function handleWheel(state, event) {
       if (event.ctrlKey || !event.cancelable) return;
@@ -2199,72 +2254,8 @@
       if (!dispatchWheel(state, event)) return;
       var metrics = nativeMetrics(state.element);
       if (!metrics) return;
-      var axes = wheelAxes(state, metrics);
       var factor = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? metrics.page : 1;
-      var converted = state.desktop && state.wheelEnabled && axes.x && !axes.y && Math.abs(event.deltaX) <= Math.abs(event.deltaY);
-      var deltaX = (converted ? event.deltaY : event.deltaX) * factor;
-      var deltaY = (converted ? 0 : event.deltaY) * factor;
-      if (!converted && handoffVerticalWheel(state, event, metrics, axes, deltaY, factor)) return;
-      if (converted && deltaX) {
-        var current = state.element.scrollLeft;
-        var desiredX = current + deltaX;
-        var _next2 = Math.max(0, Math.min(metrics.maxX, desiredX));
-        var overflow = desiredX < 0 || desiredX > metrics.maxX;
-        var stretched = false;
-        if (overflow && state.elasticEnabled) {
-          stretched = applyElasticFromDesired(state, desiredX, state.element.scrollTop, true, "x");
-          if (stretched) {
-            scrollWithinElasticBounds(state, desiredX, state.element.scrollTop);
-            if (state.elastic.wheelTimeout !== null) root.clearTimeout(state.elastic.wheelTimeout);
-            state.elastic.wheelTimeout = root.setTimeout(function() {
-              return releaseElastic(state);
-            }, ELASTIC_WHEEL_IDLE_MS);
-          }
-        } else if (state.elastic.owned) {
-          resetElastic(state);
-          refresh(state);
-        }
-        if (!stretched && _next2 !== current) state.element.scrollTo({
-          left: _next2,
-          behavior: "instant"
-        });
-        if (stretched || _next2 !== current) publish(state);
-        if (!overflow && _next2 !== current) event.preventDefault();
-        return;
-      }
-      if (state.elasticEnabled && (axes.x || axes.y)) {
-        var _desiredX = state.element.scrollLeft + (axes.x ? deltaX : 0);
-        var desiredY = state.element.scrollTop + (axes.y ? deltaY : 0);
-        var axis = axes.x && axes.y ? null : axes.x ? "x" : "y";
-        if (applyElasticFromDesired(state, _desiredX, desiredY, true, axis)) {
-          var parent = nextWheelTarget(state.element);
-          var overscroll = root.getComputedStyle(state.element).overscrollBehaviorY;
-          var verticalChain = axes.y && deltaY && (parent === null || parent === void 0 ? void 0 : parent.axes.y) && (!overscroll || overscroll === "auto") && (desiredY < 0 || desiredY > metrics.maxY);
-          event.preventDefault();
-          if (verticalChain) {
-            var remaining = desiredY < 0 ? desiredY : desiredY - metrics.maxY;
-            for (var target = parent; target && remaining; target = nextWheelTarget(target.element)) {
-              if (target.axes.y) {
-                remaining = scrollAxis(target.element, "y", remaining, target.metrics.maxY);
-                if (target.state) publish(target.state);
-              }
-              var parentOverscroll = root.getComputedStyle(target.element).overscrollBehaviorY;
-              if (parentOverscroll && parentOverscroll !== "auto") break;
-            }
-          }
-          scrollWithinElasticBounds(state, _desiredX, desiredY);
-          publish(state);
-          if (state.elastic.wheelTimeout !== null) root.clearTimeout(state.elastic.wheelTimeout);
-          state.elastic.wheelTimeout = root.setTimeout(function() {
-            return releaseElastic(state);
-          }, ELASTIC_WHEEL_IDLE_MS);
-          return;
-        }
-        if (state.elastic.owned) {
-          resetElastic(state);
-          refresh(state);
-        }
-      }
+      chainWheel(state, event, metrics, factor);
     }
   })(typeof globalThis !== "undefined" ? globalThis : window);
 })();
