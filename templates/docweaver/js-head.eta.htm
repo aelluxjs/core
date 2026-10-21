@@ -33,7 +33,7 @@
       });
   }
 
-  AelluxJs.on("Mount",
+  AelluxJs.on("BeforeMount",
     (event) => {
       initOrRefreshToc();
 
@@ -44,35 +44,36 @@
 
       prepareAjaxLinks();
 
-      document.querySelectorAll("table").forEach((table) => {
-        if (table.parentElement &&
-          table.parentElement.classList.contains("table-scroll-wrapper")) {
-          return;
-        }
-        const wrapper = document.createElement("div");
-        wrapper.classList.add("table-scroll-wrapper");
-        table.parentNode.insertBefore(wrapper, table);
-        wrapper.appendChild(table);
-      });
+      document.querySelectorAll("table:not(.table-scroll-wrapper>table)")
+        .forEach((table) => {
+          if (table.parentElement &&
+            table.parentElement.classList.contains("table-scroll-wrapper")) {
+            return;
+          }
+          table.setAttribute("data-ae-scrollbox-elastic", "");
+          const wrapper = document.createElement("div");
+          wrapper.classList.add("table-scroll-wrapper");
+          wrapper.setAttribute("data-ae-scrollbox", "pointer");
+          wrapper.setAttribute("data-ae-scrollbar", "horizontal");
+          table.parentNode.insertBefore(wrapper, table);
+          wrapper.appendChild(table);
+        });
     }
   );
 
-  AelluxJs.on("AjaxHrefStart",
-    (e) => {
-      const container = document.querySelector("#doc-content");
-      container.style.transition = null;
-      container.style.opacity = .2;
-      setNavActiveByUrl(window.location.href);
-    }
-  );
+  AelluxJs.on("AjaxHrefStart", (e) => {
+    const container = document.querySelector("#doc-content");
+    container.style.transition = null;
+    container.style.opacity = .2;
+    setNavActiveByUrl(window.location.href);
+  });
 
-  AelluxJs.on("AjaxHrefLoaded",
-    (e) => {
-      const container = document.querySelector("#doc-content");
-      container.style.transition = "opacity .25s linear";
-      container.style.opacity = null;
-    }
-  );
+  AelluxJs.on("AjaxHrefComplete", (e) => {
+    const container = document.querySelector("#doc-content");
+    container.style.transition = "opacity .25s linear";
+    container.style.opacity = null;
+    $ae('navbarSupportedContent').present.unpop();
+  });
 
   function comparableUrl(value) {
     const url = new URL(value, window.location.href);
@@ -99,44 +100,43 @@
     }
   }
 
-  document.addEventListener("DOMContentLoaded",
-    function () {
-      let currentRequest = null;
+  document.addEventListener("DOMContentLoaded", function () {
+    let currentRequest = null;
 
-      const progressBar = document.querySelector("#page-progress");
-      let progressTimer = null, progressTimer1 = null, progressTimer2 = null;
+    const progressBar = document.querySelector("#page-progress");
+    let progressTimer = null, progressTimer1 = null, progressTimer2 = null;
 
-      AelluxJs.on("AjaxHrefStart", startProgress);
-      AelluxJs.on("AjaxHrefComplete", finishProgress);
+    AelluxJs.on("AjaxHrefStart", startProgress);
+    AelluxJs.on("AjaxHrefComplete", finishProgress);
 
-      function startProgress() {
-        if (!progressBar) return;
+    function startProgress() {
+      if (!progressBar) return;
 
-        clearInterval(progressTimer);
-        clearInterval(progressTimer1);
-        clearInterval(progressTimer2);
-        progressBar.style.transition = "none";
-        progressBar.style.opacity = "1";
-        progressBar.style.width = "10%";
+      clearInterval(progressTimer);
+      clearInterval(progressTimer1);
+      clearInterval(progressTimer2);
+      progressBar.style.transition = "none";
+      progressBar.style.opacity = "1";
+      progressBar.style.width = "10%";
 
-        let progress = 10;
-        progressTimer = setInterval(() => {
-          progress += Math.random() * 12;
-          if (progress > 85) progress = 85;
-          progressBar.style.transition = null;
-          progressBar.style.width = `${progress}%`;
-        }, 200);
-      }
+      let progress = 10;
+      progressTimer = setInterval(() => {
+        progress += Math.random() * 12;
+        if (progress > 85) progress = 85;
+        progressBar.style.transition = null;
+        progressBar.style.width = `${progress}%`;
+      }, 200);
+    }
 
-      function finishProgress() {
-        if (!progressBar) return;
+    function finishProgress() {
+      if (!progressBar) return;
 
-        clearInterval(progressTimer);
-        clearInterval(progressTimer1);
-        clearInterval(progressTimer2);
-        progressBar.style.width = "100%";
-        progressTimer1 = setTimeout(() => progressBar.style.opacity = "0", 200);
-        progressTimer2 = setTimeout(() => progressBar.style.width = "0%", 450);
-      }
-    });
+      clearInterval(progressTimer);
+      clearInterval(progressTimer1);
+      clearInterval(progressTimer2);
+      progressBar.style.width = "100%";
+      progressTimer1 = setTimeout(() => progressBar.style.opacity = "0", 200);
+      progressTimer2 = setTimeout(() => progressBar.style.width = "0%", 450);
+    }
+  });
 </script>

@@ -98,16 +98,15 @@
         if (!currentElement) continue;
 
         const loadedElement = loadedDocument.querySelector(selector);
-        if (!loadedElement) {
-          selectorDiagnostic(selector, "No response element matches the selector.", currentElement);
+        if (!loadedElement || await AelluxJs.unmount(currentElement) === false) {
+          if (!loadedElement)
+            selectorDiagnostic(selector, "No response element matches the selector.", currentElement);
           if (AelluxJs.ext.feedback) {
             AelluxJs.ext.feedback.busy(currentElement, "Ajax loading", false);
             AelluxJs.ext.feedback.progress(currentElement, "Ajax loading", 1);
           }
           continue;
         }
-
-        await AelluxJs.unmount(currentElement);
 
         const replacement = document.importNode(loadedElement, true);
         currentElement.parentNode.replaceChild(replacement, currentElement);

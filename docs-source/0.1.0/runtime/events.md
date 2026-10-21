@@ -21,12 +21,30 @@ The modern runtime dispatches `CustomEvent` objects; the boot API uses a regular
 | --- | --- |
 | `AelluxJsAwake` | The modern runtime script loads, before its startup begins. |
 | `AelluxJsLegacy` | The legacy fallback script loads, before its startup begins. |
+| `AelluxJsBeforeMount` | Cancelable before a valid mount pass changes waiting state, processes declarative links, loads Extensions or invokes mount callbacks. |
 | `AelluxJsMount` | A valid mount pass finishes. It can also fire when the pass finds no new elements. |
 | `AelluxJsReady` | Startup completes its initial mount pass. The orchestrator is available, although individual Extensions or elements may have failed to mount. |
+| `AelluxJsBeforeUnmount` | Cancelable before a valid unmount pass invokes cleanup callbacks or removes registrations and controllers. |
 | `AelluxJsUnmount` | A valid unmount pass finishes. It can also fire when no matching elements were mounted. |
 | `AelluxJsUpdate` | A valid `$ae.mountManager.update(...)` pass finishes after awaiting the matching mounted `update` callbacks. It also fires if no matching callback exists. |
 
 These lifecycle events are dispatched on `document`. `Mount`, `Unmount`, and `Update` carry `detail: { root, extensions, elements }`. `root` is the resolved root of the pass, `extensions` is the selected name array or `null` for all Extensions, and `elements` contains distinct elements actually mounted, unmounted, or passed to an `update` callback. An update callback that throws still counts as invoked. The array is empty for a pass with no affected elements. An invalid root does not start a pass or dispatch its event. `$ae(element).update()` and an Extension controller's `update()` use this same mount manager. For a size update on one Adaptive element, listen for `AelluxJsAdaptiveUpdate` instead.
+
+`BeforeMount` and `BeforeUnmount` carry `detail: { root, extensions }`, with normalized Extension names in a new array, or `null` for all Extensions. `BeforeUnmount` also includes `detachedOnly`, which is `true` for automatic cleanup of removed elements and `false` for explicit passes. Call `event.preventDefault()` synchronously to cancel the entire pass. A canceled mount resolves to `[]`; a canceled unmount resolves to `false`. No matching completion event is emitted, no callback runs, and mounted controllers and waiting attributes retain their previous state. Valid empty passes still emit their before and completion events. `Update` has no cancellation hook.
+
+These hooks also cover startup mounting, element controller methods and automatic detached cleanup. Canceling the startup mount still allows `Ready`; applications can retry mounting later. A veto of detached cleanup preserves the registrations until a later cleanup or explicit unmount; it does not create a retry loop. `destroyExtensions()` and `destroy()` return `false` when their unmount is canceled and preserve the Extensions and runtime resources. Ajax Href retains a region whose unmount was canceled and continues processing its other selected regions.
+
+```js
+const preventUnmount = event => {
+  if (event.detail.root === document.getElementById("editor") && hasUnsavedChanges()) {
+    event.preventDefault();
+  }
+};
+$ae.on("BeforeUnmount", preventUnmount);
+
+const unmounted = await $ae.unmount("editor"); // false when canceled
+$ae.off("BeforeUnmount", preventUnmount);
+```
 
 ```js
 document.addEventListener("AelluxJsMount", event => {

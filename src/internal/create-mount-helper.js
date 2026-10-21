@@ -28,8 +28,7 @@ export function createMountHelper(root, mountMaps, mountedElements, elementContr
   async function unmount(elementOrId, extensionNames = null) {
     const rootElement = resolveMountElement(elementOrId, UNMOUNT);
     if (!rootElement) return false;
-    await AelluxJsMounted(rootElement, UNMOUNT, extensionNames);
-    return true;
+    return AelluxJsMounted(rootElement, UNMOUNT, extensionNames);
   }
 
   async function unmountDetached() {
@@ -41,8 +40,7 @@ export function createMountHelper(root, mountMaps, mountedElements, elementContr
       }
     }
     if (!hasDetachedElement) return false;
-    await AelluxJsMounted(root.document, UNMOUNT, null, true);
-    return true;
+    return AelluxJsMounted(root.document, UNMOUNT, null, true);
   }
 
   async function mount(elementOrId, extensionNames = null) {
@@ -50,6 +48,15 @@ export function createMountHelper(root, mountMaps, mountedElements, elementContr
     const newlyMounted = new Set();
     const rootElement = resolveMountElement(elementOrId, "mount");
     if (!rootElement) return [];
+    if (!AelluxJs.dispatch("BeforeMount", {
+      cancelable: true,
+      detail: {
+        root: rootElement,
+        extensions: extensionNames == null ? null :
+          (typeof extensionNames === "string" ? [extensionNames] : extensionNames)
+            .map(name => fromCamelCase(name))
+      }
+    })) return [];
     const waitMountedAttr = AelluxJs.attr("wait-mounted");
     const allWaiters = findElements(rootElement, `[${waitMountedAttr}]`);
     allWaiters.forEach(waiter => waiter.setAttribute("aria-busy", "true"));
@@ -269,6 +276,14 @@ export function createMountHelper(root, mountMaps, mountedElements, elementContr
       ? null
       : new Set((typeof extensionNames === "string" ? [extensionNames] : extensionNames)
         .map(name => fromCamelCase(name)));
+    if (method === UNMOUNT && !AelluxJs.dispatch("BeforeUnmount", {
+      cancelable: true,
+      detail: {
+        root: rootElement,
+        extensions: selectedNames ? Array.from(selectedNames) : null,
+        detachedOnly
+      }
+    })) return false;
     const affected = new Set();
 
     const registrations = [];
@@ -320,6 +335,7 @@ export function createMountHelper(root, mountMaps, mountedElements, elementContr
         elements: Array.from(affected)
       }
     });
+    return true;
   }
 
   async function unmountRegistration(element, mountId, controller, extensionName, selector) {

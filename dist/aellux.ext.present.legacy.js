@@ -822,6 +822,7 @@
                 element.style.setProperty("--ae-".concat(newDirection, "-low-steps").toLowerCase(), Math.max(1, parseInt(timeMs / 62.5)));
                 controller.classList.remove(className.pop, className.popping, className.unpopping);
                 controller.classList.add(transition.className);
+                controller.setAriaExpanded(gotoVisible ? "true" : "false");
                 if (interpolatedProgress) {
                   element.style.setProperty("--ae-pop-progress", "clamp(0, var(--ae-present-pop-phase), 1)");
                   element.style.setProperty("--ae-unpop-progress", "clamp(0, var(--ae-present-unpop-phase), 1)");
@@ -872,13 +873,11 @@
               if (gotoVisible && !element.hidden) {
                 autoUnpopSchedule(element, controller);
                 controller.classList.add(className.pop);
-                controller.setAriaExpanded("true");
                 AelluxJs.dispatchFrom(element, POP, {
                   bubbles: true
                 });
               }
               if (!gotoVisible && element.hidden) {
-                controller.setAriaExpanded("false");
                 AelluxJs.dispatchFrom(element, UNPOP, {
                   bubbles: true
                 });

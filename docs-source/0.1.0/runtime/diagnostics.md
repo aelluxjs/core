@@ -121,16 +121,16 @@ The validator is bundled with the runtime; its production guard avoids DOM scans
 | --- | --- | --- | --- |
 | `aellux.min.js` | 46,986 / 14,991 | 45 / 15 | 46 / 15 |
 | `aellux.esm.min.js` | 24,801 / 8,450 | 24 / 8 | 25 / 8.5 |
-| `aellux.orchestrator.min.js` | 57,262 / 19,099 | 43 / 15 | 56 / 19 |
-| `aellux.orchestrator.legacy.min.js` | 324,273 / 103,745 | 300 / 97 | 318 / 102 |
-| `aellux.full.min.js` | 127,835 / 41,039 | 130 / 40 | 130 / 40.5 |
+| `aellux.orchestrator.min.js` | 57,566 / 19,195 | 43 / 15 | 56.5 / 19 |
+| `aellux.orchestrator.legacy.min.js` | 324,854 / 103,833 | 300 / 97 | 318 / 102 |
+| `aellux.full.min.js` | 128,129 / 41,139 | 130 / 40 | 130 / 40.5 |
 | `aellux.ext.adaptive.min.js` | 4,915 / 2,291 | 4 / 3 | 5 / 3 |
 | `aellux.ext.adaptive.legacy.min.js` | 8,329 / 3,513 | 6 / 3 | 8.5 / 3.5 |
 | `aellux.ext.present.min.js` | 18,596 / 6,624 | 18 / 6.25 | 18.5 / 6.5 |
 | `aellux.ext.present.legacy.min.js` | 26,018 / 9,187 | 25 / 9 | 26 / 9 |
 | `aellux.ext.scrollbox-snap.min.js` | 10,388 / 4,020 | 10 / 4 | 10.5 / 4 |
 
-Full Legacy measures 435,120 / 130,312 bytes and retains its 425 / 138 KiB limits. Other limits are unchanged. `npm run test:budget` checks every minified distribution artifact.
+Cancelable mount/unmount preflight and cancellation-aware teardown raise the Modern Orchestrator raw limit from 56 to 56.5 KiB and Full Legacy from 425 to 426 KiB. Full Legacy measures 435,737 / 130,434 bytes, with its gzip limit retained at 138 KiB. Other limits are unchanged. `npm run test:budget` checks every minified distribution artifact.
 
 ## Code Ranges
 

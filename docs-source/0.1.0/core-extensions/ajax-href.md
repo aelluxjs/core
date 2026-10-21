@@ -18,6 +18,8 @@ The attribute holds comma-separated CSS selectors, preserving commas inside func
 
 After activation, `$ae.ext.ajaxHref.load(url, selectors, options)` provides the same replacement operation; `selectors` can also be an array. `{ ignoreHistory: true }` suppresses `PushAjaxReplace`. State Navigation handles that event and restores Ajax replacements through `SnapshotRestore`; it is already initialized in Full. In Basic mode, register `state-navigation` separately if history integration is needed.
 
+Canceling `BeforeUnmount` for a current region preserves that DOM element and its mounted behaviors; Ajax Href skips its replacement and continues with other selected regions. Canceling `BeforeMount` for a replacement leaves its imported HTML in place without mounting its behaviors. These vetoes affect the individual lifecycle pass; they do not undo history or replacements already completed for other regions.
+
 The Extension dispatches `AjaxHrefStart`, `AjaxHrefLoaded`, `AjaxHrefError`, and `AjaxHrefComplete`, and `AjaxHrefDropOrigin` when a click targets another origin. Starting a request aborts the previous request when `AbortController` is available. Destroying the Extension removes its click and snapshot listeners and aborts the pending request.
 
 ## Accessibility profile

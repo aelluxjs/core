@@ -11,6 +11,126 @@ async function attachElementMemoryToStub(page) {
   });
 }
 
+for (const options of [
+  { name: "controlled", cssMotionController: true },
+  { name: "native", cssMotionController: false },
+  { name: "legacy", forceLegacy: true },
+  { name: "no motion", motion: "" }
+]) {
+  test(`present updates controls' expanded state at animation start (${options.name})`, async ({ page }) => {
+    await page.goto("/tests/index.htm");
+    await page.evaluate(motion => {
+      document.body.innerHTML = `
+        <button id="trigger" data-ae-trigger="toggle" data-ae-target="#panel">Toggle</button>
+        <button id="dismiss" data-ae-dismiss="panel">Dismiss</button>
+        <button id="target" data-ae-target="panel">Target</button>
+        <div id="panel" data-ae-present="${motion}" hidden
+          style="--ae-pop-duration:120ms;--ae-unpop-duration:120ms">
+          <button id="inside" data-ae-dismiss>Close</button>
+        </div>`;
+    }, options.motion ?? "opacity");
+    await page.addScriptTag({ url: "/dist/aellux.js" });
+    await page.evaluate(options => AelluxJs.init({ mode: "full", ...options }), {
+      cssMotionController: options.cssMotionController ?? true,
+      forceLegacy: options.forceLegacy ?? false
+    });
+    await expect.poll(() => page.evaluate(() =>
+      typeof AelluxJs.mountManager?.controller("panel")?.present?.pop === "function"
+    )).toBe(true);
+    await page.evaluate(() => AelluxJs.mount(document, "present"));
+
+    const result = await page.evaluate(async () => {
+      const panel = document.getElementById("panel");
+      const controls = ["panel", "trigger", "dismiss", "target", "inside"]
+        .map(id => document.getElementById(id));
+      const expanded = () => controls.map(el => el.getAttribute("aria-expanded"));
+      const events = [];
+      for (const name of ["BeforePop", "Layout", "Popping", "Pop", "BeforeUnpop", "Unpopping", "Unpop"]) {
+        panel.addEventListener(`AelluxJs${name}`, () => {
+          events.push({ name, expanded: expanded(), hidden: panel.hidden });
+        });
+      }
+      const opening = $ae(panel).present.toggle(true);
+      const preparation = expanded();
+      await opening;
+      const closing = new Promise(resolve => panel.addEventListener("AelluxJsUnpop", resolve, { once: true }));
+      document.getElementById("dismiss").click();
+      await closing;
+      return { preparation, events };
+    });
+    const closed = Array(5).fill("false");
+    const opened = Array(5).fill("true");
+    expect(result.preparation).toEqual(options.motion === "" ? opened : closed);
+    expect(result.events).toEqual([
+      { name: "BeforePop", expanded: closed, hidden: true },
+      { name: "Layout", expanded: opened, hidden: false },
+      { name: "Popping", expanded: opened, hidden: false },
+      { name: "Pop", expanded: opened, hidden: false },
+      { name: "BeforeUnpop", expanded: opened, hidden: false },
+      { name: "Layout", expanded: closed, hidden: false },
+      { name: "Unpopping", expanded: closed, hidden: false },
+      { name: "Unpop", expanded: closed, hidden: true }
+    ]);
+  });
+}
+
+test("present keeps expanded state current through vetoes, reversals and newly mounted controls", async ({ page }) => {
+  await page.goto("/tests/index.htm");
+  await page.evaluate(() => {
+    document.body.innerHTML = `
+      <button id="trigger" data-ae-trigger="toggle" data-ae-target="panel">Toggle</button>
+      <div id="panel" data-ae-present="opacity" hidden
+        style="--ae-pop-duration:600ms;--ae-unpop-duration:600ms">Content</div>`;
+  });
+  await page.addScriptTag({ url: "/dist/aellux.js" });
+  await page.evaluate(() => AelluxJs.init({ mode: "full" }));
+  await expect.poll(() => page.evaluate(() =>
+    typeof AelluxJs.mountManager?.controller("panel")?.present?.pop === "function"
+  )).toBe(true);
+  await page.evaluate(() => AelluxJs.mount(document, "present"));
+
+  const result = await page.evaluate(async () => {
+    const panel = document.getElementById("panel");
+    const trigger = document.getElementById("trigger");
+    const controller = $ae(panel).present;
+    const state = () => [panel, trigger].map(el => el.getAttribute("aria-expanded"));
+    const completions = [];
+    panel.addEventListener("AelluxJsPop", () => completions.push("Pop"));
+    panel.addEventListener("AelluxJsUnpop", () => completions.push("Unpop"));
+    panel.addEventListener("AelluxJsBeforePop", event => event.preventDefault(), { once: true });
+    await controller.toggle(true);
+    const vetoedPop = { expanded: state(), hidden: panel.hidden };
+
+    const started = new Promise(resolve => panel.addEventListener("AelluxJsPopping", resolve, { once: true }));
+    const opening = controller.toggle(true);
+    await started;
+    panel.addEventListener("AelluxJsBeforeUnpop", event => event.preventDefault(), { once: true });
+    await controller.unpop();
+    const vetoedUnpop = state();
+
+    const closing = controller.unpop();
+    const reversing = { expanded: state(), hidden: panel.hidden };
+    document.body.insertAdjacentHTML("beforeend", '<button id="late" data-ae-trigger="toggle" data-ae-target="panel">Late</button>');
+    const late = document.getElementById("late");
+    await AelluxJs.mount(late, "present");
+    const mountedDuringClose = late.getAttribute("aria-expanded");
+    const reopening = controller.toggle(true);
+    const reopened = [...state(), late.getAttribute("aria-expanded")];
+    await Promise.all([opening, closing, reopening]);
+    return { vetoedPop, vetoedUnpop, reversing, mountedDuringClose, reopened, completions,
+      final: [...state(), late.getAttribute("aria-expanded")] };
+  });
+  expect(result).toEqual({
+    vetoedPop: { expanded: ["false", "false"], hidden: true },
+    vetoedUnpop: ["true", "true"],
+    reversing: { expanded: ["false", "false"], hidden: false },
+    mountedDuringClose: "false",
+    reopened: ["true", "true", "true"],
+    completions: ["Pop"],
+    final: ["true", "true", "true"]
+  });
+});
+
 test("present announces layout at transition start with its duration", async ({ page }) => {
   await page.goto("/tests/index.htm");
   await page.evaluate(() => {

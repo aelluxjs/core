@@ -298,9 +298,9 @@ pre code.hljs {
   --bs-btn-border-color: var(--bs-body-color);
 
   /* Cores do estado Hover (inverte as cores) */
-  --bs-btn-hover-color: var(--bs-body-bg);
-  --bs-btn-hover-bg: var(--bs-body-color);
-  --bs-btn-hover-border-color: var(--bs-body-color);
+  --bs-btn-hover-color: none;
+  --bs-btn-hover-bg: none;
+  --bs-btn-hover-border-color: none;
 
   /* Cores do estado Ativo/Click */
   --bs-btn-active-color: var(--bs-body-bg);
@@ -309,6 +309,12 @@ pre code.hljs {
 
   /* Foco/Ring */
   --bs-btn-focus-shadow-rgb: var(--bs-body-color-rgb);
+}
+
+.btn-outline-adaptive[aria-expanded=true] {
+  --bs-btn-color: var(--bs-body-bg);
+  --bs-btn-bg: var(--bs-body-color);
+  --bs-btn-border-color: var(--bs-body-color);
 }
 
 .bg-light-adaptive {
@@ -413,8 +419,8 @@ p {
   background: grey !important;
 
   /*margin-left:-10px!important;*/
-  margin-top: -1px !important;
-  height: calc(100% - 2px);
+  margin-top: -0.30rem !important;
+  height: calc(100% - 0.1rem);
 }
 
 .toc-link:hover,

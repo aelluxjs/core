@@ -177,7 +177,7 @@
     }
     function _load() {
       _load = _asyncToGenerator(/* @__PURE__ */ _regenerator().m(function _callee(url, selectors) {
-        var options, selectorList, elements, _iterator2, _step2, _selector, _currentElement, controller, response, html, loadedDocument, _iterator3, _step3, selector, currentElement, loadedElement, replacement, _args = arguments, _t, _t2;
+        var options, selectorList, elements, _iterator2, _step2, _selector, _currentElement, controller, response, html, loadedDocument, _iterator3, _step3, selector, currentElement, loadedElement, replacement, _args = arguments, _t, _t2, _t3, _t4;
         return _regenerator().w(function(_context) {
           while (1) switch (_context.p = _context.n) {
             case 0:
@@ -252,7 +252,7 @@
               _iterator3.s();
             case 7:
               if ((_step3 = _iterator3.n()).done) {
-                _context.n = 13;
+                _context.n = 14;
                 break;
               }
               selector = _step3.value;
@@ -261,23 +261,31 @@
                 _context.n = 8;
                 break;
               }
-              return _context.a(3, 12);
+              return _context.a(3, 13);
             case 8:
               loadedElement = loadedDocument.querySelector(selector);
-              if (loadedElement) {
-                _context.n = 9;
+              _t = !loadedElement;
+              if (_t) {
+                _context.n = 10;
                 break;
               }
-              selectorDiagnostic(selector, "No response element matches the selector.", currentElement);
+              _context.n = 9;
+              return AelluxJs.unmount(currentElement);
+            case 9:
+              _t2 = _context.v;
+              _t = _t2 === false;
+            case 10:
+              if (!_t) {
+                _context.n = 11;
+                break;
+              }
+              if (!loadedElement) selectorDiagnostic(selector, "No response element matches the selector.", currentElement);
               if (AelluxJs.ext.feedback) {
                 AelluxJs.ext.feedback.busy(currentElement, "Ajax loading", false);
                 AelluxJs.ext.feedback.progress(currentElement, "Ajax loading", 1);
               }
-              return _context.a(3, 12);
-            case 9:
-              _context.n = 10;
-              return AelluxJs.unmount(currentElement);
-            case 10:
+              return _context.a(3, 13);
+            case 11:
               replacement = document.importNode(loadedElement, true);
               currentElement.parentNode.replaceChild(replacement, currentElement);
               if (selector === "title") {
@@ -287,34 +295,34 @@
                   }
                 });
               }
-              _context.n = 11;
+              _context.n = 12;
               return AelluxJs.mount(replacement);
-            case 11:
+            case 12:
               if (AelluxJs.ext.feedback) {
                 AelluxJs.ext.feedback.busy(replacement, "Ajax loaded", false);
                 AelluxJs.ext.feedback.progress(replacement, "Ajax loaded", 1);
               }
-            case 12:
+            case 13:
               _context.n = 7;
               break;
-            case 13:
-              _context.n = 15;
-              break;
             case 14:
-              _context.p = 14;
-              _t = _context.v;
-              _iterator3.e(_t);
+              _context.n = 16;
+              break;
             case 15:
               _context.p = 15;
-              _iterator3.f();
-              return _context.f(15);
+              _t3 = _context.v;
+              _iterator3.e(_t3);
             case 16:
-              AelluxJs.dispatch("AjaxHrefLoaded");
-              _context.n = 19;
-              break;
+              _context.p = 16;
+              _iterator3.f();
+              return _context.f(16);
             case 17:
-              _context.p = 17;
-              _t2 = _context.v;
+              AelluxJs.dispatch("AjaxHrefLoaded");
+              _context.n = 20;
+              break;
+            case 18:
+              _context.p = 18;
+              _t4 = _context.v;
               selectorList.forEach(function(selector2) {
                 var currentElement2 = elements.get(selector2);
                 if (!currentElement2) return;
@@ -324,22 +332,22 @@
                 }
               });
               AelluxJs.dispatch("AjaxHrefError");
-              if (!(_t2.name === "AbortError")) {
-                _context.n = 18;
+              if (!(_t4.name === "AbortError")) {
+                _context.n = 19;
                 break;
               }
               return _context.a(2, null);
-            case 18:
-              throw _t2;
             case 19:
-              _context.p = 19;
+              throw _t4;
+            case 20:
+              _context.p = 20;
               if (previousController === controller) previousController = null;
               AelluxJs.dispatch("AjaxHrefComplete");
-              return _context.f(19);
-            case 20:
+              return _context.f(20);
+            case 21:
               return _context.a(2);
           }
-        }, _callee, null, [[6, 14, 15, 16], [3, 17, 19, 20]]);
+        }, _callee, null, [[6, 15, 16, 17], [3, 18, 20, 21]]);
       }));
       return _load.apply(this, arguments);
     }

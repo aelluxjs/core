@@ -33,7 +33,7 @@
   var define_AELLUX_OFFICIAL_EXTENSION_MANIFEST_default;
   var init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST = __esm({
     "<define:__AELLUX_OFFICIAL_EXTENSION_MANIFEST__>": function() {
-      define_AELLUX_OFFICIAL_EXTENSION_MANIFEST_default = { schemaVersion: 1, coreVersion: "0.1.0-beta.10", extensions: { preference: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.preference.min.js", integrity: "sha384-mSOgb0DekFTRXXZAgyNrPjamdlSqzL4SSGZYVWgVg+WlG+pBj11xT81v/6Xk43yO", regular: { url: "./aellux.ext.preference.js", integrity: "sha384-MlikpdHSzHzF6kz5+oJGtq3eoFsKTsx/g+FTrf+dFOU8iQGHsCpn4fP1jLlbNrj7" } }, legacy: { url: "./aellux.ext.preference.legacy.min.js", integrity: "sha384-1LMsK0W9J/PoM4tXhFgkYLRY4yWdzVoYmFy4OMDGd8lRdtptKoEb1sI9L1kzNaBu", regular: { url: "./aellux.ext.preference.legacy.js", integrity: "sha384-pozuz43OyfXrnkmuBu6KTM2lqRSqcI5LMgwAtqnzXq8xZGdVqpnmOtrBcYcMskWk" } } }, dependencies: [] }, "state-navigation": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.state-navigation.min.js", integrity: "sha384-wAbgAqjAA6wauuG+iuUtfRwxChd6fTJ0fS22fqnu2r00kouoXJWZ0f7AoTYlqBC6", regular: { url: "./aellux.ext.state-navigation.js", integrity: "sha384-PKJ8HTD7eIYDEg2hOaAJjpMYzLr2fBjBRGmIGG7XzGTzVK0yTjt5HYPO55VbWfdS" } }, legacy: { url: "./aellux.ext.state-navigation.legacy.min.js", integrity: "sha384-YkhfU15Mpk8KiO6TyoVU6z1yCiYWwnsOGE0xVaQ8NrE7IGrxOSUL005g5JeUDdJu", regular: { url: "./aellux.ext.state-navigation.legacy.js", integrity: "sha384-kaEUY0Zpw8K6pcwjm+INA5feXftLK2/N1aFpPr2LCTcetX2uoe2GGd1MJyy7u8rZ" } } }, dependencies: [] }, feedback: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.feedback.min.js", integrity: "sha384-3VP3W84ekK4MIVBQuy5+5P3bGrwOj7bBDfJnjyexZ+yDADf1jQoHEpP2J1OMUgod", regular: { url: "./aellux.ext.feedback.js", integrity: "sha384-RrPf0bRGxf68f/Rjas5MF5zC1GAubWyndCcuiYbgZsPSHGLFsQtQaUgeFX4SQz+h" } }, legacy: { url: "./aellux.ext.feedback.legacy.min.js", integrity: "sha384-zXuZEv63sd3fwaAygmyk9KazQ46KOelsvAtM+0vJ7phDwemVh1FhOjAcbhWVQM/N", regular: { url: "./aellux.ext.feedback.legacy.js", integrity: "sha384-UW1JZ1+liVWV/w3PJdhfIMztOU7zyTw/1rOyyxoxj4YJIHb1xFl8U0xeIBh8jYV7" } } }, dependencies: [], style: { url: "./aellux.ext.feedback.min.css", integrity: "sha384-OBguCYqF+dMD0Pl84C3FlY/+ohUGfW0OyynmXb/PSDEGOyuI/TQJ3EZAoCeJx+Jk", regular: { url: "./aellux.ext.feedback.css", integrity: "sha384-yk4cW+r/Mc1FRS1ZauBHC6KsKb7sxuJ0E9mmt/+AYASAdZXXMK6iuFBR+TOEh/r4" } } }, focus: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.focus.min.js", integrity: "sha384-AXpUv/Ur2Z4cKvO9EqIFqfxxdSQR5j75q0okOAWPvHhSneQ5LPjrOzk6Sl9MOo4a", regular: { url: "./aellux.ext.focus.js", integrity: "sha384-VjQzcnhLRrvRlbVQ0X4/tO0+8gqJXAmIFoeIVimjOud1wRNuBXNnSQHHW9XQPzTe" } }, legacy: { url: "./aellux.ext.focus.legacy.min.js", integrity: "sha384-I5QpUmKsA1T8NiKfKXQgbdG19Ld1ZGCWSmosygO3yGj43tdxp5zCfLyfBuFoHlKu", regular: { url: "./aellux.ext.focus.legacy.js", integrity: "sha384-5/y3J1NC/qMyV9myEj29+wGbqCVI8ICPafSebtJVfl15Qmup6vMiJzveShd3CLnw" } } }, dependencies: [] }, point: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.point.min.js", integrity: "sha384-n540II5oWbHJRt/a8i+Rgb9A3b9dm7hamg1kd3Nz7KdPQDcaa8S823t9fCrgxBWF", regular: { url: "./aellux.ext.point.js", integrity: "sha384-aDj7I5QEH/0+52E3e6yPZ/D0MEsNBdxeET3G5ToVvgczHtksMh3p8S/KOoAapRRN" } }, legacy: { url: "./aellux.ext.point.legacy.min.js", integrity: "sha384-5UmWvQHfmvttz9yeXbilawGCZH20UdR8yNBOE9kRV34wpfWASl8plzgKtLVQGO9M", regular: { url: "./aellux.ext.point.legacy.js", integrity: "sha384-gG/XONYEC1tchBcJ6bUtKYmWFHz0E+50LmMaXDAiqWBKPuwdHZeYm1uXA22lMZuN" } } }, dependencies: [] }, anchor: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.anchor.min.js", integrity: "sha384-qzKEAgWOM23Rch3bvRqMVp3Vt/oCMnsDi4U6hnUe/3Vm6IwujXuAA09tQUCaDOMS", regular: { url: "./aellux.ext.anchor.js", integrity: "sha384-edsiM2AYIPrpeQ7XQZTIrVCJ3lwWJ+HPsdCnanm1dQJZrt220u14iOTxm2t2RBhk" } }, legacy: { url: "./aellux.ext.anchor.legacy.min.js", integrity: "sha384-Gy7uPY7gVQknkTcdrI06VM1HXO6dUXCIm0KZiKyDwgX8BMGq73OZuPO0al+9VV4A", regular: { url: "./aellux.ext.anchor.legacy.js", integrity: "sha384-bpejLMYob6EdeJApd4vUG1w4pksoug8H+xFQqEjPPc7gt2zYDzPFuGO6j1j30aj0" } } }, dependencies: [] }, "ajax-href": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.ajax-href.min.js", integrity: "sha384-KWPW5FuP+wkEUZ6XoDRk4jxdvsUMbO7WgNaZVRi3mx0gQJbzKdpfmEx3fRmMaZdm", regular: { url: "./aellux.ext.ajax-href.js", integrity: "sha384-t7ceO8CWC6eRq6osy75OIqdvTwXPaVYxjvzZsTNO4UDiHDmpssFbpRUJwY94hP1h" } }, legacy: { url: "./aellux.ext.ajax-href.legacy.min.js", integrity: "sha384-Vbzp0+5zTRAPZCmP8LFRYj3DwuLJNR00t594vrMuyXLDYiFnL67abJMx2MeAobSp", regular: { url: "./aellux.ext.ajax-href.legacy.js", integrity: "sha384-z/S7bFjw6yxPEEZAMf9vDrw/ZmbW3Yuzts13MkZ20e760jVgFmLNSjVoQxZgIqgs" } } }, dependencies: [] }, scrollbox: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.scrollbox.min.js", integrity: "sha384-Y7z3QxVmQhz2sALr6Vyl/ui3NC6ddY+WQEs8ZU8yqID6w+I7wY1r71yyPt35raMD", regular: { url: "./aellux.ext.scrollbox.js", integrity: "sha384-bxTgo4Pq+nsUcDnulZt0nztWNJe12uvjqOZPplTJmASjhXhalUROW93ySO+0xibm" } }, legacy: { url: "./aellux.ext.scrollbox.legacy.min.js", integrity: "sha384-CfzdHYXu8VpdhJB6/7jR7V+BPYKXsRahbUgh3y2m1RsNwZMyhnsnYc4P8kuhYP5N", regular: { url: "./aellux.ext.scrollbox.legacy.js", integrity: "sha384-MJL9blROmE2a5323W6rCoJI91MUVEEBwRfe65/1ycCg+5N1sQQOhDs6o3nlVUpa6" } } }, dependencies: [] }, "scrollbox-snap": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.scrollbox-snap.min.js", integrity: "sha384-YNetWDUuxONIR41ykMQTu59vXnqcGmN070vqt2gHZxykQM8xVGRgOo4uUjTThbFb", regular: { url: "./aellux.ext.scrollbox-snap.js", integrity: "sha384-KmPblbbcz4OHkc0KTFYw/yuBelRxSL16pDVnLX/7jkb/xGBqPHWFP4x6GFQRIfHx" } }, legacy: { url: "./aellux.ext.scrollbox-snap.legacy.min.js", integrity: "sha384-Kbt2Fjswspgzzeop7aZZ3VYnUmaShTNswZmigPzvNNb4gxb2T6JfL8clidd58EVb", regular: { url: "./aellux.ext.scrollbox-snap.legacy.js", integrity: "sha384-rIlhaybqhGrNHSUVG6vphjZr1IJKF0lNxbYuVOeTvJSOOjTRYzRovU4rArLjJw8q" } } }, dependencies: [] }, adaptive: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.adaptive.min.js", integrity: "sha384-bkeOnTW/3uzbuhLc8fujaWnWGC+pwNAkZwci9M09paKqudp0v/flMrJ49JXw16vv", regular: { url: "./aellux.ext.adaptive.js", integrity: "sha384-Qzf9wU6DSSaaE+8lr96vnYqjKQqYxep8dhCZmjgNdqreuk9fL3qKMn3NW7DGAEaT" } }, legacy: { url: "./aellux.ext.adaptive.legacy.min.js", integrity: "sha384-YVHHWZOvf+65r/CU89nBPZXhj3j5sn4r2ho+CNUCUaYs1WE6pWIeypcq7n5OCBor", regular: { url: "./aellux.ext.adaptive.legacy.js", integrity: "sha384-gBkxqbBpIqdj5ozJm/NsenI/yKOvEGarZBl2SrPjYiiYx6cez2/FGTMf5XyzHrTj" } } }, dependencies: [], style: { url: "./aellux.ext.adaptive.min.css", integrity: "sha384-8yUP1PStfDqBCyCskP3k9WLIKgv/yl1nyDhmPz7hsX5NZ4z3ZT3ajolA+RhYlUiG", regular: { url: "./aellux.ext.adaptive.css", integrity: "sha384-HfIjX9Zk0VFRimzPvUaTS5AtwuHJHjXKoM/xbNJXj5vE7bSdBGEzbrBHfbNmYah0" } } }, present: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.present.min.js", integrity: "sha384-IF+YXaP+eI0KxLPjnokyOSVrBu2DO/Jarh7pBt/7MsKa3/swPNgWpOqqp8HSlQ03", regular: { url: "./aellux.ext.present.js", integrity: "sha384-U4NFtBPLUzexhgbPwHz+tnyMVBmtac1AqdexaYE9dkF0ZAwjXNrpsRsLWnG+pSSl" } }, legacy: { url: "./aellux.ext.present.legacy.min.js", integrity: "sha384-+IiCufWpM6PT+qlVbTXg21KUQMEh9ppCVFYAJEydg1fKeLOAXcUciHIz3lv2d68t", regular: { url: "./aellux.ext.present.legacy.js", integrity: "sha384-edDeJK/mtSoZy/gxHcGKKh7anWXqUaQ7BIMPGSHksmJFuSGWwGToPXk3a2mkgGUK" } } }, dependencies: [], style: { url: "./aellux.ext.present.min.css", integrity: "sha384-+hnlhjtXDlsPj5DFOi+ik63LdYsy/kfWSYNmEkFrmEA0iU1PONIJVIyAQMu40jLa", regular: { url: "./aellux.ext.present.css", integrity: "sha384-uDLg9dNWSpLf7awd51GBS1BjZfy1nqMfcLxbrrlyxpECNzjuAmCPL0iwxW7x8xvf" } } } } };
+      define_AELLUX_OFFICIAL_EXTENSION_MANIFEST_default = { schemaVersion: 1, coreVersion: "0.1.0-beta.10", extensions: { preference: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.preference.min.js", integrity: "sha384-mSOgb0DekFTRXXZAgyNrPjamdlSqzL4SSGZYVWgVg+WlG+pBj11xT81v/6Xk43yO", regular: { url: "./aellux.ext.preference.js", integrity: "sha384-MlikpdHSzHzF6kz5+oJGtq3eoFsKTsx/g+FTrf+dFOU8iQGHsCpn4fP1jLlbNrj7" } }, legacy: { url: "./aellux.ext.preference.legacy.min.js", integrity: "sha384-1LMsK0W9J/PoM4tXhFgkYLRY4yWdzVoYmFy4OMDGd8lRdtptKoEb1sI9L1kzNaBu", regular: { url: "./aellux.ext.preference.legacy.js", integrity: "sha384-pozuz43OyfXrnkmuBu6KTM2lqRSqcI5LMgwAtqnzXq8xZGdVqpnmOtrBcYcMskWk" } } }, dependencies: [] }, "state-navigation": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.state-navigation.min.js", integrity: "sha384-wAbgAqjAA6wauuG+iuUtfRwxChd6fTJ0fS22fqnu2r00kouoXJWZ0f7AoTYlqBC6", regular: { url: "./aellux.ext.state-navigation.js", integrity: "sha384-PKJ8HTD7eIYDEg2hOaAJjpMYzLr2fBjBRGmIGG7XzGTzVK0yTjt5HYPO55VbWfdS" } }, legacy: { url: "./aellux.ext.state-navigation.legacy.min.js", integrity: "sha384-YkhfU15Mpk8KiO6TyoVU6z1yCiYWwnsOGE0xVaQ8NrE7IGrxOSUL005g5JeUDdJu", regular: { url: "./aellux.ext.state-navigation.legacy.js", integrity: "sha384-kaEUY0Zpw8K6pcwjm+INA5feXftLK2/N1aFpPr2LCTcetX2uoe2GGd1MJyy7u8rZ" } } }, dependencies: [] }, feedback: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.feedback.min.js", integrity: "sha384-3VP3W84ekK4MIVBQuy5+5P3bGrwOj7bBDfJnjyexZ+yDADf1jQoHEpP2J1OMUgod", regular: { url: "./aellux.ext.feedback.js", integrity: "sha384-RrPf0bRGxf68f/Rjas5MF5zC1GAubWyndCcuiYbgZsPSHGLFsQtQaUgeFX4SQz+h" } }, legacy: { url: "./aellux.ext.feedback.legacy.min.js", integrity: "sha384-zXuZEv63sd3fwaAygmyk9KazQ46KOelsvAtM+0vJ7phDwemVh1FhOjAcbhWVQM/N", regular: { url: "./aellux.ext.feedback.legacy.js", integrity: "sha384-UW1JZ1+liVWV/w3PJdhfIMztOU7zyTw/1rOyyxoxj4YJIHb1xFl8U0xeIBh8jYV7" } } }, dependencies: [], style: { url: "./aellux.ext.feedback.min.css", integrity: "sha384-OBguCYqF+dMD0Pl84C3FlY/+ohUGfW0OyynmXb/PSDEGOyuI/TQJ3EZAoCeJx+Jk", regular: { url: "./aellux.ext.feedback.css", integrity: "sha384-yk4cW+r/Mc1FRS1ZauBHC6KsKb7sxuJ0E9mmt/+AYASAdZXXMK6iuFBR+TOEh/r4" } } }, focus: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.focus.min.js", integrity: "sha384-AXpUv/Ur2Z4cKvO9EqIFqfxxdSQR5j75q0okOAWPvHhSneQ5LPjrOzk6Sl9MOo4a", regular: { url: "./aellux.ext.focus.js", integrity: "sha384-VjQzcnhLRrvRlbVQ0X4/tO0+8gqJXAmIFoeIVimjOud1wRNuBXNnSQHHW9XQPzTe" } }, legacy: { url: "./aellux.ext.focus.legacy.min.js", integrity: "sha384-I5QpUmKsA1T8NiKfKXQgbdG19Ld1ZGCWSmosygO3yGj43tdxp5zCfLyfBuFoHlKu", regular: { url: "./aellux.ext.focus.legacy.js", integrity: "sha384-5/y3J1NC/qMyV9myEj29+wGbqCVI8ICPafSebtJVfl15Qmup6vMiJzveShd3CLnw" } } }, dependencies: [] }, point: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.point.min.js", integrity: "sha384-n540II5oWbHJRt/a8i+Rgb9A3b9dm7hamg1kd3Nz7KdPQDcaa8S823t9fCrgxBWF", regular: { url: "./aellux.ext.point.js", integrity: "sha384-aDj7I5QEH/0+52E3e6yPZ/D0MEsNBdxeET3G5ToVvgczHtksMh3p8S/KOoAapRRN" } }, legacy: { url: "./aellux.ext.point.legacy.min.js", integrity: "sha384-5UmWvQHfmvttz9yeXbilawGCZH20UdR8yNBOE9kRV34wpfWASl8plzgKtLVQGO9M", regular: { url: "./aellux.ext.point.legacy.js", integrity: "sha384-gG/XONYEC1tchBcJ6bUtKYmWFHz0E+50LmMaXDAiqWBKPuwdHZeYm1uXA22lMZuN" } } }, dependencies: [] }, anchor: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.anchor.min.js", integrity: "sha384-qzKEAgWOM23Rch3bvRqMVp3Vt/oCMnsDi4U6hnUe/3Vm6IwujXuAA09tQUCaDOMS", regular: { url: "./aellux.ext.anchor.js", integrity: "sha384-edsiM2AYIPrpeQ7XQZTIrVCJ3lwWJ+HPsdCnanm1dQJZrt220u14iOTxm2t2RBhk" } }, legacy: { url: "./aellux.ext.anchor.legacy.min.js", integrity: "sha384-Gy7uPY7gVQknkTcdrI06VM1HXO6dUXCIm0KZiKyDwgX8BMGq73OZuPO0al+9VV4A", regular: { url: "./aellux.ext.anchor.legacy.js", integrity: "sha384-bpejLMYob6EdeJApd4vUG1w4pksoug8H+xFQqEjPPc7gt2zYDzPFuGO6j1j30aj0" } } }, dependencies: [] }, "ajax-href": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.ajax-href.min.js", integrity: "sha384-WTva1M5sCfssJRFAo9ICF2aetQIJXFmfEKNgGyVk8hA/r0OCv2X3mKePtIRSWAKT", regular: { url: "./aellux.ext.ajax-href.js", integrity: "sha384-DpLLt9qnY8J0WS7+PZmWBkhJ8OIwL8FWuYNyrUBVcvsYTj2EyFKcoiqP3BWqn7uH" } }, legacy: { url: "./aellux.ext.ajax-href.legacy.min.js", integrity: "sha384-/KNAAYf/L3682Q9o6OjdXcBsbLrFvGN8qzjEQDRqWHseG6FE7Kw+jpeI7yC4KsJt", regular: { url: "./aellux.ext.ajax-href.legacy.js", integrity: "sha384-Jx+Cp0Bgy4+YhHLEGpalNZjASjN6rwVBagaFIH5Ty6cQIiNUFs8xVg2v7k1hlvsG" } } }, dependencies: [] }, scrollbox: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.scrollbox.min.js", integrity: "sha384-Y7z3QxVmQhz2sALr6Vyl/ui3NC6ddY+WQEs8ZU8yqID6w+I7wY1r71yyPt35raMD", regular: { url: "./aellux.ext.scrollbox.js", integrity: "sha384-bxTgo4Pq+nsUcDnulZt0nztWNJe12uvjqOZPplTJmASjhXhalUROW93ySO+0xibm" } }, legacy: { url: "./aellux.ext.scrollbox.legacy.min.js", integrity: "sha384-CfzdHYXu8VpdhJB6/7jR7V+BPYKXsRahbUgh3y2m1RsNwZMyhnsnYc4P8kuhYP5N", regular: { url: "./aellux.ext.scrollbox.legacy.js", integrity: "sha384-MJL9blROmE2a5323W6rCoJI91MUVEEBwRfe65/1ycCg+5N1sQQOhDs6o3nlVUpa6" } } }, dependencies: [] }, "scrollbox-snap": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.scrollbox-snap.min.js", integrity: "sha384-YNetWDUuxONIR41ykMQTu59vXnqcGmN070vqt2gHZxykQM8xVGRgOo4uUjTThbFb", regular: { url: "./aellux.ext.scrollbox-snap.js", integrity: "sha384-KmPblbbcz4OHkc0KTFYw/yuBelRxSL16pDVnLX/7jkb/xGBqPHWFP4x6GFQRIfHx" } }, legacy: { url: "./aellux.ext.scrollbox-snap.legacy.min.js", integrity: "sha384-Kbt2Fjswspgzzeop7aZZ3VYnUmaShTNswZmigPzvNNb4gxb2T6JfL8clidd58EVb", regular: { url: "./aellux.ext.scrollbox-snap.legacy.js", integrity: "sha384-rIlhaybqhGrNHSUVG6vphjZr1IJKF0lNxbYuVOeTvJSOOjTRYzRovU4rArLjJw8q" } } }, dependencies: [] }, adaptive: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.adaptive.min.js", integrity: "sha384-bkeOnTW/3uzbuhLc8fujaWnWGC+pwNAkZwci9M09paKqudp0v/flMrJ49JXw16vv", regular: { url: "./aellux.ext.adaptive.js", integrity: "sha384-Qzf9wU6DSSaaE+8lr96vnYqjKQqYxep8dhCZmjgNdqreuk9fL3qKMn3NW7DGAEaT" } }, legacy: { url: "./aellux.ext.adaptive.legacy.min.js", integrity: "sha384-YVHHWZOvf+65r/CU89nBPZXhj3j5sn4r2ho+CNUCUaYs1WE6pWIeypcq7n5OCBor", regular: { url: "./aellux.ext.adaptive.legacy.js", integrity: "sha384-gBkxqbBpIqdj5ozJm/NsenI/yKOvEGarZBl2SrPjYiiYx6cez2/FGTMf5XyzHrTj" } } }, dependencies: [], style: { url: "./aellux.ext.adaptive.min.css", integrity: "sha384-8yUP1PStfDqBCyCskP3k9WLIKgv/yl1nyDhmPz7hsX5NZ4z3ZT3ajolA+RhYlUiG", regular: { url: "./aellux.ext.adaptive.css", integrity: "sha384-HfIjX9Zk0VFRimzPvUaTS5AtwuHJHjXKoM/xbNJXj5vE7bSdBGEzbrBHfbNmYah0" } } }, present: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.present.min.js", integrity: "sha384-gMQioz6kcNGfSzTEjouvsNSBeSQNuJOLzqQ48ALjo+BOSQ0B2fcubT2uM3g0BE1b", regular: { url: "./aellux.ext.present.js", integrity: "sha384-VXGeFhWfV0hPrxmgVW73ONPpLgmg4DD8Th5eBul28+yIcm2v2bUkHbQkx319iJlX" } }, legacy: { url: "./aellux.ext.present.legacy.min.js", integrity: "sha384-GYN36jClJzMOUevLeNKWVz09UrbJRMuDVDag3CXkEdiDayxD0K6iaJd+dSDGPRKr", regular: { url: "./aellux.ext.present.legacy.js", integrity: "sha384-8LNGAEFvkCgZPfrPG8MojB7T5DFhR09xJ2y2qMLd9tW6e6/CrCUe8ohR5WEfrpNO" } } }, dependencies: [], style: { url: "./aellux.ext.present.min.css", integrity: "sha384-+hnlhjtXDlsPj5DFOi+ik63LdYsy/kfWSYNmEkFrmEA0iU1PONIJVIyAQMu40jLa", regular: { url: "./aellux.ext.present.css", integrity: "sha384-uDLg9dNWSpLf7awd51GBS1BjZfy1nqMfcLxbrrlyxpECNzjuAmCPL0iwxW7x8xvf" } } } } };
     }
   });
 
@@ -23274,10 +23274,7 @@
               }
               return _context2.a(2, false);
             case 1:
-              _context2.n = 2;
-              return AelluxJsMounted(rootElement, UNMOUNT, extensionNames);
-            case 2:
-              return _context2.a(2, true);
+              return _context2.a(2, AelluxJsMounted(rootElement, UNMOUNT, extensionNames));
           }
         }, _callee2);
       }));
@@ -23329,10 +23326,7 @@
               }
               return _context3.a(2, false);
             case 8:
-              _context3.n = 9;
-              return AelluxJsMounted(root2.document, UNMOUNT, null, true);
-            case 9:
-              return _context3.a(2, true);
+              return _context3.a(2, AelluxJsMounted(root2.document, UNMOUNT, null, true));
           }
         }, _callee3, null, [[1, 5, 6, 7]]);
       }));
@@ -23357,12 +23351,26 @@
               }
               return _context4.a(2, []);
             case 1:
+              if (AelluxJs2.dispatch("BeforeMount", {
+                cancelable: true,
+                detail: {
+                  root: rootElement,
+                  extensions: extensionNames == null ? null : (typeof extensionNames === "string" ? [extensionNames] : extensionNames).map(function(name) {
+                    return fromCamelCase2(name);
+                  })
+                }
+              })) {
+                _context4.n = 2;
+                break;
+              }
+              return _context4.a(2, []);
+            case 2:
               waitMountedAttr = AelluxJs2.attr("wait-mounted");
               allWaiters = findElements(rootElement, "[".concat(waitMountedAttr, "]"));
               allWaiters.forEach(function(waiter) {
                 return waiter.setAttribute("aria-busy", "true");
               });
-              _context4.p = 2;
+              _context4.p = 3;
               allLinks = findElements(rootElement, "link[rel='aelluxjs-ext']");
               _iterator2 = _createForOfIteratorHelper4(allLinks);
               try {
@@ -23387,51 +23395,51 @@
               }
               waitExtensions = [];
               _i = 0, _Object$entries = Object.entries(root2.AelluxJs.registry.ext);
-            case 3:
+            case 4:
               if (!(_i < _Object$entries.length)) {
-                _context4.n = 6;
+                _context4.n = 7;
                 break;
               }
               _Object$entries$_i = _slicedToArray2(_Object$entries[_i], 2), key = _Object$entries$_i[0], options = _Object$entries$_i[1];
               if (!options.loadWhen) {
-                _context4.n = 4;
+                _context4.n = 5;
                 break;
               }
-              return _context4.a(3, 5);
-            case 4:
-              waitExtensions.push(AelluxJs2.wait(key));
+              return _context4.a(3, 6);
             case 5:
-              _i++;
-              _context4.n = 3;
-              break;
+              waitExtensions.push(AelluxJs2.wait(key));
             case 6:
-              _context4.n = 7;
-              return Promise.all(waitExtensions);
+              _i++;
+              _context4.n = 4;
+              break;
             case 7:
               _context4.n = 8;
-              return AelluxJsMount(rootElement, extensionNames, newlyMounted);
+              return Promise.all(waitExtensions);
             case 8:
-              validateDeclarations(root2, rootElement, extensionNames);
-              _context4.n = 10;
-              break;
+              _context4.n = 9;
+              return AelluxJsMount(rootElement, extensionNames, newlyMounted);
             case 9:
-              _context4.p = 9;
+              validateDeclarations(root2, rootElement, extensionNames);
+              _context4.n = 11;
+              break;
+            case 10:
+              _context4.p = 10;
               _t2 = _context4.v;
               AelluxJs2.diagnostics.error(AelluxJs2.diagnostics.ERROR_MOUNT, {
                 cause: _t2,
                 root: rootElement,
                 extensions: extensionNames
               });
-            case 10:
-              _context4.p = 10;
+            case 11:
+              _context4.p = 11;
               allWaiters.forEach(function(waiter) {
                 return waiter.setAttribute("aria-busy", "false");
               });
-              return _context4.f(10);
-            case 11:
+              return _context4.f(11);
+            case 12:
               return _context4.a(2, Array.from(newlyMounted));
           }
-        }, _callee4, null, [[2, 9, 10, 11]]);
+        }, _callee4, null, [[3, 10, 11, 12]]);
       }));
       return _mount.apply(this, arguments);
     }
@@ -23791,27 +23799,40 @@
               selectedNames = extensionNames === null ? null : new Set((typeof extensionNames === "string" ? [extensionNames] : extensionNames).map(function(name) {
                 return fromCamelCase2(name);
               }));
+              if (!(method === UNMOUNT && !AelluxJs2.dispatch("BeforeUnmount", {
+                cancelable: true,
+                detail: {
+                  root: rootElement,
+                  extensions: selectedNames ? Array.from(selectedNames) : null,
+                  detachedOnly: detachedOnly
+                }
+              }))) {
+                _context6.n = 1;
+                break;
+              }
+              return _context6.a(2, false);
+            case 1:
               affected = /* @__PURE__ */ new Set();
               registrations = [];
               _i8 = 0, _Array$from2 = Array.from(mountedElements);
-            case 1:
+            case 2:
               if (!(_i8 < _Array$from2.length)) {
-                _context6.n = 10;
+                _context6.n = 11;
                 break;
               }
               _Array$from2$_i = _slicedToArray2(_Array$from2[_i8], 2), element = _Array$from2$_i[0], mountIds = _Array$from2$_i[1];
               inRoot = element === rootElement || rootElement.contains(element);
               detachedInGlobalUnmount = method === UNMOUNT && rootElement === root2.document && !element.isConnected;
               if (!(detachedOnly ? element.isConnected || hasPendingMounts(element) : !inRoot && !detachedInGlobalUnmount)) {
-                _context6.n = 2;
+                _context6.n = 3;
                 break;
               }
-              return _context6.a(3, 9);
-            case 2:
-              _i9 = 0, _Array$from3 = Array.from(mountIds);
+              return _context6.a(3, 10);
             case 3:
+              _i9 = 0, _Array$from3 = Array.from(mountIds);
+            case 4:
               if (!(_i9 < _Array$from3.length)) {
-                _context6.n = 9;
+                _context6.n = 10;
                 break;
               }
               mountId = _Array$from3[_i9];
@@ -23819,16 +23840,16 @@
               extensionName = mountId.slice(0, separator);
               selector = mountId.slice(separator + 1);
               if (!(selectedNames && !selectedNames.has(extensionName))) {
-                _context6.n = 4;
+                _context6.n = 5;
                 break;
               }
-              return _context6.a(3, 8);
-            case 4:
+              return _context6.a(3, 9);
+            case 5:
               extensionKey = toCamelCase2(extensionName);
               mounter = mountMaps.get(extensionKey);
               controller = mounter && mounter.get(selector);
               if (!(method === UNMOUNT)) {
-                _context6.n = 5;
+                _context6.n = 6;
                 break;
               }
               registrations.push({
@@ -23838,21 +23859,21 @@
                 extensionName: extensionName,
                 selector: selector
               });
-              return _context6.a(3, 8);
-            case 5:
-              _context6.p = 5;
+              return _context6.a(3, 9);
+            case 6:
+              _context6.p = 6;
               if (!(controller && controller[method])) {
-                _context6.n = 6;
+                _context6.n = 7;
                 break;
               }
               affected.add(element);
-              _context6.n = 6;
+              _context6.n = 7;
               return controller[method](element);
-            case 6:
-              _context6.n = 8;
-              break;
             case 7:
-              _context6.p = 7;
+              _context6.n = 9;
+              break;
+            case 8:
+              _context6.p = 8;
               _t8 = _context6.v;
               AelluxJs2.diagnostics.error(AelluxJs2.diagnostics.ERROR_EXTENSION_MOUNT, {
                 cause: _t8,
@@ -23860,52 +23881,52 @@
                 method: method,
                 selector: selector
               });
-            case 8:
-              _i9++;
-              _context6.n = 3;
-              break;
             case 9:
-              _i8++;
-              _context6.n = 1;
+              _i9++;
+              _context6.n = 4;
               break;
             case 10:
+              _i8++;
+              _context6.n = 2;
+              break;
+            case 11:
               if (!(method === UNMOUNT)) {
-                _context6.n = 18;
+                _context6.n = 19;
                 break;
               }
               registrations.sort(compareUnmountOrder);
               _iterator9 = _createForOfIteratorHelper4(registrations);
-              _context6.p = 11;
+              _context6.p = 12;
               _iterator9.s();
-            case 12:
+            case 13:
               if ((_step9 = _iterator9.n()).done) {
-                _context6.n = 15;
+                _context6.n = 16;
                 break;
               }
               _step9$value = _step9.value, _element = _step9$value.element, _mountId = _step9$value.mountId, _controller2 = _step9$value.controller, _extensionName3 = _step9$value.extensionName, _selector4 = _step9$value.selector;
-              _context6.n = 13;
+              _context6.n = 14;
               return unmountRegistration(_element, _mountId, _controller2, _extensionName3, _selector4);
-            case 13:
+            case 14:
               if (!_context6.v) {
-                _context6.n = 14;
+                _context6.n = 15;
                 break;
               }
               affected.add(_element);
-            case 14:
-              _context6.n = 12;
-              break;
             case 15:
-              _context6.n = 17;
+              _context6.n = 13;
               break;
             case 16:
-              _context6.p = 16;
-              _t9 = _context6.v;
-              _iterator9.e(_t9);
+              _context6.n = 18;
+              break;
             case 17:
               _context6.p = 17;
-              _iterator9.f();
-              return _context6.f(17);
+              _t9 = _context6.v;
+              _iterator9.e(_t9);
             case 18:
+              _context6.p = 18;
+              _iterator9.f();
+              return _context6.f(18);
+            case 19:
               AelluxJs2.dispatch(toCapitalized2(method), {
                 detail: {
                   root: rootElement,
@@ -23913,10 +23934,9 @@
                   elements: Array.from(affected)
                 }
               });
-            case 19:
-              return _context6.a(2);
+              return _context6.a(2, true);
           }
-        }, _callee6, null, [[11, 16, 17, 18], [5, 7]]);
+        }, _callee6, null, [[12, 17, 18, 19], [6, 8]]);
       }));
       return _AelluxJsMounted.apply(this, arguments);
     }
@@ -25323,11 +25343,54 @@
     }
     return ("string" === r ? String : Number)(t);
   }
+  function _createForOfIteratorHelper8(r, e) {
+    var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
+    if (!t) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray9(r)) || e && r && "number" == typeof r.length) {
+        t && (r = t);
+        var _n = 0, F = function F2() {
+        };
+        return { s: F, n: function n() {
+          return _n >= r.length ? { done: true } : { done: false, value: r[_n++] };
+        }, e: function e2(r2) {
+          throw r2;
+        }, f: F };
+      }
+      throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+    }
+    var o, a = true, u = false;
+    return { s: function s() {
+      t = t.call(r);
+    }, n: function n() {
+      var r2 = t.next();
+      return a = r2.done, r2;
+    }, e: function e2(r2) {
+      u = true, o = r2;
+    }, f: function f() {
+      try {
+        a || null == t.return || t.return();
+      } finally {
+        if (u) throw o;
+      }
+    } };
+  }
   function _slicedToArray4(r, e) {
     return _arrayWithHoles4(r) || _iterableToArrayLimit4(r, e) || _unsupportedIterableToArray9(r, e) || _nonIterableRest4();
   }
   function _nonIterableRest4() {
     throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+  }
+  function _unsupportedIterableToArray9(r, a) {
+    if (r) {
+      if ("string" == typeof r) return _arrayLikeToArray9(r, a);
+      var t = {}.toString.call(r).slice(8, -1);
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray9(r, a) : void 0;
+    }
+  }
+  function _arrayLikeToArray9(r, a) {
+    (null == a || a > r.length) && (a = r.length);
+    for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
+    return n;
   }
   function _iterableToArrayLimit4(r, l) {
     var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
@@ -25360,49 +25423,6 @@
     } : function(o2) {
       return o2 && "function" == typeof Symbol && o2.constructor === Symbol && o2 !== Symbol.prototype ? "symbol" : typeof o2;
     }, _typeof5(o);
-  }
-  function _createForOfIteratorHelper8(r, e) {
-    var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
-    if (!t) {
-      if (Array.isArray(r) || (t = _unsupportedIterableToArray9(r)) || e && r && "number" == typeof r.length) {
-        t && (r = t);
-        var _n = 0, F = function F2() {
-        };
-        return { s: F, n: function n() {
-          return _n >= r.length ? { done: true } : { done: false, value: r[_n++] };
-        }, e: function e2(r2) {
-          throw r2;
-        }, f: F };
-      }
-      throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
-    }
-    var o, a = true, u = false;
-    return { s: function s() {
-      t = t.call(r);
-    }, n: function n() {
-      var r2 = t.next();
-      return a = r2.done, r2;
-    }, e: function e2(r2) {
-      u = true, o = r2;
-    }, f: function f() {
-      try {
-        a || null == t.return || t.return();
-      } finally {
-        if (u) throw o;
-      }
-    } };
-  }
-  function _unsupportedIterableToArray9(r, a) {
-    if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray9(r, a);
-      var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray9(r, a) : void 0;
-    }
-  }
-  function _arrayLikeToArray9(r, a) {
-    (null == a || a > r.length) && (a = r.length);
-    for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
-    return n;
   }
   function _regenerator2() {
     /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/babel/babel/blob/main/packages/babel-helpers/LICENSE */
@@ -25610,15 +25630,24 @@
           },
           destroy: function destroy() {
             return _asyncToGenerator2(/* @__PURE__ */ _regenerator2().m(function _callee4() {
+              var _t;
               return _regenerator2().w(function(_context4) {
                 while (1) switch (_context4.n) {
                   case 0:
-                    AelluxJs.waitLayout.clear();
                     _context4.n = 1;
-                    return AelluxJs.destroyExtensions();
+                    return _destroyExtensions(null, function() {
+                      return AelluxJs.waitLayout.clear();
+                    });
                   case 1:
-                    mountManager.destroy();
+                    _t = _context4.v;
+                    if (!(_t === false)) {
+                      _context4.n = 2;
+                      break;
+                    }
+                    return _context4.a(2, false);
                   case 2:
+                    mountManager.destroy();
+                  case 3:
                     return _context4.a(2);
                 }
               }, _callee4);
@@ -25626,97 +25655,12 @@
           },
           destroyExtensions: function destroyExtensions(extensionNames) {
             return _asyncToGenerator2(/* @__PURE__ */ _regenerator2().m(function _callee5() {
-              var _iterator, _step, extensionName, key, extension, _t, _t2, _t3;
               return _regenerator2().w(function(_context5) {
-                while (1) switch (_context5.p = _context5.n) {
+                while (1) switch (_context5.n) {
                   case 0:
-                    if (typeof extensionNames === "string") extensionNames = [extensionNames];
-                    if (!extensionNames) extensionNames = Object.keys(AelluxJs.registry.ext);
-                    extensionNames = extensionNames.map(function(_) {
-                      return fromCamelCase2(_);
-                    });
-                    _context5.p = 1;
-                    _context5.n = 2;
-                    return AelluxJs.unmount(document, extensionNames);
-                  case 2:
-                    _context5.n = 4;
-                    break;
-                  case 3:
-                    _context5.p = 3;
-                    _t = _context5.v;
-                    AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_EXTENSION_UNMOUNT, {
-                      cause: _t,
-                      extensions: extensionNames
-                    });
-                  case 4:
-                    _iterator = _createForOfIteratorHelper8(extensionNames);
-                    _context5.p = 5;
-                    _iterator.s();
-                  case 6:
-                    if ((_step = _iterator.n()).done) {
-                      _context5.n = 14;
-                      break;
-                    }
-                    extensionName = _step.value;
-                    key = toCamelCase2(extensionName);
-                    extension = void 0;
-                    _context5.p = 7;
-                    if (extensionPromises[key]) {
-                      _context5.n = 8;
-                      break;
-                    }
-                    return _context5.a(3, 13);
-                  case 8:
-                    _context5.n = 9;
-                    return extensionPromises[key];
-                  case 9:
-                    extension = _context5.v;
-                    if (!(extension && extension.destroy)) {
-                      _context5.n = 10;
-                      break;
-                    }
-                    _context5.n = 10;
-                    return extension.destroy();
-                  case 10:
-                    _context5.n = 12;
-                    break;
-                  case 11:
-                    _context5.p = 11;
-                    _t2 = _context5.v;
-                    AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_EXTENSION_DESTROY, {
-                      cause: _t2,
-                      extension: extensionName
-                    });
-                  case 12:
-                    _context5.p = 12;
-                    delete AelluxJs.ext[key];
-                    delete extensionPromises[key];
-                    delete AelluxJs.registry.ext[key];
-                    mountManager.remove({
-                      extensionName: extensionName
-                    });
-                    delete AelluxJs.registry.lazyExtSelectors[key];
-                    removeExtensionAssets(extensionName);
-                    if (extension) extension.initialized = false;
-                    return _context5.f(12);
-                  case 13:
-                    _context5.n = 6;
-                    break;
-                  case 14:
-                    _context5.n = 16;
-                    break;
-                  case 15:
-                    _context5.p = 15;
-                    _t3 = _context5.v;
-                    _iterator.e(_t3);
-                  case 16:
-                    _context5.p = 16;
-                    _iterator.f();
-                    return _context5.f(16);
-                  case 17:
-                    return _context5.a(2);
+                    return _context5.a(2, _destroyExtensions(extensionNames));
                 }
-              }, _callee5, null, [[7, 11, 12, 13], [5, 15, 16, 17], [1, 3]]);
+              }, _callee5);
             }))();
           },
           dispatchFrom: function dispatchFrom(from, event, options) {
@@ -25740,6 +25684,113 @@
           mountManager: mountManager
         });
         root2[root2.AelluxJs.shortJSName] = root2.AelluxJs;
+        function _destroyExtensions(_x, _x2) {
+          return _destroyExtensions2.apply(this, arguments);
+        }
+        function _destroyExtensions2() {
+          _destroyExtensions2 = _asyncToGenerator2(/* @__PURE__ */ _regenerator2().m(function _callee7(extensionNames, onUnmounted) {
+            var _iterator2, _step2, extensionName, key, extension, _t2, _t3, _t4, _t5;
+            return _regenerator2().w(function(_context7) {
+              while (1) switch (_context7.p = _context7.n) {
+                case 0:
+                  if (typeof extensionNames === "string") extensionNames = [extensionNames];
+                  if (!extensionNames) extensionNames = Object.keys(AelluxJs.registry.ext);
+                  extensionNames = extensionNames.map(function(_) {
+                    return fromCamelCase2(_);
+                  });
+                  _context7.p = 1;
+                  _context7.n = 2;
+                  return AelluxJs.unmount(document, extensionNames);
+                case 2:
+                  _t2 = _context7.v;
+                  if (!(_t2 === false)) {
+                    _context7.n = 3;
+                    break;
+                  }
+                  return _context7.a(2, false);
+                case 3:
+                  _context7.n = 5;
+                  break;
+                case 4:
+                  _context7.p = 4;
+                  _t3 = _context7.v;
+                  AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_EXTENSION_UNMOUNT, {
+                    cause: _t3,
+                    extensions: extensionNames
+                  });
+                case 5:
+                  if (onUnmounted) onUnmounted();
+                  _iterator2 = _createForOfIteratorHelper8(extensionNames);
+                  _context7.p = 6;
+                  _iterator2.s();
+                case 7:
+                  if ((_step2 = _iterator2.n()).done) {
+                    _context7.n = 15;
+                    break;
+                  }
+                  extensionName = _step2.value;
+                  key = toCamelCase2(extensionName);
+                  extension = void 0;
+                  _context7.p = 8;
+                  if (extensionPromises[key]) {
+                    _context7.n = 9;
+                    break;
+                  }
+                  return _context7.a(3, 14);
+                case 9:
+                  _context7.n = 10;
+                  return extensionPromises[key];
+                case 10:
+                  extension = _context7.v;
+                  if (!(extension && extension.destroy)) {
+                    _context7.n = 11;
+                    break;
+                  }
+                  _context7.n = 11;
+                  return extension.destroy();
+                case 11:
+                  _context7.n = 13;
+                  break;
+                case 12:
+                  _context7.p = 12;
+                  _t4 = _context7.v;
+                  AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_EXTENSION_DESTROY, {
+                    cause: _t4,
+                    extension: extensionName
+                  });
+                case 13:
+                  _context7.p = 13;
+                  delete AelluxJs.ext[key];
+                  delete extensionPromises[key];
+                  delete AelluxJs.registry.ext[key];
+                  mountManager.remove({
+                    extensionName: extensionName
+                  });
+                  delete AelluxJs.registry.lazyExtSelectors[key];
+                  removeExtensionAssets(extensionName);
+                  if (extension) extension.initialized = false;
+                  return _context7.f(13);
+                case 14:
+                  _context7.n = 7;
+                  break;
+                case 15:
+                  _context7.n = 17;
+                  break;
+                case 16:
+                  _context7.p = 16;
+                  _t5 = _context7.v;
+                  _iterator2.e(_t5);
+                case 17:
+                  _context7.p = 17;
+                  _iterator2.f();
+                  return _context7.f(17);
+                case 18:
+                  return _context7.a(2);
+              }
+            }, _callee7, null, [[8, 12, 13, 14], [6, 16, 17, 18], [1, 4]]);
+          }));
+          return _destroyExtensions2.apply(this, arguments);
+        }
         function getExtension(extensionName) {
           var request = parseExtensionRequest(extensionName);
           extensionName = request.name;
@@ -25807,7 +25858,7 @@
                 }
               }, _callee6);
             }));
-            return function(_x) {
+            return function(_x3) {
               return _ref.apply(this, arguments);
             };
           })()).catch(function(error2) {
@@ -25836,20 +25887,20 @@
             version: match && match[2] || null
           };
         }
-        function extensionInitialize(_x2) {
+        function extensionInitialize(_x4) {
           return _extensionInitialize.apply(this, arguments);
         }
         function _extensionInitialize() {
-          _extensionInitialize = _asyncToGenerator2(/* @__PURE__ */ _regenerator2().m(function _callee7(extensionName) {
+          _extensionInitialize = _asyncToGenerator2(/* @__PURE__ */ _regenerator2().m(function _callee8(extensionName) {
             var key, registration, context, _error, options;
-            return _regenerator2().w(function(_context7) {
-              while (1) switch (_context7.n) {
+            return _regenerator2().w(function(_context8) {
+              while (1) switch (_context8.n) {
                 case 0:
                   extensionName = fromCamelCase2(extensionName);
                   key = toCamelCase2(extensionName);
                   registration = AelluxJs.registry.ext[key];
                   if (!(registration.coreCompatibility && !versionSatisfies(AelluxJs.version, registration.coreCompatibility))) {
-                    _context7.n = 2;
+                    _context8.n = 2;
                     break;
                   }
                   context = {
@@ -25858,13 +25909,13 @@
                     coreCompatibility: registration.coreCompatibility
                   };
                   if (!(registration.skipCompatibilityCheck === true)) {
-                    _context7.n = 1;
+                    _context8.n = 1;
                     break;
                   }
                   AelluxJs.diagnostics.warn(AelluxJs.diagnostics.WARN_EXTENSION_COMPATIBILITY_SKIPPED, _objectSpread2(_objectSpread2({}, context), {}, {
                     explicitlySkipped: true
                   }));
-                  _context7.n = 2;
+                  _context8.n = 2;
                   break;
                 case 1:
                   _error = AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_EXTENSION_VERSION_INCOMPATIBLE, context);
@@ -25872,27 +25923,27 @@
                   throw _error;
                 case 2:
                   options = AelluxJs.options.extensions[key] || {};
-                  _context7.n = 3;
+                  _context8.n = 3;
                   return AelluxJs.ext[key].init(options);
                 case 3:
                   AelluxJs.ext[key].initialized = true;
                   delete AelluxJs.registry.lazyExtSelectors[key];
-                  return _context7.a(2, AelluxJs.ext[key]);
+                  return _context8.a(2, AelluxJs.ext[key]);
               }
-            }, _callee7);
+            }, _callee8);
           }));
           return _extensionInitialize.apply(this, arguments);
         }
-        function appendExtensionAssets(_x3) {
+        function appendExtensionAssets(_x5) {
           return _appendExtensionAssets.apply(this, arguments);
         }
         function _appendExtensionAssets() {
-          _appendExtensionAssets = _asyncToGenerator2(/* @__PURE__ */ _regenerator2().m(function _callee8(extensionName) {
-            var bundledLoader, key, data, useLegacyBuild, artifact, url, scriptURL, minifiedScript, scriptVariant, loadPromises, _iterator3, _step3, dependency, _args8 = arguments, _t4;
-            return _regenerator2().w(function(_context8) {
-              while (1) switch (_context8.p = _context8.n) {
+          _appendExtensionAssets = _asyncToGenerator2(/* @__PURE__ */ _regenerator2().m(function _callee9(extensionName) {
+            var bundledLoader, key, data, useLegacyBuild, artifact, url, scriptURL, minifiedScript, scriptVariant, loadPromises, _iterator3, _step3, dependency, _args9 = arguments, _t6;
+            return _regenerator2().w(function(_context9) {
+              while (1) switch (_context9.p = _context9.n) {
                 case 0:
-                  bundledLoader = _args8.length > 1 && _args8[1] !== void 0 ? _args8[1] : null;
+                  bundledLoader = _args9.length > 1 && _args9[1] !== void 0 ? _args9[1] : null;
                   extensionName = fromCamelCase2(extensionName);
                   key = toCamelCase2(extensionName);
                   data = AelluxJs.registry.ext[key];
@@ -25904,38 +25955,38 @@
                   scriptVariant = useLegacyBuild ? minifiedScript ? "legacyMin" : "legacy" : minifiedScript ? "modernMin" : "modern";
                   loadPromises = [];
                   _iterator3 = _createForOfIteratorHelper8(data.dependencies || []);
-                  _context8.p = 1;
+                  _context9.p = 1;
                   _iterator3.s();
                 case 2:
                   if ((_step3 = _iterator3.n()).done) {
-                    _context8.n = 5;
+                    _context9.n = 5;
                     break;
                   }
                   dependency = _step3.value;
                   if (!(typeof dependency === "string")) {
-                    _context8.n = 3;
+                    _context9.n = 3;
                     break;
                   }
-                  return _context8.a(3, 4);
+                  return _context9.a(3, 4);
                 case 3:
                   loadPromises.push(AelluxJs.dep(dependency.label, dependency.url, {
                     integrity: dependency.integrity,
                     crossOrigin: dependency.crossOrigin
                   }));
                 case 4:
-                  _context8.n = 2;
+                  _context9.n = 2;
                   break;
                 case 5:
-                  _context8.n = 7;
+                  _context9.n = 7;
                   break;
                 case 6:
-                  _context8.p = 6;
-                  _t4 = _context8.v;
-                  _iterator3.e(_t4);
+                  _context9.p = 6;
+                  _t6 = _context9.v;
+                  _iterator3.e(_t6);
                 case 7:
-                  _context8.p = 7;
+                  _context9.p = 7;
                   _iterator3.f();
-                  return _context8.f(7);
+                  return _context9.f(7);
                 case 8:
                   if (bundledLoader) {
                     loadPromises.push(Promise.resolve().then(function() {
@@ -25981,9 +26032,9 @@
                       });
                     }));
                   }
-                  return _context8.a(2, Promise.all(loadPromises));
+                  return _context9.a(2, Promise.all(loadPromises));
               }
-            }, _callee8, null, [[1, 6, 7, 8]]);
+            }, _callee9, null, [[1, 6, 7, 8]]);
           }));
           return _appendExtensionAssets.apply(this, arguments);
         }
@@ -26015,80 +26066,80 @@
             }
           });
         }
-        function resolveImplicitRegistration(_x4, _x5) {
+        function resolveImplicitRegistration(_x6, _x7) {
           return _resolveImplicitRegistration.apply(this, arguments);
         }
         function _resolveImplicitRegistration() {
-          _resolveImplicitRegistration = _asyncToGenerator2(/* @__PURE__ */ _regenerator2().m(function _callee9(extensionName, registration) {
-            var requestedVersion, officialURL, requestedURL, entry, sourceURL, embeddedOfficial, embeddedEntry, official, fallback, _args9 = arguments, _t5, _t6, _t7, _t8;
-            return _regenerator2().w(function(_context9) {
-              while (1) switch (_context9.p = _context9.n) {
+          _resolveImplicitRegistration = _asyncToGenerator2(/* @__PURE__ */ _regenerator2().m(function _callee0(extensionName, registration) {
+            var requestedVersion, officialURL, requestedURL, entry, sourceURL, embeddedOfficial, embeddedEntry, official, fallback, _args0 = arguments, _t7, _t8, _t9, _t0;
+            return _regenerator2().w(function(_context0) {
+              while (1) switch (_context0.p = _context0.n) {
                 case 0:
-                  requestedVersion = _args9.length > 2 && _args9[2] !== void 0 ? _args9[2] : null;
+                  requestedVersion = _args0.length > 2 && _args0[2] !== void 0 ? _args0[2] : null;
                   officialURL = AelluxJs.extIndex.officialURL || AelluxJs.aelluxBasePath + "aellux.extensions.min.json";
                   requestedURL = requestedVersion && requestedVersion !== AelluxJs.version ? "https://cdn.jsdelivr.net/npm/".concat(officialPackage, "@").concat(encodeURIComponent(requestedVersion), "/dist/aellux.extensions.min.json") : officialURL;
                   entry = null;
                   sourceURL = requestedURL;
-                  _context9.p = 1;
+                  _context0.p = 1;
                   embeddedOfficial = requestedVersion ? null : AelluxJs.extIndex.official;
                   embeddedEntry = embeddedOfficial && embeddedOfficial.extensions[extensionName];
                   if (!(embeddedEntry && embeddedEntry.builds)) {
-                    _context9.n = 2;
+                    _context0.n = 2;
                     break;
                   }
-                  _t5 = embeddedOfficial;
-                  _context9.n = 4;
+                  _t7 = embeddedOfficial;
+                  _context0.n = 4;
                   break;
                 case 2:
-                  _context9.n = 3;
+                  _context0.n = 3;
                   return loadExtensionIndex(requestedVersion ? "official@".concat(requestedVersion) : "official", requestedURL);
                 case 3:
-                  _t5 = _context9.v;
+                  _t7 = _context0.v;
                 case 4:
-                  official = _t5;
+                  official = _t7;
                   entry = official.extensions[extensionName] || null;
-                  _context9.n = 6;
+                  _context0.n = 6;
                   break;
                 case 5:
-                  _context9.p = 5;
-                  _t6 = _context9.v;
-                  reportIndexFailure(_t6, "official", requestedURL);
+                  _context0.p = 5;
+                  _t8 = _context0.v;
+                  reportIndexFailure(_t8, "official", requestedURL);
                 case 6:
                   if (!(!entry && AelluxJs.extIndex.fallbackURL)) {
-                    _context9.n = 11;
+                    _context0.n = 11;
                     break;
                   }
                   sourceURL = AelluxJs.extIndex.fallbackURL;
-                  _context9.p = 7;
-                  _t7 = AelluxJs.extIndex.fallback;
-                  if (_t7) {
-                    _context9.n = 9;
+                  _context0.p = 7;
+                  _t9 = AelluxJs.extIndex.fallback;
+                  if (_t9) {
+                    _context0.n = 9;
                     break;
                   }
-                  _context9.n = 8;
+                  _context0.n = 8;
                   return loadExtensionIndex("fallback", sourceURL);
                 case 8:
-                  _t7 = _context9.v;
+                  _t9 = _context0.v;
                 case 9:
-                  fallback = _t7;
+                  fallback = _t9;
                   entry = fallback.extensions[extensionName] || null;
-                  _context9.n = 11;
+                  _context0.n = 11;
                   break;
                 case 10:
-                  _context9.p = 10;
-                  _t8 = _context9.v;
-                  reportIndexFailure(_t8, "custom", sourceURL);
+                  _context0.p = 10;
+                  _t0 = _context0.v;
+                  reportIndexFailure(_t0, "custom", sourceURL);
                 case 11:
                   if (entry) {
-                    _context9.n = 12;
+                    _context0.n = 12;
                     break;
                   }
-                  return _context9.a(2, registration);
+                  return _context0.a(2, registration);
                 case 12:
                   applyManifestEntry(registration, entry, sourceURL, extensionName);
-                  return _context9.a(2, registration);
+                  return _context0.a(2, registration);
               }
-            }, _callee9, null, [[7, 10], [1, 5]]);
+            }, _callee0, null, [[7, 10], [1, 5]]);
           }));
           return _resolveImplicitRegistration.apply(this, arguments);
         }
@@ -26168,10 +26219,10 @@
             if (!Array.isArray(entry.dependencies)) {
               throw manifestError(kind, url, "dependencies array for ".concat(name));
             }
-            var _iterator2 = _createForOfIteratorHelper8(entry.dependencies), _step2;
+            var _iterator = _createForOfIteratorHelper8(entry.dependencies), _step;
             try {
-              for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
-                var dependency = _step2.value;
+              for (_iterator.s(); !(_step = _iterator.n()).done; ) {
+                var dependency = _step.value;
                 if (typeof dependency === "string") continue;
                 if (!dependency || typeof dependency.label !== "string" || !dependency.label.trim() || typeof dependency.url !== "string" || typeof dependency.integrity !== "string" || !/^sha384-[A-Za-z0-9+/]+={0,2}$/.test(dependency.integrity)) {
                   throw manifestError(kind, url, "dependency URL and SHA-384 integrity for ".concat(name));
@@ -26179,9 +26230,9 @@
                 validateArtifactURL(dependency.url, url, kind);
               }
             } catch (err) {
-              _iterator2.e(err);
+              _iterator.e(err);
             } finally {
-              _iterator2.f();
+              _iterator.f();
             }
           }
         }
@@ -29519,7 +29570,7 @@
         }
         function _load() {
           _load = _asyncToGenerator6(/* @__PURE__ */ _regenerator6().m(function _callee(url, selectors) {
-            var options, selectorList, elements, _iterator2, _step2, _selector, _currentElement, controller, response, html, loadedDocument, _iterator3, _step3, selector, currentElement, loadedElement, replacement, _args = arguments, _t, _t2;
+            var options, selectorList, elements, _iterator2, _step2, _selector, _currentElement, controller, response, html, loadedDocument, _iterator3, _step3, selector, currentElement, loadedElement, replacement, _args = arguments, _t, _t2, _t3, _t4;
             return _regenerator6().w(function(_context) {
               while (1) switch (_context.p = _context.n) {
                 case 0:
@@ -29594,7 +29645,7 @@
                   _iterator3.s();
                 case 7:
                   if ((_step3 = _iterator3.n()).done) {
-                    _context.n = 13;
+                    _context.n = 14;
                     break;
                   }
                   selector = _step3.value;
@@ -29603,23 +29654,31 @@
                     _context.n = 8;
                     break;
                   }
-                  return _context.a(3, 12);
+                  return _context.a(3, 13);
                 case 8:
                   loadedElement = loadedDocument.querySelector(selector);
-                  if (loadedElement) {
-                    _context.n = 9;
+                  _t = !loadedElement;
+                  if (_t) {
+                    _context.n = 10;
                     break;
                   }
-                  selectorDiagnostic(selector, "No response element matches the selector.", currentElement);
+                  _context.n = 9;
+                  return AelluxJs2.unmount(currentElement);
+                case 9:
+                  _t2 = _context.v;
+                  _t = _t2 === false;
+                case 10:
+                  if (!_t) {
+                    _context.n = 11;
+                    break;
+                  }
+                  if (!loadedElement) selectorDiagnostic(selector, "No response element matches the selector.", currentElement);
                   if (AelluxJs2.ext.feedback) {
                     AelluxJs2.ext.feedback.busy(currentElement, "Ajax loading", false);
                     AelluxJs2.ext.feedback.progress(currentElement, "Ajax loading", 1);
                   }
-                  return _context.a(3, 12);
-                case 9:
-                  _context.n = 10;
-                  return AelluxJs2.unmount(currentElement);
-                case 10:
+                  return _context.a(3, 13);
+                case 11:
                   replacement = document.importNode(loadedElement, true);
                   currentElement.parentNode.replaceChild(replacement, currentElement);
                   if (selector === "title") {
@@ -29629,34 +29688,34 @@
                       }
                     });
                   }
-                  _context.n = 11;
+                  _context.n = 12;
                   return AelluxJs2.mount(replacement);
-                case 11:
+                case 12:
                   if (AelluxJs2.ext.feedback) {
                     AelluxJs2.ext.feedback.busy(replacement, "Ajax loaded", false);
                     AelluxJs2.ext.feedback.progress(replacement, "Ajax loaded", 1);
                   }
-                case 12:
+                case 13:
                   _context.n = 7;
                   break;
-                case 13:
-                  _context.n = 15;
-                  break;
                 case 14:
-                  _context.p = 14;
-                  _t = _context.v;
-                  _iterator3.e(_t);
+                  _context.n = 16;
+                  break;
                 case 15:
                   _context.p = 15;
-                  _iterator3.f();
-                  return _context.f(15);
+                  _t3 = _context.v;
+                  _iterator3.e(_t3);
                 case 16:
-                  AelluxJs2.dispatch("AjaxHrefLoaded");
-                  _context.n = 19;
-                  break;
+                  _context.p = 16;
+                  _iterator3.f();
+                  return _context.f(16);
                 case 17:
-                  _context.p = 17;
-                  _t2 = _context.v;
+                  AelluxJs2.dispatch("AjaxHrefLoaded");
+                  _context.n = 20;
+                  break;
+                case 18:
+                  _context.p = 18;
+                  _t4 = _context.v;
                   selectorList.forEach(function(selector2) {
                     var currentElement2 = elements.get(selector2);
                     if (!currentElement2) return;
@@ -29666,22 +29725,22 @@
                     }
                   });
                   AelluxJs2.dispatch("AjaxHrefError");
-                  if (!(_t2.name === "AbortError")) {
-                    _context.n = 18;
+                  if (!(_t4.name === "AbortError")) {
+                    _context.n = 19;
                     break;
                   }
                   return _context.a(2, null);
-                case 18:
-                  throw _t2;
                 case 19:
-                  _context.p = 19;
+                  throw _t4;
+                case 20:
+                  _context.p = 20;
                   if (previousController === controller) previousController = null;
                   AelluxJs2.dispatch("AjaxHrefComplete");
-                  return _context.f(19);
-                case 20:
+                  return _context.f(20);
+                case 21:
                   return _context.a(2);
               }
-            }, _callee, null, [[6, 14, 15, 16], [3, 17, 19, 20]]);
+            }, _callee, null, [[6, 15, 16, 17], [3, 18, 20, 21]]);
           }));
           return _load.apply(this, arguments);
         }
@@ -31085,6 +31144,7 @@
                     element.style.setProperty("--ae-".concat(newDirection, "-low-steps").toLowerCase(), Math.max(1, parseInt(timeMs / 62.5)));
                     controller.classList.remove(className.pop, className.popping, className.unpopping);
                     controller.classList.add(transition.className);
+                    controller.setAriaExpanded(gotoVisible ? "true" : "false");
                     if (interpolatedProgress) {
                       element.style.setProperty("--ae-pop-progress", "clamp(0, var(--ae-present-pop-phase), 1)");
                       element.style.setProperty("--ae-unpop-progress", "clamp(0, var(--ae-present-unpop-phase), 1)");
@@ -31135,13 +31195,11 @@
                   if (gotoVisible && !element.hidden) {
                     autoUnpopSchedule(element, controller);
                     controller.classList.add(className.pop);
-                    controller.setAriaExpanded("true");
                     AelluxJs2.dispatchFrom(element, POP, {
                       bubbles: true
                     });
                   }
                   if (!gotoVisible && element.hidden) {
-                    controller.setAriaExpanded("false");
                     AelluxJs2.dispatchFrom(element, UNPOP, {
                       bubbles: true
                     });

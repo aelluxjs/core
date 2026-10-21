@@ -1053,8 +1053,7 @@
     async function unmount(elementOrId, extensionNames = null) {
       const rootElement = resolveMountElement(elementOrId, UNMOUNT);
       if (!rootElement) return false;
-      await AelluxJsMounted(rootElement, UNMOUNT, extensionNames);
-      return true;
+      return AelluxJsMounted(rootElement, UNMOUNT, extensionNames);
     }
     async function unmountDetached() {
       let hasDetachedElement = false;
@@ -1065,14 +1064,20 @@
         }
       }
       if (!hasDetachedElement) return false;
-      await AelluxJsMounted(root.document, UNMOUNT, null, true);
-      return true;
+      return AelluxJsMounted(root.document, UNMOUNT, null, true);
     }
     async function mount(elementOrId, extensionNames = null) {
       const AelluxJs2 = root.AelluxJs;
       const newlyMounted = /* @__PURE__ */ new Set();
       const rootElement = resolveMountElement(elementOrId, "mount");
       if (!rootElement) return [];
+      if (!AelluxJs2.dispatch("BeforeMount", {
+        cancelable: true,
+        detail: {
+          root: rootElement,
+          extensions: extensionNames == null ? null : (typeof extensionNames === "string" ? [extensionNames] : extensionNames).map((name) => fromCamelCase2(name))
+        }
+      })) return [];
       const waitMountedAttr = AelluxJs2.attr("wait-mounted");
       const allWaiters = findElements(rootElement, `[${waitMountedAttr}]`);
       allWaiters.forEach((waiter) => waiter.setAttribute("aria-busy", "true"));
@@ -1270,6 +1275,14 @@
     async function AelluxJsMounted(rootElement, method, extensionNames = null, detachedOnly = false) {
       const AelluxJs2 = root.AelluxJs;
       const selectedNames = extensionNames === null ? null : new Set((typeof extensionNames === "string" ? [extensionNames] : extensionNames).map((name) => fromCamelCase2(name)));
+      if (method === UNMOUNT && !AelluxJs2.dispatch("BeforeUnmount", {
+        cancelable: true,
+        detail: {
+          root: rootElement,
+          extensions: selectedNames ? Array.from(selectedNames) : null,
+          detachedOnly
+        }
+      })) return false;
       const affected = /* @__PURE__ */ new Set();
       const registrations = [];
       for (const [element, mountIds] of Array.from(mountedElements)) {
@@ -1317,6 +1330,7 @@
           elements: Array.from(affected)
         }
       });
+      return true;
     }
     async function unmountRegistration(element, mountId, controller, extensionName, selector) {
       const pendingMount = getPendingMount(element, mountId);
@@ -2264,48 +2278,12 @@
           return mountManager.unmount(elementOrId, extensionNames);
         },
         async destroy() {
-          AelluxJs.waitLayout.clear();
-          await AelluxJs.destroyExtensions();
+          if (await destroyExtensions(null, () => AelluxJs.waitLayout.clear()) === false)
+            return false;
           mountManager.destroy();
         },
         async destroyExtensions(extensionNames) {
-          if (typeof extensionNames === "string")
-            extensionNames = [extensionNames];
-          if (!extensionNames)
-            extensionNames = Object.keys(AelluxJs.registry.ext);
-          extensionNames = extensionNames.map((_) => fromCamelCase2(_));
-          try {
-            await AelluxJs.unmount(document, extensionNames);
-          } catch (error) {
-            AelluxJs.diagnostics.error(
-              AelluxJs.diagnostics.ERROR_EXTENSION_UNMOUNT,
-              { cause: error, extensions: extensionNames }
-            );
-          }
-          for (const extensionName of extensionNames) {
-            const key = toCamelCase2(extensionName);
-            let extension;
-            try {
-              if (!extensionPromises[key]) continue;
-              extension = await extensionPromises[key];
-              if (extension && extension.destroy) {
-                await extension.destroy();
-              }
-            } catch (error) {
-              AelluxJs.diagnostics.error(
-                AelluxJs.diagnostics.ERROR_EXTENSION_DESTROY,
-                { cause: error, extension: extensionName }
-              );
-            } finally {
-              delete AelluxJs.ext[key];
-              delete extensionPromises[key];
-              delete AelluxJs.registry.ext[key];
-              mountManager.remove({ extensionName });
-              delete AelluxJs.registry.lazyExtSelectors[key];
-              removeExtensionAssets(extensionName);
-              if (extension) extension.initialized = false;
-            }
-          }
+          return destroyExtensions(extensionNames);
         },
         dispatchFrom(from, event, options) {
           options = options || {};
@@ -2334,6 +2312,42 @@
       }
     );
     root[root.AelluxJs.shortJSName] = root.AelluxJs;
+    async function destroyExtensions(extensionNames, onUnmounted) {
+      if (typeof extensionNames === "string") extensionNames = [extensionNames];
+      if (!extensionNames) extensionNames = Object.keys(AelluxJs.registry.ext);
+      extensionNames = extensionNames.map((_) => fromCamelCase2(_));
+      try {
+        if (await AelluxJs.unmount(document, extensionNames) === false) return false;
+      } catch (error) {
+        AelluxJs.diagnostics.error(
+          AelluxJs.diagnostics.ERROR_EXTENSION_UNMOUNT,
+          { cause: error, extensions: extensionNames }
+        );
+      }
+      if (onUnmounted) onUnmounted();
+      for (const extensionName of extensionNames) {
+        const key = toCamelCase2(extensionName);
+        let extension;
+        try {
+          if (!extensionPromises[key]) continue;
+          extension = await extensionPromises[key];
+          if (extension && extension.destroy) await extension.destroy();
+        } catch (error) {
+          AelluxJs.diagnostics.error(
+            AelluxJs.diagnostics.ERROR_EXTENSION_DESTROY,
+            { cause: error, extension: extensionName }
+          );
+        } finally {
+          delete AelluxJs.ext[key];
+          delete extensionPromises[key];
+          delete AelluxJs.registry.ext[key];
+          mountManager.remove({ extensionName });
+          delete AelluxJs.registry.lazyExtSelectors[key];
+          removeExtensionAssets(extensionName);
+          if (extension) extension.initialized = false;
+        }
+      }
+    }
     function getExtension(extensionName) {
       const request = parseExtensionRequest(extensionName);
       extensionName = request.name;

@@ -8620,8 +8620,18 @@
           "doc-url": "https://aelluxjs.github.io/core/docs/0.1.0/runtime/events.htm"
         },
         {
+          "name": "AelluxJsBeforeMount",
+          "description": "BeforeMount pass preflight on document. Cancel to prevent the pass and its completion event. detail: { root, extensions }. Bubbles: true. Cancelable: true.",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.0/runtime/events.htm"
+        },
+        {
           "name": "AelluxJsBeforePop",
           "description": "BeforePop notification on the Present element. Cancel to veto the transition. Bubbles: true. Cancelable: true.",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.0/runtime/events.htm"
+        },
+        {
+          "name": "AelluxJsBeforeUnmount",
+          "description": "BeforeUnmount pass preflight on document. Cancel to prevent the pass and its completion event. detail: { root, extensions }; detachedOnly identifies automatic detached cleanup. Bubbles: true. Cancelable: true.",
           "doc-url": "https://aelluxjs.github.io/core/docs/0.1.0/runtime/events.htm"
         },
         {

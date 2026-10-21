@@ -92,52 +92,12 @@ import utilsNameCase from "./internal/utils-name-case.js";
         return mountManager.unmount(elementOrId, extensionNames);
       },
       async destroy() {
-        AelluxJs.waitLayout.clear();
-        await AelluxJs.destroyExtensions();
+        if (await destroyExtensions(null, () => AelluxJs.waitLayout.clear()) === false)
+          return false;
         mountManager.destroy();
       },
       async destroyExtensions(extensionNames) {
-        if (typeof extensionNames === "string")
-          extensionNames = [extensionNames];
-
-        if (!extensionNames)
-          extensionNames = Object.keys(AelluxJs.registry.ext)
-
-        extensionNames = extensionNames.map(_ => fromCamelCase(_));
-
-        try {
-          await AelluxJs.unmount(document, extensionNames);
-        } catch (error) {
-          AelluxJs.diagnostics.error(
-            AelluxJs.diagnostics.ERROR_EXTENSION_UNMOUNT,
-            { cause: error, extensions: extensionNames }
-          );
-        }
-
-        for (const extensionName of extensionNames) {
-          const key = toCamelCase(extensionName);
-          let extension;
-          try {
-            if (!extensionPromises[key]) continue;
-            extension = await extensionPromises[key];
-            if (extension && extension.destroy) {
-              await extension.destroy();
-            }
-          } catch (error) {
-            AelluxJs.diagnostics.error(
-              AelluxJs.diagnostics.ERROR_EXTENSION_DESTROY,
-              { cause: error, extension: extensionName }
-            );
-          } finally {
-            delete AelluxJs.ext[key];
-            delete extensionPromises[key];
-            delete AelluxJs.registry.ext[key];
-            mountManager.remove({ extensionName });
-            delete AelluxJs.registry.lazyExtSelectors[key];
-            removeExtensionAssets(extensionName);
-            if (extension) extension.initialized = false;
-          }
-        }
+        return destroyExtensions(extensionNames);
       },
 
       dispatchFrom(from, event, options) {
@@ -164,6 +124,45 @@ import utilsNameCase from "./internal/utils-name-case.js";
     });
 
   root[root.AelluxJs.shortJSName] = root.AelluxJs;
+
+  async function destroyExtensions(extensionNames, onUnmounted) {
+    if (typeof extensionNames === "string") extensionNames = [extensionNames];
+    if (!extensionNames) extensionNames = Object.keys(AelluxJs.registry.ext);
+    extensionNames = extensionNames.map(_ => fromCamelCase(_));
+
+    try {
+      if (await AelluxJs.unmount(document, extensionNames) === false) return false;
+    } catch (error) {
+      AelluxJs.diagnostics.error(
+        AelluxJs.diagnostics.ERROR_EXTENSION_UNMOUNT,
+        { cause: error, extensions: extensionNames }
+      );
+    }
+    if (onUnmounted) onUnmounted();
+
+    for (const extensionName of extensionNames) {
+      const key = toCamelCase(extensionName);
+      let extension;
+      try {
+        if (!extensionPromises[key]) continue;
+        extension = await extensionPromises[key];
+        if (extension && extension.destroy) await extension.destroy();
+      } catch (error) {
+        AelluxJs.diagnostics.error(
+          AelluxJs.diagnostics.ERROR_EXTENSION_DESTROY,
+          { cause: error, extension: extensionName }
+        );
+      } finally {
+        delete AelluxJs.ext[key];
+        delete extensionPromises[key];
+        delete AelluxJs.registry.ext[key];
+        mountManager.remove({ extensionName });
+        delete AelluxJs.registry.lazyExtSelectors[key];
+        removeExtensionAssets(extensionName);
+        if (extension) extension.initialized = false;
+      }
+    }
+  }
 
   function getExtension(extensionName) {
     const request = parseExtensionRequest(extensionName);

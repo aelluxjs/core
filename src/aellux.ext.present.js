@@ -578,6 +578,7 @@
           className.unpopping
         );
         controller.classList.add(transition.className);
+        controller.setAriaExpanded(gotoVisible ? "true" : "false");
         // Clamp private CSS interpolation without adding an animation loop.
         // Stable states use literal endpoints to avoid stale computed-value
         // dependencies after Firefox releases a controlled custom-property effect.
@@ -625,11 +626,9 @@
       if (gotoVisible && !element.hidden) {
         autoUnpopSchedule(element, controller);
         controller.classList.add(className.pop);
-        controller.setAriaExpanded("true");
         AelluxJs.dispatchFrom(element, POP, { bubbles: true });
       }
       if (!gotoVisible && element.hidden) {
-        controller.setAriaExpanded("false");
         AelluxJs.dispatchFrom(element, UNPOP, { bubbles: true });
       }
     } catch (error) {

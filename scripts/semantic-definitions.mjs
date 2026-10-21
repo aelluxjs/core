@@ -91,6 +91,7 @@ export const semanticCSSProperties = [
 
 export const semanticEvents = [
   ...["Awake", "Legacy", "Ready"].map(name => ({ name, extension: "core", description: `${name} runtime startup notification on document.` })),
+  ...["BeforeMount", "BeforeUnmount"].map(name => ({ name, extension: "core", cancelable: true, description: `${name} pass preflight on document. Cancel to prevent the pass and its completion event. detail: { root, extensions }${name === "BeforeUnmount" ? "; detachedOnly identifies automatic detached cleanup" : ""}.` })),
   ...["Mount", "Unmount", "Update"].map(name => ({ name, extension: "core", description: `${name} pass completed on document. detail: { root, extensions, elements }.` })),
   { name: "AdaptiveUpdate", extension: "adaptive", description: "Element dimensions changed. detail: { width, height, ratio }." },
   { name: "Feedback", extension: "feedback", description: "Cancelable feedback event. detail: { type, message, value, target, motion }; handled boundaries stop propagation.", cancelable: true },
