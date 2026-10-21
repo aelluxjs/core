@@ -68,8 +68,8 @@
             </div>
             <div class="d-flex flex-column" data-ae-present-group>
               <% for (const item of it.menuTree) { %>
-                <li class="nav-item small-md fw-bold rounded-1 ps-md-1 bg-light-adaptive" style="flex:0">
-                  <button type="button" class="nav-link mb-1 w-100 text-start text-capitalize p-2 p-md-1 px-3 px-md-2"
+                <li class="nav-item mt-1 small-md fw-bold rounded-1 ps-md-1 bg-light-adaptive" style="flex:0">
+                  <button type="button" class="nav-link w-100 text-start text-capitalize p-2 p-md-1 px-3 px-md-2"
                     data-ae-trigger="toggle" data-ae-target="#children-<%= item.slug %>">
                     <%= item.label %>
                       <% if (item.children !==undefined) { %><span class="chevron"><i
@@ -86,9 +86,10 @@
                         <% for (const child of item.children) { %>
                           <% if (child.children !==undefined && child.children.length) { %>
 
-                            <li class="nav-item small-md fw-bold rounded-1 ps-md-1 bg-light-adaptive" style="flex:0">
+                            <li class="nav-item mt-1 small-md fw-bold rounded-1 ps-md-1 bg-light-adaptive"
+                              style="flex:0">
                               <button type="button"
-                                class="nav-link mb-1 w-100 text-start text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                class="nav-link w-100 text-start text-capitalize p-2 p-md-1 px-3 px-md-2"
                                 data-ae-trigger="toggle" data-ae-target="#children2-<%= child.slug %>">
                                 <%= child.label %>
                                   <% if (child.children !==undefined) { %><span class="chevron"><i
