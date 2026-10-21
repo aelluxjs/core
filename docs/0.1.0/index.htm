@@ -209,11 +209,12 @@
             <div class="d-flex flex-row gap-2 justify-content-between pb-2 pt-0 pt-md-2">
 
               <div class="dropdown">
-  <button class="btn btn-outline-adaptive ps-3 dropdown-toggle rounded-1" type="button" data-bs-target="dropdown"
+  <button id="btn-version" class="btn btn-outline-adaptive ps-3 dropdown-toggle rounded-1" type="button"
     data-ae-trigger="toggle" data-ae-target="dropdown-version" aria-expanded="false">
     0.1.0  </button>
-  <ul id="dropdown-version" data-ae-present="opacity transform" hidden="true"
-    class="dropdown-menu dropdown-menu-start rounded-2 overflow-hidden position-absolute" style="min-width: unset;">
+  <ul id="dropdown-version" data-ae-anchor-target="btn-version" data-ae-anchor="bottom-right:top-right"
+    data-ae-present="opacity transform" hidden="true"
+    class="dropdown-menu dropdown-menu-start rounded-2 overflow-hidden" style="min-width: unset;">
 
           <li>
         <a class="dropdown-item active" data-no-ajax=true
