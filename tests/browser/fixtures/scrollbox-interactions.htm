@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Scrollbox pointer interaction regressions</title>
+  <style>
+    .gallery {
+      position: relative;
+      max-height: 30vh;
+      width: 100%;
+      max-width: 500px;
+      overflow-y: hidden;
+    }
+    .track { padding: 20px; display: inline-flex; gap: 10px; }
+    [data-ae-snap-item] { flex: none; aspect-ratio: 1; width: 200px; background: #222; }
+    .wide { width: 300px; }
+    .decorated [data-ae-snap-item] { opacity: var(--ae-snap-focus); overflow: clip; }
+    .decoration {
+      width: 100px;
+      height: 100px;
+      background: yellow;
+      left: 50px;
+      position: relative;
+      transform: translateX(calc(200px * var(--ae-snap-viewport))) scale(calc(0.2 + 0.8 * var(--ae-snap-focus)));
+    }
+    .nested [data-ae-snap-item] { width: 500px; display: flex; }
+    .nested [data-ae-scrollbox] { max-height: 100px; flex: 1; user-select: none; color: white; }
+    .vertical-content { height: 400px; }
+  </style>
+</head>
+<body>
+  <div data-ae-scrollbox="pointer" data-ae-scrollbar style="position:relative;max-width:100%">
+    <div data-ae-scrollbox-elastic style="padding:20px">
+      <!-- Duplicate IDs deliberately exercise independent state for each element. -->
+      <div id="snap" class="gallery decorated" data-scenario="elastic" data-ae-adaptive
+        data-ae-scrollbox="pointer" data-ae-scrollbox-snap data-ae-scrollbar>
+        <div class="track" data-ae-scrollbox-elastic>
+          <div data-ae-snap-item><div class="decoration"></div></div>
+          <div data-ae-snap-item><div class="decoration"></div></div>
+          <div data-ae-snap-item class="wide"><div class="decoration"></div></div>
+          <div data-ae-snap-item><div class="decoration"></div></div>
+          <div data-ae-snap-item><div class="decoration"></div></div>
+          <div data-ae-snap-item><div class="decoration"></div></div>
+        </div>
+      </div>
+      <div id="snap" class="gallery decorated" data-scenario="plain" data-ae-adaptive
+        data-ae-scrollbox="pointer" data-ae-scrollbox-snap>
+        <div class="track">
+          <div data-ae-snap-item><div class="decoration"></div></div>
+          <div data-ae-snap-item><div class="decoration"></div></div>
+          <div data-ae-snap-item class="wide"><div class="decoration"></div></div>
+          <div data-ae-snap-item><div class="decoration"></div></div>
+          <div data-ae-snap-item><div class="decoration"></div></div>
+          <div data-ae-snap-item><div class="decoration"></div></div>
+        </div>
+      </div>
+      <div class="gallery nested" data-scenario="nested" data-ae-adaptive
+        data-ae-scrollbox="pointer" data-ae-scrollbox-snap data-ae-scrollbar>
+        <div class="track" data-ae-scrollbox-elastic>
+          <div data-ae-snap-item>
+            <div data-ae-scrollbox="pointer" data-ae-scrollbar><div class="vertical-content">Nested vertical content 1</div></div>
+          </div>
+          <div data-ae-snap-item>
+            <div data-ae-scrollbox="pointer" data-ae-scrollbar><div class="vertical-content">Nested vertical content 2</div></div>
+          </div>
+          <div data-ae-snap-item>
+            <div data-ae-scrollbox="pointer" data-ae-scrollbar><div class="vertical-content">Nested vertical content 3</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

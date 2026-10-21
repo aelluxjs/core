@@ -1,10 +1,19 @@
 import { expect, test } from "@playwright/test";
 
-for (const [index, scenario] of ["with elastic", "without elastic", "with nested vertical Scrollboxes"].entries()) {
-  test(`teste.htm PDS release visibly eases into snap ${scenario}`, async ({ page }) => {
-    await page.goto("/docs/teste.htm");
-    await page.waitForFunction(() => window.AelluxJs?.ext.scrollboxSnap?.initialized);
-    const gallery = page.locator("[data-ae-scrollbox-snap]").nth(index);
+test.beforeEach(async ({ page }) => {
+  await page.goto("/tests/browser/fixtures/scrollbox-interactions.htm");
+  await page.addScriptTag({ url: "/dist/aellux.js" });
+  await page.evaluate(() => AelluxJs.init({ mode: "full" }));
+  await page.waitForFunction(() => window.AelluxJs?.ext.scrollboxSnap?.initialized);
+});
+
+for (const [key, scenario] of [
+  ["elastic", "with elastic"],
+  ["plain", "without elastic"],
+  ["nested", "with nested vertical Scrollboxes"]
+]) {
+  test(`PDS release visibly eases into snap ${scenario}`, async ({ page }) => {
+    const gallery = page.locator(`[data-scenario="${key}"]`);
     await expect(gallery).toHaveClass(/ae--snap-ready/);
     await gallery.scrollIntoViewIfNeeded();
     const rect = await gallery.boundingBox();
@@ -34,14 +43,10 @@ for (const [index, scenario] of ["with elastic", "without elastic", "with nested
       .toBe("x mandatory");
   });
 
-  test(`teste.htm rapid alternating drags stay proportional ${scenario}`,
+  test(`rapid alternating drags stay proportional ${scenario}`,
     async ({ page }) => {
       test.setTimeout(60_000);
-      await page.goto("/docs/teste.htm");
-      await page.waitForFunction(() => window.AelluxJs?.ext.scrollboxSnap?.initialized);
-      // Use element order: the page has duplicate gallery IDs, but each
-      // element must still behave as an independent Scrollbox.
-      const gallery = page.locator("[data-ae-scrollbox-snap]").nth(index);
+      const gallery = page.locator(`[data-scenario="${key}"]`);
       await expect(gallery).toHaveClass(/ae--snap-ready/);
       await gallery.scrollIntoViewIfNeeded();
       const rect = await gallery.boundingBox();

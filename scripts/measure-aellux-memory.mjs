@@ -8,9 +8,10 @@ const bytesToMiB = bytes => Math.round(bytes / 1024 / 1024 * 100) / 100;
 
 try {
   await delay(500);
-  const source = await readFile("docs/teste.htm", "utf8");
+  const fixture = "tests/browser/fixtures/memory-workload.htm";
+  const source = await readFile(fixture, "utf8");
   const body = source.match(/<body[^>]*>([\s\S]*)<\/body>/i)?.[1];
-  if (!body) throw new Error("Body de docs/teste.htm não encontrado.");
+  if (!body) throw new Error(`Body de ${fixture} não encontrado.`);
 
   const browser = await chromium.launch({ headless: true });
   const samples = [];
@@ -36,6 +37,7 @@ try {
   const deltas = samples.map(sample => sample.delta);
   const average = deltas.reduce((sum, value) => sum + value, 0) / deltas.length;
   console.log(JSON.stringify({
+    fixture,
     samples: samples.map(sample => ({
       beforeMiB: bytesToMiB(sample.before), afterMiB: bytesToMiB(sample.after), deltaMiB: bytesToMiB(sample.delta)
     })),

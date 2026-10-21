@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Aellux memory measurement workload</title></head>
+<body>
+  <!-- Keep this workload stable so memory samples can be compared over time. -->
+  <button id="memory-trigger" data-ae-target="#memory-pop" data-ae-trigger="toggle">Toggle</button>
+  <div id="memory-pop" data-ae-present="opacity transform" hidden>
+    <div data-ae-present-motion>Present content</div>
+  </div>
+  <div data-ae-anchor-target="#memory-trigger" data-ae-anchor="bottom-right:top-right">Anchor</div>
+  <div data-ae-scrollbox="pointer" data-ae-scrollbar style="position:relative;width:500px;height:220px">
+    <div data-ae-scrollbox-elastic style="padding:20px">
+      <div data-ae-adaptive data-ae-scrollbox="pointer" data-ae-scrollbox-snap data-ae-scrollbar
+        style="position:relative;width:450px;height:160px;overflow-y:hidden">
+        <div data-ae-scrollbox-elastic style="display:inline-flex;gap:10px;padding:20px">
+          <div data-ae-snap-item style="flex:none;width:300px;height:120px">First item</div>
+          <div data-ae-snap-item style="flex:none;width:300px;height:120px">Second item</div>
+          <div data-ae-snap-item style="flex:none;width:300px;height:120px">
+            <div data-ae-scrollbox="pointer" data-ae-scrollbar style="height:80px">
+              <div style="height:400px">Nested vertical content</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="height:400px">Outer vertical content</div>
+    </div>
+  </div>
+</body>
+</html>
