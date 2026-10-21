@@ -1096,13 +1096,19 @@
       return;
     }
 
+    const previousAxis = pointerScroll.axis;
     if (!pointerScroll.axis)
       pointerScroll.axis = Math.abs(dx) >= Math.abs(dy) ? "x" : "y";
     const chain = pointerScroll.chains[pointerScroll.axis];
     const threshold = !pointerScroll.moved && chain.some(member => !member.disposed &&
       pointerAxisMaximum(member, pointerScroll.axis, pointerScroll) > 0 &&
       !dispatchSnapGesture(member, "probe", pointerScroll)) ? 1 : POINTER_SCROLL_THRESHOLD_PX;
-    if (!pointerScroll.moved && dx * dx + dy * dy < threshold * threshold) return;
+    if (!pointerScroll.moved && dx * dx + dy * dy < threshold * threshold) {
+      // A subthreshold move only probes the axis. Small cross-axis jitter
+      // must not lock the next real movement to an unavailable scroll axis.
+      pointerScroll.axis = previousAxis;
+      return;
+    }
     const verticalTextDrag = pointerScroll.verticalOnly && pointerScroll.axis === "y" &&
       Math.abs(dy) > VERTICAL_TEXT_DRAG_PX;
 

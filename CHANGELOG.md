@@ -88,6 +88,7 @@ All notable changes to aellux.js will be documented in this file.
 
 ### Fixed
 
+- Pointer dragging chooses its axis only after crossing the drag threshold, so initial cross-axis jitter cannot cancel a new drag after interrupting elastic recovery.
 - Nested wheel scrolling passes only the unconsumed distance through alternating horizontal and vertical ancestors, even with elastic enabled at every level; explicit CSS overscroll boundaries stop the corresponding axis, and native movement is canceled after a scripted handoff to avoid duplicates.
 - Completed pointer drags reset the multi-click history so rapid re-grabs near the same starting position remain draggable; ordinary double and triple clicks still allow native text selection.
 - Desktop PDS release eases into its snap destination while keeping native snap suspended; a new press cancels all remaining animation frames, and reduced motion settles immediately.

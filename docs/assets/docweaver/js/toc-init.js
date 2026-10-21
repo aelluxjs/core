@@ -48,6 +48,10 @@ async function initOrRefreshToc() {
     tocbot.refresh(tocOptions);
     tocbot._options?.scrollEndCallback();
   }
+
+  toc?.querySelectorAll("a[href]").forEach((link) => {
+    link.setAttribute("data-ae-dismiss", "toc-collapse");
+  });
 }
 
 function ensureHeadingIds(container) {

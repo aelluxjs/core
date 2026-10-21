@@ -1249,12 +1249,16 @@
         endPointerScroll(state);
         return;
       }
+      var previousAxis = pointerScroll.axis;
       if (!pointerScroll.axis) pointerScroll.axis = Math.abs(dx) >= Math.abs(dy) ? "x" : "y";
       var chain = pointerScroll.chains[pointerScroll.axis];
       var threshold = !pointerScroll.moved && chain.some(function(member2) {
         return !member2.disposed && pointerAxisMaximum(member2, pointerScroll.axis, pointerScroll) > 0 && !dispatchSnapGesture(member2, "probe", pointerScroll);
       }) ? 1 : POINTER_SCROLL_THRESHOLD_PX;
-      if (!pointerScroll.moved && dx * dx + dy * dy < threshold * threshold) return;
+      if (!pointerScroll.moved && dx * dx + dy * dy < threshold * threshold) {
+        pointerScroll.axis = previousAxis;
+        return;
+      }
       var verticalTextDrag = pointerScroll.verticalOnly && pointerScroll.axis === "y" && Math.abs(dy) > VERTICAL_TEXT_DRAG_PX;
       if (!pointerScroll.moved && now() < pointerScroll.selectionReadyTime && !verticalTextDrag) {
         pointerScroll.pendingMove = {

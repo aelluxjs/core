@@ -2472,6 +2472,26 @@ test("mouse release and click are canceled only for the drag button", async ({ p
 
 for (const axis of ["x", "y"]) {
   for (const snap of [false, true]) {
+    test(`subthreshold cross-axis jitter does not cancel a ${axis} drag${snap ? " with snap" : ""}`, async ({ page }) => {
+      await setup(page, `<div id="box" data-ae-scrollbox="pointer" data-ae-scrollbox-momentum="false"
+        ${snap ? `data-ae-scrollbox-snap="${axis === "x" ? "horizontal" : "vertical"}"` : ""}
+        style="width:100px;height:100px;overflow-${axis}:auto;overflow-${axis === "x" ? "y" : "x"}:hidden">
+        <div style="display:flex;flex-direction:${axis === "x" ? "row" : "column"}">
+          ${'<div data-ae-snap-item style="width:100px;height:100px;flex:none"></div>'.repeat(3)}
+        </div></div>`);
+      const element = page.locator("#box"), rect = await element.boundingBox();
+      const x = rect.x + 70, y = rect.y + 70;
+      await page.mouse.move(x, y);
+      await page.mouse.down();
+      await page.mouse.move(x + (axis === "y" ? 1 : 0), y + (axis === "x" ? 1 : 0));
+      await expect(element).not.toHaveClass(/ae--pointerscrolling/);
+      await page.mouse.move(x - (axis === "x" ? 10 : 0), y - (axis === "y" ? 10 : 0));
+      const position = await element.evaluate((element, axis) => element[axis === "x" ? "scrollLeft" : "scrollTop"], axis);
+      expect(position).toBe(10);
+      await expect(element).toHaveCSS("cursor", "grabbing");
+      await page.mouse.up();
+    });
+
     test(`rapid ${axis} drags can restart at the same position${snap ? " with snap" : ""}`, async ({ page }) => {
       await setup(page, `<div id="box" data-ae-scrollbox="pointer" data-ae-scrollbox-momentum="false"
         ${snap ? `data-ae-scrollbox-snap="${axis === "x" ? "horizontal" : "vertical"}"` : ""}

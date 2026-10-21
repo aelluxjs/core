@@ -76,18 +76,32 @@ body:after {
   top: 64px;
   left: 0;
   height: calc(100% - 64px);
-  transition: none !important;
   width: 250px;
   overflow-x: clip;
   overflow-y: auto;
   scrollbar-gutter: stable;
 }
 
+#navbarSupportedContent {
+  --ae-from-transform: translateX(0);
+  --ae-pop-transform: translateX(0);
+  --ae-unpop-transform: translateX(0);
+  --ae-pop-duration: 0ms;
+  --ae-unpop-duration: 0ms;
+}
+
+@media (min-width: 768px) {
+  #navbarSupportedContent {
+    transform: none !important;
+    opacity: 1 !important;
+  }
+}
+
 .content-block {
   margin-left: 250px;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 767.98px) {
   .content-block {
     margin-left: 0 !important;
   }
@@ -141,6 +155,13 @@ body:after {
     z-index: 1000;
   }
 
+  #navbarSupportedContent {
+    --ae-from-transform: translateX(100%);
+    --ae-unpop-transform: translateX(100%);
+    --ae-pop-duration: 250ms;
+    --ae-unpop-duration: 250ms;
+  }
+
 }
 
 .navbar-collapse .nav-item {
@@ -183,17 +204,32 @@ body:after {
   font-size: x-small !important;
 }
 
-.navbar-collapse .nav-item .nav-link:not(.collapsed) .chevron {
+.navbar-collapse .nav-item .nav-link[aria-expanded=true] .chevron {
   transform: translateX(-2px) rotate(90deg);
 }
 
+.navbar-collapse .docs-menu-panel[data-ae-present] {
+  --ae-pop-duration: 200ms;
+  --ae-unpop-duration: 200ms;
+}
+
+.navbar-collapse .docs-menu-panel[data-ae-present]:not([hidden]) {
+  display: grid;
+}
+
 .toc-header .toc-collapse {
+  --ae-pop-duration: 200ms;
+  --ae-unpop-duration: 200ms;
   position: absolute;
   top: 100%;
   left: 0;
   right: 0;
   border-top: var(--bs-border-width) var(--bs-border-style) var(--bs-border-color) !important;
   border-bottom: var(--bs-border-width) var(--bs-border-style) var(--bs-border-color) !important;
+}
+
+.toc-header .toc-collapse[data-ae-present]:not([hidden]) {
+  display: grid;
 }
 
 @media (min-width:992px) {
@@ -213,7 +249,14 @@ body:after {
   }
 
   .toc-header .toc-collapse {
+    --ae-pop-duration: 0ms;
+    --ae-unpop-duration: 0ms;
     display: block !important;
+    transition: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+    max-height: none !important;
+    grid-template-rows: 1fr !important;
     position: absolute !important;
     width: 250px;
     top: 0;

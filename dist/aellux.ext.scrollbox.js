@@ -1077,11 +1077,15 @@
         endPointerScroll(state);
         return;
       }
+      const previousAxis = pointerScroll.axis;
       if (!pointerScroll.axis)
         pointerScroll.axis = Math.abs(dx) >= Math.abs(dy) ? "x" : "y";
       const chain = pointerScroll.chains[pointerScroll.axis];
       const threshold = !pointerScroll.moved && chain.some((member) => !member.disposed && pointerAxisMaximum(member, pointerScroll.axis, pointerScroll) > 0 && !dispatchSnapGesture(member, "probe", pointerScroll)) ? 1 : POINTER_SCROLL_THRESHOLD_PX;
-      if (!pointerScroll.moved && dx * dx + dy * dy < threshold * threshold) return;
+      if (!pointerScroll.moved && dx * dx + dy * dy < threshold * threshold) {
+        pointerScroll.axis = previousAxis;
+        return;
+      }
       const verticalTextDrag = pointerScroll.verticalOnly && pointerScroll.axis === "y" && Math.abs(dy) > VERTICAL_TEXT_DRAG_PX;
       if (!pointerScroll.moved && now() < pointerScroll.selectionReadyTime && !verticalTextDrag) {
         pointerScroll.pendingMove = { x: event.clientX, y: event.clientY };

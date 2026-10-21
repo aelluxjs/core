@@ -74,29 +74,6 @@
     }
   );
 
-  document.addEventListener("click",
-    (e) => {
-      const link = e.target?.closest?.("a[href]");
-      const any = e.target?.closest?.("[data-bs-toggle][data-bs-continue]");
-      if (any && !link) return;
-      const el = document.querySelector("[data-bs-toggle][data-bs-autohide=true][aria-expanded=true]");
-      if (el) closeNavbar(el);
-    }
-  );
-
-  function closeNavbar(bsToggler) {
-    const targetSelector = bsToggler.getAttribute('data-bs-target') ||
-      (bsToggler.getAttribute('aria-controls') ? `#${bsToggler.getAttribute('aria-controls')}` : null);
-    const bsCollapse = targetSelector ? document.querySelector(targetSelector) : null;
-
-    // 2. If open, remove the 'show' class to hide it
-    if (bsCollapse?.classList.contains('show')) {
-      bsCollapse.classList.remove('show');
-      // 3. Update ARIA state to false
-      bsToggler.setAttribute('aria-expanded', 'false');
-    }
-  }
-
   function comparableUrl(value) {
     const url = new URL(value, window.location.href);
     return `${url.origin}${url.pathname}${url.search}`;
@@ -114,16 +91,11 @@
   }
 
   function openAllParentCollapses(element) {
-    let collapse = element.closest(".collapse:not(.show)");
+    let collapse = element.closest(".docs-menu-panel");
 
     while (collapse) {
-      if (collapse.id && collapse.getAttribute('data-bs-parent')) {
-        const selector = `[data-bs-toggle][data-bs-target="#${collapse.id}"]`;
-        const button = document.querySelector(selector);
-        button.click();
-      }
-
-      collapse = collapse.parentElement?.closest(".collapse:not(.show)");
+      AelluxJs(collapse).present.toggle(true);
+      collapse = collapse.parentElement?.closest(".docs-menu-panel");
     }
   }
 

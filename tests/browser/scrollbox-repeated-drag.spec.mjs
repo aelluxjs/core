@@ -7,6 +7,44 @@ test.beforeEach(async ({ page }) => {
   await page.waitForFunction(() => window.AelluxJs?.ext.scrollboxSnap?.initialized);
 });
 
+for (const edge of ["start", "end"]) for (const delay of [0, 16, 100]) {
+  test(`elastic ${edge} re-grab tolerates initial cross-axis jitter after ${delay}ms`, async ({ page }) => {
+    const gallery = page.locator('[data-scenario="elastic"]');
+    await expect(gallery).toHaveClass(/ae--snap-ready/);
+    await gallery.scrollIntoViewIfNeeded();
+    await gallery.evaluate((element, edge) => element.scrollTo({
+      left: edge === "start" ? 0 : element.scrollWidth, behavior: "instant"
+    }), edge);
+    const rect = await gallery.boundingBox();
+    const direction = edge === "start" ? 1 : -1;
+    const x = rect.x + (edge === "start" ? 120 : 380), y = rect.y + 140;
+    await page.mouse.move(x, y);
+    await page.mouse.down();
+    const nextX = x + direction * 75;
+    await page.mouse.move(nextX, y, { steps: 2 });
+    await page.mouse.up();
+    await expect(gallery.locator(".track")).toHaveClass(/ae--scrollbox-elastic-release/);
+    await page.waitForTimeout(delay);
+    await page.mouse.down({ clickCount: 2 });
+    await expect(gallery.locator(".track")).not.toHaveClass(/ae--scrollbox-elastic-release/);
+    expect(await gallery.locator(".track").evaluate(element => element.style.transform)).toBe("");
+    const start = await gallery.evaluate(element => element.scrollLeft);
+    // Hand jitter before the horizontal movement must not choose a vertical
+    // gesture that this horizontal-only Scrollbox cannot consume.
+    await page.mouse.move(nextX, y + 1);
+    expect(await gallery.evaluate(element => element.scrollLeft)).toBe(start);
+    await page.mouse.move(nextX - direction * 10, y);
+    expect(await gallery.evaluate(element => element.scrollLeft)).toBe(start + direction * 10);
+    await expect(gallery).toHaveClass(/ae--pointerscrolling/);
+    await expect(gallery).toHaveCSS("cursor", "grabbing");
+    await page.waitForTimeout(80);
+    expect(await gallery.evaluate(element => element.scrollLeft)).toBe(start + direction * 10);
+    await page.mouse.up();
+    await expect(gallery).not.toHaveClass(/ae--pointerscrolling/);
+    await expect.poll(() => gallery.evaluate(element => getComputedStyle(element).scrollSnapType)).toBe("x mandatory");
+  });
+}
+
 for (const [key, scenario] of [
   ["elastic", "with elastic"],
   ["plain", "without elastic"],
