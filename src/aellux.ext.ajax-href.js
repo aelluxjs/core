@@ -1,5 +1,31 @@
 /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
 
+/**
+ * Ajax Href Extension
+ *
+ * Purpose: replaces selected page regions with matching content from an HTML
+ * response and coordinates their unmount and mount lifecycle.
+ *
+ * Capability profile: asynchronous content navigation with optional history
+ * and feedback integration.
+ *
+ * Inputs and activation: Full initializes lazily for a[data-ae-ajax-href]. The
+ * attribute accepts a CSS selector list; load(url, selectors, options) also
+ * accepts selector arrays. Click interception handles eligible same-origin links.
+ *
+ * Outputs and owned state: replaces the first match for each selector, preserves
+ * regions missing from the response, and emits AjaxHref lifecycle events. It
+ * requests history and title updates and publishes optional busy/progress feedback.
+ *
+ * Lifecycle: a new request aborts the previous one when supported. Snapshot
+ * restoration reloads recorded regions without pushing history. Destruction
+ * removes listeners and aborts the pending request.
+ *
+ * Accessibility: keeps native anchor behavior for modified clicks, fragments,
+ * downloads and other excluded links. Applications must provide useful hrefs
+ * and manage focus and announcements after content replacement.
+ */
+
 (function (root) {
   "use strict";
 

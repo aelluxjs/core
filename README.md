@@ -54,6 +54,7 @@ See [Getting Started](docs-source/0.1.0/getting-started.md) for build instructio
 - [Runtime and Extension events](docs-source/0.1.0/runtime/events.md)
 - [Layout scheduling with `waitLayout`](docs-source/0.1.0/runtime/wait-layout.md)
 - [Diagnostics](docs-source/0.1.0/runtime/diagnostics.md)
+- [VS Code and JetBrains editor support](docs-source/0.1.0/integrations/editor-tooling.md)
 - [Modern and Legacy runtimes](docs-source/0.1.0/runtime/modern-legacy.md)
 - [Browser support baseline](docs-source/0.1.0/runtime/browser-support.md)
 - [ES5 support level](docs-source/0.1.0/runtime/es5-support.md)

@@ -1,0 +1,1032 @@
+{
+  "$schema": "https://raw.githubusercontent.com/microsoft/vscode-html-languageservice/main/docs/customData.schema.json",
+  "version": 1.1,
+  "globalAttributes": [
+    {
+      "name": "data-ae-adaptive",
+      "description": "Publishes size and shape classes, dimensions and orientation using the Extension's adaptiveParams thresholds.\n\nValue syntax: presence.",
+      "references": [
+        {
+          "name": "AelluxJS adaptive",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/adaptive.htm"
+        }
+      ],
+      "valueSet": "v"
+    },
+    {
+      "name": "data-ae-anchor",
+      "description": "Comma-separated target-pivot:self-pivot candidates. Pivots: top-left, top-center, top-right, center-left, center, center-right, bottom-left, bottom-center, bottom-right.\n\nValue syntax: pivot-list.\n\nExamples: `bottom-left:top-left, top-left:bottom-left`.\n\nSuggested values: `bottom-left:top-left`, `bottom-center:top-center`, `bottom-right:top-right`, `top-left:bottom-left`, `center:center`. This is an open grammar, not a closed enumeration.",
+      "references": [
+        {
+          "name": "AelluxJS anchor",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/anchor.htm"
+        }
+      ],
+      "values": [
+        {
+          "name": "bottom-left:top-left"
+        },
+        {
+          "name": "bottom-center:top-center"
+        },
+        {
+          "name": "bottom-right:top-right"
+        },
+        {
+          "name": "top-left:bottom-left"
+        },
+        {
+          "name": "center:center"
+        }
+      ]
+    },
+    {
+      "name": "data-ae-anchor-match",
+      "description": "Match the target's width and/or height through weak CSS. Empty and unknown tokens are invalid; application sizing can override the match.\n\nValue syntax: token-list.\n\nSuggested values: `width`, `height`, `width height`. This is an open grammar, not a closed enumeration.",
+      "references": [
+        {
+          "name": "AelluxJS anchor",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/anchor.htm"
+        }
+      ],
+      "values": [
+        {
+          "name": "width"
+        },
+        {
+          "name": "height"
+        },
+        {
+          "name": "width height"
+        }
+      ]
+    },
+    {
+      "name": "data-ae-anchor-target",
+      "description": "Target ID or CSS selector. Empty uses offsetParent. Target and Anchor must share a positioning reference; an associated Present Group takes precedence.\n\nValue syntax: selector.\n\nDefault behavior: \"\".\n\nExamples: `menu-trigger`, `#menu-trigger`.",
+      "references": [
+        {
+          "name": "AelluxJS anchor",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/anchor.htm"
+        }
+      ],
+      "values": [
+        {
+          "name": "menu-trigger"
+        },
+        {
+          "name": "#menu-trigger"
+        }
+      ]
+    },
+    {
+      "name": "data-ae-auto-unpop",
+      "description": "Automatically closes after the specified nonnegative duration. Values use milliseconds by default, or ms/s units.\n\nValue syntax: duration.\n\nExamples: `250ms`, `2s`.",
+      "references": [
+        {
+          "name": "AelluxJS present",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/present.htm"
+        }
+      ],
+      "values": [
+        {
+          "name": "250ms"
+        },
+        {
+          "name": "2s"
+        }
+      ]
+    },
+    {
+      "name": "data-ae-dismiss",
+      "description": "Closes one Present ID, optionally prefixed with #. Empty uses data-ae-target or the closest Present ancestor.\n\nValue syntax: id.\n\nDefault behavior: \"\".\n\nExamples: `details`.",
+      "references": [
+        {
+          "name": "AelluxJS present",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/present.htm"
+        }
+      ],
+      "values": [
+        {
+          "name": "details"
+        }
+      ]
+    },
+    {
+      "name": "data-ae-feedback",
+      "description": "Feedback boundary. Empty accepts all types; whitespace-separated types filter handled feedback and stop matching events from bubbling further.\n\nValue syntax: token-list.\n\nSuggested values: ``, `warning`, `error`, `success`, `announce`, `busy`, `progress`, `validate`, `warning error success`. This is an open grammar, not a closed enumeration.",
+      "references": [
+        {
+          "name": "AelluxJS feedback",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/feedback.htm"
+        }
+      ],
+      "values": [
+        {
+          "name": ""
+        },
+        {
+          "name": "warning"
+        },
+        {
+          "name": "error"
+        },
+        {
+          "name": "success"
+        },
+        {
+          "name": "announce"
+        },
+        {
+          "name": "busy"
+        },
+        {
+          "name": "progress"
+        },
+        {
+          "name": "validate"
+        },
+        {
+          "name": "warning error success"
+        }
+      ]
+    },
+    {
+      "name": "data-ae-focus",
+      "description": "Enter navigation on a text-entry control. Next supplies enterkeyhint when absent and focuses the next available control.\n\nValue syntax: enum.",
+      "references": [
+        {
+          "name": "AelluxJS focus",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/focus.htm"
+        }
+      ],
+      "values": [
+        {
+          "name": "next"
+        }
+      ]
+    },
+    {
+      "name": "data-ae-label",
+      "description": "Shown when this value matches the enclosing preference; otherwise hidden. It does not copy text into another element.\n\nValue syntax: string.\n\nExamples: `auto`, `light`, `dark`.",
+      "references": [
+        {
+          "name": "AelluxJS preference",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/preference.htm"
+        }
+      ],
+      "values": [
+        {
+          "name": "auto"
+        },
+        {
+          "name": "light"
+        },
+        {
+          "name": "dark"
+        }
+      ]
+    },
+    {
+      "name": "data-ae-maxfps",
+      "description": "Optional layout update ceiling on this element. Must be a finite number greater than zero; no attribute means the shared scheduler cadence.\n\nValue syntax: number.\n\nExamples: `20`, `40`, `60`.",
+      "references": [
+        {
+          "name": "AelluxJS core",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.0/runtime/wait-layout.htm"
+        }
+      ],
+      "values": [
+        {
+          "name": "20"
+        },
+        {
+          "name": "40"
+        },
+        {
+          "name": "60"
+        }
+      ]
+    },
+    {
+      "name": "data-ae-next",
+      "description": "Cycles forward through the enclosing preference's built-in values; use a keyboard-operable control.\n\nValue syntax: presence.",
+      "references": [
+        {
+          "name": "AelluxJS preference",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/preference.htm"
+        }
+      ],
+      "valueSet": "v"
+    },
+    {
+      "name": "data-ae-option",
+      "description": "Sets a value of the enclosing preference. Values depend on that preference; application-defined values remain possible.\n\nValue syntax: string.\n\nSuggested values: `auto`, `light`, `dark`, `no-preference`, `more`, `less`, `reduced`, `active`, `on`, `off`, `low`, `1`, `1.5`, `0.8`. This is an open grammar, not a closed enumeration.",
+      "references": [
+        {
+          "name": "AelluxJS preference",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/preference.htm"
+        }
+      ],
+      "values": [
+        {
+          "name": "auto"
+        },
+        {
+          "name": "light"
+        },
+        {
+          "name": "dark"
+        },
+        {
+          "name": "no-preference"
+        },
+        {
+          "name": "more"
+        },
+        {
+          "name": "less"
+        },
+        {
+          "name": "reduced"
+        },
+        {
+          "name": "active"
+        },
+        {
+          "name": "on"
+        },
+        {
+          "name": "off"
+        },
+        {
+          "name": "low"
+        },
+        {
+          "name": "1"
+        },
+        {
+          "name": "1.5"
+        },
+        {
+          "name": "0.8"
+        }
+      ]
+    },
+    {
+      "name": "data-ae-point",
+      "description": "Maximum simultaneously associated pointers. Empty defaults to 1; a nonnegative integer is expected, and 0 disables association.\n\nValue syntax: integer.\n\nDefault behavior: \"1\".\n\nExamples: `0`, `1`, `2`.",
+      "references": [
+        {
+          "name": "AelluxJS point",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/point.htm"
+        }
+      ],
+      "values": [
+        {
+          "name": "0"
+        },
+        {
+          "name": "1"
+        },
+        {
+          "name": "2"
+        }
+      ]
+    },
+    {
+      "name": "data-ae-preference",
+      "description": "Preference controlled by descendant option/label/next/previous controls. CamelCase and kebab-case preference names are accepted.\n\nValue syntax: string.\n\nSuggested values: `colorScheme`, `contrast`, `reducedMotion`, `reducedTransparency`, `forcedColors`, `textScale`, `interfaceScale`, `extendedTiming`, `largeTargets`, `haptics`, `sound`, `color-scheme`, `reduced-motion`, `reduced-transparency`, `forced-colors`, `text-scale`, `interface-scale`, `extended-timing`, `large-targets`. This is an open grammar, not a closed enumeration.",
+      "references": [
+        {
+          "name": "AelluxJS preference",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/preference.htm"
+        }
+      ],
+      "values": [
+        {
+          "name": "colorScheme"
+        },
+        {
+          "name": "contrast"
+        },
+        {
+          "name": "reducedMotion"
+        },
+        {
+          "name": "reducedTransparency"
+        },
+        {
+          "name": "forcedColors"
+        },
+        {
+          "name": "textScale"
+        },
+        {
+          "name": "interfaceScale"
+        },
+        {
+          "name": "extendedTiming"
+        },
+        {
+          "name": "largeTargets"
+        },
+        {
+          "name": "haptics"
+        },
+        {
+          "name": "sound"
+        },
+        {
+          "name": "color-scheme"
+        },
+        {
+          "name": "reduced-motion"
+        },
+        {
+          "name": "reduced-transparency"
+        },
+        {
+          "name": "forced-colors"
+        },
+        {
+          "name": "text-scale"
+        },
+        {
+          "name": "interface-scale"
+        },
+        {
+          "name": "extended-timing"
+        },
+        {
+          "name": "large-targets"
+        }
+      ]
+    },
+    {
+      "name": "data-ae-present",
+      "description": "Present container. Empty disables motion; all expands to opacity transform height width. Property tokens are whitespace-separated.\n\nValue syntax: token-list.\n\nDefault behavior: \"\".\n\nSuggested values: ``, `all`, `opacity`, `transform`, `height`, `width`, `opacity transform`, `opacity transform height width`. This is an open grammar, not a closed enumeration.",
+      "references": [
+        {
+          "name": "AelluxJS present",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/present.htm"
+        }
+      ],
+      "values": [
+        {
+          "name": ""
+        },
+        {
+          "name": "all"
+        },
+        {
+          "name": "opacity"
+        },
+        {
+          "name": "transform"
+        },
+        {
+          "name": "height"
+        },
+        {
+          "name": "width"
+        },
+        {
+          "name": "opacity transform"
+        },
+        {
+          "name": "opacity transform height width"
+        }
+      ]
+    },
+    {
+      "name": "data-ae-present-active",
+      "description": "Selected member's native ID, without #. An empty value selects no member. Invalid or ambiguous selection preserves the previous selection.\n\nValue syntax: id.\n\nDefault behavior: \"\".\n\nExamples: `details`.",
+      "references": [
+        {
+          "name": "AelluxJS present",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/present.htm"
+        }
+      ],
+      "values": [
+        {
+          "name": "details"
+        }
+      ]
+    },
+    {
+      "name": "data-ae-present-group",
+      "description": "Coordinates nested Present members by their native IDs. Nested groups own their own members.\n\nValue syntax: presence.",
+      "references": [
+        {
+          "name": "AelluxJS present",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/present.htm"
+        }
+      ],
+      "valueSet": "v"
+    },
+    {
+      "name": "data-ae-present-group-anchor",
+      "description": "One Anchor ID, optionally prefixed with #. The associated Anchor follows this group's selected member; requires Anchor.\n\nValue syntax: id.\n\nExamples: `selection-outline`.",
+      "references": [
+        {
+          "name": "AelluxJS present",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/present.htm"
+        }
+      ],
+      "values": [
+        {
+          "name": "selection-outline"
+        }
+      ]
+    },
+    {
+      "name": "data-ae-present-motion",
+      "description": "Direct content child of a Present container; enables grid-based size transitions. Put hidden on the container.\n\nValue syntax: presence.",
+      "references": [
+        {
+          "name": "AelluxJS present",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/present.htm"
+        }
+      ],
+      "valueSet": "v"
+    },
+    {
+      "name": "data-ae-present-when",
+      "description": "One class token on the Present Group that selects this member when no explicit active attribute is present.\n\nValue syntax: class-token.\n\nExamples: `show-details`.",
+      "references": [
+        {
+          "name": "AelluxJS present",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/present.htm"
+        }
+      ],
+      "values": [
+        {
+          "name": "show-details"
+        }
+      ]
+    },
+    {
+      "name": "data-ae-prev",
+      "description": "Cycles backward through the enclosing preference's built-in values; use a keyboard-operable control.\n\nValue syntax: presence.",
+      "references": [
+        {
+          "name": "AelluxJS preference",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/preference.htm"
+        }
+      ],
+      "valueSet": "v"
+    },
+    {
+      "name": "data-ae-scrollbar",
+      "description": "Custom scrollbars. Empty enables both; none hides native bars without creating custom bars. Axis tokens and aliases can be combined.\n\nValue syntax: token-list.\n\nSuggested values: ``, `vertical`, `horizontal`, `vertical horizontal`, `v h`, `y x`, `none`. This is an open grammar, not a closed enumeration.",
+      "references": [
+        {
+          "name": "AelluxJS scrollbox",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/scrollbox.htm"
+        }
+      ],
+      "values": [
+        {
+          "name": ""
+        },
+        {
+          "name": "vertical"
+        },
+        {
+          "name": "horizontal"
+        },
+        {
+          "name": "vertical horizontal"
+        },
+        {
+          "name": "v h"
+        },
+        {
+          "name": "y x"
+        },
+        {
+          "name": "none"
+        }
+      ]
+    },
+    {
+      "name": "data-ae-scrollbar-horizontal",
+      "description": "Horizontal custom bar, created automatically or reused when supplied as a direct child of Scrollbox.\n\nValue syntax: presence.",
+      "references": [
+        {
+          "name": "AelluxJS scrollbox",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/scrollbox.htm"
+        }
+      ],
+      "valueSet": "v"
+    },
+    {
+      "name": "data-ae-scrollbar-vertical",
+      "description": "Vertical custom bar, created automatically or reused when supplied as a direct child of Scrollbox.\n\nValue syntax: presence.",
+      "references": [
+        {
+          "name": "AelluxJS scrollbox",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/scrollbox.htm"
+        }
+      ],
+      "valueSet": "v"
+    },
+    {
+      "name": "data-ae-scrollbox",
+      "description": "Native scrolling with progress state. Pointer mode adds desktop mouse/pen drag scrolling; it requires usable overflow.\n\nValue syntax: enum.\n\nDefault behavior: \"native\".",
+      "references": [
+        {
+          "name": "AelluxJS scrollbox",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/scrollbox.htm"
+        }
+      ],
+      "values": [
+        {
+          "name": ""
+        },
+        {
+          "name": "native"
+        },
+        {
+          "name": "pointer"
+        }
+      ]
+    },
+    {
+      "name": "data-ae-scrollbox-elastic",
+      "description": "Mark exactly one direct content child. Empty uses 1/4; one or two nonnegative fractions or px values set vertical/horizontal limits. False disables elastic behavior.\n\nValue syntax: elastic-limits.\n\nDefault behavior: \"1/4\".\n\nSuggested values: ``, `false`, `1/4`, `80px`, `80px 40px`. This is an open grammar, not a closed enumeration.",
+      "references": [
+        {
+          "name": "AelluxJS scrollbox",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/scrollbox.htm"
+        }
+      ],
+      "values": [
+        {
+          "name": ""
+        },
+        {
+          "name": "false"
+        },
+        {
+          "name": "1/4"
+        },
+        {
+          "name": "80px"
+        },
+        {
+          "name": "80px 40px"
+        }
+      ]
+    },
+    {
+      "name": "data-ae-scrollbox-momentum",
+      "description": "Set false to disable desktop pointer momentum. Snap disables momentum on every axis.\n\nValue syntax: enum.\n\nDefault behavior: \"true\".",
+      "references": [
+        {
+          "name": "AelluxJS scrollbox",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/scrollbox.htm"
+        }
+      ],
+      "values": [
+        {
+          "name": "true"
+        },
+        {
+          "name": "false"
+        }
+      ]
+    },
+    {
+      "name": "data-ae-scrollbox-snap",
+      "description": "Snap axis on an element that also declares Scrollbox. Empty is horizontal; false disables Snap. Snap loads the Scrollbox dependency itself.\n\nValue syntax: enum.\n\nDefault behavior: \"horizontal\".",
+      "references": [
+        {
+          "name": "AelluxJS scrollbox-snap",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/scrollbox-snap.htm"
+        }
+      ],
+      "values": [
+        {
+          "name": ""
+        },
+        {
+          "name": "horizontal"
+        },
+        {
+          "name": "vertical"
+        },
+        {
+          "name": "false"
+        }
+      ]
+    },
+    {
+      "name": "data-ae-scrollbox-wheel-horizontal",
+      "description": "Set false to disable vertical-wheel conversion to horizontal scrolling.\n\nValue syntax: enum.\n\nDefault behavior: \"true\".",
+      "references": [
+        {
+          "name": "AelluxJS scrollbox",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/scrollbox.htm"
+        }
+      ],
+      "values": [
+        {
+          "name": "true"
+        },
+        {
+          "name": "false"
+        }
+      ]
+    },
+    {
+      "name": "data-ae-snap-item",
+      "description": "Snap alignment for an item belonging to the nearest Scrollbox. Left/top alias start; right/bottom alias end; empty is center.\n\nValue syntax: enum.\n\nDefault behavior: \"center\".",
+      "references": [
+        {
+          "name": "AelluxJS scrollbox-snap",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/scrollbox-snap.htm"
+        }
+      ],
+      "values": [
+        {
+          "name": ""
+        },
+        {
+          "name": "start"
+        },
+        {
+          "name": "center"
+        },
+        {
+          "name": "end"
+        },
+        {
+          "name": "left"
+        },
+        {
+          "name": "right"
+        },
+        {
+          "name": "top"
+        },
+        {
+          "name": "bottom"
+        }
+      ]
+    },
+    {
+      "name": "data-ae-target",
+      "description": "One Present target ID, optionally prefixed with #; CSS selector lists are not accepted.\n\nValue syntax: id.\n\nExamples: `details`, `#details`.",
+      "references": [
+        {
+          "name": "AelluxJS present",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/present.htm"
+        }
+      ],
+      "values": [
+        {
+          "name": "details"
+        },
+        {
+          "name": "#details"
+        }
+      ]
+    },
+    {
+      "name": "data-ae-target-message",
+      "description": "One element ID, optionally prefixed with #, receiving message text. Empty uses the boundary itself.\n\nValue syntax: id.\n\nDefault behavior: \"\".\n\nExamples: `status-message`.",
+      "references": [
+        {
+          "name": "AelluxJS feedback",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/feedback.htm"
+        }
+      ],
+      "values": [
+        {
+          "name": "status-message"
+        }
+      ]
+    },
+    {
+      "name": "data-ae-target-transform",
+      "description": "One element ID, optionally prefixed with #, receiving feedback classes and motion. Empty uses the boundary itself.\n\nValue syntax: id.\n\nDefault behavior: \"\".\n\nExamples: `status-icon`.",
+      "references": [
+        {
+          "name": "AelluxJS feedback",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/feedback.htm"
+        }
+      ],
+      "values": [
+        {
+          "name": "status-icon"
+        }
+      ]
+    },
+    {
+      "name": "data-ae-trigger",
+      "description": "Present action. Target is one native ID, or the closest Present ancestor when omitted. Prefer a native button for keyboard activation.\n\nValue syntax: enum.\n\nDefault behavior: \"toggle\".",
+      "references": [
+        {
+          "name": "AelluxJS present",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/present.htm"
+        }
+      ],
+      "values": [
+        {
+          "name": ""
+        },
+        {
+          "name": "toggle"
+        },
+        {
+          "name": "pop"
+        },
+        {
+          "name": "unpop"
+        }
+      ]
+    },
+    {
+      "name": "data-ae-trigger-on",
+      "description": "Use hover for delegated pointer hover opening/closing. Touch and keyboard activation keep click behavior.\n\nValue syntax: enum.\n\nDefault behavior: \"click\".",
+      "references": [
+        {
+          "name": "AelluxJS present",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/present.htm"
+        }
+      ],
+      "values": [
+        {
+          "name": ""
+        },
+        {
+          "name": "click"
+        },
+        {
+          "name": "hover"
+        }
+      ]
+    },
+    {
+      "name": "data-ae-unpop-on-outside",
+      "description": "Set false to keep a Present region open when clicking outside it.\n\nValue syntax: enum.\n\nDefault behavior: \"true\".",
+      "references": [
+        {
+          "name": "AelluxJS present",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/present.htm"
+        }
+      ],
+      "values": [
+        {
+          "name": "true"
+        },
+        {
+          "name": "false"
+        }
+      ]
+    },
+    {
+      "name": "data-ae-wait-mounted",
+      "description": "Keeps the element hidden until mounting completes and exposes aria-busy during the attempt.\n\nValue syntax: presence.",
+      "references": [
+        {
+          "name": "AelluxJS core",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.0/runtime/visual-mounting.htm"
+        }
+      ],
+      "valueSet": "v"
+    }
+  ],
+  "tags": [
+    {
+      "name": "a",
+      "attributes": [
+        {
+          "name": "data-ae-ajax-href",
+          "description": "CSS selectors for regions replaced from a same-origin HTML response. Each selector uses its first match; current and response documents must contain the region.\n\nValue syntax: selector-list.\n\nExamples: `title,#content`.",
+          "references": [
+            {
+              "name": "AelluxJS ajax-href",
+              "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/ajax-href.htm"
+            }
+          ],
+          "values": [
+            {
+              "name": "title,#content"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "html",
+      "attributes": [
+        {
+          "name": "data-ae-color-scheme",
+          "description": "Resolved root preference published by the runtime. Use in CSS selectors; configure choices through Preference.\n\nRuntime output; read it in selectors/styles instead of using it as an activation command.\n\nValue syntax: enum.",
+          "references": [
+            {
+              "name": "AelluxJS preference",
+              "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/preference.htm"
+            }
+          ],
+          "values": [
+            {
+              "name": "light"
+            },
+            {
+              "name": "dark"
+            }
+          ]
+        },
+        {
+          "name": "data-ae-contrast",
+          "description": "Resolved root preference published by the runtime. Use in CSS selectors; configure choices through Preference.\n\nRuntime output; read it in selectors/styles instead of using it as an activation command.\n\nValue syntax: enum.",
+          "references": [
+            {
+              "name": "AelluxJS preference",
+              "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/preference.htm"
+            }
+          ],
+          "values": [
+            {
+              "name": "no-preference"
+            },
+            {
+              "name": "more"
+            },
+            {
+              "name": "less"
+            }
+          ]
+        },
+        {
+          "name": "data-ae-forced-colors",
+          "description": "Resolved root preference published by the runtime. Use in CSS selectors; configure choices through Preference.\n\nRuntime output; read it in selectors/styles instead of using it as an activation command.\n\nValue syntax: enum.",
+          "references": [
+            {
+              "name": "AelluxJS preference",
+              "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/preference.htm"
+            }
+          ],
+          "values": [
+            {
+              "name": "no-preference"
+            },
+            {
+              "name": "active"
+            }
+          ]
+        },
+        {
+          "name": "data-ae-low-hardware",
+          "description": "Presence on html enables stepped Present easing for lower-cost motion.\n\nValue syntax: presence.",
+          "references": [
+            {
+              "name": "AelluxJS present",
+              "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/present.htm"
+            }
+          ],
+          "valueSet": "v"
+        },
+        {
+          "name": "data-ae-reduced-motion",
+          "description": "Resolved root preference published by the runtime. Use in CSS selectors; configure choices through Preference.\n\nRuntime output; read it in selectors/styles instead of using it as an activation command.\n\nValue syntax: enum.",
+          "references": [
+            {
+              "name": "AelluxJS preference",
+              "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/preference.htm"
+            }
+          ],
+          "values": [
+            {
+              "name": "no-preference"
+            },
+            {
+              "name": "reduced"
+            }
+          ]
+        },
+        {
+          "name": "data-ae-reduced-transparency",
+          "description": "Resolved root preference published by the runtime. Use in CSS selectors; configure choices through Preference.\n\nRuntime output; read it in selectors/styles instead of using it as an activation command.\n\nValue syntax: enum.",
+          "references": [
+            {
+              "name": "AelluxJS preference",
+              "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/preference.htm"
+            }
+          ],
+          "values": [
+            {
+              "name": "no-preference"
+            },
+            {
+              "name": "reduced"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "link",
+      "attributes": [
+        {
+          "name": "data-ae-builds",
+          "description": "Available Extension builds on a declarative link; space/comma-separated modern and legacy tokens. Omitted promises both.\n\nValue syntax: token-list.\n\nSuggested values: `modern`, `legacy`, `modern legacy`. This is an open grammar, not a closed enumeration.",
+          "references": [
+            {
+              "name": "AelluxJS core",
+              "url": "https://aelluxjs.github.io/core/docs/0.1.0/extensions/declarative-loading.htm"
+            }
+          ],
+          "values": [
+            {
+              "name": "modern"
+            },
+            {
+              "name": "legacy"
+            },
+            {
+              "name": "modern legacy"
+            }
+          ]
+        },
+        {
+          "name": "data-ae-load-style",
+          "description": "On a declarative link, presence/true requests the associated stylesheet, a URL selects a stylesheet, and false disables it. Omission does not request CSS.\n\nValue syntax: string.\n\nSuggested values: ``, `true`, `false`. This is an open grammar, not a closed enumeration.",
+          "references": [
+            {
+              "name": "AelluxJS core",
+              "url": "https://aelluxjs.github.io/core/docs/0.1.0/extensions/declarative-loading.htm"
+            }
+          ],
+          "values": [
+            {
+              "name": ""
+            },
+            {
+              "name": "true"
+            },
+            {
+              "name": "false"
+            }
+          ]
+        },
+        {
+          "name": "data-ae-load-when",
+          "description": "Nonempty CSS selector activating lazy Extension loading on a declarative link.\n\nValue syntax: selector.\n\nExamples: `[data-ae-present]`.",
+          "references": [
+            {
+              "name": "AelluxJS core",
+              "url": "https://aelluxjs.github.io/core/docs/0.1.0/extensions/declarative-loading.htm"
+            }
+          ],
+          "values": [
+            {
+              "name": "[data-ae-present]"
+            }
+          ]
+        },
+        {
+          "name": "rel",
+          "description": "Registers an Aellux Extension declared by this link. href is an official name or compatible Extension URL; data-ae-load-when enables lazy loading.\n\nValue syntax: string.\n\nSuggested values: `aelluxjs-ext`. This is an open grammar, not a closed enumeration.",
+          "references": [
+            {
+              "name": "AelluxJS core",
+              "url": "https://aelluxjs.github.io/core/docs/0.1.0/extensions/declarative-loading.htm"
+            }
+          ],
+          "values": [
+            {
+              "name": "aelluxjs-ext"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "meta",
+      "attributes": [
+        {
+          "name": "data-ae-theme-color",
+          "description": "Marker on the runtime-managed theme-color meta tag.\n\nRuntime output; read it in selectors/styles instead of using it as an activation command.\n\nValue syntax: presence.",
+          "references": [
+            {
+              "name": "AelluxJS core",
+              "url": "https://aelluxjs.github.io/core/docs/0.1.0/runtime/api.htm"
+            }
+          ],
+          "valueSet": "v"
+        }
+      ]
+    }
+  ],
+  "valueSets": [
+    {
+      "name": "v",
+      "values": []
+    }
+  ]
+}

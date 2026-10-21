@@ -22,6 +22,7 @@
     "url": "git+https://github.com/aelluxjs/core.git"
   },
   "type": "module",
+  "web-types": "./dist/aellux.web-types.json",
   "exports": {
     ".": {
       "import": "./dist/aellux.esm.js",
@@ -33,6 +34,10 @@
     "./full/legacy": "./dist/aellux.full.legacy.js",
     "./orchestrator": "./dist/aellux.orchestrator.js",
     "./orchestrator/legacy": "./dist/aellux.orchestrator.legacy.js",
+    "./semantic": "./dist/aellux.semantic.json",
+    "./html-data": "./dist/aellux.html-data.json",
+    "./css-data": "./dist/aellux.css-data.json",
+    "./web-types": "./dist/aellux.web-types.json",
     "./dist/*": "./dist/*"
   },
   "files": [
@@ -47,6 +52,7 @@
     "build": "npm run build:core && npm run build:docs",
     "build:core": "node scripts/build-core.mjs",
     "build:docs": "node scripts/build-docs.mjs",
+    "build:editor-data": "node scripts/build-editor-data.mjs",
     "test:budget": "node scripts/check-bundle-budget.mjs",
     "test:unit": "node --test tests/unit/*.test.mjs",
     "pretest:browser": "npm run build:core",
@@ -67,6 +73,7 @@
     "core-js": "^3.50.0",
     "custom-event-polyfill": "^1.0.7",
     "esbuild": "^0.25.0",
+    "jsonschema": "^1.5.0",
     "raf": "^3.4.1",
     "terser": "^5.51.2",
     "whatwg-fetch": "^3.6.20"

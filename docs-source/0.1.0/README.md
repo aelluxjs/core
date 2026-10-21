@@ -48,6 +48,7 @@ Add aellux.js to a page and enable the Extensions it needs. The library coordina
 - [Visual mounting states](runtime/visual-mounting.md)
 - [Diagnostics](runtime/diagnostics.md)
 - [Bootstrap integration](integrations/bootstrap.md)
+- [VS Code Custom Data and JetBrains Web Types](integrations/editor-tooling.md)
 
 ## Extensions
 
@@ -63,6 +64,7 @@ Add aellux.js to a page and enable the Extensions it needs. The library coordina
 ## Core Extensions
 
 - [Adaptive](core-extensions/adaptive.md)
+- [Ajax Href](core-extensions/ajax-href.md)
 - [Anchor](core-extensions/anchor.md)
 - [Feedback](core-extensions/feedback.md)
 - [Focus](core-extensions/focus.md)

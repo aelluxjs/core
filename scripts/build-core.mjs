@@ -15,6 +15,7 @@ import { generateFeedbackCSS } from "../src/aellux.ext.feedback.css.js";
 import { officialExtensionDefinitions } from "../src/official-extension-definitions.js";
 import { createOfficialExtensionManifest } from "./extension-manifest.mjs";
 import { normalizeSourceMapText } from "./normalize-source-map.mjs";
+import { buildEditorData } from "./build-editor-data.mjs";
 
 const projectRoot = fileURLToPath(new URL("../", import.meta.url));
 const sourceDirectory = join(projectRoot, "src");
@@ -408,6 +409,7 @@ await writeFile(join(outputDirectory, "README.md"), distributionReadme, "utf8");
 await copyFile(join(projectRoot, "LICENSE"), join(outputDirectory, "LICENSE"));
 await copyFile(join(projectRoot, "THIRD_PARTY_LICENSES.md"), join(outputDirectory, "THIRD_PARTY_LICENSES.md"));
 await cp(join(projectRoot, "third-party", "licenses"), join(outputDirectory, "third-party", "licenses"), { recursive: true });
+await buildEditorData();
 const generatedJavaScriptFiles = Array.from(generatedFiles)
   .filter(filename => filename.endsWith(".js")).length;
 console.log(`Build complete: ${generatedJavaScriptFiles} JavaScript files and source maps in dist/.`);

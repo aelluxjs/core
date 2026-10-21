@@ -1,0 +1,568 @@
+{
+  "$schema": "https://raw.githubusercontent.com/microsoft/vscode-css-languageservice/main/docs/customData.schema.json",
+  "version": 1.1,
+  "properties": [
+    {
+      "name": "--ae-anchor-origin-x",
+      "description": "Self pivot on the x axis.\n\nRuntime output; read it in selectors/styles instead of using it as an activation command.\n\nValue syntax: <percentage>.",
+      "syntax": "<percentage>",
+      "references": [
+        {
+          "name": "AelluxJS anchor",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/anchor.htm"
+        }
+      ]
+    },
+    {
+      "name": "--ae-anchor-origin-y",
+      "description": "Self pivot on the y axis.\n\nRuntime output; read it in selectors/styles instead of using it as an activation command.\n\nValue syntax: <percentage>.",
+      "syntax": "<percentage>",
+      "references": [
+        {
+          "name": "AelluxJS anchor",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/anchor.htm"
+        }
+      ]
+    },
+    {
+      "name": "--ae-anchor-switch-duration",
+      "description": "Native target-switch transition duration; reduced motion disables the transition.\n\nValue syntax: <time>.\n\nDefault behavior: \"0ms\".\n\nSuggested values: `0ms`, `150ms`, `250ms`. This is an open grammar, not a closed enumeration.",
+      "syntax": "<time>",
+      "references": [
+        {
+          "name": "AelluxJS anchor",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/anchor.htm"
+        }
+      ],
+      "values": [
+        {
+          "name": "0ms"
+        },
+        {
+          "name": "150ms"
+        },
+        {
+          "name": "250ms"
+        }
+      ]
+    },
+    {
+      "name": "--ae-anchor-switch-ease",
+      "description": "Easing for native Anchor target switches.\n\nValue syntax: <easing-function>.\n\nDefault behavior: \"ease-in-out\".\n\nSuggested values: `linear`, `ease`, `ease-in-out`. This is an open grammar, not a closed enumeration.",
+      "syntax": "<easing-function>",
+      "references": [
+        {
+          "name": "AelluxJS anchor",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/anchor.htm"
+        }
+      ],
+      "values": [
+        {
+          "name": "linear"
+        },
+        {
+          "name": "ease"
+        },
+        {
+          "name": "ease-in-out"
+        }
+      ]
+    },
+    {
+      "name": "--ae-anchor-target-height",
+      "description": "Measured target height, compensated for reference scale.\n\nRuntime output; read it in selectors/styles instead of using it as an activation command.\n\nValue syntax: <length>.",
+      "syntax": "<length>",
+      "references": [
+        {
+          "name": "AelluxJS anchor",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/anchor.htm"
+        }
+      ]
+    },
+    {
+      "name": "--ae-anchor-target-width",
+      "description": "Measured target width, compensated for reference scale.\n\nRuntime output; read it in selectors/styles instead of using it as an activation command.\n\nValue syntax: <length>.",
+      "syntax": "<length>",
+      "references": [
+        {
+          "name": "AelluxJS anchor",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/anchor.htm"
+        }
+      ]
+    },
+    {
+      "name": "--ae-anchor-x",
+      "description": "Calculated x placement in the positioning reference.\n\nRuntime output; read it in selectors/styles instead of using it as an activation command.\n\nValue syntax: <length>.",
+      "syntax": "<length>",
+      "references": [
+        {
+          "name": "AelluxJS anchor",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/anchor.htm"
+        }
+      ]
+    },
+    {
+      "name": "--ae-anchor-y",
+      "description": "Calculated y placement in the positioning reference.\n\nRuntime output; read it in selectors/styles instead of using it as an activation command.\n\nValue syntax: <length>.",
+      "syntax": "<length>",
+      "references": [
+        {
+          "name": "AelluxJS anchor",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/anchor.htm"
+        }
+      ]
+    },
+    {
+      "name": "--ae-from-height",
+      "description": "from grid height endpoint.\n\nValue syntax: <flex>.\n\nDefault behavior: \"0fr\".",
+      "syntax": "<flex>",
+      "references": [
+        {
+          "name": "AelluxJS present",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/present.htm"
+        }
+      ]
+    },
+    {
+      "name": "--ae-from-opacity",
+      "description": "from opacity endpoint.\n\nValue syntax: <number> | <percentage>.\n\nDefault behavior: \"0\".",
+      "syntax": "<number> | <percentage>",
+      "references": [
+        {
+          "name": "AelluxJS present",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/present.htm"
+        }
+      ]
+    },
+    {
+      "name": "--ae-from-transform",
+      "description": "from transform endpoint.\n\nValue syntax: <transform-list> | none.\n\nDefault behavior: \"scale(0.5)\".",
+      "syntax": "<transform-list> | none",
+      "references": [
+        {
+          "name": "AelluxJS present",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/present.htm"
+        }
+      ]
+    },
+    {
+      "name": "--ae-from-width",
+      "description": "from grid width endpoint.\n\nValue syntax: <flex>.\n\nDefault behavior: \"0fr\".",
+      "syntax": "<flex>",
+      "references": [
+        {
+          "name": "AelluxJS present",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/present.htm"
+        }
+      ]
+    },
+    {
+      "name": "--ae-height",
+      "description": "Measured Adaptive height, in unitless pixels.\n\nRuntime output; read it in selectors/styles instead of using it as an activation command.\n\nValue syntax: <number>.",
+      "syntax": "<number>",
+      "references": [
+        {
+          "name": "AelluxJS adaptive",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/adaptive.htm"
+        }
+      ]
+    },
+    {
+      "name": "--ae-pop-duration",
+      "description": "pop transition duration.\n\nValue syntax: <time>.\n\nDefault behavior: \"250ms\".\n\nSuggested values: `0s`, `150ms`, `250ms`, `500ms`. This is an open grammar, not a closed enumeration.",
+      "syntax": "<time>",
+      "references": [
+        {
+          "name": "AelluxJS present",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/present.htm"
+        }
+      ],
+      "values": [
+        {
+          "name": "0s"
+        },
+        {
+          "name": "150ms"
+        },
+        {
+          "name": "250ms"
+        },
+        {
+          "name": "500ms"
+        }
+      ]
+    },
+    {
+      "name": "--ae-pop-ease",
+      "description": "pop easing; CSS easing strings, including cubic-bezier, are supported.\n\nValue syntax: <easing-function>.\n\nDefault behavior: \"ease-out\".\n\nSuggested values: `linear`, `ease`, `ease-in`, `ease-out`, `ease-in-out`. This is an open grammar, not a closed enumeration.",
+      "syntax": "<easing-function>",
+      "references": [
+        {
+          "name": "AelluxJS present",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/present.htm"
+        }
+      ],
+      "values": [
+        {
+          "name": "linear"
+        },
+        {
+          "name": "ease"
+        },
+        {
+          "name": "ease-in"
+        },
+        {
+          "name": "ease-out"
+        },
+        {
+          "name": "ease-in-out"
+        }
+      ]
+    },
+    {
+      "name": "--ae-pop-height",
+      "description": "pop grid height endpoint.\n\nValue syntax: <flex>.\n\nDefault behavior: \"1fr\".",
+      "syntax": "<flex>",
+      "references": [
+        {
+          "name": "AelluxJS present",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/present.htm"
+        }
+      ]
+    },
+    {
+      "name": "--ae-pop-low-steps",
+      "description": "Step count used by low-hardware motion; the runtime derives it from the duration.\n\nRuntime output; read it in selectors/styles instead of using it as an activation command.\n\nValue syntax: <integer>.\n\nDefault behavior: \"4\".",
+      "syntax": "<integer>",
+      "references": [
+        {
+          "name": "AelluxJS present",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/present.htm"
+        }
+      ]
+    },
+    {
+      "name": "--ae-pop-opacity",
+      "description": "pop opacity endpoint.\n\nValue syntax: <number> | <percentage>.\n\nDefault behavior: \"1\".",
+      "syntax": "<number> | <percentage>",
+      "references": [
+        {
+          "name": "AelluxJS present",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/present.htm"
+        }
+      ]
+    },
+    {
+      "name": "--ae-pop-progress",
+      "description": "Bounded pop progress from 0 to 1. Safe for application CSS.\n\nRuntime output; read it in selectors/styles instead of using it as an activation command.\n\nValue syntax: <number>.",
+      "syntax": "<number>",
+      "references": [
+        {
+          "name": "AelluxJS present",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/present.htm"
+        }
+      ]
+    },
+    {
+      "name": "--ae-pop-transform",
+      "description": "pop transform endpoint.\n\nValue syntax: <transform-list> | none.\n\nDefault behavior: \"scale(1)\".",
+      "syntax": "<transform-list> | none",
+      "references": [
+        {
+          "name": "AelluxJS present",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/present.htm"
+        }
+      ]
+    },
+    {
+      "name": "--ae-pop-width",
+      "description": "pop grid width endpoint.\n\nValue syntax: <flex>.\n\nDefault behavior: \"1fr\".",
+      "syntax": "<flex>",
+      "references": [
+        {
+          "name": "AelluxJS present",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/present.htm"
+        }
+      ]
+    },
+    {
+      "name": "--ae-scroll-x-progress",
+      "description": "Scroll progress on x, from 0 to 1.\n\nRuntime output; read it in selectors/styles instead of using it as an activation command.\n\nValue syntax: <number>.",
+      "syntax": "<number>",
+      "references": [
+        {
+          "name": "AelluxJS scrollbox",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/scrollbox.htm"
+        }
+      ]
+    },
+    {
+      "name": "--ae-scroll-y-progress",
+      "description": "Scroll progress on y, from 0 to 1.\n\nRuntime output; read it in selectors/styles instead of using it as an activation command.\n\nValue syntax: <number>.",
+      "syntax": "<number>",
+      "references": [
+        {
+          "name": "AelluxJS scrollbox",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/scrollbox.htm"
+        }
+      ]
+    },
+    {
+      "name": "--ae-scrollbar-opacity-fade",
+      "description": "Opacity after both mouse and pointer hover end.\n\nValue syntax: <number>.\n\nDefault behavior: \"0\".\n\nSuggested values: `0`, `1`. This is an open grammar, not a closed enumeration.",
+      "syntax": "<number>",
+      "references": [
+        {
+          "name": "AelluxJS scrollbox",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/scrollbox.htm"
+        }
+      ],
+      "values": [
+        {
+          "name": "0"
+        },
+        {
+          "name": "1"
+        }
+      ]
+    },
+    {
+      "name": "--ae-scrollbar-opacity-visible",
+      "description": "Opacity while hover, drag or post-drag visibility is active.\n\nValue syntax: <number>.\n\nDefault behavior: \"1\".\n\nSuggested values: `0`, `1`. This is an open grammar, not a closed enumeration.",
+      "syntax": "<number>",
+      "references": [
+        {
+          "name": "AelluxJS scrollbox",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/scrollbox.htm"
+        }
+      ],
+      "values": [
+        {
+          "name": "0"
+        },
+        {
+          "name": "1"
+        }
+      ]
+    },
+    {
+      "name": "--ae-scrollbar-size",
+      "description": "Custom scrollbar thickness; inherited by generated bars.\n\nValue syntax: <length>.\n\nDefault behavior: \"8px\".",
+      "syntax": "<length>",
+      "references": [
+        {
+          "name": "AelluxJS scrollbox",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/scrollbox.htm"
+        }
+      ]
+    },
+    {
+      "name": "--ae-scrollbar-thumb-color",
+      "description": "Custom scrollbar thumb color. Unset uses the weak stylesheet's system CanvasText color.\n\nValue syntax: <color>.",
+      "syntax": "<color>",
+      "references": [
+        {
+          "name": "AelluxJS scrollbox",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/scrollbox.htm"
+        }
+      ]
+    },
+    {
+      "name": "--ae-scrollbar-thumb-hover-color",
+      "description": "Custom scrollbar hovered thumb color. Unset uses the weak stylesheet's system color.\n\nValue syntax: <color>.",
+      "syntax": "<color>",
+      "references": [
+        {
+          "name": "AelluxJS scrollbox",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/scrollbox.htm"
+        }
+      ]
+    },
+    {
+      "name": "--ae-scrollbar-thumb-radius",
+      "description": "Custom scrollbar thumb corner radius.\n\nValue syntax: <length-percentage>.\n\nDefault behavior: \"10px\".",
+      "syntax": "<length-percentage>",
+      "references": [
+        {
+          "name": "AelluxJS scrollbox",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/scrollbox.htm"
+        }
+      ]
+    },
+    {
+      "name": "--ae-scrollbar-track-color",
+      "description": "Custom scrollbar track color. Unset uses a transparent track.\n\nValue syntax: <color>.",
+      "syntax": "<color>",
+      "references": [
+        {
+          "name": "AelluxJS scrollbox",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/scrollbox.htm"
+        }
+      ]
+    },
+    {
+      "name": "--ae-snap-focus",
+      "description": "Per-item alignment proximity from 0 to 1; 1 means aligned with the requested snap position.\n\nRuntime output; read it in selectors/styles instead of using it as an activation command.\n\nValue syntax: <number>.",
+      "syntax": "<number>",
+      "references": [
+        {
+          "name": "AelluxJS scrollbox-snap",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/scrollbox-snap.htm"
+        }
+      ]
+    },
+    {
+      "name": "--ae-snap-viewport",
+      "description": "Per-item normalized center offset from the viewport center, clamped to -2..2.\n\nRuntime output; read it in selectors/styles instead of using it as an activation command.\n\nValue syntax: <number>.",
+      "syntax": "<number>",
+      "references": [
+        {
+          "name": "AelluxJS scrollbox-snap",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/scrollbox-snap.htm"
+        }
+      ]
+    },
+    {
+      "name": "--ae-unpop-duration",
+      "description": "unpop transition duration.\n\nValue syntax: <time>.\n\nDefault behavior: \"250ms\".\n\nSuggested values: `0s`, `150ms`, `250ms`, `500ms`. This is an open grammar, not a closed enumeration.",
+      "syntax": "<time>",
+      "references": [
+        {
+          "name": "AelluxJS present",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/present.htm"
+        }
+      ],
+      "values": [
+        {
+          "name": "0s"
+        },
+        {
+          "name": "150ms"
+        },
+        {
+          "name": "250ms"
+        },
+        {
+          "name": "500ms"
+        }
+      ]
+    },
+    {
+      "name": "--ae-unpop-ease",
+      "description": "unpop easing; CSS easing strings, including cubic-bezier, are supported.\n\nValue syntax: <easing-function>.\n\nDefault behavior: \"ease-in\".\n\nSuggested values: `linear`, `ease`, `ease-in`, `ease-out`, `ease-in-out`. This is an open grammar, not a closed enumeration.",
+      "syntax": "<easing-function>",
+      "references": [
+        {
+          "name": "AelluxJS present",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/present.htm"
+        }
+      ],
+      "values": [
+        {
+          "name": "linear"
+        },
+        {
+          "name": "ease"
+        },
+        {
+          "name": "ease-in"
+        },
+        {
+          "name": "ease-out"
+        },
+        {
+          "name": "ease-in-out"
+        }
+      ]
+    },
+    {
+      "name": "--ae-unpop-height",
+      "description": "unpop grid height endpoint.\n\nValue syntax: <flex>.\n\nDefault behavior: \"0fr\".",
+      "syntax": "<flex>",
+      "references": [
+        {
+          "name": "AelluxJS present",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/present.htm"
+        }
+      ]
+    },
+    {
+      "name": "--ae-unpop-low-steps",
+      "description": "Step count used by low-hardware motion; the runtime derives it from the duration.\n\nRuntime output; read it in selectors/styles instead of using it as an activation command.\n\nValue syntax: <integer>.\n\nDefault behavior: \"4\".",
+      "syntax": "<integer>",
+      "references": [
+        {
+          "name": "AelluxJS present",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/present.htm"
+        }
+      ]
+    },
+    {
+      "name": "--ae-unpop-opacity",
+      "description": "unpop opacity endpoint.\n\nValue syntax: <number> | <percentage>.\n\nDefault behavior: \"0\".",
+      "syntax": "<number> | <percentage>",
+      "references": [
+        {
+          "name": "AelluxJS present",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/present.htm"
+        }
+      ]
+    },
+    {
+      "name": "--ae-unpop-progress",
+      "description": "Bounded unpop progress from 0 to 1. Safe for application CSS.\n\nRuntime output; read it in selectors/styles instead of using it as an activation command.\n\nValue syntax: <number>.",
+      "syntax": "<number>",
+      "references": [
+        {
+          "name": "AelluxJS present",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/present.htm"
+        }
+      ]
+    },
+    {
+      "name": "--ae-unpop-transform",
+      "description": "unpop transform endpoint.\n\nValue syntax: <transform-list> | none.\n\nDefault behavior: \"scale(1.2)\".",
+      "syntax": "<transform-list> | none",
+      "references": [
+        {
+          "name": "AelluxJS present",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/present.htm"
+        }
+      ]
+    },
+    {
+      "name": "--ae-unpop-width",
+      "description": "unpop grid width endpoint.\n\nValue syntax: <flex>.\n\nDefault behavior: \"0fr\".",
+      "syntax": "<flex>",
+      "references": [
+        {
+          "name": "AelluxJS present",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/present.htm"
+        }
+      ]
+    },
+    {
+      "name": "--ae-width",
+      "description": "Measured Adaptive width, in unitless pixels.\n\nRuntime output; read it in selectors/styles instead of using it as an activation command.\n\nValue syntax: <number>.",
+      "syntax": "<number>",
+      "references": [
+        {
+          "name": "AelluxJS adaptive",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/adaptive.htm"
+        }
+      ]
+    },
+    {
+      "name": "--anchor-opacity",
+      "description": "Opacity copied from the target's nearest Present region, or 1. This property intentionally has no ae prefix.\n\nRuntime output; read it in selectors/styles instead of using it as an activation command.\n\nValue syntax: <number>.",
+      "syntax": "<number>",
+      "references": [
+        {
+          "name": "AelluxJS anchor",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/anchor.htm"
+        }
+      ]
+    }
+  ]
+}
