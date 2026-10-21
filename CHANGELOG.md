@@ -39,6 +39,9 @@ All notable changes to aellux.js will be documented in this file.
 
 ### Changed
 
+- Present no longer registers or writes low-hardware step variables; hardware markers do not override its configured easing.
+
+- CSS Motion's conservative property ceiling now defaults to 55 FPS; Present's progress channels share the lightweight transform/opacity classification. The scheduler applies visual limits without a second timer-based cap that could undershoot on WebKit.
 - Raised Modern Orchestrator's raw-size limit from 56 to 56.5 KiB and Full Legacy's from 425 to 426 KiB for cancelable lifecycle passes; gzip limits are unchanged.
 - Raised the affected Boot, ESM, Orchestrator, Adaptive, Present and Snap bundle limits for the configuration diagnostics; the measured sizes and previous/new limits are documented in the diagnostics guide. Full Modern's gzip limit rises from 40 to 40.5 KiB; its raw limit and Full Legacy limits are unchanged.
 - Present Group selects members by their HTML `id`; removed `data-ae-present-key`. IDs outside the group's mounted membership are rejected with diagnostic 2021.

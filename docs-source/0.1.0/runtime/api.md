@@ -42,7 +42,7 @@ The `autoViewportMeta` option defaults to `true`. During initialization, the boo
 The `skipGlobalMount` option defaults to `false`. Set it to `true` to finish orchestrator initialization and dispatch `Ready` without automatically mounting the document. Call `$ae.mount(document)` later to mount it explicitly.
 
 The `cssMotionController` option defaults to `true`. Set it to `false` to leave CSS motion under native browser timing, without a `waitLayout` progress sequence. See [CSS Motion Controller](css-motion.md).
-The boot does not set `data-ae-low-hardware`. Applications may add it to the document root when appropriate; Extensions such as Present use it when present.
+The boot does not set `data-ae-low-hardware`. Present does not use this marker to change animation easing.
 `$ae.registerCssProperty(...descriptors)` accepts one or more descriptors in the same format as `CSS.registerProperty()`. When `inherits` is omitted, AelluxJs sets it to `true`; pass `inherits: false` only when the property must not reach descendants or pseudo-elements. It attempts every registration and returns `true` only when all succeed, or `false` when the API is unavailable, no descriptors are supplied, or any registration is rejected, including an already registered name. Extensions can call it during their `init()` without requiring Properties and Values API support for their basic behavior.
 Pass Extension-specific configuration through `extensions` in `init()` options:
 

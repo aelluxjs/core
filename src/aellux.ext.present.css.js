@@ -4,7 +4,6 @@ export function generatePresentCSS(AelluxJs) {
   const presentAttribute = AelluxJs.attr("present");
   const motionAttribute = AelluxJs.attr("present-motion");
   const reducedMotionAttribute = AelluxJs.attr("reduced-motion");
-  const lowHardwareAttribute = AelluxJs.attr("low-hardware");
   const motion = `[${motionAttribute}]`;
   const present = `[${presentAttribute}]`;
   const presentWithoutMotion = `[${presentAttribute}=""]`;
@@ -39,8 +38,6 @@ ${present} {
   --ae-unpop-ease: ease-in;
   --ae-pop-duration: 300ms;
   --ae-unpop-duration: 150ms;
-  --ae-pop-low-steps: 4;
-  --ae-unpop-low-steps: 4;
 
   transition-property: var(--ae-present-properties);
 }
@@ -73,12 +70,8 @@ ${gridPresent}${presentHeight}.${willChange}, ${gridPresent}${presentHeight}.${w
 }
 html[${reducedMotionAttribute}="reduced"] ${present} {
   transition: none !important;
-  --ae-pop-duration: 0s;
-  --ae-unpop-duration: 0s;
-}
-html[${lowHardwareAttribute}] ${present} {
-  --ae-pop-ease: steps(var(--ae-pop-low-steps));
-  --ae-unpop-ease: steps(var(--ae-unpop-low-steps));
+  --ae-pop-duration: 0s !important;
+  --ae-unpop-duration: 0s !important;
 }
 ${present}.${willChange} {
   will-change: opacity, transform;

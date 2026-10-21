@@ -27,7 +27,7 @@
   var define_AELLUX_OFFICIAL_EXTENSION_MANIFEST_default;
   var init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST = __esm({
     "<define:__AELLUX_OFFICIAL_EXTENSION_MANIFEST__>"() {
-      define_AELLUX_OFFICIAL_EXTENSION_MANIFEST_default = { schemaVersion: 1, coreVersion: "0.1.0-beta.10", extensions: { preference: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.preference.min.js", integrity: "sha384-mSOgb0DekFTRXXZAgyNrPjamdlSqzL4SSGZYVWgVg+WlG+pBj11xT81v/6Xk43yO", regular: { url: "./aellux.ext.preference.js", integrity: "sha384-MlikpdHSzHzF6kz5+oJGtq3eoFsKTsx/g+FTrf+dFOU8iQGHsCpn4fP1jLlbNrj7" } }, legacy: { url: "./aellux.ext.preference.legacy.min.js", integrity: "sha384-1LMsK0W9J/PoM4tXhFgkYLRY4yWdzVoYmFy4OMDGd8lRdtptKoEb1sI9L1kzNaBu", regular: { url: "./aellux.ext.preference.legacy.js", integrity: "sha384-pozuz43OyfXrnkmuBu6KTM2lqRSqcI5LMgwAtqnzXq8xZGdVqpnmOtrBcYcMskWk" } } }, dependencies: [] }, "state-navigation": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.state-navigation.min.js", integrity: "sha384-wAbgAqjAA6wauuG+iuUtfRwxChd6fTJ0fS22fqnu2r00kouoXJWZ0f7AoTYlqBC6", regular: { url: "./aellux.ext.state-navigation.js", integrity: "sha384-PKJ8HTD7eIYDEg2hOaAJjpMYzLr2fBjBRGmIGG7XzGTzVK0yTjt5HYPO55VbWfdS" } }, legacy: { url: "./aellux.ext.state-navigation.legacy.min.js", integrity: "sha384-YkhfU15Mpk8KiO6TyoVU6z1yCiYWwnsOGE0xVaQ8NrE7IGrxOSUL005g5JeUDdJu", regular: { url: "./aellux.ext.state-navigation.legacy.js", integrity: "sha384-kaEUY0Zpw8K6pcwjm+INA5feXftLK2/N1aFpPr2LCTcetX2uoe2GGd1MJyy7u8rZ" } } }, dependencies: [] }, feedback: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.feedback.min.js", integrity: "sha384-3VP3W84ekK4MIVBQuy5+5P3bGrwOj7bBDfJnjyexZ+yDADf1jQoHEpP2J1OMUgod", regular: { url: "./aellux.ext.feedback.js", integrity: "sha384-RrPf0bRGxf68f/Rjas5MF5zC1GAubWyndCcuiYbgZsPSHGLFsQtQaUgeFX4SQz+h" } }, legacy: { url: "./aellux.ext.feedback.legacy.min.js", integrity: "sha384-zXuZEv63sd3fwaAygmyk9KazQ46KOelsvAtM+0vJ7phDwemVh1FhOjAcbhWVQM/N", regular: { url: "./aellux.ext.feedback.legacy.js", integrity: "sha384-UW1JZ1+liVWV/w3PJdhfIMztOU7zyTw/1rOyyxoxj4YJIHb1xFl8U0xeIBh8jYV7" } } }, dependencies: [], style: { url: "./aellux.ext.feedback.min.css", integrity: "sha384-OBguCYqF+dMD0Pl84C3FlY/+ohUGfW0OyynmXb/PSDEGOyuI/TQJ3EZAoCeJx+Jk", regular: { url: "./aellux.ext.feedback.css", integrity: "sha384-yk4cW+r/Mc1FRS1ZauBHC6KsKb7sxuJ0E9mmt/+AYASAdZXXMK6iuFBR+TOEh/r4" } } }, focus: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.focus.min.js", integrity: "sha384-AXpUv/Ur2Z4cKvO9EqIFqfxxdSQR5j75q0okOAWPvHhSneQ5LPjrOzk6Sl9MOo4a", regular: { url: "./aellux.ext.focus.js", integrity: "sha384-VjQzcnhLRrvRlbVQ0X4/tO0+8gqJXAmIFoeIVimjOud1wRNuBXNnSQHHW9XQPzTe" } }, legacy: { url: "./aellux.ext.focus.legacy.min.js", integrity: "sha384-I5QpUmKsA1T8NiKfKXQgbdG19Ld1ZGCWSmosygO3yGj43tdxp5zCfLyfBuFoHlKu", regular: { url: "./aellux.ext.focus.legacy.js", integrity: "sha384-5/y3J1NC/qMyV9myEj29+wGbqCVI8ICPafSebtJVfl15Qmup6vMiJzveShd3CLnw" } } }, dependencies: [] }, point: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.point.min.js", integrity: "sha384-n540II5oWbHJRt/a8i+Rgb9A3b9dm7hamg1kd3Nz7KdPQDcaa8S823t9fCrgxBWF", regular: { url: "./aellux.ext.point.js", integrity: "sha384-aDj7I5QEH/0+52E3e6yPZ/D0MEsNBdxeET3G5ToVvgczHtksMh3p8S/KOoAapRRN" } }, legacy: { url: "./aellux.ext.point.legacy.min.js", integrity: "sha384-5UmWvQHfmvttz9yeXbilawGCZH20UdR8yNBOE9kRV34wpfWASl8plzgKtLVQGO9M", regular: { url: "./aellux.ext.point.legacy.js", integrity: "sha384-gG/XONYEC1tchBcJ6bUtKYmWFHz0E+50LmMaXDAiqWBKPuwdHZeYm1uXA22lMZuN" } } }, dependencies: [] }, anchor: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.anchor.min.js", integrity: "sha384-qzKEAgWOM23Rch3bvRqMVp3Vt/oCMnsDi4U6hnUe/3Vm6IwujXuAA09tQUCaDOMS", regular: { url: "./aellux.ext.anchor.js", integrity: "sha384-edsiM2AYIPrpeQ7XQZTIrVCJ3lwWJ+HPsdCnanm1dQJZrt220u14iOTxm2t2RBhk" } }, legacy: { url: "./aellux.ext.anchor.legacy.min.js", integrity: "sha384-Gy7uPY7gVQknkTcdrI06VM1HXO6dUXCIm0KZiKyDwgX8BMGq73OZuPO0al+9VV4A", regular: { url: "./aellux.ext.anchor.legacy.js", integrity: "sha384-bpejLMYob6EdeJApd4vUG1w4pksoug8H+xFQqEjPPc7gt2zYDzPFuGO6j1j30aj0" } } }, dependencies: [] }, "ajax-href": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.ajax-href.min.js", integrity: "sha384-WTva1M5sCfssJRFAo9ICF2aetQIJXFmfEKNgGyVk8hA/r0OCv2X3mKePtIRSWAKT", regular: { url: "./aellux.ext.ajax-href.js", integrity: "sha384-DpLLt9qnY8J0WS7+PZmWBkhJ8OIwL8FWuYNyrUBVcvsYTj2EyFKcoiqP3BWqn7uH" } }, legacy: { url: "./aellux.ext.ajax-href.legacy.min.js", integrity: "sha384-/KNAAYf/L3682Q9o6OjdXcBsbLrFvGN8qzjEQDRqWHseG6FE7Kw+jpeI7yC4KsJt", regular: { url: "./aellux.ext.ajax-href.legacy.js", integrity: "sha384-Jx+Cp0Bgy4+YhHLEGpalNZjASjN6rwVBagaFIH5Ty6cQIiNUFs8xVg2v7k1hlvsG" } } }, dependencies: [] }, scrollbox: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.scrollbox.min.js", integrity: "sha384-Y7z3QxVmQhz2sALr6Vyl/ui3NC6ddY+WQEs8ZU8yqID6w+I7wY1r71yyPt35raMD", regular: { url: "./aellux.ext.scrollbox.js", integrity: "sha384-bxTgo4Pq+nsUcDnulZt0nztWNJe12uvjqOZPplTJmASjhXhalUROW93ySO+0xibm" } }, legacy: { url: "./aellux.ext.scrollbox.legacy.min.js", integrity: "sha384-CfzdHYXu8VpdhJB6/7jR7V+BPYKXsRahbUgh3y2m1RsNwZMyhnsnYc4P8kuhYP5N", regular: { url: "./aellux.ext.scrollbox.legacy.js", integrity: "sha384-MJL9blROmE2a5323W6rCoJI91MUVEEBwRfe65/1ycCg+5N1sQQOhDs6o3nlVUpa6" } } }, dependencies: [] }, "scrollbox-snap": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.scrollbox-snap.min.js", integrity: "sha384-YNetWDUuxONIR41ykMQTu59vXnqcGmN070vqt2gHZxykQM8xVGRgOo4uUjTThbFb", regular: { url: "./aellux.ext.scrollbox-snap.js", integrity: "sha384-KmPblbbcz4OHkc0KTFYw/yuBelRxSL16pDVnLX/7jkb/xGBqPHWFP4x6GFQRIfHx" } }, legacy: { url: "./aellux.ext.scrollbox-snap.legacy.min.js", integrity: "sha384-Kbt2Fjswspgzzeop7aZZ3VYnUmaShTNswZmigPzvNNb4gxb2T6JfL8clidd58EVb", regular: { url: "./aellux.ext.scrollbox-snap.legacy.js", integrity: "sha384-rIlhaybqhGrNHSUVG6vphjZr1IJKF0lNxbYuVOeTvJSOOjTRYzRovU4rArLjJw8q" } } }, dependencies: [] }, adaptive: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.adaptive.min.js", integrity: "sha384-bkeOnTW/3uzbuhLc8fujaWnWGC+pwNAkZwci9M09paKqudp0v/flMrJ49JXw16vv", regular: { url: "./aellux.ext.adaptive.js", integrity: "sha384-Qzf9wU6DSSaaE+8lr96vnYqjKQqYxep8dhCZmjgNdqreuk9fL3qKMn3NW7DGAEaT" } }, legacy: { url: "./aellux.ext.adaptive.legacy.min.js", integrity: "sha384-YVHHWZOvf+65r/CU89nBPZXhj3j5sn4r2ho+CNUCUaYs1WE6pWIeypcq7n5OCBor", regular: { url: "./aellux.ext.adaptive.legacy.js", integrity: "sha384-gBkxqbBpIqdj5ozJm/NsenI/yKOvEGarZBl2SrPjYiiYx6cez2/FGTMf5XyzHrTj" } } }, dependencies: [], style: { url: "./aellux.ext.adaptive.min.css", integrity: "sha384-8yUP1PStfDqBCyCskP3k9WLIKgv/yl1nyDhmPz7hsX5NZ4z3ZT3ajolA+RhYlUiG", regular: { url: "./aellux.ext.adaptive.css", integrity: "sha384-HfIjX9Zk0VFRimzPvUaTS5AtwuHJHjXKoM/xbNJXj5vE7bSdBGEzbrBHfbNmYah0" } } }, present: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.present.min.js", integrity: "sha384-gMQioz6kcNGfSzTEjouvsNSBeSQNuJOLzqQ48ALjo+BOSQ0B2fcubT2uM3g0BE1b", regular: { url: "./aellux.ext.present.js", integrity: "sha384-VXGeFhWfV0hPrxmgVW73ONPpLgmg4DD8Th5eBul28+yIcm2v2bUkHbQkx319iJlX" } }, legacy: { url: "./aellux.ext.present.legacy.min.js", integrity: "sha384-GYN36jClJzMOUevLeNKWVz09UrbJRMuDVDag3CXkEdiDayxD0K6iaJd+dSDGPRKr", regular: { url: "./aellux.ext.present.legacy.js", integrity: "sha384-8LNGAEFvkCgZPfrPG8MojB7T5DFhR09xJ2y2qMLd9tW6e6/CrCUe8ohR5WEfrpNO" } } }, dependencies: [], style: { url: "./aellux.ext.present.min.css", integrity: "sha384-+hnlhjtXDlsPj5DFOi+ik63LdYsy/kfWSYNmEkFrmEA0iU1PONIJVIyAQMu40jLa", regular: { url: "./aellux.ext.present.css", integrity: "sha384-uDLg9dNWSpLf7awd51GBS1BjZfy1nqMfcLxbrrlyxpECNzjuAmCPL0iwxW7x8xvf" } } } } };
+      define_AELLUX_OFFICIAL_EXTENSION_MANIFEST_default = { schemaVersion: 1, coreVersion: "0.1.0-beta.10", extensions: { preference: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.preference.min.js", integrity: "sha384-mSOgb0DekFTRXXZAgyNrPjamdlSqzL4SSGZYVWgVg+WlG+pBj11xT81v/6Xk43yO", regular: { url: "./aellux.ext.preference.js", integrity: "sha384-MlikpdHSzHzF6kz5+oJGtq3eoFsKTsx/g+FTrf+dFOU8iQGHsCpn4fP1jLlbNrj7" } }, legacy: { url: "./aellux.ext.preference.legacy.min.js", integrity: "sha384-1LMsK0W9J/PoM4tXhFgkYLRY4yWdzVoYmFy4OMDGd8lRdtptKoEb1sI9L1kzNaBu", regular: { url: "./aellux.ext.preference.legacy.js", integrity: "sha384-pozuz43OyfXrnkmuBu6KTM2lqRSqcI5LMgwAtqnzXq8xZGdVqpnmOtrBcYcMskWk" } } }, dependencies: [] }, "state-navigation": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.state-navigation.min.js", integrity: "sha384-wAbgAqjAA6wauuG+iuUtfRwxChd6fTJ0fS22fqnu2r00kouoXJWZ0f7AoTYlqBC6", regular: { url: "./aellux.ext.state-navigation.js", integrity: "sha384-PKJ8HTD7eIYDEg2hOaAJjpMYzLr2fBjBRGmIGG7XzGTzVK0yTjt5HYPO55VbWfdS" } }, legacy: { url: "./aellux.ext.state-navigation.legacy.min.js", integrity: "sha384-YkhfU15Mpk8KiO6TyoVU6z1yCiYWwnsOGE0xVaQ8NrE7IGrxOSUL005g5JeUDdJu", regular: { url: "./aellux.ext.state-navigation.legacy.js", integrity: "sha384-kaEUY0Zpw8K6pcwjm+INA5feXftLK2/N1aFpPr2LCTcetX2uoe2GGd1MJyy7u8rZ" } } }, dependencies: [] }, feedback: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.feedback.min.js", integrity: "sha384-3VP3W84ekK4MIVBQuy5+5P3bGrwOj7bBDfJnjyexZ+yDADf1jQoHEpP2J1OMUgod", regular: { url: "./aellux.ext.feedback.js", integrity: "sha384-RrPf0bRGxf68f/Rjas5MF5zC1GAubWyndCcuiYbgZsPSHGLFsQtQaUgeFX4SQz+h" } }, legacy: { url: "./aellux.ext.feedback.legacy.min.js", integrity: "sha384-zXuZEv63sd3fwaAygmyk9KazQ46KOelsvAtM+0vJ7phDwemVh1FhOjAcbhWVQM/N", regular: { url: "./aellux.ext.feedback.legacy.js", integrity: "sha384-UW1JZ1+liVWV/w3PJdhfIMztOU7zyTw/1rOyyxoxj4YJIHb1xFl8U0xeIBh8jYV7" } } }, dependencies: [], style: { url: "./aellux.ext.feedback.min.css", integrity: "sha384-OBguCYqF+dMD0Pl84C3FlY/+ohUGfW0OyynmXb/PSDEGOyuI/TQJ3EZAoCeJx+Jk", regular: { url: "./aellux.ext.feedback.css", integrity: "sha384-yk4cW+r/Mc1FRS1ZauBHC6KsKb7sxuJ0E9mmt/+AYASAdZXXMK6iuFBR+TOEh/r4" } } }, focus: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.focus.min.js", integrity: "sha384-AXpUv/Ur2Z4cKvO9EqIFqfxxdSQR5j75q0okOAWPvHhSneQ5LPjrOzk6Sl9MOo4a", regular: { url: "./aellux.ext.focus.js", integrity: "sha384-VjQzcnhLRrvRlbVQ0X4/tO0+8gqJXAmIFoeIVimjOud1wRNuBXNnSQHHW9XQPzTe" } }, legacy: { url: "./aellux.ext.focus.legacy.min.js", integrity: "sha384-I5QpUmKsA1T8NiKfKXQgbdG19Ld1ZGCWSmosygO3yGj43tdxp5zCfLyfBuFoHlKu", regular: { url: "./aellux.ext.focus.legacy.js", integrity: "sha384-5/y3J1NC/qMyV9myEj29+wGbqCVI8ICPafSebtJVfl15Qmup6vMiJzveShd3CLnw" } } }, dependencies: [] }, point: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.point.min.js", integrity: "sha384-n540II5oWbHJRt/a8i+Rgb9A3b9dm7hamg1kd3Nz7KdPQDcaa8S823t9fCrgxBWF", regular: { url: "./aellux.ext.point.js", integrity: "sha384-aDj7I5QEH/0+52E3e6yPZ/D0MEsNBdxeET3G5ToVvgczHtksMh3p8S/KOoAapRRN" } }, legacy: { url: "./aellux.ext.point.legacy.min.js", integrity: "sha384-5UmWvQHfmvttz9yeXbilawGCZH20UdR8yNBOE9kRV34wpfWASl8plzgKtLVQGO9M", regular: { url: "./aellux.ext.point.legacy.js", integrity: "sha384-gG/XONYEC1tchBcJ6bUtKYmWFHz0E+50LmMaXDAiqWBKPuwdHZeYm1uXA22lMZuN" } } }, dependencies: [] }, anchor: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.anchor.min.js", integrity: "sha384-qzKEAgWOM23Rch3bvRqMVp3Vt/oCMnsDi4U6hnUe/3Vm6IwujXuAA09tQUCaDOMS", regular: { url: "./aellux.ext.anchor.js", integrity: "sha384-edsiM2AYIPrpeQ7XQZTIrVCJ3lwWJ+HPsdCnanm1dQJZrt220u14iOTxm2t2RBhk" } }, legacy: { url: "./aellux.ext.anchor.legacy.min.js", integrity: "sha384-Gy7uPY7gVQknkTcdrI06VM1HXO6dUXCIm0KZiKyDwgX8BMGq73OZuPO0al+9VV4A", regular: { url: "./aellux.ext.anchor.legacy.js", integrity: "sha384-bpejLMYob6EdeJApd4vUG1w4pksoug8H+xFQqEjPPc7gt2zYDzPFuGO6j1j30aj0" } } }, dependencies: [] }, "ajax-href": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.ajax-href.min.js", integrity: "sha384-WTva1M5sCfssJRFAo9ICF2aetQIJXFmfEKNgGyVk8hA/r0OCv2X3mKePtIRSWAKT", regular: { url: "./aellux.ext.ajax-href.js", integrity: "sha384-DpLLt9qnY8J0WS7+PZmWBkhJ8OIwL8FWuYNyrUBVcvsYTj2EyFKcoiqP3BWqn7uH" } }, legacy: { url: "./aellux.ext.ajax-href.legacy.min.js", integrity: "sha384-/KNAAYf/L3682Q9o6OjdXcBsbLrFvGN8qzjEQDRqWHseG6FE7Kw+jpeI7yC4KsJt", regular: { url: "./aellux.ext.ajax-href.legacy.js", integrity: "sha384-Jx+Cp0Bgy4+YhHLEGpalNZjASjN6rwVBagaFIH5Ty6cQIiNUFs8xVg2v7k1hlvsG" } } }, dependencies: [] }, scrollbox: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.scrollbox.min.js", integrity: "sha384-Y7z3QxVmQhz2sALr6Vyl/ui3NC6ddY+WQEs8ZU8yqID6w+I7wY1r71yyPt35raMD", regular: { url: "./aellux.ext.scrollbox.js", integrity: "sha384-bxTgo4Pq+nsUcDnulZt0nztWNJe12uvjqOZPplTJmASjhXhalUROW93ySO+0xibm" } }, legacy: { url: "./aellux.ext.scrollbox.legacy.min.js", integrity: "sha384-CfzdHYXu8VpdhJB6/7jR7V+BPYKXsRahbUgh3y2m1RsNwZMyhnsnYc4P8kuhYP5N", regular: { url: "./aellux.ext.scrollbox.legacy.js", integrity: "sha384-MJL9blROmE2a5323W6rCoJI91MUVEEBwRfe65/1ycCg+5N1sQQOhDs6o3nlVUpa6" } } }, dependencies: [] }, "scrollbox-snap": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.scrollbox-snap.min.js", integrity: "sha384-YNetWDUuxONIR41ykMQTu59vXnqcGmN070vqt2gHZxykQM8xVGRgOo4uUjTThbFb", regular: { url: "./aellux.ext.scrollbox-snap.js", integrity: "sha384-KmPblbbcz4OHkc0KTFYw/yuBelRxSL16pDVnLX/7jkb/xGBqPHWFP4x6GFQRIfHx" } }, legacy: { url: "./aellux.ext.scrollbox-snap.legacy.min.js", integrity: "sha384-Kbt2Fjswspgzzeop7aZZ3VYnUmaShTNswZmigPzvNNb4gxb2T6JfL8clidd58EVb", regular: { url: "./aellux.ext.scrollbox-snap.legacy.js", integrity: "sha384-rIlhaybqhGrNHSUVG6vphjZr1IJKF0lNxbYuVOeTvJSOOjTRYzRovU4rArLjJw8q" } } }, dependencies: [] }, adaptive: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.adaptive.min.js", integrity: "sha384-bkeOnTW/3uzbuhLc8fujaWnWGC+pwNAkZwci9M09paKqudp0v/flMrJ49JXw16vv", regular: { url: "./aellux.ext.adaptive.js", integrity: "sha384-Qzf9wU6DSSaaE+8lr96vnYqjKQqYxep8dhCZmjgNdqreuk9fL3qKMn3NW7DGAEaT" } }, legacy: { url: "./aellux.ext.adaptive.legacy.min.js", integrity: "sha384-YVHHWZOvf+65r/CU89nBPZXhj3j5sn4r2ho+CNUCUaYs1WE6pWIeypcq7n5OCBor", regular: { url: "./aellux.ext.adaptive.legacy.js", integrity: "sha384-gBkxqbBpIqdj5ozJm/NsenI/yKOvEGarZBl2SrPjYiiYx6cez2/FGTMf5XyzHrTj" } } }, dependencies: [], style: { url: "./aellux.ext.adaptive.min.css", integrity: "sha384-8yUP1PStfDqBCyCskP3k9WLIKgv/yl1nyDhmPz7hsX5NZ4z3ZT3ajolA+RhYlUiG", regular: { url: "./aellux.ext.adaptive.css", integrity: "sha384-HfIjX9Zk0VFRimzPvUaTS5AtwuHJHjXKoM/xbNJXj5vE7bSdBGEzbrBHfbNmYah0" } } }, present: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.present.min.js", integrity: "sha384-r5gp1UJBrpL0tDIxdeomlY5UonXajSNPciSisOhy/Jyc23nABumiW2S3egSlp28P", regular: { url: "./aellux.ext.present.js", integrity: "sha384-QwoLlKPJR0csxH5duVsBHvd+VRqWHhKFYgRmXguuDLwK7/9TlowP67EjujnVukki" } }, legacy: { url: "./aellux.ext.present.legacy.min.js", integrity: "sha384-lZO5NbKqOgRSzOh/vFH9dXYrEX/YxznD3gcm44aUcrnU7i9CWq9vlwfPBfWmGLb5", regular: { url: "./aellux.ext.present.legacy.js", integrity: "sha384-2ldc5jAnTWyBMAatErdjr2VadqKqg25M2jnsvuNl78PRGYUbnnuHY8ebsjbHhSv9" } } }, dependencies: [], style: { url: "./aellux.ext.present.min.css", integrity: "sha384-DOb6RBDG19MPBX5rkdIfbj6aPBrLy75kVlS1KtI4IGpDqJkPWbqV8m0nV4mZGntD", regular: { url: "./aellux.ext.present.css", integrity: "sha384-3YKXz6WQLMgaJ+vH6Ah4U6vzKKEMrJRyBgDpLy2YcTc8aM+WWy9ZeLHWNx/9q40r" } } } } };
     }
   });
 
@@ -2362,9 +2362,8 @@
           //toggle,pop,unpop
           dismiss: AelluxJs2.attr("dismiss"),
           //target ID
-          target: AelluxJs2.attr("target"),
+          target: AelluxJs2.attr("target")
           //target ID
-          lowHardware: AelluxJs2.attr("low-hardware")
         };
         const className = {
           pop: AelluxJs2.className("pop"),
@@ -2424,9 +2423,7 @@
           ["pop-ease", "*", "ease-out"],
           ["unpop-ease", "*", "ease-in"],
           ["pop-duration", "<time>", "250ms"],
-          ["unpop-duration", "<time>", "250ms"],
-          ["pop-low-steps", "<integer>", "4"],
-          ["unpop-low-steps", "<integer>", "4"]
+          ["unpop-duration", "<time>", "250ms"]
         ];
         function init(options) {
           const descriptors = cssProperties.map(([name, syntax, initialValue]) => ({ name: `--ae-${name}`, syntax, initialValue }));
@@ -2486,8 +2483,6 @@
             element,
             [attr.present, attr.presentMotion, "hidden"],
             [
-              "--ae-pop-low-steps",
-              "--ae-unpop-low-steps",
               "--ae-pop-progress",
               "--ae-unpop-progress",
               "--ae-present-pop-phase",
@@ -2877,10 +2872,6 @@
             const timeMs = getString2Time(duration);
             const activateTransition = () => {
               if (controller.transition !== transition) return;
-              element.style.setProperty(
-                `--ae-${newDirection}-low-steps`.toLowerCase(),
-                Math.max(1, parseInt(timeMs / 62.5))
-              );
               controller.classList.remove(
                 className.pop,
                 className.popping,
@@ -3498,7 +3489,7 @@
         adjustLimit(time);
       }
       const effectiveFPS = Math.min(limitFPS === null ? Infinity : limitFPS, visualFPSLimit());
-      if (effectiveFPS >= nativeFPS) return true;
+      if (effectiveFPS === Infinity || nativeFPS !== null && effectiveFPS >= nativeFPS) return true;
       const period = 1e3 / effectiveFPS;
       frameCredit += delta;
       if (frameCredit + 1e-3 < period) return false;
@@ -4077,7 +4068,7 @@
   init_utils_name_case();
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   var attributesByExtension = {
-    present: "present present-group present-active present-when present-motion trigger trigger-on dismiss target auto-unpop unpop-on-outside low-hardware present-group-anchor",
+    present: "present present-group present-active present-when present-motion trigger trigger-on dismiss target auto-unpop unpop-on-outside present-group-anchor",
     anchor: "anchor anchor-target anchor-match anchor-style",
     scrollbox: "scrollbox scrollbox-wheel-horizontal scrollbox-momentum scrollbox-elastic scrollbar scrollbar-vertical scrollbar-horizontal",
     "scrollbox-snap": "scrollbox-snap snap-item",
@@ -4213,7 +4204,7 @@
             });
         }
       }, validateCSS = function() {
-        var _a2, _b2;
+        var _a2;
         const checkAnchor = has("anchor") && (!selected || selected.has("anchor"));
         const checkPresent = (has("present") || has("present-motion")) && (!selected || selected.has("present"));
         if (!checkAnchor && !checkPresent) return;
@@ -4233,18 +4224,6 @@
               value: value2,
               reason: `Invalid duration in ${name}.`,
               suggestion: "Use a nonnegative CSS time such as 250ms or 0s."
-            });
-        }
-        for (const name of checkPresent ? ["--ae-pop-low-steps", "--ae-unpop-low-steps"] : []) {
-          const value2 = element.style.getPropertyValue(name).trim();
-          if (value2 && ((_b2 = root2.CSS) == null ? void 0 : _b2.supports) && !root2.CSS.supports("animation-timing-function", `steps(${value2})`))
-            reportConfiguration(api, "WARN_CONFIGURATION_VALUE", {
-              extension,
-              element,
-              attribute: "style",
-              value: value2,
-              reason: `Invalid step count in ${name}.`,
-              suggestion: "Use a positive integer step count."
             });
         }
         if (!element.getClientRects().length) return;
@@ -5094,6 +5073,14 @@
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   function createCssMotionController(root2, getAelluxJs) {
     const operations = /* @__PURE__ */ new Map();
+    const lightweightProperties = /* @__PURE__ */ new Set([
+      "transform",
+      "opacity",
+      "--ae-pop-progress",
+      "--ae-unpop-progress",
+      "--ae-present-pop-phase",
+      "--ae-present-unpop-phase"
+    ]);
     let nextId = 4e6;
     function id() {
       return nextId++;
@@ -5180,7 +5167,6 @@
         return AelluxJs2.waitLayout.sequence(operationId, {
           update: () => advance(operation),
           repeat: { ms: 0 },
-          maxFPS,
           abort: () => operation.done || shouldAbort()
         }).then((progressResult) => {
           const completed = operation.done && !operation.cancelled;
@@ -5223,17 +5209,17 @@
         const end = Number(timing.endTime);
         if (Number.isFinite(end)) endTime = Math.max(endTime, end);
         applyAelluxEasing(operation, animation);
-        if (!onlyTransformAndOpacity(animation)) operation.conservative = true;
+        if (!onlyLightweightProperties(animation)) operation.conservative = true;
       }
       operation.endTime = endTime;
       operation.start = now();
       operation.controlled = true;
       if (!(endTime > 0)) operation.done = true;
     }
-    function onlyTransformAndOpacity(animation) {
+    function onlyLightweightProperties(animation) {
       try {
         if (typeof root2.CSSTransition === "function" && animation instanceof root2.CSSTransition) {
-          return animation.transitionProperty === "transform" || animation.transitionProperty === "opacity";
+          return lightweightProperties.has(animation.transitionProperty);
         }
         const frames = animation.effect.getKeyframes();
         if (!frames.length) return false;
@@ -5243,7 +5229,7 @@
           for (const property of Object.keys(frame)) {
             if (metadata.has(property)) continue;
             found = true;
-            if (property !== "transform" && property !== "opacity") return false;
+            if (!lightweightProperties.has(property)) return false;
           }
         }
         return found;
@@ -5267,13 +5253,13 @@
             option: "cssMotionPropertyMaxFPS",
             attribute: "cssMotionPropertyMaxFPS",
             value,
-            fallback: 40,
-            reason: "CSS Motion frame rate must be finite and greater than zero; using 40 FPS.",
+            fallback: 55,
+            reason: "CSS Motion frame rate must be finite and greater than zero; using 55 FPS.",
             suggestion: "Use a positive finite number or omit the option for the default."
           }
         );
       }
-      return 40;
+      return 55;
     }
     function minimumFPS(first, second) {
       const values = [first, second].filter((value) => Number.isFinite(value) && value > 0);

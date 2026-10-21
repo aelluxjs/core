@@ -4,18 +4,20 @@
 
 The controller intentionally accepts a small main-thread cost under ideal conditions. Its purpose is predictable degradation: if the browser begins missing frames because of a constrained device or competing applications, the shared scheduler can reduce update frequency instead of allowing managed motion to contribute to stalls. A sustained severe delay selects the nearest compatible lower 15-FPS budget in one adjustment; an observed 10 FPS cadence reaches the 5 FPS floor immediately.
 
-Controlled operations containing any animated property other than `transform` and `opacity` have a conservative default ceiling of 40 FPS. Configure it with `cssMotionPropertyMaxFPS` in `init()`. This is a workload policy, not a promise that `transform` or `opacity` stays on the GPU: browser composition and painting still depend on the document and device. Classification applies to the whole operation. If one transition combines `opacity`, `transform`, and `height`, all captured animations share one clock at the lowest applicable limit from `data-ae-maxfps`, `run({ maxFPS })`, and `cssMotionPropertyMaxFPS`; properties never receive independent schedules.
+Controlled operations containing animated properties beyond `transform`, `opacity`, and Present's internal progress channels have a conservative default ceiling of 55 FPS. The exempt progress properties are `--ae-pop-progress`, `--ae-unpop-progress`, `--ae-present-pop-phase`, and `--ae-present-unpop-phase`; arbitrary custom properties remain conservative because they can drive layout. Configure the ceiling with `cssMotionPropertyMaxFPS` in `init()`. This is a workload policy, not a promise that exempt properties stay on the GPU: browser composition and painting still depend on the document and device. Classification applies to the whole operation. If one transition combines `opacity`, `transform`, and `height`, all captured animations share one clock at the lowest applicable limit from `data-ae-maxfps`, `run({ maxFPS })`, and `cssMotionPropertyMaxFPS`; properties never receive independent schedules.
+
+The shared scheduler applies that visual limit once, including before its native cadence has been calibrated. CSS Motion does not also impose a timer-based sequence limit: timer wakeups can miss the next animation frame and reduce a nominal 40 FPS operation to about 32 FPS on WebKit. Frame credit preserves the requested average cadence within the browser's available frames; it does not guarantee a frame rate when the device cannot sustain it.
 
 ```js
 $ae.init({
   mode: "full",
-  cssMotionPropertyMaxFPS: 40
+  cssMotionPropertyMaxFPS: 55
 });
 ```
 
 Use `0` or `null` to disable this special property ceiling. This does not disable
 the adaptive `waitLayout` scheduler or an element's `data-ae-maxfps` limit.
-Omitting the option (or passing `undefined`) retains the 40 FPS default.
+Omitting the option (or passing `undefined`) retains the 55 FPS default.
 
 ```js
 const motionId = $ae.motion.id();

@@ -397,14 +397,6 @@
               }
             },
             {
-              "name": "data-ae-low-hardware",
-              "description": "Presence on html enables stepped Present easing for lower-cost motion.\n\nValue syntax: presence.",
-              "doc-url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/present.htm",
-              "value": {
-                "kind": "no-value"
-              }
-            },
-            {
               "name": "data-ae-reduced-motion",
               "description": "Resolved root preference published by the runtime. Use in CSS selectors; configure choices through Preference.\n\nRuntime output; read it in selectors/styles instead of using it as an activation command.\n\nValue syntax: enum.",
               "doc-url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/preference.htm",
@@ -588,11 +580,6 @@
           "doc-url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/present.htm"
         },
         {
-          "name": "--ae-pop-low-steps",
-          "description": "Step count used by low-hardware motion; the runtime derives it from the duration.\n\nRuntime output; read it in selectors/styles instead of using it as an activation command.\n\nValue syntax: <integer>.\n\nDefault behavior: \"4\".",
-          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/present.htm"
-        },
-        {
           "name": "--ae-pop-opacity",
           "description": "pop opacity endpoint.\n\nValue syntax: <number> | <percentage>.\n\nDefault behavior: \"1\".",
           "doc-url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/present.htm"
@@ -701,11 +688,6 @@
         {
           "name": "--ae-unpop-height",
           "description": "unpop grid height endpoint.\n\nValue syntax: <flex>.\n\nDefault behavior: \"0fr\".",
-          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/present.htm"
-        },
-        {
-          "name": "--ae-unpop-low-steps",
-          "description": "Step count used by low-hardware motion; the runtime derives it from the duration.\n\nRuntime output; read it in selectors/styles instead of using it as an activation command.\n\nValue syntax: <integer>.\n\nDefault behavior: \"4\".",
           "doc-url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/present.htm"
         },
         {

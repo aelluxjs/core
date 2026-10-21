@@ -6,7 +6,7 @@ import utilsNameCase from "./utils-name-case.js";
 // Only declarative, development-time checks belong here. Runtime failures remain
 // the responsibility of each Extension. No observers or production DOM scans.
 const attributesByExtension = {
-  present: "present present-group present-active present-when present-motion trigger trigger-on dismiss target auto-unpop unpop-on-outside low-hardware present-group-anchor",
+  present: "present present-group present-active present-when present-motion trigger trigger-on dismiss target auto-unpop unpop-on-outside present-group-anchor",
   anchor: "anchor anchor-target anchor-match anchor-style",
   scrollbox: "scrollbox scrollbox-wheel-horizontal scrollbox-momentum scrollbox-elastic scrollbar scrollbar-vertical scrollbar-horizontal",
   "scrollbox-snap": "scrollbox-snap snap-item",
@@ -196,12 +196,6 @@ export function validateDeclarations(root, scope, extensionNames = null, method 
         if (value && root.CSS?.supports && !root.CSS.supports("transition-duration", value))
           reportConfiguration(api, "WARN_CONFIGURATION_STYLE", { extension, element, attribute: "style", value,
             reason: `Invalid duration in ${name}.`, suggestion: "Use a nonnegative CSS time such as 250ms or 0s." });
-      }
-      for (const name of checkPresent ? ["--ae-pop-low-steps", "--ae-unpop-low-steps"] : []) {
-        const value = element.style.getPropertyValue(name).trim();
-        if (value && root.CSS?.supports && !root.CSS.supports("animation-timing-function", `steps(${value})`))
-          reportConfiguration(api, "WARN_CONFIGURATION_VALUE", { extension, element, attribute: "style", value,
-            reason: `Invalid step count in ${name}.`, suggestion: "Use a positive integer step count." });
       }
       if (!element.getClientRects().length) return;
       if (checkPresent && has("present") && element.classList.contains(api.className("present-grid")) && /(?:^|\s)(height|width)(?:\s|$)/.test(value("present")) && !["grid", "inline-grid"].includes(style.display))

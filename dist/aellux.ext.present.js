@@ -21,9 +21,8 @@
       //toggle,pop,unpop
       dismiss: AelluxJs.attr("dismiss"),
       //target ID
-      target: AelluxJs.attr("target"),
+      target: AelluxJs.attr("target")
       //target ID
-      lowHardware: AelluxJs.attr("low-hardware")
     };
     const className = {
       pop: AelluxJs.className("pop"),
@@ -83,9 +82,7 @@
       ["pop-ease", "*", "ease-out"],
       ["unpop-ease", "*", "ease-in"],
       ["pop-duration", "<time>", "250ms"],
-      ["unpop-duration", "<time>", "250ms"],
-      ["pop-low-steps", "<integer>", "4"],
-      ["unpop-low-steps", "<integer>", "4"]
+      ["unpop-duration", "<time>", "250ms"]
     ];
     function init(options) {
       const descriptors = cssProperties.map(([name, syntax, initialValue]) => ({ name: `--ae-${name}`, syntax, initialValue }));
@@ -145,8 +142,6 @@
         element,
         [attr.present, attr.presentMotion, "hidden"],
         [
-          "--ae-pop-low-steps",
-          "--ae-unpop-low-steps",
           "--ae-pop-progress",
           "--ae-unpop-progress",
           "--ae-present-pop-phase",
@@ -536,10 +531,6 @@
         const timeMs = getString2Time(duration);
         const activateTransition = () => {
           if (controller.transition !== transition) return;
-          element.style.setProperty(
-            `--ae-${newDirection}-low-steps`.toLowerCase(),
-            Math.max(1, parseInt(timeMs / 62.5))
-          );
           controller.classList.remove(
             className.pop,
             className.popping,

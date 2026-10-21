@@ -37,6 +37,11 @@
   --bs-headings-font-family: 'Geist', sans-serif;
 }
 
+[data-ae-present] {
+  --ae-pop-aellux-ease: ease-out-circ;
+  --ae-unpop-aellux-ease: ease-in-cubic;
+}
+
 h1,
 h2,
 h3,
@@ -298,14 +303,14 @@ pre code.hljs {
   --bs-btn-border-color: var(--bs-body-color);
 
   /* Cores do estado Hover (inverte as cores) */
-  --bs-btn-hover-color: none;
-  --bs-btn-hover-bg: none;
-  --bs-btn-hover-border-color: none;
+  --bs-btn-hover-color: var(--bs-btn-color);
+  --bs-btn-hover-bg: var(--bs-btn-bg);
+  --bs-btn-hover-border-color: var(--bs-btn-border-color);
 
   /* Cores do estado Ativo/Click */
-  --bs-btn-active-color: var(--bs-body-bg);
-  --bs-btn-active-bg: var(--bs-body-color);
-  --bs-btn-active-border-color: var(--bs-body-color);
+  --bs-btn-active-color: var(--bs-btn-bg);
+  --bs-btn-active-bg: var(--bs-btn-bg);
+  --bs-btn-active-border-color: var(--bs-btn-border-color);
 
   /* Foco/Ring */
   --bs-btn-focus-shadow-rgb: var(--bs-body-color-rgb);

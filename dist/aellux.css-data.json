@@ -232,17 +232,6 @@
       ]
     },
     {
-      "name": "--ae-pop-low-steps",
-      "description": "Step count used by low-hardware motion; the runtime derives it from the duration.\n\nRuntime output; read it in selectors/styles instead of using it as an activation command.\n\nValue syntax: <integer>.\n\nDefault behavior: \"4\".",
-      "syntax": "<integer>",
-      "references": [
-        {
-          "name": "AelluxJS present",
-          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/present.htm"
-        }
-      ]
-    },
-    {
       "name": "--ae-pop-opacity",
       "description": "pop opacity endpoint.\n\nValue syntax: <number> | <percentage>.\n\nDefault behavior: \"1\".",
       "syntax": "<number> | <percentage>",
@@ -480,17 +469,6 @@
       "name": "--ae-unpop-height",
       "description": "unpop grid height endpoint.\n\nValue syntax: <flex>.\n\nDefault behavior: \"0fr\".",
       "syntax": "<flex>",
-      "references": [
-        {
-          "name": "AelluxJS present",
-          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/present.htm"
-        }
-      ]
-    },
-    {
-      "name": "--ae-unpop-low-steps",
-      "description": "Step count used by low-hardware motion; the runtime derives it from the duration.\n\nRuntime output; read it in selectors/styles instead of using it as an activation command.\n\nValue syntax: <integer>.\n\nDefault behavior: \"4\".",
-      "syntax": "<integer>",
       "references": [
         {
           "name": "AelluxJS present",

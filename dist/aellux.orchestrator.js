@@ -171,7 +171,7 @@
         adjustLimit(time);
       }
       const effectiveFPS = Math.min(limitFPS === null ? Infinity : limitFPS, visualFPSLimit());
-      if (effectiveFPS >= nativeFPS) return true;
+      if (effectiveFPS === Infinity || nativeFPS !== null && effectiveFPS >= nativeFPS) return true;
       const period = 1e3 / effectiveFPS;
       frameCredit += delta;
       if (frameCredit + 1e-3 < period) return false;
@@ -756,7 +756,7 @@
   // src/internal/validate-declarations.js
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   var attributesByExtension = {
-    present: "present present-group present-active present-when present-motion trigger trigger-on dismiss target auto-unpop unpop-on-outside low-hardware present-group-anchor",
+    present: "present present-group present-active present-when present-motion trigger trigger-on dismiss target auto-unpop unpop-on-outside present-group-anchor",
     anchor: "anchor anchor-target anchor-match anchor-style",
     scrollbox: "scrollbox scrollbox-wheel-horizontal scrollbox-momentum scrollbox-elastic scrollbar scrollbar-vertical scrollbar-horizontal",
     "scrollbox-snap": "scrollbox-snap snap-item",
@@ -892,7 +892,7 @@
             });
         }
       }, validateCSS = function() {
-        var _a2, _b2;
+        var _a2;
         const checkAnchor = has("anchor") && (!selected || selected.has("anchor"));
         const checkPresent = (has("present") || has("present-motion")) && (!selected || selected.has("present"));
         if (!checkAnchor && !checkPresent) return;
@@ -912,18 +912,6 @@
               value: value2,
               reason: `Invalid duration in ${name}.`,
               suggestion: "Use a nonnegative CSS time such as 250ms or 0s."
-            });
-        }
-        for (const name of checkPresent ? ["--ae-pop-low-steps", "--ae-unpop-low-steps"] : []) {
-          const value2 = element.style.getPropertyValue(name).trim();
-          if (value2 && ((_b2 = root.CSS) == null ? void 0 : _b2.supports) && !root.CSS.supports("animation-timing-function", `steps(${value2})`))
-            reportConfiguration(api, "WARN_CONFIGURATION_VALUE", {
-              extension,
-              element,
-              attribute: "style",
-              value: value2,
-              reason: `Invalid step count in ${name}.`,
-              suggestion: "Use a positive integer step count."
             });
         }
         if (!element.getClientRects().length) return;
@@ -1770,6 +1758,14 @@
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   function createCssMotionController(root, getAelluxJs) {
     const operations = /* @__PURE__ */ new Map();
+    const lightweightProperties = /* @__PURE__ */ new Set([
+      "transform",
+      "opacity",
+      "--ae-pop-progress",
+      "--ae-unpop-progress",
+      "--ae-present-pop-phase",
+      "--ae-present-unpop-phase"
+    ]);
     let nextId = 4e6;
     function id() {
       return nextId++;
@@ -1856,7 +1852,6 @@
         return AelluxJs2.waitLayout.sequence(operationId, {
           update: () => advance(operation),
           repeat: { ms: 0 },
-          maxFPS,
           abort: () => operation.done || shouldAbort()
         }).then((progressResult) => {
           const completed = operation.done && !operation.cancelled;
@@ -1899,17 +1894,17 @@
         const end = Number(timing.endTime);
         if (Number.isFinite(end)) endTime = Math.max(endTime, end);
         applyAelluxEasing(operation, animation);
-        if (!onlyTransformAndOpacity(animation)) operation.conservative = true;
+        if (!onlyLightweightProperties(animation)) operation.conservative = true;
       }
       operation.endTime = endTime;
       operation.start = now();
       operation.controlled = true;
       if (!(endTime > 0)) operation.done = true;
     }
-    function onlyTransformAndOpacity(animation) {
+    function onlyLightweightProperties(animation) {
       try {
         if (typeof root.CSSTransition === "function" && animation instanceof root.CSSTransition) {
-          return animation.transitionProperty === "transform" || animation.transitionProperty === "opacity";
+          return lightweightProperties.has(animation.transitionProperty);
         }
         const frames = animation.effect.getKeyframes();
         if (!frames.length) return false;
@@ -1919,7 +1914,7 @@
           for (const property of Object.keys(frame)) {
             if (metadata.has(property)) continue;
             found = true;
-            if (property !== "transform" && property !== "opacity") return false;
+            if (!lightweightProperties.has(property)) return false;
           }
         }
         return found;
@@ -1943,13 +1938,13 @@
             option: "cssMotionPropertyMaxFPS",
             attribute: "cssMotionPropertyMaxFPS",
             value,
-            fallback: 40,
-            reason: "CSS Motion frame rate must be finite and greater than zero; using 40 FPS.",
+            fallback: 55,
+            reason: "CSS Motion frame rate must be finite and greater than zero; using 55 FPS.",
             suggestion: "Use a positive finite number or omit the option for the default."
           }
         );
       }
-      return 40;
+      return 55;
     }
     function minimumFPS(first, second) {
       const values = [first, second].filter((value) => Number.isFinite(value) && value > 0);

@@ -4,6 +4,10 @@
 // when the browser exposes enough of Web Animations to do that safely.
 export function createCssMotionController(root, getAelluxJs) {
   const operations = new Map();
+  const lightweightProperties = new Set([
+    "transform", "opacity", "--ae-pop-progress", "--ae-unpop-progress",
+    "--ae-present-pop-phase", "--ae-present-unpop-phase"
+  ]);
   let nextId = 4000000;
 
   function id() {
@@ -98,7 +102,6 @@ export function createCssMotionController(root, getAelluxJs) {
       return AelluxJs.waitLayout.sequence(operationId, {
         update: () => advance(operation),
         repeat: { ms: 0 },
-        maxFPS,
         abort: () => operation.done || shouldAbort()
       }).then(progressResult => {
         const completed = operation.done && !operation.cancelled;
@@ -151,7 +154,7 @@ export function createCssMotionController(root, getAelluxJs) {
       const end = Number(timing.endTime);
       if (Number.isFinite(end)) endTime = Math.max(endTime, end);
       applyAelluxEasing(operation, animation);
-      if (!onlyTransformAndOpacity(animation)) operation.conservative = true;
+      if (!onlyLightweightProperties(animation)) operation.conservative = true;
     }
     operation.endTime = endTime;
     operation.start = now();
@@ -159,11 +162,10 @@ export function createCssMotionController(root, getAelluxJs) {
     if (!(endTime > 0)) operation.done = true;
   }
 
-  function onlyTransformAndOpacity(animation) {
+  function onlyLightweightProperties(animation) {
     try {
       if (typeof root.CSSTransition === "function" && animation instanceof root.CSSTransition) {
-        return animation.transitionProperty === "transform" ||
-          animation.transitionProperty === "opacity";
+        return lightweightProperties.has(animation.transitionProperty);
       }
       const frames = animation.effect.getKeyframes();
       if (!frames.length) return false;
@@ -173,7 +175,7 @@ export function createCssMotionController(root, getAelluxJs) {
         for (const property of Object.keys(frame)) {
           if (metadata.has(property)) continue;
           found = true;
-          if (property !== "transform" && property !== "opacity") return false;
+          if (!lightweightProperties.has(property)) return false;
         }
       }
       return found;
@@ -195,11 +197,11 @@ export function createCssMotionController(root, getAelluxJs) {
     if (Number.isFinite(number) && number > 0) return number;
     if (value !== undefined) {
       AelluxJs.diagnostics.warn(AelluxJs.diagnostics.WARN_CSS_MOTION_PROPERTY_MAX_FPS_INVALID,
-        { extension: "core", option: "cssMotionPropertyMaxFPS", attribute: "cssMotionPropertyMaxFPS", value, fallback: 40,
-          reason: "CSS Motion frame rate must be finite and greater than zero; using 40 FPS.",
+        { extension: "core", option: "cssMotionPropertyMaxFPS", attribute: "cssMotionPropertyMaxFPS", value, fallback: 55,
+          reason: "CSS Motion frame rate must be finite and greater than zero; using 55 FPS.",
           suggestion: "Use a positive finite number or omit the option for the default." });
     }
-    return 40;
+    return 55;
   }
 
   function minimumFPS(first, second) {

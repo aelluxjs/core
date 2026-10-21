@@ -2498,17 +2498,6 @@
       "docURL": "https://aelluxjs.github.io/core/docs/0.1.0/extensions/declarative-loading.htm"
     },
     {
-      "name": "data-ae-low-hardware",
-      "extension": "present",
-      "description": "Presence on html enables stepped Present easing for lower-cost motion.",
-      "syntax": "presence",
-      "tags": [
-        "html"
-      ],
-      "role": "input",
-      "docURL": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/present.htm"
-    },
-    {
       "name": "data-ae-maxfps",
       "extension": "core",
       "description": "Optional layout update ceiling on this element. Must be a finite number greater than zero; no attribute means the shared scheduler cadence.",
@@ -3131,15 +3120,6 @@
       "docURL": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/present.htm"
     },
     {
-      "name": "--ae-pop-low-steps",
-      "extension": "present",
-      "syntax": "<integer>",
-      "description": "Step count used by low-hardware motion; the runtime derives it from the duration.",
-      "default": "4",
-      "role": "output",
-      "docURL": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/present.htm"
-    },
-    {
       "name": "--ae-pop-opacity",
       "extension": "present",
       "syntax": "<number> | <percentage>",
@@ -3384,15 +3364,6 @@
       "description": "unpop grid height endpoint.",
       "default": "0fr",
       "role": "input",
-      "docURL": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/present.htm"
-    },
-    {
-      "name": "--ae-unpop-low-steps",
-      "extension": "present",
-      "syntax": "<integer>",
-      "description": "Step count used by low-hardware motion; the runtime derives it from the duration.",
-      "default": "4",
-      "role": "output",
       "docURL": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/present.htm"
     },
     {

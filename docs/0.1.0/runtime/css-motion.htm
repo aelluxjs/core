@@ -84,7 +84,7 @@
             table.parentElement.classList.contains("table-scroll-wrapper")) {
             return;
           }
-          table.setAttribute("data-ae-scrollbox-elastic", "");
+          //table.setAttribute("data-ae-scrollbox-elastic", "");
           const wrapper = document.createElement("div");
           wrapper.classList.add("table-scroll-wrapper");
           wrapper.setAttribute("data-ae-scrollbox", "pointer");
@@ -208,20 +208,21 @@
             <div class="d-flex flex-row gap-2 justify-content-between pb-2 pt-0 pt-md-2">
 
               <div class="dropdown">
-  <button class="btn btn-outline-adaptive ps-3 dropdown-toggle rounded-1" type="button"
-    data-bs-toggle="dropdown" aria-expanded="false">
-0.1.0  </button>
-  <ul class="dropdown-menu dropdown-menu-start rounded-2 overflow-hidden position-absolute" style="min-width: unset;">
+  <button class="btn btn-outline-adaptive ps-3 dropdown-toggle rounded-1" type="button" data-bs-target="dropdown"
+    data-bs-trigger="toggle" aria-expanded="false">
+    0.1.0  </button>
+  <ul data-ae-present="opacity transform" hidden="true"
+    class="dropdown-menu dropdown-menu-start rounded-2 overflow-hidden position-absolute" style="min-width: unset;">
 
-
-    <li>
-      <a class="dropdown-item active" data-no-ajax=true
-        href="/core/docs/0.1.0/index.htm">0.1.0</a>
-    </li>
-
+    
+      <li>
+        <a class="dropdown-item active" data-no-ajax=true
+          href="/core/docs/0.1.0/index.htm">
+          0.1.0        </a>
+      </li>
+      
   </ul>
 </div>
-
                 <div data-ae-preference="color-scheme" class="btn-group border rounded-1 rounded overflow-hidden" style="gap:1px;" role="group" aria-label="Basic example">
 
   <input type="radio" class="btn-check" name="color-mode-selected" id="radio-color-mode-light"
@@ -553,15 +554,16 @@
           <h1>CSS Motion Controller</h1>
 <p><code>AelluxJs.motion</code> coordinates CSS transitions and CSS animations with <code>waitLayout</code>. CSS remains responsible for properties, keyframes, duration, delay, iterations and the normal CSS easing. In browsers with sufficient Web Animations API support, Aellux pauses only the animations created by the requested state change and advances their <code>currentTime</code> from a monotonic clock. <code>waitLayout.sequence()</code> decides which frames perform those updates, including adaptive FPS reduction and the element&#39;s optional <code>data-ae-maxfps</code> limit.</p>
 <p>The controller intentionally accepts a small main-thread cost under ideal conditions. Its purpose is predictable degradation: if the browser begins missing frames because of a constrained device or competing applications, the shared scheduler can reduce update frequency instead of allowing managed motion to contribute to stalls. A sustained severe delay selects the nearest compatible lower 15-FPS budget in one adjustment; an observed 10 FPS cadence reaches the 5 FPS floor immediately.</p>
-<p>Controlled operations containing any animated property other than <code>transform</code> and <code>opacity</code> have a conservative default ceiling of 40 FPS. Configure it with <code>cssMotionPropertyMaxFPS</code> in <code>init()</code>. This is a workload policy, not a promise that <code>transform</code> or <code>opacity</code> stays on the GPU: browser composition and painting still depend on the document and device. Classification applies to the whole operation. If one transition combines <code>opacity</code>, <code>transform</code>, and <code>height</code>, all captured animations share one clock at the lowest applicable limit from <code>data-ae-maxfps</code>, <code>run({ maxFPS })</code>, and <code>cssMotionPropertyMaxFPS</code>; properties never receive independent schedules.</p>
+<p>Controlled operations containing animated properties beyond <code>transform</code>, <code>opacity</code>, and Present&#39;s internal progress channels have a conservative default ceiling of 55 FPS. The exempt progress properties are <code>--ae-pop-progress</code>, <code>--ae-unpop-progress</code>, <code>--ae-present-pop-phase</code>, and <code>--ae-present-unpop-phase</code>; arbitrary custom properties remain conservative because they can drive layout. Configure the ceiling with <code>cssMotionPropertyMaxFPS</code> in <code>init()</code>. This is a workload policy, not a promise that exempt properties stay on the GPU: browser composition and painting still depend on the document and device. Classification applies to the whole operation. If one transition combines <code>opacity</code>, <code>transform</code>, and <code>height</code>, all captured animations share one clock at the lowest applicable limit from <code>data-ae-maxfps</code>, <code>run({ maxFPS })</code>, and <code>cssMotionPropertyMaxFPS</code>; properties never receive independent schedules.</p>
+<p>The shared scheduler applies that visual limit once, including before its native cadence has been calibrated. CSS Motion does not also impose a timer-based sequence limit: timer wakeups can miss the next animation frame and reduce a nominal 40 FPS operation to about 32 FPS on WebKit. Frame credit preserves the requested average cadence within the browser&#39;s available frames; it does not guarantee a frame rate when the device cannot sustain it.</p>
 <pre><code class="language-js">$ae.init({
   mode: &quot;full&quot;,
-  cssMotionPropertyMaxFPS: 40
+  cssMotionPropertyMaxFPS: 55
 });
 </code></pre>
 <p>Use <code>0</code> or <code>null</code> to disable this special property ceiling. This does not disable
 the adaptive <code>waitLayout</code> scheduler or an element&#39;s <code>data-ae-maxfps</code> limit.
-Omitting the option (or passing <code>undefined</code>) retains the 40 FPS default.</p>
+Omitting the option (or passing <code>undefined</code>) retains the 55 FPS default.</p>
 <pre><code class="language-js">const motionId = $ae.motion.id();
 await $ae.motion.run(panel, {
   id: motionId,

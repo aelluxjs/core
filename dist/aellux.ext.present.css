@@ -17,8 +17,6 @@
   --ae-unpop-ease: ease-in;
   --ae-pop-duration: 300ms;
   --ae-unpop-duration: 150ms;
-  --ae-pop-low-steps: 4;
-  --ae-unpop-low-steps: 4;
 
   transition-property: var(--ae-present-properties);
 }
@@ -51,12 +49,8 @@
 }
 html[data-ae-reduced-motion="reduced"] [data-ae-present] {
   transition: none !important;
-  --ae-pop-duration: 0s;
-  --ae-unpop-duration: 0s;
-}
-html[data-ae-low-hardware] [data-ae-present] {
-  --ae-pop-ease: steps(var(--ae-pop-low-steps));
-  --ae-unpop-ease: steps(var(--ae-unpop-low-steps));
+  --ae-pop-duration: 0s !important;
+  --ae-unpop-duration: 0s !important;
 }
 [data-ae-present].ae--will-change {
   will-change: opacity, transform;

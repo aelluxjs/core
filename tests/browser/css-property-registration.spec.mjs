@@ -97,7 +97,6 @@ test("extensions register the CSS properties they publish during init", async ({
       "--ae-from-height", "--ae-pop-height", "--ae-unpop-height",
       "--ae-from-width", "--ae-pop-width", "--ae-unpop-width",
       "--ae-pop-ease", "--ae-unpop-ease", "--ae-pop-duration", "--ae-unpop-duration",
-      "--ae-pop-low-steps", "--ae-unpop-low-steps",
       "--ae-scroll-y-progress", "--ae-scroll-x-progress",
       "--ae-snap-viewport", "--ae-snap-focus",
       "--ae-scrollbar-x", "--ae-scrollbar-y", "--ae-scrollbar-length",
@@ -113,7 +112,7 @@ test("extensions register the CSS properties they publish during init", async ({
     "0", "0", "0px", "0px", "50%", "0%", "1",
     "0", "1", "0", "scale(0.5)", "scale(1)", "scale(1.2)",
     "0fr", "1fr", "0fr", "0fr", "1fr", "0fr",
-    "ease-out", "ease-in", "0.25s", "0.25s", "4", "4",
+    "ease-out", "ease-in", "0.25s", "0.25s",
     "0", "0", "0", "0", "0px", "0px", "0px", "0px", "0px", "none", "1", "0", "10px", "8px"
   ]);
 

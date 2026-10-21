@@ -84,7 +84,7 @@
             table.parentElement.classList.contains("table-scroll-wrapper")) {
             return;
           }
-          table.setAttribute("data-ae-scrollbox-elastic", "");
+          //table.setAttribute("data-ae-scrollbox-elastic", "");
           const wrapper = document.createElement("div");
           wrapper.classList.add("table-scroll-wrapper");
           wrapper.setAttribute("data-ae-scrollbox", "pointer");
@@ -208,20 +208,21 @@
             <div class="d-flex flex-row gap-2 justify-content-between pb-2 pt-0 pt-md-2">
 
               <div class="dropdown">
-  <button class="btn btn-outline-adaptive ps-3 dropdown-toggle rounded-1" type="button"
-    data-bs-toggle="dropdown" aria-expanded="false">
-0.1.0  </button>
-  <ul class="dropdown-menu dropdown-menu-start rounded-2 overflow-hidden position-absolute" style="min-width: unset;">
+  <button class="btn btn-outline-adaptive ps-3 dropdown-toggle rounded-1" type="button" data-bs-target="dropdown"
+    data-bs-trigger="toggle" aria-expanded="false">
+    0.1.0  </button>
+  <ul data-ae-present="opacity transform" hidden="true"
+    class="dropdown-menu dropdown-menu-start rounded-2 overflow-hidden position-absolute" style="min-width: unset;">
 
-
-    <li>
-      <a class="dropdown-item active" data-no-ajax=true
-        href="/core/docs/0.1.0/index.htm">0.1.0</a>
-    </li>
-
+    
+      <li>
+        <a class="dropdown-item active" data-no-ajax=true
+          href="/core/docs/0.1.0/index.htm">
+          0.1.0        </a>
+      </li>
+      
   </ul>
 </div>
-
                 <div data-ae-preference="color-scheme" class="btn-group border rounded-1 rounded overflow-hidden" style="gap:1px;" role="group" aria-label="Basic example">
 
   <input type="radio" class="btn-check" name="color-mode-selected" id="radio-color-mode-light"

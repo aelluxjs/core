@@ -146,7 +146,7 @@ export function buildLayoutScheduler() {
       adjustLimit(time);
     }
     const effectiveFPS = Math.min(limitFPS === null ? Infinity : limitFPS, visualFPSLimit());
-    if (effectiveFPS >= nativeFPS) return true;
+    if (effectiveFPS === Infinity || (nativeFPS !== null && effectiveFPS >= nativeFPS)) return true;
     const period = 1000 / effectiveFPS;
     frameCredit += delta;
     if (frameCredit + 0.001 < period) return false;

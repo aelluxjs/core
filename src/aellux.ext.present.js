@@ -53,7 +53,6 @@
     trigger: AelluxJs.attr("trigger"), //toggle,pop,unpop
     dismiss: AelluxJs.attr("dismiss"), //target ID
     target: AelluxJs.attr("target"), //target ID
-    lowHardware: AelluxJs.attr("low-hardware"),
   };
   const className = {
     pop: AelluxJs.className("pop"),
@@ -114,8 +113,7 @@
     ["unpop-height", "*", "0fr"], ["from-width", "*", "0fr"],
     ["pop-width", "*", "1fr"], ["unpop-width", "*", "0fr"],
     ["pop-ease", "*", "ease-out"], ["unpop-ease", "*", "ease-in"],
-    ["pop-duration", "<time>", "250ms"], ["unpop-duration", "<time>", "250ms"],
-    ["pop-low-steps", "<integer>", "4"], ["unpop-low-steps", "<integer>", "4"]
+    ["pop-duration", "<time>", "250ms"], ["unpop-duration", "<time>", "250ms"]
   ];
 
   function init(options) {
@@ -175,7 +173,7 @@
     elementMemories.set(element, AelluxJs.persist.element.save(
       element,
       [attr.present, attr.presentMotion, "hidden"],
-      ["--ae-pop-low-steps", "--ae-unpop-low-steps", "--ae-pop-progress", "--ae-unpop-progress",
+      ["--ae-pop-progress", "--ae-unpop-progress",
         "--ae-present-pop-phase", "--ae-present-unpop-phase"]
     ));
     containerAriaHandlers.set(element, AelluxJs.aria.register(element));
@@ -567,11 +565,6 @@
 
       const activateTransition = () => {
         if (controller.transition !== transition) return;
-        element.style.setProperty(
-          `--ae-${newDirection}-low-steps`.toLowerCase(),
-          Math.max(1, parseInt(timeMs / 62.5))
-        );
-
         controller.classList.remove(
           className.pop,
           className.popping,

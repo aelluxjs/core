@@ -16,7 +16,6 @@ export const semanticAttributes = [
   attribute("dismiss", "present", "Closes one Present ID, optionally prefixed with #. Empty uses data-ae-target or the closest Present ancestor.", { syntax: "id", default: "", examples: ["details"] }),
   attribute("auto-unpop", "present", "Automatically closes after the specified nonnegative duration. Values use milliseconds by default, or ms/s units.", { syntax: "duration", examples: ["250ms", "2s"] }),
   attribute("unpop-on-outside", "present", "Set false to keep a Present region open when clicking outside it.", { syntax: "enum", values: ["true", "false"], default: "true" }),
-  attribute("low-hardware", "present", "Presence on html enables stepped Present easing for lower-cost motion.", { syntax: "presence", tags: ["html"] }),
   attribute("anchor", "anchor", "Comma-separated target-pivot:self-pivot candidates. Pivots: top-left, top-center, top-right, center-left, center, center-right, bottom-left, bottom-center, bottom-right.", { syntax: "pivot-list", values: ["bottom-left:top-left", "bottom-center:top-center", "bottom-right:top-right", "top-left:bottom-left", "center:center"], examples: ["bottom-left:top-left, top-left:bottom-left"] }),
   attribute("anchor-target", "anchor", "Target ID or CSS selector. Empty uses offsetParent. Target and Anchor must share a positioning reference; an associated Present Group takes precedence.", { syntax: "selector", default: "", examples: ["menu-trigger", "#menu-trigger"] }),
   attribute("anchor-match", "anchor", "Match the target's width and/or height through weak CSS. Empty and unknown tokens are invalid; application sizing can override the match.", { syntax: "token-list", values: ["width", "height", "width height"] }),
@@ -61,7 +60,6 @@ export const semanticCSSProperties = [
   ...["pop", "unpop"].flatMap(phase => [
     property(`${phase}-duration`, "present", "<time>", `${phase} transition duration.`, { default: "250ms", values: ["0s", "150ms", "250ms", "500ms"] }),
     property(`${phase}-ease`, "present", "<easing-function>", `${phase} easing; CSS easing strings, including cubic-bezier, are supported.`, { default: phase === "pop" ? "ease-out" : "ease-in", values: ["linear", "ease", "ease-in", "ease-out", "ease-in-out"] }),
-    property(`${phase}-low-steps`, "present", "<integer>", "Step count used by low-hardware motion; the runtime derives it from the duration.", { default: "4", role: "output" }),
     property(`${phase}-progress`, "present", "<number>", `Bounded ${phase} progress from 0 to 1. Safe for application CSS.`, { role: "output" })
   ]),
   ...["from", "pop", "unpop"].flatMap(phase => [

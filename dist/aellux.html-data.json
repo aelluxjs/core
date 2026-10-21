@@ -881,17 +881,6 @@
           ]
         },
         {
-          "name": "data-ae-low-hardware",
-          "description": "Presence on html enables stepped Present easing for lower-cost motion.\n\nValue syntax: presence.",
-          "references": [
-            {
-              "name": "AelluxJS present",
-              "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/present.htm"
-            }
-          ],
-          "valueSet": "v"
-        },
-        {
           "name": "data-ae-reduced-motion",
           "description": "Resolved root preference published by the runtime. Use in CSS selectors; configure choices through Preference.\n\nRuntime output; read it in selectors/styles instead of using it as an activation command.\n\nValue syntax: enum.",
           "references": [

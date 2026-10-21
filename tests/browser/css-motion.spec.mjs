@@ -17,6 +17,21 @@ async function start(page, options = {}) {
   await expect.poll(() => page.evaluate(() => typeof AelluxJs.motion?.run)).toBe("function");
 }
 
+async function startPresent(page, options = {}) {
+  await start(page, options);
+  await page.evaluate(async () => {
+    const element = document.createElement("div");
+    element.id = "present-motion";
+    element.setAttribute("data-ae-present", "transform opacity");
+    element.hidden = true;
+    element.style.cssText = "width:100px;height:20px;--ae-pop-duration:600ms;--ae-from-transform:translateX(0);--ae-pop-transform:translateX(100px)";
+    document.getElementById("motion-box").replaceWith(element);
+    AelluxJs.ext("present", { loadStyle: true });
+    await AelluxJs.wait("present");
+    await AelluxJs.mount(element, "present");
+  });
+}
+
 test("CSS motion is controlled or safely falls back per browser operation", async ({ page, browserName }) => {
   await start(page);
   await page.evaluate(() => {
@@ -116,4 +131,50 @@ test("a mixed-property operation uses one timeline at the conservative FPS", asy
   expect(observation.result).toMatchObject({ status: "completed", mode: "controlled" });
   expect(observation.synchronized).toBe(true);
   expect(observation.distinct).toBeLessThanOrEqual(3);
+});
+
+test("Present progress does not cap transform/opacity at the conservative property FPS", async ({ page }) => {
+  await startPresent(page, { cssMotionPropertyMaxFPS: 5 });
+  const observation = await page.evaluate(async () => {
+    const element = document.getElementById("present-motion");
+    const times = new Set();
+    let sample = true;
+    const inspect = () => {
+      const animation = element.getAnimations().find(animation => animation.transitionProperty === "transform");
+      if (animation) times.add(animation.currentTime);
+      if (sample) requestAnimationFrame(inspect);
+    };
+    requestAnimationFrame(inspect);
+    await $ae(element).present.toggle(true);
+    sample = false;
+    return { distinct: times.size, expanded: element.getAttribute("aria-expanded") };
+  });
+  expect(observation.distinct).toBeGreaterThan(8);
+  expect(observation.expanded).toBe("true");
+});
+
+test("Present ease-back-out matches the numeric curve including overshoot", async ({ page }) => {
+  await startPresent(page);
+  await page.evaluate(() => {
+    const element = document.getElementById("present-motion");
+    element.style.setProperty("--ae-pop-ease", "ease-out");
+    element.style.setProperty("--ae-pop-aellux-ease", "ease-back-out");
+    window.presentMotion = $ae(element).present.toggle(true);
+  });
+  await expect.poll(() => page.locator("#present-motion").evaluate(element =>
+    element.getAnimations().some(animation => animation.transitionProperty === "transform" &&
+      animation.playState === "paused" && animation.effect.getTiming().easing.startsWith("linear("))
+  )).toBe(true);
+  const samples = await page.evaluate(() => {
+    const element = document.getElementById("present-motion");
+    const animations = element.getAnimations();
+    return [0.1, 0.25, 0.5, 0.75, 0.9].map(t => {
+      animations.forEach(animation => { animation.currentTime = t * 600; });
+      return { actual: new DOMMatrixReadOnly(getComputedStyle(element).transform).m41 / 100,
+        expected: $ae.ease("ease-back-out", t) };
+    });
+  });
+  samples.forEach(sample => expect(sample.actual).toBeCloseTo(sample.expected, 4));
+  expect(samples[2].actual).toBeGreaterThan(1);
+  await page.evaluate(() => window.presentMotion);
 });

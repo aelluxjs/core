@@ -697,29 +697,37 @@ test("present attribute tokens independently select transition properties", asyn
     .toBe("opacity, transform, grid-template-columns, grid-template-rows");
 });
 
-test("present derives stepped easing from duration on low hardware", async ({ page }) => {
+test("present preserves easing without step variables when a low-hardware marker exists", async ({ page }) => {
   await page.goto("/tests/index.htm");
   await page.evaluate(() => {
     document.documentElement.setAttribute("data-ae-low-hardware", "");
     document.body.innerHTML = `
       <div id="panel" data-ae-present="all" hidden
-        style="--ae-pop-duration: 500ms"><div data-ae-present-motion></div></div>`;
+        style="--ae-pop-duration: 500ms; --ae-pop-ease: ease-out; --ae-unpop-ease: ease-in"><div data-ae-present-motion></div></div>`;
   });
   await page.addScriptTag({ url: "/dist/aellux.js" });
   await page.evaluate(() => AelluxJs.init({ mode: "full" }));
   await expect.poll(() => page.evaluate(() =>
     typeof AelluxJs.mountManager?.controller("panel")?.present?.pop === "function"
   )).toBe(true);
-  await page.evaluate(() => AelluxJs.mountManager.controller("panel").present.pop());
-  await expect.poll(() => page.evaluate(() => {
+  const states = await page.evaluate(async () => {
     const panel = document.getElementById("panel");
-    const style = getComputedStyle(panel);
-    return {
-      steps: style.getPropertyValue("--ae-pop-low-steps").trim(),
-      easing: style.getPropertyValue("--ae-pop-ease").trim(),
-      inlineSteps: panel.style.getPropertyValue("--ae-pop-low-steps").trim()
-    };
-  })).toEqual({ steps: "8", easing: "steps(8)", inlineSteps: "8" });
+    const states = [];
+    for (const direction of ["pop", "unpop"]) {
+      await AelluxJs.mountManager.controller(panel).present[direction]();
+      const style = getComputedStyle(panel);
+      states.push({
+        easing: style.getPropertyValue(`--ae-${direction}-ease`).trim(),
+        steps: style.getPropertyValue(`--ae-${direction}-low-steps`).trim(),
+        inlineSteps: panel.style.getPropertyValue(`--ae-${direction}-low-steps`).trim()
+      });
+    }
+    return states;
+  });
+  expect(states).toEqual([
+    { easing: "ease-out", steps: "", inlineSteps: "" },
+    { easing: "ease-in", steps: "", inlineSteps: "" }
+  ]);
 });
 
 test("controller lookup diagnoses invalid inputs and unmounted elements", async ({ page }) => {

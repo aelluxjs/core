@@ -207,9 +207,8 @@
       //toggle,pop,unpop
       dismiss: AelluxJs.attr("dismiss"),
       //target ID
-      target: AelluxJs.attr("target"),
+      target: AelluxJs.attr("target")
       //target ID
-      lowHardware: AelluxJs.attr("low-hardware")
     };
     var className = {
       pop: AelluxJs.className("pop"),
@@ -249,7 +248,7 @@
     var groupObserver = null;
     var groupsQueued = false;
     var interpolatedProgress = false;
-    var cssProperties = [["pop-progress", "<number>", "0"], ["unpop-progress", "<number>", "1"], ["present-pop-phase", "<number>", "0"], ["present-unpop-phase", "<number>", "1"], ["from-opacity", OPACITY_SYNTAX, "0"], ["pop-opacity", OPACITY_SYNTAX, "1"], ["unpop-opacity", OPACITY_SYNTAX, "0"], ["from-transform", TRANSFORM_SYNTAX, "scale(0.5)"], ["pop-transform", TRANSFORM_SYNTAX, "scale(1)"], ["unpop-transform", TRANSFORM_SYNTAX, "scale(1.2)"], ["from-height", "*", "0fr"], ["pop-height", "*", "1fr"], ["unpop-height", "*", "0fr"], ["from-width", "*", "0fr"], ["pop-width", "*", "1fr"], ["unpop-width", "*", "0fr"], ["pop-ease", "*", "ease-out"], ["unpop-ease", "*", "ease-in"], ["pop-duration", "<time>", "250ms"], ["unpop-duration", "<time>", "250ms"], ["pop-low-steps", "<integer>", "4"], ["unpop-low-steps", "<integer>", "4"]];
+    var cssProperties = [["pop-progress", "<number>", "0"], ["unpop-progress", "<number>", "1"], ["present-pop-phase", "<number>", "0"], ["present-unpop-phase", "<number>", "1"], ["from-opacity", OPACITY_SYNTAX, "0"], ["pop-opacity", OPACITY_SYNTAX, "1"], ["unpop-opacity", OPACITY_SYNTAX, "0"], ["from-transform", TRANSFORM_SYNTAX, "scale(0.5)"], ["pop-transform", TRANSFORM_SYNTAX, "scale(1)"], ["unpop-transform", TRANSFORM_SYNTAX, "scale(1.2)"], ["from-height", "*", "0fr"], ["pop-height", "*", "1fr"], ["unpop-height", "*", "0fr"], ["from-width", "*", "0fr"], ["pop-width", "*", "1fr"], ["unpop-width", "*", "0fr"], ["pop-ease", "*", "ease-out"], ["unpop-ease", "*", "ease-in"], ["pop-duration", "<time>", "250ms"], ["unpop-duration", "<time>", "250ms"]];
     function init(options) {
       var descriptors = cssProperties.map(function(_ref) {
         var _ref2 = _slicedToArray(_ref, 3), name = _ref2[0], syntax = _ref2[1], initialValue = _ref2[2];
@@ -345,7 +344,7 @@
     }
     function mountPresentContainer(element) {
       if (presentElements.has(element)) return;
-      elementMemories.set(element, AelluxJs.persist.element.save(element, [attr.present, attr.presentMotion, "hidden"], ["--ae-pop-low-steps", "--ae-unpop-low-steps", "--ae-pop-progress", "--ae-unpop-progress", "--ae-present-pop-phase", "--ae-present-unpop-phase"]));
+      elementMemories.set(element, AelluxJs.persist.element.save(element, [attr.present, attr.presentMotion, "hidden"], ["--ae-pop-progress", "--ae-unpop-progress", "--ae-present-pop-phase", "--ae-present-unpop-phase"]));
       containerAriaHandlers.set(element, AelluxJs.aria.register(element));
       if ((element.getAttribute(attr.present) || "").trim().toLowerCase() === "all") {
         element.setAttribute(attr.present, DEFAULT_PRESENT);
@@ -819,7 +818,6 @@
               timeMs = getString2Time(duration);
               activateTransition = function activateTransition2() {
                 if (controller.transition !== transition) return;
-                element.style.setProperty("--ae-".concat(newDirection, "-low-steps").toLowerCase(), Math.max(1, parseInt(timeMs / 62.5)));
                 controller.classList.remove(className.pop, className.popping, className.unpopping);
                 controller.classList.add(transition.className);
                 controller.setAriaExpanded(gotoVisible ? "true" : "false");

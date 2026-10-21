@@ -563,6 +563,22 @@ test("timer-driven idle batches recover one FPS budget and publish it on html", 
   });
 });
 
+test("visual FPS limits apply while native cadence is still being calibrated", async () => {
+  await withClock(async clock => {
+    const scheduler = buildLayoutScheduler();
+    scheduler.setVisualFPSLimit(901, 5);
+    let calls = 0;
+    const running = scheduler.sequence(902, { update() { calls++; }, repeat: { ms: 0 } });
+    await Promise.resolve(); // queue the first update before advancing the clock
+    await clock.frames(8);
+    assert.equal(calls, 1, "calibration must not release eight unrestricted updates");
+    await clock.frames(5);
+    assert.equal(calls, 2);
+    scheduler.clear();
+    await running;
+  });
+});
+
 test("a CSS Motion visual ceiling delays but preserves independent layout work", async () => {
   await withClock(async clock => {
     const scheduler = buildLayoutScheduler();
