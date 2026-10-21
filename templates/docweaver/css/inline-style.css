@@ -218,10 +218,6 @@ body:after {
   --ae-unpop-duration: 200ms;
 }
 
-.navbar-collapse .docs-menu-panel[data-ae-present]:not([hidden]) {
-  display: grid;
-}
-
 .toc-header .toc-collapse {
   --ae-from-transform: scaleY(0);
   --ae-pop-transform: scaleY(1);

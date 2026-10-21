@@ -66,14 +66,14 @@
     container.style.transition = null;
     container.style.opacity = .2;
     setNavActiveByUrl(window.location.href);
+    $ae('navbarSupportedContent').present.unpop();
+    window.scrollTo({ top: 0 });
   });
 
   AelluxJs.on("AjaxHrefComplete", (e) => {
     const container = document.querySelector("#doc-content");
     container.style.transition = "opacity .25s linear";
     container.style.opacity = null;
-    $ae('navbarSupportedContent').present.unpop();
-    window.scrollTo({ top: 0 });
   });
 
   function comparableUrl(value) {

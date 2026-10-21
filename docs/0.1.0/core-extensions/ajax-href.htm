@@ -100,14 +100,14 @@
     container.style.transition = null;
     container.style.opacity = .2;
     setNavActiveByUrl(window.location.href);
+    $ae('navbarSupportedContent').present.unpop();
+    window.scrollTo({ top: 0 });
   });
 
   AelluxJs.on("AjaxHrefComplete", (e) => {
     const container = document.querySelector("#doc-content");
     container.style.transition = "opacity .25s linear";
     container.style.opacity = null;
-    $ae('navbarSupportedContent').present.unpop();
-    window.scrollTo({ top: 0 });
   });
 
   function comparableUrl(value) {
@@ -203,20 +203,19 @@
 
         <div class="navbar-collapse bg-white border-end d-md-block" id="navbarSupportedContent" hidden
           data-ae-present="transform" data-ae-scrollbox="pointer">
-          <ul class="navbar-nav w-100 h-100 gap-1 my-0 p-2 ps-md-3 pe-3 pe-md-2 flex-column align-self-start text-white"
-            data-ae-present-group>
+          <ul
+            class="navbar-nav w-100 h-100 gap-1 my-0 p-2 ps-md-3 pe-3 pe-md-2 flex-column align-self-start text-white">
 
             <div class="d-flex flex-row gap-2 justify-content-between pb-2 pt-0 pt-md-2">
 
               <div class="dropdown">
   <button class="btn btn-outline-adaptive ps-3 dropdown-toggle rounded-1" type="button" data-bs-target="dropdown"
-    data-ae-trigger="toggle" aria-expanded="false">
+    data-ae-trigger="toggle" data-ae-target="dropdown-version" aria-expanded="false">
     0.1.0  </button>
-  <ul data-ae-present="opacity transform" hidden="true"
+  <ul id="dropdown-version" data-ae-present="opacity transform" hidden="true"
     class="dropdown-menu dropdown-menu-start rounded-2 overflow-hidden position-absolute" style="min-width: unset;">
 
-    
-      <li>
+          <li>
         <a class="dropdown-item active" data-no-ajax=true
           href="/core/docs/0.1.0/index.htm">
           0.1.0        </a>
@@ -255,243 +254,243 @@
 
 </div>
             </div>
+            <div data-ae-present-group>
+                              <li class="nav-item small-md fw-bold rounded-1 ps-md-1 bg-light-adaptive" style="flex:0">
+                  <button type="button" class="nav-link w-100 text-start text-capitalize p-2 p-md-1 px-3 px-md-2"
+                    data-ae-trigger="toggle" data-ae-target="#children-overview">
+                    Overview                      <span class="chevron"><i
+                            class="bi bi-chevron-right small"></i></span>
+                                          </button>
+                </li>
 
-                          <li class="nav-item small-md fw-bold rounded-1 ps-md-1 bg-light-adaptive" style="flex:0">
-                <button type="button" class="nav-link w-100 text-start text-capitalize p-2 p-md-1 px-3 px-md-2"
-                  data-ae-trigger="toggle" data-ae-target="#children-overview">
-                  Overview                    <span class="chevron"><i
-                          class="bi bi-chevron-right small"></i></span>
-                                      </button>
-              </li>
+                                  <div id="children-overview" class="docs-menu-panel border-start ms-2"
+                    data-ae-present="height opacity" data-ae-unpop-on-outside="false"  hidden>
+                      <div class="ps-2 gap-1 d-flex flex-column">
+                                                                                <li class="nav-item small-md rounded-1 ps-md-1"
+                                style="flex:0">
+                                <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/index.htm">
+                                  aellux.js Docs                                </a>
+                              </li>
+                                                                                                                      <li class="nav-item small-md rounded-1 ps-md-1"
+                                style="flex:0">
+                                <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/getting-started.htm">
+                                  Getting Started                                </a>
+                              </li>
+                                                                                                                      <li class="nav-item small-md rounded-1 ps-md-1"
+                                style="flex:0">
+                                <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/compatibility.htm">
+                                  Compatibility                                </a>
+                              </li>
+                                                                                                                      <li class="nav-item small-md rounded-1 ps-md-1"
+                                style="flex:0">
+                                <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/validation-scenarios.htm">
+                                  Validation Scenarios                                </a>
+                              </li>
+                                                                                    </div>
+                  </div>
+                                                      <li class="nav-item small-md fw-bold rounded-1 ps-md-1 bg-light-adaptive" style="flex:0">
+                  <button type="button" class="nav-link w-100 text-start text-capitalize p-2 p-md-1 px-3 px-md-2"
+                    data-ae-trigger="toggle" data-ae-target="#children-runtime">
+                    Runtime                      <span class="chevron"><i
+                            class="bi bi-chevron-right small"></i></span>
+                                          </button>
+                </li>
 
-                              <div id="children-overview" class="docs-menu-panel border-start ms-2"
-                  data-ae-present="height opacity" data-ae-unpop-on-outside="false"  hidden>
-                    <div class="ps-2 gap-1 d-flex flex-column" data-ae-present-motion>
-                                                                          <li class="nav-item small-md rounded-1 ps-md-1"
-                              style="flex:0">
-                              <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/index.htm">
-                                aellux.js Docs                              </a>
-                            </li>
-                                                                                                              <li class="nav-item small-md rounded-1 ps-md-1"
-                              style="flex:0">
-                              <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/getting-started.htm">
-                                Getting Started                              </a>
-                            </li>
-                                                                                                              <li class="nav-item small-md rounded-1 ps-md-1"
-                              style="flex:0">
-                              <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/compatibility.htm">
-                                Compatibility                              </a>
-                            </li>
-                                                                                                              <li class="nav-item small-md rounded-1 ps-md-1"
-                              style="flex:0">
-                              <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/validation-scenarios.htm">
-                                Validation Scenarios                              </a>
-                            </li>
-                                                                              </div>
-                </div>
-                                                <li class="nav-item small-md fw-bold rounded-1 ps-md-1 bg-light-adaptive" style="flex:0">
-                <button type="button" class="nav-link w-100 text-start text-capitalize p-2 p-md-1 px-3 px-md-2"
-                  data-ae-trigger="toggle" data-ae-target="#children-runtime">
-                  Runtime                    <span class="chevron"><i
-                          class="bi bi-chevron-right small"></i></span>
-                                      </button>
-              </li>
+                                  <div id="children-runtime" class="docs-menu-panel border-start ms-2"
+                    data-ae-present="height opacity" data-ae-unpop-on-outside="false"  hidden>
+                      <div class="ps-2 gap-1 d-flex flex-column">
+                                                                                <li class="nav-item small-md rounded-1 ps-md-1"
+                                style="flex:0">
+                                <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/runtime/api.htm">
+                                  Runtime API                                </a>
+                              </li>
+                                                                                                                      <li class="nav-item small-md rounded-1 ps-md-1"
+                                style="flex:0">
+                                <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/runtime/wait-layout.htm">
+                                  waitLayout                                </a>
+                              </li>
+                                                                                                                      <li class="nav-item small-md rounded-1 ps-md-1"
+                                style="flex:0">
+                                <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/runtime/events.htm">
+                                  Events                                </a>
+                              </li>
+                                                                                                                      <li class="nav-item small-md rounded-1 ps-md-1"
+                                style="flex:0">
+                                <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/runtime/modern-legacy.htm">
+                                  Modern &amp; Legacy                                </a>
+                              </li>
+                                                                                                                      <li class="nav-item small-md rounded-1 ps-md-1"
+                                style="flex:0">
+                                <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/runtime/browser-support.htm">
+                                  Browser Support                                </a>
+                              </li>
+                                                                                                                      <li class="nav-item small-md rounded-1 ps-md-1"
+                                style="flex:0">
+                                <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/runtime/performance.htm">
+                                  Performance and Bundle Budget                                </a>
+                              </li>
+                                                                                                                      <li class="nav-item small-md rounded-1 ps-md-1"
+                                style="flex:0">
+                                <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/runtime/es5-support.htm">
+                                  ES5 Support                                </a>
+                              </li>
+                                                                                                                      <li class="nav-item small-md rounded-1 ps-md-1"
+                                style="flex:0">
+                                <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/runtime/visual-mounting.htm">
+                                  Visual Mounting                                </a>
+                              </li>
+                                                                                                                      <li class="nav-item small-md rounded-1 ps-md-1"
+                                style="flex:0">
+                                <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/runtime/diagnostics.htm">
+                                  Diagnostics                                </a>
+                              </li>
+                                                                                    </div>
+                  </div>
+                                                      <li class="nav-item small-md fw-bold rounded-1 ps-md-1 bg-light-adaptive" style="flex:0">
+                  <button type="button" class="nav-link w-100 text-start text-capitalize p-2 p-md-1 px-3 px-md-2"
+                    data-ae-trigger="toggle" data-ae-target="#children-extensions">
+                    Extensions                      <span class="chevron"><i
+                            class="bi bi-chevron-right small"></i></span>
+                                          </button>
+                </li>
 
-                              <div id="children-runtime" class="docs-menu-panel border-start ms-2"
-                  data-ae-present="height opacity" data-ae-unpop-on-outside="false"  hidden>
-                    <div class="ps-2 gap-1 d-flex flex-column" data-ae-present-motion>
-                                                                          <li class="nav-item small-md rounded-1 ps-md-1"
-                              style="flex:0">
-                              <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/runtime/api.htm">
-                                Runtime API                              </a>
-                            </li>
-                                                                                                              <li class="nav-item small-md rounded-1 ps-md-1"
-                              style="flex:0">
-                              <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/runtime/wait-layout.htm">
-                                waitLayout                              </a>
-                            </li>
-                                                                                                              <li class="nav-item small-md rounded-1 ps-md-1"
-                              style="flex:0">
-                              <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/runtime/events.htm">
-                                Events                              </a>
-                            </li>
-                                                                                                              <li class="nav-item small-md rounded-1 ps-md-1"
-                              style="flex:0">
-                              <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/runtime/modern-legacy.htm">
-                                Modern &amp; Legacy                              </a>
-                            </li>
-                                                                                                              <li class="nav-item small-md rounded-1 ps-md-1"
-                              style="flex:0">
-                              <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/runtime/browser-support.htm">
-                                Browser Support                              </a>
-                            </li>
-                                                                                                              <li class="nav-item small-md rounded-1 ps-md-1"
-                              style="flex:0">
-                              <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/runtime/performance.htm">
-                                Performance and Bundle Budget                              </a>
-                            </li>
-                                                                                                              <li class="nav-item small-md rounded-1 ps-md-1"
-                              style="flex:0">
-                              <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/runtime/es5-support.htm">
-                                ES5 Support                              </a>
-                            </li>
-                                                                                                              <li class="nav-item small-md rounded-1 ps-md-1"
-                              style="flex:0">
-                              <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/runtime/visual-mounting.htm">
-                                Visual Mounting                              </a>
-                            </li>
-                                                                                                              <li class="nav-item small-md rounded-1 ps-md-1"
-                              style="flex:0">
-                              <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/runtime/diagnostics.htm">
-                                Diagnostics                              </a>
-                            </li>
-                                                                              </div>
-                </div>
-                                                <li class="nav-item small-md fw-bold rounded-1 ps-md-1 bg-light-adaptive" style="flex:0">
-                <button type="button" class="nav-link w-100 text-start text-capitalize p-2 p-md-1 px-3 px-md-2"
-                  data-ae-trigger="toggle" data-ae-target="#children-extensions">
-                  Extensions                    <span class="chevron"><i
-                          class="bi bi-chevron-right small"></i></span>
-                                      </button>
-              </li>
+                                  <div id="children-extensions" class="docs-menu-panel border-start ms-2"
+                    data-ae-present="height opacity" data-ae-unpop-on-outside="false"  hidden>
+                      <div class="ps-2 gap-1 d-flex flex-column">
+                                                                                <li class="nav-item small-md rounded-1 ps-md-1"
+                                style="flex:0">
+                                <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/extensions/authoring.htm">
+                                  Extension Authoring                                </a>
+                              </li>
+                                                                                                                      <li class="nav-item small-md rounded-1 ps-md-1"
+                                style="flex:0">
+                                <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/extensions/accessibility.htm">
+                                  Accessibility Requirements                                </a>
+                              </li>
+                                                                                                                      <li class="nav-item small-md rounded-1 ps-md-1"
+                                style="flex:0">
+                                <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/extensions/registration.htm">
+                                  Registration                                </a>
+                              </li>
+                                                                                                                      <li class="nav-item small-md rounded-1 ps-md-1"
+                                style="flex:0">
+                                <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/extensions/official-registry.htm">
+                                  Official Registry                                </a>
+                              </li>
+                                                                                                                      <li class="nav-item small-md rounded-1 ps-md-1"
+                                style="flex:0">
+                                <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/extensions/declarative-loading.htm">
+                                  Declarative Loading                                </a>
+                              </li>
+                                                                                                                      <li class="nav-item small-md rounded-1 ps-md-1"
+                                style="flex:0">
+                                <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/extensions/lazy-loading.htm">
+                                  Lazy Loading                                </a>
+                              </li>
+                                                                                                                      <li class="nav-item small-md rounded-1 ps-md-1"
+                                style="flex:0">
+                                <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/extensions/styles.htm">
+                                  Extension Styles                                </a>
+                              </li>
+                                                                                                                      <li class="nav-item small-md rounded-1 ps-md-1"
+                                style="flex:0">
+                                <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/extensions/csp-and-trust.htm">
+                                  CSP and Extension Trust                                </a>
+                              </li>
+                                                                                                                      <li class="nav-item small-md rounded-1 ps-md-1"
+                                style="flex:0">
+                                <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/extensions/legacy-variants.htm">
+                                  Modern &amp; Legacy Variants                                </a>
+                              </li>
+                                                                                    </div>
+                  </div>
+                                                      <li class="nav-item small-md fw-bold rounded-1 ps-md-1 bg-light-adaptive" style="flex:0">
+                  <button type="button" class="nav-link w-100 text-start text-capitalize p-2 p-md-1 px-3 px-md-2"
+                    data-ae-trigger="toggle" data-ae-target="#children-core-extensions">
+                    Core Extensions                      <span class="chevron"><i
+                            class="bi bi-chevron-right small"></i></span>
+                                          </button>
+                </li>
 
-                              <div id="children-extensions" class="docs-menu-panel border-start ms-2"
-                  data-ae-present="height opacity" data-ae-unpop-on-outside="false"  hidden>
-                    <div class="ps-2 gap-1 d-flex flex-column" data-ae-present-motion>
-                                                                          <li class="nav-item small-md rounded-1 ps-md-1"
-                              style="flex:0">
-                              <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/extensions/authoring.htm">
-                                Extension Authoring                              </a>
-                            </li>
-                                                                                                              <li class="nav-item small-md rounded-1 ps-md-1"
-                              style="flex:0">
-                              <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/extensions/accessibility.htm">
-                                Accessibility Requirements                              </a>
-                            </li>
-                                                                                                              <li class="nav-item small-md rounded-1 ps-md-1"
-                              style="flex:0">
-                              <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/extensions/registration.htm">
-                                Registration                              </a>
-                            </li>
-                                                                                                              <li class="nav-item small-md rounded-1 ps-md-1"
-                              style="flex:0">
-                              <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/extensions/official-registry.htm">
-                                Official Registry                              </a>
-                            </li>
-                                                                                                              <li class="nav-item small-md rounded-1 ps-md-1"
-                              style="flex:0">
-                              <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/extensions/declarative-loading.htm">
-                                Declarative Loading                              </a>
-                            </li>
-                                                                                                              <li class="nav-item small-md rounded-1 ps-md-1"
-                              style="flex:0">
-                              <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/extensions/lazy-loading.htm">
-                                Lazy Loading                              </a>
-                            </li>
-                                                                                                              <li class="nav-item small-md rounded-1 ps-md-1"
-                              style="flex:0">
-                              <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/extensions/styles.htm">
-                                Extension Styles                              </a>
-                            </li>
-                                                                                                              <li class="nav-item small-md rounded-1 ps-md-1"
-                              style="flex:0">
-                              <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/extensions/csp-and-trust.htm">
-                                CSP and Extension Trust                              </a>
-                            </li>
-                                                                                                              <li class="nav-item small-md rounded-1 ps-md-1"
-                              style="flex:0">
-                              <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/extensions/legacy-variants.htm">
-                                Modern &amp; Legacy Variants                              </a>
-                            </li>
-                                                                              </div>
-                </div>
-                                                <li class="nav-item small-md fw-bold rounded-1 ps-md-1 bg-light-adaptive" style="flex:0">
-                <button type="button" class="nav-link w-100 text-start text-capitalize p-2 p-md-1 px-3 px-md-2"
-                  data-ae-trigger="toggle" data-ae-target="#children-core-extensions">
-                  Core Extensions                    <span class="chevron"><i
-                          class="bi bi-chevron-right small"></i></span>
-                                      </button>
-              </li>
+                                  <div id="children-core-extensions" class="docs-menu-panel border-start ms-2"
+                    data-ae-present="height opacity" data-ae-unpop-on-outside="false" >
+                      <div class="ps-2 gap-1 d-flex flex-column">
+                                                                                <li class="nav-item small-md rounded-1 ps-md-1"
+                                style="flex:0">
+                                <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/core-extensions/adaptive.htm">
+                                  Adaptive                                </a>
+                              </li>
+                                                                                                                      <li class="nav-item small-md rounded-1 ps-md-1 active"
+                                style="flex:0">
+                                <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/core-extensions/ajax-href.htm">
+                                  Ajax Href                                </a>
+                              </li>
+                                                                                                                      <li class="nav-item small-md rounded-1 ps-md-1"
+                                style="flex:0">
+                                <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/core-extensions/anchor.htm">
+                                  Anchor                                </a>
+                              </li>
+                                                                                                                      <li class="nav-item small-md rounded-1 ps-md-1"
+                                style="flex:0">
+                                <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/core-extensions/feedback.htm">
+                                  Feedback                                </a>
+                              </li>
+                                                                                                                      <li class="nav-item small-md rounded-1 ps-md-1"
+                                style="flex:0">
+                                <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/core-extensions/focus.htm">
+                                  Focus                                </a>
+                              </li>
+                                                                                                                      <li class="nav-item small-md rounded-1 ps-md-1"
+                                style="flex:0">
+                                <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/core-extensions/point.htm">
+                                  Point                                </a>
+                              </li>
+                                                                                                                      <li class="nav-item small-md rounded-1 ps-md-1"
+                                style="flex:0">
+                                <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/core-extensions/preference.htm">
+                                  Preference                                </a>
+                              </li>
+                                                                                                                      <li class="nav-item small-md rounded-1 ps-md-1"
+                                style="flex:0">
+                                <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/core-extensions/present.htm">
+                                  Present                                </a>
+                              </li>
+                                                                                                                      <li class="nav-item small-md rounded-1 ps-md-1"
+                                style="flex:0">
+                                <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/core-extensions/scrollbox.htm">
+                                  Scrollbox                                </a>
+                              </li>
+                                                                                                                      <li class="nav-item small-md rounded-1 ps-md-1"
+                                style="flex:0">
+                                <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/core-extensions/scrollbox-snap.htm">
+                                  Scrollbox Snap                                </a>
+                              </li>
+                                                                                                                      <li class="nav-item small-md rounded-1 ps-md-1"
+                                style="flex:0">
+                                <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/core-extensions/state-navigation.htm">
+                                  State Navigation                                </a>
+                              </li>
+                                                                                    </div>
+                  </div>
+                                                      <li class="nav-item small-md fw-bold rounded-1 ps-md-1 bg-light-adaptive" style="flex:0">
+                  <button type="button" class="nav-link w-100 text-start text-capitalize p-2 p-md-1 px-3 px-md-2"
+                    data-ae-trigger="toggle" data-ae-target="#children-integrations">
+                    Integrations                      <span class="chevron"><i
+                            class="bi bi-chevron-right small"></i></span>
+                                          </button>
+                </li>
 
-                              <div id="children-core-extensions" class="docs-menu-panel border-start ms-2"
-                  data-ae-present="height opacity" data-ae-unpop-on-outside="false" >
-                    <div class="ps-2 gap-1 d-flex flex-column" data-ae-present-motion>
-                                                                          <li class="nav-item small-md rounded-1 ps-md-1"
-                              style="flex:0">
-                              <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/core-extensions/adaptive.htm">
-                                Adaptive                              </a>
-                            </li>
-                                                                                                              <li class="nav-item small-md rounded-1 ps-md-1 active"
-                              style="flex:0">
-                              <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/core-extensions/ajax-href.htm">
-                                Ajax Href                              </a>
-                            </li>
-                                                                                                              <li class="nav-item small-md rounded-1 ps-md-1"
-                              style="flex:0">
-                              <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/core-extensions/anchor.htm">
-                                Anchor                              </a>
-                            </li>
-                                                                                                              <li class="nav-item small-md rounded-1 ps-md-1"
-                              style="flex:0">
-                              <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/core-extensions/feedback.htm">
-                                Feedback                              </a>
-                            </li>
-                                                                                                              <li class="nav-item small-md rounded-1 ps-md-1"
-                              style="flex:0">
-                              <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/core-extensions/focus.htm">
-                                Focus                              </a>
-                            </li>
-                                                                                                              <li class="nav-item small-md rounded-1 ps-md-1"
-                              style="flex:0">
-                              <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/core-extensions/point.htm">
-                                Point                              </a>
-                            </li>
-                                                                                                              <li class="nav-item small-md rounded-1 ps-md-1"
-                              style="flex:0">
-                              <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/core-extensions/preference.htm">
-                                Preference                              </a>
-                            </li>
-                                                                                                              <li class="nav-item small-md rounded-1 ps-md-1"
-                              style="flex:0">
-                              <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/core-extensions/present.htm">
-                                Present                              </a>
-                            </li>
-                                                                                                              <li class="nav-item small-md rounded-1 ps-md-1"
-                              style="flex:0">
-                              <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/core-extensions/scrollbox.htm">
-                                Scrollbox                              </a>
-                            </li>
-                                                                                                              <li class="nav-item small-md rounded-1 ps-md-1"
-                              style="flex:0">
-                              <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/core-extensions/scrollbox-snap.htm">
-                                Scrollbox Snap                              </a>
-                            </li>
-                                                                                                              <li class="nav-item small-md rounded-1 ps-md-1"
-                              style="flex:0">
-                              <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/core-extensions/state-navigation.htm">
-                                State Navigation                              </a>
-                            </li>
-                                                                              </div>
-                </div>
-                                                <li class="nav-item small-md fw-bold rounded-1 ps-md-1 bg-light-adaptive" style="flex:0">
-                <button type="button" class="nav-link w-100 text-start text-capitalize p-2 p-md-1 px-3 px-md-2"
-                  data-ae-trigger="toggle" data-ae-target="#children-integrations">
-                  Integrations                    <span class="chevron"><i
-                          class="bi bi-chevron-right small"></i></span>
-                                      </button>
-              </li>
-
-                              <div id="children-integrations" class="docs-menu-panel border-start ms-2"
-                  data-ae-present="height opacity" data-ae-unpop-on-outside="false"  hidden>
-                    <div class="ps-2 gap-1 d-flex flex-column" data-ae-present-motion>
-                                                                          <li class="nav-item small-md rounded-1 ps-md-1"
-                              style="flex:0">
-                              <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/integrations/bootstrap.htm">
-                                Bootstrap Integration                              </a>
-                            </li>
-                                                                              </div>
-                </div>
-                                  
+                                  <div id="children-integrations" class="docs-menu-panel border-start ms-2"
+                    data-ae-present="height opacity" data-ae-unpop-on-outside="false"  hidden>
+                      <div class="ps-2 gap-1 d-flex flex-column">
+                                                                                <li class="nav-item small-md rounded-1 ps-md-1"
+                                style="flex:0">
+                                <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/integrations/bootstrap.htm">
+                                  Bootstrap Integration                                </a>
+                              </li>
+                                                                                    </div>
+                  </div>
+                                                  </div>
           </ul>
         </div>
 
