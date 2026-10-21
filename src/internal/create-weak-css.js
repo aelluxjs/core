@@ -83,6 +83,7 @@ export default function createWeakCss() {
 
     :where([?scrollbox][?scrollbox-snap].%snap-ready) {
       scroll-snap-type: x mandatory !important;
+      scroll-behavior: auto !important;
     }
 
     :where([?scrollbox][?scrollbox-snap='vertical'].%snap-ready) {

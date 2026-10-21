@@ -1168,6 +1168,7 @@
         chains: chains,
         axes: axes,
         styles: [],
+        fractions: /* @__PURE__ */ new Map(),
         momentumState: null,
         momentumStartX: 0,
         momentumStartY: 0,
@@ -1314,15 +1315,19 @@
           var _element = _member2.element;
           var previousX = _element.scrollLeft, previousY = _element.scrollTop;
           var current = axis === "x" ? previousX : previousY;
-          var desired = Math.max(0, Math.min(pointerAxisMaximum(_member2, axis, pointerScroll), current + remaining));
+          var maximum = pointerAxisMaximum(_member2, axis, pointerScroll);
+          var logical = Math.max(0, Math.min(maximum, current + (pointerScroll.fractions.get(_member2) || 0)));
+          var desired = Math.max(0, Math.min(maximum, logical + remaining));
           _element.scrollTo({
             left: axis === "x" ? desired : previousX,
             top: axis === "y" ? desired : previousY,
             behavior: "instant"
           });
-          var used = (axis === "x" ? _element.scrollLeft : _element.scrollTop) - current;
+          var actual = axis === "x" ? _element.scrollLeft : _element.scrollTop;
+          pointerScroll.fractions.set(_member2, desired - actual);
+          remaining -= desired - logical;
+          var used = actual - current;
           if (!used) continue;
-          remaining -= used;
           publish(_member2);
           lastUsed = _member2;
           lastStartX = previousX;

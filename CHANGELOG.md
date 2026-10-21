@@ -83,6 +83,8 @@ All notable changes to aellux.js will be documented in this file.
 
 ### Fixed
 
+- Scrollbox preserves fractional pointer movement across events so browser rounding does not create elastic pressure or send movement to a parent before reaching an edge.
+- Snap boxes use automatic native scroll positioning while controller, wheel and scripted flick navigation retain their explicit smooth behavior.
 - A new mouse or pen press stops smooth Scrollbox snap motion, clears pending flicks, and suspends snap until the last pointer ends or window focus is lost; native touch keeps its snap behavior.
 - Scrollbox snap keeps the starting item fixed throughout a pointer drag and disables PDS momentum on both axes while snap is enabled.
 - New pointer and wheel input finishes elastic recovery before measuring or processing the interaction, including presses on controls and custom scrollbars.

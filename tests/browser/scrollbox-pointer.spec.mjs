@@ -1194,6 +1194,99 @@ for (const axis of ["x", "y"]) {
 }
 
 for (const axis of ["x", "y"]) {
+  for (const elastic of [false, true]) {
+    test(`fractional ${axis} pointer steps stay proportional${elastic ? " with elastic" : ""}`, async ({ page }) => {
+      await setup(page, `<div id="gallery" data-ae-scrollbox="pointer"
+        data-ae-scrollbox-snap="${axis === "x" ? "horizontal" : "vertical"}"
+        style="width:100px;height:100px;overflow-${axis}:auto;overflow-${axis === "x" ? "y" : "x"}:hidden">
+        <div ${elastic ? "data-ae-scrollbox-elastic" : ""}
+          style="display:flex;flex-direction:${axis === "x" ? "row" : "column"};width:${axis === "x" ? 2000 : 100}px">
+          ${'<div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>'.repeat(20)}
+        </div>
+      </div>`);
+      const result = await page.evaluate(async axis => {
+        const element = document.getElementById("gallery"), rect = element.getBoundingClientRect();
+        const send = (type, distance) => new PointerEvent(type, {
+          bubbles: true, cancelable: true, isPrimary: true, pointerId: 314, pointerType: "mouse",
+          button: 0, buttons: type === "pointerup" ? 0 : 1,
+          clientX: rect.left + 70 - (axis === "x" ? distance : 0),
+          clientY: rect.top + 70 - (axis === "y" ? distance : 0)
+        });
+        const position = () => axis === "x" ? element.scrollLeft : element.scrollTop;
+        const down = send("pointerdown", 0);
+        const origin = axis === "x" ? down.clientX : down.clientY;
+        element.dispatchEvent(down);
+        const samples = [];
+        for (const distance of [250 / 3, 500 / 3, 250, 250.2, 250.4, 250.6, 250.8, 251,
+          250.8, 250.6, 250.4, 250.2, 250]) {
+          const move = send("pointermove", distance);
+          window.dispatchEvent(move);
+          // Some engines quantize PointerEvent coordinates at construction.
+          const delivered = origin - (axis === "x" ? move.clientX : move.clientY);
+          samples.push({ distance, delivered, position: position() });
+        }
+        await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+        const held = position(), transform = element.firstElementChild.style.transform;
+        window.dispatchEvent(send("pointerup", 250));
+        return { samples, held, transform };
+      }, axis);
+      // Native scroll offsets may truncate instead of rounding to nearest.
+      // Keep every sample within one CSS pixel and whole-pixel totals exact.
+      for (const sample of result.samples)
+        expect(Math.abs(sample.position - sample.delivered), JSON.stringify(sample)).toBeLessThan(1);
+      expect(result.samples.find(sample => sample.delivered === 251).position).toBe(251);
+      expect(result.held).toBe(250);
+      expect(result.transform).toBe("");
+    });
+  }
+}
+
+for (const axis of ["x", "y"]) {
+  test(`nested ${axis} pointer scrolling sends only real overflow to the parent`, async ({ page }) => {
+    await setup(page, `<div id="outer" data-ae-scrollbox="pointer" data-ae-scrollbox-momentum="false"
+      style="width:120px;height:120px;overflow:auto">
+      <div style="width:${axis === "x" ? 1000 : 120}px;height:${axis === "y" ? 1000 : 120}px">
+        <div id="inner" data-ae-scrollbox="pointer"
+          data-ae-scrollbox-snap="${axis === "x" ? "horizontal" : "vertical"}"
+          style="width:100px;height:100px;overflow-${axis}:auto;overflow-${axis === "x" ? "y" : "x"}:hidden">
+          <div style="display:flex;flex-direction:${axis === "x" ? "row" : "column"};width:${axis === "x" ? 300 : 100}px">
+            ${'<div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>'.repeat(3)}
+          </div>
+        </div>
+      </div>
+    </div>`);
+    const samples = await page.evaluate(axis => {
+      const inner = document.getElementById("inner"), outer = document.getElementById("outer");
+      const rect = inner.getBoundingClientRect();
+      const send = (type, distance) => new PointerEvent(type, {
+        bubbles: true, cancelable: true, isPrimary: true, pointerId: 315, pointerType: "mouse",
+        button: 0, buttons: type === "pointerup" ? 0 : 1,
+        clientX: rect.left + 70 - (axis === "x" ? distance : 0),
+        clientY: rect.top + 70 - (axis === "y" ? distance : 0)
+      });
+      const down = send("pointerdown", 0);
+      const origin = axis === "x" ? down.clientX : down.clientY;
+      inner.dispatchEvent(down);
+      const samples = [];
+      for (const distance of [190.2, 200.2, 250.2, 250.4, 250.6, 250.8, 251]) {
+        const move = send("pointermove", distance);
+        window.dispatchEvent(move);
+        const delivered = origin - (axis === "x" ? move.clientX : move.clientY);
+        samples.push({ distance: delivered, inner: axis === "x" ? inner.scrollLeft : inner.scrollTop,
+          outer: axis === "x" ? outer.scrollLeft : outer.scrollTop });
+      }
+      window.dispatchEvent(send("pointerup", 251));
+      return samples;
+    }, axis);
+    for (const sample of samples) {
+      expect(Math.abs(sample.inner - Math.min(200, sample.distance))).toBeLessThan(1);
+      expect(Math.abs(sample.outer - Math.max(0, sample.distance - 200))).toBeLessThan(1);
+    }
+    expect(samples.at(-1)).toEqual({ distance: 251, inner: 200, outer: 51 });
+  });
+}
+
+for (const axis of ["x", "y"]) {
   for (const textOrigin of [false, true]) {
     for (const trigger of ["controller", "wheel", "flick"]) {
       test(`new ${axis} pointer press stops ${trigger} snap ${textOrigin ? "during the text selection wait" : "before the drag threshold"}`,

@@ -1043,7 +1043,7 @@
       lastX: event.clientX, lastY: event.clientY,
       moved: false, started: false, axis: null, chain, chains, axes,
 
-      styles: [],
+      styles: [], fractions: new Map(),
       momentumState: null, momentumStartX: 0, momentumStartY: 0,
       elasticForce: 0,
       startTime: time, endTime: null,
@@ -1162,16 +1162,22 @@
       const element = member.element;
       const previousX = element.scrollLeft, previousY = element.scrollTop;
       const current = axis === "x" ? previousX : previousY;
-      const desired = Math.max(0, Math.min(pointerAxisMaximum(member, axis, pointerScroll),
-        current + remaining));
+      const maximum = pointerAxisMaximum(member, axis, pointerScroll);
+      const logical = Math.max(0, Math.min(maximum,
+        current + (pointerScroll.fractions.get(member) || 0)));
+      const desired = Math.max(0, Math.min(maximum, logical + remaining));
       element.scrollTo({
         left: axis === "x" ? desired : previousX,
         top: axis === "y" ? desired : previousY,
         behavior: "instant"
       });
-      const used = (axis === "x" ? element.scrollLeft : element.scrollTop) - current;
+      const actual = axis === "x" ? element.scrollLeft : element.scrollTop;
+      // Carry browser rounding into the next move. Only actual edge overflow
+      // may reach another box or become elastic pressure.
+      pointerScroll.fractions.set(member, desired - actual);
+      remaining -= desired - logical;
+      const used = actual - current;
       if (!used) continue;
-      remaining -= used;
       publish(member);
       lastUsed = member;
       lastStartX = previousX;
