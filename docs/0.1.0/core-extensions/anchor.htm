@@ -212,18 +212,19 @@
   <button id="btn-version" class="btn btn-outline-adaptive ps-3 dropdown-toggle rounded-1" type="button"
     data-ae-trigger="toggle" data-ae-target="dropdown-version" aria-expanded="false">
     0.1.0  </button>
-  <ul id="dropdown-version" data-ae-anchor-target="btn-version" data-ae-anchor="bottom-right:top-right"
-    data-ae-present="opacity transform" hidden="true"
-    class="dropdown-menu dropdown-menu-start rounded-2 overflow-hidden position-absolute show"
-    style="min-width: unset;">
+  <div class="position-absolute" data-ae-anchor-target="btn-version" data-ae-anchor="bottom-right:top-right">
+    <ul id="dropdown-version" data-ae-present="opacity transform" hidden="true"
+      class="dropdown-menu dropdown-menu-start rounded-2 overflow-hidden position-relative show"
+      style="min-width: unset;">
 
-          <li>
-        <a class="dropdown-item active" data-no-ajax=true
-          href="/core/docs/0.1.0/index.htm">
-          0.1.0        </a>
-      </li>
-      
-  </ul>
+              <li>
+          <a class="dropdown-item active" data-no-ajax=true
+            href="/core/docs/0.1.0/index.htm">
+            0.1.0          </a>
+        </li>
+        
+    </ul>
+  </div>
 </div>
                 <div data-ae-preference="color-scheme" class="btn-group border rounded-1 rounded overflow-hidden" style="gap:1px;" role="group" aria-label="Basic example">
 
@@ -256,7 +257,7 @@
 
 </div>
             </div>
-            <div data-ae-present-group>
+            <div class="d-flex flex-column gap-1" data-ae-present-group>
                               <li class="nav-item small-md fw-bold rounded-1 ps-md-1 bg-light-adaptive" style="flex:0">
                   <button type="button" class="nav-link w-100 text-start text-capitalize p-2 p-md-1 px-3 px-md-2"
                     data-ae-trigger="toggle" data-ae-target="#children-overview">
@@ -615,7 +616,7 @@ await $ae.mountManager.update(anchor, &quot;anchor&quot;);
 /* Application declarations override the zero-specificity matching rules. */
 .menu { width: 20rem; max-height: 15rem; }
 </code></pre>
-<p>The matching rules use <code>box-sizing: border-box</code>; application CSS may override that too. Anchor projects the matching dimensions while evaluating viewport candidates, then writes dimensions and position together. The matching transform uses a percentage self-pivot, so the actual CSS box remains aligned without positioning against its previous width or height. Normal width/height declarations, padding, borders and size constraints remain the browser&#39;s responsibility. Applications overriding <code>transform</code> also take responsibility for the resulting positioning.</p>
+<p>The matching rules use <code>box-sizing: border-box</code>; application CSS may override that too. Anchor projects the matching dimensions while evaluating viewport candidates, then writes dimensions and position together. The matching transform uses a percentage self-pivot, so the actual CSS box remains aligned without positioning against its previous width or height. Normal width/height declarations, padding, borders and size constraints remain the browser&#39;s responsibility. Applications overriding <code>transform</code> also take responsibility for the resulting positioning. When Anchor and Present share an element, Anchor takes priority over Present transform motion. Present retains opacity and size motion and leaves Anchor transform out of its transitions. Development validation reports <code>WARN_PRESENT_ANCHOR_TRANSFORM</code> (<code>2031</code>) when Present also requests transform (including <code>all</code>); animate a child for an independent visual transform.</p>
 <p>ResizeObserver and existing Layout events keep intermediate target dimensions updated. A known-duration <code>AelluxJsLayout</code> event also works without ResizeObserver. There is no permanent geometry polling: finite layout tracking ends after its announced duration. The global adaptive scheduler and <code>data-ae-maxfps</code> limit geometry measurements and updates. As with existing Anchor tracking, a measured position can lag a moving target by the eligible read/update cadence; a low FPS ceiling trades tracking frequency for less work.</p>
 <p>Anchor installs one owned, zero-specificity stylesheet when the Extension initializes. Independent loading still needs only <code>$ae.ext(&quot;anchor&quot;)</code>; no additional stylesheet request is required. Unmount restores previous inline geometry values and priorities. Destruction removes the Extension&#39;s additional stylesheet. The boot&#39;s original Anchor visibility and positioning rules remain available independently.</p>
 <p>Application inline <code>position</code>, <code>left</code>, <code>top</code>, <code>transform</code> and <code>transform-origin</code> declarations remain intact while mounted. They override the weak positioning rules; overriding transform or offsets makes the application responsible for the resulting placement. Matching still publishes the target&#39;s dimensions without writing application width or height. The shared DOM observer filters unrelated mutations before scheduling geometry work; association scans run only when group/Anchor declarations or their DOM membership can change. Stable interfaces have no permanent geometry polling.</p>

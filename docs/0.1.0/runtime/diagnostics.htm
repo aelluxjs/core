@@ -212,18 +212,19 @@
   <button id="btn-version" class="btn btn-outline-adaptive ps-3 dropdown-toggle rounded-1" type="button"
     data-ae-trigger="toggle" data-ae-target="dropdown-version" aria-expanded="false">
     0.1.0  </button>
-  <ul id="dropdown-version" data-ae-anchor-target="btn-version" data-ae-anchor="bottom-right:top-right"
-    data-ae-present="opacity transform" hidden="true"
-    class="dropdown-menu dropdown-menu-start rounded-2 overflow-hidden position-absolute show"
-    style="min-width: unset;">
+  <div class="position-absolute" data-ae-anchor-target="btn-version" data-ae-anchor="bottom-right:top-right">
+    <ul id="dropdown-version" data-ae-present="opacity transform" hidden="true"
+      class="dropdown-menu dropdown-menu-start rounded-2 overflow-hidden position-relative show"
+      style="min-width: unset;">
 
-          <li>
-        <a class="dropdown-item active" data-no-ajax=true
-          href="/core/docs/0.1.0/index.htm">
-          0.1.0        </a>
-      </li>
-      
-  </ul>
+              <li>
+          <a class="dropdown-item active" data-no-ajax=true
+            href="/core/docs/0.1.0/index.htm">
+            0.1.0          </a>
+        </li>
+        
+    </ul>
+  </div>
 </div>
                 <div data-ae-preference="color-scheme" class="btn-group border rounded-1 rounded overflow-hidden" style="gap:1px;" role="group" aria-label="Basic example">
 
@@ -256,7 +257,7 @@
 
 </div>
             </div>
-            <div data-ae-present-group>
+            <div class="d-flex flex-column gap-1" data-ae-present-group>
                               <li class="nav-item small-md fw-bold rounded-1 ps-md-1 bg-light-adaptive" style="flex:0">
                   <button type="button" class="nav-link w-100 text-start text-capitalize p-2 p-md-1 px-3 px-md-2"
                     data-ae-trigger="toggle" data-ae-target="#children-overview">
@@ -685,7 +686,7 @@ $ae.init({ environment: &quot;production&quot;, verboseLevel: &quot;warn&quot; }
 </tr>
 <tr>
 <td><code>2026</code></td>
-<td>Invalid attribute, numeric parameter, pivot or CSS step count.</td>
+<td>Invalid attribute, numeric parameter, or pivot.</td>
 </tr>
 <tr>
 <td><code>2027</code></td>
@@ -702,6 +703,10 @@ $ae.init({ environment: &quot;production&quot;, verboseLevel: &quot;warn&quot; }
 <tr>
 <td><code>2030</code></td>
 <td>Effective CSS blocks requested layout/scrolling, or a motion duration is invalid.</td>
+</tr>
+<tr>
+<td><code>2031</code></td>
+<td>Present and Anchor both request transform on one element. Anchor takes priority; remove the Present transform token or animate a child.</td>
 </tr>
 </tbody></table>
 <p>Attribute spelling checks follow the configured prefix and accept attributes used by registered custom Extension selectors. They suggest only names within one edit of a known name, including adjacent transpositions; arbitrary application attributes are not rejected. This is a typo check, not an exhaustive HTML schema.</p>
@@ -721,31 +726,31 @@ $ae.init({ environment: &quot;production&quot;, verboseLevel: &quot;warn&quot; }
 </thead>
 <tbody><tr>
 <td><code>aellux.min.js</code></td>
-<td>46,986 / 14,998</td>
+<td>47,091 / 15,026</td>
 <td>45 / 15</td>
 <td>46 / 15</td>
 </tr>
 <tr>
 <td><code>aellux.esm.min.js</code></td>
-<td>24,801 / 8,451</td>
+<td>24,906 / 8,476</td>
 <td>24 / 8</td>
 <td>25 / 8.5</td>
 </tr>
 <tr>
 <td><code>aellux.orchestrator.min.js</code></td>
-<td>57,264 / 19,136</td>
+<td>57,553 / 19,224</td>
 <td>43 / 15</td>
 <td>56.5 / 19</td>
 </tr>
 <tr>
 <td><code>aellux.orchestrator.legacy.min.js</code></td>
-<td>324,497 / 103,748</td>
+<td>324,802 / 103,843</td>
 <td>300 / 97</td>
 <td>318 / 102</td>
 </tr>
 <tr>
 <td><code>aellux.full.min.js</code></td>
-<td>127,592 / 41,020</td>
+<td>127,881 / 41,113</td>
 <td>130 / 40</td>
 <td>130 / 40.5</td>
 </tr>
@@ -780,7 +785,7 @@ $ae.init({ environment: &quot;production&quot;, verboseLevel: &quot;warn&quot; }
 <td>10.5 / 4</td>
 </tr>
 </tbody></table>
-<p>Cancelable mount/unmount preflight and cancellation-aware teardown raise the Modern Orchestrator raw limit from 56 to 56.5 KiB and Full Legacy from 425 to 426 KiB. With the CSS Motion cadence correction and lightweight Present progress classification, Full Legacy measures 435,136 / 130,268 bytes, with its gzip limit retained at 138 KiB. Other limits are unchanged. <code>npm run test:budget</code> checks every minified distribution artifact.</p>
+<p>Cancelable mount/unmount preflight and cancellation-aware teardown raise the Modern Orchestrator raw limit from 56 to 56.5 KiB and Full Legacy from 425 to 426 KiB. With the CSS Motion cadence correction and lightweight Present progress classification, Full Legacy measures 435,441 / 130,367 bytes, with its gzip limit retained at 138 KiB. Other limits are unchanged. <code>npm run test:budget</code> checks every minified distribution artifact.</p>
 <h2>Code Ranges</h2>
 <ul>
 <li><code>1000-1099</code>: boot and Core usage errors.</li>

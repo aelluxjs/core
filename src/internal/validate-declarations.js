@@ -185,6 +185,9 @@ export function validateDeclarations(root, scope, extensionNames = null, method 
       const checkAnchor = has("anchor") && (!selected || selected.has("anchor"));
       const checkPresent = (has("present") || has("present-motion")) && (!selected || selected.has("present"));
       if (!checkAnchor && !checkPresent) return;
+      if (has("anchor") && has("present") && value("present").trim().split(/\s+/).some(token => token === "transform" || token === "all"))
+        invalid("present", "present", "Anchor and Present both declare transform; Anchor takes priority.",
+          "Remove transform from Present, or animate a child element instead.", "WARN_PRESENT_ANCHOR_TRANSFORM");
       const extension = checkAnchor ? "anchor" : "present";
       const style = root.getComputedStyle(element);
       const durations = [

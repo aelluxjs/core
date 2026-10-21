@@ -394,6 +394,17 @@
                 }
               }
             },
+            "WARN_PRESENT_ANCHOR_TRANSFORM": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "number"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            },
             "ERROR_EXTENSION_ATTACH": {
               "type": "object",
               "properties": {
@@ -1446,6 +1457,17 @@
               }
             },
             "WARN_ANCHOR_GROUP": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "number"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            },
+            "WARN_PRESENT_ANCHOR_TRANSFORM": {
               "type": "object",
               "properties": {
                 "code": {

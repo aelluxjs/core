@@ -30,6 +30,52 @@ async function start(page, options = {}, html = fixture) {
   await page.evaluate(() => AelluxJs.mount(document));
 }
 
+for (const forceLegacy of [false, true]) for (const cssMotionController of [true, false]) for (const grid of [true, false]) {
+  test(`Anchor owns transform during Present pop/unpop (legacy=${forceLegacy}, controlled=${cssMotionController}, grid=${grid})`, async ({ page }) => {
+    await start(page, { forceLegacy, cssMotionController }, `<style>
+      #ref{position:relative;margin:80px;width:500px;height:300px}
+      #trigger{position:relative;width:150px;height:40px}
+      #menu{position:absolute;--ae-pop-duration:250ms;--ae-unpop-duration:250ms;
+        --ae-from-transform:translateX(200px) scale(.3);--ae-pop-transform:scale(2);--ae-unpop-transform:translateY(100px)}
+      #content{height:60px}
+      </style><div id="ref"><button id="trigger">Versions</button>
+      <div id="menu" data-ae-anchor="bottom-right:top-right" data-ae-anchor-target="trigger"
+        data-ae-anchor-match="width" data-ae-present="opacity transform height" hidden>
+        <div id="content" ${grid ? "data-ae-present-motion" : ""}>0.1.0</div>
+      </div></div>`);
+    await page.evaluate(async () => {
+      const menu = document.getElementById("menu");
+      window.anchorMotionStates = [];
+      for (const event of ["AelluxJsPopping", "AelluxJsUnpopping"]) menu.addEventListener(event, () => {
+        window.anchorMotionStates.push({ event, properties: getComputedStyle(menu).transitionProperty });
+      });
+      await $ae("menu").present.pop();
+    });
+    const alignment = () => page.evaluate(() => {
+      const menu = document.getElementById("menu"), rect = menu.getBoundingClientRect();
+      const trigger = document.getElementById("trigger").getBoundingClientRect();
+      return { right: Math.abs(rect.right - trigger.right), top: Math.abs(rect.top - trigger.bottom),
+        width: Math.abs(rect.width - trigger.width), opacity: getComputedStyle(menu).opacity };
+    });
+    await expect.poll(alignment).toEqual({ right: 0, top: 0, width: 0, opacity: "1" });
+    await page.evaluate(async () => {
+      document.getElementById("trigger").style.left = "70px";
+      document.getElementById("trigger").style.top = "40px";
+      await AelluxJs.mountManager.update("menu", "anchor");
+    });
+    await expect.poll(alignment).toEqual({ right: 0, top: 0, width: 0, opacity: "1" });
+    await page.evaluate(() => $ae("menu").present.unpop());
+    await expect(page.locator("#menu")).toHaveJSProperty("hidden", true);
+    const states = await page.evaluate(() => window.anchorMotionStates);
+    expect(states).toHaveLength(2);
+    for (const { properties } of states) {
+      expect(properties.split(",").map(value => value.trim())).not.toContain("transform");
+      expect(properties).toContain("opacity");
+    }
+    expect(await page.locator("#menu").getAttribute("data-ae-present")).toBe("opacity transform height");
+  });
+}
+
 for (const forceLegacy of [false, true]) {
   test(`minified Basic loads independent extensions with final SRI (legacy=${forceLegacy})`, async ({ page }) => {
     await start(page, { mode: "basic", minified: true, forceLegacy }, fixture.replace('data-ae-present-active="a"', 'data-ae-present-active="a" data-ae-present-group-anchor="indicator"'));

@@ -27,6 +27,9 @@
 [data-ae-present]:not(.ae--present-grid) {
   --ae-present-properties: opacity, transform, max-height, max-width;
 }
+[data-ae-present][data-ae-anchor] {
+  --ae-present-properties: opacity, max-height, max-width, grid-template-rows, grid-template-columns;
+}
 [data-ae-present]>[data-ae-present-motion] {
   place-self: stretch;
   contain: layout paint;
@@ -68,21 +71,19 @@ html[data-ae-reduced-motion="reduced"] [data-ae-present] {
 [data-ae-present~="opacity"] {
   opacity: var(--ae-from-opacity, 0);
 }
-[data-ae-present~="transform"] {
+[data-ae-present~="transform"]:not([data-ae-anchor]) {
   transform: var(--ae-from-transform);
 }
-[data-ae-present~="opacity"].ae--popping,
-[data-ae-present~="opacity"].ae--pop {
+[data-ae-present~="opacity"]:is(.ae--popping, .ae--pop) {
   opacity: var(--ae-pop-opacity, 1);
 }
-[data-ae-present~="transform"].ae--popping,
-[data-ae-present~="transform"].ae--pop {
+[data-ae-present~="transform"]:not([data-ae-anchor]):is(.ae--popping, .ae--pop) {
   transform: var(--ae-pop-transform);
 }
 [data-ae-present~="opacity"].ae--unpopping {
   opacity: var(--ae-unpop-opacity, 0);
 }
-[data-ae-present~="transform"].ae--unpopping {
+[data-ae-present~="transform"]:not([data-ae-anchor]).ae--unpopping {
   transform: var(--ae-unpop-transform);
 }
 [data-ae-present].ae--pop, [data-ae-present].ae--popping {

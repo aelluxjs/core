@@ -22273,6 +22273,9 @@
           var checkAnchor = has("anchor") && (!selected || selected.has("anchor"));
           var checkPresent = (has("present") || has("present-motion")) && (!selected || selected.has("present"));
           if (!checkAnchor && !checkPresent) return;
+          if (has("anchor") && has("present") && value("present").trim().split(/\s+/).some(function(token) {
+            return token === "transform" || token === "all";
+          })) invalid("present", "present", "Anchor and Present both declare transform; Anchor takes priority.", "Remove transform from Present, or animate a child element instead.", "WARN_PRESENT_ANCHOR_TRANSFORM");
           var extension2 = checkAnchor ? "anchor" : "present";
           var style = root.getComputedStyle(element);
           var durations = [].concat(_toConsumableArray2(checkPresent ? ["--ae-pop-duration", "--ae-unpop-duration"] : []), _toConsumableArray2(checkAnchor ? ["--ae-anchor-switch-duration"] : []));

@@ -99,11 +99,12 @@ Configuration diagnostics explain what happened, identify the element/attribute/
 | --- | --- |
 | `2024` | Likely misspelled Aellux attribute, with a suggested spelling. |
 | `2025` | Declared behavior requires an Extension that is not initialized. |
-| `2026` | Invalid attribute, numeric parameter, pivot or CSS step count. |
+| `2026` | Invalid attribute, numeric parameter, or pivot. |
 | `2027` | Missing/incompatible target, unmeasurable explicitly updated Anchor target, or invalid/missing AJAX selector. |
 | `2028` | Snap without Scrollbox, an orphan Snap item, or a misplaced Elastic wrapper. |
 | `2029` | Present trigger/dismiss control is not reachable with the keyboard. |
 | `2030` | Effective CSS blocks requested layout/scrolling, or a motion duration is invalid. |
+| `2031` | Present and Anchor both request transform on one element. Anchor takes priority; remove the Present transform token or animate a child. |
 
 Attribute spelling checks follow the configured prefix and accept attributes used by registered custom Extension selectors. They suggest only names within one edit of a known name, including adjacent transpositions; arbitrary application attributes are not rejected. This is a typo check, not an exhaustive HTML schema.
 
@@ -119,18 +120,18 @@ The validator is bundled with the runtime; its production guard avoids DOM scans
 
 | Artifact | Measured raw / gzip bytes | Previous limits | Current limits |
 | --- | --- | --- | --- |
-| `aellux.min.js` | 46,986 / 14,998 | 45 / 15 | 46 / 15 |
-| `aellux.esm.min.js` | 24,801 / 8,451 | 24 / 8 | 25 / 8.5 |
-| `aellux.orchestrator.min.js` | 57,264 / 19,136 | 43 / 15 | 56.5 / 19 |
-| `aellux.orchestrator.legacy.min.js` | 324,497 / 103,748 | 300 / 97 | 318 / 102 |
-| `aellux.full.min.js` | 127,592 / 41,020 | 130 / 40 | 130 / 40.5 |
+| `aellux.min.js` | 47,091 / 15,026 | 45 / 15 | 46 / 15 |
+| `aellux.esm.min.js` | 24,906 / 8,476 | 24 / 8 | 25 / 8.5 |
+| `aellux.orchestrator.min.js` | 57,553 / 19,224 | 43 / 15 | 56.5 / 19 |
+| `aellux.orchestrator.legacy.min.js` | 324,802 / 103,843 | 300 / 97 | 318 / 102 |
+| `aellux.full.min.js` | 127,881 / 41,113 | 130 / 40 | 130 / 40.5 |
 | `aellux.ext.adaptive.min.js` | 4,915 / 2,291 | 4 / 3 | 5 / 3 |
 | `aellux.ext.adaptive.legacy.min.js` | 8,329 / 3,513 | 6 / 3 | 8.5 / 3.5 |
 | `aellux.ext.present.min.js` | 18,342 / 6,549 | 18 / 6.25 | 18.5 / 6.5 |
 | `aellux.ext.present.legacy.min.js` | 25,755 / 9,108 | 25 / 9 | 26 / 9 |
 | `aellux.ext.scrollbox-snap.min.js` | 10,388 / 4,020 | 10 / 4 | 10.5 / 4 |
 
-Cancelable mount/unmount preflight and cancellation-aware teardown raise the Modern Orchestrator raw limit from 56 to 56.5 KiB and Full Legacy from 425 to 426 KiB. With the CSS Motion cadence correction and lightweight Present progress classification, Full Legacy measures 435,136 / 130,268 bytes, with its gzip limit retained at 138 KiB. Other limits are unchanged. `npm run test:budget` checks every minified distribution artifact.
+Cancelable mount/unmount preflight and cancellation-aware teardown raise the Modern Orchestrator raw limit from 56 to 56.5 KiB and Full Legacy from 425 to 426 KiB. With the CSS Motion cadence correction and lightweight Present progress classification, Full Legacy measures 435,441 / 130,367 bytes, with its gzip limit retained at 138 KiB. Other limits are unchanged. `npm run test:budget` checks every minified distribution artifact.
 
 ## Code Ranges
 

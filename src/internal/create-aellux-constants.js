@@ -90,6 +90,7 @@ export function createAelluxConstants() {
       WARN_CONFIGURATION_STRUCTURE: { code: 2028, message: "An Aellux declaration is missing required HTML structure." },
       WARN_CONTROL_ACCESSIBILITY: { code: 2029, message: "An Aellux control is not reachable with the keyboard." },
       WARN_CONFIGURATION_STYLE: { code: 2030, message: "Effective CSS prevents the declared Aellux behavior." },
+      WARN_PRESENT_ANCHOR_TRANSFORM: { code: 2031, message: "Anchor owns transform; Present transform is ignored." },
       INFO_LEGACY_FALLBACK: { code: 3000, message: AELLUX + "is starting the Legacy runtime." },
       INFO_PRESENT_MEASURED_LAYOUT: { code: 3001, message: "Present measures size transitions without a direct present-motion child; add one to use the grid layout strategy." },
       INFO_FEEDBACK_MOTION_CUSTOM: { code: 3002, message: "The requested feedback motion is not standard. Standard motions are listed in the diagnostic context." }

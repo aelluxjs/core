@@ -54,6 +54,29 @@ test("basic reports missing Extensions after mounting and gives actionable contr
   ]));
 });
 
+for (const forceLegacy of [false, true]) test(`Present/Anchor transform conflict reports Anchor priority (${forceLegacy ? "Legacy" : "Modern"})`, async ({ page }) => {
+  await start(page, `<div style="position:relative">
+    <button id="trigger">Open</button>
+    <div id="conflict" data-ae-anchor="bottom-left:top-left" data-ae-anchor-target="trigger" data-ae-present="opacity transform" hidden></div>
+    <div id="all" data-ae-anchor="bottom-left:top-left" data-ae-anchor-target="trigger" data-ae-present="all" hidden></div>
+    <div id="safe" data-ae-anchor="bottom-left:top-left" data-ae-anchor-target="trigger" data-ae-present="opacity" hidden></div>
+  </div>`, { forceLegacy });
+  const entries = (await diagnostics(page)).filter(entry => entry.code === 2031);
+  expect(entries.map(entry => entry.element).sort()).toEqual(["all", "conflict"]);
+  expect(entries).toEqual(expect.arrayContaining([
+    expect.objectContaining({ element: "conflict", attribute: "data-ae-present", value: "opacity transform",
+      reason: expect.stringContaining("Anchor takes priority"), suggestion: expect.stringContaining("child") })
+  ]));
+  await page.evaluate(() => AelluxJs.mount(document));
+  expect((await diagnostics(page)).filter(entry => entry.code === 2031)).toHaveLength(2);
+  await page.evaluate(async () => {
+    document.getElementById("safe").setAttribute("data-ae-present", "transform");
+    await AelluxJs.mountManager.update("safe", "anchor");
+  });
+  expect((await diagnostics(page)).filter(entry => entry.code === 2031).map(entry => entry.element))
+    .toContain("safe");
+});
+
 test("production skips semantic scans even with warning verbosity", async ({ page }) => {
   await start(page, '<div id="typo" data-ae-presnt></div><div data-ae-focus="wrong"></div>', { environment: "production", verboseLevel: "warn" });
   expect((await diagnostics(page)).filter(entry => entry.code >= 2024 && entry.code <= 2030)).toEqual([]);

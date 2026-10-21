@@ -3,12 +3,13 @@
 export function generatePresentCSS(AelluxJs) {
   const presentAttribute = AelluxJs.attr("present");
   const motionAttribute = AelluxJs.attr("present-motion");
+  const anchorAttribute = AelluxJs.attr("anchor");
   const reducedMotionAttribute = AelluxJs.attr("reduced-motion");
   const motion = `[${motionAttribute}]`;
   const present = `[${presentAttribute}]`;
   const presentWithoutMotion = `[${presentAttribute}=""]`;
   const presentOpacity = `[${presentAttribute}~="opacity"]`;
-  const presentTransform = `[${presentAttribute}~="transform"]`;
+  const presentTransform = `[${presentAttribute}~="transform"]:not([${anchorAttribute}])`;
   const presentHeight = `[${presentAttribute}~="height"]`;
   const presentWidth = `[${presentAttribute}~="width"]`;
   const pop = AelluxJs.className("pop");
@@ -47,6 +48,9 @@ ${gridPresent} {
 }
 ${measuredPresent} {
   --ae-present-properties: opacity, transform, max-height, max-width;
+}
+${present}[${anchorAttribute}] {
+  --ae-present-properties: opacity, max-height, max-width, grid-template-rows, grid-template-columns;
 }
 ${present}>${motion} {
   place-self: stretch;
@@ -92,12 +96,10 @@ ${presentOpacity} {
 ${presentTransform} {
   transform: var(--ae-from-transform);
 }
-${presentOpacity}.${popping},
-${presentOpacity}.${pop} {
+${presentOpacity}:is(.${popping}, .${pop}) {
   opacity: var(--ae-pop-opacity, 1);
 }
-${presentTransform}.${popping},
-${presentTransform}.${pop} {
+${presentTransform}:is(.${popping}, .${pop}) {
   transform: var(--ae-pop-transform);
 }
 ${presentOpacity}.${unpopping} {
