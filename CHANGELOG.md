@@ -93,6 +93,8 @@ All notable changes to aellux.js will be documented in this file.
 
 ### Fixed
 
+- Scrollbox interrupts momentum on pointer-down before drag eligibility checks, including custom scrollbar grabs and controls; all wheel events stop it before cancellation or zoom checks.
+
 - Present updates `aria-expanded` on regions and their trigger, dismiss and target controls when opening or closing animations start, so controls animate with the panel instead of waiting for completion.
 - Pointer dragging chooses its axis only after crossing the drag threshold, so initial cross-axis jitter cannot cancel a new drag after interrupting elastic recovery.
 - Nested wheel scrolling passes only the unconsumed distance through alternating horizontal and vertical ancestors, even with elastic enabled at every level; explicit CSS overscroll boundaries stop the corresponding axis, and native movement is canceled after a scripted handoff to avoid duplicates.

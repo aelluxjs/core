@@ -107,6 +107,7 @@
     container.style.transition = "opacity .25s linear";
     container.style.opacity = null;
     $ae('navbarSupportedContent').present.unpop();
+    window.scrollTo({ top: 0 });
   });
 
   function comparableUrl(value) {
@@ -209,7 +210,7 @@
 
               <div class="dropdown">
   <button class="btn btn-outline-adaptive ps-3 dropdown-toggle rounded-1" type="button" data-bs-target="dropdown"
-    data-bs-trigger="toggle" aria-expanded="false">
+    data-ae-trigger="toggle" aria-expanded="false">
     0.1.0  </button>
   <ul data-ae-present="opacity transform" hidden="true"
     class="dropdown-menu dropdown-menu-start rounded-2 overflow-hidden position-absolute" style="min-width: unset;">
@@ -265,7 +266,7 @@
 
                               <div id="children-overview" class="docs-menu-panel border-start ms-2"
                   data-ae-present="height opacity" data-ae-unpop-on-outside="false"  hidden>
-                    <div class="ps-2 gap-1 d-flex flex-column" data-ae-present-motion data-ae-present-group>
+                    <div class="ps-2 gap-1 d-flex flex-column" data-ae-present-motion>
                                                                           <li class="nav-item small-md rounded-1 ps-md-1"
                               style="flex:0">
                               <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/index.htm">
@@ -298,7 +299,7 @@
 
                               <div id="children-runtime" class="docs-menu-panel border-start ms-2"
                   data-ae-present="height opacity" data-ae-unpop-on-outside="false"  hidden>
-                    <div class="ps-2 gap-1 d-flex flex-column" data-ae-present-motion data-ae-present-group>
+                    <div class="ps-2 gap-1 d-flex flex-column" data-ae-present-motion>
                                                                           <li class="nav-item small-md rounded-1 ps-md-1"
                               style="flex:0">
                               <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/runtime/api.htm">
@@ -356,7 +357,7 @@
 
                               <div id="children-extensions" class="docs-menu-panel border-start ms-2"
                   data-ae-present="height opacity" data-ae-unpop-on-outside="false"  hidden>
-                    <div class="ps-2 gap-1 d-flex flex-column" data-ae-present-motion data-ae-present-group>
+                    <div class="ps-2 gap-1 d-flex flex-column" data-ae-present-motion>
                                                                           <li class="nav-item small-md rounded-1 ps-md-1"
                               style="flex:0">
                               <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/extensions/authoring.htm">
@@ -414,7 +415,7 @@
 
                               <div id="children-core-extensions" class="docs-menu-panel border-start ms-2"
                   data-ae-present="height opacity" data-ae-unpop-on-outside="false"  hidden>
-                    <div class="ps-2 gap-1 d-flex flex-column" data-ae-present-motion data-ae-present-group>
+                    <div class="ps-2 gap-1 d-flex flex-column" data-ae-present-motion>
                                                                           <li class="nav-item small-md rounded-1 ps-md-1"
                               style="flex:0">
                               <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/core-extensions/adaptive.htm">
@@ -482,7 +483,7 @@
 
                               <div id="children-integrations" class="docs-menu-panel border-start ms-2"
                   data-ae-present="height opacity" data-ae-unpop-on-outside="false"  hidden>
-                    <div class="ps-2 gap-1 d-flex flex-column" data-ae-present-motion data-ae-present-group>
+                    <div class="ps-2 gap-1 d-flex flex-column" data-ae-present-motion>
                                                                           <li class="nav-item small-md rounded-1 ps-md-1"
                               style="flex:0">
                               <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/integrations/bootstrap.htm">

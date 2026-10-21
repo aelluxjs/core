@@ -107,6 +107,7 @@
     container.style.transition = "opacity .25s linear";
     container.style.opacity = null;
     $ae('navbarSupportedContent').present.unpop();
+    window.scrollTo({ top: 0 });
   });
 
   function comparableUrl(value) {
@@ -209,7 +210,7 @@
 
               <div class="dropdown">
   <button class="btn btn-outline-adaptive ps-3 dropdown-toggle rounded-1" type="button" data-bs-target="dropdown"
-    data-bs-trigger="toggle" aria-expanded="false">
+    data-ae-trigger="toggle" aria-expanded="false">
     0.1.0  </button>
   <ul data-ae-present="opacity transform" hidden="true"
     class="dropdown-menu dropdown-menu-start rounded-2 overflow-hidden position-absolute" style="min-width: unset;">
@@ -265,7 +266,7 @@
 
                               <div id="children-overview" class="docs-menu-panel border-start ms-2"
                   data-ae-present="height opacity" data-ae-unpop-on-outside="false"  hidden>
-                    <div class="ps-2 gap-1 d-flex flex-column" data-ae-present-motion data-ae-present-group>
+                    <div class="ps-2 gap-1 d-flex flex-column" data-ae-present-motion>
                                                                           <li class="nav-item small-md rounded-1 ps-md-1"
                               style="flex:0">
                               <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/index.htm">
@@ -298,7 +299,7 @@
 
                               <div id="children-runtime" class="docs-menu-panel border-start ms-2"
                   data-ae-present="height opacity" data-ae-unpop-on-outside="false"  hidden>
-                    <div class="ps-2 gap-1 d-flex flex-column" data-ae-present-motion data-ae-present-group>
+                    <div class="ps-2 gap-1 d-flex flex-column" data-ae-present-motion>
                                                                           <li class="nav-item small-md rounded-1 ps-md-1"
                               style="flex:0">
                               <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/runtime/api.htm">
@@ -356,7 +357,7 @@
 
                               <div id="children-extensions" class="docs-menu-panel border-start ms-2"
                   data-ae-present="height opacity" data-ae-unpop-on-outside="false"  hidden>
-                    <div class="ps-2 gap-1 d-flex flex-column" data-ae-present-motion data-ae-present-group>
+                    <div class="ps-2 gap-1 d-flex flex-column" data-ae-present-motion>
                                                                           <li class="nav-item small-md rounded-1 ps-md-1"
                               style="flex:0">
                               <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/extensions/authoring.htm">
@@ -414,7 +415,7 @@
 
                               <div id="children-core-extensions" class="docs-menu-panel border-start ms-2"
                   data-ae-present="height opacity" data-ae-unpop-on-outside="false" >
-                    <div class="ps-2 gap-1 d-flex flex-column" data-ae-present-motion data-ae-present-group>
+                    <div class="ps-2 gap-1 d-flex flex-column" data-ae-present-motion>
                                                                           <li class="nav-item small-md rounded-1 ps-md-1"
                               style="flex:0">
                               <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/core-extensions/adaptive.htm">
@@ -482,7 +483,7 @@
 
                               <div id="children-integrations" class="docs-menu-panel border-start ms-2"
                   data-ae-present="height opacity" data-ae-unpop-on-outside="false"  hidden>
-                    <div class="ps-2 gap-1 d-flex flex-column" data-ae-present-motion data-ae-present-group>
+                    <div class="ps-2 gap-1 d-flex flex-column" data-ae-present-motion>
                                                                           <li class="nav-item small-md rounded-1 ps-md-1"
                               style="flex:0">
                               <a class="nav-link text-capitalize p-2 p-md-1 px-3 px-md-2" href="/core/docs/0.1.0/integrations/bootstrap.htm">
@@ -633,7 +634,7 @@
   &lt;/div&gt;
 &lt;/div&gt;
 </code></pre>
-<p>In <code>pointer</code> mode, a quick release continues scrolling with gradually decreasing speed. Momentum is enabled by default and applies only to desktop pointer dragging. An enabled <code>data-ae-scrollbox-snap</code> disables PDS momentum for the entire box, including dragging in the other axis and when <code>data-ae-scrollbox-momentum=&quot;true&quot;</code>. Without snap, momentum starts after more than 15 px within the latest 300 ms of dragging and uses a deceleration value of 0.0015 to calculate the destination. Each animation frame moves 10% of the remaining distance to that destination; it ends when both axes match to three decimal places. It stops at the scroll boundary, on a new pointer or wheel interaction, when snap is enabled, when the mode changes, or when the box unmounts. Set <code>data-ae-scrollbox-momentum=&quot;false&quot;</code> to disable it:</p>
+<p>In <code>pointer</code> mode, a quick release continues scrolling with gradually decreasing speed. Momentum is enabled by default and applies only to desktop pointer dragging. An enabled <code>data-ae-scrollbox-snap</code> disables PDS momentum for the entire box, including dragging in the other axis and when <code>data-ae-scrollbox-momentum=&quot;true&quot;</code>. Without snap, momentum starts after more than 15 px within the latest 300 ms of dragging and uses a deceleration value of 0.0015 to calculate the destination. Each animation frame moves 10% of the remaining distance to that destination; it ends when both axes match to three decimal places. It stops at the scroll boundary, immediately on pointer-down anywhere inside the box (including controls, nested content, native scrollbar presses, and custom scrollbar thumb/track grabs), or on any wheel event, even when that event is noncancelable, already prevented, or uses Ctrl for zoom. Interruption happens before drag eligibility checks and does not require pointer movement. Momentum does not resume when that interaction ends; only a new qualifying drag release can start it again. Enabling snap, changing the mode, or unmounting also stops momentum. Set <code>data-ae-scrollbox-momentum=&quot;false&quot;</code> to disable it:</p>
 <pre><code class="language-html">&lt;div data-ae-scrollbox=&quot;pointer&quot; data-ae-scrollbox-momentum=&quot;false&quot;&gt;
   &lt;div&gt;Scrollable content&lt;/div&gt;
 &lt;/div&gt;

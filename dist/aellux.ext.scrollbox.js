@@ -315,7 +315,10 @@
         if (event.target !== element) return;
       };
       state.onWheel = (event) => handleWheel(state, event);
-      state.onInteractionStart = () => finishElasticRelease(state);
+      state.onInteractionStart = () => {
+        cancelMomentum(state);
+        finishElasticRelease(state);
+      };
       state.onPointerDown = (event) => startPointerScroll(state, event);
       state.onPointerOver = (event) => updatePointerScrollCursor(
         state,
@@ -1964,13 +1967,13 @@
       if (handled) event.preventDefault();
     }
     function handleWheel(state, event) {
+      cancelMomentum(state);
       if (event.ctrlKey || !event.cancelable) return;
       if (state.desktop && state.mode === POINTER && state.element.classList.contains(pointerScrollingClass)) {
         if (event.cancelable) event.preventDefault();
         event.stopPropagation();
         return;
       }
-      cancelMomentum(state);
       if (event.defaultPrevented) return;
       if (event.target.closest(`[${attribute}]`) !== state.element) return;
       finishElasticRelease(state);

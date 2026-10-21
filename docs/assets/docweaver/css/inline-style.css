@@ -308,9 +308,9 @@ pre code.hljs {
   --bs-btn-hover-border-color: var(--bs-btn-border-color);
 
   /* Cores do estado Ativo/Click */
-  --bs-btn-active-color: var(--bs-btn-bg);
-  --bs-btn-active-bg: var(--bs-btn-bg);
-  --bs-btn-active-border-color: var(--bs-btn-border-color);
+  --bs-btn-active-color: var(--bs-body-bg);
+  --bs-btn-active-bg: var(--bs-body-color);
+  --bs-btn-active-border-color: var(--bs-body-color);
 
   /* Foco/Ring */
   --bs-btn-focus-shadow-rgb: var(--bs-body-color-rgb);

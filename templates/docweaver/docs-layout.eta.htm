@@ -82,7 +82,7 @@
                 <div id="children-<%= item.slug %>" class="docs-menu-panel border-start ms-2"
                   data-ae-present="height opacity" data-ae-unpop-on-outside="false" <% if (!item.active) { %> hidden<% }
                     %>>
-                    <div class="ps-2 gap-1 d-flex flex-column" data-ae-present-motion data-ae-present-group>
+                    <div class="ps-2 gap-1 d-flex flex-column" data-ae-present-motion>
                       <% for (const child of item.children) { %>
                         <% if (child.children !==undefined && child.children.length) { %>
 

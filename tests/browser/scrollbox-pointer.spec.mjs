@@ -3351,6 +3351,108 @@ test("momentum advances ten percent of the remaining distance each frame and ter
   expect(result.pending).toBe(0);
 });
 
+for (const interaction of ["content", "button", "multiclick", "touch", "prevented pointerdown", "wheel", "noncancelable wheel", "ctrl wheel", "prevented wheel"]) {
+  test(`momentum stops immediately on ${interaction} without requiring a new drag`, async ({ page }) => {
+    await setup(page, box("box", "pointer", "", '<button id="control">Action</button>', null)
+      .replace("width:300px;height:300px", "width:2000px;height:2000px"));
+    await page.evaluate(() => {
+      window.pendingMomentumFrames = [];
+      window.requestAnimationFrame = callback => {
+        window.pendingMomentumFrames.push(callback);
+        return window.pendingMomentumFrames.length;
+      };
+    });
+    await drag(page, "box");
+    const result = await page.evaluate(async interaction => {
+      const element = document.getElementById("box");
+      const frame = async () => {
+        const callbacks = window.pendingMomentumFrames.splice(0);
+        for (const callback of callbacks) callback(performance.now());
+        await Promise.resolve();
+      };
+      await frame();
+      const coasting = element.scrollLeft;
+      let event;
+      if (interaction.includes("wheel")) {
+        event = new WheelEvent("wheel", {
+          bubbles: true, cancelable: interaction !== "noncancelable wheel",
+          ctrlKey: interaction === "ctrl wheel", deltaY: 10
+        });
+        if (interaction === "prevented wheel") event.preventDefault();
+        element.dispatchEvent(event);
+      } else {
+        const target = interaction === "button" ? document.getElementById("control") : element;
+        const rect = target.getBoundingClientRect();
+        event = new PointerEvent("pointerdown", {
+          bubbles: true, cancelable: true, isPrimary: true, pointerId: 18,
+          pointerType: interaction === "touch" ? "touch" : "mouse",
+          button: 0, buttons: 1, detail: interaction === "multiclick" ? 2 : 1,
+          clientX: rect.left + 5, clientY: rect.top + 5
+        });
+        if (interaction === "prevented pointerdown") event.preventDefault();
+        target.dispatchEvent(event);
+      }
+      const stopped = element.scrollLeft;
+      for (let index = 0; index < 8; index++) await frame();
+      return { coasting, stopped, after: element.scrollLeft,
+        pending: window.pendingMomentumFrames.length, prevented: event.defaultPrevented };
+    }, interaction);
+    expect(result.coasting).toBeGreaterThan(50);
+    expect(result.after).toBe(result.stopped);
+    expect(result.pending).toBe(0);
+    if (["button", "touch", "noncancelable wheel", "ctrl wheel"].includes(interaction))
+      expect(result.prevented).toBe(false);
+  });
+}
+
+for (const axis of ["x", "y"]) for (const part of ["thumb", "track"]) {
+  test(`momentum stops on ${axis} scrollbar ${part} press before it moves`, async ({ page }) => {
+    await setup(page, box("box", "pointer", 'data-ae-scrollbar="x y"', "", null)
+      .replace("width:300px;height:300px", "width:2000px;height:2000px")
+      .replace('overflow:auto;', 'overflow:auto;--ae-scrollbar-track-color:rgb(70,80,90);--ae-scrollbar-opacity-fade:1;'));
+    await page.evaluate(() => {
+      window.pendingMomentumFrames = [];
+      window.requestAnimationFrame = callback => {
+        window.pendingMomentumFrames.push(callback);
+        return window.pendingMomentumFrames.length;
+      };
+    });
+    await drag(page, "box");
+    const coasting = await page.evaluate(async () => {
+      for (const callback of window.pendingMomentumFrames.splice(0)) callback(performance.now());
+      await Promise.resolve();
+      return document.getElementById("box").scrollLeft;
+    });
+    expect(coasting).toBeGreaterThan(50);
+    const position = await page.locator(`[data-ae-scrollbar-${axis === "x" ? "horizontal" : "vertical"}]`)
+      .evaluate((element, { axis, part }) => {
+        const rect = element.getBoundingClientRect();
+        const start = parseFloat(element.style.getPropertyValue("--ae-scrollbar-thumb-position"));
+        const size = parseFloat(element.style.getPropertyValue("--ae-scrollbar-thumb-size"));
+        const offset = part === "thumb" ? start + size / 2 : 80;
+        return { x: rect.left + (axis === "x" ? offset : 4), y: rect.top + (axis === "y" ? offset : 4) };
+      }, { axis, part });
+    await page.mouse.move(position.x, position.y);
+    await page.mouse.down();
+    const positions = await page.evaluate(async () => {
+      const element = document.getElementById("box");
+      const before = [element.scrollLeft, element.scrollTop];
+      for (let index = 0; index < 8; index++) {
+        for (const callback of window.pendingMomentumFrames.splice(0)) callback(performance.now());
+        await Promise.resolve();
+      }
+      return { before, after: [element.scrollLeft, element.scrollTop] };
+    });
+    expect(positions.after).toEqual(positions.before);
+    if (part === "thumb") {
+      await page.mouse.move(position.x + (axis === "x" ? 10 : 0), position.y + (axis === "y" ? 10 : 0));
+      const moved = await page.locator("#box").evaluate((element, axis) => axis === "x" ? element.scrollLeft : element.scrollTop, axis);
+      expect(moved).toBeGreaterThan(positions.before[axis === "x" ? 0 : 1]);
+    }
+    await page.mouse.up();
+  });
+}
+
 test("momentum false stops at release", async ({ page }) => {
   await setup(page, box("box"));
   expect(await drag(page, "box")).toMatchObject({ x: 50, y: 0 });
