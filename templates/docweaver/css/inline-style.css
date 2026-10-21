@@ -214,8 +214,10 @@ body:after {
 }
 
 .navbar-collapse .docs-menu-panel[data-ae-present] {
-  --ae-pop-duration: 200ms;
-  --ae-unpop-duration: 200ms;
+  --ae-pop-duration: 350ms;
+  --ae-unpop-duration: 350ms;
+  --ae-pop-aellux-ease: ease-in-out-circ;
+  --ae-unpop-aellux-ease: ease-in-out-circ;
 }
 
 .toc-header .toc-collapse {

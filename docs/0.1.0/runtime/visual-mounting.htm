@@ -44,7 +44,7 @@
 <script src="https://cdn.jsdelivr.net/npm/tocbot@4.32/dist/tocbot.min.js"></script>
 
 <script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.12/highlight.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.12/languages/html.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.12/languages/xml.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.12/languages/json.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.12/languages/bash.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.12/languages/javascript.min.js"></script>
@@ -212,7 +212,7 @@
   <button id="btn-version" class="btn btn-outline-adaptive ps-3 dropdown-toggle rounded-1" type="button"
     data-ae-trigger="toggle" data-ae-target="dropdown-version" aria-expanded="false">
     0.1.0  </button>
-  <div class="position-absolute" data-ae-anchor-target="btn-version" data-ae-anchor="bottom-right:top-right">
+  <div class="position-absolute" data-ae-anchor-target="btn-version" data-ae-anchor="bottom-left:top-left">
     <ul id="dropdown-version" data-ae-present="opacity transform" hidden="true"
       class="dropdown-menu dropdown-menu-start rounded-2 overflow-hidden position-relative show"
       style="min-width: unset;">
@@ -226,30 +226,28 @@
     </ul>
   </div>
 </div>
-                <div data-ae-preference="color-scheme" class="btn-group border rounded-1 rounded overflow-hidden" style="gap:1px;" role="group" aria-label="Basic example">
+                <div data-ae-preference="color-scheme" class="btn-group border rounded-1 rounded overflow-hidden" style="gap:1px;"
+  role="group" aria-label="Basic example" style="--bs-border-radius:--bs-border-radius-sm">
 
-  <input type="radio" class="btn-check" name="color-mode-selected" id="radio-color-mode-light"
-    autocomplete="off" aria-label="Light Mode">
-  <label
-    class="btn  btn-outline-adaptive py-1 border-0 d-inline-flex justify-content-center align-items-center"
+  <input type="radio" class="btn-check" name="color-mode-selected" id="radio-color-mode-light" autocomplete="off"
+    aria-label="Light Mode">
+  <label class="btn  btn-outline-adaptive py-1 border-0 d-inline-flex justify-content-center align-items-center"
     for="radio-color-mode-light" data-ae-option="light" onclick aria-label="Light Mode">
     <i class="bi bi-sun"></i>
     <span class="visually-hidden">Light Mode</span>
   </label>
 
-  <input type="radio" class="btn-check" name="color-mode-selected" id="radio-color-mode-dark"
-    autocomplete="off" aria-label="Dark Mode">
-  <label
-    class="btn  btn-outline-adaptive py-1 border-0  d-inline-flex justify-content-center align-items-center"
+  <input type="radio" class="btn-check" name="color-mode-selected" id="radio-color-mode-dark" autocomplete="off"
+    aria-label="Dark Mode">
+  <label class="btn  btn-outline-adaptive py-1 border-0  d-inline-flex justify-content-center align-items-center"
     for="radio-color-mode-dark" data-ae-option="dark" onclick aria-label="Dark Mode">
     <i class="bi bi-moon-fill"></i>
     <span class="visually-hidden">Dark Mode</span>
   </label>
 
-  <input type="radio" class="btn-check" name="color-mode-selected" id="radio-color-mode-auto"
-    autocomplete="off" aria-label="Auto Mode">
-  <label
-    class="btn  btn-outline-adaptive py-1 border-0 d-inline-flex justify-content-center align-items-center"
+  <input type="radio" class="btn-check" name="color-mode-selected" id="radio-color-mode-auto" autocomplete="off"
+    aria-label="Auto Mode">
+  <label class="btn  btn-outline-adaptive py-1 border-0 d-inline-flex justify-content-center align-items-center"
     for="radio-color-mode-auto" data-ae-option="auto" onclick aria-label="Auto Mode">
     <i class="bi bi-circle-half"></i>
     <span class="visually-hidden">Auto Mode</span>
