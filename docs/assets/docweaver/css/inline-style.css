@@ -55,9 +55,12 @@ html,
 body {
   margin: 0;
   padding: 0;
-  scroll-behavior: smooth;
   letter-spacing: 0.01em;
   scrollbar-gutter: stable;
+}
+
+* {
+  scroll-behavior: smooth;
 }
 
 body:after {
@@ -239,7 +242,15 @@ body:after {
   max-height: 500px;
 }
 
+[data-ae-scrollbar] {
+  --ae-scrollbar-size: 4px;
+}
+
 @media (min-width:992px) {
+  [data-ae-scrollbar] {
+    --ae-scrollbar-size: 8px;
+  }
+
   .content-block .content-wrapper .article {
     margin-right: 250px;
     max-height: 100%;
