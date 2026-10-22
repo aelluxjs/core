@@ -66,6 +66,7 @@ Add aellux.js to a page and enable the Extensions it needs. The library coordina
 - [Adaptive](core-extensions/adaptive.md)
 - [Ajax Href](core-extensions/ajax-href.md)
 - [Anchor](core-extensions/anchor.md)
+- [Overflow Marquee](core-extensions/overflow-marquee.md)
 - [Feedback](core-extensions/feedback.md)
 - [Focus](core-extensions/focus.md)
 - [Point](core-extensions/point.md)

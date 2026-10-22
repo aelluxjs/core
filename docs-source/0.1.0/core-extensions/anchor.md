@@ -45,6 +45,10 @@ await $ae.mountManager.update(anchor, "anchor");
 
 Anchor reads geometry through `$ae.waitLayout.read()` and writes CSS through `$ae.waitLayout.update()`.
 
+## Overflow Marquee
+
+Single-line overflow animation is provided by the separate [Overflow Marquee](overflow-marquee.md) Extension. It initializes Anchor as its geometry dependency, then owns its own mount map, stylesheet and visibility-aware motion. Register `$ae.ext("overflow-marquee")`; an ordinary Anchor registration does not mount those elements.
+
 ## Target Visibility
 
 Anchor uses computed CSS to decide whether its target is visible. A `hidden` attribute or an inline declaration does not suppress anchoring when the cascade overrides it. For example, a Present container with `hidden` remains an eligible target if its effective display, visibility and opacity make it visible.
@@ -103,35 +107,38 @@ Switch interpolation deliberately uses native CSS rather than taking ownership t
 
 ## Present Group Anchor
 
-`data-ae-present-group-anchor` names one Anchor by ID, with or without `#`. Present owns the accepted selection and publishes its changes; Anchor resolves the selected element through the optional public Present interface. Neither Extension imports the other's implementation.
+When `data-ae-anchor-target` resolves to an element with `data-ae-present-group`, Anchor automatically uses that group's accepted selected member as its effective target. The reference accepts the usual ID, optionally prefixed with `#`, or a CSS selector. Each Anchor declares its own target, so multiple Anchors can follow the same group from inside or outside it. Present owns the accepted selection and publishes its changes; Anchor queries the optional public Present interface. Neither Extension imports the other's implementation.
 
 ```html
 <div id="views" data-ae-present-group data-ae-present-active="first"
-     data-ae-present-group-anchor="indicator"
      style="position:relative;min-height:12rem">
   <section id="first" data-ae-present="opacity"
            style="width:12rem">First content</section>
   <section id="second" data-ae-present="opacity"
            style="width:18rem" hidden>Second content</section>
   <div id="indicator" class="selection-anchor"
+       data-ae-anchor-target="views"
        data-ae-anchor="bottom-left:bottom-left" data-ae-anchor-match="width height"
        style="--ae-anchor-switch-duration:250ms;--ae-anchor-switch-ease:ease-in-out;
               opacity:1;pointer-events:none;background:color-mix(in srgb,Highlight 15%,transparent)"></div>
+  <div data-ae-anchor-target="#views" data-ae-anchor="top-right:bottom-right">
+    Selection label
+  </div>
 </div>
 <button type="button" data-ae-trigger="pop" data-ae-target="second">Second view</button>
 ```
 
 Or select with `await $ae("views").present.show("second")`. Attribute changes, class selection and triggers all use the same accepted selection. The associated Anchor resolves the target as soon as that selection is confirmed and positions against it once its computed CSS passes the visibility checks; it does not wait for Pop completion. A canceled BeforePop/BeforeUnpop does not publish a new selection. The normal Present opacity-copying behavior remains; the example overrides opacity to keep its decorative marker opaque while the target fades in, once the target's opacity is greater than zero.
 
-Target precedence is:
+Target resolution is:
 
-1. A declared, valid Present Group association uses that group's mounted selection.
-2. Without an association, `data-ae-anchor-target` applies.
-3. Without either, the positioning reference remains the target.
+1. Resolve the explicit `data-ae-anchor-target` ID or selector.
+2. If that element is a Present Group, use its mounted selection; otherwise use the element itself.
+3. With no explicit target, use the Anchor's positioning reference itself, even if that reference is also a group.
 
-An associated group with no selection, or whose Present controller has not mounted yet, leaves the Anchor inactive. Removing the association restores normal target resolution. Present does not rewrite `data-ae-anchor-target`. Late loading, remount and dynamically inserted members use the existing selection; Anchor does not scan member IDs or maintain another selection registry. An Anchor may sit outside the group if it shares the selected member's positioning reference.
+An explicit group target with no selection, or whose Present controller has not mounted yet, leaves the Anchor inactive. It does not fall back to the group's box or search for a visible member. Changing `data-ae-anchor-target` can switch between groups and ordinary elements; removing it restores the positioning-reference default. Present does not rewrite the attribute. Late loading, remount and dynamically inserted members use the existing selection; Anchor does not scan member IDs or maintain another selection registry. Each Anchor must share the selected member's positioning reference, including when it sits inside the group. Independent matching, pivots, switching durations and FPS limits remain local to each Anchor.
 
-`WARN_ANCHOR_GROUP` (2023) reports missing/non-Anchor association IDs, multiple groups controlling one Anchor, circular target chains and matching configurations involving an in-flow Anchor. Conflicting and circular targets remain inactive. Invalid member selection is diagnosed by Present (2021). Incompatible positioning references retain `ERROR_ANCHOR_REFERENCE_CONTEXT` (1119). Dimension matching requires an out-of-flow Anchor; application CSS that places a matched Anchor back in normal flow can create a size dependency and is rejected before matching begins.
+`WARN_ANCHOR_GROUP` (2023) reports circular target chains and matching configurations involving an in-flow Anchor, with the Anchor's `data-ae-anchor-target` in its context. Multiple Anchors targeting one group are supported. Invalid member selection is diagnosed by Present (2021). Incompatible positioning references retain `ERROR_ANCHOR_REFERENCE_CONTEXT` (1119). Dimension matching requires an out-of-flow Anchor; application CSS that places a matched Anchor back in normal flow can create a size dependency and is rejected before matching begins.
 
 ## Delivery B distribution cost
 
@@ -144,4 +151,10 @@ The matching geometry, native switching lifecycle, shared association observer, 
 
 The compressed increases are 1,774 and 1,925 bytes respectively. No dependency or animation scheduler is added. The new weak rules ship with Anchor rather than enlarging the boot's weak stylesheet. Boot, Full and Present remain within their existing limits.
 
-The approved limits are 15/6 KiB for Modern and 23/8 KiB for Legacy (raw/gzip), increased from 9/4 and 16/6 KiB respectively. These limits cover the Delivery B output with modest room for maintenance, and both Anchor artifacts pass `test:budget`.
+The limits remain 15/6 KiB for Modern and 23/8 KiB for Legacy (raw/gzip), increased from 9/4 and 16/6 KiB respectively. The separate [Overflow Marquee](overflow-marquee.md#distribution-cost) distribution has its own measured limits; Anchor does not include that implementation.
+
+## Placement maps for dependent Extensions
+
+`$ae.ext.anchor.createPlacementMap()` creates an independently owned set of placements. Wait for Anchor initialization before calling it. The map exposes `mount(element)`, `measure(element, pairs, target = element.parentElement)`, `place(element, placement)`, `unmount(element)`, `invisible(element)` and `destroy()`. Pivot strings use the same `target:self` syntax as declarative Anchors. An invalid or unmounted measurement returns `null`; check `placement.valid` before using its geometry. `invisible()` checks computed CSS, without viewport intersection.
+
+The consumer owns its mount selector, wrapping, positioning CSS, observers and timing. The map saves the owned styles and class on mount and restores them on unmount or destruction. Use `waitLayout.read()` for measurement and `waitLayout.update()` for placement. Elements in this map need no `data-ae-anchor` and do not install ordinary Anchor tracking. Overflow Marquee uses this API for its generated wrappers. Destroying Anchor disposes any remaining placement maps.

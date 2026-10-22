@@ -200,7 +200,6 @@
     var targetAttribute = AelluxJs.attr("anchor-target");
     var matchAttribute = AelluxJs.attr("anchor-match");
     var groupAttribute = AelluxJs.attr("present-group");
-    var groupAnchorAttribute = AelluxJs.attr("present-group-anchor");
     var layoutEvent = AelluxJs.eventName("Layout");
     var anchoredClass = AelluxJs.className("anchored");
     var switchingClass = AelluxJs.className("anchor-switching");
@@ -219,12 +218,14 @@
     };
     var anchors = /* @__PURE__ */ new Map();
     var elementMemories = /* @__PURE__ */ new WeakMap();
+    var placementMaps = /* @__PURE__ */ new Set();
     var nextLayoutId = 2e6;
     var mutations = null;
     var weakStyle = null;
     AelluxJs.extAttach(extensionName, {
       init: init,
-      destroy: destroy
+      destroy: destroy,
+      createPlacementMap: createPlacementMap
     });
     function init() {
       weakStyle = document.createElement("style");
@@ -281,9 +282,21 @@
     function _destroy() {
       _destroy = _asyncToGenerator(/* @__PURE__ */ _regenerator().m(function _callee() {
         var _weakStyle;
+        var _iterator10, _step10, map;
         return _regenerator().w(function(_context) {
           while (1) switch (_context.n) {
             case 0:
+              _iterator10 = _createForOfIteratorHelper(placementMaps);
+              try {
+                for (_iterator10.s(); !(_step10 = _iterator10.n()).done; ) {
+                  map = _step10.value;
+                  map.destroy();
+                }
+              } catch (err) {
+                _iterator10.e(err);
+              } finally {
+                _iterator10.f();
+              }
               _context.n = 1;
               return Promise.all(Array.from(anchors.keys(), unmountAnchor));
             case 1:
@@ -299,6 +312,47 @@
       }));
       return _destroy.apply(this, arguments);
     }
+    function createPlacementMap() {
+      var memories = /* @__PURE__ */ new Map();
+      var disposed = false;
+      var map = {
+        mount: function mount(element) {
+          if (!disposed && !memories.has(element)) memories.set(element, AelluxJs.persist.element.save(element, ["class"], ownedProperties));
+        },
+        unmount: function unmount(element) {
+          var _memories$get;
+          (_memories$get = memories.get(element)) === null || _memories$get === void 0 || _memories$get.restore();
+          memories.delete(element);
+        },
+        measure: function measure(element, pairs) {
+          var target = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : element.parentElement;
+          var candidates = parseCandidates(pairs);
+          if (memories.has(element) && candidates.length) return readPlacement(element, target, candidates, true);
+          return null;
+        },
+        place: function place(element, placement) {
+          if (memories.has(element) && placement !== null && placement !== void 0 && placement.valid) writePlacement(element, placement);
+        },
+        invisible: isInvisible,
+        destroy: function destroy2() {
+          disposed = true;
+          var _iterator = _createForOfIteratorHelper(memories.keys()), _step;
+          try {
+            for (_iterator.s(); !(_step = _iterator.n()).done; ) {
+              var element = _step.value;
+              map.unmount(element);
+            }
+          } catch (err) {
+            _iterator.e(err);
+          } finally {
+            _iterator.f();
+          }
+          placementMaps.delete(map);
+        }
+      };
+      placementMaps.add(map);
+      return map;
+    }
     function mountAnchor(element) {
       if (anchors.has(element)) return;
       elementMemories.set(element, AelluxJs.persist.element.save(element, [], ownedProperties));
@@ -310,7 +364,6 @@
         resolvedTarget: null,
         reference: null,
         group: null,
-        conflict: false,
         lastPlacement: null,
         switchTimer: null,
         interruptSwitch: false,
@@ -347,7 +400,7 @@
             subtree: true,
             childList: true,
             attributes: true,
-            attributeFilter: [attribute, targetAttribute, matchAttribute, groupAttribute, groupAnchorAttribute, AelluxJs.attr("reduced-motion"), "id", "hidden", "class", "style"]
+            attributeFilter: [attribute, targetAttribute, matchAttribute, groupAttribute, AelluxJs.attr("reduced-motion"), "id", "hidden", "class", "style"]
           });
         }
       }
@@ -364,7 +417,6 @@
           return scheduleAnchor(element);
         });
       }
-      refreshAssociations();
       return updateAnchor(element);
     }
     function unmountAnchor(_x) {
@@ -412,26 +464,12 @@
     }
     function scheduleUpdate() {
       if (!anchors.size) return;
-      var _iterator = _createForOfIteratorHelper(anchors), _step;
-      try {
-        for (_iterator.s(); !(_step = _iterator.n()).done; ) {
-          var _step$value = _slicedToArray(_step.value, 2), element = _step$value[0], state = _step$value[1];
-          state.interruptSwitch = true;
-          scheduleAnchor(element);
-        }
-      } catch (err) {
-        _iterator.e(err);
-      } finally {
-        _iterator.f();
-      }
-    }
-    function onGroupChange(event) {
       var _iterator2 = _createForOfIteratorHelper(anchors), _step2;
       try {
         for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
-          var _event$detail;
           var _step2$value = _slicedToArray(_step2.value, 2), element = _step2$value[0], state = _step2$value[1];
-          if (state.group === ((_event$detail = event.detail) === null || _event$detail === void 0 ? void 0 : _event$detail.group)) scheduleAnchor(element);
+          state.interruptSwitch = true;
+          scheduleAnchor(element);
         }
       } catch (err) {
         _iterator2.e(err);
@@ -439,31 +477,39 @@
         _iterator2.f();
       }
     }
-    function onMutations(records) {
-      var affected = /* @__PURE__ */ new Set();
-      var associationSelector = "[".concat(groupAnchorAttribute, "],[").concat(attribute, "]");
-      var containsAssociation = function containsAssociation2(node2) {
-        return node2.nodeType === 1 && (node2.matches(associationSelector) || node2.querySelector(associationSelector));
-      };
-      var associationsChanged = false;
-      var _iterator3 = _createForOfIteratorHelper(records), _step3;
+    function onGroupChange(event) {
+      var _iterator3 = _createForOfIteratorHelper(anchors), _step3;
       try {
         for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
-          var record = _step3.value;
+          var _event$detail;
+          var _step3$value = _slicedToArray(_step3.value, 2), element = _step3$value[0], state = _step3$value[1];
+          if (state.group === ((_event$detail = event.detail) === null || _event$detail === void 0 ? void 0 : _event$detail.group)) scheduleAnchor(element);
+        }
+      } catch (err) {
+        _iterator3.e(err);
+      } finally {
+        _iterator3.f();
+      }
+    }
+    function onMutations(records) {
+      var affected = /* @__PURE__ */ new Set();
+      var _iterator4 = _createForOfIteratorHelper(records), _step4;
+      try {
+        for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
+          var record = _step4.value;
           var node = record.target;
           var structural = record.type === "childList";
           var visual = record.attributeName === "class" || record.attributeName === "style";
-          if (structural ? [].concat(_toConsumableArray(record.addedNodes), _toConsumableArray(record.removedNodes)).some(containsAssociation) : record.attributeName === groupAnchorAttribute || record.attributeName === groupAttribute || (record.attributeName === "id" || record.attributeName === attribute) && (anchors.has(node) || node.hasAttribute(attribute))) associationsChanged = true;
           var _iterator6 = _createForOfIteratorHelper(anchors), _step6;
           try {
             for (_iterator6.s(); !(_step6 = _iterator6.n()).done; ) {
               var _state$reference;
-              var _step6$value = _slicedToArray(_step6.value, 2), _element = _step6$value[0], state = _step6$value[1];
+              var _step6$value = _slicedToArray(_step6.value, 2), element = _step6$value[0], state = _step6$value[1];
               if (visual) {
-                if (node !== _element && state.resolvedTarget && node.contains(state.resolvedTarget)) affected.add(_element);
+                if (node !== element && (state.resolvedTarget && node.contains(state.resolvedTarget) || state.group && node.contains(state.group) || targetChanged(element, state))) affected.add(element);
                 continue;
               }
-              if (node === _element || node === document.documentElement || node.contains(_element) || state.resolvedTarget && node.contains(state.resolvedTarget) || structural && (_state$reference = state.reference) !== null && _state$reference !== void 0 && _state$reference.contains(node) || !state.group && _element.hasAttribute(targetAttribute) && resolveElement(_element.getAttribute(targetAttribute)) !== state.resolvedTarget) affected.add(_element);
+              if (node === element || node === document.documentElement || node.contains(element) || state.resolvedTarget && node.contains(state.resolvedTarget) || state.group && node.contains(state.group) || structural && (_state$reference = state.reference) !== null && _state$reference !== void 0 && _state$reference.contains(node) || targetChanged(element, state)) affected.add(element);
             }
           } catch (err) {
             _iterator6.e(err);
@@ -472,29 +518,15 @@
           }
         }
       } catch (err) {
-        _iterator3.e(err);
+        _iterator4.e(err);
       } finally {
-        _iterator3.f();
-      }
-      if (associationsChanged) {
-        refreshAssociations();
-        var _iterator4 = _createForOfIteratorHelper(anchors.keys()), _step4;
-        try {
-          for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
-            var element = _step4.value;
-            affected.add(element);
-          }
-        } catch (err) {
-          _iterator4.e(err);
-        } finally {
-          _iterator4.f();
-        }
+        _iterator4.f();
       }
       var _iterator5 = _createForOfIteratorHelper(affected), _step5;
       try {
         for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
-          var _element2 = _step5.value;
-          scheduleAnchor(_element2);
+          var _element = _step5.value;
+          scheduleAnchor(_element);
         }
       } catch (err) {
         _iterator5.e(err);
@@ -502,58 +534,26 @@
         _iterator5.f();
       }
     }
-    function associationDiagnostic(group, reason) {
+    function targetChanged(element, state) {
+      var value = element.getAttribute(targetAttribute);
+      return value && value.trim() && resolveElement(value) !== (state.group || state.resolvedTarget);
+    }
+    function associationDiagnostic(element, reason) {
       AelluxJs.diagnostics.warn(AelluxJs.diagnostics.WARN_ANCHOR_GROUP, {
         extension: extensionName,
-        element: group,
+        element: element,
         reason: reason,
-        attribute: groupAnchorAttribute,
-        value: group.getAttribute(groupAnchorAttribute),
-        suggestion: "Reference one existing Anchor ID from one Present Group and ensure compatible positioning references."
+        attribute: targetAttribute,
+        value: element.getAttribute(targetAttribute),
+        suggestion: "Reference an element or Present Group without circular targets, share a positioning reference, and keep dimension-matched Anchors out of normal flow."
       });
-    }
-    function refreshAssociations() {
-      var _iterator7 = _createForOfIteratorHelper(anchors.values()), _step7;
-      try {
-        for (_iterator7.s(); !(_step7 = _iterator7.n()).done; ) {
-          var state = _step7.value;
-          state.group = null;
-          state.conflict = false;
-        }
-      } catch (err) {
-        _iterator7.e(err);
-      } finally {
-        _iterator7.f();
-      }
-      var _iterator8 = _createForOfIteratorHelper(document.querySelectorAll("[".concat(groupAttribute, "][").concat(groupAnchorAttribute, "]"))), _step8;
-      try {
-        for (_iterator8.s(); !(_step8 = _iterator8.n()).done; ) {
-          var group = _step8.value;
-          var id = (group.getAttribute(groupAnchorAttribute) || "").replace(/^#/, "");
-          var element = id && !/\s/.test(id) ? document.getElementById(id) : null;
-          if (!element || !element.hasAttribute(attribute)) {
-            associationDiagnostic(group, "Expected an existing Anchor ID.");
-            continue;
-          }
-          var _state = anchors.get(element);
-          if (!_state) continue;
-          if (_state.group) {
-            _state.conflict = true;
-            associationDiagnostic(group, "Multiple groups reference the same Anchor.");
-          } else _state.group = group;
-        }
-      } catch (err) {
-        _iterator8.e(err);
-      } finally {
-        _iterator8.f();
-      }
     }
     function effectiveTarget(element, state) {
       var _AelluxJs$ext$present, _AelluxJs$ext$present2;
-      if (state.conflict) return null;
-      if (state.group) return ((_AelluxJs$ext$present = AelluxJs.ext.present) === null || _AelluxJs$ext$present === void 0 || (_AelluxJs$ext$present2 = _AelluxJs$ext$present.selected) === null || _AelluxJs$ext$present2 === void 0 ? void 0 : _AelluxJs$ext$present2.call(_AelluxJs$ext$present, state.group)) || null;
       var value = element.getAttribute(targetAttribute);
-      return value && value.trim() ? resolveElement(value) : element.offsetParent;
+      var target = value && value.trim() ? resolveElement(value) : element.offsetParent;
+      state.group = value && value.trim() && target !== null && target !== void 0 && target.hasAttribute(groupAttribute) ? target : null;
+      return state.group ? ((_AelluxJs$ext$present = AelluxJs.ext.present) === null || _AelluxJs$ext$present === void 0 || (_AelluxJs$ext$present2 = _AelluxJs$ext$present.selected) === null || _AelluxJs$ext$present2 === void 0 ? void 0 : _AelluxJs$ext$present2.call(_AelluxJs$ext$present, state.group)) || null : target;
     }
     function circularTarget(element, target) {
       var visited = /* @__PURE__ */ new Set([element]);
@@ -573,10 +573,10 @@
         return;
       }
       if (durationMs === 0) {
-        var _iterator9 = _createForOfIteratorHelper(anchors), _step9;
+        var _iterator7 = _createForOfIteratorHelper(anchors), _step7;
         try {
-          for (_iterator9.s(); !(_step9 = _iterator9.n()).done; ) {
-            var _step9$value = _slicedToArray(_step9.value, 2), element = _step9$value[0], state = _step9$value[1];
+          for (_iterator7.s(); !(_step7 = _iterator7.n()).done; ) {
+            var _step7$value = _slicedToArray(_step7.value, 2), element = _step7$value[0], state = _step7$value[1];
             var maxFPS = AelluxJs.layoutMaxFPS(element);
             state.layoutUntil = now() + 1e3 / (maxFPS || 60);
             state.layoutSingle = true;
@@ -584,25 +584,25 @@
             scheduleAnchor(element, true);
           }
         } catch (err) {
-          _iterator9.e(err);
+          _iterator7.e(err);
         } finally {
-          _iterator9.f();
+          _iterator7.f();
         }
         return;
       }
-      var _iterator0 = _createForOfIteratorHelper(anchors), _step0;
+      var _iterator8 = _createForOfIteratorHelper(anchors), _step8;
       try {
-        for (_iterator0.s(); !(_step0 = _iterator0.n()).done; ) {
-          var _step0$value = _slicedToArray(_step0.value, 2), _element3 = _step0$value[0], _state2 = _step0$value[1];
-          _state2.layoutUntil = Math.max(_state2.layoutUntil, now() + durationMs);
-          _state2.layoutSingle = false;
-          _state2.layoutFinalPending = true;
-          scheduleAnchor(_element3, durationMs > 0);
+        for (_iterator8.s(); !(_step8 = _iterator8.n()).done; ) {
+          var _step8$value = _slicedToArray(_step8.value, 2), _element2 = _step8$value[0], _state = _step8$value[1];
+          _state.layoutUntil = Math.max(_state.layoutUntil, now() + durationMs);
+          _state.layoutSingle = false;
+          _state.layoutFinalPending = true;
+          scheduleAnchor(_element2, durationMs > 0);
         }
       } catch (err) {
-        _iterator0.e(err);
+        _iterator8.e(err);
       } finally {
-        _iterator0.f();
+        _iterator8.f();
       }
     }
     function scheduleAnchor(element) {
@@ -929,6 +929,7 @@
       var targetRect = toReference(target.getBoundingClientRect(), reference, referenceRect, scaleX, scaleY);
       var selfRect = element.getBoundingClientRect();
       var projectSize = function projectSize2(axis, actual, desired) {
+        var _anchors$get;
         if (!tokens.includes(axis) || element.style[axis]) return actual;
         var previous = parseFloat(element.style.getPropertyValue("--ae-anchor-target-".concat(axis))) || 0;
         var sides = axis === "width" ? ["Left", "Right"] : ["Top", "Bottom"];
@@ -941,7 +942,7 @@
         var constrain = function constrain2(value) {
           return Math.max(minimum, Math.min(Number.isFinite(maximum) ? maximum : Infinity, value));
         };
-        return anchors.get(element).switchTimer === null && Math.abs(parseFloat(style[axis]) - constrain(previous)) > 0.5 ? actual : constrain(desired) + (borderBox ? 0 : extra);
+        return !((_anchors$get = anchors.get(element)) !== null && _anchors$get !== void 0 && _anchors$get.switchTimer) && Math.abs(parseFloat(style[axis]) - constrain(previous)) > 0.5 ? actual : constrain(desired) + (borderBox ? 0 : extra);
       };
       var selfWidth = projectSize("width", selfRect.width / scaleX, targetRect.width);
       var selfHeight = projectSize("height", selfRect.height / scaleY, targetRect.height);
@@ -952,10 +953,10 @@
         height: root.innerHeight
       }, reference, referenceRect, scaleX, scaleY);
       var selected = null;
-      var _iterator1 = _createForOfIteratorHelper(candidates), _step1;
+      var _iterator9 = _createForOfIteratorHelper(candidates), _step9;
       try {
-        for (_iterator1.s(); !(_step1 = _iterator1.n()).done; ) {
-          var candidate = _step1.value;
+        for (_iterator9.s(); !(_step9 = _iterator9.n()).done; ) {
+          var candidate = _step9.value;
           var x = targetRect.left + targetRect.width * candidate.target[0] - selfWidth * candidate.self[0];
           var y = targetRect.top + targetRect.height * candidate.target[1] - selfHeight * candidate.self[1];
           var result = {
@@ -972,9 +973,9 @@
           }
         }
       } catch (err) {
-        _iterator1.e(err);
+        _iterator9.e(err);
       } finally {
-        _iterator1.f();
+        _iterator9.f();
       }
       var present = target.closest("[".concat(presentAttribute, "]"));
       var opacity = present ? root.getComputedStyle(present).opacity : "1";
@@ -1044,18 +1045,18 @@
       state.target = target;
       if (state.observer) state.observer.disconnect();
       if (state.intersectionObserver) state.intersectionObserver.disconnect();
-      var _iterator10 = _createForOfIteratorHelper(/* @__PURE__ */ new Set([element, target, reference])), _step10;
+      var _iterator0 = _createForOfIteratorHelper(/* @__PURE__ */ new Set([element, target, reference])), _step0;
       try {
-        for (_iterator10.s(); !(_step10 = _iterator10.n()).done; ) {
-          var observed = _step10.value;
+        for (_iterator0.s(); !(_step0 = _iterator0.n()).done; ) {
+          var observed = _step0.value;
           if (!observed) continue;
           if (state.observer) state.observer.observe(observed);
           if (state.intersectionObserver) state.intersectionObserver.observe(observed);
         }
       } catch (err) {
-        _iterator10.e(err);
+        _iterator0.e(err);
       } finally {
-        _iterator10.f();
+        _iterator0.f();
       }
     }
     function listenForLayout(state, reference) {
@@ -1109,10 +1110,10 @@
     }
     function parseCandidates(value) {
       var result = [];
-      var _iterator11 = _createForOfIteratorHelper((value || "").split(",")), _step11;
+      var _iterator1 = _createForOfIteratorHelper((value || "").split(",")), _step1;
       try {
-        for (_iterator11.s(); !(_step11 = _iterator11.n()).done; ) {
-          var token = _step11.value;
+        for (_iterator1.s(); !(_step1 = _iterator1.n()).done; ) {
+          var token = _step1.value;
           var pair = token.trim().toLowerCase().split(":");
           if (pair.length !== 2 || !pivots[pair[0].trim()] || !pivots[pair[1].trim()]) continue;
           result.push({
@@ -1121,9 +1122,9 @@
           });
         }
       } catch (err) {
-        _iterator11.e(err);
+        _iterator1.e(err);
       } finally {
-        _iterator11.f();
+        _iterator1.f();
       }
       return result;
     }

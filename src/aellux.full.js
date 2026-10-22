@@ -24,6 +24,7 @@ root.AelluxJs.extIndex.official = typeof __AELLUX_OFFICIAL_EXTENSION_MANIFEST__ 
 // when their selectors match, keeping their code out of the Full runtime.
 root.AelluxJs.ext("adaptive", { loadWhen: "[data-ae-adaptive]", loadStyle: true });
 root.AelluxJs.ext("anchor", { loadWhen: "[data-ae-anchor]" });
+root.AelluxJs.ext("overflow-marquee", { loadWhen: "[data-ae-overflow-marquee]" });
 root.AelluxJs.ext("ajax-href", { loadWhen: "a[data-ae-ajax-href]" });
 root.AelluxJs.ext("feedback", { loadWhen: "[data-ae-feedback]", loadStyle: true });
 root.AelluxJs.ext("focus", { loadWhen: "[data-ae-focus]" });

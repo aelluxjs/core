@@ -1,18 +1,23 @@
 export const bundleBudget = Object.freeze([
   // Actionable diagnostic catalog/context plus the development-only semantic
   // mount validator. Measured costs and previous limits: runtime/diagnostics.md.
-  { file: "aellux.min.js", maxRawBytes: 46.5 * 1024, maxGzipBytes: 15 * 1024 },
+  // Includes the official entry for the dedicated Overflow Marquee Extension.
+  { file: "aellux.min.js", maxRawBytes: 47.5 * 1024, maxGzipBytes: 15.5 * 1024 },
   { file: "aellux.esm.min.js", maxRawBytes: 25 * 1024, maxGzipBytes: 8.5 * 1024 },
   // Development HTML source inspection for discarded duplicate attributes.
   { file: "aellux.orchestrator.min.js", maxRawBytes: 59 * 1024, maxGzipBytes: 20 * 1024 },
   { file: "aellux.orchestrator.legacy.min.js", maxRawBytes: 324 * 1024, maxGzipBytes: 103 * 1024 },
-  { file: "aellux.full.min.js", maxRawBytes: 130 * 1024, maxGzipBytes: 41.5 * 1024 },
+  // Independent Overflow Marquee registration and official artifact metadata.
+  { file: "aellux.full.min.js", maxRawBytes: 130 * 1024, maxGzipBytes: 42 * 1024 },
   { file: "aellux.full.legacy.min.js", maxRawBytes: 432 * 1024, maxGzipBytes: 138 * 1024 },
   { file: "aellux.ext.adaptive.min.css", maxRawBytes: 121 * 1024, maxGzipBytes: 11 * 1024 },
   { file: "aellux.ext.adaptive.min.js", maxRawBytes: 5 * 1024, maxGzipBytes: 3 * 1024 },
   { file: "aellux.ext.adaptive.legacy.min.js", maxRawBytes: 8.5 * 1024, maxGzipBytes: 3.5 * 1024 },
   { file: "aellux.ext.anchor.min.js", maxRawBytes: 15 * 1024, maxGzipBytes: 6 * 1024 },
   { file: "aellux.ext.anchor.legacy.min.js", maxRawBytes: 23 * 1024, maxGzipBytes: 8 * 1024 },
+  // Dedicated lazy Extension; measured costs: core-extensions/overflow-marquee.md.
+  { file: "aellux.ext.overflow-marquee.min.js", maxRawBytes: 11.5 * 1024, maxGzipBytes: 4.5 * 1024 },
+  { file: "aellux.ext.overflow-marquee.legacy.min.js", maxRawBytes: 23 * 1024, maxGzipBytes: 8 * 1024 },
   { file: "aellux.ext.ajax-href.min.js", maxRawBytes: 7 * 1024, maxGzipBytes: 3 * 1024 },
   { file: "aellux.ext.ajax-href.legacy.min.js", maxRawBytes: 14.5 * 1024, maxGzipBytes: 5.5 * 1024 },
   { file: "aellux.ext.feedback.min.css", maxRawBytes: 3 * 1024, maxGzipBytes: 2 * 1024 },

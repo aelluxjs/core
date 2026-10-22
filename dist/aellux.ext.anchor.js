@@ -14,7 +14,6 @@
     const targetAttribute = AelluxJs.attr("anchor-target");
     const matchAttribute = AelluxJs.attr("anchor-match");
     const groupAttribute = AelluxJs.attr("present-group");
-    const groupAnchorAttribute = AelluxJs.attr("present-group-anchor");
     const layoutEvent = AelluxJs.eventName("Layout");
     const anchoredClass = AelluxJs.className("anchored");
     const switchingClass = AelluxJs.className("anchor-switching");
@@ -44,10 +43,11 @@
     };
     const anchors = /* @__PURE__ */ new Map();
     const elementMemories = /* @__PURE__ */ new WeakMap();
+    const placementMaps = /* @__PURE__ */ new Set();
     let nextLayoutId = 2e6;
     let mutations = null;
     let weakStyle = null;
-    AelluxJs.extAttach(extensionName, { init, destroy });
+    AelluxJs.extAttach(extensionName, { init, destroy, createPlacementMap });
     function init() {
       weakStyle = document.createElement("style");
       weakStyle.setAttribute(AelluxJs.attr("anchor-style"), "");
@@ -90,10 +90,42 @@
       });
     }
     async function destroy() {
+      for (const map of placementMaps) map.destroy();
       await Promise.all(Array.from(anchors.keys(), unmountAnchor));
       AelluxJs.mountManager.remove({ extensionName });
       weakStyle == null ? void 0 : weakStyle.remove();
       weakStyle = null;
+    }
+    function createPlacementMap() {
+      const memories = /* @__PURE__ */ new Map();
+      let disposed = false;
+      const map = {
+        mount(element) {
+          if (!disposed && !memories.has(element))
+            memories.set(element, AelluxJs.persist.element.save(element, ["class"], ownedProperties));
+        },
+        unmount(element) {
+          var _a;
+          (_a = memories.get(element)) == null ? void 0 : _a.restore();
+          memories.delete(element);
+        },
+        measure(element, pairs, target = element.parentElement) {
+          const candidates = parseCandidates(pairs);
+          if (memories.has(element) && candidates.length) return readPlacement(element, target, candidates, true);
+          return null;
+        },
+        place(element, placement) {
+          if (memories.has(element) && (placement == null ? void 0 : placement.valid)) writePlacement(element, placement);
+        },
+        invisible: isInvisible,
+        destroy() {
+          disposed = true;
+          for (const element of memories.keys()) map.unmount(element);
+          placementMaps.delete(map);
+        }
+      };
+      placementMaps.add(map);
+      return map;
     }
     function mountAnchor(element) {
       if (anchors.has(element)) return;
@@ -106,7 +138,6 @@
         resolvedTarget: null,
         reference: null,
         group: null,
-        conflict: false,
         lastPlacement: null,
         switchTimer: null,
         interruptSwitch: false,
@@ -143,7 +174,6 @@
               targetAttribute,
               matchAttribute,
               groupAttribute,
-              groupAnchorAttribute,
               AelluxJs.attr("reduced-motion"),
               "id",
               "hidden",
@@ -162,7 +192,6 @@
       if (typeof root.IntersectionObserver === "function") {
         state.intersectionObserver = new root.IntersectionObserver(() => scheduleAnchor(element));
       }
-      refreshAssociations();
       return updateAnchor(element);
     }
     async function unmountAnchor(element) {
@@ -203,67 +232,43 @@
     function onMutations(records) {
       var _a;
       const affected = /* @__PURE__ */ new Set();
-      const associationSelector = `[${groupAnchorAttribute}],[${attribute}]`;
-      const containsAssociation = (node) => node.nodeType === 1 && (node.matches(associationSelector) || node.querySelector(associationSelector));
-      let associationsChanged = false;
       for (const record of records) {
         const node = record.target;
         const structural = record.type === "childList";
         const visual = record.attributeName === "class" || record.attributeName === "style";
-        if (structural ? [...record.addedNodes, ...record.removedNodes].some(containsAssociation) : record.attributeName === groupAnchorAttribute || record.attributeName === groupAttribute || (record.attributeName === "id" || record.attributeName === attribute) && (anchors.has(node) || node.hasAttribute(attribute))) associationsChanged = true;
         for (const [element, state] of anchors) {
           if (visual) {
-            if (node !== element && state.resolvedTarget && node.contains(state.resolvedTarget)) affected.add(element);
+            if (node !== element && (state.resolvedTarget && node.contains(state.resolvedTarget) || state.group && node.contains(state.group) || targetChanged(element, state))) affected.add(element);
             continue;
           }
-          if (node === element || node === document.documentElement || node.contains(element) || state.resolvedTarget && node.contains(state.resolvedTarget) || structural && ((_a = state.reference) == null ? void 0 : _a.contains(node)) || !state.group && element.hasAttribute(targetAttribute) && resolveElement(element.getAttribute(targetAttribute)) !== state.resolvedTarget) affected.add(element);
+          if (node === element || node === document.documentElement || node.contains(element) || state.resolvedTarget && node.contains(state.resolvedTarget) || state.group && node.contains(state.group) || structural && ((_a = state.reference) == null ? void 0 : _a.contains(node)) || targetChanged(element, state)) affected.add(element);
         }
-      }
-      if (associationsChanged) {
-        refreshAssociations();
-        for (const element of anchors.keys()) affected.add(element);
       }
       for (const element of affected) scheduleAnchor(element);
     }
-    function associationDiagnostic(group, reason) {
+    function targetChanged(element, state) {
+      const value = element.getAttribute(targetAttribute);
+      return value && value.trim() && resolveElement(value) !== (state.group || state.resolvedTarget);
+    }
+    function associationDiagnostic(element, reason) {
       AelluxJs.diagnostics.warn(
         AelluxJs.diagnostics.WARN_ANCHOR_GROUP,
         {
           extension: extensionName,
-          element: group,
+          element,
           reason,
-          attribute: groupAnchorAttribute,
-          value: group.getAttribute(groupAnchorAttribute),
-          suggestion: "Reference one existing Anchor ID from one Present Group and ensure compatible positioning references."
+          attribute: targetAttribute,
+          value: element.getAttribute(targetAttribute),
+          suggestion: "Reference an element or Present Group without circular targets, share a positioning reference, and keep dimension-matched Anchors out of normal flow."
         }
       );
     }
-    function refreshAssociations() {
-      for (const state of anchors.values()) {
-        state.group = null;
-        state.conflict = false;
-      }
-      for (const group of document.querySelectorAll(`[${groupAttribute}][${groupAnchorAttribute}]`)) {
-        const id = (group.getAttribute(groupAnchorAttribute) || "").replace(/^#/, "");
-        const element = id && !/\s/.test(id) ? document.getElementById(id) : null;
-        if (!element || !element.hasAttribute(attribute)) {
-          associationDiagnostic(group, "Expected an existing Anchor ID.");
-          continue;
-        }
-        const state = anchors.get(element);
-        if (!state) continue;
-        if (state.group) {
-          state.conflict = true;
-          associationDiagnostic(group, "Multiple groups reference the same Anchor.");
-        } else state.group = group;
-      }
-    }
     function effectiveTarget(element, state) {
       var _a, _b;
-      if (state.conflict) return null;
-      if (state.group) return ((_b = (_a = AelluxJs.ext.present) == null ? void 0 : _a.selected) == null ? void 0 : _b.call(_a, state.group)) || null;
       const value = element.getAttribute(targetAttribute);
-      return value && value.trim() ? resolveElement(value) : element.offsetParent;
+      const target = value && value.trim() ? resolveElement(value) : element.offsetParent;
+      state.group = value && value.trim() && (target == null ? void 0 : target.hasAttribute(groupAttribute)) ? target : null;
+      return state.group ? ((_b = (_a = AelluxJs.ext.present) == null ? void 0 : _a.selected) == null ? void 0 : _b.call(_a, state.group)) || null : target;
     }
     function circularTarget(element, target) {
       const visited = /* @__PURE__ */ new Set([element]);
@@ -487,6 +492,7 @@
       const targetRect = toReference(target.getBoundingClientRect(), reference, referenceRect, scaleX, scaleY);
       const selfRect = element.getBoundingClientRect();
       const projectSize = (axis, actual, desired) => {
+        var _a;
         if (!tokens.includes(axis) || element.style[axis]) return actual;
         const previous = parseFloat(element.style.getPropertyValue(`--ae-anchor-target-${axis}`)) || 0;
         const sides = axis === "width" ? ["Left", "Right"] : ["Top", "Bottom"];
@@ -495,7 +501,7 @@
         const minimum = Math.max(borderBox ? extra : 0, parseFloat(style.getPropertyValue(`min-${axis}`)) || 0);
         const maximum = parseFloat(style.getPropertyValue(`max-${axis}`));
         const constrain = (value) => Math.max(minimum, Math.min(Number.isFinite(maximum) ? maximum : Infinity, value));
-        return anchors.get(element).switchTimer === null && Math.abs(parseFloat(style[axis]) - constrain(previous)) > 0.5 ? actual : constrain(desired) + (borderBox ? 0 : extra);
+        return !((_a = anchors.get(element)) == null ? void 0 : _a.switchTimer) && Math.abs(parseFloat(style[axis]) - constrain(previous)) > 0.5 ? actual : constrain(desired) + (borderBox ? 0 : extra);
       };
       const selfWidth = projectSize("width", selfRect.width / scaleX, targetRect.width);
       const selfHeight = projectSize("height", selfRect.height / scaleY, targetRect.height);

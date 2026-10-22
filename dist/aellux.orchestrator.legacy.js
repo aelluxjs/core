@@ -22082,7 +22082,7 @@
     var _iterator3 = _createForOfIteratorHelper3(elements), _step3;
     try {
       var _loop = function _loop2() {
-        var _element$parentElemen, _api$ext$anchor;
+        var _element$parentElemen;
         var element = _step3.value;
         var has = function has2(name2) {
           return element.hasAttribute(attr(name2));
@@ -22165,7 +22165,6 @@
         }
         if ((!selected || selected.has("scrollbox")) && has("scrollbox-elastic") && value("scrollbox-elastic") !== "false" && !((_element$parentElemen = element.parentElement) !== null && _element$parentElemen !== void 0 && _element$parentElemen.hasAttribute(attr("scrollbox")))) invalid("scrollbox", "scrollbox-elastic", "Elastic wrapper must be a direct child of Scrollbox.", "Place exactly one marked wrapper directly inside data-ae-scrollbox.", "WARN_CONFIGURATION_STRUCTURE");
         if ((!selected || selected.has("scrollbox-snap")) && has("snap-item") && !element.closest("[".concat(attr("scrollbox"), "]"))) invalid("scrollbox-snap", "snap-item", "Snap item has no Scrollbox ancestor.", "Place snap items inside a Scrollbox with Snap enabled.", "WARN_CONFIGURATION_STRUCTURE");
-        if ((!selected || selected.has("anchor")) && has("present-group-anchor") && !((_api$ext$anchor = api.ext.anchor) !== null && _api$ext$anchor !== void 0 && _api$ext$anchor.initialized)) report("WARN_EXTENSION_REQUIRED", "anchor", "present-group-anchor", "The group association requires Anchor.", "Register and initialize Anchor, and reference an existing Anchor ID.");
         if (!selected && has("maxfps") && (!value("maxfps").trim() || !Number.isFinite(Number(value("maxfps"))) || Number(value("maxfps")) <= 0)) invalid("core", "maxfps", "Frame rate must be finite and greater than zero.", "Use a positive number or remove the attribute.", "WARN_LAYOUT_MAX_FPS_INVALID");
         if (!selected || selected.has("present") || selected.has("anchor")) validateCSS();
         function validatePresent() {
@@ -22213,9 +22212,10 @@
           }
         }
         function validateAnchor() {
+          var _target;
           var pivots = new Set("top-left top-center top-right center-left center center-right bottom-left bottom-center bottom-right".split(" "));
-          var pairs = value("anchor").split(",");
-          if (!pairs.every(function(token) {
+          var pairs = has("anchor") ? value("anchor").split(",") : [];
+          if (has("anchor") && !pairs.every(function(token) {
             var pair = token.trim().toLowerCase().split(":");
             return pair.length === 2 && pair.every(function(pivot) {
               return pivots.has(pivot.trim());
@@ -22226,13 +22226,16 @@
           })) invalid("anchor", "anchor-match", "Unknown matching dimension.", "Use width, height, or width height.", "WARN_ANCHOR_MATCH");
           var reference = value("anchor-target");
           if (!reference) return;
-          if (element.id && _toConsumableArray2(root.document.querySelectorAll("[".concat(attr("present-group-anchor"), "]"))).some(function(group) {
-            return group.getAttribute(attr("present-group-anchor")).replace(/^#/, "") === element.id;
-          })) return;
           var target;
           try {
             target = root.document.getElementById(reference.replace(/^#/, "")) || root.document.querySelector(reference);
           } catch (_) {
+          }
+          if ((_target = target) !== null && _target !== void 0 && _target.hasAttribute(attr("present-group"))) {
+            var _api$ext$present, _api$ext$present2, _api$ext$present2$sel;
+            if (!((_api$ext$present = api.ext.present) !== null && _api$ext$present !== void 0 && _api$ext$present.initialized)) report("WARN_EXTENSION_REQUIRED", "present", "anchor-target", "A Present Group target requires Present.", "Register and initialize Present before mounting the group and its Anchors.");
+            target = (_api$ext$present2 = api.ext.present) === null || _api$ext$present2 === void 0 || (_api$ext$present2$sel = _api$ext$present2.selected) === null || _api$ext$present2$sel === void 0 ? void 0 : _api$ext$present2$sel.call(_api$ext$present2, target);
+            if (!target) return;
           }
           if (!target) invalid("anchor", "anchor-target", "Anchor target does not exist or the selector is invalid.", "Use an existing target ID or a valid CSS selector.", "WARN_CONFIGURATION_TARGET");
           else if (method === "update" && element.getClientRects().length && !target.getClientRects().length && !target.closest("[".concat(attr("present"), "],[hidden]"))) invalid("anchor", "anchor-target", "The explicitly updated Anchor target cannot currently be measured.", "Reveal the target before requesting placement, or update again after it becomes measurable.", "WARN_CONFIGURATION_TARGET");
@@ -22350,8 +22353,9 @@
       init_utils_name_case();
       /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
       attributesByExtension = {
-        present: "present present-group present-active present-when present-motion trigger trigger-on dismiss target auto-unpop unpop-on-outside present-group-anchor",
+        present: "present present-group present-active present-when present-motion trigger trigger-on dismiss target auto-unpop unpop-on-outside",
         anchor: "anchor anchor-target anchor-match anchor-style",
+        "overflow-marquee": "overflow-marquee overflow-marquee-content overflow-marquee-active overflow-marquee-style",
         scrollbox: "scrollbox scrollbox-wheel-horizontal scrollbox-momentum scrollbox-elastic scrollbar scrollbar-vertical scrollbar-horizontal",
         "scrollbox-snap": "scrollbox-snap snap-item",
         focus: "focus",
@@ -22365,6 +22369,7 @@
       activation = {
         present: "present present-group trigger dismiss",
         anchor: "anchor",
+        "overflow-marquee": "overflow-marquee",
         scrollbox: "scrollbox",
         "scrollbox-snap": "scrollbox-snap",
         focus: "focus",

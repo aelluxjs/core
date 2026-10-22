@@ -132,16 +132,16 @@ For a swap with motion, all required `BeforePop`/`BeforeUnpop` events run first.
 
 ```html
 <div id="views" data-ae-present-group data-ae-present-active="home-panel"
-     data-ae-present-group-anchor="selection-indicator" style="position:relative">
+     style="position:relative">
   <section id="home-panel" data-ae-present="opacity">Home</section>
   <section id="settings-panel" data-ae-present="opacity" hidden>Settings</section>
   <div id="selection-indicator" data-ae-anchor="bottom-left:bottom-left"
-       data-ae-anchor-match="width"
+       data-ae-anchor-target="views" data-ae-anchor-match="width"
        style="--ae-anchor-switch-duration:250ms;--ae-anchor-switch-ease:ease-in-out"></div>
 </div>
 ```
 
-`data-ae-present-group-anchor` accepts one Anchor ID, optionally prefixed with `#`. Anchor owns resolution, geometry, matching, switching, association diagnostics and fallback to its ordinary target when the association is removed. Present performs no geometry calculations and does not require Anchor to be loaded. See [Anchor](anchor.md#present-group-anchor) for precedence, compatible positioning references, conflicts and an integrated example. A group may remain temporarily without a selected member; its associated Anchor then remains inactive.
+Each Anchor points `data-ae-anchor-target` at the group's ID or CSS selector and automatically follows its accepted selected member. Multiple Anchors can follow one group, each with independent pivots, matching and switching options. Anchor owns target resolution, geometry and diagnostics; Present performs no geometry calculations and does not require Anchor to be loaded. See [Anchor](anchor.md#present-group-anchor) for compatible positioning references and an integrated example. A group with no selected member leaves all Anchors targeting it inactive.
 
 Delivery B adds the query and notification bridge without increasing Present's existing limits. Its minified Modern script is 17,240 bytes (gzip: 6,106), compared with Delivery A's 16,914 / 5,971 bytes. Legacy is 24,552 / 8,662 bytes, compared with 24,334 / 8,528. Shared selector strings avoid repeated construction and keep both artifacts inside the 17/6 and 24/9 KiB limits respectively.
 

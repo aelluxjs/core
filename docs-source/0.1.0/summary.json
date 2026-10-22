@@ -48,6 +48,7 @@
         { "label": "Adaptive", "href": "core-extensions/adaptive.md" },
         { "label": "Ajax Href", "href": "core-extensions/ajax-href.md" },
         { "label": "Anchor", "href": "core-extensions/anchor.md" },
+        { "label": "Overflow Marquee", "href": "core-extensions/overflow-marquee.md" },
         { "label": "Feedback", "href": "core-extensions/feedback.md" },
         { "label": "Focus", "href": "core-extensions/focus.md" },
         { "label": "Point", "href": "core-extensions/point.md" },

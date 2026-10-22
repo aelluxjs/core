@@ -168,6 +168,28 @@
       ]
     },
     {
+      "name": "--ae-overflow-marquee-delay",
+      "description": "Overflow Marquee pause before each pass; nonnegative ms/s values. Invalid values use 1200ms.\n\nValue syntax: <time>.\n\nDefault behavior: \"1200ms\".",
+      "syntax": "<time>",
+      "references": [
+        {
+          "name": "AelluxJS overflow-marquee",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/overflow-marquee.htm"
+        }
+      ]
+    },
+    {
+      "name": "--ae-overflow-marquee-speed",
+      "description": "Overflow Marquee speed in CSS pixels per second. Positive numbers only; invalid values use 30.\n\nValue syntax: <number>.\n\nDefault behavior: \"30\".",
+      "syntax": "<number>",
+      "references": [
+        {
+          "name": "AelluxJS overflow-marquee",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/overflow-marquee.htm"
+        }
+      ]
+    },
+    {
       "name": "--ae-pop-duration",
       "description": "pop transition duration.\n\nValue syntax: <time>.\n\nDefault behavior: \"250ms\".\n\nSuggested values: `0s`, `150ms`, `250ms`, `500ms`. This is an open grammar, not a closed enumeration.",
       "syntax": "<time>",

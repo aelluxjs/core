@@ -63,7 +63,7 @@
     },
     {
       "name": "data-ae-anchor-target",
-      "description": "Target ID or CSS selector. Empty uses offsetParent. Target and Anchor must share a positioning reference; an associated Present Group takes precedence.\n\nValue syntax: selector.\n\nDefault behavior: \"\".\n\nExamples: `menu-trigger`, `#menu-trigger`.",
+      "description": "Target ID or CSS selector. A Present Group target resolves to its accepted selected member, allowing multiple Anchors per group. Empty uses offsetParent. Effective target and Anchor must share a positioning reference.\n\nValue syntax: selector.\n\nDefault behavior: \"\".\n\nExamples: `menu-trigger`, `#menu-trigger`, `#views`.",
       "references": [
         {
           "name": "AelluxJS anchor",
@@ -76,6 +76,9 @@
         },
         {
           "name": "#menu-trigger"
+        },
+        {
+          "name": "#views"
         }
       ]
     },
@@ -274,6 +277,17 @@
       ]
     },
     {
+      "name": "data-ae-overflow-marquee",
+      "description": "Single-line overflow marquee. Loads Anchor during initialization for placement geometry. Starts only when visible and pauses in place while hidden or offscreen. Root reduced motion keeps ellipsis; desktop overflow receives a native title unless authored.\n\nValue syntax: presence.",
+      "references": [
+        {
+          "name": "AelluxJS overflow-marquee",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/overflow-marquee.htm"
+        }
+      ],
+      "valueSet": "v"
+    },
+    {
       "name": "data-ae-point",
       "description": "Maximum simultaneously associated pointers. Empty defaults to 1; a nonnegative integer is expected, and 0 disables association.\n\nValue syntax: integer.\n\nDefault behavior: \"1\".\n\nExamples: `0`, `1`, `2`.",
       "references": [
@@ -424,21 +438,6 @@
         }
       ],
       "valueSet": "v"
-    },
-    {
-      "name": "data-ae-present-group-anchor",
-      "description": "One Anchor ID, optionally prefixed with #. The associated Anchor follows this group's selected member; requires Anchor.\n\nValue syntax: id.\n\nExamples: `selection-outline`.",
-      "references": [
-        {
-          "name": "AelluxJS present",
-          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/present.htm"
-        }
-      ],
-      "values": [
-        {
-          "name": "selection-outline"
-        }
-      ]
     },
     {
       "name": "data-ae-present-motion",

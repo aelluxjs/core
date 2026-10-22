@@ -6,8 +6,9 @@ import utilsNameCase from "./utils-name-case.js";
 // Only declarative, development-time checks belong here. Runtime failures remain
 // the responsibility of each Extension. No observers or production DOM scans.
 const attributesByExtension = {
-  present: "present present-group present-active present-when present-motion trigger trigger-on dismiss target auto-unpop unpop-on-outside present-group-anchor",
+  present: "present present-group present-active present-when present-motion trigger trigger-on dismiss target auto-unpop unpop-on-outside",
   anchor: "anchor anchor-target anchor-match anchor-style",
+  "overflow-marquee": "overflow-marquee overflow-marquee-content overflow-marquee-active overflow-marquee-style",
   scrollbox: "scrollbox scrollbox-wheel-horizontal scrollbox-momentum scrollbox-elastic scrollbar scrollbar-vertical scrollbar-horizontal",
   "scrollbox-snap": "scrollbox-snap snap-item",
   focus: "focus", point: "point", adaptive: "adaptive", "ajax-href": "ajax-href",
@@ -16,7 +17,7 @@ const attributesByExtension = {
 };
 const coreAttributes = "maxfps wait-mounted ext ext-style dep load-when builds load-style weak-style legacy esm theme-color";
 const activation = {
-  present: "present present-group trigger dismiss", anchor: "anchor",
+  present: "present present-group trigger dismiss", anchor: "anchor", "overflow-marquee": "overflow-marquee",
   scrollbox: "scrollbox", "scrollbox-snap": "scrollbox-snap",
   focus: "focus", point: "point", adaptive: "adaptive", "ajax-href": "ajax-href",
   preference: "preference", feedback: "feedback"
@@ -98,8 +99,6 @@ export function validateDeclarations(root, scope, extensionNames = null, method 
       invalid("scrollbox", "scrollbox-elastic", "Elastic wrapper must be a direct child of Scrollbox.", "Place exactly one marked wrapper directly inside data-ae-scrollbox.", "WARN_CONFIGURATION_STRUCTURE");
     if ((!selected || selected.has("scrollbox-snap")) && has("snap-item") && !element.closest(`[${attr("scrollbox")}]`))
       invalid("scrollbox-snap", "snap-item", "Snap item has no Scrollbox ancestor.", "Place snap items inside a Scrollbox with Snap enabled.", "WARN_CONFIGURATION_STRUCTURE");
-    if ((!selected || selected.has("anchor")) && has("present-group-anchor") && !api.ext.anchor?.initialized)
-      report("WARN_EXTENSION_REQUIRED", "anchor", "present-group-anchor", "The group association requires Anchor.", "Register and initialize Anchor, and reference an existing Anchor ID.");
     if (!selected && has("maxfps") && (!value("maxfps").trim() || !Number.isFinite(Number(value("maxfps"))) || Number(value("maxfps")) <= 0))
       invalid("core", "maxfps", "Frame rate must be finite and greater than zero.", "Use a positive number or remove the attribute.", "WARN_LAYOUT_MAX_FPS_INVALID");
     if (!selected || selected.has("present") || selected.has("anchor")) validateCSS();
@@ -138,19 +137,23 @@ export function validateDeclarations(root, scope, extensionNames = null, method 
 
     function validateAnchor() {
       const pivots = new Set("top-left top-center top-right center-left center center-right bottom-left bottom-center bottom-right".split(" "));
-      const pairs = value("anchor").split(",");
-      if (!pairs.every(token => { const pair = token.trim().toLowerCase().split(":"); return pair.length === 2 && pair.every(pivot => pivots.has(pivot.trim())); }))
+      const pairs = has("anchor") ? value("anchor").split(",") : [];
+      if (has("anchor") && !pairs.every(token => { const pair = token.trim().toLowerCase().split(":"); return pair.length === 2 && pair.every(pivot => pivots.has(pivot.trim())); }))
         invalid("anchor", "anchor", "Anchor pivot pair is invalid.", "Use target:self pairs such as bottom-center:top-center, separated by commas.");
       if (has("anchor-match") && value("anchor-match").trim().split(/\s+/).some(token => !["width", "height"].includes(token)))
         invalid("anchor", "anchor-match", "Unknown matching dimension.", "Use width, height, or width height.", "WARN_ANCHOR_MATCH");
       const reference = value("anchor-target");
       if (!reference) return;
-      // An associated group owns the effective target and can temporarily have
-      // no selection. Its fallback declaration must not emit missing-target noise.
-      if (element.id && [...root.document.querySelectorAll(`[${attr("present-group-anchor")}]`)].some(group => group.getAttribute(attr("present-group-anchor")).replace(/^#/, "") === element.id)) return;
       let target;
       try { target = root.document.getElementById(reference.replace(/^#/, "")) || root.document.querySelector(reference); }
       catch (_) { /* report the declaration below */ }
+      if (target?.hasAttribute(attr("present-group"))) {
+        if (!api.ext.present?.initialized)
+          report("WARN_EXTENSION_REQUIRED", "present", "anchor-target", "A Present Group target requires Present.", "Register and initialize Present before mounting the group and its Anchors.");
+        // A mounted group with no accepted selection is a normal inactive state.
+        target = api.ext.present?.selected?.(target);
+        if (!target) return;
+      }
       if (!target) invalid("anchor", "anchor-target", "Anchor target does not exist or the selector is invalid.", "Use an existing target ID or a valid CSS selector.", "WARN_CONFIGURATION_TARGET");
       else if (method === "update" && element.getClientRects().length && !target.getClientRects().length && !target.closest(`[${attr("present")}],[hidden]`))
         invalid("anchor", "anchor-target", "The explicitly updated Anchor target cannot currently be measured.", "Reveal the target before requesting placement, or update again after it becomes measurable.", "WARN_CONFIGURATION_TARGET");

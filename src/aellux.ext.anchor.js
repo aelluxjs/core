@@ -10,7 +10,8 @@
  * Capability profile: visual positioning and layout observation.
  *
  * Inputs and activation: mounts `[data-ae-anchor]` and resolves an optional
- * `data-ae-anchor-target`; without one, the positioning parent is the target.
+ * `data-ae-anchor-target`; a Present Group target resolves to its selected member.
+ * Without an explicit target, the positioning parent is the target.
  * `data-ae-maxfps` sets an optional maximum update rate.
  * Scroll, resize, size and intersection changes, and bubbling `AelluxJsLayout`
  * events schedule placement updates at the configured rate. A Layout event with
@@ -47,7 +48,6 @@
   const targetAttribute = AelluxJs.attr("anchor-target");
   const matchAttribute = AelluxJs.attr("anchor-match");
   const groupAttribute = AelluxJs.attr("present-group");
-  const groupAnchorAttribute = AelluxJs.attr("present-group-anchor");
   const layoutEvent = AelluxJs.eventName("Layout");
   const anchoredClass = AelluxJs.className("anchored");
   const switchingClass = AelluxJs.className("anchor-switching");
@@ -68,11 +68,11 @@
 
   const anchors = new Map();
   const elementMemories = new WeakMap();
+  const placementMaps = new Set();
   let nextLayoutId = 2000000;
   let mutations = null;
   let weakStyle = null;
-
-  AelluxJs.extAttach(extensionName, { init, destroy });
+  AelluxJs.extAttach(extensionName, { init, destroy, createPlacementMap });
 
   function init() {
     weakStyle = document.createElement("style");
@@ -115,10 +115,44 @@
   }
 
   async function destroy() {
+    for (const map of placementMaps) map.destroy();
     await Promise.all(Array.from(anchors.keys(), unmountAnchor));
     AelluxJs.mountManager.remove({ extensionName });
     weakStyle?.remove();
     weakStyle = null;
+  }
+
+  // Other Extensions can own wrapping, observation and timing while reusing
+  // Anchor geometry. These maps never join ordinary Anchor tracking.
+  function createPlacementMap() {
+    const memories = new Map();
+    let disposed = false;
+    const map = {
+      mount(element) {
+        if (!disposed && !memories.has(element))
+          memories.set(element, AelluxJs.persist.element.save(element, ["class"], ownedProperties));
+      },
+      unmount(element) {
+        memories.get(element)?.restore();
+        memories.delete(element);
+      },
+      measure(element, pairs, target = element.parentElement) {
+        const candidates = parseCandidates(pairs);
+        if (memories.has(element) && candidates.length) return readPlacement(element, target, candidates, true);
+        return null;
+      },
+      place(element, placement) {
+        if (memories.has(element) && placement?.valid) writePlacement(element, placement);
+      },
+      invisible: isInvisible,
+      destroy() {
+        disposed = true;
+        for (const element of memories.keys()) map.unmount(element);
+        placementMaps.delete(map);
+      }
+    };
+    placementMaps.add(map);
+    return map;
   }
 
   function mountAnchor(element) {
@@ -127,7 +161,7 @@
     const state = {
       invalidContext: false, active: false, revision: 0,
       target: null, resolvedTarget: null, reference: null,
-      group: null, conflict: false, lastPlacement: null, switchTimer: null,
+      group: null, lastPlacement: null, switchTimer: null,
       interruptSwitch: false,
       layoutId: nextLayoutId++, styleLayoutId: nextLayoutId++,
       layoutUntil: 0, layoutSingle: false,
@@ -151,7 +185,7 @@
         mutations = new root.MutationObserver(onMutations);
         mutations.observe(document, { subtree: true, childList: true, attributes: true,
           attributeFilter: [attribute, targetAttribute, matchAttribute, groupAttribute,
-            groupAnchorAttribute, AelluxJs.attr("reduced-motion"), "id", "hidden", "class", "style"] });
+            AelluxJs.attr("reduced-motion"), "id", "hidden", "class", "style"] });
       }
     }
     if (typeof root.ResizeObserver === "function") {
@@ -163,7 +197,6 @@
     if (typeof root.IntersectionObserver === "function") {
       state.intersectionObserver = new root.IntersectionObserver(() => scheduleAnchor(element));
     }
-    refreshAssociations();
     return updateAnchor(element);
   }
 
@@ -206,69 +239,45 @@
 
   function onMutations(records) {
     const affected = new Set();
-    const associationSelector = `[${groupAnchorAttribute}],[${attribute}]`;
-    const containsAssociation = node => node.nodeType === 1 &&
-      (node.matches(associationSelector) || node.querySelector(associationSelector));
-    let associationsChanged = false;
     for (const record of records) {
       const node = record.target;
       const structural = record.type === "childList";
       const visual = record.attributeName === "class" || record.attributeName === "style";
-      if (structural ? [...record.addedNodes, ...record.removedNodes].some(containsAssociation) :
-        record.attributeName === groupAnchorAttribute || record.attributeName === groupAttribute ||
-        (record.attributeName === "id" || record.attributeName === attribute) &&
-          (anchors.has(node) || node.hasAttribute(attribute))) associationsChanged = true;
       for (const [element, state] of anchors) {
         // Present can mount after Anchor's first read, revealing a target by
         // class alone. Ignore our own visual writes to avoid observer loops.
         if (visual) {
-          if (node !== element && state.resolvedTarget && node.contains(state.resolvedTarget)) affected.add(element);
+          if (node !== element && (state.resolvedTarget && node.contains(state.resolvedTarget) ||
+              state.group && node.contains(state.group) || targetChanged(element, state))) affected.add(element);
           continue;
         }
         if (node === element || node === document.documentElement ||
           node.contains(element) || state.resolvedTarget && node.contains(state.resolvedTarget) ||
+          state.group && node.contains(state.group) ||
           structural && state.reference?.contains(node) ||
-          !state.group && element.hasAttribute(targetAttribute) &&
-            resolveElement(element.getAttribute(targetAttribute)) !== state.resolvedTarget) affected.add(element);
+          targetChanged(element, state)) affected.add(element);
       }
-    }
-    if (associationsChanged) {
-      refreshAssociations();
-      for (const element of anchors.keys()) affected.add(element);
     }
     for (const element of affected) scheduleAnchor(element);
   }
 
-  function associationDiagnostic(group, reason) {
-    AelluxJs.diagnostics.warn(AelluxJs.diagnostics.WARN_ANCHOR_GROUP,
-      { extension: extensionName, element: group, reason,
-        attribute: groupAnchorAttribute, value: group.getAttribute(groupAnchorAttribute),
-        suggestion: "Reference one existing Anchor ID from one Present Group and ensure compatible positioning references." });
+  function targetChanged(element, state) {
+    const value = element.getAttribute(targetAttribute);
+    return value && value.trim() && resolveElement(value) !== (state.group || state.resolvedTarget);
   }
 
-  function refreshAssociations() {
-    for (const state of anchors.values()) { state.group = null; state.conflict = false; }
-    for (const group of document.querySelectorAll(`[${groupAttribute}][${groupAnchorAttribute}]`)) {
-      const id = (group.getAttribute(groupAnchorAttribute) || "").replace(/^#/, "");
-      const element = id && !/\s/.test(id) ? document.getElementById(id) : null;
-      if (!element || !element.hasAttribute(attribute)) {
-        associationDiagnostic(group, "Expected an existing Anchor ID.");
-        continue;
-      }
-      const state = anchors.get(element);
-      if (!state) continue;
-      if (state.group) {
-        state.conflict = true;
-        associationDiagnostic(group, "Multiple groups reference the same Anchor.");
-      } else state.group = group;
-    }
+  function associationDiagnostic(element, reason) {
+    AelluxJs.diagnostics.warn(AelluxJs.diagnostics.WARN_ANCHOR_GROUP,
+      { extension: extensionName, element, reason,
+        attribute: targetAttribute, value: element.getAttribute(targetAttribute),
+        suggestion: "Reference an element or Present Group without circular targets, share a positioning reference, and keep dimension-matched Anchors out of normal flow." });
   }
 
   function effectiveTarget(element, state) {
-    if (state.conflict) return null;
-    if (state.group) return AelluxJs.ext.present?.selected?.(state.group) || null;
     const value = element.getAttribute(targetAttribute);
-    return value && value.trim() ? resolveElement(value) : element.offsetParent;
+    const target = value && value.trim() ? resolveElement(value) : element.offsetParent;
+    state.group = value && value.trim() && target?.hasAttribute(groupAttribute) ? target : null;
+    return state.group ? AelluxJs.ext.present?.selected?.(state.group) || null : target;
   }
 
   function circularTarget(element, target) {
@@ -518,7 +527,7 @@
       const constrain = value => Math.max(minimum, Math.min(Number.isFinite(maximum) ? maximum : Infinity, value));
       // An application width/height that differs from the prior weak match
       // remains authoritative. The percentage self-pivot also uses its actual box.
-      return anchors.get(element).switchTimer === null && Math.abs(parseFloat(style[axis]) - constrain(previous)) > 0.5
+      return !anchors.get(element)?.switchTimer && Math.abs(parseFloat(style[axis]) - constrain(previous)) > 0.5
         ? actual : constrain(desired) + (borderBox ? 0 : extra);
     };
     const selfWidth = projectSize("width", selfRect.width / scaleX, targetRect.width);

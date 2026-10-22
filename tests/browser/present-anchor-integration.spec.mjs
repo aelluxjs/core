@@ -13,6 +13,8 @@ const fixture = `<style>
   <div id="indicator" data-ae-anchor="bottom-right:top-right" data-ae-anchor-match="width height"
   style="--ae-anchor-switch-duration:350ms;--ae-anchor-switch-ease:linear"></div></div>`;
 
+const groupFixture = fixture.replace('id="indicator"', 'id="indicator" data-ae-anchor-target="group"');
+
 async function start(page, options = {}, html = fixture) {
   const { minified = false, ...runtimeOptions } = options;
   await page.goto("/tests/index.htm");
@@ -78,7 +80,7 @@ for (const forceLegacy of [false, true]) for (const cssMotionController of [true
 
 for (const forceLegacy of [false, true]) {
   test(`minified Basic loads independent extensions with final SRI (legacy=${forceLegacy})`, async ({ page }) => {
-    await start(page, { mode: "basic", minified: true, forceLegacy }, fixture.replace('data-ae-present-active="a"', 'data-ae-present-active="a" data-ae-present-group-anchor="indicator"'));
+    await start(page, { mode: "basic", minified: true, forceLegacy }, groupFixture);
     await aligned(page, "a");
     expect(await page.evaluate(() => $ae("group").present.show("b"))).toBe(true);
     await aligned(page, "b");
@@ -150,7 +152,7 @@ for (const failure of ["throws", "incompatible", "duplicate"]) {
 
 for (const mode of ["basic", "full"]) for (const forceLegacy of [false, true]) for (const cssMotionController of [false, true]) {
   test(`integrated interruption, logical target, geometry and teardown (${mode}, legacy=${forceLegacy}, motion=${cssMotionController})`, async ({ page }) => {
-    await start(page, { mode, forceLegacy, cssMotionController }, fixture.replace('data-ae-present-active="a"', 'data-ae-present-active="a" data-ae-present-group-anchor="indicator"'));
+    await start(page, { mode, forceLegacy, cssMotionController }, groupFixture);
     await aligned(page, "a");
     const results = await page.evaluate(() => {
       const c = $ae("group").present;
@@ -158,10 +160,24 @@ for (const mode of ["basic", "full"]) for (const forceLegacy of [false, true]) f
     });
     expect(results).toEqual([false, false, true]);
     await aligned(page, "a");
-    await page.evaluate(() => { window.pending = $ae("group").present.show("b"); });
-    expect(await page.evaluate(() => $ae("group").present.selected()?.id)).toBe("b");
-    await expect.poll(() => page.locator("#indicator").evaluate(e => e.getBoundingClientRect().width)).toBeGreaterThan(91);
-    expect(await page.locator("#indicator").evaluate(e => e.getBoundingClientRect().width)).toBeLessThan(150);
+    const intermediate = await page.evaluate(async () => {
+      const anchor = document.getElementById("indicator");
+      window.pending = $ae("group").present.show("b");
+      const selected = $ae("group").present.selected()?.id;
+      // Sample in-page: two separate protocol reads can straddle completion.
+      const width = await new Promise(resolve => {
+        const sample = () => {
+          const value = anchor.getBoundingClientRect().width;
+          if (value > 91) resolve(value);
+          else requestAnimationFrame(sample);
+        };
+        requestAnimationFrame(sample);
+      });
+      return { selected, width };
+    });
+    expect(intermediate.selected).toBe("b");
+    expect(intermediate.width).toBeGreaterThan(91);
+    expect(intermediate.width).toBeLessThan(150);
     await page.setViewportSize({ width: 850, height: 650 });
     await page.evaluate(() => window.pending);
     await aligned(page, "b");
@@ -222,9 +238,9 @@ test("unrelated DOM mutations do not rescan groups or measure every Anchor", asy
   });
   for (const count of [1, 10, 40]) {
     await start(page, {}, `<div id="unrelated"></div><div style="position:relative;width:800px;height:500px">
-      ${Array.from({ length: count }, (_, i) => `<div data-ae-present-group data-ae-present-active="target${i}" data-ae-present-group-anchor="anchor${i}">
+      ${Array.from({ length: count }, (_, i) => `<div id="group${i}" data-ae-present-group data-ae-present-active="target${i}">
         <div id="target${i}" data-ae-present style="position:absolute;width:30px;height:20px"></div></div>
-        <div id="anchor${i}" data-ae-anchor="bottom-left:top-left" data-ae-anchor-target="target${i}"></div>`).join("")}</div>`);
+        <div id="anchor${i}" data-ae-anchor="bottom-left:top-left" data-ae-anchor-target="group${i}"></div>`).join("")}</div>`);
     await expect(page.locator(".ae--anchored")).toHaveCount(count);
     await page.waitForTimeout(300);
     measurements.push(await page.evaluate(async count => {
@@ -268,7 +284,7 @@ test("unrelated DOM mutations do not rescan groups or measure every Anchor", asy
 });
 
 test("member replacement during Pop, veto, clearing and scrolling follow the logical selection", async ({ page }) => {
-  await start(page, {}, fixture.replace('data-ae-present-active="a"', 'data-ae-present-active="a" data-ae-present-group-anchor="indicator"'));
+  await start(page, {}, groupFixture);
   await aligned(page, "a");
   await page.evaluate(() => {
     const ref = document.getElementById("ref");
@@ -299,7 +315,7 @@ test("member replacement during Pop, veto, clearing and scrolling follow the log
 
 test("Anchor initialized before Present recovers when the group mounts", async ({ page }) => {
   await page.goto("/tests/index.htm");
-  await page.evaluate(html => { document.body.innerHTML = html; }, fixture.replace('data-ae-present-active="a"', 'data-ae-present-active="a" data-ae-present-group-anchor="indicator"'));
+  await page.evaluate(html => { document.body.innerHTML = html; }, groupFixture);
   await page.addScriptTag({ url: "/dist/aellux.js" });
   await page.evaluate(() => { AelluxJs.ext("anchor"); AelluxJs.init({ mode: "basic" }); });
   await expect.poll(() => page.evaluate(() => !!AelluxJs.ext.anchor?.initialized)).toBe(true);
@@ -331,7 +347,7 @@ test("destroy during combined motion disconnects observers and leaves no delayed
       };
     }
   });
-  await start(page, {}, fixture.replace('data-ae-present-active="a"', 'data-ae-present-active="a" data-ae-present-group-anchor="indicator"'));
+  await start(page, {}, groupFixture);
   await aligned(page, "a");
   expect(await page.evaluate(() => Object.values(window.liveObservers).every(live => live.size > 0))).toBe(true);
   await page.locator("#trigger").hover();

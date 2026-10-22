@@ -33,7 +33,7 @@
   var define_AELLUX_OFFICIAL_EXTENSION_MANIFEST_default;
   var init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST = __esm({
     "<define:__AELLUX_OFFICIAL_EXTENSION_MANIFEST__>": function() {
-      define_AELLUX_OFFICIAL_EXTENSION_MANIFEST_default = { schemaVersion: 1, coreVersion: "0.1.0-beta.10", extensions: { preference: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.preference.min.js", integrity: "sha384-mSOgb0DekFTRXXZAgyNrPjamdlSqzL4SSGZYVWgVg+WlG+pBj11xT81v/6Xk43yO", regular: { url: "./aellux.ext.preference.js", integrity: "sha384-MlikpdHSzHzF6kz5+oJGtq3eoFsKTsx/g+FTrf+dFOU8iQGHsCpn4fP1jLlbNrj7" } }, legacy: { url: "./aellux.ext.preference.legacy.min.js", integrity: "sha384-1LMsK0W9J/PoM4tXhFgkYLRY4yWdzVoYmFy4OMDGd8lRdtptKoEb1sI9L1kzNaBu", regular: { url: "./aellux.ext.preference.legacy.js", integrity: "sha384-pozuz43OyfXrnkmuBu6KTM2lqRSqcI5LMgwAtqnzXq8xZGdVqpnmOtrBcYcMskWk" } } }, dependencies: [] }, "state-navigation": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.state-navigation.min.js", integrity: "sha384-wAbgAqjAA6wauuG+iuUtfRwxChd6fTJ0fS22fqnu2r00kouoXJWZ0f7AoTYlqBC6", regular: { url: "./aellux.ext.state-navigation.js", integrity: "sha384-PKJ8HTD7eIYDEg2hOaAJjpMYzLr2fBjBRGmIGG7XzGTzVK0yTjt5HYPO55VbWfdS" } }, legacy: { url: "./aellux.ext.state-navigation.legacy.min.js", integrity: "sha384-YkhfU15Mpk8KiO6TyoVU6z1yCiYWwnsOGE0xVaQ8NrE7IGrxOSUL005g5JeUDdJu", regular: { url: "./aellux.ext.state-navigation.legacy.js", integrity: "sha384-kaEUY0Zpw8K6pcwjm+INA5feXftLK2/N1aFpPr2LCTcetX2uoe2GGd1MJyy7u8rZ" } } }, dependencies: [] }, feedback: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.feedback.min.js", integrity: "sha384-3VP3W84ekK4MIVBQuy5+5P3bGrwOj7bBDfJnjyexZ+yDADf1jQoHEpP2J1OMUgod", regular: { url: "./aellux.ext.feedback.js", integrity: "sha384-RrPf0bRGxf68f/Rjas5MF5zC1GAubWyndCcuiYbgZsPSHGLFsQtQaUgeFX4SQz+h" } }, legacy: { url: "./aellux.ext.feedback.legacy.min.js", integrity: "sha384-zXuZEv63sd3fwaAygmyk9KazQ46KOelsvAtM+0vJ7phDwemVh1FhOjAcbhWVQM/N", regular: { url: "./aellux.ext.feedback.legacy.js", integrity: "sha384-UW1JZ1+liVWV/w3PJdhfIMztOU7zyTw/1rOyyxoxj4YJIHb1xFl8U0xeIBh8jYV7" } } }, dependencies: [], style: { url: "./aellux.ext.feedback.min.css", integrity: "sha384-OBguCYqF+dMD0Pl84C3FlY/+ohUGfW0OyynmXb/PSDEGOyuI/TQJ3EZAoCeJx+Jk", regular: { url: "./aellux.ext.feedback.css", integrity: "sha384-yk4cW+r/Mc1FRS1ZauBHC6KsKb7sxuJ0E9mmt/+AYASAdZXXMK6iuFBR+TOEh/r4" } } }, focus: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.focus.min.js", integrity: "sha384-AXpUv/Ur2Z4cKvO9EqIFqfxxdSQR5j75q0okOAWPvHhSneQ5LPjrOzk6Sl9MOo4a", regular: { url: "./aellux.ext.focus.js", integrity: "sha384-VjQzcnhLRrvRlbVQ0X4/tO0+8gqJXAmIFoeIVimjOud1wRNuBXNnSQHHW9XQPzTe" } }, legacy: { url: "./aellux.ext.focus.legacy.min.js", integrity: "sha384-I5QpUmKsA1T8NiKfKXQgbdG19Ld1ZGCWSmosygO3yGj43tdxp5zCfLyfBuFoHlKu", regular: { url: "./aellux.ext.focus.legacy.js", integrity: "sha384-5/y3J1NC/qMyV9myEj29+wGbqCVI8ICPafSebtJVfl15Qmup6vMiJzveShd3CLnw" } } }, dependencies: [] }, point: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.point.min.js", integrity: "sha384-n540II5oWbHJRt/a8i+Rgb9A3b9dm7hamg1kd3Nz7KdPQDcaa8S823t9fCrgxBWF", regular: { url: "./aellux.ext.point.js", integrity: "sha384-aDj7I5QEH/0+52E3e6yPZ/D0MEsNBdxeET3G5ToVvgczHtksMh3p8S/KOoAapRRN" } }, legacy: { url: "./aellux.ext.point.legacy.min.js", integrity: "sha384-5UmWvQHfmvttz9yeXbilawGCZH20UdR8yNBOE9kRV34wpfWASl8plzgKtLVQGO9M", regular: { url: "./aellux.ext.point.legacy.js", integrity: "sha384-gG/XONYEC1tchBcJ6bUtKYmWFHz0E+50LmMaXDAiqWBKPuwdHZeYm1uXA22lMZuN" } } }, dependencies: [] }, anchor: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.anchor.min.js", integrity: "sha384-IOAgoqbmTVgPyq5yGK61iIt8uzmUL1atnF9Tb91Ca/gp0SReAXyS2zrrMEPpbnHs", regular: { url: "./aellux.ext.anchor.js", integrity: "sha384-bNbg633yc49hexfqzu95t9S++jbSEIFCDjDhm5XyvPBrrumhDnAfU3OHKn+RAobq" } }, legacy: { url: "./aellux.ext.anchor.legacy.min.js", integrity: "sha384-PUtoUQFsU66KcaDkLQo8KrpDaR0oJ5SqfFEVnL5nXEKOCBC1ZZ8i589DsIKCJ5us", regular: { url: "./aellux.ext.anchor.legacy.js", integrity: "sha384-q6rKE//NHdRHw7TNsJo1FGN0H/xEPHVd1E6OH5olfOZbQfJvgRguCQCIaxcCKS6N" } } }, dependencies: [] }, "ajax-href": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.ajax-href.min.js", integrity: "sha384-5bXxuklqmUnxKorhVuhIw/EfJIT0z55pvKIQtbDEaNvjl5cMku8f/faGNBVYsuyu", regular: { url: "./aellux.ext.ajax-href.js", integrity: "sha384-4vJnfttGluarmVygTLViyu1NmXXg0fU729Ray1tvgApz+/G2zgCSu7pcw5YxEcR4" } }, legacy: { url: "./aellux.ext.ajax-href.legacy.min.js", integrity: "sha384-HxGsZa3tsy0v7Ow1antMf85v7O718RcOuO4zJ4/lTRZgY+7SdXfdYfbcOR7PFnlG", regular: { url: "./aellux.ext.ajax-href.legacy.js", integrity: "sha384-XNg/4wQcESX2cmMmdYRBS53xonuwuOh18Wkvqrofr2S8MYSVt/VOM49sxjgnDXfI" } } }, dependencies: [] }, scrollbox: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.scrollbox.min.js", integrity: "sha384-1TqqZT+ulF8e4U8Uttxk+ZXd3gXG6FB5mMXiOiDzJfJulzbWHlcX77dj9jidNUmA", regular: { url: "./aellux.ext.scrollbox.js", integrity: "sha384-S5Z3YWg+j/ZNEX3RqxHFSWEi3uPFKa/erx6XPOJRv6lJNcPGV9wtQaxAuF6fr0Qw" } }, legacy: { url: "./aellux.ext.scrollbox.legacy.min.js", integrity: "sha384-/sQKFIT8u/TAUe+WV4tpu3GOqH+EbUvzOeuko37R9FcL/QFEjYiGT4rzYtJ9fF5g", regular: { url: "./aellux.ext.scrollbox.legacy.js", integrity: "sha384-wIM7v+QbvDB0bXfgUVwT9VS9HqZCEukunJKaDCAUy4wy5P3+i1u8NpEMVXfbkhFy" } } }, dependencies: [] }, "scrollbox-snap": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.scrollbox-snap.min.js", integrity: "sha384-YNetWDUuxONIR41ykMQTu59vXnqcGmN070vqt2gHZxykQM8xVGRgOo4uUjTThbFb", regular: { url: "./aellux.ext.scrollbox-snap.js", integrity: "sha384-KmPblbbcz4OHkc0KTFYw/yuBelRxSL16pDVnLX/7jkb/xGBqPHWFP4x6GFQRIfHx" } }, legacy: { url: "./aellux.ext.scrollbox-snap.legacy.min.js", integrity: "sha384-Kbt2Fjswspgzzeop7aZZ3VYnUmaShTNswZmigPzvNNb4gxb2T6JfL8clidd58EVb", regular: { url: "./aellux.ext.scrollbox-snap.legacy.js", integrity: "sha384-rIlhaybqhGrNHSUVG6vphjZr1IJKF0lNxbYuVOeTvJSOOjTRYzRovU4rArLjJw8q" } } }, dependencies: [] }, adaptive: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.adaptive.min.js", integrity: "sha384-bkeOnTW/3uzbuhLc8fujaWnWGC+pwNAkZwci9M09paKqudp0v/flMrJ49JXw16vv", regular: { url: "./aellux.ext.adaptive.js", integrity: "sha384-Qzf9wU6DSSaaE+8lr96vnYqjKQqYxep8dhCZmjgNdqreuk9fL3qKMn3NW7DGAEaT" } }, legacy: { url: "./aellux.ext.adaptive.legacy.min.js", integrity: "sha384-YVHHWZOvf+65r/CU89nBPZXhj3j5sn4r2ho+CNUCUaYs1WE6pWIeypcq7n5OCBor", regular: { url: "./aellux.ext.adaptive.legacy.js", integrity: "sha384-gBkxqbBpIqdj5ozJm/NsenI/yKOvEGarZBl2SrPjYiiYx6cez2/FGTMf5XyzHrTj" } } }, dependencies: [], style: { url: "./aellux.ext.adaptive.min.css", integrity: "sha384-8yUP1PStfDqBCyCskP3k9WLIKgv/yl1nyDhmPz7hsX5NZ4z3ZT3ajolA+RhYlUiG", regular: { url: "./aellux.ext.adaptive.css", integrity: "sha384-HfIjX9Zk0VFRimzPvUaTS5AtwuHJHjXKoM/xbNJXj5vE7bSdBGEzbrBHfbNmYah0" } } }, present: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.present.min.js", integrity: "sha384-r5gp1UJBrpL0tDIxdeomlY5UonXajSNPciSisOhy/Jyc23nABumiW2S3egSlp28P", regular: { url: "./aellux.ext.present.js", integrity: "sha384-QwoLlKPJR0csxH5duVsBHvd+VRqWHhKFYgRmXguuDLwK7/9TlowP67EjujnVukki" } }, legacy: { url: "./aellux.ext.present.legacy.min.js", integrity: "sha384-lZO5NbKqOgRSzOh/vFH9dXYrEX/YxznD3gcm44aUcrnU7i9CWq9vlwfPBfWmGLb5", regular: { url: "./aellux.ext.present.legacy.js", integrity: "sha384-2ldc5jAnTWyBMAatErdjr2VadqKqg25M2jnsvuNl78PRGYUbnnuHY8ebsjbHhSv9" } } }, dependencies: [], style: { url: "./aellux.ext.present.min.css", integrity: "sha384-2QoNgFTu/KOOrgaTKZV4VXCoIaU2h5PMPILW5LHseXK2ygNpF6miOfxZUwkTBgPY", regular: { url: "./aellux.ext.present.css", integrity: "sha384-uZ/OPZK9sRFcaejKJHrc0wPaPXFKeGS+pBWWbkMEe3+3M6zLEa7nBc/cD0Tejsmr" } } } } };
+      define_AELLUX_OFFICIAL_EXTENSION_MANIFEST_default = { schemaVersion: 1, coreVersion: "0.1.0-beta.10", extensions: { preference: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.preference.min.js", integrity: "sha384-mSOgb0DekFTRXXZAgyNrPjamdlSqzL4SSGZYVWgVg+WlG+pBj11xT81v/6Xk43yO", regular: { url: "./aellux.ext.preference.js", integrity: "sha384-MlikpdHSzHzF6kz5+oJGtq3eoFsKTsx/g+FTrf+dFOU8iQGHsCpn4fP1jLlbNrj7" } }, legacy: { url: "./aellux.ext.preference.legacy.min.js", integrity: "sha384-1LMsK0W9J/PoM4tXhFgkYLRY4yWdzVoYmFy4OMDGd8lRdtptKoEb1sI9L1kzNaBu", regular: { url: "./aellux.ext.preference.legacy.js", integrity: "sha384-pozuz43OyfXrnkmuBu6KTM2lqRSqcI5LMgwAtqnzXq8xZGdVqpnmOtrBcYcMskWk" } } }, dependencies: [] }, "state-navigation": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.state-navigation.min.js", integrity: "sha384-wAbgAqjAA6wauuG+iuUtfRwxChd6fTJ0fS22fqnu2r00kouoXJWZ0f7AoTYlqBC6", regular: { url: "./aellux.ext.state-navigation.js", integrity: "sha384-PKJ8HTD7eIYDEg2hOaAJjpMYzLr2fBjBRGmIGG7XzGTzVK0yTjt5HYPO55VbWfdS" } }, legacy: { url: "./aellux.ext.state-navigation.legacy.min.js", integrity: "sha384-YkhfU15Mpk8KiO6TyoVU6z1yCiYWwnsOGE0xVaQ8NrE7IGrxOSUL005g5JeUDdJu", regular: { url: "./aellux.ext.state-navigation.legacy.js", integrity: "sha384-kaEUY0Zpw8K6pcwjm+INA5feXftLK2/N1aFpPr2LCTcetX2uoe2GGd1MJyy7u8rZ" } } }, dependencies: [] }, feedback: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.feedback.min.js", integrity: "sha384-3VP3W84ekK4MIVBQuy5+5P3bGrwOj7bBDfJnjyexZ+yDADf1jQoHEpP2J1OMUgod", regular: { url: "./aellux.ext.feedback.js", integrity: "sha384-RrPf0bRGxf68f/Rjas5MF5zC1GAubWyndCcuiYbgZsPSHGLFsQtQaUgeFX4SQz+h" } }, legacy: { url: "./aellux.ext.feedback.legacy.min.js", integrity: "sha384-zXuZEv63sd3fwaAygmyk9KazQ46KOelsvAtM+0vJ7phDwemVh1FhOjAcbhWVQM/N", regular: { url: "./aellux.ext.feedback.legacy.js", integrity: "sha384-UW1JZ1+liVWV/w3PJdhfIMztOU7zyTw/1rOyyxoxj4YJIHb1xFl8U0xeIBh8jYV7" } } }, dependencies: [], style: { url: "./aellux.ext.feedback.min.css", integrity: "sha384-OBguCYqF+dMD0Pl84C3FlY/+ohUGfW0OyynmXb/PSDEGOyuI/TQJ3EZAoCeJx+Jk", regular: { url: "./aellux.ext.feedback.css", integrity: "sha384-yk4cW+r/Mc1FRS1ZauBHC6KsKb7sxuJ0E9mmt/+AYASAdZXXMK6iuFBR+TOEh/r4" } } }, focus: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.focus.min.js", integrity: "sha384-AXpUv/Ur2Z4cKvO9EqIFqfxxdSQR5j75q0okOAWPvHhSneQ5LPjrOzk6Sl9MOo4a", regular: { url: "./aellux.ext.focus.js", integrity: "sha384-VjQzcnhLRrvRlbVQ0X4/tO0+8gqJXAmIFoeIVimjOud1wRNuBXNnSQHHW9XQPzTe" } }, legacy: { url: "./aellux.ext.focus.legacy.min.js", integrity: "sha384-I5QpUmKsA1T8NiKfKXQgbdG19Ld1ZGCWSmosygO3yGj43tdxp5zCfLyfBuFoHlKu", regular: { url: "./aellux.ext.focus.legacy.js", integrity: "sha384-5/y3J1NC/qMyV9myEj29+wGbqCVI8ICPafSebtJVfl15Qmup6vMiJzveShd3CLnw" } } }, dependencies: [] }, point: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.point.min.js", integrity: "sha384-n540II5oWbHJRt/a8i+Rgb9A3b9dm7hamg1kd3Nz7KdPQDcaa8S823t9fCrgxBWF", regular: { url: "./aellux.ext.point.js", integrity: "sha384-aDj7I5QEH/0+52E3e6yPZ/D0MEsNBdxeET3G5ToVvgczHtksMh3p8S/KOoAapRRN" } }, legacy: { url: "./aellux.ext.point.legacy.min.js", integrity: "sha384-5UmWvQHfmvttz9yeXbilawGCZH20UdR8yNBOE9kRV34wpfWASl8plzgKtLVQGO9M", regular: { url: "./aellux.ext.point.legacy.js", integrity: "sha384-gG/XONYEC1tchBcJ6bUtKYmWFHz0E+50LmMaXDAiqWBKPuwdHZeYm1uXA22lMZuN" } } }, dependencies: [] }, anchor: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.anchor.min.js", integrity: "sha384-THCWnysyORP8ISwVh+Yc6uMN0NlIxC0WtIZ/qF5yTbhInc+hRT9mEkvmmL+cg+Ur", regular: { url: "./aellux.ext.anchor.js", integrity: "sha384-s9ORVuYisV71knncKu9bMJnSA3VHuHsIS6pXbq2f41cTNAZGFDQuT6vlt0qoaD8R" } }, legacy: { url: "./aellux.ext.anchor.legacy.min.js", integrity: "sha384-mg7cFWfbuqqRSIms52+WekWGKmrUOet3rOX9mS6oLzCiS+nf46bAAVUwWzXJbKAu", regular: { url: "./aellux.ext.anchor.legacy.js", integrity: "sha384-B0n+FimvIoRLyVrirHFSvBcqwaugQOnv93k23/6lFfKuFCcso0YW7JhQ920v4Zmb" } } }, dependencies: [] }, "overflow-marquee": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.overflow-marquee.min.js", integrity: "sha384-H9WLDLXmWdzDd4jQ4tKsjzJPktFOPMHYV8WrlKW8QDmwY+XT9nL2sd49ZnJJuojJ", regular: { url: "./aellux.ext.overflow-marquee.js", integrity: "sha384-irgucaTsTPAJXTdr+nIq+nayfXdG2dftNVZb39c1x0ikKyQdMWTLjKPBrROnQjAi" } }, legacy: { url: "./aellux.ext.overflow-marquee.legacy.min.js", integrity: "sha384-GUHnlrrpKCMX+E5TW+LRPr2oYkp8nRTtcuswLiWWWmdj7Azhq9WznzcKv+cIpXbF", regular: { url: "./aellux.ext.overflow-marquee.legacy.js", integrity: "sha384-rSB9mmuIhygxi0xQvKn1/491IB1PGVRPJxEXLX8JF1ZXvA5EsN+27abdh4oqUccz" } } }, dependencies: [] }, "ajax-href": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.ajax-href.min.js", integrity: "sha384-5bXxuklqmUnxKorhVuhIw/EfJIT0z55pvKIQtbDEaNvjl5cMku8f/faGNBVYsuyu", regular: { url: "./aellux.ext.ajax-href.js", integrity: "sha384-4vJnfttGluarmVygTLViyu1NmXXg0fU729Ray1tvgApz+/G2zgCSu7pcw5YxEcR4" } }, legacy: { url: "./aellux.ext.ajax-href.legacy.min.js", integrity: "sha384-HxGsZa3tsy0v7Ow1antMf85v7O718RcOuO4zJ4/lTRZgY+7SdXfdYfbcOR7PFnlG", regular: { url: "./aellux.ext.ajax-href.legacy.js", integrity: "sha384-XNg/4wQcESX2cmMmdYRBS53xonuwuOh18Wkvqrofr2S8MYSVt/VOM49sxjgnDXfI" } } }, dependencies: [] }, scrollbox: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.scrollbox.min.js", integrity: "sha384-1TqqZT+ulF8e4U8Uttxk+ZXd3gXG6FB5mMXiOiDzJfJulzbWHlcX77dj9jidNUmA", regular: { url: "./aellux.ext.scrollbox.js", integrity: "sha384-S5Z3YWg+j/ZNEX3RqxHFSWEi3uPFKa/erx6XPOJRv6lJNcPGV9wtQaxAuF6fr0Qw" } }, legacy: { url: "./aellux.ext.scrollbox.legacy.min.js", integrity: "sha384-/sQKFIT8u/TAUe+WV4tpu3GOqH+EbUvzOeuko37R9FcL/QFEjYiGT4rzYtJ9fF5g", regular: { url: "./aellux.ext.scrollbox.legacy.js", integrity: "sha384-wIM7v+QbvDB0bXfgUVwT9VS9HqZCEukunJKaDCAUy4wy5P3+i1u8NpEMVXfbkhFy" } } }, dependencies: [] }, "scrollbox-snap": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.scrollbox-snap.min.js", integrity: "sha384-YNetWDUuxONIR41ykMQTu59vXnqcGmN070vqt2gHZxykQM8xVGRgOo4uUjTThbFb", regular: { url: "./aellux.ext.scrollbox-snap.js", integrity: "sha384-KmPblbbcz4OHkc0KTFYw/yuBelRxSL16pDVnLX/7jkb/xGBqPHWFP4x6GFQRIfHx" } }, legacy: { url: "./aellux.ext.scrollbox-snap.legacy.min.js", integrity: "sha384-Kbt2Fjswspgzzeop7aZZ3VYnUmaShTNswZmigPzvNNb4gxb2T6JfL8clidd58EVb", regular: { url: "./aellux.ext.scrollbox-snap.legacy.js", integrity: "sha384-rIlhaybqhGrNHSUVG6vphjZr1IJKF0lNxbYuVOeTvJSOOjTRYzRovU4rArLjJw8q" } } }, dependencies: [] }, adaptive: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.adaptive.min.js", integrity: "sha384-bkeOnTW/3uzbuhLc8fujaWnWGC+pwNAkZwci9M09paKqudp0v/flMrJ49JXw16vv", regular: { url: "./aellux.ext.adaptive.js", integrity: "sha384-Qzf9wU6DSSaaE+8lr96vnYqjKQqYxep8dhCZmjgNdqreuk9fL3qKMn3NW7DGAEaT" } }, legacy: { url: "./aellux.ext.adaptive.legacy.min.js", integrity: "sha384-YVHHWZOvf+65r/CU89nBPZXhj3j5sn4r2ho+CNUCUaYs1WE6pWIeypcq7n5OCBor", regular: { url: "./aellux.ext.adaptive.legacy.js", integrity: "sha384-gBkxqbBpIqdj5ozJm/NsenI/yKOvEGarZBl2SrPjYiiYx6cez2/FGTMf5XyzHrTj" } } }, dependencies: [], style: { url: "./aellux.ext.adaptive.min.css", integrity: "sha384-8yUP1PStfDqBCyCskP3k9WLIKgv/yl1nyDhmPz7hsX5NZ4z3ZT3ajolA+RhYlUiG", regular: { url: "./aellux.ext.adaptive.css", integrity: "sha384-HfIjX9Zk0VFRimzPvUaTS5AtwuHJHjXKoM/xbNJXj5vE7bSdBGEzbrBHfbNmYah0" } } }, present: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.present.min.js", integrity: "sha384-r5gp1UJBrpL0tDIxdeomlY5UonXajSNPciSisOhy/Jyc23nABumiW2S3egSlp28P", regular: { url: "./aellux.ext.present.js", integrity: "sha384-QwoLlKPJR0csxH5duVsBHvd+VRqWHhKFYgRmXguuDLwK7/9TlowP67EjujnVukki" } }, legacy: { url: "./aellux.ext.present.legacy.min.js", integrity: "sha384-lZO5NbKqOgRSzOh/vFH9dXYrEX/YxznD3gcm44aUcrnU7i9CWq9vlwfPBfWmGLb5", regular: { url: "./aellux.ext.present.legacy.js", integrity: "sha384-2ldc5jAnTWyBMAatErdjr2VadqKqg25M2jnsvuNl78PRGYUbnnuHY8ebsjbHhSv9" } } }, dependencies: [], style: { url: "./aellux.ext.present.min.css", integrity: "sha384-2QoNgFTu/KOOrgaTKZV4VXCoIaU2h5PMPILW5LHseXK2ygNpF6miOfxZUwkTBgPY", regular: { url: "./aellux.ext.present.css", integrity: "sha384-uZ/OPZK9sRFcaejKJHrc0wPaPXFKeGS+pBWWbkMEe3+3M6zLEa7nBc/cD0Tejsmr" } } } } };
     }
   });
 
@@ -22735,7 +22735,7 @@
     var _iterator3 = _createForOfIteratorHelper3(elements), _step3;
     try {
       var _loop = function _loop2() {
-        var _element$parentElemen, _api$ext$anchor;
+        var _element$parentElemen;
         var element = _step3.value;
         var has = function has2(name2) {
           return element.hasAttribute(attr(name2));
@@ -22818,7 +22818,6 @@
         }
         if ((!selected || selected.has("scrollbox")) && has("scrollbox-elastic") && value("scrollbox-elastic") !== "false" && !((_element$parentElemen = element.parentElement) !== null && _element$parentElemen !== void 0 && _element$parentElemen.hasAttribute(attr("scrollbox")))) invalid("scrollbox", "scrollbox-elastic", "Elastic wrapper must be a direct child of Scrollbox.", "Place exactly one marked wrapper directly inside data-ae-scrollbox.", "WARN_CONFIGURATION_STRUCTURE");
         if ((!selected || selected.has("scrollbox-snap")) && has("snap-item") && !element.closest("[".concat(attr("scrollbox"), "]"))) invalid("scrollbox-snap", "snap-item", "Snap item has no Scrollbox ancestor.", "Place snap items inside a Scrollbox with Snap enabled.", "WARN_CONFIGURATION_STRUCTURE");
-        if ((!selected || selected.has("anchor")) && has("present-group-anchor") && !((_api$ext$anchor = api.ext.anchor) !== null && _api$ext$anchor !== void 0 && _api$ext$anchor.initialized)) report("WARN_EXTENSION_REQUIRED", "anchor", "present-group-anchor", "The group association requires Anchor.", "Register and initialize Anchor, and reference an existing Anchor ID.");
         if (!selected && has("maxfps") && (!value("maxfps").trim() || !Number.isFinite(Number(value("maxfps"))) || Number(value("maxfps")) <= 0)) invalid("core", "maxfps", "Frame rate must be finite and greater than zero.", "Use a positive number or remove the attribute.", "WARN_LAYOUT_MAX_FPS_INVALID");
         if (!selected || selected.has("present") || selected.has("anchor")) validateCSS();
         function validatePresent() {
@@ -22866,9 +22865,10 @@
           }
         }
         function validateAnchor() {
+          var _target;
           var pivots = new Set("top-left top-center top-right center-left center center-right bottom-left bottom-center bottom-right".split(" "));
-          var pairs = value("anchor").split(",");
-          if (!pairs.every(function(token) {
+          var pairs = has("anchor") ? value("anchor").split(",") : [];
+          if (has("anchor") && !pairs.every(function(token) {
             var pair = token.trim().toLowerCase().split(":");
             return pair.length === 2 && pair.every(function(pivot) {
               return pivots.has(pivot.trim());
@@ -22879,13 +22879,16 @@
           })) invalid("anchor", "anchor-match", "Unknown matching dimension.", "Use width, height, or width height.", "WARN_ANCHOR_MATCH");
           var reference = value("anchor-target");
           if (!reference) return;
-          if (element.id && _toConsumableArray2(root2.document.querySelectorAll("[".concat(attr("present-group-anchor"), "]"))).some(function(group) {
-            return group.getAttribute(attr("present-group-anchor")).replace(/^#/, "") === element.id;
-          })) return;
           var target;
           try {
             target = root2.document.getElementById(reference.replace(/^#/, "")) || root2.document.querySelector(reference);
           } catch (_) {
+          }
+          if ((_target = target) !== null && _target !== void 0 && _target.hasAttribute(attr("present-group"))) {
+            var _api$ext$present, _api$ext$present2, _api$ext$present2$sel;
+            if (!((_api$ext$present = api.ext.present) !== null && _api$ext$present !== void 0 && _api$ext$present.initialized)) report("WARN_EXTENSION_REQUIRED", "present", "anchor-target", "A Present Group target requires Present.", "Register and initialize Present before mounting the group and its Anchors.");
+            target = (_api$ext$present2 = api.ext.present) === null || _api$ext$present2 === void 0 || (_api$ext$present2$sel = _api$ext$present2.selected) === null || _api$ext$present2$sel === void 0 ? void 0 : _api$ext$present2$sel.call(_api$ext$present2, target);
+            if (!target) return;
           }
           if (!target) invalid("anchor", "anchor-target", "Anchor target does not exist or the selector is invalid.", "Use an existing target ID or a valid CSS selector.", "WARN_CONFIGURATION_TARGET");
           else if (method === "update" && element.getClientRects().length && !target.getClientRects().length && !target.closest("[".concat(attr("present"), "],[hidden]"))) invalid("anchor", "anchor-target", "The explicitly updated Anchor target cannot currently be measured.", "Reveal the target before requesting placement, or update again after it becomes measurable.", "WARN_CONFIGURATION_TARGET");
@@ -23004,8 +23007,9 @@
       init_utils_name_case();
       /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
       attributesByExtension = {
-        present: "present present-group present-active present-when present-motion trigger trigger-on dismiss target auto-unpop unpop-on-outside present-group-anchor",
+        present: "present present-group present-active present-when present-motion trigger trigger-on dismiss target auto-unpop unpop-on-outside",
         anchor: "anchor anchor-target anchor-match anchor-style",
+        "overflow-marquee": "overflow-marquee overflow-marquee-content overflow-marquee-active overflow-marquee-style",
         scrollbox: "scrollbox scrollbox-wheel-horizontal scrollbox-momentum scrollbox-elastic scrollbar scrollbar-vertical scrollbar-horizontal",
         "scrollbox-snap": "scrollbox-snap snap-item",
         focus: "focus",
@@ -23019,6 +23023,7 @@
       activation = {
         present: "present present-group trigger dismiss",
         anchor: "anchor",
+        "overflow-marquee": "overflow-marquee",
         scrollbox: "scrollbox",
         "scrollbox-snap": "scrollbox-snap",
         focus: "focus",
@@ -28739,7 +28744,6 @@
         var targetAttribute = AelluxJs2.attr("anchor-target");
         var matchAttribute = AelluxJs2.attr("anchor-match");
         var groupAttribute = AelluxJs2.attr("present-group");
-        var groupAnchorAttribute = AelluxJs2.attr("present-group-anchor");
         var layoutEvent = AelluxJs2.eventName("Layout");
         var anchoredClass = AelluxJs2.className("anchored");
         var switchingClass = AelluxJs2.className("anchor-switching");
@@ -28758,12 +28762,14 @@
         };
         var anchors = /* @__PURE__ */ new Map();
         var elementMemories = /* @__PURE__ */ new WeakMap();
+        var placementMaps = /* @__PURE__ */ new Set();
         var nextLayoutId = 2e6;
         var mutations = null;
         var weakStyle = null;
         AelluxJs2.extAttach(extensionName, {
           init: init,
-          destroy: destroy
+          destroy: destroy,
+          createPlacementMap: createPlacementMap
         });
         function init() {
           weakStyle = document.createElement("style");
@@ -28820,9 +28826,21 @@
         function _destroy() {
           _destroy = _asyncToGenerator5(/* @__PURE__ */ _regenerator5().m(function _callee() {
             var _weakStyle;
+            var _iterator10, _step10, map;
             return _regenerator5().w(function(_context) {
               while (1) switch (_context.n) {
                 case 0:
+                  _iterator10 = _createForOfIteratorHelper15(placementMaps);
+                  try {
+                    for (_iterator10.s(); !(_step10 = _iterator10.n()).done; ) {
+                      map = _step10.value;
+                      map.destroy();
+                    }
+                  } catch (err) {
+                    _iterator10.e(err);
+                  } finally {
+                    _iterator10.f();
+                  }
                   _context.n = 1;
                   return Promise.all(Array.from(anchors.keys(), unmountAnchor));
                 case 1:
@@ -28838,6 +28856,47 @@
           }));
           return _destroy.apply(this, arguments);
         }
+        function createPlacementMap() {
+          var memories = /* @__PURE__ */ new Map();
+          var disposed = false;
+          var map = {
+            mount: function mount(element) {
+              if (!disposed && !memories.has(element)) memories.set(element, AelluxJs2.persist.element.save(element, ["class"], ownedProperties));
+            },
+            unmount: function unmount(element) {
+              var _memories$get;
+              (_memories$get = memories.get(element)) === null || _memories$get === void 0 || _memories$get.restore();
+              memories.delete(element);
+            },
+            measure: function measure(element, pairs) {
+              var target = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : element.parentElement;
+              var candidates = parseCandidates(pairs);
+              if (memories.has(element) && candidates.length) return readPlacement(element, target, candidates, true);
+              return null;
+            },
+            place: function place(element, placement) {
+              if (memories.has(element) && placement !== null && placement !== void 0 && placement.valid) writePlacement(element, placement);
+            },
+            invisible: isInvisible,
+            destroy: function destroy2() {
+              disposed = true;
+              var _iterator = _createForOfIteratorHelper15(memories.keys()), _step;
+              try {
+                for (_iterator.s(); !(_step = _iterator.n()).done; ) {
+                  var element = _step.value;
+                  map.unmount(element);
+                }
+              } catch (err) {
+                _iterator.e(err);
+              } finally {
+                _iterator.f();
+              }
+              placementMaps.delete(map);
+            }
+          };
+          placementMaps.add(map);
+          return map;
+        }
         function mountAnchor(element) {
           if (anchors.has(element)) return;
           elementMemories.set(element, AelluxJs2.persist.element.save(element, [], ownedProperties));
@@ -28849,7 +28908,6 @@
             resolvedTarget: null,
             reference: null,
             group: null,
-            conflict: false,
             lastPlacement: null,
             switchTimer: null,
             interruptSwitch: false,
@@ -28886,7 +28944,7 @@
                 subtree: true,
                 childList: true,
                 attributes: true,
-                attributeFilter: [attribute, targetAttribute, matchAttribute, groupAttribute, groupAnchorAttribute, AelluxJs2.attr("reduced-motion"), "id", "hidden", "class", "style"]
+                attributeFilter: [attribute, targetAttribute, matchAttribute, groupAttribute, AelluxJs2.attr("reduced-motion"), "id", "hidden", "class", "style"]
               });
             }
           }
@@ -28903,7 +28961,6 @@
               return scheduleAnchor(element);
             });
           }
-          refreshAssociations();
           return updateAnchor(element);
         }
         function unmountAnchor(_x) {
@@ -28951,26 +29008,12 @@
         }
         function scheduleUpdate() {
           if (!anchors.size) return;
-          var _iterator = _createForOfIteratorHelper15(anchors), _step;
-          try {
-            for (_iterator.s(); !(_step = _iterator.n()).done; ) {
-              var _step$value = _slicedToArray7(_step.value, 2), element = _step$value[0], state = _step$value[1];
-              state.interruptSwitch = true;
-              scheduleAnchor(element);
-            }
-          } catch (err) {
-            _iterator.e(err);
-          } finally {
-            _iterator.f();
-          }
-        }
-        function onGroupChange(event) {
           var _iterator2 = _createForOfIteratorHelper15(anchors), _step2;
           try {
             for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
-              var _event$detail;
               var _step2$value = _slicedToArray7(_step2.value, 2), element = _step2$value[0], state = _step2$value[1];
-              if (state.group === ((_event$detail = event.detail) === null || _event$detail === void 0 ? void 0 : _event$detail.group)) scheduleAnchor(element);
+              state.interruptSwitch = true;
+              scheduleAnchor(element);
             }
           } catch (err) {
             _iterator2.e(err);
@@ -28978,31 +29021,39 @@
             _iterator2.f();
           }
         }
-        function onMutations(records) {
-          var affected = /* @__PURE__ */ new Set();
-          var associationSelector = "[".concat(groupAnchorAttribute, "],[").concat(attribute, "]");
-          var containsAssociation = function containsAssociation2(node2) {
-            return node2.nodeType === 1 && (node2.matches(associationSelector) || node2.querySelector(associationSelector));
-          };
-          var associationsChanged = false;
-          var _iterator3 = _createForOfIteratorHelper15(records), _step3;
+        function onGroupChange(event) {
+          var _iterator3 = _createForOfIteratorHelper15(anchors), _step3;
           try {
             for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
-              var record = _step3.value;
+              var _event$detail;
+              var _step3$value = _slicedToArray7(_step3.value, 2), element = _step3$value[0], state = _step3$value[1];
+              if (state.group === ((_event$detail = event.detail) === null || _event$detail === void 0 ? void 0 : _event$detail.group)) scheduleAnchor(element);
+            }
+          } catch (err) {
+            _iterator3.e(err);
+          } finally {
+            _iterator3.f();
+          }
+        }
+        function onMutations(records) {
+          var affected = /* @__PURE__ */ new Set();
+          var _iterator4 = _createForOfIteratorHelper15(records), _step4;
+          try {
+            for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
+              var record = _step4.value;
               var node = record.target;
               var structural = record.type === "childList";
               var visual = record.attributeName === "class" || record.attributeName === "style";
-              if (structural ? [].concat(_toConsumableArray6(record.addedNodes), _toConsumableArray6(record.removedNodes)).some(containsAssociation) : record.attributeName === groupAnchorAttribute || record.attributeName === groupAttribute || (record.attributeName === "id" || record.attributeName === attribute) && (anchors.has(node) || node.hasAttribute(attribute))) associationsChanged = true;
               var _iterator6 = _createForOfIteratorHelper15(anchors), _step6;
               try {
                 for (_iterator6.s(); !(_step6 = _iterator6.n()).done; ) {
                   var _state$reference;
-                  var _step6$value = _slicedToArray7(_step6.value, 2), _element = _step6$value[0], state = _step6$value[1];
+                  var _step6$value = _slicedToArray7(_step6.value, 2), element = _step6$value[0], state = _step6$value[1];
                   if (visual) {
-                    if (node !== _element && state.resolvedTarget && node.contains(state.resolvedTarget)) affected.add(_element);
+                    if (node !== element && (state.resolvedTarget && node.contains(state.resolvedTarget) || state.group && node.contains(state.group) || targetChanged(element, state))) affected.add(element);
                     continue;
                   }
-                  if (node === _element || node === document.documentElement || node.contains(_element) || state.resolvedTarget && node.contains(state.resolvedTarget) || structural && (_state$reference = state.reference) !== null && _state$reference !== void 0 && _state$reference.contains(node) || !state.group && _element.hasAttribute(targetAttribute) && resolveElement(_element.getAttribute(targetAttribute)) !== state.resolvedTarget) affected.add(_element);
+                  if (node === element || node === document.documentElement || node.contains(element) || state.resolvedTarget && node.contains(state.resolvedTarget) || state.group && node.contains(state.group) || structural && (_state$reference = state.reference) !== null && _state$reference !== void 0 && _state$reference.contains(node) || targetChanged(element, state)) affected.add(element);
                 }
               } catch (err) {
                 _iterator6.e(err);
@@ -29011,29 +29062,15 @@
               }
             }
           } catch (err) {
-            _iterator3.e(err);
+            _iterator4.e(err);
           } finally {
-            _iterator3.f();
-          }
-          if (associationsChanged) {
-            refreshAssociations();
-            var _iterator4 = _createForOfIteratorHelper15(anchors.keys()), _step4;
-            try {
-              for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
-                var element = _step4.value;
-                affected.add(element);
-              }
-            } catch (err) {
-              _iterator4.e(err);
-            } finally {
-              _iterator4.f();
-            }
+            _iterator4.f();
           }
           var _iterator5 = _createForOfIteratorHelper15(affected), _step5;
           try {
             for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
-              var _element2 = _step5.value;
-              scheduleAnchor(_element2);
+              var _element = _step5.value;
+              scheduleAnchor(_element);
             }
           } catch (err) {
             _iterator5.e(err);
@@ -29041,58 +29078,26 @@
             _iterator5.f();
           }
         }
-        function associationDiagnostic(group, reason) {
+        function targetChanged(element, state) {
+          var value = element.getAttribute(targetAttribute);
+          return value && value.trim() && resolveElement(value) !== (state.group || state.resolvedTarget);
+        }
+        function associationDiagnostic(element, reason) {
           AelluxJs2.diagnostics.warn(AelluxJs2.diagnostics.WARN_ANCHOR_GROUP, {
             extension: extensionName,
-            element: group,
+            element: element,
             reason: reason,
-            attribute: groupAnchorAttribute,
-            value: group.getAttribute(groupAnchorAttribute),
-            suggestion: "Reference one existing Anchor ID from one Present Group and ensure compatible positioning references."
+            attribute: targetAttribute,
+            value: element.getAttribute(targetAttribute),
+            suggestion: "Reference an element or Present Group without circular targets, share a positioning reference, and keep dimension-matched Anchors out of normal flow."
           });
-        }
-        function refreshAssociations() {
-          var _iterator7 = _createForOfIteratorHelper15(anchors.values()), _step7;
-          try {
-            for (_iterator7.s(); !(_step7 = _iterator7.n()).done; ) {
-              var state = _step7.value;
-              state.group = null;
-              state.conflict = false;
-            }
-          } catch (err) {
-            _iterator7.e(err);
-          } finally {
-            _iterator7.f();
-          }
-          var _iterator8 = _createForOfIteratorHelper15(document.querySelectorAll("[".concat(groupAttribute, "][").concat(groupAnchorAttribute, "]"))), _step8;
-          try {
-            for (_iterator8.s(); !(_step8 = _iterator8.n()).done; ) {
-              var group = _step8.value;
-              var id = (group.getAttribute(groupAnchorAttribute) || "").replace(/^#/, "");
-              var element = id && !/\s/.test(id) ? document.getElementById(id) : null;
-              if (!element || !element.hasAttribute(attribute)) {
-                associationDiagnostic(group, "Expected an existing Anchor ID.");
-                continue;
-              }
-              var _state = anchors.get(element);
-              if (!_state) continue;
-              if (_state.group) {
-                _state.conflict = true;
-                associationDiagnostic(group, "Multiple groups reference the same Anchor.");
-              } else _state.group = group;
-            }
-          } catch (err) {
-            _iterator8.e(err);
-          } finally {
-            _iterator8.f();
-          }
         }
         function effectiveTarget(element, state) {
           var _AelluxJs$ext$present, _AelluxJs$ext$present2;
-          if (state.conflict) return null;
-          if (state.group) return ((_AelluxJs$ext$present = AelluxJs2.ext.present) === null || _AelluxJs$ext$present === void 0 || (_AelluxJs$ext$present2 = _AelluxJs$ext$present.selected) === null || _AelluxJs$ext$present2 === void 0 ? void 0 : _AelluxJs$ext$present2.call(_AelluxJs$ext$present, state.group)) || null;
           var value = element.getAttribute(targetAttribute);
-          return value && value.trim() ? resolveElement(value) : element.offsetParent;
+          var target = value && value.trim() ? resolveElement(value) : element.offsetParent;
+          state.group = value && value.trim() && target !== null && target !== void 0 && target.hasAttribute(groupAttribute) ? target : null;
+          return state.group ? ((_AelluxJs$ext$present = AelluxJs2.ext.present) === null || _AelluxJs$ext$present === void 0 || (_AelluxJs$ext$present2 = _AelluxJs$ext$present.selected) === null || _AelluxJs$ext$present2 === void 0 ? void 0 : _AelluxJs$ext$present2.call(_AelluxJs$ext$present, state.group)) || null : target;
         }
         function circularTarget(element, target) {
           var visited = /* @__PURE__ */ new Set([element]);
@@ -29112,10 +29117,10 @@
             return;
           }
           if (durationMs === 0) {
-            var _iterator9 = _createForOfIteratorHelper15(anchors), _step9;
+            var _iterator7 = _createForOfIteratorHelper15(anchors), _step7;
             try {
-              for (_iterator9.s(); !(_step9 = _iterator9.n()).done; ) {
-                var _step9$value = _slicedToArray7(_step9.value, 2), element = _step9$value[0], state = _step9$value[1];
+              for (_iterator7.s(); !(_step7 = _iterator7.n()).done; ) {
+                var _step7$value = _slicedToArray7(_step7.value, 2), element = _step7$value[0], state = _step7$value[1];
                 var maxFPS = AelluxJs2.layoutMaxFPS(element);
                 state.layoutUntil = now() + 1e3 / (maxFPS || 60);
                 state.layoutSingle = true;
@@ -29123,25 +29128,25 @@
                 scheduleAnchor(element, true);
               }
             } catch (err) {
-              _iterator9.e(err);
+              _iterator7.e(err);
             } finally {
-              _iterator9.f();
+              _iterator7.f();
             }
             return;
           }
-          var _iterator0 = _createForOfIteratorHelper15(anchors), _step0;
+          var _iterator8 = _createForOfIteratorHelper15(anchors), _step8;
           try {
-            for (_iterator0.s(); !(_step0 = _iterator0.n()).done; ) {
-              var _step0$value = _slicedToArray7(_step0.value, 2), _element3 = _step0$value[0], _state2 = _step0$value[1];
-              _state2.layoutUntil = Math.max(_state2.layoutUntil, now() + durationMs);
-              _state2.layoutSingle = false;
-              _state2.layoutFinalPending = true;
-              scheduleAnchor(_element3, durationMs > 0);
+            for (_iterator8.s(); !(_step8 = _iterator8.n()).done; ) {
+              var _step8$value = _slicedToArray7(_step8.value, 2), _element2 = _step8$value[0], _state = _step8$value[1];
+              _state.layoutUntil = Math.max(_state.layoutUntil, now() + durationMs);
+              _state.layoutSingle = false;
+              _state.layoutFinalPending = true;
+              scheduleAnchor(_element2, durationMs > 0);
             }
           } catch (err) {
-            _iterator0.e(err);
+            _iterator8.e(err);
           } finally {
-            _iterator0.f();
+            _iterator8.f();
           }
         }
         function scheduleAnchor(element) {
@@ -29468,6 +29473,7 @@
           var targetRect = toReference(target.getBoundingClientRect(), reference, referenceRect, scaleX, scaleY);
           var selfRect = element.getBoundingClientRect();
           var projectSize = function projectSize2(axis, actual, desired) {
+            var _anchors$get;
             if (!tokens.includes(axis) || element.style[axis]) return actual;
             var previous = parseFloat(element.style.getPropertyValue("--ae-anchor-target-".concat(axis))) || 0;
             var sides = axis === "width" ? ["Left", "Right"] : ["Top", "Bottom"];
@@ -29480,7 +29486,7 @@
             var constrain = function constrain2(value) {
               return Math.max(minimum, Math.min(Number.isFinite(maximum) ? maximum : Infinity, value));
             };
-            return anchors.get(element).switchTimer === null && Math.abs(parseFloat(style[axis]) - constrain(previous)) > 0.5 ? actual : constrain(desired) + (borderBox ? 0 : extra);
+            return !((_anchors$get = anchors.get(element)) !== null && _anchors$get !== void 0 && _anchors$get.switchTimer) && Math.abs(parseFloat(style[axis]) - constrain(previous)) > 0.5 ? actual : constrain(desired) + (borderBox ? 0 : extra);
           };
           var selfWidth = projectSize("width", selfRect.width / scaleX, targetRect.width);
           var selfHeight = projectSize("height", selfRect.height / scaleY, targetRect.height);
@@ -29491,10 +29497,10 @@
             height: root2.innerHeight
           }, reference, referenceRect, scaleX, scaleY);
           var selected = null;
-          var _iterator1 = _createForOfIteratorHelper15(candidates), _step1;
+          var _iterator9 = _createForOfIteratorHelper15(candidates), _step9;
           try {
-            for (_iterator1.s(); !(_step1 = _iterator1.n()).done; ) {
-              var candidate = _step1.value;
+            for (_iterator9.s(); !(_step9 = _iterator9.n()).done; ) {
+              var candidate = _step9.value;
               var x = targetRect.left + targetRect.width * candidate.target[0] - selfWidth * candidate.self[0];
               var y = targetRect.top + targetRect.height * candidate.target[1] - selfHeight * candidate.self[1];
               var result = {
@@ -29511,9 +29517,9 @@
               }
             }
           } catch (err) {
-            _iterator1.e(err);
+            _iterator9.e(err);
           } finally {
-            _iterator1.f();
+            _iterator9.f();
           }
           var present2 = target.closest("[".concat(presentAttribute, "]"));
           var opacity = present2 ? root2.getComputedStyle(present2).opacity : "1";
@@ -29583,18 +29589,18 @@
           state.target = target;
           if (state.observer) state.observer.disconnect();
           if (state.intersectionObserver) state.intersectionObserver.disconnect();
-          var _iterator10 = _createForOfIteratorHelper15(/* @__PURE__ */ new Set([element, target, reference])), _step10;
+          var _iterator0 = _createForOfIteratorHelper15(/* @__PURE__ */ new Set([element, target, reference])), _step0;
           try {
-            for (_iterator10.s(); !(_step10 = _iterator10.n()).done; ) {
-              var observed = _step10.value;
+            for (_iterator0.s(); !(_step0 = _iterator0.n()).done; ) {
+              var observed = _step0.value;
               if (!observed) continue;
               if (state.observer) state.observer.observe(observed);
               if (state.intersectionObserver) state.intersectionObserver.observe(observed);
             }
           } catch (err) {
-            _iterator10.e(err);
+            _iterator0.e(err);
           } finally {
-            _iterator10.f();
+            _iterator0.f();
           }
         }
         function listenForLayout(state, reference) {
@@ -29648,10 +29654,10 @@
         }
         function parseCandidates(value) {
           var result = [];
-          var _iterator11 = _createForOfIteratorHelper15((value || "").split(",")), _step11;
+          var _iterator1 = _createForOfIteratorHelper15((value || "").split(",")), _step1;
           try {
-            for (_iterator11.s(); !(_step11 = _iterator11.n()).done; ) {
-              var token = _step11.value;
+            for (_iterator1.s(); !(_step1 = _iterator1.n()).done; ) {
+              var token = _step1.value;
               var pair = token.trim().toLowerCase().split(":");
               if (pair.length !== 2 || !pivots[pair[0].trim()] || !pivots[pair[1].trim()]) continue;
               result.push({
@@ -29660,9 +29666,9 @@
               });
             }
           } catch (err) {
-            _iterator11.e(err);
+            _iterator1.e(err);
           } finally {
-            _iterator11.f();
+            _iterator1.f();
           }
           return result;
         }
@@ -32072,6 +32078,9 @@
       });
       root.AelluxJs.ext("anchor", {
         loadWhen: "[data-ae-anchor]"
+      });
+      root.AelluxJs.ext("overflow-marquee", {
+        loadWhen: "[data-ae-overflow-marquee]"
       });
       root.AelluxJs.ext("ajax-href", {
         loadWhen: "a[data-ae-ajax-href]"

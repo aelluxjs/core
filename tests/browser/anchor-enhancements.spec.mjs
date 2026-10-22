@@ -216,15 +216,16 @@ test("scroll and resize interrupt switching for immediate tracking; hidden, remo
 });
 
 const group = `<div id="group" data-ae-present-group data-ae-present-active="a"
-  data-ae-present-group-anchor="indicator" class="view-a">
+  class="view-a">
   <section id="a" class="target" data-ae-present="opacity" data-ae-present-when="view-a">A</section>
   <section id="b" class="target" data-ae-present="opacity" data-ae-present-when="view-b" hidden
     style="--ae-pop-duration:700ms">B</section>
   <section id="c" class="target" data-ae-present="opacity" hidden>C</section></div>`;
+const groupIndicator = indicator.replace('data-ae-anchor-target="a"', 'data-ae-anchor-target="group"');
 
 for (const forceLegacy of [false, true]) test(`group-selected target still requires effective visibility (legacy=${forceLegacy})`, async ({ page }) => {
   await start(page, `${stage}<style>#a{transition:none!important}#a.transparent{opacity:0!important}</style>
-    <div id="ref">${group}${indicator}</div>`, { forceLegacy });
+    <div id="ref">${group}${groupIndicator}</div>`, { forceLegacy });
   await aligned(page, "a");
   await page.locator("#a").evaluate(element => element.classList.add("transparent"));
   await expect(page.locator("#indicator")).not.toHaveClass(/ae--anchored/);
@@ -236,7 +237,7 @@ for (const forceLegacy of [false, true]) test(`group-selected target still requi
 
 for (const mode of ["basic", "full"]) for (const forceLegacy of [false, true]) {
   test(`group association, selection event, veto, precedence and remount (${mode}, legacy=${forceLegacy})`, async ({ page }) => {
-    await start(page, `${stage}<div id="ref">${group}${indicator}</div>`, { mode, forceLegacy });
+    await start(page, `${stage}<div id="ref">${group}${groupIndicator}</div>`, { mode, forceLegacy });
     await aligned(page, "a");
     expect(await page.evaluate(() => $ae("group").present.selected()?.id)).toBe("a");
     await page.evaluate(() => {
@@ -266,28 +267,37 @@ for (const mode of ["basic", "full"]) for (const forceLegacy of [false, true]) {
     await aligned(page, "a");
     await page.evaluate(() => $ae("group").present.show(""));
     await expect(page.locator("#indicator")).not.toHaveClass(/ae--anchored/);
-    await page.locator("#group").evaluate(element => element.removeAttribute("data-ae-present-group-anchor"));
-    // The explicit target survives the association and becomes authoritative again.
+    await page.locator("#indicator").evaluate(element => element.setAttribute("data-ae-anchor-target", "a"));
+    // Retargeting an ordinary element leaves group selection independent.
     await expect(page.locator("#indicator")).toHaveAttribute("data-ae-anchor-target", "a");
     await page.evaluate(async () => {
       await AelluxJs.unmount(document.getElementById("group"), "present");
       await AelluxJs.mount(document.getElementById("group"), "present");
-      document.getElementById("group").setAttribute("data-ae-present-group-anchor", "indicator");
+      document.getElementById("indicator").setAttribute("data-ae-anchor-target", "#group");
     });
     await aligned(page, "a");
   });
 }
 
-test("association diagnostics, conflicts, dynamic members, replacement Anchor and teardown", async ({ page }) => {
-  await start(page, `${stage}<div id="ref">${group}${indicator}
-    <div id="other" data-ae-anchor="bottom-right:top-right" data-ae-anchor-match="width height"></div>
-    <div id="conflict" data-ae-present-group data-ae-present-group-anchor="missing"></div></div>`);
+for (const mode of ["basic", "full"]) for (const forceLegacy of [false, true]) test(`multiple Anchors follow one group independently (${mode}, legacy=${forceLegacy})`, async ({ page }) => {
+  const inside = '<div id="other" data-ae-anchor="bottom-right:top-right" data-ae-anchor-match="width height" data-ae-anchor-target="#group" style="--ae-anchor-switch-duration:0ms"></div>';
+  await start(page, `${stage}<div id="ref">${group.replace("</div>", inside + "</div>")}${groupIndicator}</div>`, { mode, forceLegacy });
   await aligned(page, "a");
-  await expect.poll(() => page.evaluate(() => AelluxJs.diagnostics.showHistory().some(entry => entry.code === 2023))).toBe(true);
-  await page.locator("#conflict").evaluate(element => element.setAttribute("data-ae-present-group-anchor", "indicator"));
+  await expect.poll(async () => (await geometry(page, "other", "a")).width).toBe(80);
+  await page.evaluate(() => $ae("group").present.show("b"));
+  await aligned(page, "b");
+  await expect.poll(async () => (await geometry(page, "other", "b")).width).toBe(160);
+  await expect(page.locator("#other")).not.toHaveClass(/ae--anchor-switching/);
+  await page.evaluate(() => $ae("group").present.show(""));
   await expect(page.locator("#indicator")).not.toHaveClass(/ae--anchored/);
-  await page.locator("#conflict").evaluate(element => element.removeAttribute("data-ae-present-group-anchor"));
-  await aligned(page, "a");
+  await expect(page.locator("#other")).not.toHaveClass(/ae--anchored/);
+  await page.evaluate(() => $ae("group").present.show("b"));
+  await aligned(page, "b");
+  await expect(page.locator("#other")).toHaveClass(/ae--anchored/);
+  await page.locator("#other").evaluate(element => element.setAttribute("data-ae-anchor-target", "a"));
+  await expect(page.locator("#other")).not.toHaveClass(/ae--anchored/);
+  await page.evaluate(() => $ae("group").present.show("a"));
+  await expect(page.locator("#other")).toHaveClass(/ae--anchored/);
   await page.evaluate(() => document.getElementById("a").remove());
   await expect(page.locator("#indicator")).not.toHaveClass(/ae--anchored/);
   await page.evaluate(async () => {
@@ -295,7 +305,7 @@ test("association diagnostics, conflicts, dynamic members, replacement Anchor an
     await AelluxJs.mount(document.getElementById("a"));
   });
   await aligned(page, "a");
-  await page.locator("#group").evaluate(element => element.setAttribute("data-ae-present-group-anchor", "#other"));
+  await page.locator("#other").evaluate(element => element.setAttribute("data-ae-anchor-target", "#group"));
   await expect.poll(async () => (await geometry(page, "other", "a")).width).toBe(80);
   await page.evaluate(async () => {
     document.getElementById("other").setAttribute("data-ae-anchor-target", "b");
@@ -303,11 +313,49 @@ test("association diagnostics, conflicts, dynamic members, replacement Anchor an
   });
   await expect(page.locator("#other")).not.toHaveClass(/ae--anchored|ae--anchor-switching/);
   expect(await page.locator("#other").evaluate(element => element.style.getPropertyValue("--ae-anchor-target-width"))).toBe("");
+  await page.evaluate(() => $ae("group").present.show("b"));
+  await aligned(page, "b");
+  expect(await page.evaluate(() => AelluxJs.diagnostics.showHistory().filter(entry => entry.code === 2023 || entry.code === 1119))).toEqual([]);
+});
+
+for (const forceLegacy of [false, true]) test(`Anchor retargets groups, selectors, recreated groups and plain elements (legacy=${forceLegacy})`, async ({ page }) => {
+  await start(page, `${stage}<div id="ref">${group}${groupIndicator}
+    <div id="alternate" class="follow" data-ae-present-group data-ae-present-active="d">
+      <div id="d" class="target" data-ae-present="" style="left:400px;top:300px;width:60px;height:30px">D</div>
+    </div></div>`, { forceLegacy });
+  await aligned(page, "a");
+  await page.locator("#indicator").evaluate(element => element.setAttribute("data-ae-anchor-target", ".follow"));
+  await aligned(page, "d");
+  // A change to the old group must not steal the Anchor back.
+  await page.evaluate(() => $ae("group").present.show("b"));
+  await aligned(page, "d");
+  await page.locator("#alternate").evaluate(element => { element.id = "renamed"; });
+  await aligned(page, "d");
+  await page.locator("#renamed").evaluate(element => element.classList.remove("follow"));
+  await expect(page.locator("#indicator")).not.toHaveClass(/ae--anchored/);
+  await page.locator("#renamed").evaluate(element => element.classList.add("follow"));
+  await aligned(page, "d");
+  await page.locator("#indicator").evaluate(element => element.setAttribute("data-ae-anchor-target", "group"));
+  await aligned(page, "b");
+  await page.locator("#group").evaluate(element => element.removeAttribute("data-ae-present-group"));
+  await expect(page.locator("#indicator")).toHaveClass(/ae--anchored/);
+  await expect.poll(async () => (await geometry(page, "indicator", "group")).width).toBe(750);
+  await page.locator("#group").evaluate(element => element.setAttribute("data-ae-present-group", ""));
+  await aligned(page, "b");
+  await page.evaluate(() => document.getElementById("group").remove());
+  await expect(page.locator("#indicator")).not.toHaveClass(/ae--anchored/);
+  await page.evaluate(async markup => {
+    document.getElementById("ref").insertAdjacentHTML("afterbegin", markup);
+    await AelluxJs.mount(document.getElementById("group"));
+  }, group);
+  await aligned(page, "a");
+  await page.locator("#indicator").evaluate(element => element.setAttribute("data-ae-anchor-target", "d"));
+  await aligned(page, "d");
 });
 
 test("circular associations and incompatible positioning contexts are diagnosed", async ({ page }) => {
-  await start(page, `${stage}<div id="ref"><div data-ae-present-group data-ae-present-active="self" data-ae-present-group-anchor="self">
-    <div id="self" data-ae-present data-ae-anchor="top-left:top-left"></div></div>
+  await start(page, `${stage}<div id="ref"><div id="group" data-ae-present-group data-ae-present-active="self">
+    <div id="self" data-ae-present data-ae-anchor="top-left:top-left" data-ae-anchor-target="group"></div></div>
     <div style="position:relative"><div id="nested" style="width:30px;height:30px"></div></div>
     <div id="indicator" data-ae-anchor="top-left:top-left" data-ae-anchor-target="nested"></div></div>`);
   await expect.poll(() => page.evaluate(() => AelluxJs.diagnostics.showHistory().some(entry => entry.code === 2023))).toBe(true);
@@ -317,7 +365,7 @@ test("circular associations and incompatible positioning contexts are diagnosed"
 
 test("Anchor loaded after Present reads the accepted selection without replaying group changes", async ({ page }) => {
   await page.goto("/tests/index.htm");
-  await page.evaluate(html => { document.body.innerHTML = html; }, `${stage}<div id="ref">${group}${indicator}</div>`);
+  await page.evaluate(html => { document.body.innerHTML = html; }, `${stage}<div id="ref">${group}${groupIndicator}</div>`);
   await page.addScriptTag({ url: "/dist/aellux.js" });
   await page.evaluate(() => { AelluxJs.ext("present", { loadStyle: true }); AelluxJs.init({ mode: "basic" }); });
   await expect.poll(() => page.evaluate(() => AelluxJs.ext.present?.initialized)).toBe(true);
@@ -376,7 +424,7 @@ test("matching rejects an in-flow Anchor before a containing layout can feed bac
 });
 
 test("group switches under a low FPS ceiling follow the last selection and track its measured Pop", async ({ page }) => {
-  await start(page, `${stage}<div id="ref">${group}${indicator}</div>`);
+  await start(page, `${stage}<div id="ref">${group}${groupIndicator}</div>`);
   await aligned(page, "a");
   await page.evaluate(() => {
     const anchor = document.getElementById("indicator"), member = document.getElementById("b");
@@ -397,5 +445,5 @@ test("group switches under a low FPS ceiling follow the last selection and track
   await page.evaluate(() => window.latest);
   await aligned(page, "b");
   expect(await page.evaluate(() => $ae("group").present.selected()?.id)).toBe("b");
-  await expect(page.locator("#indicator")).toHaveAttribute("data-ae-anchor-target", "a");
+  await expect(page.locator("#indicator")).toHaveAttribute("data-ae-anchor-target", "group");
 });

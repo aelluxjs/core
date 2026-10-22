@@ -254,12 +254,23 @@ test("valid declarations and hidden Present targets remain quiet", async ({ page
   expect((await diagnostics(page)).filter(entry => entry.code >= 2024 && entry.code <= 2030)).toEqual([]);
 });
 
-test("group-driven Anchor ignores its absent fallback while no member is selected", async ({ page }) => {
+test("Anchor targeting a group with no selected member remains quiet", async ({ page }) => {
   await start(page, `<div style="position:relative;width:300px;height:150px">
-    <section data-ae-present-group data-ae-present-active="" data-ae-present-group-anchor="anchor">
+    <section id="group" data-ae-present-group data-ae-present-active="">
       <div id="member" data-ae-present hidden style="position:absolute"></div></section>
-    <div id="anchor" data-ae-anchor="bottom-center:top-center" data-ae-anchor-target="missing-fallback"></div></div>`);
+    <div id="anchor" data-ae-anchor="bottom-center:top-center" data-ae-anchor-target="group"></div></div>`);
   await page.evaluate(() => AelluxJs.mountManager.update(document));
+  expect((await diagnostics(page)).filter(entry => entry.code === 2027)).toEqual([]);
+});
+
+test("Anchor group targets explain a missing Present Extension", async ({ page }) => {
+  await start(page, `<div style="position:relative"><section id="group" data-ae-present-group>
+    <div id="member" data-ae-present>Member</div></section>
+    <div id="anchor" data-ae-anchor="bottom-left:top-left" data-ae-anchor-target="group"></div></div>`, { mode: "basic" });
+  await page.evaluate(async () => { AelluxJs.ext("anchor"); await AelluxJs.mount(document, "anchor"); });
+  expect(await diagnostics(page)).toEqual(expect.arrayContaining([
+    expect.objectContaining({ code: 2025, element: "anchor", attribute: "data-ae-anchor-target", reason: "A Present Group target requires Present." })
+  ]));
   expect((await diagnostics(page)).filter(entry => entry.code === 2027)).toEqual([]);
 });
 

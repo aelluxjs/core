@@ -34,6 +34,9 @@ test("open attribute grammars remain open while closed enums preserve string val
   assert.equal(find(attributes, "data-ae-scrollbox-momentum").value.type, '\"true\" | \"false\"');
   assert.deepEqual(find(attributes, "data-ae-adaptive").value, { kind: "no-value" });
   assert.equal(find(attributes, "data-ae-present-key"), undefined);
+  assert.equal(find(attributes, "data-ae-present-group-anchor"), undefined);
+  assert.ok(find(attributes, "data-ae-overflow-marquee"));
+  assert.match(find(catalog.attributes, "data-ae-anchor-target").description, /multiple Anchors per group/);
 });
 
 test("tag-specific declarations extend native tags and retain the default namespace", () => {

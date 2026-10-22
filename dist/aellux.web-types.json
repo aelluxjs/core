@@ -35,7 +35,7 @@
         },
         {
           "name": "data-ae-anchor-target",
-          "description": "Target ID or CSS selector. Empty uses offsetParent. Target and Anchor must share a positioning reference; an associated Present Group takes precedence.\n\nValue syntax: selector.\n\nDefault behavior: \"\".\n\nExamples: `menu-trigger`, `#menu-trigger`.",
+          "description": "Target ID or CSS selector. A Present Group target resolves to its accepted selected member, allowing multiple Anchors per group. Empty uses offsetParent. Effective target and Anchor must share a positioning reference.\n\nValue syntax: selector.\n\nDefault behavior: \"\".\n\nExamples: `menu-trigger`, `#menu-trigger`, `#views`.",
           "doc-url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/anchor.htm",
           "default": "",
           "value": {
@@ -116,6 +116,14 @@
           }
         },
         {
+          "name": "data-ae-overflow-marquee",
+          "description": "Single-line overflow marquee. Loads Anchor during initialization for placement geometry. Starts only when visible and pauses in place while hidden or offscreen. Root reduced motion keeps ellipsis; desktop overflow receives a native title unless authored.\n\nValue syntax: presence.",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/overflow-marquee.htm",
+          "value": {
+            "kind": "no-value"
+          }
+        },
+        {
           "name": "data-ae-point",
           "description": "Maximum simultaneously associated pointers. Empty defaults to 1; a nonnegative integer is expected, and 0 disables association.\n\nValue syntax: integer.\n\nDefault behavior: \"1\".\n\nExamples: `0`, `1`, `2`.",
           "doc-url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/point.htm",
@@ -160,15 +168,6 @@
           "doc-url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/present.htm",
           "value": {
             "kind": "no-value"
-          }
-        },
-        {
-          "name": "data-ae-present-group-anchor",
-          "description": "One Anchor ID, optionally prefixed with #. The associated Anchor follows this group's selected member; requires Anchor.\n\nValue syntax: id.\n\nExamples: `selection-outline`.",
-          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/present.htm",
-          "value": {
-            "kind": "plain",
-            "type": "string"
           }
         },
         {
@@ -550,6 +549,16 @@
           "name": "--ae-height",
           "description": "Measured Adaptive height, in unitless pixels.\n\nRuntime output; read it in selectors/styles instead of using it as an activation command.\n\nValue syntax: <number>.",
           "doc-url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/adaptive.htm"
+        },
+        {
+          "name": "--ae-overflow-marquee-delay",
+          "description": "Overflow Marquee pause before each pass; nonnegative ms/s values. Invalid values use 1200ms.\n\nValue syntax: <time>.\n\nDefault behavior: \"1200ms\".",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/overflow-marquee.htm"
+        },
+        {
+          "name": "--ae-overflow-marquee-speed",
+          "description": "Overflow Marquee speed in CSS pixels per second. Positive numbers only; invalid values use 30.\n\nValue syntax: <number>.\n\nDefault behavior: \"30\".",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/overflow-marquee.htm"
         },
         {
           "name": "--ae-pop-duration",

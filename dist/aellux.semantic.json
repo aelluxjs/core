@@ -15,6 +15,7 @@
     "focus",
     "point",
     "anchor",
+    "overflow-marquee",
     "ajax-href",
     "scrollbox",
     "scrollbox-snap",
@@ -2324,12 +2325,13 @@
     {
       "name": "data-ae-anchor-target",
       "extension": "anchor",
-      "description": "Target ID or CSS selector. Empty uses offsetParent. Target and Anchor must share a positioning reference; an associated Present Group takes precedence.",
+      "description": "Target ID or CSS selector. A Present Group target resolves to its accepted selected member, allowing multiple Anchors per group. Empty uses offsetParent. Effective target and Anchor must share a positioning reference.",
       "syntax": "selector",
       "default": "",
       "examples": [
         "menu-trigger",
-        "#menu-trigger"
+        "#menu-trigger",
+        "#views"
       ],
       "role": "input",
       "docURL": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/anchor.htm"
@@ -2588,6 +2590,38 @@
       "docURL": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/preference.htm"
     },
     {
+      "name": "data-ae-overflow-marquee",
+      "extension": "overflow-marquee",
+      "description": "Single-line overflow marquee. Loads Anchor during initialization for placement geometry. Starts only when visible and pauses in place while hidden or offscreen. Root reduced motion keeps ellipsis; desktop overflow receives a native title unless authored.",
+      "syntax": "presence",
+      "role": "input",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/overflow-marquee.htm"
+    },
+    {
+      "name": "data-ae-overflow-marquee-active",
+      "extension": "overflow-marquee",
+      "description": "Internal Overflow Marquee wrapper, active-state marker or owned stylesheet.",
+      "syntax": "presence",
+      "role": "internal",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/overflow-marquee.htm"
+    },
+    {
+      "name": "data-ae-overflow-marquee-content",
+      "extension": "overflow-marquee",
+      "description": "Internal Overflow Marquee wrapper, active-state marker or owned stylesheet.",
+      "syntax": "presence",
+      "role": "internal",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/overflow-marquee.htm"
+    },
+    {
+      "name": "data-ae-overflow-marquee-style",
+      "extension": "overflow-marquee",
+      "description": "Internal Overflow Marquee wrapper, active-state marker or owned stylesheet.",
+      "syntax": "presence",
+      "role": "internal",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/overflow-marquee.htm"
+    },
+    {
       "name": "data-ae-point",
       "extension": "point",
       "description": "Maximum simultaneously associated pointers. Empty defaults to 1; a nonnegative integer is expected, and 0 disables association.",
@@ -2666,17 +2700,6 @@
       "extension": "present",
       "description": "Coordinates nested Present members by their native IDs. Nested groups own their own members.",
       "syntax": "presence",
-      "role": "input",
-      "docURL": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/present.htm"
-    },
-    {
-      "name": "data-ae-present-group-anchor",
-      "extension": "present",
-      "description": "One Anchor ID, optionally prefixed with #. The associated Anchor follows this group's selected member; requires Anchor.",
-      "syntax": "id",
-      "examples": [
-        "selection-outline"
-      ],
       "role": "input",
       "docURL": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/present.htm"
     },
@@ -3122,6 +3145,24 @@
       "description": "Measured Adaptive height, in unitless pixels.",
       "role": "output",
       "docURL": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/adaptive.htm"
+    },
+    {
+      "name": "--ae-overflow-marquee-delay",
+      "extension": "overflow-marquee",
+      "syntax": "<time>",
+      "description": "Overflow Marquee pause before each pass; nonnegative ms/s values. Invalid values use 1200ms.",
+      "default": "1200ms",
+      "role": "input",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/overflow-marquee.htm"
+    },
+    {
+      "name": "--ae-overflow-marquee-speed",
+      "extension": "overflow-marquee",
+      "syntax": "<number>",
+      "description": "Overflow Marquee speed in CSS pixels per second. Positive numbers only; invalid values use 30.",
+      "default": "30",
+      "role": "input",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/overflow-marquee.htm"
     },
     {
       "name": "--ae-pop-duration",

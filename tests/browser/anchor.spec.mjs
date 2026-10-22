@@ -11,7 +11,7 @@ async function startAnchor(page, markup, options = {}) {
     document.body.innerHTML = html;
     AelluxJs.ext("anchor");
   }, { html: markup, disableObservers: options.disableObservers });
-  await page.addScriptTag({ url: "/src/aellux.ext.anchor.js" });
+  await page.addScriptTag({ url: "/dist/aellux.ext.anchor.js" });
   await page.evaluate(() => AelluxJs.init({ mode: "basic" }));
   await expect.poll(() => page.evaluate(() => AelluxJs.ext.anchor?.initialized)).toBe(true);
 }
@@ -234,7 +234,7 @@ test("intersection changes schedule placement updates and unmount disconnects th
         style="width:10px;height:10px"></div></div>`;
     AelluxJs.ext("anchor");
   });
-  await page.addScriptTag({ url: "/src/aellux.ext.anchor.js" });
+  await page.addScriptTag({ url: "/dist/aellux.ext.anchor.js" });
   await page.evaluate(() => AelluxJs.init({ mode: "basic" }));
   await expect.poll(() => page.locator("#anchor").evaluate(element =>
     element.style.getPropertyValue("--ae-anchor-x"))).toBe("20px");
@@ -272,7 +272,7 @@ test("layout event on the shared positioning parent replaces position polling", 
         style="width:10px;height:10px"></div></div>`;
     AelluxJs.ext("anchor");
   });
-  await page.addScriptTag({ url: "/src/aellux.ext.anchor.js" });
+  await page.addScriptTag({ url: "/dist/aellux.ext.anchor.js" });
   await page.evaluate(() => AelluxJs.init({ mode: "basic" }));
   const x = () => page.locator("#anchor").evaluate(element =>
     element.style.getPropertyValue("--ae-anchor-x")

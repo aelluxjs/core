@@ -756,8 +756,9 @@
   // src/internal/validate-declarations.js
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   var attributesByExtension = {
-    present: "present present-group present-active present-when present-motion trigger trigger-on dismiss target auto-unpop unpop-on-outside present-group-anchor",
+    present: "present present-group present-active present-when present-motion trigger trigger-on dismiss target auto-unpop unpop-on-outside",
     anchor: "anchor anchor-target anchor-match anchor-style",
+    "overflow-marquee": "overflow-marquee overflow-marquee-content overflow-marquee-active overflow-marquee-style",
     scrollbox: "scrollbox scrollbox-wheel-horizontal scrollbox-momentum scrollbox-elastic scrollbar scrollbar-vertical scrollbar-horizontal",
     "scrollbox-snap": "scrollbox-snap snap-item",
     focus: "focus",
@@ -771,6 +772,7 @@
   var activation = {
     present: "present present-group trigger dismiss",
     anchor: "anchor",
+    "overflow-marquee": "overflow-marquee",
     scrollbox: "scrollbox",
     "scrollbox-snap": "scrollbox-snap",
     focus: "focus",
@@ -781,7 +783,7 @@
     feedback: "feedback"
   };
   function validateDeclarations(root, scope, extensionNames = null, method = "mount") {
-    var _a, _b, _c;
+    var _a, _b;
     const api = root.AelluxJs;
     if (api.options.environment !== "development") return;
     const selected = extensionNames === null ? null : new Set(
@@ -846,9 +848,10 @@
           });
         }
       }, validateAnchor = function() {
+        var _a2, _b2, _c;
         const pivots = new Set("top-left top-center top-right center-left center center-right bottom-left bottom-center bottom-right".split(" "));
-        const pairs = value("anchor").split(",");
-        if (!pairs.every((token) => {
+        const pairs = has("anchor") ? value("anchor").split(",") : [];
+        if (has("anchor") && !pairs.every((token) => {
           const pair = token.trim().toLowerCase().split(":");
           return pair.length === 2 && pair.every((pivot) => pivots.has(pivot.trim()));
         }))
@@ -857,11 +860,16 @@
           invalid("anchor", "anchor-match", "Unknown matching dimension.", "Use width, height, or width height.", "WARN_ANCHOR_MATCH");
         const reference = value("anchor-target");
         if (!reference) return;
-        if (element.id && [...root.document.querySelectorAll(`[${attr("present-group-anchor")}]`)].some((group) => group.getAttribute(attr("present-group-anchor")).replace(/^#/, "") === element.id)) return;
         let target;
         try {
           target = root.document.getElementById(reference.replace(/^#/, "")) || root.document.querySelector(reference);
         } catch (_) {
+        }
+        if (target == null ? void 0 : target.hasAttribute(attr("present-group"))) {
+          if (!((_a2 = api.ext.present) == null ? void 0 : _a2.initialized))
+            report("WARN_EXTENSION_REQUIRED", "present", "anchor-target", "A Present Group target requires Present.", "Register and initialize Present before mounting the group and its Anchors.");
+          target = (_c = (_b2 = api.ext.present) == null ? void 0 : _b2.selected) == null ? void 0 : _c.call(_b2, target);
+          if (!target) return;
         }
         if (!target) invalid("anchor", "anchor-target", "Anchor target does not exist or the selector is invalid.", "Use an existing target ID or a valid CSS selector.", "WARN_CONFIGURATION_TARGET");
         else if (method === "update" && element.getClientRects().length && !target.getClientRects().length && !target.closest(`[${attr("present")}],[hidden]`))
@@ -991,8 +999,6 @@
         invalid("scrollbox", "scrollbox-elastic", "Elastic wrapper must be a direct child of Scrollbox.", "Place exactly one marked wrapper directly inside data-ae-scrollbox.", "WARN_CONFIGURATION_STRUCTURE");
       if ((!selected || selected.has("scrollbox-snap")) && has("snap-item") && !element.closest(`[${attr("scrollbox")}]`))
         invalid("scrollbox-snap", "snap-item", "Snap item has no Scrollbox ancestor.", "Place snap items inside a Scrollbox with Snap enabled.", "WARN_CONFIGURATION_STRUCTURE");
-      if ((!selected || selected.has("anchor")) && has("present-group-anchor") && !((_c = api.ext.anchor) == null ? void 0 : _c.initialized))
-        report("WARN_EXTENSION_REQUIRED", "anchor", "present-group-anchor", "The group association requires Anchor.", "Register and initialize Anchor, and reference an existing Anchor ID.");
       if (!selected && has("maxfps") && (!value("maxfps").trim() || !Number.isFinite(Number(value("maxfps"))) || Number(value("maxfps")) <= 0))
         invalid("core", "maxfps", "Frame rate must be finite and greater than zero.", "Use a positive number or remove the attribute.", "WARN_LAYOUT_MAX_FPS_INVALID");
       if (!selected || selected.has("present") || selected.has("anchor")) validateCSS();
