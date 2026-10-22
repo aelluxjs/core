@@ -231,9 +231,12 @@ body:after {
   top: 100%;
   left: 0;
   right: 0;
-  height: 500px;
   border-top: var(--bs-border-width) var(--bs-border-style) var(--bs-border-color) !important;
   border-bottom: var(--bs-border-width) var(--bs-border-style) var(--bs-border-color) !important;
+}
+
+.toc-header .toc-collapse>* {
+  max-height: 500px;
 }
 
 @media (min-width:992px) {
@@ -264,9 +267,12 @@ body:after {
     top: 0;
     right: 0;
     left: 0;
-    height: calc(100dvh - 65px);
     border-top: none !important;
     border-bottom: none !important;
+  }
+
+  .toc-header .toc-collapse>* {
+    max-height: calc(100dvh - 65px);
   }
 }
 
