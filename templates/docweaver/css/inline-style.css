@@ -84,7 +84,7 @@ body:after {
   width: 250px;
   overflow-x: clip;
   overflow-y: auto;
-  scrollbar-gutter: stable;
+  scrollbar-gutter: unset;
 }
 
 #navbarSupportedContent {
@@ -264,6 +264,7 @@ body:after {
     top: 0;
     right: 0;
     left: 0;
+    max-height: initial;
     border-top: none !important;
     border-bottom: none !important;
   }
@@ -440,7 +441,7 @@ p {
 }
 
 .toc-link.is-active-link:before {
-  background: var(--bs-primary) !important;
+  background: var(--bs-link-color) !important;
 }
 
 
