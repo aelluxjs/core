@@ -442,6 +442,7 @@
       if (previousController) {
         previousController.abort();
       }
+      previousController = null;
     }
     var previousController = null;
     function load(_x, _x2) {
@@ -449,7 +450,7 @@
     }
     function _load() {
       _load = _asyncToGenerator(/* @__PURE__ */ _regenerator().m(function _callee(url, selectors) {
-        var options, selectorList, elements, _iterator2, _step2, _selector, _currentElement, controller, response, html, loadedDocument, _iterator3, _step3, selector, currentElement, loadedElement, replacement, _args = arguments, _t, _t2, _t3, _t4;
+        var options, selectorList, elements, _iterator2, _step2, _selector, _currentElement, controller, response, html, loadedDocument, historyRequested, _iterator3, _step3, selector, currentElement, loadedElement, replacement, _args = arguments, _t, _t2, _t3, _t4;
         return _regenerator().w(function(_context) {
           while (1) switch (_context.p = _context.n) {
             case 0:
@@ -494,18 +495,10 @@
               previousController = controller;
               elements.forEach(function(currentElement2) {
                 if (AelluxJs.ext.feedback) {
-                  AelluxJs.ext.feedback.busy(currentElement2, "Ajax loading", true);
-                  AelluxJs.ext.feedback.progress(currentElement2, "Ajax loading", 0);
+                  AelluxJs.ext.feedback.busy("Ajax loading", currentElement2, true);
+                  AelluxJs.ext.feedback.progress("Ajax loading", currentElement2, 0);
                 }
               });
-              if (!("ignoreHistory" in options) || !options.ignoreHistory) {
-                AelluxJs.dispatch("PushAjaxReplace", {
-                  detail: {
-                    url: url,
-                    selectors: selectors
-                  }
-                });
-              }
               AelluxJs.dispatch("AjaxHrefStart");
               _context.p = 3;
               _context.n = 4;
@@ -518,48 +511,76 @@
               return response.text();
             case 5:
               html = _context.v;
+              if (!(previousController !== controller)) {
+                _context.n = 6;
+                break;
+              }
+              return _context.a(2, null);
+            case 6:
               validateHTMLSource(AelluxJs, html, response.url || String(url));
               loadedDocument = new DOMParser().parseFromString(html, "text/html");
+              historyRequested = false;
               _iterator3 = _createForOfIteratorHelper3(selectorList);
-              _context.p = 6;
+              _context.p = 7;
               _iterator3.s();
-            case 7:
+            case 8:
               if ((_step3 = _iterator3.n()).done) {
-                _context.n = 14;
+                _context.n = 17;
                 break;
               }
               selector = _step3.value;
-              currentElement = elements.get(selector);
-              if (currentElement) {
-                _context.n = 8;
+              if (!(previousController !== controller)) {
+                _context.n = 9;
                 break;
               }
-              return _context.a(3, 13);
-            case 8:
-              loadedElement = loadedDocument.querySelector(selector);
-              _t = !loadedElement;
-              if (_t) {
+              return _context.a(2, null);
+            case 9:
+              currentElement = elements.get(selector);
+              if (currentElement) {
                 _context.n = 10;
                 break;
               }
-              _context.n = 9;
+              return _context.a(3, 16);
+            case 10:
+              loadedElement = loadedDocument.querySelector(selector);
+              _t = !loadedElement;
+              if (_t) {
+                _context.n = 12;
+                break;
+              }
+              _context.n = 11;
               return AelluxJs.unmount(currentElement);
-            case 9:
+            case 11:
               _t2 = _context.v;
               _t = _t2 === false;
-            case 10:
+            case 12:
               if (!_t) {
-                _context.n = 11;
+                _context.n = 13;
                 break;
               }
               if (!loadedElement) selectorDiagnostic(selector, "No response element matches the selector.", currentElement);
               if (AelluxJs.ext.feedback) {
-                AelluxJs.ext.feedback.busy(currentElement, "Ajax loading", false);
-                AelluxJs.ext.feedback.progress(currentElement, "Ajax loading", 1);
+                AelluxJs.ext.feedback.busy("Ajax loading", currentElement, false);
+                AelluxJs.ext.feedback.progress("Ajax loading", currentElement, 1);
               }
-              return _context.a(3, 13);
-            case 11:
+              return _context.a(3, 16);
+            case 13:
               replacement = document.importNode(loadedElement, true);
+              if (!(previousController !== controller)) {
+                _context.n = 14;
+                break;
+              }
+              return _context.a(2, null);
+            case 14:
+              if (!historyRequested && !options.ignoreHistory) {
+                AelluxJs.dispatch("PushAjaxReplace", {
+                  detail: {
+                    url: url,
+                    selectors: selectors
+                  }
+                });
+                historyRequested = true;
+              }
               currentElement.parentNode.replaceChild(replacement, currentElement);
               if (selector === "title") {
                 AelluxJs.dispatch("UpdateBaseTitle", {
@@ -568,59 +589,59 @@
                   }
                 });
               }
-              _context.n = 12;
+              _context.n = 15;
               return AelluxJs.mount(replacement);
-            case 12:
-              if (AelluxJs.ext.feedback) {
-                AelluxJs.ext.feedback.busy(replacement, "Ajax loaded", false);
-                AelluxJs.ext.feedback.progress(replacement, "Ajax loaded", 1);
-              }
-            case 13:
-              _context.n = 7;
-              break;
-            case 14:
-              _context.n = 16;
-              break;
             case 15:
-              _context.p = 15;
-              _t3 = _context.v;
-              _iterator3.e(_t3);
+              if (AelluxJs.ext.feedback) {
+                AelluxJs.ext.feedback.busy("Ajax loaded", replacement, false);
+                AelluxJs.ext.feedback.progress("Ajax loaded", replacement, 1);
+              }
             case 16:
-              _context.p = 16;
-              _iterator3.f();
-              return _context.f(16);
+              _context.n = 8;
+              break;
             case 17:
-              AelluxJs.dispatch("AjaxHrefLoaded");
-              _context.n = 20;
+              _context.n = 19;
               break;
             case 18:
               _context.p = 18;
+              _t3 = _context.v;
+              _iterator3.e(_t3);
+            case 19:
+              _context.p = 19;
+              _iterator3.f();
+              return _context.f(19);
+            case 20:
+              AelluxJs.dispatch("AjaxHrefLoaded");
+              _context.n = 23;
+              break;
+            case 21:
+              _context.p = 21;
               _t4 = _context.v;
               selectorList.forEach(function(selector2) {
                 var currentElement2 = elements.get(selector2);
                 if (!currentElement2) return;
                 if (AelluxJs.ext.feedback) {
-                  AelluxJs.ext.feedback.busy(currentElement2, "Ajax loading", false);
-                  AelluxJs.ext.feedback.progress(currentElement2, "Ajax loading", 1);
+                  AelluxJs.ext.feedback.busy("Ajax loading", currentElement2, false);
+                  AelluxJs.ext.feedback.progress("Ajax loading", currentElement2, 1);
                 }
               });
               AelluxJs.dispatch("AjaxHrefError");
               if (!(_t4.name === "AbortError")) {
-                _context.n = 19;
+                _context.n = 22;
                 break;
               }
               return _context.a(2, null);
-            case 19:
+            case 22:
               throw _t4;
-            case 20:
-              _context.p = 20;
+            case 23:
+              _context.p = 23;
               if (previousController === controller) previousController = null;
               AelluxJs.dispatch("AjaxHrefComplete");
-              return _context.f(20);
-            case 21:
+              return _context.f(23);
+            case 24:
               return _context.a(2);
           }
-        }, _callee, null, [[6, 15, 16, 17], [3, 18, 20, 21]]);
+        }, _callee, null, [[7, 18, 19, 20], [3, 21, 23, 24]]);
       }));
       return _load.apply(this, arguments);
     }

@@ -2,14 +2,14 @@
 
 import { createOverflowMarquee } from "./internal/create-overflow-marquee.js";
 
-// This Extension owns the content wrapper, weak CSS and visibility-aware
+// This Extension owns the content wrapper and visibility-aware
 // lifecycle. Anchor is loaded in init solely to supply its placement map.
 (function (root) {
   "use strict";
   const api = root.AelluxJs;
   const extensionName = "overflow-marquee";
   if (!api) throw new Error('[aellux.js] Load the boot script before the overflow-marquee extension.');
-  let marquee = null, placements = null, weakStyle = null;
+  let marquee = null, placements = null;
   api.extAttach(extensionName, { init, destroy });
 
   async function init() {
@@ -25,10 +25,6 @@ import { createOverflowMarquee } from "./internal/create-overflow-marquee.js";
       { name: "--ae-overflow-marquee-speed", syntax: "<number>", initialValue: "30" },
       { name: "--ae-overflow-marquee-delay", syntax: "<time>", initialValue: "1200ms" }
     );
-    weakStyle = root.document.createElement("style");
-    weakStyle.setAttribute(api.attr("overflow-marquee-style"), "");
-    weakStyle.textContent = marquee.css.replace(/\s*([{};:,])\s*/g, "$1").replace(/;}/g, "}").trim();
-    root.document.head.appendChild(weakStyle);
     api.mountManager.add({ extensionName, selector: marquee.selector,
       mount: marquee.mount, unmount: marquee.unmount, update: marquee.update });
   }
@@ -37,7 +33,6 @@ import { createOverflowMarquee } from "./internal/create-overflow-marquee.js";
     await marquee?.destroy();
     placements?.destroy();
     api.mountManager.remove({ extensionName });
-    weakStyle?.remove();
-    marquee = placements = weakStyle = null;
+    marquee = placements = null;
   }
 })(typeof globalThis !== "undefined" ? globalThis : window);

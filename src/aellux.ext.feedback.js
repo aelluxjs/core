@@ -128,6 +128,7 @@
         const advancedEase = root.getComputedStyle(transformElement)
           .getPropertyValue("--ae-feedback-aellux-ease").trim() || undefined;
         AelluxJs.motion.run(transformElement, {
+          extension: extensionName,
           id,
           apply: () => transformElement.classList.add(motionClass),
           easing: advancedEase,

@@ -743,13 +743,13 @@
         },
         {
           "name": "ae--anchor-switching",
-          "description": "Runtime-managed state class; useful in CSS selectors.",
+          "description": "Runtime-managed state class. Use in application CSS selectors; do not set it to command the runtime.",
           "doc-url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/anchor.htm"
         },
         {
           "name": "ae--anchored",
           "description": "Runtime-managed state class. Use in application CSS selectors; do not set it to command the runtime.",
-          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.0/runtime/api.htm"
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/anchor.htm"
         },
         {
           "name": "ae--feedback-motion-",
@@ -829,12 +829,12 @@
         {
           "name": "ae--native-sb-hide",
           "description": "Runtime-managed state class. Use in application CSS selectors; do not set it to command the runtime.",
-          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.0/runtime/api.htm"
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/scrollbox.htm"
         },
         {
           "name": "ae--pointerscrolling",
           "description": "Runtime-managed state class. Use in application CSS selectors; do not set it to command the runtime.",
-          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.0/runtime/api.htm"
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/scrollbox.htm"
         },
         {
           "name": "ae--pop",
@@ -874,7 +874,7 @@
         {
           "name": "ae--scrollbar-visible",
           "description": "Runtime-managed state class. Use in application CSS selectors; do not set it to command the runtime.",
-          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.0/runtime/api.htm"
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/scrollbox.htm"
         },
         {
           "name": "ae--scrollbox-elastic-release",
@@ -899,12 +899,12 @@
         {
           "name": "ae--snap-ready",
           "description": "Runtime-managed state class. Use in application CSS selectors; do not set it to command the runtime.",
-          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.0/runtime/api.htm"
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/scrollbox.htm"
         },
         {
           "name": "ae--snap-suspended",
           "description": "Runtime-managed state class. Use in application CSS selectors; do not set it to command the runtime.",
-          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.0/runtime/api.htm"
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/scrollbox.htm"
         },
         {
           "name": "ae--unpopping",

@@ -50,6 +50,7 @@ import { validateHTMLSource } from "./internal/validate-html-source.js";
     document.removeEventListener("click", onClick);
     AelluxJs.off("SnapshotRestore", OnSnapshotRestoreAjax);
     if (previousController) { previousController.abort(); }
+    previousController = null;
   }
 
   let previousController = null;
@@ -75,28 +76,24 @@ import { validateHTMLSource } from "./internal/validate-html-source.js";
     elements.forEach(function (currentElement) {
       //feedback busy/progress
       if (AelluxJs.ext.feedback) {
-        AelluxJs.ext.feedback.busy(currentElement, "Ajax loading", true);
-        AelluxJs.ext.feedback.progress(currentElement, "Ajax loading", 0);
+        AelluxJs.ext.feedback.busy("Ajax loading", currentElement, true);
+        AelluxJs.ext.feedback.progress("Ajax loading", currentElement, 0);
       }
       //AJAX PROGRESS UPDATE VALUE
     });
-
-    if (!("ignoreHistory" in options) || !options.ignoreHistory) {
-      AelluxJs.dispatch(
-        "PushAjaxReplace",
-        { detail: { url, selectors } }
-      );
-    }
 
     AelluxJs.dispatch("AjaxHrefStart");
 
     try {
       const response = await AelluxJs.request(url, { signal: controller.signal });
       const html = await response.text();
+      if (previousController !== controller) return null;
       validateHTMLSource(AelluxJs, html, response.url || String(url));
       const loadedDocument = new DOMParser().parseFromString(html, "text/html");
+      let historyRequested = false;
 
       for (const selector of selectorList) {
+        if (previousController !== controller) return null;
         const currentElement = elements.get(selector);
         if (!currentElement) continue;
 
@@ -105,13 +102,20 @@ import { validateHTMLSource } from "./internal/validate-html-source.js";
           if (!loadedElement)
             selectorDiagnostic(selector, "No response element matches the selector.", currentElement);
           if (AelluxJs.ext.feedback) {
-            AelluxJs.ext.feedback.busy(currentElement, "Ajax loading", false);
-            AelluxJs.ext.feedback.progress(currentElement, "Ajax loading", 1);
+            AelluxJs.ext.feedback.busy("Ajax loading", currentElement, false);
+            AelluxJs.ext.feedback.progress("Ajax loading", currentElement, 1);
           }
           continue;
         }
 
         const replacement = document.importNode(loadedElement, true);
+        if (previousController !== controller) return null;
+        // Commit navigation only after a response region has passed its unmount
+        // veto. Keep the new base URL in effect when mounting imported content.
+        if (!historyRequested && !options.ignoreHistory) {
+          AelluxJs.dispatch("PushAjaxReplace", { detail: { url, selectors } });
+          historyRequested = true;
+        }
         currentElement.parentNode.replaceChild(replacement, currentElement);
 
         if (selector === "title") {
@@ -124,8 +128,8 @@ import { validateHTMLSource } from "./internal/validate-html-source.js";
 
         //feedback busy/progress
         if (AelluxJs.ext.feedback) {
-          AelluxJs.ext.feedback.busy(replacement, "Ajax loaded", false);
-          AelluxJs.ext.feedback.progress(replacement, "Ajax loaded", 1);
+          AelluxJs.ext.feedback.busy("Ajax loaded", replacement, false);
+          AelluxJs.ext.feedback.progress("Ajax loaded", replacement, 1);
         }
       }
 
@@ -137,8 +141,8 @@ import { validateHTMLSource } from "./internal/validate-html-source.js";
         if (!currentElement) return;
         //feedback busy/progress
         if (AelluxJs.ext.feedback) {
-          AelluxJs.ext.feedback.busy(currentElement, "Ajax loading", false);
-          AelluxJs.ext.feedback.progress(currentElement, "Ajax loading", 1);
+          AelluxJs.ext.feedback.busy("Ajax loading", currentElement, false);
+          AelluxJs.ext.feedback.progress("Ajax loading", currentElement, 1);
         }
       });
 

@@ -1,9 +1,9 @@
 # Overflow Marquee
 
-`overflow-marquee` is a dedicated Extension for `[data-ae-overflow-marquee]`. Register only `$ae.ext("overflow-marquee")` in Basic mode. During `init()`, it registers Anchor if necessary and awaits `$ae.wait("anchor")` before obtaining a placement map and registering its own mount map. Full mode registers it lazily and requests its separate Modern or Legacy script only when matching content is mounted. Anchor alone does not mount marquee elements.
+`overflow-marquee` is a dedicated Extension for `[data-ae-overflow-marquee]`. Register only `$ae.ext("overflow-marquee", { loadStyle: true })` in Basic mode. During `init()`, it registers Anchor if necessary and awaits `$ae.wait("anchor")` before obtaining a placement map and registering its own mount map. Full mode registers it lazily and requests its separate Modern or Legacy script only when matching content is mounted. Anchor alone does not mount marquee elements.
 
 ```js
-$ae.ext("overflow-marquee");
+$ae.ext("overflow-marquee", { loadStyle: true });
 $ae.init({ mode: "basic" });
 ```
 
@@ -13,7 +13,7 @@ $ae.init({ mode: "basic" });
 </span>
 ```
 
-The Extension's owned weak stylesheet supplies relative positioning, clipping and ellipsis. It applies `white-space:nowrap!important` to the host and its generated wrapper, without writing inline whitespace styles. Ordinary author styles remain subject to the CSS cascade; a higher-priority important rule can override the weak rule. The wrapper stays in normal flow to preserve the label's height. Its nodes are moved, not cloned, preserving their identity and listeners. Use this on single-line content containers; inserting a wrapper changes direct-child selector relationships.
+The external stylesheet, included in Full or requested with `loadStyle: true` in Basic, supplies relative positioning, clipping and ellipsis. It applies `white-space:nowrap!important` to the host and its generated wrapper, without writing inline whitespace styles. Ordinary author styles remain subject to the CSS cascade; a higher-priority important rule can override the weak rule. The wrapper stays in normal flow to preserve the label's height. Its nodes are moved, not cloned, preserving their identity and listeners. Use this on single-line content containers; inserting a wrapper changes direct-child selector relationships.
 
 When content overflows horizontally, the wrapper waits at the start, moves linearly from `top-left:top-left` toward `bottom-right:bottom-right`, and waits for the same duration at the end. It then jumps back without animating the return, waits at the start, and repeats. Geometry compensates for host padding and borders and holds the vertical position. RTL text travels in the opposite direction. The defaults are 30 CSS pixels per second and a 1200ms pause at each end. Customize them on the host:
 
@@ -32,7 +32,7 @@ Mouse hover pauses movement by default on devices offering hover and a fine poin
 
 On devices offering hover and a fine pointer, overflowing labels receive their complete normalized text in the host's native `title` attribute, including in reduced-motion mode. An authored `title`, even an empty one, is preserved. Owned titles update with text changes and are removed when overflow disappears or on unmount; application changes to the title are retained. No custom tooltip or duplicate accessible text is inserted.
 
-Unmount cancels motion and pending work, disconnects component observers/listeners, unwraps the current content and removes owned tooltip/state attributes. The weak stylesheet remains while Overflow Marquee is initialized. Destroying the Extension releases its placement map and removes its own stylesheet; Anchor's stylesheet belongs to Anchor. Generated wrappers do not carry `data-ae-anchor`, so ordinary Anchor discovery and updates cannot compete with their animation.
+Unmount cancels motion and pending work, disconnects component observers/listeners, unwraps the current content and removes owned tooltip/state attributes. The external stylesheet remains across unmount/remount. Destroying the Extension releases its placement map and removes an individually loaded stylesheet; the shared Full stylesheet remains. Generated wrappers do not carry `data-ae-anchor`, so ordinary Anchor discovery and updates cannot compete with their animation.
 
 ## Distribution cost
 

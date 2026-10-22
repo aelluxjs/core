@@ -2406,9 +2406,9 @@ test("full runtime writes the renamed history state marker", async ({ page }) =>
     initialized: false,
     registered: true,
     bundled: true,
-    style: true,
+    style: false,
     presentInitialized: false,
-    presentStyle: true,
+    presentStyle: false,
     ajaxHrefBundled: true
   });
   expect(await page.evaluate(() => history.state?.aelluxJsState)).toBe(true);
@@ -2422,11 +2422,11 @@ test("minified distribution exposes the renamed global", async ({ page }) => {
   await expect.poll(() => page.evaluate(() => window.AelluxJs.diagnostics.supported)).toBe(true);
   await page.evaluate(() => Promise.all([AelluxJs.wait("adaptive"), AelluxJs.wait("present")]));
   await expect.poll(() => page.evaluate(() => AelluxJs.ext.adaptive?.initialized)).toBe(true);
-  await expect(page.locator('link[data-ae-ext-style="adaptive"]')).toHaveAttribute(
-    "href", /aellux\.ext\.adaptive\.min\.css$/
+  await expect(page.locator('link[data-ae-full-style]')).toHaveAttribute(
+    "href", /aellux\.full\.min\.css$/
   );
-  await expect(page.locator('link[data-ae-ext-style="present"]')).toHaveAttribute(
-    "href", /aellux\.ext\.present\.min\.css$/
+  await expect(page.locator('link[data-ae-full-style]')).toHaveAttribute(
+    "href", /aellux\.full\.min\.css$/
   );
   expect(await page.evaluate(() => window.AelluxJs === window.$ae)).toBe(true);
   expect(await page.evaluate(() => typeof window.Aellux)).toBe("undefined");
@@ -2439,11 +2439,11 @@ test("legacy full runtime loads generated Extension stylesheets", async ({ page 
   await expect.poll(() => page.evaluate(() => AelluxJs.orchestratorVersion)).toBe("0.1.0-beta.10");
   await page.evaluate(() => Promise.all([AelluxJs.wait("adaptive"), AelluxJs.wait("present")]));
   await expect.poll(() => page.evaluate(() => AelluxJs.ext.adaptive?.initialized)).toBe(true);
-  await expect(page.locator('link[data-ae-ext-style="adaptive"]')).toHaveAttribute(
-    "href", /aellux\.ext\.adaptive\.css$/
+  await expect(page.locator('link[data-ae-full-style]')).toHaveAttribute(
+    "href", /aellux\.full\.css$/
   );
-  await expect(page.locator('link[data-ae-ext-style="present"]')).toHaveAttribute(
-    "href", /aellux\.ext\.present\.css$/
+  await expect(page.locator('link[data-ae-full-style]')).toHaveAttribute(
+    "href", /aellux\.full\.css$/
   );
 });
 
@@ -2703,8 +2703,8 @@ test("full runtime loads generated adaptive styles", async ({ page }) => {
   await expect.poll(() => page.evaluate(() => AelluxJs.orchestratorVersion)).toBe("0.1.0-beta.10");
   await page.evaluate(() => AelluxJs.wait("adaptive"));
   await expect.poll(() => page.evaluate(() => AelluxJs.ext.adaptive?.initialized)).toBe(true);
-  await expect(page.locator('link[data-ae-ext-style="adaptive"]')).toHaveAttribute(
-    "href", /aellux\.ext\.adaptive\.css$/
+  await expect(page.locator('link[data-ae-full-style]')).toHaveAttribute(
+    "href", /aellux\.full\.css$/
   );
   await expect.poll(() => page.locator("#adaptive-probe").evaluate(
     element => getComputedStyle(element).paddingTop

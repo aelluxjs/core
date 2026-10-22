@@ -152,6 +152,7 @@
       if (previousController) {
         previousController.abort();
       }
+      previousController = null;
     }
     let previousController = null;
     async function load(url, selectors, options = {}) {
@@ -172,23 +173,20 @@
       previousController = controller;
       elements.forEach(function(currentElement) {
         if (AelluxJs.ext.feedback) {
-          AelluxJs.ext.feedback.busy(currentElement, "Ajax loading", true);
-          AelluxJs.ext.feedback.progress(currentElement, "Ajax loading", 0);
+          AelluxJs.ext.feedback.busy("Ajax loading", currentElement, true);
+          AelluxJs.ext.feedback.progress("Ajax loading", currentElement, 0);
         }
       });
-      if (!("ignoreHistory" in options) || !options.ignoreHistory) {
-        AelluxJs.dispatch(
-          "PushAjaxReplace",
-          { detail: { url, selectors } }
-        );
-      }
       AelluxJs.dispatch("AjaxHrefStart");
       try {
         const response = await AelluxJs.request(url, { signal: controller.signal });
         const html = await response.text();
+        if (previousController !== controller) return null;
         validateHTMLSource(AelluxJs, html, response.url || String(url));
         const loadedDocument = new DOMParser().parseFromString(html, "text/html");
+        let historyRequested = false;
         for (const selector of selectorList) {
+          if (previousController !== controller) return null;
           const currentElement = elements.get(selector);
           if (!currentElement) continue;
           const loadedElement = loadedDocument.querySelector(selector);
@@ -196,12 +194,17 @@
             if (!loadedElement)
               selectorDiagnostic(selector, "No response element matches the selector.", currentElement);
             if (AelluxJs.ext.feedback) {
-              AelluxJs.ext.feedback.busy(currentElement, "Ajax loading", false);
-              AelluxJs.ext.feedback.progress(currentElement, "Ajax loading", 1);
+              AelluxJs.ext.feedback.busy("Ajax loading", currentElement, false);
+              AelluxJs.ext.feedback.progress("Ajax loading", currentElement, 1);
             }
             continue;
           }
           const replacement = document.importNode(loadedElement, true);
+          if (previousController !== controller) return null;
+          if (!historyRequested && !options.ignoreHistory) {
+            AelluxJs.dispatch("PushAjaxReplace", { detail: { url, selectors } });
+            historyRequested = true;
+          }
           currentElement.parentNode.replaceChild(replacement, currentElement);
           if (selector === "title") {
             AelluxJs.dispatch("UpdateBaseTitle", {
@@ -210,8 +213,8 @@
           }
           await AelluxJs.mount(replacement);
           if (AelluxJs.ext.feedback) {
-            AelluxJs.ext.feedback.busy(replacement, "Ajax loaded", false);
-            AelluxJs.ext.feedback.progress(replacement, "Ajax loaded", 1);
+            AelluxJs.ext.feedback.busy("Ajax loaded", replacement, false);
+            AelluxJs.ext.feedback.progress("Ajax loaded", replacement, 1);
           }
         }
         AelluxJs.dispatch("AjaxHrefLoaded");
@@ -220,8 +223,8 @@
           const currentElement = elements.get(selector);
           if (!currentElement) return;
           if (AelluxJs.ext.feedback) {
-            AelluxJs.ext.feedback.busy(currentElement, "Ajax loading", false);
-            AelluxJs.ext.feedback.progress(currentElement, "Ajax loading", 1);
+            AelluxJs.ext.feedback.busy("Ajax loading", currentElement, false);
+            AelluxJs.ext.feedback.progress("Ajax loading", currentElement, 1);
           }
         });
         AelluxJs.dispatch("AjaxHrefError");

@@ -2,20 +2,21 @@
 
 import { reportConfiguration, diagnosePresentTarget } from "./report-configuration.js";
 import utilsNameCase from "./utils-name-case.js";
+import { transformOwners, diagnoseResource } from "./diagnose-resources.js";
 
 // Only declarative, development-time checks belong here. Runtime failures remain
 // the responsibility of each Extension. No observers or production DOM scans.
 const attributesByExtension = {
   present: "present present-group present-active present-when present-motion trigger trigger-on dismiss target auto-unpop unpop-on-outside",
-  anchor: "anchor anchor-target anchor-match anchor-style",
-  "overflow-marquee": "overflow-marquee overflow-marquee-content overflow-marquee-active overflow-marquee-style",
+  anchor: "anchor anchor-target anchor-match",
+  "overflow-marquee": "overflow-marquee overflow-marquee-content overflow-marquee-active",
   scrollbox: "scrollbox scrollbox-wheel-horizontal scrollbox-momentum scrollbox-elastic scrollbar scrollbar-vertical scrollbar-horizontal",
   "scrollbox-snap": "scrollbox-snap snap-item",
   focus: "focus", point: "point", adaptive: "adaptive", "ajax-href": "ajax-href",
   preference: "preference option label next prev ready",
   feedback: "feedback target-message target-transform"
 };
-const coreAttributes = "maxfps wait-mounted ext ext-style dep load-when builds load-style weak-style legacy esm theme-color";
+const coreAttributes = "maxfps wait-mounted ext ext-style dep load-when builds load-style weak-style full-style legacy esm theme-color";
 const activation = {
   present: "present present-group trigger dismiss", anchor: "anchor", "overflow-marquee": "overflow-marquee",
   scrollbox: "scrollbox", "scrollbox-snap": "scrollbox-snap",
@@ -102,6 +103,11 @@ export function validateDeclarations(root, scope, extensionNames = null, method 
     if (!selected && has("maxfps") && (!value("maxfps").trim() || !Number.isFinite(Number(value("maxfps"))) || Number(value("maxfps")) <= 0))
       invalid("core", "maxfps", "Frame rate must be finite and greater than zero.", "Use a positive number or remove the attribute.", "WARN_LAYOUT_MAX_FPS_INVALID");
     if (!selected || selected.has("present") || selected.has("anchor")) validateCSS();
+    if ((!selected || selected.has("present") || selected.has("scrollbox")) && has("scrollbox-elastic")) {
+      const writers = transformOwners(api, element);
+      if (writers.includes("scrollbox-elastic") && writers.includes("present"))
+        diagnoseResource(api, element, "transform", ["scrollbox-elastic", "present"]);
+    }
 
     function validatePresent() {
       if (has("present") && value("present").trim().split(/\s+/).some(token => token && !["opacity", "transform", "height", "width"].includes(token)))
@@ -176,6 +182,13 @@ export function validateDeclarations(root, scope, extensionNames = null, method 
       for (const item of element.querySelectorAll(`[${attr("snap-item")}]`)) {
         if (item.closest(`[${attr("scrollbox")}]`) !== element) continue;
         const alignment = item.getAttribute(attr("snap-item"));
+        const style = root.getComputedStyle(item);
+        if (item.getClientRects().length && [style.transform, style.translate, style.rotate, style.scale].some(value => value && value !== "none"))
+          reportConfiguration(api, "WARN_SCROLLBOX_SNAP_TRANSFORM", {
+            extension: "scrollbox-snap", element: item, attribute: attr("snap-item"),
+            reason: "Snap geometry includes a transform applied to the item itself.",
+            suggestion: "Apply the visual transform to a child of the snap item."
+          });
         if (!["", "start", "end", "center", "left", "right", "top", "bottom"].includes(alignment))
           reportConfiguration(api, "WARN_CONFIGURATION_VALUE", {
             extension: "scrollbox-snap", element: item, attribute: attr("snap-item"), value: alignment,

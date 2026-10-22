@@ -183,7 +183,9 @@ import utilsNameCase from "./internal/utils-name-case.js";
       if (AelluxJs.ext[key].initialized) {
         extensionPromises[key] = Promise.resolve(AelluxJs.ext[key]);
       } else {
-        extensionPromises[key] = Promise.resolve()
+        const registration = AelluxJs.registry.ext[key];
+        extensionPromises[key] = (registration.loadStyle && registration.loadStyle !== "false"
+          ? appendExtensionAssets(extensionName) : Promise.resolve())
           .then(() => extensionInitialize(extensionName))
           .catch(error => {
             if (!error || !error.aelluxCompatibility) {
@@ -314,7 +316,7 @@ import utilsNameCase from "./internal/utils-name-case.js";
 
     if (bundledLoader) {
       loadPromises.push(Promise.resolve().then(() => bundledLoader()));
-    } else {
+    } else if (!AelluxJs.ext[key]) {
       loadPromises.push(new Promise(
         (resolve, reject) => {
           const attr = AelluxJs.attr("ext");
@@ -332,7 +334,10 @@ import utilsNameCase from "./internal/utils-name-case.js";
       ));
     }
 
-    if (data.loadStyle && data.loadStyle !== "false") {
+    const defaultStyle = data.loadStyle === true || data.loadStyle === "true";
+    const fullStyle = AelluxJs.bundledExtensions && (bundledLoader || data.official) &&
+      document.querySelector(`link[${AelluxJs.attr("full-style")}]`);
+    if (data.loadStyle && data.loadStyle !== "false" && !(defaultStyle && fullStyle)) {
       loadPromises.push(new Promise(
         (resolve) => {
           const styleDefaultURL = data.loadStyle === true ||

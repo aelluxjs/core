@@ -1,5 +1,7 @@
 /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
 
+import { diagnoseMotionResources } from "./diagnose-resources.js";
+
 // CSS remains the motion definition. This service only owns time progression
 // when the browser exposes enough of Web Animations to do that safely.
 export function createCssMotionController(root, getAelluxJs) {
@@ -124,8 +126,10 @@ export function createCssMotionController(root, getAelluxJs) {
     // The read occurs after the state-changing update, allowing transitions to
     // be materialized by style calculation without a per-frame layout read.
     operation.element.getBoundingClientRect();
-    return operation.element.getAnimations().filter(animation =>
+    const animations = operation.element.getAnimations().filter(animation =>
       !operation.before.has(animation) && controllable(animation));
+    diagnoseMotionResources(getAelluxJs(), operation.element, animations, operation.options.extension || "css-motion");
+    return animations;
   }
 
   function controllable(animation) {
@@ -245,13 +249,19 @@ export function createCssMotionController(root, getAelluxJs) {
   }
 
   function nativeRun(operation) {
+    let before = operation.before;
+    if (getAelluxJs().options.environment === "development" && typeof operation.element.getAnimations === "function")
+      before = new Set(operation.element.getAnimations());
     operation.options.apply();
-    return nativeWait(operation);
+    return nativeWait(operation, before);
   }
 
-  function nativeWait(operation) {
+  function nativeWait(operation, before = operation.before) {
     const animations = typeof operation.element.getAnimations === "function"
       ? operation.element.getAnimations().filter(animation => !operation.before.has(animation)) : [];
+    diagnoseMotionResources(getAelluxJs(), operation.element,
+      before === operation.before ? animations : animations.filter(animation => !before.has(animation)),
+      operation.options.extension || "css-motion");
     return new Promise(resolve => {
       operation.nativeResolve = resolve;
       const complete = () => {

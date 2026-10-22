@@ -19,10 +19,10 @@ async function setup(page, html, { coarse = false } = {}) {
   await page.addScriptTag({ url: "/dist/aellux.js" });
   await page.evaluate(({ markup, usesSnap }) => {
     document.body.innerHTML = markup;
-    AelluxJs.ext("scrollbox");
+    AelluxJs.ext("scrollbox", { loadStyle: true });
     if (usesSnap) AelluxJs.ext("scrollbox-snap");
   }, { markup: html, usesSnap });
-  await page.addScriptTag({ url: "/src/aellux.ext.scrollbox.js" });
+  await page.addScriptTag({ url: "/dist/aellux.ext.scrollbox.js" });
   if (usesSnap) await page.addScriptTag({ url: "/src/aellux.ext.scrollbox-snap.js" });
   await page.evaluate(() => AelluxJs.init({ mode: "basic" }));
   await expect.poll(() => page.evaluate(() => AelluxJs.ext.scrollbox?.initialized)).toBe(true);

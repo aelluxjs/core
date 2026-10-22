@@ -10,6 +10,9 @@ import createWeakCss from "../src/internal/create-weak-css.js";
 import { generateAdaptiveCSS } from "../src/aellux.ext.adaptive.css.js";
 import { generateFeedbackCSS } from "../src/aellux.ext.feedback.css.js";
 import { generatePresentCSS } from "../src/aellux.ext.present.css.js";
+import { generateScrollboxCSS } from "../src/aellux.ext.scrollbox.css.js";
+import { generateAnchorCSS } from "../src/aellux.ext.anchor.css.js";
+import { generateOverflowMarqueeCSS } from "../src/aellux.ext.overflow-marquee.css.js";
 import { officialExtensionDefinitions } from "../src/official-extension-definitions.js";
 import { semanticAttributes, semanticCSSProperties, semanticEvents } from "./semantic-definitions.mjs";
 
@@ -34,6 +37,9 @@ export async function createSemanticCatalog(metadata, constants = createAelluxCo
   const stylesheets = [
     ["adaptive", generateAdaptiveCSS(api)], ["present", generatePresentCSS(api)],
     ["feedback", generateFeedbackCSS(api)],
+    ["scrollbox", generateScrollboxCSS(api)],
+    ["anchor", generateAnchorCSS(api)],
+    ["overflow-marquee", generateOverflowMarqueeCSS(api)],
     ["core", createWeakCss().replace(/\?([a-z][0-9a-z-]*)/gi, (_, name) => api.attr(name)).replace(/%([a-z][0-9a-z-]*)/gi, (_, name) => api.className(name))]
   ];
   for (const [extension, css] of stylesheets) {

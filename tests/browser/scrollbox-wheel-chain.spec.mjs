@@ -18,10 +18,10 @@ async function setupChain(page, { axes = ["y", "x", "y"], rooms = [0, 0, 300],
           style="position:relative;display:inline-block;vertical-align:top;width:${size + (axis === "x" ? extra : 0)}px;height:${size + (axis === "y" ? extra : 0)}px">${points}${child}</div></div>`;
     });
     document.body.innerHTML = child;
-    AelluxJs.ext("scrollbox");
+    AelluxJs.ext("scrollbox", { loadStyle: true });
     if (snap) AelluxJs.ext("scrollbox-snap");
   }, { axes, styles, elastic, plain, zeroRange, snap });
-  await page.addScriptTag({ url: "/src/aellux.ext.scrollbox.js" });
+  await page.addScriptTag({ url: "/dist/aellux.ext.scrollbox.js" });
   if (snap) await page.addScriptTag({ url: "/src/aellux.ext.scrollbox-snap.js" });
   await page.evaluate(() => AelluxJs.init({ mode: "basic" }));
   await page.waitForFunction(snap => AelluxJs.ext.scrollbox?.initialized &&

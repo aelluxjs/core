@@ -267,7 +267,7 @@ test("Anchor group targets explain a missing Present Extension", async ({ page }
   await start(page, `<div style="position:relative"><section id="group" data-ae-present-group>
     <div id="member" data-ae-present>Member</div></section>
     <div id="anchor" data-ae-anchor="bottom-left:top-left" data-ae-anchor-target="group"></div></div>`, { mode: "basic" });
-  await page.evaluate(async () => { AelluxJs.ext("anchor"); await AelluxJs.mount(document, "anchor"); });
+  await page.evaluate(async () => { AelluxJs.ext("anchor", { loadStyle: true }); await AelluxJs.mount(document, "anchor"); });
   expect(await diagnostics(page)).toEqual(expect.arrayContaining([
     expect.objectContaining({ code: 2025, element: "anchor", attribute: "data-ae-anchor-target", reason: "A Present Group target requires Present." })
   ]));

@@ -10,7 +10,7 @@ Scrollbox marks positions within 5 px of each scroll limit with `ae--scroll-v-st
 }
 ```
 
-The boot's weak CSS supplies `overflow: auto`, `contain: layout paint`, and thin scrollbars. It gives the elastic child `display: inline-block` with `vertical-align: top` so the inline line box adds no scrollable space below. If application CSS sets the elastic wrapper to `block`, `flex`, or `grid`, Scrollbox reports diagnostic 2016 and uses `inline-block`, `inline-flex`, or `inline-grid` respectively. It restores the previous inline `display` when the wrapper changes or unmounts. It also enables smooth programmatic scrolling on all elements; `html[data-ae-reduced-motion="reduced"]` restores immediate scrolling and removes custom scrollbar transitions. Elastic snapback also finishes immediately under that attribute. Pointer dragging and momentum set each position immediately so they follow the gesture. An application can override the weak styles. Basic Scrollbox and snap do not require a content wrapper; elastic edges require a single marked content child.
+Scrollbox uses the external `aellux.ext.scrollbox.css`, requested with `{ loadStyle: true }` in Basic or included in the shared Full stylesheet. This weak CSS supplies `overflow: auto`, `contain: layout paint`, and thin scrollbars. It gives the elastic child `display: inline-block` with `vertical-align: top` so the inline line box adds no scrollable space below. If application CSS sets the elastic wrapper to `block`, `flex`, or `grid`, Scrollbox reports diagnostic 2016 and uses `inline-block`, `inline-flex`, or `inline-grid` respectively. It restores the previous inline `display` when the wrapper changes or unmounts. The boot's global weak CSS enables smooth programmatic scrolling on all elements; `html[data-ae-reduced-motion="reduced"]` restores immediate scrolling and removes custom scrollbar transitions. Elastic snapback also finishes immediately under that attribute. Pointer dragging and momentum set each position immediately so they follow the gesture. An application can override the weak styles. Basic Scrollbox and snap do not require a content wrapper; elastic edges require a single marked content child.
 
 ## Custom scrollbars
 
@@ -48,7 +48,7 @@ Pointer Drag Scroll (PDS) uses the primary mouse button or pen. Once movement re
 
 A completed PDS gesture, including a snap flick consumed during the text-selection wait, does not count toward the next double-click sequence. Rapid re-grabs near the same starting position remain draggable; ordinary double and triple clicks keep native text selection.
 
-Once PDS begins, Scrollbox adds `ae--pointerscrolling` to the box. The boot's weak CSS applies `cursor: grabbing !important` to the box and its contents until the gesture ends. If its only direct child enables `data-ae-scrollbox-elastic`, that child and its descendants also receive `pointer-events: none !important` during PDS. Scrollbox cancels wheel input over the box during this interval, along with the default action of its `pointermove`, matching-button `mousemove`, `touchmove`, and cancelable drag events. Canceling `dragstart` prevents a native drag from taking over the gesture. Native `scroll` events still reach listeners and report the updated scroll position.
+Once PDS begins, Scrollbox adds `ae--pointerscrolling` to the box. Scrollbox's weak CSS applies `cursor: grabbing !important` to the box and its contents until the gesture ends. If its only direct child enables `data-ae-scrollbox-elastic`, that child and its descendants also receive `pointer-events: none !important` during PDS. Scrollbox cancels wheel input over the box during this interval, along with the default action of its `pointermove`, matching-button `mousemove`, `touchmove`, and cancelable drag events. Canceling `dragstart` prevents a native drag from taking over the gesture. Native `scroll` events still reach listeners and report the updated scroll position.
 
 `AelluxJsPointerScrollStart` fires when PDS actually activates, after the axis is locked. `AelluxJsPointerScrollEnd` fires after its temporary classes and styles are removed. Both events originate on the scrollbox where the gesture began and bubble; their `detail` contains `{ axis, pointerId, pointerType, elements }`, where `elements` lists the activated boxes in a nested chain. A snap flick that ends before PDS activates emits neither event.
 
@@ -159,6 +159,8 @@ When scrolling settles, Scrollbox identifies the selected point and emits `Aellu
   <article data-ae-snap-item="right">Third</article>
 </div>
 ```
+
+Keep Present transform and Feedback transform motion off the elastic wrapper itself; development diagnostics report competing writers with code `2033`. Animate a child of the wrapper instead. Apply visual transforms to children of `data-ae-snap-item` as well; development mounts and explicit updates report a transformed item with code `2020`. When `ResizeObserver` is available, Snap observes both the box and eligible items so its viewport/focus variables refresh when an item resizes without changing the box's dimensions.
 
 Snap can share the elastic wrapper:
 

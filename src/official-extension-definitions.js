@@ -8,10 +8,10 @@ export const officialExtensionDefinitions = Object.freeze([
   Object.freeze({ name: "feedback", style: true, dependencies: Object.freeze([]) }),
   Object.freeze({ name: "focus", style: false, dependencies: Object.freeze([]) }),
   Object.freeze({ name: "point", style: false, dependencies: Object.freeze([]) }),
-  Object.freeze({ name: "anchor", style: false, dependencies: Object.freeze([]) }),
-  Object.freeze({ name: "overflow-marquee", style: false, dependencies: Object.freeze([]) }),
+  Object.freeze({ name: "anchor", style: true, dependencies: Object.freeze([]) }),
+  Object.freeze({ name: "overflow-marquee", style: true, dependencies: Object.freeze([]) }),
   Object.freeze({ name: "ajax-href", style: false, dependencies: Object.freeze([]) }),
-  Object.freeze({ name: "scrollbox", style: false, dependencies: Object.freeze([]) }),
+  Object.freeze({ name: "scrollbox", style: true, dependencies: Object.freeze([]) }),
   Object.freeze({ name: "scrollbox-snap", style: false, dependencies: Object.freeze([]) }),
   Object.freeze({ name: "adaptive", style: true, dependencies: Object.freeze([]) }),
   Object.freeze({ name: "present", style: true, dependencies: Object.freeze([]) })

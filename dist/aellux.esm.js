@@ -966,6 +966,7 @@ function createAelluxConstants() {
       WARN_CONFIGURATION_STYLE: { code: 2030, message: "Effective CSS prevents the declared Aellux behavior." },
       WARN_PRESENT_ANCHOR_TRANSFORM: { code: 2031, message: "Anchor owns transform; Present transform is ignored." },
       WARN_ATTRIBUTE_DUPLICATE: { code: 2032, message: "Duplicate HTML attributes discard values and may affect appearance or behavior." },
+      WARN_RESOURCE_CONFLICT: { code: 2033, message: "Behaviors replace the same CSS resource; animate a child element instead." },
       INFO_LEGACY_FALLBACK: { code: 3e3, message: AELLUX + "is starting the Legacy runtime." },
       INFO_PRESENT_MEASURED_LAYOUT: { code: 3001, message: "Present measures size transitions without a direct present-motion child; add one to use the grid layout strategy." },
       INFO_FEEDBACK_MOTION_CUSTOM: { code: 3002, message: "The requested feedback motion is not standard. Standard motions are listed in the diagnostic context." },

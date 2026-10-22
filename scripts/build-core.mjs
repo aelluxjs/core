@@ -12,6 +12,10 @@ import { createContext, runInContext } from "node:vm";
 import { generateAdaptiveCSS } from "../src/aellux.ext.adaptive.css.js";
 import { generatePresentCSS } from "../src/aellux.ext.present.css.js";
 import { generateFeedbackCSS } from "../src/aellux.ext.feedback.css.js";
+import { generateScrollboxCSS } from "../src/aellux.ext.scrollbox.css.js";
+import { generateAnchorCSS } from "../src/aellux.ext.anchor.css.js";
+import { generateOverflowMarqueeCSS } from "../src/aellux.ext.overflow-marquee.css.js";
+import { generateFullCSS } from "../src/aellux.full.css.js";
 import { officialExtensionDefinitions } from "../src/official-extension-definitions.js";
 import { createOfficialExtensionManifest } from "./extension-manifest.mjs";
 import { normalizeSourceMapText } from "./normalize-source-map.mjs";
@@ -103,6 +107,19 @@ await buildGeneratedStylesheet(
   "aellux.ext.feedback.css",
   generateFeedbackCSS(bootstrapContext.AelluxJs)
 );
+await buildGeneratedStylesheet(
+  "aellux.ext.scrollbox.css",
+  generateScrollboxCSS(bootstrapContext.AelluxJs)
+);
+await buildGeneratedStylesheet(
+  "aellux.ext.anchor.css",
+  generateAnchorCSS(bootstrapContext.AelluxJs)
+);
+await buildGeneratedStylesheet(
+  "aellux.ext.overflow-marquee.css",
+  generateOverflowMarqueeCSS(bootstrapContext.AelluxJs)
+);
+await buildGeneratedStylesheet("aellux.full.css", generateFullCSS(bootstrapContext.AelluxJs));
 
 async function buildGeneratedStylesheet(filename, contents) {
   const outputPath = join(outputDirectory, filename);

@@ -23,7 +23,7 @@ async function start(page, options = {}, html = fixture) {
   await page.evaluate(options => {
     if (options.mode === "basic") {
       AelluxJs.ext("present", { loadStyle: true });
-      AelluxJs.ext("anchor");
+      AelluxJs.ext("anchor", { loadStyle: true });
     }
     AelluxJs.init({ mode: "full", ...options });
   }, runtimeOptions);
@@ -317,7 +317,7 @@ test("Anchor initialized before Present recovers when the group mounts", async (
   await page.goto("/tests/index.htm");
   await page.evaluate(html => { document.body.innerHTML = html; }, groupFixture);
   await page.addScriptTag({ url: "/dist/aellux.js" });
-  await page.evaluate(() => { AelluxJs.ext("anchor"); AelluxJs.init({ mode: "basic" }); });
+  await page.evaluate(() => { AelluxJs.ext("anchor", { loadStyle: true }); AelluxJs.init({ mode: "basic" }); });
   await expect.poll(() => page.evaluate(() => !!AelluxJs.ext.anchor?.initialized)).toBe(true);
   await page.evaluate(() => AelluxJs.mount(document, "anchor"));
   await expect(page.locator("#indicator")).not.toHaveClass(/ae--anchored/);
@@ -396,7 +396,7 @@ test("class and style visibility changes reactivate the resolved target without 
   await aligned(page, "a");
 });
 
-test("external-only CSP blocks both owned style blocks; lifecycle remains idempotent", async ({ page }) => {
+test("external-only CSP permits Anchor CSS and lifecycle remains idempotent", async ({ page }) => {
   await page.addInitScript(() => {
     window.styleViolations = [];
     document.addEventListener("securitypolicyviolation", event => {
@@ -408,16 +408,16 @@ test("external-only CSP blocks both owned style blocks; lifecycle remains idempo
     body: '<!doctype html><div style="position:relative"><div id="indicator" data-ae-anchor="bottom-left:top-left" data-ae-anchor-match="width"></div></div><script src="/dist/aellux.js"></script>'
   }));
   await page.goto("/tests/csp-audit.htm");
-  await page.evaluate(() => { AelluxJs.ext("anchor"); AelluxJs.init({ mode: "basic" }); });
+  await page.evaluate(() => { AelluxJs.ext("anchor", { loadStyle: true }); AelluxJs.init({ mode: "basic" }); });
   await expect.poll(() => page.evaluate(() => !!AelluxJs.ext.anchor?.initialized)).toBe(true);
-  await expect.poll(() => page.evaluate(() => window.styleViolations.filter(uri => uri === "inline").length)).toBeGreaterThanOrEqual(2);
-  expect(await page.locator("[data-ae-anchor-style]").evaluate(style => style.sheet === null)).toBe(true);
+  await expect.poll(() => page.evaluate(() => window.styleViolations.filter(uri => uri === "inline").length)).toBeGreaterThanOrEqual(1);
+  expect(await page.locator('link[data-ae-ext-style="anchor"]').evaluate(style => style.sheet !== null)).toBe(true);
   await page.evaluate(async () => {
     await AelluxJs.mount(document, "anchor");
     await AelluxJs.unmount(document.getElementById("indicator"), "anchor");
     await AelluxJs.mount(document, "anchor");
   });
-  await expect(page.locator("[data-ae-anchor-style]")).toHaveCount(1);
+  await expect(page.locator('link[data-ae-ext-style="anchor"]')).toHaveCount(1);
   await page.evaluate(() => AelluxJs.destroy());
-  await expect(page.locator("[data-ae-anchor-style]")).toHaveCount(0);
+  await expect(page.locator('link[data-ae-ext-style="anchor"]')).toHaveCount(0);
 });

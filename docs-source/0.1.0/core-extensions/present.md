@@ -1,6 +1,6 @@
 # Present Extension
 
-`present` controls the visibility of elements marked with `data-ae-present`. It is included in the `full` runtime, which automatically requests its generated stylesheet. In `basic` mode, register the script and stylesheet with `$ae.ext("present", { loadStyle: true })`.
+`present` controls the visibility of elements marked with `data-ae-present`. It is included in the `full` runtime, with CSS supplied by the shared Full stylesheet. In `basic` mode, register the script and stylesheet with `$ae.ext("present", { loadStyle: true })`.
 
 ## Accessibility profile
 

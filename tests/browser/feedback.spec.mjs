@@ -29,7 +29,7 @@ test("feedback boundaries update text, filter types, and load standard motion st
       boundaryClass: section.classList.contains("ae--feedback-error"),
       messageClass: message.classList.contains("ae--feedback-error"),
       motionClass: field.classList.contains("ae--feedback-motion-shake"),
-      styleLoaded: Boolean(document.querySelector('link[data-ae-ext-style="feedback"]'))
+      styleLoaded: Boolean(document.querySelector('link[data-ae-full-style]'))
     };
   });
   expect(result).toEqual({

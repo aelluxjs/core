@@ -10,7 +10,7 @@ async function start(page, html = markup(), options = {}) {
   await page.addScriptTag({ url: "/dist/aellux.js" });
   await page.evaluate(({ html, options }) => {
     document.body.innerHTML = '<style>.wrap{white-space:normal}</style>' + html;
-    if (options.mode === "basic") AelluxJs.ext("overflow-marquee");
+    if (options.mode === "basic") AelluxJs.ext("overflow-marquee", { loadStyle: true });
     AelluxJs.init({ mode: "full", ...options });
   }, { html, options });
   await expect.poll(() => page.evaluate(() => AelluxJs.ext.overflowMarquee?.initialized)).toBe(true);
@@ -22,7 +22,9 @@ async function start(page, html = markup(), options = {}) {
 for (const mode of ["basic", "full"]) for (const forceLegacy of [false, true]) {
   test(`marquee mounts from its attribute and jumps back after a linear pass (${mode}, legacy=${forceLegacy})`, async ({ page }) => {
     const requests = [];
-    page.on("request", request => { if (request.url().includes("aellux.ext.overflow-marquee")) requests.push(request.url()); });
+    page.on("request", request => {
+      if (request.resourceType() === "script" && request.url().includes("aellux.ext.overflow-marquee")) requests.push(request.url());
+    });
     await start(page, markup(), { mode, forceLegacy });
     expect(requests).toHaveLength(1);
     expect(requests[0]).toContain(forceLegacy ? "aellux.ext.overflow-marquee.legacy.js" : "aellux.ext.overflow-marquee.js");
@@ -158,7 +160,7 @@ test("Anchor alone does not mount marquees and Full keeps the dedicated extensio
   await page.addScriptTag({ url: "/dist/aellux.js" });
   await page.evaluate(html => {
     document.body.innerHTML = html;
-    AelluxJs.ext("anchor");
+    AelluxJs.ext("anchor", { loadStyle: true });
     AelluxJs.init({ mode: "basic" });
   }, markup());
   await expect.poll(() => page.evaluate(() => AelluxJs.ext.anchor?.initialized)).toBe(true);
@@ -178,9 +180,9 @@ test("Anchor alone does not mount marquees and Full keeps the dedicated extensio
   expect(await page.evaluate(() => !!AelluxJs.ext.overflowMarquee?.initialized)).toBe(false);
 });
 
-test("destroy releases the dedicated stylesheet, wrappers and both placement lifecycles", async ({ page }) => {
+test("destroy releases wrappers and placements while retaining the shared Full stylesheet", async ({ page }) => {
   await start(page);
-  await expect(page.locator("style[data-ae-overflow-marquee-style]")).toHaveCount(1);
+  await expect(page.locator("link[data-ae-full-style]")).toHaveCount(1);
   await page.evaluate(() => AelluxJs.destroy());
   await expect(page.locator("[data-ae-overflow-marquee-content]")).toHaveCount(0);
   await expect(page.locator("style[data-ae-overflow-marquee-style]")).toHaveCount(0);

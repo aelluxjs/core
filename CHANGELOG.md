@@ -6,6 +6,7 @@ All notable changes to aellux.js will be documented in this file.
 
 ### Added
 
+- Development diagnostics identify competing transform writers (`2033`) from actual CSS Motion effects and Present declarations on Elastic wrappers. Transformed Snap items now emit the existing `2020` warning.
 - Overflow Marquee waits for the configured delay at both ends of each pass and pauses by default during mouse hover or focus within, preserving the position and remaining endpoint delay until every pause reason clears.
 - A dedicated Overflow Marquee Extension mounts `data-ae-overflow-marquee`, initializing Anchor as its placement dependency. It owns forced single-line weak CSS, linear overflow motion with an instant reset, root reduced-motion ellipsis, and native desktop `title` tooltips. Animation starts only while visible and preserves its position and remaining delay while hidden, offscreen or in a background document. Wrapping preserves original nodes and is reversed on unmount. Full loads its separate Modern or Legacy file on demand; Basic registers only `overflow-marquee`.
 - Development diagnostics now report duplicate HTML attributes (`2032`), including discarded `class` and `style` values, with source locations and corrective suggestions. Initial document source is inspected once asynchronously; AJAX Href reuses response text before parsing, and production performs neither check.
@@ -42,6 +43,9 @@ All notable changes to aellux.js will be documented in this file.
 
 ### Changed
 
+- Raised only the affected Orchestrator and Full bundle limits for shared transform diagnostics and integration fixes; the diagnostics guide records previous limits and measured raw/gzip costs.
+- AJAX Href commits history only when the first response region is accepted for replacement; network failures, missing response regions and total unmount vetoes preserve the URL. Superseded responses cannot replace current content. Busy/progress Feedback calls use the public argument order.
+- Scrollbox Snap observes item sizes as well as its viewport so item geometry variables refresh when content resizes independently.
 - Anchor now follows a Present Group's selected member when `data-ae-anchor-target` references that group, supporting multiple independent Anchors per group. Removed the reverse `data-ae-present-group-anchor` association; migrate its reference onto each Anchor's target attribute.
 - Raised the affected Boot, Orchestrator, Full and AJAX Href bundle limits for duplicate-attribute source diagnostics; measurements and previous/current limits are documented in the diagnostics guide.
 - Present no longer registers or writes low-hardware step variables; hardware markers do not override its configured easing.

@@ -10,9 +10,9 @@ test("scrollbox exposes progress in both axes and restores styles on unmount", a
           --ae-scroll-x-progress: .4; --ae-scroll-y-progress: .7">
         <div id="content" style="width: 300px; height: 400px"></div>
       </div>`;
-    AelluxJs.ext("scrollbox");
+    AelluxJs.ext("scrollbox", { loadStyle: true });
   });
-  await page.addScriptTag({ url: "/src/aellux.ext.scrollbox.js" });
+  await page.addScriptTag({ url: "/dist/aellux.ext.scrollbox.js" });
   await page.evaluate(() => AelluxJs.init({ mode: "basic" }));
   await expect.poll(() => page.evaluate(() => AelluxJs.ext.scrollbox?.initialized)).toBe(true);
   expect(await page.evaluate(() => AelluxJs.ext.scrollboxSnap?.initialized ?? false)).toBe(false);
@@ -48,10 +48,10 @@ test("snap focus reaches content nested inside a snap item", async ({ page }) =>
       </div>
       <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
     </div>`;
-    AelluxJs.ext("scrollbox");
+    AelluxJs.ext("scrollbox", { loadStyle: true });
     AelluxJs.ext("scrollbox-snap");
   });
-  await page.addScriptTag({ url: "/src/aellux.ext.scrollbox.js" });
+  await page.addScriptTag({ url: "/dist/aellux.ext.scrollbox.js" });
   await page.addScriptTag({ url: "/src/aellux.ext.scrollbox-snap.js" });
   await page.evaluate(() => AelluxJs.init({ mode: "basic" }));
   await expect.poll(() => page.evaluate(() => AelluxJs.ext.scrollbox?.initialized)).toBe(true);
@@ -69,10 +69,10 @@ test("native touch drag rejects programmatic snap navigation", async ({ page }) 
       <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
       <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
     </div>`;
-    AelluxJs.ext("scrollbox");
+    AelluxJs.ext("scrollbox", { loadStyle: true });
     AelluxJs.ext("scrollbox-snap");
   });
-  await page.addScriptTag({ url: "/src/aellux.ext.scrollbox.js" });
+  await page.addScriptTag({ url: "/dist/aellux.ext.scrollbox.js" });
   await page.addScriptTag({ url: "/src/aellux.ext.scrollbox-snap.js" });
   await page.evaluate(() => AelluxJs.init({ mode: "basic" }));
   await expect.poll(() => page.evaluate(() => AelluxJs.ext.scrollbox?.initialized)).toBe(true);
@@ -113,10 +113,10 @@ test("destroying Snap leaves Scrollbox scrolling and releases navigation", async
       <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
       <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
     </div>`;
-    AelluxJs.ext("scrollbox");
+    AelluxJs.ext("scrollbox", { loadStyle: true });
     AelluxJs.ext("scrollbox-snap");
   });
-  await page.addScriptTag({ url: "/src/aellux.ext.scrollbox.js" });
+  await page.addScriptTag({ url: "/dist/aellux.ext.scrollbox.js" });
   await page.addScriptTag({ url: "/src/aellux.ext.scrollbox-snap.js" });
   await page.evaluate(() => AelluxJs.init({ mode: "basic" }));
   await expect.poll(() => page.evaluate(() => AelluxJs.ext.scrollboxSnap?.initialized)).toBe(true);

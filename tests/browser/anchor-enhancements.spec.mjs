@@ -7,7 +7,7 @@ async function start(page, html, options = {}) {
   await page.evaluate(({ mode = "full", forceLegacy = false, noResizeObserver = false }) => {
     if (noResizeObserver) window.ResizeObserver = class { observe() {} disconnect() {} };
     if (mode === "basic") {
-      AelluxJs.ext("anchor");
+      AelluxJs.ext("anchor", { loadStyle: true });
       if (document.querySelector("[data-ae-present-group]")) AelluxJs.ext("present", { loadStyle: true });
     }
     AelluxJs.init({ mode, forceLegacy });
@@ -372,7 +372,7 @@ test("Anchor loaded after Present reads the accepted selection without replaying
   await page.evaluate(() => AelluxJs.mount(document, "present"));
   await page.evaluate(async () => {
     await $ae("group").present.show("b");
-    AelluxJs.ext("anchor");
+    AelluxJs.ext("anchor", { loadStyle: true });
     await AelluxJs.mount(document, "anchor");
   });
   await expect.poll(() => page.evaluate(() => AelluxJs.ext.anchor?.initialized)).toBe(true);
@@ -409,9 +409,9 @@ test("zero duration, CSS steps easing and unmount during a switch leave no delay
   await expect(page.locator("#indicator")).not.toHaveClass(/ae--anchored|ae--anchor-switching/);
   await page.evaluate(() => AelluxJs.mount(document.getElementById("indicator"), "anchor"));
   await aligned(page, "a");
-  await expect(page.locator("[data-ae-anchor-style]")).toHaveCount(1);
+  await expect(page.locator("link[data-ae-full-style]")).toHaveCount(1);
   await page.evaluate(() => AelluxJs.destroy());
-  await expect(page.locator("[data-ae-anchor-style]")).toHaveCount(0);
+  await expect(page.locator("link[data-ae-full-style]")).toHaveCount(1);
 });
 
 test("matching rejects an in-flow Anchor before a containing layout can feed back", async ({ page }) => {

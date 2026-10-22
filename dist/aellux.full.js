@@ -27,7 +27,7 @@
   var define_AELLUX_OFFICIAL_EXTENSION_MANIFEST_default;
   var init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST = __esm({
     "<define:__AELLUX_OFFICIAL_EXTENSION_MANIFEST__>"() {
-      define_AELLUX_OFFICIAL_EXTENSION_MANIFEST_default = { schemaVersion: 1, coreVersion: "0.1.0-beta.10", extensions: { preference: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.preference.min.js", integrity: "sha384-mSOgb0DekFTRXXZAgyNrPjamdlSqzL4SSGZYVWgVg+WlG+pBj11xT81v/6Xk43yO", regular: { url: "./aellux.ext.preference.js", integrity: "sha384-MlikpdHSzHzF6kz5+oJGtq3eoFsKTsx/g+FTrf+dFOU8iQGHsCpn4fP1jLlbNrj7" } }, legacy: { url: "./aellux.ext.preference.legacy.min.js", integrity: "sha384-1LMsK0W9J/PoM4tXhFgkYLRY4yWdzVoYmFy4OMDGd8lRdtptKoEb1sI9L1kzNaBu", regular: { url: "./aellux.ext.preference.legacy.js", integrity: "sha384-pozuz43OyfXrnkmuBu6KTM2lqRSqcI5LMgwAtqnzXq8xZGdVqpnmOtrBcYcMskWk" } } }, dependencies: [] }, "state-navigation": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.state-navigation.min.js", integrity: "sha384-wAbgAqjAA6wauuG+iuUtfRwxChd6fTJ0fS22fqnu2r00kouoXJWZ0f7AoTYlqBC6", regular: { url: "./aellux.ext.state-navigation.js", integrity: "sha384-PKJ8HTD7eIYDEg2hOaAJjpMYzLr2fBjBRGmIGG7XzGTzVK0yTjt5HYPO55VbWfdS" } }, legacy: { url: "./aellux.ext.state-navigation.legacy.min.js", integrity: "sha384-YkhfU15Mpk8KiO6TyoVU6z1yCiYWwnsOGE0xVaQ8NrE7IGrxOSUL005g5JeUDdJu", regular: { url: "./aellux.ext.state-navigation.legacy.js", integrity: "sha384-kaEUY0Zpw8K6pcwjm+INA5feXftLK2/N1aFpPr2LCTcetX2uoe2GGd1MJyy7u8rZ" } } }, dependencies: [] }, feedback: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.feedback.min.js", integrity: "sha384-3VP3W84ekK4MIVBQuy5+5P3bGrwOj7bBDfJnjyexZ+yDADf1jQoHEpP2J1OMUgod", regular: { url: "./aellux.ext.feedback.js", integrity: "sha384-RrPf0bRGxf68f/Rjas5MF5zC1GAubWyndCcuiYbgZsPSHGLFsQtQaUgeFX4SQz+h" } }, legacy: { url: "./aellux.ext.feedback.legacy.min.js", integrity: "sha384-zXuZEv63sd3fwaAygmyk9KazQ46KOelsvAtM+0vJ7phDwemVh1FhOjAcbhWVQM/N", regular: { url: "./aellux.ext.feedback.legacy.js", integrity: "sha384-UW1JZ1+liVWV/w3PJdhfIMztOU7zyTw/1rOyyxoxj4YJIHb1xFl8U0xeIBh8jYV7" } } }, dependencies: [], style: { url: "./aellux.ext.feedback.min.css", integrity: "sha384-OBguCYqF+dMD0Pl84C3FlY/+ohUGfW0OyynmXb/PSDEGOyuI/TQJ3EZAoCeJx+Jk", regular: { url: "./aellux.ext.feedback.css", integrity: "sha384-yk4cW+r/Mc1FRS1ZauBHC6KsKb7sxuJ0E9mmt/+AYASAdZXXMK6iuFBR+TOEh/r4" } } }, focus: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.focus.min.js", integrity: "sha384-AXpUv/Ur2Z4cKvO9EqIFqfxxdSQR5j75q0okOAWPvHhSneQ5LPjrOzk6Sl9MOo4a", regular: { url: "./aellux.ext.focus.js", integrity: "sha384-VjQzcnhLRrvRlbVQ0X4/tO0+8gqJXAmIFoeIVimjOud1wRNuBXNnSQHHW9XQPzTe" } }, legacy: { url: "./aellux.ext.focus.legacy.min.js", integrity: "sha384-I5QpUmKsA1T8NiKfKXQgbdG19Ld1ZGCWSmosygO3yGj43tdxp5zCfLyfBuFoHlKu", regular: { url: "./aellux.ext.focus.legacy.js", integrity: "sha384-5/y3J1NC/qMyV9myEj29+wGbqCVI8ICPafSebtJVfl15Qmup6vMiJzveShd3CLnw" } } }, dependencies: [] }, point: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.point.min.js", integrity: "sha384-n540II5oWbHJRt/a8i+Rgb9A3b9dm7hamg1kd3Nz7KdPQDcaa8S823t9fCrgxBWF", regular: { url: "./aellux.ext.point.js", integrity: "sha384-aDj7I5QEH/0+52E3e6yPZ/D0MEsNBdxeET3G5ToVvgczHtksMh3p8S/KOoAapRRN" } }, legacy: { url: "./aellux.ext.point.legacy.min.js", integrity: "sha384-5UmWvQHfmvttz9yeXbilawGCZH20UdR8yNBOE9kRV34wpfWASl8plzgKtLVQGO9M", regular: { url: "./aellux.ext.point.legacy.js", integrity: "sha384-gG/XONYEC1tchBcJ6bUtKYmWFHz0E+50LmMaXDAiqWBKPuwdHZeYm1uXA22lMZuN" } } }, dependencies: [] }, anchor: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.anchor.min.js", integrity: "sha384-THCWnysyORP8ISwVh+Yc6uMN0NlIxC0WtIZ/qF5yTbhInc+hRT9mEkvmmL+cg+Ur", regular: { url: "./aellux.ext.anchor.js", integrity: "sha384-s9ORVuYisV71knncKu9bMJnSA3VHuHsIS6pXbq2f41cTNAZGFDQuT6vlt0qoaD8R" } }, legacy: { url: "./aellux.ext.anchor.legacy.min.js", integrity: "sha384-mg7cFWfbuqqRSIms52+WekWGKmrUOet3rOX9mS6oLzCiS+nf46bAAVUwWzXJbKAu", regular: { url: "./aellux.ext.anchor.legacy.js", integrity: "sha384-B0n+FimvIoRLyVrirHFSvBcqwaugQOnv93k23/6lFfKuFCcso0YW7JhQ920v4Zmb" } } }, dependencies: [] }, "overflow-marquee": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.overflow-marquee.min.js", integrity: "sha384-k4Fi/6rWlMkzTe4WjvC4OsFCY0nOvdM0ufwOyF85InNyEPrHKtMjKsRIajPre9z8", regular: { url: "./aellux.ext.overflow-marquee.js", integrity: "sha384-/ZrMQa7jt1RVcT3jXhBB5O1hcjvJArca+xbVS6wtMDVdLrY8u0oDotlq52Sh2t/n" } }, legacy: { url: "./aellux.ext.overflow-marquee.legacy.min.js", integrity: "sha384-JcxKQFJE6abVU/qtP25j7IcbdIunsFBJ1Jw6gHEb12VPJKPswm+xkXT/B0z7OiP6", regular: { url: "./aellux.ext.overflow-marquee.legacy.js", integrity: "sha384-KlqUfl5YdsyA36c5ZEQKLcZO43kfyLmycuLdsQ6Dd1+sv0qzGg1HhRXcFYc/9Pet" } } }, dependencies: [] }, "ajax-href": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.ajax-href.min.js", integrity: "sha384-5bXxuklqmUnxKorhVuhIw/EfJIT0z55pvKIQtbDEaNvjl5cMku8f/faGNBVYsuyu", regular: { url: "./aellux.ext.ajax-href.js", integrity: "sha384-4vJnfttGluarmVygTLViyu1NmXXg0fU729Ray1tvgApz+/G2zgCSu7pcw5YxEcR4" } }, legacy: { url: "./aellux.ext.ajax-href.legacy.min.js", integrity: "sha384-HxGsZa3tsy0v7Ow1antMf85v7O718RcOuO4zJ4/lTRZgY+7SdXfdYfbcOR7PFnlG", regular: { url: "./aellux.ext.ajax-href.legacy.js", integrity: "sha384-XNg/4wQcESX2cmMmdYRBS53xonuwuOh18Wkvqrofr2S8MYSVt/VOM49sxjgnDXfI" } } }, dependencies: [] }, scrollbox: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.scrollbox.min.js", integrity: "sha384-1TqqZT+ulF8e4U8Uttxk+ZXd3gXG6FB5mMXiOiDzJfJulzbWHlcX77dj9jidNUmA", regular: { url: "./aellux.ext.scrollbox.js", integrity: "sha384-S5Z3YWg+j/ZNEX3RqxHFSWEi3uPFKa/erx6XPOJRv6lJNcPGV9wtQaxAuF6fr0Qw" } }, legacy: { url: "./aellux.ext.scrollbox.legacy.min.js", integrity: "sha384-/sQKFIT8u/TAUe+WV4tpu3GOqH+EbUvzOeuko37R9FcL/QFEjYiGT4rzYtJ9fF5g", regular: { url: "./aellux.ext.scrollbox.legacy.js", integrity: "sha384-wIM7v+QbvDB0bXfgUVwT9VS9HqZCEukunJKaDCAUy4wy5P3+i1u8NpEMVXfbkhFy" } } }, dependencies: [] }, "scrollbox-snap": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.scrollbox-snap.min.js", integrity: "sha384-YNetWDUuxONIR41ykMQTu59vXnqcGmN070vqt2gHZxykQM8xVGRgOo4uUjTThbFb", regular: { url: "./aellux.ext.scrollbox-snap.js", integrity: "sha384-KmPblbbcz4OHkc0KTFYw/yuBelRxSL16pDVnLX/7jkb/xGBqPHWFP4x6GFQRIfHx" } }, legacy: { url: "./aellux.ext.scrollbox-snap.legacy.min.js", integrity: "sha384-Kbt2Fjswspgzzeop7aZZ3VYnUmaShTNswZmigPzvNNb4gxb2T6JfL8clidd58EVb", regular: { url: "./aellux.ext.scrollbox-snap.legacy.js", integrity: "sha384-rIlhaybqhGrNHSUVG6vphjZr1IJKF0lNxbYuVOeTvJSOOjTRYzRovU4rArLjJw8q" } } }, dependencies: [] }, adaptive: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.adaptive.min.js", integrity: "sha384-bkeOnTW/3uzbuhLc8fujaWnWGC+pwNAkZwci9M09paKqudp0v/flMrJ49JXw16vv", regular: { url: "./aellux.ext.adaptive.js", integrity: "sha384-Qzf9wU6DSSaaE+8lr96vnYqjKQqYxep8dhCZmjgNdqreuk9fL3qKMn3NW7DGAEaT" } }, legacy: { url: "./aellux.ext.adaptive.legacy.min.js", integrity: "sha384-YVHHWZOvf+65r/CU89nBPZXhj3j5sn4r2ho+CNUCUaYs1WE6pWIeypcq7n5OCBor", regular: { url: "./aellux.ext.adaptive.legacy.js", integrity: "sha384-gBkxqbBpIqdj5ozJm/NsenI/yKOvEGarZBl2SrPjYiiYx6cez2/FGTMf5XyzHrTj" } } }, dependencies: [], style: { url: "./aellux.ext.adaptive.min.css", integrity: "sha384-8yUP1PStfDqBCyCskP3k9WLIKgv/yl1nyDhmPz7hsX5NZ4z3ZT3ajolA+RhYlUiG", regular: { url: "./aellux.ext.adaptive.css", integrity: "sha384-HfIjX9Zk0VFRimzPvUaTS5AtwuHJHjXKoM/xbNJXj5vE7bSdBGEzbrBHfbNmYah0" } } }, present: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.present.min.js", integrity: "sha384-r5gp1UJBrpL0tDIxdeomlY5UonXajSNPciSisOhy/Jyc23nABumiW2S3egSlp28P", regular: { url: "./aellux.ext.present.js", integrity: "sha384-QwoLlKPJR0csxH5duVsBHvd+VRqWHhKFYgRmXguuDLwK7/9TlowP67EjujnVukki" } }, legacy: { url: "./aellux.ext.present.legacy.min.js", integrity: "sha384-lZO5NbKqOgRSzOh/vFH9dXYrEX/YxznD3gcm44aUcrnU7i9CWq9vlwfPBfWmGLb5", regular: { url: "./aellux.ext.present.legacy.js", integrity: "sha384-2ldc5jAnTWyBMAatErdjr2VadqKqg25M2jnsvuNl78PRGYUbnnuHY8ebsjbHhSv9" } } }, dependencies: [], style: { url: "./aellux.ext.present.min.css", integrity: "sha384-2QoNgFTu/KOOrgaTKZV4VXCoIaU2h5PMPILW5LHseXK2ygNpF6miOfxZUwkTBgPY", regular: { url: "./aellux.ext.present.css", integrity: "sha384-uZ/OPZK9sRFcaejKJHrc0wPaPXFKeGS+pBWWbkMEe3+3M6zLEa7nBc/cD0Tejsmr" } } } } };
+      define_AELLUX_OFFICIAL_EXTENSION_MANIFEST_default = { schemaVersion: 1, coreVersion: "0.1.0-beta.10", extensions: { preference: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.preference.min.js", integrity: "sha384-mSOgb0DekFTRXXZAgyNrPjamdlSqzL4SSGZYVWgVg+WlG+pBj11xT81v/6Xk43yO", regular: { url: "./aellux.ext.preference.js", integrity: "sha384-MlikpdHSzHzF6kz5+oJGtq3eoFsKTsx/g+FTrf+dFOU8iQGHsCpn4fP1jLlbNrj7" } }, legacy: { url: "./aellux.ext.preference.legacy.min.js", integrity: "sha384-1LMsK0W9J/PoM4tXhFgkYLRY4yWdzVoYmFy4OMDGd8lRdtptKoEb1sI9L1kzNaBu", regular: { url: "./aellux.ext.preference.legacy.js", integrity: "sha384-pozuz43OyfXrnkmuBu6KTM2lqRSqcI5LMgwAtqnzXq8xZGdVqpnmOtrBcYcMskWk" } } }, dependencies: [] }, "state-navigation": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.state-navigation.min.js", integrity: "sha384-wAbgAqjAA6wauuG+iuUtfRwxChd6fTJ0fS22fqnu2r00kouoXJWZ0f7AoTYlqBC6", regular: { url: "./aellux.ext.state-navigation.js", integrity: "sha384-PKJ8HTD7eIYDEg2hOaAJjpMYzLr2fBjBRGmIGG7XzGTzVK0yTjt5HYPO55VbWfdS" } }, legacy: { url: "./aellux.ext.state-navigation.legacy.min.js", integrity: "sha384-YkhfU15Mpk8KiO6TyoVU6z1yCiYWwnsOGE0xVaQ8NrE7IGrxOSUL005g5JeUDdJu", regular: { url: "./aellux.ext.state-navigation.legacy.js", integrity: "sha384-kaEUY0Zpw8K6pcwjm+INA5feXftLK2/N1aFpPr2LCTcetX2uoe2GGd1MJyy7u8rZ" } } }, dependencies: [] }, feedback: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.feedback.min.js", integrity: "sha384-oHAcvQwCs/v3ktzXoNdJEDEkaV6NI29MjzjF068Lw0oL9NwVP5THnxzb12f0ySkY", regular: { url: "./aellux.ext.feedback.js", integrity: "sha384-dGcxHfGyV544C6livNJKKrlNWky/fBFkMONowmtlhHZ5exWL8AJOoV40jJhZW6Iq" } }, legacy: { url: "./aellux.ext.feedback.legacy.min.js", integrity: "sha384-S31Sa8B4kbKL/xsEJ3QTTikO+AjuXSc9GXBzNw8kl/b2amk5tzqgQNNKQPfGnYdF", regular: { url: "./aellux.ext.feedback.legacy.js", integrity: "sha384-sy2QmY3L1TlvGPgdebeu5q9ZJl/bOeUstWE0Cu+QJUIYWSF9y1YH6mCpe09/eKrd" } } }, dependencies: [], style: { url: "./aellux.ext.feedback.min.css", integrity: "sha384-OBguCYqF+dMD0Pl84C3FlY/+ohUGfW0OyynmXb/PSDEGOyuI/TQJ3EZAoCeJx+Jk", regular: { url: "./aellux.ext.feedback.css", integrity: "sha384-yk4cW+r/Mc1FRS1ZauBHC6KsKb7sxuJ0E9mmt/+AYASAdZXXMK6iuFBR+TOEh/r4" } } }, focus: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.focus.min.js", integrity: "sha384-AXpUv/Ur2Z4cKvO9EqIFqfxxdSQR5j75q0okOAWPvHhSneQ5LPjrOzk6Sl9MOo4a", regular: { url: "./aellux.ext.focus.js", integrity: "sha384-VjQzcnhLRrvRlbVQ0X4/tO0+8gqJXAmIFoeIVimjOud1wRNuBXNnSQHHW9XQPzTe" } }, legacy: { url: "./aellux.ext.focus.legacy.min.js", integrity: "sha384-I5QpUmKsA1T8NiKfKXQgbdG19Ld1ZGCWSmosygO3yGj43tdxp5zCfLyfBuFoHlKu", regular: { url: "./aellux.ext.focus.legacy.js", integrity: "sha384-5/y3J1NC/qMyV9myEj29+wGbqCVI8ICPafSebtJVfl15Qmup6vMiJzveShd3CLnw" } } }, dependencies: [] }, point: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.point.min.js", integrity: "sha384-n540II5oWbHJRt/a8i+Rgb9A3b9dm7hamg1kd3Nz7KdPQDcaa8S823t9fCrgxBWF", regular: { url: "./aellux.ext.point.js", integrity: "sha384-aDj7I5QEH/0+52E3e6yPZ/D0MEsNBdxeET3G5ToVvgczHtksMh3p8S/KOoAapRRN" } }, legacy: { url: "./aellux.ext.point.legacy.min.js", integrity: "sha384-5UmWvQHfmvttz9yeXbilawGCZH20UdR8yNBOE9kRV34wpfWASl8plzgKtLVQGO9M", regular: { url: "./aellux.ext.point.legacy.js", integrity: "sha384-gG/XONYEC1tchBcJ6bUtKYmWFHz0E+50LmMaXDAiqWBKPuwdHZeYm1uXA22lMZuN" } } }, dependencies: [] }, anchor: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.anchor.min.js", integrity: "sha384-vpHUGJwyY3qnW78C6Yo8CLc2vgbn1KJ8FcOtQawBtCKarQ0CoihuNQ7ZCKnMbOjx", regular: { url: "./aellux.ext.anchor.js", integrity: "sha384-LaYGJ6p9H5QBGJf5j19wHgT+CFcMim2h0Ro+itxYnLkIE29RFtPdj8P8L9EYWAWr" } }, legacy: { url: "./aellux.ext.anchor.legacy.min.js", integrity: "sha384-Ym0BnY5sDflVI4JyPVWymZKurBcJTAbPNe2gy+6qHcD7x6RyIKwvff6o+6BfeZDy", regular: { url: "./aellux.ext.anchor.legacy.js", integrity: "sha384-bN9t1anpKLUDUvnbE845H1+9UvP+XDfrsN5AhrKLUQJ5fm3YcFqiylDNFuE02RlJ" } } }, dependencies: [], style: { url: "./aellux.ext.anchor.min.css", integrity: "sha384-DwxfMH5mNSvmF0U4/dgL6dbe+5U1x97y2H4skxW7nUUzjr99IXNl9aVDwRjfvNGz", regular: { url: "./aellux.ext.anchor.css", integrity: "sha384-tHVCjTT3bvlmkAIDfMyevvrkAB7crjBXQAfY1l8XcaWhBFSersWJk+JndC6Bd9mO" } } }, "overflow-marquee": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.overflow-marquee.min.js", integrity: "sha384-EUZO28afWnFc6O49cABa3rPbKZdDpt1qf7STLiI6pNi3lIY+2bwRQRzU3cZ6AK+u", regular: { url: "./aellux.ext.overflow-marquee.js", integrity: "sha384-qBC4/o78des4U3qldDyUAerX5x6jT7cudmsuArw0caNMu7tF+kjhg/WdD44qbh6p" } }, legacy: { url: "./aellux.ext.overflow-marquee.legacy.min.js", integrity: "sha384-ceZW+Z6XzECKkRUbAPt6pJ50JmbCwaAN1l5JN65Yj+2WOEov43bKUQ6pB5XpAz3k", regular: { url: "./aellux.ext.overflow-marquee.legacy.js", integrity: "sha384-HyHNSpTOh9IvFhnjPqNoVfnZ7suRqWq5Cby+Oem4gRUiSY+/tXhSc4nO7JP94QfM" } } }, dependencies: [], style: { url: "./aellux.ext.overflow-marquee.min.css", integrity: "sha384-227/o3V6WqWkOwwlcZPWi9LjjLnbP102GcrmuRFMcA5LRvDjuuW0GgFmOr9a6CLq", regular: { url: "./aellux.ext.overflow-marquee.css", integrity: "sha384-n7NbmKXeKb6tdUwdw/4hJUFbZfKKpgbuLed9qONT1wpVK/em6yYoj+CfSbl+Z5XS" } } }, "ajax-href": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.ajax-href.min.js", integrity: "sha384-jxDsnmMvHrnNfxntbkGWVFZauZaNnECbBsM5DiEgdwcectCoWx116N2+IaUL6IDH", regular: { url: "./aellux.ext.ajax-href.js", integrity: "sha384-RB1GUnt5XN82+aPHz/j5vimLS+3Mm6+0fWgjCRsmqq+rpMvnVQf38lpcQmxTIz21" } }, legacy: { url: "./aellux.ext.ajax-href.legacy.min.js", integrity: "sha384-kQPEKITjFVakYS6iYflvWQVHVmzs/cA7OY63LPmlmOYsbccWL3ChgEdACFz61Eti", regular: { url: "./aellux.ext.ajax-href.legacy.js", integrity: "sha384-jkSfdZKloRimQ/ySale8mwkfxx1I/sWD5EhMcKA3epR2C4QCtiGmgp4+SEq5rtDd" } } }, dependencies: [] }, scrollbox: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.scrollbox.min.js", integrity: "sha384-1TqqZT+ulF8e4U8Uttxk+ZXd3gXG6FB5mMXiOiDzJfJulzbWHlcX77dj9jidNUmA", regular: { url: "./aellux.ext.scrollbox.js", integrity: "sha384-S5Z3YWg+j/ZNEX3RqxHFSWEi3uPFKa/erx6XPOJRv6lJNcPGV9wtQaxAuF6fr0Qw" } }, legacy: { url: "./aellux.ext.scrollbox.legacy.min.js", integrity: "sha384-/sQKFIT8u/TAUe+WV4tpu3GOqH+EbUvzOeuko37R9FcL/QFEjYiGT4rzYtJ9fF5g", regular: { url: "./aellux.ext.scrollbox.legacy.js", integrity: "sha384-wIM7v+QbvDB0bXfgUVwT9VS9HqZCEukunJKaDCAUy4wy5P3+i1u8NpEMVXfbkhFy" } } }, dependencies: [], style: { url: "./aellux.ext.scrollbox.min.css", integrity: "sha384-JHqaS1bOe84ly3LSDcK68GJr8/CabByFgMeEPYHeawHtw4bMikkrsC+FCFKdrdJ6", regular: { url: "./aellux.ext.scrollbox.css", integrity: "sha384-tB8nUfKwRJ+GsVpAukiNgHcr7rEeXqxdnrQdZLpy4RnqPTXhArJ5AlLJu/1yel8K" } } }, "scrollbox-snap": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.scrollbox-snap.min.js", integrity: "sha384-NNIBI4kj4sdGSI+XDs2LeBrjdo7AAN4eVtQeyAGScLBvxkZEFx3OaT9xpaW4b4Wq", regular: { url: "./aellux.ext.scrollbox-snap.js", integrity: "sha384-gmMGaW0wvR61QynjfBKga6/+7NMAWzk6ALIYmMC0hy9gkSvCrvKXueA+ETEgM9wB" } }, legacy: { url: "./aellux.ext.scrollbox-snap.legacy.min.js", integrity: "sha384-a35oytvnpf0myg+Brd+mFDgQBcbNaihANZl5J+GmrEqlyDl8CDQy0OZyu5Ld3l64", regular: { url: "./aellux.ext.scrollbox-snap.legacy.js", integrity: "sha384-9hE1HNRl9mFvr5aLiaRNZSQsTBb1XoicM6xGqeuISTS6OqL1sZm6DlmY6qxcQJk+" } } }, dependencies: [] }, adaptive: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.adaptive.min.js", integrity: "sha384-bkeOnTW/3uzbuhLc8fujaWnWGC+pwNAkZwci9M09paKqudp0v/flMrJ49JXw16vv", regular: { url: "./aellux.ext.adaptive.js", integrity: "sha384-Qzf9wU6DSSaaE+8lr96vnYqjKQqYxep8dhCZmjgNdqreuk9fL3qKMn3NW7DGAEaT" } }, legacy: { url: "./aellux.ext.adaptive.legacy.min.js", integrity: "sha384-YVHHWZOvf+65r/CU89nBPZXhj3j5sn4r2ho+CNUCUaYs1WE6pWIeypcq7n5OCBor", regular: { url: "./aellux.ext.adaptive.legacy.js", integrity: "sha384-gBkxqbBpIqdj5ozJm/NsenI/yKOvEGarZBl2SrPjYiiYx6cez2/FGTMf5XyzHrTj" } } }, dependencies: [], style: { url: "./aellux.ext.adaptive.min.css", integrity: "sha384-8yUP1PStfDqBCyCskP3k9WLIKgv/yl1nyDhmPz7hsX5NZ4z3ZT3ajolA+RhYlUiG", regular: { url: "./aellux.ext.adaptive.css", integrity: "sha384-HfIjX9Zk0VFRimzPvUaTS5AtwuHJHjXKoM/xbNJXj5vE7bSdBGEzbrBHfbNmYah0" } } }, present: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.present.min.js", integrity: "sha384-EIaNqaLi7JHQ2RXOI6kX70LbsXAxcf2EgFoCkbs6m6SmIkvSyueWneyt0al0eymR", regular: { url: "./aellux.ext.present.js", integrity: "sha384-fAf7M1Hv8zdfUOFwdiii5rZC8pkEuOJDbskWXzVWe7Y0Tj0hEGctYMmzEZpKsfny" } }, legacy: { url: "./aellux.ext.present.legacy.min.js", integrity: "sha384-C4SfaexHaP88DdRQ2Nliq+HFljay9nkOxjMMQwh6mXRQsPwMb4Pm9TIwe1IpVUPm", regular: { url: "./aellux.ext.present.legacy.js", integrity: "sha384-NWJMHfgYAytfDxWS6e4l6NkrLKrLcJcvtuvzO8pCi5GrOFB5RsY+wspG8seVp0Mf" } } }, dependencies: [], style: { url: "./aellux.ext.present.min.css", integrity: "sha384-2QoNgFTu/KOOrgaTKZV4VXCoIaU2h5PMPILW5LHseXK2ygNpF6miOfxZUwkTBgPY", regular: { url: "./aellux.ext.present.css", integrity: "sha384-uZ/OPZK9sRFcaejKJHrc0wPaPXFKeGS+pBWWbkMEe3+3M6zLEa7nBc/cD0Tejsmr" } } } } };
     }
   });
 
@@ -783,6 +783,7 @@
               motionOperations.set(transformElement, operation);
               const advancedEase = root2.getComputedStyle(transformElement).getPropertyValue("--ae-feedback-aellux-ease").trim() || void 0;
               AelluxJs2.motion.run(transformElement, {
+                extension: extensionName,
                 id,
                 apply: () => transformElement.classList.add(motionClass),
                 easing: advancedEase,
@@ -1372,30 +1373,8 @@
         const placementMaps = /* @__PURE__ */ new Set();
         let nextLayoutId = 2e6;
         let mutations = null;
-        let weakStyle = null;
         AelluxJs2.extAttach(extensionName, { init, destroy, createPlacementMap });
         function init() {
-          weakStyle = document.createElement("style");
-          weakStyle.setAttribute(AelluxJs2.attr("anchor-style"), "");
-          weakStyle.textContent = `
-      :where([${attribute}][${matchAttribute}~="width"]) {
-        width:var(--ae-anchor-target-width,0px);box-sizing:border-box;
-      }
-      :where([${attribute}][${matchAttribute}~="height"]) {
-        height:var(--ae-anchor-target-height,0px);box-sizing:border-box;
-      }
-      :where([${attribute}][${matchAttribute}].${anchoredClass}) {
-        transform:translate3d(var(--ae-anchor-pivot-x),var(--ae-anchor-pivot-y),0)
-          translate(calc(0% - var(--ae-anchor-origin-x)),calc(0% - var(--ae-anchor-origin-y)));
-      }
-      :where([${attribute}].${switchingClass}) {
-        transition-property:transform,width,height;
-        transition-duration:var(--ae-anchor-switch-duration,0ms);
-        transition-timing-function:var(--ae-anchor-switch-ease,ease-in-out);transition-delay:0s;
-      }
-      :where(html[${AelluxJs2.attr("reduced-motion")}="reduced"] [${attribute}].${switchingClass}) {transition:none;}
-    `.replace(/\s*([{};:,])\s*/g, "$1").replace(/;}/g, "}").trim();
-          document.head.appendChild(weakStyle);
           AelluxJs2.registerCssProperty(
             { name: "--ae-anchor-x", syntax: "<length>", initialValue: "0px" },
             { name: "--ae-anchor-y", syntax: "<length>", initialValue: "0px" },
@@ -1419,8 +1398,6 @@
           for (const map of placementMaps) map.destroy();
           await Promise.all(Array.from(anchors.keys(), unmountAnchor));
           AelluxJs2.mountManager.remove({ extensionName });
-          weakStyle == null ? void 0 : weakStyle.remove();
-          weakStyle = null;
         }
         function createPlacementMap() {
           const memories = /* @__PURE__ */ new Map();
@@ -2030,6 +2007,7 @@
           if (previousController) {
             previousController.abort();
           }
+          previousController = null;
         }
         let previousController = null;
         async function load(url, selectors, options = {}) {
@@ -2050,23 +2028,20 @@
           previousController = controller;
           elements.forEach(function(currentElement) {
             if (AelluxJs2.ext.feedback) {
-              AelluxJs2.ext.feedback.busy(currentElement, "Ajax loading", true);
-              AelluxJs2.ext.feedback.progress(currentElement, "Ajax loading", 0);
+              AelluxJs2.ext.feedback.busy("Ajax loading", currentElement, true);
+              AelluxJs2.ext.feedback.progress("Ajax loading", currentElement, 0);
             }
           });
-          if (!("ignoreHistory" in options) || !options.ignoreHistory) {
-            AelluxJs2.dispatch(
-              "PushAjaxReplace",
-              { detail: { url, selectors } }
-            );
-          }
           AelluxJs2.dispatch("AjaxHrefStart");
           try {
             const response = await AelluxJs2.request(url, { signal: controller.signal });
             const html = await response.text();
+            if (previousController !== controller) return null;
             validateHTMLSource(AelluxJs2, html, response.url || String(url));
             const loadedDocument = new DOMParser().parseFromString(html, "text/html");
+            let historyRequested = false;
             for (const selector of selectorList) {
+              if (previousController !== controller) return null;
               const currentElement = elements.get(selector);
               if (!currentElement) continue;
               const loadedElement = loadedDocument.querySelector(selector);
@@ -2074,12 +2049,17 @@
                 if (!loadedElement)
                   selectorDiagnostic(selector, "No response element matches the selector.", currentElement);
                 if (AelluxJs2.ext.feedback) {
-                  AelluxJs2.ext.feedback.busy(currentElement, "Ajax loading", false);
-                  AelluxJs2.ext.feedback.progress(currentElement, "Ajax loading", 1);
+                  AelluxJs2.ext.feedback.busy("Ajax loading", currentElement, false);
+                  AelluxJs2.ext.feedback.progress("Ajax loading", currentElement, 1);
                 }
                 continue;
               }
               const replacement = document.importNode(loadedElement, true);
+              if (previousController !== controller) return null;
+              if (!historyRequested && !options.ignoreHistory) {
+                AelluxJs2.dispatch("PushAjaxReplace", { detail: { url, selectors } });
+                historyRequested = true;
+              }
               currentElement.parentNode.replaceChild(replacement, currentElement);
               if (selector === "title") {
                 AelluxJs2.dispatch("UpdateBaseTitle", {
@@ -2088,8 +2068,8 @@
               }
               await AelluxJs2.mount(replacement);
               if (AelluxJs2.ext.feedback) {
-                AelluxJs2.ext.feedback.busy(replacement, "Ajax loaded", false);
-                AelluxJs2.ext.feedback.progress(replacement, "Ajax loaded", 1);
+                AelluxJs2.ext.feedback.busy("Ajax loaded", replacement, false);
+                AelluxJs2.ext.feedback.progress("Ajax loaded", replacement, 1);
               }
             }
             AelluxJs2.dispatch("AjaxHrefLoaded");
@@ -2098,8 +2078,8 @@
               const currentElement = elements.get(selector);
               if (!currentElement) return;
               if (AelluxJs2.ext.feedback) {
-                AelluxJs2.ext.feedback.busy(currentElement, "Ajax loading", false);
-                AelluxJs2.ext.feedback.progress(currentElement, "Ajax loading", 1);
+                AelluxJs2.ext.feedback.busy("Ajax loading", currentElement, false);
+                AelluxJs2.ext.feedback.progress("Ajax loading", currentElement, 1);
               }
             });
             AelluxJs2.dispatch("AjaxHrefError");
@@ -3048,6 +3028,7 @@
             };
             const advancedEase = root2.getComputedStyle(element).getPropertyValue(`--ae-${newDirection}-aellux-ease`.toLowerCase()).trim() || void 0;
             const motionOptions = {
+              extension: extensionName,
               id: controller.motionId,
               apply: activateTransition,
               easing: advancedEase,
@@ -4196,11 +4177,54 @@
   init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
   init_report_configuration();
   init_utils_name_case();
+
+  // src/internal/diagnose-resources.js
+  init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
+  /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+  function transformOwners(api, element) {
+    var _a, _b, _c, _d;
+    const owners = [];
+    if (((_a = api.ext.anchor) == null ? void 0 : _a.initialized) && element.classList.contains(api.className("anchored"))) owners.push("anchor");
+    const parent = element.parentElement;
+    if (((_b = api.ext.scrollbox) == null ? void 0 : _b.initialized) && element.hasAttribute(api.attr("scrollbox-elastic")) && element.getAttribute(api.attr("scrollbox-elastic")) !== "false" && (parent == null ? void 0 : parent.hasAttribute(api.attr("scrollbox")))) {
+      const children = [...parent.children].filter((child) => !child.hasAttribute(api.attr("scrollbar-vertical")) && !child.hasAttribute(api.attr("scrollbar-horizontal")));
+      if (children.length === 1) owners.push("scrollbox-elastic");
+    }
+    if (((_c = api.ext.present) == null ? void 0 : _c.initialized) && !element.hasAttribute(api.attr("anchor")) && ((_d = element.getAttribute(api.attr("present"))) == null ? void 0 : _d.split(/\s+/).includes("transform"))) owners.push("present");
+    return owners;
+  }
+  function diagnoseResource(api, element, property, writers) {
+    api.diagnostics.warn(api.diagnostics.WARN_RESOURCE_CONFLICT, {
+      extension: writers[writers.length - 1],
+      element,
+      attribute: "style",
+      property,
+      writers,
+      reason: `${writers.join(" and ")} replace the same ${property} on this element.`,
+      suggestion: "Keep positioning and elastic transforms on the outer element; animate a child element instead."
+    });
+  }
+  function diagnoseMotionResources(api, element, animations, extension) {
+    if (api.options.environment !== "development") return;
+    for (const animation of animations) {
+      try {
+        const effect = animation.effect;
+        if ((effect == null ? void 0 : effect.target) !== element || effect.pseudoElement) continue;
+        const frames = effect.getKeyframes();
+        if (!frames.some((frame) => "transform" in frame && (frame.composite === "replace" || (!frame.composite || frame.composite === "auto") && (!effect.composite || effect.composite === "replace")))) continue;
+        const owners = transformOwners(api, element).filter((owner) => owner !== extension);
+        for (const owner of owners) diagnoseResource(api, element, "transform", [owner, extension]);
+      } catch (_) {
+      }
+    }
+  }
+
+  // src/internal/validate-declarations.js
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   var attributesByExtension = {
     present: "present present-group present-active present-when present-motion trigger trigger-on dismiss target auto-unpop unpop-on-outside",
-    anchor: "anchor anchor-target anchor-match anchor-style",
-    "overflow-marquee": "overflow-marquee overflow-marquee-content overflow-marquee-active overflow-marquee-style",
+    anchor: "anchor anchor-target anchor-match",
+    "overflow-marquee": "overflow-marquee overflow-marquee-content overflow-marquee-active",
     scrollbox: "scrollbox scrollbox-wheel-horizontal scrollbox-momentum scrollbox-elastic scrollbar scrollbar-vertical scrollbar-horizontal",
     "scrollbox-snap": "scrollbox-snap snap-item",
     focus: "focus",
@@ -4210,7 +4234,7 @@
     preference: "preference option label next prev ready",
     feedback: "feedback target-message target-transform"
   };
-  var coreAttributes = "maxfps wait-mounted ext ext-style dep load-when builds load-style weak-style legacy esm theme-color";
+  var coreAttributes = "maxfps wait-mounted ext ext-style dep load-when builds load-style weak-style full-style legacy esm theme-color";
   var activation = {
     present: "present present-group trigger dismiss",
     anchor: "anchor",
@@ -4331,6 +4355,15 @@
         for (const item of element.querySelectorAll(`[${attr("snap-item")}]`)) {
           if (item.closest(`[${attr("scrollbox")}]`) !== element) continue;
           const alignment = item.getAttribute(attr("snap-item"));
+          const style = root2.getComputedStyle(item);
+          if (item.getClientRects().length && [style.transform, style.translate, style.rotate, style.scale].some((value2) => value2 && value2 !== "none"))
+            reportConfiguration(api, "WARN_SCROLLBOX_SNAP_TRANSFORM", {
+              extension: "scrollbox-snap",
+              element: item,
+              attribute: attr("snap-item"),
+              reason: "Snap geometry includes a transform applied to the item itself.",
+              suggestion: "Apply the visual transform to a child of the snap item."
+            });
           if (!["", "start", "end", "center", "left", "right", "top", "bottom"].includes(alignment))
             reportConfiguration(api, "WARN_CONFIGURATION_VALUE", {
               extension: "scrollbox-snap",
@@ -4444,6 +4477,11 @@
       if (!selected && has("maxfps") && (!value("maxfps").trim() || !Number.isFinite(Number(value("maxfps"))) || Number(value("maxfps")) <= 0))
         invalid("core", "maxfps", "Frame rate must be finite and greater than zero.", "Use a positive number or remove the attribute.", "WARN_LAYOUT_MAX_FPS_INVALID");
       if (!selected || selected.has("present") || selected.has("anchor")) validateCSS();
+      if ((!selected || selected.has("present") || selected.has("scrollbox")) && has("scrollbox-elastic")) {
+        const writers = transformOwners(api, element);
+        if (writers.includes("scrollbox-elastic") && writers.includes("present"))
+          diagnoseResource(api, element, "transform", ["scrollbox-elastic", "present"]);
+      }
     }
     function invisible(element) {
       for (let node = element; node; node = node.parentElement) {
@@ -5339,7 +5377,9 @@
     }
     function capture(operation) {
       operation.element.getBoundingClientRect();
-      return operation.element.getAnimations().filter((animation) => !operation.before.has(animation) && controllable(animation));
+      const animations = operation.element.getAnimations().filter((animation) => !operation.before.has(animation) && controllable(animation));
+      diagnoseMotionResources(getAelluxJs(), operation.element, animations, operation.options.extension || "css-motion");
+      return animations;
     }
     function controllable(animation) {
       try {
@@ -5450,11 +5490,20 @@
       return `linear(${points.join(", ")})`;
     }
     function nativeRun(operation) {
+      let before = operation.before;
+      if (getAelluxJs().options.environment === "development" && typeof operation.element.getAnimations === "function")
+        before = new Set(operation.element.getAnimations());
       operation.options.apply();
-      return nativeWait(operation);
+      return nativeWait(operation, before);
     }
-    function nativeWait(operation) {
+    function nativeWait(operation, before = operation.before) {
       const animations = typeof operation.element.getAnimations === "function" ? operation.element.getAnimations().filter((animation) => !operation.before.has(animation)) : [];
+      diagnoseMotionResources(
+        getAelluxJs(),
+        operation.element,
+        before === operation.before ? animations : animations.filter((animation) => !before.has(animation)),
+        operation.options.extension || "css-motion"
+      );
       return new Promise((resolve) => {
         operation.nativeResolve = resolve;
         const complete = () => {
@@ -5831,7 +5880,8 @@
         if (AelluxJs.ext[key].initialized) {
           extensionPromises[key] = Promise.resolve(AelluxJs.ext[key]);
         } else {
-          extensionPromises[key] = Promise.resolve().then(() => extensionInitialize(extensionName)).catch((error) => {
+          const registration = AelluxJs.registry.ext[key];
+          extensionPromises[key] = (registration.loadStyle && registration.loadStyle !== "false" ? appendExtensionAssets(extensionName) : Promise.resolve()).then(() => extensionInitialize(extensionName)).catch((error) => {
             if (!error || !error.aelluxCompatibility) {
               AelluxJs.diagnostics.error(
                 AelluxJs.diagnostics.ERROR_EXTENSION_INITIALIZE,
@@ -5939,7 +5989,7 @@
       }
       if (bundledLoader) {
         loadPromises.push(Promise.resolve().then(() => bundledLoader()));
-      } else {
+      } else if (!AelluxJs.ext[key]) {
         loadPromises.push(new Promise(
           (resolve, reject) => {
             const attr = AelluxJs.attr("ext");
@@ -5954,7 +6004,9 @@
           }
         ));
       }
-      if (data.loadStyle && data.loadStyle !== "false") {
+      const defaultStyle = data.loadStyle === true || data.loadStyle === "true";
+      const fullStyle = AelluxJs.bundledExtensions && (bundledLoader || data.official) && document.querySelector(`link[${AelluxJs.attr("full-style")}]`);
+      if (data.loadStyle && data.loadStyle !== "false" && !(defaultStyle && fullStyle)) {
         loadPromises.push(new Promise(
           (resolve) => {
             const styleDefaultURL = data.loadStyle === true || data.loadStyle === "true" || data.loadStyle === "";
@@ -6266,16 +6318,15 @@
     "present": () => Promise.resolve().then(() => (init_aellux_ext_present(), aellux_ext_present_exports))
   });
   root.AelluxJs.extIndex.official = typeof define_AELLUX_OFFICIAL_EXTENSION_MANIFEST_default !== "undefined" ? define_AELLUX_OFFICIAL_EXTENSION_MANIFEST_default : null;
-  root.AelluxJs.ext("adaptive", { loadWhen: "[data-ae-adaptive]", loadStyle: true });
+  root.AelluxJs.ext("adaptive", { loadWhen: "[data-ae-adaptive]" });
   root.AelluxJs.ext("anchor", { loadWhen: "[data-ae-anchor]" });
   root.AelluxJs.ext("overflow-marquee", { loadWhen: "[data-ae-overflow-marquee]" });
   root.AelluxJs.ext("ajax-href", { loadWhen: "a[data-ae-ajax-href]" });
-  root.AelluxJs.ext("feedback", { loadWhen: "[data-ae-feedback]", loadStyle: true });
+  root.AelluxJs.ext("feedback", { loadWhen: "[data-ae-feedback]" });
   root.AelluxJs.ext("focus", { loadWhen: "[data-ae-focus]" });
   root.AelluxJs.ext("point", { loadWhen: "[data-ae-point]" });
   root.AelluxJs.ext("present", {
-    loadWhen: "[data-ae-present],[data-ae-present-group],[data-ae-trigger],[data-ae-dismiss],[data-ae-target]",
-    loadStyle: true
+    loadWhen: "[data-ae-present],[data-ae-present-group],[data-ae-trigger],[data-ae-dismiss],[data-ae-target]"
   });
   root.AelluxJs.ext("scrollbox", { loadWhen: "[data-ae-scrollbox]" });
   root.AelluxJs.ext("scrollbox-snap", { loadWhen: "[data-ae-scrollbox-snap]" });

@@ -279,8 +279,8 @@ test("present prepares will-change before starting a transition", async ({ page 
   });
   await page.addScriptTag({ url: "/dist/aellux.js" });
   await page.evaluate(() => AelluxJs.init({ mode: "full" }));
-  await expect(page.locator('link[data-ae-ext-style="present"]')).toHaveAttribute(
-    "href", /aellux\.ext\.present\.css$/
+  await expect(page.locator('link[data-ae-full-style]')).toHaveAttribute(
+    "href", /aellux\.full\.css$/
   );
   await expect.poll(() => page.evaluate(() =>
     typeof AelluxJs.mountManager?.controller("panel")?.present?.pop === "function"
@@ -560,8 +560,8 @@ test("present disables transitions when reduced motion is active", async ({ page
   });
   await page.addScriptTag({ url: "/dist/aellux.js" });
   await page.evaluate(() => AelluxJs.init({ mode: "full" }));
-  await expect(page.locator('link[data-ae-ext-style="present"]')).toHaveAttribute(
-    "href", /aellux\.ext\.present\.css$/
+  await expect(page.locator('link[data-ae-full-style]')).toHaveAttribute(
+    "href", /aellux\.full\.css$/
   );
   await page.evaluate(() => {
     document.documentElement.setAttribute("data-ae-reduced-motion", "reduced");

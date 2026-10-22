@@ -22,16 +22,15 @@ root.AelluxJs.extIndex.official = typeof __AELLUX_OFFICIAL_EXTENSION_MANIFEST__ 
 // Bundled Extensions initialize on demand without separate script requests.
 // Scrollbox and Snap use the embedded official manifest to load separate files
 // when their selectors match, keeping their code out of the Full runtime.
-root.AelluxJs.ext("adaptive", { loadWhen: "[data-ae-adaptive]", loadStyle: true });
+root.AelluxJs.ext("adaptive", { loadWhen: "[data-ae-adaptive]" });
 root.AelluxJs.ext("anchor", { loadWhen: "[data-ae-anchor]" });
 root.AelluxJs.ext("overflow-marquee", { loadWhen: "[data-ae-overflow-marquee]" });
 root.AelluxJs.ext("ajax-href", { loadWhen: "a[data-ae-ajax-href]" });
-root.AelluxJs.ext("feedback", { loadWhen: "[data-ae-feedback]", loadStyle: true });
+root.AelluxJs.ext("feedback", { loadWhen: "[data-ae-feedback]" });
 root.AelluxJs.ext("focus", { loadWhen: "[data-ae-focus]" });
 root.AelluxJs.ext("point", { loadWhen: "[data-ae-point]" });
 root.AelluxJs.ext("present", {
-  loadWhen: "[data-ae-present],[data-ae-present-group],[data-ae-trigger],[data-ae-dismiss],[data-ae-target]",
-  loadStyle: true
+  loadWhen: "[data-ae-present],[data-ae-present-group],[data-ae-trigger],[data-ae-dismiss],[data-ae-target]"
 });
 root.AelluxJs.ext("scrollbox", { loadWhen: "[data-ae-scrollbox]" });
 root.AelluxJs.ext("scrollbox-snap", { loadWhen: "[data-ae-scrollbox-snap]" });

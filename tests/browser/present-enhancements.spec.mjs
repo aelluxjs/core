@@ -10,9 +10,9 @@ async function start(page, markup, options = {}) {
   }, options);
   await expect.poll(() => page.evaluate(() => !!AelluxJs.ext.present?.initialized)).toBe(true);
   await page.evaluate(() => AelluxJs.mount(document, "present"));
-  await expect(page.locator('link[data-ae-ext-style="present"]')).toHaveCount(1);
+  await expect(page.locator('link[data-ae-ext-style="present"],link[data-ae-full-style]')).toHaveCount(1);
   await page.evaluate(async () => {
-    const link = document.querySelector('link[data-ae-ext-style="present"]');
+    const link = document.querySelector('link[data-ae-ext-style="present"],link[data-ae-full-style]');
     if (!link.sheet) await new Promise(resolve => link.addEventListener("load", resolve, { once: true }));
   });
 }

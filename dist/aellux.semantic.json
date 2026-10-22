@@ -417,6 +417,17 @@
                 }
               }
             },
+            "WARN_RESOURCE_CONFLICT": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "number"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            },
             "ERROR_EXTENSION_ATTACH": {
               "type": "object",
               "properties": {
@@ -1501,6 +1512,17 @@
                 }
               }
             },
+            "WARN_RESOURCE_CONFLICT": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "number"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            },
             "ERROR_EXTENSION_ATTACH": {
               "type": "object",
               "properties": {
@@ -2314,15 +2336,6 @@
       "docURL": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/anchor.htm"
     },
     {
-      "name": "data-ae-anchor-style",
-      "extension": "core",
-      "description": "Internal runtime marker; applications should not configure this attribute.",
-      "syntax": "string",
-      "role": "internal",
-      "doc": "runtime/api",
-      "docURL": "https://aelluxjs.github.io/core/docs/0.1.0/runtime/api.htm"
-    },
-    {
       "name": "data-ae-anchor-target",
       "extension": "anchor",
       "description": "Target ID or CSS selector. A Present Group target resolves to its accepted selected member, allowing multiple Anchors per group. Empty uses offsetParent. Effective target and Anchor must share a positioning reference.",
@@ -2490,6 +2503,15 @@
       "docURL": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/preference.htm"
     },
     {
+      "name": "data-ae-full-style",
+      "extension": "core",
+      "description": "Internal runtime marker; applications should not configure this attribute.",
+      "syntax": "string",
+      "role": "internal",
+      "doc": "runtime/api",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.0/runtime/api.htm"
+    },
+    {
       "name": "data-ae-label",
       "extension": "preference",
       "description": "Shown when this value matches the enclosing preference; otherwise hidden. It does not copy text into another element.",
@@ -2600,7 +2622,7 @@
     {
       "name": "data-ae-overflow-marquee-active",
       "extension": "overflow-marquee",
-      "description": "Internal Overflow Marquee wrapper, active-state marker or owned stylesheet.",
+      "description": "Internal Overflow Marquee wrapper or active-state marker.",
       "syntax": "presence",
       "role": "internal",
       "docURL": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/overflow-marquee.htm"
@@ -2608,15 +2630,7 @@
     {
       "name": "data-ae-overflow-marquee-content",
       "extension": "overflow-marquee",
-      "description": "Internal Overflow Marquee wrapper, active-state marker or owned stylesheet.",
-      "syntax": "presence",
-      "role": "internal",
-      "docURL": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/overflow-marquee.htm"
-    },
-    {
-      "name": "data-ae-overflow-marquee-style",
-      "extension": "overflow-marquee",
-      "description": "Internal Overflow Marquee wrapper, active-state marker or owned stylesheet.",
+      "description": "Internal Overflow Marquee wrapper or active-state marker.",
       "syntax": "presence",
       "role": "internal",
       "docURL": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/overflow-marquee.htm"
@@ -3523,15 +3537,15 @@
       "name": "ae--anchor-switching",
       "extension": "anchor",
       "role": "output",
-      "description": "Runtime-managed state class; useful in CSS selectors.",
+      "description": "Runtime-managed state class. Use in application CSS selectors; do not set it to command the runtime.",
       "docURL": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/anchor.htm"
     },
     {
       "name": "ae--anchored",
-      "extension": "core",
+      "extension": "anchor",
       "role": "output",
       "description": "Runtime-managed state class. Use in application CSS selectors; do not set it to command the runtime.",
-      "docURL": "https://aelluxjs.github.io/core/docs/0.1.0/runtime/api.htm"
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/anchor.htm"
     },
     {
       "name": "ae--feedback-motion-",
@@ -3640,17 +3654,17 @@
     },
     {
       "name": "ae--native-sb-hide",
-      "extension": "core",
+      "extension": "scrollbox",
       "role": "output",
       "description": "Runtime-managed state class. Use in application CSS selectors; do not set it to command the runtime.",
-      "docURL": "https://aelluxjs.github.io/core/docs/0.1.0/runtime/api.htm"
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/scrollbox.htm"
     },
     {
       "name": "ae--pointerscrolling",
-      "extension": "core",
+      "extension": "scrollbox",
       "role": "output",
       "description": "Runtime-managed state class. Use in application CSS selectors; do not set it to command the runtime.",
-      "docURL": "https://aelluxjs.github.io/core/docs/0.1.0/runtime/api.htm"
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/scrollbox.htm"
     },
     {
       "name": "ae--pop",
@@ -3703,10 +3717,10 @@
     },
     {
       "name": "ae--scrollbar-visible",
-      "extension": "core",
+      "extension": "scrollbox",
       "role": "output",
       "description": "Runtime-managed state class. Use in application CSS selectors; do not set it to command the runtime.",
-      "docURL": "https://aelluxjs.github.io/core/docs/0.1.0/runtime/api.htm"
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/scrollbox.htm"
     },
     {
       "name": "ae--scrollbox-elastic-release",
@@ -3738,17 +3752,17 @@
     },
     {
       "name": "ae--snap-ready",
-      "extension": "core",
+      "extension": "scrollbox",
       "role": "output",
       "description": "Runtime-managed state class. Use in application CSS selectors; do not set it to command the runtime.",
-      "docURL": "https://aelluxjs.github.io/core/docs/0.1.0/runtime/api.htm"
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/scrollbox.htm"
     },
     {
       "name": "ae--snap-suspended",
-      "extension": "core",
+      "extension": "scrollbox",
       "role": "output",
       "description": "Runtime-managed state class. Use in application CSS selectors; do not set it to command the runtime.",
-      "docURL": "https://aelluxjs.github.io/core/docs/0.1.0/runtime/api.htm"
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/scrollbox.htm"
     },
     {
       "name": "ae--unpopping",

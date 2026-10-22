@@ -46,30 +46,8 @@
     const placementMaps = /* @__PURE__ */ new Set();
     let nextLayoutId = 2e6;
     let mutations = null;
-    let weakStyle = null;
     AelluxJs.extAttach(extensionName, { init, destroy, createPlacementMap });
     function init() {
-      weakStyle = document.createElement("style");
-      weakStyle.setAttribute(AelluxJs.attr("anchor-style"), "");
-      weakStyle.textContent = `
-      :where([${attribute}][${matchAttribute}~="width"]) {
-        width:var(--ae-anchor-target-width,0px);box-sizing:border-box;
-      }
-      :where([${attribute}][${matchAttribute}~="height"]) {
-        height:var(--ae-anchor-target-height,0px);box-sizing:border-box;
-      }
-      :where([${attribute}][${matchAttribute}].${anchoredClass}) {
-        transform:translate3d(var(--ae-anchor-pivot-x),var(--ae-anchor-pivot-y),0)
-          translate(calc(0% - var(--ae-anchor-origin-x)),calc(0% - var(--ae-anchor-origin-y)));
-      }
-      :where([${attribute}].${switchingClass}) {
-        transition-property:transform,width,height;
-        transition-duration:var(--ae-anchor-switch-duration,0ms);
-        transition-timing-function:var(--ae-anchor-switch-ease,ease-in-out);transition-delay:0s;
-      }
-      :where(html[${AelluxJs.attr("reduced-motion")}="reduced"] [${attribute}].${switchingClass}) {transition:none;}
-    `.replace(/\s*([{};:,])\s*/g, "$1").replace(/;}/g, "}").trim();
-      document.head.appendChild(weakStyle);
       AelluxJs.registerCssProperty(
         { name: "--ae-anchor-x", syntax: "<length>", initialValue: "0px" },
         { name: "--ae-anchor-y", syntax: "<length>", initialValue: "0px" },
@@ -93,8 +71,6 @@
       for (const map of placementMaps) map.destroy();
       await Promise.all(Array.from(anchors.keys(), unmountAnchor));
       AelluxJs.mountManager.remove({ extensionName });
-      weakStyle == null ? void 0 : weakStyle.remove();
-      weakStyle = null;
     }
     function createPlacementMap() {
       const memories = /* @__PURE__ */ new Map();

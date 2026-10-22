@@ -1,6 +1,6 @@
 # Adaptive Extension
 
-`adaptive` adds size and shape classes to elements marked with `data-ae-adaptive`. It is included in the `full` runtime and automatically requests its stylesheet there. In `basic` mode, register it with `$ae.ext("adaptive", { loadStyle: true })` before initialization.
+`adaptive` adds size and shape classes to elements marked with `data-ae-adaptive`. It is included in the `full` runtime and its CSS is supplied by the shared Full stylesheet. In `basic` mode, register it with `$ae.ext("adaptive", { loadStyle: true })` before initialization.
 
 ```html
 <div id="responsive" data-ae-adaptive>Responsive content</div>

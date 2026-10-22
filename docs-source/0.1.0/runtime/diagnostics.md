@@ -97,6 +97,7 @@ Configuration diagnostics explain what happened, identify the element/attribute/
 
 | Code | Meaning |
 | --- | --- |
+| `2020` | An effective CSS transform is applied directly to a Snap item. Apply visual transforms to its children instead. |
 | `2024` | Likely misspelled Aellux attribute, with a suggested spelling. |
 | `2025` | Declared behavior requires an Extension that is not initialized. |
 | `2026` | Invalid attribute, numeric parameter, or pivot. |
@@ -106,6 +107,11 @@ Configuration diagnostics explain what happened, identify the element/attribute/
 | `2030` | Effective CSS blocks requested layout/scrolling, or a motion duration is invalid. |
 | `2031` | Present and Anchor both request transform on one element. Anchor takes priority; remove the Present transform token or animate a child. |
 | `2032` | Duplicate HTML attributes on one start tag; the browser keeps the first value and discards subsequent values. Includes `class`, `style`, native and custom attributes. |
+| `2033` | Behaviors replace the same CSS resource on one element. The context identifies the `property` and its `writers`. |
+
+`WARN_RESOURCE_CONFLICT` (`2033`) checks persistent transform writers without a separate ownership registry. Development mounts and explicit updates diagnose Present transform on a valid Elastic wrapper. When CSS Motion captures an actual replacing transform effect, it compares that effect with Anchor, Elastic and Present on the effect's target. Feedback passes its resolved `data-ae-target-transform` destination, so animating a child remains valid. This works with controlled and native CSS Motion when Web Animations exposes keyframes. Opacity-only effects, additive composition, pseudo-elements and separate targets are excluded. Reduced motion with no active effect emits no motion conflict. Browsers without inspectable effects skip this runtime check; production skips all resource checks.
+
+The checks report incompatible composition and preserve the requested animation. Move visual animation onto a child to keep positioning and elastic transforms independent. They do not automatically merge transforms, inspect arbitrary application animations outside CSS Motion, or infer a conflict merely from two Extension declarations.
 
 `WARN_ATTRIBUTE_DUPLICATE` (`2032`) inspects original HTML text in development, since duplicate attributes no longer exist in the parsed DOM. After the first unscoped document mount, Core makes one asynchronous GET for the initial document URL with `cache: "force-cache"`, preferring the HTTP cache. This inspection does not delay mounting or `Ready`; unavailable source is skipped without failing the mount. Scoped mounts and explicit updates do not request source. AJAX Href inspects each response text before parsing, using the existing response without an additional request. Production skips both checks, even with warning verbosity enabled.
 
@@ -151,6 +157,15 @@ Duplicate-attribute source inspection adds the scanner and its development guard
 | `aellux.full.legacy.min.js` | 441,545 / 131,670 | 426 / 138 | 432 / 138 |
 | `aellux.ext.ajax-href.min.js` | 7,096 / 3,049 | 5 / 3 | 7 / 3 |
 | `aellux.ext.ajax-href.legacy.min.js` | 14,608 / 5,531 | 12 / 5 | 14.5 / 5.5 |
+
+Resource conflict diagnostics, eligible Snap item style checks and the associated integration fixes add the following costs relative to `321cef0`. These limits supersede the affected entries above. All other artifact limits, including Boot/ESM and Full Legacy gzip, remain unchanged.
+
+| Artifact | Measured raw / gzip bytes | Added raw / gzip bytes | Previous limits | Current limits |
+| --- | --- | --- | --- | --- |
+| `aellux.orchestrator.min.js` | 62,551 / 20,899 | 2,341 / 644 | 59 / 20 | 62 / 20.5 |
+| `aellux.orchestrator.legacy.min.js` | 335,131 / 105,919 | 4,155 / 762 | 324 / 103 | 328 / 104 |
+| `aellux.full.min.js` | 133,617 / 43,261 | 2,435 / 709 | 130 / 42 | 131 / 42.5 |
+| `aellux.full.legacy.min.js` | 446,470 / 132,741 | 4,251 / 785 | 432 / 138 | 437 / 138 |
 
 ## Code Ranges
 

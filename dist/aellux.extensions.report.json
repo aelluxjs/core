@@ -31,12 +31,12 @@
     {
       "name": "anchor",
       "status": "valid",
-      "artifacts": 2
+      "artifacts": 3
     },
     {
       "name": "overflow-marquee",
       "status": "valid",
-      "artifacts": 2
+      "artifacts": 3
     },
     {
       "name": "ajax-href",
@@ -46,7 +46,7 @@
     {
       "name": "scrollbox",
       "status": "valid",
-      "artifacts": 2
+      "artifacts": 3
     },
     {
       "name": "scrollbox-snap",

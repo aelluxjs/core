@@ -11,14 +11,7 @@ export function createOverflowMarquee(root, api, anchor) {
   const desktop = root.matchMedia?.("(any-hover: hover) and (any-pointer: fine)");
   let observer = null;
 
-  const css = `
-    :where(${selector}:not([hidden])) {display:block}
-    :where(${selector}) {position:relative;min-width:0;overflow:hidden;overflow:clip;text-overflow:ellipsis;white-space:nowrap!important}
-    :where([${contentAttribute}]) {display:block;position:relative;width:auto;max-width:none;contain:none;visibility:inherit;opacity:1;pointer-events:inherit;overflow:hidden;text-overflow:ellipsis;white-space:nowrap!important;transform:none;transition:none}
-    :where([${activeAttribute}]>[${contentAttribute}]) {width:max-content;overflow:visible;transform:translate3d(var(--ae-anchor-x,0px),0,0)}
-    :where(html[${reducedAttribute}="reduced"] ${selector}>[${contentAttribute}]) {width:auto;overflow:hidden;text-overflow:ellipsis;transform:none!important;transition:none!important}
-  `;
-  return { selector, css, mount, unmount, update, destroy };
+  return { selector, mount, unmount, update, destroy };
 
   function listenMedia(add) {
     if (desktop?.addEventListener) desktop[add ? "addEventListener" : "removeEventListener"]("change", refreshAll);

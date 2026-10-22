@@ -231,10 +231,8 @@
     var states = /* @__PURE__ */ new Map();
     var desktop = (_root$matchMedia = root.matchMedia) === null || _root$matchMedia === void 0 ? void 0 : _root$matchMedia.call(root, "(any-hover: hover) and (any-pointer: fine)");
     var observer = null;
-    var css = "\n    :where(".concat(selector, ":not([hidden])) {display:block}\n    :where(").concat(selector, ") {position:relative;min-width:0;overflow:hidden;overflow:clip;text-overflow:ellipsis;white-space:nowrap!important}\n    :where([").concat(contentAttribute, "]) {display:block;position:relative;width:auto;max-width:none;contain:none;visibility:inherit;opacity:1;pointer-events:inherit;overflow:hidden;text-overflow:ellipsis;white-space:nowrap!important;transform:none;transition:none}\n    :where([").concat(activeAttribute, "]>[").concat(contentAttribute, "]) {width:max-content;overflow:visible;transform:translate3d(var(--ae-anchor-x,0px),0,0)}\n    :where(html[").concat(reducedAttribute, '="reduced"] ').concat(selector, ">[").concat(contentAttribute, "]) {width:auto;overflow:hidden;text-overflow:ellipsis;transform:none!important;transition:none!important}\n  ");
     return {
       selector: selector,
-      css: css,
       mount: mount,
       unmount: unmount,
       update: update,
@@ -1042,7 +1040,7 @@
     var api = root.AelluxJs;
     var extensionName = "overflow-marquee";
     if (!api) throw new Error("[aellux.js] Load the boot script before the overflow-marquee extension.");
-    var marquee = null, placements = null, weakStyle = null;
+    var marquee = null, placements = null;
     api.extAttach(extensionName, {
       init: init,
       destroy: destroy
@@ -1082,10 +1080,6 @@
                 syntax: "<time>",
                 initialValue: "1200ms"
               });
-              weakStyle = root.document.createElement("style");
-              weakStyle.setAttribute(api.attr("overflow-marquee-style"), "");
-              weakStyle.textContent = marquee.css.replace(/\s*([{};:,])\s*/g, "$1").replace(/;}/g, "}").trim();
-              root.document.head.appendChild(weakStyle);
               api.mountManager.add({
                 extensionName: extensionName,
                 selector: marquee.selector,
@@ -1105,7 +1099,7 @@
     }
     function _destroy() {
       _destroy = _asyncToGenerator2(/* @__PURE__ */ _regenerator2().m(function _callee2() {
-        var _marquee, _placements, _weakStyle;
+        var _marquee, _placements;
         return _regenerator2().w(function(_context2) {
           while (1) switch (_context2.n) {
             case 0:
@@ -1116,8 +1110,7 @@
               api.mountManager.remove({
                 extensionName: extensionName
               });
-              (_weakStyle = weakStyle) === null || _weakStyle === void 0 || _weakStyle.remove();
-              marquee = placements = weakStyle = null;
+              marquee = placements = null;
             case 2:
               return _context2.a(2);
           }

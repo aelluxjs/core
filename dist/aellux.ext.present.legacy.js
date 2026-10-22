@@ -837,6 +837,7 @@
               };
               advancedEase = root.getComputedStyle(element).getPropertyValue("--ae-".concat(newDirection, "-aellux-ease").toLowerCase()).trim() || void 0;
               motionOptions = {
+                extension: extensionName,
                 id: controller.motionId,
                 apply: activateTransition,
                 easing: advancedEase,

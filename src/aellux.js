@@ -26,6 +26,7 @@ import createWeakCss from "./internal/create-weak-css.js";
     ? __AELLUX_OFFICIAL_EXTENSION_MANIFEST__ : null;
 
   var scriptExtension = ".js";
+  var loadingFullStyle = false;
   var existingApi = root.AelluxJs;
   var api = existingApi &&
     existingApi.shortJSName === CONSTANTS.AELLUXJS_SHORT_JS_NAME &&
@@ -92,9 +93,12 @@ import createWeakCss from "./internal/create-weak-css.js";
     api.diagnostics.notAvailable = [];
 
     api.updatePreferenceAttributesHTML(); // Set HTML to persisted preferences.
-    addWeakStyles();
     updateViewportMeta();
-    loadOrchestrator();
+    if (api.options.mode === "full") loadFullStyle();
+    else {
+      addWeakStyles();
+      loadOrchestrator();
+    }
   };
   if (api.minified) scriptExtension = ".min.js";
 
@@ -205,6 +209,32 @@ import createWeakCss from "./internal/create-weak-css.js";
         );
       }
     });
+  }
+
+  function loadFullStyle() {
+    if (loadingFullStyle) return;
+    loadingFullStyle = true;
+    var filename = "aellux.full" + (api.minified ? ".min.css" : ".css");
+    var link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = api.aelluxBasePath + filename;
+    link.setAttribute(api.attr("full-style"), "true");
+    applyCoreIntegrity(link, filename);
+    assetLoadHelper(link, {
+      loadCallback: finish,
+      errorCallback: function () {
+        diagnostics.warn(diagnostics.WARN_EXTENSION_STYLE_LOAD, {
+          extension: "full", element: link, url: link.href,
+          reason: "The Full stylesheet could not be loaded.",
+          suggestion: "Check the Full CSS URL, integrity metadata and CSP style-src policy."
+        });
+        finish();
+      }
+    });
+    function finish() {
+      loadingFullStyle = false;
+      loadOrchestrator();
+    }
   }
 
   function addWeakStyles() {

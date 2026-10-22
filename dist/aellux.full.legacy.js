@@ -33,7 +33,7 @@
   var define_AELLUX_OFFICIAL_EXTENSION_MANIFEST_default;
   var init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST = __esm({
     "<define:__AELLUX_OFFICIAL_EXTENSION_MANIFEST__>": function() {
-      define_AELLUX_OFFICIAL_EXTENSION_MANIFEST_default = { schemaVersion: 1, coreVersion: "0.1.0-beta.10", extensions: { preference: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.preference.min.js", integrity: "sha384-mSOgb0DekFTRXXZAgyNrPjamdlSqzL4SSGZYVWgVg+WlG+pBj11xT81v/6Xk43yO", regular: { url: "./aellux.ext.preference.js", integrity: "sha384-MlikpdHSzHzF6kz5+oJGtq3eoFsKTsx/g+FTrf+dFOU8iQGHsCpn4fP1jLlbNrj7" } }, legacy: { url: "./aellux.ext.preference.legacy.min.js", integrity: "sha384-1LMsK0W9J/PoM4tXhFgkYLRY4yWdzVoYmFy4OMDGd8lRdtptKoEb1sI9L1kzNaBu", regular: { url: "./aellux.ext.preference.legacy.js", integrity: "sha384-pozuz43OyfXrnkmuBu6KTM2lqRSqcI5LMgwAtqnzXq8xZGdVqpnmOtrBcYcMskWk" } } }, dependencies: [] }, "state-navigation": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.state-navigation.min.js", integrity: "sha384-wAbgAqjAA6wauuG+iuUtfRwxChd6fTJ0fS22fqnu2r00kouoXJWZ0f7AoTYlqBC6", regular: { url: "./aellux.ext.state-navigation.js", integrity: "sha384-PKJ8HTD7eIYDEg2hOaAJjpMYzLr2fBjBRGmIGG7XzGTzVK0yTjt5HYPO55VbWfdS" } }, legacy: { url: "./aellux.ext.state-navigation.legacy.min.js", integrity: "sha384-YkhfU15Mpk8KiO6TyoVU6z1yCiYWwnsOGE0xVaQ8NrE7IGrxOSUL005g5JeUDdJu", regular: { url: "./aellux.ext.state-navigation.legacy.js", integrity: "sha384-kaEUY0Zpw8K6pcwjm+INA5feXftLK2/N1aFpPr2LCTcetX2uoe2GGd1MJyy7u8rZ" } } }, dependencies: [] }, feedback: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.feedback.min.js", integrity: "sha384-3VP3W84ekK4MIVBQuy5+5P3bGrwOj7bBDfJnjyexZ+yDADf1jQoHEpP2J1OMUgod", regular: { url: "./aellux.ext.feedback.js", integrity: "sha384-RrPf0bRGxf68f/Rjas5MF5zC1GAubWyndCcuiYbgZsPSHGLFsQtQaUgeFX4SQz+h" } }, legacy: { url: "./aellux.ext.feedback.legacy.min.js", integrity: "sha384-zXuZEv63sd3fwaAygmyk9KazQ46KOelsvAtM+0vJ7phDwemVh1FhOjAcbhWVQM/N", regular: { url: "./aellux.ext.feedback.legacy.js", integrity: "sha384-UW1JZ1+liVWV/w3PJdhfIMztOU7zyTw/1rOyyxoxj4YJIHb1xFl8U0xeIBh8jYV7" } } }, dependencies: [], style: { url: "./aellux.ext.feedback.min.css", integrity: "sha384-OBguCYqF+dMD0Pl84C3FlY/+ohUGfW0OyynmXb/PSDEGOyuI/TQJ3EZAoCeJx+Jk", regular: { url: "./aellux.ext.feedback.css", integrity: "sha384-yk4cW+r/Mc1FRS1ZauBHC6KsKb7sxuJ0E9mmt/+AYASAdZXXMK6iuFBR+TOEh/r4" } } }, focus: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.focus.min.js", integrity: "sha384-AXpUv/Ur2Z4cKvO9EqIFqfxxdSQR5j75q0okOAWPvHhSneQ5LPjrOzk6Sl9MOo4a", regular: { url: "./aellux.ext.focus.js", integrity: "sha384-VjQzcnhLRrvRlbVQ0X4/tO0+8gqJXAmIFoeIVimjOud1wRNuBXNnSQHHW9XQPzTe" } }, legacy: { url: "./aellux.ext.focus.legacy.min.js", integrity: "sha384-I5QpUmKsA1T8NiKfKXQgbdG19Ld1ZGCWSmosygO3yGj43tdxp5zCfLyfBuFoHlKu", regular: { url: "./aellux.ext.focus.legacy.js", integrity: "sha384-5/y3J1NC/qMyV9myEj29+wGbqCVI8ICPafSebtJVfl15Qmup6vMiJzveShd3CLnw" } } }, dependencies: [] }, point: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.point.min.js", integrity: "sha384-n540II5oWbHJRt/a8i+Rgb9A3b9dm7hamg1kd3Nz7KdPQDcaa8S823t9fCrgxBWF", regular: { url: "./aellux.ext.point.js", integrity: "sha384-aDj7I5QEH/0+52E3e6yPZ/D0MEsNBdxeET3G5ToVvgczHtksMh3p8S/KOoAapRRN" } }, legacy: { url: "./aellux.ext.point.legacy.min.js", integrity: "sha384-5UmWvQHfmvttz9yeXbilawGCZH20UdR8yNBOE9kRV34wpfWASl8plzgKtLVQGO9M", regular: { url: "./aellux.ext.point.legacy.js", integrity: "sha384-gG/XONYEC1tchBcJ6bUtKYmWFHz0E+50LmMaXDAiqWBKPuwdHZeYm1uXA22lMZuN" } } }, dependencies: [] }, anchor: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.anchor.min.js", integrity: "sha384-THCWnysyORP8ISwVh+Yc6uMN0NlIxC0WtIZ/qF5yTbhInc+hRT9mEkvmmL+cg+Ur", regular: { url: "./aellux.ext.anchor.js", integrity: "sha384-s9ORVuYisV71knncKu9bMJnSA3VHuHsIS6pXbq2f41cTNAZGFDQuT6vlt0qoaD8R" } }, legacy: { url: "./aellux.ext.anchor.legacy.min.js", integrity: "sha384-mg7cFWfbuqqRSIms52+WekWGKmrUOet3rOX9mS6oLzCiS+nf46bAAVUwWzXJbKAu", regular: { url: "./aellux.ext.anchor.legacy.js", integrity: "sha384-B0n+FimvIoRLyVrirHFSvBcqwaugQOnv93k23/6lFfKuFCcso0YW7JhQ920v4Zmb" } } }, dependencies: [] }, "overflow-marquee": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.overflow-marquee.min.js", integrity: "sha384-k4Fi/6rWlMkzTe4WjvC4OsFCY0nOvdM0ufwOyF85InNyEPrHKtMjKsRIajPre9z8", regular: { url: "./aellux.ext.overflow-marquee.js", integrity: "sha384-/ZrMQa7jt1RVcT3jXhBB5O1hcjvJArca+xbVS6wtMDVdLrY8u0oDotlq52Sh2t/n" } }, legacy: { url: "./aellux.ext.overflow-marquee.legacy.min.js", integrity: "sha384-JcxKQFJE6abVU/qtP25j7IcbdIunsFBJ1Jw6gHEb12VPJKPswm+xkXT/B0z7OiP6", regular: { url: "./aellux.ext.overflow-marquee.legacy.js", integrity: "sha384-KlqUfl5YdsyA36c5ZEQKLcZO43kfyLmycuLdsQ6Dd1+sv0qzGg1HhRXcFYc/9Pet" } } }, dependencies: [] }, "ajax-href": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.ajax-href.min.js", integrity: "sha384-5bXxuklqmUnxKorhVuhIw/EfJIT0z55pvKIQtbDEaNvjl5cMku8f/faGNBVYsuyu", regular: { url: "./aellux.ext.ajax-href.js", integrity: "sha384-4vJnfttGluarmVygTLViyu1NmXXg0fU729Ray1tvgApz+/G2zgCSu7pcw5YxEcR4" } }, legacy: { url: "./aellux.ext.ajax-href.legacy.min.js", integrity: "sha384-HxGsZa3tsy0v7Ow1antMf85v7O718RcOuO4zJ4/lTRZgY+7SdXfdYfbcOR7PFnlG", regular: { url: "./aellux.ext.ajax-href.legacy.js", integrity: "sha384-XNg/4wQcESX2cmMmdYRBS53xonuwuOh18Wkvqrofr2S8MYSVt/VOM49sxjgnDXfI" } } }, dependencies: [] }, scrollbox: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.scrollbox.min.js", integrity: "sha384-1TqqZT+ulF8e4U8Uttxk+ZXd3gXG6FB5mMXiOiDzJfJulzbWHlcX77dj9jidNUmA", regular: { url: "./aellux.ext.scrollbox.js", integrity: "sha384-S5Z3YWg+j/ZNEX3RqxHFSWEi3uPFKa/erx6XPOJRv6lJNcPGV9wtQaxAuF6fr0Qw" } }, legacy: { url: "./aellux.ext.scrollbox.legacy.min.js", integrity: "sha384-/sQKFIT8u/TAUe+WV4tpu3GOqH+EbUvzOeuko37R9FcL/QFEjYiGT4rzYtJ9fF5g", regular: { url: "./aellux.ext.scrollbox.legacy.js", integrity: "sha384-wIM7v+QbvDB0bXfgUVwT9VS9HqZCEukunJKaDCAUy4wy5P3+i1u8NpEMVXfbkhFy" } } }, dependencies: [] }, "scrollbox-snap": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.scrollbox-snap.min.js", integrity: "sha384-YNetWDUuxONIR41ykMQTu59vXnqcGmN070vqt2gHZxykQM8xVGRgOo4uUjTThbFb", regular: { url: "./aellux.ext.scrollbox-snap.js", integrity: "sha384-KmPblbbcz4OHkc0KTFYw/yuBelRxSL16pDVnLX/7jkb/xGBqPHWFP4x6GFQRIfHx" } }, legacy: { url: "./aellux.ext.scrollbox-snap.legacy.min.js", integrity: "sha384-Kbt2Fjswspgzzeop7aZZ3VYnUmaShTNswZmigPzvNNb4gxb2T6JfL8clidd58EVb", regular: { url: "./aellux.ext.scrollbox-snap.legacy.js", integrity: "sha384-rIlhaybqhGrNHSUVG6vphjZr1IJKF0lNxbYuVOeTvJSOOjTRYzRovU4rArLjJw8q" } } }, dependencies: [] }, adaptive: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.adaptive.min.js", integrity: "sha384-bkeOnTW/3uzbuhLc8fujaWnWGC+pwNAkZwci9M09paKqudp0v/flMrJ49JXw16vv", regular: { url: "./aellux.ext.adaptive.js", integrity: "sha384-Qzf9wU6DSSaaE+8lr96vnYqjKQqYxep8dhCZmjgNdqreuk9fL3qKMn3NW7DGAEaT" } }, legacy: { url: "./aellux.ext.adaptive.legacy.min.js", integrity: "sha384-YVHHWZOvf+65r/CU89nBPZXhj3j5sn4r2ho+CNUCUaYs1WE6pWIeypcq7n5OCBor", regular: { url: "./aellux.ext.adaptive.legacy.js", integrity: "sha384-gBkxqbBpIqdj5ozJm/NsenI/yKOvEGarZBl2SrPjYiiYx6cez2/FGTMf5XyzHrTj" } } }, dependencies: [], style: { url: "./aellux.ext.adaptive.min.css", integrity: "sha384-8yUP1PStfDqBCyCskP3k9WLIKgv/yl1nyDhmPz7hsX5NZ4z3ZT3ajolA+RhYlUiG", regular: { url: "./aellux.ext.adaptive.css", integrity: "sha384-HfIjX9Zk0VFRimzPvUaTS5AtwuHJHjXKoM/xbNJXj5vE7bSdBGEzbrBHfbNmYah0" } } }, present: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.present.min.js", integrity: "sha384-r5gp1UJBrpL0tDIxdeomlY5UonXajSNPciSisOhy/Jyc23nABumiW2S3egSlp28P", regular: { url: "./aellux.ext.present.js", integrity: "sha384-QwoLlKPJR0csxH5duVsBHvd+VRqWHhKFYgRmXguuDLwK7/9TlowP67EjujnVukki" } }, legacy: { url: "./aellux.ext.present.legacy.min.js", integrity: "sha384-lZO5NbKqOgRSzOh/vFH9dXYrEX/YxznD3gcm44aUcrnU7i9CWq9vlwfPBfWmGLb5", regular: { url: "./aellux.ext.present.legacy.js", integrity: "sha384-2ldc5jAnTWyBMAatErdjr2VadqKqg25M2jnsvuNl78PRGYUbnnuHY8ebsjbHhSv9" } } }, dependencies: [], style: { url: "./aellux.ext.present.min.css", integrity: "sha384-2QoNgFTu/KOOrgaTKZV4VXCoIaU2h5PMPILW5LHseXK2ygNpF6miOfxZUwkTBgPY", regular: { url: "./aellux.ext.present.css", integrity: "sha384-uZ/OPZK9sRFcaejKJHrc0wPaPXFKeGS+pBWWbkMEe3+3M6zLEa7nBc/cD0Tejsmr" } } } } };
+      define_AELLUX_OFFICIAL_EXTENSION_MANIFEST_default = { schemaVersion: 1, coreVersion: "0.1.0-beta.10", extensions: { preference: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.preference.min.js", integrity: "sha384-mSOgb0DekFTRXXZAgyNrPjamdlSqzL4SSGZYVWgVg+WlG+pBj11xT81v/6Xk43yO", regular: { url: "./aellux.ext.preference.js", integrity: "sha384-MlikpdHSzHzF6kz5+oJGtq3eoFsKTsx/g+FTrf+dFOU8iQGHsCpn4fP1jLlbNrj7" } }, legacy: { url: "./aellux.ext.preference.legacy.min.js", integrity: "sha384-1LMsK0W9J/PoM4tXhFgkYLRY4yWdzVoYmFy4OMDGd8lRdtptKoEb1sI9L1kzNaBu", regular: { url: "./aellux.ext.preference.legacy.js", integrity: "sha384-pozuz43OyfXrnkmuBu6KTM2lqRSqcI5LMgwAtqnzXq8xZGdVqpnmOtrBcYcMskWk" } } }, dependencies: [] }, "state-navigation": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.state-navigation.min.js", integrity: "sha384-wAbgAqjAA6wauuG+iuUtfRwxChd6fTJ0fS22fqnu2r00kouoXJWZ0f7AoTYlqBC6", regular: { url: "./aellux.ext.state-navigation.js", integrity: "sha384-PKJ8HTD7eIYDEg2hOaAJjpMYzLr2fBjBRGmIGG7XzGTzVK0yTjt5HYPO55VbWfdS" } }, legacy: { url: "./aellux.ext.state-navigation.legacy.min.js", integrity: "sha384-YkhfU15Mpk8KiO6TyoVU6z1yCiYWwnsOGE0xVaQ8NrE7IGrxOSUL005g5JeUDdJu", regular: { url: "./aellux.ext.state-navigation.legacy.js", integrity: "sha384-kaEUY0Zpw8K6pcwjm+INA5feXftLK2/N1aFpPr2LCTcetX2uoe2GGd1MJyy7u8rZ" } } }, dependencies: [] }, feedback: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.feedback.min.js", integrity: "sha384-oHAcvQwCs/v3ktzXoNdJEDEkaV6NI29MjzjF068Lw0oL9NwVP5THnxzb12f0ySkY", regular: { url: "./aellux.ext.feedback.js", integrity: "sha384-dGcxHfGyV544C6livNJKKrlNWky/fBFkMONowmtlhHZ5exWL8AJOoV40jJhZW6Iq" } }, legacy: { url: "./aellux.ext.feedback.legacy.min.js", integrity: "sha384-S31Sa8B4kbKL/xsEJ3QTTikO+AjuXSc9GXBzNw8kl/b2amk5tzqgQNNKQPfGnYdF", regular: { url: "./aellux.ext.feedback.legacy.js", integrity: "sha384-sy2QmY3L1TlvGPgdebeu5q9ZJl/bOeUstWE0Cu+QJUIYWSF9y1YH6mCpe09/eKrd" } } }, dependencies: [], style: { url: "./aellux.ext.feedback.min.css", integrity: "sha384-OBguCYqF+dMD0Pl84C3FlY/+ohUGfW0OyynmXb/PSDEGOyuI/TQJ3EZAoCeJx+Jk", regular: { url: "./aellux.ext.feedback.css", integrity: "sha384-yk4cW+r/Mc1FRS1ZauBHC6KsKb7sxuJ0E9mmt/+AYASAdZXXMK6iuFBR+TOEh/r4" } } }, focus: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.focus.min.js", integrity: "sha384-AXpUv/Ur2Z4cKvO9EqIFqfxxdSQR5j75q0okOAWPvHhSneQ5LPjrOzk6Sl9MOo4a", regular: { url: "./aellux.ext.focus.js", integrity: "sha384-VjQzcnhLRrvRlbVQ0X4/tO0+8gqJXAmIFoeIVimjOud1wRNuBXNnSQHHW9XQPzTe" } }, legacy: { url: "./aellux.ext.focus.legacy.min.js", integrity: "sha384-I5QpUmKsA1T8NiKfKXQgbdG19Ld1ZGCWSmosygO3yGj43tdxp5zCfLyfBuFoHlKu", regular: { url: "./aellux.ext.focus.legacy.js", integrity: "sha384-5/y3J1NC/qMyV9myEj29+wGbqCVI8ICPafSebtJVfl15Qmup6vMiJzveShd3CLnw" } } }, dependencies: [] }, point: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.point.min.js", integrity: "sha384-n540II5oWbHJRt/a8i+Rgb9A3b9dm7hamg1kd3Nz7KdPQDcaa8S823t9fCrgxBWF", regular: { url: "./aellux.ext.point.js", integrity: "sha384-aDj7I5QEH/0+52E3e6yPZ/D0MEsNBdxeET3G5ToVvgczHtksMh3p8S/KOoAapRRN" } }, legacy: { url: "./aellux.ext.point.legacy.min.js", integrity: "sha384-5UmWvQHfmvttz9yeXbilawGCZH20UdR8yNBOE9kRV34wpfWASl8plzgKtLVQGO9M", regular: { url: "./aellux.ext.point.legacy.js", integrity: "sha384-gG/XONYEC1tchBcJ6bUtKYmWFHz0E+50LmMaXDAiqWBKPuwdHZeYm1uXA22lMZuN" } } }, dependencies: [] }, anchor: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.anchor.min.js", integrity: "sha384-vpHUGJwyY3qnW78C6Yo8CLc2vgbn1KJ8FcOtQawBtCKarQ0CoihuNQ7ZCKnMbOjx", regular: { url: "./aellux.ext.anchor.js", integrity: "sha384-LaYGJ6p9H5QBGJf5j19wHgT+CFcMim2h0Ro+itxYnLkIE29RFtPdj8P8L9EYWAWr" } }, legacy: { url: "./aellux.ext.anchor.legacy.min.js", integrity: "sha384-Ym0BnY5sDflVI4JyPVWymZKurBcJTAbPNe2gy+6qHcD7x6RyIKwvff6o+6BfeZDy", regular: { url: "./aellux.ext.anchor.legacy.js", integrity: "sha384-bN9t1anpKLUDUvnbE845H1+9UvP+XDfrsN5AhrKLUQJ5fm3YcFqiylDNFuE02RlJ" } } }, dependencies: [], style: { url: "./aellux.ext.anchor.min.css", integrity: "sha384-DwxfMH5mNSvmF0U4/dgL6dbe+5U1x97y2H4skxW7nUUzjr99IXNl9aVDwRjfvNGz", regular: { url: "./aellux.ext.anchor.css", integrity: "sha384-tHVCjTT3bvlmkAIDfMyevvrkAB7crjBXQAfY1l8XcaWhBFSersWJk+JndC6Bd9mO" } } }, "overflow-marquee": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.overflow-marquee.min.js", integrity: "sha384-EUZO28afWnFc6O49cABa3rPbKZdDpt1qf7STLiI6pNi3lIY+2bwRQRzU3cZ6AK+u", regular: { url: "./aellux.ext.overflow-marquee.js", integrity: "sha384-qBC4/o78des4U3qldDyUAerX5x6jT7cudmsuArw0caNMu7tF+kjhg/WdD44qbh6p" } }, legacy: { url: "./aellux.ext.overflow-marquee.legacy.min.js", integrity: "sha384-ceZW+Z6XzECKkRUbAPt6pJ50JmbCwaAN1l5JN65Yj+2WOEov43bKUQ6pB5XpAz3k", regular: { url: "./aellux.ext.overflow-marquee.legacy.js", integrity: "sha384-HyHNSpTOh9IvFhnjPqNoVfnZ7suRqWq5Cby+Oem4gRUiSY+/tXhSc4nO7JP94QfM" } } }, dependencies: [], style: { url: "./aellux.ext.overflow-marquee.min.css", integrity: "sha384-227/o3V6WqWkOwwlcZPWi9LjjLnbP102GcrmuRFMcA5LRvDjuuW0GgFmOr9a6CLq", regular: { url: "./aellux.ext.overflow-marquee.css", integrity: "sha384-n7NbmKXeKb6tdUwdw/4hJUFbZfKKpgbuLed9qONT1wpVK/em6yYoj+CfSbl+Z5XS" } } }, "ajax-href": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.ajax-href.min.js", integrity: "sha384-jxDsnmMvHrnNfxntbkGWVFZauZaNnECbBsM5DiEgdwcectCoWx116N2+IaUL6IDH", regular: { url: "./aellux.ext.ajax-href.js", integrity: "sha384-RB1GUnt5XN82+aPHz/j5vimLS+3Mm6+0fWgjCRsmqq+rpMvnVQf38lpcQmxTIz21" } }, legacy: { url: "./aellux.ext.ajax-href.legacy.min.js", integrity: "sha384-kQPEKITjFVakYS6iYflvWQVHVmzs/cA7OY63LPmlmOYsbccWL3ChgEdACFz61Eti", regular: { url: "./aellux.ext.ajax-href.legacy.js", integrity: "sha384-jkSfdZKloRimQ/ySale8mwkfxx1I/sWD5EhMcKA3epR2C4QCtiGmgp4+SEq5rtDd" } } }, dependencies: [] }, scrollbox: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.scrollbox.min.js", integrity: "sha384-1TqqZT+ulF8e4U8Uttxk+ZXd3gXG6FB5mMXiOiDzJfJulzbWHlcX77dj9jidNUmA", regular: { url: "./aellux.ext.scrollbox.js", integrity: "sha384-S5Z3YWg+j/ZNEX3RqxHFSWEi3uPFKa/erx6XPOJRv6lJNcPGV9wtQaxAuF6fr0Qw" } }, legacy: { url: "./aellux.ext.scrollbox.legacy.min.js", integrity: "sha384-/sQKFIT8u/TAUe+WV4tpu3GOqH+EbUvzOeuko37R9FcL/QFEjYiGT4rzYtJ9fF5g", regular: { url: "./aellux.ext.scrollbox.legacy.js", integrity: "sha384-wIM7v+QbvDB0bXfgUVwT9VS9HqZCEukunJKaDCAUy4wy5P3+i1u8NpEMVXfbkhFy" } } }, dependencies: [], style: { url: "./aellux.ext.scrollbox.min.css", integrity: "sha384-JHqaS1bOe84ly3LSDcK68GJr8/CabByFgMeEPYHeawHtw4bMikkrsC+FCFKdrdJ6", regular: { url: "./aellux.ext.scrollbox.css", integrity: "sha384-tB8nUfKwRJ+GsVpAukiNgHcr7rEeXqxdnrQdZLpy4RnqPTXhArJ5AlLJu/1yel8K" } } }, "scrollbox-snap": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.scrollbox-snap.min.js", integrity: "sha384-NNIBI4kj4sdGSI+XDs2LeBrjdo7AAN4eVtQeyAGScLBvxkZEFx3OaT9xpaW4b4Wq", regular: { url: "./aellux.ext.scrollbox-snap.js", integrity: "sha384-gmMGaW0wvR61QynjfBKga6/+7NMAWzk6ALIYmMC0hy9gkSvCrvKXueA+ETEgM9wB" } }, legacy: { url: "./aellux.ext.scrollbox-snap.legacy.min.js", integrity: "sha384-a35oytvnpf0myg+Brd+mFDgQBcbNaihANZl5J+GmrEqlyDl8CDQy0OZyu5Ld3l64", regular: { url: "./aellux.ext.scrollbox-snap.legacy.js", integrity: "sha384-9hE1HNRl9mFvr5aLiaRNZSQsTBb1XoicM6xGqeuISTS6OqL1sZm6DlmY6qxcQJk+" } } }, dependencies: [] }, adaptive: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.adaptive.min.js", integrity: "sha384-bkeOnTW/3uzbuhLc8fujaWnWGC+pwNAkZwci9M09paKqudp0v/flMrJ49JXw16vv", regular: { url: "./aellux.ext.adaptive.js", integrity: "sha384-Qzf9wU6DSSaaE+8lr96vnYqjKQqYxep8dhCZmjgNdqreuk9fL3qKMn3NW7DGAEaT" } }, legacy: { url: "./aellux.ext.adaptive.legacy.min.js", integrity: "sha384-YVHHWZOvf+65r/CU89nBPZXhj3j5sn4r2ho+CNUCUaYs1WE6pWIeypcq7n5OCBor", regular: { url: "./aellux.ext.adaptive.legacy.js", integrity: "sha384-gBkxqbBpIqdj5ozJm/NsenI/yKOvEGarZBl2SrPjYiiYx6cez2/FGTMf5XyzHrTj" } } }, dependencies: [], style: { url: "./aellux.ext.adaptive.min.css", integrity: "sha384-8yUP1PStfDqBCyCskP3k9WLIKgv/yl1nyDhmPz7hsX5NZ4z3ZT3ajolA+RhYlUiG", regular: { url: "./aellux.ext.adaptive.css", integrity: "sha384-HfIjX9Zk0VFRimzPvUaTS5AtwuHJHjXKoM/xbNJXj5vE7bSdBGEzbrBHfbNmYah0" } } }, present: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.present.min.js", integrity: "sha384-EIaNqaLi7JHQ2RXOI6kX70LbsXAxcf2EgFoCkbs6m6SmIkvSyueWneyt0al0eymR", regular: { url: "./aellux.ext.present.js", integrity: "sha384-fAf7M1Hv8zdfUOFwdiii5rZC8pkEuOJDbskWXzVWe7Y0Tj0hEGctYMmzEZpKsfny" } }, legacy: { url: "./aellux.ext.present.legacy.min.js", integrity: "sha384-C4SfaexHaP88DdRQ2Nliq+HFljay9nkOxjMMQwh6mXRQsPwMb4Pm9TIwe1IpVUPm", regular: { url: "./aellux.ext.present.legacy.js", integrity: "sha384-NWJMHfgYAytfDxWS6e4l6NkrLKrLcJcvtuvzO8pCi5GrOFB5RsY+wspG8seVp0Mf" } } }, dependencies: [], style: { url: "./aellux.ext.present.min.css", integrity: "sha384-2QoNgFTu/KOOrgaTKZV4VXCoIaU2h5PMPILW5LHseXK2ygNpF6miOfxZUwkTBgPY", regular: { url: "./aellux.ext.present.css", integrity: "sha384-uZ/OPZK9sRFcaejKJHrc0wPaPXFKeGS+pBWWbkMEe3+3M6zLEa7nBc/cD0Tejsmr" } } } } };
     }
   });
 
@@ -22557,6 +22557,134 @@
     }
   });
 
+  // src/internal/diagnose-resources.js
+  function _createForOfIteratorHelper3(r, e) {
+    var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
+    if (!t) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray3(r)) || e && r && "number" == typeof r.length) {
+        t && (r = t);
+        var _n = 0, F = function F2() {
+        };
+        return { s: F, n: function n() {
+          return _n >= r.length ? { done: true } : { done: false, value: r[_n++] };
+        }, e: function e2(r2) {
+          throw r2;
+        }, f: F };
+      }
+      throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+    }
+    var o, a = true, u = false;
+    return { s: function s() {
+      t = t.call(r);
+    }, n: function n() {
+      var r2 = t.next();
+      return a = r2.done, r2;
+    }, e: function e2(r2) {
+      u = true, o = r2;
+    }, f: function f() {
+      try {
+        a || null == t.return || t.return();
+      } finally {
+        if (u) throw o;
+      }
+    } };
+  }
+  function _toConsumableArray2(r) {
+    return _arrayWithoutHoles2(r) || _iterableToArray2(r) || _unsupportedIterableToArray3(r) || _nonIterableSpread2();
+  }
+  function _nonIterableSpread2() {
+    throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+  }
+  function _unsupportedIterableToArray3(r, a) {
+    if (r) {
+      if ("string" == typeof r) return _arrayLikeToArray3(r, a);
+      var t = {}.toString.call(r).slice(8, -1);
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray3(r, a) : void 0;
+    }
+  }
+  function _iterableToArray2(r) {
+    if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
+  }
+  function _arrayWithoutHoles2(r) {
+    if (Array.isArray(r)) return _arrayLikeToArray3(r);
+  }
+  function _arrayLikeToArray3(r, a) {
+    (null == a || a > r.length) && (a = r.length);
+    for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
+    return n;
+  }
+  function transformOwners(api, element) {
+    var _api$ext$anchor, _api$ext$scrollbox, _api$ext$present, _element$getAttribute;
+    var owners = [];
+    if ((_api$ext$anchor = api.ext.anchor) !== null && _api$ext$anchor !== void 0 && _api$ext$anchor.initialized && element.classList.contains(api.className("anchored"))) owners.push("anchor");
+    var parent = element.parentElement;
+    if ((_api$ext$scrollbox = api.ext.scrollbox) !== null && _api$ext$scrollbox !== void 0 && _api$ext$scrollbox.initialized && element.hasAttribute(api.attr("scrollbox-elastic")) && element.getAttribute(api.attr("scrollbox-elastic")) !== "false" && parent !== null && parent !== void 0 && parent.hasAttribute(api.attr("scrollbox"))) {
+      var children = _toConsumableArray2(parent.children).filter(function(child) {
+        return !child.hasAttribute(api.attr("scrollbar-vertical")) && !child.hasAttribute(api.attr("scrollbar-horizontal"));
+      });
+      if (children.length === 1) owners.push("scrollbox-elastic");
+    }
+    if ((_api$ext$present = api.ext.present) !== null && _api$ext$present !== void 0 && _api$ext$present.initialized && !element.hasAttribute(api.attr("anchor")) && (_element$getAttribute = element.getAttribute(api.attr("present"))) !== null && _element$getAttribute !== void 0 && _element$getAttribute.split(/\s+/).includes("transform")) owners.push("present");
+    return owners;
+  }
+  function diagnoseResource(api, element, property, writers) {
+    api.diagnostics.warn(api.diagnostics.WARN_RESOURCE_CONFLICT, {
+      extension: writers[writers.length - 1],
+      element: element,
+      attribute: "style",
+      property: property,
+      writers: writers,
+      reason: "".concat(writers.join(" and "), " replace the same ").concat(property, " on this element."),
+      suggestion: "Keep positioning and elastic transforms on the outer element; animate a child element instead."
+    });
+  }
+  function diagnoseMotionResources(api, element, animations, extension) {
+    if (api.options.environment !== "development") return;
+    var _iterator = _createForOfIteratorHelper3(animations), _step;
+    try {
+      var _loop = function _loop2() {
+        var animation = _step.value;
+        try {
+          var effect = animation.effect;
+          if ((effect === null || effect === void 0 ? void 0 : effect.target) !== element || effect.pseudoElement) return 0;
+          var frames = effect.getKeyframes();
+          if (!frames.some(function(frame) {
+            return "transform" in frame && (frame.composite === "replace" || (!frame.composite || frame.composite === "auto") && (!effect.composite || effect.composite === "replace"));
+          })) return 0;
+          var owners = transformOwners(api, element).filter(function(owner2) {
+            return owner2 !== extension;
+          });
+          var _iterator2 = _createForOfIteratorHelper3(owners), _step2;
+          try {
+            for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
+              var owner = _step2.value;
+              diagnoseResource(api, element, "transform", [owner, extension]);
+            }
+          } catch (err) {
+            _iterator2.e(err);
+          } finally {
+            _iterator2.f();
+          }
+        } catch (_) {
+        }
+      }, _ret;
+      for (_iterator.s(); !(_step = _iterator.n()).done; ) {
+        _ret = _loop();
+        if (_ret === 0) continue;
+      }
+    } catch (err) {
+      _iterator.e(err);
+    } finally {
+      _iterator.f();
+    }
+  }
+  var init_diagnose_resources = __esm({
+    "src/internal/diagnose-resources.js": function() {
+      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
+      /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+    }
+  });
+
   // src/internal/validate-declarations.js
   function _typeof2(o) {
     "@babel/helpers - typeof";
@@ -22604,22 +22732,22 @@
     }
     return ("string" === r ? String : Number)(t);
   }
-  function _toConsumableArray2(r) {
-    return _arrayWithoutHoles2(r) || _iterableToArray2(r) || _unsupportedIterableToArray3(r) || _nonIterableSpread2();
+  function _toConsumableArray3(r) {
+    return _arrayWithoutHoles3(r) || _iterableToArray3(r) || _unsupportedIterableToArray4(r) || _nonIterableSpread3();
   }
-  function _nonIterableSpread2() {
+  function _nonIterableSpread3() {
     throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
-  function _iterableToArray2(r) {
+  function _iterableToArray3(r) {
     if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
   }
-  function _arrayWithoutHoles2(r) {
-    if (Array.isArray(r)) return _arrayLikeToArray3(r);
+  function _arrayWithoutHoles3(r) {
+    if (Array.isArray(r)) return _arrayLikeToArray4(r);
   }
-  function _createForOfIteratorHelper3(r, e) {
+  function _createForOfIteratorHelper4(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
-      if (Array.isArray(r) || (t = _unsupportedIterableToArray3(r)) || e && r && "number" == typeof r.length) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray4(r)) || e && r && "number" == typeof r.length) {
         t && (r = t);
         var _n = 0, F = function F2() {
         };
@@ -22648,19 +22776,19 @@
     } };
   }
   function _slicedToArray(r, e) {
-    return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray3(r, e) || _nonIterableRest();
+    return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray4(r, e) || _nonIterableRest();
   }
   function _nonIterableRest() {
     throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
-  function _unsupportedIterableToArray3(r, a) {
+  function _unsupportedIterableToArray4(r, a) {
     if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray3(r, a);
+      if ("string" == typeof r) return _arrayLikeToArray4(r, a);
       var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray3(r, a) : void 0;
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray4(r, a) : void 0;
     }
   }
-  function _arrayLikeToArray3(r, a) {
+  function _arrayLikeToArray4(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
@@ -22702,7 +22830,7 @@
     var owners = /* @__PURE__ */ new Map();
     for (var _i = 0, _Object$entries = Object.entries(attributesByExtension); _i < _Object$entries.length; _i++) {
       var _Object$entries$_i = _slicedToArray(_Object$entries[_i], 2), extension = _Object$entries$_i[0], names = _Object$entries$_i[1];
-      var _iterator = _createForOfIteratorHelper3(names.split(" ")), _step;
+      var _iterator = _createForOfIteratorHelper4(names.split(" ")), _step;
       try {
         for (_iterator.s(); !(_step = _iterator.n()).done; ) {
           var name = _step.value;
@@ -22714,12 +22842,12 @@
         _iterator.f();
       }
     }
-    var known = new Set([].concat(_toConsumableArray2(owners.keys()), _toConsumableArray2(coreAttributes.split(" ").map(attr)), _toConsumableArray2(Object.keys(api.registry.preferenceMediaQueries).map(function(name2) {
+    var known = new Set([].concat(_toConsumableArray3(owners.keys()), _toConsumableArray3(coreAttributes.split(" ").map(attr)), _toConsumableArray3(Object.keys(api.registry.preferenceMediaQueries).map(function(name2) {
       return attr(utils_name_case_default.fromCamelCase(name2));
     }))));
-    for (var _i2 = 0, _arr = [].concat(_toConsumableArray2(Object.values(api.registry.extMounters)), _toConsumableArray2(Object.values(api.registry.lazyExtSelectors))); _i2 < _arr.length; _i2++) {
+    for (var _i2 = 0, _arr = [].concat(_toConsumableArray3(Object.values(api.registry.extMounters)), _toConsumableArray3(Object.values(api.registry.lazyExtSelectors))); _i2 < _arr.length; _i2++) {
       var selector = _arr[_i2];
-      var _iterator2 = _createForOfIteratorHelper3(selector.match(/\[[^\s\]~|^$*!=]+/g) || []), _step2;
+      var _iterator2 = _createForOfIteratorHelper4(selector.match(/\[[^\s\]~|^$*!=]+/g) || []), _step2;
       try {
         for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
           var match = _step2.value;
@@ -22731,8 +22859,8 @@
         _iterator2.f();
       }
     }
-    var elements = [].concat(_toConsumableArray2(scope.nodeType === 1 ? [scope] : []), _toConsumableArray2(scope.querySelectorAll("*")));
-    var _iterator3 = _createForOfIteratorHelper3(elements), _step3;
+    var elements = [].concat(_toConsumableArray3(scope.nodeType === 1 ? [scope] : []), _toConsumableArray3(scope.querySelectorAll("*")));
+    var _iterator3 = _createForOfIteratorHelper4(elements), _step3;
     try {
       var _loop = function _loop2() {
         var _element$parentElemen;
@@ -22757,14 +22885,14 @@
           var code = arguments.length > 4 && arguments[4] !== void 0 ? arguments[4] : "WARN_CONFIGURATION_VALUE";
           return report(code, extension2, name2, reason, suggestion);
         };
-        var _iterator4 = _createForOfIteratorHelper3(element.attributes), _step4;
+        var _iterator4 = _createForOfIteratorHelper4(element.attributes), _step4;
         try {
           var _loop22 = function _loop23() {
             var attribute = _step4.value;
             var owner = owners.get(attribute.name);
             if (selected && (!owner || !selected.has(owner))) return 1;
             if (!selected && attribute.name.startsWith(prefix) && !known.has(attribute.name)) {
-              var candidate = _toConsumableArray2(known).find(function(name2) {
+              var candidate = _toConsumableArray3(known).find(function(name2) {
                 return oneEditApart(attribute.name, name2);
               });
               if (candidate) reportConfiguration(api, "WARN_ATTRIBUTE_UNKNOWN", {
@@ -22820,6 +22948,10 @@
         if ((!selected || selected.has("scrollbox-snap")) && has("snap-item") && !element.closest("[".concat(attr("scrollbox"), "]"))) invalid("scrollbox-snap", "snap-item", "Snap item has no Scrollbox ancestor.", "Place snap items inside a Scrollbox with Snap enabled.", "WARN_CONFIGURATION_STRUCTURE");
         if (!selected && has("maxfps") && (!value("maxfps").trim() || !Number.isFinite(Number(value("maxfps"))) || Number(value("maxfps")) <= 0)) invalid("core", "maxfps", "Frame rate must be finite and greater than zero.", "Use a positive number or remove the attribute.", "WARN_LAYOUT_MAX_FPS_INVALID");
         if (!selected || selected.has("present") || selected.has("anchor")) validateCSS();
+        if ((!selected || selected.has("present") || selected.has("scrollbox")) && has("scrollbox-elastic")) {
+          var writers = transformOwners(api, element);
+          if (writers.includes("scrollbox-elastic") && writers.includes("present")) diagnoseResource(api, element, "transform", ["scrollbox-elastic", "present"]);
+        }
         function validatePresent() {
           if (has("present") && value("present").trim().split(/\s+/).some(function(token) {
             return token && !["opacity", "transform", "height", "width"].includes(token);
@@ -22838,13 +22970,13 @@
           }
           if (has("auto-unpop") && value("auto-unpop") && !/^(?:\d+(?:\.\d+)?|\.\d+)(?:ms|s)?$/.test(value("auto-unpop").trim())) invalid("present", "auto-unpop", "Auto-unpop duration is invalid.", "Use a nonnegative duration such as 250ms or 2s.");
           if (has("present-group")) {
-            var members = _toConsumableArray2(element.querySelectorAll("[".concat(attr("present"), "]"))).filter(function(member2) {
+            var members = _toConsumableArray3(element.querySelectorAll("[".concat(attr("present"), "]"))).filter(function(member2) {
               return member2.closest("[".concat(attr("present-group"), "]")) === element;
             });
             if (!members.some(function(member2) {
               return member2.id;
             })) invalid("present", "present-group", "Group has no identifiable Present members.", "Add Present descendants with unique native IDs.", "WARN_PRESENT_GROUP_SELECTION");
-            var _iterator5 = _createForOfIteratorHelper3(members), _step5;
+            var _iterator5 = _createForOfIteratorHelper4(members), _step5;
             try {
               for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
                 var member = _step5.value;
@@ -22904,12 +23036,22 @@
         }
         function validateSnap() {
           if (!["", "horizontal", "vertical", "false"].includes(value("scrollbox-snap"))) invalid("scrollbox-snap", "scrollbox-snap", "Unknown snap axis.", "Use horizontal, vertical, or false.");
-          var _iterator6 = _createForOfIteratorHelper3(element.querySelectorAll("[".concat(attr("snap-item"), "]"))), _step6;
+          var _iterator6 = _createForOfIteratorHelper4(element.querySelectorAll("[".concat(attr("snap-item"), "]"))), _step6;
           try {
             for (_iterator6.s(); !(_step6 = _iterator6.n()).done; ) {
               var item = _step6.value;
               if (item.closest("[".concat(attr("scrollbox"), "]")) !== element) continue;
               var alignment = item.getAttribute(attr("snap-item"));
+              var style = root2.getComputedStyle(item);
+              if (item.getClientRects().length && [style.transform, style.translate, style.rotate, style.scale].some(function(value2) {
+                return value2 && value2 !== "none";
+              })) reportConfiguration(api, "WARN_SCROLLBOX_SNAP_TRANSFORM", {
+                extension: "scrollbox-snap",
+                element: item,
+                attribute: attr("snap-item"),
+                reason: "Snap geometry includes a transform applied to the item itself.",
+                suggestion: "Apply the visual transform to a child of the snap item."
+              });
               if (!["", "start", "end", "center", "left", "right", "top", "bottom"].includes(alignment)) reportConfiguration(api, "WARN_CONFIGURATION_VALUE", {
                 extension: "scrollbox-snap",
                 element: item,
@@ -22934,8 +23076,8 @@
           })) invalid("present", "present", "Anchor and Present both declare transform; Anchor takes priority.", "Remove transform from Present, or animate a child element instead.", "WARN_PRESENT_ANCHOR_TRANSFORM");
           var extension2 = checkAnchor ? "anchor" : "present";
           var style = root2.getComputedStyle(element);
-          var durations = [].concat(_toConsumableArray2(checkPresent ? ["--ae-pop-duration", "--ae-unpop-duration"] : []), _toConsumableArray2(checkAnchor ? ["--ae-anchor-switch-duration"] : []));
-          var _iterator7 = _createForOfIteratorHelper3(durations), _step7;
+          var durations = [].concat(_toConsumableArray3(checkPresent ? ["--ae-pop-duration", "--ae-unpop-duration"] : []), _toConsumableArray3(checkAnchor ? ["--ae-anchor-switch-duration"] : []));
+          var _iterator7 = _createForOfIteratorHelper4(durations), _step7;
           try {
             for (_iterator7.s(); !(_step7 = _iterator7.n()).done; ) {
               var _root$CSS;
@@ -23005,11 +23147,12 @@
       init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       init_report_configuration();
       init_utils_name_case();
+      init_diagnose_resources();
       /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
       attributesByExtension = {
         present: "present present-group present-active present-when present-motion trigger trigger-on dismiss target auto-unpop unpop-on-outside",
-        anchor: "anchor anchor-target anchor-match anchor-style",
-        "overflow-marquee": "overflow-marquee overflow-marquee-content overflow-marquee-active overflow-marquee-style",
+        anchor: "anchor anchor-target anchor-match",
+        "overflow-marquee": "overflow-marquee overflow-marquee-content overflow-marquee-active",
         scrollbox: "scrollbox scrollbox-wheel-horizontal scrollbox-momentum scrollbox-elastic scrollbar scrollbar-vertical scrollbar-horizontal",
         "scrollbox-snap": "scrollbox-snap snap-item",
         focus: "focus",
@@ -23019,7 +23162,7 @@
         preference: "preference option label next prev ready",
         feedback: "feedback target-message target-transform"
       };
-      coreAttributes = "maxfps wait-mounted ext ext-style dep load-when builds load-style weak-style legacy esm theme-color";
+      coreAttributes = "maxfps wait-mounted ext ext-style dep load-when builds load-style weak-style full-style legacy esm theme-color";
       activation = {
         present: "present present-group trigger dismiss",
         anchor: "anchor",
@@ -23037,10 +23180,10 @@
   });
 
   // src/internal/find-duplicate-attributes.js
-  function _createForOfIteratorHelper4(r, e) {
+  function _createForOfIteratorHelper5(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
-      if (Array.isArray(r) || (t = _unsupportedIterableToArray4(r)) || e && r && "number" == typeof r.length) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray5(r)) || e && r && "number" == typeof r.length) {
         t && (r = t);
         var _n = 0, F = function F2() {
         };
@@ -23068,14 +23211,14 @@
       }
     } };
   }
-  function _unsupportedIterableToArray4(r, a) {
+  function _unsupportedIterableToArray5(r, a) {
     if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray4(r, a);
+      if ("string" == typeof r) return _arrayLikeToArray5(r, a);
       var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray4(r, a) : void 0;
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray5(r, a) : void 0;
     }
   }
-  function _arrayLikeToArray4(r, a) {
+  function _arrayLikeToArray5(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
@@ -23164,7 +23307,7 @@
         });
       }
       if (index >= html.length) break;
-      var _iterator = _createForOfIteratorHelper4(attributes.values()), _step;
+      var _iterator = _createForOfIteratorHelper5(attributes.values()), _step;
       try {
         for (_iterator.s(); !(_step = _iterator.n()).done; ) {
           var _attribute = _step.value;
@@ -23240,110 +23383,6 @@
     }
     return ("string" === r ? String : Number)(t);
   }
-  function _createForOfIteratorHelper5(r, e) {
-    var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
-    if (!t) {
-      if (Array.isArray(r) || (t = _unsupportedIterableToArray5(r)) || e && r && "number" == typeof r.length) {
-        t && (r = t);
-        var _n = 0, F = function F2() {
-        };
-        return { s: F, n: function n() {
-          return _n >= r.length ? { done: true } : { done: false, value: r[_n++] };
-        }, e: function e2(r2) {
-          throw r2;
-        }, f: F };
-      }
-      throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
-    }
-    var o, a = true, u = false;
-    return { s: function s() {
-      t = t.call(r);
-    }, n: function n() {
-      var r2 = t.next();
-      return a = r2.done, r2;
-    }, e: function e2(r2) {
-      u = true, o = r2;
-    }, f: function f() {
-      try {
-        a || null == t.return || t.return();
-      } finally {
-        if (u) throw o;
-      }
-    } };
-  }
-  function _unsupportedIterableToArray5(r, a) {
-    if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray5(r, a);
-      var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray5(r, a) : void 0;
-    }
-  }
-  function _arrayLikeToArray5(r, a) {
-    (null == a || a > r.length) && (a = r.length);
-    for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
-    return n;
-  }
-  function validateHTMLSource(api, html, source) {
-    if (api.options.environment !== "development") return;
-    var _iterator = _createForOfIteratorHelper5(findDuplicateAttributes(html)), _step;
-    try {
-      for (_iterator.s(); !(_step = _iterator.n()).done; ) {
-        var duplicate = _step.value;
-        var attribute = duplicate.attribute;
-        reportConfiguration(api, "WARN_ATTRIBUTE_DUPLICATE", _objectSpread2(_objectSpread2({
-          extension: "core",
-          source: source
-        }, duplicate), {}, {
-          reason: "The ".concat(attribute, " attribute occurs more than once on the same start tag; the HTML parser keeps the first value and discards the others."),
-          suggestion: attribute === "class" ? "Combine all class names in one class attribute, separated by spaces." : attribute === "style" ? "Combine the intended CSS declarations in one style attribute, separated by semicolons." : "Keep one ".concat(attribute, " attribute with the intended value.")
-        }));
-      }
-    } catch (err) {
-      _iterator.e(err);
-    } finally {
-      _iterator.f();
-    }
-  }
-  var init_validate_html_source = __esm({
-    "src/internal/validate-html-source.js": function() {
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
-      init_find_duplicate_attributes();
-      init_report_configuration();
-      /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
-    }
-  });
-
-  // src/internal/create-mount-helper.js
-  function _slicedToArray2(r, e) {
-    return _arrayWithHoles2(r) || _iterableToArrayLimit2(r, e) || _unsupportedIterableToArray6(r, e) || _nonIterableRest2();
-  }
-  function _nonIterableRest2() {
-    throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
-  }
-  function _iterableToArrayLimit2(r, l) {
-    var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
-    if (null != t) {
-      var e, n, i, u, a = [], f = true, o = false;
-      try {
-        if (i = (t = t.call(r)).next, 0 === l) {
-          if (Object(t) !== t) return;
-          f = false;
-        } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = true) ;
-      } catch (r2) {
-        o = true, n = r2;
-      } finally {
-        try {
-          if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return;
-        } finally {
-          if (o) throw n;
-        }
-      }
-      return a;
-    }
-  }
-  function _arrayWithHoles2(r) {
-    if (Array.isArray(r)) return r;
-  }
   function _createForOfIteratorHelper6(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
@@ -23383,6 +23422,110 @@
     }
   }
   function _arrayLikeToArray6(r, a) {
+    (null == a || a > r.length) && (a = r.length);
+    for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
+    return n;
+  }
+  function validateHTMLSource(api, html, source) {
+    if (api.options.environment !== "development") return;
+    var _iterator = _createForOfIteratorHelper6(findDuplicateAttributes(html)), _step;
+    try {
+      for (_iterator.s(); !(_step = _iterator.n()).done; ) {
+        var duplicate = _step.value;
+        var attribute = duplicate.attribute;
+        reportConfiguration(api, "WARN_ATTRIBUTE_DUPLICATE", _objectSpread2(_objectSpread2({
+          extension: "core",
+          source: source
+        }, duplicate), {}, {
+          reason: "The ".concat(attribute, " attribute occurs more than once on the same start tag; the HTML parser keeps the first value and discards the others."),
+          suggestion: attribute === "class" ? "Combine all class names in one class attribute, separated by spaces." : attribute === "style" ? "Combine the intended CSS declarations in one style attribute, separated by semicolons." : "Keep one ".concat(attribute, " attribute with the intended value.")
+        }));
+      }
+    } catch (err) {
+      _iterator.e(err);
+    } finally {
+      _iterator.f();
+    }
+  }
+  var init_validate_html_source = __esm({
+    "src/internal/validate-html-source.js": function() {
+      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
+      init_find_duplicate_attributes();
+      init_report_configuration();
+      /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+    }
+  });
+
+  // src/internal/create-mount-helper.js
+  function _slicedToArray2(r, e) {
+    return _arrayWithHoles2(r) || _iterableToArrayLimit2(r, e) || _unsupportedIterableToArray7(r, e) || _nonIterableRest2();
+  }
+  function _nonIterableRest2() {
+    throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+  }
+  function _iterableToArrayLimit2(r, l) {
+    var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
+    if (null != t) {
+      var e, n, i, u, a = [], f = true, o = false;
+      try {
+        if (i = (t = t.call(r)).next, 0 === l) {
+          if (Object(t) !== t) return;
+          f = false;
+        } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = true) ;
+      } catch (r2) {
+        o = true, n = r2;
+      } finally {
+        try {
+          if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return;
+        } finally {
+          if (o) throw n;
+        }
+      }
+      return a;
+    }
+  }
+  function _arrayWithHoles2(r) {
+    if (Array.isArray(r)) return r;
+  }
+  function _createForOfIteratorHelper7(r, e) {
+    var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
+    if (!t) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray7(r)) || e && r && "number" == typeof r.length) {
+        t && (r = t);
+        var _n = 0, F = function F2() {
+        };
+        return { s: F, n: function n() {
+          return _n >= r.length ? { done: true } : { done: false, value: r[_n++] };
+        }, e: function e2(r2) {
+          throw r2;
+        }, f: F };
+      }
+      throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+    }
+    var o, a = true, u = false;
+    return { s: function s() {
+      t = t.call(r);
+    }, n: function n() {
+      var r2 = t.next();
+      return a = r2.done, r2;
+    }, e: function e2(r2) {
+      u = true, o = r2;
+    }, f: function f() {
+      try {
+        a || null == t.return || t.return();
+      } finally {
+        if (u) throw o;
+      }
+    } };
+  }
+  function _unsupportedIterableToArray7(r, a) {
+    if (r) {
+      if ("string" == typeof r) return _arrayLikeToArray7(r, a);
+      var t = {}.toString.call(r).slice(8, -1);
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray7(r, a) : void 0;
+    }
+  }
+  function _arrayLikeToArray7(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
@@ -23564,7 +23707,7 @@
           while (1) switch (_context3.p = _context3.n) {
             case 0:
               hasDetachedElement = false;
-              _iterator = _createForOfIteratorHelper6(mountedElements.keys());
+              _iterator = _createForOfIteratorHelper7(mountedElements.keys());
               _context3.p = 1;
               _iterator.s();
             case 2:
@@ -23646,7 +23789,7 @@
               });
               _context4.p = 3;
               allLinks = findElements(rootElement, "link[rel='aelluxjs-ext']");
-              _iterator2 = _createForOfIteratorHelper6(allLinks);
+              _iterator2 = _createForOfIteratorHelper7(allLinks);
               try {
                 for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
                   link = _step2.value;
@@ -23777,7 +23920,7 @@
             case 1:
               candidatesByExtension = /* @__PURE__ */ new Map();
               allElements = findElements(rootElement, filter.join(","));
-              _iterator3 = _createForOfIteratorHelper6(allElements);
+              _iterator3 = _createForOfIteratorHelper7(allElements);
               try {
                 for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
                   element = _step3.value;
@@ -23795,7 +23938,7 @@
                       if (element.matches(_selector3) && filter.indexOf(_selector3) !== -1) localExtensionNames.add(fromCamelCase2(_key3));
                     }
                   }
-                  _iterator8 = _createForOfIteratorHelper6(localExtensionNames);
+                  _iterator8 = _createForOfIteratorHelper7(localExtensionNames);
                   try {
                     for (_iterator8.s(); !(_step8 = _iterator8.n()).done; ) {
                       _extensionName2 = _step8.value;
@@ -23833,7 +23976,7 @@
               }));
             case 2:
               loaded = _context5.v;
-              _iterator4 = _createForOfIteratorHelper6(loaded);
+              _iterator4 = _createForOfIteratorHelper7(loaded);
               _context5.p = 3;
               _iterator4.s();
             case 4:
@@ -23883,7 +24026,7 @@
               }
               return _context5.a(3, 13);
             case 12:
-              _iterator5 = _createForOfIteratorHelper6(mounter);
+              _iterator5 = _createForOfIteratorHelper7(mounter);
               try {
                 for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
                   _step5$value = _slicedToArray2(_step5.value, 2), selector = _step5$value[0], controller = _step5$value[1];
@@ -23924,7 +24067,7 @@
               return _context5.a(3, 32);
             case 17:
               mountableElements = findElements(rootElement, _selector);
-              _iterator6 = _createForOfIteratorHelper6(mountableElements);
+              _iterator6 = _createForOfIteratorHelper7(mountableElements);
               _context5.p = 18;
               _iterator6.s();
             case 19:
@@ -24021,7 +24164,7 @@
               _context5.n = 15;
               break;
             case 33:
-              _iterator7 = _createForOfIteratorHelper6(elementsAffected);
+              _iterator7 = _createForOfIteratorHelper7(elementsAffected);
               _context5.p = 34;
               _iterator7.s();
             case 35:
@@ -24185,7 +24328,7 @@
                 break;
               }
               registrations.sort(compareUnmountOrder);
-              _iterator9 = _createForOfIteratorHelper6(registrations);
+              _iterator9 = _createForOfIteratorHelper7(registrations);
               _context6.p = 12;
               _iterator9.s();
             case 13:
@@ -24459,17 +24602,17 @@
   });
 
   // src/internal/build-mount-map-manager.js
-  function _toConsumableArray3(r) {
-    return _arrayWithoutHoles3(r) || _iterableToArray3(r) || _unsupportedIterableToArray7(r) || _nonIterableSpread3();
+  function _toConsumableArray4(r) {
+    return _arrayWithoutHoles4(r) || _iterableToArray4(r) || _unsupportedIterableToArray8(r) || _nonIterableSpread4();
   }
-  function _nonIterableSpread3() {
+  function _nonIterableSpread4() {
     throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
-  function _iterableToArray3(r) {
+  function _iterableToArray4(r) {
     if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
   }
-  function _arrayWithoutHoles3(r) {
-    if (Array.isArray(r)) return _arrayLikeToArray7(r);
+  function _arrayWithoutHoles4(r) {
+    if (Array.isArray(r)) return _arrayLikeToArray8(r);
   }
   function _typeof4(o) {
     "@babel/helpers - typeof";
@@ -24479,10 +24622,10 @@
       return o2 && "function" == typeof Symbol && o2.constructor === Symbol && o2 !== Symbol.prototype ? "symbol" : typeof o2;
     }, _typeof4(o);
   }
-  function _createForOfIteratorHelper7(r, e) {
+  function _createForOfIteratorHelper8(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
-      if (Array.isArray(r) || (t = _unsupportedIterableToArray7(r)) || e && r && "number" == typeof r.length) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray8(r)) || e && r && "number" == typeof r.length) {
         t && (r = t);
         var _n = 0, F = function F2() {
         };
@@ -24510,14 +24653,14 @@
       }
     } };
   }
-  function _unsupportedIterableToArray7(r, a) {
+  function _unsupportedIterableToArray8(r, a) {
     if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray7(r, a);
+      if ("string" == typeof r) return _arrayLikeToArray8(r, a);
       var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray7(r, a) : void 0;
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray8(r, a) : void 0;
     }
   }
-  function _arrayLikeToArray7(r, a) {
+  function _arrayLikeToArray8(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
@@ -24565,7 +24708,7 @@
       return task;
     }
     function hasRemovedNodes(records) {
-      var _iterator = _createForOfIteratorHelper7(records), _step;
+      var _iterator = _createForOfIteratorHelper8(records), _step;
       try {
         for (_iterator.s(); !(_step = _iterator.n()).done; ) {
           var record = _step.value;
@@ -24579,7 +24722,7 @@
       return false;
     }
     function hasDetachedMountedElement() {
-      var _iterator2 = _createForOfIteratorHelper7(mountedElements.keys()), _step2;
+      var _iterator2 = _createForOfIteratorHelper8(mountedElements.keys()), _step2;
       try {
         for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
           var element = _step2.value;
@@ -24682,7 +24825,7 @@
         controllers: controllers,
         priority: priority
       });
-      root2.AelluxJs.registry.extMounters[key] = _toConsumableArray3(map.keys()).join(",");
+      root2.AelluxJs.registry.extMounters[key] = _toConsumableArray4(map.keys()).join(",");
       return manager;
     }
     function remove() {
@@ -24704,14 +24847,14 @@
         maps.delete(key);
         delete root2.AelluxJs.registry.extMounters[key];
       } else if (removed) {
-        root2.AelluxJs.registry.extMounters[key] = _toConsumableArray3(map.keys()).join(",");
+        root2.AelluxJs.registry.extMounters[key] = _toConsumableArray4(map.keys()).join(",");
       }
       return removed;
     }
     function hasMountedRegistration(extensionName, selector) {
       var prefix = "".concat(fromCamelCase2(extensionName), "@");
       var mountId = selector === void 0 ? null : "".concat(prefix).concat(selector);
-      var _iterator3 = _createForOfIteratorHelper7(mountedElements.values()), _step3;
+      var _iterator3 = _createForOfIteratorHelper8(mountedElements.values()), _step3;
       try {
         for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
           var registrations = _step3.value;
@@ -24719,7 +24862,7 @@
             if (registrations.has(mountId)) return true;
             continue;
           }
-          var _iterator4 = _createForOfIteratorHelper7(registrations), _step4;
+          var _iterator4 = _createForOfIteratorHelper8(registrations), _step4;
           try {
             for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
               var id = _step4.value;
@@ -24751,19 +24894,19 @@
 
   // src/internal/create-aria-helper.js
   function _slicedToArray3(r, e) {
-    return _arrayWithHoles3(r) || _iterableToArrayLimit3(r, e) || _unsupportedIterableToArray8(r, e) || _nonIterableRest3();
+    return _arrayWithHoles3(r) || _iterableToArrayLimit3(r, e) || _unsupportedIterableToArray9(r, e) || _nonIterableRest3();
   }
   function _nonIterableRest3() {
     throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
-  function _unsupportedIterableToArray8(r, a) {
+  function _unsupportedIterableToArray9(r, a) {
     if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray8(r, a);
+      if ("string" == typeof r) return _arrayLikeToArray9(r, a);
       var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray8(r, a) : void 0;
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray9(r, a) : void 0;
     }
   }
-  function _arrayLikeToArray8(r, a) {
+  function _arrayLikeToArray9(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
@@ -24925,22 +25068,22 @@
   });
 
   // src/internal/create-css-motion-controller.js
-  function _toConsumableArray4(r) {
-    return _arrayWithoutHoles4(r) || _iterableToArray4(r) || _unsupportedIterableToArray9(r) || _nonIterableSpread4();
+  function _toConsumableArray5(r) {
+    return _arrayWithoutHoles5(r) || _iterableToArray5(r) || _unsupportedIterableToArray10(r) || _nonIterableSpread5();
   }
-  function _nonIterableSpread4() {
+  function _nonIterableSpread5() {
     throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
-  function _iterableToArray4(r) {
+  function _iterableToArray5(r) {
     if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
   }
-  function _arrayWithoutHoles4(r) {
-    if (Array.isArray(r)) return _arrayLikeToArray9(r);
+  function _arrayWithoutHoles5(r) {
+    if (Array.isArray(r)) return _arrayLikeToArray10(r);
   }
-  function _createForOfIteratorHelper8(r, e) {
+  function _createForOfIteratorHelper9(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
-      if (Array.isArray(r) || (t = _unsupportedIterableToArray9(r)) || e && r && "number" == typeof r.length) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray10(r)) || e && r && "number" == typeof r.length) {
         t && (r = t);
         var _n = 0, F = function F2() {
         };
@@ -24968,14 +25111,14 @@
       }
     } };
   }
-  function _unsupportedIterableToArray9(r, a) {
+  function _unsupportedIterableToArray10(r, a) {
     if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray9(r, a);
+      if ("string" == typeof r) return _arrayLikeToArray10(r, a);
       var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray9(r, a) : void 0;
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray10(r, a) : void 0;
     }
   }
-  function _arrayLikeToArray9(r, a) {
+  function _arrayLikeToArray10(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
@@ -25041,7 +25184,7 @@
       }
       if (!supported(element)) return nativeRun(operation);
       try {
-        var _iterator = _createForOfIteratorHelper8(element.getAnimations()), _step;
+        var _iterator = _createForOfIteratorHelper9(element.getAnimations()), _step;
         try {
           for (_iterator.s(); !(_step = _iterator.n()).done; ) {
             var animation = _step.value;
@@ -25123,9 +25266,11 @@
     }
     function capture(operation) {
       operation.element.getBoundingClientRect();
-      return operation.element.getAnimations().filter(function(animation) {
+      var animations = operation.element.getAnimations().filter(function(animation) {
         return !operation.before.has(animation) && controllable(animation);
       });
+      diagnoseMotionResources(getAelluxJs(), operation.element, animations, operation.options.extension || "css-motion");
+      return animations;
     }
     function controllable(animation) {
       try {
@@ -25143,7 +25288,7 @@
       }
       var endTime = 0;
       operation.animations = animations;
-      var _iterator2 = _createForOfIteratorHelper8(animations), _step2;
+      var _iterator2 = _createForOfIteratorHelper9(animations), _step2;
       try {
         for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
           var animation = _step2.value;
@@ -25174,7 +25319,7 @@
         if (!frames.length) return false;
         var metadata = /* @__PURE__ */ new Set(["offset", "computedOffset", "easing", "composite"]);
         var found = false;
-        var _iterator3 = _createForOfIteratorHelper8(frames), _step3;
+        var _iterator3 = _createForOfIteratorHelper9(frames), _step3;
         try {
           for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
             var frame = _step3.value;
@@ -25220,13 +25365,13 @@
       var values = [first, second].filter(function(value) {
         return Number.isFinite(value) && value > 0;
       });
-      return values.length ? Math.min.apply(Math, _toConsumableArray4(values)) : void 0;
+      return values.length ? Math.min.apply(Math, _toConsumableArray5(values)) : void 0;
     }
     function advance(operation) {
       if (!operation.controlled || operation.done) return;
       var elapsed = Math.max(0, now() - operation.start);
       var time = Math.min(elapsed, operation.endTime);
-      var _iterator4 = _createForOfIteratorHelper8(operation.animations), _step4;
+      var _iterator4 = _createForOfIteratorHelper9(operation.animations), _step4;
       try {
         for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
           var animation = _step4.value;
@@ -25264,13 +25409,19 @@
       return "linear(".concat(points.join(", "), ")");
     }
     function nativeRun(operation) {
+      var before = operation.before;
+      if (getAelluxJs().options.environment === "development" && typeof operation.element.getAnimations === "function") before = new Set(operation.element.getAnimations());
       operation.options.apply();
-      return nativeWait(operation);
+      return nativeWait(operation, before);
     }
     function nativeWait(operation) {
+      var before = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : operation.before;
       var animations = typeof operation.element.getAnimations === "function" ? operation.element.getAnimations().filter(function(animation) {
         return !operation.before.has(animation);
       }) : [];
+      diagnoseMotionResources(getAelluxJs(), operation.element, before === operation.before ? animations : animations.filter(function(animation) {
+        return !before.has(animation);
+      }), operation.options.extension || "css-motion");
       return new Promise(function(resolve) {
         operation.nativeResolve = resolve;
         var complete = function complete2() {
@@ -25336,7 +25487,7 @@
       if (operations.get(operation.id) === operation) getAelluxJs().waitLayout.setVisualFPSLimit(operation.id, null);
       if (operation.nativeTimer !== null) root2.clearTimeout(operation.nativeTimer);
       operation.nativeTimer = null;
-      var _iterator5 = _createForOfIteratorHelper8(operation.animations), _step5;
+      var _iterator5 = _createForOfIteratorHelper9(operation.animations), _step5;
       try {
         for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
           var animation = _step5.value;
@@ -25373,15 +25524,16 @@
   var init_create_css_motion_controller = __esm({
     "src/internal/create-css-motion-controller.js": function() {
       init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
+      init_diagnose_resources();
       /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
     }
   });
 
   // src/internal/ease.js
-  function _createForOfIteratorHelper9(r, e) {
+  function _createForOfIteratorHelper10(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
-      if (Array.isArray(r) || (t = _unsupportedIterableToArray10(r)) || e && r && "number" == typeof r.length) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray11(r)) || e && r && "number" == typeof r.length) {
         t && (r = t);
         var _n = 0, F = function F2() {
         };
@@ -25409,26 +25561,26 @@
       }
     } };
   }
-  function _toConsumableArray5(r) {
-    return _arrayWithoutHoles5(r) || _iterableToArray5(r) || _unsupportedIterableToArray10(r) || _nonIterableSpread5();
+  function _toConsumableArray6(r) {
+    return _arrayWithoutHoles6(r) || _iterableToArray6(r) || _unsupportedIterableToArray11(r) || _nonIterableSpread6();
   }
-  function _nonIterableSpread5() {
+  function _nonIterableSpread6() {
     throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
-  function _unsupportedIterableToArray10(r, a) {
+  function _unsupportedIterableToArray11(r, a) {
     if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray10(r, a);
+      if ("string" == typeof r) return _arrayLikeToArray11(r, a);
       var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray10(r, a) : void 0;
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray11(r, a) : void 0;
     }
   }
-  function _iterableToArray5(r) {
+  function _iterableToArray6(r) {
     if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
   }
-  function _arrayWithoutHoles5(r) {
-    if (Array.isArray(r)) return _arrayLikeToArray10(r);
+  function _arrayWithoutHoles6(r) {
+    if (Array.isArray(r)) return _arrayLikeToArray11(r);
   }
-  function _arrayLikeToArray10(r, a) {
+  function _arrayLikeToArray11(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
@@ -25517,7 +25669,7 @@
       })) {
         throw new RangeError("Invalid cubic bezier: ".concat(name));
       }
-      return cubicBezier.apply(void 0, [t].concat(_toConsumableArray5(points.map(Number))));
+      return cubicBezier.apply(void 0, [t].concat(_toConsumableArray6(points.map(Number))));
     }
     var key = name.replace(/[\s_-]/g, "").toLowerCase();
     if (key.startsWith(EASE_PREFIX)) key = key.slice(EASE_PREFIX.length);
@@ -25526,7 +25678,7 @@
     if (key === "smootherstep") return t * t * t * (t * (6 * t - 15) + 10);
     var family = "";
     var direction = "";
-    var _iterator = _createForOfIteratorHelper9(DIRECTIONS), _step;
+    var _iterator = _createForOfIteratorHelper10(DIRECTIONS), _step;
     try {
       for (_iterator.s(); !(_step = _iterator.n()).done; ) {
         var candidate = _step.value;
@@ -25634,10 +25786,10 @@
     }
     return ("string" === r ? String : Number)(t);
   }
-  function _createForOfIteratorHelper10(r, e) {
+  function _createForOfIteratorHelper11(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
-      if (Array.isArray(r) || (t = _unsupportedIterableToArray11(r)) || e && r && "number" == typeof r.length) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray12(r)) || e && r && "number" == typeof r.length) {
         t && (r = t);
         var _n = 0, F = function F2() {
         };
@@ -25666,19 +25818,19 @@
     } };
   }
   function _slicedToArray4(r, e) {
-    return _arrayWithHoles4(r) || _iterableToArrayLimit4(r, e) || _unsupportedIterableToArray11(r, e) || _nonIterableRest4();
+    return _arrayWithHoles4(r) || _iterableToArrayLimit4(r, e) || _unsupportedIterableToArray12(r, e) || _nonIterableRest4();
   }
   function _nonIterableRest4() {
     throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
-  function _unsupportedIterableToArray11(r, a) {
+  function _unsupportedIterableToArray12(r, a) {
     if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray11(r, a);
+      if ("string" == typeof r) return _arrayLikeToArray12(r, a);
       var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray11(r, a) : void 0;
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray12(r, a) : void 0;
     }
   }
-  function _arrayLikeToArray11(r, a) {
+  function _arrayLikeToArray12(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
@@ -26011,7 +26163,7 @@
                   });
                 case 5:
                   if (onUnmounted) onUnmounted();
-                  _iterator2 = _createForOfIteratorHelper10(extensionNames);
+                  _iterator2 = _createForOfIteratorHelper11(extensionNames);
                   _context7.p = 6;
                   _iterator2.s();
                 case 7:
@@ -26096,7 +26248,8 @@
             if (AelluxJs.ext[key].initialized) {
               extensionPromises[key] = Promise.resolve(AelluxJs.ext[key]);
             } else {
-              extensionPromises[key] = Promise.resolve().then(function() {
+              var registration = AelluxJs.registry.ext[key];
+              extensionPromises[key] = (registration.loadStyle && registration.loadStyle !== "false" ? appendExtensionAssets(extensionName) : Promise.resolve()).then(function() {
                 return extensionInitialize(extensionName);
               }).catch(function(error2) {
                 if (!error2 || !error2.aelluxCompatibility) {
@@ -26113,8 +26266,8 @@
           }
           var bundledLoader = AelluxJs.bundledExtensions ? AelluxJs.bundledExtensions[key] : null;
           extensionPromises[key] = Promise.resolve().then(function() {
-            var registration = AelluxJs.registry.ext[key];
-            return (registration.implicit || request.version) && !bundledLoader && !AelluxJs.ext[key] ? resolveImplicitRegistration(extensionName, registration, request.version) : registration;
+            var registration2 = AelluxJs.registry.ext[key];
+            return (registration2.implicit || request.version) && !bundledLoader && !AelluxJs.ext[key] ? resolveImplicitRegistration(extensionName, registration2, request.version) : registration2;
           }).then(/* @__PURE__ */ (function() {
             var _ref = _asyncToGenerator2(/* @__PURE__ */ _regenerator2().m(function _callee6(data) {
               return _regenerator2().w(function(_context6) {
@@ -26154,8 +26307,8 @@
             };
           })()).catch(function(error2) {
             if (!error2 || !error2.aelluxCompatibility) {
-              var registration = AelluxJs.registry.ext[key];
-              if (registration && registration.implicit && !registration.manifestResolved) {
+              var _registration = AelluxJs.registry.ext[key];
+              if (_registration && _registration.implicit && !_registration.manifestResolved) {
                 AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_EXTENSION_INDEX_NOT_FOUND, {
                   extension: extensionName
                 });
@@ -26230,7 +26383,7 @@
         }
         function _appendExtensionAssets() {
           _appendExtensionAssets = _asyncToGenerator2(/* @__PURE__ */ _regenerator2().m(function _callee9(extensionName) {
-            var bundledLoader, key, data, useLegacyBuild, artifact, url, scriptURL, minifiedScript, scriptVariant, loadPromises, _iterator3, _step3, dependency, _args9 = arguments, _t6;
+            var bundledLoader, key, data, useLegacyBuild, artifact, url, scriptURL, minifiedScript, scriptVariant, loadPromises, _iterator3, _step3, dependency, defaultStyle, fullStyle, _args9 = arguments, _t6;
             return _regenerator2().w(function(_context9) {
               while (1) switch (_context9.p = _context9.n) {
                 case 0:
@@ -26245,7 +26398,7 @@
                   minifiedScript = /\.min\.js(?=[?#]|$)/.test(scriptURL);
                   scriptVariant = useLegacyBuild ? minifiedScript ? "legacyMin" : "legacy" : minifiedScript ? "modernMin" : "modern";
                   loadPromises = [];
-                  _iterator3 = _createForOfIteratorHelper10(data.dependencies || []);
+                  _iterator3 = _createForOfIteratorHelper11(data.dependencies || []);
                   _context9.p = 1;
                   _iterator3.s();
                 case 2:
@@ -26283,7 +26436,7 @@
                     loadPromises.push(Promise.resolve().then(function() {
                       return bundledLoader();
                     }));
-                  } else {
+                  } else if (!AelluxJs.ext[key]) {
                     loadPromises.push(new Promise(function(resolve, reject) {
                       var attr = AelluxJs.attr("ext");
                       var script = document.createElement("script");
@@ -26296,7 +26449,9 @@
                       });
                     }));
                   }
-                  if (data.loadStyle && data.loadStyle !== "false") {
+                  defaultStyle = data.loadStyle === true || data.loadStyle === "true";
+                  fullStyle = AelluxJs.bundledExtensions && (bundledLoader || data.official) && document.querySelector("link[".concat(AelluxJs.attr("full-style"), "]"));
+                  if (data.loadStyle && data.loadStyle !== "false" && !(defaultStyle && fullStyle)) {
                     loadPromises.push(new Promise(function(resolve) {
                       var styleDefaultURL = data.loadStyle === true || data.loadStyle === "true" || data.loadStyle === "";
                       var href = data.styleArtifact ? data.styleArtifact.url : styleDefaultURL ? url.replace(/\.js(?=[?#]|$)/, ".css") : data.loadStyle;
@@ -26510,7 +26665,7 @@
             if (!Array.isArray(entry.dependencies)) {
               throw manifestError(kind, url, "dependencies array for ".concat(name));
             }
-            var _iterator = _createForOfIteratorHelper10(entry.dependencies), _step;
+            var _iterator = _createForOfIteratorHelper11(entry.dependencies), _step;
             try {
               for (_iterator.s(); !(_step = _iterator.n()).done; ) {
                 var dependency = _step.value;
@@ -26660,10 +26815,10 @@
 
   // src/aellux.ext.preference.js
   var aellux_ext_preference_exports = {};
-  function _createForOfIteratorHelper11(r, e) {
+  function _createForOfIteratorHelper12(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
-      if (Array.isArray(r) || (t = _unsupportedIterableToArray12(r)) || e && r && "number" == typeof r.length) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray13(r)) || e && r && "number" == typeof r.length) {
         t && (r = t);
         var _n = 0, F = function F2() {
         };
@@ -26692,19 +26847,19 @@
     } };
   }
   function _slicedToArray5(r, e) {
-    return _arrayWithHoles5(r) || _iterableToArrayLimit5(r, e) || _unsupportedIterableToArray12(r, e) || _nonIterableRest5();
+    return _arrayWithHoles5(r) || _iterableToArrayLimit5(r, e) || _unsupportedIterableToArray13(r, e) || _nonIterableRest5();
   }
   function _nonIterableRest5() {
     throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
-  function _unsupportedIterableToArray12(r, a) {
+  function _unsupportedIterableToArray13(r, a) {
     if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray12(r, a);
+      if ("string" == typeof r) return _arrayLikeToArray13(r, a);
       var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray12(r, a) : void 0;
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray13(r, a) : void 0;
     }
   }
-  function _arrayLikeToArray12(r, a) {
+  function _arrayLikeToArray13(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
@@ -26813,7 +26968,7 @@
           update();
         }
         function destroy() {
-          var _iterator = _createForOfIteratorHelper11(containerPreferences.keys()), _step;
+          var _iterator = _createForOfIteratorHelper12(containerPreferences.keys()), _step;
           try {
             for (_iterator.s(); !(_step = _iterator.n()).done; ) {
               var container = _step.value;
@@ -26878,7 +27033,7 @@
             computedPreferences[_key] = nextPreferences[_key];
           }
           AelluxJs2.updatePreferenceAttributesHTML(computedPreferences);
-          var _iterator2 = _createForOfIteratorHelper11(containerPreferences.keys()), _step2;
+          var _iterator2 = _createForOfIteratorHelper12(containerPreferences.keys()), _step2;
           try {
             for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
               var container = _step2.value;
@@ -26889,13 +27044,13 @@
           } finally {
             _iterator2.f();
           }
-          var _iterator3 = _createForOfIteratorHelper11(changed), _step3;
+          var _iterator3 = _createForOfIteratorHelper12(changed), _step3;
           try {
             for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
               var _key2 = _step3.value;
               var containers = containersByPreference.get(_key2);
               if (containers) {
-                var _iterator4 = _createForOfIteratorHelper11(containers), _step4;
+                var _iterator4 = _createForOfIteratorHelper12(containers), _step4;
                 try {
                   for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
                     var _container = _step4.value;
@@ -26986,7 +27141,7 @@
           AelluxJs2.offEvent(container, "$click", onContainerClick);
           var labels = containerLabels.get(container);
           if (labels) {
-            var _iterator5 = _createForOfIteratorHelper11(labels), _step5;
+            var _iterator5 = _createForOfIteratorHelper12(labels), _step5;
             try {
               for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
                 var _labelMemories$get;
@@ -27491,10 +27646,10 @@
       r2 ? i ? i(e2, r2, { value: n2, enumerable: !t2, configurable: !t2, writable: !t2 }) : e2[r2] = n2 : (o("next", 0), o("throw", 1), o("return", 2));
     }, _regeneratorDefine24(e, r, n, t);
   }
-  function _createForOfIteratorHelper12(r, e) {
+  function _createForOfIteratorHelper13(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
-      if (Array.isArray(r) || (t = _unsupportedIterableToArray13(r)) || e && r && "number" == typeof r.length) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray14(r)) || e && r && "number" == typeof r.length) {
         t && (r = t);
         var _n = 0, F = function F2() {
         };
@@ -27522,14 +27677,14 @@
       }
     } };
   }
-  function _unsupportedIterableToArray13(r, a) {
+  function _unsupportedIterableToArray14(r, a) {
     if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray13(r, a);
+      if ("string" == typeof r) return _arrayLikeToArray14(r, a);
       var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray13(r, a) : void 0;
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray14(r, a) : void 0;
     }
   }
-  function _arrayLikeToArray13(r, a) {
+  function _arrayLikeToArray14(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
@@ -27611,7 +27766,7 @@
                   AelluxJs2.mountManager.remove({
                     extensionName: extensionName
                   });
-                  _iterator2 = _createForOfIteratorHelper12(motionOperations.values());
+                  _iterator2 = _createForOfIteratorHelper13(motionOperations.values());
                   try {
                     for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
                       operation = _step2.value;
@@ -27662,7 +27817,7 @@
           });
           if (messageElement && typeof message === "string") {
             var textNode = null;
-            var _iterator = _createForOfIteratorHelper12(messageElement.childNodes), _step;
+            var _iterator = _createForOfIteratorHelper13(messageElement.childNodes), _step;
             try {
               for (_iterator.s(); !(_step = _iterator.n()).done; ) {
                 var child = _step.value;
@@ -27709,6 +27864,7 @@
               motionOperations.set(transformElement, operation);
               var advancedEase = root2.getComputedStyle(transformElement).getPropertyValue("--ae-feedback-aellux-ease").trim() || void 0;
               AelluxJs2.motion.run(transformElement, {
+                extension: extensionName,
                 id: id,
                 apply: function apply() {
                   return transformElement.classList.add(motionClass);
@@ -27892,10 +28048,10 @@
 
   // src/aellux.ext.focus.js
   var aellux_ext_focus_exports = {};
-  function _createForOfIteratorHelper13(r, e) {
+  function _createForOfIteratorHelper14(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
-      if (Array.isArray(r) || (t = _unsupportedIterableToArray14(r)) || e && r && "number" == typeof r.length) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray15(r)) || e && r && "number" == typeof r.length) {
         t && (r = t);
         var _n = 0, F = function F2() {
         };
@@ -27923,14 +28079,14 @@
       }
     } };
   }
-  function _unsupportedIterableToArray14(r, a) {
+  function _unsupportedIterableToArray15(r, a) {
     if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray14(r, a);
+      if ("string" == typeof r) return _arrayLikeToArray15(r, a);
       var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray14(r, a) : void 0;
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray15(r, a) : void 0;
     }
   }
-  function _arrayLikeToArray14(r, a) {
+  function _arrayLikeToArray15(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
@@ -28013,7 +28169,7 @@
           if (event.key !== "Enter" || event.isComposing || event.repeat || event.defaultPrevented || event.target !== event.currentTarget && event.target.closest(focusableSelector) !== event.currentTarget) return;
           var elements = document.querySelectorAll(focusableSelector);
           var foundCurrent = false;
-          var _iterator = _createForOfIteratorHelper13(elements), _step;
+          var _iterator = _createForOfIteratorHelper14(elements), _step;
           try {
             for (_iterator.s(); !(_step = _iterator.n()).done; ) {
               var element = _step.value;
@@ -28159,7 +28315,7 @@
     return ("string" === r ? String : Number)(t);
   }
   function _slicedToArray6(r, e) {
-    return _arrayWithHoles6(r) || _iterableToArrayLimit6(r, e) || _unsupportedIterableToArray15(r, e) || _nonIterableRest6();
+    return _arrayWithHoles6(r) || _iterableToArrayLimit6(r, e) || _unsupportedIterableToArray16(r, e) || _nonIterableRest6();
   }
   function _nonIterableRest6() {
     throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
@@ -28188,10 +28344,10 @@
   function _arrayWithHoles6(r) {
     if (Array.isArray(r)) return r;
   }
-  function _createForOfIteratorHelper14(r, e) {
+  function _createForOfIteratorHelper15(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
-      if (Array.isArray(r) || (t = _unsupportedIterableToArray15(r)) || e && r && "number" == typeof r.length) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray16(r)) || e && r && "number" == typeof r.length) {
         t && (r = t);
         var _n = 0, F = function F2() {
         };
@@ -28219,14 +28375,14 @@
       }
     } };
   }
-  function _unsupportedIterableToArray15(r, a) {
+  function _unsupportedIterableToArray16(r, a) {
     if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray15(r, a);
+      if ("string" == typeof r) return _arrayLikeToArray16(r, a);
       var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray15(r, a) : void 0;
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray16(r, a) : void 0;
     }
   }
-  function _arrayLikeToArray15(r, a) {
+  function _arrayLikeToArray16(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
@@ -28262,7 +28418,7 @@
             unmount: unmountPointable,
             controllers: ["pointers"]
           });
-          var _iterator = _createForOfIteratorHelper14(pointerEvents), _step;
+          var _iterator = _createForOfIteratorHelper15(pointerEvents), _step;
           try {
             for (_iterator.s(); !(_step = _iterator.n()).done; ) {
               var _step$value = _slicedToArray6(_step.value, 2), suffix = _step$value[0], handler = _step$value[1];
@@ -28278,7 +28434,7 @@
           AelluxJs2.mountManager.remove({
             extensionName: extensionName
           });
-          var _iterator2 = _createForOfIteratorHelper14(pointerEvents), _step2;
+          var _iterator2 = _createForOfIteratorHelper15(pointerEvents), _step2;
           try {
             for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
               var _step2$value = _slicedToArray6(_step2.value, 2), suffix = _step2$value[0], handler = _step2$value[1];
@@ -28297,7 +28453,7 @@
         }
         function unmountPointable(element) {
           pointableElements.delete(element);
-          var _iterator3 = _createForOfIteratorHelper14(trackedPointers.values()), _step3;
+          var _iterator3 = _createForOfIteratorHelper15(trackedPointers.values()), _step3;
           try {
             for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
               var pointer = _step3.value;
@@ -28312,7 +28468,7 @@
         }
         function pointers(element) {
           var result = [];
-          var _iterator4 = _createForOfIteratorHelper14(trackedPointers.values()), _step4;
+          var _iterator4 = _createForOfIteratorHelper15(trackedPointers.values()), _step4;
           try {
             for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
               var pointer = _step4.value;
@@ -28337,7 +28493,7 @@
           while (element) {
             if (pointableElements.has(element) && element.hasAttribute(pointableAttribute)) {
               var occupied = 0;
-              var _iterator5 = _createForOfIteratorHelper14(trackedPointers.values()), _step5;
+              var _iterator5 = _createForOfIteratorHelper15(trackedPointers.values()), _step5;
               try {
                 for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
                   var other = _step5.value;
@@ -28619,20 +28775,20 @@
       r2 ? i ? i(e2, r2, { value: n2, enumerable: !t2, configurable: !t2, writable: !t2 }) : e2[r2] = n2 : (o("next", 0), o("throw", 1), o("return", 2));
     }, _regeneratorDefine25(e, r, n, t);
   }
-  function _toConsumableArray6(r) {
-    return _arrayWithoutHoles6(r) || _iterableToArray6(r) || _unsupportedIterableToArray16(r) || _nonIterableSpread6();
+  function _toConsumableArray7(r) {
+    return _arrayWithoutHoles7(r) || _iterableToArray7(r) || _unsupportedIterableToArray17(r) || _nonIterableSpread7();
   }
-  function _nonIterableSpread6() {
+  function _nonIterableSpread7() {
     throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
-  function _iterableToArray6(r) {
+  function _iterableToArray7(r) {
     if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
   }
-  function _arrayWithoutHoles6(r) {
-    if (Array.isArray(r)) return _arrayLikeToArray16(r);
+  function _arrayWithoutHoles7(r) {
+    if (Array.isArray(r)) return _arrayLikeToArray17(r);
   }
   function _slicedToArray7(r, e) {
-    return _arrayWithHoles7(r) || _iterableToArrayLimit7(r, e) || _unsupportedIterableToArray16(r, e) || _nonIterableRest7();
+    return _arrayWithHoles7(r) || _iterableToArrayLimit7(r, e) || _unsupportedIterableToArray17(r, e) || _nonIterableRest7();
   }
   function _nonIterableRest7() {
     throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
@@ -28661,10 +28817,10 @@
   function _arrayWithHoles7(r) {
     if (Array.isArray(r)) return r;
   }
-  function _createForOfIteratorHelper15(r, e) {
+  function _createForOfIteratorHelper16(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
-      if (Array.isArray(r) || (t = _unsupportedIterableToArray16(r)) || e && r && "number" == typeof r.length) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray17(r)) || e && r && "number" == typeof r.length) {
         t && (r = t);
         var _n = 0, F = function F2() {
         };
@@ -28692,14 +28848,14 @@
       }
     } };
   }
-  function _unsupportedIterableToArray16(r, a) {
+  function _unsupportedIterableToArray17(r, a) {
     if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray16(r, a);
+      if ("string" == typeof r) return _arrayLikeToArray17(r, a);
       var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray16(r, a) : void 0;
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray17(r, a) : void 0;
     }
   }
-  function _arrayLikeToArray16(r, a) {
+  function _arrayLikeToArray17(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
@@ -28765,17 +28921,12 @@
         var placementMaps = /* @__PURE__ */ new Set();
         var nextLayoutId = 2e6;
         var mutations = null;
-        var weakStyle = null;
         AelluxJs2.extAttach(extensionName, {
           init: init,
           destroy: destroy,
           createPlacementMap: createPlacementMap
         });
         function init() {
-          weakStyle = document.createElement("style");
-          weakStyle.setAttribute(AelluxJs2.attr("anchor-style"), "");
-          weakStyle.textContent = "\n      :where([".concat(attribute, "][").concat(matchAttribute, '~="width"]) {\n        width:var(--ae-anchor-target-width,0px);box-sizing:border-box;\n      }\n      :where([').concat(attribute, "][").concat(matchAttribute, '~="height"]) {\n        height:var(--ae-anchor-target-height,0px);box-sizing:border-box;\n      }\n      :where([').concat(attribute, "][").concat(matchAttribute, "].").concat(anchoredClass, ") {\n        transform:translate3d(var(--ae-anchor-pivot-x),var(--ae-anchor-pivot-y),0)\n          translate(calc(0% - var(--ae-anchor-origin-x)),calc(0% - var(--ae-anchor-origin-y)));\n      }\n      :where([").concat(attribute, "].").concat(switchingClass, ") {\n        transition-property:transform,width,height;\n        transition-duration:var(--ae-anchor-switch-duration,0ms);\n        transition-timing-function:var(--ae-anchor-switch-ease,ease-in-out);transition-delay:0s;\n      }\n      :where(html[").concat(AelluxJs2.attr("reduced-motion"), '="reduced"] [').concat(attribute, "].").concat(switchingClass, ") {transition:none;}\n    ").replace(/\s*([{};:,])\s*/g, "$1").replace(/;}/g, "}").trim();
-          document.head.appendChild(weakStyle);
           AelluxJs2.registerCssProperty({
             name: "--ae-anchor-x",
             syntax: "<length>",
@@ -28825,12 +28976,11 @@
         }
         function _destroy() {
           _destroy = _asyncToGenerator5(/* @__PURE__ */ _regenerator5().m(function _callee() {
-            var _weakStyle;
             var _iterator10, _step10, map;
             return _regenerator5().w(function(_context) {
               while (1) switch (_context.n) {
                 case 0:
-                  _iterator10 = _createForOfIteratorHelper15(placementMaps);
+                  _iterator10 = _createForOfIteratorHelper16(placementMaps);
                   try {
                     for (_iterator10.s(); !(_step10 = _iterator10.n()).done; ) {
                       map = _step10.value;
@@ -28847,8 +28997,6 @@
                   AelluxJs2.mountManager.remove({
                     extensionName: extensionName
                   });
-                  (_weakStyle = weakStyle) === null || _weakStyle === void 0 || _weakStyle.remove();
-                  weakStyle = null;
                 case 2:
                   return _context.a(2);
               }
@@ -28880,7 +29028,7 @@
             invisible: isInvisible,
             destroy: function destroy2() {
               disposed = true;
-              var _iterator = _createForOfIteratorHelper15(memories.keys()), _step;
+              var _iterator = _createForOfIteratorHelper16(memories.keys()), _step;
               try {
                 for (_iterator.s(); !(_step = _iterator.n()).done; ) {
                   var element = _step.value;
@@ -29008,7 +29156,7 @@
         }
         function scheduleUpdate() {
           if (!anchors.size) return;
-          var _iterator2 = _createForOfIteratorHelper15(anchors), _step2;
+          var _iterator2 = _createForOfIteratorHelper16(anchors), _step2;
           try {
             for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
               var _step2$value = _slicedToArray7(_step2.value, 2), element = _step2$value[0], state = _step2$value[1];
@@ -29022,7 +29170,7 @@
           }
         }
         function onGroupChange(event) {
-          var _iterator3 = _createForOfIteratorHelper15(anchors), _step3;
+          var _iterator3 = _createForOfIteratorHelper16(anchors), _step3;
           try {
             for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
               var _event$detail;
@@ -29037,14 +29185,14 @@
         }
         function onMutations(records) {
           var affected = /* @__PURE__ */ new Set();
-          var _iterator4 = _createForOfIteratorHelper15(records), _step4;
+          var _iterator4 = _createForOfIteratorHelper16(records), _step4;
           try {
             for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
               var record = _step4.value;
               var node = record.target;
               var structural = record.type === "childList";
               var visual = record.attributeName === "class" || record.attributeName === "style";
-              var _iterator6 = _createForOfIteratorHelper15(anchors), _step6;
+              var _iterator6 = _createForOfIteratorHelper16(anchors), _step6;
               try {
                 for (_iterator6.s(); !(_step6 = _iterator6.n()).done; ) {
                   var _state$reference;
@@ -29066,7 +29214,7 @@
           } finally {
             _iterator4.f();
           }
-          var _iterator5 = _createForOfIteratorHelper15(affected), _step5;
+          var _iterator5 = _createForOfIteratorHelper16(affected), _step5;
           try {
             for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
               var _element = _step5.value;
@@ -29117,7 +29265,7 @@
             return;
           }
           if (durationMs === 0) {
-            var _iterator7 = _createForOfIteratorHelper15(anchors), _step7;
+            var _iterator7 = _createForOfIteratorHelper16(anchors), _step7;
             try {
               for (_iterator7.s(); !(_step7 = _iterator7.n()).done; ) {
                 var _step7$value = _slicedToArray7(_step7.value, 2), element = _step7$value[0], state = _step7$value[1];
@@ -29134,7 +29282,7 @@
             }
             return;
           }
-          var _iterator8 = _createForOfIteratorHelper15(anchors), _step8;
+          var _iterator8 = _createForOfIteratorHelper16(anchors), _step8;
           try {
             for (_iterator8.s(); !(_step8 = _iterator8.n()).done; ) {
               var _step8$value = _slicedToArray7(_step8.value, 2), _element2 = _step8$value[0], _state = _step8$value[1];
@@ -29497,7 +29645,7 @@
             height: root2.innerHeight
           }, reference, referenceRect, scaleX, scaleY);
           var selected = null;
-          var _iterator9 = _createForOfIteratorHelper15(candidates), _step9;
+          var _iterator9 = _createForOfIteratorHelper16(candidates), _step9;
           try {
             for (_iterator9.s(); !(_step9 = _iterator9.n()).done; ) {
               var candidate = _step9.value;
@@ -29534,7 +29682,7 @@
             duration: duration,
             width: targetRect.width,
             height: targetRect.height,
-            signature: [selected.x, selected.y, targetRect.width, targetRect.height].concat(_toConsumableArray6(selected.self)).join("/")
+            signature: [selected.x, selected.y, targetRect.width, targetRect.height].concat(_toConsumableArray7(selected.self)).join("/")
           };
         }
         function writePlacement(element, placement) {
@@ -29589,7 +29737,7 @@
           state.target = target;
           if (state.observer) state.observer.disconnect();
           if (state.intersectionObserver) state.intersectionObserver.disconnect();
-          var _iterator0 = _createForOfIteratorHelper15(/* @__PURE__ */ new Set([element, target, reference])), _step0;
+          var _iterator0 = _createForOfIteratorHelper16(/* @__PURE__ */ new Set([element, target, reference])), _step0;
           try {
             for (_iterator0.s(); !(_step0 = _iterator0.n()).done; ) {
               var observed = _step0.value;
@@ -29654,7 +29802,7 @@
         }
         function parseCandidates(value) {
           var result = [];
-          var _iterator1 = _createForOfIteratorHelper15((value || "").split(",")), _step1;
+          var _iterator1 = _createForOfIteratorHelper16((value || "").split(",")), _step1;
           try {
             for (_iterator1.s(); !(_step1 = _iterator1.n()).done; ) {
               var token = _step1.value;
@@ -29764,10 +29912,10 @@
       r2 ? i ? i(e2, r2, { value: n2, enumerable: !t2, configurable: !t2, writable: !t2 }) : e2[r2] = n2 : (o("next", 0), o("throw", 1), o("return", 2));
     }, _regeneratorDefine26(e, r, n, t);
   }
-  function _createForOfIteratorHelper16(r, e) {
+  function _createForOfIteratorHelper17(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
-      if (Array.isArray(r) || (t = _unsupportedIterableToArray17(r)) || e && r && "number" == typeof r.length) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray18(r)) || e && r && "number" == typeof r.length) {
         t && (r = t);
         var _n = 0, F = function F2() {
         };
@@ -29795,14 +29943,14 @@
       }
     } };
   }
-  function _unsupportedIterableToArray17(r, a) {
+  function _unsupportedIterableToArray18(r, a) {
     if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray17(r, a);
+      if ("string" == typeof r) return _arrayLikeToArray18(r, a);
       var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray17(r, a) : void 0;
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray18(r, a) : void 0;
     }
   }
-  function _arrayLikeToArray17(r, a) {
+  function _arrayLikeToArray18(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
@@ -29860,6 +30008,7 @@
           if (previousController) {
             previousController.abort();
           }
+          previousController = null;
         }
         var previousController = null;
         function load(_x, _x2) {
@@ -29867,7 +30016,7 @@
         }
         function _load() {
           _load = _asyncToGenerator6(/* @__PURE__ */ _regenerator6().m(function _callee(url, selectors) {
-            var options, selectorList, elements, _iterator2, _step2, _selector, _currentElement, controller, response, html, loadedDocument, _iterator3, _step3, selector, currentElement, loadedElement, replacement, _args = arguments, _t, _t2, _t3, _t4;
+            var options, selectorList, elements, _iterator2, _step2, _selector, _currentElement, controller, response, html, loadedDocument, historyRequested, _iterator3, _step3, selector, currentElement, loadedElement, replacement, _args = arguments, _t, _t2, _t3, _t4;
             return _regenerator6().w(function(_context) {
               while (1) switch (_context.p = _context.n) {
                 case 0:
@@ -29881,7 +30030,7 @@
                   return _context.a(2, null);
                 case 1:
                   elements = /* @__PURE__ */ new Map();
-                  _iterator2 = _createForOfIteratorHelper16(selectorList);
+                  _iterator2 = _createForOfIteratorHelper17(selectorList);
                   try {
                     for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
                       _selector = _step2.value;
@@ -29912,18 +30061,10 @@
                   previousController = controller;
                   elements.forEach(function(currentElement2) {
                     if (AelluxJs2.ext.feedback) {
-                      AelluxJs2.ext.feedback.busy(currentElement2, "Ajax loading", true);
-                      AelluxJs2.ext.feedback.progress(currentElement2, "Ajax loading", 0);
+                      AelluxJs2.ext.feedback.busy("Ajax loading", currentElement2, true);
+                      AelluxJs2.ext.feedback.progress("Ajax loading", currentElement2, 0);
                     }
                   });
-                  if (!("ignoreHistory" in options) || !options.ignoreHistory) {
-                    AelluxJs2.dispatch("PushAjaxReplace", {
-                      detail: {
-                        url: url,
-                        selectors: selectors
-                      }
-                    });
-                  }
                   AelluxJs2.dispatch("AjaxHrefStart");
                   _context.p = 3;
                   _context.n = 4;
@@ -29936,48 +30077,76 @@
                   return response.text();
                 case 5:
                   html = _context.v;
+                  if (!(previousController !== controller)) {
+                    _context.n = 6;
+                    break;
+                  }
+                  return _context.a(2, null);
+                case 6:
                   validateHTMLSource(AelluxJs2, html, response.url || String(url));
                   loadedDocument = new DOMParser().parseFromString(html, "text/html");
-                  _iterator3 = _createForOfIteratorHelper16(selectorList);
-                  _context.p = 6;
+                  historyRequested = false;
+                  _iterator3 = _createForOfIteratorHelper17(selectorList);
+                  _context.p = 7;
                   _iterator3.s();
-                case 7:
+                case 8:
                   if ((_step3 = _iterator3.n()).done) {
-                    _context.n = 14;
+                    _context.n = 17;
                     break;
                   }
                   selector = _step3.value;
-                  currentElement = elements.get(selector);
-                  if (currentElement) {
-                    _context.n = 8;
+                  if (!(previousController !== controller)) {
+                    _context.n = 9;
                     break;
                   }
-                  return _context.a(3, 13);
-                case 8:
-                  loadedElement = loadedDocument.querySelector(selector);
-                  _t = !loadedElement;
-                  if (_t) {
+                  return _context.a(2, null);
+                case 9:
+                  currentElement = elements.get(selector);
+                  if (currentElement) {
                     _context.n = 10;
                     break;
                   }
-                  _context.n = 9;
+                  return _context.a(3, 16);
+                case 10:
+                  loadedElement = loadedDocument.querySelector(selector);
+                  _t = !loadedElement;
+                  if (_t) {
+                    _context.n = 12;
+                    break;
+                  }
+                  _context.n = 11;
                   return AelluxJs2.unmount(currentElement);
-                case 9:
+                case 11:
                   _t2 = _context.v;
                   _t = _t2 === false;
-                case 10:
+                case 12:
                   if (!_t) {
-                    _context.n = 11;
+                    _context.n = 13;
                     break;
                   }
                   if (!loadedElement) selectorDiagnostic(selector, "No response element matches the selector.", currentElement);
                   if (AelluxJs2.ext.feedback) {
-                    AelluxJs2.ext.feedback.busy(currentElement, "Ajax loading", false);
-                    AelluxJs2.ext.feedback.progress(currentElement, "Ajax loading", 1);
+                    AelluxJs2.ext.feedback.busy("Ajax loading", currentElement, false);
+                    AelluxJs2.ext.feedback.progress("Ajax loading", currentElement, 1);
                   }
-                  return _context.a(3, 13);
-                case 11:
+                  return _context.a(3, 16);
+                case 13:
                   replacement = document.importNode(loadedElement, true);
+                  if (!(previousController !== controller)) {
+                    _context.n = 14;
+                    break;
+                  }
+                  return _context.a(2, null);
+                case 14:
+                  if (!historyRequested && !options.ignoreHistory) {
+                    AelluxJs2.dispatch("PushAjaxReplace", {
+                      detail: {
+                        url: url,
+                        selectors: selectors
+                      }
+                    });
+                    historyRequested = true;
+                  }
                   currentElement.parentNode.replaceChild(replacement, currentElement);
                   if (selector === "title") {
                     AelluxJs2.dispatch("UpdateBaseTitle", {
@@ -29986,59 +30155,59 @@
                       }
                     });
                   }
-                  _context.n = 12;
+                  _context.n = 15;
                   return AelluxJs2.mount(replacement);
-                case 12:
-                  if (AelluxJs2.ext.feedback) {
-                    AelluxJs2.ext.feedback.busy(replacement, "Ajax loaded", false);
-                    AelluxJs2.ext.feedback.progress(replacement, "Ajax loaded", 1);
-                  }
-                case 13:
-                  _context.n = 7;
-                  break;
-                case 14:
-                  _context.n = 16;
-                  break;
                 case 15:
-                  _context.p = 15;
-                  _t3 = _context.v;
-                  _iterator3.e(_t3);
+                  if (AelluxJs2.ext.feedback) {
+                    AelluxJs2.ext.feedback.busy("Ajax loaded", replacement, false);
+                    AelluxJs2.ext.feedback.progress("Ajax loaded", replacement, 1);
+                  }
                 case 16:
-                  _context.p = 16;
-                  _iterator3.f();
-                  return _context.f(16);
+                  _context.n = 8;
+                  break;
                 case 17:
-                  AelluxJs2.dispatch("AjaxHrefLoaded");
-                  _context.n = 20;
+                  _context.n = 19;
                   break;
                 case 18:
                   _context.p = 18;
+                  _t3 = _context.v;
+                  _iterator3.e(_t3);
+                case 19:
+                  _context.p = 19;
+                  _iterator3.f();
+                  return _context.f(19);
+                case 20:
+                  AelluxJs2.dispatch("AjaxHrefLoaded");
+                  _context.n = 23;
+                  break;
+                case 21:
+                  _context.p = 21;
                   _t4 = _context.v;
                   selectorList.forEach(function(selector2) {
                     var currentElement2 = elements.get(selector2);
                     if (!currentElement2) return;
                     if (AelluxJs2.ext.feedback) {
-                      AelluxJs2.ext.feedback.busy(currentElement2, "Ajax loading", false);
-                      AelluxJs2.ext.feedback.progress(currentElement2, "Ajax loading", 1);
+                      AelluxJs2.ext.feedback.busy("Ajax loading", currentElement2, false);
+                      AelluxJs2.ext.feedback.progress("Ajax loading", currentElement2, 1);
                     }
                   });
                   AelluxJs2.dispatch("AjaxHrefError");
                   if (!(_t4.name === "AbortError")) {
-                    _context.n = 19;
+                    _context.n = 22;
                     break;
                   }
                   return _context.a(2, null);
-                case 19:
+                case 22:
                   throw _t4;
-                case 20:
-                  _context.p = 20;
+                case 23:
+                  _context.p = 23;
                   if (previousController === controller) previousController = null;
                   AelluxJs2.dispatch("AjaxHrefComplete");
-                  return _context.f(20);
-                case 21:
+                  return _context.f(23);
+                case 24:
                   return _context.a(2);
               }
-            }, _callee, null, [[6, 15, 16, 17], [3, 18, 20, 21]]);
+            }, _callee, null, [[7, 18, 19, 20], [3, 21, 23, 24]]);
           }));
           return _load.apply(this, arguments);
         }
@@ -30055,7 +30224,7 @@
         }
         function parseSelectors(selectors) {
           var list = [];
-          var _iterator = _createForOfIteratorHelper16(Array.isArray(selectors) ? selectors : [selectors]), _step;
+          var _iterator = _createForOfIteratorHelper17(Array.isArray(selectors) ? selectors : [selectors]), _step;
           try {
             for (_iterator.s(); !(_step = _iterator.n()).done; ) {
               var input = _step.value;
@@ -30164,10 +30333,10 @@
 
   // src/aellux.ext.adaptive.js
   var aellux_ext_adaptive_exports = {};
-  function _createForOfIteratorHelper17(r, e) {
+  function _createForOfIteratorHelper18(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
-      if (Array.isArray(r) || (t = _unsupportedIterableToArray18(r)) || e && r && "number" == typeof r.length) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray19(r)) || e && r && "number" == typeof r.length) {
         t && (r = t);
         var _n = 0, F = function F2() {
         };
@@ -30234,19 +30403,19 @@
     return ("string" === r ? String : Number)(t);
   }
   function _slicedToArray8(r, e) {
-    return _arrayWithHoles8(r) || _iterableToArrayLimit8(r, e) || _unsupportedIterableToArray18(r, e) || _nonIterableRest8();
+    return _arrayWithHoles8(r) || _iterableToArrayLimit8(r, e) || _unsupportedIterableToArray19(r, e) || _nonIterableRest8();
   }
   function _nonIterableRest8() {
     throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
-  function _unsupportedIterableToArray18(r, a) {
+  function _unsupportedIterableToArray19(r, a) {
     if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray18(r, a);
+      if ("string" == typeof r) return _arrayLikeToArray19(r, a);
       var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray18(r, a) : void 0;
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray19(r, a) : void 0;
     }
   }
-  function _arrayLikeToArray18(r, a) {
+  function _arrayLikeToArray19(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
@@ -30422,7 +30591,7 @@
         function destroy() {
           pendingResizeEntries.clear();
           pendingResizeElements.clear();
-          var _iterator = _createForOfIteratorHelper17(adaptiveElements), _step;
+          var _iterator = _createForOfIteratorHelper18(adaptiveElements), _step;
           try {
             for (_iterator.s(); !(_step = _iterator.n()).done; ) {
               var element = _step.value;
@@ -30460,7 +30629,7 @@
           layoutIds.delete(element);
           if (resizeObserver) resizeObserver.unobserve(element);
           else if (adaptiveElements.size === 0) AelluxJs2.offEvent(root2, "$resize", onWindowResize);
-          var _iterator2 = _createForOfIteratorHelper17(managedClasses), _step2;
+          var _iterator2 = _createForOfIteratorHelper18(managedClasses), _step2;
           try {
             for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
               var name = _step2.value;
@@ -30477,7 +30646,7 @@
           elementMemories.delete(element);
         }
         function onResize(entries) {
-          var _iterator3 = _createForOfIteratorHelper17(entries), _step3;
+          var _iterator3 = _createForOfIteratorHelper18(entries), _step3;
           try {
             for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
               var entry = _step3.value;
@@ -30493,7 +30662,7 @@
           scheduleUpdate();
         }
         function onWindowResize() {
-          var _iterator4 = _createForOfIteratorHelper17(adaptiveElements), _step4;
+          var _iterator4 = _createForOfIteratorHelper18(adaptiveElements), _step4;
           try {
             for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
               var element = _step4.value;
@@ -30567,7 +30736,7 @@
             var threshold = sizeThresholds[i];
             element.classList.toggle(threshold.className, space >= threshold.minimum);
           }
-          var _iterator5 = _createForOfIteratorHelper17(dimensionProperties), _step5;
+          var _iterator5 = _createForOfIteratorHelper18(dimensionProperties), _step5;
           try {
             for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
               var name = _step5.value;
@@ -30718,10 +30887,10 @@
       });
     };
   }
-  function _createForOfIteratorHelper18(r, e) {
+  function _createForOfIteratorHelper19(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
-      if (Array.isArray(r) || (t = _unsupportedIterableToArray19(r)) || e && r && "number" == typeof r.length) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray20(r)) || e && r && "number" == typeof r.length) {
         t && (r = t);
         var _n = 0, F = function F2() {
         };
@@ -30749,32 +30918,32 @@
       }
     } };
   }
-  function _toConsumableArray7(r) {
-    return _arrayWithoutHoles7(r) || _iterableToArray7(r) || _unsupportedIterableToArray19(r) || _nonIterableSpread7();
+  function _toConsumableArray8(r) {
+    return _arrayWithoutHoles8(r) || _iterableToArray8(r) || _unsupportedIterableToArray20(r) || _nonIterableSpread8();
   }
-  function _nonIterableSpread7() {
+  function _nonIterableSpread8() {
     throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
-  function _iterableToArray7(r) {
+  function _iterableToArray8(r) {
     if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
   }
-  function _arrayWithoutHoles7(r) {
-    if (Array.isArray(r)) return _arrayLikeToArray19(r);
+  function _arrayWithoutHoles8(r) {
+    if (Array.isArray(r)) return _arrayLikeToArray20(r);
   }
   function _slicedToArray9(r, e) {
-    return _arrayWithHoles9(r) || _iterableToArrayLimit9(r, e) || _unsupportedIterableToArray19(r, e) || _nonIterableRest9();
+    return _arrayWithHoles9(r) || _iterableToArrayLimit9(r, e) || _unsupportedIterableToArray20(r, e) || _nonIterableRest9();
   }
   function _nonIterableRest9() {
     throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
-  function _unsupportedIterableToArray19(r, a) {
+  function _unsupportedIterableToArray20(r, a) {
     if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray19(r, a);
+      if ("string" == typeof r) return _arrayLikeToArray20(r, a);
       var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray19(r, a) : void 0;
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray20(r, a) : void 0;
     }
   }
-  function _arrayLikeToArray19(r, a) {
+  function _arrayLikeToArray20(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
@@ -30878,9 +31047,9 @@
               initialValue: initialValue
             };
           });
-          var progressRegistered = AelluxJs2.registerCssProperty.apply(AelluxJs2, _toConsumableArray7(descriptors.slice(0, 4)));
+          var progressRegistered = AelluxJs2.registerCssProperty.apply(AelluxJs2, _toConsumableArray8(descriptors.slice(0, 4)));
           interpolatedProgress = !!(progressRegistered && root2.CSS.supports && root2.CSS.supports("opacity", "clamp(0, 0.5, 1)"));
-          AelluxJs2.registerCssProperty.apply(AelluxJs2, _toConsumableArray7(descriptors.slice(4)));
+          AelluxJs2.registerCssProperty.apply(AelluxJs2, _toConsumableArray8(descriptors.slice(4)));
           AelluxJs2.mountManager.add({
             extensionName: extensionName,
             selector: presentSelector,
@@ -30915,7 +31084,7 @@
           AelluxJs2.off("$click", OnClick);
           document.removeEventListener("pointerover", onHover);
           document.removeEventListener("pointerout", onHover);
-          var _iterator = _createForOfIteratorHelper18(groups.keys()), _step;
+          var _iterator = _createForOfIteratorHelper19(groups.keys()), _step;
           try {
             for (_iterator.s(); !(_step = _iterator.n()).done; ) {
               var group = _step.value;
@@ -30926,7 +31095,7 @@
           } finally {
             _iterator.f();
           }
-          var _iterator2 = _createForOfIteratorHelper18(hoverTimers.keys()), _step2;
+          var _iterator2 = _createForOfIteratorHelper19(hoverTimers.keys()), _step2;
           try {
             for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
               var target = _step2.value;
@@ -30938,7 +31107,7 @@
             _iterator2.f();
           }
           hoveredTriggers.clear();
-          var _iterator3 = _createForOfIteratorHelper18(triggerElementsSet), _step3;
+          var _iterator3 = _createForOfIteratorHelper19(triggerElementsSet), _step3;
           try {
             for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
               var triggerElement = _step3.value;
@@ -30949,7 +31118,7 @@
           } finally {
             _iterator3.f();
           }
-          var _iterator4 = _createForOfIteratorHelper18(presentElements.keys()), _step4;
+          var _iterator4 = _createForOfIteratorHelper19(presentElements.keys()), _step4;
           try {
             for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
               var element = _step4.value;
@@ -31041,7 +31210,7 @@
             openPresentElements.add(element);
           }
           presentElements.set(element, presentController);
-          var _iterator5 = _createForOfIteratorHelper18(element.querySelectorAll("[".concat(attr.trigger, "],[").concat(attr.dismiss, "],[").concat(attr.target, "]"))), _step5;
+          var _iterator5 = _createForOfIteratorHelper19(element.querySelectorAll("[".concat(attr.trigger, "],[").concat(attr.dismiss, "],[").concat(attr.target, "]"))), _step5;
           try {
             for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
               var _triggerElement = _step5.value;
@@ -31057,7 +31226,7 @@
           }
           var idTriggers = triggersByTargetId.get(element.id);
           if (idTriggers) {
-            var _iterator6 = _createForOfIteratorHelper18(idTriggers), _step6;
+            var _iterator6 = _createForOfIteratorHelper19(idTriggers), _step6;
             try {
               for (_iterator6.s(); !(_step6 = _iterator6.n()).done; ) {
                 var triggerElement = _step6.value;
@@ -31078,7 +31247,7 @@
           if (!presentElements.has(element)) return;
           var controller = presentElements.get(element);
           cancelHoverClose(element);
-          var _iterator7 = _createForOfIteratorHelper18(controller.triggers), _step7;
+          var _iterator7 = _createForOfIteratorHelper19(controller.triggers), _step7;
           try {
             for (_iterator7.s(); !(_step7 = _iterator7.n()).done; ) {
               var button = _step7.value;
@@ -31202,7 +31371,7 @@
           }
           updateTriggerAriaExpanded(triggerElement);
           triggerAriaHandlers.get(triggerElement).set({
-            controls: _toConsumableArray7(targetIds)
+            controls: _toConsumableArray8(targetIds)
           });
         }
         function updateTriggerAriaExpanded(triggerElement) {
@@ -31457,6 +31626,7 @@
                   };
                   advancedEase = root2.getComputedStyle(element).getPropertyValue("--ae-".concat(newDirection, "-aellux-ease").toLowerCase()).trim() || void 0;
                   motionOptions = {
+                    extension: extensionName,
                     id: controller.motionId,
                     apply: activateTransition,
                     easing: advancedEase,
@@ -31596,7 +31766,7 @@
           unpop(element);
         }
         function outsideClickAutoUnpop(currentExceptions) {
-          var _iterator8 = _createForOfIteratorHelper18(openPresentElements), _step8;
+          var _iterator8 = _createForOfIteratorHelper19(openPresentElements), _step8;
           try {
             var _loop = function _loop2() {
               var pContainer = _step8.value;
@@ -31697,7 +31867,7 @@
           if (!interpolatedProgress) element.style.setProperty("--ae-".concat(direction, "-progress"), value);
         }
         function groupMembers(group) {
-          return _toConsumableArray7(presentElements.keys()).filter(function(element) {
+          return _toConsumableArray8(presentElements.keys()).filter(function(element) {
             return element.isConnected && element !== group && element.id && element.closest(groupSelector) === group;
           });
         }
@@ -31735,7 +31905,7 @@
           groups.delete(group);
           state.jobs.clear();
           publishGroup(group, state, null);
-          var _iterator9 = _createForOfIteratorHelper18(groupMembers(group)), _step9;
+          var _iterator9 = _createForOfIteratorHelper19(groupMembers(group)), _step9;
           try {
             for (_iterator9.s(); !(_step9 = _iterator9.n()).done; ) {
               var member = _step9.value;
@@ -31871,7 +32041,7 @@
               return presentElements.has(member2) && member2.isConnected && member2.closest(groupSelector) === group && member2.id === ids[index] && member2.getAttribute(attr.when) === conditions[index];
             });
           };
-          var _iterator0 = _createForOfIteratorHelper18(changes), _step0;
+          var _iterator0 = _createForOfIteratorHelper19(changes), _step0;
           try {
             for (_iterator0.s(); !(_step0 = _iterator0.n()).done; ) {
               var member = _step0.value;
@@ -31903,7 +32073,7 @@
             complete = resolve;
           });
           state.pending = pending;
-          var _iterator1 = _createForOfIteratorHelper18(changes), _step1;
+          var _iterator1 = _createForOfIteratorHelper19(changes), _step1;
           try {
             var _loop2 = function _loop22() {
               var member2 = _step1.value;
@@ -31946,7 +32116,7 @@
         function inHoverRegion(target, node) {
           if (!node || !node.nodeType) return false;
           if (target.contains(node)) return true;
-          var _iterator10 = _createForOfIteratorHelper18(triggerElementsSet), _step10;
+          var _iterator10 = _createForOfIteratorHelper19(triggerElementsSet), _step10;
           try {
             for (_iterator10.s(); !(_step10 = _iterator10.n()).done; ) {
               var button = _step10.value;
@@ -31980,13 +32150,13 @@
               } else hoveredTriggers.delete(button);
             }
           }
-          var _iterator11 = _createForOfIteratorHelper18(openPresentElements), _step11;
+          var _iterator11 = _createForOfIteratorHelper19(openPresentElements), _step11;
           try {
             var _loop3 = function _loop32() {
               var target2 = _step11.value;
               if (!inHoverRegion(target2, event.target)) return 1;
               if (entering || inHoverRegion(target2, event.relatedTarget)) cancelHoverClose(target2);
-              else if (_toConsumableArray7(triggerElementsSet).some(function(control) {
+              else if (_toConsumableArray8(triggerElementsSet).some(function(control) {
                 return triggerTargets.get(control) === target2 && control.getAttribute(attr.triggerOn) === "hover" && control.getAttribute(attr.trigger) !== "unpop";
               })) {
                 cancelHoverClose(target2);
@@ -32073,8 +32243,7 @@
       });
       root.AelluxJs.extIndex.official = typeof define_AELLUX_OFFICIAL_EXTENSION_MANIFEST_default !== "undefined" ? define_AELLUX_OFFICIAL_EXTENSION_MANIFEST_default : null;
       root.AelluxJs.ext("adaptive", {
-        loadWhen: "[data-ae-adaptive]",
-        loadStyle: true
+        loadWhen: "[data-ae-adaptive]"
       });
       root.AelluxJs.ext("anchor", {
         loadWhen: "[data-ae-anchor]"
@@ -32086,8 +32255,7 @@
         loadWhen: "a[data-ae-ajax-href]"
       });
       root.AelluxJs.ext("feedback", {
-        loadWhen: "[data-ae-feedback]",
-        loadStyle: true
+        loadWhen: "[data-ae-feedback]"
       });
       root.AelluxJs.ext("focus", {
         loadWhen: "[data-ae-focus]"
@@ -32096,8 +32264,7 @@
         loadWhen: "[data-ae-point]"
       });
       root.AelluxJs.ext("present", {
-        loadWhen: "[data-ae-present],[data-ae-present-group],[data-ae-trigger],[data-ae-dismiss],[data-ae-target]",
-        loadStyle: true
+        loadWhen: "[data-ae-present],[data-ae-present-group],[data-ae-trigger],[data-ae-dismiss],[data-ae-target]"
       });
       root.AelluxJs.ext("scrollbox", {
         loadWhen: "[data-ae-scrollbox]"

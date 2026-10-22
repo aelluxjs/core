@@ -753,12 +753,52 @@
     return false;
   }
 
+  // src/internal/diagnose-resources.js
+  /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+  function transformOwners(api, element) {
+    var _a, _b, _c, _d;
+    const owners = [];
+    if (((_a = api.ext.anchor) == null ? void 0 : _a.initialized) && element.classList.contains(api.className("anchored"))) owners.push("anchor");
+    const parent = element.parentElement;
+    if (((_b = api.ext.scrollbox) == null ? void 0 : _b.initialized) && element.hasAttribute(api.attr("scrollbox-elastic")) && element.getAttribute(api.attr("scrollbox-elastic")) !== "false" && (parent == null ? void 0 : parent.hasAttribute(api.attr("scrollbox")))) {
+      const children = [...parent.children].filter((child) => !child.hasAttribute(api.attr("scrollbar-vertical")) && !child.hasAttribute(api.attr("scrollbar-horizontal")));
+      if (children.length === 1) owners.push("scrollbox-elastic");
+    }
+    if (((_c = api.ext.present) == null ? void 0 : _c.initialized) && !element.hasAttribute(api.attr("anchor")) && ((_d = element.getAttribute(api.attr("present"))) == null ? void 0 : _d.split(/\s+/).includes("transform"))) owners.push("present");
+    return owners;
+  }
+  function diagnoseResource(api, element, property, writers) {
+    api.diagnostics.warn(api.diagnostics.WARN_RESOURCE_CONFLICT, {
+      extension: writers[writers.length - 1],
+      element,
+      attribute: "style",
+      property,
+      writers,
+      reason: `${writers.join(" and ")} replace the same ${property} on this element.`,
+      suggestion: "Keep positioning and elastic transforms on the outer element; animate a child element instead."
+    });
+  }
+  function diagnoseMotionResources(api, element, animations, extension) {
+    if (api.options.environment !== "development") return;
+    for (const animation of animations) {
+      try {
+        const effect = animation.effect;
+        if ((effect == null ? void 0 : effect.target) !== element || effect.pseudoElement) continue;
+        const frames = effect.getKeyframes();
+        if (!frames.some((frame) => "transform" in frame && (frame.composite === "replace" || (!frame.composite || frame.composite === "auto") && (!effect.composite || effect.composite === "replace")))) continue;
+        const owners = transformOwners(api, element).filter((owner) => owner !== extension);
+        for (const owner of owners) diagnoseResource(api, element, "transform", [owner, extension]);
+      } catch (_) {
+      }
+    }
+  }
+
   // src/internal/validate-declarations.js
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   var attributesByExtension = {
     present: "present present-group present-active present-when present-motion trigger trigger-on dismiss target auto-unpop unpop-on-outside",
-    anchor: "anchor anchor-target anchor-match anchor-style",
-    "overflow-marquee": "overflow-marquee overflow-marquee-content overflow-marquee-active overflow-marquee-style",
+    anchor: "anchor anchor-target anchor-match",
+    "overflow-marquee": "overflow-marquee overflow-marquee-content overflow-marquee-active",
     scrollbox: "scrollbox scrollbox-wheel-horizontal scrollbox-momentum scrollbox-elastic scrollbar scrollbar-vertical scrollbar-horizontal",
     "scrollbox-snap": "scrollbox-snap snap-item",
     focus: "focus",
@@ -768,7 +808,7 @@
     preference: "preference option label next prev ready",
     feedback: "feedback target-message target-transform"
   };
-  var coreAttributes = "maxfps wait-mounted ext ext-style dep load-when builds load-style weak-style legacy esm theme-color";
+  var coreAttributes = "maxfps wait-mounted ext ext-style dep load-when builds load-style weak-style full-style legacy esm theme-color";
   var activation = {
     present: "present present-group trigger dismiss",
     anchor: "anchor",
@@ -889,6 +929,15 @@
         for (const item of element.querySelectorAll(`[${attr("snap-item")}]`)) {
           if (item.closest(`[${attr("scrollbox")}]`) !== element) continue;
           const alignment = item.getAttribute(attr("snap-item"));
+          const style = root.getComputedStyle(item);
+          if (item.getClientRects().length && [style.transform, style.translate, style.rotate, style.scale].some((value2) => value2 && value2 !== "none"))
+            reportConfiguration(api, "WARN_SCROLLBOX_SNAP_TRANSFORM", {
+              extension: "scrollbox-snap",
+              element: item,
+              attribute: attr("snap-item"),
+              reason: "Snap geometry includes a transform applied to the item itself.",
+              suggestion: "Apply the visual transform to a child of the snap item."
+            });
           if (!["", "start", "end", "center", "left", "right", "top", "bottom"].includes(alignment))
             reportConfiguration(api, "WARN_CONFIGURATION_VALUE", {
               extension: "scrollbox-snap",
@@ -1002,6 +1051,11 @@
       if (!selected && has("maxfps") && (!value("maxfps").trim() || !Number.isFinite(Number(value("maxfps"))) || Number(value("maxfps")) <= 0))
         invalid("core", "maxfps", "Frame rate must be finite and greater than zero.", "Use a positive number or remove the attribute.", "WARN_LAYOUT_MAX_FPS_INVALID");
       if (!selected || selected.has("present") || selected.has("anchor")) validateCSS();
+      if ((!selected || selected.has("present") || selected.has("scrollbox")) && has("scrollbox-elastic")) {
+        const writers = transformOwners(api, element);
+        if (writers.includes("scrollbox-elastic") && writers.includes("present"))
+          diagnoseResource(api, element, "transform", ["scrollbox-elastic", "present"]);
+      }
     }
     function invisible(element) {
       for (let node = element; node; node = node.parentElement) {
@@ -1995,7 +2049,9 @@
     }
     function capture(operation) {
       operation.element.getBoundingClientRect();
-      return operation.element.getAnimations().filter((animation) => !operation.before.has(animation) && controllable(animation));
+      const animations = operation.element.getAnimations().filter((animation) => !operation.before.has(animation) && controllable(animation));
+      diagnoseMotionResources(getAelluxJs(), operation.element, animations, operation.options.extension || "css-motion");
+      return animations;
     }
     function controllable(animation) {
       try {
@@ -2106,11 +2162,20 @@
       return `linear(${points.join(", ")})`;
     }
     function nativeRun(operation) {
+      let before = operation.before;
+      if (getAelluxJs().options.environment === "development" && typeof operation.element.getAnimations === "function")
+        before = new Set(operation.element.getAnimations());
       operation.options.apply();
-      return nativeWait(operation);
+      return nativeWait(operation, before);
     }
-    function nativeWait(operation) {
+    function nativeWait(operation, before = operation.before) {
       const animations = typeof operation.element.getAnimations === "function" ? operation.element.getAnimations().filter((animation) => !operation.before.has(animation)) : [];
+      diagnoseMotionResources(
+        getAelluxJs(),
+        operation.element,
+        before === operation.before ? animations : animations.filter((animation) => !before.has(animation)),
+        operation.options.extension || "css-motion"
+      );
       return new Promise((resolve) => {
         operation.nativeResolve = resolve;
         const complete = () => {
@@ -2485,7 +2550,8 @@
         if (AelluxJs.ext[key].initialized) {
           extensionPromises[key] = Promise.resolve(AelluxJs.ext[key]);
         } else {
-          extensionPromises[key] = Promise.resolve().then(() => extensionInitialize(extensionName)).catch((error) => {
+          const registration = AelluxJs.registry.ext[key];
+          extensionPromises[key] = (registration.loadStyle && registration.loadStyle !== "false" ? appendExtensionAssets(extensionName) : Promise.resolve()).then(() => extensionInitialize(extensionName)).catch((error) => {
             if (!error || !error.aelluxCompatibility) {
               AelluxJs.diagnostics.error(
                 AelluxJs.diagnostics.ERROR_EXTENSION_INITIALIZE,
@@ -2593,7 +2659,7 @@
       }
       if (bundledLoader) {
         loadPromises.push(Promise.resolve().then(() => bundledLoader()));
-      } else {
+      } else if (!AelluxJs.ext[key]) {
         loadPromises.push(new Promise(
           (resolve, reject) => {
             const attr = AelluxJs.attr("ext");
@@ -2608,7 +2674,9 @@
           }
         ));
       }
-      if (data.loadStyle && data.loadStyle !== "false") {
+      const defaultStyle = data.loadStyle === true || data.loadStyle === "true";
+      const fullStyle = AelluxJs.bundledExtensions && (bundledLoader || data.official) && document.querySelector(`link[${AelluxJs.attr("full-style")}]`);
+      if (data.loadStyle && data.loadStyle !== "false" && !(defaultStyle && fullStyle)) {
         loadPromises.push(new Promise(
           (resolve) => {
             const styleDefaultURL = data.loadStyle === true || data.loadStyle === "true" || data.loadStyle === "";

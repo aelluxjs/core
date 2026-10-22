@@ -1,6 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { createCssMotionController } from "../../src/internal/create-css-motion-controller.js";
+import { diagnoseMotionResources } from "../../src/internal/diagnose-resources.js";
 
 async function propertyPolicy(properties, options = {}, transition = true, requestedFPS) {
   class Animation {
@@ -95,4 +96,36 @@ test("a partial WAAPI capture failure resumes every effect already paused", asyn
     getAnimations: () => applied ? [first, second] : [] };
   await assert.rejects(motion.run(element, { id: motion.id(), apply() { applied = true; } }), /pause rejected/);
   assert.equal(paused, false);
+});
+
+test("development motion diagnostics ignore existing effects without changing native completion", async () => {
+  let finishExisting, applied = false, settled = false;
+  const existing = { finished: new Promise(resolve => { finishExisting = resolve; }),
+    effect: { getKeyframes() { assert.fail("An existing animation must not be diagnosed as a new effect"); } } };
+  const element = { nodeType: 1, getAnimations: () => applied ? [existing, added] : [existing] };
+  const added = { finished: Promise.resolve(), effect: { target: element, getKeyframes: () => [{ opacity: 0 }, { opacity: 1 }] } };
+  const api = { options: { cssMotionController: false, environment: "development" },
+    currentPreference: () => "no-preference", waitLayout: { cancel() {}, setVisualFPSLimit() {} } };
+  const motion = createCssMotionController({ setTimeout, clearTimeout }, () => api);
+  const pending = motion.run(element, { id: motion.id(), apply() { applied = true; } });
+  pending.then(() => { settled = true; });
+  await new Promise(resolve => setImmediate(resolve));
+  assert.equal(settled, false);
+  finishExisting();
+  assert.equal((await pending).status, "completed");
+});
+
+test("per-keyframe replacement overrides additive effect composition for resource diagnostics", () => {
+  const warnings = [];
+  const element = { classList: { contains: name => name === "ae--anchored" }, getAttribute: () => null,
+    hasAttribute: () => false, parentElement: null };
+  const api = { options: { environment: "development" }, ext: { anchor: { initialized: true } },
+    className: name => `ae--${name}`, attr: name => `data-ae-${name}`,
+    diagnostics: { warn: (_definition, context) => warnings.push(context) } };
+  const effect = composite => ({ target: element, composite: "add",
+    getKeyframes: () => [{ transform: "translateX(2px)", composite }] });
+  diagnoseMotionResources(api, element, [{ effect: effect("auto") }], "feedback");
+  assert.equal(warnings.length, 0);
+  diagnoseMotionResources(api, element, [{ effect: effect("replace") }], "feedback");
+  assert.deepEqual(warnings.map(context => context.writers), [["anchor", "feedback"]]);
 });

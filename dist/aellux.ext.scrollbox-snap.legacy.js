@@ -262,6 +262,21 @@
         state.notifiedIndex = null;
       }
       var items = itemsFor(state);
+      if (state.resizeObserver) {
+        state.resizeObserver.disconnect();
+        state.resizeObserver.observe(state.element);
+        var _iterator2 = _createForOfIteratorHelper(items), _step2;
+        try {
+          for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
+            var item = _step2.value;
+            state.resizeObserver.observe(item);
+          }
+        } catch (err) {
+          _iterator2.e(err);
+        } finally {
+          _iterator2.f();
+        }
+      }
       if (!items.length) {
         AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_SCROLLBOX_SNAP_ITEMS, {
           extension: extensionName,
@@ -336,10 +351,10 @@
       var size = axis === HORIZONTAL ? element.clientWidth : element.clientHeight;
       if (!size) return;
       var center = axis === HORIZONTAL ? rect.left + element.clientLeft + size / 2 : rect.top + element.clientTop + size / 2;
-      var _iterator2 = _createForOfIteratorHelper(itemsFor(state)), _step2;
+      var _iterator3 = _createForOfIteratorHelper(itemsFor(state)), _step3;
       try {
-        for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
-          var item = _step2.value;
+        for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
+          var item = _step3.value;
           if (!state.savedItems.has(item)) {
             state.savedItems.set(item, AelluxJs.persist.element.save(item, [], properties));
           }
@@ -349,22 +364,22 @@
           item.style.setProperty(properties[1], Math.max(0, 1 - Math.abs(offset(state, item, axis, false, rect, box)) / size));
         }
       } catch (err) {
-        _iterator2.e(err);
-      } finally {
-        _iterator2.f();
-      }
-    }
-    function restoreItems(state) {
-      var _iterator3 = _createForOfIteratorHelper(state.savedItems.values()), _step3;
-      try {
-        for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
-          var memory = _step3.value;
-          memory.restore();
-        }
-      } catch (err) {
         _iterator3.e(err);
       } finally {
         _iterator3.f();
+      }
+    }
+    function restoreItems(state) {
+      var _iterator4 = _createForOfIteratorHelper(state.savedItems.values()), _step4;
+      try {
+        for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
+          var memory = _step4.value;
+          memory.restore();
+        }
+      } catch (err) {
+        _iterator4.e(err);
+      } finally {
+        _iterator4.f();
       }
       state.savedItems.clear();
     }
@@ -403,16 +418,16 @@
     }
     function animateRelease(state, from, to, axis) {
       var start = root.performance.now();
-      var _step4 = function step(time) {
+      var _step5 = function step(time) {
         var progress = Math.max(0, Math.min(1, (time - start) / SNAP_RELEASE_MS));
         scrollTo(state, from + (to - from) * (1 - Math.pow(1 - progress, 3)), axis, INSTANT);
-        if (progress < 1) state.frame = root.requestAnimationFrame(_step4);
+        if (progress < 1) state.frame = root.requestAnimationFrame(_step5);
         else {
           cancelRelease(state);
           finish(state);
         }
       };
-      state.frame = root.requestAnimationFrame(_step4);
+      state.frame = root.requestAnimationFrame(_step5);
     }
     function next(element) {
       var state = states.get(element);
@@ -526,16 +541,16 @@
       var active = kind === POINTER ? state.activePointers : state.activeTouches;
       if (kind === POINTER) active.add(event.pointerId);
       else {
-        var _iterator4 = _createForOfIteratorHelper(event.changedTouches), _step5;
+        var _iterator5 = _createForOfIteratorHelper(event.changedTouches), _step6;
         try {
-          for (_iterator4.s(); !(_step5 = _iterator4.n()).done; ) {
-            var touch = _step5.value;
+          for (_iterator5.s(); !(_step6 = _iterator5.n()).done; ) {
+            var touch = _step6.value;
             active.add(touch.identifier);
           }
         } catch (err) {
-          _iterator4.e(err);
+          _iterator5.e(err);
         } finally {
-          _iterator4.f();
+          _iterator5.f();
         }
       }
       state.target = null;
@@ -569,16 +584,16 @@
       var active = kind === POINTER ? state.activePointers : state.activeTouches;
       if (kind === POINTER) active.delete(event.pointerId);
       else {
-        var _iterator5 = _createForOfIteratorHelper(event.changedTouches), _step6;
+        var _iterator6 = _createForOfIteratorHelper(event.changedTouches), _step7;
         try {
-          for (_iterator5.s(); !(_step6 = _iterator5.n()).done; ) {
-            var touch = _step6.value;
+          for (_iterator6.s(); !(_step7 = _iterator6.n()).done; ) {
+            var touch = _step7.value;
             active.delete(touch.identifier);
           }
         } catch (err) {
-          _iterator5.e(err);
+          _iterator6.e(err);
         } finally {
-          _iterator5.f();
+          _iterator6.f();
         }
       }
       if (!hasActiveGesture(state)) endDesktopGesture(state);

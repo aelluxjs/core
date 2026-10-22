@@ -31,14 +31,7 @@
     const states = /* @__PURE__ */ new Map();
     const desktop = (_a = root.matchMedia) == null ? void 0 : _a.call(root, "(any-hover: hover) and (any-pointer: fine)");
     let observer = null;
-    const css = `
-    :where(${selector}:not([hidden])) {display:block}
-    :where(${selector}) {position:relative;min-width:0;overflow:hidden;overflow:clip;text-overflow:ellipsis;white-space:nowrap!important}
-    :where([${contentAttribute}]) {display:block;position:relative;width:auto;max-width:none;contain:none;visibility:inherit;opacity:1;pointer-events:inherit;overflow:hidden;text-overflow:ellipsis;white-space:nowrap!important;transform:none;transition:none}
-    :where([${activeAttribute}]>[${contentAttribute}]) {width:max-content;overflow:visible;transform:translate3d(var(--ae-anchor-x,0px),0,0)}
-    :where(html[${reducedAttribute}="reduced"] ${selector}>[${contentAttribute}]) {width:auto;overflow:hidden;text-overflow:ellipsis;transform:none!important;transition:none!important}
-  `;
-    return { selector, css, mount, unmount, update, destroy };
+    return { selector, mount, unmount, update, destroy };
     function listenMedia(add) {
       if (desktop == null ? void 0 : desktop.addEventListener) desktop[add ? "addEventListener" : "removeEventListener"]("change", refreshAll);
       else if (desktop == null ? void 0 : desktop.addListener) desktop[add ? "addListener" : "removeListener"](refreshAll);
@@ -439,7 +432,7 @@
     const api = root.AelluxJs;
     const extensionName = "overflow-marquee";
     if (!api) throw new Error("[aellux.js] Load the boot script before the overflow-marquee extension.");
-    let marquee = null, placements = null, weakStyle = null;
+    let marquee = null, placements = null;
     api.extAttach(extensionName, { init, destroy });
     async function init() {
       if (!api.registry.ext.anchor) api.ext("anchor");
@@ -453,10 +446,6 @@
         { name: "--ae-overflow-marquee-speed", syntax: "<number>", initialValue: "30" },
         { name: "--ae-overflow-marquee-delay", syntax: "<time>", initialValue: "1200ms" }
       );
-      weakStyle = root.document.createElement("style");
-      weakStyle.setAttribute(api.attr("overflow-marquee-style"), "");
-      weakStyle.textContent = marquee.css.replace(/\s*([{};:,])\s*/g, "$1").replace(/;}/g, "}").trim();
-      root.document.head.appendChild(weakStyle);
       api.mountManager.add({
         extensionName,
         selector: marquee.selector,
@@ -469,8 +458,7 @@
       await (marquee == null ? void 0 : marquee.destroy());
       placements == null ? void 0 : placements.destroy();
       api.mountManager.remove({ extensionName });
-      weakStyle == null ? void 0 : weakStyle.remove();
-      marquee = placements = weakStyle = null;
+      marquee = placements = null;
     }
   })(typeof globalThis !== "undefined" ? globalThis : window);
 })();

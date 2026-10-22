@@ -19,8 +19,8 @@ export const semanticAttributes = [
   attribute("anchor-target", "anchor", "Target ID or CSS selector. A Present Group target resolves to its accepted selected member, allowing multiple Anchors per group. Empty uses offsetParent. Effective target and Anchor must share a positioning reference.", { syntax: "selector", default: "", examples: ["menu-trigger", "#menu-trigger", "#views"] }),
   attribute("anchor-match", "anchor", "Match the target's width and/or height through weak CSS. Empty and unknown tokens are invalid; application sizing can override the match.", { syntax: "token-list", values: ["width", "height", "width height"] }),
   attribute("overflow-marquee", "overflow-marquee", "Single-line overflow marquee with equal holds at both ends. Loads Anchor for placement. Starts only when visible; hidden/offscreen, mouse hover and focus within pause in place. Root reduced motion keeps ellipsis; desktop overflow receives a native title unless authored.", { syntax: "presence" }),
-  ...["overflow-marquee-content", "overflow-marquee-active", "overflow-marquee-style"].map(name =>
-    attribute(name, "overflow-marquee", "Internal Overflow Marquee wrapper, active-state marker or owned stylesheet.", { syntax: "presence", role: "internal" })),
+  ...["overflow-marquee-content", "overflow-marquee-active"].map(name =>
+    attribute(name, "overflow-marquee", "Internal Overflow Marquee wrapper or active-state marker.", { syntax: "presence", role: "internal" })),
   attribute("scrollbox", "scrollbox", "Native scrolling with progress state. Pointer mode adds desktop mouse/pen drag scrolling; it requires usable overflow.", { syntax: "enum", values: ["", "native", "pointer"], default: "native" }),
   attribute("scrollbox-wheel-horizontal", "scrollbox", "Set false to disable vertical-wheel conversion to horizontal scrolling.", { syntax: "enum", values: ["true", "false"], default: "true" }),
   attribute("scrollbox-momentum", "scrollbox", "Set false to disable desktop pointer momentum. Snap disables momentum on every axis.", { syntax: "enum", values: ["true", "false"], default: "true" }),
@@ -53,7 +53,7 @@ export const semanticAttributes = [
     ["reduced-motion", ["no-preference", "reduced"]], ["reduced-transparency", ["no-preference", "reduced"]],
     ["forced-colors", ["no-preference", "active"]]
   ].map(([name, values]) => attribute(name, "preference", "Resolved root preference published by the runtime. Use in CSS selectors; configure choices through Preference.", { syntax: "enum", values, tags: ["html"], role: "output" })),
-  ...["ext", "ext-style", "dep", "weak-style", "legacy", "esm", "anchor-style", "ready"].map(name =>
+  ...["ext", "ext-style", "dep", "weak-style", "full-style", "legacy", "esm", "ready"].map(name =>
     attribute(name, "core", "Internal runtime marker; applications should not configure this attribute.", { syntax: "string", role: "internal", doc: "runtime/api" }))
 ];
 

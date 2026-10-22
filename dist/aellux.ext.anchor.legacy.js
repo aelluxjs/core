@@ -221,17 +221,12 @@
     var placementMaps = /* @__PURE__ */ new Set();
     var nextLayoutId = 2e6;
     var mutations = null;
-    var weakStyle = null;
     AelluxJs.extAttach(extensionName, {
       init: init,
       destroy: destroy,
       createPlacementMap: createPlacementMap
     });
     function init() {
-      weakStyle = document.createElement("style");
-      weakStyle.setAttribute(AelluxJs.attr("anchor-style"), "");
-      weakStyle.textContent = "\n      :where([".concat(attribute, "][").concat(matchAttribute, '~="width"]) {\n        width:var(--ae-anchor-target-width,0px);box-sizing:border-box;\n      }\n      :where([').concat(attribute, "][").concat(matchAttribute, '~="height"]) {\n        height:var(--ae-anchor-target-height,0px);box-sizing:border-box;\n      }\n      :where([').concat(attribute, "][").concat(matchAttribute, "].").concat(anchoredClass, ") {\n        transform:translate3d(var(--ae-anchor-pivot-x),var(--ae-anchor-pivot-y),0)\n          translate(calc(0% - var(--ae-anchor-origin-x)),calc(0% - var(--ae-anchor-origin-y)));\n      }\n      :where([").concat(attribute, "].").concat(switchingClass, ") {\n        transition-property:transform,width,height;\n        transition-duration:var(--ae-anchor-switch-duration,0ms);\n        transition-timing-function:var(--ae-anchor-switch-ease,ease-in-out);transition-delay:0s;\n      }\n      :where(html[").concat(AelluxJs.attr("reduced-motion"), '="reduced"] [').concat(attribute, "].").concat(switchingClass, ") {transition:none;}\n    ").replace(/\s*([{};:,])\s*/g, "$1").replace(/;}/g, "}").trim();
-      document.head.appendChild(weakStyle);
       AelluxJs.registerCssProperty({
         name: "--ae-anchor-x",
         syntax: "<length>",
@@ -281,7 +276,6 @@
     }
     function _destroy() {
       _destroy = _asyncToGenerator(/* @__PURE__ */ _regenerator().m(function _callee() {
-        var _weakStyle;
         var _iterator10, _step10, map;
         return _regenerator().w(function(_context) {
           while (1) switch (_context.n) {
@@ -303,8 +297,6 @@
               AelluxJs.mountManager.remove({
                 extensionName: extensionName
               });
-              (_weakStyle = weakStyle) === null || _weakStyle === void 0 || _weakStyle.remove();
-              weakStyle = null;
             case 2:
               return _context.a(2);
           }

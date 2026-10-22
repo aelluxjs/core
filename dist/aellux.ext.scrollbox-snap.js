@@ -156,6 +156,11 @@
         state.notifiedIndex = null;
       }
       const items = itemsFor(state);
+      if (state.resizeObserver) {
+        state.resizeObserver.disconnect();
+        state.resizeObserver.observe(state.element);
+        for (const item of items) state.resizeObserver.observe(item);
+      }
       if (!items.length) {
         AelluxJs.diagnostics.error(
           AelluxJs.diagnostics.ERROR_SCROLLBOX_SNAP_ITEMS,
