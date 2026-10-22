@@ -14,10 +14,15 @@ Syntax compatibility alone does not provide missing browser APIs. For this reaso
 - `fetch`;
 - `CustomEvent`;
 - `requestAnimationFrame` and `cancelAnimationFrame`;
+- `<dialog>` (`show()`, `showModal()`, `close()` and `<form method="dialog">`) through `dialog-polyfill`, including its CSS;
 - `Element.prototype.matches`; and
 - `NodeList.prototype.forEach`.
 
 The generated Legacy Extensions do not embed these dependencies again. They are loaded after, and share the environment prepared by, the Legacy orchestrator.
+
+`<dialog>` is the standard element for Aellux modal interfaces. Missing dialog methods select the Legacy runtime automatically. The fallback registers dialogs in each `$ae.mount(root)` subtree before Extension mounting, including the root itself; await mounting before calling its dialog methods. With `skipGlobalMount: true`, explicitly mount the desired subtree. Native dialog implementations are preserved, including when Legacy is forced.
+
+The fallback implements the established dialog API, not newer features such as `requestClose()` or `closedby`. Place modal dialogs directly under `<body>` where possible: unlike the native top layer, the fallback is subject to ancestor stacking contexts. Style both `dialog::backdrop` and `dialog + .backdrop` when customizing the backdrop. See the [upstream limitations](https://github.com/GoogleChrome/dialog-polyfill#limitations).
 
 Third-party Extensions may rely on this list only while running under the aellux.js Legacy runtime. Any additional API must be feature-detected and included by the Extension's own build or loaded as an explicit dependency. Babel or another transpiler can produce ES5 syntax, but does not automatically provide missing browser APIs.
 

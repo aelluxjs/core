@@ -672,6 +672,30 @@ npm run test:budget
 <h2>Limits</h2>
 <p><a href="https://github.com/aelluxjs/core/blob/main/scripts/bundle-budget.config.mjs"><code>scripts/bundle-budget.config.mjs</code></a> is the source of truth for every raw and gzip limit. It covers the minified boot, ESM entry, Modern and Legacy orchestrators, Full runtimes, Core Extensions (including separate Scrollbox Snap files), and generated Extension stylesheets. The <code>test:budget</code> command prints each artifact&#39;s measured size beside its current limit and fails if a new minified JavaScript or CSS file has no budget. Full incorporates nine Core Extensions and makes Scrollbox and Scrollbox Snap available through separate on-demand files.</p>
 <h2>Scope and Limitations</h2>
+<p>The Legacy dialog fallback includes <code>dialog-polyfill</code> 0.5.6, its CSS, and mount registration. The measured minified costs are:</p>
+<table>
+<thead>
+<tr>
+<th>Artifact</th>
+<th>Before raw / gzip</th>
+<th>With dialog raw / gzip</th>
+<th>Current limits raw / gzip</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Legacy orchestrator</td>
+<td>328.2 / 103.7 KiB</td>
+<td>341.4 / 107.4 KiB</td>
+<td>342 / 108 KiB</td>
+</tr>
+<tr>
+<td>Legacy Full</td>
+<td>436.7 / 129.9 KiB</td>
+<td>449.8 / 133.8 KiB</td>
+<td>451 / 138 KiB</td>
+</tr>
+</tbody></table>
+<p>The previous limits were 328.5 / 104 KiB and 437 / 138 KiB respectively. Modern runtimes do not include this fallback.</p>
 <p>This budget detects distribution-size regressions. It does not measure page-specific network time, parsing time, boot time, layout, mount duration, memory use, or real-user performance. The Legacy full bundle is materially larger because it includes the shared polyfills required for its ES5 path. Runtime-performance budgets require representative application fixtures and remain post-release work.</p>
 <p>For layout work inside an Extension, use <a href="wait-layout.htm"><code>waitLayout</code></a> to batch geometry reads and dependent CSS or DOM writes. The guide includes code for coalescing frequent scroll and resize notifications.</p>
         </div>

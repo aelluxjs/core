@@ -673,10 +673,13 @@
 <li><code>fetch</code>;</li>
 <li><code>CustomEvent</code>;</li>
 <li><code>requestAnimationFrame</code> and <code>cancelAnimationFrame</code>;</li>
+<li><code>&lt;dialog&gt;</code> (<code>show()</code>, <code>showModal()</code>, <code>close()</code> and <code>&lt;form method=&quot;dialog&quot;&gt;</code>) through <code>dialog-polyfill</code>, including its CSS;</li>
 <li><code>Element.prototype.matches</code>; and</li>
 <li><code>NodeList.prototype.forEach</code>.</li>
 </ul>
 <p>The generated Legacy Extensions do not embed these dependencies again. They are loaded after, and share the environment prepared by, the Legacy orchestrator.</p>
+<p><code>&lt;dialog&gt;</code> is the standard element for Aellux modal interfaces. Missing dialog methods select the Legacy runtime automatically. The fallback registers dialogs in each <code>$ae.mount(root)</code> subtree before Extension mounting, including the root itself; await mounting before calling its dialog methods. With <code>skipGlobalMount: true</code>, explicitly mount the desired subtree. Native dialog implementations are preserved, including when Legacy is forced.</p>
+<p>The fallback implements the established dialog API, not newer features such as <code>requestClose()</code> or <code>closedby</code>. Place modal dialogs directly under <code>&lt;body&gt;</code> where possible: unlike the native top layer, the fallback is subject to ancestor stacking contexts. Style both <code>dialog::backdrop</code> and <code>dialog + .backdrop</code> when customizing the backdrop. See the <a href="https://github.com/GoogleChrome/dialog-polyfill#limitations">upstream limitations</a>.</p>
 <p>Third-party Extensions may rely on this list only while running under the aellux.js Legacy runtime. Any additional API must be feature-detected and included by the Extension&#39;s own build or loaded as an explicit dependency. Babel or another transpiler can produce ES5 syntax, but does not automatically provide missing browser APIs.</p>
 <p>Browser primitives such as the DOM, <code>XMLHttpRequest</code> and <code>DOMParser</code> are still expected from the host environment. For <code>0.1.0</code>, the Legacy contract covers the ES5 output, runtime selection and fallback, shared polyfill installation, and generated Extension variants when exercised in the current tested browser engines. It does not declare compatibility with any historical browser version. ES5 syntax must therefore not be interpreted as unrestricted support for old browsers.</p>
 <p>See <a href="../extensions/authoring.htm">Extension Authoring</a> for the publication contract and reference build.</p>

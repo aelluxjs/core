@@ -72,6 +72,7 @@
     "@wolimp/docweaver": "github:wolimp-inc/docweaver#141bb1a9c76155341fb4d9b13e09f8f284798fdf",
     "core-js": "^3.50.0",
     "custom-event-polyfill": "^1.0.7",
+    "dialog-polyfill": "^0.5.6",
     "esbuild": "^0.25.0",
     "jsonschema": "^1.5.0",
     "raf": "^3.4.1",

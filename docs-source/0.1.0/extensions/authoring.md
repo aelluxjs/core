@@ -192,6 +192,7 @@ The Legacy orchestrator provides these compatibility layers once for all Extensi
 - `fetch`;
 - `CustomEvent`;
 - `requestAnimationFrame` and `cancelAnimationFrame`;
+- `<dialog>` (`show()`, `showModal()`, `close()` and `<form method="dialog">`), registered before Extension mounting in each `$ae.mount(root)` subtree;
 - `Element.prototype.matches`; and
 - `NodeList.prototype.forEach`.
 

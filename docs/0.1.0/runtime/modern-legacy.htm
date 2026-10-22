@@ -681,6 +681,7 @@
 <p>For <code>0.1.0</code>, automated validation forces this profile in the same current Chromium, Firefox, and WebKit engines used by the Modern suite. It verifies boot selection, the Legacy orchestrator, shared polyfill setup, and compatible Extension variants. The release does not claim support for historical Chrome, Firefox, Safari, Edge Legacy, or Internet Explorer versions. A historical browser enters the support matrix only after a separate run on that exact browser and operating system.</p>
 <h2>Selection Rules</h2>
 <p>The boot script checks the capabilities required by the orchestrator before loading it. Missing capabilities are recorded in <code>AelluxJs.diagnostics.notAvailable</code>.</p>
+<p>The required APIs include <code>HTMLDialogElement.prototype.show</code>, <code>showModal</code>, and <code>close</code>. If any are missing, Legacy supplies the dialog fallback and its styles. Existing and dynamically inserted dialogs are registered through <code>$ae.mount(root)</code>; see <a href="es5-support.htm">ES5 support level</a> for usage and fallback limitations.</p>
 <p>Force Legacy through initialization options or the development query parameter:</p>
 <pre><code class="language-js">$ae.init({ mode: &quot;basic&quot;, forceLegacy: true });
 </code></pre>

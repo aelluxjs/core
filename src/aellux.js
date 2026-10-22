@@ -117,7 +117,7 @@ import createWeakCss from "./internal/create-weak-css.js";
               var fullname = typeof option.name === "string" ? option.name : option.name.join(".");
               var obj = typeof option.name === "string" ?
                 window[option.name] :
-                window[option.name[0]][option.name[1]];
+                window[option.name[0]] && window[option.name[0]][option.name[1]];
               if (!obj || typeof obj[method] !== "function") {
                 AelluxJs.diagnostics.notAvailable.push(fullname + "." + method);
               }

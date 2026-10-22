@@ -39,12 +39,16 @@ const packageVersion = packageMetadata.version;
 const versionDefine = { __AELLUX_VERSION__: JSON.stringify(packageVersion) };
 const legacyThirdPartyBanner =
   "/*! Includes Babel helpers, core-js, custom-event-polyfill, raf, performance-now and whatwg-fetch (MIT). " +
+  "Includes dialog-polyfill (BSD-3-Clause). " +
   "Copyright and license texts: third-party/licenses/ in this distribution. */";
 const legacySourceFiles = sourceFiles.filter(sourceFile => {
   const filename = basename(sourceFile);
   return filename === "aellux.orchestrator.js" ||
     /^aellux\.ext\.[\w-]+\.js$/.test(filename);
 });
+const dialogPolyfillCSS = await readFile(
+  join(projectRoot, "node_modules/dialog-polyfill/dist/dialog-polyfill.css"), "utf8"
+);
 const legacyPolyfills = `
 require("core-js/stable");
 require("custom-event-polyfill");
@@ -60,6 +64,9 @@ if (window.NodeList && !window.NodeList.prototype.forEach) {
     Array.prototype.forEach.call(this, callback, thisArg);
   };
 }
+require("./src/internal/install-dialog-polyfill.js").installDialogPolyfill(
+  window, ${JSON.stringify(dialogPolyfillCSS)}
+);
 `;
 
 const legacyOrchestratorEntry = `${legacyPolyfills}

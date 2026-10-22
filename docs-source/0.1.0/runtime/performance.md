@@ -17,6 +17,15 @@ The CI workflow runs the same command after `npm run build`. A pull request fail
 
 ## Scope and Limitations
 
+The Legacy dialog fallback includes `dialog-polyfill` 0.5.6, its CSS, and mount registration. The measured minified costs are:
+
+| Artifact | Before raw / gzip | With dialog raw / gzip | Current limits raw / gzip |
+| --- | --- | --- | --- |
+| Legacy orchestrator | 328.2 / 103.7 KiB | 341.4 / 107.4 KiB | 342 / 108 KiB |
+| Legacy Full | 436.7 / 129.9 KiB | 449.8 / 133.8 KiB | 451 / 138 KiB |
+
+The previous limits were 328.5 / 104 KiB and 437 / 138 KiB respectively. Modern runtimes do not include this fallback.
+
 This budget detects distribution-size regressions. It does not measure page-specific network time, parsing time, boot time, layout, mount duration, memory use, or real-user performance. The Legacy full bundle is materially larger because it includes the shared polyfills required for its ES5 path. Runtime-performance budgets require representative application fixtures and remain post-release work.
 
 For layout work inside an Extension, use [`waitLayout`](wait-layout.md) to batch geometry reads and dependent CSS or DOM writes. The guide includes code for coalescing frequent scroll and resize notifications.

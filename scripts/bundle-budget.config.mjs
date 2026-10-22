@@ -8,10 +8,11 @@ export const bundleBudget = Object.freeze([
   // Also covers CSS Motion subtree capture; fade costs: core-extensions/overflow-marquee.md.
   // Measured deltas and the superseded limits: runtime/diagnostics.md.
   { file: "aellux.orchestrator.min.js", maxRawBytes: 62 * 1024, maxGzipBytes: 20.75 * 1024 },
-  { file: "aellux.orchestrator.legacy.min.js", maxRawBytes: 328.5 * 1024, maxGzipBytes: 104 * 1024 },
+  // Includes dialog-polyfill behavior and inline CSS; costs: runtime/performance.md.
+  { file: "aellux.orchestrator.legacy.min.js", maxRawBytes: 342 * 1024, maxGzipBytes: 108 * 1024 },
   // Full uses one external stylesheet shared by all Core Extensions.
   { file: "aellux.full.min.js", maxRawBytes: 131.5 * 1024, maxGzipBytes: 42.75 * 1024 },
-  { file: "aellux.full.legacy.min.js", maxRawBytes: 437 * 1024, maxGzipBytes: 138 * 1024 },
+  { file: "aellux.full.legacy.min.js", maxRawBytes: 451 * 1024, maxGzipBytes: 138 * 1024 },
   { file: "aellux.full.min.css", maxRawBytes: 122 * 1024, maxGzipBytes: 12 * 1024 },
   { file: "aellux.ext.adaptive.min.css", maxRawBytes: 121 * 1024, maxGzipBytes: 11 * 1024 },
   { file: "aellux.ext.adaptive.min.js", maxRawBytes: 5 * 1024, maxGzipBytes: 3 * 1024 },

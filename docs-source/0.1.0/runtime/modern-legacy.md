@@ -26,6 +26,8 @@ For `0.1.0`, automated validation forces this profile in the same current Chromi
 
 The boot script checks the capabilities required by the orchestrator before loading it. Missing capabilities are recorded in `AelluxJs.diagnostics.notAvailable`.
 
+The required APIs include `HTMLDialogElement.prototype.show`, `showModal`, and `close`. If any are missing, Legacy supplies the dialog fallback and its styles. Existing and dynamically inserted dialogs are registered through `$ae.mount(root)`; see [ES5 support level](es5-support.md) for usage and fallback limitations.
+
 Force Legacy through initialization options or the development query parameter:
 
 ```js
