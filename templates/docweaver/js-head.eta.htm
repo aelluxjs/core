@@ -44,7 +44,7 @@
 
       prepareAjaxLinks();
 
-      document.querySelectorAll("table:not(.table-scroll-wrapper>table)")
+      document.querySelectorAll("table:not([data-ae-scrollbox])")
         .forEach((table) => {
           if (table.parentElement &&
             table.parentElement.classList.contains("table-scroll-wrapper")) {
@@ -57,6 +57,12 @@
           wrapper.setAttribute("data-ae-scrollbar", "horizontal");
           table.parentNode.insertBefore(wrapper, table);
           wrapper.appendChild(table);
+        });
+
+      document.querySelectorAll("pre:not([data-ae-scrollbox])")
+        .forEach((pre) => {
+          pre.setAttribute("data-ae-scrollbox", "pointer");
+          pre.setAttribute("data-ae-scrollbar", "horizontal");
         });
     }
   );
