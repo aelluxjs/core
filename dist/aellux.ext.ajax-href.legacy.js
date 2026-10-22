@@ -616,7 +616,12 @@
               _iterator3.f();
               return _context.f(19);
             case 20:
-              AelluxJs.dispatch("AjaxHrefLoaded");
+              AelluxJs.dispatch("AjaxHrefLoaded", {
+                detail: {
+                  url: url,
+                  selectors: selectors
+                }
+              });
               _context.n = 23;
               break;
             case 21:
@@ -641,7 +646,12 @@
             case 23:
               _context.p = 23;
               if (previousController === controller) previousController = null;
-              AelluxJs.dispatch("AjaxHrefComplete");
+              AelluxJs.dispatch("AjaxHrefComplete", {
+                detail: {
+                  url: url,
+                  selectors: selectors
+                }
+              });
               return _context.f(23);
             case 24:
               return _context.a(2);
@@ -739,9 +749,25 @@
       if (destinyUrl.href === currentUrl.href) {
         if (destinyUrl.hash && destinyUrl.hash !== currentUrl.hash) return;
         event.preventDefault();
-        AelluxJs.dispatch("AjaxHrefStart");
-        AelluxJs.dispatch("AjaxHrefLoaded");
-        AelluxJs.dispatch("AjaxHrefComplete");
+        var url = link.href;
+        AelluxJs.dispatch("AjaxHrefStart", {
+          detail: {
+            url: url,
+            selectors: selectors
+          }
+        });
+        AelluxJs.dispatch("AjaxHrefLoaded", {
+          detail: {
+            url: url,
+            selectors: selectors
+          }
+        });
+        AelluxJs.dispatch("AjaxHrefComplete", {
+          detail: {
+            url: url,
+            selectors: selectors
+          }
+        });
         return;
       }
       event.preventDefault();

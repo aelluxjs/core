@@ -217,7 +217,7 @@
             AelluxJs.ext.feedback.progress("Ajax loaded", replacement, 1);
           }
         }
-        AelluxJs.dispatch("AjaxHrefLoaded");
+        AelluxJs.dispatch("AjaxHrefLoaded", { detail: { url, selectors } });
       } catch (error) {
         selectorList.forEach(function(selector) {
           const currentElement = elements.get(selector);
@@ -233,7 +233,7 @@
       } finally {
         if (previousController === controller)
           previousController = null;
-        AelluxJs.dispatch("AjaxHrefComplete");
+        AelluxJs.dispatch("AjaxHrefComplete", { detail: { url, selectors } });
       }
     }
     function selectorDiagnostic(value, reason, element = null) {
@@ -316,9 +316,10 @@
       if (destinyUrl.href === currentUrl.href) {
         if (destinyUrl.hash && destinyUrl.hash !== currentUrl.hash) return;
         event.preventDefault();
-        AelluxJs.dispatch("AjaxHrefStart");
-        AelluxJs.dispatch("AjaxHrefLoaded");
-        AelluxJs.dispatch("AjaxHrefComplete");
+        const url = link.href;
+        AelluxJs.dispatch("AjaxHrefStart", { detail: { url, selectors } });
+        AelluxJs.dispatch("AjaxHrefLoaded", { detail: { url, selectors } });
+        AelluxJs.dispatch("AjaxHrefComplete", { detail: { url, selectors } });
         return;
       }
       event.preventDefault();

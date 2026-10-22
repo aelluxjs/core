@@ -79,7 +79,7 @@
                 </li>
 
                 <% if (item.children !==undefined && item.children.length) { %>
-                  <div id="children-<%= item.slug %>" class="docs-menu-panel border-start ms-2"
+                  <div id="children-<%= item.slug %>" class="docs-menu-panel d-block border-start ms-2"
                     data-ae-present="height opacity" data-ae-unpop-on-outside="false" <% if (!item.active) { %> hidden<%
                       } %>>
                       <div class="ps-2 gap-1 d-flex flex-column" data-ae-present-motion>
@@ -98,7 +98,7 @@
                               </button>
                             </li>
 
-                            <div id="children2-<%= child.slug %>" class="docs-menu-panel border-start ms-2"
+                            <div id="children2-<%= child.slug %>" class="docs-menu-panel d-block border-start ms-2"
                               data-ae-present="height opacity" data-ae-unpop-on-outside="false" <% if (!child.active) {
                               %>
                               hidden<% } %>>
