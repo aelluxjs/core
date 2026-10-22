@@ -285,15 +285,13 @@ body:after {
 
 pre {
   background: #0d1117;
-}
-
-pre code.hljs,
-pre {
   border-radius: 3px;
 }
 
 code.hljs {
-  overflow: visible;
+  border-radius: 3px;
+  overflow: visible !important;
+  display: inline-block !important;
 }
 
 /*[data-bs-theme=dark] */
