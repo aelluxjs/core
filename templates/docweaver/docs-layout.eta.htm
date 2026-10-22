@@ -110,7 +110,7 @@
                                         class="nav-item mt-1 small-md rounded-1 ps-md-1<% if (child2.active) { %> active<% } %>"
                                         style="flex:0">
                                         <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
-                                          href="<%= child2.href %>" data-ae-overflow-marquee="200px">
+                                          href="<%= child2.href %>" data-ae-overflow-marquee="190px">
                                           <%= child2.label %>
                                         </a>
                                       </li>
@@ -122,7 +122,7 @@
                                   class="nav-item mt-1 small-md rounded-1 ps-md-1<% if (child.active) { %> active<% } %>"
                                   style="flex:0">
                                   <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
-                                    href="<%= child.href %>" data-ae-overflow-marquee="200px">
+                                    href="<%= child.href %>" data-ae-overflow-marquee="190px">
                                     <%= child.label %>
                                   </a>
                                 </li>
@@ -162,7 +162,8 @@
           </button>
         </div>
 
-        <div class="toc-collapse bg-white overflow-hidden" id="toc-collapse" data-ae-present="transform opacity" hidden>
+        <div class="toc-collapse bg-white overflow-hidden" id="toc-collapse" data-ae-scrollbox data-ae-scrollbar
+          data-ae-present="transform opacity" hidden style="overscroll-behavior: contain;">
           <div class="pt-1 pt-lg-2 p-4 p-lg-0 d-table w-100">
             <div class="h6 fw-bold p-2 pb-1">On this page</div>
             <div class="position-relative overflow-hidden">

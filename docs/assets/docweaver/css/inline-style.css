@@ -231,6 +231,7 @@ body:after {
   top: 100%;
   left: 0;
   right: 0;
+  max-height: calc(100dvh - 117px);
   border-top: var(--bs-border-width) var(--bs-border-style) var(--bs-border-color) !important;
   border-bottom: var(--bs-border-width) var(--bs-border-style) var(--bs-border-color) !important;
 }
