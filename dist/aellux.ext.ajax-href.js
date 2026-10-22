@@ -177,7 +177,7 @@
           AelluxJs.ext.feedback.progress("Ajax loading", currentElement, 0);
         }
       });
-      AelluxJs.dispatch("AjaxHrefStart");
+      AelluxJs.dispatch("AjaxHrefStart", { detail: { url, selectors } });
       try {
         const response = await AelluxJs.request(url, { signal: controller.signal });
         const html = await response.text();

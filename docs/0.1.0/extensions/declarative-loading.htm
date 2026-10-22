@@ -99,7 +99,7 @@
     const container = document.querySelector("#doc-content");
     container.style.transition = null;
     container.style.opacity = .2;
-    setNavActiveByUrl(window.location.href);
+    setNavActiveByUrl(e.detail.url);
     $ae('navbarSupportedContent').present.unpop();
     window.scrollTo({ top: 0 });
   });

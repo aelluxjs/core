@@ -82,7 +82,7 @@ import { validateHTMLSource } from "./internal/validate-html-source.js";
       //AJAX PROGRESS UPDATE VALUE
     });
 
-    AelluxJs.dispatch("AjaxHrefStart");
+    AelluxJs.dispatch("AjaxHrefStart", { detail: { url, selectors } });
 
     try {
       const response = await AelluxJs.request(url, { signal: controller.signal });

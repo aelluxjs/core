@@ -499,7 +499,12 @@
                   AelluxJs.ext.feedback.progress("Ajax loading", currentElement2, 0);
                 }
               });
-              AelluxJs.dispatch("AjaxHrefStart");
+              AelluxJs.dispatch("AjaxHrefStart", {
+                detail: {
+                  url: url,
+                  selectors: selectors
+                }
+              });
               _context.p = 3;
               _context.n = 4;
               return AelluxJs.request(url, {
