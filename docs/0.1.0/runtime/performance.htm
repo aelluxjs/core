@@ -97,6 +97,10 @@
         .forEach((element) => {
           element.setAttribute("data-ae-scrollbox", "pointer");
           element.setAttribute("data-ae-scrollbar", "horizontal");
+          const wrapper = document.createElement("div");
+          wrapper.classList.add("code-wrapper")
+          element.parentNode.insertBefore(wrapper, element);
+          wrapper.appendChild(element);
         });
     }
   );
