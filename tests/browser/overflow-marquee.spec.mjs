@@ -5,7 +5,7 @@ const markup = (contents = text, extra = "") => `<div id="label" data-ae-overflo
   style="width:140px;font:16px/20px monospace;padding:3px 7px;border:2px solid;white-space:normal;
   --ae-overflow-marquee-speed:900;--ae-overflow-marquee-delay:80ms" ${extra}>${contents}</div>`;
 
-async function start(page, html = markup(), options = {}) {
+async function start(page, html = markup(), options = {}, wrapped = true) {
   await page.goto("/tests/index.htm");
   await page.addScriptTag({ url: "/dist/aellux.js" });
   await page.evaluate(({ html, options }) => {
@@ -16,8 +16,87 @@ async function start(page, html = markup(), options = {}) {
   await expect.poll(() => page.evaluate(() => AelluxJs.ext.overflowMarquee?.initialized)).toBe(true);
   expect(await page.evaluate(() => AelluxJs.ext.anchor?.initialized)).toBe(true);
   await page.evaluate(() => AelluxJs.mount(document));
-  await expect(page.locator("#label > [data-ae-overflow-marquee-viewport] > [data-ae-overflow-marquee-content]")).toHaveCount(1);
+  await expect(page.locator("#label > [data-ae-overflow-marquee-viewport] > [data-ae-overflow-marquee-content]")).toHaveCount(wrapped ? 1 : 0);
 }
+
+for (const forceLegacy of [false, true]) for (const limit of ["200", "200px"]) {
+  test(`pixel limit skips marquee presentation until content strictly exceeds it (${limit}, legacy=${forceLegacy})`, async ({ page }) => {
+    const html = markup('<span id="original" style="display:inline-block;width:200px;height:20px">Label</span>')
+      .replace("data-ae-overflow-marquee class", `data-ae-overflow-marquee="${limit}" class`);
+    await start(page, html, { mode: limit === "200" ? "basic" : "full", forceLegacy }, false);
+    const host = page.locator("#label");
+    await expect(host).toHaveCSS("white-space", "normal");
+    await expect(host).toHaveCSS("overflow", "visible");
+    await expect(host).not.toHaveAttribute("title");
+    await expect(host).not.toHaveAttribute("data-ae-overflow-marquee-ready");
+    await expect(host).not.toHaveAttribute("data-ae-overflow-marquee-active");
+    const original = await host.evaluate(element => {
+      window.limitOriginal = element.firstChild;
+      window.limitStyle = element.getAttribute("style");
+      window.limitClicks = 0;
+      element.firstChild.addEventListener("click", () => window.limitClicks++);
+      return element.getBoundingClientRect().width;
+    });
+    // The gate still applies when content overflows the narrower host.
+    await page.waitForTimeout(100);
+    await page.evaluate(() => {
+      window.limitProbes = 0;
+      const createRange = document.createRange.bind(document);
+      document.createRange = () => { window.limitProbes++; return createRange(); };
+      document.dispatchEvent(new Event("visibilitychange"));
+      window.dispatchEvent(new Event("scroll"));
+      document.getElementById("label").dispatchEvent(new Event("mouseenter"));
+      document.getElementById("label").dispatchEvent(new Event("focusin"));
+    });
+    await page.waitForTimeout(100);
+    expect(await page.evaluate(() => window.limitProbes)).toBe(0);
+    await expect(host.locator("[data-ae-overflow-marquee-viewport]")).toHaveCount(0);
+    await page.locator("#original").evaluate(element => element.style.width = "201px");
+    await expect(host).toHaveAttribute("data-ae-overflow-marquee-active", "");
+    await expect(host).toHaveCSS("width", "140px");
+    expect(await host.evaluate(element => element.getBoundingClientRect().width)).toBe(original);
+    await page.locator("#original").evaluate(element => element.style.width = "199px");
+    await expect(host.locator("[data-ae-overflow-marquee-viewport]")).toHaveCount(0);
+    await expect(host).not.toHaveAttribute("title");
+    await expect(host).toHaveCSS("white-space", "normal");
+    expect(await host.evaluate(element => element.firstChild === window.limitOriginal &&
+      element.getAttribute("style") === window.limitStyle)).toBe(true);
+    await page.evaluate(() => { window.limitOriginal.click(); });
+    expect(await page.evaluate(() => window.limitClicks)).toBe(1);
+    // A height greater than the limit also qualifies; motion stays horizontal.
+    await page.locator("#original").evaluate(element => element.style.height = "201px");
+    await expect(host).toHaveAttribute("data-ae-overflow-marquee-active", "");
+    await host.evaluate(element => element.setAttribute("data-ae-overflow-marquee", "1000px"));
+    await expect(host.locator("[data-ae-overflow-marquee-viewport]")).toHaveCount(0);
+    await page.evaluate(() => AelluxJs.unmount(document.getElementById("label"), "overflow-marquee"));
+    await expect(host).not.toHaveAttribute("data-ae-overflow-marquee-ready");
+  });
+}
+
+test("pixel limit measures unwrapped text, reacts to replacement and does not impose a width", async ({ page }) => {
+  await start(page, markup("Short").replace("data-ae-overflow-marquee class", 'data-ae-overflow-marquee="250.5px" class'), {}, false);
+  const host = page.locator("#label");
+  await host.evaluate((element, value) => element.textContent = value, text);
+  await expect(host).toHaveAttribute("data-ae-overflow-marquee-active", "");
+  await host.evaluate(element => element.style.width = "900px");
+  await expect(host).not.toHaveAttribute("data-ae-overflow-marquee-active");
+  await expect(host).toHaveCSS("width", "900px");
+  await host.evaluate(element => element.textContent = "Short");
+  await expect(host.locator("[data-ae-overflow-marquee-viewport]")).toHaveCount(0);
+  await host.evaluate(element => element.setAttribute("data-ae-overflow-marquee", ""));
+  await expect(host.locator("[data-ae-overflow-marquee-viewport]")).toHaveCount(1);
+});
+
+test("pixel limit preserves missing styles and includes the content line height", async ({ page }) => {
+  await start(page, '<div style="width:10px;font:16px/40px monospace"><a id="label" data-ae-overflow-marquee="200px">ii</a></div>', {}, false);
+  const host = page.locator("#label");
+  await expect(host).not.toHaveAttribute("style");
+  await host.evaluate(element => element.setAttribute("data-ae-overflow-marquee", "30px"));
+  await expect(host).toHaveAttribute("data-ae-overflow-marquee-active", "");
+  await host.evaluate(element => element.setAttribute("data-ae-overflow-marquee", "200px"));
+  await expect(host.locator("[data-ae-overflow-marquee-viewport]")).toHaveCount(0);
+  await expect(host).not.toHaveAttribute("style");
+});
 
 for (const mode of ["basic", "full"]) for (const forceLegacy of [false, true]) {
   test(`marquee mounts from its attribute and jumps back after a linear pass (${mode}, legacy=${forceLegacy})`, async ({ page }) => {

@@ -13,6 +13,15 @@ $ae.init({ mode: "basic" });
 </span>
 ```
 
+The attribute also accepts a nonnegative pixel limit, with or without `px`:
+
+```html
+<a data-ae-overflow-marquee="250px" href="/details">A navigation label</a>
+<span data-ae-overflow-marquee="250">Another label</span>
+```
+
+This value is only a condition; it does not set or cap the layout width. The intrinsic single-line content width or height must strictly exceed it before marquee is considered. Equal or smaller content keeps its authored presentation, without generated wrappers, clipping, ellipsis, fade, owned tooltip, visibility/interaction checks or motion. Only content/size monitoring and the threshold measurement remain, so edits, style changes, font loading and resizing can enable it later. Crossing back below the limit cancels motion and restores the original nodes and presentation. Horizontal overflow within the existing layout is still required to animate; a height exceeding the limit does not introduce vertical movement. An empty attribute preserves the original overflow behavior. Decimals are accepted; invalid values fall back to the empty behavior. Changing the value reconfigures a mounted label.
+
 The external stylesheet, included in Full or requested with `loadStyle: true` in Basic, supplies relative positioning, clipping and ellipsis. It applies `white-space:nowrap!important` to the host and its generated content wrapper, without writing inline whitespace styles. Ordinary author styles remain subject to the CSS cascade; a higher-priority important rule can override the weak rule. A stationary viewport contains the moving content wrapper, both in normal flow to preserve the label's height. Original nodes are moved, not cloned, preserving their identity and listeners. Use this on single-line content containers; inserting these layers changes direct-child selector relationships.
 
 When content overflows horizontally, the wrapper waits at the start, moves linearly from `top-left:top-left` toward `bottom-right:bottom-right`, and waits for the same duration at the end. It then jumps back without animating the return, waits at the start, and repeats. Geometry compensates for host padding and borders and holds the vertical position. RTL text travels in the opposite direction. The defaults are 30 CSS pixels per second and a 1200ms pause at each end. Customize them on the host:
@@ -53,16 +62,18 @@ Marquee behavior ships in its own script. Anchor provides only a reusable placem
 
 | Artifact | Raw / gzip | Limit raw / gzip |
 | --- | ---: | ---: |
-| `aellux.min.js` | 44,489 / 15,097 | 47.5 / 15.5 KiB |
-| `aellux.ext.overflow-marquee.min.js` | 11,950 / 4,395 | 12 / 4.5 KiB |
-| `aellux.ext.overflow-marquee.legacy.min.js` | 23,635 / 7,748 | 23.5 / 8 KiB |
-| `aellux.ext.overflow-marquee.min.css` | 2,487 / 622 | 2.5 / 1 KiB |
+| `aellux.min.js` | 44,489 / 15,095 | 47.5 / 15.5 KiB |
+| `aellux.ext.overflow-marquee.min.js` | 13,773 / 4,887 | 13.5 / 5 KiB |
+| `aellux.ext.overflow-marquee.legacy.min.js` | 25,722 / 8,135 | 25.5 / 8 KiB |
+| `aellux.ext.overflow-marquee.min.css` | 2,621 / 639 | 2.75 / 1 KiB |
 | `aellux.ext.anchor.min.js` | 13,637 / 5,028 | 15 / 6 KiB |
 | `aellux.ext.anchor.legacy.min.js` | 21,064 / 7,483 | 23 / 8 KiB |
-| `aellux.orchestrator.min.js` | 63,459 / 21,146 | 62 / 20.75 KiB |
-| `aellux.full.min.js` | 134,414 / 43,621 | 131.5 / 42.75 KiB |
-| `aellux.full.legacy.min.js` | 447,169 / 133,006 | 437 / 138 KiB |
+| `aellux.orchestrator.min.js` | 63,482 / 21,149 | 62 / 20.75 KiB |
+| `aellux.full.min.js` | 134,437 / 43,620 | 131.5 / 42.75 KiB |
+| `aellux.full.legacy.min.js` | 447,192 / 133,005 | 437 / 138 KiB |
 
 Registering Anchor alone does not download or initialize Overflow Marquee. The progressive fade adds 1,102/292 bytes in Modern, 1,172/284 bytes in Legacy and 1,559/231 bytes in the dedicated stylesheet (raw/gzip), compared with the preceding checked-in artifacts. The Extension's script limits remain unchanged; its CSS raw limit increases from 1.5 to 2.5 KiB.
+
+The optional pixel limit adds 1,823/492 bytes in Modern, 2,087/387 bytes in Legacy and 134/17 bytes in CSS (raw/gzip), relative to the fade implementation. This includes measuring intrinsic content, skipping marquee work and styles while dormant, and restoring/reapplying the wrapper lifecycle when content crosses the limit. Its budgets increase from 12/4.5 to 13.5/5 KiB in Modern, from 23.5/8 to 25.5/8 KiB in Legacy, and from 2.5/1 to 2.75/1 KiB in CSS. Shared JavaScript limits remain unchanged.
 
 The shared CSS Motion subtree option and semantic validation for both overflow fades add 667/168 bytes to Orchestrator Modern and 667/202 bytes to Full Modern. Their gzip limits increase from 20.5 to 20.75 KiB and from 42.5 to 42.75 KiB respectively. Combined distribution costs and the remaining shared budget adjustments are recorded in [Scrollbox](scrollbox.md#distribution-cost). Anchor and Full Legacy keep their existing limits.

@@ -1,9 +1,9 @@
 /*! aellux.js Overflow Marquee Extension | SPDX-License-Identifier: Apache-2.0 */
 
-:where([data-ae-overflow-marquee]:not([hidden])) {
+:where([data-ae-overflow-marquee]:is([data-ae-overflow-marquee=""],[data-ae-overflow-marquee-ready]):not([hidden])) {
   display: block;
 }
-:where([data-ae-overflow-marquee]) {
+:where([data-ae-overflow-marquee]:is([data-ae-overflow-marquee=""],[data-ae-overflow-marquee-ready])) {
   position: relative;
   min-width: 0;
   overflow: hidden;

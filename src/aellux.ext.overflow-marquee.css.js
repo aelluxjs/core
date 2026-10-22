@@ -1,7 +1,8 @@
 /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
 
 export function generateOverflowMarqueeCSS(AelluxJs) {
-  const selector = `[${AelluxJs.attr("overflow-marquee")}]`;
+  const attribute = AelluxJs.attr("overflow-marquee");
+  const selector = `[${attribute}]:is([${attribute}=""],[${AelluxJs.attr("overflow-marquee-ready")}])`;
   const contentAttribute = AelluxJs.attr("overflow-marquee-content");
   const activeAttribute = AelluxJs.attr("overflow-marquee-active");
   const viewportAttribute = AelluxJs.attr("overflow-marquee-viewport");
@@ -64,11 +65,11 @@ export function generateOverflowMarqueeCSS(AelluxJs) {
   overflow: visible;
   transform: translate3d(var(--ae-anchor-x, 0px), 0, 0);
 }
-:where(html[${reducedMotionAttribute}="reduced"] ${selector}>[${viewportAttribute}]) {
+:where(html[${reducedMotionAttribute}="reduced"] [${attribute}]>[${viewportAttribute}]) {
   --ae-overflow-marquee-offset: 0px !important;
   transition: none !important;
 }
-:where(html[${reducedMotionAttribute}="reduced"] ${selector}>[${viewportAttribute}]>[${contentAttribute}]) {
+:where(html[${reducedMotionAttribute}="reduced"] [${attribute}]>[${viewportAttribute}]>[${contentAttribute}]) {
   width: auto;
   overflow: hidden;
   text-overflow: ellipsis;

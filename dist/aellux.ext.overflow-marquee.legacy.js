@@ -1,4 +1,14 @@
 (function() {
+  // src/internal/parse-overflow-marquee-limit.js
+  /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+  function parseOverflowMarqueeLimit(value) {
+    var text = (value || "").trim();
+    if (!text) return null;
+    if (!/^(?:\d+(?:\.\d+)?|\.\d+)(?:px)?$/i.test(text)) return void 0;
+    var limit = parseFloat(text);
+    return Number.isFinite(limit) ? limit : void 0;
+  }
+
   // src/internal/create-overflow-marquee.js
   function _typeof(o) {
     "@babel/helpers - typeof";
@@ -226,6 +236,7 @@
     var attribute = api.attr("overflow-marquee");
     var contentAttribute = api.attr("overflow-marquee-content");
     var activeAttribute = api.attr("overflow-marquee-active");
+    var readyAttribute = api.attr("overflow-marquee-ready");
     var viewportAttribute = api.attr("overflow-marquee-viewport");
     var fadeAttribute = api.attr("overflow-marquee-fade");
     var offsetProperty = "--ae-overflow-marquee-offset";
@@ -245,12 +256,12 @@
       if (desktop !== null && desktop !== void 0 && desktop.addEventListener) desktop[add ? "addEventListener" : "removeEventListener"]("change", refreshAll);
       else if (desktop !== null && desktop !== void 0 && desktop.addListener) desktop[add ? "addListener" : "removeListener"](refreshAll);
     }
-    function refreshAll() {
-      var _iterator = _createForOfIteratorHelper(states.keys()), _step;
+    function refreshAll(event) {
+      var _iterator = _createForOfIteratorHelper(states), _step;
       try {
         for (_iterator.s(); !(_step = _iterator.n()).done; ) {
-          var element = _step.value;
-          schedule(element);
+          var _step$value = _slicedToArray(_step.value, 2), element = _step$value[0], state = _step$value[1];
+          if (state.enabled || (event === null || event === void 0 ? void 0 : event.type) === "resize" || (event === null || event === void 0 ? void 0 : event.type) === "loadingdone") schedule(element);
         }
       } catch (err) {
         _iterator.e(err);
@@ -263,6 +274,7 @@
       try {
         for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
           var _step2$value = _slicedToArray(_step2.value, 2), element = _step2$value[0], state = _step2$value[1];
+          if (!state.enabled) continue;
           if (event.target !== state.wrapper && event.target !== state.viewport && (event.target.contains(element) || element.contains(event.target))) schedule(element);
         }
       } catch (err) {
@@ -287,7 +299,7 @@
     }
     function _mount() {
       _mount = _asyncToGenerator(/* @__PURE__ */ _regenerator().m(function _callee(element) {
-        var wrapper, viewport, state, _i2, _arr, name, _root$document$fonts, _root$document$fonts$, _i3, _arr2, _name;
+        var wrapper, viewport, state, _root$document$fonts, _root$document$fonts$, _i3, _arr2, name;
         return _regenerator().w(function(_context) {
           while (1) switch (_context.n) {
             case 0:
@@ -318,19 +330,16 @@
                 intersecting: root.IntersectionObserver ? false : null,
                 phase: "wait",
                 x: 0,
-                memory: api.persist.element.save(element, [activeAttribute]),
+                memory: api.persist.element.save(element, [activeAttribute, readyAttribute]),
                 resize: null,
-                intersection: null
+                intersection: null,
+                enabled: false,
+                probeStyle: void 0
               };
               states.set(element, state);
               state.onInteraction = function() {
                 return schedule(element);
               };
-              for (_i2 = 0, _arr = ["mouseenter", "mouseleave", "focusin", "focusout"]; _i2 < _arr.length; _i2++) {
-                name = _arr[_i2];
-                element.addEventListener(name, state.onInteraction);
-              }
-              reconcile(state);
               if (states.size === 1) {
                 if (root.MutationObserver) {
                   observer = new root.MutationObserver(function(records) {
@@ -342,6 +351,8 @@
                           var node = record.target;
                           if ((node === value.wrapper || node === value.viewport) && record.type === "attributes") return false;
                           if (record.type === "attributes" && node === host && record.attributeName === activeAttribute) return false;
+                          if (record.type === "attributes" && node === host && record.attributeName === "style" && host.getAttribute("style") === value.probeStyle) return false;
+                          if (!value.enabled && record.type === "attributes" && [fadeAttribute, reducedAttribute, "dir"].includes(record.attributeName)) return false;
                           return node === root.document.documentElement || host.contains(node) || node.contains(host);
                         })) schedule(host);
                       };
@@ -364,8 +375,8 @@
                 }
                 root.document.addEventListener("visibilitychange", refreshAll);
                 for (_i3 = 0, _arr2 = ["transitionend", "transitioncancel", "animationstart", "animationend", "animationcancel"]; _i3 < _arr2.length; _i3++) {
-                  _name = _arr2[_i3];
-                  root.document.addEventListener(_name, motionChanged, true);
+                  name = _arr2[_i3];
+                  root.document.addEventListener(name, motionChanged, true);
                 }
                 root.addEventListener("resize", refreshAll);
                 root.addEventListener("scroll", refreshAll, {
@@ -380,7 +391,6 @@
                   return schedule(element);
                 });
                 state.resize.observe(element);
-                state.resize.observe(wrapper);
               }
               if (root.IntersectionObserver) {
                 state.intersection = new root.IntersectionObserver(function(entries) {
@@ -390,19 +400,69 @@
                 }, {
                   threshold: [0, 1e-6]
                 });
-                state.intersection.observe(element);
               }
               _context.n = 2;
-              return anchor.mount(wrapper);
-            case 2:
-              _context.n = 3;
               return update(element);
-            case 3:
+            case 2:
               return _context.a(2);
           }
         }, _callee);
       }));
       return _mount.apply(this, arguments);
+    }
+    function unwrap(state) {
+      if (state.viewport.parentNode !== state.element) return;
+      reconcile(state);
+      while (state.wrapper.firstChild) state.element.insertBefore(state.wrapper.firstChild, state.viewport);
+      state.viewport.remove();
+    }
+    function enable(state, enabled) {
+      if (state.enabled === enabled) return;
+      state.enabled = enabled;
+      var element = state.element, wrapper = state.wrapper;
+      for (var _i = 0, _arr = ["mouseenter", "mouseleave", "focusin", "focusout"]; _i < _arr.length; _i++) {
+        var name = _arr[_i];
+        element[enabled ? "addEventListener" : "removeEventListener"](name, state.onInteraction);
+      }
+      if (enabled) {
+        var _state$resize, _state$intersection;
+        element.setAttribute(readyAttribute, "");
+        reconcile(state);
+        anchor.mount(wrapper);
+        (_state$resize = state.resize) === null || _state$resize === void 0 || _state$resize.observe(wrapper);
+        (_state$intersection = state.intersection) === null || _state$intersection === void 0 || _state$intersection.observe(element);
+      } else {
+        var _state$resize2, _state$intersection2;
+        stop(state);
+        state.paused = true;
+        state.signature = null;
+        state.placements = null;
+        (_state$resize2 = state.resize) === null || _state$resize2 === void 0 || _state$resize2.unobserve(wrapper);
+        (_state$intersection2 = state.intersection) === null || _state$intersection2 === void 0 || _state$intersection2.disconnect();
+        state.intersecting = root.IntersectionObserver ? false : null;
+        anchor.unmount(wrapper);
+        unwrap(state);
+        tooltip(state, null);
+        element.removeAttribute(activeAttribute);
+        element.removeAttribute(readyAttribute);
+      }
+    }
+    function exceedsLimit(state, limit) {
+      var element = state.element, wrapper = state.wrapper;
+      state.probeStyle = element.getAttribute("style");
+      try {
+        element.style.setProperty("white-space", "nowrap", "important");
+        var range = root.document.createRange();
+        range.selectNodeContents(state.viewport.parentNode === element && wrapper.parentNode === state.viewport ? wrapper : element);
+        var bounds = range.getBoundingClientRect();
+        var lineHeight = element.textContent.trim() ? parseFloat(root.getComputedStyle(element).lineHeight) || 0 : 0;
+        return bounds.width > limit || Math.max(bounds.height, lineHeight) > limit;
+      } finally {
+        if (state.probeStyle === null) {
+          element.getAttribute("style");
+          element.removeAttribute("style");
+        } else element.setAttribute("style", state.probeStyle);
+      }
     }
     function reconcile(state) {
       var element = state.element, wrapper = state.wrapper, viewport = state.viewport;
@@ -410,8 +470,8 @@
       if (viewport.parentNode === element && wrapper.parentNode === viewport && element.childNodes.length === 1 && viewport.childNodes.length === 1) return;
       var contents = root.document.createDocumentFragment();
       var _collect = function collect(parent) {
-        for (var _i = 0, _Array$from = Array.from(parent.childNodes); _i < _Array$from.length; _i++) {
-          var node = _Array$from[_i];
+        for (var _i2 = 0, _Array$from = Array.from(parent.childNodes); _i2 < _Array$from.length; _i2++) {
+          var node = _Array$from[_i2];
           if (node === viewport || node === wrapper) _collect(node);
           else contents.appendChild(node);
         }
@@ -425,11 +485,13 @@
       var state = states.get(element);
       if (!state) return;
       rememberProgress(state);
-      if (!visible(state)) {
-        pause(state);
-        return;
+      if (state.enabled) {
+        if (!visible(state)) {
+          pause(state);
+          return;
+        }
+        if (interacting(state)) pause(state);
       }
-      if (interacting(state)) pause(state);
       update(element).catch(function(cause) {
         return api.diagnostics.error(api.diagnostics.ERROR_EXTENSION_MOUNT, {
           extension: "overflow-marquee",
@@ -460,7 +522,7 @@
     }
     function _refresh() {
       _refresh = _asyncToGenerator(/* @__PURE__ */ _regenerator().m(function _callee2(state) {
-        var element, wrapper, layoutId, alive, measured, signature, revision, placements, _t;
+        var element, wrapper, layoutId, alive, limit, eligible, measured, signature, revision, placements, _t;
         return _regenerator().w(function(_context2) {
           while (1) switch (_context2.n) {
             case 0:
@@ -469,26 +531,76 @@
                 return states.get(element) === state;
               };
               rememberProgress(state);
-              if (visible(state)) {
+              if (!(state.enabled && !visible(state))) {
                 _context2.n = 1;
                 break;
               }
               pause(state);
               return _context2.a(2);
             case 1:
-              if (interacting(state)) pause(state);
+              limit = parseOverflowMarqueeLimit(element.getAttribute(attribute));
+              if (!(limit != null)) {
+                _context2.n = 5;
+                break;
+              }
               _context2.n = 2;
-              return api.waitLayout.update(layoutId, function() {
-                if (alive()) reconcile(state);
+              return api.waitLayout.read(layoutId, function() {
+                return alive() && exceedsLimit(state, limit);
               });
             case 2:
+              eligible = _context2.v;
               if (alive()) {
                 _context2.n = 3;
                 break;
               }
               return _context2.a(2);
             case 3:
+              if (eligible) {
+                _context2.n = 5;
+                break;
+              }
               _context2.n = 4;
+              return api.waitLayout.update(layoutId, function() {
+                if (alive()) enable(state, false);
+              });
+            case 4:
+              return _context2.a(2);
+            case 5:
+              if (state.enabled) {
+                _context2.n = 6;
+                break;
+              }
+              _context2.n = 6;
+              return api.waitLayout.update(layoutId, function() {
+                if (alive()) enable(state, true);
+              });
+            case 6:
+              if (alive()) {
+                _context2.n = 7;
+                break;
+              }
+              return _context2.a(2);
+            case 7:
+              if (visible(state)) {
+                _context2.n = 8;
+                break;
+              }
+              pause(state);
+              return _context2.a(2);
+            case 8:
+              if (interacting(state)) pause(state);
+              _context2.n = 9;
+              return api.waitLayout.update(layoutId, function() {
+                if (alive()) reconcile(state);
+              });
+            case 9:
+              if (alive()) {
+                _context2.n = 10;
+                break;
+              }
+              return _context2.a(2);
+            case 10:
+              _context2.n = 11;
               return api.waitLayout.read(layoutId, function() {
                 var style = root.getComputedStyle(element);
                 var padding = (parseFloat(style.paddingLeft) || 0) + (parseFloat(style.paddingRight) || 0);
@@ -511,18 +623,18 @@
                   text: wrapper.textContent.replace(/\s+/g, " ").trim()
                 };
               });
-            case 4:
+            case 11:
               measured = _context2.v;
               if (!(!alive() || !measured)) {
-                _context2.n = 5;
+                _context2.n = 12;
                 break;
               }
               return _context2.a(2);
-            case 5:
+            case 12:
               signature = JSON.stringify(_objectSpread(_objectSpread({}, measured), {}, {
                 fade: void 0
               }));
-              _context2.n = 6;
+              _context2.n = 13;
               return api.waitLayout.update(layoutId, function() {
                 var _root$CSS;
                 if (!alive()) return;
@@ -545,27 +657,27 @@
                 state.viewport.setAttribute("dir", measured.direction);
                 element.toggleAttribute ? element.toggleAttribute(activeAttribute, measured.active) : measured.active ? element.setAttribute(activeAttribute, "") : element.removeAttribute(activeAttribute);
               });
-            case 6:
+            case 13:
               if (!(!alive() || signature !== state.signature || !measured.active || state.timer !== null || state.running)) {
-                _context2.n = 7;
+                _context2.n = 14;
                 break;
               }
               return _context2.a(2);
-            case 7:
+            case 14:
               if (canRun(state)) {
-                _context2.n = 8;
+                _context2.n = 15;
                 break;
               }
               pause(state);
               return _context2.a(2);
-            case 8:
+            case 15:
               revision = state.revision;
               _t = state.placements;
               if (_t) {
-                _context2.n = 10;
+                _context2.n = 17;
                 break;
               }
-              _context2.n = 9;
+              _context2.n = 16;
               return api.waitLayout.read(layoutId, function() {
                 var start = anchor.measure(wrapper, false);
                 var end = anchor.measure(wrapper, true);
@@ -586,17 +698,17 @@
                   distance: distance
                 };
               });
-            case 9:
+            case 16:
               _t = _context2.v;
-            case 10:
+            case 17:
               placements = _t;
               if (!(!alive() || revision !== state.revision || !placements)) {
-                _context2.n = 11;
+                _context2.n = 18;
                 break;
               }
               return _context2.a(2);
-            case 11:
-              _context2.n = 12;
+            case 18:
+              _context2.n = 19;
               return api.waitLayout.update(layoutId, function() {
                 if (!alive() || revision !== state.revision) return;
                 state.placements = placements;
@@ -610,7 +722,7 @@
                 if (state.phase === "travel") cycle(state);
                 else wait(state);
               });
-            case 12:
+            case 19:
               return _context2.a(2);
           }
         }, _callee2);
@@ -834,8 +946,8 @@
     }
     function _unmount() {
       _unmount = _asyncToGenerator(/* @__PURE__ */ _regenerator().m(function _callee4(element) {
-        var _state$resize, _state$intersection;
-        var state, _i4, _arr3, name, _observer, _root$document$fonts2, _root$document$fonts3, _i5, _arr4, _name2;
+        var _state$resize3, _state$intersection3;
+        var state, _i4, _arr3, name, _observer, _root$document$fonts2, _root$document$fonts3, _i5, _arr4, _name;
         return _regenerator().w(function(_context4) {
           while (1) switch (_context4.n) {
             case 0:
@@ -849,8 +961,8 @@
               states.delete(element);
               stop(state);
               api.waitLayout.cancel(state.layoutId);
-              (_state$resize = state.resize) === null || _state$resize === void 0 || _state$resize.disconnect();
-              (_state$intersection = state.intersection) === null || _state$intersection === void 0 || _state$intersection.disconnect();
+              (_state$resize3 = state.resize) === null || _state$resize3 === void 0 || _state$resize3.disconnect();
+              (_state$intersection3 = state.intersection) === null || _state$intersection3 === void 0 || _state$intersection3.disconnect();
               for (_i4 = 0, _arr3 = ["mouseenter", "mouseleave", "focusin", "focusout"]; _i4 < _arr3.length; _i4++) {
                 name = _arr3[_i4];
                 element.removeEventListener(name, state.onInteraction);
@@ -858,11 +970,7 @@
               _context4.n = 2;
               return anchor.unmount(state.wrapper);
             case 2:
-              if (state.viewport.parentNode === element) {
-                reconcile(state);
-                while (state.wrapper.firstChild) element.insertBefore(state.wrapper.firstChild, state.viewport);
-                state.viewport.remove();
-              }
+              unwrap(state);
               tooltip(state, null);
               state.memory.restore();
               if (!states.size) {
@@ -870,8 +978,8 @@
                 observer = null;
                 root.document.removeEventListener("visibilitychange", refreshAll);
                 for (_i5 = 0, _arr4 = ["transitionend", "transitioncancel", "animationstart", "animationend", "animationcancel"]; _i5 < _arr4.length; _i5++) {
-                  _name2 = _arr4[_i5];
-                  root.document.removeEventListener(_name2, motionChanged, true);
+                  _name = _arr4[_i5];
+                  root.document.removeEventListener(_name, motionChanged, true);
                 }
                 root.removeEventListener("resize", refreshAll);
                 root.removeEventListener("scroll", refreshAll, true);

@@ -1,10 +1,13 @@
 /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
 
 // The dedicated Extension owns wrapping and motion; Anchor supplies geometry.
+import { parseOverflowMarqueeLimit } from "./parse-overflow-marquee-limit.js";
+
 export function createOverflowMarquee(root, api, anchor) {
   const attribute = api.attr("overflow-marquee");
   const contentAttribute = api.attr("overflow-marquee-content");
   const activeAttribute = api.attr("overflow-marquee-active");
+  const readyAttribute = api.attr("overflow-marquee-ready");
   const viewportAttribute = api.attr("overflow-marquee-viewport");
   const fadeAttribute = api.attr("overflow-marquee-fade");
   const offsetProperty = "--ae-overflow-marquee-offset";
@@ -21,10 +24,14 @@ export function createOverflowMarquee(root, api, anchor) {
     else if (desktop?.addListener) desktop[add ? "addListener" : "removeListener"](refreshAll);
   }
 
-  function refreshAll() { for (const element of states.keys()) schedule(element); }
+  function refreshAll(event) {
+    for (const [element, state] of states)
+      if (state.enabled || event?.type === "resize" || event?.type === "loadingdone") schedule(element);
+  }
 
   function motionChanged(event) {
     for (const [element, state] of states) {
+      if (!state.enabled) continue;
       if (event.target !== state.wrapper && event.target !== state.viewport &&
         (event.target.contains(element) || element.contains(event.target))) schedule(element);
     }
@@ -54,12 +61,10 @@ export function createOverflowMarquee(root, api, anchor) {
     const state = { element, wrapper, viewport, revision: 0, signature: null, pending: null, dirty: false,
       timer: null, motionId: api.motion.id(), layoutId: api.motion.id(), cycleId: api.motion.id(), ownedTitle: null,
       paused: true, intersecting: root.IntersectionObserver ? false : null, phase: "wait", x: 0,
-      memory: api.persist.element.save(element, [activeAttribute]), resize: null, intersection: null };
+      memory: api.persist.element.save(element, [activeAttribute, readyAttribute]), resize: null, intersection: null,
+      enabled: false, probeStyle: undefined };
     states.set(element, state);
     state.onInteraction = () => schedule(element);
-    for (const name of ["mouseenter", "mouseleave", "focusin", "focusout"])
-      element.addEventListener(name, state.onInteraction);
-    reconcile(state);
     if (states.size === 1) {
       if (root.MutationObserver) {
         observer = new root.MutationObserver(records => {
@@ -68,6 +73,12 @@ export function createOverflowMarquee(root, api, anchor) {
               const node = record.target;
               if ((node === value.wrapper || node === value.viewport) && record.type === "attributes") return false;
               if (record.type === "attributes" && node === host && record.attributeName === activeAttribute) return false;
+              // The intrinsic-size probe restores the exact authored style in
+              // the same task. Its temporary whitespace must not wake itself.
+              if (record.type === "attributes" && node === host && record.attributeName === "style" &&
+                host.getAttribute("style") === value.probeStyle) return false;
+              if (!value.enabled && record.type === "attributes" &&
+                [fadeAttribute, reducedAttribute, "dir"].includes(record.attributeName)) return false;
               return node === root.document.documentElement || host.contains(node) || node.contains(host);
             })) schedule(host);
           }
@@ -86,7 +97,6 @@ export function createOverflowMarquee(root, api, anchor) {
     if (root.ResizeObserver) {
       state.resize = new root.ResizeObserver(() => schedule(element));
       state.resize.observe(element);
-      state.resize.observe(wrapper);
     }
     if (root.IntersectionObserver) {
       // An edge-only entry needs a later positive-area notification too.
@@ -95,10 +105,66 @@ export function createOverflowMarquee(root, api, anchor) {
         state.intersecting = entry.isIntersecting && entry.intersectionRect.width > 0 && entry.intersectionRect.height > 0;
         schedule(element);
       }, { threshold: [0, 0.000001] });
-      state.intersection.observe(element);
     }
-    await anchor.mount(wrapper);
     await update(element);
+  }
+
+  function unwrap(state) {
+    if (state.viewport.parentNode !== state.element) return;
+    reconcile(state);
+    while (state.wrapper.firstChild) state.element.insertBefore(state.wrapper.firstChild, state.viewport);
+    state.viewport.remove();
+  }
+
+  function enable(state, enabled) {
+    if (state.enabled === enabled) return;
+    state.enabled = enabled;
+    const { element, wrapper } = state;
+    for (const name of ["mouseenter", "mouseleave", "focusin", "focusout"])
+      element[enabled ? "addEventListener" : "removeEventListener"](name, state.onInteraction);
+    if (enabled) {
+      element.setAttribute(readyAttribute, "");
+      reconcile(state);
+      anchor.mount(wrapper);
+      state.resize?.observe(wrapper);
+      state.intersection?.observe(element);
+    } else {
+      stop(state);
+      state.paused = true;
+      state.signature = null;
+      state.placements = null;
+      state.resize?.unobserve(wrapper);
+      state.intersection?.disconnect();
+      state.intersecting = root.IntersectionObserver ? false : null;
+      anchor.unmount(wrapper);
+      unwrap(state);
+      tooltip(state, null);
+      element.removeAttribute(activeAttribute);
+      element.removeAttribute(readyAttribute);
+    }
+  }
+
+  function exceedsLimit(state, limit) {
+    const { element, wrapper } = state;
+    state.probeStyle = element.getAttribute("style");
+    try {
+      // Measure the real nodes without cloning or reparenting them. Restore
+      // before paint so dormant labels retain their authored wrapping/layout.
+      element.style.setProperty("white-space", "nowrap", "important");
+      const range = root.document.createRange();
+      range.selectNodeContents(state.viewport.parentNode === element && wrapper.parentNode === state.viewport ? wrapper : element);
+      const bounds = range.getBoundingClientRect();
+      const lineHeight = element.textContent.trim() ? parseFloat(root.getComputedStyle(element).lineHeight) || 0 : 0;
+      return bounds.width > limit || Math.max(bounds.height, lineHeight) > limit;
+    } finally {
+      if (state.probeStyle === null) {
+        // Flush CSSOM's lazy attribute serialization before removal; otherwise
+        // Chromium/WebKit can recreate an empty style attribute on the next read.
+        element.getAttribute("style");
+        element.removeAttribute("style");
+      }
+      else element.setAttribute("style", state.probeStyle);
+    }
   }
 
   function reconcile(state) {
@@ -125,8 +191,10 @@ export function createOverflowMarquee(root, api, anchor) {
     rememberProgress(state);
     // Suspend synchronously, including when the layout scheduler itself is
     // waiting for the document to become visible. No idle animation polling.
-    if (!visible(state)) { pause(state); return; }
-    if (interacting(state)) pause(state);
+    if (state.enabled) {
+      if (!visible(state)) { pause(state); return; }
+      if (interacting(state)) pause(state);
+    }
     update(element).catch(cause => api.diagnostics.error(api.diagnostics.ERROR_EXTENSION_MOUNT,
       { extension: "overflow-marquee", element, method: "update", cause }));
   }
@@ -146,6 +214,18 @@ export function createOverflowMarquee(root, api, anchor) {
     const { element, wrapper, layoutId } = state;
     const alive = () => states.get(element) === state;
     rememberProgress(state);
+    if (state.enabled && !visible(state)) { pause(state); return; }
+    const limit = parseOverflowMarqueeLimit(element.getAttribute(attribute));
+    if (limit != null) {
+      const eligible = await api.waitLayout.read(layoutId, () => alive() && exceedsLimit(state, limit));
+      if (!alive()) return;
+      if (!eligible) {
+        await api.waitLayout.update(layoutId, () => { if (alive()) enable(state, false); });
+        return;
+      }
+    }
+    if (!state.enabled) await api.waitLayout.update(layoutId, () => { if (alive()) enable(state, true); });
+    if (!alive()) return;
     if (!visible(state)) { pause(state); return; }
     if (interacting(state)) pause(state);
     await api.waitLayout.update(layoutId, () => { if (alive()) reconcile(state); });
@@ -367,11 +447,7 @@ export function createOverflowMarquee(root, api, anchor) {
     for (const name of ["mouseenter", "mouseleave", "focusin", "focusout"])
       element.removeEventListener(name, state.onInteraction);
     await anchor.unmount(state.wrapper);
-    if (state.viewport.parentNode === element) {
-      reconcile(state);
-      while (state.wrapper.firstChild) element.insertBefore(state.wrapper.firstChild, state.viewport);
-      state.viewport.remove();
-    }
+    unwrap(state);
     tooltip(state, null);
     state.memory.restore();
     if (!states.size) {

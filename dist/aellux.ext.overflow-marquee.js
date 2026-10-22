@@ -19,6 +19,16 @@
   };
   var __spreadProps = (a, b) => __defProps(a, __getOwnPropDescs(b));
 
+  // src/internal/parse-overflow-marquee-limit.js
+  /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+  function parseOverflowMarqueeLimit(value) {
+    const text = (value || "").trim();
+    if (!text) return null;
+    if (!/^(?:\d+(?:\.\d+)?|\.\d+)(?:px)?$/i.test(text)) return void 0;
+    const limit = parseFloat(text);
+    return Number.isFinite(limit) ? limit : void 0;
+  }
+
   // src/internal/create-overflow-marquee.js
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   function createOverflowMarquee(root, api, anchor) {
@@ -26,6 +36,7 @@
     const attribute = api.attr("overflow-marquee");
     const contentAttribute = api.attr("overflow-marquee-content");
     const activeAttribute = api.attr("overflow-marquee-active");
+    const readyAttribute = api.attr("overflow-marquee-ready");
     const viewportAttribute = api.attr("overflow-marquee-viewport");
     const fadeAttribute = api.attr("overflow-marquee-fade");
     const offsetProperty = "--ae-overflow-marquee-offset";
@@ -39,11 +50,13 @@
       if (desktop == null ? void 0 : desktop.addEventListener) desktop[add ? "addEventListener" : "removeEventListener"]("change", refreshAll);
       else if (desktop == null ? void 0 : desktop.addListener) desktop[add ? "addListener" : "removeListener"](refreshAll);
     }
-    function refreshAll() {
-      for (const element of states.keys()) schedule(element);
+    function refreshAll(event) {
+      for (const [element, state] of states)
+        if (state.enabled || (event == null ? void 0 : event.type) === "resize" || (event == null ? void 0 : event.type) === "loadingdone") schedule(element);
     }
     function motionChanged(event) {
       for (const [element, state] of states) {
+        if (!state.enabled) continue;
         if (event.target !== state.wrapper && event.target !== state.viewport && (event.target.contains(element) || element.contains(event.target))) schedule(element);
       }
     }
@@ -82,15 +95,14 @@
         intersecting: root.IntersectionObserver ? false : null,
         phase: "wait",
         x: 0,
-        memory: api.persist.element.save(element, [activeAttribute]),
+        memory: api.persist.element.save(element, [activeAttribute, readyAttribute]),
         resize: null,
-        intersection: null
+        intersection: null,
+        enabled: false,
+        probeStyle: void 0
       };
       states.set(element, state);
       state.onInteraction = () => schedule(element);
-      for (const name of ["mouseenter", "mouseleave", "focusin", "focusout"])
-        element.addEventListener(name, state.onInteraction);
-      reconcile(state);
       if (states.size === 1) {
         if (root.MutationObserver) {
           observer = new root.MutationObserver((records) => {
@@ -99,6 +111,8 @@
                 const node = record.target;
                 if ((node === value.wrapper || node === value.viewport) && record.type === "attributes") return false;
                 if (record.type === "attributes" && node === host && record.attributeName === activeAttribute) return false;
+                if (record.type === "attributes" && node === host && record.attributeName === "style" && host.getAttribute("style") === value.probeStyle) return false;
+                if (!value.enabled && record.type === "attributes" && [fadeAttribute, reducedAttribute, "dir"].includes(record.attributeName)) return false;
                 return node === root.document.documentElement || host.contains(node) || node.contains(host);
               })) schedule(host);
             }
@@ -122,7 +136,6 @@
       if (root.ResizeObserver) {
         state.resize = new root.ResizeObserver(() => schedule(element));
         state.resize.observe(element);
-        state.resize.observe(wrapper);
       }
       if (root.IntersectionObserver) {
         state.intersection = new root.IntersectionObserver((entries) => {
@@ -130,10 +143,59 @@
           state.intersecting = entry.isIntersecting && entry.intersectionRect.width > 0 && entry.intersectionRect.height > 0;
           schedule(element);
         }, { threshold: [0, 1e-6] });
-        state.intersection.observe(element);
       }
-      await anchor.mount(wrapper);
       await update(element);
+    }
+    function unwrap(state) {
+      if (state.viewport.parentNode !== state.element) return;
+      reconcile(state);
+      while (state.wrapper.firstChild) state.element.insertBefore(state.wrapper.firstChild, state.viewport);
+      state.viewport.remove();
+    }
+    function enable(state, enabled) {
+      var _a2, _b, _c, _d;
+      if (state.enabled === enabled) return;
+      state.enabled = enabled;
+      const { element, wrapper } = state;
+      for (const name of ["mouseenter", "mouseleave", "focusin", "focusout"])
+        element[enabled ? "addEventListener" : "removeEventListener"](name, state.onInteraction);
+      if (enabled) {
+        element.setAttribute(readyAttribute, "");
+        reconcile(state);
+        anchor.mount(wrapper);
+        (_a2 = state.resize) == null ? void 0 : _a2.observe(wrapper);
+        (_b = state.intersection) == null ? void 0 : _b.observe(element);
+      } else {
+        stop(state);
+        state.paused = true;
+        state.signature = null;
+        state.placements = null;
+        (_c = state.resize) == null ? void 0 : _c.unobserve(wrapper);
+        (_d = state.intersection) == null ? void 0 : _d.disconnect();
+        state.intersecting = root.IntersectionObserver ? false : null;
+        anchor.unmount(wrapper);
+        unwrap(state);
+        tooltip(state, null);
+        element.removeAttribute(activeAttribute);
+        element.removeAttribute(readyAttribute);
+      }
+    }
+    function exceedsLimit(state, limit) {
+      const { element, wrapper } = state;
+      state.probeStyle = element.getAttribute("style");
+      try {
+        element.style.setProperty("white-space", "nowrap", "important");
+        const range = root.document.createRange();
+        range.selectNodeContents(state.viewport.parentNode === element && wrapper.parentNode === state.viewport ? wrapper : element);
+        const bounds = range.getBoundingClientRect();
+        const lineHeight = element.textContent.trim() ? parseFloat(root.getComputedStyle(element).lineHeight) || 0 : 0;
+        return bounds.width > limit || Math.max(bounds.height, lineHeight) > limit;
+      } finally {
+        if (state.probeStyle === null) {
+          element.getAttribute("style");
+          element.removeAttribute("style");
+        } else element.setAttribute("style", state.probeStyle);
+      }
     }
     function reconcile(state) {
       const { element, wrapper, viewport } = state;
@@ -155,11 +217,13 @@
       const state = states.get(element);
       if (!state) return;
       rememberProgress(state);
-      if (!visible(state)) {
-        pause(state);
-        return;
+      if (state.enabled) {
+        if (!visible(state)) {
+          pause(state);
+          return;
+        }
+        if (interacting(state)) pause(state);
       }
-      if (interacting(state)) pause(state);
       update(element).catch((cause) => api.diagnostics.error(
         api.diagnostics.ERROR_EXTENSION_MOUNT,
         { extension: "overflow-marquee", element, method: "update", cause }
@@ -185,6 +249,25 @@
       const { element, wrapper, layoutId } = state;
       const alive = () => states.get(element) === state;
       rememberProgress(state);
+      if (state.enabled && !visible(state)) {
+        pause(state);
+        return;
+      }
+      const limit = parseOverflowMarqueeLimit(element.getAttribute(attribute));
+      if (limit != null) {
+        const eligible = await api.waitLayout.read(layoutId, () => alive() && exceedsLimit(state, limit));
+        if (!alive()) return;
+        if (!eligible) {
+          await api.waitLayout.update(layoutId, () => {
+            if (alive()) enable(state, false);
+          });
+          return;
+        }
+      }
+      if (!state.enabled) await api.waitLayout.update(layoutId, () => {
+        if (alive()) enable(state, true);
+      });
+      if (!alive()) return;
       if (!visible(state)) {
         pause(state);
         return;
@@ -431,11 +514,7 @@
       for (const name of ["mouseenter", "mouseleave", "focusin", "focusout"])
         element.removeEventListener(name, state.onInteraction);
       await anchor.unmount(state.wrapper);
-      if (state.viewport.parentNode === element) {
-        reconcile(state);
-        while (state.wrapper.firstChild) element.insertBefore(state.wrapper.firstChild, state.viewport);
-        state.viewport.remove();
-      }
+      unwrap(state);
       tooltip(state, null);
       state.memory.restore();
       if (!states.size) {

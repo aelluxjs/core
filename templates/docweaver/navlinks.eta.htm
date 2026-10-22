@@ -2,7 +2,7 @@
   <% if (it.prevLink) { %>
     <a href="<%= it.prevLink.href %>" class="text-decoration-none d-inline-flex flex-row gap-2" style="max-width: 45%;">
       ← <span class="text-decoration-underline text-truncate overflow-hidden d-inline-block align-middle flex-fill"
-        style="max-width:200px" data-ae-overflow-marquee>
+        style="max-width:200px" data-ae-overflow-marquee="80">
         <%= it.prevLink.label %>
       </span>
     </a>
@@ -15,7 +15,7 @@
             class="text-decoration-none d-inline-flex flex-row justify-content-end gap-2" style="width: 40%;">
             <span
               class="text-decoration-underline text-truncate overflow-hidden d-inline-block align-middle flex-fill text-end"
-              style="max-width:200px" data-ae-overflow-marquee>
+              style="max-width:200px" data-ae-overflow-marquee="80">
               <%= it.nextLink.label %>
             </span> →
           </a>

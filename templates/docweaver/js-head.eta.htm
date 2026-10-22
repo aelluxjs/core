@@ -59,10 +59,10 @@
           wrapper.appendChild(table);
         });
 
-      document.querySelectorAll("pre:not([data-ae-scrollbox])")
-        .forEach((pre) => {
-          pre.setAttribute("data-ae-scrollbox", "pointer");
-          pre.setAttribute("data-ae-scrollbar", "horizontal");
+      document.querySelectorAll("code:not([data-ae-scrollbox])")
+        .forEach((element) => {
+          element.setAttribute("data-ae-scrollbox", "pointer");
+          element.setAttribute("data-ae-scrollbar", "horizontal");
         });
     }
   );
