@@ -292,6 +292,10 @@ pre {
   border-radius: 3px;
 }
 
+code.hljs {
+  overflow: visible;
+}
+
 /*[data-bs-theme=dark] */
 .bg-white {
   background-color: var(--bs-body-bg) !important;
