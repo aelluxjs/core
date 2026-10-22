@@ -76,6 +76,83 @@ for (const forceLegacy of [false, true]) test(`root reduced motion keeps ellipsi
   await expect(host).toHaveAttribute("data-ae-overflow-marquee-active", "");
 });
 
+for (const forceLegacy of [false, true]) test(`both ends hold for the configured delay before the next phase (${forceLegacy})`, async ({ page }) => {
+  await start(page, markup().replace("80ms", "350ms"), { forceLegacy });
+  const holds = await page.locator("#label").evaluate(async element => {
+    const wrapper = element.firstElementChild;
+    let endAt = null, startAt = null;
+    return new Promise((resolve, reject) => {
+      const timeout = setTimeout(() => reject(new Error("Both endpoint holds did not complete")), 7000);
+      const sample = () => {
+        const now = performance.now();
+        const x = new DOMMatrixReadOnly(getComputedStyle(wrapper).transform).m41;
+        const phase = wrapper.getAttribute("data-ae-overflow-marquee-content");
+        if (endAt === null && x < -50 && phase === "bottom-right:bottom-right" && wrapper.style.transition === "none") endAt = now;
+        if (endAt !== null && startAt === null && Math.abs(x) < 1 && phase === "top-left:top-left") startAt = now;
+        if (startAt !== null && x < -5 && phase === "bottom-right:bottom-right") {
+          clearTimeout(timeout);
+          resolve({ endHold: startAt - endAt, startHold: now - startAt });
+        } else requestAnimationFrame(sample);
+      };
+      requestAnimationFrame(sample);
+    });
+  });
+  expect(holds.endHold).toBeGreaterThanOrEqual(300);
+  expect(holds.startHold).toBeGreaterThanOrEqual(300);
+  expect(Math.abs(holds.endHold - holds.startHold)).toBeLessThan(180);
+});
+
+for (const options of [{}, { forceLegacy: true }, { cssMotionController: false }]) {
+  test(`hover and focus within pause together and resume in place (${JSON.stringify(options)})`, async ({ page }) => {
+    await start(page, markup(`<a id="first" href="#label">${text}</a><a id="second" href="#label"> More</a>`, 'tabindex="0"'), options);
+    const host = page.locator("#label"), content = host.locator("[data-ae-overflow-marquee-content]");
+    const offset = () => content.evaluate(element => new DOMMatrixReadOnly(getComputedStyle(element).transform).m41);
+    await expect.poll(offset, { intervals: [20, 40] }).toBeLessThan(-50);
+    const box = await host.boundingBox();
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    await expect.poll(() => content.evaluate(element => element.getAnimations().length)).toBe(0);
+    const frozen = await offset();
+    expect(frozen).toBeLessThan(-20);
+    await page.waitForTimeout(250);
+    expect(await offset()).toBeCloseTo(frozen, 1);
+    await expect(host).toHaveAttribute("title", `${text} More`);
+    await host.focus();
+    await page.mouse.move(900, 600);
+    await page.waitForTimeout(150);
+    expect(await offset()).toBeCloseTo(frozen, 1);
+    for (const id of ["first", "second"]) {
+      await page.locator(`#${id}`).focus();
+      await page.waitForTimeout(120);
+      expect(await offset()).toBeCloseTo(frozen, 1);
+    }
+    await page.evaluate(() => document.activeElement.blur());
+    await expect.poll(offset, { intervals: [20, 40] }).toBeLessThan(frozen - 25);
+    await page.evaluate(() => AelluxJs.unmount(document.getElementById("label"), "overflow-marquee"));
+    await host.hover();
+    await host.focus();
+    await page.waitForTimeout(100);
+    await expect(content).toHaveCount(0);
+  });
+}
+
+test("hover preserves the remaining end hold before the instant reset", async ({ page }) => {
+  await start(page, markup(text, 'tabindex="0"').replace("80ms", "600ms"));
+  const host = page.locator("#label"), content = host.locator("[data-ae-overflow-marquee-content]");
+  await expect.poll(() => content.evaluate(element =>
+    element.getAttribute("data-ae-overflow-marquee-content") === "bottom-right:bottom-right" && element.style.transition === "none"),
+  { intervals: [20, 40] }).toBe(true);
+  await host.hover();
+  const end = await content.evaluate(element => new DOMMatrixReadOnly(getComputedStyle(element).transform).m41);
+  expect(end).toBeLessThan(-100);
+  await page.waitForTimeout(700);
+  expect(await content.evaluate(element => new DOMMatrixReadOnly(getComputedStyle(element).transform).m41)).toBe(end);
+  await page.mouse.move(900, 600);
+  await page.waitForTimeout(150);
+  expect(await content.evaluate(element => new DOMMatrixReadOnly(getComputedStyle(element).transform).m41)).toBe(end);
+  await expect(content).toHaveAttribute("data-ae-overflow-marquee-content", "top-left:top-left");
+  expect(await content.evaluate(element => new DOMMatrixReadOnly(getComputedStyle(element).transform).m41)).toBe(0);
+});
+
 test("Anchor alone does not mount marquees and Full keeps the dedicated extension lazy", async ({ page }) => {
   await page.goto("/tests/index.htm");
   await page.addScriptTag({ url: "/dist/aellux.js" });

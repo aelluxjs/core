@@ -41,6 +41,13 @@ export function createOverflowMarquee(root, api, anchor) {
       bounds.left < root.innerWidth && bounds.top < root.innerHeight;
   }
 
+  function interacting(state) {
+    return state.element.contains(root.document.activeElement) ||
+      !!(desktop?.matches && state.element.matches(":hover"));
+  }
+
+  function canRun(state) { return visible(state) && !interacting(state); }
+
   async function mount(element) {
     if (states.has(element)) return;
     const wrapper = root.document.createElement("span");
@@ -50,6 +57,9 @@ export function createOverflowMarquee(root, api, anchor) {
       paused: true, intersecting: root.IntersectionObserver ? false : null, phase: "wait", x: 0,
       memory: api.persist.element.save(element, [activeAttribute]), resize: null, intersection: null };
     states.set(element, state);
+    state.onInteraction = () => schedule(element);
+    for (const name of ["mouseenter", "mouseleave", "focusin", "focusout"])
+      element.addEventListener(name, state.onInteraction);
     reconcile(state);
     if (states.size === 1) {
       if (root.MutationObserver) {
@@ -111,6 +121,7 @@ export function createOverflowMarquee(root, api, anchor) {
     // Suspend synchronously, including when the layout scheduler itself is
     // waiting for the document to become visible. No idle animation polling.
     if (!visible(state)) { pause(state); return; }
+    if (interacting(state)) pause(state);
     update(element).catch(cause => api.diagnostics.error(api.diagnostics.ERROR_EXTENSION_MOUNT,
       { extension: "overflow-marquee", element, method: "update", cause }));
   }
@@ -131,6 +142,7 @@ export function createOverflowMarquee(root, api, anchor) {
     const alive = () => states.get(element) === state;
     rememberProgress(state);
     if (!visible(state)) { pause(state); return; }
+    if (interacting(state)) pause(state);
     await api.waitLayout.update(layoutId, () => { if (alive()) reconcile(state); });
     if (!alive()) return;
     const measured = await api.waitLayout.read(layoutId, () => {
@@ -168,7 +180,7 @@ export function createOverflowMarquee(root, api, anchor) {
         measured.active ? element.setAttribute(activeAttribute, "") : element.removeAttribute(activeAttribute);
     });
     if (!alive() || signature !== state.signature || !measured.active || state.timer !== null || state.running) return;
-    if (!visible(state)) { pause(state); return; }
+    if (!canRun(state)) { pause(state); return; }
     const revision = state.revision;
     const placements = state.placements || await api.waitLayout.read(layoutId, () => {
       const start = anchor.measure(wrapper, false);
@@ -186,7 +198,7 @@ export function createOverflowMarquee(root, api, anchor) {
     await api.waitLayout.update(layoutId, () => {
       if (!alive() || revision !== state.revision) return;
       state.placements = placements;
-      if (!visible(state)) { pause(state); return; }
+      if (!canRun(state)) { pause(state); return; }
       state.paused = false;
       anchor.place(wrapper, at(state, state.x));
       if (state.phase === "travel") cycle(state);
@@ -200,8 +212,11 @@ export function createOverflowMarquee(root, api, anchor) {
   }
 
   function wait(state) {
+    const revision = state.revision;
     state.deadline = now() + state.remaining;
-    state.timer = root.setTimeout(() => cycle(state), state.remaining);
+    state.timer = root.setTimeout(() => {
+      if (revision === state.revision && states.get(state.element) === state) cycle(state);
+    }, state.remaining);
   }
 
   function now() { return root.performance.now(); }
@@ -245,15 +260,32 @@ export function createOverflowMarquee(root, api, anchor) {
     const current = () => states.get(state.element) === state && revision === state.revision;
     state.timer = null;
     if (!current()) return;
-    if (!visible(state)) { state.remaining = 0; pause(state); return; }
+    state.remaining = 0;
+    if (!canRun(state)) { pause(state); return; }
     state.running = true;
-    state.phase = "travel";
     state.started = undefined;
     try {
+      if (state.phase === "end") {
+        await api.waitLayout.update(state.cycleId, () => {
+          if (!current()) return;
+          // After the end hold, jump back without a return transition.
+          state.wrapper.style.transition = "none";
+          state.wrapper.setAttribute(contentAttribute, "top-left:top-left");
+          state.x = 0;
+          anchor.place(state.wrapper, placements.start);
+          state.phase = "wait";
+          state.running = false;
+          state.remaining = measured.delay;
+          if (canRun(state)) wait(state);
+          else pause(state);
+        });
+        return;
+      }
+      state.phase = "travel";
       const duration = Math.abs(placements.end.selected.x - state.x) / measured.speed * 1000;
       await api.waitLayout.read(state.cycleId, () => root.getComputedStyle(state.wrapper).transform);
       if (!current()) return;
-      if (!visible(state)) { pause(state); return; }
+      if (!canRun(state)) { pause(state); return; }
       state.from = state.x;
       state.duration = duration;
       state.elapsed = 0;
@@ -274,14 +306,13 @@ export function createOverflowMarquee(root, api, anchor) {
       await api.waitLayout.update(state.cycleId, () => {
         if (!current()) return;
         state.wrapper.style.transition = "none";
-        state.wrapper.setAttribute(contentAttribute, "top-left:top-left");
-        anchor.place(state.wrapper, placements.start);
+        anchor.place(state.wrapper, placements.end);
         state.running = false;
-        state.x = 0;
+        state.x = placements.end.selected.x;
         state.animation = null;
-        state.phase = "wait";
+        state.phase = "end";
         state.remaining = measured.delay;
-        if (visible(state)) wait(state);
+        if (canRun(state)) wait(state);
         else pause(state);
       });
     } catch (cause) {
@@ -308,6 +339,8 @@ export function createOverflowMarquee(root, api, anchor) {
     api.waitLayout.cancel(state.layoutId);
     state.resize?.disconnect();
     state.intersection?.disconnect();
+    for (const name of ["mouseenter", "mouseleave", "focusin", "focusout"])
+      element.removeEventListener(name, state.onInteraction);
     await anchor.unmount(state.wrapper);
     if (state.wrapper.parentNode === element) {
       while (state.wrapper.firstChild) element.insertBefore(state.wrapper.firstChild, state.wrapper);

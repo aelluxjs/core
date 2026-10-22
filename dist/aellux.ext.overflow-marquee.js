@@ -56,6 +56,12 @@
       const bounds = state.element.getBoundingClientRect();
       return bounds.width > 0 && bounds.height > 0 && bounds.right > 0 && bounds.bottom > 0 && bounds.left < root.innerWidth && bounds.top < root.innerHeight;
     }
+    function interacting(state) {
+      return state.element.contains(root.document.activeElement) || !!((desktop == null ? void 0 : desktop.matches) && state.element.matches(":hover"));
+    }
+    function canRun(state) {
+      return visible(state) && !interacting(state);
+    }
     async function mount(element) {
       var _a2, _b;
       if (states.has(element)) return;
@@ -82,6 +88,9 @@
         intersection: null
       };
       states.set(element, state);
+      state.onInteraction = () => schedule(element);
+      for (const name of ["mouseenter", "mouseleave", "focusin", "focusout"])
+        element.addEventListener(name, state.onInteraction);
       reconcile(state);
       if (states.size === 1) {
         if (root.MutationObserver) {
@@ -147,6 +156,7 @@
         pause(state);
         return;
       }
+      if (interacting(state)) pause(state);
       update(element).catch((cause) => api.diagnostics.error(
         api.diagnostics.ERROR_EXTENSION_MOUNT,
         { extension: "overflow-marquee", element, method: "update", cause }
@@ -176,6 +186,7 @@
         pause(state);
         return;
       }
+      if (interacting(state)) pause(state);
       await api.waitLayout.update(layoutId, () => {
         if (alive()) reconcile(state);
       });
@@ -220,7 +231,7 @@
         element.toggleAttribute ? element.toggleAttribute(activeAttribute, measured.active) : measured.active ? element.setAttribute(activeAttribute, "") : element.removeAttribute(activeAttribute);
       });
       if (!alive() || signature !== state.signature || !measured.active || state.timer !== null || state.running) return;
-      if (!visible(state)) {
+      if (!canRun(state)) {
         pause(state);
         return;
       }
@@ -240,7 +251,7 @@
       await api.waitLayout.update(layoutId, () => {
         if (!alive() || revision !== state.revision) return;
         state.placements = placements;
-        if (!visible(state)) {
+        if (!canRun(state)) {
           pause(state);
           return;
         }
@@ -255,8 +266,11 @@
       return __spreadProps(__spreadValues({}, base), { selected: __spreadProps(__spreadValues({}, base.selected), { x }) });
     }
     function wait(state) {
+      const revision = state.revision;
       state.deadline = now() + state.remaining;
-      state.timer = root.setTimeout(() => cycle(state), state.remaining);
+      state.timer = root.setTimeout(() => {
+        if (revision === state.revision && states.get(state.element) === state) cycle(state);
+      }, state.remaining);
     }
     function now() {
       return root.performance.now();
@@ -296,19 +310,34 @@
       const current = () => states.get(state.element) === state && revision === state.revision;
       state.timer = null;
       if (!current()) return;
-      if (!visible(state)) {
-        state.remaining = 0;
+      state.remaining = 0;
+      if (!canRun(state)) {
         pause(state);
         return;
       }
       state.running = true;
-      state.phase = "travel";
       state.started = void 0;
       try {
+        if (state.phase === "end") {
+          await api.waitLayout.update(state.cycleId, () => {
+            if (!current()) return;
+            state.wrapper.style.transition = "none";
+            state.wrapper.setAttribute(contentAttribute, "top-left:top-left");
+            state.x = 0;
+            anchor.place(state.wrapper, placements.start);
+            state.phase = "wait";
+            state.running = false;
+            state.remaining = measured.delay;
+            if (canRun(state)) wait(state);
+            else pause(state);
+          });
+          return;
+        }
+        state.phase = "travel";
         const duration = Math.abs(placements.end.selected.x - state.x) / measured.speed * 1e3;
         await api.waitLayout.read(state.cycleId, () => root.getComputedStyle(state.wrapper).transform);
         if (!current()) return;
-        if (!visible(state)) {
+        if (!canRun(state)) {
           pause(state);
           return;
         }
@@ -341,14 +370,13 @@
         await api.waitLayout.update(state.cycleId, () => {
           if (!current()) return;
           state.wrapper.style.transition = "none";
-          state.wrapper.setAttribute(contentAttribute, "top-left:top-left");
-          anchor.place(state.wrapper, placements.start);
+          anchor.place(state.wrapper, placements.end);
           state.running = false;
-          state.x = 0;
+          state.x = placements.end.selected.x;
           state.animation = null;
-          state.phase = "wait";
+          state.phase = "end";
           state.remaining = measured.delay;
-          if (visible(state)) wait(state);
+          if (canRun(state)) wait(state);
           else pause(state);
         });
       } catch (cause) {
@@ -378,6 +406,8 @@
       api.waitLayout.cancel(state.layoutId);
       (_a2 = state.resize) == null ? void 0 : _a2.disconnect();
       (_b = state.intersection) == null ? void 0 : _b.disconnect();
+      for (const name of ["mouseenter", "mouseleave", "focusin", "focusout"])
+        element.removeEventListener(name, state.onInteraction);
       await anchor.unmount(state.wrapper);
       if (state.wrapper.parentNode === element) {
         while (state.wrapper.firstChild) element.insertBefore(state.wrapper.firstChild, state.wrapper);

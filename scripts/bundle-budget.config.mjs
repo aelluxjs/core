@@ -16,8 +16,8 @@ export const bundleBudget = Object.freeze([
   { file: "aellux.ext.anchor.min.js", maxRawBytes: 15 * 1024, maxGzipBytes: 6 * 1024 },
   { file: "aellux.ext.anchor.legacy.min.js", maxRawBytes: 23 * 1024, maxGzipBytes: 8 * 1024 },
   // Dedicated lazy Extension; measured costs: core-extensions/overflow-marquee.md.
-  { file: "aellux.ext.overflow-marquee.min.js", maxRawBytes: 11.5 * 1024, maxGzipBytes: 4.5 * 1024 },
-  { file: "aellux.ext.overflow-marquee.legacy.min.js", maxRawBytes: 23 * 1024, maxGzipBytes: 8 * 1024 },
+  { file: "aellux.ext.overflow-marquee.min.js", maxRawBytes: 12 * 1024, maxGzipBytes: 4.5 * 1024 },
+  { file: "aellux.ext.overflow-marquee.legacy.min.js", maxRawBytes: 23.5 * 1024, maxGzipBytes: 8 * 1024 },
   { file: "aellux.ext.ajax-href.min.js", maxRawBytes: 7 * 1024, maxGzipBytes: 3 * 1024 },
   { file: "aellux.ext.ajax-href.legacy.min.js", maxRawBytes: 14.5 * 1024, maxGzipBytes: 5.5 * 1024 },
   { file: "aellux.ext.feedback.min.css", maxRawBytes: 3 * 1024, maxGzipBytes: 2 * 1024 },

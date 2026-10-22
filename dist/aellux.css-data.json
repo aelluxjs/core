@@ -169,7 +169,7 @@
     },
     {
       "name": "--ae-overflow-marquee-delay",
-      "description": "Overflow Marquee pause before each pass; nonnegative ms/s values. Invalid values use 1200ms.\n\nValue syntax: <time>.\n\nDefault behavior: \"1200ms\".",
+      "description": "Overflow Marquee pause at both ends of each pass; nonnegative ms/s values. Invalid values use 1200ms.\n\nValue syntax: <time>.\n\nDefault behavior: \"1200ms\".",
       "syntax": "<time>",
       "references": [
         {

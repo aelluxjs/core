@@ -6,6 +6,7 @@ All notable changes to aellux.js will be documented in this file.
 
 ### Added
 
+- Overflow Marquee waits for the configured delay at both ends of each pass and pauses by default during mouse hover or focus within, preserving the position and remaining endpoint delay until every pause reason clears.
 - A dedicated Overflow Marquee Extension mounts `data-ae-overflow-marquee`, initializing Anchor as its placement dependency. It owns forced single-line weak CSS, linear overflow motion with an instant reset, root reduced-motion ellipsis, and native desktop `title` tooltips. Animation starts only while visible and preserves its position and remaining delay while hidden, offscreen or in a background document. Wrapping preserves original nodes and is reversed on unmount. Full loads its separate Modern or Legacy file on demand; Basic registers only `overflow-marquee`.
 - Development diagnostics now report duplicate HTML attributes (`2032`), including discarded `class` and `style` values, with source locations and corrective suggestions. Initial document source is inspected once asynchronously; AJAX Href reuses response text before parsing, and production performs neither check.
 - Cancelable `BeforeMount` and `BeforeUnmount` lifecycle events prevent the corresponding pass before callbacks or state changes; teardown and AJAX replacement respect unmount cancellation.

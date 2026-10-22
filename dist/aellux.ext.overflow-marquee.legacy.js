@@ -275,12 +275,18 @@
       var bounds = state.element.getBoundingClientRect();
       return bounds.width > 0 && bounds.height > 0 && bounds.right > 0 && bounds.bottom > 0 && bounds.left < root.innerWidth && bounds.top < root.innerHeight;
     }
+    function interacting(state) {
+      return state.element.contains(root.document.activeElement) || !!(desktop !== null && desktop !== void 0 && desktop.matches && state.element.matches(":hover"));
+    }
+    function canRun(state) {
+      return visible(state) && !interacting(state);
+    }
     function mount(_x) {
       return _mount.apply(this, arguments);
     }
     function _mount() {
       _mount = _asyncToGenerator(/* @__PURE__ */ _regenerator().m(function _callee(element) {
-        var wrapper, state, _root$document$fonts, _root$document$fonts$, _i2, _arr, name;
+        var wrapper, state, _i2, _arr, name, _root$document$fonts, _root$document$fonts$, _i3, _arr2, _name;
         return _regenerator().w(function(_context) {
           while (1) switch (_context.n) {
             case 0:
@@ -313,6 +319,13 @@
                 intersection: null
               };
               states.set(element, state);
+              state.onInteraction = function() {
+                return schedule(element);
+              };
+              for (_i2 = 0, _arr = ["mouseenter", "mouseleave", "focusin", "focusout"]; _i2 < _arr.length; _i2++) {
+                name = _arr[_i2];
+                element.addEventListener(name, state.onInteraction);
+              }
               reconcile(state);
               if (states.size === 1) {
                 if (root.MutationObserver) {
@@ -346,9 +359,9 @@
                   });
                 }
                 root.document.addEventListener("visibilitychange", refreshAll);
-                for (_i2 = 0, _arr = ["transitionend", "transitioncancel", "animationstart", "animationend", "animationcancel"]; _i2 < _arr.length; _i2++) {
-                  name = _arr[_i2];
-                  root.document.addEventListener(name, motionChanged, true);
+                for (_i3 = 0, _arr2 = ["transitionend", "transitioncancel", "animationstart", "animationend", "animationcancel"]; _i3 < _arr2.length; _i3++) {
+                  _name = _arr2[_i3];
+                  root.document.addEventListener(_name, motionChanged, true);
                 }
                 root.addEventListener("resize", refreshAll);
                 root.addEventListener("scroll", refreshAll, {
@@ -406,6 +419,7 @@
         pause(state);
         return;
       }
+      if (interacting(state)) pause(state);
       update(element).catch(function(cause) {
         return api.diagnostics.error(api.diagnostics.ERROR_EXTENSION_MOUNT, {
           extension: "overflow-marquee",
@@ -452,6 +466,7 @@
               pause(state);
               return _context2.a(2);
             case 1:
+              if (interacting(state)) pause(state);
               _context2.n = 2;
               return api.waitLayout.update(layoutId, function() {
                 if (alive()) reconcile(state);
@@ -518,7 +533,7 @@
               }
               return _context2.a(2);
             case 7:
-              if (visible(state)) {
+              if (canRun(state)) {
                 _context2.n = 8;
                 break;
               }
@@ -570,7 +585,7 @@
               return api.waitLayout.update(layoutId, function() {
                 if (!alive() || revision !== state.revision) return;
                 state.placements = placements;
-                if (!visible(state)) {
+                if (!canRun(state)) {
                   pause(state);
                   return;
                 }
@@ -595,9 +610,10 @@
       });
     }
     function wait(state) {
+      var revision = state.revision;
       state.deadline = now() + state.remaining;
       state.timer = root.setTimeout(function() {
-        return cycle(state);
+        if (revision === state.revision && states.get(state.element) === state) cycle(state);
       }, state.remaining);
     }
     function now() {
@@ -653,37 +669,57 @@
               }
               return _context3.a(2);
             case 1:
-              if (visible(state)) {
+              state.remaining = 0;
+              if (canRun(state)) {
                 _context3.n = 2;
                 break;
               }
-              state.remaining = 0;
               pause(state);
               return _context3.a(2);
             case 2:
               state.running = true;
-              state.phase = "travel";
               state.started = void 0;
               _context3.p = 3;
-              duration = Math.abs(placements.end.selected.x - state.x) / measured.speed * 1e3;
-              _context3.n = 4;
-              return api.waitLayout.read(state.cycleId, function() {
-                return root.getComputedStyle(state.wrapper).transform;
-              });
-            case 4:
-              if (current()) {
+              if (!(state.phase === "end")) {
                 _context3.n = 5;
                 break;
               }
+              _context3.n = 4;
+              return api.waitLayout.update(state.cycleId, function() {
+                if (!current()) return;
+                state.wrapper.style.transition = "none";
+                state.wrapper.setAttribute(contentAttribute, "top-left:top-left");
+                state.x = 0;
+                anchor.place(state.wrapper, placements.start);
+                state.phase = "wait";
+                state.running = false;
+                state.remaining = measured.delay;
+                if (canRun(state)) wait(state);
+                else pause(state);
+              });
+            case 4:
               return _context3.a(2);
             case 5:
-              if (visible(state)) {
-                _context3.n = 6;
+              state.phase = "travel";
+              duration = Math.abs(placements.end.selected.x - state.x) / measured.speed * 1e3;
+              _context3.n = 6;
+              return api.waitLayout.read(state.cycleId, function() {
+                return root.getComputedStyle(state.wrapper).transform;
+              });
+            case 6:
+              if (current()) {
+                _context3.n = 7;
+                break;
+              }
+              return _context3.a(2);
+            case 7:
+              if (canRun(state)) {
+                _context3.n = 8;
                 break;
               }
               pause(state);
               return _context3.a(2);
-            case 6:
+            case 8:
               state.from = state.x;
               state.duration = duration;
               state.elapsed = 0;
@@ -704,57 +740,56 @@
                   anchor.place(state.wrapper, placements.end);
                 }
               });
-              _context3.n = 7;
+              _context3.n = 9;
               return api.waitLayout.read(state.cycleId, function() {
                 var _state$wrapper$getAni, _state$wrapper;
                 if (current()) state.animation = ((_state$wrapper$getAni = (_state$wrapper = state.wrapper).getAnimations) === null || _state$wrapper$getAni === void 0 ? void 0 : _state$wrapper$getAni.call(_state$wrapper).find(function(animation) {
                   return animation.transitionProperty === "transform";
                 })) || null;
               });
-            case 7:
-              _context3.n = 8;
+            case 9:
+              _context3.n = 10;
               return completion;
-            case 8:
+            case 10:
               result = _context3.v;
               if (!(!current() || result.status !== "completed")) {
-                _context3.n = 9;
+                _context3.n = 11;
                 break;
               }
               return _context3.a(2);
-            case 9:
-              _context3.n = 10;
+            case 11:
+              _context3.n = 12;
               return api.waitLayout.update(state.cycleId, function() {
                 if (!current()) return;
                 state.wrapper.style.transition = "none";
-                state.wrapper.setAttribute(contentAttribute, "top-left:top-left");
-                anchor.place(state.wrapper, placements.start);
+                anchor.place(state.wrapper, placements.end);
                 state.running = false;
-                state.x = 0;
+                state.x = placements.end.selected.x;
                 state.animation = null;
-                state.phase = "wait";
+                state.phase = "end";
                 state.remaining = measured.delay;
-                if (visible(state)) wait(state);
+                if (canRun(state)) wait(state);
                 else pause(state);
               });
-            case 10:
-              _context3.n = 12;
+            case 12:
+              _context3.n = 14;
               break;
-            case 11:
-              _context3.p = 11;
+            case 13:
+              _context3.p = 13;
               _t2 = _context3.v;
               if (current()) api.diagnostics.error(api.diagnostics.ERROR_EXTENSION_TRANSITION, {
                 extension: "overflow-marquee",
                 element: state.element,
                 cause: _t2
               });
-            case 12:
-              _context3.p = 12;
+            case 14:
+              _context3.p = 14;
               if (current()) state.running = false;
-              return _context3.f(12);
-            case 13:
+              return _context3.f(14);
+            case 15:
               return _context3.a(2);
           }
-        }, _callee3, null, [[3, 11, 12, 13]]);
+        }, _callee3, null, [[3, 13, 14, 15]]);
       }));
       return _cycle.apply(this, arguments);
     }
@@ -773,7 +808,7 @@
     function _unmount() {
       _unmount = _asyncToGenerator(/* @__PURE__ */ _regenerator().m(function _callee4(element) {
         var _state$resize, _state$intersection;
-        var state, _observer, _root$document$fonts2, _root$document$fonts3, _i3, _arr2, name;
+        var state, _i4, _arr3, name, _observer, _root$document$fonts2, _root$document$fonts3, _i5, _arr4, _name2;
         return _regenerator().w(function(_context4) {
           while (1) switch (_context4.n) {
             case 0:
@@ -789,6 +824,10 @@
               api.waitLayout.cancel(state.layoutId);
               (_state$resize = state.resize) === null || _state$resize === void 0 || _state$resize.disconnect();
               (_state$intersection = state.intersection) === null || _state$intersection === void 0 || _state$intersection.disconnect();
+              for (_i4 = 0, _arr3 = ["mouseenter", "mouseleave", "focusin", "focusout"]; _i4 < _arr3.length; _i4++) {
+                name = _arr3[_i4];
+                element.removeEventListener(name, state.onInteraction);
+              }
               _context4.n = 2;
               return anchor.unmount(state.wrapper);
             case 2:
@@ -802,9 +841,9 @@
                 (_observer = observer) === null || _observer === void 0 || _observer.disconnect();
                 observer = null;
                 root.document.removeEventListener("visibilitychange", refreshAll);
-                for (_i3 = 0, _arr2 = ["transitionend", "transitioncancel", "animationstart", "animationend", "animationcancel"]; _i3 < _arr2.length; _i3++) {
-                  name = _arr2[_i3];
-                  root.document.removeEventListener(name, motionChanged, true);
+                for (_i5 = 0, _arr4 = ["transitionend", "transitioncancel", "animationstart", "animationend", "animationcancel"]; _i5 < _arr4.length; _i5++) {
+                  _name2 = _arr4[_i5];
+                  root.document.removeEventListener(_name2, motionChanged, true);
                 }
                 root.removeEventListener("resize", refreshAll);
                 root.removeEventListener("scroll", refreshAll, true);
@@ -823,21 +862,21 @@
     }
     function _destroy() {
       _destroy = _asyncToGenerator(/* @__PURE__ */ _regenerator().m(function _callee5() {
-        var _i4, _Array$from2, _element;
+        var _i6, _Array$from2, _element;
         return _regenerator().w(function(_context5) {
           while (1) switch (_context5.n) {
             case 0:
-              _i4 = 0, _Array$from2 = Array.from(states.keys());
+              _i6 = 0, _Array$from2 = Array.from(states.keys());
             case 1:
-              if (!(_i4 < _Array$from2.length)) {
+              if (!(_i6 < _Array$from2.length)) {
                 _context5.n = 3;
                 break;
               }
-              _element = _Array$from2[_i4];
+              _element = _Array$from2[_i6];
               _context5.n = 2;
               return unmount(_element);
             case 2:
-              _i4++;
+              _i6++;
               _context5.n = 1;
               break;
             case 3:

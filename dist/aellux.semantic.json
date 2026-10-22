@@ -2592,7 +2592,7 @@
     {
       "name": "data-ae-overflow-marquee",
       "extension": "overflow-marquee",
-      "description": "Single-line overflow marquee. Loads Anchor during initialization for placement geometry. Starts only when visible and pauses in place while hidden or offscreen. Root reduced motion keeps ellipsis; desktop overflow receives a native title unless authored.",
+      "description": "Single-line overflow marquee with equal holds at both ends. Loads Anchor for placement. Starts only when visible; hidden/offscreen, mouse hover and focus within pause in place. Root reduced motion keeps ellipsis; desktop overflow receives a native title unless authored.",
       "syntax": "presence",
       "role": "input",
       "docURL": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/overflow-marquee.htm"
@@ -3150,7 +3150,7 @@
       "name": "--ae-overflow-marquee-delay",
       "extension": "overflow-marquee",
       "syntax": "<time>",
-      "description": "Overflow Marquee pause before each pass; nonnegative ms/s values. Invalid values use 1200ms.",
+      "description": "Overflow Marquee pause at both ends of each pass; nonnegative ms/s values. Invalid values use 1200ms.",
       "default": "1200ms",
       "role": "input",
       "docURL": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/overflow-marquee.htm"
