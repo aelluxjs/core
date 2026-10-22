@@ -55,82 +55,85 @@
         </button>
 
         <div class="navbar-collapse bg-white border-end d-md-block" id="navbarSupportedContent" hidden
-          data-ae-present="transform" data-ae-scrollbox="pointer">
-          <ul
-            class="navbar-nav w-100 h-100 gap-1 my-0 p-2 ps-md-3 pe-3 pe-md-2 flex-column align-self-start text-white">
+          data-ae-present="transform">
+          <div data-ae-scrollbox="pointer" style="width:100%;height:100%;">
+            <ul
+              class="navbar-nav w-100 h-100 gap-1 my-0 p-2 ps-md-3 pe-3 pe-md-2 flex-column align-self-start text-white">
 
-            <div class="d-flex flex-row gap-2 justify-content-between pb-2 pt-0 pt-md-2">
+              <div class="d-flex flex-row gap-2 justify-content-between pb-2 pt-0 pt-md-2">
 
-              <%~ include("./versions-menu.eta.htm") %>
+                <%~ include("./versions-menu.eta.htm") %>
 
-                <%~ include("./color-scheme-menu.eta.htm") %>
+                  <%~ include("./color-scheme-menu.eta.htm") %>
 
-            </div>
-            <div class="d-flex flex-column" data-ae-present-group>
-              <% for (const item of it.menuTree) { %>
-                <li class="nav-item mt-1 small-md fw-bold rounded-1 ps-md-1 bg-light-adaptive" style="flex:0">
-                  <button type="button" class="nav-link w-100 text-start text-capitalize p-2 p-md-1 px-3 px-md-2"
-                    data-ae-trigger="toggle" data-ae-target="#children-<%= item.slug %>">
-                    <%= item.label %>
-                      <% if (item.children !==undefined) { %><span class="chevron"><i
-                            class="bi bi-chevron-right small"></i></span>
-                        <% } %>
-                  </button>
-                </li>
+              </div>
+              <div class="d-flex flex-column" data-ae-present-group>
+                <% for (const item of it.menuTree) { %>
+                  <li class="nav-item mt-1 small-md fw-bold rounded-1 ps-md-1 bg-light-adaptive" style="flex:0">
+                    <button type="button" class="nav-link w-100 text-start text-capitalize p-2 p-md-1 px-3 px-md-2"
+                      data-ae-trigger="toggle" data-ae-target="#children-<%= item.slug %>">
+                      <%= item.label %>
+                        <% if (item.children !==undefined) { %><span class="chevron"><i
+                              class="bi bi-chevron-right small"></i></span>
+                          <% } %>
+                    </button>
+                  </li>
 
-                <% if (item.children !==undefined && item.children.length) { %>
-                  <div id="children-<%= item.slug %>" class="docs-menu-panel border-start ms-2"
-                    data-ae-present="height opacity" data-ae-unpop-on-outside="false" <% if (!item.active) { %> hidden<%
-                      } %>>
-                      <div class="ps-2 gap-1 d-flex flex-column overflow-hidden" data-ae-present-motion>
-                        <% for (const child of item.children) { %>
-                          <% if (child.children !==undefined && child.children.length) { %>
+                  <% if (item.children !==undefined && item.children.length) { %>
+                    <div id="children-<%= item.slug %>" class="docs-menu-panel border-start ms-2"
+                      data-ae-present="height opacity" data-ae-unpop-on-outside="false" <% if (!item.active) { %> hidden
+                      <% } %>>
+                        <div class="ps-2 gap-1 d-flex flex-column overflow-hidden" data-ae-present-motion>
+                          <% for (const child of item.children) { %>
+                            <% if (child.children !==undefined && child.children.length) { %>
 
-                            <li class="nav-item mt-1 small-md fw-bold rounded-1 ps-md-1 bg-light-adaptive"
-                              style="flex:0">
-                              <button type="button" class="nav-link text-start text-capitalize p-2 p-md-1 px-3 px-md-2"
-                                data-ae-trigger="toggle" data-ae-target="#children2-<%= child.slug %>">
-                                <%= child.label %>
-                                  <% if (child.children !==undefined) { %><span class="chevron"><i
-                                        class="bi bi-chevron-right small"></i></span>
-                                    <% } %>
-                              </button>
-                            </li>
-
-                            <div id="children2-<%= child.slug %>" class="docs-menu-panel border-start ms-2"
-                              data-ae-present="height opacity" data-ae-unpop-on-outside="false" <% if (!child.active) {
-                              %>
-                              hidden<% } %>>
-                                <div class="ps-2 gap-1 d-flex flex-column overflow-hidden" data-ae-present-motion>
-                                  <% for (const child2 of child.children) { %>
-                                    <li
-                                      class="nav-item mt-1 small-md rounded-1 ps-md-1<% if (child2.active) { %> active<% } %>"
-                                      style="flex:0">
-                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
-                                        href="<%= child2.href %>" data-ae-overflow-marquee>
-                                        <%= child2.label %>
-                                      </a>
-                                    </li>
-                                    <% } %>
-                                </div>
-                            </div>
-                            <% } else { %>
-                              <li
-                                class="nav-item mt-1 small-md rounded-1 ps-md-1<% if (child.active) { %> active<% } %>"
+                              <li class="nav-item mt-1 small-md fw-bold rounded-1 ps-md-1 bg-light-adaptive"
                                 style="flex:0">
-                                <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
-                                  href="<%= child.href %>" data-ae-overflow-marquee>
+                                <button type="button"
+                                  class="nav-link text-start text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                  data-ae-trigger="toggle" data-ae-target="#children2-<%= child.slug %>">
                                   <%= child.label %>
-                                </a>
+                                    <% if (child.children !==undefined) { %><span class="chevron"><i
+                                          class="bi bi-chevron-right small"></i></span>
+                                      <% } %>
+                                </button>
                               </li>
-                              <% } %>
+
+                              <div id="children2-<%= child.slug %>" class="docs-menu-panel border-start ms-2"
+                                data-ae-present="height opacity" data-ae-unpop-on-outside="false" <% if (!child.active)
+                                { %>
+                                hidden<% } %>>
+                                  <div class="ps-2 gap-1 d-flex flex-column overflow-hidden" data-ae-present-motion>
+                                    <% for (const child2 of child.children) { %>
+                                      <li
+                                        class="nav-item mt-1 small-md rounded-1 ps-md-1<% if (child2.active) { %> active<% } %>"
+                                        style="flex:0">
+                                        <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                          href="<%= child2.href %>" data-ae-overflow-marquee>
+                                          <%= child2.label %>
+                                        </a>
+                                      </li>
+                                      <% } %>
+                                  </div>
+                              </div>
+                              <% } else { %>
+                                <li
+                                  class="nav-item mt-1 small-md rounded-1 ps-md-1<% if (child.active) { %> active<% } %>"
+                                  style="flex:0">
+                                  <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                    href="<%= child.href %>" data-ae-overflow-marquee>
+                                    <%= child.label %>
+                                  </a>
+                                </li>
                                 <% } %>
-                      </div>
-                  </div>
-                  <% } %>
+                                  <% } %>
+                        </div>
+                    </div>
                     <% } %>
-            </div>
-          </ul>
+                      <% } %>
+              </div>
+            </ul>
+          </div>
         </div>
 
       </div>
@@ -173,7 +176,7 @@
       <div class="article p-4">
 
         <nav id="doc-breadcrumb" style="--bs-breadcrumb-divider: '›';overflow-x:auto;overflow-y:clip;" class="w-100"
-          aria-label="breadcrumb" ajax-load="doc-breadcrumb">
+          aria-label="breadcrumb" ajax-load="doc-breadcrumb" data-ae-scrollbox="pointer">
           <ol class="breadcrumb flex-nowrap">
 
             <% for (const item of it.breadcrumb) { %>
