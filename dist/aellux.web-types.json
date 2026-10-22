@@ -124,6 +124,16 @@
           }
         },
         {
+          "name": "data-ae-overflow-marquee-fade",
+          "description": "Progressive overflow fade. Enabled by default; false disables it. Attribute changes reconfigure the mounted label.\n\nValue syntax: enum.\n\nDefault behavior: \"true\".",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/overflow-marquee.htm",
+          "default": "true",
+          "value": {
+            "kind": "plain",
+            "type": "\"\" | \"true\" | \"false\""
+          }
+        },
+        {
           "name": "data-ae-point",
           "description": "Maximum simultaneously associated pointers. Empty defaults to 1; a nonnegative integer is expected, and 0 disables association.\n\nValue syntax: integer.\n\nDefault behavior: \"1\".\n\nExamples: `0`, `1`, `2`.",
           "doc-url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/point.htm",
@@ -238,6 +248,16 @@
           "value": {
             "kind": "plain",
             "type": "string"
+          }
+        },
+        {
+          "name": "data-ae-scrollbox-fade",
+          "description": "Progressive overflow fade on all scrollable edges. Enabled by default; false disables it. Existing application masks are preserved.\n\nValue syntax: enum.\n\nDefault behavior: \"true\".",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/scrollbox.htm",
+          "default": "true",
+          "value": {
+            "kind": "plain",
+            "type": "\"\" | \"true\" | \"false\""
           }
         },
         {
@@ -556,6 +576,16 @@
           "doc-url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/overflow-marquee.htm"
         },
         {
+          "name": "--ae-overflow-marquee-fade-size",
+          "description": "Maximum width of each progressive overflow fade. Zero disables the visual effect.\n\nValue syntax: <length>.\n\nDefault behavior: \"16px\".\n\nSuggested values: `0px`, `16px`, `24px`. This is an open grammar, not a closed enumeration.",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/overflow-marquee.htm",
+          "values": [
+            "0px",
+            "16px",
+            "24px"
+          ]
+        },
+        {
           "name": "--ae-overflow-marquee-speed",
           "description": "Overflow Marquee speed in CSS pixels per second. Positive numbers only; invalid values use 30.\n\nValue syntax: <number>.\n\nDefault behavior: \"30\".",
           "doc-url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/overflow-marquee.htm"
@@ -660,6 +690,16 @@
           "name": "--ae-scrollbar-track-color",
           "description": "Custom scrollbar track color. Unset uses a transparent track.\n\nValue syntax: <color>.",
           "doc-url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/scrollbox.htm"
+        },
+        {
+          "name": "--ae-scrollbox-fade-size",
+          "description": "Maximum extent of each progressive overflow fade. Zero removes the visual effect.\n\nValue syntax: <length>.\n\nDefault behavior: \"16px\".\n\nSuggested values: `0px`, `16px`, `24px`. This is an open grammar, not a closed enumeration.",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/scrollbox.htm",
+          "values": [
+            "0px",
+            "16px",
+            "24px"
+          ]
         },
         {
           "name": "--ae-snap-focus",

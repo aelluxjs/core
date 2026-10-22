@@ -26,6 +26,9 @@
     const attribute = api.attr("overflow-marquee");
     const contentAttribute = api.attr("overflow-marquee-content");
     const activeAttribute = api.attr("overflow-marquee-active");
+    const viewportAttribute = api.attr("overflow-marquee-viewport");
+    const fadeAttribute = api.attr("overflow-marquee-fade");
+    const offsetProperty = "--ae-overflow-marquee-offset";
     const reducedAttribute = api.attr("reduced-motion");
     const selector = `[${attribute}]`;
     const states = /* @__PURE__ */ new Map();
@@ -41,7 +44,7 @@
     }
     function motionChanged(event) {
       for (const [element, state] of states) {
-        if (event.target !== state.wrapper && (event.target.contains(element) || element.contains(event.target))) schedule(element);
+        if (event.target !== state.wrapper && event.target !== state.viewport && (event.target.contains(element) || element.contains(event.target))) schedule(element);
       }
     }
     function visible(state) {
@@ -59,10 +62,13 @@
       var _a2, _b;
       if (states.has(element)) return;
       const wrapper = root.document.createElement("span");
+      const viewport = root.document.createElement("span");
+      viewport.setAttribute(viewportAttribute, "");
       wrapper.setAttribute(contentAttribute, "top-left:top-left");
       const state = {
         element,
         wrapper,
+        viewport,
         revision: 0,
         signature: null,
         pending: null,
@@ -91,7 +97,7 @@
             for (const [host, value] of states) {
               if (records.some((record) => {
                 const node = record.target;
-                if (node === value.wrapper && record.type === "attributes") return false;
+                if ((node === value.wrapper || node === value.viewport) && record.type === "attributes") return false;
                 if (record.type === "attributes" && node === host && record.attributeName === activeAttribute) return false;
                 return node === root.document.documentElement || host.contains(node) || node.contains(host);
               })) schedule(host);
@@ -102,7 +108,7 @@
             childList: true,
             characterData: true,
             attributes: true,
-            attributeFilter: [attribute, reducedAttribute, "class", "style", "hidden", "dir"]
+            attributeFilter: [attribute, fadeAttribute, reducedAttribute, "class", "style", "hidden", "dir"]
           });
         }
         root.document.addEventListener("visibilitychange", refreshAll);
@@ -123,23 +129,27 @@
           const entry = entries[entries.length - 1];
           state.intersecting = entry.isIntersecting && entry.intersectionRect.width > 0 && entry.intersectionRect.height > 0;
           schedule(element);
-        });
+        }, { threshold: [0, 1e-6] });
         state.intersection.observe(element);
       }
       await anchor.mount(wrapper);
       await update(element);
     }
     function reconcile(state) {
-      const { element, wrapper } = state;
-      if (wrapper.parentNode !== element) wrapper.textContent = "";
-      if (wrapper.parentNode === element && element.childNodes.length === 1) return;
+      const { element, wrapper, viewport } = state;
+      if (viewport.parentNode !== element || wrapper.parentNode !== viewport) wrapper.textContent = "";
+      if (viewport.parentNode === element && wrapper.parentNode === viewport && element.childNodes.length === 1 && viewport.childNodes.length === 1) return;
       const contents = root.document.createDocumentFragment();
-      for (const node of Array.from(element.childNodes)) {
-        if (node === wrapper) while (wrapper.firstChild) contents.appendChild(wrapper.firstChild);
-        else contents.appendChild(node);
-      }
+      const collect = (parent) => {
+        for (const node of Array.from(parent.childNodes)) {
+          if (node === viewport || node === wrapper) collect(node);
+          else contents.appendChild(node);
+        }
+      };
+      collect(element);
       wrapper.appendChild(contents);
-      element.appendChild(wrapper);
+      viewport.appendChild(wrapper);
+      element.appendChild(viewport);
     }
     function schedule(element) {
       const state = states.get(element);
@@ -199,6 +209,7 @@
           content,
           overflow,
           active: overflow && !reduced,
+          fade: element.getAttribute(fadeAttribute) !== "false",
           speed: Number.isFinite(rawSpeed) && rawSpeed > 0 ? rawSpeed : 30,
           delay: delayValue ? parseFloat(rawDelay) * (delayValue[1] === "s" ? 1e3 : 1) : 1200,
           direction: style.direction,
@@ -206,10 +217,12 @@
         };
       });
       if (!alive() || !measured) return;
-      const signature = JSON.stringify(measured);
+      const signature = JSON.stringify(__spreadProps(__spreadValues({}, measured), { fade: void 0 }));
       await api.waitLayout.update(layoutId, () => {
+        var _a2;
         if (!alive()) return;
         tooltip(state, measured.overflow && (desktop == null ? void 0 : desktop.matches) ? measured.text : null);
+        state.viewport.setAttribute(viewportAttribute, measured.overflow && measured.fade && (!measured.active || typeof ((_a2 = root.CSS) == null ? void 0 : _a2.registerProperty) === "function") ? "fade" : "");
         if (signature === state.signature) return;
         stop(state);
         state.signature = signature;
@@ -221,6 +234,10 @@
         wrapper.style.transition = "none";
         wrapper.setAttribute(contentAttribute, "top-left:top-left");
         wrapper.style.setProperty("--ae-anchor-x", "0px");
+        state.viewport.style.transition = "none";
+        state.viewport.style.setProperty(offsetProperty, "0px");
+        state.viewport.style.setProperty("--ae-overflow-marquee-distance", `${Math.max(0, measured.content - measured.width)}px`);
+        state.viewport.setAttribute("dir", measured.direction);
         element.toggleAttribute ? element.toggleAttribute(activeAttribute, measured.active) : measured.active ? element.setAttribute(activeAttribute, "") : element.removeAttribute(activeAttribute);
       });
       if (!alive() || signature !== state.signature || !measured.active || state.timer !== null || state.running) return;
@@ -233,9 +250,7 @@
         const start = anchor.measure(wrapper, false);
         const end = anchor.measure(wrapper, true);
         if (!(start == null ? void 0 : start.valid) || !(end == null ? void 0 : end.valid)) return null;
-        const style = root.getComputedStyle(element);
-        const inset = ["borderLeftWidth", "borderRightWidth", "paddingLeft", "paddingRight"].reduce((sum, property) => sum + (parseFloat(style[property]) || 0), 0);
-        const distance = Math.max(0, start.selected.x - end.selected.x + inset);
+        const distance = Math.max(0, start.selected.x - end.selected.x);
         const rtl = measured.direction === "rtl";
         const placement = (base, x) => __spreadProps(__spreadValues({}, base), { selected: __spreadProps(__spreadValues({}, base.selected), { x, y: 0 }) });
         return { start: placement(rtl ? end : start, 0), end: placement(rtl ? start : end, rtl ? distance : -distance), distance };
@@ -244,6 +259,7 @@
       await api.waitLayout.update(layoutId, () => {
         if (!alive() || revision !== state.revision) return;
         state.placements = placements;
+        state.viewport.style.setProperty("--ae-overflow-marquee-distance", `${placements.distance}px`);
         if (!canRun(state)) {
           pause(state);
           return;
@@ -257,6 +273,10 @@
     function at(state, x) {
       const base = state.placements.start;
       return __spreadProps(__spreadValues({}, base), { selected: __spreadProps(__spreadValues({}, base.selected), { x }) });
+    }
+    function freezeFade(state) {
+      state.viewport.style.transition = "none";
+      state.viewport.style.setProperty(offsetProperty, `${Math.abs(state.x)}px`);
     }
     function wait(state) {
       const revision = state.revision;
@@ -284,6 +304,7 @@
       stop(state);
       state.paused = true;
       state.wrapper.style.transition = "none";
+      freezeFade(state);
       if (state.placements) anchor.place(state.wrapper, at(state, state.x));
     }
     function tooltip(state, text) {
@@ -317,6 +338,7 @@
             state.wrapper.style.transition = "none";
             state.wrapper.setAttribute(contentAttribute, "top-left:top-left");
             state.x = 0;
+            freezeFade(state);
             anchor.place(state.wrapper, placements.start);
             state.phase = "wait";
             state.running = false;
@@ -328,7 +350,10 @@
         }
         state.phase = "travel";
         const duration = Math.abs(placements.end.selected.x - state.x) / measured.speed * 1e3;
-        await api.waitLayout.read(state.cycleId, () => root.getComputedStyle(state.wrapper).transform);
+        await api.waitLayout.read(state.cycleId, () => {
+          root.getComputedStyle(state.viewport).getPropertyValue(offsetProperty);
+          return root.getComputedStyle(state.wrapper).transform;
+        });
         if (!current()) return;
         if (!canRun(state)) {
           pause(state);
@@ -340,8 +365,9 @@
         state.animation = null;
         state.controlled = api.motion.supported(state.wrapper);
         state.started = now();
-        const completion = api.motion.run(state.wrapper, {
+        const completion = api.motion.run(state.viewport, {
           id: state.motionId,
+          subtree: true,
           nativeDuration: duration,
           maxFPS: api.layoutMaxFPS(state.element),
           abort() {
@@ -350,6 +376,8 @@
           },
           apply() {
             state.wrapper.style.transition = `transform ${duration}ms linear`;
+            state.viewport.style.transition = `${offsetProperty} ${duration}ms linear`;
+            state.viewport.style.setProperty(offsetProperty, `${placements.distance}px`);
             state.wrapper.setAttribute(contentAttribute, "bottom-right:bottom-right");
             anchor.place(state.wrapper, placements.end);
           }
@@ -366,6 +394,7 @@
           anchor.place(state.wrapper, placements.end);
           state.running = false;
           state.x = placements.end.selected.x;
+          freezeFade(state);
           state.animation = null;
           state.phase = "end";
           state.remaining = measured.delay;
@@ -402,9 +431,10 @@
       for (const name of ["mouseenter", "mouseleave", "focusin", "focusout"])
         element.removeEventListener(name, state.onInteraction);
       await anchor.unmount(state.wrapper);
-      if (state.wrapper.parentNode === element) {
-        while (state.wrapper.firstChild) element.insertBefore(state.wrapper.firstChild, state.wrapper);
-        state.wrapper.remove();
+      if (state.viewport.parentNode === element) {
+        reconcile(state);
+        while (state.wrapper.firstChild) element.insertBefore(state.wrapper.firstChild, state.viewport);
+        state.viewport.remove();
       }
       tooltip(state, null);
       state.memory.restore();
@@ -444,7 +474,9 @@
       }));
       api.registerCssProperty(
         { name: "--ae-overflow-marquee-speed", syntax: "<number>", initialValue: "30" },
-        { name: "--ae-overflow-marquee-delay", syntax: "<time>", initialValue: "1200ms" }
+        { name: "--ae-overflow-marquee-delay", syntax: "<time>", initialValue: "1200ms" },
+        { name: "--ae-overflow-marquee-fade-size", syntax: "<length>", initialValue: "16px" },
+        { name: "--ae-overflow-marquee-offset", syntax: "<length>", initialValue: "0px", inherits: false }
       );
       api.mountManager.add({
         extensionName,

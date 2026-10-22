@@ -16,7 +16,7 @@ async function start(page, html = markup(), options = {}) {
   await expect.poll(() => page.evaluate(() => AelluxJs.ext.overflowMarquee?.initialized)).toBe(true);
   expect(await page.evaluate(() => AelluxJs.ext.anchor?.initialized)).toBe(true);
   await page.evaluate(() => AelluxJs.mount(document));
-  await expect(page.locator("#label > [data-ae-overflow-marquee-content]")).toHaveCount(1);
+  await expect(page.locator("#label > [data-ae-overflow-marquee-viewport] > [data-ae-overflow-marquee-content]")).toHaveCount(1);
 }
 
 for (const mode of ["basic", "full"]) for (const forceLegacy of [false, true]) {
@@ -38,7 +38,7 @@ for (const mode of ["basic", "full"]) for (const forceLegacy of [false, true]) {
     expect(await host.evaluate(element => element.style.whiteSpace)).toBe("normal");
     expect(await host.evaluate(element => element.getBoundingClientRect().height)).toBe(30);
     const pass = await host.evaluate(async element => {
-      const wrapper = element.firstElementChild;
+      const wrapper = element.querySelector("[data-ae-overflow-marquee-content]");
       const style = getComputedStyle(element);
       const baseline = () => element.getBoundingClientRect().left + parseFloat(style.borderLeftWidth) + parseFloat(style.paddingLeft);
       const distance = wrapper.getBoundingClientRect().width - (element.clientWidth - 14);
@@ -81,7 +81,7 @@ for (const forceLegacy of [false, true]) test(`root reduced motion keeps ellipsi
 for (const forceLegacy of [false, true]) test(`both ends hold for the configured delay before the next phase (${forceLegacy})`, async ({ page }) => {
   await start(page, markup().replace("80ms", "350ms"), { forceLegacy });
   const holds = await page.locator("#label").evaluate(async element => {
-    const wrapper = element.firstElementChild;
+    const wrapper = element.querySelector("[data-ae-overflow-marquee-content]");
     let endAt = null, startAt = null;
     return new Promise((resolve, reject) => {
       const timeout = setTimeout(() => reject(new Error("Both endpoint holds did not complete")), 7000);
@@ -114,9 +114,14 @@ for (const options of [{}, { forceLegacy: true }, { cssMotionController: false }
     await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
     await expect.poll(() => content.evaluate(element => element.getAnimations().length)).toBe(0);
     const frozen = await offset();
+    const frozenFade = await host.locator("[data-ae-overflow-marquee-viewport]").evaluate(element =>
+      parseFloat(getComputedStyle(element).getPropertyValue("--ae-overflow-marquee-offset")));
+    expect(frozenFade).toBeCloseTo(Math.abs(frozen), 1);
     expect(frozen).toBeLessThan(-20);
     await page.waitForTimeout(250);
     expect(await offset()).toBeCloseTo(frozen, 1);
+    expect(await host.locator("[data-ae-overflow-marquee-viewport]").evaluate(element =>
+      parseFloat(getComputedStyle(element).getPropertyValue("--ae-overflow-marquee-offset")))).toBe(frozenFade);
     await expect(host).toHaveAttribute("title", `${text} More`);
     await host.focus();
     await page.mouse.move(900, 600);
@@ -134,6 +139,7 @@ for (const options of [{}, { forceLegacy: true }, { cssMotionController: false }
     await host.focus();
     await page.waitForTimeout(100);
     await expect(content).toHaveCount(0);
+    await expect(host.locator("[data-ae-overflow-marquee-viewport]")).toHaveCount(0);
   });
 }
 
@@ -197,7 +203,7 @@ test("fitting labels stay static and react to edits and complete content replace
   const host = page.locator("#label");
   await expect(host).not.toHaveAttribute("data-ae-overflow-marquee-active");
   await expect(host).not.toHaveAttribute("title");
-  await host.evaluate((element, text) => { element.firstElementChild.firstChild.nodeValue = text; }, text);
+  await host.evaluate((element, text) => { element.querySelector("[data-ae-overflow-marquee-content]").firstChild.nodeValue = text; }, text);
   await expect(host).toHaveAttribute("data-ae-overflow-marquee-active", "");
   await expect(host).toHaveAttribute("title", text);
   await host.evaluate(element => { element.textContent = "Replacement"; });
@@ -243,7 +249,7 @@ test("hidden labels and window resizing without ResizeObserver recompute overflo
   await start(page);
   const host = page.locator("#label");
   await host.evaluate(element => { element.hidden = true; });
-  await expect.poll(() => host.evaluate(element => element.firstElementChild.getAnimations().length)).toBe(0);
+  await expect.poll(() => host.evaluate(element => element.querySelector("[data-ae-overflow-marquee-content]").getAnimations().length)).toBe(0);
   await host.evaluate(element => { element.hidden = false; element.style.width = "1200px"; });
   await page.evaluate(() => window.dispatchEvent(new Event("resize")));
   await expect(host).not.toHaveAttribute("data-ae-overflow-marquee-active");
@@ -266,20 +272,22 @@ for (const options of [{}, { forceLegacy: true }, { cssMotionController: false }
     await expect(host).not.toHaveAttribute("data-ae-overflow-marquee-active");
     await parent.evaluate(element => { element.style.opacity = "1"; });
     await expect.poll(() => host.evaluate(element => {
-      const x = new DOMMatrixReadOnly(getComputedStyle(element.firstElementChild).transform).m41;
+      const x = new DOMMatrixReadOnly(getComputedStyle(element.querySelector("[data-ae-overflow-marquee-content]")).transform).m41;
       return x < -60 && x > -300;
     }), { intervals: [20, 40] }).toBe(true);
     await parent.evaluate(element => { element.style.opacity = "0"; });
-    await expect.poll(() => host.evaluate(element => element.firstElementChild.getAnimations().length)).toBe(0);
+    await expect.poll(() => host.evaluate(element => element.querySelector("[data-ae-overflow-marquee-content]").getAnimations().length)).toBe(0);
     const snapshot = await host.evaluate(element => ({
-      x: new DOMMatrixReadOnly(getComputedStyle(element.firstElementChild).transform).m41, runs: window.marqueeRuns
+      x: new DOMMatrixReadOnly(getComputedStyle(element.querySelector("[data-ae-overflow-marquee-content]")).transform).m41, runs: window.marqueeRuns
     }));
     expect(snapshot.x).toBeLessThan(-30);
     await page.waitForTimeout(750);
     const paused = await host.evaluate(element => ({
-      x: new DOMMatrixReadOnly(getComputedStyle(element.firstElementChild).transform).m41, runs: window.marqueeRuns
+      x: new DOMMatrixReadOnly(getComputedStyle(element.querySelector("[data-ae-overflow-marquee-content]")).transform).m41, runs: window.marqueeRuns
     }));
     expect(paused).toEqual(snapshot);
+    expect(await host.locator("[data-ae-overflow-marquee-viewport]").evaluate(element =>
+      parseFloat(getComputedStyle(element).getPropertyValue("--ae-overflow-marquee-offset")))).toBeCloseTo(Math.abs(paused.x), 1);
     const restored = await parent.evaluate(async element => {
       element.style.opacity = "1";
       await new Promise(resolve => requestAnimationFrame(resolve));
@@ -288,7 +296,7 @@ for (const options of [{}, { forceLegacy: true }, { cssMotionController: false }
     expect(Math.abs(restored - snapshot.x)).toBeLessThan(35);
     await expect.poll(() => page.evaluate(() => window.marqueeRuns)).toBeGreaterThan(snapshot.runs);
     await expect.poll(() => host.evaluate(element =>
-      new DOMMatrixReadOnly(getComputedStyle(element.firstElementChild).transform).m41)).toBeLessThan(snapshot.x - 30);
+      new DOMMatrixReadOnly(getComputedStyle(element.querySelector("[data-ae-overflow-marquee-content]")).transform).m41)).toBeLessThan(snapshot.x - 30);
   });
 }
 
@@ -298,12 +306,12 @@ test("leaving the viewport pauses motion and keeps the remaining restart delay",
   await expect(host).toHaveAttribute("data-ae-overflow-marquee-active", "");
   await host.evaluate(element => { element.style.marginTop = "2000px"; });
   await page.waitForTimeout(1700);
-  expect(await host.evaluate(element => element.firstElementChild.getAnimations().length)).toBe(0);
+  expect(await host.evaluate(element => element.querySelector("[data-ae-overflow-marquee-content]").getAnimations().length)).toBe(0);
   await host.evaluate(element => { element.style.marginTop = "0px"; });
   await page.waitForTimeout(250);
-  expect(await host.evaluate(element => getComputedStyle(element.firstElementChild).transform)).toMatch(/matrix\(1, 0, 0, 1, 0, 0\)/);
+  expect(await host.evaluate(element => getComputedStyle(element.querySelector("[data-ae-overflow-marquee-content]")).transform)).toMatch(/matrix\(1, 0, 0, 1, 0, 0\)/);
   await expect.poll(() => host.evaluate(element =>
-    new DOMMatrixReadOnly(getComputedStyle(element.firstElementChild).transform).m41), { intervals: [20, 50] }).toBeLessThan(-20);
+    new DOMMatrixReadOnly(getComputedStyle(element.querySelector("[data-ae-overflow-marquee-content]")).transform).m41), { intervals: [20, 50] }).toBeLessThan(-20);
 });
 
 test("display:none and background documents suspend without losing progress", async ({ page }) => {
@@ -311,9 +319,9 @@ test("display:none and background documents suspend without losing progress", as
   const host = page.locator("#label");
   for (const reason of ["display", "document"]) {
     await expect.poll(() => host.evaluate(element =>
-      new DOMMatrixReadOnly(getComputedStyle(element.firstElementChild).transform).m41)).toBeLessThan(-35);
+      new DOMMatrixReadOnly(getComputedStyle(element.querySelector("[data-ae-overflow-marquee-content]")).transform).m41)).toBeLessThan(-35);
     const before = await host.evaluate(element =>
-      new DOMMatrixReadOnly(getComputedStyle(element.firstElementChild).transform).m41);
+      new DOMMatrixReadOnly(getComputedStyle(element.querySelector("[data-ae-overflow-marquee-content]")).transform).m41);
     await host.evaluate((element, reason) => {
       if (reason === "display") element.style.display = "none";
       else {
@@ -321,12 +329,12 @@ test("display:none and background documents suspend without losing progress", as
         document.dispatchEvent(new Event("visibilitychange"));
       }
     }, reason);
-    await expect.poll(() => host.evaluate(element => element.firstElementChild.getAnimations().length)).toBe(0);
-    const offset = await host.evaluate(element => parseFloat(element.firstElementChild.style.getPropertyValue("--ae-anchor-x")));
+    await expect.poll(() => host.evaluate(element => element.querySelector("[data-ae-overflow-marquee-content]").getAnimations().length)).toBe(0);
+    const offset = await host.evaluate(element => parseFloat(element.querySelector("[data-ae-overflow-marquee-content]").style.getPropertyValue("--ae-anchor-x")));
     expect(offset).toBeLessThan(-20);
     expect(Math.abs(offset - before)).toBeLessThan(20);
     await page.waitForTimeout(400);
-    expect(await host.evaluate(element => parseFloat(element.firstElementChild.style.getPropertyValue("--ae-anchor-x")))).toBe(offset);
+    expect(await host.evaluate(element => parseFloat(element.querySelector("[data-ae-overflow-marquee-content]").style.getPropertyValue("--ae-anchor-x")))).toBe(offset);
     const restored = await host.evaluate(async (element, reason) => {
       if (reason === "display") element.style.display = "block";
       else {
@@ -334,7 +342,7 @@ test("display:none and background documents suspend without losing progress", as
         document.dispatchEvent(new Event("visibilitychange"));
       }
       await new Promise(resolve => requestAnimationFrame(resolve));
-      return new DOMMatrixReadOnly(getComputedStyle(element.firstElementChild).transform).m41;
+      return new DOMMatrixReadOnly(getComputedStyle(element.querySelector("[data-ae-overflow-marquee-content]")).transform).m41;
     }, reason);
     expect(Math.abs(restored - offset)).toBeLessThan(15);
   }
@@ -348,12 +356,12 @@ test("ancestor clipping and CSS visibility changes wake only visible labels", as
   await page.locator("#clip").evaluate(element => { element.scrollTop = 80; });
   await expect(host).toHaveAttribute("data-ae-overflow-marquee-active", "");
   await page.locator("#clip").evaluate(element => { element.style.visibility = "hidden"; });
-  await expect.poll(() => host.evaluate(element => element.firstElementChild.getAnimations().length)).toBe(0);
-  const offset = await host.evaluate(element => element.firstElementChild.style.getPropertyValue("--ae-anchor-x"));
+  await expect.poll(() => host.evaluate(element => element.querySelector("[data-ae-overflow-marquee-content]").getAnimations().length)).toBe(0);
+  const offset = await host.evaluate(element => element.querySelector("[data-ae-overflow-marquee-content]").style.getPropertyValue("--ae-anchor-x"));
   await page.waitForTimeout(200);
-  expect(await host.evaluate(element => element.firstElementChild.style.getPropertyValue("--ae-anchor-x"))).toBe(offset);
+  expect(await host.evaluate(element => element.querySelector("[data-ae-overflow-marquee-content]").style.getPropertyValue("--ae-anchor-x"))).toBe(offset);
   await page.locator("#clip").evaluate(element => { element.style.visibility = "visible"; });
-  await expect.poll(() => host.evaluate(element => element.firstElementChild.getAnimations().length)).toBeGreaterThan(0);
+  await expect.poll(() => host.evaluate(element => element.querySelector("[data-ae-overflow-marquee-content]").getAnimations().length)).toBeGreaterThan(0);
 });
 
 test("CSS reveal transitions, overridden hidden and missing IntersectionObserver use final visibility", async ({ page }) => {
@@ -364,11 +372,171 @@ test("CSS reveal transitions, overridden hidden and missing IntersectionObserver
   await page.locator("#parent").evaluate(element => { element.style.opacity = "1"; });
   await expect(host).toHaveAttribute("data-ae-overflow-marquee-active", "");
   await page.locator("#parent").evaluate(element => { element.style.opacity = "0"; });
-  await expect.poll(() => host.evaluate(element => element.firstElementChild.getAnimations().length)).toBe(0);
+  await expect.poll(() => host.evaluate(element => element.querySelector("[data-ae-overflow-marquee-content]").getAnimations().length)).toBe(0);
   await page.evaluate(() => AelluxJs.unmount(document.getElementById("label"), "overflow-marquee"));
   await page.locator("#parent").evaluate(element => { element.style.opacity = "1"; });
   await page.waitForTimeout(200);
   await expect(host.locator("[data-ae-overflow-marquee-content]")).toHaveCount(0);
   await expect(host).toHaveText(text);
   await expect(host).not.toHaveAttribute("title");
+});
+
+// Sample actual rendered alpha over the white host, including the gradient's
+// width and strength; inspecting only custom properties would miss paint bugs.
+async function edgePixels(page, viewport) {
+  const png = (await viewport.screenshot()).toString("base64");
+  return page.evaluate(async png => {
+    const image = new Image();
+    image.src = `data:image/png;base64,${png}`;
+    await image.decode();
+    const canvas = document.createElement("canvas");
+    canvas.width = image.width; canvas.height = image.height;
+    const context = canvas.getContext("2d");
+    context.drawImage(image, 0, 0);
+    const red = x => context.getImageData(x, 5, 1, 1).data[0];
+    return { left: red(0), right: red(image.width - 1), middle: red(Math.floor(image.width / 2)) };
+  }, png);
+}
+
+for (const forceLegacy of [false, true]) for (const direction of ["ltr", "rtl"]) {
+  test(`fade paints progressive hidden amounts on a stationary viewport (${direction}, legacy=${forceLegacy})`, async ({ page }) => {
+    await start(page, markup('<span style="display:inline-block;width:400px;height:20px;background:black">label</span>', `dir="${direction}"`)
+      .replace("white-space:normal", "white-space:normal;background:white;border-color:blue")
+      .replace("900", "100"), { forceLegacy, cssMotionController: false });
+    const viewport = page.locator("[data-ae-overflow-marquee-viewport]");
+    const content = page.locator("[data-ae-overflow-marquee-content]");
+    await expect.poll(() => content.evaluate(element => element.getAnimations().length)).toBe(1);
+    const rect = await viewport.boundingBox();
+    const samples = [];
+    for (const fraction of [0, 0.02, 0.5, 0.98, 1]) {
+      const geometry = await viewport.evaluate((element, fraction) => {
+        const wrapper = element.firstElementChild;
+        for (const node of [element, wrapper]) for (const animation of node.getAnimations()) {
+          animation.pause();
+          animation.currentTime = animation.effect.getComputedTiming().duration * fraction;
+        }
+        return { x: new DOMMatrixReadOnly(getComputedStyle(wrapper).transform).m41,
+          offset: parseFloat(getComputedStyle(element).getPropertyValue("--ae-overflow-marquee-offset")),
+          distance: parseFloat(element.style.getPropertyValue("--ae-overflow-marquee-distance")),
+          hostMask: getComputedStyle(element.parentElement).maskImage,
+          mask: getComputedStyle(element).maskImage };
+      }, fraction);
+      expect(geometry.offset).toBeCloseTo(geometry.distance * fraction, 1);
+      expect(Math.abs(geometry.x)).toBeCloseTo(geometry.offset, 1);
+      expect(geometry.hostMask).toBe("none");
+      expect(geometry.mask).toContain("linear-gradient");
+      expect(await viewport.boundingBox()).toEqual(rect);
+      const pixels = await edgePixels(page, viewport);
+      expect(pixels.middle).toBe(0);
+      samples.push(direction === "rtl" ? { left: pixels.right, right: pixels.left } : pixels);
+    }
+    expect(samples[0].left).toBeLessThan(5);
+    expect(samples[0].right).toBeGreaterThan(220);
+    expect(samples[1].left).toBeGreaterThan(30);
+    expect(samples[1].left).toBeLessThan(150);
+    expect(samples[2].left).toBeGreaterThan(220);
+    expect(samples[2].right).toBeGreaterThan(220);
+    expect(samples[3].right).toBeGreaterThan(30);
+    expect(samples[3].right).toBeLessThan(150);
+    expect(samples[4].left).toBeGreaterThan(220);
+    expect(samples[4].right).toBeLessThan(5);
+    // Zero size makes the mask fully opaque, even at an interior position.
+    await page.locator("#label").evaluate(element => element.style.setProperty("--ae-overflow-marquee-fade-size", "0px"));
+    expect(await edgePixels(page, viewport)).toEqual({ left: 0, right: 0, middle: 0 });
+  });
+}
+
+for (const forceLegacy of [false, true]) {
+  test(`fade reconfigures without restarting and survives reduced motion and geometry changes (${forceLegacy})`, async ({ page }) => {
+    await start(page, markup(text, 'tabindex="0"').replace("900", "100"), { forceLegacy });
+    const host = page.locator("#label"), viewport = host.locator("[data-ae-overflow-marquee-viewport]");
+    await expect.poll(() => viewport.evaluate(element =>
+      parseFloat(getComputedStyle(element).getPropertyValue("--ae-overflow-marquee-offset")))).toBeGreaterThan(30);
+    await host.focus();
+    const frozen = await viewport.evaluate(element => getComputedStyle(element).getPropertyValue("--ae-overflow-marquee-offset"));
+    for (const value of ["false", "true", null]) {
+      await host.evaluate((element, value) => value === null ? element.removeAttribute("data-ae-overflow-marquee-fade") :
+        element.setAttribute("data-ae-overflow-marquee-fade", value), value);
+      if (value === "false") await expect(viewport).toHaveCSS("mask-image", "none");
+      else await expect(viewport).toHaveCSS("mask-image", /linear-gradient/);
+      expect(await viewport.evaluate(element => getComputedStyle(element).getPropertyValue("--ae-overflow-marquee-offset"))).toBe(frozen);
+    }
+    await page.evaluate(() => document.documentElement.setAttribute("data-ae-reduced-motion", "reduced"));
+    await expect(host).not.toHaveAttribute("data-ae-overflow-marquee-active");
+    await expect(viewport).toHaveCSS("mask-image", /linear-gradient/);
+    await expect(viewport).toHaveCSS("--ae-overflow-marquee-offset", "0px");
+    await expect(host.locator("[data-ae-overflow-marquee-content]")).toHaveCSS("text-overflow", "ellipsis");
+    await host.evaluate(element => element.style.width = "1200px");
+    await expect(viewport).toHaveCSS("mask-image", "none");
+    await host.evaluate(element => element.style.width = "140px");
+    await expect(viewport).toHaveCSS("mask-image", /linear-gradient/);
+    await viewport.evaluate(element => element.textContent = "Short");
+    await expect(host).toHaveText("Short");
+    await expect(viewport).toHaveCSS("mask-image", "none");
+    await host.evaluate((element, text) => element.textContent = text, text);
+    await expect(viewport).toHaveCSS("mask-image", /linear-gradient/);
+    await host.evaluate(element => element.textContent = "Short");
+    await expect(viewport).toHaveCSS("mask-image", "none");
+    await page.evaluate(() => AelluxJs.unmount(document.getElementById("label"), "overflow-marquee"));
+    await expect(host.locator("span")).toHaveCount(0);
+    await expect(host).toHaveText("Short");
+  });
+
+  test(`small overflow has a proportionate fade and invalid declarations use semantic diagnostics (${forceLegacy})`, async ({ page }) => {
+    await start(page, markup('<span style="display:inline-block;width:144px;height:20px;background:black">label</span>')
+      .replace("white-space:normal", "white-space:normal;background:white")
+      .replace("80ms", "10000ms"), { forceLegacy, environment: "development" });
+    const viewport = page.locator("[data-ae-overflow-marquee-viewport]");
+    const pixels = await edgePixels(page, viewport);
+    expect(pixels.left).toBe(0);
+    expect(pixels.right).toBeGreaterThan(30);
+    expect(pixels.right).toBeLessThan(90);
+    await page.locator("#label").evaluate(element => element.setAttribute("data-ae-overflow-marquee-fade", "invalid"));
+    await page.evaluate(() => AelluxJs.mountManager.update(document));
+    const diagnostics = await page.evaluate(() => AelluxJs.diagnostics.showHistory().filter(entry =>
+      entry.context?.attribute === "data-ae-overflow-marquee-fade").map(entry => entry.code));
+    expect(diagnostics).toContain(2026);
+    await expect(viewport).toHaveCSS("mask-image", /linear-gradient/);
+    expect(await page.evaluate(() => AelluxJs.diagnostics.showHistory().filter(entry => entry.level === 0))).toEqual([]);
+  });
+}
+
+test("missing property interpolation keeps native marquee motion functional without discrete masks", async ({ page }) => {
+  await page.addInitScript(() => { CSS.registerProperty = undefined; });
+  await start(page);
+  await expect(page.locator("[data-ae-overflow-marquee-viewport]")).toHaveCSS("mask-image", "none");
+  await expect.poll(() => page.locator("[data-ae-overflow-marquee-content]").evaluate(element =>
+    new DOMMatrixReadOnly(getComputedStyle(element).transform).m41)).toBeLessThan(-30);
+});
+
+for (const options of [{}, { forceLegacy: true }, { cssMotionController: false }]) {
+  test(`fade and transform share the live clock and FPS limit (${JSON.stringify(options)})`, async ({ page }) => {
+    await start(page, markup(text, 'data-ae-maxfps="15"').replace("900", "100"), options);
+    const content = page.locator("[data-ae-overflow-marquee-content]");
+    await expect.poll(() => content.evaluate(element => element.getAnimations().length)).toBe(1);
+    const differences = await content.evaluate(element => new Promise(resolve => {
+      const samples = [];
+      const sample = () => {
+        const x = Math.abs(new DOMMatrixReadOnly(getComputedStyle(element).transform).m41);
+        const offset = parseFloat(getComputedStyle(element.parentElement).getPropertyValue("--ae-overflow-marquee-offset"));
+        samples.push(Math.abs(x - offset));
+        if (samples.length === 20) resolve(samples);
+        else requestAnimationFrame(sample);
+      };
+      requestAnimationFrame(sample);
+    }));
+    expect(Math.max(...differences)).toBeLessThan(0.1);
+  });
+}
+
+for (const forceLegacy of [false, true]) test(`native cycles preserve existing infinite descendant animations (${forceLegacy})`, async ({ page }) => {
+  await start(page, '<style>@keyframes child-glow{from{opacity:.8}to{opacity:1}}</style>' +
+    markup(`<span id="animated-child" style="animation:child-glow 1s linear infinite">${text}</span>`),
+    { forceLegacy, cssMotionController: false });
+  const content = page.locator("[data-ae-overflow-marquee-content]");
+  await expect.poll(() => content.evaluate(element =>
+    element.getAttribute("data-ae-overflow-marquee-content") === "bottom-right:bottom-right" && element.style.transition === "none"),
+    { intervals: [20, 40] }).toBe(true);
+  await expect(content).toHaveAttribute("data-ae-overflow-marquee-content", "top-left:top-left");
+  expect(await page.locator("#animated-child").evaluate(element => element.getAnimations()[0].playState)).toBe("running");
 });

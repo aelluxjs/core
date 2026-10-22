@@ -13,6 +13,8 @@
     const momentumAttribute = AelluxJs.attr("scrollbox-momentum");
     const snapAttribute = AelluxJs.attr("scrollbox-snap");
     const elasticAttribute = AelluxJs.attr("scrollbox-elastic");
+    const fadeAttribute = AelluxJs.attr("scrollbox-fade");
+    const fadeStateAttribute = AelluxJs.attr("scrollbox-fade-state");
     const scrollbarAttribute = AelluxJs.attr("scrollbar");
     const scrollbarVerticalAttribute = AelluxJs.attr("scrollbar-vertical");
     const scrollbarHorizontalAttribute = AelluxJs.attr("scrollbar-horizontal");
@@ -135,6 +137,14 @@
       "contextmenu"
     ]);
     const properties = ["--ae-scroll-y-progress", "--ae-scroll-x-progress"];
+    const fadeProperties = ["top", "right", "bottom", "left"].map((side) => `--ae-scrollbox-hidden-${side}`);
+    const supportsCSS = (name, value) => {
+      var _a, _b;
+      return !!((_b = (_a = root.CSS) == null ? void 0 : _a.supports) == null ? void 0 : _b.call(_a, name, value));
+    };
+    const maskSupported = supportsCSS("mask-image", "linear-gradient(#000,#000)") || supportsCSS("-webkit-mask-image", "linear-gradient(#000,#000)");
+    const compositeSupported = supportsCSS("mask-composite", "intersect") || supportsCSS("-webkit-mask-composite", "source-in");
+    let rtlScrollType = null;
     const scrollboxes = /* @__PURE__ */ new Map();
     const elementMemories = /* @__PURE__ */ new WeakMap();
     const cursorMemories = /* @__PURE__ */ new WeakMap();
@@ -156,6 +166,8 @@
     function init() {
       AelluxJs.registerCssProperty(
         ...properties.map((name) => ({ name, syntax: "<number>", initialValue: "0" })),
+        ...fadeProperties.map((name) => ({ name, syntax: "<length>", initialValue: "0px", inherits: false })),
+        { name: "--ae-scrollbox-fade-size", syntax: "<length>", initialValue: "16px" },
         ...scrollbarProperties.map((name, index) => ({
           name,
           syntax: index === 5 ? "block | none" : "<length>",
@@ -231,7 +243,7 @@
     }
     function mountScrollbox(element) {
       if (scrollboxes.has(element)) return;
-      elementMemories.set(element, AelluxJs.persist.element.save(element, [], properties));
+      elementMemories.set(element, AelluxJs.persist.element.save(element, [fadeStateAttribute], [...properties, ...fadeProperties]));
       cursorMemories.set(element, AelluxJs.persist.element.save(element, [], ["cursor"]));
       const elastic = {
         wrapper: null,
@@ -275,6 +287,8 @@
         metrics: null,
         mode: null,
         desktop: false,
+        fadeAuthored: null,
+        fadeAxes: null,
         cursor: { owned: false },
         wheelEnabled: true,
         momentumEnabled: true,
@@ -1750,7 +1764,7 @@
             subtree: true,
             characterData: true,
             attributes: true,
-            attributeFilter: [elasticAttribute, scrollbarAttribute, snapAttribute]
+            attributeFilter: [elasticAttribute, scrollbarAttribute, snapAttribute, fadeAttribute, attribute, "dir"]
           }
         );
       }
@@ -1777,8 +1791,7 @@
         page: element.clientHeight || 1
       };
     }
-    function wheelAxes(state, metrics) {
-      const style = root.getComputedStyle(state.element);
+    function wheelAxes(state, metrics, style = root.getComputedStyle(state.element)) {
       const available = (value) => value === "auto" || value === "scroll";
       const stopsChain = (value) => value === "contain" || value === "none";
       return {
@@ -1787,6 +1800,48 @@
         stopX: available(style.overflowX) && stopsChain(style.overscrollBehaviorX),
         stopY: available(style.overflowY) && stopsChain(style.overscrollBehaviorY)
       };
+    }
+    function physicalScrollLeft(element, maximum, direction) {
+      let position = element.scrollLeft;
+      if (direction === "rtl" && maximum > 0) {
+        if (rtlScrollType === null) {
+          const probe = root.document.createElement("div");
+          const child = root.document.createElement("div");
+          probe.style.cssText = "position:absolute;left:-10000px;top:-10000px;width:4px;height:1px;overflow:scroll;direction:rtl;visibility:hidden;scroll-behavior:auto";
+          child.style.cssText = "width:8px;height:1px";
+          probe.appendChild(child);
+          root.document.body.appendChild(probe);
+          if (probe.scrollLeft > 0) rtlScrollType = "default";
+          else {
+            probe.scrollLeft = 1;
+            rtlScrollType = probe.scrollLeft === 0 ? "negative" : "reverse";
+          }
+          probe.remove();
+        }
+        if (rtlScrollType === "negative") position += maximum;
+        else if (rtlScrollType === "reverse") position = maximum - position;
+      }
+      return Math.max(0, Math.min(maximum, position));
+    }
+    function readFade(state, metrics, axes, style) {
+      const element = state.element;
+      if (state.fadeAuthored === null)
+        state.fadeAuthored = [style.maskImage, style.webkitMaskImage].some((value) => value && value !== "none");
+      if (state.elastic.owned) {
+        metrics = state.metrics || metrics;
+        axes = state.fadeAxes || axes;
+      } else state.fadeAxes = axes;
+      const x = axes.x ? physicalScrollLeft(element, metrics.maxX, style.direction) : 0;
+      const y = Math.max(0, Math.min(metrics.maxY, element.scrollTop));
+      const distances = [
+        axes.y ? y : 0,
+        axes.x ? metrics.maxX - x : 0,
+        axes.y ? metrics.maxY - y : 0,
+        axes.x ? x : 0
+      ];
+      const snapAxis = hasSnap(element) ? element.getAttribute(snapAttribute) === "vertical" ? "y" : "x" : null;
+      const primary = snapAxis || (axes.y ? "y" : "x");
+      return { distances, mode: maskSupported && !state.fadeAuthored && element.getAttribute(fadeAttribute) !== "false" && (axes.x || axes.y) ? compositeSupported ? "both" : primary : "" };
     }
     function publish(state) {
       if (state.disposed) return;
@@ -1799,13 +1854,16 @@
         const metrics = nativeMetrics(state.element);
         const scrollTop = state.element.scrollTop;
         const scrollLeft = state.element.scrollLeft;
+        const style = root.getComputedStyle(state.element);
+        const axes = wheelAxes(state, metrics, style);
+        const fade = readFade(state, metrics, axes, style);
         if (!state.elastic.active) state.metrics = metrics;
         if (state.elasticEnabled && state.elastic.wrapper && !state.elastic.active)
           state.elastic.dimensions = measureElasticWrapper(state.elastic.wrapper);
         const bars = state.scrollbar.x || state.scrollbar.y;
-        const axes = bars ? wheelAxes(state, metrics) : null;
         return {
           revision: state.layoutRevision,
+          fade,
           scrollTop,
           scrollLeft,
           y: progress(scrollTop, metrics.maxY),
@@ -1831,6 +1889,12 @@
           }
           state.element.style.setProperty(properties[0], values.y);
           state.element.style.setProperty(properties[1], values.x);
+          fadeProperties.forEach((name, index) => {
+            if (state.element.style.getPropertyPriority(name)) state.element.style.removeProperty(name);
+            state.element.style.setProperty(name, `${values.fade.distances[index]}px`);
+          });
+          if (values.fade.mode) state.element.setAttribute(fadeStateAttribute, values.fade.mode);
+          else state.element.removeAttribute(fadeStateAttribute);
           if (values.edges && !state.elastic.owned) {
             scrollEdgeClasses.forEach((name, index) => state.element.classList.toggle(name, values.edges[index]));
           }

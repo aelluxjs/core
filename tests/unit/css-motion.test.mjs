@@ -129,3 +129,52 @@ test("per-keyframe replacement overrides additive effect composition for resourc
   diagnoseMotionResources(api, element, [{ effect: effect("replace") }], "feedback");
   assert.deepEqual(warnings.map(context => context.writers), [["anchor", "feedback"]]);
 });
+
+for (const subtree of [false, true]) test(`subtree capture shares one clock and preserves preexisting child effects (${subtree})`, async () => {
+  let applied = false, time = 0;
+  const effects = [];
+  const effect = () => {
+    const animation = { currentTime: -1, effect: { getComputedTiming: () => ({ endTime: 100 }),
+      getKeyframes: () => [{ opacity: 0 }, { opacity: 1 }] }, pause() {}, finish() {}, cancel() {} };
+    effects.push(animation);
+    return animation;
+  };
+  const parentEffect = effect(), childEffect = effect(), existing = effect();
+  const child = { getAnimations: () => applied ? [existing, childEffect] : [existing] };
+  const parent = { nodeType: 1, isConnected: true, getBoundingClientRect() {},
+    getAnimations: () => applied ? [parentEffect] : [], querySelectorAll: () => [child] };
+  let sequences = 0;
+  const api = { options: {}, currentPreference: () => "no-preference", layoutMaxFPS: () => 30,
+    waitLayout: { cancel() {}, setVisualFPSLimit() {}, sequence(id, stage) {
+      sequences++;
+      if (stage.read) stage.update(stage.read());
+      else { time = 50; stage.update(); }
+      return Promise.resolve({ status: "completed" });
+    } } };
+  class Animation { pause() {} get currentTime() { return 0; } }
+  const motion = createCssMotionController({ Animation, performance: { now: () => time } }, () => api);
+  await motion.run(parent, { id: motion.id(), subtree, apply() { applied = true; } });
+  assert.equal(parentEffect.currentTime, 50);
+  assert.equal(childEffect.currentTime, subtree ? 50 : -1);
+  assert.equal(existing.currentTime, -1);
+  assert.equal(sequences, 2);
+});
+
+test("native subtree completion excludes an existing infinite descendant animation", async () => {
+  let applied = false;
+  const existing = { finished: new Promise(() => {}) };
+  const child = { getAnimations: () => [existing] };
+  const added = { finished: Promise.resolve() };
+  const element = { nodeType: 1, querySelectorAll: () => [child], getAnimations: () => applied ? [added] : [] };
+  const api = { options: { cssMotionController: false }, currentPreference: () => "no-preference",
+    waitLayout: { cancel() {}, setVisualFPSLimit() {} } };
+  const motion = createCssMotionController({ setTimeout, clearTimeout }, () => api);
+  let timer;
+  try {
+    const result = await Promise.race([
+      motion.run(element, { id: motion.id(), subtree: true, apply() { applied = true; } }),
+      new Promise(resolve => { timer = setTimeout(() => resolve("stalled"), 100); })
+    ]);
+    assert.equal(result.status, "completed");
+  } finally { clearTimeout(timer); }
+});

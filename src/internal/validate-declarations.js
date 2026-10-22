@@ -9,8 +9,8 @@ import { transformOwners, diagnoseResource } from "./diagnose-resources.js";
 const attributesByExtension = {
   present: "present present-group present-active present-when present-motion trigger trigger-on dismiss target auto-unpop unpop-on-outside",
   anchor: "anchor anchor-target anchor-match",
-  "overflow-marquee": "overflow-marquee overflow-marquee-content overflow-marquee-active",
-  scrollbox: "scrollbox scrollbox-wheel-horizontal scrollbox-momentum scrollbox-elastic scrollbar scrollbar-vertical scrollbar-horizontal",
+  "overflow-marquee": "overflow-marquee overflow-marquee-fade overflow-marquee-viewport overflow-marquee-content overflow-marquee-active",
+  scrollbox: "scrollbox scrollbox-fade scrollbox-fade-state scrollbox-wheel-horizontal scrollbox-momentum scrollbox-elastic scrollbar scrollbar-vertical scrollbar-horizontal",
   "scrollbox-snap": "scrollbox-snap snap-item",
   focus: "focus", point: "point", adaptive: "adaptive", "ajax-href": "ajax-href",
   preference: "preference option label next prev ready",
@@ -76,7 +76,14 @@ export function validateDeclarations(root, scope, extensionNames = null, method 
       }
       if (extension === "present") validatePresent();
       if (extension === "anchor") validateAnchor();
+      if (extension === "overflow-marquee" && has("overflow-marquee-fade") &&
+        !["", "true", "false"].includes(value("overflow-marquee-fade")))
+        invalid(extension, "overflow-marquee-fade", "Overflow Marquee fade expects a boolean value.",
+          "Use true or false, or omit the attribute to enable the fade.");
       if (extension === "scrollbox") validateScrollbox();
+      if (extension === "scrollbox" && has("scrollbox-fade") && !["", "true", "false"].includes(value("scrollbox-fade")))
+        invalid(extension, "scrollbox-fade", "Scrollbox fade expects a boolean value.",
+          "Use true or false, or omit the attribute to enable the fade.");
       if (extension === "scrollbox-snap") validateSnap();
       if (extension === "focus") {
         if (value("focus") && value("focus") !== "next")

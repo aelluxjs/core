@@ -226,6 +226,9 @@
     var attribute = api.attr("overflow-marquee");
     var contentAttribute = api.attr("overflow-marquee-content");
     var activeAttribute = api.attr("overflow-marquee-active");
+    var viewportAttribute = api.attr("overflow-marquee-viewport");
+    var fadeAttribute = api.attr("overflow-marquee-fade");
+    var offsetProperty = "--ae-overflow-marquee-offset";
     var reducedAttribute = api.attr("reduced-motion");
     var selector = "[".concat(attribute, "]");
     var states = /* @__PURE__ */ new Map();
@@ -260,7 +263,7 @@
       try {
         for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
           var _step2$value = _slicedToArray(_step2.value, 2), element = _step2$value[0], state = _step2$value[1];
-          if (event.target !== state.wrapper && (event.target.contains(element) || element.contains(event.target))) schedule(element);
+          if (event.target !== state.wrapper && event.target !== state.viewport && (event.target.contains(element) || element.contains(event.target))) schedule(element);
         }
       } catch (err) {
         _iterator2.e(err);
@@ -284,7 +287,7 @@
     }
     function _mount() {
       _mount = _asyncToGenerator(/* @__PURE__ */ _regenerator().m(function _callee(element) {
-        var wrapper, state, _i2, _arr, name, _root$document$fonts, _root$document$fonts$, _i3, _arr2, _name;
+        var wrapper, viewport, state, _i2, _arr, name, _root$document$fonts, _root$document$fonts$, _i3, _arr2, _name;
         return _regenerator().w(function(_context) {
           while (1) switch (_context.n) {
             case 0:
@@ -295,10 +298,13 @@
               return _context.a(2);
             case 1:
               wrapper = root.document.createElement("span");
+              viewport = root.document.createElement("span");
+              viewport.setAttribute(viewportAttribute, "");
               wrapper.setAttribute(contentAttribute, "top-left:top-left");
               state = {
                 element: element,
                 wrapper: wrapper,
+                viewport: viewport,
                 revision: 0,
                 signature: null,
                 pending: null,
@@ -334,7 +340,7 @@
                         var _step3$value = _slicedToArray(_step3.value, 2), host = _step3$value[0], value = _step3$value[1];
                         if (records.some(function(record) {
                           var node = record.target;
-                          if (node === value.wrapper && record.type === "attributes") return false;
+                          if ((node === value.wrapper || node === value.viewport) && record.type === "attributes") return false;
                           if (record.type === "attributes" && node === host && record.attributeName === activeAttribute) return false;
                           return node === root.document.documentElement || host.contains(node) || node.contains(host);
                         })) schedule(host);
@@ -353,7 +359,7 @@
                     childList: true,
                     characterData: true,
                     attributes: true,
-                    attributeFilter: [attribute, reducedAttribute, "class", "style", "hidden", "dir"]
+                    attributeFilter: [attribute, fadeAttribute, reducedAttribute, "class", "style", "hidden", "dir"]
                   });
                 }
                 root.document.addEventListener("visibilitychange", refreshAll);
@@ -381,6 +387,8 @@
                   var entry = entries[entries.length - 1];
                   state.intersecting = entry.isIntersecting && entry.intersectionRect.width > 0 && entry.intersectionRect.height > 0;
                   schedule(element);
+                }, {
+                  threshold: [0, 1e-6]
                 });
                 state.intersection.observe(element);
               }
@@ -397,17 +405,21 @@
       return _mount.apply(this, arguments);
     }
     function reconcile(state) {
-      var element = state.element, wrapper = state.wrapper;
-      if (wrapper.parentNode !== element) wrapper.textContent = "";
-      if (wrapper.parentNode === element && element.childNodes.length === 1) return;
+      var element = state.element, wrapper = state.wrapper, viewport = state.viewport;
+      if (viewport.parentNode !== element || wrapper.parentNode !== viewport) wrapper.textContent = "";
+      if (viewport.parentNode === element && wrapper.parentNode === viewport && element.childNodes.length === 1 && viewport.childNodes.length === 1) return;
       var contents = root.document.createDocumentFragment();
-      for (var _i = 0, _Array$from = Array.from(element.childNodes); _i < _Array$from.length; _i++) {
-        var node = _Array$from[_i];
-        if (node === wrapper) while (wrapper.firstChild) contents.appendChild(wrapper.firstChild);
-        else contents.appendChild(node);
-      }
+      var _collect = function collect(parent) {
+        for (var _i = 0, _Array$from = Array.from(parent.childNodes); _i < _Array$from.length; _i++) {
+          var node = _Array$from[_i];
+          if (node === viewport || node === wrapper) _collect(node);
+          else contents.appendChild(node);
+        }
+      };
+      _collect(element);
       wrapper.appendChild(contents);
-      element.appendChild(wrapper);
+      viewport.appendChild(wrapper);
+      element.appendChild(viewport);
     }
     function schedule(element) {
       var state = states.get(element);
@@ -492,6 +504,7 @@
                   content: content,
                   overflow: overflow,
                   active: overflow && !reduced,
+                  fade: element.getAttribute(fadeAttribute) !== "false",
                   speed: Number.isFinite(rawSpeed) && rawSpeed > 0 ? rawSpeed : 30,
                   delay: delayValue ? parseFloat(rawDelay) * (delayValue[1] === "s" ? 1e3 : 1) : 1200,
                   direction: style.direction,
@@ -506,11 +519,15 @@
               }
               return _context2.a(2);
             case 5:
-              signature = JSON.stringify(measured);
+              signature = JSON.stringify(_objectSpread(_objectSpread({}, measured), {}, {
+                fade: void 0
+              }));
               _context2.n = 6;
               return api.waitLayout.update(layoutId, function() {
+                var _root$CSS;
                 if (!alive()) return;
                 tooltip(state, measured.overflow && desktop !== null && desktop !== void 0 && desktop.matches ? measured.text : null);
+                state.viewport.setAttribute(viewportAttribute, measured.overflow && measured.fade && (!measured.active || typeof ((_root$CSS = root.CSS) === null || _root$CSS === void 0 ? void 0 : _root$CSS.registerProperty) === "function") ? "fade" : "");
                 if (signature === state.signature) return;
                 stop(state);
                 state.signature = signature;
@@ -522,6 +539,10 @@
                 wrapper.style.transition = "none";
                 wrapper.setAttribute(contentAttribute, "top-left:top-left");
                 wrapper.style.setProperty("--ae-anchor-x", "0px");
+                state.viewport.style.transition = "none";
+                state.viewport.style.setProperty(offsetProperty, "0px");
+                state.viewport.style.setProperty("--ae-overflow-marquee-distance", "".concat(Math.max(0, measured.content - measured.width), "px"));
+                state.viewport.setAttribute("dir", measured.direction);
                 element.toggleAttribute ? element.toggleAttribute(activeAttribute, measured.active) : measured.active ? element.setAttribute(activeAttribute, "") : element.removeAttribute(activeAttribute);
               });
             case 6:
@@ -549,11 +570,7 @@
                 var start = anchor.measure(wrapper, false);
                 var end = anchor.measure(wrapper, true);
                 if (!(start !== null && start !== void 0 && start.valid) || !(end !== null && end !== void 0 && end.valid)) return null;
-                var style = root.getComputedStyle(element);
-                var inset = ["borderLeftWidth", "borderRightWidth", "paddingLeft", "paddingRight"].reduce(function(sum, property) {
-                  return sum + (parseFloat(style[property]) || 0);
-                }, 0);
-                var distance = Math.max(0, start.selected.x - end.selected.x + inset);
+                var distance = Math.max(0, start.selected.x - end.selected.x);
                 var rtl = measured.direction === "rtl";
                 var placement = function placement2(base, x) {
                   return _objectSpread(_objectSpread({}, base), {}, {
@@ -583,6 +600,7 @@
               return api.waitLayout.update(layoutId, function() {
                 if (!alive() || revision !== state.revision) return;
                 state.placements = placements;
+                state.viewport.style.setProperty("--ae-overflow-marquee-distance", "".concat(placements.distance, "px"));
                 if (!canRun(state)) {
                   pause(state);
                   return;
@@ -606,6 +624,10 @@
           x: x
         })
       });
+    }
+    function freezeFade(state) {
+      state.viewport.style.transition = "none";
+      state.viewport.style.setProperty(offsetProperty, "".concat(Math.abs(state.x), "px"));
     }
     function wait(state) {
       var revision = state.revision;
@@ -633,6 +655,7 @@
       stop(state);
       state.paused = true;
       state.wrapper.style.transition = "none";
+      freezeFade(state);
       if (state.placements) anchor.place(state.wrapper, at(state, state.x));
     }
     function tooltip(state, text) {
@@ -688,6 +711,7 @@
                 state.wrapper.style.transition = "none";
                 state.wrapper.setAttribute(contentAttribute, "top-left:top-left");
                 state.x = 0;
+                freezeFade(state);
                 anchor.place(state.wrapper, placements.start);
                 state.phase = "wait";
                 state.running = false;
@@ -702,6 +726,7 @@
               duration = Math.abs(placements.end.selected.x - state.x) / measured.speed * 1e3;
               _context3.n = 6;
               return api.waitLayout.read(state.cycleId, function() {
+                root.getComputedStyle(state.viewport).getPropertyValue(offsetProperty);
                 return root.getComputedStyle(state.wrapper).transform;
               });
             case 6:
@@ -724,8 +749,9 @@
               state.animation = null;
               state.controlled = api.motion.supported(state.wrapper);
               state.started = now();
-              completion = api.motion.run(state.wrapper, {
+              completion = api.motion.run(state.viewport, {
                 id: state.motionId,
+                subtree: true,
                 nativeDuration: duration,
                 maxFPS: api.layoutMaxFPS(state.element),
                 abort: function abort() {
@@ -734,6 +760,8 @@
                 },
                 apply: function apply() {
                   state.wrapper.style.transition = "transform ".concat(duration, "ms linear");
+                  state.viewport.style.transition = "".concat(offsetProperty, " ").concat(duration, "ms linear");
+                  state.viewport.style.setProperty(offsetProperty, "".concat(placements.distance, "px"));
                   state.wrapper.setAttribute(contentAttribute, "bottom-right:bottom-right");
                   anchor.place(state.wrapper, placements.end);
                 }
@@ -763,6 +791,7 @@
                 anchor.place(state.wrapper, placements.end);
                 state.running = false;
                 state.x = placements.end.selected.x;
+                freezeFade(state);
                 state.animation = null;
                 state.phase = "end";
                 state.remaining = measured.delay;
@@ -829,9 +858,10 @@
               _context4.n = 2;
               return anchor.unmount(state.wrapper);
             case 2:
-              if (state.wrapper.parentNode === element) {
-                while (state.wrapper.firstChild) element.insertBefore(state.wrapper.firstChild, state.wrapper);
-                state.wrapper.remove();
+              if (state.viewport.parentNode === element) {
+                reconcile(state);
+                while (state.wrapper.firstChild) element.insertBefore(state.wrapper.firstChild, state.viewport);
+                state.viewport.remove();
               }
               tooltip(state, null);
               state.memory.restore();
@@ -1079,6 +1109,15 @@
                 name: "--ae-overflow-marquee-delay",
                 syntax: "<time>",
                 initialValue: "1200ms"
+              }, {
+                name: "--ae-overflow-marquee-fade-size",
+                syntax: "<length>",
+                initialValue: "16px"
+              }, {
+                name: "--ae-overflow-marquee-offset",
+                syntax: "<length>",
+                initialValue: "0px",
+                inherits: false
               });
               api.mountManager.add({
                 extensionName: extensionName,

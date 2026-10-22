@@ -798,8 +798,8 @@
   var attributesByExtension = {
     present: "present present-group present-active present-when present-motion trigger trigger-on dismiss target auto-unpop unpop-on-outside",
     anchor: "anchor anchor-target anchor-match",
-    "overflow-marquee": "overflow-marquee overflow-marquee-content overflow-marquee-active",
-    scrollbox: "scrollbox scrollbox-wheel-horizontal scrollbox-momentum scrollbox-elastic scrollbar scrollbar-vertical scrollbar-horizontal",
+    "overflow-marquee": "overflow-marquee overflow-marquee-fade overflow-marquee-viewport overflow-marquee-content overflow-marquee-active",
+    scrollbox: "scrollbox scrollbox-fade scrollbox-fade-state scrollbox-wheel-horizontal scrollbox-momentum scrollbox-elastic scrollbar scrollbar-vertical scrollbar-horizontal",
     "scrollbox-snap": "scrollbox-snap snap-item",
     focus: "focus",
     point: "point",
@@ -1025,7 +1025,21 @@
         }
         if (extension === "present") validatePresent();
         if (extension === "anchor") validateAnchor();
+        if (extension === "overflow-marquee" && has("overflow-marquee-fade") && !["", "true", "false"].includes(value("overflow-marquee-fade")))
+          invalid(
+            extension,
+            "overflow-marquee-fade",
+            "Overflow Marquee fade expects a boolean value.",
+            "Use true or false, or omit the attribute to enable the fade."
+          );
         if (extension === "scrollbox") validateScrollbox();
+        if (extension === "scrollbox" && has("scrollbox-fade") && !["", "true", "false"].includes(value("scrollbox-fade")))
+          invalid(
+            extension,
+            "scrollbox-fade",
+            "Scrollbox fade expects a boolean value.",
+            "Use true or false, or omit the attribute to enable the fade."
+          );
         if (extension === "scrollbox-snap") validateSnap();
         if (extension === "focus") {
           if (value("focus") && value("focus") !== "next")
@@ -1997,7 +2011,7 @@
       }
       if (!supported(element)) return nativeRun(operation);
       try {
-        for (const animation of element.getAnimations()) operation.before.add(animation);
+        for (const animation of animationsFor(operation)) operation.before.add(animation);
         options.apply();
       } catch (error) {
         operations.delete(operationId);
@@ -2049,7 +2063,7 @@
     }
     function capture(operation) {
       operation.element.getBoundingClientRect();
-      const animations = operation.element.getAnimations().filter((animation) => !operation.before.has(animation) && controllable(animation));
+      const animations = animationsFor(operation).filter((animation) => !operation.before.has(animation) && controllable(animation));
       diagnoseMotionResources(getAelluxJs(), operation.element, animations, operation.options.extension || "css-motion");
       return animations;
     }
@@ -2060,6 +2074,11 @@
       } catch (_) {
         return false;
       }
+    }
+    function animationsFor(operation) {
+      const { element, options } = operation;
+      if (!options.subtree) return element.getAnimations();
+      return [element, ...element.querySelectorAll("*")].flatMap((node) => node.getAnimations());
     }
     function prepare(operation, animations) {
       if (!animations.length) {
@@ -2163,13 +2182,14 @@
     }
     function nativeRun(operation) {
       let before = operation.before;
-      if (getAelluxJs().options.environment === "development" && typeof operation.element.getAnimations === "function")
-        before = new Set(operation.element.getAnimations());
+      if ((operation.options.subtree || getAelluxJs().options.environment === "development") && typeof operation.element.getAnimations === "function")
+        before = new Set(animationsFor(operation));
+      if (operation.options.subtree) operation.before = before;
       operation.options.apply();
       return nativeWait(operation, before);
     }
     function nativeWait(operation, before = operation.before) {
-      const animations = typeof operation.element.getAnimations === "function" ? operation.element.getAnimations().filter((animation) => !operation.before.has(animation)) : [];
+      const animations = typeof operation.element.getAnimations === "function" ? animationsFor(operation).filter((animation) => !operation.before.has(animation)) : [];
       diagnoseMotionResources(
         getAelluxJs(),
         operation.element,

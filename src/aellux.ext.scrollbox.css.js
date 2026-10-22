@@ -3,6 +3,7 @@
 export function generateScrollboxCSS(AelluxJs) {
   const scrollboxAttribute = AelluxJs.attr("scrollbox");
   const scrollboxElasticAttribute = AelluxJs.attr("scrollbox-elastic");
+  const fadeStateAttribute = AelluxJs.attr("scrollbox-fade-state");
   const scrollboxSnapAttribute = AelluxJs.attr("scrollbox-snap");
   const snapReadyClass = AelluxJs.className("snap-ready");
   const snapSuspendedClass = AelluxJs.className("snap-suspended");
@@ -21,6 +22,36 @@ export function generateScrollboxCSS(AelluxJs) {
   overflow: auto;
   scrollbar-width: thin;
   scrollbar-color: color-mix(in srgb, CanvasText 50%, transparent) transparent;
+}
+
+:where([${scrollboxAttribute}][${fadeStateAttribute}]) {
+  --ae-scrollbox-fade-length: max(0px, var(--ae-scrollbox-fade-size, 16px));
+  --ae-scrollbox-fade-left: min(50%, var(--ae-scrollbox-fade-length), var(--ae-scrollbox-hidden-left));
+  --ae-scrollbox-fade-right: min(50%, var(--ae-scrollbox-fade-length), var(--ae-scrollbox-hidden-right));
+  --ae-scrollbox-fade-top: min(50%, var(--ae-scrollbox-fade-length), var(--ae-scrollbox-hidden-top));
+  --ae-scrollbox-fade-bottom: min(50%, var(--ae-scrollbox-fade-length), var(--ae-scrollbox-hidden-bottom));
+  --ae-scrollbox-mask-x: linear-gradient(to right,
+    transparent calc(var(--ae-scrollbox-fade-left) - var(--ae-scrollbox-fade-length)),
+    #000 var(--ae-scrollbox-fade-left), #000 calc(100% - var(--ae-scrollbox-fade-right)),
+    transparent calc(100% + var(--ae-scrollbox-fade-length) - var(--ae-scrollbox-fade-right)));
+  --ae-scrollbox-mask-y: linear-gradient(to bottom,
+    transparent calc(var(--ae-scrollbox-fade-top) - var(--ae-scrollbox-fade-length)),
+    #000 var(--ae-scrollbox-fade-top), #000 calc(100% - var(--ae-scrollbox-fade-bottom)),
+    transparent calc(100% + var(--ae-scrollbox-fade-length) - var(--ae-scrollbox-fade-bottom)));
+}
+:where([${scrollboxAttribute}][${fadeStateAttribute}="both"]) {
+  -webkit-mask-image: var(--ae-scrollbox-mask-x), var(--ae-scrollbox-mask-y);
+  -webkit-mask-composite: source-in;
+  mask-image: var(--ae-scrollbox-mask-x), var(--ae-scrollbox-mask-y);
+  mask-composite: intersect;
+}
+:where([${scrollboxAttribute}][${fadeStateAttribute}="x"]) {
+  -webkit-mask-image: var(--ae-scrollbox-mask-x);
+  mask-image: var(--ae-scrollbox-mask-x);
+}
+:where([${scrollboxAttribute}][${fadeStateAttribute}="y"]) {
+  -webkit-mask-image: var(--ae-scrollbox-mask-y);
+  mask-image: var(--ae-scrollbox-mask-y);
 }
 
 :where([${scrollboxElasticAttribute}]) {

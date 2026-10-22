@@ -2636,6 +2636,28 @@
       "docURL": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/overflow-marquee.htm"
     },
     {
+      "name": "data-ae-overflow-marquee-fade",
+      "extension": "overflow-marquee",
+      "description": "Progressive overflow fade. Enabled by default; false disables it. Attribute changes reconfigure the mounted label.",
+      "syntax": "enum",
+      "values": [
+        "",
+        "true",
+        "false"
+      ],
+      "default": "true",
+      "role": "input",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/overflow-marquee.htm"
+    },
+    {
+      "name": "data-ae-overflow-marquee-viewport",
+      "extension": "overflow-marquee",
+      "description": "Internal Overflow Marquee wrapper or active-state marker.",
+      "syntax": "presence",
+      "role": "internal",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/overflow-marquee.htm"
+    },
+    {
       "name": "data-ae-point",
       "extension": "point",
       "description": "Maximum simultaneously associated pointers. Empty defaults to 1; a nonnegative integer is expected, and 0 disables association.",
@@ -2844,6 +2866,33 @@
       ],
       "default": "1/4",
       "role": "input",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/scrollbox.htm"
+    },
+    {
+      "name": "data-ae-scrollbox-fade",
+      "extension": "scrollbox",
+      "description": "Progressive overflow fade on all scrollable edges. Enabled by default; false disables it. Existing application masks are preserved.",
+      "syntax": "enum",
+      "values": [
+        "",
+        "true",
+        "false"
+      ],
+      "default": "true",
+      "role": "input",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/scrollbox.htm"
+    },
+    {
+      "name": "data-ae-scrollbox-fade-state",
+      "extension": "scrollbox",
+      "description": "Internal Scrollbox mask composition or primary-axis marker.",
+      "syntax": "enum",
+      "values": [
+        "both",
+        "x",
+        "y"
+      ],
+      "role": "internal",
       "docURL": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/scrollbox.htm"
     },
     {
@@ -3170,6 +3219,68 @@
       "docURL": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/overflow-marquee.htm"
     },
     {
+      "name": "--ae-overflow-marquee-distance",
+      "extension": "overflow-marquee",
+      "syntax": "*",
+      "description": "Private Overflow Marquee mask geometry.",
+      "role": "internal",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/overflow-marquee.htm"
+    },
+    {
+      "name": "--ae-overflow-marquee-fade-size",
+      "extension": "overflow-marquee",
+      "syntax": "<length>",
+      "description": "Maximum width of each progressive overflow fade. Zero disables the visual effect.",
+      "default": "16px",
+      "values": [
+        "0px",
+        "16px",
+        "24px"
+      ],
+      "role": "input",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/overflow-marquee.htm"
+    },
+    {
+      "name": "--ae-overflow-marquee-left",
+      "extension": "overflow-marquee",
+      "syntax": "*",
+      "description": "Private Overflow Marquee mask geometry.",
+      "role": "internal",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/overflow-marquee.htm"
+    },
+    {
+      "name": "--ae-overflow-marquee-mask",
+      "extension": "overflow-marquee",
+      "syntax": "*",
+      "description": "Private Overflow Marquee mask geometry.",
+      "role": "internal",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/overflow-marquee.htm"
+    },
+    {
+      "name": "--ae-overflow-marquee-offset",
+      "extension": "overflow-marquee",
+      "syntax": "*",
+      "description": "Private Overflow Marquee mask geometry.",
+      "role": "internal",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/overflow-marquee.htm"
+    },
+    {
+      "name": "--ae-overflow-marquee-right",
+      "extension": "overflow-marquee",
+      "syntax": "*",
+      "description": "Private Overflow Marquee mask geometry.",
+      "role": "internal",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/overflow-marquee.htm"
+    },
+    {
+      "name": "--ae-overflow-marquee-size",
+      "extension": "overflow-marquee",
+      "syntax": "*",
+      "description": "Private Overflow Marquee mask geometry.",
+      "role": "internal",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/overflow-marquee.htm"
+    },
+    {
       "name": "--ae-overflow-marquee-speed",
       "extension": "overflow-marquee",
       "syntax": "<number>",
@@ -3408,6 +3519,108 @@
       "description": "Private implementation property; not an application configuration contract.",
       "role": "internal",
       "docURL": "https://aelluxjs.github.io/core/docs/0.1.0/runtime/api.htm"
+    },
+    {
+      "name": "--ae-scrollbox-fade-bottom",
+      "extension": "scrollbox",
+      "syntax": "*",
+      "description": "Private Scrollbox overflow mask geometry.",
+      "role": "internal",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/scrollbox.htm"
+    },
+    {
+      "name": "--ae-scrollbox-fade-left",
+      "extension": "scrollbox",
+      "syntax": "*",
+      "description": "Private Scrollbox overflow mask geometry.",
+      "role": "internal",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/scrollbox.htm"
+    },
+    {
+      "name": "--ae-scrollbox-fade-length",
+      "extension": "scrollbox",
+      "syntax": "*",
+      "description": "Private Scrollbox overflow mask geometry.",
+      "role": "internal",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/scrollbox.htm"
+    },
+    {
+      "name": "--ae-scrollbox-fade-right",
+      "extension": "scrollbox",
+      "syntax": "*",
+      "description": "Private Scrollbox overflow mask geometry.",
+      "role": "internal",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/scrollbox.htm"
+    },
+    {
+      "name": "--ae-scrollbox-fade-size",
+      "extension": "scrollbox",
+      "syntax": "<length>",
+      "description": "Maximum extent of each progressive overflow fade. Zero removes the visual effect.",
+      "default": "16px",
+      "values": [
+        "0px",
+        "16px",
+        "24px"
+      ],
+      "role": "input",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/scrollbox.htm"
+    },
+    {
+      "name": "--ae-scrollbox-fade-top",
+      "extension": "scrollbox",
+      "syntax": "*",
+      "description": "Private Scrollbox overflow mask geometry.",
+      "role": "internal",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/scrollbox.htm"
+    },
+    {
+      "name": "--ae-scrollbox-hidden-bottom",
+      "extension": "scrollbox",
+      "syntax": "*",
+      "description": "Private Scrollbox overflow mask geometry.",
+      "role": "internal",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/scrollbox.htm"
+    },
+    {
+      "name": "--ae-scrollbox-hidden-left",
+      "extension": "scrollbox",
+      "syntax": "*",
+      "description": "Private Scrollbox overflow mask geometry.",
+      "role": "internal",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/scrollbox.htm"
+    },
+    {
+      "name": "--ae-scrollbox-hidden-right",
+      "extension": "scrollbox",
+      "syntax": "*",
+      "description": "Private Scrollbox overflow mask geometry.",
+      "role": "internal",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/scrollbox.htm"
+    },
+    {
+      "name": "--ae-scrollbox-hidden-top",
+      "extension": "scrollbox",
+      "syntax": "*",
+      "description": "Private Scrollbox overflow mask geometry.",
+      "role": "internal",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/scrollbox.htm"
+    },
+    {
+      "name": "--ae-scrollbox-mask-x",
+      "extension": "scrollbox",
+      "syntax": "*",
+      "description": "Private Scrollbox overflow mask geometry.",
+      "role": "internal",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/scrollbox.htm"
+    },
+    {
+      "name": "--ae-scrollbox-mask-y",
+      "extension": "scrollbox",
+      "syntax": "*",
+      "description": "Private Scrollbox overflow mask geometry.",
+      "role": "internal",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/scrollbox.htm"
     },
     {
       "name": "--ae-snap-focus",

@@ -22275,7 +22275,9 @@
           }
           if (_extension === "present") validatePresent();
           if (_extension === "anchor") validateAnchor();
+          if (_extension === "overflow-marquee" && has("overflow-marquee-fade") && !["", "true", "false"].includes(value("overflow-marquee-fade"))) invalid(_extension, "overflow-marquee-fade", "Overflow Marquee fade expects a boolean value.", "Use true or false, or omit the attribute to enable the fade.");
           if (_extension === "scrollbox") validateScrollbox();
+          if (_extension === "scrollbox" && has("scrollbox-fade") && !["", "true", "false"].includes(value("scrollbox-fade"))) invalid(_extension, "scrollbox-fade", "Scrollbox fade expects a boolean value.", "Use true or false, or omit the attribute to enable the fade.");
           if (_extension === "scrollbox-snap") validateSnap();
           if (_extension === "focus") {
             if (value("focus") && value("focus") !== "next") invalid(_extension, "focus", "Unknown Focus mode.", "Use next for Enter navigation, or remove the attribute.");
@@ -22497,8 +22499,8 @@
       attributesByExtension = {
         present: "present present-group present-active present-when present-motion trigger trigger-on dismiss target auto-unpop unpop-on-outside",
         anchor: "anchor anchor-target anchor-match",
-        "overflow-marquee": "overflow-marquee overflow-marquee-content overflow-marquee-active",
-        scrollbox: "scrollbox scrollbox-wheel-horizontal scrollbox-momentum scrollbox-elastic scrollbar scrollbar-vertical scrollbar-horizontal",
+        "overflow-marquee": "overflow-marquee overflow-marquee-fade overflow-marquee-viewport overflow-marquee-content overflow-marquee-active",
+        scrollbox: "scrollbox scrollbox-fade scrollbox-fade-state scrollbox-wheel-horizontal scrollbox-momentum scrollbox-elastic scrollbar scrollbar-vertical scrollbar-horizontal",
         "scrollbox-snap": "scrollbox-snap snap-item",
         focus: "focus",
         point: "point",
@@ -24524,7 +24526,7 @@
       }
       if (!supported(element)) return nativeRun(operation);
       try {
-        var _iterator = _createForOfIteratorHelper9(element.getAnimations()), _step;
+        var _iterator = _createForOfIteratorHelper9(animationsFor(operation)), _step;
         try {
           for (_iterator.s(); !(_step = _iterator.n()).done; ) {
             var animation = _step.value;
@@ -24606,7 +24608,7 @@
     }
     function capture(operation) {
       operation.element.getBoundingClientRect();
-      var animations = operation.element.getAnimations().filter(function(animation) {
+      var animations = animationsFor(operation).filter(function(animation) {
         return !operation.before.has(animation) && controllable(animation);
       });
       diagnoseMotionResources(getAelluxJs(), operation.element, animations, operation.options.extension || "css-motion");
@@ -24619,6 +24621,13 @@
       } catch (_) {
         return false;
       }
+    }
+    function animationsFor(operation) {
+      var element = operation.element, options = operation.options;
+      if (!options.subtree) return element.getAnimations();
+      return [element].concat(_toConsumableArray5(element.querySelectorAll("*"))).flatMap(function(node) {
+        return node.getAnimations();
+      });
     }
     function prepare(operation, animations) {
       if (!animations.length) {
@@ -24750,13 +24759,14 @@
     }
     function nativeRun(operation) {
       var before = operation.before;
-      if (getAelluxJs().options.environment === "development" && typeof operation.element.getAnimations === "function") before = new Set(operation.element.getAnimations());
+      if ((operation.options.subtree || getAelluxJs().options.environment === "development") && typeof operation.element.getAnimations === "function") before = new Set(animationsFor(operation));
+      if (operation.options.subtree) operation.before = before;
       operation.options.apply();
       return nativeWait(operation, before);
     }
     function nativeWait(operation) {
       var before = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : operation.before;
-      var animations = typeof operation.element.getAnimations === "function" ? operation.element.getAnimations().filter(function(animation) {
+      var animations = typeof operation.element.getAnimations === "function" ? animationsFor(operation).filter(function(animation) {
         return !operation.before.has(animation);
       }) : [];
       diagnoseMotionResources(getAelluxJs(), operation.element, before === operation.before ? animations : animations.filter(function(animation) {

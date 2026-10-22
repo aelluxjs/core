@@ -288,6 +288,27 @@
       "valueSet": "v"
     },
     {
+      "name": "data-ae-overflow-marquee-fade",
+      "description": "Progressive overflow fade. Enabled by default; false disables it. Attribute changes reconfigure the mounted label.\n\nValue syntax: enum.\n\nDefault behavior: \"true\".",
+      "references": [
+        {
+          "name": "AelluxJS overflow-marquee",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/overflow-marquee.htm"
+        }
+      ],
+      "values": [
+        {
+          "name": ""
+        },
+        {
+          "name": "true"
+        },
+        {
+          "name": "false"
+        }
+      ]
+    },
+    {
       "name": "data-ae-point",
       "description": "Maximum simultaneously associated pointers. Empty defaults to 1; a nonnegative integer is expected, and 0 disables association.\n\nValue syntax: integer.\n\nDefault behavior: \"1\".\n\nExamples: `0`, `1`, `2`.",
       "references": [
@@ -576,6 +597,27 @@
         },
         {
           "name": "80px 40px"
+        }
+      ]
+    },
+    {
+      "name": "data-ae-scrollbox-fade",
+      "description": "Progressive overflow fade on all scrollable edges. Enabled by default; false disables it. Existing application masks are preserved.\n\nValue syntax: enum.\n\nDefault behavior: \"true\".",
+      "references": [
+        {
+          "name": "AelluxJS scrollbox",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/scrollbox.htm"
+        }
+      ],
+      "values": [
+        {
+          "name": ""
+        },
+        {
+          "name": "true"
+        },
+        {
+          "name": "false"
         }
       ]
     },

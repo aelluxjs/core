@@ -653,6 +653,21 @@
 }
 </code></pre>
 <p>Scrollbox uses the external <code>aellux.ext.scrollbox.css</code>, requested with <code>{ loadStyle: true }</code> in Basic or included in the shared Full stylesheet. This weak CSS supplies <code>overflow: auto</code>, <code>contain: layout paint</code>, and thin scrollbars. It gives the elastic child <code>display: inline-block</code> with <code>vertical-align: top</code> so the inline line box adds no scrollable space below. If application CSS sets the elastic wrapper to <code>block</code>, <code>flex</code>, or <code>grid</code>, Scrollbox reports diagnostic 2016 and uses <code>inline-block</code>, <code>inline-flex</code>, or <code>inline-grid</code> respectively. It restores the previous inline <code>display</code> when the wrapper changes or unmounts. The boot&#39;s global weak CSS enables smooth programmatic scrolling on all elements; <code>html[data-ae-reduced-motion=&quot;reduced&quot;]</code> restores immediate scrolling and removes custom scrollbar transitions. Elastic snapback also finishes immediately under that attribute. Pointer dragging and momentum set each position immediately so they follow the gesture. An application can override the weak styles. Basic Scrollbox and snap do not require a content wrapper; elastic edges require a single marked content child.</p>
+<h2>Overflow fade</h2>
+<p>Overflowing Scrollboxes receive a visual transparency fade by default. The top, right, bottom and left fades correspond to the actual content hidden beyond each physical edge. User scrolling and programmatic scrolling, including smooth Snap travel, update them through the existing <code>publish(state)</code> layout read/update. Fitting content and axes whose computed overflow is not <code>auto</code> or <code>scroll</code> contribute no fade. RTL scroll offsets are normalized to physical left/right distances, including older positive-coordinate models. Native overscroll is clamped to the real range; Elastic uses the original scroll bounds and axis availability rather than its temporary transformed extent.</p>
+<pre><code class="language-html">&lt;div data-ae-scrollbox data-ae-scrollbox-fade=&quot;false&quot;&gt;
+  &lt;!-- Scrolling remains available without the visual fade. --&gt;
+&lt;/div&gt;
+</code></pre>
+<p>The attribute defaults to enabled; empty and <code>true</code> also enable it. Only <code>false</code> disables it. Attribute changes reconfigure the mounted box. Invalid values keep the default and use semantic configuration diagnostic 2026 in development mode.</p>
+<pre><code class="language-css">.scrollable {
+  --ae-scrollbox-fade-size: 16px;
+}
+</code></pre>
+<p>Use a nonnegative CSS length. Each fade&#39;s width is limited to the hidden distance, this maximum and half the visible axis. Its strength also decreases as the hidden distance approaches zero: 4px of hidden content produces a subtle fade covering at most 4px. <code>0px</code> removes the visual effect. Reduced motion keeps the indication because it adds no animation or artificial transition.</p>
+<p>The stationary mask is applied to the Scrollbox itself using a horizontal and a vertical <code>linear-gradient()</code>, combined with <code>mask-composite:intersect</code> (WebKit&#39;s <code>source-in</code> equivalent). Their transparency multiplies at the corners. If composition is unavailable, one gradient follows the configured Snap axis, otherwise the only scrollable axis or vertical when both scroll. Without mask support, scrolling continues without the effect. No wrappers, overlays, extra frame loop or recurring layout reads are introduced. Four private hidden-distance properties are published with the existing progress update and restored, including prior priorities, on unmount.</p>
+<p><strong>Painting limitation:</strong> a CSS mask composites the container together with its contents. The fade also attenuates the container&#39;s background, border and any native or custom scrollbar painted in the faded region. Their interaction remains available. Keep decoration on an existing surrounding element, adjust the fade size or disable the effect when an opaque border, background or scrollbar is required. Native scrolling, PDS, Elastic, Snap, nested boxes and sticky descendants retain their structure and behavior. Masking does not change focus, keyboard operation, text selection or pointer hit testing.</p>
+<p>An application mask already present at the first publish reserves the container for the application: automatic masking remains disabled for that mount. Scrollbox never writes inline <code>mask-*</code> properties. The generated mask rules use zero-specificity selectors, allowing later application styles to override them. Unmount removes the owned marker and restores the preceding distance values without touching authored masks.</p>
 <h2>Custom scrollbars</h2>
 <p>Add <code>data-ae-scrollbar=&quot;vertical&quot;</code>, <code>&quot;horizontal&quot;</code>, or both (for example, <code>&quot;v h&quot;</code> or <code>&quot;y x&quot;</code>) to show custom scrollbars. An empty <code>data-ae-scrollbar</code> enables both axes. Set it to <code>&quot;none&quot;</code> to hide native scrollbars without creating custom bars. Scrollbox creates <code>data-ae-scrollbar-vertical</code> and <code>data-ae-scrollbar-horizontal</code> as direct children of the scrollbox, or reuses existing direct children with those attributes. They sit beside the content and are excluded from the elastic wrapper&#39;s single-child check. A bar is never a snap point unless explicitly marked with <code>data-ae-snap-item</code>. A bar appears only when its axis overflows and its computed <code>overflow-x</code> or <code>overflow-y</code> is <code>auto</code> or <code>scroll</code>; <code>hidden</code> and <code>clip</code> keep that axis&#39;s bar at <code>display: none</code>. Scrollbox adds <code>ae--native-sb-hide</code> for custom bars and for <code>&quot;none&quot;</code> to hide native scrollbars.</p>
 <p>The bars normally fade between opacity 0 and 1. Set inherited <code>--ae-scrollbar-opacity-fade</code> and <code>--ae-scrollbar-opacity-visible</code> on the scrollbox, including through inline CSS, to customize those values. Setting both to <code>1</code> keeps the bars opaque whenever their axis is scrollable. Mouse and pointer hover are tracked separately, so either one keeps the bars visible. They fade out after both hovers end or a click starts outside the box, unless PDS is active. After PDS ends, they remain visible for one second; when that timer ends, any active mouse or pointer hover still keeps them visible. The track overlays the viewport and follows scrolling with <code>translate3d</code>; its thumb uses a separate transform. Drag the thumb with a mouse, pen, or touch to scroll continuously; the track and thumb positions update during the movement so they remain under the pointer. While a scrollbar is being dragged, PDS cannot start on that scrollbox or its scroll chain, and CSS snap alignment is suspended until release. Clicking outside the thumb recenters it on the track only when the computed track background is visible and its opacity is greater than zero; a transparent or invisible track does not respond to that click. The weak CSS uses the same system <code>CanvasText</code> based colors as its native scrollbar styling. Set inherited <code>--ae-scrollbar-thumb-color</code>, <code>--ae-scrollbar-thumb-hover-color</code>, <code>--ae-scrollbar-track-color</code>, <code>--ae-scrollbar-thumb-radius</code>, and <code>--ae-scrollbar-size</code> on the scrollbox, including through inline CSS, to customize the thumb colors, track color, thumb corner radius, and bar thickness. The color properties have no registered initial value, so the weak CSS uses its <code>CanvasText</code> based thumb colors and transparent track when they are unset. The radius and thickness default to <code>10px</code> and <code>8px</code>. The same values style native scrollbars when custom bars are not enabled. Owned bar elements are removed at unmount; pre-existing bars and their original inline scrollbar properties are preserved.</p>
@@ -782,6 +797,58 @@ gallery.next();      // Move to the following point.
 gallery.previous();  // Move to the preceding point.
 </code></pre>
 <p><code>index</code> is zero-based in DOM order. All three methods return <code>true</code> when a point is available and <code>false</code> otherwise. They work in both native and pointer modes.</p>
+<h2>Distribution cost</h2>
+<p>The four-edge fade adds 1,958/730 bytes to Scrollbox Modern, 2,108/698 bytes to Legacy and 1,706/242 bytes to its stylesheet (raw/gzip level 9), compared with the preceding checked-in artifacts. The Modern script retains its existing limits. The dedicated CSS raw limit increases from 5 to 6.5 KiB; Legacy changes from 44/14 to 46/14.5 KiB (raw/gzip).</p>
+<table>
+<thead>
+<tr>
+<th>Artifact</th>
+<th align="right">Raw / gzip bytes</th>
+<th align="right">Limit raw / gzip</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>aellux.ext.scrollbox.min.js</code></td>
+<td align="right">41,063 / 13,259</td>
+<td align="right">46 / 14 KiB</td>
+</tr>
+<tr>
+<td><code>aellux.ext.scrollbox.legacy.min.js</code></td>
+<td align="right">46,757 / 14,584</td>
+<td align="right">46 / 14.5 KiB</td>
+</tr>
+<tr>
+<td><code>aellux.ext.scrollbox.min.css</code></td>
+<td align="right">6,198 / 1,194</td>
+<td align="right">6.5 / 1.5 KiB</td>
+</tr>
+<tr>
+<td><code>aellux.orchestrator.min.js</code></td>
+<td align="right">63,459 / 21,146</td>
+<td align="right">62 / 20.75 KiB</td>
+</tr>
+<tr>
+<td><code>aellux.orchestrator.legacy.min.js</code></td>
+<td align="right">336,068 / 106,160</td>
+<td align="right">328.5 / 104 KiB</td>
+</tr>
+<tr>
+<td><code>aellux.full.min.js</code></td>
+<td align="right">134,414 / 43,621</td>
+<td align="right">131.5 / 42.75 KiB</td>
+</tr>
+<tr>
+<td><code>aellux.full.legacy.min.js</code></td>
+<td align="right">447,169 / 133,006</td>
+<td align="right">437 / 138 KiB</td>
+</tr>
+<tr>
+<td><code>aellux.full.min.css</code></td>
+<td align="right">124,021 / 11,598</td>
+<td align="right">122 / 12 KiB</td>
+</tr>
+</tbody></table>
+<p>Together with Overflow Marquee&#39;s fade, the shared controller and semantic validation add 667/168 bytes to Orchestrator Modern and 690/162 bytes to Legacy. Their combined contribution to Full is 667/202 bytes in Modern, 690/162 bytes in Legacy and 3,265/436 bytes in Full CSS. Orchestrator Modern&#39;s gzip limit changes from 20.5 to 20.75 KiB; Orchestrator Legacy&#39;s raw limit changes from 328 to 328.5 KiB. Full Modern changes from 131/42.5 to 131.5/42.75 KiB, and Full CSS&#39;s raw limit changes from 121 to 122 KiB. Full Legacy retains its existing limits.</p>
         </div>
 
         <div id="doc-navlinks2" ajax-load="doc-navlinks2">

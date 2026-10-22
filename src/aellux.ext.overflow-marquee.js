@@ -23,7 +23,9 @@ import { createOverflowMarquee } from "./internal/create-overflow-marquee.js";
     });
     api.registerCssProperty(
       { name: "--ae-overflow-marquee-speed", syntax: "<number>", initialValue: "30" },
-      { name: "--ae-overflow-marquee-delay", syntax: "<time>", initialValue: "1200ms" }
+      { name: "--ae-overflow-marquee-delay", syntax: "<time>", initialValue: "1200ms" },
+      { name: "--ae-overflow-marquee-fade-size", syntax: "<length>", initialValue: "16px" },
+      { name: "--ae-overflow-marquee-offset", syntax: "<length>", initialValue: "0px", inherits: false }
     );
     api.mountManager.add({ extensionName, selector: marquee.selector,
       mount: marquee.mount, unmount: marquee.unmount, update: marquee.update });

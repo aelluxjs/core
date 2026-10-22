@@ -648,6 +648,7 @@ await $ae.motion.run(panel, {
 });
 </code></pre>
 <p><code>run()</code> returns <code>{ id, status, mode }</code>. <code>mode</code> is <code>&quot;controlled&quot;</code>, <code>&quot;native&quot;</code>, or <code>&quot;reduced&quot;</code>. A new operation with the same ID replaces the previous operation. <code>$ae.motion.cancel(id)</code> cancels owned scheduler work and releases captured animations.</p>
+<p>Set <code>subtree: true</code> to capture new transitions and animations on the element and its descendants in the same operation. Existing effects remain outside its ownership. All captured effects share the same clock and FPS policy. Overflow Marquee uses this to synchronize a stationary viewport&#39;s fade offset with its child content&#39;s transform. The default captures only effects on the requested element.</p>
 <p>Cancellation also settles a native operation as <code>status: &quot;aborted&quot;</code>, even if an underlying <code>Animation.finished</code> Promise never settles. A failure partway through capturing multiple effects releases every effect already paused, resuming native playback before reporting the error. Completion or cancellation clears the operation&#39;s visual FPS ceiling. Native fallback leaves CSS playback under browser control; canceling the waiting operation does not claim ownership of unrelated native animations.</p>
 <h2>Native fallback and disabling control</h2>
 <p>Set the global initialization option <code>cssMotionController</code> to <code>false</code> to disable temporal control completely:</p>

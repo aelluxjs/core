@@ -36,6 +36,8 @@ test("open attribute grammars remain open while closed enums preserve string val
   assert.equal(find(attributes, "data-ae-present-key"), undefined);
   assert.equal(find(attributes, "data-ae-present-group-anchor"), undefined);
   assert.ok(find(attributes, "data-ae-overflow-marquee"));
+  assert.equal(find(attributes, "data-ae-overflow-marquee-fade").value.type, '\"\" | \"true\" | \"false\"');
+  assert.equal(find(attributes, "data-ae-scrollbox-fade").value.type, '\"\" | \"true\" | \"false\"');
   assert.match(find(catalog.attributes, "data-ae-anchor-target").description, /multiple Anchors per group/);
 });
 
@@ -52,6 +54,8 @@ test("tag-specific declarations extend native tags and retain the default namesp
 
 test("metadata agrees with runtime defaults and distinguishes outputs from private fields", () => {
   assert.equal(find(catalog.cssProperties, "--ae-scrollbar-size").default, "8px");
+  assert.equal(find(catalog.cssProperties, "--ae-overflow-marquee-fade-size").default, "16px");
+  assert.equal(find(catalog.cssProperties, "--ae-scrollbox-fade-size").default, "16px");
   assert.equal(find(catalog.cssProperties, "--ae-pop-duration").default, "250ms");
   assert.equal(find(catalog.cssProperties, "--ae-snap-focus").role, "output");
   assert.match(find(catalog.cssProperties, "--ae-snap-viewport").description, /-2\.\.2/);

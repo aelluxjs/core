@@ -13,7 +13,7 @@ $ae.init({ mode: "basic" });
 </span>
 ```
 
-The external stylesheet, included in Full or requested with `loadStyle: true` in Basic, supplies relative positioning, clipping and ellipsis. It applies `white-space:nowrap!important` to the host and its generated wrapper, without writing inline whitespace styles. Ordinary author styles remain subject to the CSS cascade; a higher-priority important rule can override the weak rule. The wrapper stays in normal flow to preserve the label's height. Its nodes are moved, not cloned, preserving their identity and listeners. Use this on single-line content containers; inserting a wrapper changes direct-child selector relationships.
+The external stylesheet, included in Full or requested with `loadStyle: true` in Basic, supplies relative positioning, clipping and ellipsis. It applies `white-space:nowrap!important` to the host and its generated content wrapper, without writing inline whitespace styles. Ordinary author styles remain subject to the CSS cascade; a higher-priority important rule can override the weak rule. A stationary viewport contains the moving content wrapper, both in normal flow to preserve the label's height. Original nodes are moved, not cloned, preserving their identity and listeners. Use this on single-line content containers; inserting these layers changes direct-child selector relationships.
 
 When content overflows horizontally, the wrapper waits at the start, moves linearly from `top-left:top-left` toward `bottom-right:bottom-right`, and waits for the same duration at the end. It then jumps back without animating the return, waits at the start, and repeats. Geometry compensates for host padding and borders and holds the vertical position. RTL text travels in the opposite direction. The defaults are 30 CSS pixels per second and a 1200ms pause at each end. Customize them on the host:
 
@@ -21,12 +21,25 @@ When content overflows horizontally, the wrapper waits at the start, moves linea
 .label {
   --ae-overflow-marquee-speed: 30;
   --ae-overflow-marquee-delay: 1200ms;
+  --ae-overflow-marquee-fade-size: 16px;
 }
 ```
 
+Overflow receives a progressive transparency fade by default. At the start only the trailing edge fades; during travel both edges fade according to the hidden content; at the end only the leading edge fades. RTL reverses these edges. Each fade is limited to the hidden distance, the configured maximum size and half the viewport width. When less than the configured size is hidden, its strength also decreases continuously. Fitting labels have no mask. Use a nonnegative CSS length for `--ae-overflow-marquee-fade-size`; `0px` makes the mask fully opaque and removes the visual effect.
+
+```html
+<span data-ae-overflow-marquee data-ae-overflow-marquee-fade="false">
+  This overflowing label moves without a fade
+</span>
+```
+
+The fade attribute defaults to enabled. Empty and `true` also enable it; only `false` disables it. Changing or removing it updates an already mounted label without restarting its current pass. Invalid values keep the default and receive the existing semantic configuration diagnostic in development mode.
+
+The viewport uses only `mask-image:linear-gradient(...)` and its WebKit-prefixed equivalent. It stays fixed over the visible content area, leaving the host's background and border intact. Masking works with any text or background color and inserts no duplicate accessible content. Anchor still measures and places the content wrapper. CSS Motion captures the viewport's registered offset transition together with the wrapper's transform in one operation, so their clocks, FPS policy and cancellation stay synchronized. No fade-specific frame loop or per-frame layout measurement is added. Browsers without CSS masks keep the motion without the visual effect. Without registered custom-property interpolation, moving labels omit the fade; static reduced-motion labels can still display it.
+
 Speed accepts a positive number; delay accepts a nonnegative `ms` or `s` time. Invalid values use the defaults. CSS Motion and the shared layout scheduler control transitions; `data-ae-maxfps` can cap a label's motion. Measurements and the first pass wait until the label is actually visible. Computed CSS hiding, leaving the viewport or an observed clipping container, and a background document pause the current pass in place, including its remaining restart delay. Reappearing resumes from that position without counting invisible time. Paused labels keep no animation sequence or restart timer running; observers and visibility events wake them. Visibility does not detect coverage by unrelated elements. Without IntersectionObserver, viewport bounds and CSS visibility provide the fallback. Content or size changes on return restart with the updated geometry. Font loading and window resize also refresh measurements.
 
-With `html[data-ae-reduced-motion="reduced"]`, movement is disabled immediately by CSS and the running cycle is canceled. The wrapper uses its available width with `text-overflow:ellipsis`; the complete text remains in the DOM. Returning to `no-preference` restarts from the beginning after the configured pause. Labels that fit do not animate.
+With Aellux's resolved `reduced-motion` preference, published as `html[data-ae-reduced-motion="reduced"]`, movement is disabled immediately by CSS and the running cycle is canceled. The wrapper uses its available width with `text-overflow:ellipsis`, retaining the static trailing overflow fade; the complete text remains in the DOM. Returning to `no-preference` restarts from the beginning after the configured pause. Labels that fit do not animate.
 
 Mouse hover pauses movement by default on devices offering hover and a fine pointer. Focus on the host or any descendant also pauses it; the Extension does not change focusability. Moving focus between descendants keeps the pause. All pause reasons compose: playback resumes only after hover, focus and visibility blocks have cleared, preserving the current position and the remaining delay at either endpoint. Hover and focus leave the native tooltip and overflow measurements available.
 
@@ -40,14 +53,16 @@ Marquee behavior ships in its own script. Anchor provides only a reusable placem
 
 | Artifact | Raw / gzip | Limit raw / gzip |
 | --- | ---: | ---: |
-| `aellux.min.js` | 48,079 / 15,355 | 47.5 / 15.5 KiB |
-| `aellux.ext.overflow-marquee.min.js` | 11,773 / 4,427 | 12 / 4.5 KiB |
-| `aellux.ext.overflow-marquee.legacy.min.js` | 23,479 / 7,805 | 23.5 / 8 KiB |
-| `aellux.ext.anchor.min.js` | 14,672 / 5,358 | 15 / 6 KiB |
-| `aellux.ext.anchor.legacy.min.js` | 22,229 / 7,836 | 23 / 8 KiB |
-| `aellux.full.min.js` | 131,182 / 42,552 | 130 / 42 KiB |
-| `aellux.full.legacy.min.js` | 442,219 / 131,956 | 432 / 138 KiB |
+| `aellux.min.js` | 44,489 / 15,097 | 47.5 / 15.5 KiB |
+| `aellux.ext.overflow-marquee.min.js` | 11,950 / 4,395 | 12 / 4.5 KiB |
+| `aellux.ext.overflow-marquee.legacy.min.js` | 23,635 / 7,748 | 23.5 / 8 KiB |
+| `aellux.ext.overflow-marquee.min.css` | 2,487 / 622 | 2.5 / 1 KiB |
+| `aellux.ext.anchor.min.js` | 13,637 / 5,028 | 15 / 6 KiB |
+| `aellux.ext.anchor.legacy.min.js` | 21,064 / 7,483 | 23 / 8 KiB |
+| `aellux.orchestrator.min.js` | 63,459 / 21,146 | 62 / 20.75 KiB |
+| `aellux.full.min.js` | 134,414 / 43,621 | 131.5 / 42.75 KiB |
+| `aellux.full.legacy.min.js` | 447,169 / 133,006 | 437 / 138 KiB |
 
-Anchor and Full Legacy retain their existing limits. The boot's raw/gzip limits increase from 46.5/15 to 47.5/15.5 KiB for the new official entry and maintenance room for its integrity hashes. Full Modern's gzip limit increases from 41.5 to 42 KiB to cover the additional official metadata and registration. Registering Anchor alone does not download or initialize Overflow Marquee.
+Registering Anchor alone does not download or initialize Overflow Marquee. The progressive fade adds 1,102/292 bytes in Modern, 1,172/284 bytes in Legacy and 1,559/231 bytes in the dedicated stylesheet (raw/gzip), compared with the preceding checked-in artifacts. The Extension's script limits remain unchanged; its CSS raw limit increases from 1.5 to 2.5 KiB.
 
-Equal endpoint holds and interaction pauses add 681/170 bytes in Modern and 785/227 bytes in Legacy (raw/gzip) over the initial dedicated Extension. Their raw limits increase from 11.5 to 12 KiB and from 23 to 23.5 KiB respectively; gzip limits remain unchanged.
+The shared CSS Motion subtree option and semantic validation for both overflow fades add 667/168 bytes to Orchestrator Modern and 667/202 bytes to Full Modern. Their gzip limits increase from 20.5 to 20.75 KiB and from 42.5 to 42.75 KiB respectively. Combined distribution costs and the remaining shared budget adjustments are recorded in [Scrollbox](scrollbox.md#distribution-cost). Anchor and Full Legacy keep their existing limits.

@@ -179,6 +179,28 @@
       ]
     },
     {
+      "name": "--ae-overflow-marquee-fade-size",
+      "description": "Maximum width of each progressive overflow fade. Zero disables the visual effect.\n\nValue syntax: <length>.\n\nDefault behavior: \"16px\".\n\nSuggested values: `0px`, `16px`, `24px`. This is an open grammar, not a closed enumeration.",
+      "syntax": "<length>",
+      "references": [
+        {
+          "name": "AelluxJS overflow-marquee",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/overflow-marquee.htm"
+        }
+      ],
+      "values": [
+        {
+          "name": "0px"
+        },
+        {
+          "name": "16px"
+        },
+        {
+          "name": "24px"
+        }
+      ]
+    },
+    {
       "name": "--ae-overflow-marquee-speed",
       "description": "Overflow Marquee speed in CSS pixels per second. Positive numbers only; invalid values use 30.\n\nValue syntax: <number>.\n\nDefault behavior: \"30\".",
       "syntax": "<number>",
@@ -409,6 +431,28 @@
         {
           "name": "AelluxJS scrollbox",
           "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/scrollbox.htm"
+        }
+      ]
+    },
+    {
+      "name": "--ae-scrollbox-fade-size",
+      "description": "Maximum extent of each progressive overflow fade. Zero removes the visual effect.\n\nValue syntax: <length>.\n\nDefault behavior: \"16px\".\n\nSuggested values: `0px`, `16px`, `24px`. This is an open grammar, not a closed enumeration.",
+      "syntax": "<length>",
+      "references": [
+        {
+          "name": "AelluxJS scrollbox",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/scrollbox.htm"
+        }
+      ],
+      "values": [
+        {
+          "name": "0px"
+        },
+        {
+          "name": "16px"
+        },
+        {
+          "name": "24px"
         }
       ]
     },
