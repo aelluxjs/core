@@ -25,7 +25,7 @@ for (const forceLegacy of [false, true]) for (const limit of ["200", "200px"]) {
       .replace("data-ae-overflow-marquee class", `data-ae-overflow-marquee="${limit}" class`);
     await start(page, html, { mode: limit === "200" ? "basic" : "full", forceLegacy }, false);
     const host = page.locator("#label");
-    await expect(host).toHaveCSS("white-space", "normal");
+    await expect(host).toHaveCSS("white-space", "nowrap");
     await expect(host).toHaveCSS("overflow", "visible");
     await expect(host).not.toHaveAttribute("title");
     await expect(host).not.toHaveAttribute("data-ae-overflow-marquee-ready");
@@ -58,7 +58,7 @@ for (const forceLegacy of [false, true]) for (const limit of ["200", "200px"]) {
     await page.locator("#original").evaluate(element => element.style.width = "199px");
     await expect(host.locator("[data-ae-overflow-marquee-viewport]")).toHaveCount(0);
     await expect(host).not.toHaveAttribute("title");
-    await expect(host).toHaveCSS("white-space", "normal");
+    await expect(host).toHaveCSS("white-space", "nowrap");
     expect(await host.evaluate(element => element.firstChild === window.limitOriginal &&
       element.getAttribute("style") === window.limitStyle)).toBe(true);
     await page.evaluate(() => { window.limitOriginal.click(); });
@@ -70,6 +70,9 @@ for (const forceLegacy of [false, true]) for (const limit of ["200", "200px"]) {
     await expect(host.locator("[data-ae-overflow-marquee-viewport]")).toHaveCount(0);
     await page.evaluate(() => AelluxJs.unmount(document.getElementById("label"), "overflow-marquee"));
     await expect(host).not.toHaveAttribute("data-ae-overflow-marquee-ready");
+    await expect(host).toHaveCSS("white-space", "nowrap");
+    await host.evaluate(element => element.removeAttribute("data-ae-overflow-marquee"));
+    await expect(host).toHaveCSS("white-space", "normal");
   });
 }
 

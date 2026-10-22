@@ -283,7 +283,12 @@ body:after {
   pointer-events: none;
 }
 
-pre code.hljs {
+pre {
+  background: #0d1117;
+}
+
+pre code.hljs,
+pre {
   border-radius: 3px;
 }
 

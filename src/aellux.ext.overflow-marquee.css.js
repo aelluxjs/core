@@ -19,6 +19,8 @@ export function generateOverflowMarqueeCSS(AelluxJs) {
   overflow: hidden;
   overflow: clip;
   text-overflow: ellipsis;
+}
+:where([${attribute}], [${contentAttribute}]) {
   white-space: nowrap !important;
 }
 :where([${viewportAttribute}]) {
@@ -56,7 +58,6 @@ export function generateOverflowMarqueeCSS(AelluxJs) {
   pointer-events: inherit;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap !important;
   transform: none;
   transition: none;
 }
