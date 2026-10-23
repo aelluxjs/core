@@ -376,11 +376,15 @@
         direction: null,
         classList: element.classList,
         triggers: /* @__PURE__ */ new Set(),
+        triggerExpanded: !element.hidden,
         setAriaExpanded: function setAriaExpanded(value) {
           this.expanded = value === "true";
           containerAriaHandlers.get(element).set({
             expanded: this.expanded
           });
+        },
+        setTriggerExpanded: function setTriggerExpanded(value) {
+          this.triggerExpanded = value;
           this.triggers.forEach(updateTriggerAriaExpanded);
         },
         stop: function stop() {
@@ -591,7 +595,7 @@
       var _presentElements$get4, _triggerAriaHandlers$5;
       var target = triggerTargets.get(triggerElement);
       if (!target) return;
-      var expanded = ((_presentElements$get4 = presentElements.get(target)) === null || _presentElements$get4 === void 0 ? void 0 : _presentElements$get4.expanded) === true;
+      var expanded = ((_presentElements$get4 = presentElements.get(target)) === null || _presentElements$get4 === void 0 ? void 0 : _presentElements$get4.triggerExpanded) === true;
       (_triggerAriaHandlers$5 = triggerAriaHandlers.get(triggerElement)) === null || _triggerAriaHandlers$5 === void 0 || _triggerAriaHandlers$5.set({
         expanded: expanded
       });
@@ -766,6 +770,7 @@
                 });
               }
               controller.direction = newDirection;
+              controller.setTriggerExpanded(gotoVisible);
               setPhase(element, "pop", "0");
               setPhase(element, "unpop", "0");
               element.style.setProperty("--ae-pop-progress", "0");
@@ -1154,6 +1159,7 @@
             controller.stop();
             member.hidden = !visible;
             controller.classList.toggle(className.pop, visible);
+            controller.setTriggerExpanded(visible);
             setProgress(member, visible);
             syncAriaExpanded(member, controller);
             if (!visible) openPresentElements.delete(member);

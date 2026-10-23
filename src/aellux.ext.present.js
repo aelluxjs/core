@@ -207,9 +207,13 @@
       direction: null,
       classList: element.classList,
       triggers: new Set(),
+      triggerExpanded: !element.hidden,
       setAriaExpanded: function (value) {
         this.expanded = value === "true";
         containerAriaHandlers.get(element).set({ expanded: this.expanded });
+      },
+      setTriggerExpanded: function (value) {
+        this.triggerExpanded = value;
         this.triggers.forEach(updateTriggerAriaExpanded);
       },
       stop: function (options = {}) {
@@ -402,7 +406,7 @@
   function updateTriggerAriaExpanded(triggerElement) {
     const target = triggerTargets.get(triggerElement);
     if (!target) return;
-    const expanded = presentElements.get(target)?.expanded === true;
+    const expanded = presentElements.get(target)?.triggerExpanded === true;
     triggerAriaHandlers.get(triggerElement)?.set({ expanded });
   }
 
@@ -521,6 +525,9 @@
         controller.stop({ replacement: reusePreparation, transitionStart: true });
       }
       controller.direction = newDirection;
+      // Triggers announce the accepted action immediately, independently of
+      // the panel's effective visibility at the end of the transition.
+      controller.setTriggerExpanded(gotoVisible);
       // Neither channel animates backwards when the direction changes.
       setPhase(element, "pop", "0");
       setPhase(element, "unpop", "0");
@@ -870,6 +877,7 @@
         controller.stop();
         member.hidden = !visible;
         controller.classList.toggle(className.pop, visible);
+        controller.setTriggerExpanded(visible);
         setProgress(member, visible);
         syncAriaExpanded(member, controller);
         if (!visible) openPresentElements.delete(member);
