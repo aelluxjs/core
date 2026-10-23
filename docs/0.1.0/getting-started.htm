@@ -535,6 +535,13 @@
                                     class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                     style="flex:0">
                                     <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                      href="/core/docs/0.1.0/core-extensions/dialog.htm" data-ae-overflow-marquee="190px">
+                                      Dialog                                    </a>
+                                  </div>
+                                                                                                                                      <div
+                                    class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                    style="flex:0">
+                                    <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                       href="/core/docs/0.1.0/core-extensions/overflow-marquee.htm" data-ae-overflow-marquee="190px">
                                       Overflow Marquee                                    </a>
                                   </div>
@@ -721,7 +728,7 @@ npm run build
 &lt;/script&gt;
 </code></pre>
 <p>The Full runtime is loaded by the aellux.js boot script; it is not a standalone entry point. <strong>Full means integrated availability, not physical inclusion in one file.</strong> It incorporates Adaptive, Ajax Href, Anchor, Feedback, Focus, Point, Preference, Present, and State Navigation. Adaptive, Ajax Href, Anchor, Feedback, Focus, Point, and Present initialize when matching markup is mounted; Preference and State Navigation initialize at startup. Ajax Href uses <code>a[data-ae-ajax-href]</code>.</p>
-<p>Full also registers Overflow Marquee, Scrollbox and Scrollbox Snap for on-demand loading, keeping their implementations in separate distribution files. <code>data-ae-overflow-marquee</code> requests its dedicated Extension, which initializes Anchor before registering its mount map. Mounting an element with <code>data-ae-scrollbox</code> requests the compatible Scrollbox script. Mounting one with both <code>data-ae-scrollbox</code> and <code>data-ae-scrollbox-snap</code> also requests Snap, which waits for Scrollbox before mounting. The Full runtime embeds official artifact metadata, so these requests do not require a separate manifest download for the current Core version. Modern or Legacy and normal or minified files follow the boot selection. All generated Core Extension styles are supplied by the shared Full stylesheet. No separate registration is needed for these Core Extensions in <code>full</code> mode.</p>
+<p>Full also registers Dialog, Overflow Marquee, Scrollbox and Scrollbox Snap for on-demand loading, keeping their implementations in separate distribution files. Mounting a native <code>&lt;dialog&gt;</code> requests the <a href="core-extensions/dialog.htm">Dialog Extension</a>, whose Legacy script contains its own polyfill and inline CSS. <code>data-ae-overflow-marquee</code> requests its dedicated Extension, which initializes Anchor before registering its mount map. Mounting an element with <code>data-ae-scrollbox</code> requests the compatible Scrollbox script. Mounting one with both <code>data-ae-scrollbox</code> and <code>data-ae-scrollbox-snap</code> also requests Snap, which waits for Scrollbox before mounting. The Full runtime embeds official artifact metadata, so these requests do not require a separate manifest download for the current Core version. Modern or Legacy and normal or minified files follow the boot selection. All generated Core Extension styles are supplied by the shared Full stylesheet. No separate registration is needed for these Core Extensions in <code>full</code> mode.</p>
 <p>Full automatically loads <code>aellux.full.css</code> (or <code>.min.css</code> with the minified boot) beside the runtime, using the configured base path. Deploy this stylesheet with the JavaScript artifacts. It includes the global defaults and all Core Extension CSS.</p>
 <h2>Basic Mode</h2>
 <p>Basic mode loads the orchestrator and only the Extensions registered by the page:</p>
@@ -767,7 +774,7 @@ console.log(AelluxJs.attr(&quot;scrollbox&quot;));
                 Special thanks to
                 <a style="color:inherit!important;" href="https://getbootstrap.com/" target="_blank"
                   rel="noopener noreferrer">Bootstrap</a>
-                - this page layout was built around Bootstrap’s responsive components and utility classes.
+                - this page layout was built around its responsive components and utility classes.
               </div>
             </div>
           </footer>

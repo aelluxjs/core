@@ -24,6 +24,11 @@
       "artifacts": 2
     },
     {
+      "name": "dialog",
+      "status": "valid",
+      "artifacts": 2
+    },
+    {
       "name": "point",
       "status": "valid",
       "artifacts": 2

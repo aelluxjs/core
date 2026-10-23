@@ -39,16 +39,15 @@ const packageVersion = packageMetadata.version;
 const versionDefine = { __AELLUX_VERSION__: JSON.stringify(packageVersion) };
 const legacyThirdPartyBanner =
   "/*! Includes Babel helpers, core-js, custom-event-polyfill, raf, performance-now and whatwg-fetch (MIT). " +
-  "Includes dialog-polyfill (BSD-3-Clause). " +
   "Copyright and license texts: third-party/licenses/ in this distribution. */";
+const dialogThirdPartyBanner =
+  "/*! Includes dialog-polyfill (BSD-3-Clause). Copyright and license text: " +
+  "third-party/licenses/dialog-polyfill.LICENSE in this distribution. */";
 const legacySourceFiles = sourceFiles.filter(sourceFile => {
   const filename = basename(sourceFile);
   return filename === "aellux.orchestrator.js" ||
     /^aellux\.ext\.[\w-]+\.js$/.test(filename);
 });
-const dialogPolyfillCSS = await readFile(
-  join(projectRoot, "node_modules/dialog-polyfill/dist/dialog-polyfill.css"), "utf8"
-);
 const legacyPolyfills = `
 require("core-js/stable");
 require("custom-event-polyfill");
@@ -64,9 +63,6 @@ if (window.NodeList && !window.NodeList.prototype.forEach) {
     Array.prototype.forEach.call(this, callback, thisArg);
   };
 }
-require("./src/internal/install-dialog-polyfill.js").installDialogPolyfill(
-  window, ${JSON.stringify(dialogPolyfillCSS)}
-);
 `;
 
 const legacyOrchestratorEntry = `${legacyPolyfills}
@@ -176,7 +172,8 @@ for (const sourceFile of legacySourceFiles) {
   const distributionFilename = filename.replace(/\.js$/, ".legacy.js");
   const sourceFileName = relative(projectRoot, sourceFile).replace(/\\/g, "/");
   const isOrchestrator = filename === "aellux.orchestrator.js";
-  const transformed = isOrchestrator
+  const isDialog = filename === "aellux.ext.dialog.js";
+  const transformed = isOrchestrator || isDialog
     ? null
     : await transpileLegacySource(sourceFile, sourceFileName);
 
@@ -187,12 +184,13 @@ for (const sourceFile of legacySourceFiles) {
     await build({
       absWorkingDir: projectRoot,
       stdin: {
-        contents: isOrchestrator ? legacyOrchestratorEntry : transformed.code,
+        contents: isOrchestrator ? legacyOrchestratorEntry : isDialog
+          ? 'require("./src/internal/dialog.legacy.entry.js");' : transformed.code,
         loader: "js",
-        resolveDir: isOrchestrator ? projectRoot : sourceDirectory,
+        resolveDir: isOrchestrator || isDialog ? projectRoot : sourceDirectory,
         sourcefile: isOrchestrator
           ? "aellux.orchestrator.legacy.entry.js"
-          : sourceFileName
+          : isDialog ? "aellux.ext.dialog.legacy.entry.js" : sourceFileName
       },
       outfile: join(outputDirectory, outputFilename),
       bundle: true,
@@ -203,6 +201,7 @@ for (const sourceFile of legacySourceFiles) {
       sourcemap: true,
       legalComments: "inline",
       ...(isOrchestrator ? { banner: { js: legacyThirdPartyBanner } } : {}),
+      ...(isDialog ? { banner: { js: dialogThirdPartyBanner }, loader: { ".css": "text" } } : {}),
       plugins: [legacyBundlePlugin()]
       ,define: versionDefine
     });

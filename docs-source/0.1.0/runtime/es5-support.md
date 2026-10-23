@@ -14,13 +14,12 @@ Syntax compatibility alone does not provide missing browser APIs. For this reaso
 - `fetch`;
 - `CustomEvent`;
 - `requestAnimationFrame` and `cancelAnimationFrame`;
-- `<dialog>` (`show()`, `showModal()`, `close()` and `<form method="dialog">`) through `dialog-polyfill`, including its CSS;
 - `Element.prototype.matches`; and
 - `NodeList.prototype.forEach`.
 
-The generated Legacy Extensions do not embed these dependencies again. They are loaded after, and share the environment prepared by, the Legacy orchestrator.
+The generated Legacy Extensions do not embed these shared dependencies again. They are loaded after, and share the environment prepared by, the Legacy orchestrator. Extension-specific compatibility belongs to the corresponding Extension.
 
-`<dialog>` is the standard element for Aellux modal interfaces. Missing dialog methods select the Legacy runtime automatically. The fallback registers dialogs in each `$ae.mount(root)` subtree before Extension mounting, including the root itself; await mounting before calling its dialog methods. With `skipGlobalMount: true`, explicitly mount the desired subtree. Native dialog implementations are preserved, including when Legacy is forced.
+`<dialog>` is the standard element for Aellux modal interfaces. Missing dialog methods select the Legacy runtime automatically, but the runtime does not install the fallback globally. The official [Dialog Extension](../core-extensions/dialog.md) embeds `dialog-polyfill` and its CSS exclusively in its Legacy files. Full loads it on demand for `dialog`; Basic requires `$ae.ext("dialog")`. Registration occurs during Dialog mounting, before its controllers become available. Await mounting before calling dialog methods; with `skipGlobalMount: true`, explicitly mount the desired subtree. Native dialog implementations are preserved, including when Legacy is forced.
 
 The fallback implements the established dialog API, not newer features such as `requestClose()` or `closedby`. Place modal dialogs directly under `<body>` where possible: unlike the native top layer, the fallback is subject to ancestor stacking contexts. Style both `dialog::backdrop` and `dialog + .backdrop` when customizing the backdrop. See the [upstream limitations](https://github.com/GoogleChrome/dialog-polyfill#limitations).
 

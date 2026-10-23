@@ -536,6 +536,13 @@
                                     class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                     style="flex:0">
                                     <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                      href="/core/docs/0.1.0/core-extensions/dialog.htm" data-ae-overflow-marquee="190px">
+                                      Dialog                                    </a>
+                                  </div>
+                                                                                                                                      <div
+                                    class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                    style="flex:0">
+                                    <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                       href="/core/docs/0.1.0/core-extensions/overflow-marquee.htm" data-ae-overflow-marquee="190px">
                                       Overflow Marquee                                    </a>
                                   </div>
@@ -710,32 +717,31 @@
 
           <main id="doc-content" style="min-height: calc(100vh - 200px);" class="js-toc-content"
             ajax-load="doc-content">
-            <h1>Bootstrap Integration</h1>
-<p>aellux.js complements Bootstrap; it does not replace or bundle it. Bootstrap owns its visual system and components, while aellux.js manages independently loadable UX behaviors.</p>
+            <h1 id="bootstrap-integration"><a href="https://getbootstrap.com/">Bootstrap</a> Integration</h1><p>aellux.js complements <a href="https://getbootstrap.com/">Bootstrap</a>; it does not replace or bundle it. <a href="https://getbootstrap.com/">Bootstrap</a> owns its visual system and components, while aellux.js manages independently loadable UX behaviors.</p>
 <h2>Namespaces</h2>
 <ul>
 <li>aellux.js declarations use <code>data-ae-*</code>.</li>
 <li>Runtime state classes use <code>ae--*</code>.</li>
 <li>aellux.js events use the <code>AelluxJs</code> prefix.</li>
 </ul>
-<p>These namespaces are designed to avoid collisions with Bootstrap&#39;s public classes and data attributes.</p>
+<p>These namespaces are designed to avoid collisions with <a href="https://getbootstrap.com/">Bootstrap</a>&#39;s public classes and data attributes.</p>
 <h2>Loading Order</h2>
-<p>When an application&#39;s Extension stylesheet should take precedence over Bootstrap, load it after Bootstrap:</p>
+<p>When an application&#39;s Extension stylesheet should take precedence over <a href="https://getbootstrap.com/">Bootstrap</a>, load it after <a href="https://getbootstrap.com/">Bootstrap</a>:</p>
 <pre><code class="language-html">&lt;link rel=&quot;stylesheet&quot; href=&quot;./bootstrap.min.css&quot;&gt;
 &lt;link rel=&quot;stylesheet&quot; href=&quot;./styles/extension.css&quot;&gt;
 &lt;script src=&quot;./dist/aellux.js&quot;&gt;&lt;/script&gt;
 </code></pre>
 <p>The application controls the selectors and priority of its Extension stylesheet.</p>
-<p>When adding motion or accessibility rules alongside Bootstrap, target AelluxJs preference attributes on <code>&lt;html&gt;</code> so a saved local choice and the device setting both affect the result. For example, use <code>html[data-ae-reduced-motion=&quot;reduced&quot;] .custom-transition { transition: none; }</code> for application owned motion. Apply this convention to future integration styles and scripts; use <code>$ae.currentPreference(&quot;reduced-motion&quot;)</code> in JavaScript before starting optional animations.</p>
+<p>When adding motion or accessibility rules alongside <a href="https://getbootstrap.com/">Bootstrap</a>, target AelluxJs preference attributes on <code>&lt;html&gt;</code> so a saved local choice and the device setting both affect the result. For example, use <code>html[data-ae-reduced-motion=&quot;reduced&quot;] .custom-transition { transition: none; }</code> for application owned motion. Apply this convention to future integration styles and scripts; use <code>$ae.currentPreference(&quot;reduced-motion&quot;)</code> in JavaScript before starting optional animations.</p>
 <h2>JavaScript Coexistence</h2>
-<p>Extensions should avoid unnecessary <code>preventDefault()</code> and <code>stopPropagation()</code>, should not remove third-party listeners, and must keep mounting idempotent when Bootstrap reveals or modifies content dynamically.</p>
+<p>Extensions should avoid unnecessary <code>preventDefault()</code> and <code>stopPropagation()</code>, should not remove third-party listeners, and must keep mounting idempotent when <a href="https://getbootstrap.com/">Bootstrap</a> reveals or modifies content dynamically.</p>
 <p>After inserting or revealing dynamic markup, update only the affected root when possible:</p>
 <pre><code class="language-js">await $ae.mount(changedElement);
 </code></pre>
-<p>The browser validation suite includes a repeatable Bootstrap CSS coexistence scenario. Bootstrap JavaScript components remain outside the validated scope.</p>
+<p>The browser validation suite includes a repeatable <a href="https://getbootstrap.com/">Bootstrap</a> CSS coexistence scenario. <a href="https://getbootstrap.com/">Bootstrap</a> JavaScript components remain outside the validated scope.</p>
 <h2>Validation Scope</h2>
-<p>The <code>tests/browser/bootstrap-integration.html</code> scenario loads the versioned local fixture <code>tests/fixtures/bootstrap-5.3.8.min.css</code> before aellux.js. It verifies the fixture integrity, confirms Bootstrap button styles are applied, exercises declarative lazy Extension loading, and checks that Preference mounts without removing Bootstrap classes. The test rejects external requests, so it runs without CDN or network access.</p>
-<p>The proven scope is CSS and namespace coexistence with Bootstrap 5.3.8 for the markup exercised by that scenario. Bootstrap JavaScript components, dynamically revealed Bootstrap content, plugin events and listener coexistence are not covered by this result.</p>
+<p>The <code>tests/browser/bootstrap-integration.html</code> scenario loads the versioned local fixture <code>tests/fixtures/bootstrap-5.3.8.min.css</code> before aellux.js. It verifies the fixture integrity, confirms <a href="https://getbootstrap.com/">Bootstrap</a> button styles are applied, exercises declarative lazy Extension loading, and checks that Preference mounts without removing <a href="https://getbootstrap.com/">Bootstrap</a> classes. The test rejects external requests, so it runs without CDN or network access.</p>
+<p>The proven scope is CSS and namespace coexistence with <a href="https://getbootstrap.com/">Bootstrap</a> 5.3.8 for the markup exercised by that scenario. <a href="https://getbootstrap.com/">Bootstrap</a> JavaScript components, dynamically revealed <a href="https://getbootstrap.com/">Bootstrap</a> content, plugin events and listener coexistence are not covered by this result.</p>
           </main>
 
           <div id="doc-navlinks2" ajax-load="doc-navlinks2">
@@ -763,7 +769,7 @@
                 Special thanks to
                 <a style="color:inherit!important;" href="https://getbootstrap.com/" target="_blank"
                   rel="noopener noreferrer">Bootstrap</a>
-                - this page layout was built around Bootstrap’s responsive components and utility classes.
+                - this page layout was built around its responsive components and utility classes.
               </div>
             </div>
           </footer>

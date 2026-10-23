@@ -13,18 +13,20 @@ The CI workflow runs the same command after `npm run build`. A pull request fail
 
 ## Limits
 
-[`scripts/bundle-budget.config.mjs`](https://github.com/aelluxjs/core/blob/main/scripts/bundle-budget.config.mjs) is the source of truth for every raw and gzip limit. It covers the minified boot, ESM entry, Modern and Legacy orchestrators, Full runtimes, Core Extensions (including separate Scrollbox Snap files), and generated Extension stylesheets. The `test:budget` command prints each artifact's measured size beside its current limit and fails if a new minified JavaScript or CSS file has no budget. Full incorporates nine Core Extensions and makes Scrollbox and Scrollbox Snap available through separate on-demand files.
+[`scripts/bundle-budget.config.mjs`](https://github.com/aelluxjs/core/blob/main/scripts/bundle-budget.config.mjs) is the source of truth for every raw and gzip limit. It covers the minified boot, ESM entry, Modern and Legacy orchestrators, Full runtimes, Core Extensions (including separate Dialog and Scrollbox Snap files), and generated Extension stylesheets. The `test:budget` command prints each artifact's measured size beside its current limit and fails if a new minified JavaScript or CSS file has no budget. Full incorporates nine Core Extensions and makes Dialog, Overflow Marquee, Scrollbox and Scrollbox Snap available through separate on-demand files.
 
 ## Scope and Limitations
 
-The Legacy dialog fallback includes `dialog-polyfill` 0.5.6, its CSS, and mount registration. The measured minified costs are:
+The [Dialog Extension](../core-extensions/dialog.md) Legacy script exclusively includes `dialog-polyfill` 0.5.6, its CSS and per-element mount registration. Compared with the preceding checked-in artifacts, the measured minified sizes are raw/gzip level 9 bytes:
 
-| Artifact | Before raw / gzip | With dialog raw / gzip | Current limits raw / gzip |
+| Artifact | Before raw / gzip bytes | After raw / gzip bytes | Current limits raw / gzip |
 | --- | --- | --- | --- |
-| Legacy orchestrator | 328.2 / 103.7 KiB | 341.4 / 107.4 KiB | 342 / 108 KiB |
-| Legacy Full | 436.7 / 129.9 KiB | 449.8 / 133.8 KiB | 451 / 138 KiB |
+| Legacy orchestrator | 349,522 / 109,918 | 336,063 / 106,151 | 328.5 / 104 KiB |
+| Legacy Full | 464,668 / 138,283 | 451,842 / 134,544 | 441.5 / 132 KiB |
+| Dialog Modern | Separate artifact added | 825 / 450 | 1 / 0.5 KiB |
+| Dialog Legacy | Separate artifact added | 14,529 / 4,870 | 14.5 / 5 KiB |
 
-The previous limits were 328.5 / 104 KiB and 437 / 138 KiB respectively. Modern runtimes do not include this fallback.
+The global Legacy limits decrease from 342/108 KiB and 454.5/138 KiB respectively. Orchestrator loses 13,459 raw and 3,767 gzip bytes; Full loses 12,826 raw and 3,739 gzip bytes. Full Modern adds 626/264 bytes and the boot adds 789/271 bytes for the new signed registry entry and selective registration, within their existing limits. Pages without dialogs do not download the Extension. Modern artifacts contain no dialog fallback code or CSS.
 
 This budget detects distribution-size regressions. It does not measure page-specific network time, parsing time, boot time, layout, mount duration, memory use, or real-user performance. The Legacy full bundle is materially larger because it includes the shared polyfills required for its ES5 path. Runtime-performance budgets require representative application fixtures and remain post-release work.
 

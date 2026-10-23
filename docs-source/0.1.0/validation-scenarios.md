@@ -11,9 +11,9 @@ npx playwright install
 npm run test:browser
 ```
 
-`test:browser` builds `dist/` before testing. Use `npm run test:browser -- --project=chromium` to run only Chromium. To use an installed Chrome or Edge instead of Playwright's Chromium, set `AELLUXJS_TEST_BROWSER_CHANNEL` to `chrome` or `msedge` and select the Chromium project. The Bootstrap scenario uses the versioned local fixture `tests/fixtures/bootstrap-5.3.8.min.css` and requires no CDN or network access.
+`test:browser` builds `dist/` before testing. Use `npm run test:browser -- --project=chromium` to run only Chromium. To use an installed Chrome or Edge instead of Playwright's Chromium, set `AELLUXJS_TEST_BROWSER_CHANNEL` to `chrome` or `msedge` and select the Chromium project. The [Bootstrap](https://getbootstrap.com/) scenario uses the versioned local fixture `tests/fixtures/bootstrap-5.3.8.min.css` and requires no CDN or network access.
 
-To run one spec after a build, use `npx playwright test tests/browser/full-bundle.spec.mjs --project=chromium`. For a Scrollbox change, replace that path with `tests/browser/scrollbox-pointer.spec.mjs` or `tests/browser/scrollbox-scrollbar.spec.mjs`. Direct `npx playwright test` commands use the current `dist/` files; run `npm run build:core` first after changing runtime or Extension source. The full bundle spec compares the bundled, registered, and lazy Core Extensions with every `src/aellux.ext.*.js` source file that calls `extAttach` in the normal and minified Modern and Legacy runtimes. Extension registry tests verify that separate Scrollbox and Snap files load when needed. Run `npm run test:budget` after a build to check raw and gzip artifact limits.
+To run one spec after a build, use `npx playwright test tests/browser/full-bundle.spec.mjs --project=chromium`. For a Scrollbox change, replace that path with `tests/browser/scrollbox-pointer.spec.mjs` or `tests/browser/scrollbox-scrollbar.spec.mjs`. Direct `npx playwright test` commands use the current `dist/` files; run `npm run build:core` first after changing runtime or Extension source. The full bundle spec compares the bundled, registered, and lazy Core Extensions with the explicit list in `src/official-extension-definitions.js` in the normal and minified Modern and Legacy runtimes. Extension registry tests verify that separate Scrollbox and Snap files load when needed. Run `npm run test:budget` after a build to check raw and gzip artifact limits.
 
 ## Browser Matrix
 
@@ -32,7 +32,7 @@ The test runner's summary gives the current count and result. One worker reduces
 | Scenario | Example |
 | --- | --- |
 | Native HTML and Web Platform | [`html-web-platform.html`](https://github.com/aelluxjs/core/blob/main/tests/browser/html-web-platform.html) |
-| Bootstrap coexistence | [`bootstrap-integration.html`](https://github.com/aelluxjs/core/blob/main/tests/browser/bootstrap-integration.html) |
+| [Bootstrap](https://getbootstrap.com/) coexistence | [`bootstrap-integration.html`](https://github.com/aelluxjs/core/blob/main/tests/browser/bootstrap-integration.html) |
 | Dynamic DOM followed by `$ae.mount(root)` | [`dynamic-update.html`](https://github.com/aelluxjs/core/blob/main/tests/browser/dynamic-update.html) |
 | Eager Extension loading | [`extension-eager.html`](https://github.com/aelluxjs/core/blob/main/tests/browser/extension-eager.html) |
 | Lazy Extension loading | [`extension-lazy.html`](https://github.com/aelluxjs/core/blob/main/tests/browser/extension-lazy.html) |
@@ -58,7 +58,7 @@ The browser suite covers the release contract in Chromium, Firefox, and WebKit:
 | Contract area | Covered behavior |
 | --- | --- |
 | API normalization and builds | Global and ESM identity, camelCase Extension keys and options, compound filenames, Modern and Legacy selection, minified files, optional styles, and incompatible builds. |
-| Full distribution coverage | Bundled Core Extensions initialize from the Full runtime; Scrollbox and Scrollbox Snap load separate compatible files on demand, without a duplicate script request or a manifest fetch for the current Core version. Modern, Legacy, normal, and minified paths are checked. |
+| Full distribution coverage | Bundled Core Extensions initialize from the Full runtime; Dialog, Overflow Marquee, Scrollbox and Scrollbox Snap load separate compatible files on demand, without a duplicate script request or a manifest fetch for the current Core version. Modern, Legacy, normal, and minified paths are checked. |
 | Diagnostics | Severity, verbosity updates, retained history, invalid selectors and registrations, unavailable storage, callback failures, transitions, and lifecycle failures. |
 | Configuration diagnostics | Development-only semantic mount/update checks, scoped Extensions, configured prefixes, custom selector attributes, actionable targets/values/structure, CSS and keyboard reachability, quiet hidden/group states, Modern/Legacy paths, runtime AJAX validation and Adaptive numeric fallbacks. |
 | Loading | Eager and lazy loading, shared concurrent Promises, failed `init()` retry, failed script retry, optional stylesheet failure, and lazy-index cleanup after success or destruction. |

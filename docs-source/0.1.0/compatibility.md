@@ -33,11 +33,11 @@ Third-party Extensions declare their published artifacts through `builds: ["mode
 
 See [Authoring Third-Party aellux.js Extensions](extensions/authoring.md) for lifecycle rules, filename conventions, the reference Legacy build, and the exact polyfill boundary.
 
-## Bootstrap
+<h2 id="bootstrap"><a href="https://getbootstrap.com/">Bootstrap</a></h2>
 
-aellux.js does not require or bundle Bootstrap. Its attributes, classes, and events use aellux.js-specific namespaces. Optional Extension stylesheets can be loaded after Bootstrap when an application needs them to take precedence. The automated suite validates basic CSS and namespace coexistence with the local Bootstrap 5.3.8 fixture; it does not claim compatibility with Bootstrap JavaScript components or plugins.
+aellux.js does not require or bundle [Bootstrap](https://getbootstrap.com/). Its attributes, classes, and events use aellux.js-specific namespaces. Optional Extension stylesheets can be loaded after [Bootstrap](https://getbootstrap.com/) when an application needs them to take precedence. The automated suite validates basic CSS and namespace coexistence with the local [Bootstrap](https://getbootstrap.com/) 5.3.8 fixture; it does not claim compatibility with [Bootstrap](https://getbootstrap.com/) JavaScript components or plugins.
 
-See [Bootstrap integration](integrations/bootstrap.md) and the browser validation scenario in `tests/browser/bootstrap-integration.html`.
+See the [integration guide](integrations/bootstrap.md) for [Bootstrap](https://getbootstrap.com/) and the browser validation scenario in `tests/browser/bootstrap-integration.html`.
 
 ## Current Limits
 

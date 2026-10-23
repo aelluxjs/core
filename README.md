@@ -7,11 +7,11 @@
 [![npm license](https://img.shields.io/npm/l/%40aelluxjs%2Fcore)](https://github.com/aelluxjs/core/blob/main/LICENSE)
 [![Documentation](https://img.shields.io/badge/docs-online-blue)](https://aelluxjs.github.io/core/docs/0.1.0/)
 
-aellux.js is a lightweight extension-management library for modular UX behaviors in browser interfaces. It complements Bootstrap and other visual systems with declarative HTML attributes and independently loadable JavaScript Extensions.
+aellux.js is a lightweight extension-management library for modular UX behaviors in browser interfaces. It complements [Bootstrap](https://getbootstrap.com/) and other visual systems with declarative HTML attributes and independently loadable JavaScript Extensions.
 
 An **EXT (aellux.js Extension)** owns one focused UX responsibility and exposes its API under `AelluxJs.ext` and its `$ae.ext` alias. The aellux.js boot script selects the runtime, while the orchestrator loads Extensions and coordinates `init`, `mount`, `unmount`, and `destroy`.
 
-aellux.js does not require or bundle Bootstrap. Its `data-ae-*` and `ae--*` namespaces are designed to coexist with existing applications and frameworks.
+aellux.js does not require or bundle [Bootstrap](https://getbootstrap.com/). Its `data-ae-*` and `ae--*` namespaces are designed to coexist with existing applications and frameworks.
 
 ## Quick Start
 
@@ -22,7 +22,7 @@ aellux.js does not require or bundle Bootstrap. Its `data-ae-*` and `ae--*` name
 </script>
 ```
 
-Use `full` to make Adaptive, Ajax Href, Anchor, Overflow Marquee, Feedback, Focus, Point, Preference, Present, Scrollbox, Scrollbox Snap, and State Navigation available without separate registration. Full loads Overflow Marquee, Scrollbox and Scrollbox Snap as separate Extension scripts when matching elements are mounted. See [Getting Started](docs-source/0.1.0/getting-started.md) for the loading details. Use `basic` to register only what the page needs:
+Use `full` to make Adaptive, Ajax Href, Anchor, Dialog, Overflow Marquee, Feedback, Focus, Point, Preference, Present, Scrollbox, Scrollbox Snap, and State Navigation available without separate registration. Full loads Dialog, Overflow Marquee, Scrollbox and Scrollbox Snap as separate Extension scripts when matching elements are mounted. See [Getting Started](docs-source/0.1.0/getting-started.md) for the loading details. Use `basic` to register only what the page needs:
 
 ```html
 <script src="./dist/aellux.js"></script>
@@ -59,7 +59,7 @@ See [Getting Started](docs-source/0.1.0/getting-started.md) for build instructio
 - [Browser support baseline](docs-source/0.1.0/runtime/browser-support.md)
 - [ES5 support level](docs-source/0.1.0/runtime/es5-support.md)
 - [Visual mounting states](docs-source/0.1.0/runtime/visual-mounting.md)
-- [Bootstrap integration](docs-source/0.1.0/integrations/bootstrap.md)
+- [Integration guide](docs-source/0.1.0/integrations/bootstrap.md) for [Bootstrap](https://getbootstrap.com/)
 - [Registering aellux.js Extensions](docs-source/0.1.0/extensions/registration.md)
 - [Official Extension registry and compatibility](docs-source/0.1.0/extensions/official-registry.md)
 - [Authoring third-party Extensions](docs-source/0.1.0/extensions/authoring.md)

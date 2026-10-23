@@ -11,7 +11,7 @@ The Modern JavaScript and CSS bundles use project source. The Legacy orchestrato
 | `@babel/helpers` | 7.29.7 | Babel-generated Legacy helpers | `third-party/licenses/babel-helpers.LICENSE` |
 | `core-js` | 3.50.0 | Legacy orchestrator and full polyfills | `third-party/licenses/core-js.LICENSE` |
 | `custom-event-polyfill` | 1.0.7 | Legacy orchestrator and full polyfills | `third-party/licenses/custom-event-polyfill.LICENSE` |
-| `dialog-polyfill` | 0.5.6 | Legacy orchestrator and full dialog behavior and CSS (BSD-3-Clause) | `third-party/licenses/dialog-polyfill.LICENSE` |
+| `dialog-polyfill` | 0.5.6 | Dialog Extension Legacy scripts only: fallback behavior and inline CSS (BSD-3-Clause) | `third-party/licenses/dialog-polyfill.LICENSE` |
 | `raf` | 3.4.1 | Legacy orchestrator and full polyfills | `third-party/licenses/raf.LICENSE` |
 | `performance-now` | 2.1.0 | Transitive dependency of `raf` in Legacy bundles | `third-party/licenses/performance-now.LICENSE` |
 | `whatwg-fetch` | 3.6.20 | Legacy orchestrator and full polyfills | `third-party/licenses/whatwg-fetch.LICENSE` |

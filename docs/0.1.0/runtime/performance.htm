@@ -535,6 +535,13 @@
                                     class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                     style="flex:0">
                                     <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                      href="/core/docs/0.1.0/core-extensions/dialog.htm" data-ae-overflow-marquee="190px">
+                                      Dialog                                    </a>
+                                  </div>
+                                                                                                                                      <div
+                                    class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                    style="flex:0">
+                                    <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                       href="/core/docs/0.1.0/core-extensions/overflow-marquee.htm" data-ae-overflow-marquee="190px">
                                       Overflow Marquee                                    </a>
                                   </div>
@@ -718,32 +725,44 @@ npm run test:budget
 </code></pre>
 <p>The CI workflow runs the same command after <code>npm run build</code>. A pull request fails if an artifact exceeds either limit. Review the generated artifact and its delivery cost before changing a limit.</p>
 <h2>Limits</h2>
-<p><a href="https://github.com/aelluxjs/core/blob/main/scripts/bundle-budget.config.mjs"><code>scripts/bundle-budget.config.mjs</code></a> is the source of truth for every raw and gzip limit. It covers the minified boot, ESM entry, Modern and Legacy orchestrators, Full runtimes, Core Extensions (including separate Scrollbox Snap files), and generated Extension stylesheets. The <code>test:budget</code> command prints each artifact&#39;s measured size beside its current limit and fails if a new minified JavaScript or CSS file has no budget. Full incorporates nine Core Extensions and makes Scrollbox and Scrollbox Snap available through separate on-demand files.</p>
+<p><a href="https://github.com/aelluxjs/core/blob/main/scripts/bundle-budget.config.mjs"><code>scripts/bundle-budget.config.mjs</code></a> is the source of truth for every raw and gzip limit. It covers the minified boot, ESM entry, Modern and Legacy orchestrators, Full runtimes, Core Extensions (including separate Dialog and Scrollbox Snap files), and generated Extension stylesheets. The <code>test:budget</code> command prints each artifact&#39;s measured size beside its current limit and fails if a new minified JavaScript or CSS file has no budget. Full incorporates nine Core Extensions and makes Dialog, Overflow Marquee, Scrollbox and Scrollbox Snap available through separate on-demand files.</p>
 <h2>Scope and Limitations</h2>
-<p>The Legacy dialog fallback includes <code>dialog-polyfill</code> 0.5.6, its CSS, and mount registration. The measured minified costs are:</p>
+<p>The <a href="../core-extensions/dialog.htm">Dialog Extension</a> Legacy script exclusively includes <code>dialog-polyfill</code> 0.5.6, its CSS and per-element mount registration. Compared with the preceding checked-in artifacts, the measured minified sizes are raw/gzip level 9 bytes:</p>
 <table>
 <thead>
 <tr>
 <th>Artifact</th>
-<th>Before raw / gzip</th>
-<th>With dialog raw / gzip</th>
+<th>Before raw / gzip bytes</th>
+<th>After raw / gzip bytes</th>
 <th>Current limits raw / gzip</th>
 </tr>
 </thead>
 <tbody><tr>
 <td>Legacy orchestrator</td>
-<td>328.2 / 103.7 KiB</td>
-<td>341.4 / 107.4 KiB</td>
-<td>342 / 108 KiB</td>
+<td>349,522 / 109,918</td>
+<td>336,063 / 106,151</td>
+<td>328.5 / 104 KiB</td>
 </tr>
 <tr>
 <td>Legacy Full</td>
-<td>436.7 / 129.9 KiB</td>
-<td>449.8 / 133.8 KiB</td>
-<td>451 / 138 KiB</td>
+<td>464,668 / 138,283</td>
+<td>451,842 / 134,544</td>
+<td>441.5 / 132 KiB</td>
+</tr>
+<tr>
+<td>Dialog Modern</td>
+<td>Separate artifact added</td>
+<td>825 / 450</td>
+<td>1 / 0.5 KiB</td>
+</tr>
+<tr>
+<td>Dialog Legacy</td>
+<td>Separate artifact added</td>
+<td>14,529 / 4,870</td>
+<td>14.5 / 5 KiB</td>
 </tr>
 </tbody></table>
-<p>The previous limits were 328.5 / 104 KiB and 437 / 138 KiB respectively. Modern runtimes do not include this fallback.</p>
+<p>The global Legacy limits decrease from 342/108 KiB and 454.5/138 KiB respectively. Orchestrator loses 13,459 raw and 3,767 gzip bytes; Full loses 12,826 raw and 3,739 gzip bytes. Full Modern adds 626/264 bytes and the boot adds 789/271 bytes for the new signed registry entry and selective registration, within their existing limits. Pages without dialogs do not download the Extension. Modern artifacts contain no dialog fallback code or CSS.</p>
 <p>This budget detects distribution-size regressions. It does not measure page-specific network time, parsing time, boot time, layout, mount duration, memory use, or real-user performance. The Legacy full bundle is materially larger because it includes the shared polyfills required for its ES5 path. Runtime-performance budgets require representative application fixtures and remain post-release work.</p>
 <p>For layout work inside an Extension, use <a href="wait-layout.htm"><code>waitLayout</code></a> to batch geometry reads and dependent CSS or DOM writes. The guide includes code for coalescing frequent scroll and resize notifications.</p>
           </main>
@@ -773,7 +792,7 @@ npm run test:budget
                 Special thanks to
                 <a style="color:inherit!important;" href="https://getbootstrap.com/" target="_blank"
                   rel="noopener noreferrer">Bootstrap</a>
-                - this page layout was built around Bootstrap’s responsive components and utility classes.
+                - this page layout was built around its responsive components and utility classes.
               </div>
             </div>
           </footer>

@@ -535,6 +535,13 @@
                                     class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                     style="flex:0">
                                     <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                      href="/core/docs/0.1.0/core-extensions/dialog.htm" data-ae-overflow-marquee="190px">
+                                      Dialog                                    </a>
+                                  </div>
+                                                                                                                                      <div
+                                    class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                    style="flex:0">
+                                    <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                       href="/core/docs/0.1.0/core-extensions/overflow-marquee.htm" data-ae-overflow-marquee="190px">
                                       Overflow Marquee                                    </a>
                                   </div>
@@ -856,11 +863,10 @@ node build-extension.mjs ./src/aellux.ext.example.js ./dist
 <li><code>fetch</code>;</li>
 <li><code>CustomEvent</code>;</li>
 <li><code>requestAnimationFrame</code> and <code>cancelAnimationFrame</code>;</li>
-<li><code>&lt;dialog&gt;</code> (<code>show()</code>, <code>showModal()</code>, <code>close()</code> and <code>&lt;form method=&quot;dialog&quot;&gt;</code>), registered before Extension mounting in each <code>$ae.mount(root)</code> subtree;</li>
 <li><code>Element.prototype.matches</code>; and</li>
 <li><code>NodeList.prototype.forEach</code>.</li>
 </ul>
-<p>The Core does not guarantee every browser or application API. If an Extension requires another capability, such as <code>WebSocket</code>, Web Components, a Canvas API, extra <code>Intl</code> locale data, or a third-party package, it must feature-detect that dependency and bundle or load its own fallback. Additional polyfills should avoid replacing a native implementation when one is already available.</p>
+<p>The Core does not guarantee every browser or application API. Dialog compatibility belongs to the official <a href="../core-extensions/dialog.htm">Dialog Extension</a>, which bundles its fallback in its Legacy files and mounts before ordinary consumers. If an Extension requires another capability, such as <code>WebSocket</code>, Web Components, a Canvas API, extra <code>Intl</code> locale data, or a third-party package, it must feature-detect that dependency and bundle or load its own fallback. Additional polyfills should avoid replacing a native implementation when one is already available.</p>
 <p>Transpilation only changes syntax. It does not create missing browser APIs, so an Extension is not Legacy-compatible until both its syntax and runtime dependencies are covered.</p>
 <h2>Styles and Resources</h2>
 <p>Use <code>loadStyle: true</code> when the stylesheet follows the Extension filename, or pass a stylesheet URL. Modern and Legacy JavaScript variants share the same CSS unless the Extension implements an explicit alternative resource strategy.</p>
@@ -912,7 +918,7 @@ node build-extension.mjs ./src/aellux.ext.example.js ./dist
                 Special thanks to
                 <a style="color:inherit!important;" href="https://getbootstrap.com/" target="_blank"
                   rel="noopener noreferrer">Bootstrap</a>
-                - this page layout was built around Bootstrap’s responsive components and utility classes.
+                - this page layout was built around its responsive components and utility classes.
               </div>
             </div>
           </footer>

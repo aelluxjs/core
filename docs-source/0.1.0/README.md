@@ -47,7 +47,7 @@ Add aellux.js to a page and enable the Extensions it needs. The library coordina
 - [ES5 support level](runtime/es5-support.md)
 - [Visual mounting states](runtime/visual-mounting.md)
 - [Diagnostics](runtime/diagnostics.md)
-- [Bootstrap integration](integrations/bootstrap.md)
+- [Integration guide](integrations/bootstrap.md) for [Bootstrap](https://getbootstrap.com/)
 - [VS Code Custom Data and JetBrains Web Types](integrations/editor-tooling.md)
 
 ## Extensions
@@ -70,6 +70,7 @@ Add aellux.js to a page and enable the Extensions it needs. The library coordina
 - [Feedback](core-extensions/feedback.md)
 - [Focus](core-extensions/focus.md)
 - [Point](core-extensions/point.md)
+- [Dialog](core-extensions/dialog.md)
 - [Preference](core-extensions/preference.md)
 - [Present](core-extensions/present.md)
 - [Scrollbox](core-extensions/scrollbox.md)

@@ -535,6 +535,13 @@
                                     class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                     style="flex:0">
                                     <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                      href="/core/docs/0.1.0/core-extensions/dialog.htm" data-ae-overflow-marquee="190px">
+                                      Dialog                                    </a>
+                                  </div>
+                                                                                                                                      <div
+                                    class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                    style="flex:0">
+                                    <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                       href="/core/docs/0.1.0/core-extensions/overflow-marquee.htm" data-ae-overflow-marquee="190px">
                                       Overflow Marquee                                    </a>
                                   </div>
@@ -729,7 +736,7 @@
 <p>For <code>0.1.0</code>, automated validation forces this profile in the same current Chromium, Firefox, and WebKit engines used by the Modern suite. It verifies boot selection, the Legacy orchestrator, shared polyfill setup, and compatible Extension variants. The release does not claim support for historical Chrome, Firefox, Safari, Edge Legacy, or Internet Explorer versions. A historical browser enters the support matrix only after a separate run on that exact browser and operating system.</p>
 <h2>Selection Rules</h2>
 <p>The boot script checks the capabilities required by the orchestrator before loading it. Missing capabilities are recorded in <code>AelluxJs.diagnostics.notAvailable</code>.</p>
-<p>The required APIs include <code>HTMLDialogElement.prototype.show</code>, <code>showModal</code>, and <code>close</code>. If any are missing, Legacy supplies the dialog fallback and its styles. Existing and dynamically inserted dialogs are registered through <code>$ae.mount(root)</code>; see <a href="es5-support.htm">ES5 support level</a> for usage and fallback limitations.</p>
+<p>The required APIs include <code>HTMLDialogElement.prototype.show</code>, <code>showModal</code>, and <code>close</code>. If any are missing, Legacy is selected. The fallback and its inline CSS belong exclusively to the <a href="../core-extensions/dialog.htm">Dialog Extension</a> Legacy files, and are installed only when that Extension mounts an element lacking the complete API. Full registers Dialog on demand for <code>dialog</code>; Basic requires explicit registration. Existing and dynamically inserted dialogs are registered through <code>$ae.mount(root)</code>; see <a href="es5-support.htm">ES5 support level</a> for usage and fallback limitations.</p>
 <p>Force Legacy through initialization options or the development query parameter:</p>
 <pre><code class="language-js">$ae.init({ mode: &quot;basic&quot;, forceLegacy: true });
 </code></pre>
@@ -763,7 +770,7 @@
                 Special thanks to
                 <a style="color:inherit!important;" href="https://getbootstrap.com/" target="_blank"
                   rel="noopener noreferrer">Bootstrap</a>
-                - this page layout was built around Bootstrap’s responsive components and utility classes.
+                - this page layout was built around its responsive components and utility classes.
               </div>
             </div>
           </footer>

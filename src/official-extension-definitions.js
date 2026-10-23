@@ -7,6 +7,7 @@ export const officialExtensionDefinitions = Object.freeze([
   Object.freeze({ name: "state-navigation", style: false, dependencies: Object.freeze([]) }),
   Object.freeze({ name: "feedback", style: true, dependencies: Object.freeze([]) }),
   Object.freeze({ name: "focus", style: false, dependencies: Object.freeze([]) }),
+  Object.freeze({ name: "dialog", style: false, dependencies: Object.freeze([]) }),
   Object.freeze({ name: "point", style: false, dependencies: Object.freeze([]) }),
   Object.freeze({ name: "anchor", style: true, dependencies: Object.freeze([]) }),
   Object.freeze({ name: "overflow-marquee", style: true, dependencies: Object.freeze([]) }),
