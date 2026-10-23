@@ -29,7 +29,7 @@
 
       document.querySelectorAll('pre code:not([data-highlighted])')
         .forEach((block) => {
-          hljs.highlightElement(block);
+          hljs?.highlightElement(block);
         });
 
       prepareAjaxLinks();

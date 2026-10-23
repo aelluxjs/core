@@ -62,7 +62,7 @@
 
       document.querySelectorAll('pre code:not([data-highlighted])')
         .forEach((block) => {
-          hljs.highlightElement(block);
+          hljs?.highlightElement(block);
         });
 
       prepareAjaxLinks();
@@ -715,13 +715,14 @@
 
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/tocbot@4.32/dist/tocbot.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/tocbot@4.32/dist/tocbot.min.js" async defer></script>
 
-<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.12/highlight.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.12/languages/xml.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.12/languages/json.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.12/languages/bash.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.12/languages/javascript.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.12/highlight.min.js" async></script>
+<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.12/languages/xml.min.js" async defer></script>
+<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.12/languages/json.min.js" async defer></script>
+<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.12/languages/bash.min.js" async defer></script>
+<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.12/languages/javascript.min.js" async
+  defer></script>
 
 <script src="/core/docs/assets/docweaver/js/toc-init.js?t=1"></script>
 
