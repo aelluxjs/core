@@ -1,17 +1,79 @@
 import { expect, test } from "@playwright/test";
 
-async function start(page, { mode = "full", forceLegacy = false, markup = '<button id="install" data-ae-pwa="install">Install App</button>', options = {} } = {}) {
+async function start(page, { mode = "full", forceLegacy = false, environment = "production", markup = '<button id="install" data-ae-pwa="install">Install App</button>', options = {} } = {}) {
   await page.goto("/tests/index.htm");
   await page.addScriptTag({ url: "/dist/aellux.js" });
-  await page.evaluate(async ({ mode, forceLegacy, markup, options }) => {
+  await page.evaluate(async ({ mode, forceLegacy, environment, markup, options }) => {
     document.body.innerHTML = markup;
     if (mode === "basic") AelluxJs.ext("pwa", { loadWhen: "[data-ae-pwa]" });
     await new Promise(resolve => {
       AelluxJs.on("Ready", resolve, { once: true });
-      AelluxJs.init({ mode, forceLegacy, extensions: { pwa: options } });
+      AelluxJs.init({ mode, forceLegacy, environment, verboseLevel: "error", extensions: { pwa: options } });
     });
-  }, { mode, forceLegacy, markup, options });
+  }, { mode, forceLegacy, environment, markup, options });
 }
+
+async function manifestWarnings(page) {
+  return page.evaluate(() => $ae.diagnostics.showHistory().filter(entry =>
+    entry.code === 2028 && entry.context?.extension === "pwa").map(entry => ({
+      code: entry.code, attribute: entry.context.attribute, value: entry.context.value, suggestion: entry.context.suggestion
+    })));
+}
+
+for (const forceLegacy of [false, true]) {
+  test(`PWA diagnoses missing manifest once in development without delaying the native prompt (Legacy=${forceLegacy})`, async ({ page }) => {
+    await start(page, { environment: "development", forceLegacy });
+    expect(await manifestWarnings(page)).toEqual([expect.objectContaining({ code: 2028, attribute: "rel", suggestion: expect.stringContaining('rel="manifest"') })]);
+    await page.evaluate(async () => {
+      await $ae.mount();
+      await $ae.ext.pwa.install({ fallback: "none" });
+      await $ae.ext.pwa.install({ fallback: "none" });
+    });
+    expect(await manifestWarnings(page)).toHaveLength(1);
+    await nativeEvent(page);
+    await page.locator("#install").click();
+    expect(await page.evaluate(() => ({ calls: promptCalls, inClick: promptInClick, activation: promptActivation })))
+      .toEqual({ calls: 1, inClick: true, activation: true });
+    expect(await manifestWarnings(page)).toHaveLength(1);
+  });
+
+  test(`PWA recognizes a manifest before dynamic mounting and rechecks removed or blank href (Legacy=${forceLegacy})`, async ({ page }) => {
+    await start(page, { environment: "development", forceLegacy, markup: "<main>App</main>" });
+    expect(await manifestWarnings(page)).toHaveLength(0);
+    await page.evaluate(async () => {
+      const link = document.createElement("link");
+      link.rel = "alternate MANIFEST";
+      link.href = "./app.webmanifest";
+      document.head.appendChild(link);
+      const button = document.createElement("button");
+      button.id = "install";
+      button.setAttribute("data-ae-pwa", "install");
+      document.body.appendChild(button);
+      await $ae.mount(button);
+      await $ae.ext.pwa.install({ fallback: context => { window.manifestURL = context.manifestURL; } });
+    });
+    expect(await manifestWarnings(page)).toHaveLength(0);
+    expect(await page.evaluate(() => manifestURL)).toBe("http://127.0.0.1:4173/tests/app.webmanifest");
+    await page.evaluate(async () => {
+      const link = [...document.querySelectorAll("link[rel]")].find(link => link.rel === "alternate MANIFEST");
+      link.removeAttribute("href");
+      await $ae.ext.pwa.install({ fallback: "none" });
+      link.setAttribute("href", "  ");
+      await $ae.ext.pwa.install({ fallback: context => { window.manifestURL = context.manifestURL; } });
+    });
+    expect(await manifestWarnings(page)).toEqual([
+      expect.objectContaining({ attribute: "href", value: null }),
+      expect.objectContaining({ attribute: "href", value: "  " })
+    ]);
+    expect(await page.evaluate(() => manifestURL)).toBe(null);
+  });
+}
+
+test("production does not emit manifest presence diagnostics", async ({ page }) => {
+  await start(page);
+  await page.evaluate(() => $ae.ext.pwa.install({ fallback: "none" }));
+  expect(await manifestWarnings(page)).toHaveLength(0);
+});
 async function nativeEvent(page, outcome = "accepted") {
   await page.evaluate(outcome => {
     window.promptCalls = 0;

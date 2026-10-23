@@ -7,6 +7,8 @@ PWA is an official, optional Extension for page-side installation, installation 
 Full recognizes this explicit declaration, including dynamically inserted elements followed by `$ae.mount(element)`:
 
 ```html
+<!-- In the document head; provide the application-owned manifest file. -->
+<link rel="manifest" href="./manifest.webmanifest">
 <button type="button" data-ae-pwa="install">Install App</button>
 <script src="./dist/aellux.js"></script>
 <script>$ae.init({ mode: "full" });</script>
@@ -52,7 +54,7 @@ $ae.ext.pwa.install({ fallback: "none" });    // State/events, no built-in guide
 $ae.ext.pwa.install({ fallback: context => renderMyInstallUI(context) });
 ```
 
-`context` contains `{ status, element, manifest, manifestURL }`. `manifestURL` reads an existing native manifest link without fetching it or delaying the native prompt. Optional `manifest` data supplied by the developer is forwarded to custom renderers; automatic manifest download is unnecessary. A custom fallback may explain unknown environments; the default does not guess instructions. Installed/unavailable contexts return without presenting guidance.
+`context` contains `{ status, element, manifest, manifestURL }`. `manifestURL` reads the first native manifest link when its `href` is nonempty, or is `null` when that declaration is absent or empty, without fetching it or delaying the native prompt. Optional `manifest` data supplied by the developer is forwarded to custom renderers; this does not create the browser's manifest link or replace its file. A custom fallback may explain unknown environments; the default does not guess instructions. Installed/unavailable contexts return without presenting guidance.
 
 ## Default guide and customization
 
@@ -122,6 +124,45 @@ updateButton.addEventListener("click", () => pwa.applyUpdate());
 Identical concurrent or repeated registrations are shared within the instance. One registration is observed at a time; registering another script/scope switches the observed registration. `checkUpdate()` calls the native `registration.update()` and returns that registration, or `null` if none is managed. Existing waiting replacements are also detected after registration.
 
 No automatic `skipWaiting`, `clients.claim()` or reload occurs. `applyUpdate()` returns `false` if there is no waiting worker; otherwise it posts `{ type: "AELLUX_PWA_SKIP_WAITING" }` and returns `true`. The supplied reusable worker understands that explicit command. Other workers need their own handler. Applications decide if and when to reload after `PwaUpdateComplete`. Destroy releases observers and controls but **does not unregister workers, delete persistent caches or uninstall the app**.
+
+## Application manifest: purpose, declaration and checks
+
+The Web App Manifest supplies the browser with application metadata used for installation and launch: identity, name, icons, starting URL, display mode and navigation scope. Provide an application-owned JSON file and reference it from the head of every entry page that offers installation:
+
+```html
+<head>
+  <link rel="manifest" href="./manifest.webmanifest">
+</head>
+```
+
+A PWA button or registered Service Worker does not supply these metadata. For the browser's installable-PWA flow, configure the manifest and the members required by the target browser; a link alone does not establish eligibility or guarantee `beforeinstallprompt`. Some browsers also allow adding ordinary sites to the Home Screen, so a missing manifest does not prove that every installation route is unavailable. See [MDN: installation requirements and the role of the manifest](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Guides/Making_PWAs_installable#installability).
+
+For the available properties and their meanings, use the [MDN manifest members reference](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Manifest/Reference). Start with `id`, `name`/`short_name`, `icons`, `start_url`, `scope` and `display`, then add application-specific fields such as colors or shortcuts. Check each property's browser compatibility. The [W3C Web Application Manifest specification](https://www.w3.org/TR/appmanifest/) defines the format and processing rules; the [MDN manifest guide](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Manifest#deploying_a_manifest) explains linking and serving the file. Serve it as JSON, preferably with `Content-Type: application/manifest+json`. Relative resource paths, such as icon `src` values, resolve against the manifest URL; consult each member's own URL resolution rules. The manifest's `scope` describes application navigation and is distinct from the Service Worker's registration scope.
+
+When PWA initializes or `install()` is requested with `environment: "development"`, it checks for a native `link` whose `rel` contains the `manifest` token and whose `href` is nonempty. A missing link or missing/blank `href` records `WARN_CONFIGURATION_STRUCTURE` (`2028`), with `extension: "pwa"`, the relevant element/attribute, reason and corrective suggestion. Repeated equivalent warnings use the existing diagnostic deduplication. A manifest added later is recognized on the next installation request. Production performs no diagnostic presence scan, and pages that never load PWA gain no check or listener.
+
+This check examines the declaration only: it does not fetch the manifest, parse its JSON, verify icons, validate its members or establish installability. Use browser developer tools to inspect the actual manifest response and installation issues. The warning does not block mounting, installation APIs or independent offline support. Aellux never generates a manifest in the browser.
+
+## Minimal `sw.js` with `importScripts()`
+
+Host the principal worker in the application's origin, for example `/my-app/sw.js`, and deploy the reusable script beside the other Aellux assets:
+
+```js
+// /my-app/sw.js — classic worker, executed outside the page
+self.AelluxPWAConfig = { name: "example", version: "1.0.0" };
+importScripts("./vendor/aellux.pwa.sw.min.js");
+```
+
+Register that local entry from the page after explicitly loading PWA:
+
+```js
+const pwa = await $ae.wait("pwa");
+await pwa.register({ script: "./sw.js", scope: "./", type: "classic" });
+```
+
+`importScripts()` synchronously executes the shared script inside the same classic worker. Assign `self.AelluxPWAConfig` **before** importing so that the shared implementation reads your settings while registering its handlers. The relative import above resolves against the principal worker URL, giving `/my-app/vendor/aellux.pwa.sw.min.js`; Aellux cache/offline configuration URLs instead resolve against the registration scope. This API is named `importScripts()` (plural), works in workers, and cannot be used with `type: "module"`. See the [external `importScripts()` reference](https://developer.mozilla.org/en-US/docs/Web/API/WorkerGlobalScope/importScripts).
+
+This minimum registers worker lifecycle handlers but enables no precache, managed request caching or offline fallback. Add an explicit `offline` page and `cache` policies as in the complete example below to enable those capabilities. The manifest link remains in the page; `sw.js` does not replace it. The principal worker must be same-origin; only the imported reusable script may use a CDN, subject to the applicable security policies. Serve the scripts with a JavaScript MIME type over HTTPS or a trusted local development origin.
 
 ## Complete local example
 

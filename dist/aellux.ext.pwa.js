@@ -61,6 +61,7 @@
         unmount,
         controllers: ["install", "register", "checkUpdate", "applyUpdate", "status"]
       });
+      diagnoseManifest();
     }
     function destroy() {
       if (!active) return;
@@ -148,11 +149,29 @@
     function argumentsFor(first, second) {
       return (first == null ? void 0 : first.nodeType) === 1 ? { element: first, options: second || {} } : { element: null, options: first || {} };
     }
+    function manifestLink() {
+      return Array.from(root.document.querySelectorAll("link[rel]")).find((link) => /(?:^|\s)manifest(?:\s|$)/i.test(link.getAttribute("rel") || ""));
+    }
+    function diagnoseManifest() {
+      var _a, _b;
+      if (api.options.environment !== "development") return;
+      const link = manifestLink();
+      if ((_a = link == null ? void 0 : link.getAttribute("href")) == null ? void 0 : _a.trim()) return;
+      api.diagnostics.warn(api.diagnostics.WARN_CONFIGURATION_STRUCTURE, {
+        extension: extensionName,
+        element: link || root.document.documentElement,
+        attribute: link ? "href" : "rel",
+        value: (_b = link == null ? void 0 : link.getAttribute("href")) != null ? _b : null,
+        reason: link ? "The Web App Manifest link has no nonempty href." : "The page has no Web App Manifest link.",
+        suggestion: 'Add <link rel="manifest" href="./manifest.webmanifest"> in the document head and provide an application manifest. See the PWA documentation; registering a Service Worker does not supply a manifest.'
+      });
+    }
     function install(first, second) {
       var _a, _b, _c;
       const { element, options } = argumentsFor(first, second);
       if (!active) return Promise.reject(new Error("PWA is not initialized."));
       if (promptTask) return promptTask;
+      diagnoseManifest();
       const current = status(), token = revision;
       if (current.installMethod === "unavailable") return Promise.resolve({ outcome: "unavailable", status: current });
       if (current.canPrompt) {
@@ -181,11 +200,12 @@
       }
       if (guideTask) return guideTask;
       const fallback = (_b = (_a = options.fallback) != null ? _a : settings.fallback) != null ? _b : "default";
+      const link = manifestLink();
       const context = {
         status: current,
         element,
         manifest: options.manifest || settings.manifest || null,
-        manifestURL: ((_c = root.document.querySelector('link[rel~="manifest"]')) == null ? void 0 : _c.href) || null
+        manifestURL: ((_c = link == null ? void 0 : link.getAttribute("href")) == null ? void 0 : _c.trim()) ? link.href : null
       };
       const task = Promise.resolve().then(() => {
         if (!active || token !== revision) return { outcome: "unavailable", status: status() };

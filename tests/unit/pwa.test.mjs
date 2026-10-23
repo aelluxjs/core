@@ -4,12 +4,13 @@ import { readFile } from "node:fs/promises";
 import { runInNewContext } from "node:vm";
 
 const source = await readFile(new URL("../../src/aellux.ext.pwa.js", import.meta.url), "utf8");
-function setup({ navigator = {}, secure = true } = {}) {
-  const root = new EventTarget(), events = [], maps = new Map();
+function setup({ navigator = {}, secure = true, environment = "production", manifestLinks = [] } = {}) {
+  const root = new EventTarget(), events = [], warnings = [], maps = new Map();
   let extension;
   Object.assign(root, { navigator, isSecureContext: secure, location: new URL("https://app.test/sub/"),
-    document: { baseURI: "https://app.test/sub/", querySelector: () => null },
-    AelluxJs: { attr: name => `data-ae-${name}`, eventName: name => name.startsWith("$") ? name.slice(1) : `Demo${name}`,
+    document: { baseURI: "https://app.test/sub/", documentElement: {}, querySelector: () => null, querySelectorAll: () => manifestLinks },
+    AelluxJs: { options: { environment }, attr: name => `data-ae-${name}`, eventName: name => name.startsWith("$") ? name.slice(1) : `Demo${name}`,
+      diagnostics: { WARN_CONFIGURATION_STRUCTURE: { code: 2028 }, warn: (definition, context) => warnings.push({ code: definition.code, context }) },
       extAttach: (_, value) => { extension = value; },
       onEvent: (target, event, fn) => target.addEventListener(event.slice(1), fn),
       offEvent: (target, event, fn) => target.removeEventListener(event.slice(1), fn),
@@ -18,7 +19,7 @@ function setup({ navigator = {}, secure = true } = {}) {
     } });
   runInNewContext(source, { globalThis: root, URL, Promise, Set, Map, Error, TypeError });
   extension.init();
-  return { root, extension, events, maps };
+  return { root, extension, events, warnings, maps };
 }
 function prompt(root, outcome = "accepted", callback = () => {}) {
   const event = new Event("beforeinstallprompt", { cancelable: true });
@@ -28,6 +29,44 @@ function prompt(root, outcome = "accepted", callback = () => {}) {
   root.dispatchEvent(event);
   return { event, calls: () => calls };
 }
+
+test("development reports a missing or empty manifest declaration without blocking install", async () => {
+  for (const href of [undefined, null, "", "  \t "]) {
+    const link = href === undefined ? null : { getAttribute: name => name === "rel" ? "manifest" : href };
+    const { extension, warnings } = setup({ environment: "development", manifestLinks: link ? [link] : [] });
+    assert.equal(warnings.length, 1);
+    assert.equal(warnings[0].code, 2028);
+    assert.equal(warnings[0].context.extension, "pwa");
+    assert.equal(warnings[0].context.attribute, link ? "href" : "rel");
+    assert.match(warnings[0].context.suggestion, /rel="manifest"/);
+    assert.equal((await extension.install({ fallback: "none" })).outcome, "unknown");
+  }
+});
+
+test("manifest presence recognizes rel tokens, forwards its URL, and does not fetch or parse the file", async () => {
+  const links = [{ getAttribute: name => name === "rel" ? "alternate \t MANIFEST" : "app.webmanifest",
+    href: "https://app.test/sub/app.webmanifest" }];
+  const { extension, warnings, root } = setup({ environment: "development", manifestLinks: links });
+  let context;
+  await extension.install({ fallback: value => { context = value; } });
+  assert.equal(warnings.length, 0);
+  assert.equal(context.manifestURL, links[0].href);
+  links.length = 0;
+  const native = prompt(root);
+  const task = extension.install();
+  assert.equal(native.calls(), 1);
+  assert.equal((await task).outcome, "accepted");
+  assert.equal(warnings.length, 1);
+});
+
+test("production does not diagnose a missing manifest or scan links before native prompt", async () => {
+  const { extension, root, warnings } = setup();
+  root.document.querySelectorAll = () => { throw new Error("Unexpected manifest presence scan"); };
+  const native = prompt(root);
+  assert.equal((await extension.install()).outcome, "accepted");
+  assert.equal(native.calls(), 1);
+  assert.equal(warnings.length, 0);
+});
 
 test("native prompt runs synchronously once, shares pending result, emits normalized events and clears references", async () => {
   const { root, extension, events } = setup();

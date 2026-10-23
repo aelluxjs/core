@@ -243,6 +243,7 @@
         unmount: unmount,
         controllers: ["install", "register", "checkUpdate", "applyUpdate", "status"]
       });
+      diagnoseManifest();
     }
     function destroy() {
       var _media3, _media4;
@@ -354,11 +355,31 @@
         options: first || {}
       };
     }
+    function manifestLink() {
+      return Array.from(root.document.querySelectorAll("link[rel]")).find(function(link) {
+        return /(?:^|\s)manifest(?:\s|$)/i.test(link.getAttribute("rel") || "");
+      });
+    }
+    function diagnoseManifest() {
+      var _link$getAttribute, _link$getAttribute2;
+      if (api.options.environment !== "development") return;
+      var link = manifestLink();
+      if (link !== null && link !== void 0 && (_link$getAttribute = link.getAttribute("href")) !== null && _link$getAttribute !== void 0 && _link$getAttribute.trim()) return;
+      api.diagnostics.warn(api.diagnostics.WARN_CONFIGURATION_STRUCTURE, {
+        extension: extensionName,
+        element: link || root.document.documentElement,
+        attribute: link ? "href" : "rel",
+        value: (_link$getAttribute2 = link === null || link === void 0 ? void 0 : link.getAttribute("href")) !== null && _link$getAttribute2 !== void 0 ? _link$getAttribute2 : null,
+        reason: link ? "The Web App Manifest link has no nonempty href." : "The page has no Web App Manifest link.",
+        suggestion: 'Add <link rel="manifest" href="./manifest.webmanifest"> in the document head and provide an application manifest. See the PWA documentation; registering a Service Worker does not supply a manifest.'
+      });
+    }
     function install(first, second) {
-      var _ref, _options$fallback, _root$document$queryS;
+      var _ref, _options$fallback, _link$getAttribute3;
       var _argumentsFor = argumentsFor(first, second), element = _argumentsFor.element, options = _argumentsFor.options;
       if (!active) return Promise.reject(new Error("PWA is not initialized."));
       if (promptTask) return promptTask;
+      diagnoseManifest();
       var current = status(), token = revision;
       if (current.installMethod === "unavailable") return Promise.resolve({
         outcome: "unavailable",
@@ -403,11 +424,12 @@
       }
       if (guideTask) return guideTask;
       var fallback = (_ref = (_options$fallback = options.fallback) !== null && _options$fallback !== void 0 ? _options$fallback : settings.fallback) !== null && _ref !== void 0 ? _ref : "default";
+      var link = manifestLink();
       var context = {
         status: current,
         element: element,
         manifest: options.manifest || settings.manifest || null,
-        manifestURL: ((_root$document$queryS = root.document.querySelector('link[rel~="manifest"]')) === null || _root$document$queryS === void 0 ? void 0 : _root$document$queryS.href) || null
+        manifestURL: link !== null && link !== void 0 && (_link$getAttribute3 = link.getAttribute("href")) !== null && _link$getAttribute3 !== void 0 && _link$getAttribute3.trim() ? link.href : null
       };
       var task = Promise.resolve().then(function() {
         if (!active || token !== revision) return {
