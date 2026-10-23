@@ -16,11 +16,11 @@ root.AelluxJs.bundledExtensions = Object.freeze({
   "present": () => import("./aellux.ext.present.js")
 });
 
-root.AelluxJs.extIndex.official = typeof __AELLUX_OFFICIAL_EXTENSION_MANIFEST__ !== "undefined"
-  ? __AELLUX_OFFICIAL_EXTENSION_MANIFEST__ : null;
+// The version-matched boot script already supplies the signed official index.
+// Reuse it instead of embedding a second copy in both Full variants.
 
 // Bundled Extensions initialize on demand without separate script requests.
-// Dialog, Overflow Marquee, Scrollbox and Snap use the embedded official
+// Dialog, PWA, Overflow Marquee, Scrollbox and Snap use the embedded official
 // manifest to load separate files when their selectors match.
 root.AelluxJs.ext("adaptive", { loadWhen: "[data-ae-adaptive]" });
 root.AelluxJs.ext("anchor", { loadWhen: "[data-ae-anchor]" });
@@ -29,6 +29,7 @@ root.AelluxJs.ext("ajax-href", { loadWhen: "a[data-ae-ajax-href]" });
 root.AelluxJs.ext("feedback", { loadWhen: "[data-ae-feedback]" });
 root.AelluxJs.ext("focus", { loadWhen: "[data-ae-focus]" });
 root.AelluxJs.ext("dialog", { loadWhen: "dialog" });
+root.AelluxJs.ext("pwa", { loadWhen: "[data-ae-pwa]" });
 root.AelluxJs.ext("point", { loadWhen: "[data-ae-point]" });
 root.AelluxJs.ext("present", {
   loadWhen: "[data-ae-present],[data-ae-present-group],[data-ae-trigger],[data-ae-dismiss],[data-ae-target]"

@@ -29,19 +29,10 @@
     return __copyProps(__defProp({}, "__esModule", { value: true }), mod);
   };
 
-  // <define:__AELLUX_OFFICIAL_EXTENSION_MANIFEST__>
-  var define_AELLUX_OFFICIAL_EXTENSION_MANIFEST_default;
-  var init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST = __esm({
-    "<define:__AELLUX_OFFICIAL_EXTENSION_MANIFEST__>": function() {
-      define_AELLUX_OFFICIAL_EXTENSION_MANIFEST_default = { schemaVersion: 1, coreVersion: "0.1.0-beta.10", extensions: { preference: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.preference.min.js", integrity: "sha384-mSOgb0DekFTRXXZAgyNrPjamdlSqzL4SSGZYVWgVg+WlG+pBj11xT81v/6Xk43yO", regular: { url: "./aellux.ext.preference.js", integrity: "sha384-MlikpdHSzHzF6kz5+oJGtq3eoFsKTsx/g+FTrf+dFOU8iQGHsCpn4fP1jLlbNrj7" } }, legacy: { url: "./aellux.ext.preference.legacy.min.js", integrity: "sha384-1LMsK0W9J/PoM4tXhFgkYLRY4yWdzVoYmFy4OMDGd8lRdtptKoEb1sI9L1kzNaBu", regular: { url: "./aellux.ext.preference.legacy.js", integrity: "sha384-pozuz43OyfXrnkmuBu6KTM2lqRSqcI5LMgwAtqnzXq8xZGdVqpnmOtrBcYcMskWk" } } }, dependencies: [] }, "state-navigation": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.state-navigation.min.js", integrity: "sha384-wAbgAqjAA6wauuG+iuUtfRwxChd6fTJ0fS22fqnu2r00kouoXJWZ0f7AoTYlqBC6", regular: { url: "./aellux.ext.state-navigation.js", integrity: "sha384-PKJ8HTD7eIYDEg2hOaAJjpMYzLr2fBjBRGmIGG7XzGTzVK0yTjt5HYPO55VbWfdS" } }, legacy: { url: "./aellux.ext.state-navigation.legacy.min.js", integrity: "sha384-YkhfU15Mpk8KiO6TyoVU6z1yCiYWwnsOGE0xVaQ8NrE7IGrxOSUL005g5JeUDdJu", regular: { url: "./aellux.ext.state-navigation.legacy.js", integrity: "sha384-kaEUY0Zpw8K6pcwjm+INA5feXftLK2/N1aFpPr2LCTcetX2uoe2GGd1MJyy7u8rZ" } } }, dependencies: [] }, feedback: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.feedback.min.js", integrity: "sha384-oHAcvQwCs/v3ktzXoNdJEDEkaV6NI29MjzjF068Lw0oL9NwVP5THnxzb12f0ySkY", regular: { url: "./aellux.ext.feedback.js", integrity: "sha384-dGcxHfGyV544C6livNJKKrlNWky/fBFkMONowmtlhHZ5exWL8AJOoV40jJhZW6Iq" } }, legacy: { url: "./aellux.ext.feedback.legacy.min.js", integrity: "sha384-S31Sa8B4kbKL/xsEJ3QTTikO+AjuXSc9GXBzNw8kl/b2amk5tzqgQNNKQPfGnYdF", regular: { url: "./aellux.ext.feedback.legacy.js", integrity: "sha384-sy2QmY3L1TlvGPgdebeu5q9ZJl/bOeUstWE0Cu+QJUIYWSF9y1YH6mCpe09/eKrd" } } }, dependencies: [], style: { url: "./aellux.ext.feedback.min.css", integrity: "sha384-OBguCYqF+dMD0Pl84C3FlY/+ohUGfW0OyynmXb/PSDEGOyuI/TQJ3EZAoCeJx+Jk", regular: { url: "./aellux.ext.feedback.css", integrity: "sha384-yk4cW+r/Mc1FRS1ZauBHC6KsKb7sxuJ0E9mmt/+AYASAdZXXMK6iuFBR+TOEh/r4" } } }, focus: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.focus.min.js", integrity: "sha384-AXpUv/Ur2Z4cKvO9EqIFqfxxdSQR5j75q0okOAWPvHhSneQ5LPjrOzk6Sl9MOo4a", regular: { url: "./aellux.ext.focus.js", integrity: "sha384-VjQzcnhLRrvRlbVQ0X4/tO0+8gqJXAmIFoeIVimjOud1wRNuBXNnSQHHW9XQPzTe" } }, legacy: { url: "./aellux.ext.focus.legacy.min.js", integrity: "sha384-I5QpUmKsA1T8NiKfKXQgbdG19Ld1ZGCWSmosygO3yGj43tdxp5zCfLyfBuFoHlKu", regular: { url: "./aellux.ext.focus.legacy.js", integrity: "sha384-5/y3J1NC/qMyV9myEj29+wGbqCVI8ICPafSebtJVfl15Qmup6vMiJzveShd3CLnw" } } }, dependencies: [] }, dialog: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.dialog.min.js", integrity: "sha384-81nKjx0YpSsLAomqC9KkisQwzb4vuBlCt2LDzrQKmbySglCi2uL+TMog9IsgM6fY", regular: { url: "./aellux.ext.dialog.js", integrity: "sha384-l/JiEWfwZjoRstLvtduKXEprGYknbGI8N+UCthSf4eV2IeBrbJhArdrQ+KTtffIS" } }, legacy: { url: "./aellux.ext.dialog.legacy.min.js", integrity: "sha384-HD1NDBMWzJf3cjZKnbpL1pE4s5KTfvlyRai5l/1jfintahqpf87jEoMjwT+nO473", regular: { url: "./aellux.ext.dialog.legacy.js", integrity: "sha384-j9FgIwwar14yeeayJ7oLhqCdCzFyKaXjea8aYIP+gUO94IjZ0vkskGCfaSflrFnH" } } }, dependencies: [] }, point: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.point.min.js", integrity: "sha384-Xs6j53KcvGe+uxFvAZxA33QVWZUTQdbRLvx/SmPRYwtI1FdRqtg7HX1vvqw3sllx", regular: { url: "./aellux.ext.point.js", integrity: "sha384-SADPZVR4ANG+cju1qXjtio97ylPp5DbnMbBZORgkHUjjPUKWa2dJ3xw4/X7geubu" } }, legacy: { url: "./aellux.ext.point.legacy.min.js", integrity: "sha384-PNoKlNYaZJ1K+RPkFVJ/KWGu2xcY/qD/wS2bZIBrtYOhKPeJz/N0S7ddMQEWtlRb", regular: { url: "./aellux.ext.point.legacy.js", integrity: "sha384-4ZTxlwhOgRY7WLohaQm3vPaCAr0Il1zbLDXx4FxcrqHPbe/jufJftB+nCty6zBdb" } } }, dependencies: [] }, anchor: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.anchor.min.js", integrity: "sha384-vpHUGJwyY3qnW78C6Yo8CLc2vgbn1KJ8FcOtQawBtCKarQ0CoihuNQ7ZCKnMbOjx", regular: { url: "./aellux.ext.anchor.js", integrity: "sha384-LaYGJ6p9H5QBGJf5j19wHgT+CFcMim2h0Ro+itxYnLkIE29RFtPdj8P8L9EYWAWr" } }, legacy: { url: "./aellux.ext.anchor.legacy.min.js", integrity: "sha384-Ym0BnY5sDflVI4JyPVWymZKurBcJTAbPNe2gy+6qHcD7x6RyIKwvff6o+6BfeZDy", regular: { url: "./aellux.ext.anchor.legacy.js", integrity: "sha384-bN9t1anpKLUDUvnbE845H1+9UvP+XDfrsN5AhrKLUQJ5fm3YcFqiylDNFuE02RlJ" } } }, dependencies: [], style: { url: "./aellux.ext.anchor.min.css", integrity: "sha384-DwxfMH5mNSvmF0U4/dgL6dbe+5U1x97y2H4skxW7nUUzjr99IXNl9aVDwRjfvNGz", regular: { url: "./aellux.ext.anchor.css", integrity: "sha384-tHVCjTT3bvlmkAIDfMyevvrkAB7crjBXQAfY1l8XcaWhBFSersWJk+JndC6Bd9mO" } } }, "overflow-marquee": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.overflow-marquee.min.js", integrity: "sha384-Eqmu0pNMC64qS7kK8HI8nG9sjDDZn62b0O8SY2D7qOcC6rF0mj8XmAmrulQmP99L", regular: { url: "./aellux.ext.overflow-marquee.js", integrity: "sha384-n0Pkh5AsBRtTSSShu9YJf/qSevWP0r7+asYOBqyglI5z7gWTWbjE/0rAlqeoZWJ3" } }, legacy: { url: "./aellux.ext.overflow-marquee.legacy.min.js", integrity: "sha384-lOog++PR/TJTbVS+/TVvp6RuT972idDV+nzb0s6yd8hK9cyDh4d9UR1sROfFMp+S", regular: { url: "./aellux.ext.overflow-marquee.legacy.js", integrity: "sha384-DJwiequ7f6edt0D9cflftvA036vZWLH3RK50O0zX+3F+IbHldPHP92dbDjUTvGWf" } } }, dependencies: [], style: { url: "./aellux.ext.overflow-marquee.min.css", integrity: "sha384-PD8sxZJw/8gWr9Rq2l7wwUzADqBY74KSE1nn258niuXi97P+MSKN6tCxvocJPGd/", regular: { url: "./aellux.ext.overflow-marquee.css", integrity: "sha384-HyIVGE6lr+ZML8gekuK733ELP8Bd2gdj/+to+QhBYPN+tytaTEHP07ub3nAkOG3y" } } }, "ajax-href": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.ajax-href.min.js", integrity: "sha384-DD+XtPvKyNGWtcjYNTTcXU5e+PgMl7Ev81DgYMNEF0hNAxML61MGS9g8fy6hWIY5", regular: { url: "./aellux.ext.ajax-href.js", integrity: "sha384-h5H+QebE/oUgoWuMMOJOXZoqkjRenBh/EtpOIeU67b7mYDV2pBTvA3qMUiXFc8OS" } }, legacy: { url: "./aellux.ext.ajax-href.legacy.min.js", integrity: "sha384-Q1j4je0/BTjMBSZo29omTv/vLo4oyuaqYlG3h41XRJ02fnTm2X7qkhN2bAL2XZTe", regular: { url: "./aellux.ext.ajax-href.legacy.js", integrity: "sha384-snUrmBWZVPLbXiIkVpi0iaYYitOG/Uxa6gnMAg/iKJxPrfvP1of6LtpB0MC4XqrC" } } }, dependencies: [] }, scrollbox: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.scrollbox.min.js", integrity: "sha384-xvvqVjp8L4JLOKOPmIBAQu74doqxHEbcdHXO/678AzEIfnwJ7n4sNLErwAFWT/TF", regular: { url: "./aellux.ext.scrollbox.js", integrity: "sha384-8LkpI3GuwNINJsz6yjIJu379A5JSndRVfaiOYq6DASpouBAtnoGXi3grX1taS/LH" } }, legacy: { url: "./aellux.ext.scrollbox.legacy.min.js", integrity: "sha384-NfjjNIioenO0EAxx9GrcD/I9ILUL4nMzjAdyBF7bel05CRtOfTx1n1qS5zN3W7E1", regular: { url: "./aellux.ext.scrollbox.legacy.js", integrity: "sha384-DHH1dF+lyHWcO+fiwkwOP8c01PIPfOEHHp61yPEcDgDHsy8x+ugcClr/E3SbDJN4" } } }, dependencies: [], style: { url: "./aellux.ext.scrollbox.min.css", integrity: "sha384-+7gbnqlykQX9O8Q2E2+TcXQk0zpdZhUvNgwqlsL914/cBKo/zlEnbiltW4GcrsXT", regular: { url: "./aellux.ext.scrollbox.css", integrity: "sha384-/LJ8wnR9DMXq2PAGEXphThjj0l18YAkatUlI4YFCtCRK8hTB6QSrDVqbSRhNskg1" } } }, "scrollbox-snap": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.scrollbox-snap.min.js", integrity: "sha384-NNIBI4kj4sdGSI+XDs2LeBrjdo7AAN4eVtQeyAGScLBvxkZEFx3OaT9xpaW4b4Wq", regular: { url: "./aellux.ext.scrollbox-snap.js", integrity: "sha384-gmMGaW0wvR61QynjfBKga6/+7NMAWzk6ALIYmMC0hy9gkSvCrvKXueA+ETEgM9wB" } }, legacy: { url: "./aellux.ext.scrollbox-snap.legacy.min.js", integrity: "sha384-a35oytvnpf0myg+Brd+mFDgQBcbNaihANZl5J+GmrEqlyDl8CDQy0OZyu5Ld3l64", regular: { url: "./aellux.ext.scrollbox-snap.legacy.js", integrity: "sha384-9hE1HNRl9mFvr5aLiaRNZSQsTBb1XoicM6xGqeuISTS6OqL1sZm6DlmY6qxcQJk+" } } }, dependencies: [] }, adaptive: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.adaptive.min.js", integrity: "sha384-bkeOnTW/3uzbuhLc8fujaWnWGC+pwNAkZwci9M09paKqudp0v/flMrJ49JXw16vv", regular: { url: "./aellux.ext.adaptive.js", integrity: "sha384-Qzf9wU6DSSaaE+8lr96vnYqjKQqYxep8dhCZmjgNdqreuk9fL3qKMn3NW7DGAEaT" } }, legacy: { url: "./aellux.ext.adaptive.legacy.min.js", integrity: "sha384-YVHHWZOvf+65r/CU89nBPZXhj3j5sn4r2ho+CNUCUaYs1WE6pWIeypcq7n5OCBor", regular: { url: "./aellux.ext.adaptive.legacy.js", integrity: "sha384-gBkxqbBpIqdj5ozJm/NsenI/yKOvEGarZBl2SrPjYiiYx6cez2/FGTMf5XyzHrTj" } } }, dependencies: [], style: { url: "./aellux.ext.adaptive.min.css", integrity: "sha384-8yUP1PStfDqBCyCskP3k9WLIKgv/yl1nyDhmPz7hsX5NZ4z3ZT3ajolA+RhYlUiG", regular: { url: "./aellux.ext.adaptive.css", integrity: "sha384-HfIjX9Zk0VFRimzPvUaTS5AtwuHJHjXKoM/xbNJXj5vE7bSdBGEzbrBHfbNmYah0" } } }, present: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.present.min.js", integrity: "sha384-e9Ugejn8LF60AH/CrY7S33a6WkJKok6FLfMPnveyXRFRu0itRKedTU3317VirXIq", regular: { url: "./aellux.ext.present.js", integrity: "sha384-J/mWEj4jLGHfxvvPXMXLBt+09WhXRyGxQ8dNx7FIdXzXDLaeNi7bsBeuWbCg/i9Y" } }, legacy: { url: "./aellux.ext.present.legacy.min.js", integrity: "sha384-vaLbshfAzl9Wjx/bCsgkeY7d8QUD7sAXowycvuBAZWdGB71uD6Jtgbz+6bJpSDhm", regular: { url: "./aellux.ext.present.legacy.js", integrity: "sha384-++NYmpMqNbWqFDSZ32aasH6/X/nSAqixtJeYSYWXTus8kcdaAH2PyYcZNXWbj/L1" } } }, dependencies: [], style: { url: "./aellux.ext.present.min.css", integrity: "sha384-2QoNgFTu/KOOrgaTKZV4VXCoIaU2h5PMPILW5LHseXK2ygNpF6miOfxZUwkTBgPY", regular: { url: "./aellux.ext.present.css", integrity: "sha384-uZ/OPZK9sRFcaejKJHrc0wPaPXFKeGS+pBWWbkMEe3+3M6zLEa7nBc/cD0Tejsmr" } } } } };
-    }
-  });
-
   // node_modules/core-js/internals/global-this.js
   var require_global_this = __commonJS({
     "node_modules/core-js/internals/global-this.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var check = function(it) {
         return it && it.Math === Math && it;
       };
@@ -58,7 +49,6 @@
   var require_fails = __commonJS({
     "node_modules/core-js/internals/fails.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       module.exports = function(exec) {
         try {
           return !!exec();
@@ -73,7 +63,6 @@
   var require_descriptors = __commonJS({
     "node_modules/core-js/internals/descriptors.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var fails = require_fails();
       module.exports = !fails(function() {
         return Object.defineProperty({}, 1, { get: function() {
@@ -87,7 +76,6 @@
   var require_function_bind_native = __commonJS({
     "node_modules/core-js/internals/function-bind-native.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var fails = require_fails();
       module.exports = !fails(function() {
         var test = function() {
@@ -101,7 +89,6 @@
   var require_function_call = __commonJS({
     "node_modules/core-js/internals/function-call.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var NATIVE_BIND = require_function_bind_native();
       var call = Function.prototype.call;
       module.exports = NATIVE_BIND ? call.bind(call) : function() {
@@ -114,7 +101,6 @@
   var require_object_property_is_enumerable = __commonJS({
     "node_modules/core-js/internals/object-property-is-enumerable.js": function(exports) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $propertyIsEnumerable = {}.propertyIsEnumerable;
       var getOwnPropertyDescriptor = Object.getOwnPropertyDescriptor;
       var NASHORN_BUG = getOwnPropertyDescriptor && !$propertyIsEnumerable.call({ 1: 2 }, 1);
@@ -129,7 +115,6 @@
   var require_create_property_descriptor = __commonJS({
     "node_modules/core-js/internals/create-property-descriptor.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       module.exports = function(bitmap, value) {
         return {
           enumerable: !(bitmap & 1),
@@ -145,7 +130,6 @@
   var require_function_uncurry_this = __commonJS({
     "node_modules/core-js/internals/function-uncurry-this.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var NATIVE_BIND = require_function_bind_native();
       var FunctionPrototype = Function.prototype;
       var call = FunctionPrototype.call;
@@ -162,7 +146,6 @@
   var require_classof_raw = __commonJS({
     "node_modules/core-js/internals/classof-raw.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var uncurryThis = require_function_uncurry_this();
       var toString = uncurryThis({}.toString);
       var stringSlice = uncurryThis("".slice);
@@ -176,7 +159,6 @@
   var require_indexed_object = __commonJS({
     "node_modules/core-js/internals/indexed-object.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var uncurryThis = require_function_uncurry_this();
       var fails = require_fails();
       var classof = require_classof_raw();
@@ -194,7 +176,6 @@
   var require_is_null_or_undefined = __commonJS({
     "node_modules/core-js/internals/is-null-or-undefined.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       module.exports = function(it) {
         return it === null || it === void 0;
       };
@@ -205,7 +186,6 @@
   var require_require_object_coercible = __commonJS({
     "node_modules/core-js/internals/require-object-coercible.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var isNullOrUndefined = require_is_null_or_undefined();
       var $TypeError = TypeError;
       module.exports = function(it) {
@@ -219,7 +199,6 @@
   var require_to_indexed_object = __commonJS({
     "node_modules/core-js/internals/to-indexed-object.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var IndexedObject = require_indexed_object();
       var requireObjectCoercible = require_require_object_coercible();
       module.exports = function(it) {
@@ -232,7 +211,6 @@
   var require_is_callable = __commonJS({
     "node_modules/core-js/internals/is-callable.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var documentAll = typeof document == "object" && document.all;
       module.exports = typeof documentAll == "undefined" && documentAll !== void 0 ? function(argument) {
         return typeof argument == "function" || argument === documentAll;
@@ -246,7 +224,6 @@
   var require_is_object = __commonJS({
     "node_modules/core-js/internals/is-object.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var isCallable = require_is_callable();
       module.exports = function(it) {
         return typeof it == "object" ? it !== null : isCallable(it);
@@ -258,7 +235,6 @@
   var require_get_built_in = __commonJS({
     "node_modules/core-js/internals/get-built-in.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var globalThis2 = require_global_this();
       var isCallable = require_is_callable();
       var aFunction = function(argument) {
@@ -274,7 +250,6 @@
   var require_object_is_prototype_of = __commonJS({
     "node_modules/core-js/internals/object-is-prototype-of.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var uncurryThis = require_function_uncurry_this();
       module.exports = uncurryThis({}.isPrototypeOf);
     }
@@ -284,7 +259,6 @@
   var require_environment_user_agent = __commonJS({
     "node_modules/core-js/internals/environment-user-agent.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var globalThis2 = require_global_this();
       var navigator = globalThis2.navigator;
       var userAgent = navigator && navigator.userAgent;
@@ -296,7 +270,6 @@
   var require_environment_v8_version = __commonJS({
     "node_modules/core-js/internals/environment-v8-version.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var globalThis2 = require_global_this();
       var userAgent = require_environment_user_agent();
       var process2 = globalThis2.process;
@@ -324,7 +297,6 @@
   var require_symbol_constructor_detection = __commonJS({
     "node_modules/core-js/internals/symbol-constructor-detection.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var V8_VERSION = require_environment_v8_version();
       var fails = require_fails();
       var globalThis2 = require_global_this();
@@ -341,7 +313,6 @@
   var require_use_symbol_as_uid = __commonJS({
     "node_modules/core-js/internals/use-symbol-as-uid.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var NATIVE_SYMBOL = require_symbol_constructor_detection();
       module.exports = NATIVE_SYMBOL && !Symbol.sham && typeof Symbol.iterator == "symbol";
     }
@@ -351,7 +322,6 @@
   var require_is_symbol = __commonJS({
     "node_modules/core-js/internals/is-symbol.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var getBuiltIn = require_get_built_in();
       var isCallable = require_is_callable();
       var isPrototypeOf = require_object_is_prototype_of();
@@ -370,7 +340,6 @@
   var require_try_to_string = __commonJS({
     "node_modules/core-js/internals/try-to-string.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $String = String;
       module.exports = function(argument) {
         try {
@@ -386,7 +355,6 @@
   var require_a_callable = __commonJS({
     "node_modules/core-js/internals/a-callable.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var isCallable = require_is_callable();
       var tryToString = require_try_to_string();
       var $TypeError = TypeError;
@@ -401,7 +369,6 @@
   var require_get_method = __commonJS({
     "node_modules/core-js/internals/get-method.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var aCallable = require_a_callable();
       var isNullOrUndefined = require_is_null_or_undefined();
       module.exports = function(V, P) {
@@ -415,7 +382,6 @@
   var require_ordinary_to_primitive = __commonJS({
     "node_modules/core-js/internals/ordinary-to-primitive.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var call = require_function_call();
       var isCallable = require_is_callable();
       var isObject = require_is_object();
@@ -434,7 +400,6 @@
   var require_is_pure = __commonJS({
     "node_modules/core-js/internals/is-pure.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       module.exports = false;
     }
   });
@@ -443,7 +408,6 @@
   var require_define_global_property = __commonJS({
     "node_modules/core-js/internals/define-global-property.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var globalThis2 = require_global_this();
       var defineProperty = Object.defineProperty;
       module.exports = function(key, value) {
@@ -461,7 +425,6 @@
   var require_shared_store = __commonJS({
     "node_modules/core-js/internals/shared-store.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var IS_PURE = require_is_pure();
       var globalThis2 = require_global_this();
       var defineGlobalProperty = require_define_global_property();
@@ -481,7 +444,6 @@
   var require_shared = __commonJS({
     "node_modules/core-js/internals/shared.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var store = require_shared_store();
       var create = Object.create || Object;
       module.exports = function(key, value) {
@@ -494,7 +456,6 @@
   var require_to_object = __commonJS({
     "node_modules/core-js/internals/to-object.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var requireObjectCoercible = require_require_object_coercible();
       var $Object = Object;
       module.exports = function(argument) {
@@ -507,7 +468,6 @@
   var require_has_own_property = __commonJS({
     "node_modules/core-js/internals/has-own-property.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var uncurryThis = require_function_uncurry_this();
       var toObject = require_to_object();
       var hasOwnProperty = uncurryThis({}.hasOwnProperty);
@@ -521,7 +481,6 @@
   var require_uid = __commonJS({
     "node_modules/core-js/internals/uid.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var uncurryThis = require_function_uncurry_this();
       var id = 0;
       var postfix = Math.random();
@@ -536,7 +495,6 @@
   var require_well_known_symbol = __commonJS({
     "node_modules/core-js/internals/well-known-symbol.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var globalThis2 = require_global_this();
       var shared = require_shared();
       var hasOwn = require_has_own_property();
@@ -559,7 +517,6 @@
   var require_to_primitive = __commonJS({
     "node_modules/core-js/internals/to-primitive.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var call = require_function_call();
       var isObject = require_is_object();
       var isSymbol = require_is_symbol();
@@ -588,7 +545,6 @@
   var require_to_property_key = __commonJS({
     "node_modules/core-js/internals/to-property-key.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var toPrimitive = require_to_primitive();
       var isSymbol = require_is_symbol();
       module.exports = function(argument) {
@@ -602,7 +558,6 @@
   var require_document_create_element = __commonJS({
     "node_modules/core-js/internals/document-create-element.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var globalThis2 = require_global_this();
       var isObject = require_is_object();
       var document2 = globalThis2.document;
@@ -617,7 +572,6 @@
   var require_ie8_dom_define = __commonJS({
     "node_modules/core-js/internals/ie8-dom-define.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var DESCRIPTORS = require_descriptors();
       var fails = require_fails();
       var createElement = require_document_create_element();
@@ -635,7 +589,6 @@
   var require_object_get_own_property_descriptor = __commonJS({
     "node_modules/core-js/internals/object-get-own-property-descriptor.js": function(exports) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var DESCRIPTORS = require_descriptors();
       var call = require_function_call();
       var propertyIsEnumerableModule = require_object_property_is_enumerable();
@@ -661,7 +614,6 @@
   var require_v8_prototype_define_bug = __commonJS({
     "node_modules/core-js/internals/v8-prototype-define-bug.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var DESCRIPTORS = require_descriptors();
       var fails = require_fails();
       module.exports = DESCRIPTORS && fails(function() {
@@ -678,7 +630,6 @@
   var require_an_object = __commonJS({
     "node_modules/core-js/internals/an-object.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var isObject = require_is_object();
       var $String = String;
       var $TypeError = TypeError;
@@ -693,7 +644,6 @@
   var require_object_define_property = __commonJS({
     "node_modules/core-js/internals/object-define-property.js": function(exports) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var DESCRIPTORS = require_descriptors();
       var IE8_DOM_DEFINE = require_ie8_dom_define();
       var V8_PROTOTYPE_DEFINE_BUG = require_v8_prototype_define_bug();
@@ -740,7 +690,6 @@
   var require_create_non_enumerable_property = __commonJS({
     "node_modules/core-js/internals/create-non-enumerable-property.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var DESCRIPTORS = require_descriptors();
       var definePropertyModule = require_object_define_property();
       var createPropertyDescriptor = require_create_property_descriptor();
@@ -757,7 +706,6 @@
   var require_function_name = __commonJS({
     "node_modules/core-js/internals/function-name.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var DESCRIPTORS = require_descriptors();
       var hasOwn = require_has_own_property();
       var FunctionPrototype = Function.prototype;
@@ -778,7 +726,6 @@
   var require_inspect_source = __commonJS({
     "node_modules/core-js/internals/inspect-source.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var uncurryThis = require_function_uncurry_this();
       var isCallable = require_is_callable();
       var store = require_shared_store();
@@ -796,7 +743,6 @@
   var require_weak_map_basic_detection = __commonJS({
     "node_modules/core-js/internals/weak-map-basic-detection.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var globalThis2 = require_global_this();
       var isCallable = require_is_callable();
       var WeakMap2 = globalThis2.WeakMap;
@@ -808,7 +754,6 @@
   var require_shared_key = __commonJS({
     "node_modules/core-js/internals/shared-key.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var shared = require_shared();
       var uid = require_uid();
       var keys = shared("keys");
@@ -822,7 +767,6 @@
   var require_hidden_keys = __commonJS({
     "node_modules/core-js/internals/hidden-keys.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       module.exports = {};
     }
   });
@@ -831,7 +775,6 @@
   var require_internal_state = __commonJS({
     "node_modules/core-js/internals/internal-state.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var NATIVE_WEAK_MAP = require_weak_map_basic_detection();
       var globalThis2 = require_global_this();
       var isObject = require_is_object();
@@ -907,7 +850,6 @@
   var require_make_built_in = __commonJS({
     "node_modules/core-js/internals/make-built-in.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var uncurryThis = require_function_uncurry_this();
       var fails = require_fails();
       var isCallable = require_is_callable();
@@ -963,7 +905,6 @@
   var require_define_built_in = __commonJS({
     "node_modules/core-js/internals/define-built-in.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var isCallable = require_is_callable();
       var definePropertyModule = require_object_define_property();
       var makeBuiltIn = require_make_built_in();
@@ -999,7 +940,6 @@
   var require_math_trunc = __commonJS({
     "node_modules/core-js/internals/math-trunc.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var ceil = Math.ceil;
       var floor = Math.floor;
       module.exports = Math.trunc || function trunc(x) {
@@ -1013,7 +953,6 @@
   var require_to_integer_or_infinity = __commonJS({
     "node_modules/core-js/internals/to-integer-or-infinity.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var trunc = require_math_trunc();
       module.exports = function(argument) {
         var number = +argument;
@@ -1026,7 +965,6 @@
   var require_to_absolute_index = __commonJS({
     "node_modules/core-js/internals/to-absolute-index.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var toIntegerOrInfinity = require_to_integer_or_infinity();
       var max = Math.max;
       var min = Math.min;
@@ -1041,7 +979,6 @@
   var require_to_length = __commonJS({
     "node_modules/core-js/internals/to-length.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var toIntegerOrInfinity = require_to_integer_or_infinity();
       var min = Math.min;
       module.exports = function(argument) {
@@ -1055,7 +992,6 @@
   var require_length_of_array_like = __commonJS({
     "node_modules/core-js/internals/length-of-array-like.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var toLength = require_to_length();
       module.exports = function(obj) {
         return toLength(obj.length);
@@ -1067,7 +1003,6 @@
   var require_array_includes = __commonJS({
     "node_modules/core-js/internals/array-includes.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var toIndexedObject = require_to_indexed_object();
       var toAbsoluteIndex = require_to_absolute_index();
       var lengthOfArrayLike = require_length_of_array_like();
@@ -1103,7 +1038,6 @@
   var require_object_keys_internal = __commonJS({
     "node_modules/core-js/internals/object-keys-internal.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var uncurryThis = require_function_uncurry_this();
       var hasOwn = require_has_own_property();
       var toIndexedObject = require_to_indexed_object();
@@ -1128,7 +1062,6 @@
   var require_enum_bug_keys = __commonJS({
     "node_modules/core-js/internals/enum-bug-keys.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       module.exports = [
         "constructor",
         "hasOwnProperty",
@@ -1145,7 +1078,6 @@
   var require_object_get_own_property_names = __commonJS({
     "node_modules/core-js/internals/object-get-own-property-names.js": function(exports) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var internalObjectKeys = require_object_keys_internal();
       var enumBugKeys = require_enum_bug_keys();
       var hiddenKeys = enumBugKeys.concat("length", "prototype");
@@ -1159,7 +1091,6 @@
   var require_object_get_own_property_symbols = __commonJS({
     "node_modules/core-js/internals/object-get-own-property-symbols.js": function(exports) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       exports.f = Object.getOwnPropertySymbols;
     }
   });
@@ -1168,7 +1099,6 @@
   var require_own_keys = __commonJS({
     "node_modules/core-js/internals/own-keys.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var getBuiltIn = require_get_built_in();
       var uncurryThis = require_function_uncurry_this();
       var getOwnPropertyNamesModule = require_object_get_own_property_names();
@@ -1187,7 +1117,6 @@
   var require_copy_constructor_properties = __commonJS({
     "node_modules/core-js/internals/copy-constructor-properties.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var hasOwn = require_has_own_property();
       var ownKeys5 = require_own_keys();
       var getOwnPropertyDescriptorModule = require_object_get_own_property_descriptor();
@@ -1210,7 +1139,6 @@
   var require_is_forced = __commonJS({
     "node_modules/core-js/internals/is-forced.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var fails = require_fails();
       var isCallable = require_is_callable();
       var replacement = /#|\.prototype\./;
@@ -1232,7 +1160,6 @@
   var require_export = __commonJS({
     "node_modules/core-js/internals/export.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var globalThis2 = require_global_this();
       var getOwnPropertyDescriptor = require_object_get_own_property_descriptor().f;
       var createNonEnumerableProperty = require_create_non_enumerable_property();
@@ -1276,7 +1203,6 @@
   var require_to_string_tag_support = __commonJS({
     "node_modules/core-js/internals/to-string-tag-support.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var wellKnownSymbol = require_well_known_symbol();
       var TO_STRING_TAG = wellKnownSymbol("toStringTag");
       var test = {};
@@ -1289,7 +1215,6 @@
   var require_classof = __commonJS({
     "node_modules/core-js/internals/classof.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var TO_STRING_TAG_SUPPORT = require_to_string_tag_support();
       var isCallable = require_is_callable();
       var classofRaw = require_classof_raw();
@@ -1316,7 +1241,6 @@
   var require_to_string = __commonJS({
     "node_modules/core-js/internals/to-string.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var classof = require_classof();
       var $String = String;
       module.exports = function(argument) {
@@ -1330,7 +1254,6 @@
   var require_object_keys = __commonJS({
     "node_modules/core-js/internals/object-keys.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var internalObjectKeys = require_object_keys_internal();
       var enumBugKeys = require_enum_bug_keys();
       module.exports = Object.keys || function keys(O) {
@@ -1343,7 +1266,6 @@
   var require_object_define_properties = __commonJS({
     "node_modules/core-js/internals/object-define-properties.js": function(exports) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var DESCRIPTORS = require_descriptors();
       var V8_PROTOTYPE_DEFINE_BUG = require_v8_prototype_define_bug();
       var definePropertyModule = require_object_define_property();
@@ -1367,7 +1289,6 @@
   var require_html = __commonJS({
     "node_modules/core-js/internals/html.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var getBuiltIn = require_get_built_in();
       module.exports = getBuiltIn("document", "documentElement");
     }
@@ -1377,7 +1298,6 @@
   var require_object_create = __commonJS({
     "node_modules/core-js/internals/object-create.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var anObject = require_an_object();
       var definePropertiesModule = require_object_define_properties();
       var enumBugKeys = require_enum_bug_keys();
@@ -1444,7 +1364,6 @@
   var require_array_slice = __commonJS({
     "node_modules/core-js/internals/array-slice.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var uncurryThis = require_function_uncurry_this();
       module.exports = uncurryThis([].slice);
     }
@@ -1454,7 +1373,6 @@
   var require_object_get_own_property_names_external = __commonJS({
     "node_modules/core-js/internals/object-get-own-property-names-external.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var classof = require_classof_raw();
       var toIndexedObject = require_to_indexed_object();
       var $getOwnPropertyNames = require_object_get_own_property_names().f;
@@ -1477,7 +1395,6 @@
   var require_define_built_in_accessor = __commonJS({
     "node_modules/core-js/internals/define-built-in-accessor.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var makeBuiltIn = require_make_built_in();
       var defineProperty = require_object_define_property();
       module.exports = function(target, name, descriptor) {
@@ -1492,7 +1409,6 @@
   var require_well_known_symbol_wrapped = __commonJS({
     "node_modules/core-js/internals/well-known-symbol-wrapped.js": function(exports) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var wellKnownSymbol = require_well_known_symbol();
       exports.f = wellKnownSymbol;
     }
@@ -1502,7 +1418,6 @@
   var require_path = __commonJS({
     "node_modules/core-js/internals/path.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var globalThis2 = require_global_this();
       module.exports = globalThis2;
     }
@@ -1512,7 +1427,6 @@
   var require_well_known_symbol_define = __commonJS({
     "node_modules/core-js/internals/well-known-symbol-define.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var path = require_path();
       var hasOwn = require_has_own_property();
       var wrappedWellKnownSymbolModule = require_well_known_symbol_wrapped();
@@ -1530,7 +1444,6 @@
   var require_symbol_define_to_primitive = __commonJS({
     "node_modules/core-js/internals/symbol-define-to-primitive.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var call = require_function_call();
       var getBuiltIn = require_get_built_in();
       var wellKnownSymbol = require_well_known_symbol();
@@ -1553,7 +1466,6 @@
   var require_set_to_string_tag = __commonJS({
     "node_modules/core-js/internals/set-to-string-tag.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var defineProperty = require_object_define_property().f;
       var hasOwn = require_has_own_property();
       var wellKnownSymbol = require_well_known_symbol();
@@ -1571,7 +1483,6 @@
   var require_function_uncurry_this_clause = __commonJS({
     "node_modules/core-js/internals/function-uncurry-this-clause.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var classofRaw = require_classof_raw();
       var uncurryThis = require_function_uncurry_this();
       module.exports = function(fn) {
@@ -1584,7 +1495,6 @@
   var require_function_bind_context = __commonJS({
     "node_modules/core-js/internals/function-bind-context.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var uncurryThis = require_function_uncurry_this_clause();
       var aCallable = require_a_callable();
       var NATIVE_BIND = require_function_bind_native();
@@ -1602,7 +1512,6 @@
   var require_is_array = __commonJS({
     "node_modules/core-js/internals/is-array.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var classof = require_classof_raw();
       module.exports = Array.isArray || function isArray(argument) {
         return classof(argument) === "Array";
@@ -1614,7 +1523,6 @@
   var require_is_constructor = __commonJS({
     "node_modules/core-js/internals/is-constructor.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var uncurryThis = require_function_uncurry_this();
       var fails = require_fails();
       var isCallable = require_is_callable();
@@ -1664,7 +1572,6 @@
   var require_array_species_constructor = __commonJS({
     "node_modules/core-js/internals/array-species-constructor.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var isArray = require_is_array();
       var isConstructor = require_is_constructor();
       var isObject = require_is_object();
@@ -1690,7 +1597,6 @@
   var require_array_species_create = __commonJS({
     "node_modules/core-js/internals/array-species-create.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var arraySpeciesConstructor = require_array_species_constructor();
       module.exports = function(originalArray, length) {
         return new (arraySpeciesConstructor(originalArray))(length === 0 ? 0 : length);
@@ -1702,7 +1608,6 @@
   var require_create_property = __commonJS({
     "node_modules/core-js/internals/create-property.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var DESCRIPTORS = require_descriptors();
       var definePropertyModule = require_object_define_property();
       var createPropertyDescriptor = require_create_property_descriptor();
@@ -1717,7 +1622,6 @@
   var require_array_iteration = __commonJS({
     "node_modules/core-js/internals/array-iteration.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var bind = require_function_bind_context();
       var IndexedObject = require_indexed_object();
       var toObject = require_to_object();
@@ -1804,7 +1708,6 @@
   var require_es_symbol_constructor = __commonJS({
     "node_modules/core-js/modules/es.symbol.constructor.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var globalThis2 = require_global_this();
       var call = require_function_call();
@@ -2043,7 +1946,6 @@
   var require_symbol_registry_detection = __commonJS({
     "node_modules/core-js/internals/symbol-registry-detection.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var NATIVE_SYMBOL = require_symbol_constructor_detection();
       module.exports = NATIVE_SYMBOL && !!Symbol["for"] && !!Symbol.keyFor;
     }
@@ -2053,7 +1955,6 @@
   var require_es_symbol_for = __commonJS({
     "node_modules/core-js/modules/es.symbol.for.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var getBuiltIn = require_get_built_in();
       var hasOwn = require_has_own_property();
@@ -2079,7 +1980,6 @@
   var require_es_symbol_key_for = __commonJS({
     "node_modules/core-js/modules/es.symbol.key-for.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var hasOwn = require_has_own_property();
       var isSymbol = require_is_symbol();
@@ -2100,7 +2000,6 @@
   var require_is_raw_json = __commonJS({
     "node_modules/core-js/internals/is-raw-json.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var isObject = require_is_object();
       var getInternalState = require_internal_state().get;
       module.exports = function isRawJSON(O) {
@@ -2115,7 +2014,6 @@
   var require_this_number_value = __commonJS({
     "node_modules/core-js/internals/this-number-value.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var uncurryThis = require_function_uncurry_this();
       module.exports = uncurryThis(1.1.valueOf);
     }
@@ -2125,7 +2023,6 @@
   var require_parse_json_string = __commonJS({
     "node_modules/core-js/internals/parse-json-string.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var uncurryThis = require_function_uncurry_this();
       var hasOwn = require_has_own_property();
       var $SyntaxError = SyntaxError;
@@ -2183,7 +2080,6 @@
   var require_native_raw_json = __commonJS({
     "node_modules/core-js/internals/native-raw-json.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var fails = require_fails();
       module.exports = !fails(function() {
         var unsafeInt = "9007199254740993";
@@ -2197,7 +2093,6 @@
   var require_es_json_stringify = __commonJS({
     "node_modules/core-js/modules/es.json.stringify.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var getBuiltIn = require_get_built_in();
       var call = require_function_call();
@@ -2393,7 +2288,6 @@
   var require_es_object_get_own_property_symbols = __commonJS({
     "node_modules/core-js/modules/es.object.get-own-property-symbols.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var NATIVE_SYMBOL = require_symbol_constructor_detection();
       var fails = require_fails();
@@ -2415,7 +2309,6 @@
   var require_es_symbol = __commonJS({
     "node_modules/core-js/modules/es.symbol.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       require_es_symbol_constructor();
       require_es_symbol_for();
       require_es_symbol_key_for();
@@ -2428,7 +2321,6 @@
   var require_es_symbol_description = __commonJS({
     "node_modules/core-js/modules/es.symbol.description.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var DESCRIPTORS = require_descriptors();
       var globalThis2 = require_global_this();
@@ -2497,7 +2389,6 @@
   var require_es_symbol_async_dispose = __commonJS({
     "node_modules/core-js/modules/es.symbol.async-dispose.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var globalThis2 = require_global_this();
       var defineWellKnownSymbol = require_well_known_symbol_define();
       var defineProperty = require_object_define_property().f;
@@ -2518,7 +2409,6 @@
   var require_es_symbol_async_iterator = __commonJS({
     "node_modules/core-js/modules/es.symbol.async-iterator.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var defineWellKnownSymbol = require_well_known_symbol_define();
       defineWellKnownSymbol("asyncIterator");
     }
@@ -2528,7 +2418,6 @@
   var require_es_symbol_dispose = __commonJS({
     "node_modules/core-js/modules/es.symbol.dispose.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var globalThis2 = require_global_this();
       var defineWellKnownSymbol = require_well_known_symbol_define();
       var defineProperty = require_object_define_property().f;
@@ -2549,7 +2438,6 @@
   var require_es_symbol_has_instance = __commonJS({
     "node_modules/core-js/modules/es.symbol.has-instance.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var defineWellKnownSymbol = require_well_known_symbol_define();
       defineWellKnownSymbol("hasInstance");
     }
@@ -2559,7 +2447,6 @@
   var require_es_symbol_is_concat_spreadable = __commonJS({
     "node_modules/core-js/modules/es.symbol.is-concat-spreadable.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var defineWellKnownSymbol = require_well_known_symbol_define();
       defineWellKnownSymbol("isConcatSpreadable");
     }
@@ -2569,7 +2456,6 @@
   var require_es_symbol_iterator = __commonJS({
     "node_modules/core-js/modules/es.symbol.iterator.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var defineWellKnownSymbol = require_well_known_symbol_define();
       defineWellKnownSymbol("iterator");
     }
@@ -2579,7 +2465,6 @@
   var require_es_symbol_match = __commonJS({
     "node_modules/core-js/modules/es.symbol.match.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var defineWellKnownSymbol = require_well_known_symbol_define();
       defineWellKnownSymbol("match");
     }
@@ -2589,7 +2474,6 @@
   var require_es_symbol_match_all = __commonJS({
     "node_modules/core-js/modules/es.symbol.match-all.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var defineWellKnownSymbol = require_well_known_symbol_define();
       defineWellKnownSymbol("matchAll");
     }
@@ -2599,7 +2483,6 @@
   var require_es_symbol_replace = __commonJS({
     "node_modules/core-js/modules/es.symbol.replace.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var defineWellKnownSymbol = require_well_known_symbol_define();
       defineWellKnownSymbol("replace");
     }
@@ -2609,7 +2492,6 @@
   var require_es_symbol_search = __commonJS({
     "node_modules/core-js/modules/es.symbol.search.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var defineWellKnownSymbol = require_well_known_symbol_define();
       defineWellKnownSymbol("search");
     }
@@ -2619,7 +2501,6 @@
   var require_es_symbol_species = __commonJS({
     "node_modules/core-js/modules/es.symbol.species.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var defineWellKnownSymbol = require_well_known_symbol_define();
       defineWellKnownSymbol("species");
     }
@@ -2629,7 +2510,6 @@
   var require_es_symbol_split = __commonJS({
     "node_modules/core-js/modules/es.symbol.split.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var defineWellKnownSymbol = require_well_known_symbol_define();
       defineWellKnownSymbol("split");
     }
@@ -2639,7 +2519,6 @@
   var require_es_symbol_to_primitive = __commonJS({
     "node_modules/core-js/modules/es.symbol.to-primitive.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var defineWellKnownSymbol = require_well_known_symbol_define();
       var defineSymbolToPrimitive = require_symbol_define_to_primitive();
       defineWellKnownSymbol("toPrimitive");
@@ -2651,7 +2530,6 @@
   var require_es_symbol_to_string_tag = __commonJS({
     "node_modules/core-js/modules/es.symbol.to-string-tag.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var getBuiltIn = require_get_built_in();
       var defineWellKnownSymbol = require_well_known_symbol_define();
       var setToStringTag = require_set_to_string_tag();
@@ -2664,7 +2542,6 @@
   var require_es_symbol_unscopables = __commonJS({
     "node_modules/core-js/modules/es.symbol.unscopables.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var defineWellKnownSymbol = require_well_known_symbol_define();
       defineWellKnownSymbol("unscopables");
     }
@@ -2674,7 +2551,6 @@
   var require_function_apply = __commonJS({
     "node_modules/core-js/internals/function-apply.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var NATIVE_BIND = require_function_bind_native();
       var FunctionPrototype = Function.prototype;
       var apply = FunctionPrototype.apply;
@@ -2689,7 +2565,6 @@
   var require_function_uncurry_this_accessor = __commonJS({
     "node_modules/core-js/internals/function-uncurry-this-accessor.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var uncurryThis = require_function_uncurry_this();
       var aCallable = require_a_callable();
       module.exports = function(object, key, method) {
@@ -2705,7 +2580,6 @@
   var require_is_possible_prototype = __commonJS({
     "node_modules/core-js/internals/is-possible-prototype.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var isObject = require_is_object();
       module.exports = function(argument) {
         return isObject(argument) || argument === null;
@@ -2717,7 +2591,6 @@
   var require_a_possible_prototype = __commonJS({
     "node_modules/core-js/internals/a-possible-prototype.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var isPossiblePrototype = require_is_possible_prototype();
       var $String = String;
       var $TypeError = TypeError;
@@ -2732,7 +2605,6 @@
   var require_object_set_prototype_of = __commonJS({
     "node_modules/core-js/internals/object-set-prototype-of.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var uncurryThisAccessor = require_function_uncurry_this_accessor();
       var isObject = require_is_object();
       var requireObjectCoercible = require_require_object_coercible();
@@ -2763,7 +2635,6 @@
   var require_proxy_accessor = __commonJS({
     "node_modules/core-js/internals/proxy-accessor.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var defineProperty = require_object_define_property().f;
       module.exports = function(Target, Source, key) {
         key in Target || defineProperty(Target, key, {
@@ -2783,7 +2654,6 @@
   var require_inherit_if_required = __commonJS({
     "node_modules/core-js/internals/inherit-if-required.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var isCallable = require_is_callable();
       var isObject = require_is_object();
       var setPrototypeOf = require_object_set_prototype_of();
@@ -2803,7 +2673,6 @@
   var require_normalize_string_argument = __commonJS({
     "node_modules/core-js/internals/normalize-string-argument.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var toString = require_to_string();
       module.exports = function(argument, $default) {
         return argument === void 0 ? arguments.length < 2 ? "" : $default : toString(argument);
@@ -2815,7 +2684,6 @@
   var require_install_error_cause = __commonJS({
     "node_modules/core-js/internals/install-error-cause.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var isObject = require_is_object();
       var createNonEnumerableProperty = require_create_non_enumerable_property();
       module.exports = function(O, options) {
@@ -2830,7 +2698,6 @@
   var require_error_stack_clear = __commonJS({
     "node_modules/core-js/internals/error-stack-clear.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var uncurryThis = require_function_uncurry_this();
       var $Error = Error;
       var replace = uncurryThis("".replace);
@@ -2852,7 +2719,6 @@
   var require_error_stack_installable = __commonJS({
     "node_modules/core-js/internals/error-stack-installable.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var fails = require_fails();
       var createPropertyDescriptor = require_create_property_descriptor();
       module.exports = !fails(function() {
@@ -2868,7 +2734,6 @@
   var require_error_stack_install = __commonJS({
     "node_modules/core-js/internals/error-stack-install.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var createNonEnumerableProperty = require_create_non_enumerable_property();
       var clearErrorStack = require_error_stack_clear();
       var ERROR_STACK_INSTALLABLE = require_error_stack_installable();
@@ -2886,7 +2751,6 @@
   var require_wrap_error_constructor_with_cause = __commonJS({
     "node_modules/core-js/internals/wrap-error-constructor-with-cause.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var getBuiltIn = require_get_built_in();
       var hasOwn = require_has_own_property();
       var createNonEnumerableProperty = require_create_non_enumerable_property();
@@ -2945,7 +2809,6 @@
   var require_es_error_cause = __commonJS({
     "node_modules/core-js/modules/es.error.cause.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var globalThis2 = require_global_this();
       var apply = require_function_apply();
@@ -3022,7 +2885,6 @@
   var require_es_error_is_error = __commonJS({
     "node_modules/core-js/modules/es.error.is-error.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var getBuiltIn = require_get_built_in();
       var isObject = require_is_object();
@@ -3055,7 +2917,6 @@
   var require_error_to_string = __commonJS({
     "node_modules/core-js/internals/error-to-string.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var DESCRIPTORS = require_descriptors();
       var fails = require_fails();
       var anObject = require_an_object();
@@ -3083,7 +2944,6 @@
   var require_es_error_to_string = __commonJS({
     "node_modules/core-js/modules/es.error.to-string.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var defineBuiltIn = require_define_built_in();
       var errorToString = require_error_to_string();
       var ErrorPrototype = Error.prototype;
@@ -3097,7 +2957,6 @@
   var require_correct_prototype_getter = __commonJS({
     "node_modules/core-js/internals/correct-prototype-getter.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var fails = require_fails();
       module.exports = !fails(function() {
         function F() {
@@ -3112,7 +2971,6 @@
   var require_object_get_prototype_of = __commonJS({
     "node_modules/core-js/internals/object-get-prototype-of.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var hasOwn = require_has_own_property();
       var isCallable = require_is_callable();
       var toObject = require_to_object();
@@ -3137,7 +2995,6 @@
   var require_iterators = __commonJS({
     "node_modules/core-js/internals/iterators.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       module.exports = Object.create ? /* @__PURE__ */ Object.create(null) : {};
     }
   });
@@ -3146,7 +3003,6 @@
   var require_is_array_iterator_method = __commonJS({
     "node_modules/core-js/internals/is-array-iterator-method.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var wellKnownSymbol = require_well_known_symbol();
       var Iterators = require_iterators();
       var ITERATOR = wellKnownSymbol("iterator");
@@ -3161,7 +3017,6 @@
   var require_get_iterator_method_internal = __commonJS({
     "node_modules/core-js/internals/get-iterator-method-internal.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var classof = require_classof_raw();
       var isNullOrUndefined = require_is_null_or_undefined();
       var getMethod = require_get_method();
@@ -3178,7 +3033,6 @@
   var require_get_iterator_internal = __commonJS({
     "node_modules/core-js/internals/get-iterator-internal.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var call = require_function_call();
       var isCallable = require_is_callable();
       var anObject = require_an_object();
@@ -3197,7 +3051,6 @@
   var require_iterator_close = __commonJS({
     "node_modules/core-js/internals/iterator-close.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var call = require_function_call();
       var anObject = require_an_object();
       var getMethod = require_get_method();
@@ -3227,7 +3080,6 @@
   var require_iterate = __commonJS({
     "node_modules/core-js/internals/iterate.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var bind = require_function_bind_context();
       var call = require_function_call();
       var anObject = require_an_object();
@@ -3301,7 +3153,6 @@
   var require_es_aggregate_error_constructor = __commonJS({
     "node_modules/core-js/modules/es.aggregate-error.constructor.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var isPrototypeOf = require_object_is_prototype_of();
       var getPrototypeOf = require_object_get_prototype_of();
@@ -3352,7 +3203,6 @@
   var require_es_aggregate_error = __commonJS({
     "node_modules/core-js/modules/es.aggregate-error.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       require_es_aggregate_error_constructor();
     }
   });
@@ -3361,7 +3211,6 @@
   var require_es_aggregate_error_cause = __commonJS({
     "node_modules/core-js/modules/es.aggregate-error.cause.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var getBuiltIn = require_get_built_in();
       var apply = require_function_apply();
@@ -3388,7 +3237,6 @@
   var require_es_suppressed_error_constructor = __commonJS({
     "node_modules/core-js/modules/es.suppressed-error.constructor.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var globalThis2 = require_global_this();
       var isPrototypeOf = require_object_is_prototype_of();
@@ -3444,7 +3292,6 @@
   var require_add_to_unscopables = __commonJS({
     "node_modules/core-js/internals/add-to-unscopables.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var wellKnownSymbol = require_well_known_symbol();
       var create = require_object_create();
       var defineProperty = require_object_define_property().f;
@@ -3466,7 +3313,6 @@
   var require_es_array_at = __commonJS({
     "node_modules/core-js/modules/es.array.at.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var toObject = require_to_object();
       var lengthOfArrayLike = require_length_of_array_like();
@@ -3489,7 +3335,6 @@
   var require_does_not_exceed_safe_integer = __commonJS({
     "node_modules/core-js/internals/does-not-exceed-safe-integer.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $TypeError = TypeError;
       var MAX_SAFE_INTEGER = 9007199254740991;
       module.exports = function(it) {
@@ -3503,7 +3348,6 @@
   var require_array_set_length = __commonJS({
     "node_modules/core-js/internals/array-set-length.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var DESCRIPTORS = require_descriptors();
       var isArray = require_is_array();
       var $TypeError = TypeError;
@@ -3531,7 +3375,6 @@
   var require_array_method_has_species_support = __commonJS({
     "node_modules/core-js/internals/array-method-has-species-support.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var fails = require_fails();
       var wellKnownSymbol = require_well_known_symbol();
       var V8_VERSION = require_environment_v8_version();
@@ -3553,7 +3396,6 @@
   var require_es_array_concat = __commonJS({
     "node_modules/core-js/modules/es.array.concat.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var fails = require_fails();
       var isArray = require_is_array();
@@ -3608,7 +3450,6 @@
   var require_delete_property_or_throw = __commonJS({
     "node_modules/core-js/internals/delete-property-or-throw.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var tryToString = require_try_to_string();
       var $TypeError = TypeError;
       module.exports = function(O, P) {
@@ -3621,7 +3462,6 @@
   var require_array_copy_within = __commonJS({
     "node_modules/core-js/internals/array-copy-within.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var toObject = require_to_object();
       var toAbsoluteIndex = require_to_absolute_index();
       var lengthOfArrayLike = require_length_of_array_like();
@@ -3655,7 +3495,6 @@
   var require_es_array_copy_within = __commonJS({
     "node_modules/core-js/modules/es.array.copy-within.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var copyWithin = require_array_copy_within();
       var addToUnscopables = require_add_to_unscopables();
@@ -3670,7 +3509,6 @@
   var require_array_method_is_strict = __commonJS({
     "node_modules/core-js/internals/array-method-is-strict.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var fails = require_fails();
       module.exports = function(METHOD_NAME, argument) {
         var method = [][METHOD_NAME];
@@ -3687,7 +3525,6 @@
   var require_es_array_every = __commonJS({
     "node_modules/core-js/modules/es.array.every.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var $every = require_array_iteration().every;
       var arrayMethodIsStrict = require_array_method_is_strict();
@@ -3704,7 +3541,6 @@
   var require_array_fill = __commonJS({
     "node_modules/core-js/internals/array-fill.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var toObject = require_to_object();
       var toAbsoluteIndex = require_to_absolute_index();
       var lengthOfArrayLike = require_length_of_array_like();
@@ -3725,7 +3561,6 @@
   var require_es_array_fill = __commonJS({
     "node_modules/core-js/modules/es.array.fill.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var fill = require_array_fill();
       var addToUnscopables = require_add_to_unscopables();
@@ -3740,7 +3575,6 @@
   var require_es_array_filter = __commonJS({
     "node_modules/core-js/modules/es.array.filter.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var $filter = require_array_iteration().filter;
       var arrayMethodHasSpeciesSupport = require_array_method_has_species_support();
@@ -3757,7 +3591,6 @@
   var require_es_array_find = __commonJS({
     "node_modules/core-js/modules/es.array.find.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var $find = require_array_iteration().find;
       var addToUnscopables = require_add_to_unscopables();
@@ -3779,7 +3612,6 @@
   var require_es_array_find_index = __commonJS({
     "node_modules/core-js/modules/es.array.find-index.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var $findIndex = require_array_iteration().findIndex;
       var addToUnscopables = require_add_to_unscopables();
@@ -3801,7 +3633,6 @@
   var require_array_iteration_from_last = __commonJS({
     "node_modules/core-js/internals/array-iteration-from-last.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var bind = require_function_bind_context();
       var IndexedObject = require_indexed_object();
       var toObject = require_to_object();
@@ -3843,7 +3674,6 @@
   var require_es_array_find_last = __commonJS({
     "node_modules/core-js/modules/es.array.find-last.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var $findLast = require_array_iteration_from_last().findLast;
       var addToUnscopables = require_add_to_unscopables();
@@ -3860,7 +3690,6 @@
   var require_es_array_find_last_index = __commonJS({
     "node_modules/core-js/modules/es.array.find-last-index.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var $findLastIndex = require_array_iteration_from_last().findLastIndex;
       var addToUnscopables = require_add_to_unscopables();
@@ -3877,7 +3706,6 @@
   var require_flatten_into_array = __commonJS({
     "node_modules/core-js/internals/flatten-into-array.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var isArray = require_is_array();
       var lengthOfArrayLike = require_length_of_array_like();
       var doesNotExceedSafeInteger = require_does_not_exceed_safe_integer();
@@ -3912,7 +3740,6 @@
   var require_es_array_flat = __commonJS({
     "node_modules/core-js/modules/es.array.flat.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var flattenIntoArray = require_flatten_into_array();
       var toObject = require_to_object();
@@ -3937,7 +3764,6 @@
   var require_es_array_flat_map = __commonJS({
     "node_modules/core-js/modules/es.array.flat-map.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var flattenIntoArray = require_flatten_into_array();
       var aCallable = require_a_callable();
@@ -3962,7 +3788,6 @@
   var require_array_for_each = __commonJS({
     "node_modules/core-js/internals/array-for-each.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $forEach = require_array_iteration().forEach;
       var arrayMethodIsStrict = require_array_method_is_strict();
       var STRICT_METHOD = arrayMethodIsStrict("forEach");
@@ -3976,7 +3801,6 @@
   var require_es_array_for_each = __commonJS({
     "node_modules/core-js/modules/es.array.for-each.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var forEach = require_array_for_each();
       $({ target: "Array", proto: true, forced: [].forEach !== forEach }, {
@@ -3989,7 +3813,6 @@
   var require_call_with_safe_iteration_closing = __commonJS({
     "node_modules/core-js/internals/call-with-safe-iteration-closing.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var anObject = require_an_object();
       var iteratorClose = require_iterator_close();
       module.exports = function(iterator, fn, value, ENTRIES) {
@@ -4006,7 +3829,6 @@
   var require_array_from = __commonJS({
     "node_modules/core-js/internals/array-from.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var bind = require_function_bind_context();
       var call = require_function_call();
       var toObject = require_to_object();
@@ -4066,7 +3888,6 @@
   var require_check_correctness_of_iteration = __commonJS({
     "node_modules/core-js/internals/check-correctness-of-iteration.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var wellKnownSymbol = require_well_known_symbol();
       var ITERATOR = wellKnownSymbol("iterator");
       var SAFE_CLOSING = false;
@@ -4118,7 +3939,6 @@
   var require_es_array_from = __commonJS({
     "node_modules/core-js/modules/es.array.from.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var from = require_array_from();
       var checkCorrectnessOfIteration = require_check_correctness_of_iteration();
@@ -4135,7 +3955,6 @@
   var require_es_array_includes = __commonJS({
     "node_modules/core-js/modules/es.array.includes.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var $includes = require_array_includes().includes;
       var fails = require_fails();
@@ -4159,7 +3978,6 @@
   var require_es_array_index_of = __commonJS({
     "node_modules/core-js/modules/es.array.index-of.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var uncurryThis = require_function_uncurry_this_clause();
       var $indexOf = require_array_includes().indexOf;
@@ -4180,7 +3998,6 @@
   var require_es_array_is_array = __commonJS({
     "node_modules/core-js/modules/es.array.is-array.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var isArray = require_is_array();
       $({ target: "Array", stat: true }, {
@@ -4193,7 +4010,6 @@
   var require_iterators_core = __commonJS({
     "node_modules/core-js/internals/iterators-core.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var fails = require_fails();
       var isCallable = require_is_callable();
       var isObject = require_is_object();
@@ -4237,7 +4053,6 @@
   var require_iterator_create_constructor = __commonJS({
     "node_modules/core-js/internals/iterator-create-constructor.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var IteratorPrototype = require_iterators_core().IteratorPrototype;
       var create = require_object_create();
       var createPropertyDescriptor = require_create_property_descriptor();
@@ -4260,7 +4075,6 @@
   var require_iterator_define = __commonJS({
     "node_modules/core-js/internals/iterator-define.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var call = require_function_call();
       var IS_PURE = require_is_pure();
@@ -4366,7 +4180,6 @@
   var require_create_iter_result_object = __commonJS({
     "node_modules/core-js/internals/create-iter-result-object.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       module.exports = function(value, done) {
         return { value: value, done: done };
       };
@@ -4377,7 +4190,6 @@
   var require_es_array_iterator = __commonJS({
     "node_modules/core-js/modules/es.array.iterator.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var toIndexedObject = require_to_indexed_object();
       var addToUnscopables = require_add_to_unscopables();
       var Iterators = require_iterators();
@@ -4431,7 +4243,6 @@
   var require_es_array_join = __commonJS({
     "node_modules/core-js/modules/es.array.join.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var uncurryThis = require_function_uncurry_this();
       var IndexedObject = require_indexed_object();
@@ -4452,7 +4263,6 @@
   var require_array_last_index_of = __commonJS({
     "node_modules/core-js/internals/array-last-index-of.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var apply = require_function_apply();
       var toIndexedObject = require_to_indexed_object();
       var toIntegerOrInfinity = require_to_integer_or_infinity();
@@ -4481,7 +4291,6 @@
   var require_es_array_last_index_of = __commonJS({
     "node_modules/core-js/modules/es.array.last-index-of.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var lastIndexOf = require_array_last_index_of();
       $({ target: "Array", proto: true, forced: lastIndexOf !== [].lastIndexOf }, {
@@ -4494,7 +4303,6 @@
   var require_es_array_map = __commonJS({
     "node_modules/core-js/modules/es.array.map.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var $map = require_array_iteration().map;
       var arrayMethodHasSpeciesSupport = require_array_method_has_species_support();
@@ -4511,7 +4319,6 @@
   var require_es_array_of = __commonJS({
     "node_modules/core-js/modules/es.array.of.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var fails = require_fails();
       var isConstructor = require_is_constructor();
@@ -4540,7 +4347,6 @@
   var require_es_array_push = __commonJS({
     "node_modules/core-js/modules/es.array.push.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var toObject = require_to_object();
       var lengthOfArrayLike = require_length_of_array_like();
@@ -4580,7 +4386,6 @@
   var require_array_reduce = __commonJS({
     "node_modules/core-js/internals/array-reduce.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var aCallable = require_a_callable();
       var toObject = require_to_object();
       var IndexedObject = require_indexed_object();
@@ -4628,7 +4433,6 @@
   var require_environment = __commonJS({
     "node_modules/core-js/internals/environment.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var globalThis2 = require_global_this();
       var userAgent = require_environment_user_agent();
       var classof = require_classof_raw();
@@ -4653,7 +4457,6 @@
   var require_environment_is_node = __commonJS({
     "node_modules/core-js/internals/environment-is-node.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var ENVIRONMENT = require_environment();
       module.exports = ENVIRONMENT === "NODE";
     }
@@ -4663,7 +4466,6 @@
   var require_es_array_reduce = __commonJS({
     "node_modules/core-js/modules/es.array.reduce.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var $reduce = require_array_reduce().left;
       var arrayMethodIsStrict = require_array_method_is_strict();
@@ -4684,7 +4486,6 @@
   var require_es_array_reduce_right = __commonJS({
     "node_modules/core-js/modules/es.array.reduce-right.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var $reduceRight = require_array_reduce().right;
       var arrayMethodIsStrict = require_array_method_is_strict();
@@ -4704,7 +4505,6 @@
   var require_es_array_reverse = __commonJS({
     "node_modules/core-js/modules/es.array.reverse.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var uncurryThis = require_function_uncurry_this();
       var isArray = require_is_array();
@@ -4723,7 +4523,6 @@
   var require_es_array_slice = __commonJS({
     "node_modules/core-js/modules/es.array.slice.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var isArray = require_is_array();
       var isConstructor = require_is_constructor();
@@ -4772,7 +4571,6 @@
   var require_es_array_some = __commonJS({
     "node_modules/core-js/modules/es.array.some.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var $some = require_array_iteration().some;
       var arrayMethodIsStrict = require_array_method_is_strict();
@@ -4789,7 +4587,6 @@
   var require_array_sort = __commonJS({
     "node_modules/core-js/internals/array-sort.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var arraySlice = require_array_slice();
       var floor = Math.floor;
       var sort = function(array, comparefn) {
@@ -4827,7 +4624,6 @@
   var require_environment_ff_version = __commonJS({
     "node_modules/core-js/internals/environment-ff-version.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var userAgent = require_environment_user_agent();
       var firefox = userAgent.match(/firefox\/(\d+)/i);
       module.exports = !!firefox && +firefox[1];
@@ -4838,7 +4634,6 @@
   var require_environment_is_ie_or_edge = __commonJS({
     "node_modules/core-js/internals/environment-is-ie-or-edge.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var UA = require_environment_user_agent();
       module.exports = /MSIE|Trident/.test(UA);
     }
@@ -4848,7 +4643,6 @@
   var require_environment_webkit_version = __commonJS({
     "node_modules/core-js/internals/environment-webkit-version.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var userAgent = require_environment_user_agent();
       var webkit = userAgent.match(/AppleWebKit\/(\d+)\./);
       module.exports = !!webkit && +webkit[1];
@@ -4859,7 +4653,6 @@
   var require_es_array_sort = __commonJS({
     "node_modules/core-js/modules/es.array.sort.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var uncurryThis = require_function_uncurry_this();
       var aCallable = require_a_callable();
@@ -4957,7 +4750,6 @@
   var require_set_species = __commonJS({
     "node_modules/core-js/internals/set-species.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var getBuiltIn = require_get_built_in();
       var defineBuiltInAccessor = require_define_built_in_accessor();
       var wellKnownSymbol = require_well_known_symbol();
@@ -4981,7 +4773,6 @@
   var require_es_array_species = __commonJS({
     "node_modules/core-js/modules/es.array.species.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var setSpecies = require_set_species();
       setSpecies("Array");
     }
@@ -4991,7 +4782,6 @@
   var require_es_array_splice = __commonJS({
     "node_modules/core-js/modules/es.array.splice.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var toObject = require_to_object();
       var toAbsoluteIndex = require_to_absolute_index();
@@ -5059,7 +4849,6 @@
   var require_es_array_to_reversed = __commonJS({
     "node_modules/core-js/modules/es.array.to-reversed.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var lengthOfArrayLike = require_length_of_array_like();
       var toIndexedObject = require_to_indexed_object();
@@ -5084,7 +4873,6 @@
   var require_array_from_constructor_and_list = __commonJS({
     "node_modules/core-js/internals/array-from-constructor-and-list.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var lengthOfArrayLike = require_length_of_array_like();
       module.exports = function(Constructor, list, $length) {
         var index = 0;
@@ -5100,7 +4888,6 @@
   var require_get_built_in_prototype_method = __commonJS({
     "node_modules/core-js/internals/get-built-in-prototype-method.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var globalThis2 = require_global_this();
       module.exports = function(CONSTRUCTOR, METHOD) {
         var Constructor = globalThis2[CONSTRUCTOR];
@@ -5114,7 +4901,6 @@
   var require_es_array_to_sorted = __commonJS({
     "node_modules/core-js/modules/es.array.to-sorted.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var uncurryThis = require_function_uncurry_this();
       var aCallable = require_a_callable();
@@ -5140,7 +4926,6 @@
   var require_es_array_to_spliced = __commonJS({
     "node_modules/core-js/modules/es.array.to-spliced.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var addToUnscopables = require_add_to_unscopables();
       var doesNotExceedSafeInteger = require_does_not_exceed_safe_integer();
@@ -5185,7 +4970,6 @@
   var require_es_array_unscopables_flat = __commonJS({
     "node_modules/core-js/modules/es.array.unscopables.flat.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var addToUnscopables = require_add_to_unscopables();
       addToUnscopables("flat");
     }
@@ -5195,7 +4979,6 @@
   var require_es_array_unscopables_flat_map = __commonJS({
     "node_modules/core-js/modules/es.array.unscopables.flat-map.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var addToUnscopables = require_add_to_unscopables();
       addToUnscopables("flatMap");
     }
@@ -5205,7 +4988,6 @@
   var require_es_array_unshift = __commonJS({
     "node_modules/core-js/modules/es.array.unshift.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var toObject = require_to_object();
       var lengthOfArrayLike = require_length_of_array_like();
@@ -5249,7 +5031,6 @@
   var require_es_array_with = __commonJS({
     "node_modules/core-js/modules/es.array.with.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var lengthOfArrayLike = require_length_of_array_like();
       var toIntegerOrInfinity = require_to_integer_or_infinity();
@@ -5286,7 +5067,6 @@
   var require_array_buffer_basic_detection = __commonJS({
     "node_modules/core-js/internals/array-buffer-basic-detection.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       module.exports = typeof ArrayBuffer != "undefined" && typeof DataView != "undefined";
     }
   });
@@ -5295,7 +5075,6 @@
   var require_define_built_ins = __commonJS({
     "node_modules/core-js/internals/define-built-ins.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var defineBuiltIn = require_define_built_in();
       module.exports = function(target, src, options) {
         for (var key in src) defineBuiltIn(target, key, src[key], options);
@@ -5308,7 +5087,6 @@
   var require_an_instance = __commonJS({
     "node_modules/core-js/internals/an-instance.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var isPrototypeOf = require_object_is_prototype_of();
       var $TypeError = TypeError;
       module.exports = function(it, Prototype) {
@@ -5322,7 +5100,6 @@
   var require_to_index = __commonJS({
     "node_modules/core-js/internals/to-index.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var toIntegerOrInfinity = require_to_integer_or_infinity();
       var toLength = require_to_length();
       var $RangeError = RangeError;
@@ -5340,7 +5117,6 @@
   var require_math_sign = __commonJS({
     "node_modules/core-js/internals/math-sign.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       module.exports = Math.sign || function sign(x) {
         var n = +x;
         return n === 0 || n !== n ? n : n < 0 ? -1 : 1;
@@ -5352,7 +5128,6 @@
   var require_math_round_ties_to_even = __commonJS({
     "node_modules/core-js/internals/math-round-ties-to-even.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var EPSILON = 2220446049250313e-31;
       var INVERSE_EPSILON = 1 / EPSILON;
       module.exports = function(n) {
@@ -5365,7 +5140,6 @@
   var require_math_float_round = __commonJS({
     "node_modules/core-js/internals/math-float-round.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var sign = require_math_sign();
       var roundTiesToEven = require_math_round_ties_to_even();
       var abs = Math.abs;
@@ -5387,7 +5161,6 @@
   var require_math_fround = __commonJS({
     "node_modules/core-js/internals/math-fround.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var floatRound = require_math_float_round();
       var FLOAT32_EPSILON = 11920928955078125e-23;
       var FLOAT32_MAX_VALUE = 34028234663852886e22;
@@ -5402,7 +5175,6 @@
   var require_ieee754 = __commonJS({
     "node_modules/core-js/internals/ieee754.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $Array = Array;
       var abs = Math.abs;
       var pow = Math.pow;
@@ -5507,7 +5279,6 @@
   var require_array_buffer = __commonJS({
     "node_modules/core-js/internals/array-buffer.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var globalThis2 = require_global_this();
       var uncurryThis = require_function_uncurry_this();
       var DESCRIPTORS = require_descriptors();
@@ -5748,7 +5519,6 @@
   var require_es_array_buffer_constructor = __commonJS({
     "node_modules/core-js/modules/es.array-buffer.constructor.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var globalThis2 = require_global_this();
       var arrayBufferModule = require_array_buffer();
@@ -5767,7 +5537,6 @@
   var require_array_buffer_view_core = __commonJS({
     "node_modules/core-js/internals/array-buffer-view-core.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var NATIVE_ARRAY_BUFFER = require_array_buffer_basic_detection();
       var DESCRIPTORS = require_descriptors();
       var globalThis2 = require_global_this();
@@ -5944,7 +5713,6 @@
   var require_es_array_buffer_is_view = __commonJS({
     "node_modules/core-js/modules/es.array-buffer.is-view.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var ArrayBufferViewCore = require_array_buffer_view_core();
       var NATIVE_ARRAY_BUFFER_VIEWS = ArrayBufferViewCore.NATIVE_ARRAY_BUFFER_VIEWS;
@@ -5958,7 +5726,6 @@
   var require_es_array_buffer_slice = __commonJS({
     "node_modules/core-js/modules/es.array-buffer.slice.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var uncurryThis = require_function_uncurry_this_clause();
       var fails = require_fails();
@@ -6000,7 +5767,6 @@
   var require_es_data_view_constructor = __commonJS({
     "node_modules/core-js/modules/es.data-view.constructor.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var ArrayBufferModule = require_array_buffer();
       var NATIVE_ARRAY_BUFFER = require_array_buffer_basic_detection();
@@ -6014,7 +5780,6 @@
   var require_es_data_view = __commonJS({
     "node_modules/core-js/modules/es.data-view.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       require_es_data_view_constructor();
     }
   });
@@ -6023,7 +5788,6 @@
   var require_es_data_view_get_float16 = __commonJS({
     "node_modules/core-js/modules/es.data-view.get-float16.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var uncurryThis = require_function_uncurry_this();
       var pow = Math.pow;
@@ -6052,7 +5816,6 @@
   var require_a_data_view = __commonJS({
     "node_modules/core-js/internals/a-data-view.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var classof = require_classof();
       var $TypeError = TypeError;
       module.exports = function(argument) {
@@ -6066,7 +5829,6 @@
   var require_math_log2 = __commonJS({
     "node_modules/core-js/internals/math-log2.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var log = Math.log;
       var LN2 = Math.LN2;
       module.exports = Math.log2 || function log2(x) {
@@ -6079,7 +5841,6 @@
   var require_es_data_view_set_float16 = __commonJS({
     "node_modules/core-js/modules/es.data-view.set-float16.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var uncurryThis = require_function_uncurry_this();
       var aDataView = require_a_data_view();
@@ -6127,7 +5888,6 @@
   var require_array_buffer_byte_length = __commonJS({
     "node_modules/core-js/internals/array-buffer-byte-length.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var globalThis2 = require_global_this();
       var uncurryThisAccessor = require_function_uncurry_this_accessor();
       var classof = require_classof_raw();
@@ -6144,7 +5904,6 @@
   var require_array_buffer_is_detached = __commonJS({
     "node_modules/core-js/internals/array-buffer-is-detached.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var globalThis2 = require_global_this();
       var NATIVE_ARRAY_BUFFER = require_array_buffer_basic_detection();
       var arrayBufferByteLength = require_array_buffer_byte_length();
@@ -6165,7 +5924,6 @@
   var require_es_array_buffer_detached = __commonJS({
     "node_modules/core-js/modules/es.array-buffer.detached.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var DESCRIPTORS = require_descriptors();
       var defineBuiltInAccessor = require_define_built_in_accessor();
       var isDetached = require_array_buffer_is_detached();
@@ -6185,7 +5943,6 @@
   var require_array_buffer_not_detached = __commonJS({
     "node_modules/core-js/internals/array-buffer-not-detached.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var isDetached = require_array_buffer_is_detached();
       var $TypeError = TypeError;
       module.exports = function(it) {
@@ -6199,7 +5956,6 @@
   var require_get_built_in_node_module = __commonJS({
     "node_modules/core-js/internals/get-built-in-node-module.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var globalThis2 = require_global_this();
       var IS_NODE = require_environment_is_node();
       module.exports = function(name) {
@@ -6221,7 +5977,6 @@
   var require_structured_clone_proper_transfer = __commonJS({
     "node_modules/core-js/internals/structured-clone-proper-transfer.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var globalThis2 = require_global_this();
       var fails = require_fails();
       var V8 = require_environment_v8_version();
@@ -6240,7 +5995,6 @@
   var require_detach_transferable = __commonJS({
     "node_modules/core-js/internals/detach-transferable.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var globalThis2 = require_global_this();
       var getBuiltInNodeModule = require_get_built_in_node_module();
       var PROPER_STRUCTURED_CLONE_TRANSFER = require_structured_clone_proper_transfer();
@@ -6282,7 +6036,6 @@
   var require_array_buffer_transfer = __commonJS({
     "node_modules/core-js/internals/array-buffer-transfer.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var globalThis2 = require_global_this();
       var uncurryThis = require_function_uncurry_this();
       var uncurryThisAccessor = require_function_uncurry_this_accessor();
@@ -6333,7 +6086,6 @@
   var require_es_array_buffer_transfer = __commonJS({
     "node_modules/core-js/modules/es.array-buffer.transfer.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var $transfer = require_array_buffer_transfer();
       if ($transfer) $({ target: "ArrayBuffer", proto: true }, {
@@ -6348,7 +6100,6 @@
   var require_es_array_buffer_transfer_to_fixed_length = __commonJS({
     "node_modules/core-js/modules/es.array-buffer.transfer-to-fixed-length.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var $transfer = require_array_buffer_transfer();
       if ($transfer) $({ target: "ArrayBuffer", proto: true }, {
@@ -6363,7 +6114,6 @@
   var require_es_date_get_year = __commonJS({
     "node_modules/core-js/modules/es.date.get-year.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var uncurryThis = require_function_uncurry_this();
       var fails = require_fails();
@@ -6383,7 +6133,6 @@
   var require_es_date_now = __commonJS({
     "node_modules/core-js/modules/es.date.now.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var uncurryThis = require_function_uncurry_this();
       var $Date = Date;
@@ -6400,7 +6149,6 @@
   var require_es_date_set_year = __commonJS({
     "node_modules/core-js/modules/es.date.set-year.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var uncurryThis = require_function_uncurry_this();
       var toIntegerOrInfinity = require_to_integer_or_infinity();
@@ -6424,7 +6172,6 @@
   var require_es_date_to_gmt_string = __commonJS({
     "node_modules/core-js/modules/es.date.to-gmt-string.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       $({ target: "Date", proto: true }, {
         toGMTString: Date.prototype.toUTCString
@@ -6436,7 +6183,6 @@
   var require_string_repeat = __commonJS({
     "node_modules/core-js/internals/string-repeat.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var toIntegerOrInfinity = require_to_integer_or_infinity();
       var toString = require_to_string();
       var requireObjectCoercible = require_require_object_coercible();
@@ -6457,7 +6203,6 @@
   var require_string_pad = __commonJS({
     "node_modules/core-js/internals/string-pad.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var uncurryThis = require_function_uncurry_this();
       var toLength = require_to_length();
       var toString = require_to_string();
@@ -6496,7 +6241,6 @@
   var require_date_to_iso_string = __commonJS({
     "node_modules/core-js/internals/date-to-iso-string.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var uncurryThis = require_function_uncurry_this();
       var fails = require_fails();
       var padStart = require_string_pad().start;
@@ -6532,7 +6276,6 @@
   var require_es_date_to_iso_string = __commonJS({
     "node_modules/core-js/modules/es.date.to-iso-string.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var toISOString = require_date_to_iso_string();
       $({ target: "Date", proto: true, forced: Date.prototype.toISOString !== toISOString }, {
@@ -6545,7 +6288,6 @@
   var require_es_date_to_json = __commonJS({
     "node_modules/core-js/modules/es.date.to-json.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var fails = require_fails();
       var toObject = require_to_object();
@@ -6570,7 +6312,6 @@
   var require_date_to_primitive = __commonJS({
     "node_modules/core-js/internals/date-to-primitive.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var anObject = require_an_object();
       var ordinaryToPrimitive = require_ordinary_to_primitive();
       var $TypeError = TypeError;
@@ -6587,7 +6328,6 @@
   var require_es_date_to_primitive = __commonJS({
     "node_modules/core-js/modules/es.date.to-primitive.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var hasOwn = require_has_own_property();
       var defineBuiltIn = require_define_built_in();
       var dateToPrimitive = require_date_to_primitive();
@@ -6604,7 +6344,6 @@
   var require_es_date_to_string = __commonJS({
     "node_modules/core-js/modules/es.date.to-string.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var uncurryThis = require_function_uncurry_this();
       var defineBuiltIn = require_define_built_in();
       var DatePrototype = Date.prototype;
@@ -6625,7 +6364,6 @@
   var require_add_disposable_resource = __commonJS({
     "node_modules/core-js/internals/add-disposable-resource.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var getBuiltIn = require_get_built_in();
       var call = require_function_call();
       var uncurryThis = require_function_uncurry_this();
@@ -6680,7 +6418,6 @@
   var require_es_disposable_stack_constructor = __commonJS({
     "node_modules/core-js/modules/es.disposable-stack.constructor.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var DESCRIPTORS = require_descriptors();
       var getBuiltIn = require_get_built_in();
@@ -6788,7 +6525,6 @@
   var require_es_escape = __commonJS({
     "node_modules/core-js/modules/es.escape.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var uncurryThis = require_function_uncurry_this();
       var toString = require_to_string();
@@ -6835,7 +6571,6 @@
   var require_function_bind = __commonJS({
     "node_modules/core-js/internals/function-bind.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var uncurryThis = require_function_uncurry_this();
       var aCallable = require_a_callable();
       var isObject = require_is_object();
@@ -6873,7 +6608,6 @@
   var require_es_function_bind = __commonJS({
     "node_modules/core-js/modules/es.function.bind.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var bind = require_function_bind();
       $({ target: "Function", proto: true, forced: Function.bind !== bind }, {
@@ -6886,7 +6620,6 @@
   var require_es_function_has_instance = __commonJS({
     "node_modules/core-js/modules/es.function.has-instance.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var isCallable = require_is_callable();
       var isObject = require_is_object();
       var definePropertyModule = require_object_define_property();
@@ -6909,7 +6642,6 @@
   var require_es_function_name = __commonJS({
     "node_modules/core-js/modules/es.function.name.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var DESCRIPTORS = require_descriptors();
       var FUNCTION_NAME_EXISTS = require_function_name().EXISTS;
       var uncurryThis = require_function_uncurry_this();
@@ -6938,7 +6670,6 @@
   var require_es_global_this = __commonJS({
     "node_modules/core-js/modules/es.global-this.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var globalThis2 = require_global_this();
       $({ global: true, forced: globalThis2.globalThis !== globalThis2 }, {
@@ -6951,7 +6682,6 @@
   var require_es_iterator_constructor = __commonJS({
     "node_modules/core-js/modules/es.iterator.constructor.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var globalThis2 = require_global_this();
       var anInstance = require_an_instance();
@@ -7009,7 +6739,6 @@
   var require_iterator_close_all = __commonJS({
     "node_modules/core-js/internals/iterator-close-all.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var iteratorClose = require_iterator_close();
       module.exports = function(iters, kind, value) {
         for (var i = iters.length - 1; i >= 0; i--) {
@@ -7031,7 +6760,6 @@
   var require_iterator_cleanup_state = __commonJS({
     "node_modules/core-js/internals/iterator-cleanup-state.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       module.exports = function(state) {
         state.iterator = state.next = state.nextHandler = state.mapper = state.predicate = state.inner = state.iterables = state.iters = state.openIters = state.padding = state.finishResults = state.buffer = null;
       };
@@ -7042,7 +6770,6 @@
   var require_iterator_create_proxy = __commonJS({
     "node_modules/core-js/internals/iterator-create-proxy.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var call = require_function_call();
       var create = require_object_create();
       var createNonEnumerableProperty = require_create_non_enumerable_property();
@@ -7133,7 +6860,6 @@
   var require_es_iterator_concat = __commonJS({
     "node_modules/core-js/modules/es.iterator.concat.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var call = require_function_call();
       var aCallable = require_a_callable();
@@ -7192,7 +6918,6 @@
   var require_es_iterator_dispose = __commonJS({
     "node_modules/core-js/modules/es.iterator.dispose.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var call = require_function_call();
       var defineBuiltIn = require_define_built_in();
       var getMethod = require_get_method();
@@ -7213,7 +6938,6 @@
   var require_get_iterator_direct = __commonJS({
     "node_modules/core-js/internals/get-iterator-direct.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       module.exports = function(obj) {
         return {
           iterator: obj,
@@ -7228,7 +6952,6 @@
   var require_not_a_nan = __commonJS({
     "node_modules/core-js/internals/not-a-nan.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $RangeError = RangeError;
       module.exports = function(it) {
         if (it === it) return it;
@@ -7241,7 +6964,6 @@
   var require_to_positive_integer = __commonJS({
     "node_modules/core-js/internals/to-positive-integer.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var toIntegerOrInfinity = require_to_integer_or_infinity();
       var $RangeError = RangeError;
       module.exports = function(it) {
@@ -7256,7 +6978,6 @@
   var require_iterator_helper_throws_on_invalid_iterator = __commonJS({
     "node_modules/core-js/internals/iterator-helper-throws-on-invalid-iterator.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       module.exports = function(methodName, argument) {
         var method = typeof Iterator == "function" && Iterator.prototype[methodName];
         if (method) try {
@@ -7272,7 +6993,6 @@
   var require_iterator_helper_without_closing_on_early_error = __commonJS({
     "node_modules/core-js/internals/iterator-helper-without-closing-on-early-error.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var globalThis2 = require_global_this();
       module.exports = function(METHOD_NAME, ExpectedError) {
         var Iterator2 = globalThis2.Iterator;
@@ -7300,7 +7020,6 @@
   var require_es_iterator_drop = __commonJS({
     "node_modules/core-js/modules/es.iterator.drop.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var call = require_function_call();
       var anObject = require_an_object();
@@ -7366,7 +7085,6 @@
   var require_es_iterator_every = __commonJS({
     "node_modules/core-js/modules/es.iterator.every.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var call = require_function_call();
       var iterate = require_iterate();
@@ -7399,7 +7117,6 @@
   var require_es_iterator_filter = __commonJS({
     "node_modules/core-js/modules/es.iterator.filter.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var call = require_function_call();
       var aCallable = require_a_callable();
@@ -7449,7 +7166,6 @@
   var require_es_iterator_find = __commonJS({
     "node_modules/core-js/modules/es.iterator.find.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var call = require_function_call();
       var iterate = require_iterate();
@@ -7482,7 +7198,6 @@
   var require_get_iterator_flattenable = __commonJS({
     "node_modules/core-js/internals/get-iterator-flattenable.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var call = require_function_call();
       var anObject = require_an_object();
       var getIteratorDirect = require_get_iterator_direct();
@@ -7499,7 +7214,6 @@
   var require_es_iterator_flat_map = __commonJS({
     "node_modules/core-js/modules/es.iterator.flat-map.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var call = require_function_call();
       var aCallable = require_a_callable();
@@ -7566,7 +7280,6 @@
   var require_es_iterator_for_each = __commonJS({
     "node_modules/core-js/modules/es.iterator.for-each.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var call = require_function_call();
       var iterate = require_iterate();
@@ -7599,7 +7312,6 @@
   var require_es_iterator_from = __commonJS({
     "node_modules/core-js/modules/es.iterator.from.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var call = require_function_call();
       var toObject = require_to_object();
@@ -7631,7 +7343,6 @@
   var require_es_iterator_map = __commonJS({
     "node_modules/core-js/modules/es.iterator.map.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var call = require_function_call();
       var aCallable = require_a_callable();
@@ -7674,7 +7385,6 @@
   var require_es_iterator_reduce = __commonJS({
     "node_modules/core-js/modules/es.iterator.reduce.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var iterate = require_iterate();
       var aCallable = require_a_callable();
@@ -7725,7 +7435,6 @@
   var require_es_iterator_some = __commonJS({
     "node_modules/core-js/modules/es.iterator.some.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var call = require_function_call();
       var iterate = require_iterate();
@@ -7758,7 +7467,6 @@
   var require_es_iterator_take = __commonJS({
     "node_modules/core-js/modules/es.iterator.take.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var call = require_function_call();
       var anObject = require_an_object();
@@ -7820,7 +7528,6 @@
   var require_es_iterator_to_array = __commonJS({
     "node_modules/core-js/modules/es.iterator.to-array.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var anObject = require_an_object();
       var createProperty = require_create_property();
@@ -7843,7 +7550,6 @@
   var require_an_object_or_undefined = __commonJS({
     "node_modules/core-js/internals/an-object-or-undefined.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var isObject = require_is_object();
       var $String = String;
       var $TypeError = TypeError;
@@ -7858,7 +7564,6 @@
   var require_get_iterator_record = __commonJS({
     "node_modules/core-js/internals/get-iterator-record.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var getIterator = require_get_iterator_internal();
       var getIteratorDirect = require_get_iterator_direct();
       module.exports = function(argument) {
@@ -7871,7 +7576,6 @@
   var require_get_mode_option = __commonJS({
     "node_modules/core-js/internals/get-mode-option.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $TypeError = TypeError;
       module.exports = function(options) {
         var mode = options && options.mode;
@@ -7885,7 +7589,6 @@
   var require_iterator_zip = __commonJS({
     "node_modules/core-js/internals/iterator-zip.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var call = require_function_call();
       var uncurryThis = require_function_uncurry_this();
       var anObject = require_an_object();
@@ -7984,7 +7687,6 @@
   var require_es_iterator_zip = __commonJS({
     "node_modules/core-js/modules/es.iterator.zip.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var anObject = require_an_object();
       var anObjectOrUndefined = require_an_object_or_undefined();
@@ -8075,7 +7777,6 @@
   var require_es_iterator_zip_keyed = __commonJS({
     "node_modules/core-js/modules/es.iterator.zip-keyed.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var anObject = require_an_object();
       var anObjectOrUndefined = require_an_object_or_undefined();
@@ -8145,7 +7846,6 @@
   var require_es_json_is_raw_json = __commonJS({
     "node_modules/core-js/modules/es.json.is-raw-json.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var NATIVE_RAW_JSON = require_native_raw_json();
       var isRawJSON = require_is_raw_json();
@@ -8159,7 +7859,6 @@
   var require_es_json_parse = __commonJS({
     "node_modules/core-js/modules/es.json.parse.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var DESCRIPTORS = require_descriptors();
       var globalThis2 = require_global_this();
@@ -8410,7 +8109,6 @@
   var require_freezing = __commonJS({
     "node_modules/core-js/internals/freezing.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var fails = require_fails();
       module.exports = !fails(function() {
         return Object.isExtensible(Object.preventExtensions({}));
@@ -8422,7 +8120,6 @@
   var require_es_json_raw_json = __commonJS({
     "node_modules/core-js/modules/es.json.raw-json.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var FREEZING = require_freezing();
       var NATIVE_RAW_JSON = require_native_raw_json();
@@ -8461,7 +8158,6 @@
   var require_es_json_to_string_tag = __commonJS({
     "node_modules/core-js/modules/es.json.to-string-tag.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var globalThis2 = require_global_this();
       var setToStringTag = require_set_to_string_tag();
       setToStringTag(globalThis2.JSON, "JSON", true);
@@ -8472,7 +8168,6 @@
   var require_array_buffer_non_extensible = __commonJS({
     "node_modules/core-js/internals/array-buffer-non-extensible.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var fails = require_fails();
       module.exports = fails(function() {
         if (typeof ArrayBuffer == "function") {
@@ -8487,7 +8182,6 @@
   var require_object_is_extensible = __commonJS({
     "node_modules/core-js/internals/object-is-extensible.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var fails = require_fails();
       var isObject = require_is_object();
       var classof = require_classof_raw();
@@ -8508,7 +8202,6 @@
   var require_internal_metadata = __commonJS({
     "node_modules/core-js/internals/internal-metadata.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var uncurryThis = require_function_uncurry_this();
       var hiddenKeys = require_hidden_keys();
@@ -8590,7 +8283,6 @@
   var require_collection = __commonJS({
     "node_modules/core-js/internals/collection.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var globalThis2 = require_global_this();
       var uncurryThis = require_function_uncurry_this();
@@ -8689,7 +8381,6 @@
   var require_collection_strong = __commonJS({
     "node_modules/core-js/internals/collection-strong.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var create = require_object_create();
       var defineBuiltInAccessor = require_define_built_in_accessor();
       var defineBuiltIns = require_define_built_ins();
@@ -8873,7 +8564,6 @@
   var require_es_map_constructor = __commonJS({
     "node_modules/core-js/modules/es.map.constructor.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var collection = require_collection();
       var collectionStrong = require_collection_strong();
       collection("Map", function(init) {
@@ -8888,7 +8578,6 @@
   var require_es_map = __commonJS({
     "node_modules/core-js/modules/es.map.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       require_es_map_constructor();
     }
   });
@@ -8897,7 +8586,6 @@
   var require_map_helpers = __commonJS({
     "node_modules/core-js/internals/map-helpers.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var uncurryThis = require_function_uncurry_this();
       var MapPrototype = Map.prototype;
       module.exports = {
@@ -8916,7 +8604,6 @@
   var require_es_map_group_by = __commonJS({
     "node_modules/core-js/modules/es.map.group-by.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var uncurryThis = require_function_uncurry_this();
       var aCallable = require_a_callable();
@@ -8958,7 +8645,6 @@
   var require_es_map_get_or_insert = __commonJS({
     "node_modules/core-js/modules/es.map.get-or-insert.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var MapHelpers = require_map_helpers();
       var IS_PURE = require_is_pure();
@@ -8979,7 +8665,6 @@
   var require_es_map_get_or_insert_computed = __commonJS({
     "node_modules/core-js/modules/es.map.get-or-insert-computed.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var aCallable = require_a_callable();
       var MapHelpers = require_map_helpers();
@@ -9005,7 +8690,6 @@
   var require_math_log1p = __commonJS({
     "node_modules/core-js/internals/math-log1p.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var log = Math.log;
       module.exports = Math.log1p || function log1p(x) {
         var n = +x;
@@ -9020,7 +8704,6 @@
   var require_es_math_acosh = __commonJS({
     "node_modules/core-js/modules/es.math.acosh.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var log1p = require_math_log1p();
       var $acosh = Math.acosh;
@@ -9041,7 +8724,6 @@
   var require_es_math_asinh = __commonJS({
     "node_modules/core-js/modules/es.math.asinh.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var log1p = require_math_log1p();
       var $asinh = Math.asinh;
@@ -9064,7 +8746,6 @@
   var require_es_math_atanh = __commonJS({
     "node_modules/core-js/modules/es.math.atanh.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var log1p = require_math_log1p();
       var $atanh = Math.atanh;
@@ -9082,7 +8763,6 @@
   var require_es_math_cbrt = __commonJS({
     "node_modules/core-js/modules/es.math.cbrt.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var sign = require_math_sign();
       var abs = Math.abs;
@@ -9101,7 +8781,6 @@
   var require_es_math_clz32 = __commonJS({
     "node_modules/core-js/modules/es.math.clz32.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var floor = Math.floor;
       var log = Math.log;
@@ -9119,7 +8798,6 @@
   var require_math_expm1 = __commonJS({
     "node_modules/core-js/internals/math-expm1.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $expm1 = Math.expm1;
       var exp = Math.exp;
       module.exports = !$expm1 || $expm1(10) > 22025.465794806718 || $expm1(10) < 22025.465794806718 || $expm1(-2e-17) !== -2e-17 ? function expm1(x) {
@@ -9133,7 +8811,6 @@
   var require_es_math_cosh = __commonJS({
     "node_modules/core-js/modules/es.math.cosh.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var expm1 = require_math_expm1();
       var $cosh = Math.cosh;
@@ -9153,7 +8830,6 @@
   var require_es_math_expm1 = __commonJS({
     "node_modules/core-js/modules/es.math.expm1.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var expm1 = require_math_expm1();
       $({ target: "Math", stat: true, forced: expm1 !== Math.expm1 }, { expm1: expm1 });
@@ -9164,7 +8840,6 @@
   var require_es_math_fround = __commonJS({
     "node_modules/core-js/modules/es.math.fround.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var fround = require_math_fround();
       $({ target: "Math", stat: true }, { fround: fround });
@@ -9175,7 +8850,6 @@
   var require_es_math_f16round = __commonJS({
     "node_modules/core-js/modules/es.math.f16round.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var floatRound = require_math_float_round();
       var FLOAT16_EPSILON = 9765625e-10;
@@ -9193,7 +8867,6 @@
   var require_es_math_hypot = __commonJS({
     "node_modules/core-js/modules/es.math.hypot.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var $hypot = Math.hypot;
       var abs = Math.abs;
@@ -9228,7 +8901,6 @@
   var require_es_math_imul = __commonJS({
     "node_modules/core-js/modules/es.math.imul.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var fails = require_fails();
       var $imul = Math.imul;
@@ -9252,7 +8924,6 @@
   var require_math_log10 = __commonJS({
     "node_modules/core-js/internals/math-log10.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var log = Math.log;
       var LOG10E = Math.LOG10E;
       module.exports = Math.log10 || function log10(x) {
@@ -9265,7 +8936,6 @@
   var require_es_math_log10 = __commonJS({
     "node_modules/core-js/modules/es.math.log10.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var log10 = require_math_log10();
       $({ target: "Math", stat: true }, {
@@ -9278,7 +8948,6 @@
   var require_es_math_log1p = __commonJS({
     "node_modules/core-js/modules/es.math.log1p.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var log1p = require_math_log1p();
       $({ target: "Math", stat: true }, { log1p: log1p });
@@ -9289,7 +8958,6 @@
   var require_es_math_log2 = __commonJS({
     "node_modules/core-js/modules/es.math.log2.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var log2 = require_math_log2();
       $({ target: "Math", stat: true }, {
@@ -9302,7 +8970,6 @@
   var require_es_math_sign = __commonJS({
     "node_modules/core-js/modules/es.math.sign.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var sign = require_math_sign();
       $({ target: "Math", stat: true }, {
@@ -9315,7 +8982,6 @@
   var require_es_math_sinh = __commonJS({
     "node_modules/core-js/modules/es.math.sinh.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var fails = require_fails();
       var expm1 = require_math_expm1();
@@ -9338,7 +9004,6 @@
   var require_es_math_sum_precise = __commonJS({
     "node_modules/core-js/modules/es.math.sum-precise.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var uncurryThis = require_function_uncurry_this();
       var iterate = require_iterate();
@@ -9473,7 +9138,6 @@
   var require_es_math_tanh = __commonJS({
     "node_modules/core-js/modules/es.math.tanh.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var expm1 = require_math_expm1();
       var exp = Math.exp;
@@ -9492,7 +9156,6 @@
   var require_es_math_to_string_tag = __commonJS({
     "node_modules/core-js/modules/es.math.to-string-tag.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var setToStringTag = require_set_to_string_tag();
       setToStringTag(Math, "Math", true);
     }
@@ -9502,7 +9165,6 @@
   var require_es_math_trunc = __commonJS({
     "node_modules/core-js/modules/es.math.trunc.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var trunc = require_math_trunc();
       $({ target: "Math", stat: true }, {
@@ -9515,7 +9177,6 @@
   var require_whitespaces = __commonJS({
     "node_modules/core-js/internals/whitespaces.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       module.exports = "	\n\v\f\r \xA0\u1680\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200A\u202F\u205F\u3000\u2028\u2029\uFEFF";
     }
   });
@@ -9524,7 +9185,6 @@
   var require_string_trim = __commonJS({
     "node_modules/core-js/internals/string-trim.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var uncurryThis = require_function_uncurry_this();
       var requireObjectCoercible = require_require_object_coercible();
       var toString = require_to_string();
@@ -9558,7 +9218,6 @@
   var require_es_number_constructor = __commonJS({
     "node_modules/core-js/modules/es.number.constructor.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var IS_PURE = require_is_pure();
       var DESCRIPTORS = require_descriptors();
@@ -9660,7 +9319,6 @@
   var require_es_number_epsilon = __commonJS({
     "node_modules/core-js/modules/es.number.epsilon.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       $({ target: "Number", stat: true, nonConfigurable: true, nonWritable: true }, {
         EPSILON: Math.pow(2, -52)
@@ -9672,7 +9330,6 @@
   var require_number_is_finite = __commonJS({
     "node_modules/core-js/internals/number-is-finite.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var globalThis2 = require_global_this();
       var globalIsFinite = globalThis2.isFinite;
       module.exports = Number.isFinite || function isFinite2(it) {
@@ -9685,7 +9342,6 @@
   var require_es_number_is_finite = __commonJS({
     "node_modules/core-js/modules/es.number.is-finite.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var numberIsFinite = require_number_is_finite();
       $({ target: "Number", stat: true }, { isFinite: numberIsFinite });
@@ -9696,7 +9352,6 @@
   var require_is_integral_number = __commonJS({
     "node_modules/core-js/internals/is-integral-number.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var isObject = require_is_object();
       var floor = Math.floor;
       module.exports = Number.isInteger || function isInteger(it) {
@@ -9709,7 +9364,6 @@
   var require_es_number_is_integer = __commonJS({
     "node_modules/core-js/modules/es.number.is-integer.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var isIntegralNumber = require_is_integral_number();
       $({ target: "Number", stat: true }, {
@@ -9722,7 +9376,6 @@
   var require_es_number_is_nan = __commonJS({
     "node_modules/core-js/modules/es.number.is-nan.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       $({ target: "Number", stat: true }, {
         isNaN: function isNaN(number) {
@@ -9736,7 +9389,6 @@
   var require_es_number_is_safe_integer = __commonJS({
     "node_modules/core-js/modules/es.number.is-safe-integer.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var isIntegralNumber = require_is_integral_number();
       var abs = Math.abs;
@@ -9752,7 +9404,6 @@
   var require_es_number_max_safe_integer = __commonJS({
     "node_modules/core-js/modules/es.number.max-safe-integer.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       $({ target: "Number", stat: true, nonConfigurable: true, nonWritable: true }, {
         MAX_SAFE_INTEGER: 9007199254740991
@@ -9764,7 +9415,6 @@
   var require_es_number_min_safe_integer = __commonJS({
     "node_modules/core-js/modules/es.number.min-safe-integer.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       $({ target: "Number", stat: true, nonConfigurable: true, nonWritable: true }, {
         MIN_SAFE_INTEGER: -9007199254740991
@@ -9776,7 +9426,6 @@
   var require_number_parse_float = __commonJS({
     "node_modules/core-js/internals/number-parse-float.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var globalThis2 = require_global_this();
       var fails = require_fails();
       var uncurryThis = require_function_uncurry_this();
@@ -9802,7 +9451,6 @@
   var require_es_number_parse_float = __commonJS({
     "node_modules/core-js/modules/es.number.parse-float.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var parseFloat2 = require_number_parse_float();
       $({ target: "Number", stat: true, forced: Number.parseFloat !== parseFloat2 }, {
@@ -9815,7 +9463,6 @@
   var require_number_parse_int = __commonJS({
     "node_modules/core-js/internals/number-parse-int.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var globalThis2 = require_global_this();
       var fails = require_fails();
       var uncurryThis = require_function_uncurry_this();
@@ -9841,7 +9488,6 @@
   var require_es_number_parse_int = __commonJS({
     "node_modules/core-js/modules/es.number.parse-int.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var parseInt2 = require_number_parse_int();
       $({ target: "Number", stat: true, forced: Number.parseInt !== parseInt2 }, {
@@ -9854,7 +9500,6 @@
   var require_es_number_to_exponential = __commonJS({
     "node_modules/core-js/modules/es.number.to-exponential.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var uncurryThis = require_function_uncurry_this();
       var toIntegerOrInfinity = require_to_integer_or_infinity();
@@ -9944,7 +9589,6 @@
   var require_es_number_to_fixed = __commonJS({
     "node_modules/core-js/modules/es.number.to-fixed.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var uncurryThis = require_function_uncurry_this();
       var toIntegerOrInfinity = require_to_integer_or_infinity();
@@ -10066,7 +9710,6 @@
   var require_es_number_to_precision = __commonJS({
     "node_modules/core-js/modules/es.number.to-precision.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var uncurryThis = require_function_uncurry_this();
       var fails = require_fails();
@@ -10089,7 +9732,6 @@
   var require_object_assign = __commonJS({
     "node_modules/core-js/internals/object-assign.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var DESCRIPTORS = require_descriptors();
       var uncurryThis = require_function_uncurry_this();
       var call = require_function_call();
@@ -10147,7 +9789,6 @@
   var require_es_object_assign = __commonJS({
     "node_modules/core-js/modules/es.object.assign.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var assign = require_object_assign();
       $({ target: "Object", stat: true, arity: 2, forced: Object.assign !== assign }, {
@@ -10160,7 +9801,6 @@
   var require_es_object_create = __commonJS({
     "node_modules/core-js/modules/es.object.create.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var DESCRIPTORS = require_descriptors();
       var create = require_object_create();
@@ -10174,7 +9814,6 @@
   var require_object_prototype_accessors_forced = __commonJS({
     "node_modules/core-js/internals/object-prototype-accessors-forced.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var IS_PURE = require_is_pure();
       var globalThis2 = require_global_this();
       var fails = require_fails();
@@ -10193,7 +9832,6 @@
   var require_es_object_define_getter = __commonJS({
     "node_modules/core-js/modules/es.object.define-getter.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var DESCRIPTORS = require_descriptors();
       var FORCED = require_object_prototype_accessors_forced();
@@ -10214,7 +9852,6 @@
   var require_es_object_define_properties = __commonJS({
     "node_modules/core-js/modules/es.object.define-properties.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var DESCRIPTORS = require_descriptors();
       var defineProperties = require_object_define_properties().f;
@@ -10228,7 +9865,6 @@
   var require_es_object_define_property = __commonJS({
     "node_modules/core-js/modules/es.object.define-property.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var DESCRIPTORS = require_descriptors();
       var defineProperty = require_object_define_property().f;
@@ -10242,7 +9878,6 @@
   var require_es_object_define_setter = __commonJS({
     "node_modules/core-js/modules/es.object.define-setter.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var DESCRIPTORS = require_descriptors();
       var FORCED = require_object_prototype_accessors_forced();
@@ -10263,7 +9898,6 @@
   var require_object_to_array = __commonJS({
     "node_modules/core-js/internals/object-to-array.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var DESCRIPTORS = require_descriptors();
       var fails = require_fails();
       var uncurryThis = require_function_uncurry_this();
@@ -10311,7 +9945,6 @@
   var require_es_object_entries = __commonJS({
     "node_modules/core-js/modules/es.object.entries.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var $entries = require_object_to_array().entries;
       $({ target: "Object", stat: true }, {
@@ -10326,7 +9959,6 @@
   var require_es_object_freeze = __commonJS({
     "node_modules/core-js/modules/es.object.freeze.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var FREEZING = require_freezing();
       var fails = require_fails();
@@ -10348,7 +9980,6 @@
   var require_es_object_from_entries = __commonJS({
     "node_modules/core-js/modules/es.object.from-entries.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var iterate = require_iterate();
       var createProperty = require_create_property();
@@ -10368,7 +9999,6 @@
   var require_es_object_get_own_property_descriptor = __commonJS({
     "node_modules/core-js/modules/es.object.get-own-property-descriptor.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var fails = require_fails();
       var toIndexedObject = require_to_indexed_object();
@@ -10389,7 +10019,6 @@
   var require_es_object_get_own_property_descriptors = __commonJS({
     "node_modules/core-js/modules/es.object.get-own-property-descriptors.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var DESCRIPTORS = require_descriptors();
       var ownKeys5 = require_own_keys();
@@ -10418,7 +10047,6 @@
   var require_es_object_get_own_property_names = __commonJS({
     "node_modules/core-js/modules/es.object.get-own-property-names.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var fails = require_fails();
       var getOwnPropertyNames = require_object_get_own_property_names_external().f;
@@ -10435,7 +10063,6 @@
   var require_es_object_get_prototype_of = __commonJS({
     "node_modules/core-js/modules/es.object.get-prototype-of.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var fails = require_fails();
       var toObject = require_to_object();
@@ -10456,7 +10083,6 @@
   var require_es_object_group_by = __commonJS({
     "node_modules/core-js/modules/es.object.group-by.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var createProperty = require_create_property();
       var getBuiltIn = require_get_built_in();
@@ -10497,7 +10123,6 @@
   var require_es_object_has_own = __commonJS({
     "node_modules/core-js/modules/es.object.has-own.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var hasOwn = require_has_own_property();
       $({ target: "Object", stat: true }, {
@@ -10510,7 +10135,6 @@
   var require_same_value = __commonJS({
     "node_modules/core-js/internals/same-value.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       module.exports = Object.is || function is(x, y) {
         return x === y ? x !== 0 || 1 / x === 1 / y : x !== x && y !== y;
       };
@@ -10521,7 +10145,6 @@
   var require_es_object_is = __commonJS({
     "node_modules/core-js/modules/es.object.is.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var is = require_same_value();
       $({ target: "Object", stat: true }, {
@@ -10534,7 +10157,6 @@
   var require_es_object_is_extensible = __commonJS({
     "node_modules/core-js/modules/es.object.is-extensible.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var $isExtensible = require_object_is_extensible();
       $({ target: "Object", stat: true, forced: Object.isExtensible !== $isExtensible }, {
@@ -10547,7 +10169,6 @@
   var require_es_object_is_frozen = __commonJS({
     "node_modules/core-js/modules/es.object.is-frozen.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var fails = require_fails();
       var isObject = require_is_object();
@@ -10571,7 +10192,6 @@
   var require_es_object_is_sealed = __commonJS({
     "node_modules/core-js/modules/es.object.is-sealed.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var fails = require_fails();
       var isObject = require_is_object();
@@ -10595,7 +10215,6 @@
   var require_es_object_keys = __commonJS({
     "node_modules/core-js/modules/es.object.keys.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var toObject = require_to_object();
       var nativeKeys = require_object_keys();
@@ -10615,7 +10234,6 @@
   var require_es_object_lookup_getter = __commonJS({
     "node_modules/core-js/modules/es.object.lookup-getter.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var DESCRIPTORS = require_descriptors();
       var FORCED = require_object_prototype_accessors_forced();
@@ -10642,7 +10260,6 @@
   var require_es_object_lookup_setter = __commonJS({
     "node_modules/core-js/modules/es.object.lookup-setter.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var DESCRIPTORS = require_descriptors();
       var FORCED = require_object_prototype_accessors_forced();
@@ -10669,7 +10286,6 @@
   var require_es_object_prevent_extensions = __commonJS({
     "node_modules/core-js/modules/es.object.prevent-extensions.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var isObject = require_is_object();
       var onFreeze = require_internal_metadata().onFreeze;
@@ -10691,7 +10307,6 @@
   var require_es_object_proto = __commonJS({
     "node_modules/core-js/modules/es.object.proto.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var DESCRIPTORS = require_descriptors();
       var defineBuiltInAccessor = require_define_built_in_accessor();
       var isObject = require_is_object();
@@ -10724,7 +10339,6 @@
   var require_es_object_seal = __commonJS({
     "node_modules/core-js/modules/es.object.seal.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var isObject = require_is_object();
       var onFreeze = require_internal_metadata().onFreeze;
@@ -10746,7 +10360,6 @@
   var require_es_object_set_prototype_of = __commonJS({
     "node_modules/core-js/modules/es.object.set-prototype-of.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var setPrototypeOf = require_object_set_prototype_of();
       $({ target: "Object", stat: true }, {
@@ -10759,7 +10372,6 @@
   var require_object_to_string = __commonJS({
     "node_modules/core-js/internals/object-to-string.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var TO_STRING_TAG_SUPPORT = require_to_string_tag_support();
       var classof = require_classof();
       module.exports = TO_STRING_TAG_SUPPORT ? {}.toString : function toString() {
@@ -10772,7 +10384,6 @@
   var require_es_object_to_string = __commonJS({
     "node_modules/core-js/modules/es.object.to-string.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var TO_STRING_TAG_SUPPORT = require_to_string_tag_support();
       var defineBuiltIn = require_define_built_in();
       var toString = require_object_to_string();
@@ -10786,7 +10397,6 @@
   var require_es_object_values = __commonJS({
     "node_modules/core-js/modules/es.object.values.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var $values = require_object_to_array().values;
       $({ target: "Object", stat: true }, {
@@ -10801,7 +10411,6 @@
   var require_es_parse_float = __commonJS({
     "node_modules/core-js/modules/es.parse-float.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var $parseFloat = require_number_parse_float();
       $({ global: true, forced: parseFloat !== $parseFloat }, {
@@ -10814,7 +10423,6 @@
   var require_es_parse_int = __commonJS({
     "node_modules/core-js/modules/es.parse-int.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var $parseInt = require_number_parse_int();
       $({ global: true, forced: parseInt !== $parseInt }, {
@@ -10827,7 +10435,6 @@
   var require_a_constructor = __commonJS({
     "node_modules/core-js/internals/a-constructor.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var isConstructor = require_is_constructor();
       var tryToString = require_try_to_string();
       var $TypeError = TypeError;
@@ -10842,7 +10449,6 @@
   var require_species_constructor = __commonJS({
     "node_modules/core-js/internals/species-constructor.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var anObject = require_an_object();
       var aConstructor = require_a_constructor();
       var isNullOrUndefined = require_is_null_or_undefined();
@@ -10860,7 +10466,6 @@
   var require_validate_arguments_length = __commonJS({
     "node_modules/core-js/internals/validate-arguments-length.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $TypeError = TypeError;
       module.exports = function(passed, required) {
         if (passed < required) throw new $TypeError("Not enough arguments");
@@ -10873,7 +10478,6 @@
   var require_environment_is_ios = __commonJS({
     "node_modules/core-js/internals/environment-is-ios.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var userAgent = require_environment_user_agent();
       module.exports = /ipad|iphone|ipod/i.test(userAgent) && /applewebkit/i.test(userAgent);
     }
@@ -10883,7 +10487,6 @@
   var require_task = __commonJS({
     "node_modules/core-js/internals/task.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var globalThis2 = require_global_this();
       var apply = require_function_apply();
       var bind = require_function_bind_context();
@@ -10985,7 +10588,6 @@
   var require_safe_get_built_in = __commonJS({
     "node_modules/core-js/internals/safe-get-built-in.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var globalThis2 = require_global_this();
       var DESCRIPTORS = require_descriptors();
       var getOwnPropertyDescriptor = Object.getOwnPropertyDescriptor;
@@ -11001,7 +10603,6 @@
   var require_queue = __commonJS({
     "node_modules/core-js/internals/queue.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var Queue = function() {
         this.head = null;
         this.tail = null;
@@ -11031,7 +10632,6 @@
   var require_environment_is_ios_pebble = __commonJS({
     "node_modules/core-js/internals/environment-is-ios-pebble.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var userAgent = require_environment_user_agent();
       module.exports = /ipad|iphone|ipod/i.test(userAgent) && typeof Pebble != "undefined";
     }
@@ -11041,7 +10641,6 @@
   var require_environment_is_webos_webkit = __commonJS({
     "node_modules/core-js/internals/environment-is-webos-webkit.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var userAgent = require_environment_user_agent();
       module.exports = /web0s(?!.*chrome)/i.test(userAgent);
     }
@@ -11051,7 +10650,6 @@
   var require_microtask = __commonJS({
     "node_modules/core-js/internals/microtask.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var globalThis2 = require_global_this();
       var safeGetBuiltIn = require_safe_get_built_in();
       var bind = require_function_bind_context();
@@ -11123,7 +10721,6 @@
   var require_host_report_errors = __commonJS({
     "node_modules/core-js/internals/host-report-errors.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       module.exports = function(a, b) {
         try {
           arguments.length === 1 ? console.error(a) : console.error(a, b);
@@ -11137,7 +10734,6 @@
   var require_perform = __commonJS({
     "node_modules/core-js/internals/perform.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       module.exports = function(exec) {
         try {
           return { error: false, value: exec() };
@@ -11152,7 +10748,6 @@
   var require_promise_native_constructor = __commonJS({
     "node_modules/core-js/internals/promise-native-constructor.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var globalThis2 = require_global_this();
       module.exports = globalThis2.Promise;
     }
@@ -11162,7 +10757,6 @@
   var require_promise_constructor_detection = __commonJS({
     "node_modules/core-js/internals/promise-constructor-detection.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var globalThis2 = require_global_this();
       var NativePromiseConstructor = require_promise_native_constructor();
       var isCallable = require_is_callable();
@@ -11210,7 +10804,6 @@
   var require_new_promise_capability = __commonJS({
     "node_modules/core-js/internals/new-promise-capability.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var aCallable = require_a_callable();
       var $TypeError = TypeError;
       var PromiseCapability = function(C) {
@@ -11233,7 +10826,6 @@
   var require_es_promise_constructor = __commonJS({
     "node_modules/core-js/modules/es.promise.constructor.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var IS_PURE = require_is_pure();
       var IS_NODE = require_environment_is_node();
@@ -11498,7 +11090,6 @@
   var require_promise_statics_incorrect_iteration = __commonJS({
     "node_modules/core-js/internals/promise-statics-incorrect-iteration.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var NativePromiseConstructor = require_promise_native_constructor();
       var checkCorrectnessOfIteration = require_check_correctness_of_iteration();
       var FORCED_PROMISE_CONSTRUCTOR = require_promise_constructor_detection().CONSTRUCTOR;
@@ -11513,7 +11104,6 @@
   var require_es_promise_all = __commonJS({
     "node_modules/core-js/modules/es.promise.all.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var call = require_function_call();
       var aCallable = require_a_callable();
@@ -11556,7 +11146,6 @@
   var require_es_promise_catch = __commonJS({
     "node_modules/core-js/modules/es.promise.catch.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var IS_PURE = require_is_pure();
       var FORCED_PROMISE_CONSTRUCTOR = require_promise_constructor_detection().CONSTRUCTOR;
@@ -11584,7 +11173,6 @@
   var require_es_promise_race = __commonJS({
     "node_modules/core-js/modules/es.promise.race.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var call = require_function_call();
       var aCallable = require_a_callable();
@@ -11614,7 +11202,6 @@
   var require_es_promise_reject = __commonJS({
     "node_modules/core-js/modules/es.promise.reject.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var newPromiseCapabilityModule = require_new_promise_capability();
       var FORCED_PROMISE_CONSTRUCTOR = require_promise_constructor_detection().CONSTRUCTOR;
@@ -11633,7 +11220,6 @@
   var require_promise_resolve = __commonJS({
     "node_modules/core-js/internals/promise-resolve.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var anObject = require_an_object();
       var isObject = require_is_object();
       var newPromiseCapability = require_new_promise_capability();
@@ -11652,7 +11238,6 @@
   var require_es_promise_resolve = __commonJS({
     "node_modules/core-js/modules/es.promise.resolve.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var getBuiltIn = require_get_built_in();
       var IS_PURE = require_is_pure();
@@ -11673,7 +11258,6 @@
   var require_es_promise = __commonJS({
     "node_modules/core-js/modules/es.promise.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       require_es_promise_constructor();
       require_es_promise_all();
       require_es_promise_catch();
@@ -11687,7 +11271,6 @@
   var require_es_promise_all_settled = __commonJS({
     "node_modules/core-js/modules/es.promise.all-settled.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var call = require_function_call();
       var aCallable = require_a_callable();
@@ -11735,7 +11318,6 @@
   var require_es_promise_any = __commonJS({
     "node_modules/core-js/modules/es.promise.any.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var call = require_function_call();
       var aCallable = require_a_callable();
@@ -11786,7 +11368,6 @@
   var require_es_promise_finally = __commonJS({
     "node_modules/core-js/modules/es.promise.finally.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var IS_PURE = require_is_pure();
       var NativePromiseConstructor = require_promise_native_constructor();
@@ -11834,7 +11415,6 @@
   var require_es_promise_try = __commonJS({
     "node_modules/core-js/modules/es.promise.try.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var globalThis2 = require_global_this();
       var apply = require_function_apply();
@@ -11873,7 +11453,6 @@
   var require_es_promise_with_resolvers = __commonJS({
     "node_modules/core-js/modules/es.promise.with-resolvers.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var newPromiseCapabilityModule = require_new_promise_capability();
       $({ target: "Promise", stat: true }, {
@@ -11893,7 +11472,6 @@
   var require_async_iterator_prototype = __commonJS({
     "node_modules/core-js/internals/async-iterator-prototype.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var globalThis2 = require_global_this();
       var shared = require_shared_store();
       var isCallable = require_is_callable();
@@ -11934,7 +11512,6 @@
   var require_async_from_sync_iterator = __commonJS({
     "node_modules/core-js/internals/async-from-sync-iterator.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var call = require_function_call();
       var anObject = require_an_object();
       var create = require_object_create();
@@ -12018,7 +11595,6 @@
   var require_get_async_iterator = __commonJS({
     "node_modules/core-js/internals/get-async-iterator.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var call = require_function_call();
       var AsyncFromSyncIterator = require_async_from_sync_iterator();
       var anObject = require_an_object();
@@ -12038,7 +11614,6 @@
   var require_async_iterator_close = __commonJS({
     "node_modules/core-js/internals/async-iterator-close.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var call = require_function_call();
       var anObject = require_an_object();
       var getBuiltIn = require_get_built_in();
@@ -12071,7 +11646,6 @@
   var require_async_iterator_iteration = __commonJS({
     "node_modules/core-js/internals/async-iterator-iteration.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var call = require_function_call();
       var aCallable = require_a_callable();
       var anObject = require_an_object();
@@ -12177,7 +11751,6 @@
   var require_array_from_async = __commonJS({
     "node_modules/core-js/internals/array-from-async.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var bind = require_function_bind_context();
       var uncurryThis = require_function_uncurry_this();
       var isConstructor = require_is_constructor();
@@ -12224,7 +11797,6 @@
   var require_es_array_from_async = __commonJS({
     "node_modules/core-js/modules/es.array.from-async.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var fromAsync = require_array_from_async();
       var fails = require_fails();
@@ -12247,7 +11819,6 @@
   var require_es_async_disposable_stack_constructor = __commonJS({
     "node_modules/core-js/modules/es.async-disposable-stack.constructor.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var DESCRIPTORS = require_descriptors();
       var getBuiltIn = require_get_built_in();
@@ -12369,7 +11940,6 @@
   var require_es_async_iterator_async_dispose = __commonJS({
     "node_modules/core-js/modules/es.async-iterator.async-dispose.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var call = require_function_call();
       var defineBuiltIn = require_define_built_in();
       var getBuiltIn = require_get_built_in();
@@ -12399,7 +11969,6 @@
   var require_es_reflect_apply = __commonJS({
     "node_modules/core-js/modules/es.reflect.apply.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var functionApply = require_function_apply();
       var aCallable = require_a_callable();
@@ -12421,7 +11990,6 @@
   var require_es_reflect_construct = __commonJS({
     "node_modules/core-js/modules/es.reflect.construct.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var getBuiltIn = require_get_built_in();
       var apply = require_function_apply();
@@ -12481,7 +12049,6 @@
   var require_es_reflect_define_property = __commonJS({
     "node_modules/core-js/modules/es.reflect.define-property.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var DESCRIPTORS = require_descriptors();
       var anObject = require_an_object();
@@ -12515,7 +12082,6 @@
   var require_es_reflect_delete_property = __commonJS({
     "node_modules/core-js/modules/es.reflect.delete-property.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var anObject = require_an_object();
       var getOwnPropertyDescriptor = require_object_get_own_property_descriptor().f;
@@ -12535,7 +12101,6 @@
   var require_is_data_descriptor = __commonJS({
     "node_modules/core-js/internals/is-data-descriptor.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var hasOwn = require_has_own_property();
       module.exports = function(descriptor) {
         return descriptor !== void 0 && (hasOwn(descriptor, "value") || hasOwn(descriptor, "writable"));
@@ -12547,7 +12112,6 @@
   var require_es_reflect_get = __commonJS({
     "node_modules/core-js/modules/es.reflect.get.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var call = require_function_call();
       var isObject = require_is_object();
@@ -12575,7 +12139,6 @@
   var require_es_reflect_get_own_property_descriptor = __commonJS({
     "node_modules/core-js/modules/es.reflect.get-own-property-descriptor.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var DESCRIPTORS = require_descriptors();
       var anObject = require_an_object();
@@ -12592,7 +12155,6 @@
   var require_es_reflect_get_prototype_of = __commonJS({
     "node_modules/core-js/modules/es.reflect.get-prototype-of.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var anObject = require_an_object();
       var objectGetPrototypeOf = require_object_get_prototype_of();
@@ -12609,7 +12171,6 @@
   var require_es_reflect_has = __commonJS({
     "node_modules/core-js/modules/es.reflect.has.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       $({ target: "Reflect", stat: true }, {
         has: function has(target, propertyKey) {
@@ -12623,7 +12184,6 @@
   var require_es_reflect_is_extensible = __commonJS({
     "node_modules/core-js/modules/es.reflect.is-extensible.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var anObject = require_an_object();
       var $isExtensible = require_object_is_extensible();
@@ -12640,7 +12200,6 @@
   var require_es_reflect_own_keys = __commonJS({
     "node_modules/core-js/modules/es.reflect.own-keys.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var ownKeys5 = require_own_keys();
       $({ target: "Reflect", stat: true }, {
@@ -12653,7 +12212,6 @@
   var require_es_reflect_prevent_extensions = __commonJS({
     "node_modules/core-js/modules/es.reflect.prevent-extensions.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var getBuiltIn = require_get_built_in();
       var anObject = require_an_object();
@@ -12677,7 +12235,6 @@
   var require_es_reflect_set = __commonJS({
     "node_modules/core-js/modules/es.reflect.set.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var call = require_function_call();
       var anObject = require_an_object();
@@ -12733,7 +12290,6 @@
   var require_es_reflect_set_prototype_of = __commonJS({
     "node_modules/core-js/modules/es.reflect.set-prototype-of.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var anObject = require_an_object();
       var aPossiblePrototype = require_a_possible_prototype();
@@ -12757,7 +12313,6 @@
   var require_es_reflect_to_string_tag = __commonJS({
     "node_modules/core-js/modules/es.reflect.to-string-tag.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var globalThis2 = require_global_this();
       var setToStringTag = require_set_to_string_tag();
@@ -12770,7 +12325,6 @@
   var require_is_regexp = __commonJS({
     "node_modules/core-js/internals/is-regexp.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var isObject = require_is_object();
       var classof = require_classof_raw();
       var wellKnownSymbol = require_well_known_symbol();
@@ -12786,7 +12340,6 @@
   var require_regexp_flags_detection = __commonJS({
     "node_modules/core-js/internals/regexp-flags-detection.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var globalThis2 = require_global_this();
       var fails = require_fails();
       var RegExp2 = globalThis2.RegExp;
@@ -12826,7 +12379,6 @@
   var require_regexp_flags = __commonJS({
     "node_modules/core-js/internals/regexp-flags.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var anObject = require_an_object();
       module.exports = function() {
         var that = anObject(this);
@@ -12848,7 +12400,6 @@
   var require_regexp_get_flags = __commonJS({
     "node_modules/core-js/internals/regexp-get-flags.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var call = require_function_call();
       var hasOwn = require_has_own_property();
       var isPrototypeOf = require_object_is_prototype_of();
@@ -12867,7 +12418,6 @@
   var require_regexp_sticky_helpers = __commonJS({
     "node_modules/core-js/internals/regexp-sticky-helpers.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var fails = require_fails();
       var globalThis2 = require_global_this();
       var $RegExp = globalThis2.RegExp;
@@ -12896,7 +12446,6 @@
   var require_regexp_unsupported_dot_all = __commonJS({
     "node_modules/core-js/internals/regexp-unsupported-dot-all.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var fails = require_fails();
       var globalThis2 = require_global_this();
       var $RegExp = globalThis2.RegExp;
@@ -12911,7 +12460,6 @@
   var require_regexp_unsupported_ncg = __commonJS({
     "node_modules/core-js/internals/regexp-unsupported-ncg.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var fails = require_fails();
       var globalThis2 = require_global_this();
       var $RegExp = globalThis2.RegExp;
@@ -12926,7 +12474,6 @@
   var require_es_regexp_constructor = __commonJS({
     "node_modules/core-js/modules/es.regexp.constructor.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var DESCRIPTORS = require_descriptors();
       var globalThis2 = require_global_this();
       var uncurryThis = require_function_uncurry_this();
@@ -13116,7 +12663,6 @@
   var require_a_string = __commonJS({
     "node_modules/core-js/internals/a-string.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $TypeError = TypeError;
       module.exports = function(argument) {
         if (typeof argument == "string") return argument;
@@ -13129,7 +12675,6 @@
   var require_es_regexp_escape = __commonJS({
     "node_modules/core-js/modules/es.regexp.escape.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var uncurryThis = require_function_uncurry_this();
       var aString = require_a_string();
@@ -13193,7 +12738,6 @@
   var require_es_regexp_dot_all = __commonJS({
     "node_modules/core-js/modules/es.regexp.dot-all.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var DESCRIPTORS = require_descriptors();
       var UNSUPPORTED_DOT_ALL = require_regexp_unsupported_dot_all();
       var classof = require_classof_raw();
@@ -13220,7 +12764,6 @@
   var require_regexp_exec = __commonJS({
     "node_modules/core-js/internals/regexp-exec.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var call = require_function_call();
       var uncurryThis = require_function_uncurry_this();
       var toString = require_to_string();
@@ -13323,7 +12866,6 @@
   var require_es_regexp_exec = __commonJS({
     "node_modules/core-js/modules/es.regexp.exec.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var exec = require_regexp_exec();
       $({ target: "RegExp", proto: true, forced: /./.exec !== exec }, {
@@ -13336,7 +12878,6 @@
   var require_es_regexp_flags = __commonJS({
     "node_modules/core-js/modules/es.regexp.flags.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var DESCRIPTORS = require_descriptors();
       var defineBuiltInAccessor = require_define_built_in_accessor();
       var regExpFlagsDetection = require_regexp_flags_detection();
@@ -13355,7 +12896,6 @@
   var require_es_regexp_sticky = __commonJS({
     "node_modules/core-js/modules/es.regexp.sticky.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var DESCRIPTORS = require_descriptors();
       var MISSED_STICKY = require_regexp_sticky_helpers().MISSED_STICKY;
       var classof = require_classof_raw();
@@ -13382,7 +12922,6 @@
   var require_es_regexp_test = __commonJS({
     "node_modules/core-js/modules/es.regexp.test.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       require_es_regexp_exec();
       var $ = require_export();
       var call = require_function_call();
@@ -13418,7 +12957,6 @@
   var require_es_regexp_to_string = __commonJS({
     "node_modules/core-js/modules/es.regexp.to-string.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var PROPER_FUNCTION_NAME = require_function_name().PROPER;
       var defineBuiltIn = require_define_built_in();
       var anObject = require_an_object();
@@ -13447,7 +12985,6 @@
   var require_es_set_constructor = __commonJS({
     "node_modules/core-js/modules/es.set.constructor.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var collection = require_collection();
       var collectionStrong = require_collection_strong();
       collection("Set", function(init) {
@@ -13462,7 +12999,6 @@
   var require_es_set = __commonJS({
     "node_modules/core-js/modules/es.set.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       require_es_set_constructor();
     }
   });
@@ -13471,7 +13007,6 @@
   var require_set_helpers = __commonJS({
     "node_modules/core-js/internals/set-helpers.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var uncurryThis = require_function_uncurry_this();
       var SetPrototype = Set.prototype;
       module.exports = {
@@ -13489,7 +13024,6 @@
   var require_a_set = __commonJS({
     "node_modules/core-js/internals/a-set.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var has = require_set_helpers().has;
       module.exports = function(it) {
         has(it);
@@ -13502,7 +13036,6 @@
   var require_iterate_simple = __commonJS({
     "node_modules/core-js/internals/iterate-simple.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var call = require_function_call();
       module.exports = function(record, fn, ITERATOR_INSTEAD_OF_RECORD) {
         var iterator = ITERATOR_INSTEAD_OF_RECORD ? record : record.iterator;
@@ -13520,7 +13053,6 @@
   var require_set_iterate = __commonJS({
     "node_modules/core-js/internals/set-iterate.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var uncurryThis = require_function_uncurry_this();
       var iterateSimple = require_iterate_simple();
       var SetHelpers = require_set_helpers();
@@ -13539,7 +13071,6 @@
   var require_set_clone = __commonJS({
     "node_modules/core-js/internals/set-clone.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var SetHelpers = require_set_helpers();
       var iterate = require_set_iterate();
       var Set2 = SetHelpers.Set;
@@ -13558,7 +13089,6 @@
   var require_set_size = __commonJS({
     "node_modules/core-js/internals/set-size.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var uncurryThisAccessor = require_function_uncurry_this_accessor();
       var SetHelpers = require_set_helpers();
       module.exports = uncurryThisAccessor(SetHelpers.proto, "size", "get") || function(set) {
@@ -13571,7 +13101,6 @@
   var require_get_set_record = __commonJS({
     "node_modules/core-js/internals/get-set-record.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var aCallable = require_a_callable();
       var anObject = require_an_object();
       var call = require_function_call();
@@ -13610,7 +13139,6 @@
   var require_set_difference = __commonJS({
     "node_modules/core-js/internals/set-difference.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var aSet = require_a_set();
       var SetHelpers = require_set_helpers();
       var clone = require_set_clone();
@@ -13639,7 +13167,6 @@
   var require_set_method_accept_set_like = __commonJS({
     "node_modules/core-js/internals/set-method-accept-set-like.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var getBuiltIn = require_get_built_in();
       var createSetLike = function(size) {
         return {
@@ -13695,7 +13222,6 @@
   var require_es_set_difference_v2 = __commonJS({
     "node_modules/core-js/modules/es.set.difference.v2.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var difference = require_set_difference();
       var fails = require_fails();
@@ -13733,7 +13259,6 @@
   var require_set_intersection = __commonJS({
     "node_modules/core-js/internals/set-intersection.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var aSet = require_a_set();
       var SetHelpers = require_set_helpers();
       var size = require_set_size();
@@ -13765,7 +13290,6 @@
   var require_es_set_intersection_v2 = __commonJS({
     "node_modules/core-js/modules/es.set.intersection.v2.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var fails = require_fails();
       var intersection = require_set_intersection();
@@ -13785,7 +13309,6 @@
   var require_set_is_disjoint_from = __commonJS({
     "node_modules/core-js/internals/set-is-disjoint-from.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var aSet = require_a_set();
       var has = require_set_helpers().has;
       var size = require_set_size();
@@ -13811,7 +13334,6 @@
   var require_es_set_is_disjoint_from_v2 = __commonJS({
     "node_modules/core-js/modules/es.set.is-disjoint-from.v2.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var isDisjointFrom = require_set_is_disjoint_from();
       var setMethodAcceptSetLike = require_set_method_accept_set_like();
@@ -13828,7 +13350,6 @@
   var require_set_is_subset_of = __commonJS({
     "node_modules/core-js/internals/set-is-subset-of.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var aSet = require_a_set();
       var size = require_set_size();
       var iterate = require_set_iterate();
@@ -13848,7 +13369,6 @@
   var require_es_set_is_subset_of_v2 = __commonJS({
     "node_modules/core-js/modules/es.set.is-subset-of.v2.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var isSubsetOf = require_set_is_subset_of();
       var setMethodAcceptSetLike = require_set_method_accept_set_like();
@@ -13865,7 +13385,6 @@
   var require_set_is_superset_of = __commonJS({
     "node_modules/core-js/internals/set-is-superset-of.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var aSet = require_a_set();
       var has = require_set_helpers().has;
       var size = require_set_size();
@@ -13888,7 +13407,6 @@
   var require_es_set_is_superset_of_v2 = __commonJS({
     "node_modules/core-js/modules/es.set.is-superset-of.v2.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var isSupersetOf = require_set_is_superset_of();
       var setMethodAcceptSetLike = require_set_method_accept_set_like();
@@ -13905,7 +13423,6 @@
   var require_set_symmetric_difference = __commonJS({
     "node_modules/core-js/internals/set-symmetric-difference.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var aSet = require_a_set();
       var SetHelpers = require_set_helpers();
       var clone = require_set_clone();
@@ -13931,7 +13448,6 @@
   var require_set_method_get_keys_before_cloning_detection = __commonJS({
     "node_modules/core-js/internals/set-method-get-keys-before-cloning-detection.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       module.exports = function(METHOD_NAME) {
         try {
           var baseSet = /* @__PURE__ */ new Set();
@@ -13965,7 +13481,6 @@
   var require_es_set_symmetric_difference_v2 = __commonJS({
     "node_modules/core-js/modules/es.set.symmetric-difference.v2.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var symmetricDifference = require_set_symmetric_difference();
       var setMethodGetKeysBeforeCloning = require_set_method_get_keys_before_cloning_detection();
@@ -13981,7 +13496,6 @@
   var require_set_union = __commonJS({
     "node_modules/core-js/internals/set-union.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var aSet = require_a_set();
       var add = require_set_helpers().add;
       var clone = require_set_clone();
@@ -14003,7 +13517,6 @@
   var require_es_set_union_v2 = __commonJS({
     "node_modules/core-js/modules/es.set.union.v2.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var union = require_set_union();
       var setMethodGetKeysBeforeCloning = require_set_method_get_keys_before_cloning_detection();
@@ -14019,7 +13532,6 @@
   var require_es_string_at_alternative = __commonJS({
     "node_modules/core-js/modules/es.string.at-alternative.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var uncurryThis = require_function_uncurry_this();
       var requireObjectCoercible = require_require_object_coercible();
@@ -14046,7 +13558,6 @@
   var require_string_multibyte = __commonJS({
     "node_modules/core-js/internals/string-multibyte.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var uncurryThis = require_function_uncurry_this();
       var toIntegerOrInfinity = require_to_integer_or_infinity();
       var toString = require_to_string();
@@ -14080,7 +13591,6 @@
   var require_es_string_code_point_at = __commonJS({
     "node_modules/core-js/modules/es.string.code-point-at.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var codeAt = require_string_multibyte().codeAt;
       $({ target: "String", proto: true }, {
@@ -14095,7 +13605,6 @@
   var require_not_a_regexp = __commonJS({
     "node_modules/core-js/internals/not-a-regexp.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var isRegExp = require_is_regexp();
       var $TypeError = TypeError;
       module.exports = function(it) {
@@ -14111,7 +13620,6 @@
   var require_correct_is_regexp_logic = __commonJS({
     "node_modules/core-js/internals/correct-is-regexp-logic.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var wellKnownSymbol = require_well_known_symbol();
       var MATCH = wellKnownSymbol("match");
       module.exports = function(METHOD_NAME) {
@@ -14134,7 +13642,6 @@
   var require_es_string_ends_with = __commonJS({
     "node_modules/core-js/modules/es.string.ends-with.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var uncurryThis = require_function_uncurry_this_clause();
       var getOwnPropertyDescriptor = require_object_get_own_property_descriptor().f;
@@ -14169,7 +13676,6 @@
   var require_es_string_from_code_point = __commonJS({
     "node_modules/core-js/modules/es.string.from-code-point.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var uncurryThis = require_function_uncurry_this();
       var toAbsoluteIndex = require_to_absolute_index();
@@ -14200,7 +13706,6 @@
   var require_es_string_includes = __commonJS({
     "node_modules/core-js/modules/es.string.includes.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var uncurryThis = require_function_uncurry_this();
       var notARegExp = require_not_a_regexp();
@@ -14224,7 +13729,6 @@
   var require_es_string_is_well_formed = __commonJS({
     "node_modules/core-js/modules/es.string.is-well-formed.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var uncurryThis = require_function_uncurry_this();
       var requireObjectCoercible = require_require_object_coercible();
@@ -14249,7 +13753,6 @@
   var require_es_string_iterator = __commonJS({
     "node_modules/core-js/modules/es.string.iterator.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var charAt = require_string_multibyte().charAt;
       var toString = require_to_string();
       var InternalStateModule = require_internal_state();
@@ -14281,7 +13784,6 @@
   var require_fix_regexp_well_known_symbol_logic = __commonJS({
     "node_modules/core-js/internals/fix-regexp-well-known-symbol-logic.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       require_es_regexp_exec();
       var call = require_function_call();
       var defineBuiltIn = require_define_built_in();
@@ -14342,7 +13844,6 @@
   var require_advance_string_index = __commonJS({
     "node_modules/core-js/internals/advance-string-index.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var charAt = require_string_multibyte().charAt;
       module.exports = function(S, index, unicode) {
         return index + (unicode ? charAt(S, index).length || 1 : 1);
@@ -14354,7 +13855,6 @@
   var require_regexp_exec_abstract = __commonJS({
     "node_modules/core-js/internals/regexp-exec-abstract.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var call = require_function_call();
       var anObject = require_an_object();
       var isCallable = require_is_callable();
@@ -14378,7 +13878,6 @@
   var require_es_string_match = __commonJS({
     "node_modules/core-js/modules/es.string.match.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var call = require_function_call();
       var uncurryThis = require_function_uncurry_this();
       var fixRegExpWellKnownSymbolLogic = require_fix_regexp_well_known_symbol_logic();
@@ -14434,7 +13933,6 @@
   var require_es_string_match_all = __commonJS({
     "node_modules/core-js/modules/es.string.match-all.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var call = require_function_call();
       var uncurryThis = require_function_uncurry_this_clause();
@@ -14534,7 +14032,6 @@
   var require_string_pad_webkit_bug = __commonJS({
     "node_modules/core-js/internals/string-pad-webkit-bug.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var userAgent = require_environment_user_agent();
       module.exports = /Version\/10(?:\.\d+){1,2}(?: [\w./]+)?(?: Mobile\/\w+)? Safari\//.test(userAgent);
     }
@@ -14544,7 +14041,6 @@
   var require_es_string_pad_end = __commonJS({
     "node_modules/core-js/modules/es.string.pad-end.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var $padEnd = require_string_pad().end;
       var WEBKIT_BUG = require_string_pad_webkit_bug();
@@ -14560,7 +14056,6 @@
   var require_es_string_pad_start = __commonJS({
     "node_modules/core-js/modules/es.string.pad-start.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var $padStart = require_string_pad().start;
       var WEBKIT_BUG = require_string_pad_webkit_bug();
@@ -14576,7 +14071,6 @@
   var require_es_string_raw = __commonJS({
     "node_modules/core-js/modules/es.string.raw.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var uncurryThis = require_function_uncurry_this();
       var toIndexedObject = require_to_indexed_object();
@@ -14607,7 +14101,6 @@
   var require_es_string_repeat = __commonJS({
     "node_modules/core-js/modules/es.string.repeat.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var repeat = require_string_repeat();
       $({ target: "String", proto: true }, {
@@ -14620,7 +14113,6 @@
   var require_get_substitution = __commonJS({
     "node_modules/core-js/internals/get-substitution.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var uncurryThis = require_function_uncurry_this();
       var toObject = require_to_object();
       var floor = Math.floor;
@@ -14672,7 +14164,6 @@
   var require_es_string_replace = __commonJS({
     "node_modules/core-js/modules/es.string.replace.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var apply = require_function_apply();
       var call = require_function_call();
       var uncurryThis = require_function_uncurry_this();
@@ -14790,7 +14281,6 @@
   var require_es_string_replace_all = __commonJS({
     "node_modules/core-js/modules/es.string.replace-all.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var call = require_function_call();
       var uncurryThis = require_function_uncurry_this();
@@ -14852,7 +14342,6 @@
   var require_es_string_search = __commonJS({
     "node_modules/core-js/modules/es.string.search.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var call = require_function_call();
       var fixRegExpWellKnownSymbolLogic = require_fix_regexp_well_known_symbol_logic();
       var anObject = require_an_object();
@@ -14895,7 +14384,6 @@
   var require_es_string_split = __commonJS({
     "node_modules/core-js/modules/es.string.split.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var call = require_function_call();
       var uncurryThis = require_function_uncurry_this();
       var fixRegExpWellKnownSymbolLogic = require_fix_regexp_well_known_symbol_logic();
@@ -14994,7 +14482,6 @@
   var require_es_string_starts_with = __commonJS({
     "node_modules/core-js/modules/es.string.starts-with.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var uncurryThis = require_function_uncurry_this_clause();
       var getOwnPropertyDescriptor = require_object_get_own_property_descriptor().f;
@@ -15027,7 +14514,6 @@
   var require_es_string_substr = __commonJS({
     "node_modules/core-js/modules/es.string.substr.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var uncurryThis = require_function_uncurry_this();
       var requireObjectCoercible = require_require_object_coercible();
@@ -15056,7 +14542,6 @@
   var require_es_string_to_well_formed = __commonJS({
     "node_modules/core-js/modules/es.string.to-well-formed.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var call = require_function_call();
       var uncurryThis = require_function_uncurry_this();
@@ -15097,7 +14582,6 @@
   var require_string_trim_forced = __commonJS({
     "node_modules/core-js/internals/string-trim-forced.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var PROPER_FUNCTION_NAME = require_function_name().PROPER;
       var fails = require_fails();
       var whitespaces = require_whitespaces();
@@ -15114,7 +14598,6 @@
   var require_es_string_trim = __commonJS({
     "node_modules/core-js/modules/es.string.trim.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var $trim = require_string_trim().trim;
       var forcedStringTrimMethod = require_string_trim_forced();
@@ -15130,7 +14613,6 @@
   var require_string_trim_end = __commonJS({
     "node_modules/core-js/internals/string-trim-end.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $trimEnd = require_string_trim().end;
       var forcedStringTrimMethod = require_string_trim_forced();
       module.exports = forcedStringTrimMethod("trimEnd") ? function trimEnd() {
@@ -15143,7 +14625,6 @@
   var require_es_string_trim_right = __commonJS({
     "node_modules/core-js/modules/es.string.trim-right.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var trimEnd = require_string_trim_end();
       $({ target: "String", proto: true, name: "trimEnd", forced: "".trimRight !== trimEnd }, {
@@ -15156,7 +14637,6 @@
   var require_es_string_trim_end = __commonJS({
     "node_modules/core-js/modules/es.string.trim-end.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       require_es_string_trim_right();
       var $ = require_export();
       var trimEnd = require_string_trim_end();
@@ -15170,7 +14650,6 @@
   var require_string_trim_start = __commonJS({
     "node_modules/core-js/internals/string-trim-start.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $trimStart = require_string_trim().start;
       var forcedStringTrimMethod = require_string_trim_forced();
       module.exports = forcedStringTrimMethod("trimStart") ? function trimStart() {
@@ -15183,7 +14662,6 @@
   var require_es_string_trim_left = __commonJS({
     "node_modules/core-js/modules/es.string.trim-left.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var trimStart = require_string_trim_start();
       $({ target: "String", proto: true, name: "trimStart", forced: "".trimLeft !== trimStart }, {
@@ -15196,7 +14674,6 @@
   var require_es_string_trim_start = __commonJS({
     "node_modules/core-js/modules/es.string.trim-start.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       require_es_string_trim_left();
       var $ = require_export();
       var trimStart = require_string_trim_start();
@@ -15210,7 +14687,6 @@
   var require_create_html = __commonJS({
     "node_modules/core-js/internals/create-html.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var uncurryThis = require_function_uncurry_this();
       var requireObjectCoercible = require_require_object_coercible();
       var toString = require_to_string();
@@ -15229,7 +14705,6 @@
   var require_string_html_forced = __commonJS({
     "node_modules/core-js/internals/string-html-forced.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var fails = require_fails();
       module.exports = function(METHOD_NAME) {
         return fails(function() {
@@ -15244,7 +14719,6 @@
   var require_es_string_anchor = __commonJS({
     "node_modules/core-js/modules/es.string.anchor.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var createHTML = require_create_html();
       var forcedStringHTMLMethod = require_string_html_forced();
@@ -15260,7 +14734,6 @@
   var require_es_string_big = __commonJS({
     "node_modules/core-js/modules/es.string.big.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var createHTML = require_create_html();
       var forcedStringHTMLMethod = require_string_html_forced();
@@ -15276,7 +14749,6 @@
   var require_es_string_blink = __commonJS({
     "node_modules/core-js/modules/es.string.blink.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var createHTML = require_create_html();
       var forcedStringHTMLMethod = require_string_html_forced();
@@ -15292,7 +14764,6 @@
   var require_es_string_bold = __commonJS({
     "node_modules/core-js/modules/es.string.bold.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var createHTML = require_create_html();
       var forcedStringHTMLMethod = require_string_html_forced();
@@ -15308,7 +14779,6 @@
   var require_es_string_fixed = __commonJS({
     "node_modules/core-js/modules/es.string.fixed.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var createHTML = require_create_html();
       var forcedStringHTMLMethod = require_string_html_forced();
@@ -15324,7 +14794,6 @@
   var require_es_string_fontcolor = __commonJS({
     "node_modules/core-js/modules/es.string.fontcolor.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var createHTML = require_create_html();
       var forcedStringHTMLMethod = require_string_html_forced();
@@ -15340,7 +14809,6 @@
   var require_es_string_fontsize = __commonJS({
     "node_modules/core-js/modules/es.string.fontsize.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var createHTML = require_create_html();
       var forcedStringHTMLMethod = require_string_html_forced();
@@ -15356,7 +14824,6 @@
   var require_es_string_italics = __commonJS({
     "node_modules/core-js/modules/es.string.italics.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var createHTML = require_create_html();
       var forcedStringHTMLMethod = require_string_html_forced();
@@ -15372,7 +14839,6 @@
   var require_es_string_link = __commonJS({
     "node_modules/core-js/modules/es.string.link.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var createHTML = require_create_html();
       var forcedStringHTMLMethod = require_string_html_forced();
@@ -15388,7 +14854,6 @@
   var require_es_string_small = __commonJS({
     "node_modules/core-js/modules/es.string.small.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var createHTML = require_create_html();
       var forcedStringHTMLMethod = require_string_html_forced();
@@ -15404,7 +14869,6 @@
   var require_es_string_strike = __commonJS({
     "node_modules/core-js/modules/es.string.strike.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var createHTML = require_create_html();
       var forcedStringHTMLMethod = require_string_html_forced();
@@ -15420,7 +14884,6 @@
   var require_es_string_sub = __commonJS({
     "node_modules/core-js/modules/es.string.sub.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var createHTML = require_create_html();
       var forcedStringHTMLMethod = require_string_html_forced();
@@ -15436,7 +14899,6 @@
   var require_es_string_sup = __commonJS({
     "node_modules/core-js/modules/es.string.sup.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var createHTML = require_create_html();
       var forcedStringHTMLMethod = require_string_html_forced();
@@ -15452,7 +14914,6 @@
   var require_typed_array_constructors_require_wrappers = __commonJS({
     "node_modules/core-js/internals/typed-array-constructors-require-wrappers.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var globalThis2 = require_global_this();
       var fails = require_fails();
       var checkCorrectnessOfIteration = require_check_correctness_of_iteration();
@@ -15478,7 +14939,6 @@
   var require_to_offset = __commonJS({
     "node_modules/core-js/internals/to-offset.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var toPositiveInteger = require_to_positive_integer();
       var $RangeError = RangeError;
       module.exports = function(it, BYTES) {
@@ -15493,7 +14953,6 @@
   var require_to_uint8_clamped = __commonJS({
     "node_modules/core-js/internals/to-uint8-clamped.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var floor = Math.floor;
       module.exports = function(it) {
         var number = +it;
@@ -15511,7 +14970,6 @@
   var require_is_big_int_array = __commonJS({
     "node_modules/core-js/internals/is-big-int-array.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var classof = require_classof();
       module.exports = function(it) {
         var klass = classof(it);
@@ -15524,7 +14982,6 @@
   var require_to_big_int = __commonJS({
     "node_modules/core-js/internals/to-big-int.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var toPrimitive = require_to_primitive();
       var $TypeError = TypeError;
       module.exports = function(argument) {
@@ -15539,7 +14996,6 @@
   var require_typed_array_from = __commonJS({
     "node_modules/core-js/internals/typed-array-from.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var bind = require_function_bind_context();
       var call = require_function_call();
       var aCallable = require_a_callable();
@@ -15588,7 +15044,6 @@
   var require_typed_array_constructor = __commonJS({
     "node_modules/core-js/internals/typed-array-constructor.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var globalThis2 = require_global_this();
       var call = require_function_call();
@@ -15789,7 +15244,6 @@
   var require_es_typed_array_float32_array = __commonJS({
     "node_modules/core-js/modules/es.typed-array.float32-array.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var createTypedArrayConstructor = require_typed_array_constructor();
       createTypedArrayConstructor("Float32", function(init) {
         return function Float32Array(data, byteOffset, length) {
@@ -15803,7 +15257,6 @@
   var require_es_typed_array_float64_array = __commonJS({
     "node_modules/core-js/modules/es.typed-array.float64-array.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var createTypedArrayConstructor = require_typed_array_constructor();
       createTypedArrayConstructor("Float64", function(init) {
         return function Float64Array(data, byteOffset, length) {
@@ -15817,7 +15270,6 @@
   var require_es_typed_array_int8_array = __commonJS({
     "node_modules/core-js/modules/es.typed-array.int8-array.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var createTypedArrayConstructor = require_typed_array_constructor();
       createTypedArrayConstructor("Int8", function(init) {
         return function Int8Array2(data, byteOffset, length) {
@@ -15831,7 +15283,6 @@
   var require_es_typed_array_int16_array = __commonJS({
     "node_modules/core-js/modules/es.typed-array.int16-array.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var createTypedArrayConstructor = require_typed_array_constructor();
       createTypedArrayConstructor("Int16", function(init) {
         return function Int16Array(data, byteOffset, length) {
@@ -15845,7 +15296,6 @@
   var require_es_typed_array_int32_array = __commonJS({
     "node_modules/core-js/modules/es.typed-array.int32-array.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var createTypedArrayConstructor = require_typed_array_constructor();
       createTypedArrayConstructor("Int32", function(init) {
         return function Int32Array(data, byteOffset, length) {
@@ -15859,7 +15309,6 @@
   var require_es_typed_array_uint8_array = __commonJS({
     "node_modules/core-js/modules/es.typed-array.uint8-array.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var createTypedArrayConstructor = require_typed_array_constructor();
       createTypedArrayConstructor("Uint8", function(init) {
         return function Uint8Array2(data, byteOffset, length) {
@@ -15873,7 +15322,6 @@
   var require_es_typed_array_uint8_clamped_array = __commonJS({
     "node_modules/core-js/modules/es.typed-array.uint8-clamped-array.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var createTypedArrayConstructor = require_typed_array_constructor();
       createTypedArrayConstructor("Uint8", function(init) {
         return function Uint8ClampedArray2(data, byteOffset, length) {
@@ -15887,7 +15335,6 @@
   var require_es_typed_array_uint16_array = __commonJS({
     "node_modules/core-js/modules/es.typed-array.uint16-array.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var createTypedArrayConstructor = require_typed_array_constructor();
       createTypedArrayConstructor("Uint16", function(init) {
         return function Uint16Array(data, byteOffset, length) {
@@ -15901,7 +15348,6 @@
   var require_es_typed_array_uint32_array = __commonJS({
     "node_modules/core-js/modules/es.typed-array.uint32-array.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var createTypedArrayConstructor = require_typed_array_constructor();
       createTypedArrayConstructor("Uint32", function(init) {
         return function Uint32Array(data, byteOffset, length) {
@@ -15915,7 +15361,6 @@
   var require_es_typed_array_at = __commonJS({
     "node_modules/core-js/modules/es.typed-array.at.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var ArrayBufferViewCore = require_array_buffer_view_core();
       var lengthOfArrayLike = require_length_of_array_like();
       var toIntegerOrInfinity = require_to_integer_or_infinity();
@@ -15935,7 +15380,6 @@
   var require_es_typed_array_copy_within = __commonJS({
     "node_modules/core-js/modules/es.typed-array.copy-within.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var uncurryThis = require_function_uncurry_this();
       var ArrayBufferViewCore = require_array_buffer_view_core();
       var $ArrayCopyWithin = require_array_copy_within();
@@ -15952,7 +15396,6 @@
   var require_es_typed_array_every = __commonJS({
     "node_modules/core-js/modules/es.typed-array.every.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var ArrayBufferViewCore = require_array_buffer_view_core();
       var $every = require_array_iteration().every;
       var aTypedArray = ArrayBufferViewCore.aTypedArray;
@@ -15967,7 +15410,6 @@
   var require_es_typed_array_fill = __commonJS({
     "node_modules/core-js/modules/es.typed-array.fill.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var ArrayBufferViewCore = require_array_buffer_view_core();
       var $fill = require_array_fill();
       var toBigInt = require_to_big_int();
@@ -15998,7 +15440,6 @@
   var require_typed_array_from_same_type_and_list = __commonJS({
     "node_modules/core-js/internals/typed-array-from-same-type-and-list.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var arrayFromConstructorAndList = require_array_from_constructor_and_list();
       var getTypedArrayConstructor = require_array_buffer_view_core().getTypedArrayConstructor;
       module.exports = function(instance, list) {
@@ -16011,7 +15452,6 @@
   var require_es_typed_array_filter = __commonJS({
     "node_modules/core-js/modules/es.typed-array.filter.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var ArrayBufferViewCore = require_array_buffer_view_core();
       var $filter = require_array_iteration().filter;
       var fromSameTypeAndList = require_typed_array_from_same_type_and_list();
@@ -16028,7 +15468,6 @@
   var require_es_typed_array_find = __commonJS({
     "node_modules/core-js/modules/es.typed-array.find.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var ArrayBufferViewCore = require_array_buffer_view_core();
       var $find = require_array_iteration().find;
       var aTypedArray = ArrayBufferViewCore.aTypedArray;
@@ -16043,7 +15482,6 @@
   var require_es_typed_array_find_index = __commonJS({
     "node_modules/core-js/modules/es.typed-array.find-index.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var ArrayBufferViewCore = require_array_buffer_view_core();
       var $findIndex = require_array_iteration().findIndex;
       var aTypedArray = ArrayBufferViewCore.aTypedArray;
@@ -16058,7 +15496,6 @@
   var require_es_typed_array_find_last = __commonJS({
     "node_modules/core-js/modules/es.typed-array.find-last.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var ArrayBufferViewCore = require_array_buffer_view_core();
       var $findLast = require_array_iteration_from_last().findLast;
       var aTypedArray = ArrayBufferViewCore.aTypedArray;
@@ -16073,7 +15510,6 @@
   var require_es_typed_array_find_last_index = __commonJS({
     "node_modules/core-js/modules/es.typed-array.find-last-index.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var ArrayBufferViewCore = require_array_buffer_view_core();
       var $findLastIndex = require_array_iteration_from_last().findLastIndex;
       var aTypedArray = ArrayBufferViewCore.aTypedArray;
@@ -16088,7 +15524,6 @@
   var require_es_typed_array_for_each = __commonJS({
     "node_modules/core-js/modules/es.typed-array.for-each.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var ArrayBufferViewCore = require_array_buffer_view_core();
       var $forEach = require_array_iteration().forEach;
       var aTypedArray = ArrayBufferViewCore.aTypedArray;
@@ -16103,7 +15538,6 @@
   var require_es_typed_array_from = __commonJS({
     "node_modules/core-js/modules/es.typed-array.from.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var TYPED_ARRAYS_CONSTRUCTORS_REQUIRES_WRAPPERS = require_typed_array_constructors_require_wrappers();
       var exportTypedArrayStaticMethod = require_array_buffer_view_core().exportTypedArrayStaticMethod;
       var typedArrayFrom = require_typed_array_from();
@@ -16115,7 +15549,6 @@
   var require_es_typed_array_includes = __commonJS({
     "node_modules/core-js/modules/es.typed-array.includes.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var ArrayBufferViewCore = require_array_buffer_view_core();
       var $includes = require_array_includes().includes;
       var aTypedArray = ArrayBufferViewCore.aTypedArray;
@@ -16130,7 +15563,6 @@
   var require_es_typed_array_index_of = __commonJS({
     "node_modules/core-js/modules/es.typed-array.index-of.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var ArrayBufferViewCore = require_array_buffer_view_core();
       var $indexOf = require_array_includes().indexOf;
       var aTypedArray = ArrayBufferViewCore.aTypedArray;
@@ -16145,7 +15577,6 @@
   var require_es_typed_array_iterator = __commonJS({
     "node_modules/core-js/modules/es.typed-array.iterator.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var globalThis2 = require_global_this();
       var fails = require_fails();
       var uncurryThis = require_function_uncurry_this();
@@ -16182,7 +15613,6 @@
   var require_es_typed_array_join = __commonJS({
     "node_modules/core-js/modules/es.typed-array.join.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var ArrayBufferViewCore = require_array_buffer_view_core();
       var uncurryThis = require_function_uncurry_this();
       var aTypedArray = ArrayBufferViewCore.aTypedArray;
@@ -16198,7 +15628,6 @@
   var require_es_typed_array_last_index_of = __commonJS({
     "node_modules/core-js/modules/es.typed-array.last-index-of.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var ArrayBufferViewCore = require_array_buffer_view_core();
       var apply = require_function_apply();
       var $lastIndexOf = require_array_last_index_of();
@@ -16215,7 +15644,6 @@
   var require_es_typed_array_map = __commonJS({
     "node_modules/core-js/modules/es.typed-array.map.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var ArrayBufferViewCore = require_array_buffer_view_core();
       var $map = require_array_iteration().map;
       var fromSameTypeAndList = require_typed_array_from_same_type_and_list();
@@ -16232,7 +15660,6 @@
   var require_es_typed_array_of = __commonJS({
     "node_modules/core-js/modules/es.typed-array.of.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var ArrayBufferViewCore = require_array_buffer_view_core();
       var TYPED_ARRAYS_CONSTRUCTORS_REQUIRES_WRAPPERS = require_typed_array_constructors_require_wrappers();
       var aTypedArrayConstructor = ArrayBufferViewCore.aTypedArrayConstructor;
@@ -16251,7 +15678,6 @@
   var require_es_typed_array_reduce = __commonJS({
     "node_modules/core-js/modules/es.typed-array.reduce.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var ArrayBufferViewCore = require_array_buffer_view_core();
       var $reduce = require_array_reduce().left;
       var aTypedArray = ArrayBufferViewCore.aTypedArray;
@@ -16267,7 +15693,6 @@
   var require_es_typed_array_reduce_right = __commonJS({
     "node_modules/core-js/modules/es.typed-array.reduce-right.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var ArrayBufferViewCore = require_array_buffer_view_core();
       var $reduceRight = require_array_reduce().right;
       var aTypedArray = ArrayBufferViewCore.aTypedArray;
@@ -16283,7 +15708,6 @@
   var require_es_typed_array_reverse = __commonJS({
     "node_modules/core-js/modules/es.typed-array.reverse.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var ArrayBufferViewCore = require_array_buffer_view_core();
       var aTypedArray = ArrayBufferViewCore.aTypedArray;
       var exportTypedArrayMethod = ArrayBufferViewCore.exportTypedArrayMethod;
@@ -16308,7 +15732,6 @@
   var require_es_typed_array_set = __commonJS({
     "node_modules/core-js/modules/es.typed-array.set.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var globalThis2 = require_global_this();
       var call = require_function_call();
       var ArrayBufferViewCore = require_array_buffer_view_core();
@@ -16351,7 +15774,6 @@
   var require_es_typed_array_slice = __commonJS({
     "node_modules/core-js/modules/es.typed-array.slice.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var ArrayBufferViewCore = require_array_buffer_view_core();
       var fails = require_fails();
       var arraySlice = require_array_slice();
@@ -16377,7 +15799,6 @@
   var require_es_typed_array_some = __commonJS({
     "node_modules/core-js/modules/es.typed-array.some.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var ArrayBufferViewCore = require_array_buffer_view_core();
       var $some = require_array_iteration().some;
       var aTypedArray = ArrayBufferViewCore.aTypedArray;
@@ -16392,7 +15813,6 @@
   var require_es_typed_array_sort = __commonJS({
     "node_modules/core-js/modules/es.typed-array.sort.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var globalThis2 = require_global_this();
       var uncurryThis = require_function_uncurry_this_clause();
       var fails = require_fails();
@@ -16453,7 +15873,6 @@
   var require_es_typed_array_subarray = __commonJS({
     "node_modules/core-js/modules/es.typed-array.subarray.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var ArrayBufferViewCore = require_array_buffer_view_core();
       var toLength = require_to_length();
       var toAbsoluteIndex = require_to_absolute_index();
@@ -16478,7 +15897,6 @@
   var require_es_typed_array_to_locale_string = __commonJS({
     "node_modules/core-js/modules/es.typed-array.to-locale-string.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var globalThis2 = require_global_this();
       var apply = require_function_apply();
       var ArrayBufferViewCore = require_array_buffer_view_core();
@@ -16510,7 +15928,6 @@
   var require_es_typed_array_to_reversed = __commonJS({
     "node_modules/core-js/modules/es.typed-array.to-reversed.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var lengthOfArrayLike = require_length_of_array_like();
       var ArrayBufferViewCore = require_array_buffer_view_core();
       var aTypedArray = ArrayBufferViewCore.aTypedArray;
@@ -16531,7 +15948,6 @@
   var require_es_typed_array_to_sorted = __commonJS({
     "node_modules/core-js/modules/es.typed-array.to-sorted.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var ArrayBufferViewCore = require_array_buffer_view_core();
       var uncurryThis = require_function_uncurry_this();
       var aCallable = require_a_callable();
@@ -16553,7 +15969,6 @@
   var require_es_typed_array_to_string = __commonJS({
     "node_modules/core-js/modules/es.typed-array.to-string.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var exportTypedArrayMethod = require_array_buffer_view_core().exportTypedArrayMethod;
       var fails = require_fails();
       var globalThis2 = require_global_this();
@@ -16578,7 +15993,6 @@
   var require_es_typed_array_with = __commonJS({
     "node_modules/core-js/modules/es.typed-array.with.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var ArrayBufferViewCore = require_array_buffer_view_core();
       var isBigIntArray = require_is_big_int_array();
       var lengthOfArrayLike = require_length_of_array_like();
@@ -16623,7 +16037,6 @@
   var require_base64_map = __commonJS({
     "node_modules/core-js/internals/base64-map.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var commonAlphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
       var base64Alphabet = commonAlphabet + "+/";
       var base64UrlAlphabet = commonAlphabet + "-_";
@@ -16646,7 +16059,6 @@
   var require_get_alphabet_option = __commonJS({
     "node_modules/core-js/internals/get-alphabet-option.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $TypeError = TypeError;
       module.exports = function(options) {
         var alphabet = options && options.alphabet;
@@ -16660,7 +16072,6 @@
   var require_uint8_from_base64 = __commonJS({
     "node_modules/core-js/internals/uint8-from-base64.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var globalThis2 = require_global_this();
       var uncurryThis = require_function_uncurry_this();
       var anObjectOrUndefined = require_an_object_or_undefined();
@@ -16804,7 +16215,6 @@
   var require_es_uint8_array_from_base64 = __commonJS({
     "node_modules/core-js/modules/es.uint8-array.from-base64.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var globalThis2 = require_global_this();
       var arrayFromConstructorAndList = require_array_from_constructor_and_list();
@@ -16835,7 +16245,6 @@
   var require_uint8_from_hex = __commonJS({
     "node_modules/core-js/internals/uint8-from-hex.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var globalThis2 = require_global_this();
       var uncurryThis = require_function_uncurry_this();
       var Uint8Array2 = globalThis2.Uint8Array;
@@ -16865,7 +16274,6 @@
   var require_es_uint8_array_from_hex = __commonJS({
     "node_modules/core-js/modules/es.uint8-array.from-hex.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var globalThis2 = require_global_this();
       var aString = require_a_string();
@@ -16882,7 +16290,6 @@
   var require_an_uint8_array = __commonJS({
     "node_modules/core-js/internals/an-uint8-array.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var classof = require_classof();
       var $TypeError = TypeError;
       module.exports = function(argument) {
@@ -16896,7 +16303,6 @@
   var require_es_uint8_array_set_from_base64 = __commonJS({
     "node_modules/core-js/modules/es.uint8-array.set-from-base64.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var globalThis2 = require_global_this();
       var $fromBase64 = require_uint8_from_base64();
@@ -16934,7 +16340,6 @@
   var require_es_uint8_array_set_from_hex = __commonJS({
     "node_modules/core-js/modules/es.uint8-array.set-from-hex.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var globalThis2 = require_global_this();
       var aString = require_a_string();
@@ -16965,7 +16370,6 @@
   var require_es_uint8_array_to_base64 = __commonJS({
     "node_modules/core-js/modules/es.uint8-array.to-base64.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var globalThis2 = require_global_this();
       var uncurryThis = require_function_uncurry_this();
@@ -17037,7 +16441,6 @@
   var require_es_uint8_array_to_hex = __commonJS({
     "node_modules/core-js/modules/es.uint8-array.to-hex.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var globalThis2 = require_global_this();
       var uncurryThis = require_function_uncurry_this();
@@ -17074,7 +16477,6 @@
   var require_es_unescape = __commonJS({
     "node_modules/core-js/modules/es.unescape.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var uncurryThis = require_function_uncurry_this();
       var toString = require_to_string();
@@ -17122,7 +16524,6 @@
   var require_collection_weak = __commonJS({
     "node_modules/core-js/internals/collection-weak.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var uncurryThis = require_function_uncurry_this();
       var defineBuiltIns = require_define_built_ins();
       var getWeakData = require_internal_metadata().getWeakData;
@@ -17247,7 +16648,6 @@
   var require_es_weak_map_constructor = __commonJS({
     "node_modules/core-js/modules/es.weak-map.constructor.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var FREEZING = require_freezing();
       var globalThis2 = require_global_this();
       var uncurryThis = require_function_uncurry_this();
@@ -17349,7 +16749,6 @@
   var require_es_weak_map = __commonJS({
     "node_modules/core-js/modules/es.weak-map.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       require_es_weak_map_constructor();
     }
   });
@@ -17358,7 +16757,6 @@
   var require_weak_map_helpers = __commonJS({
     "node_modules/core-js/internals/weak-map-helpers.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var uncurryThis = require_function_uncurry_this();
       var WeakMapPrototype = WeakMap.prototype;
       module.exports = {
@@ -17376,7 +16774,6 @@
   var require_es_weak_map_get_or_insert = __commonJS({
     "node_modules/core-js/modules/es.weak-map.get-or-insert.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var WeakMapHelpers = require_weak_map_helpers();
       var IS_PURE = require_is_pure();
@@ -17397,7 +16794,6 @@
   var require_a_weak_map = __commonJS({
     "node_modules/core-js/internals/a-weak-map.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var has = require_weak_map_helpers().has;
       module.exports = function(it) {
         has(it);
@@ -17410,7 +16806,6 @@
   var require_a_weak_key = __commonJS({
     "node_modules/core-js/internals/a-weak-key.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var WeakMapHelpers = require_weak_map_helpers();
       var weakmap = new WeakMapHelpers.WeakMap();
       var set = WeakMapHelpers.set;
@@ -17427,7 +16822,6 @@
   var require_es_weak_map_get_or_insert_computed = __commonJS({
     "node_modules/core-js/modules/es.weak-map.get-or-insert-computed.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var aCallable = require_a_callable();
       var aWeakMap = require_a_weak_map();
@@ -17464,7 +16858,6 @@
   var require_es_weak_set_constructor = __commonJS({
     "node_modules/core-js/modules/es.weak-set.constructor.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var collection = require_collection();
       var collectionWeak = require_collection_weak();
       collection("WeakSet", function(init) {
@@ -17479,7 +16872,6 @@
   var require_es_weak_set = __commonJS({
     "node_modules/core-js/modules/es.weak-set.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       require_es_weak_set_constructor();
     }
   });
@@ -17488,7 +16880,6 @@
   var require_web_atob = __commonJS({
     "node_modules/core-js/modules/web.atob.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var globalThis2 = require_global_this();
       var getBuiltIn = require_get_built_in();
@@ -17555,7 +16946,6 @@
   var require_web_btoa = __commonJS({
     "node_modules/core-js/modules/web.btoa.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var globalThis2 = require_global_this();
       var getBuiltIn = require_get_built_in();
@@ -17608,7 +16998,6 @@
   var require_dom_iterables = __commonJS({
     "node_modules/core-js/internals/dom-iterables.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       module.exports = {
         CSSRuleList: 0,
         CSSStyleDeclaration: 0,
@@ -17649,7 +17038,6 @@
   var require_dom_token_list_prototype = __commonJS({
     "node_modules/core-js/internals/dom-token-list-prototype.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var documentCreateElement = require_document_create_element();
       var classList = documentCreateElement("span").classList;
       var DOMTokenListPrototype = classList && classList.constructor && classList.constructor.prototype;
@@ -17661,7 +17049,6 @@
   var require_web_dom_collections_for_each = __commonJS({
     "node_modules/core-js/modules/web.dom-collections.for-each.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var globalThis2 = require_global_this();
       var DOMIterables = require_dom_iterables();
       var DOMTokenListPrototype = require_dom_token_list_prototype();
@@ -17688,7 +17075,6 @@
   var require_web_dom_collections_iterator = __commonJS({
     "node_modules/core-js/modules/web.dom-collections.iterator.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var globalThis2 = require_global_this();
       var DOMIterables = require_dom_iterables();
       var DOMTokenListPrototype = require_dom_token_list_prototype();
@@ -17727,7 +17113,6 @@
   var require_dom_exception_constants = __commonJS({
     "node_modules/core-js/internals/dom-exception-constants.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       module.exports = {
         IndexSizeError: { s: "INDEX_SIZE_ERR", c: 1, m: 1 },
         DOMStringSizeError: { s: "DOMSTRING_SIZE_ERR", c: 2, m: 0 },
@@ -17762,7 +17147,6 @@
   var require_web_dom_exception_constructor = __commonJS({
     "node_modules/core-js/modules/web.dom-exception.constructor.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var getBuiltIn = require_get_built_in();
       var getBuiltInNodeModule = require_get_built_in_node_module();
@@ -17885,7 +17269,6 @@
   var require_web_dom_exception_stack = __commonJS({
     "node_modules/core-js/modules/web.dom-exception.stack.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var globalThis2 = require_global_this();
       var getBuiltIn = require_get_built_in();
@@ -17948,7 +17331,6 @@
   var require_web_dom_exception_to_string_tag = __commonJS({
     "node_modules/core-js/modules/web.dom-exception.to-string-tag.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var getBuiltIn = require_get_built_in();
       var setToStringTag = require_set_to_string_tag();
       var DOM_EXCEPTION = "DOMException";
@@ -17960,7 +17342,6 @@
   var require_web_clear_immediate = __commonJS({
     "node_modules/core-js/modules/web.clear-immediate.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var globalThis2 = require_global_this();
       var clearImmediate = require_task().clear;
@@ -17974,7 +17355,6 @@
   var require_schedulers_fix = __commonJS({
     "node_modules/core-js/internals/schedulers-fix.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var globalThis2 = require_global_this();
       var apply = require_function_apply();
       var isCallable = require_is_callable();
@@ -18006,7 +17386,6 @@
   var require_web_set_immediate = __commonJS({
     "node_modules/core-js/modules/web.set-immediate.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var globalThis2 = require_global_this();
       var setTask = require_task().set;
@@ -18022,7 +17401,6 @@
   var require_web_immediate = __commonJS({
     "node_modules/core-js/modules/web.immediate.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       require_web_clear_immediate();
       require_web_set_immediate();
     }
@@ -18032,7 +17410,6 @@
   var require_web_queue_microtask = __commonJS({
     "node_modules/core-js/modules/web.queue-microtask.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var globalThis2 = require_global_this();
       var microtask = require_microtask();
@@ -18056,7 +17433,6 @@
   var require_web_self = __commonJS({
     "node_modules/core-js/modules/web.self.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var globalThis2 = require_global_this();
       var defineBuiltInAccessor = require_define_built_in_accessor();
@@ -18098,7 +17474,6 @@
   var require_web_structured_clone = __commonJS({
     "node_modules/core-js/modules/web.structured-clone.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var IS_PURE = require_is_pure();
       var $ = require_export();
       var globalThis2 = require_global_this();
@@ -18561,7 +17936,6 @@
   var require_web_set_interval = __commonJS({
     "node_modules/core-js/modules/web.set-interval.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var globalThis2 = require_global_this();
       var schedulersFix = require_schedulers_fix();
@@ -18576,7 +17950,6 @@
   var require_web_set_timeout = __commonJS({
     "node_modules/core-js/modules/web.set-timeout.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var globalThis2 = require_global_this();
       var schedulersFix = require_schedulers_fix();
@@ -18591,7 +17964,6 @@
   var require_web_timers = __commonJS({
     "node_modules/core-js/modules/web.timers.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       require_web_set_interval();
       require_web_set_timeout();
     }
@@ -18601,7 +17973,6 @@
   var require_url_constructor_detection = __commonJS({
     "node_modules/core-js/internals/url-constructor-detection.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var fails = require_fails();
       var wellKnownSymbol = require_well_known_symbol();
       var DESCRIPTORS = require_descriptors();
@@ -18628,7 +17999,6 @@
   var require_string_punycode_to_ascii = __commonJS({
     "node_modules/core-js/internals/string-punycode-to-ascii.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var uncurryThis = require_function_uncurry_this();
       var maxInt = 2147483647;
       var base = 36;
@@ -18764,7 +18134,6 @@
   var require_url_percent_coding = __commonJS({
     "node_modules/core-js/internals/url-percent-coding.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       require_es_string_from_code_point();
       var getBuiltIn = require_get_built_in();
       var uncurryThis = require_function_uncurry_this();
@@ -18897,7 +18266,6 @@
   var require_web_url_search_params_constructor = __commonJS({
     "node_modules/core-js/modules/web.url-search-params.constructor.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       require_es_array_iterator();
       var $ = require_export();
       var globalThis2 = require_global_this();
@@ -19265,7 +18633,6 @@
   var require_web_url_constructor = __commonJS({
     "node_modules/core-js/modules/web.url.constructor.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       require_es_string_iterator();
       var $ = require_export();
       var DESCRIPTORS = require_descriptors();
@@ -20287,7 +19654,6 @@
   var require_web_url = __commonJS({
     "node_modules/core-js/modules/web.url.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       require_web_url_constructor();
     }
   });
@@ -20296,7 +19662,6 @@
   var require_web_url_can_parse = __commonJS({
     "node_modules/core-js/modules/web.url.can-parse.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var getBuiltIn = require_get_built_in();
       var fails = require_fails();
@@ -20329,7 +19694,6 @@
   var require_web_url_parse = __commonJS({
     "node_modules/core-js/modules/web.url.parse.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var getBuiltIn = require_get_built_in();
       var validateArgumentsLength = require_validate_arguments_length();
@@ -20355,7 +19719,6 @@
   var require_web_url_to_json = __commonJS({
     "node_modules/core-js/modules/web.url.to-json.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var $ = require_export();
       var call = require_function_call();
       var getBuiltInPrototypeMethod = require_get_built_in_prototype_method();
@@ -20372,7 +19735,6 @@
   var require_web_url_search_params = __commonJS({
     "node_modules/core-js/modules/web.url-search-params.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       require_web_url_search_params_constructor();
     }
   });
@@ -20381,7 +19743,6 @@
   var require_web_url_search_params_delete = __commonJS({
     "node_modules/core-js/modules/web.url-search-params.delete.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var defineBuiltIn = require_define_built_in();
       var uncurryThis = require_function_uncurry_this();
       var toString = require_to_string();
@@ -20429,7 +19790,6 @@
   var require_web_url_search_params_has = __commonJS({
     "node_modules/core-js/modules/web.url-search-params.has.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var defineBuiltIn = require_define_built_in();
       var uncurryThis = require_function_uncurry_this();
       var toString = require_to_string();
@@ -20461,7 +19821,6 @@
   var require_web_url_search_params_size = __commonJS({
     "node_modules/core-js/modules/web.url-search-params.size.js": function() {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var DESCRIPTORS = require_descriptors();
       var uncurryThis = require_function_uncurry_this();
       var defineBuiltInAccessor = require_define_built_in_accessor();
@@ -20487,7 +19846,6 @@
   var require_stable = __commonJS({
     "node_modules/core-js/stable/index.js": function(exports, module) {
       "use strict";
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       require_es_symbol();
       require_es_symbol_description();
       require_es_symbol_async_dispose();
@@ -20814,7 +20172,6 @@
   // node_modules/custom-event-polyfill/polyfill.js
   var require_polyfill = __commonJS({
     "node_modules/custom-event-polyfill/polyfill.js": function() {
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       (function() {
         if (typeof window === "undefined") {
           return;
@@ -20863,7 +20220,6 @@
   // node_modules/performance-now/lib/performance-now.js
   var require_performance_now = __commonJS({
     "node_modules/performance-now/lib/performance-now.js": function(exports, module) {
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       (function() {
         var getNanoSeconds, hrtime, loadTime, moduleLoadTime, nodeLoadTime, upTime;
         if (typeof performance !== "undefined" && performance !== null && performance.now) {
@@ -20901,7 +20257,6 @@
   // node_modules/raf/index.js
   var require_raf = __commonJS({
     "node_modules/raf/index.js": function(exports, module) {
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       var now = require_performance_now();
       var root2 = typeof window === "undefined" ? global : window;
       var vendors = ["moz", "webkit"];
@@ -20973,7 +20328,6 @@
   // node_modules/raf/polyfill.js
   var require_polyfill2 = __commonJS({
     "node_modules/raf/polyfill.js": function() {
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       require_raf().polyfill();
     }
   });
@@ -20981,7 +20335,6 @@
   // node_modules/whatwg-fetch/dist/fetch.umd.js
   var require_fetch_umd = __commonJS({
     "node_modules/whatwg-fetch/dist/fetch.umd.js": function(exports, module) {
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       (function(global2, factory) {
         typeof exports === "object" && typeof module !== "undefined" ? factory(exports) : typeof define === "function" && define.amd ? define(["exports"], factory) : factory(global2.WHATWGFetch = {});
       })(exports, (function(exports2) {
@@ -21543,7 +20896,6 @@
   }
   var init_asset_load_helper = __esm({
     "src/internal/asset-load-helper.js": function() {
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
     }
   });
@@ -22272,7 +21624,6 @@
   }
   var init_build_layout_scheduler = __esm({
     "src/internal/build-layout-scheduler.js": function() {
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
     }
   });
@@ -22294,7 +21645,6 @@
   var utils_name_case_default;
   var init_utils_name_case = __esm({
     "src/internal/utils-name-case.js": function() {
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
       utils_name_case_default = {
         toCapitalized: toCapitalized,
@@ -22495,7 +21845,6 @@
   }
   var init_create_controller_helper = __esm({
     "src/internal/create-controller-helper.js": function() {
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       init_utils_name_case();
       /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
     }
@@ -22526,7 +21875,6 @@
   }
   var init_resolve_element_or_id = __esm({
     "src/internal/resolve-element-or-id.js": function() {
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
     }
   });
@@ -22551,7 +21899,6 @@
   }
   var init_report_configuration = __esm({
     "src/internal/report-configuration.js": function() {
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
     }
   });
@@ -22679,7 +22026,6 @@
   }
   var init_diagnose_resources = __esm({
     "src/internal/diagnose-resources.js": function() {
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
     }
   });
@@ -23145,7 +22491,6 @@
   var attributesByExtension, coreAttributes, activation;
   var init_validate_declarations = __esm({
     "src/internal/validate-declarations.js": function() {
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       init_report_configuration();
       init_utils_name_case();
       init_diagnose_resources();
@@ -23332,7 +22677,6 @@
   }
   var init_find_duplicate_attributes = __esm({
     "src/internal/find-duplicate-attributes.js": function() {
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
     }
   });
@@ -23450,7 +22794,6 @@
   }
   var init_validate_html_source = __esm({
     "src/internal/validate-html-source.js": function() {
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       init_find_duplicate_attributes();
       init_report_configuration();
       /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
@@ -24592,7 +23935,6 @@
   }
   var init_create_mount_helper = __esm({
     "src/internal/create-mount-helper.js": function() {
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       init_utils_name_case();
       init_create_controller_helper();
       init_resolve_element_or_id();
@@ -24885,7 +24227,6 @@
   }
   var init_build_mount_map_manager = __esm({
     "src/internal/build-mount-map-manager.js": function() {
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       init_create_mount_helper();
       init_resolve_element_or_id();
       init_utils_name_case();
@@ -25063,7 +24404,6 @@
   }
   var init_create_aria_helper = __esm({
     "src/internal/create-aria-helper.js": function() {
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
     }
   });
@@ -25532,7 +24872,6 @@
   }
   var init_create_css_motion_controller = __esm({
     "src/internal/create-css-motion-controller.js": function() {
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       init_diagnose_resources();
       /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
     }
@@ -25726,7 +25065,6 @@
   var EASE_PREFIX, IN, OUT, IN_OUT, DIRECTIONS, QUAD, CUBIC, QUART, QUINT, SINE, EXPO, CIRC, BACK, ELASTIC, BOUNCE, FAMILIES, ALIASES, CSS_NUMBER;
   var init_ease = __esm({
     "src/internal/ease.js": function() {
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
       EASE_PREFIX = "ease";
       IN = "in";
@@ -25979,7 +25317,6 @@
   }
   var init_aellux_orchestrator = __esm({
     "src/aellux.orchestrator.js": function() {
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       init_asset_load_helper();
       init_build_layout_scheduler();
       init_build_mount_map_manager();
@@ -26899,7 +26236,6 @@
   }
   var init_aellux_ext_preference = __esm({
     "src/aellux.ext.preference.js": function() {
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       init_utils_name_case();
       /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
       (function(root2) {
@@ -27315,7 +26651,6 @@
   }
   var init_aellux_ext_state_navigation = __esm({
     "src/aellux.ext.state-navigation.js": function() {
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
       (function(root2) {
         "use strict";
@@ -27723,7 +27058,6 @@
   }
   var init_aellux_ext_feedback = __esm({
     "src/aellux.ext.feedback.js": function() {
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
       (function(root2) {
         "use strict";
@@ -28102,7 +27436,6 @@
   }
   var init_aellux_ext_focus = __esm({
     "src/aellux.ext.focus.js": function() {
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
       (function(root2) {
         "use strict";
@@ -28398,7 +27731,6 @@
   }
   var init_aellux_ext_point = __esm({
     "src/aellux.ext.point.js": function() {
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
       (function(root2) {
         "use strict";
@@ -28996,7 +28328,6 @@
   }
   var init_aellux_ext_anchor = __esm({
     "src/aellux.ext.anchor.js": function() {
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
       (function(root2) {
         "use strict";
@@ -30091,7 +29422,6 @@
   }
   var init_aellux_ext_ajax_href = __esm({
     "src/aellux.ext.ajax-href.js": function() {
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       init_validate_html_source();
       /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
       (function(root2) {
@@ -30596,7 +29926,6 @@
   }
   var init_aellux_ext_adaptive = __esm({
     "src/aellux.ext.adaptive.js": function() {
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
       (function(root2) {
         "use strict";
@@ -31116,7 +30445,6 @@
   }
   var init_aellux_ext_present = __esm({
     "src/aellux.ext.present.js": function() {
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
       (function(root2) {
         "use strict";
@@ -32451,7 +31779,6 @@
   var root;
   var init_aellux_full = __esm({
     "src/aellux.full.js": function() {
-      init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
       init_aellux_orchestrator();
       /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
       root = typeof globalThis !== "undefined" ? globalThis : window;
@@ -32502,7 +31829,6 @@
           });
         }
       });
-      root.AelluxJs.extIndex.official = typeof define_AELLUX_OFFICIAL_EXTENSION_MANIFEST_default !== "undefined" ? define_AELLUX_OFFICIAL_EXTENSION_MANIFEST_default : null;
       root.AelluxJs.ext("adaptive", {
         loadWhen: "[data-ae-adaptive]"
       });
@@ -32524,6 +31850,9 @@
       root.AelluxJs.ext("dialog", {
         loadWhen: "dialog"
       });
+      root.AelluxJs.ext("pwa", {
+        loadWhen: "[data-ae-pwa]"
+      });
       root.AelluxJs.ext("point", {
         loadWhen: "[data-ae-point]"
       });
@@ -32540,7 +31869,6 @@
   });
 
   // aellux.full.legacy.entry.js
-  init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST();
   require_stable();
   require_polyfill();
   require_polyfill2();

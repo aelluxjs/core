@@ -102,3 +102,7 @@ $ae.dispatch("PushState", {
 ```
 
 See [State Navigation](../core-extensions/state-navigation.md) for validation rules and history behavior. Scrollbox publishes native `scroll` events rather than a separate `AelluxJsScroll` event.
+
+## Optional PWA notifications
+
+The external [PWA Extension](../core-extensions/pwa.md) normalizes `PwaInstallAvailable`, `PwaInstallRequested`, `PwaInstallAccepted`, `PwaInstallDismissed`, `PwaInstallManual`, `PwaInstalled`, `PwaWorkerRegistered`, `PwaUpdateAvailable`, `PwaUpdateComplete` and `PwaError` through `AelluxJs.eventName()`. All include `detail.status`; worker notifications include `registration`, and errors include `operation` and `error`. They bubble from an initiating control or dispatch on `document`. No PWA event listener is installed until the Extension is explicitly initialized.

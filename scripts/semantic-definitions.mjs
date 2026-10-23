@@ -4,6 +4,8 @@
 // Values on open grammars are suggestions, not a closed enum.
 const attribute = (name, extension, description, options = {}) => ({ name, extension, description, ...options });
 export const semanticAttributes = [
+  attribute("pwa", "pwa", "Explicitly loads the optional external PWA Extension. Install uses native click and never registers a Service Worker automatically.", { syntax: "enum", values: ["install"] }),
+  attribute("pwa-guide", "pwa", "Internal marker on the generated installation guide dialog.", { role: "internal", syntax: "presence" }),
   attribute("present", "present", "Present container. Empty disables motion; all expands to opacity transform height width. Property tokens are whitespace-separated.", { syntax: "token-list", values: ["", "all", "opacity", "transform", "height", "width", "opacity transform", "opacity transform height width"], default: "" }),
   attribute("present-group", "present", "Coordinates nested Present members by their native IDs. Nested groups own their own members.", { syntax: "presence" }),
   attribute("present-active", "present", "Selected member's native ID, without #. An empty value selects no member. Invalid or ambiguous selection preserves the previous selection.", { syntax: "id", default: "", examples: ["details"] }),
@@ -99,6 +101,7 @@ export const semanticCSSProperties = [
 ];
 
 export const semanticEvents = [
+  ...["PwaInstallAvailable", "PwaInstallRequested", "PwaInstallAccepted", "PwaInstallDismissed", "PwaInstallManual", "PwaInstalled", "PwaWorkerRegistered", "PwaUpdateAvailable", "PwaUpdateComplete", "PwaError"].map(name => ({ name, extension: "pwa", description: "PWA notification on the initiating control or document. detail includes status; worker events include registration; errors include operation and error." })),
   ...["Awake", "Legacy", "Ready"].map(name => ({ name, extension: "core", description: `${name} runtime startup notification on document.` })),
   ...["BeforeMount", "BeforeUnmount"].map(name => ({ name, extension: "core", cancelable: true, description: `${name} pass preflight on document. Cancel to prevent the pass and its completion event. detail: { root, extensions }${name === "BeforeUnmount" ? "; detachedOnly identifies automatic detached cleanup" : ""}.` })),
   ...["Mount", "Unmount", "Update"].map(name => ({ name, extension: "core", description: `${name} pass completed on document. detail: { root, extensions, elements }.` })),

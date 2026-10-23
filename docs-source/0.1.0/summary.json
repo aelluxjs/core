@@ -53,6 +53,7 @@
         { "label": "Feedback", "href": "core-extensions/feedback.md" },
         { "label": "Focus", "href": "core-extensions/focus.md" },
         { "label": "Point", "href": "core-extensions/point.md" },
+        { "label": "PWA", "href": "core-extensions/pwa.md" },
         { "label": "Preference", "href": "core-extensions/preference.md" },
         { "label": "Present", "href": "core-extensions/present.md" },
         { "label": "Scrollbox", "href": "core-extensions/scrollbox.md" },

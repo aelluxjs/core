@@ -58,7 +58,7 @@ The browser suite covers the release contract in Chromium, Firefox, and WebKit:
 | Contract area | Covered behavior |
 | --- | --- |
 | API normalization and builds | Global and ESM identity, camelCase Extension keys and options, compound filenames, Modern and Legacy selection, minified files, optional styles, and incompatible builds. |
-| Full distribution coverage | Bundled Core Extensions initialize from the Full runtime; Dialog, Overflow Marquee, Scrollbox and Scrollbox Snap load separate compatible files on demand, without a duplicate script request or a manifest fetch for the current Core version. Modern, Legacy, normal, and minified paths are checked. |
+| Full distribution coverage | Bundled Core Extensions initialize from the Full runtime; Dialog, Overflow Marquee, PWA, Scrollbox and Scrollbox Snap load separate compatible files on demand, without a duplicate script request or a manifest fetch for the current Core version. Modern, Legacy, normal, and minified paths are checked. |
 | Diagnostics | Severity, verbosity updates, retained history, invalid selectors and registrations, unavailable storage, callback failures, transitions, and lifecycle failures. |
 | Configuration diagnostics | Development-only semantic mount/update checks, scoped Extensions, configured prefixes, custom selector attributes, actionable targets/values/structure, CSS and keyboard reachability, quiet hidden/group states, Modern/Legacy paths, runtime AJAX validation and Adaptive numeric fallbacks. |
 | Loading | Eager and lazy loading, shared concurrent Promises, failed `init()` retry, failed script retry, optional stylesheet failure, and lazy-index cleanup after success or destruction. |

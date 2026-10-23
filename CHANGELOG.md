@@ -6,6 +6,7 @@ All notable changes to aellux.js will be documented in this file.
 
 ### Added
 
+- Optional external PWA Extension with lazy declarative install controls, native prompt handling, replaceable English/Portuguese manual guidance, semantic state events, explicit worker registration and application-controlled updates. Its independent classic worker provides scoped, versioned precache and configurable network/cache strategies with conservative privacy defaults; neither implementation nor PWA styles enter Full/Core bundles.
 - Point recognizes short primary taps on mounted buttons, links and role buttons, emitting bubbling, composed `AelluxJsTap` events independently of native click and scroll, with lifecycle cleanup and Modern/Legacy coverage.
 - Present routes Point taps through its existing trigger, dismiss and outside activation behavior, deferring tap-only actions so a matching native click takes priority without a duplicate action; pending fallbacks are cleaned up on unmount and destruction.
 - Development diagnostics identify competing transform writers (`2033`) from actual CSS Motion effects and Present declarations on Elastic wrappers. Transformed Snap items now emit the existing `2020` warning.

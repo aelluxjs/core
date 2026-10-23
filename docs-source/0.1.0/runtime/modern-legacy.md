@@ -20,6 +20,8 @@ When required capabilities are unavailable, or the Modern runtime fails to load,
 
 The build transpiles the Modern orchestrator and each core Extension into ES5-syntax Legacy variants. Both Legacy runtime files install the Core polyfills before starting the runtime. Individually loaded Extensions reuse that environment and therefore do not duplicate those polyfills in each generated file.
 
+[PWA](../core-extensions/pwa.md) remains external and lazy in both Full variants. Its Legacy Extension detects missing installation and worker APIs without polyfilling them. The independent classic `aellux.pwa.sw.js` runs only in browsers supporting Service Workers; it is never imported into either page runtime.
+
 For `0.1.0`, automated validation forces this profile in the same current Chromium, Firefox, and WebKit engines used by the Modern suite. It verifies boot selection, the Legacy orchestrator, shared polyfill setup, and compatible Extension variants. The release does not claim support for historical Chrome, Firefox, Safari, Edge Legacy, or Internet Explorer versions. A historical browser enters the support matrix only after a separate run on that exact browser and operating system.
 
 ## Selection Rules

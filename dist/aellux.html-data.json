@@ -511,6 +511,21 @@
       "valueSet": "v"
     },
     {
+      "name": "data-ae-pwa",
+      "description": "Explicitly loads the optional external PWA Extension. Install uses native click and never registers a Service Worker automatically.\n\nValue syntax: enum.",
+      "references": [
+        {
+          "name": "AelluxJS pwa",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/pwa.htm"
+        }
+      ],
+      "values": [
+        {
+          "name": "install"
+        }
+      ]
+    },
+    {
       "name": "data-ae-scrollbar",
       "description": "Custom scrollbars. Empty enables both; none hides native bars without creating custom bars. Axis tokens and aliases can be combined.\n\nValue syntax: token-list.\n\nSuggested values: ``, `vertical`, `horizontal`, `vertical horizontal`, `v h`, `y x`, `none`. This is an open grammar, not a closed enumeration.",
       "references": [

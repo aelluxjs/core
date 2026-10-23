@@ -570,6 +570,13 @@
                                     class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                     style="flex:0">
                                     <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                      href="/core/docs/0.1.0/core-extensions/pwa.htm" data-ae-overflow-marquee="190px">
+                                      PWA                                    </a>
+                                  </div>
+                                                                                                                                      <div
+                                    class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                    style="flex:0">
+                                    <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                       href="/core/docs/0.1.0/core-extensions/preference.htm" data-ae-overflow-marquee="190px">
                                       Preference                                    </a>
                                   </div>
@@ -721,7 +728,7 @@
 <p>The build publishes <code>dist/aellux.extensions.min.json</code> with schema version <code>1</code>. Its <code>coreVersion</code> comes from <code>package.json</code>; every approved entry has an exact <code>coreCompatibility</code>, Modern and Legacy URLs with SHA-384 integrity, optional stylesheet metadata, and a dependency list. Approval is controlled by the explicit list in <code>src/official-extension-definitions.js</code>: the presence of an Extension source file alone never makes it official.</p>
 <p>Set <code>AELLUX_OFFICIAL_CDN_BASE</code> to an immutable HTTPS distribution base while building release artifacts. The build appends the encoded package version and filename. Without that release setting, package builds use <code>./</code> URLs so the registry remains usable beside the files in <code>dist</code>. The build validates all required local artifacts and final-byte hashes and writes <code>aellux.extensions.report.json</code>; invalid or incomplete official metadata fails the build.</p>
 <h2>Resolution and caching</h2>
-<p><code>basic</code> fetches the official index only when a name-only registration must be resolved. One cached Promise is shared by concurrent requests. <code>full</code> embeds the official metadata for the current Core version, so its Core Extensions do not need an index request. It uses bundled implementations for Adaptive, Ajax Href, Anchor, Feedback, Focus, Point, Preference, Present, and State Navigation. Ajax Href initializes when mounting <code>a[data-ae-ajax-href]</code>. Dialog, Overflow Marquee, Scrollbox and Scrollbox Snap are registered in Full but load their separate, signed Extension scripts on demand.</p>
+<p><code>basic</code> fetches the official index only when a name-only registration must be resolved. One cached Promise is shared by concurrent requests. <code>full</code> reuses the official metadata embedded by the version-matched boot script, so its Core Extensions do not need an index request. It uses bundled implementations for Adaptive, Ajax Href, Anchor, Feedback, Focus, Point, Preference, Present, and State Navigation. Ajax Href initializes when mounting <code>a[data-ae-ajax-href]</code>. Dialog, Overflow Marquee, PWA, Scrollbox and Scrollbox Snap are registered in Full but load their separate, signed Extension scripts on demand.</p>
 <p>Resolution order is: an explicit URL/registration, a bundled implementation, official metadata, the configured custom fallback, and finally the historical local filename convention. A custom index cannot silently replace an official entry.</p>
 <pre><code class="language-js">$ae.extIndex.setFallback(&quot;https://example.org/my-extensions.json&quot;);
 $ae.ext(&quot;my-extension&quot;);

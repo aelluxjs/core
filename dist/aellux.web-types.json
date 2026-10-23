@@ -208,6 +208,15 @@
           }
         },
         {
+          "name": "data-ae-pwa",
+          "description": "Explicitly loads the optional external PWA Extension. Install uses native click and never registers a Service Worker automatically.\n\nValue syntax: enum.",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/pwa.htm",
+          "value": {
+            "kind": "plain",
+            "type": "\"install\""
+          }
+        },
+        {
           "name": "data-ae-scrollbar",
           "description": "Custom scrollbars. Empty enables both; none hides native bars without creating custom bars. Axis tokens and aliases can be combined.\n\nValue syntax: token-list.\n\nSuggested values: ``, `vertical`, `horizontal`, `vertical horizontal`, `v h`, `y x`, `none`. This is an open grammar, not a closed enumeration.",
           "doc-url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/scrollbox.htm",
@@ -8750,6 +8759,56 @@
         {
           "name": "AelluxJsPushState",
           "description": "State Navigation command on document. Required detail: { key, value, title? }. Bubbles: true. Cancelable: false.",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.0/runtime/events.htm"
+        },
+        {
+          "name": "AelluxJsPwaError",
+          "description": "PWA notification on the initiating control or document. detail includes status; worker events include registration; errors include operation and error. Bubbles: true. Cancelable: false.",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.0/runtime/events.htm"
+        },
+        {
+          "name": "AelluxJsPwaInstallAccepted",
+          "description": "PWA notification on the initiating control or document. detail includes status; worker events include registration; errors include operation and error. Bubbles: true. Cancelable: false.",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.0/runtime/events.htm"
+        },
+        {
+          "name": "AelluxJsPwaInstallAvailable",
+          "description": "PWA notification on the initiating control or document. detail includes status; worker events include registration; errors include operation and error. Bubbles: true. Cancelable: false.",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.0/runtime/events.htm"
+        },
+        {
+          "name": "AelluxJsPwaInstallDismissed",
+          "description": "PWA notification on the initiating control or document. detail includes status; worker events include registration; errors include operation and error. Bubbles: true. Cancelable: false.",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.0/runtime/events.htm"
+        },
+        {
+          "name": "AelluxJsPwaInstallManual",
+          "description": "PWA notification on the initiating control or document. detail includes status; worker events include registration; errors include operation and error. Bubbles: true. Cancelable: false.",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.0/runtime/events.htm"
+        },
+        {
+          "name": "AelluxJsPwaInstallRequested",
+          "description": "PWA notification on the initiating control or document. detail includes status; worker events include registration; errors include operation and error. Bubbles: true. Cancelable: false.",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.0/runtime/events.htm"
+        },
+        {
+          "name": "AelluxJsPwaInstalled",
+          "description": "PWA notification on the initiating control or document. detail includes status; worker events include registration; errors include operation and error. Bubbles: true. Cancelable: false.",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.0/runtime/events.htm"
+        },
+        {
+          "name": "AelluxJsPwaUpdateAvailable",
+          "description": "PWA notification on the initiating control or document. detail includes status; worker events include registration; errors include operation and error. Bubbles: true. Cancelable: false.",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.0/runtime/events.htm"
+        },
+        {
+          "name": "AelluxJsPwaUpdateComplete",
+          "description": "PWA notification on the initiating control or document. detail includes status; worker events include registration; errors include operation and error. Bubbles: true. Cancelable: false.",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.0/runtime/events.htm"
+        },
+        {
+          "name": "AelluxJsPwaWorkerRegistered",
+          "description": "PWA notification on the initiating control or document. detail includes status; worker events include registration; errors include operation and error. Bubbles: true. Cancelable: false.",
           "doc-url": "https://aelluxjs.github.io/core/docs/0.1.0/runtime/events.htm"
         },
         {

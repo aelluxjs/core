@@ -30,9 +30,9 @@ for (const { boot, forceLegacy } of [
       legacy: AelluxJs.diagnostics.legacy
     }));
     expect(state).toEqual({
-      bundled: coreExtensions.filter(name => !["dialog", "scrollbox", "scrollboxSnap", "overflowMarquee"].includes(name)),
+      bundled: coreExtensions.filter(name => !["dialog", "pwa", "scrollbox", "scrollboxSnap", "overflowMarquee"].includes(name)),
       registered: coreExtensions,
-      lazy: ["adaptive", "ajaxHref", "anchor", "dialog", "feedback", "focus", "overflowMarquee", "point", "present", "scrollbox", "scrollboxSnap"],
+      lazy: ["adaptive", "ajaxHref", "anchor", "dialog", "feedback", "focus", "overflowMarquee", "point", "present", "pwa", "scrollbox", "scrollboxSnap"],
       externalScripts: [],
       legacy: forceLegacy
     });

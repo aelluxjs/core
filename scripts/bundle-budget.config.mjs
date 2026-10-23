@@ -1,4 +1,7 @@
 export const bundleBudget = Object.freeze([
+  { file: "aellux.ext.pwa.min.js", maxRawBytes: 11 * 1024, maxGzipBytes: 4.5 * 1024 },
+  { file: "aellux.ext.pwa.legacy.min.js", maxRawBytes: 18 * 1024, maxGzipBytes: 7 * 1024 },
+  { file: "aellux.pwa.sw.min.js", maxRawBytes: 5 * 1024, maxGzipBytes: 2.5 * 1024 },
   // Actionable diagnostic catalog/context plus the development-only semantic
   // mount validator. Measured costs and previous limits: runtime/diagnostics.md.
   // Includes the official entry for the dedicated Overflow Marquee Extension.

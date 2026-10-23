@@ -29,6 +29,11 @@
       "artifacts": 2
     },
     {
+      "name": "pwa",
+      "status": "valid",
+      "artifacts": 2
+    },
+    {
       "name": "point",
       "status": "valid",
       "artifacts": 2

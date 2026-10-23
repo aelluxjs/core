@@ -22,7 +22,7 @@ aellux.js does not require or bundle [Bootstrap](https://getbootstrap.com/). Its
 </script>
 ```
 
-Use `full` to make Adaptive, Ajax Href, Anchor, Dialog, Overflow Marquee, Feedback, Focus, Point, Preference, Present, Scrollbox, Scrollbox Snap, and State Navigation available without separate registration. Full loads Dialog, Overflow Marquee, Scrollbox and Scrollbox Snap as separate Extension scripts when matching elements are mounted. See [Getting Started](docs-source/0.1.0/getting-started.md) for the loading details. Use `basic` to register only what the page needs:
+Use `full` to make Adaptive, Ajax Href, Anchor, Dialog, Overflow Marquee, Feedback, Focus, Point, Preference, Present, PWA, Scrollbox, Scrollbox Snap, and State Navigation available without separate registration. Full loads Dialog, Overflow Marquee, PWA, Scrollbox and Scrollbox Snap as separate Extension scripts when matching elements are mounted. [PWA](docs-source/0.1.0/core-extensions/pwa.md) remains entirely optional: its page code and independent reusable Service Worker are never incorporated into Full/Core or shared CSS. See [Getting Started](docs-source/0.1.0/getting-started.md) for the loading details. Use `basic` to register only what the page needs:
 
 ```html
 <script src="./dist/aellux.js"></script>
