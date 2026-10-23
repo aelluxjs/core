@@ -10,12 +10,12 @@ Describe an Extension with one or more capabilities. These categories may overla
 
 | Capability | Typical responsibility | Requirements that apply |
 | --- | --- | --- |
-| Interaction and input | Click, keyboard, pointer, drag, selection, or custom controls. | Semantics, keyboard access, accessible names, focus, input alternatives, and state communication. |
-| Structure and state | Show, hide, insert, remove, reorder, label, select, expand, or relate content. | DOM order, semantic structure, ARIA or native state, relationships, focus safety, and announcements when needed. |
-| Visual and adaptive presentation | Layout, theme, scale, contrast, color, viewport, or input-mode adaptation. | Reflow, zoom, contrast, forced colors, reduced transparency, text and interface scale, and alternatives to color-only meaning. |
-| Motion and timing | Animation, transition, automatic progression, delay, or dismissal. | Reduced motion, interruption, timing controls, understandable state without animation, and timer cleanup. |
-| External data and integration | Fetch, persistence, synchronization, embedded services, or third-party APIs. | Pending and failure states when user-facing, recovery, stable focus, meaningful status communication, and asynchronous cleanup. |
-| Infrastructure and policy | Diagnostics, scheduling, event routing, rules, registries, or services without direct UI. | Preservation of existing semantics and state, predictable failure behavior, cleanup, and documentation of indirect UI effects. |
+| Interaction and input | Click, keyboard, pointer, drag, selection, or custom controls. | Semantics, keyboard access, accessible names, focus, input<br>alternatives, and state communication. |
+| Structure and state | Show, hide, insert, remove, reorder, label, select, expand, or relate<br>content. | DOM order, semantic structure, ARIA or native state, relationships,<br>focus safety, and announcements when needed. |
+| Visual and adaptive presentation | Layout, theme, scale, contrast, color, viewport, or input-mode<br>adaptation. | Reflow, zoom, contrast, forced colors, reduced transparency, text and<br>interface scale, and alternatives to color-only meaning. |
+| Motion and timing | Animation, transition, automatic progression, delay, or dismissal. | Reduced motion, interruption, timing controls, understandable state<br>without animation, and timer cleanup. |
+| External data and integration | Fetch, persistence, synchronization, embedded services, or third-party<br>APIs. | Pending and failure states when user-facing, recovery, stable focus,<br>meaningful status communication, and asynchronous cleanup. |
+| Infrastructure and policy | Diagnostics, scheduling, event routing, rules, registries, or services<br>without direct UI. | Preservation of existing semantics and state, predictable failure<br>behavior, cleanup, and documentation of indirect UI effects. |
 
 Do not force an Extension into a single category. For example, a dialog behavior can declare interaction, structure and state, and motion. A background registry may declare only infrastructure and policy. A network synchronization Extension may declare external data and integration without declaring interaction.
 
@@ -40,17 +40,17 @@ Define the applicable fields on the Extension's page. State `Not applicable` wit
 | Field | Required definition |
 | --- | --- |
 | Capabilities | Every applicable category from the capability profile. |
-| Affected output | Elements, attributes, content, styles, events, stored values, or external results produced or changed. |
-| Inputs and activation | Pointer, keyboard, programmatic, lifecycle, media-query, network, storage, or other triggers. |
-| Semantic host | Expected native elements and any supported non-native host. Required when DOM semantics are affected. |
-| Accessible name | Source of the visible label or accessible name for controls the Extension creates or owns. |
-| State and relationships | Owned `aria-*`, `hidden`, disabled, selected, checked, expanded, busy, IDs, and references. |
-| Focus | Whether focus can move, become hidden, require restoration, or remain unchanged. |
-| Presentation | Effects on color, contrast, layout, zoom, text scale, interface scale, or forced colors. |
-| Motion and timing | Transitions, delays, automatic actions, dismissal, and relevant user preferences. |
-| Pending, success, and failure | User-visible behavior while asynchronous or external work is pending, succeeds, or fails. |
-| Announcements | Changes that require notification beyond native semantics, focus, or control state. |
-| Lifecycle cleanup | Attributes, listeners, timers, requests, observers, generated content, relationships, and references released during cleanup. |
+| Affected output | Elements, attributes, content, styles, events, stored values, or<br>external results produced or changed. |
+| Inputs and activation | Pointer, keyboard, programmatic, lifecycle, media-query, network,<br>storage, or other triggers. |
+| Semantic host | Expected native elements and any supported non-native host. Required<br>when DOM semantics are affected. |
+| Accessible name | Source of the visible label or accessible name for controls the<br>Extension creates or owns. |
+| State and relationships | Owned `aria-*`, `hidden`, disabled, selected, checked, expanded, busy,<br>IDs, and references. |
+| Focus | Whether focus can move, become hidden, require restoration, or remain<br>unchanged. |
+| Presentation | Effects on color, contrast, layout, zoom, text scale, interface scale,<br>or forced colors. |
+| Motion and timing | Transitions, delays, automatic actions, dismissal, and relevant user<br>preferences. |
+| Pending, success, and failure | User-visible behavior while asynchronous or external work is pending,<br>succeeds, or fails. |
+| Announcements | Changes that require notification beyond native semantics, focus, or<br>control state. |
+| Lifecycle cleanup | Attributes, listeners, timers, requests, observers, generated content,<br>relationships, and references released during cleanup. |
 | Limitations | Any relevant scenario that has not been validated. |
 
 ## Capability-Specific Behavior
@@ -138,12 +138,12 @@ Validate the universal requirements and each declared capability. Tests or docum
 
 | Capability | Minimum validation |
 | --- | --- |
-| Interaction and input | Keyboard activation, Tab order, input alternatives, accessible names, and owned control state. |
-| Structure and state | DOM and reading order, focus safety, synchronized native or ARIA state, valid relationships, and necessary announcements. |
-| Visual and adaptive presentation | Zoom, text and interface scale, contrast, forced colors, reflow, and absence of color-only meaning where affected. |
-| Motion and timing | Reduced motion, disabled animation, interruption, timing control, and cleanup. |
-| External data and integration | Pending, success, failure, cancellation, stale responses, focus stability, and cleanup. |
-| Infrastructure and policy | Stable contracts, failure isolation, indirect state effects, cleanup, and diagnostics behavior. |
+| Interaction and input | Keyboard activation, Tab order, input alternatives, accessible names,<br>and owned control state. |
+| Structure and state | DOM and reading order, focus safety, synchronized native or ARIA<br>state, valid relationships, and necessary announcements. |
+| Visual and adaptive presentation | Zoom, text and interface scale, contrast, forced colors, reflow, and<br>absence of color-only meaning where affected. |
+| Motion and timing | Reduced motion, disabled animation, interruption, timing control, and<br>cleanup. |
+| External data and integration | Pending, success, failure, cancellation, stale responses, focus<br>stability, and cleanup. |
+| Infrastructure and policy | Stable contracts, failure isolation, indirect state effects, cleanup,<br>and diagnostics behavior. |
 
 Also validate failed initialization or mounting, repeated lifecycle execution, and the Modern or Legacy environments claimed by the Extension when those lifecycle paths exist.
 

@@ -824,67 +824,67 @@ npm run test:browser
 </thead>
 <tbody><tr>
 <td>API normalization and builds</td>
-<td>Global and ESM identity, camelCase Extension keys and options, compound filenames, Modern and Legacy selection, minified files, optional styles, and incompatible builds.</td>
+<td>Global and ESM identity, camelCase Extension keys and options,<br>compound filenames, Modern and Legacy selection, minified files,<br>optional styles, and incompatible builds.</td>
 </tr>
 <tr>
 <td>Full distribution coverage</td>
-<td>Bundled Core Extensions initialize from the Full runtime; Dialog, Overflow Marquee, PWA, Scrollbox and Scrollbox Snap load separate compatible files on demand, without a duplicate script request or a manifest fetch for the current Core version. Modern, Legacy, normal, and minified paths are checked.</td>
+<td>Bundled Core Extensions initialize from the Full runtime; Dialog,<br>Overflow Marquee, PWA, Scrollbox and Scrollbox Snap load separate<br>compatible files on demand, without a duplicate script request or a<br>manifest fetch for the current Core version. Modern, Legacy, normal,<br>and minified paths are checked.</td>
 </tr>
 <tr>
 <td>Diagnostics</td>
-<td>Severity, verbosity updates, retained history, invalid selectors and registrations, unavailable storage, callback failures, transitions, and lifecycle failures.</td>
+<td>Severity, verbosity updates, retained history, invalid selectors and<br>registrations, unavailable storage, callback failures, transitions,<br>and lifecycle failures.</td>
 </tr>
 <tr>
 <td>Configuration diagnostics</td>
-<td>Development-only semantic mount/update checks, scoped Extensions, configured prefixes, custom selector attributes, actionable targets/values/structure, CSS and keyboard reachability, quiet hidden/group states, Modern/Legacy paths, runtime AJAX validation and Adaptive numeric fallbacks.</td>
+<td>Development-only semantic mount/update checks, scoped Extensions,<br>configured prefixes, custom selector attributes, actionable<br>targets/values/structure, CSS and keyboard reachability, quiet<br>hidden/group states, Modern/Legacy paths, runtime AJAX validation and<br>Adaptive numeric fallbacks.</td>
 </tr>
 <tr>
 <td>Loading</td>
-<td>Eager and lazy loading, shared concurrent Promises, failed <code>init()</code> retry, failed script retry, optional stylesheet failure, and lazy-index cleanup after success or destruction.</td>
+<td>Eager and lazy loading, shared concurrent Promises, failed <code>init()</code><br>retry, failed script retry, optional stylesheet failure, and<br>lazy-index cleanup after success or destruction.</td>
 </tr>
 <tr>
 <td>Lifecycle failure isolation</td>
-<td>Rejected initialization, partial element mounting, failed update and unmount callbacks, failed destroy callbacks, and continued work for unaffected elements, registrations, and Extensions.</td>
+<td>Rejected initialization, partial element mounting, failed update and<br>unmount callbacks, failed destroy callbacks, and continued work for<br>unaffected elements, registrations, and Extensions.</td>
 </tr>
 <tr>
 <td>Controllers and mount maps</td>
-<td>Controller lookup, bound public methods and element-scoped events, forced mount/update/unmount, missing methods, duplicate maps, ascending map priorities, active-map removal protection, and cleanup after the last registration.</td>
+<td>Controller lookup, bound public methods and element-scoped events,<br>forced mount/update/unmount, missing methods, duplicate maps,<br>ascending map priorities, active-map removal protection, and cleanup<br>after the last registration.</td>
 </tr>
 <tr>
 <td>Mount results and attributes</td>
-<td>Unique return values, partial success results, concurrent mounts, failed-mount rollback, overlapping registrations, lifecycle event details with distinct affected elements, and restoration of <code>data-ae-*</code>, <code>aria-*</code>, and <code>hidden</code>.</td>
+<td>Unique return values, partial success results, concurrent mounts,<br>failed-mount rollback, overlapping registrations, lifecycle event<br>details with distinct affected elements, and restoration of <code>data-ae-*</code>,<br><code>aria-*</code>, and <code>hidden</code>.</td>
 </tr>
 <tr>
 <td>Resource cleanup</td>
-<td>Element and global listeners, Extension scripts and styles, mount maps, controllers, layout queues, failed and dormant lazy registrations, and the mount manager observer.</td>
+<td>Element and global listeners, Extension scripts and styles, mount<br>maps, controllers, layout queues, failed and dormant lazy<br>registrations, and the mount manager observer.</td>
 </tr>
 <tr>
 <td>Detached elements</td>
-<td>Removal during async mount, observer cleanup, moves within the document, explicit unmount races, and global cleanup when <code>MutationObserver</code> is unavailable.</td>
+<td>Removal during async mount, observer cleanup, moves within the<br>document, explicit unmount races, and global cleanup when<br><code>MutationObserver</code> is unavailable.</td>
 </tr>
 <tr>
 <td>Accessibility contracts</td>
-<td>Native keyboard activation for Preference controls, Focus restoration and hint cleanup, Present focus release plus ARIA state synchronization, failed-mount <code>aria-busy</code> cleanup, and root attributes for reduced motion, contrast, and forced colors.</td>
+<td>Native keyboard activation for Preference controls, Focus restoration<br>and hint cleanup, Present focus release plus ARIA state<br>synchronization, failed-mount <code>aria-busy</code> cleanup, and root attributes<br>for reduced motion, contrast, and forced colors.</td>
 </tr>
 <tr>
 <td>Extension event details</td>
-<td>Adaptive dimensions, Preference changes, Scrollbox snap and pointer scroll events, and State Navigation snapshot copies.</td>
+<td>Adaptive dimensions, Preference changes, Scrollbox snap and pointer<br>scroll events, and State Navigation snapshot copies.</td>
 </tr>
 <tr>
 <td>Feedback</td>
-<td>Boundary type filtering, text and class updates, generated motion stylesheet loading, and invalid argument diagnostics.</td>
+<td>Boundary type filtering, text and class updates, generated motion<br>stylesheet loading, and invalid argument diagnostics.</td>
 </tr>
 <tr>
 <td>Layout and presentation</td>
-<td>Anchor geometry, event-driven refresh and throttling; Adaptive resize fallback; Present transitions, focus release, ARIA state, and generated styles.</td>
+<td>Anchor geometry, event-driven refresh and throttling; Adaptive resize<br>fallback; Present transitions, focus release, ARIA state, and<br>generated styles.</td>
 </tr>
 <tr>
 <td>Scrollbox interactions</td>
-<td>Native progress, pointer drag and selection rules, nested scroll handoff, momentum, elastic pressure, snap navigation, custom scrollbar dragging, and scroll edge classes.</td>
+<td>Native progress, pointer drag and selection rules, nested scroll<br>handoff, momentum, elastic pressure, snap navigation, custom scrollbar<br>dragging, and scroll edge classes.</td>
 </tr>
 <tr>
 <td>Asset integrity and dependencies</td>
-<td>Variant-specific SRI, changed-byte rejection, <code>crossorigin</code>, CSS property registration, and dependency registration and retry.</td>
+<td>Variant-specific SRI, changed-byte rejection, <code>crossorigin</code>, CSS<br>property registration, and dependency registration and retry.</td>
 </tr>
 </tbody></table>
 <p>The contract suite does not establish support for historical or mobile browsers and does not replace the separate accessibility review or additional iframe scenarios.</p>

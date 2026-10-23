@@ -748,7 +748,7 @@
 </tr>
 <tr>
 <td><code>warn()</code></td>
-<td>The system can continue, but a limitation or unexpected condition needs attention.</td>
+<td>The system can continue, but a limitation or unexpected condition<br>needs attention.</td>
 <td>A browser capability is missing and the Legacy runtime will be used.</td>
 </tr>
 <tr>
@@ -832,7 +832,7 @@ $ae.init({ environment: &quot;production&quot;, verboseLevel: &quot;warn&quot; }
 </thead>
 <tbody><tr>
 <td><code>2020</code></td>
-<td>An effective CSS transform is applied directly to a Snap item. Apply visual transforms to its children instead.</td>
+<td>An effective CSS transform is applied directly to a Snap item. Apply<br>visual transforms to its children instead.</td>
 </tr>
 <tr>
 <td><code>2024</code></td>
@@ -848,11 +848,11 @@ $ae.init({ environment: &quot;production&quot;, verboseLevel: &quot;warn&quot; }
 </tr>
 <tr>
 <td><code>2027</code></td>
-<td>Missing/incompatible target, unmeasurable explicitly updated Anchor target, or invalid/missing AJAX selector.</td>
+<td>Missing/incompatible target, unmeasurable explicitly updated Anchor<br>target, or invalid/missing AJAX selector.</td>
 </tr>
 <tr>
 <td><code>2028</code></td>
-<td>Snap without Scrollbox, an orphan Snap item, a misplaced Elastic wrapper, or PWA without a manifest link/nonempty <code>href</code>.</td>
+<td>Snap without Scrollbox, an orphan Snap item, a misplaced Elastic<br>wrapper, or PWA without a manifest link/nonempty <code>href</code>.</td>
 </tr>
 <tr>
 <td><code>2029</code></td>
@@ -860,19 +860,19 @@ $ae.init({ environment: &quot;production&quot;, verboseLevel: &quot;warn&quot; }
 </tr>
 <tr>
 <td><code>2030</code></td>
-<td>Effective CSS blocks requested layout/scrolling, or a motion duration is invalid.</td>
+<td>Effective CSS blocks requested layout/scrolling, or a motion duration<br>is invalid.</td>
 </tr>
 <tr>
 <td><code>2031</code></td>
-<td>Present and Anchor both request transform on one element. Anchor takes priority; remove the Present transform token or animate a child.</td>
+<td>Present and Anchor both request transform on one element. Anchor takes<br>priority; remove the Present transform token or animate a child.</td>
 </tr>
 <tr>
 <td><code>2032</code></td>
-<td>Duplicate HTML attributes on one start tag; the browser keeps the first value and discards subsequent values. Includes <code>class</code>, <code>style</code>, native and custom attributes.</td>
+<td>Duplicate HTML attributes on one start tag; the browser keeps the<br>first value and discards subsequent values. Includes <code>class</code>, <code>style</code>,<br>native and custom attributes.</td>
 </tr>
 <tr>
 <td><code>2033</code></td>
-<td>Behaviors replace the same CSS resource on one element. The context identifies the <code>property</code> and its <code>writers</code>.</td>
+<td>Behaviors replace the same CSS resource on one element. The context<br>identifies the <code>property</code> and its <code>writers</code>.</td>
 </tr>
 </tbody></table>
 <p><code>WARN_RESOURCE_CONFLICT</code> (<code>2033</code>) checks persistent transform writers without a separate ownership registry. Development mounts and explicit updates diagnose Present transform on a valid Elastic wrapper. When CSS Motion captures an actual replacing transform effect, it compares that effect with Anchor, Elastic and Present on the effect&#39;s target. Feedback passes its resolved <code>data-ae-target-transform</code> destination, so animating a child remains valid. This works with controlled and native CSS Motion when Web Animations exposes keyframes. Opacity-only effects, additive composition, pseudo-elements and separate targets are excluded. Reduced motion with no active effect emits no motion conflict. Browsers without inspectable effects skip this runtime check; production skips all resource checks.</p>

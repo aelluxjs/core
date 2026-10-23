@@ -57,21 +57,21 @@ The browser suite covers the release contract in Chromium, Firefox, and WebKit:
 
 | Contract area | Covered behavior |
 | --- | --- |
-| API normalization and builds | Global and ESM identity, camelCase Extension keys and options, compound filenames, Modern and Legacy selection, minified files, optional styles, and incompatible builds. |
-| Full distribution coverage | Bundled Core Extensions initialize from the Full runtime; Dialog, Overflow Marquee, PWA, Scrollbox and Scrollbox Snap load separate compatible files on demand, without a duplicate script request or a manifest fetch for the current Core version. Modern, Legacy, normal, and minified paths are checked. |
-| Diagnostics | Severity, verbosity updates, retained history, invalid selectors and registrations, unavailable storage, callback failures, transitions, and lifecycle failures. |
-| Configuration diagnostics | Development-only semantic mount/update checks, scoped Extensions, configured prefixes, custom selector attributes, actionable targets/values/structure, CSS and keyboard reachability, quiet hidden/group states, Modern/Legacy paths, runtime AJAX validation and Adaptive numeric fallbacks. |
-| Loading | Eager and lazy loading, shared concurrent Promises, failed `init()` retry, failed script retry, optional stylesheet failure, and lazy-index cleanup after success or destruction. |
-| Lifecycle failure isolation | Rejected initialization, partial element mounting, failed update and unmount callbacks, failed destroy callbacks, and continued work for unaffected elements, registrations, and Extensions. |
-| Controllers and mount maps | Controller lookup, bound public methods and element-scoped events, forced mount/update/unmount, missing methods, duplicate maps, ascending map priorities, active-map removal protection, and cleanup after the last registration. |
-| Mount results and attributes | Unique return values, partial success results, concurrent mounts, failed-mount rollback, overlapping registrations, lifecycle event details with distinct affected elements, and restoration of `data-ae-*`, `aria-*`, and `hidden`. |
-| Resource cleanup | Element and global listeners, Extension scripts and styles, mount maps, controllers, layout queues, failed and dormant lazy registrations, and the mount manager observer. |
-| Detached elements | Removal during async mount, observer cleanup, moves within the document, explicit unmount races, and global cleanup when `MutationObserver` is unavailable. |
-| Accessibility contracts | Native keyboard activation for Preference controls, Focus restoration and hint cleanup, Present focus release plus ARIA state synchronization, failed-mount `aria-busy` cleanup, and root attributes for reduced motion, contrast, and forced colors. |
-| Extension event details | Adaptive dimensions, Preference changes, Scrollbox snap and pointer scroll events, and State Navigation snapshot copies. |
-| Feedback | Boundary type filtering, text and class updates, generated motion stylesheet loading, and invalid argument diagnostics. |
-| Layout and presentation | Anchor geometry, event-driven refresh and throttling; Adaptive resize fallback; Present transitions, focus release, ARIA state, and generated styles. |
-| Scrollbox interactions | Native progress, pointer drag and selection rules, nested scroll handoff, momentum, elastic pressure, snap navigation, custom scrollbar dragging, and scroll edge classes. |
-| Asset integrity and dependencies | Variant-specific SRI, changed-byte rejection, `crossorigin`, CSS property registration, and dependency registration and retry. |
+| API normalization and builds | Global and ESM identity, camelCase Extension keys and options,<br>compound filenames, Modern and Legacy selection, minified files,<br>optional styles, and incompatible builds. |
+| Full distribution coverage | Bundled Core Extensions initialize from the Full runtime; Dialog,<br>Overflow Marquee, PWA, Scrollbox and Scrollbox Snap load separate<br>compatible files on demand, without a duplicate script request or a<br>manifest fetch for the current Core version. Modern, Legacy, normal,<br>and minified paths are checked. |
+| Diagnostics | Severity, verbosity updates, retained history, invalid selectors and<br>registrations, unavailable storage, callback failures, transitions,<br>and lifecycle failures. |
+| Configuration diagnostics | Development-only semantic mount/update checks, scoped Extensions,<br>configured prefixes, custom selector attributes, actionable<br>targets/values/structure, CSS and keyboard reachability, quiet<br>hidden/group states, Modern/Legacy paths, runtime AJAX validation and<br>Adaptive numeric fallbacks. |
+| Loading | Eager and lazy loading, shared concurrent Promises, failed `init()`<br>retry, failed script retry, optional stylesheet failure, and<br>lazy-index cleanup after success or destruction. |
+| Lifecycle failure isolation | Rejected initialization, partial element mounting, failed update and<br>unmount callbacks, failed destroy callbacks, and continued work for<br>unaffected elements, registrations, and Extensions. |
+| Controllers and mount maps | Controller lookup, bound public methods and element-scoped events,<br>forced mount/update/unmount, missing methods, duplicate maps,<br>ascending map priorities, active-map removal protection, and cleanup<br>after the last registration. |
+| Mount results and attributes | Unique return values, partial success results, concurrent mounts,<br>failed-mount rollback, overlapping registrations, lifecycle event<br>details with distinct affected elements, and restoration of `data-ae-*`,<br>`aria-*`, and `hidden`. |
+| Resource cleanup | Element and global listeners, Extension scripts and styles, mount<br>maps, controllers, layout queues, failed and dormant lazy<br>registrations, and the mount manager observer. |
+| Detached elements | Removal during async mount, observer cleanup, moves within the<br>document, explicit unmount races, and global cleanup when<br>`MutationObserver` is unavailable. |
+| Accessibility contracts | Native keyboard activation for Preference controls, Focus restoration<br>and hint cleanup, Present focus release plus ARIA state<br>synchronization, failed-mount `aria-busy` cleanup, and root attributes<br>for reduced motion, contrast, and forced colors. |
+| Extension event details | Adaptive dimensions, Preference changes, Scrollbox snap and pointer<br>scroll events, and State Navigation snapshot copies. |
+| Feedback | Boundary type filtering, text and class updates, generated motion<br>stylesheet loading, and invalid argument diagnostics. |
+| Layout and presentation | Anchor geometry, event-driven refresh and throttling; Adaptive resize<br>fallback; Present transitions, focus release, ARIA state, and<br>generated styles. |
+| Scrollbox interactions | Native progress, pointer drag and selection rules, nested scroll<br>handoff, momentum, elastic pressure, snap navigation, custom scrollbar<br>dragging, and scroll edge classes. |
+| Asset integrity and dependencies | Variant-specific SRI, changed-byte rejection, `crossorigin`, CSS<br>property registration, and dependency registration and retry. |
 
 The contract suite does not establish support for historical or mobile browsers and does not replace the separate accessibility review or additional iframe scenarios.

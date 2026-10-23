@@ -4,10 +4,10 @@ Aellux ships generated semantic metadata for HTML/CSS completion, hover document
 
 | File in `dist/` | Purpose |
 | --- | --- |
-| `aellux.html-data.json` | VS Code HTML Custom Data 1.1: public attributes, known values, examples and documentation links. |
-| `aellux.css-data.json` | VS Code CSS Custom Data 1.1: public CSS custom properties, syntax and descriptions. |
-| `aellux.web-types.json` | JetBrains Web Types: HTML attributes, CSS properties/classes and DOM events. |
-| `aellux.semantic.json` | Shared semantic catalog, including internal/output roles and the existing boot and runtime API shape contract, for other tooling. |
+| `aellux.html-data.json` | VS Code HTML Custom Data 1.1: public attributes, known values,<br>examples and documentation links. |
+| `aellux.css-data.json` | VS Code CSS Custom Data 1.1: public CSS custom properties, syntax and<br>descriptions. |
+| `aellux.web-types.json` | JetBrains Web Types: HTML attributes, CSS properties/classes and DOM<br>events. |
+| `aellux.semantic.json` | Shared semantic catalog, including internal/output roles and the<br>existing boot and runtime API shape contract, for other tooling. |
 
 ## VS Code
 
