@@ -1,10 +1,38 @@
 <script src="https://cdn.jsdelivr.net/npm/tocbot@4.32/dist/tocbot.min.js" async defer></script>
-
-<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.12/highlight.min.js" async></script>
-<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.12/languages/xml.min.js" async defer></script>
-<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.12/languages/json.min.js" async defer></script>
-<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.12/languages/bash.min.js" async defer></script>
-<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.12/languages/javascript.min.js" async
-  defer></script>
-
 <script src="<%= it.outputPath %>/js/toc-init.js?t=1"></script>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tocbot@4.36/dist/tocbot.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.12/styles/github-dark.min.css">
+
+<script>
+  const highlightReady = (async () => {
+    const baseUrl = "https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.12/";
+    await AelluxJs.dep("highlightjs", `${baseUrl}highlight.min.js`);
+    await Promise.all(["xml", "json", "bash", "javascript"].map(language =>
+      AelluxJs.dep(`highlightjs-${language}`, `${baseUrl}languages/${language}.min.js`)
+    ));
+    return window.hljs;
+  })().catch(error => {
+    console.error("Failed to load syntax highlighting.", error);
+    return null;
+  });
+
+  let highlightPending = false;
+
+  async function highlightCode() {
+    if (highlightPending) return;
+    highlightPending = true;
+    try {
+      const highlighter = await highlightReady;
+      if (!highlighter) return;
+      if (document.readyState === "loading") {
+        await new Promise(resolve => document.addEventListener("DOMContentLoaded", resolve, { once: true }));
+      }
+      document.querySelectorAll('pre code:not([data-highlighted])').forEach(block => {
+        highlighter.highlightElement(block);
+      });
+    } finally {
+      highlightPending = false;
+    }
+  }
+</script>
