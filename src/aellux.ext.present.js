@@ -15,7 +15,8 @@
  * tokens during mount. A direct `[data-ae-present-motion]` child enables grid
  * size transitions; without it, size transitions measure the container.
  * Trigger and dismiss relationships use extension data attributes and may
- * target a region by ID, with or without a leading #.
+ * target a region by ID, with or without a leading #. Point tap notifications
+ * share click activation; a matching native click takes priority over a queued tap.
  *
  * Outputs and owned state: owns presentation and will-change classes plus its
  * changes to `hidden`, `aria-expanded` and `aria-controls`. It exposes
@@ -81,6 +82,7 @@
     TRANSFORM_SYNTAX = "<transform-list> | none";
 
   const TRANSITION_PREPARE_TIME = 100;
+  const TAP_CLICK_WAIT_TIME = 32;
   const presentElements = new Map();
   const openPresentElements = new Set();
   let fallbackMotionId = 5000000;
@@ -95,6 +97,7 @@
   const groups = new Map();
   const hoverTimers = new Map();
   const hoveredTriggers = new Set();
+  const pendingTaps = new Set();
   let groupObserver = null;
   let groupsQueued = false;
   let interpolatedProgress = false;
@@ -148,12 +151,15 @@
     document.addEventListener("pointerover", onHover);
     document.addEventListener("pointerout", onHover);
     AelluxJs.on("$click", OnClick);
+    AelluxJs.on("tap", onTap);
     AelluxJs.onEvent(root, "$resize", refreshExpandedStates);
   }
 
   function destroy() {
     AelluxJs.mountManager.remove({ extensionName });
     AelluxJs.off("$click", OnClick);
+    AelluxJs.off("tap", onTap);
+    for (const pending of pendingTaps) cancelPendingTap(pending);
     AelluxJs.offEvent(root, "$resize", refreshExpandedStates);
     document.removeEventListener("pointerover", onHover);
     document.removeEventListener("pointerout", onHover);
@@ -283,6 +289,7 @@
 
   function unmountPresentContainer(element) {
     if (!presentElements.has(element)) return;
+    cancelElementTaps(element);
     const controller = presentElements.get(element);
     cancelHoverClose(element);
     for (const button of controller.triggers) hoveredTriggers.delete(button);
@@ -308,6 +315,7 @@
 
   function unmountTriggerElement(triggerElement) {
     if (!triggerElementsSet.has(triggerElement)) return;
+    cancelElementTaps(triggerElement);
     hoveredTriggers.delete(triggerElement);
     const target = triggerTargets.get(triggerElement);
     if (target) {
@@ -743,12 +751,70 @@
   }
 
   function OnClick(event) {
-    if (!event.target) return;
-    const container = event.target.closest(presentSelector);
-    const exceptions = [event.target];
+    const target = activationTarget(event);
+    if (!target) return;
+    let matched;
+    for (const pending of pendingTaps) {
+      const pointerId = event.pointerId;
+      // WebKit may expose a touch/pen compatibility click as a mouse pointer
+      // with a different ID. Match that short-lived pair by its target instead.
+      const compatibilityClick = event.pointerType === "mouse" &&
+        ["touch", "pen"].includes(pending.event.detail?.pointerType);
+      if (!compatibilityClick && typeof pointerId === "number" && typeof pending.event.detail?.pointerId === "number" &&
+        pointerId !== pending.event.detail.pointerId) continue;
+      if (pending.target === target || pending.target.contains(target) || target.contains(pending.target))
+        matched = pending;
+    }
+    if (matched) cancelPendingTap(matched);
+    activate(event, target);
+  }
+
+  function activationTarget(event) {
+    const path = event.composedPath ? event.composedPath() : [];
+    const target = path[0] || event.target;
+    return target?.closest ? target : null;
+  }
+
+  function onTap(event) {
+    const target = activationTarget(event);
+    if (!target) return;
+    const control = target.closest(`[${attr.trigger}],[${attr.dismiss}]`);
+    if (control) refreshChangedTrigger(control);
+    const pending = {
+      event, target, hoverSuppressed: control && suppressHoverClick(control, event),
+      present: triggerTargets.get(control),
+      point: AelluxJs.mountManager.controller(target)?.point,
+      timer: null
+    };
+    pendingTaps.add(pending);
+    // Touch compatibility click can arrive in a later input task, after a 0 ms
+    // timer. Keep a short grace period so that click owns the action.
+    pending.timer = setTimeout(() => {
+      pendingTaps.delete(pending);
+      if (!target.isConnected ||
+        (pending.point && AelluxJs.mountManager.controller(target)?.point !== pending.point)) return;
+      activate(event, target, pending.hoverSuppressed);
+    }, TAP_CLICK_WAIT_TIME);
+  }
+
+  function cancelPendingTap(pending) {
+    clearTimeout(pending.timer);
+    pendingTaps.delete(pending);
+  }
+
+  function cancelElementTaps(element) {
+    for (const pending of pendingTaps) {
+      if (element.contains(pending.target) || pending.present === element)
+        cancelPendingTap(pending);
+    }
+  }
+
+  function activate(event, eventTarget, hoverSuppressed) {
+    const container = eventTarget.closest(presentSelector);
+    const exceptions = [eventTarget];
 
     var button;
-    button = event.target.closest(`[${attr.trigger}]`);
+    button = eventTarget.closest(`[${attr.trigger}]`);
     if (button) {
       refreshChangedTrigger(button);
       const triggerAttr = button.getAttribute(attr.trigger);
@@ -758,11 +824,11 @@
         diagnoseTarget(button, target, attr.target, targetSelector);
         if (target) {
           exceptions.push(target);
-          if (!suppressHoverClick(button, event)) trigger(target, triggerAttr);
+          if (!(hoverSuppressed ?? suppressHoverClick(button, event))) trigger(target, triggerAttr);
         }
       } else if (container) {
         exceptions.push(container);
-        if (!suppressHoverClick(button, event)) trigger(container, triggerAttr);
+        if (!(hoverSuppressed ?? suppressHoverClick(button, event))) trigger(container, triggerAttr);
       } else {
         AelluxJs.diagnostics.error(
           AelluxJs.diagnostics.ERROR_PRESENT_CONTROL_TARGET_MISSING,
@@ -770,7 +836,7 @@
         );
       }
     }
-    button = event.target.closest(`[${attr.dismiss}]`);
+    button = eventTarget.closest(`[${attr.dismiss}]`);
     if (button) {
       refreshChangedTrigger(button);
       const dismiss = button.getAttribute(attr.dismiss);
@@ -1047,8 +1113,10 @@
   }
 
   function suppressHoverClick(button, event) {
-    return button.getAttribute(attr.triggerOn) === "hover" && event.detail > 0 &&
-      event.pointerType !== "touch" && hoveredTriggers.has(button);
+    const pointerType = event.pointerType || event.detail?.pointerType;
+    const pointerActivation = typeof event.detail === "number" ? event.detail > 0 : !!pointerType;
+    return button.getAttribute(attr.triggerOn) === "hover" && pointerActivation &&
+      pointerType !== "touch" && hoveredTriggers.has(button);
   }
 
   function onHover(event) {

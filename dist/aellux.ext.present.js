@@ -45,6 +45,7 @@
     });
     const POP = "Pop", UNPOP = "Unpop", BEFORE = "Before", PING = "ping", MILLISECOND = "ms", SECOND = "s", DEFAULT_PRESENT = "opacity transform height width", OPACITY_SYNTAX = "<number> | <percentage>", TRANSFORM_SYNTAX = "<transform-list> | none";
     const TRANSITION_PREPARE_TIME = 100;
+    const TAP_CLICK_WAIT_TIME = 32;
     const presentElements = /* @__PURE__ */ new Map();
     const openPresentElements = /* @__PURE__ */ new Set();
     let fallbackMotionId = 5e6;
@@ -59,6 +60,7 @@
     const groups = /* @__PURE__ */ new Map();
     const hoverTimers = /* @__PURE__ */ new Map();
     const hoveredTriggers = /* @__PURE__ */ new Set();
+    const pendingTaps = /* @__PURE__ */ new Set();
     let groupObserver = null;
     let groupsQueued = false;
     let interpolatedProgress = false;
@@ -119,11 +121,14 @@
       document.addEventListener("pointerover", onHover);
       document.addEventListener("pointerout", onHover);
       AelluxJs.on("$click", OnClick);
+      AelluxJs.on("tap", onTap);
       AelluxJs.onEvent(root, "$resize", refreshExpandedStates);
     }
     function destroy() {
       AelluxJs.mountManager.remove({ extensionName });
       AelluxJs.off("$click", OnClick);
+      AelluxJs.off("tap", onTap);
+      for (const pending of pendingTaps) cancelPendingTap(pending);
       AelluxJs.offEvent(root, "$resize", refreshExpandedStates);
       document.removeEventListener("pointerover", onHover);
       document.removeEventListener("pointerout", onHover);
@@ -255,6 +260,7 @@
     function unmountPresentContainer(element) {
       var _a, _b, _c;
       if (!presentElements.has(element)) return;
+      cancelElementTaps(element);
       const controller = presentElements.get(element);
       cancelHoverClose(element);
       for (const button of controller.triggers) hoveredTriggers.delete(button);
@@ -279,6 +285,7 @@
     function unmountTriggerElement(triggerElement) {
       var _a, _b;
       if (!triggerElementsSet.has(triggerElement)) return;
+      cancelElementTaps(triggerElement);
       hoveredTriggers.delete(triggerElement);
       const target = triggerTargets.get(triggerElement);
       if (target) {
@@ -682,11 +689,62 @@
       if (value !== indexedTriggerValues.get(button)) refreshTriggerTargets(button);
     }
     function OnClick(event) {
-      if (!event.target) return;
-      const container = event.target.closest(presentSelector);
-      const exceptions = [event.target];
+      var _a, _b;
+      const target = activationTarget(event);
+      if (!target) return;
+      let matched;
+      for (const pending of pendingTaps) {
+        const pointerId = event.pointerId;
+        const compatibilityClick = event.pointerType === "mouse" && ["touch", "pen"].includes((_a = pending.event.detail) == null ? void 0 : _a.pointerType);
+        if (!compatibilityClick && typeof pointerId === "number" && typeof ((_b = pending.event.detail) == null ? void 0 : _b.pointerId) === "number" && pointerId !== pending.event.detail.pointerId) continue;
+        if (pending.target === target || pending.target.contains(target) || target.contains(pending.target))
+          matched = pending;
+      }
+      if (matched) cancelPendingTap(matched);
+      activate(event, target);
+    }
+    function activationTarget(event) {
+      const path = event.composedPath ? event.composedPath() : [];
+      const target = path[0] || event.target;
+      return (target == null ? void 0 : target.closest) ? target : null;
+    }
+    function onTap(event) {
+      var _a;
+      const target = activationTarget(event);
+      if (!target) return;
+      const control = target.closest(`[${attr.trigger}],[${attr.dismiss}]`);
+      if (control) refreshChangedTrigger(control);
+      const pending = {
+        event,
+        target,
+        hoverSuppressed: control && suppressHoverClick(control, event),
+        present: triggerTargets.get(control),
+        point: (_a = AelluxJs.mountManager.controller(target)) == null ? void 0 : _a.point,
+        timer: null
+      };
+      pendingTaps.add(pending);
+      pending.timer = setTimeout(() => {
+        var _a2;
+        pendingTaps.delete(pending);
+        if (!target.isConnected || pending.point && ((_a2 = AelluxJs.mountManager.controller(target)) == null ? void 0 : _a2.point) !== pending.point) return;
+        activate(event, target, pending.hoverSuppressed);
+      }, TAP_CLICK_WAIT_TIME);
+    }
+    function cancelPendingTap(pending) {
+      clearTimeout(pending.timer);
+      pendingTaps.delete(pending);
+    }
+    function cancelElementTaps(element) {
+      for (const pending of pendingTaps) {
+        if (element.contains(pending.target) || pending.present === element)
+          cancelPendingTap(pending);
+      }
+    }
+    function activate(event, eventTarget, hoverSuppressed) {
+      const container = eventTarget.closest(presentSelector);
+      const exceptions = [eventTarget];
       var button;
-      button = event.target.closest(`[${attr.trigger}]`);
+      button = eventTarget.closest(`[${attr.trigger}]`);
       if (button) {
         refreshChangedTrigger(button);
         const triggerAttr = button.getAttribute(attr.trigger);
@@ -696,11 +754,11 @@
           diagnoseTarget(button, target, attr.target, targetSelector);
           if (target) {
             exceptions.push(target);
-            if (!suppressHoverClick(button, event)) trigger(target, triggerAttr);
+            if (!(hoverSuppressed != null ? hoverSuppressed : suppressHoverClick(button, event))) trigger(target, triggerAttr);
           }
         } else if (container) {
           exceptions.push(container);
-          if (!suppressHoverClick(button, event)) trigger(container, triggerAttr);
+          if (!(hoverSuppressed != null ? hoverSuppressed : suppressHoverClick(button, event))) trigger(container, triggerAttr);
         } else {
           AelluxJs.diagnostics.error(
             AelluxJs.diagnostics.ERROR_PRESENT_CONTROL_TARGET_MISSING,
@@ -708,7 +766,7 @@
           );
         }
       }
-      button = event.target.closest(`[${attr.dismiss}]`);
+      button = eventTarget.closest(`[${attr.dismiss}]`);
       if (button) {
         refreshChangedTrigger(button);
         const dismiss = button.getAttribute(attr.dismiss);
@@ -971,7 +1029,10 @@
       return false;
     }
     function suppressHoverClick(button, event) {
-      return button.getAttribute(attr.triggerOn) === "hover" && event.detail > 0 && event.pointerType !== "touch" && hoveredTriggers.has(button);
+      var _a;
+      const pointerType = event.pointerType || ((_a = event.detail) == null ? void 0 : _a.pointerType);
+      const pointerActivation = typeof event.detail === "number" ? event.detail > 0 : !!pointerType;
+      return button.getAttribute(attr.triggerOn) === "hover" && pointerActivation && pointerType !== "touch" && hoveredTriggers.has(button);
     }
     function onHover(event) {
       var _a;

@@ -27,7 +27,7 @@
   var define_AELLUX_OFFICIAL_EXTENSION_MANIFEST_default;
   var init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST = __esm({
     "<define:__AELLUX_OFFICIAL_EXTENSION_MANIFEST__>"() {
-      define_AELLUX_OFFICIAL_EXTENSION_MANIFEST_default = { schemaVersion: 1, coreVersion: "0.1.0-beta.10", extensions: { preference: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.preference.min.js", integrity: "sha384-mSOgb0DekFTRXXZAgyNrPjamdlSqzL4SSGZYVWgVg+WlG+pBj11xT81v/6Xk43yO", regular: { url: "./aellux.ext.preference.js", integrity: "sha384-MlikpdHSzHzF6kz5+oJGtq3eoFsKTsx/g+FTrf+dFOU8iQGHsCpn4fP1jLlbNrj7" } }, legacy: { url: "./aellux.ext.preference.legacy.min.js", integrity: "sha384-1LMsK0W9J/PoM4tXhFgkYLRY4yWdzVoYmFy4OMDGd8lRdtptKoEb1sI9L1kzNaBu", regular: { url: "./aellux.ext.preference.legacy.js", integrity: "sha384-pozuz43OyfXrnkmuBu6KTM2lqRSqcI5LMgwAtqnzXq8xZGdVqpnmOtrBcYcMskWk" } } }, dependencies: [] }, "state-navigation": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.state-navigation.min.js", integrity: "sha384-wAbgAqjAA6wauuG+iuUtfRwxChd6fTJ0fS22fqnu2r00kouoXJWZ0f7AoTYlqBC6", regular: { url: "./aellux.ext.state-navigation.js", integrity: "sha384-PKJ8HTD7eIYDEg2hOaAJjpMYzLr2fBjBRGmIGG7XzGTzVK0yTjt5HYPO55VbWfdS" } }, legacy: { url: "./aellux.ext.state-navigation.legacy.min.js", integrity: "sha384-YkhfU15Mpk8KiO6TyoVU6z1yCiYWwnsOGE0xVaQ8NrE7IGrxOSUL005g5JeUDdJu", regular: { url: "./aellux.ext.state-navigation.legacy.js", integrity: "sha384-kaEUY0Zpw8K6pcwjm+INA5feXftLK2/N1aFpPr2LCTcetX2uoe2GGd1MJyy7u8rZ" } } }, dependencies: [] }, feedback: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.feedback.min.js", integrity: "sha384-oHAcvQwCs/v3ktzXoNdJEDEkaV6NI29MjzjF068Lw0oL9NwVP5THnxzb12f0ySkY", regular: { url: "./aellux.ext.feedback.js", integrity: "sha384-dGcxHfGyV544C6livNJKKrlNWky/fBFkMONowmtlhHZ5exWL8AJOoV40jJhZW6Iq" } }, legacy: { url: "./aellux.ext.feedback.legacy.min.js", integrity: "sha384-S31Sa8B4kbKL/xsEJ3QTTikO+AjuXSc9GXBzNw8kl/b2amk5tzqgQNNKQPfGnYdF", regular: { url: "./aellux.ext.feedback.legacy.js", integrity: "sha384-sy2QmY3L1TlvGPgdebeu5q9ZJl/bOeUstWE0Cu+QJUIYWSF9y1YH6mCpe09/eKrd" } } }, dependencies: [], style: { url: "./aellux.ext.feedback.min.css", integrity: "sha384-OBguCYqF+dMD0Pl84C3FlY/+ohUGfW0OyynmXb/PSDEGOyuI/TQJ3EZAoCeJx+Jk", regular: { url: "./aellux.ext.feedback.css", integrity: "sha384-yk4cW+r/Mc1FRS1ZauBHC6KsKb7sxuJ0E9mmt/+AYASAdZXXMK6iuFBR+TOEh/r4" } } }, focus: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.focus.min.js", integrity: "sha384-AXpUv/Ur2Z4cKvO9EqIFqfxxdSQR5j75q0okOAWPvHhSneQ5LPjrOzk6Sl9MOo4a", regular: { url: "./aellux.ext.focus.js", integrity: "sha384-VjQzcnhLRrvRlbVQ0X4/tO0+8gqJXAmIFoeIVimjOud1wRNuBXNnSQHHW9XQPzTe" } }, legacy: { url: "./aellux.ext.focus.legacy.min.js", integrity: "sha384-I5QpUmKsA1T8NiKfKXQgbdG19Ld1ZGCWSmosygO3yGj43tdxp5zCfLyfBuFoHlKu", regular: { url: "./aellux.ext.focus.legacy.js", integrity: "sha384-5/y3J1NC/qMyV9myEj29+wGbqCVI8ICPafSebtJVfl15Qmup6vMiJzveShd3CLnw" } } }, dependencies: [] }, point: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.point.min.js", integrity: "sha384-n540II5oWbHJRt/a8i+Rgb9A3b9dm7hamg1kd3Nz7KdPQDcaa8S823t9fCrgxBWF", regular: { url: "./aellux.ext.point.js", integrity: "sha384-aDj7I5QEH/0+52E3e6yPZ/D0MEsNBdxeET3G5ToVvgczHtksMh3p8S/KOoAapRRN" } }, legacy: { url: "./aellux.ext.point.legacy.min.js", integrity: "sha384-5UmWvQHfmvttz9yeXbilawGCZH20UdR8yNBOE9kRV34wpfWASl8plzgKtLVQGO9M", regular: { url: "./aellux.ext.point.legacy.js", integrity: "sha384-gG/XONYEC1tchBcJ6bUtKYmWFHz0E+50LmMaXDAiqWBKPuwdHZeYm1uXA22lMZuN" } } }, dependencies: [] }, anchor: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.anchor.min.js", integrity: "sha384-vpHUGJwyY3qnW78C6Yo8CLc2vgbn1KJ8FcOtQawBtCKarQ0CoihuNQ7ZCKnMbOjx", regular: { url: "./aellux.ext.anchor.js", integrity: "sha384-LaYGJ6p9H5QBGJf5j19wHgT+CFcMim2h0Ro+itxYnLkIE29RFtPdj8P8L9EYWAWr" } }, legacy: { url: "./aellux.ext.anchor.legacy.min.js", integrity: "sha384-Ym0BnY5sDflVI4JyPVWymZKurBcJTAbPNe2gy+6qHcD7x6RyIKwvff6o+6BfeZDy", regular: { url: "./aellux.ext.anchor.legacy.js", integrity: "sha384-bN9t1anpKLUDUvnbE845H1+9UvP+XDfrsN5AhrKLUQJ5fm3YcFqiylDNFuE02RlJ" } } }, dependencies: [], style: { url: "./aellux.ext.anchor.min.css", integrity: "sha384-DwxfMH5mNSvmF0U4/dgL6dbe+5U1x97y2H4skxW7nUUzjr99IXNl9aVDwRjfvNGz", regular: { url: "./aellux.ext.anchor.css", integrity: "sha384-tHVCjTT3bvlmkAIDfMyevvrkAB7crjBXQAfY1l8XcaWhBFSersWJk+JndC6Bd9mO" } } }, "overflow-marquee": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.overflow-marquee.min.js", integrity: "sha384-Eqmu0pNMC64qS7kK8HI8nG9sjDDZn62b0O8SY2D7qOcC6rF0mj8XmAmrulQmP99L", regular: { url: "./aellux.ext.overflow-marquee.js", integrity: "sha384-n0Pkh5AsBRtTSSShu9YJf/qSevWP0r7+asYOBqyglI5z7gWTWbjE/0rAlqeoZWJ3" } }, legacy: { url: "./aellux.ext.overflow-marquee.legacy.min.js", integrity: "sha384-lOog++PR/TJTbVS+/TVvp6RuT972idDV+nzb0s6yd8hK9cyDh4d9UR1sROfFMp+S", regular: { url: "./aellux.ext.overflow-marquee.legacy.js", integrity: "sha384-DJwiequ7f6edt0D9cflftvA036vZWLH3RK50O0zX+3F+IbHldPHP92dbDjUTvGWf" } } }, dependencies: [], style: { url: "./aellux.ext.overflow-marquee.min.css", integrity: "sha384-PD8sxZJw/8gWr9Rq2l7wwUzADqBY74KSE1nn258niuXi97P+MSKN6tCxvocJPGd/", regular: { url: "./aellux.ext.overflow-marquee.css", integrity: "sha384-HyIVGE6lr+ZML8gekuK733ELP8Bd2gdj/+to+QhBYPN+tytaTEHP07ub3nAkOG3y" } } }, "ajax-href": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.ajax-href.min.js", integrity: "sha384-DD+XtPvKyNGWtcjYNTTcXU5e+PgMl7Ev81DgYMNEF0hNAxML61MGS9g8fy6hWIY5", regular: { url: "./aellux.ext.ajax-href.js", integrity: "sha384-h5H+QebE/oUgoWuMMOJOXZoqkjRenBh/EtpOIeU67b7mYDV2pBTvA3qMUiXFc8OS" } }, legacy: { url: "./aellux.ext.ajax-href.legacy.min.js", integrity: "sha384-Q1j4je0/BTjMBSZo29omTv/vLo4oyuaqYlG3h41XRJ02fnTm2X7qkhN2bAL2XZTe", regular: { url: "./aellux.ext.ajax-href.legacy.js", integrity: "sha384-snUrmBWZVPLbXiIkVpi0iaYYitOG/Uxa6gnMAg/iKJxPrfvP1of6LtpB0MC4XqrC" } } }, dependencies: [] }, scrollbox: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.scrollbox.min.js", integrity: "sha384-xvvqVjp8L4JLOKOPmIBAQu74doqxHEbcdHXO/678AzEIfnwJ7n4sNLErwAFWT/TF", regular: { url: "./aellux.ext.scrollbox.js", integrity: "sha384-8LkpI3GuwNINJsz6yjIJu379A5JSndRVfaiOYq6DASpouBAtnoGXi3grX1taS/LH" } }, legacy: { url: "./aellux.ext.scrollbox.legacy.min.js", integrity: "sha384-NfjjNIioenO0EAxx9GrcD/I9ILUL4nMzjAdyBF7bel05CRtOfTx1n1qS5zN3W7E1", regular: { url: "./aellux.ext.scrollbox.legacy.js", integrity: "sha384-DHH1dF+lyHWcO+fiwkwOP8c01PIPfOEHHp61yPEcDgDHsy8x+ugcClr/E3SbDJN4" } } }, dependencies: [], style: { url: "./aellux.ext.scrollbox.min.css", integrity: "sha384-+7gbnqlykQX9O8Q2E2+TcXQk0zpdZhUvNgwqlsL914/cBKo/zlEnbiltW4GcrsXT", regular: { url: "./aellux.ext.scrollbox.css", integrity: "sha384-/LJ8wnR9DMXq2PAGEXphThjj0l18YAkatUlI4YFCtCRK8hTB6QSrDVqbSRhNskg1" } } }, "scrollbox-snap": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.scrollbox-snap.min.js", integrity: "sha384-NNIBI4kj4sdGSI+XDs2LeBrjdo7AAN4eVtQeyAGScLBvxkZEFx3OaT9xpaW4b4Wq", regular: { url: "./aellux.ext.scrollbox-snap.js", integrity: "sha384-gmMGaW0wvR61QynjfBKga6/+7NMAWzk6ALIYmMC0hy9gkSvCrvKXueA+ETEgM9wB" } }, legacy: { url: "./aellux.ext.scrollbox-snap.legacy.min.js", integrity: "sha384-a35oytvnpf0myg+Brd+mFDgQBcbNaihANZl5J+GmrEqlyDl8CDQy0OZyu5Ld3l64", regular: { url: "./aellux.ext.scrollbox-snap.legacy.js", integrity: "sha384-9hE1HNRl9mFvr5aLiaRNZSQsTBb1XoicM6xGqeuISTS6OqL1sZm6DlmY6qxcQJk+" } } }, dependencies: [] }, adaptive: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.adaptive.min.js", integrity: "sha384-bkeOnTW/3uzbuhLc8fujaWnWGC+pwNAkZwci9M09paKqudp0v/flMrJ49JXw16vv", regular: { url: "./aellux.ext.adaptive.js", integrity: "sha384-Qzf9wU6DSSaaE+8lr96vnYqjKQqYxep8dhCZmjgNdqreuk9fL3qKMn3NW7DGAEaT" } }, legacy: { url: "./aellux.ext.adaptive.legacy.min.js", integrity: "sha384-YVHHWZOvf+65r/CU89nBPZXhj3j5sn4r2ho+CNUCUaYs1WE6pWIeypcq7n5OCBor", regular: { url: "./aellux.ext.adaptive.legacy.js", integrity: "sha384-gBkxqbBpIqdj5ozJm/NsenI/yKOvEGarZBl2SrPjYiiYx6cez2/FGTMf5XyzHrTj" } } }, dependencies: [], style: { url: "./aellux.ext.adaptive.min.css", integrity: "sha384-8yUP1PStfDqBCyCskP3k9WLIKgv/yl1nyDhmPz7hsX5NZ4z3ZT3ajolA+RhYlUiG", regular: { url: "./aellux.ext.adaptive.css", integrity: "sha384-HfIjX9Zk0VFRimzPvUaTS5AtwuHJHjXKoM/xbNJXj5vE7bSdBGEzbrBHfbNmYah0" } } }, present: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.present.min.js", integrity: "sha384-0KpYkdu0TQGwun6CZNzZQgg/wSO8z3hebXqVAk2v1I7Y8tUa+GuDVmhnuV1gznpd", regular: { url: "./aellux.ext.present.js", integrity: "sha384-r2N72qKuILNn0313FbTC0+E94MUUUqyeCjGSzmPHQptTcwMUjtCEAC7tmcWqy66L" } }, legacy: { url: "./aellux.ext.present.legacy.min.js", integrity: "sha384-y0AsBs4t9APaNX1JpHyDbF/I+PmCI7dtG1zcSat8D0azFQ0k6+3c2vzaCrWjPqr+", regular: { url: "./aellux.ext.present.legacy.js", integrity: "sha384-tpld652dxeupFeDsBpyxhimpIWtBGgtM/WdKle4YLdBrMfG7Gdj27TjtZAwmSE9L" } } }, dependencies: [], style: { url: "./aellux.ext.present.min.css", integrity: "sha384-2QoNgFTu/KOOrgaTKZV4VXCoIaU2h5PMPILW5LHseXK2ygNpF6miOfxZUwkTBgPY", regular: { url: "./aellux.ext.present.css", integrity: "sha384-uZ/OPZK9sRFcaejKJHrc0wPaPXFKeGS+pBWWbkMEe3+3M6zLEa7nBc/cD0Tejsmr" } } } } };
+      define_AELLUX_OFFICIAL_EXTENSION_MANIFEST_default = { schemaVersion: 1, coreVersion: "0.1.0-beta.10", extensions: { preference: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.preference.min.js", integrity: "sha384-mSOgb0DekFTRXXZAgyNrPjamdlSqzL4SSGZYVWgVg+WlG+pBj11xT81v/6Xk43yO", regular: { url: "./aellux.ext.preference.js", integrity: "sha384-MlikpdHSzHzF6kz5+oJGtq3eoFsKTsx/g+FTrf+dFOU8iQGHsCpn4fP1jLlbNrj7" } }, legacy: { url: "./aellux.ext.preference.legacy.min.js", integrity: "sha384-1LMsK0W9J/PoM4tXhFgkYLRY4yWdzVoYmFy4OMDGd8lRdtptKoEb1sI9L1kzNaBu", regular: { url: "./aellux.ext.preference.legacy.js", integrity: "sha384-pozuz43OyfXrnkmuBu6KTM2lqRSqcI5LMgwAtqnzXq8xZGdVqpnmOtrBcYcMskWk" } } }, dependencies: [] }, "state-navigation": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.state-navigation.min.js", integrity: "sha384-wAbgAqjAA6wauuG+iuUtfRwxChd6fTJ0fS22fqnu2r00kouoXJWZ0f7AoTYlqBC6", regular: { url: "./aellux.ext.state-navigation.js", integrity: "sha384-PKJ8HTD7eIYDEg2hOaAJjpMYzLr2fBjBRGmIGG7XzGTzVK0yTjt5HYPO55VbWfdS" } }, legacy: { url: "./aellux.ext.state-navigation.legacy.min.js", integrity: "sha384-YkhfU15Mpk8KiO6TyoVU6z1yCiYWwnsOGE0xVaQ8NrE7IGrxOSUL005g5JeUDdJu", regular: { url: "./aellux.ext.state-navigation.legacy.js", integrity: "sha384-kaEUY0Zpw8K6pcwjm+INA5feXftLK2/N1aFpPr2LCTcetX2uoe2GGd1MJyy7u8rZ" } } }, dependencies: [] }, feedback: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.feedback.min.js", integrity: "sha384-oHAcvQwCs/v3ktzXoNdJEDEkaV6NI29MjzjF068Lw0oL9NwVP5THnxzb12f0ySkY", regular: { url: "./aellux.ext.feedback.js", integrity: "sha384-dGcxHfGyV544C6livNJKKrlNWky/fBFkMONowmtlhHZ5exWL8AJOoV40jJhZW6Iq" } }, legacy: { url: "./aellux.ext.feedback.legacy.min.js", integrity: "sha384-S31Sa8B4kbKL/xsEJ3QTTikO+AjuXSc9GXBzNw8kl/b2amk5tzqgQNNKQPfGnYdF", regular: { url: "./aellux.ext.feedback.legacy.js", integrity: "sha384-sy2QmY3L1TlvGPgdebeu5q9ZJl/bOeUstWE0Cu+QJUIYWSF9y1YH6mCpe09/eKrd" } } }, dependencies: [], style: { url: "./aellux.ext.feedback.min.css", integrity: "sha384-OBguCYqF+dMD0Pl84C3FlY/+ohUGfW0OyynmXb/PSDEGOyuI/TQJ3EZAoCeJx+Jk", regular: { url: "./aellux.ext.feedback.css", integrity: "sha384-yk4cW+r/Mc1FRS1ZauBHC6KsKb7sxuJ0E9mmt/+AYASAdZXXMK6iuFBR+TOEh/r4" } } }, focus: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.focus.min.js", integrity: "sha384-AXpUv/Ur2Z4cKvO9EqIFqfxxdSQR5j75q0okOAWPvHhSneQ5LPjrOzk6Sl9MOo4a", regular: { url: "./aellux.ext.focus.js", integrity: "sha384-VjQzcnhLRrvRlbVQ0X4/tO0+8gqJXAmIFoeIVimjOud1wRNuBXNnSQHHW9XQPzTe" } }, legacy: { url: "./aellux.ext.focus.legacy.min.js", integrity: "sha384-I5QpUmKsA1T8NiKfKXQgbdG19Ld1ZGCWSmosygO3yGj43tdxp5zCfLyfBuFoHlKu", regular: { url: "./aellux.ext.focus.legacy.js", integrity: "sha384-5/y3J1NC/qMyV9myEj29+wGbqCVI8ICPafSebtJVfl15Qmup6vMiJzveShd3CLnw" } } }, dependencies: [] }, point: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.point.min.js", integrity: "sha384-Xs6j53KcvGe+uxFvAZxA33QVWZUTQdbRLvx/SmPRYwtI1FdRqtg7HX1vvqw3sllx", regular: { url: "./aellux.ext.point.js", integrity: "sha384-SADPZVR4ANG+cju1qXjtio97ylPp5DbnMbBZORgkHUjjPUKWa2dJ3xw4/X7geubu" } }, legacy: { url: "./aellux.ext.point.legacy.min.js", integrity: "sha384-PNoKlNYaZJ1K+RPkFVJ/KWGu2xcY/qD/wS2bZIBrtYOhKPeJz/N0S7ddMQEWtlRb", regular: { url: "./aellux.ext.point.legacy.js", integrity: "sha384-4ZTxlwhOgRY7WLohaQm3vPaCAr0Il1zbLDXx4FxcrqHPbe/jufJftB+nCty6zBdb" } } }, dependencies: [] }, anchor: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.anchor.min.js", integrity: "sha384-vpHUGJwyY3qnW78C6Yo8CLc2vgbn1KJ8FcOtQawBtCKarQ0CoihuNQ7ZCKnMbOjx", regular: { url: "./aellux.ext.anchor.js", integrity: "sha384-LaYGJ6p9H5QBGJf5j19wHgT+CFcMim2h0Ro+itxYnLkIE29RFtPdj8P8L9EYWAWr" } }, legacy: { url: "./aellux.ext.anchor.legacy.min.js", integrity: "sha384-Ym0BnY5sDflVI4JyPVWymZKurBcJTAbPNe2gy+6qHcD7x6RyIKwvff6o+6BfeZDy", regular: { url: "./aellux.ext.anchor.legacy.js", integrity: "sha384-bN9t1anpKLUDUvnbE845H1+9UvP+XDfrsN5AhrKLUQJ5fm3YcFqiylDNFuE02RlJ" } } }, dependencies: [], style: { url: "./aellux.ext.anchor.min.css", integrity: "sha384-DwxfMH5mNSvmF0U4/dgL6dbe+5U1x97y2H4skxW7nUUzjr99IXNl9aVDwRjfvNGz", regular: { url: "./aellux.ext.anchor.css", integrity: "sha384-tHVCjTT3bvlmkAIDfMyevvrkAB7crjBXQAfY1l8XcaWhBFSersWJk+JndC6Bd9mO" } } }, "overflow-marquee": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.overflow-marquee.min.js", integrity: "sha384-Eqmu0pNMC64qS7kK8HI8nG9sjDDZn62b0O8SY2D7qOcC6rF0mj8XmAmrulQmP99L", regular: { url: "./aellux.ext.overflow-marquee.js", integrity: "sha384-n0Pkh5AsBRtTSSShu9YJf/qSevWP0r7+asYOBqyglI5z7gWTWbjE/0rAlqeoZWJ3" } }, legacy: { url: "./aellux.ext.overflow-marquee.legacy.min.js", integrity: "sha384-lOog++PR/TJTbVS+/TVvp6RuT972idDV+nzb0s6yd8hK9cyDh4d9UR1sROfFMp+S", regular: { url: "./aellux.ext.overflow-marquee.legacy.js", integrity: "sha384-DJwiequ7f6edt0D9cflftvA036vZWLH3RK50O0zX+3F+IbHldPHP92dbDjUTvGWf" } } }, dependencies: [], style: { url: "./aellux.ext.overflow-marquee.min.css", integrity: "sha384-PD8sxZJw/8gWr9Rq2l7wwUzADqBY74KSE1nn258niuXi97P+MSKN6tCxvocJPGd/", regular: { url: "./aellux.ext.overflow-marquee.css", integrity: "sha384-HyIVGE6lr+ZML8gekuK733ELP8Bd2gdj/+to+QhBYPN+tytaTEHP07ub3nAkOG3y" } } }, "ajax-href": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.ajax-href.min.js", integrity: "sha384-DD+XtPvKyNGWtcjYNTTcXU5e+PgMl7Ev81DgYMNEF0hNAxML61MGS9g8fy6hWIY5", regular: { url: "./aellux.ext.ajax-href.js", integrity: "sha384-h5H+QebE/oUgoWuMMOJOXZoqkjRenBh/EtpOIeU67b7mYDV2pBTvA3qMUiXFc8OS" } }, legacy: { url: "./aellux.ext.ajax-href.legacy.min.js", integrity: "sha384-Q1j4je0/BTjMBSZo29omTv/vLo4oyuaqYlG3h41XRJ02fnTm2X7qkhN2bAL2XZTe", regular: { url: "./aellux.ext.ajax-href.legacy.js", integrity: "sha384-snUrmBWZVPLbXiIkVpi0iaYYitOG/Uxa6gnMAg/iKJxPrfvP1of6LtpB0MC4XqrC" } } }, dependencies: [] }, scrollbox: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.scrollbox.min.js", integrity: "sha384-xvvqVjp8L4JLOKOPmIBAQu74doqxHEbcdHXO/678AzEIfnwJ7n4sNLErwAFWT/TF", regular: { url: "./aellux.ext.scrollbox.js", integrity: "sha384-8LkpI3GuwNINJsz6yjIJu379A5JSndRVfaiOYq6DASpouBAtnoGXi3grX1taS/LH" } }, legacy: { url: "./aellux.ext.scrollbox.legacy.min.js", integrity: "sha384-NfjjNIioenO0EAxx9GrcD/I9ILUL4nMzjAdyBF7bel05CRtOfTx1n1qS5zN3W7E1", regular: { url: "./aellux.ext.scrollbox.legacy.js", integrity: "sha384-DHH1dF+lyHWcO+fiwkwOP8c01PIPfOEHHp61yPEcDgDHsy8x+ugcClr/E3SbDJN4" } } }, dependencies: [], style: { url: "./aellux.ext.scrollbox.min.css", integrity: "sha384-+7gbnqlykQX9O8Q2E2+TcXQk0zpdZhUvNgwqlsL914/cBKo/zlEnbiltW4GcrsXT", regular: { url: "./aellux.ext.scrollbox.css", integrity: "sha384-/LJ8wnR9DMXq2PAGEXphThjj0l18YAkatUlI4YFCtCRK8hTB6QSrDVqbSRhNskg1" } } }, "scrollbox-snap": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.scrollbox-snap.min.js", integrity: "sha384-NNIBI4kj4sdGSI+XDs2LeBrjdo7AAN4eVtQeyAGScLBvxkZEFx3OaT9xpaW4b4Wq", regular: { url: "./aellux.ext.scrollbox-snap.js", integrity: "sha384-gmMGaW0wvR61QynjfBKga6/+7NMAWzk6ALIYmMC0hy9gkSvCrvKXueA+ETEgM9wB" } }, legacy: { url: "./aellux.ext.scrollbox-snap.legacy.min.js", integrity: "sha384-a35oytvnpf0myg+Brd+mFDgQBcbNaihANZl5J+GmrEqlyDl8CDQy0OZyu5Ld3l64", regular: { url: "./aellux.ext.scrollbox-snap.legacy.js", integrity: "sha384-9hE1HNRl9mFvr5aLiaRNZSQsTBb1XoicM6xGqeuISTS6OqL1sZm6DlmY6qxcQJk+" } } }, dependencies: [] }, adaptive: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.adaptive.min.js", integrity: "sha384-bkeOnTW/3uzbuhLc8fujaWnWGC+pwNAkZwci9M09paKqudp0v/flMrJ49JXw16vv", regular: { url: "./aellux.ext.adaptive.js", integrity: "sha384-Qzf9wU6DSSaaE+8lr96vnYqjKQqYxep8dhCZmjgNdqreuk9fL3qKMn3NW7DGAEaT" } }, legacy: { url: "./aellux.ext.adaptive.legacy.min.js", integrity: "sha384-YVHHWZOvf+65r/CU89nBPZXhj3j5sn4r2ho+CNUCUaYs1WE6pWIeypcq7n5OCBor", regular: { url: "./aellux.ext.adaptive.legacy.js", integrity: "sha384-gBkxqbBpIqdj5ozJm/NsenI/yKOvEGarZBl2SrPjYiiYx6cez2/FGTMf5XyzHrTj" } } }, dependencies: [], style: { url: "./aellux.ext.adaptive.min.css", integrity: "sha384-8yUP1PStfDqBCyCskP3k9WLIKgv/yl1nyDhmPz7hsX5NZ4z3ZT3ajolA+RhYlUiG", regular: { url: "./aellux.ext.adaptive.css", integrity: "sha384-HfIjX9Zk0VFRimzPvUaTS5AtwuHJHjXKoM/xbNJXj5vE7bSdBGEzbrBHfbNmYah0" } } }, present: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.present.min.js", integrity: "sha384-e9Ugejn8LF60AH/CrY7S33a6WkJKok6FLfMPnveyXRFRu0itRKedTU3317VirXIq", regular: { url: "./aellux.ext.present.js", integrity: "sha384-J/mWEj4jLGHfxvvPXMXLBt+09WhXRyGxQ8dNx7FIdXzXDLaeNi7bsBeuWbCg/i9Y" } }, legacy: { url: "./aellux.ext.present.legacy.min.js", integrity: "sha384-vaLbshfAzl9Wjx/bCsgkeY7d8QUD7sAXowycvuBAZWdGB71uD6Jtgbz+6bJpSDhm", regular: { url: "./aellux.ext.present.legacy.js", integrity: "sha384-++NYmpMqNbWqFDSZ32aasH6/X/nSAqixtJeYSYWXTus8kcdaAH2PyYcZNXWbj/L1" } } }, dependencies: [], style: { url: "./aellux.ext.present.min.css", integrity: "sha384-2QoNgFTu/KOOrgaTKZV4VXCoIaU2h5PMPILW5LHseXK2ygNpF6miOfxZUwkTBgPY", regular: { url: "./aellux.ext.present.css", integrity: "sha384-uZ/OPZK9sRFcaejKJHrc0wPaPXFKeGS+pBWWbkMEe3+3M6zLEa7nBc/cD0Tejsmr" } } } } };
     }
   });
 
@@ -1097,6 +1097,8 @@
         const pointableElements = /* @__PURE__ */ new Set();
         const pointableAttribute = AelluxJs2.attr("point");
         const pointableSelector = `[${pointableAttribute}]`;
+        const tapSelector = 'button, a, [role="button"]';
+        const tapDuration = 300;
         const pointerEvents = [
           ["down", onPointerDown],
           ["move", onPointerMove],
@@ -1137,6 +1139,7 @@
           for (const pointer of trackedPointers.values()) {
             if (pointer.target === element) pointer.target = null;
             if (pointer.pressStart === element) pointer.pressStart = null;
+            if (pointer.tap && pointer.tap.element === element) pointer.tap = null;
           }
         }
         function pointers(element) {
@@ -1205,13 +1208,68 @@
         function canHover(event) {
           return event.pointerType === "mouse" || event.pointerType === "pen";
         }
+        function canTap(element) {
+          return element && pointableElements.has(element) && element.isConnected && element.hasAttribute(pointableAttribute) && limitFor(element) > 0 && element.matches(tapSelector) && !element.matches(":disabled, [disabled]") && !element.closest('[aria-disabled="true"], [inert]');
+        }
+        function startTap(pointer, event, wasPressed) {
+          pointer.tap = null;
+          let multitouch = false;
+          if (event.pointerType === "touch") {
+            for (const other of trackedPointers.values()) {
+              if (other !== pointer && other.pressed && other.pointerType === "touch") {
+                other.tap = null;
+                multitouch = true;
+              }
+            }
+          }
+          if (wasPressed || multitouch || !event.isPrimary || event.button !== 0) return;
+          const origin = event.composedPath ? event.composedPath()[0] : event.target;
+          const element = targetFor(origin, pointer);
+          if (!canTap(element)) return;
+          const scrollOffsets = [];
+          let ancestor = element;
+          while (ancestor) {
+            scrollOffsets.push({ element: ancestor, x: ancestor.scrollLeft, y: ancestor.scrollTop });
+            ancestor = ancestor.parentElement || ancestor.getRootNode && ancestor.getRootNode().host;
+          }
+          pointer.tap = {
+            element,
+            distance: 0,
+            limit: event.pointerType === "mouse" ? 4 : 10,
+            bounds: element.getBoundingClientRect(),
+            scrollOffsets
+          };
+        }
+        function finishTap(pointer, event) {
+          const tap = pointer.tap;
+          pointer.tap = null;
+          if (!tap || !event.isPrimary || event.button !== 0 || event.pointerType !== pointer.pointerType || pointer.deltaTime > tapDuration || !canTap(tap.element)) return null;
+          const path = event.composedPath ? event.composedPath() : [];
+          const target = path[0] || event.target;
+          const captured = target && target.hasPointerCapture && target.hasPointerCapture(event.pointerId);
+          if (captured || !path.includes(tap.element) && !tap.element.contains(target)) {
+            const bounds = tap.bounds;
+            if (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom) return null;
+            if (!captured && !tap.scrollOffsets.some((offset) => offset.element.scrollLeft !== offset.x || offset.element.scrollTop !== offset.y)) return null;
+          }
+          return { element: tap.element, detail: {
+            pointerType: pointer.pointerType,
+            pointerId: pointer.pointerId,
+            duration: pointer.deltaTime,
+            distance: tap.distance,
+            originalEvent: event
+          } };
+        }
         function addPointer(event, pressed, hover) {
           const pointer = new AePointer(event, pressed, hover);
           trackedPointers.set(event.pointerId, pointer);
           return pointer;
         }
         function onPointerDown(event) {
-          const pointer = trackedPointers.get(event.pointerId) || addPointer(event, true, canHover(event));
+          let pointer = trackedPointers.get(event.pointerId);
+          const wasPressed = pointer && pointer.pressed;
+          pointer = pointer || addPointer(event, true, canHover(event));
+          pointer.tap = null;
           pointer.initial.x = event.clientX;
           pointer.initial.y = event.clientY;
           pointer.pointerType = event.pointerType;
@@ -1221,6 +1279,7 @@
           pointer.update(event);
           pointer.target = targetFor(event.target, pointer);
           pointer.pressStart = pointer.target;
+          startTap(pointer, event, wasPressed);
           dispatchToTarget("PointerDown", pointer, event);
         }
         function onPointerMove(event) {
@@ -1240,12 +1299,19 @@
           pointer.pressed = false;
           pointer.endPress();
           pointer.target = targetFor(event.target, pointer);
+          const tap = finishTap(pointer, event);
           dispatchRelease("PointerUp", pointer, event);
+          if (tap && canTap(tap.element)) AelluxJs2.dispatchFrom(tap.element, "tap", {
+            bubbles: true,
+            composed: true,
+            detail: tap.detail
+          });
           if (!pointer.hover) trackedPointers.delete(event.pointerId);
         }
         function onPointerCancel(event) {
           const pointer = trackedPointers.get(event.pointerId);
           if (pointer) {
+            pointer.tap = null;
             pointer.update(event);
             pointer.pressed = false;
             pointer.endPress();
@@ -1290,6 +1356,7 @@
             this.hover = hover;
             this.target = null;
             this.pressStart = null;
+            this.tap = null;
           }
           get deltaTime() {
             var _a;
@@ -1310,6 +1377,19 @@
             this.delta.x = this.current.x - this.initial.x;
             this.delta.y = this.current.y - this.initial.y;
             this.buttons = event.buttons;
+            if (this.tap) {
+              let distance = Math.hypot(this.delta.x, this.delta.y);
+              if (event.getCoalescedEvents) {
+                for (const sample of event.getCoalescedEvents()) {
+                  distance = Math.max(
+                    distance,
+                    Math.hypot(sample.clientX - this.initial.x, sample.clientY - this.initial.y)
+                  );
+                }
+              }
+              this.tap.distance = Math.max(this.tap.distance, distance);
+              if (distance > this.tap.limit) this.tap = null;
+            }
           }
           beforeDispatch() {
             this.movement.x = this.current.x - this.lastDispatched.x;
@@ -2520,6 +2600,7 @@
         });
         const POP = "Pop", UNPOP = "Unpop", BEFORE = "Before", PING = "ping", MILLISECOND = "ms", SECOND = "s", DEFAULT_PRESENT = "opacity transform height width", OPACITY_SYNTAX = "<number> | <percentage>", TRANSFORM_SYNTAX = "<transform-list> | none";
         const TRANSITION_PREPARE_TIME = 100;
+        const TAP_CLICK_WAIT_TIME = 32;
         const presentElements = /* @__PURE__ */ new Map();
         const openPresentElements = /* @__PURE__ */ new Set();
         let fallbackMotionId = 5e6;
@@ -2534,6 +2615,7 @@
         const groups = /* @__PURE__ */ new Map();
         const hoverTimers = /* @__PURE__ */ new Map();
         const hoveredTriggers = /* @__PURE__ */ new Set();
+        const pendingTaps = /* @__PURE__ */ new Set();
         let groupObserver = null;
         let groupsQueued = false;
         let interpolatedProgress = false;
@@ -2594,11 +2676,14 @@
           document.addEventListener("pointerover", onHover);
           document.addEventListener("pointerout", onHover);
           AelluxJs2.on("$click", OnClick);
+          AelluxJs2.on("tap", onTap);
           AelluxJs2.onEvent(root2, "$resize", refreshExpandedStates);
         }
         function destroy() {
           AelluxJs2.mountManager.remove({ extensionName });
           AelluxJs2.off("$click", OnClick);
+          AelluxJs2.off("tap", onTap);
+          for (const pending of pendingTaps) cancelPendingTap(pending);
           AelluxJs2.offEvent(root2, "$resize", refreshExpandedStates);
           document.removeEventListener("pointerover", onHover);
           document.removeEventListener("pointerout", onHover);
@@ -2730,6 +2815,7 @@
         function unmountPresentContainer(element) {
           var _a, _b, _c;
           if (!presentElements.has(element)) return;
+          cancelElementTaps(element);
           const controller = presentElements.get(element);
           cancelHoverClose(element);
           for (const button of controller.triggers) hoveredTriggers.delete(button);
@@ -2754,6 +2840,7 @@
         function unmountTriggerElement(triggerElement) {
           var _a, _b;
           if (!triggerElementsSet.has(triggerElement)) return;
+          cancelElementTaps(triggerElement);
           hoveredTriggers.delete(triggerElement);
           const target = triggerTargets.get(triggerElement);
           if (target) {
@@ -3157,11 +3244,62 @@
           if (value !== indexedTriggerValues.get(button)) refreshTriggerTargets(button);
         }
         function OnClick(event) {
-          if (!event.target) return;
-          const container = event.target.closest(presentSelector);
-          const exceptions = [event.target];
+          var _a, _b;
+          const target = activationTarget(event);
+          if (!target) return;
+          let matched;
+          for (const pending of pendingTaps) {
+            const pointerId = event.pointerId;
+            const compatibilityClick = event.pointerType === "mouse" && ["touch", "pen"].includes((_a = pending.event.detail) == null ? void 0 : _a.pointerType);
+            if (!compatibilityClick && typeof pointerId === "number" && typeof ((_b = pending.event.detail) == null ? void 0 : _b.pointerId) === "number" && pointerId !== pending.event.detail.pointerId) continue;
+            if (pending.target === target || pending.target.contains(target) || target.contains(pending.target))
+              matched = pending;
+          }
+          if (matched) cancelPendingTap(matched);
+          activate(event, target);
+        }
+        function activationTarget(event) {
+          const path = event.composedPath ? event.composedPath() : [];
+          const target = path[0] || event.target;
+          return (target == null ? void 0 : target.closest) ? target : null;
+        }
+        function onTap(event) {
+          var _a;
+          const target = activationTarget(event);
+          if (!target) return;
+          const control = target.closest(`[${attr.trigger}],[${attr.dismiss}]`);
+          if (control) refreshChangedTrigger(control);
+          const pending = {
+            event,
+            target,
+            hoverSuppressed: control && suppressHoverClick(control, event),
+            present: triggerTargets.get(control),
+            point: (_a = AelluxJs2.mountManager.controller(target)) == null ? void 0 : _a.point,
+            timer: null
+          };
+          pendingTaps.add(pending);
+          pending.timer = setTimeout(() => {
+            var _a2;
+            pendingTaps.delete(pending);
+            if (!target.isConnected || pending.point && ((_a2 = AelluxJs2.mountManager.controller(target)) == null ? void 0 : _a2.point) !== pending.point) return;
+            activate(event, target, pending.hoverSuppressed);
+          }, TAP_CLICK_WAIT_TIME);
+        }
+        function cancelPendingTap(pending) {
+          clearTimeout(pending.timer);
+          pendingTaps.delete(pending);
+        }
+        function cancelElementTaps(element) {
+          for (const pending of pendingTaps) {
+            if (element.contains(pending.target) || pending.present === element)
+              cancelPendingTap(pending);
+          }
+        }
+        function activate(event, eventTarget, hoverSuppressed) {
+          const container = eventTarget.closest(presentSelector);
+          const exceptions = [eventTarget];
           var button;
-          button = event.target.closest(`[${attr.trigger}]`);
+          button = eventTarget.closest(`[${attr.trigger}]`);
           if (button) {
             refreshChangedTrigger(button);
             const triggerAttr = button.getAttribute(attr.trigger);
@@ -3171,11 +3309,11 @@
               diagnoseTarget(button, target, attr.target, targetSelector);
               if (target) {
                 exceptions.push(target);
-                if (!suppressHoverClick(button, event)) trigger(target, triggerAttr);
+                if (!(hoverSuppressed != null ? hoverSuppressed : suppressHoverClick(button, event))) trigger(target, triggerAttr);
               }
             } else if (container) {
               exceptions.push(container);
-              if (!suppressHoverClick(button, event)) trigger(container, triggerAttr);
+              if (!(hoverSuppressed != null ? hoverSuppressed : suppressHoverClick(button, event))) trigger(container, triggerAttr);
             } else {
               AelluxJs2.diagnostics.error(
                 AelluxJs2.diagnostics.ERROR_PRESENT_CONTROL_TARGET_MISSING,
@@ -3183,7 +3321,7 @@
               );
             }
           }
-          button = event.target.closest(`[${attr.dismiss}]`);
+          button = eventTarget.closest(`[${attr.dismiss}]`);
           if (button) {
             refreshChangedTrigger(button);
             const dismiss = button.getAttribute(attr.dismiss);
@@ -3446,7 +3584,10 @@
           return false;
         }
         function suppressHoverClick(button, event) {
-          return button.getAttribute(attr.triggerOn) === "hover" && event.detail > 0 && event.pointerType !== "touch" && hoveredTriggers.has(button);
+          var _a;
+          const pointerType = event.pointerType || ((_a = event.detail) == null ? void 0 : _a.pointerType);
+          const pointerActivation = typeof event.detail === "number" ? event.detail > 0 : !!pointerType;
+          return button.getAttribute(attr.triggerOn) === "hover" && pointerActivation && pointerType !== "touch" && hoveredTriggers.has(button);
         }
         function onHover(event) {
           var _a;

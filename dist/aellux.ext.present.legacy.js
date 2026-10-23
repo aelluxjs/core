@@ -231,6 +231,7 @@
     });
     var POP = "Pop", UNPOP = "Unpop", BEFORE = "Before", PING = "ping", MILLISECOND = "ms", SECOND = "s", DEFAULT_PRESENT = "opacity transform height width", OPACITY_SYNTAX = "<number> | <percentage>", TRANSFORM_SYNTAX = "<transform-list> | none";
     var TRANSITION_PREPARE_TIME = 100;
+    var TAP_CLICK_WAIT_TIME = 32;
     var presentElements = /* @__PURE__ */ new Map();
     var openPresentElements = /* @__PURE__ */ new Set();
     var fallbackMotionId = 5e6;
@@ -245,6 +246,7 @@
     var groups = /* @__PURE__ */ new Map();
     var hoverTimers = /* @__PURE__ */ new Map();
     var hoveredTriggers = /* @__PURE__ */ new Set();
+    var pendingTaps = /* @__PURE__ */ new Set();
     var groupObserver = null;
     var groupsQueued = false;
     var interpolatedProgress = false;
@@ -287,6 +289,7 @@
       document.addEventListener("pointerover", onHover);
       document.addEventListener("pointerout", onHover);
       AelluxJs.on("$click", OnClick);
+      AelluxJs.on("tap", onTap);
       AelluxJs.onEvent(root, "$resize", refreshExpandedStates);
     }
     function destroy() {
@@ -294,53 +297,65 @@
         extensionName: extensionName
       });
       AelluxJs.off("$click", OnClick);
-      AelluxJs.offEvent(root, "$resize", refreshExpandedStates);
-      document.removeEventListener("pointerover", onHover);
-      document.removeEventListener("pointerout", onHover);
-      var _iterator = _createForOfIteratorHelper(groups.keys()), _step;
+      AelluxJs.off("tap", onTap);
+      var _iterator = _createForOfIteratorHelper(pendingTaps), _step;
       try {
         for (_iterator.s(); !(_step = _iterator.n()).done; ) {
-          var group = _step.value;
-          unmountGroup(group);
+          var pending = _step.value;
+          cancelPendingTap(pending);
         }
       } catch (err) {
         _iterator.e(err);
       } finally {
         _iterator.f();
       }
-      var _iterator2 = _createForOfIteratorHelper(hoverTimers.keys()), _step2;
+      AelluxJs.offEvent(root, "$resize", refreshExpandedStates);
+      document.removeEventListener("pointerover", onHover);
+      document.removeEventListener("pointerout", onHover);
+      var _iterator2 = _createForOfIteratorHelper(groups.keys()), _step2;
       try {
         for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
-          var target = _step2.value;
-          cancelHoverClose(target);
+          var group = _step2.value;
+          unmountGroup(group);
         }
       } catch (err) {
         _iterator2.e(err);
       } finally {
         _iterator2.f();
       }
-      hoveredTriggers.clear();
-      var _iterator3 = _createForOfIteratorHelper(triggerElementsSet), _step3;
+      var _iterator3 = _createForOfIteratorHelper(hoverTimers.keys()), _step3;
       try {
         for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
-          var triggerElement = _step3.value;
-          unmountTriggerElement(triggerElement);
+          var target = _step3.value;
+          cancelHoverClose(target);
         }
       } catch (err) {
         _iterator3.e(err);
       } finally {
         _iterator3.f();
       }
-      var _iterator4 = _createForOfIteratorHelper(presentElements.keys()), _step4;
+      hoveredTriggers.clear();
+      var _iterator4 = _createForOfIteratorHelper(triggerElementsSet), _step4;
       try {
         for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
-          var element = _step4.value;
-          unmountPresentContainer(element);
+          var triggerElement = _step4.value;
+          unmountTriggerElement(triggerElement);
         }
       } catch (err) {
         _iterator4.e(err);
       } finally {
         _iterator4.f();
+      }
+      var _iterator5 = _createForOfIteratorHelper(presentElements.keys()), _step5;
+      try {
+        for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
+          var element = _step5.value;
+          unmountPresentContainer(element);
+        }
+      } catch (err) {
+        _iterator5.e(err);
+      } finally {
+        _iterator5.f();
       }
       openPresentElements.clear();
     }
@@ -426,32 +441,32 @@
         openPresentElements.add(element);
       }
       presentElements.set(element, presentController);
-      var _iterator5 = _createForOfIteratorHelper(element.querySelectorAll("[".concat(attr.trigger, "],[").concat(attr.dismiss, "],[").concat(attr.target, "]"))), _step5;
+      var _iterator6 = _createForOfIteratorHelper(element.querySelectorAll("[".concat(attr.trigger, "],[").concat(attr.dismiss, "],[").concat(attr.target, "]"))), _step6;
       try {
-        for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
-          var _triggerElement = _step5.value;
+        for (_iterator6.s(); !(_step6 = _iterator6.n()).done; ) {
+          var _triggerElement = _step6.value;
           if (triggerTargets.get(_triggerElement) === element) {
             presentController.triggers.add(_triggerElement);
             updateTriggerAriaExpanded(_triggerElement);
           }
         }
       } catch (err) {
-        _iterator5.e(err);
+        _iterator6.e(err);
       } finally {
-        _iterator5.f();
+        _iterator6.f();
       }
       var idTriggers = triggersByTargetId.get(element.id);
       if (idTriggers) {
-        var _iterator6 = _createForOfIteratorHelper(idTriggers), _step6;
+        var _iterator7 = _createForOfIteratorHelper(idTriggers), _step7;
         try {
-          for (_iterator6.s(); !(_step6 = _iterator6.n()).done; ) {
-            var triggerElement = _step6.value;
+          for (_iterator7.s(); !(_step7 = _iterator7.n()).done; ) {
+            var triggerElement = _step7.value;
             refreshTriggerTargets(triggerElement);
           }
         } catch (err) {
-          _iterator6.e(err);
+          _iterator7.e(err);
         } finally {
-          _iterator6.f();
+          _iterator7.f();
         }
       }
       setProgress(element, !element.hidden);
@@ -462,18 +477,19 @@
     function unmountPresentContainer(element) {
       var _AelluxJs$waitLayout, _containerAriaHandler, _elementMemories$get;
       if (!presentElements.has(element)) return;
+      cancelElementTaps(element);
       var controller = presentElements.get(element);
       cancelHoverClose(element);
-      var _iterator7 = _createForOfIteratorHelper(controller.triggers), _step7;
+      var _iterator8 = _createForOfIteratorHelper(controller.triggers), _step8;
       try {
-        for (_iterator7.s(); !(_step7 = _iterator7.n()).done; ) {
-          var button = _step7.value;
+        for (_iterator8.s(); !(_step8 = _iterator8.n()).done; ) {
+          var button = _step8.value;
           hoveredTriggers.delete(button);
         }
       } catch (err) {
-        _iterator7.e(err);
+        _iterator8.e(err);
       } finally {
-        _iterator7.f();
+        _iterator8.f();
       }
       controller.stop();
       (_AelluxJs$waitLayout = AelluxJs.waitLayout) === null || _AelluxJs$waitLayout === void 0 || _AelluxJs$waitLayout.cancel(controller.motionId);
@@ -496,6 +512,7 @@
     function unmountTriggerElement(triggerElement) {
       var _triggerAriaHandlers$;
       if (!triggerElementsSet.has(triggerElement)) return;
+      cancelElementTaps(triggerElement);
       hoveredTriggers.delete(triggerElement);
       var target = triggerTargets.get(triggerElement);
       if (target) {
@@ -987,10 +1004,10 @@
       unpop(element);
     }
     function outsideClickAutoUnpop(currentExceptions) {
-      var _iterator8 = _createForOfIteratorHelper(openPresentElements), _step8;
+      var _iterator9 = _createForOfIteratorHelper(openPresentElements), _step9;
       try {
         var _loop = function _loop2() {
-          var pContainer = _step8.value;
+          var pContainer = _step9.value;
           if (pContainer.hidden === true || pContainer.getAttribute(attr.unpopOnOutside) === "false" || currentExceptions.some(function(e) {
             return pContainer.contains(e);
           })) {
@@ -998,13 +1015,13 @@
           }
           unpop(pContainer);
         };
-        for (_iterator8.s(); !(_step8 = _iterator8.n()).done; ) {
+        for (_iterator9.s(); !(_step9 = _iterator9.n()).done; ) {
           if (_loop()) continue;
         }
       } catch (err) {
-        _iterator8.e(err);
+        _iterator9.e(err);
       } finally {
-        _iterator8.f();
+        _iterator9.f();
       }
     }
     function refreshChangedTrigger(button) {
@@ -1013,11 +1030,76 @@
       if (value !== indexedTriggerValues.get(button)) refreshTriggerTargets(button);
     }
     function OnClick(event) {
-      if (!event.target) return;
-      var container = event.target.closest(presentSelector);
-      var exceptions = [event.target];
+      var target = activationTarget(event);
+      if (!target) return;
+      var matched;
+      var _iterator0 = _createForOfIteratorHelper(pendingTaps), _step0;
+      try {
+        for (_iterator0.s(); !(_step0 = _iterator0.n()).done; ) {
+          var _pending$event$detail, _pending$event$detail2;
+          var pending = _step0.value;
+          var pointerId = event.pointerId;
+          var compatibilityClick = event.pointerType === "mouse" && ["touch", "pen"].includes((_pending$event$detail = pending.event.detail) === null || _pending$event$detail === void 0 ? void 0 : _pending$event$detail.pointerType);
+          if (!compatibilityClick && typeof pointerId === "number" && typeof ((_pending$event$detail2 = pending.event.detail) === null || _pending$event$detail2 === void 0 ? void 0 : _pending$event$detail2.pointerId) === "number" && pointerId !== pending.event.detail.pointerId) continue;
+          if (pending.target === target || pending.target.contains(target) || target.contains(pending.target)) matched = pending;
+        }
+      } catch (err) {
+        _iterator0.e(err);
+      } finally {
+        _iterator0.f();
+      }
+      if (matched) cancelPendingTap(matched);
+      activate(event, target);
+    }
+    function activationTarget(event) {
+      var path = event.composedPath ? event.composedPath() : [];
+      var target = path[0] || event.target;
+      return target !== null && target !== void 0 && target.closest ? target : null;
+    }
+    function onTap(event) {
+      var _AelluxJs$mountManage;
+      var target = activationTarget(event);
+      if (!target) return;
+      var control = target.closest("[".concat(attr.trigger, "],[").concat(attr.dismiss, "]"));
+      if (control) refreshChangedTrigger(control);
+      var pending = {
+        event: event,
+        target: target,
+        hoverSuppressed: control && suppressHoverClick(control, event),
+        present: triggerTargets.get(control),
+        point: (_AelluxJs$mountManage = AelluxJs.mountManager.controller(target)) === null || _AelluxJs$mountManage === void 0 ? void 0 : _AelluxJs$mountManage.point,
+        timer: null
+      };
+      pendingTaps.add(pending);
+      pending.timer = setTimeout(function() {
+        var _AelluxJs$mountManage2;
+        pendingTaps.delete(pending);
+        if (!target.isConnected || pending.point && ((_AelluxJs$mountManage2 = AelluxJs.mountManager.controller(target)) === null || _AelluxJs$mountManage2 === void 0 ? void 0 : _AelluxJs$mountManage2.point) !== pending.point) return;
+        activate(event, target, pending.hoverSuppressed);
+      }, TAP_CLICK_WAIT_TIME);
+    }
+    function cancelPendingTap(pending) {
+      clearTimeout(pending.timer);
+      pendingTaps.delete(pending);
+    }
+    function cancelElementTaps(element) {
+      var _iterator1 = _createForOfIteratorHelper(pendingTaps), _step1;
+      try {
+        for (_iterator1.s(); !(_step1 = _iterator1.n()).done; ) {
+          var pending = _step1.value;
+          if (element.contains(pending.target) || pending.present === element) cancelPendingTap(pending);
+        }
+      } catch (err) {
+        _iterator1.e(err);
+      } finally {
+        _iterator1.f();
+      }
+    }
+    function activate(event, eventTarget, hoverSuppressed) {
+      var container = eventTarget.closest(presentSelector);
+      var exceptions = [eventTarget];
       var button;
-      button = event.target.closest("[".concat(attr.trigger, "]"));
+      button = eventTarget.closest("[".concat(attr.trigger, "]"));
       if (button) {
         refreshChangedTrigger(button);
         var triggerAttr = button.getAttribute(attr.trigger);
@@ -1027,11 +1109,11 @@
           diagnoseTarget(button, target, attr.target, targetSelector);
           if (target) {
             exceptions.push(target);
-            if (!suppressHoverClick(button, event)) trigger(target, triggerAttr);
+            if (!(hoverSuppressed !== null && hoverSuppressed !== void 0 ? hoverSuppressed : suppressHoverClick(button, event))) trigger(target, triggerAttr);
           }
         } else if (container) {
           exceptions.push(container);
-          if (!suppressHoverClick(button, event)) trigger(container, triggerAttr);
+          if (!(hoverSuppressed !== null && hoverSuppressed !== void 0 ? hoverSuppressed : suppressHoverClick(button, event))) trigger(container, triggerAttr);
         } else {
           AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_PRESENT_CONTROL_TARGET_MISSING, {
             extension: extensionName,
@@ -1040,7 +1122,7 @@
           });
         }
       }
-      button = event.target.closest("[".concat(attr.dismiss, "]"));
+      button = eventTarget.closest("[".concat(attr.dismiss, "]"));
       if (button) {
         refreshChangedTrigger(button);
         var dismiss = button.getAttribute(attr.dismiss);
@@ -1088,16 +1170,16 @@
       if (controller.expanded !== visible) controller.setAriaExpanded(String(visible));
     }
     function refreshExpandedStates() {
-      var _iterator9 = _createForOfIteratorHelper(presentElements), _step9;
+      var _iterator10 = _createForOfIteratorHelper(presentElements), _step10;
       try {
-        for (_iterator9.s(); !(_step9 = _iterator9.n()).done; ) {
-          var _step9$value = _slicedToArray(_step9.value, 2), element = _step9$value[0], controller = _step9$value[1];
+        for (_iterator10.s(); !(_step10 = _iterator10.n()).done; ) {
+          var _step10$value = _slicedToArray(_step10.value, 2), element = _step10$value[0], controller = _step10$value[1];
           if (!controller.transition) syncAriaExpanded(element, controller);
         }
       } catch (err) {
-        _iterator9.e(err);
+        _iterator10.e(err);
       } finally {
-        _iterator9.f();
+        _iterator10.f();
       }
     }
     function setProgress(element, visible) {
@@ -1149,10 +1231,10 @@
       groups.delete(group);
       state.jobs.clear();
       publishGroup(group, state, null);
-      var _iterator0 = _createForOfIteratorHelper(groupMembers(group)), _step0;
+      var _iterator11 = _createForOfIteratorHelper(groupMembers(group)), _step11;
       try {
-        for (_iterator0.s(); !(_step0 = _iterator0.n()).done; ) {
-          var member = _step0.value;
+        for (_iterator11.s(); !(_step11 = _iterator11.n()).done; ) {
+          var member = _step11.value;
           var controller = presentElements.get(member);
           if (controller.transition) {
             var visible = controller.direction === POP;
@@ -1166,9 +1248,9 @@
           }
         }
       } catch (err) {
-        _iterator0.e(err);
+        _iterator11.e(err);
       } finally {
-        _iterator0.f();
+        _iterator11.f();
       }
       state.memory.restore();
       if (!groups.size && groupObserver) {
@@ -1286,10 +1368,10 @@
           return presentElements.has(member2) && member2.isConnected && member2.closest(groupSelector) === group && member2.id === ids[index] && member2.getAttribute(attr.when) === conditions[index];
         });
       };
-      var _iterator1 = _createForOfIteratorHelper(changes), _step1;
+      var _iterator12 = _createForOfIteratorHelper(changes), _step12;
       try {
-        for (_iterator1.s(); !(_step1 = _iterator1.n()).done; ) {
-          var member = _step1.value;
+        for (_iterator12.s(); !(_step12 = _iterator12.n()).done; ) {
+          var member = _step12.value;
           var allowed = AelluxJs.dispatchFrom(member, member === selected2 ? "BeforePop" : "BeforeUnpop", {
             bubbles: true,
             cancelable: true
@@ -1308,9 +1390,9 @@
           }
         }
       } catch (err) {
-        _iterator1.e(err);
+        _iterator12.e(err);
       } finally {
-        _iterator1.f();
+        _iterator12.f();
       }
       state.selected = selected2;
       var complete;
@@ -1318,10 +1400,10 @@
         complete = resolve;
       });
       state.pending = pending;
-      var _iterator10 = _createForOfIteratorHelper(changes), _step10;
+      var _iterator13 = _createForOfIteratorHelper(changes), _step13;
       try {
         var _loop2 = function _loop22() {
-          var member2 = _step10.value;
+          var member2 = _step13.value;
           var job = presentTransition(member2, member2 === selected2, false, true);
           if (groups.get(group) !== state || state.revision !== revision) {
             complete(false);
@@ -1334,14 +1416,14 @@
             if (state.jobs.get(member2) === job) state.jobs.delete(member2);
           });
         }, _ret;
-        for (_iterator10.s(); !(_step10 = _iterator10.n()).done; ) {
+        for (_iterator13.s(); !(_step13 = _iterator13.n()).done; ) {
           _ret = _loop2();
           if (_ret) return _ret.v;
         }
       } catch (err) {
-        _iterator10.e(err);
+        _iterator13.e(err);
       } finally {
-        _iterator10.f();
+        _iterator13.f();
       }
       publishGroup(group, state, selected2);
       Promise.all(members.map(function(member2) {
@@ -1361,21 +1443,24 @@
     function inHoverRegion(target, node) {
       if (!node || !node.nodeType) return false;
       if (target.contains(node)) return true;
-      var _iterator11 = _createForOfIteratorHelper(triggerElementsSet), _step11;
+      var _iterator14 = _createForOfIteratorHelper(triggerElementsSet), _step14;
       try {
-        for (_iterator11.s(); !(_step11 = _iterator11.n()).done; ) {
-          var button = _step11.value;
+        for (_iterator14.s(); !(_step14 = _iterator14.n()).done; ) {
+          var button = _step14.value;
           if (button.getAttribute(attr.triggerOn) === "hover" && triggerTargets.get(button) === target && button.contains(node)) return true;
         }
       } catch (err) {
-        _iterator11.e(err);
+        _iterator14.e(err);
       } finally {
-        _iterator11.f();
+        _iterator14.f();
       }
       return false;
     }
     function suppressHoverClick(button, event) {
-      return button.getAttribute(attr.triggerOn) === "hover" && event.detail > 0 && event.pointerType !== "touch" && hoveredTriggers.has(button);
+      var _event$detail;
+      var pointerType = event.pointerType || ((_event$detail = event.detail) === null || _event$detail === void 0 ? void 0 : _event$detail.pointerType);
+      var pointerActivation = typeof event.detail === "number" ? event.detail > 0 : !!pointerType;
+      return button.getAttribute(attr.triggerOn) === "hover" && pointerActivation && pointerType !== "touch" && hoveredTriggers.has(button);
     }
     function onHover(event) {
       var _event$target;
@@ -1395,10 +1480,10 @@
           } else hoveredTriggers.delete(button);
         }
       }
-      var _iterator12 = _createForOfIteratorHelper(openPresentElements), _step12;
+      var _iterator15 = _createForOfIteratorHelper(openPresentElements), _step15;
       try {
         var _loop3 = function _loop32() {
-          var target2 = _step12.value;
+          var target2 = _step15.value;
           if (!inHoverRegion(target2, event.target)) return 1;
           if (entering || inHoverRegion(target2, event.relatedTarget)) cancelHoverClose(target2);
           else if (_toConsumableArray(triggerElementsSet).some(function(control) {
@@ -1411,13 +1496,13 @@
             }, 120));
           }
         };
-        for (_iterator12.s(); !(_step12 = _iterator12.n()).done; ) {
+        for (_iterator15.s(); !(_step15 = _iterator15.n()).done; ) {
           if (_loop3()) continue;
         }
       } catch (err) {
-        _iterator12.e(err);
+        _iterator15.e(err);
       } finally {
-        _iterator12.f();
+        _iterator15.f();
       }
     }
     function getString2Time(string) {

@@ -37,7 +37,7 @@
   var define_AELLUX_OFFICIAL_EXTENSION_MANIFEST_default;
   var init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST = __esm({
     "<define:__AELLUX_OFFICIAL_EXTENSION_MANIFEST__>": function() {
-      define_AELLUX_OFFICIAL_EXTENSION_MANIFEST_default = { schemaVersion: 1, coreVersion: "0.1.0-beta.10", extensions: { preference: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.preference.min.js", integrity: "sha384-mSOgb0DekFTRXXZAgyNrPjamdlSqzL4SSGZYVWgVg+WlG+pBj11xT81v/6Xk43yO", regular: { url: "./aellux.ext.preference.js", integrity: "sha384-MlikpdHSzHzF6kz5+oJGtq3eoFsKTsx/g+FTrf+dFOU8iQGHsCpn4fP1jLlbNrj7" } }, legacy: { url: "./aellux.ext.preference.legacy.min.js", integrity: "sha384-1LMsK0W9J/PoM4tXhFgkYLRY4yWdzVoYmFy4OMDGd8lRdtptKoEb1sI9L1kzNaBu", regular: { url: "./aellux.ext.preference.legacy.js", integrity: "sha384-pozuz43OyfXrnkmuBu6KTM2lqRSqcI5LMgwAtqnzXq8xZGdVqpnmOtrBcYcMskWk" } } }, dependencies: [] }, "state-navigation": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.state-navigation.min.js", integrity: "sha384-wAbgAqjAA6wauuG+iuUtfRwxChd6fTJ0fS22fqnu2r00kouoXJWZ0f7AoTYlqBC6", regular: { url: "./aellux.ext.state-navigation.js", integrity: "sha384-PKJ8HTD7eIYDEg2hOaAJjpMYzLr2fBjBRGmIGG7XzGTzVK0yTjt5HYPO55VbWfdS" } }, legacy: { url: "./aellux.ext.state-navigation.legacy.min.js", integrity: "sha384-YkhfU15Mpk8KiO6TyoVU6z1yCiYWwnsOGE0xVaQ8NrE7IGrxOSUL005g5JeUDdJu", regular: { url: "./aellux.ext.state-navigation.legacy.js", integrity: "sha384-kaEUY0Zpw8K6pcwjm+INA5feXftLK2/N1aFpPr2LCTcetX2uoe2GGd1MJyy7u8rZ" } } }, dependencies: [] }, feedback: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.feedback.min.js", integrity: "sha384-oHAcvQwCs/v3ktzXoNdJEDEkaV6NI29MjzjF068Lw0oL9NwVP5THnxzb12f0ySkY", regular: { url: "./aellux.ext.feedback.js", integrity: "sha384-dGcxHfGyV544C6livNJKKrlNWky/fBFkMONowmtlhHZ5exWL8AJOoV40jJhZW6Iq" } }, legacy: { url: "./aellux.ext.feedback.legacy.min.js", integrity: "sha384-S31Sa8B4kbKL/xsEJ3QTTikO+AjuXSc9GXBzNw8kl/b2amk5tzqgQNNKQPfGnYdF", regular: { url: "./aellux.ext.feedback.legacy.js", integrity: "sha384-sy2QmY3L1TlvGPgdebeu5q9ZJl/bOeUstWE0Cu+QJUIYWSF9y1YH6mCpe09/eKrd" } } }, dependencies: [], style: { url: "./aellux.ext.feedback.min.css", integrity: "sha384-OBguCYqF+dMD0Pl84C3FlY/+ohUGfW0OyynmXb/PSDEGOyuI/TQJ3EZAoCeJx+Jk", regular: { url: "./aellux.ext.feedback.css", integrity: "sha384-yk4cW+r/Mc1FRS1ZauBHC6KsKb7sxuJ0E9mmt/+AYASAdZXXMK6iuFBR+TOEh/r4" } } }, focus: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.focus.min.js", integrity: "sha384-AXpUv/Ur2Z4cKvO9EqIFqfxxdSQR5j75q0okOAWPvHhSneQ5LPjrOzk6Sl9MOo4a", regular: { url: "./aellux.ext.focus.js", integrity: "sha384-VjQzcnhLRrvRlbVQ0X4/tO0+8gqJXAmIFoeIVimjOud1wRNuBXNnSQHHW9XQPzTe" } }, legacy: { url: "./aellux.ext.focus.legacy.min.js", integrity: "sha384-I5QpUmKsA1T8NiKfKXQgbdG19Ld1ZGCWSmosygO3yGj43tdxp5zCfLyfBuFoHlKu", regular: { url: "./aellux.ext.focus.legacy.js", integrity: "sha384-5/y3J1NC/qMyV9myEj29+wGbqCVI8ICPafSebtJVfl15Qmup6vMiJzveShd3CLnw" } } }, dependencies: [] }, point: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.point.min.js", integrity: "sha384-n540II5oWbHJRt/a8i+Rgb9A3b9dm7hamg1kd3Nz7KdPQDcaa8S823t9fCrgxBWF", regular: { url: "./aellux.ext.point.js", integrity: "sha384-aDj7I5QEH/0+52E3e6yPZ/D0MEsNBdxeET3G5ToVvgczHtksMh3p8S/KOoAapRRN" } }, legacy: { url: "./aellux.ext.point.legacy.min.js", integrity: "sha384-5UmWvQHfmvttz9yeXbilawGCZH20UdR8yNBOE9kRV34wpfWASl8plzgKtLVQGO9M", regular: { url: "./aellux.ext.point.legacy.js", integrity: "sha384-gG/XONYEC1tchBcJ6bUtKYmWFHz0E+50LmMaXDAiqWBKPuwdHZeYm1uXA22lMZuN" } } }, dependencies: [] }, anchor: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.anchor.min.js", integrity: "sha384-vpHUGJwyY3qnW78C6Yo8CLc2vgbn1KJ8FcOtQawBtCKarQ0CoihuNQ7ZCKnMbOjx", regular: { url: "./aellux.ext.anchor.js", integrity: "sha384-LaYGJ6p9H5QBGJf5j19wHgT+CFcMim2h0Ro+itxYnLkIE29RFtPdj8P8L9EYWAWr" } }, legacy: { url: "./aellux.ext.anchor.legacy.min.js", integrity: "sha384-Ym0BnY5sDflVI4JyPVWymZKurBcJTAbPNe2gy+6qHcD7x6RyIKwvff6o+6BfeZDy", regular: { url: "./aellux.ext.anchor.legacy.js", integrity: "sha384-bN9t1anpKLUDUvnbE845H1+9UvP+XDfrsN5AhrKLUQJ5fm3YcFqiylDNFuE02RlJ" } } }, dependencies: [], style: { url: "./aellux.ext.anchor.min.css", integrity: "sha384-DwxfMH5mNSvmF0U4/dgL6dbe+5U1x97y2H4skxW7nUUzjr99IXNl9aVDwRjfvNGz", regular: { url: "./aellux.ext.anchor.css", integrity: "sha384-tHVCjTT3bvlmkAIDfMyevvrkAB7crjBXQAfY1l8XcaWhBFSersWJk+JndC6Bd9mO" } } }, "overflow-marquee": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.overflow-marquee.min.js", integrity: "sha384-Eqmu0pNMC64qS7kK8HI8nG9sjDDZn62b0O8SY2D7qOcC6rF0mj8XmAmrulQmP99L", regular: { url: "./aellux.ext.overflow-marquee.js", integrity: "sha384-n0Pkh5AsBRtTSSShu9YJf/qSevWP0r7+asYOBqyglI5z7gWTWbjE/0rAlqeoZWJ3" } }, legacy: { url: "./aellux.ext.overflow-marquee.legacy.min.js", integrity: "sha384-lOog++PR/TJTbVS+/TVvp6RuT972idDV+nzb0s6yd8hK9cyDh4d9UR1sROfFMp+S", regular: { url: "./aellux.ext.overflow-marquee.legacy.js", integrity: "sha384-DJwiequ7f6edt0D9cflftvA036vZWLH3RK50O0zX+3F+IbHldPHP92dbDjUTvGWf" } } }, dependencies: [], style: { url: "./aellux.ext.overflow-marquee.min.css", integrity: "sha384-PD8sxZJw/8gWr9Rq2l7wwUzADqBY74KSE1nn258niuXi97P+MSKN6tCxvocJPGd/", regular: { url: "./aellux.ext.overflow-marquee.css", integrity: "sha384-HyIVGE6lr+ZML8gekuK733ELP8Bd2gdj/+to+QhBYPN+tytaTEHP07ub3nAkOG3y" } } }, "ajax-href": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.ajax-href.min.js", integrity: "sha384-DD+XtPvKyNGWtcjYNTTcXU5e+PgMl7Ev81DgYMNEF0hNAxML61MGS9g8fy6hWIY5", regular: { url: "./aellux.ext.ajax-href.js", integrity: "sha384-h5H+QebE/oUgoWuMMOJOXZoqkjRenBh/EtpOIeU67b7mYDV2pBTvA3qMUiXFc8OS" } }, legacy: { url: "./aellux.ext.ajax-href.legacy.min.js", integrity: "sha384-Q1j4je0/BTjMBSZo29omTv/vLo4oyuaqYlG3h41XRJ02fnTm2X7qkhN2bAL2XZTe", regular: { url: "./aellux.ext.ajax-href.legacy.js", integrity: "sha384-snUrmBWZVPLbXiIkVpi0iaYYitOG/Uxa6gnMAg/iKJxPrfvP1of6LtpB0MC4XqrC" } } }, dependencies: [] }, scrollbox: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.scrollbox.min.js", integrity: "sha384-xvvqVjp8L4JLOKOPmIBAQu74doqxHEbcdHXO/678AzEIfnwJ7n4sNLErwAFWT/TF", regular: { url: "./aellux.ext.scrollbox.js", integrity: "sha384-8LkpI3GuwNINJsz6yjIJu379A5JSndRVfaiOYq6DASpouBAtnoGXi3grX1taS/LH" } }, legacy: { url: "./aellux.ext.scrollbox.legacy.min.js", integrity: "sha384-NfjjNIioenO0EAxx9GrcD/I9ILUL4nMzjAdyBF7bel05CRtOfTx1n1qS5zN3W7E1", regular: { url: "./aellux.ext.scrollbox.legacy.js", integrity: "sha384-DHH1dF+lyHWcO+fiwkwOP8c01PIPfOEHHp61yPEcDgDHsy8x+ugcClr/E3SbDJN4" } } }, dependencies: [], style: { url: "./aellux.ext.scrollbox.min.css", integrity: "sha384-+7gbnqlykQX9O8Q2E2+TcXQk0zpdZhUvNgwqlsL914/cBKo/zlEnbiltW4GcrsXT", regular: { url: "./aellux.ext.scrollbox.css", integrity: "sha384-/LJ8wnR9DMXq2PAGEXphThjj0l18YAkatUlI4YFCtCRK8hTB6QSrDVqbSRhNskg1" } } }, "scrollbox-snap": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.scrollbox-snap.min.js", integrity: "sha384-NNIBI4kj4sdGSI+XDs2LeBrjdo7AAN4eVtQeyAGScLBvxkZEFx3OaT9xpaW4b4Wq", regular: { url: "./aellux.ext.scrollbox-snap.js", integrity: "sha384-gmMGaW0wvR61QynjfBKga6/+7NMAWzk6ALIYmMC0hy9gkSvCrvKXueA+ETEgM9wB" } }, legacy: { url: "./aellux.ext.scrollbox-snap.legacy.min.js", integrity: "sha384-a35oytvnpf0myg+Brd+mFDgQBcbNaihANZl5J+GmrEqlyDl8CDQy0OZyu5Ld3l64", regular: { url: "./aellux.ext.scrollbox-snap.legacy.js", integrity: "sha384-9hE1HNRl9mFvr5aLiaRNZSQsTBb1XoicM6xGqeuISTS6OqL1sZm6DlmY6qxcQJk+" } } }, dependencies: [] }, adaptive: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.adaptive.min.js", integrity: "sha384-bkeOnTW/3uzbuhLc8fujaWnWGC+pwNAkZwci9M09paKqudp0v/flMrJ49JXw16vv", regular: { url: "./aellux.ext.adaptive.js", integrity: "sha384-Qzf9wU6DSSaaE+8lr96vnYqjKQqYxep8dhCZmjgNdqreuk9fL3qKMn3NW7DGAEaT" } }, legacy: { url: "./aellux.ext.adaptive.legacy.min.js", integrity: "sha384-YVHHWZOvf+65r/CU89nBPZXhj3j5sn4r2ho+CNUCUaYs1WE6pWIeypcq7n5OCBor", regular: { url: "./aellux.ext.adaptive.legacy.js", integrity: "sha384-gBkxqbBpIqdj5ozJm/NsenI/yKOvEGarZBl2SrPjYiiYx6cez2/FGTMf5XyzHrTj" } } }, dependencies: [], style: { url: "./aellux.ext.adaptive.min.css", integrity: "sha384-8yUP1PStfDqBCyCskP3k9WLIKgv/yl1nyDhmPz7hsX5NZ4z3ZT3ajolA+RhYlUiG", regular: { url: "./aellux.ext.adaptive.css", integrity: "sha384-HfIjX9Zk0VFRimzPvUaTS5AtwuHJHjXKoM/xbNJXj5vE7bSdBGEzbrBHfbNmYah0" } } }, present: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.present.min.js", integrity: "sha384-0KpYkdu0TQGwun6CZNzZQgg/wSO8z3hebXqVAk2v1I7Y8tUa+GuDVmhnuV1gznpd", regular: { url: "./aellux.ext.present.js", integrity: "sha384-r2N72qKuILNn0313FbTC0+E94MUUUqyeCjGSzmPHQptTcwMUjtCEAC7tmcWqy66L" } }, legacy: { url: "./aellux.ext.present.legacy.min.js", integrity: "sha384-y0AsBs4t9APaNX1JpHyDbF/I+PmCI7dtG1zcSat8D0azFQ0k6+3c2vzaCrWjPqr+", regular: { url: "./aellux.ext.present.legacy.js", integrity: "sha384-tpld652dxeupFeDsBpyxhimpIWtBGgtM/WdKle4YLdBrMfG7Gdj27TjtZAwmSE9L" } } }, dependencies: [], style: { url: "./aellux.ext.present.min.css", integrity: "sha384-2QoNgFTu/KOOrgaTKZV4VXCoIaU2h5PMPILW5LHseXK2ygNpF6miOfxZUwkTBgPY", regular: { url: "./aellux.ext.present.css", integrity: "sha384-uZ/OPZK9sRFcaejKJHrc0wPaPXFKeGS+pBWWbkMEe3+3M6zLEa7nBc/cD0Tejsmr" } } } } };
+      define_AELLUX_OFFICIAL_EXTENSION_MANIFEST_default = { schemaVersion: 1, coreVersion: "0.1.0-beta.10", extensions: { preference: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.preference.min.js", integrity: "sha384-mSOgb0DekFTRXXZAgyNrPjamdlSqzL4SSGZYVWgVg+WlG+pBj11xT81v/6Xk43yO", regular: { url: "./aellux.ext.preference.js", integrity: "sha384-MlikpdHSzHzF6kz5+oJGtq3eoFsKTsx/g+FTrf+dFOU8iQGHsCpn4fP1jLlbNrj7" } }, legacy: { url: "./aellux.ext.preference.legacy.min.js", integrity: "sha384-1LMsK0W9J/PoM4tXhFgkYLRY4yWdzVoYmFy4OMDGd8lRdtptKoEb1sI9L1kzNaBu", regular: { url: "./aellux.ext.preference.legacy.js", integrity: "sha384-pozuz43OyfXrnkmuBu6KTM2lqRSqcI5LMgwAtqnzXq8xZGdVqpnmOtrBcYcMskWk" } } }, dependencies: [] }, "state-navigation": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.state-navigation.min.js", integrity: "sha384-wAbgAqjAA6wauuG+iuUtfRwxChd6fTJ0fS22fqnu2r00kouoXJWZ0f7AoTYlqBC6", regular: { url: "./aellux.ext.state-navigation.js", integrity: "sha384-PKJ8HTD7eIYDEg2hOaAJjpMYzLr2fBjBRGmIGG7XzGTzVK0yTjt5HYPO55VbWfdS" } }, legacy: { url: "./aellux.ext.state-navigation.legacy.min.js", integrity: "sha384-YkhfU15Mpk8KiO6TyoVU6z1yCiYWwnsOGE0xVaQ8NrE7IGrxOSUL005g5JeUDdJu", regular: { url: "./aellux.ext.state-navigation.legacy.js", integrity: "sha384-kaEUY0Zpw8K6pcwjm+INA5feXftLK2/N1aFpPr2LCTcetX2uoe2GGd1MJyy7u8rZ" } } }, dependencies: [] }, feedback: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.feedback.min.js", integrity: "sha384-oHAcvQwCs/v3ktzXoNdJEDEkaV6NI29MjzjF068Lw0oL9NwVP5THnxzb12f0ySkY", regular: { url: "./aellux.ext.feedback.js", integrity: "sha384-dGcxHfGyV544C6livNJKKrlNWky/fBFkMONowmtlhHZ5exWL8AJOoV40jJhZW6Iq" } }, legacy: { url: "./aellux.ext.feedback.legacy.min.js", integrity: "sha384-S31Sa8B4kbKL/xsEJ3QTTikO+AjuXSc9GXBzNw8kl/b2amk5tzqgQNNKQPfGnYdF", regular: { url: "./aellux.ext.feedback.legacy.js", integrity: "sha384-sy2QmY3L1TlvGPgdebeu5q9ZJl/bOeUstWE0Cu+QJUIYWSF9y1YH6mCpe09/eKrd" } } }, dependencies: [], style: { url: "./aellux.ext.feedback.min.css", integrity: "sha384-OBguCYqF+dMD0Pl84C3FlY/+ohUGfW0OyynmXb/PSDEGOyuI/TQJ3EZAoCeJx+Jk", regular: { url: "./aellux.ext.feedback.css", integrity: "sha384-yk4cW+r/Mc1FRS1ZauBHC6KsKb7sxuJ0E9mmt/+AYASAdZXXMK6iuFBR+TOEh/r4" } } }, focus: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.focus.min.js", integrity: "sha384-AXpUv/Ur2Z4cKvO9EqIFqfxxdSQR5j75q0okOAWPvHhSneQ5LPjrOzk6Sl9MOo4a", regular: { url: "./aellux.ext.focus.js", integrity: "sha384-VjQzcnhLRrvRlbVQ0X4/tO0+8gqJXAmIFoeIVimjOud1wRNuBXNnSQHHW9XQPzTe" } }, legacy: { url: "./aellux.ext.focus.legacy.min.js", integrity: "sha384-I5QpUmKsA1T8NiKfKXQgbdG19Ld1ZGCWSmosygO3yGj43tdxp5zCfLyfBuFoHlKu", regular: { url: "./aellux.ext.focus.legacy.js", integrity: "sha384-5/y3J1NC/qMyV9myEj29+wGbqCVI8ICPafSebtJVfl15Qmup6vMiJzveShd3CLnw" } } }, dependencies: [] }, point: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.point.min.js", integrity: "sha384-Xs6j53KcvGe+uxFvAZxA33QVWZUTQdbRLvx/SmPRYwtI1FdRqtg7HX1vvqw3sllx", regular: { url: "./aellux.ext.point.js", integrity: "sha384-SADPZVR4ANG+cju1qXjtio97ylPp5DbnMbBZORgkHUjjPUKWa2dJ3xw4/X7geubu" } }, legacy: { url: "./aellux.ext.point.legacy.min.js", integrity: "sha384-PNoKlNYaZJ1K+RPkFVJ/KWGu2xcY/qD/wS2bZIBrtYOhKPeJz/N0S7ddMQEWtlRb", regular: { url: "./aellux.ext.point.legacy.js", integrity: "sha384-4ZTxlwhOgRY7WLohaQm3vPaCAr0Il1zbLDXx4FxcrqHPbe/jufJftB+nCty6zBdb" } } }, dependencies: [] }, anchor: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.anchor.min.js", integrity: "sha384-vpHUGJwyY3qnW78C6Yo8CLc2vgbn1KJ8FcOtQawBtCKarQ0CoihuNQ7ZCKnMbOjx", regular: { url: "./aellux.ext.anchor.js", integrity: "sha384-LaYGJ6p9H5QBGJf5j19wHgT+CFcMim2h0Ro+itxYnLkIE29RFtPdj8P8L9EYWAWr" } }, legacy: { url: "./aellux.ext.anchor.legacy.min.js", integrity: "sha384-Ym0BnY5sDflVI4JyPVWymZKurBcJTAbPNe2gy+6qHcD7x6RyIKwvff6o+6BfeZDy", regular: { url: "./aellux.ext.anchor.legacy.js", integrity: "sha384-bN9t1anpKLUDUvnbE845H1+9UvP+XDfrsN5AhrKLUQJ5fm3YcFqiylDNFuE02RlJ" } } }, dependencies: [], style: { url: "./aellux.ext.anchor.min.css", integrity: "sha384-DwxfMH5mNSvmF0U4/dgL6dbe+5U1x97y2H4skxW7nUUzjr99IXNl9aVDwRjfvNGz", regular: { url: "./aellux.ext.anchor.css", integrity: "sha384-tHVCjTT3bvlmkAIDfMyevvrkAB7crjBXQAfY1l8XcaWhBFSersWJk+JndC6Bd9mO" } } }, "overflow-marquee": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.overflow-marquee.min.js", integrity: "sha384-Eqmu0pNMC64qS7kK8HI8nG9sjDDZn62b0O8SY2D7qOcC6rF0mj8XmAmrulQmP99L", regular: { url: "./aellux.ext.overflow-marquee.js", integrity: "sha384-n0Pkh5AsBRtTSSShu9YJf/qSevWP0r7+asYOBqyglI5z7gWTWbjE/0rAlqeoZWJ3" } }, legacy: { url: "./aellux.ext.overflow-marquee.legacy.min.js", integrity: "sha384-lOog++PR/TJTbVS+/TVvp6RuT972idDV+nzb0s6yd8hK9cyDh4d9UR1sROfFMp+S", regular: { url: "./aellux.ext.overflow-marquee.legacy.js", integrity: "sha384-DJwiequ7f6edt0D9cflftvA036vZWLH3RK50O0zX+3F+IbHldPHP92dbDjUTvGWf" } } }, dependencies: [], style: { url: "./aellux.ext.overflow-marquee.min.css", integrity: "sha384-PD8sxZJw/8gWr9Rq2l7wwUzADqBY74KSE1nn258niuXi97P+MSKN6tCxvocJPGd/", regular: { url: "./aellux.ext.overflow-marquee.css", integrity: "sha384-HyIVGE6lr+ZML8gekuK733ELP8Bd2gdj/+to+QhBYPN+tytaTEHP07ub3nAkOG3y" } } }, "ajax-href": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.ajax-href.min.js", integrity: "sha384-DD+XtPvKyNGWtcjYNTTcXU5e+PgMl7Ev81DgYMNEF0hNAxML61MGS9g8fy6hWIY5", regular: { url: "./aellux.ext.ajax-href.js", integrity: "sha384-h5H+QebE/oUgoWuMMOJOXZoqkjRenBh/EtpOIeU67b7mYDV2pBTvA3qMUiXFc8OS" } }, legacy: { url: "./aellux.ext.ajax-href.legacy.min.js", integrity: "sha384-Q1j4je0/BTjMBSZo29omTv/vLo4oyuaqYlG3h41XRJ02fnTm2X7qkhN2bAL2XZTe", regular: { url: "./aellux.ext.ajax-href.legacy.js", integrity: "sha384-snUrmBWZVPLbXiIkVpi0iaYYitOG/Uxa6gnMAg/iKJxPrfvP1of6LtpB0MC4XqrC" } } }, dependencies: [] }, scrollbox: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.scrollbox.min.js", integrity: "sha384-xvvqVjp8L4JLOKOPmIBAQu74doqxHEbcdHXO/678AzEIfnwJ7n4sNLErwAFWT/TF", regular: { url: "./aellux.ext.scrollbox.js", integrity: "sha384-8LkpI3GuwNINJsz6yjIJu379A5JSndRVfaiOYq6DASpouBAtnoGXi3grX1taS/LH" } }, legacy: { url: "./aellux.ext.scrollbox.legacy.min.js", integrity: "sha384-NfjjNIioenO0EAxx9GrcD/I9ILUL4nMzjAdyBF7bel05CRtOfTx1n1qS5zN3W7E1", regular: { url: "./aellux.ext.scrollbox.legacy.js", integrity: "sha384-DHH1dF+lyHWcO+fiwkwOP8c01PIPfOEHHp61yPEcDgDHsy8x+ugcClr/E3SbDJN4" } } }, dependencies: [], style: { url: "./aellux.ext.scrollbox.min.css", integrity: "sha384-+7gbnqlykQX9O8Q2E2+TcXQk0zpdZhUvNgwqlsL914/cBKo/zlEnbiltW4GcrsXT", regular: { url: "./aellux.ext.scrollbox.css", integrity: "sha384-/LJ8wnR9DMXq2PAGEXphThjj0l18YAkatUlI4YFCtCRK8hTB6QSrDVqbSRhNskg1" } } }, "scrollbox-snap": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.scrollbox-snap.min.js", integrity: "sha384-NNIBI4kj4sdGSI+XDs2LeBrjdo7AAN4eVtQeyAGScLBvxkZEFx3OaT9xpaW4b4Wq", regular: { url: "./aellux.ext.scrollbox-snap.js", integrity: "sha384-gmMGaW0wvR61QynjfBKga6/+7NMAWzk6ALIYmMC0hy9gkSvCrvKXueA+ETEgM9wB" } }, legacy: { url: "./aellux.ext.scrollbox-snap.legacy.min.js", integrity: "sha384-a35oytvnpf0myg+Brd+mFDgQBcbNaihANZl5J+GmrEqlyDl8CDQy0OZyu5Ld3l64", regular: { url: "./aellux.ext.scrollbox-snap.legacy.js", integrity: "sha384-9hE1HNRl9mFvr5aLiaRNZSQsTBb1XoicM6xGqeuISTS6OqL1sZm6DlmY6qxcQJk+" } } }, dependencies: [] }, adaptive: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.adaptive.min.js", integrity: "sha384-bkeOnTW/3uzbuhLc8fujaWnWGC+pwNAkZwci9M09paKqudp0v/flMrJ49JXw16vv", regular: { url: "./aellux.ext.adaptive.js", integrity: "sha384-Qzf9wU6DSSaaE+8lr96vnYqjKQqYxep8dhCZmjgNdqreuk9fL3qKMn3NW7DGAEaT" } }, legacy: { url: "./aellux.ext.adaptive.legacy.min.js", integrity: "sha384-YVHHWZOvf+65r/CU89nBPZXhj3j5sn4r2ho+CNUCUaYs1WE6pWIeypcq7n5OCBor", regular: { url: "./aellux.ext.adaptive.legacy.js", integrity: "sha384-gBkxqbBpIqdj5ozJm/NsenI/yKOvEGarZBl2SrPjYiiYx6cez2/FGTMf5XyzHrTj" } } }, dependencies: [], style: { url: "./aellux.ext.adaptive.min.css", integrity: "sha384-8yUP1PStfDqBCyCskP3k9WLIKgv/yl1nyDhmPz7hsX5NZ4z3ZT3ajolA+RhYlUiG", regular: { url: "./aellux.ext.adaptive.css", integrity: "sha384-HfIjX9Zk0VFRimzPvUaTS5AtwuHJHjXKoM/xbNJXj5vE7bSdBGEzbrBHfbNmYah0" } } }, present: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.present.min.js", integrity: "sha384-e9Ugejn8LF60AH/CrY7S33a6WkJKok6FLfMPnveyXRFRu0itRKedTU3317VirXIq", regular: { url: "./aellux.ext.present.js", integrity: "sha384-J/mWEj4jLGHfxvvPXMXLBt+09WhXRyGxQ8dNx7FIdXzXDLaeNi7bsBeuWbCg/i9Y" } }, legacy: { url: "./aellux.ext.present.legacy.min.js", integrity: "sha384-vaLbshfAzl9Wjx/bCsgkeY7d8QUD7sAXowycvuBAZWdGB71uD6Jtgbz+6bJpSDhm", regular: { url: "./aellux.ext.present.legacy.js", integrity: "sha384-++NYmpMqNbWqFDSZ32aasH6/X/nSAqixtJeYSYWXTus8kcdaAH2PyYcZNXWbj/L1" } } }, dependencies: [], style: { url: "./aellux.ext.present.min.css", integrity: "sha384-2QoNgFTu/KOOrgaTKZV4VXCoIaU2h5PMPILW5LHseXK2ygNpF6miOfxZUwkTBgPY", regular: { url: "./aellux.ext.present.css", integrity: "sha384-uZ/OPZK9sRFcaejKJHrc0wPaPXFKeGS+pBWWbkMEe3+3M6zLEa7nBc/cD0Tejsmr" } } } } };
     }
   });
 
@@ -29106,6 +29106,8 @@
         var pointableElements = /* @__PURE__ */ new Set();
         var pointableAttribute = AelluxJs2.attr("point");
         var pointableSelector = "[".concat(pointableAttribute, "]");
+        var tapSelector = 'button, a, [role="button"]';
+        var tapDuration = 300;
         var pointerEvents = [["down", onPointerDown], ["move", onPointerMove], ["up", onPointerUp], ["cancel", onPointerCancel], ["over", onPointerOver], ["out", onPointerOut]];
         AelluxJs2.extAttach(extensionName, {
           init: init,
@@ -29162,6 +29164,7 @@
               var pointer = _step3.value;
               if (pointer.target === element) pointer.target = null;
               if (pointer.pressStart === element) pointer.pressStart = null;
+              if (pointer.tap && pointer.tap.element === element) pointer.tap = null;
             }
           } catch (err) {
             _iterator3.e(err);
@@ -29252,13 +29255,85 @@
         function canHover(event) {
           return event.pointerType === "mouse" || event.pointerType === "pen";
         }
+        function canTap(element) {
+          return element && pointableElements.has(element) && element.isConnected && element.hasAttribute(pointableAttribute) && limitFor(element) > 0 && element.matches(tapSelector) && !element.matches(":disabled, [disabled]") && !element.closest('[aria-disabled="true"], [inert]');
+        }
+        function startTap(pointer, event, wasPressed) {
+          pointer.tap = null;
+          var multitouch = false;
+          if (event.pointerType === "touch") {
+            var _iterator6 = _createForOfIteratorHelper15(trackedPointers.values()), _step6;
+            try {
+              for (_iterator6.s(); !(_step6 = _iterator6.n()).done; ) {
+                var other = _step6.value;
+                if (other !== pointer && other.pressed && other.pointerType === "touch") {
+                  other.tap = null;
+                  multitouch = true;
+                }
+              }
+            } catch (err) {
+              _iterator6.e(err);
+            } finally {
+              _iterator6.f();
+            }
+          }
+          if (wasPressed || multitouch || !event.isPrimary || event.button !== 0) return;
+          var origin = event.composedPath ? event.composedPath()[0] : event.target;
+          var element = targetFor(origin, pointer);
+          if (!canTap(element)) return;
+          var scrollOffsets = [];
+          var ancestor = element;
+          while (ancestor) {
+            scrollOffsets.push({
+              element: ancestor,
+              x: ancestor.scrollLeft,
+              y: ancestor.scrollTop
+            });
+            ancestor = ancestor.parentElement || ancestor.getRootNode && ancestor.getRootNode().host;
+          }
+          pointer.tap = {
+            element: element,
+            distance: 0,
+            limit: event.pointerType === "mouse" ? 4 : 10,
+            bounds: element.getBoundingClientRect(),
+            scrollOffsets: scrollOffsets
+          };
+        }
+        function finishTap(pointer, event) {
+          var tap = pointer.tap;
+          pointer.tap = null;
+          if (!tap || !event.isPrimary || event.button !== 0 || event.pointerType !== pointer.pointerType || pointer.deltaTime > tapDuration || !canTap(tap.element)) return null;
+          var path = event.composedPath ? event.composedPath() : [];
+          var target = path[0] || event.target;
+          var captured = target && target.hasPointerCapture && target.hasPointerCapture(event.pointerId);
+          if (captured || !path.includes(tap.element) && !tap.element.contains(target)) {
+            var bounds = tap.bounds;
+            if (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom) return null;
+            if (!captured && !tap.scrollOffsets.some(function(offset) {
+              return offset.element.scrollLeft !== offset.x || offset.element.scrollTop !== offset.y;
+            })) return null;
+          }
+          return {
+            element: tap.element,
+            detail: {
+              pointerType: pointer.pointerType,
+              pointerId: pointer.pointerId,
+              duration: pointer.deltaTime,
+              distance: tap.distance,
+              originalEvent: event
+            }
+          };
+        }
         function addPointer(event, pressed, hover) {
           var pointer = new AePointer(event, pressed, hover);
           trackedPointers.set(event.pointerId, pointer);
           return pointer;
         }
         function onPointerDown(event) {
-          var pointer = trackedPointers.get(event.pointerId) || addPointer(event, true, canHover(event));
+          var pointer = trackedPointers.get(event.pointerId);
+          var wasPressed = pointer && pointer.pressed;
+          pointer = pointer || addPointer(event, true, canHover(event));
+          pointer.tap = null;
           pointer.initial.x = event.clientX;
           pointer.initial.y = event.clientY;
           pointer.pointerType = event.pointerType;
@@ -29268,6 +29343,7 @@
           pointer.update(event);
           pointer.target = targetFor(event.target, pointer);
           pointer.pressStart = pointer.target;
+          startTap(pointer, event, wasPressed);
           dispatchToTarget("PointerDown", pointer, event);
         }
         function onPointerMove(event) {
@@ -29287,12 +29363,19 @@
           pointer.pressed = false;
           pointer.endPress();
           pointer.target = targetFor(event.target, pointer);
+          var tap = finishTap(pointer, event);
           dispatchRelease("PointerUp", pointer, event);
+          if (tap && canTap(tap.element)) AelluxJs2.dispatchFrom(tap.element, "tap", {
+            bubbles: true,
+            composed: true,
+            detail: tap.detail
+          });
           if (!pointer.hover) trackedPointers.delete(event.pointerId);
         }
         function onPointerCancel(event) {
           var pointer = trackedPointers.get(event.pointerId);
           if (pointer) {
+            pointer.tap = null;
             pointer.update(event);
             pointer.pressed = false;
             pointer.endPress();
@@ -29356,6 +29439,7 @@
             this.hover = hover;
             this.target = null;
             this.pressStart = null;
+            this.tap = null;
           }
           return _createClass(AePointer2, [{
             key: "deltaTime",
@@ -29383,6 +29467,24 @@
               this.delta.x = this.current.x - this.initial.x;
               this.delta.y = this.current.y - this.initial.y;
               this.buttons = event.buttons;
+              if (this.tap) {
+                var distance = Math.hypot(this.delta.x, this.delta.y);
+                if (event.getCoalescedEvents) {
+                  var _iterator7 = _createForOfIteratorHelper15(event.getCoalescedEvents()), _step7;
+                  try {
+                    for (_iterator7.s(); !(_step7 = _iterator7.n()).done; ) {
+                      var sample = _step7.value;
+                      distance = Math.max(distance, Math.hypot(sample.clientX - this.initial.x, sample.clientY - this.initial.y));
+                    }
+                  } catch (err) {
+                    _iterator7.e(err);
+                  } finally {
+                    _iterator7.f();
+                  }
+                }
+                this.tap.distance = Math.max(this.tap.distance, distance);
+                if (distance > this.tap.limit) this.tap = null;
+              }
             }
           }, {
             key: "beforeDispatch",
@@ -31754,6 +31856,7 @@
         });
         var POP = "Pop", UNPOP = "Unpop", BEFORE = "Before", PING = "ping", MILLISECOND = "ms", SECOND = "s", DEFAULT_PRESENT = "opacity transform height width", OPACITY_SYNTAX = "<number> | <percentage>", TRANSFORM_SYNTAX = "<transform-list> | none";
         var TRANSITION_PREPARE_TIME = 100;
+        var TAP_CLICK_WAIT_TIME = 32;
         var presentElements = /* @__PURE__ */ new Map();
         var openPresentElements = /* @__PURE__ */ new Set();
         var fallbackMotionId = 5e6;
@@ -31768,6 +31871,7 @@
         var groups = /* @__PURE__ */ new Map();
         var hoverTimers = /* @__PURE__ */ new Map();
         var hoveredTriggers = /* @__PURE__ */ new Set();
+        var pendingTaps = /* @__PURE__ */ new Set();
         var groupObserver = null;
         var groupsQueued = false;
         var interpolatedProgress = false;
@@ -31810,6 +31914,7 @@
           document.addEventListener("pointerover", onHover);
           document.addEventListener("pointerout", onHover);
           AelluxJs2.on("$click", OnClick);
+          AelluxJs2.on("tap", onTap);
           AelluxJs2.onEvent(root2, "$resize", refreshExpandedStates);
         }
         function destroy() {
@@ -31817,53 +31922,65 @@
             extensionName: extensionName
           });
           AelluxJs2.off("$click", OnClick);
-          AelluxJs2.offEvent(root2, "$resize", refreshExpandedStates);
-          document.removeEventListener("pointerover", onHover);
-          document.removeEventListener("pointerout", onHover);
-          var _iterator = _createForOfIteratorHelper19(groups.keys()), _step;
+          AelluxJs2.off("tap", onTap);
+          var _iterator = _createForOfIteratorHelper19(pendingTaps), _step;
           try {
             for (_iterator.s(); !(_step = _iterator.n()).done; ) {
-              var group = _step.value;
-              unmountGroup(group);
+              var pending = _step.value;
+              cancelPendingTap(pending);
             }
           } catch (err) {
             _iterator.e(err);
           } finally {
             _iterator.f();
           }
-          var _iterator2 = _createForOfIteratorHelper19(hoverTimers.keys()), _step2;
+          AelluxJs2.offEvent(root2, "$resize", refreshExpandedStates);
+          document.removeEventListener("pointerover", onHover);
+          document.removeEventListener("pointerout", onHover);
+          var _iterator2 = _createForOfIteratorHelper19(groups.keys()), _step2;
           try {
             for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
-              var target = _step2.value;
-              cancelHoverClose(target);
+              var group = _step2.value;
+              unmountGroup(group);
             }
           } catch (err) {
             _iterator2.e(err);
           } finally {
             _iterator2.f();
           }
-          hoveredTriggers.clear();
-          var _iterator3 = _createForOfIteratorHelper19(triggerElementsSet), _step3;
+          var _iterator3 = _createForOfIteratorHelper19(hoverTimers.keys()), _step3;
           try {
             for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
-              var triggerElement = _step3.value;
-              unmountTriggerElement(triggerElement);
+              var target = _step3.value;
+              cancelHoverClose(target);
             }
           } catch (err) {
             _iterator3.e(err);
           } finally {
             _iterator3.f();
           }
-          var _iterator4 = _createForOfIteratorHelper19(presentElements.keys()), _step4;
+          hoveredTriggers.clear();
+          var _iterator4 = _createForOfIteratorHelper19(triggerElementsSet), _step4;
           try {
             for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
-              var element = _step4.value;
-              unmountPresentContainer(element);
+              var triggerElement = _step4.value;
+              unmountTriggerElement(triggerElement);
             }
           } catch (err) {
             _iterator4.e(err);
           } finally {
             _iterator4.f();
+          }
+          var _iterator5 = _createForOfIteratorHelper19(presentElements.keys()), _step5;
+          try {
+            for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
+              var element = _step5.value;
+              unmountPresentContainer(element);
+            }
+          } catch (err) {
+            _iterator5.e(err);
+          } finally {
+            _iterator5.f();
           }
           openPresentElements.clear();
         }
@@ -31949,32 +32066,32 @@
             openPresentElements.add(element);
           }
           presentElements.set(element, presentController);
-          var _iterator5 = _createForOfIteratorHelper19(element.querySelectorAll("[".concat(attr.trigger, "],[").concat(attr.dismiss, "],[").concat(attr.target, "]"))), _step5;
+          var _iterator6 = _createForOfIteratorHelper19(element.querySelectorAll("[".concat(attr.trigger, "],[").concat(attr.dismiss, "],[").concat(attr.target, "]"))), _step6;
           try {
-            for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
-              var _triggerElement = _step5.value;
+            for (_iterator6.s(); !(_step6 = _iterator6.n()).done; ) {
+              var _triggerElement = _step6.value;
               if (triggerTargets.get(_triggerElement) === element) {
                 presentController.triggers.add(_triggerElement);
                 updateTriggerAriaExpanded(_triggerElement);
               }
             }
           } catch (err) {
-            _iterator5.e(err);
+            _iterator6.e(err);
           } finally {
-            _iterator5.f();
+            _iterator6.f();
           }
           var idTriggers = triggersByTargetId.get(element.id);
           if (idTriggers) {
-            var _iterator6 = _createForOfIteratorHelper19(idTriggers), _step6;
+            var _iterator7 = _createForOfIteratorHelper19(idTriggers), _step7;
             try {
-              for (_iterator6.s(); !(_step6 = _iterator6.n()).done; ) {
-                var triggerElement = _step6.value;
+              for (_iterator7.s(); !(_step7 = _iterator7.n()).done; ) {
+                var triggerElement = _step7.value;
                 refreshTriggerTargets(triggerElement);
               }
             } catch (err) {
-              _iterator6.e(err);
+              _iterator7.e(err);
             } finally {
-              _iterator6.f();
+              _iterator7.f();
             }
           }
           setProgress(element, !element.hidden);
@@ -31985,18 +32102,19 @@
         function unmountPresentContainer(element) {
           var _AelluxJs$waitLayout, _containerAriaHandler, _elementMemories$get;
           if (!presentElements.has(element)) return;
+          cancelElementTaps(element);
           var controller = presentElements.get(element);
           cancelHoverClose(element);
-          var _iterator7 = _createForOfIteratorHelper19(controller.triggers), _step7;
+          var _iterator8 = _createForOfIteratorHelper19(controller.triggers), _step8;
           try {
-            for (_iterator7.s(); !(_step7 = _iterator7.n()).done; ) {
-              var button = _step7.value;
+            for (_iterator8.s(); !(_step8 = _iterator8.n()).done; ) {
+              var button = _step8.value;
               hoveredTriggers.delete(button);
             }
           } catch (err) {
-            _iterator7.e(err);
+            _iterator8.e(err);
           } finally {
-            _iterator7.f();
+            _iterator8.f();
           }
           controller.stop();
           (_AelluxJs$waitLayout = AelluxJs2.waitLayout) === null || _AelluxJs$waitLayout === void 0 || _AelluxJs$waitLayout.cancel(controller.motionId);
@@ -32019,6 +32137,7 @@
         function unmountTriggerElement(triggerElement) {
           var _triggerAriaHandlers$;
           if (!triggerElementsSet.has(triggerElement)) return;
+          cancelElementTaps(triggerElement);
           hoveredTriggers.delete(triggerElement);
           var target = triggerTargets.get(triggerElement);
           if (target) {
@@ -32510,10 +32629,10 @@
           unpop(element);
         }
         function outsideClickAutoUnpop(currentExceptions) {
-          var _iterator8 = _createForOfIteratorHelper19(openPresentElements), _step8;
+          var _iterator9 = _createForOfIteratorHelper19(openPresentElements), _step9;
           try {
             var _loop = function _loop2() {
-              var pContainer = _step8.value;
+              var pContainer = _step9.value;
               if (pContainer.hidden === true || pContainer.getAttribute(attr.unpopOnOutside) === "false" || currentExceptions.some(function(e) {
                 return pContainer.contains(e);
               })) {
@@ -32521,13 +32640,13 @@
               }
               unpop(pContainer);
             };
-            for (_iterator8.s(); !(_step8 = _iterator8.n()).done; ) {
+            for (_iterator9.s(); !(_step9 = _iterator9.n()).done; ) {
               if (_loop()) continue;
             }
           } catch (err) {
-            _iterator8.e(err);
+            _iterator9.e(err);
           } finally {
-            _iterator8.f();
+            _iterator9.f();
           }
         }
         function refreshChangedTrigger(button) {
@@ -32536,11 +32655,76 @@
           if (value !== indexedTriggerValues.get(button)) refreshTriggerTargets(button);
         }
         function OnClick(event) {
-          if (!event.target) return;
-          var container = event.target.closest(presentSelector);
-          var exceptions = [event.target];
+          var target = activationTarget(event);
+          if (!target) return;
+          var matched;
+          var _iterator0 = _createForOfIteratorHelper19(pendingTaps), _step0;
+          try {
+            for (_iterator0.s(); !(_step0 = _iterator0.n()).done; ) {
+              var _pending$event$detail, _pending$event$detail2;
+              var pending = _step0.value;
+              var pointerId = event.pointerId;
+              var compatibilityClick = event.pointerType === "mouse" && ["touch", "pen"].includes((_pending$event$detail = pending.event.detail) === null || _pending$event$detail === void 0 ? void 0 : _pending$event$detail.pointerType);
+              if (!compatibilityClick && typeof pointerId === "number" && typeof ((_pending$event$detail2 = pending.event.detail) === null || _pending$event$detail2 === void 0 ? void 0 : _pending$event$detail2.pointerId) === "number" && pointerId !== pending.event.detail.pointerId) continue;
+              if (pending.target === target || pending.target.contains(target) || target.contains(pending.target)) matched = pending;
+            }
+          } catch (err) {
+            _iterator0.e(err);
+          } finally {
+            _iterator0.f();
+          }
+          if (matched) cancelPendingTap(matched);
+          activate(event, target);
+        }
+        function activationTarget(event) {
+          var path = event.composedPath ? event.composedPath() : [];
+          var target = path[0] || event.target;
+          return target !== null && target !== void 0 && target.closest ? target : null;
+        }
+        function onTap(event) {
+          var _AelluxJs$mountManage;
+          var target = activationTarget(event);
+          if (!target) return;
+          var control = target.closest("[".concat(attr.trigger, "],[").concat(attr.dismiss, "]"));
+          if (control) refreshChangedTrigger(control);
+          var pending = {
+            event: event,
+            target: target,
+            hoverSuppressed: control && suppressHoverClick(control, event),
+            present: triggerTargets.get(control),
+            point: (_AelluxJs$mountManage = AelluxJs2.mountManager.controller(target)) === null || _AelluxJs$mountManage === void 0 ? void 0 : _AelluxJs$mountManage.point,
+            timer: null
+          };
+          pendingTaps.add(pending);
+          pending.timer = setTimeout(function() {
+            var _AelluxJs$mountManage2;
+            pendingTaps.delete(pending);
+            if (!target.isConnected || pending.point && ((_AelluxJs$mountManage2 = AelluxJs2.mountManager.controller(target)) === null || _AelluxJs$mountManage2 === void 0 ? void 0 : _AelluxJs$mountManage2.point) !== pending.point) return;
+            activate(event, target, pending.hoverSuppressed);
+          }, TAP_CLICK_WAIT_TIME);
+        }
+        function cancelPendingTap(pending) {
+          clearTimeout(pending.timer);
+          pendingTaps.delete(pending);
+        }
+        function cancelElementTaps(element) {
+          var _iterator1 = _createForOfIteratorHelper19(pendingTaps), _step1;
+          try {
+            for (_iterator1.s(); !(_step1 = _iterator1.n()).done; ) {
+              var pending = _step1.value;
+              if (element.contains(pending.target) || pending.present === element) cancelPendingTap(pending);
+            }
+          } catch (err) {
+            _iterator1.e(err);
+          } finally {
+            _iterator1.f();
+          }
+        }
+        function activate(event, eventTarget, hoverSuppressed) {
+          var container = eventTarget.closest(presentSelector);
+          var exceptions = [eventTarget];
           var button;
-          button = event.target.closest("[".concat(attr.trigger, "]"));
+          button = eventTarget.closest("[".concat(attr.trigger, "]"));
           if (button) {
             refreshChangedTrigger(button);
             var triggerAttr = button.getAttribute(attr.trigger);
@@ -32550,11 +32734,11 @@
               diagnoseTarget(button, target, attr.target, targetSelector);
               if (target) {
                 exceptions.push(target);
-                if (!suppressHoverClick(button, event)) trigger(target, triggerAttr);
+                if (!(hoverSuppressed !== null && hoverSuppressed !== void 0 ? hoverSuppressed : suppressHoverClick(button, event))) trigger(target, triggerAttr);
               }
             } else if (container) {
               exceptions.push(container);
-              if (!suppressHoverClick(button, event)) trigger(container, triggerAttr);
+              if (!(hoverSuppressed !== null && hoverSuppressed !== void 0 ? hoverSuppressed : suppressHoverClick(button, event))) trigger(container, triggerAttr);
             } else {
               AelluxJs2.diagnostics.error(AelluxJs2.diagnostics.ERROR_PRESENT_CONTROL_TARGET_MISSING, {
                 extension: extensionName,
@@ -32563,7 +32747,7 @@
               });
             }
           }
-          button = event.target.closest("[".concat(attr.dismiss, "]"));
+          button = eventTarget.closest("[".concat(attr.dismiss, "]"));
           if (button) {
             refreshChangedTrigger(button);
             var dismiss = button.getAttribute(attr.dismiss);
@@ -32611,16 +32795,16 @@
           if (controller.expanded !== visible) controller.setAriaExpanded(String(visible));
         }
         function refreshExpandedStates() {
-          var _iterator9 = _createForOfIteratorHelper19(presentElements), _step9;
+          var _iterator10 = _createForOfIteratorHelper19(presentElements), _step10;
           try {
-            for (_iterator9.s(); !(_step9 = _iterator9.n()).done; ) {
-              var _step9$value = _slicedToArray9(_step9.value, 2), element = _step9$value[0], controller = _step9$value[1];
+            for (_iterator10.s(); !(_step10 = _iterator10.n()).done; ) {
+              var _step10$value = _slicedToArray9(_step10.value, 2), element = _step10$value[0], controller = _step10$value[1];
               if (!controller.transition) syncAriaExpanded(element, controller);
             }
           } catch (err) {
-            _iterator9.e(err);
+            _iterator10.e(err);
           } finally {
-            _iterator9.f();
+            _iterator10.f();
           }
         }
         function setProgress(element, visible) {
@@ -32672,10 +32856,10 @@
           groups.delete(group);
           state.jobs.clear();
           publishGroup(group, state, null);
-          var _iterator0 = _createForOfIteratorHelper19(groupMembers(group)), _step0;
+          var _iterator11 = _createForOfIteratorHelper19(groupMembers(group)), _step11;
           try {
-            for (_iterator0.s(); !(_step0 = _iterator0.n()).done; ) {
-              var member = _step0.value;
+            for (_iterator11.s(); !(_step11 = _iterator11.n()).done; ) {
+              var member = _step11.value;
               var controller = presentElements.get(member);
               if (controller.transition) {
                 var visible = controller.direction === POP;
@@ -32689,9 +32873,9 @@
               }
             }
           } catch (err) {
-            _iterator0.e(err);
+            _iterator11.e(err);
           } finally {
-            _iterator0.f();
+            _iterator11.f();
           }
           state.memory.restore();
           if (!groups.size && groupObserver) {
@@ -32809,10 +32993,10 @@
               return presentElements.has(member2) && member2.isConnected && member2.closest(groupSelector) === group && member2.id === ids[index] && member2.getAttribute(attr.when) === conditions[index];
             });
           };
-          var _iterator1 = _createForOfIteratorHelper19(changes), _step1;
+          var _iterator12 = _createForOfIteratorHelper19(changes), _step12;
           try {
-            for (_iterator1.s(); !(_step1 = _iterator1.n()).done; ) {
-              var member = _step1.value;
+            for (_iterator12.s(); !(_step12 = _iterator12.n()).done; ) {
+              var member = _step12.value;
               var allowed = AelluxJs2.dispatchFrom(member, member === selected2 ? "BeforePop" : "BeforeUnpop", {
                 bubbles: true,
                 cancelable: true
@@ -32831,9 +33015,9 @@
               }
             }
           } catch (err) {
-            _iterator1.e(err);
+            _iterator12.e(err);
           } finally {
-            _iterator1.f();
+            _iterator12.f();
           }
           state.selected = selected2;
           var complete;
@@ -32841,10 +33025,10 @@
             complete = resolve;
           });
           state.pending = pending;
-          var _iterator10 = _createForOfIteratorHelper19(changes), _step10;
+          var _iterator13 = _createForOfIteratorHelper19(changes), _step13;
           try {
             var _loop2 = function _loop22() {
-              var member2 = _step10.value;
+              var member2 = _step13.value;
               var job = presentTransition(member2, member2 === selected2, false, true);
               if (groups.get(group) !== state || state.revision !== revision) {
                 complete(false);
@@ -32857,14 +33041,14 @@
                 if (state.jobs.get(member2) === job) state.jobs.delete(member2);
               });
             }, _ret;
-            for (_iterator10.s(); !(_step10 = _iterator10.n()).done; ) {
+            for (_iterator13.s(); !(_step13 = _iterator13.n()).done; ) {
               _ret = _loop2();
               if (_ret) return _ret.v;
             }
           } catch (err) {
-            _iterator10.e(err);
+            _iterator13.e(err);
           } finally {
-            _iterator10.f();
+            _iterator13.f();
           }
           publishGroup(group, state, selected2);
           Promise.all(members.map(function(member2) {
@@ -32884,21 +33068,24 @@
         function inHoverRegion(target, node) {
           if (!node || !node.nodeType) return false;
           if (target.contains(node)) return true;
-          var _iterator11 = _createForOfIteratorHelper19(triggerElementsSet), _step11;
+          var _iterator14 = _createForOfIteratorHelper19(triggerElementsSet), _step14;
           try {
-            for (_iterator11.s(); !(_step11 = _iterator11.n()).done; ) {
-              var button = _step11.value;
+            for (_iterator14.s(); !(_step14 = _iterator14.n()).done; ) {
+              var button = _step14.value;
               if (button.getAttribute(attr.triggerOn) === "hover" && triggerTargets.get(button) === target && button.contains(node)) return true;
             }
           } catch (err) {
-            _iterator11.e(err);
+            _iterator14.e(err);
           } finally {
-            _iterator11.f();
+            _iterator14.f();
           }
           return false;
         }
         function suppressHoverClick(button, event) {
-          return button.getAttribute(attr.triggerOn) === "hover" && event.detail > 0 && event.pointerType !== "touch" && hoveredTriggers.has(button);
+          var _event$detail;
+          var pointerType = event.pointerType || ((_event$detail = event.detail) === null || _event$detail === void 0 ? void 0 : _event$detail.pointerType);
+          var pointerActivation = typeof event.detail === "number" ? event.detail > 0 : !!pointerType;
+          return button.getAttribute(attr.triggerOn) === "hover" && pointerActivation && pointerType !== "touch" && hoveredTriggers.has(button);
         }
         function onHover(event) {
           var _event$target;
@@ -32918,10 +33105,10 @@
               } else hoveredTriggers.delete(button);
             }
           }
-          var _iterator12 = _createForOfIteratorHelper19(openPresentElements), _step12;
+          var _iterator15 = _createForOfIteratorHelper19(openPresentElements), _step15;
           try {
             var _loop3 = function _loop32() {
-              var target2 = _step12.value;
+              var target2 = _step15.value;
               if (!inHoverRegion(target2, event.target)) return 1;
               if (entering || inHoverRegion(target2, event.relatedTarget)) cancelHoverClose(target2);
               else if (_toConsumableArray8(triggerElementsSet).some(function(control) {
@@ -32934,13 +33121,13 @@
                 }, 120));
               }
             };
-            for (_iterator12.s(); !(_step12 = _iterator12.n()).done; ) {
+            for (_iterator15.s(); !(_step15 = _iterator15.n()).done; ) {
               if (_loop3()) continue;
             }
           } catch (err) {
-            _iterator12.e(err);
+            _iterator15.e(err);
           } finally {
-            _iterator12.f();
+            _iterator15.f();
           }
         }
         function getString2Time(string) {

@@ -16,7 +16,9 @@
  *
  * Outputs and owned state: keeps positions, movement, press timing, press origin
  * and current target. It dispatches non-bubbling `AelluxJsPointer*` events and
- * exposes `point.pointers()` on mounted controllers.
+ * exposes `point.pointers()` on mounted controllers. Mounted buttons, links and
+ * role=button controls also emit bubbling, composed `AelluxJsTap` events for
+ * short primary presses, independently of native click and scroll behavior.
  *
  * Lifecycle: removes global listeners, clears tracked pointers and releases
  * per-element pointer references on unmount or destruction.
@@ -41,6 +43,8 @@
   const pointableElements = new Set();
   const pointableAttribute = AelluxJs.attr("point");
   const pointableSelector = `[${pointableAttribute}]`;
+  const tapSelector = "button, a, [role=\"button\"]";
+  const tapDuration = 300;
   const pointerEvents = [
     ["down", onPointerDown], ["move", onPointerMove], ["up", onPointerUp],
     ["cancel", onPointerCancel], ["over", onPointerOver], ["out", onPointerOut]
@@ -78,6 +82,7 @@
     for (const pointer of trackedPointers.values()) {
       if (pointer.target === element) pointer.target = null;
       if (pointer.pressStart === element) pointer.pressStart = null;
+      if (pointer.tap && pointer.tap.element === element) pointer.tap = null;
     }
   }
 
@@ -153,6 +158,68 @@
     return event.pointerType === "mouse" || event.pointerType === "pen";
   }
 
+  function canTap(element) {
+    return element && pointableElements.has(element) && element.isConnected &&
+      element.hasAttribute(pointableAttribute) && limitFor(element) > 0 &&
+      element.matches(tapSelector) && !element.matches(":disabled, [disabled]") &&
+      !element.closest('[aria-disabled="true"], [inert]');
+  }
+
+  function startTap(pointer, event, wasPressed) {
+    pointer.tap = null;
+    let multitouch = false;
+    if (event.pointerType === "touch") {
+      for (const other of trackedPointers.values()) {
+        if (other !== pointer && other.pressed && other.pointerType === "touch") {
+          other.tap = null;
+          multitouch = true;
+        }
+      }
+    }
+    if (wasPressed || multitouch || !event.isPrimary || event.button !== 0) return;
+    // composedPath reveals explicitly mounted controls inside an open shadow root
+    // without changing the existing Pointer* target routing.
+    const origin = event.composedPath ? event.composedPath()[0] : event.target;
+    const element = targetFor(origin, pointer);
+    if (!canTap(element)) return;
+    const scrollOffsets = [];
+    let ancestor = element;
+    while (ancestor) {
+      scrollOffsets.push({ element: ancestor, x: ancestor.scrollLeft, y: ancestor.scrollTop });
+      ancestor = ancestor.parentElement || (ancestor.getRootNode && ancestor.getRootNode().host);
+    }
+    pointer.tap = {
+      element, distance: 0, limit: event.pointerType === "mouse" ? 4 : 10,
+      bounds: element.getBoundingClientRect(), scrollOffsets
+    };
+  }
+
+  function finishTap(pointer, event) {
+    const tap = pointer.tap;
+    // Consume before any consumer callbacks can reenter release handling.
+    pointer.tap = null;
+    if (!tap || !event.isPrimary || event.button !== 0 ||
+      event.pointerType !== pointer.pointerType || pointer.deltaTime > tapDuration ||
+      !canTap(tap.element)) return null;
+    const path = event.composedPath ? event.composedPath() : [];
+    const target = path[0] || event.target;
+    const captured = target && target.hasPointerCapture && target.hasPointerCapture(event.pointerId);
+    if (captured || (!path.includes(tap.element) && !tap.element.contains(target))) {
+      // Capture can conceal an outside release; scroll can retarget a stationary
+      // release. Check the press area and only use scroll changes to allow that
+      // retargeting, never as an independent reason to cancel a gesture.
+      const bounds = tap.bounds;
+      if (event.clientX < bounds.left || event.clientX > bounds.right ||
+        event.clientY < bounds.top || event.clientY > bounds.bottom) return null;
+      if (!captured && !tap.scrollOffsets.some(offset =>
+        offset.element.scrollLeft !== offset.x || offset.element.scrollTop !== offset.y)) return null;
+    }
+    return { element: tap.element, detail: {
+      pointerType: pointer.pointerType, pointerId: pointer.pointerId,
+      duration: pointer.deltaTime, distance: tap.distance, originalEvent: event
+    } };
+  }
+
   function addPointer(event, pressed, hover) {
     const pointer = new AePointer(event, pressed, hover);
     trackedPointers.set(event.pointerId, pointer);
@@ -160,8 +227,11 @@
   }
 
   function onPointerDown(event) {
-    const pointer = trackedPointers.get(event.pointerId) ||
+    let pointer = trackedPointers.get(event.pointerId);
+    const wasPressed = pointer && pointer.pressed;
+    pointer = pointer ||
       addPointer(event, true, canHover(event));
+    pointer.tap = null;
     pointer.initial.x = event.clientX;
     pointer.initial.y = event.clientY;
     pointer.pointerType = event.pointerType;
@@ -171,6 +241,7 @@
     pointer.update(event);
     pointer.target = targetFor(event.target, pointer);
     pointer.pressStart = pointer.target;
+    startTap(pointer, event, wasPressed);
     dispatchToTarget("PointerDown", pointer, event);
   }
 
@@ -192,13 +263,18 @@
     pointer.pressed = false;
     pointer.endPress();
     pointer.target = targetFor(event.target, pointer);
+    const tap = finishTap(pointer, event);
     dispatchRelease("PointerUp", pointer, event);
+    if (tap && canTap(tap.element)) AelluxJs.dispatchFrom(tap.element, "tap", {
+      bubbles: true, composed: true, detail: tap.detail
+    });
     if (!pointer.hover) trackedPointers.delete(event.pointerId);
   }
 
   function onPointerCancel(event) {
     const pointer = trackedPointers.get(event.pointerId);
     if (pointer) {
+      pointer.tap = null;
       pointer.update(event);
       pointer.pressed = false;
       pointer.endPress();
@@ -247,6 +323,7 @@
       this.hover = hover;
       this.target = null;
       this.pressStart = null;
+      this.tap = null;
     }
 
     get deltaTime() {
@@ -270,6 +347,17 @@
       this.delta.x = this.current.x - this.initial.x;
       this.delta.y = this.current.y - this.initial.y;
       this.buttons = event.buttons;
+      if (this.tap) {
+        let distance = Math.hypot(this.delta.x, this.delta.y);
+        if (event.getCoalescedEvents) {
+          for (const sample of event.getCoalescedEvents()) {
+            distance = Math.max(distance,
+              Math.hypot(sample.clientX - this.initial.x, sample.clientY - this.initial.y));
+          }
+        }
+        this.tap.distance = Math.max(this.tap.distance, distance);
+        if (distance > this.tap.limit) this.tap = null;
+      }
     }
 
     beforeDispatch() {

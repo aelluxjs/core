@@ -63,6 +63,7 @@ These events are available when the corresponding Extension is loaded. Events fr
 | Adaptive | `AelluxJsAdaptiveUpdate` | Updated element; `detail` is `{ width, height, ratio }`. |
 | Feedback | `AelluxJsFeedback` | Feedback target, or `document`; `detail` is `{ type, message, value, target, motion }`. The event is cancelable. A matching mounted feedback boundary stops propagation. |
 | Point | `AelluxJsPointerDown`, `AelluxJsPointerMove`, `AelluxJsPointerUp`, `AelluxJsPointerCancel`, `AelluxJsPointerHover` | Selected element; `detail` includes `pointer`, `target`, `pressStart`, `originalEvent`, and `hover`. These events do **not** bubble. |
+| Point | `AelluxJsTap` | Eligible mounted button, link or role button; bubbling and composed. `detail` is `{ pointerType, pointerId, duration, distance, originalEvent }`. Emitted on a valid short primary release, independently of native click and scroll. |
 | Preference | `AelluxJsPreferencesChange` | `document`; `detail` is `{ changed, preferences }`, with a changed-key array and a snapshot of current values. `changed` can be empty. |
 | Present | `AelluxJsBeforePop`, `AelluxJsBeforeUnpop` | Present element; cancelable before a transition starts. |
 | Present | `AelluxJsPopping`, `AelluxJsUnpopping`, `AelluxJsPop`, `AelluxJsUnpop` | Present element; transition start and completion notifications. |

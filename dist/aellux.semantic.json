@@ -15000,6 +15000,15 @@
     {
       "bubbles": true,
       "cancelable": false,
+      "name": "AelluxJsTap",
+      "extension": "point",
+      "composed": true,
+      "description": "Short primary pointer activation of an eligible mounted Point control. Bubbles across shadow boundaries; detail: { pointerType, pointerId, duration, distance, originalEvent }. Independent of native click and scroll.",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.0/runtime/events.htm"
+    },
+    {
+      "bubbles": true,
+      "cancelable": false,
       "name": "AelluxJsUnmount",
       "extension": "core",
       "description": "Unmount pass completed on document. detail: { root, extensions, elements }.",

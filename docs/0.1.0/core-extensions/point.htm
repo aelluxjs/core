@@ -39,6 +39,7 @@
 
 <script src="/core/dist/aellux.min.js"></script>
 <script>
+  AelluxJs.ext("point");
   AelluxJs.ext("ajax-href");
   AelluxJs.ext("preference");
   AelluxJs.ext("state-navigation");
@@ -226,7 +227,7 @@
           </div>
 
           <button class="navbar-toggler" type="button" data-ae-trigger="toggle" data-ae-target="#navbarSupportedContent"
-            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation" data-ae-point>
             <div class="hamburger">
               <span></span>
               <span></span>
@@ -291,7 +292,8 @@
                 </div>
                 <div class="d-flex flex-column" data-ae-present-group>
                                       <div class="nav-item mt-1 small-md fw-bold rounded-1 ps-md-1 bg-light-adaptive" style="flex:0">
-                      <button type="button" class="nav-link w-100 text-start text-capitalize p-2 p-md-1 px-3 px-md-2"
+                      <button data-ae-point type="button"
+                        class="nav-link w-100 text-start text-capitalize p-2 p-md-1 px-3 px-md-2"
                         data-ae-trigger="toggle" data-ae-target="#children-overview">
                         Overview                          <span class="chevron"><svg class="svg-icon small"
                                 aria-hidden="true" focusable="false">
@@ -335,7 +337,8 @@
                                                                                                 </div>
                       </div>
                                                                   <div class="nav-item mt-1 small-md fw-bold rounded-1 ps-md-1 bg-light-adaptive" style="flex:0">
-                      <button type="button" class="nav-link w-100 text-start text-capitalize p-2 p-md-1 px-3 px-md-2"
+                      <button data-ae-point type="button"
+                        class="nav-link w-100 text-start text-capitalize p-2 p-md-1 px-3 px-md-2"
                         data-ae-trigger="toggle" data-ae-target="#children-runtime">
                         Runtime                          <span class="chevron"><svg class="svg-icon small"
                                 aria-hidden="true" focusable="false">
@@ -414,7 +417,8 @@
                                                                                                 </div>
                       </div>
                                                                   <div class="nav-item mt-1 small-md fw-bold rounded-1 ps-md-1 bg-light-adaptive" style="flex:0">
-                      <button type="button" class="nav-link w-100 text-start text-capitalize p-2 p-md-1 px-3 px-md-2"
+                      <button data-ae-point type="button"
+                        class="nav-link w-100 text-start text-capitalize p-2 p-md-1 px-3 px-md-2"
                         data-ae-trigger="toggle" data-ae-target="#children-extensions">
                         Extensions                          <span class="chevron"><svg class="svg-icon small"
                                 aria-hidden="true" focusable="false">
@@ -493,7 +497,8 @@
                                                                                                 </div>
                       </div>
                                                                   <div class="nav-item mt-1 small-md fw-bold rounded-1 ps-md-1 bg-light-adaptive" style="flex:0">
-                      <button type="button" class="nav-link w-100 text-start text-capitalize p-2 p-md-1 px-3 px-md-2"
+                      <button data-ae-point type="button"
+                        class="nav-link w-100 text-start text-capitalize p-2 p-md-1 px-3 px-md-2"
                         data-ae-trigger="toggle" data-ae-target="#children-core-extensions">
                         Core Extensions                          <span class="chevron"><svg class="svg-icon small"
                                 aria-hidden="true" focusable="false">
@@ -592,7 +597,8 @@
                                                                                                 </div>
                       </div>
                                                                   <div class="nav-item mt-1 small-md fw-bold rounded-1 ps-md-1 bg-light-adaptive" style="flex:0">
-                      <button type="button" class="nav-link w-100 text-start text-capitalize p-2 p-md-1 px-3 px-md-2"
+                      <button data-ae-point type="button"
+                        class="nav-link w-100 text-start text-capitalize p-2 p-md-1 px-3 px-md-2"
                         data-ae-trigger="toggle" data-ae-target="#children-integrations">
                         Integrations                          <span class="chevron"><svg class="svg-icon small"
                                 aria-hidden="true" focusable="false">
@@ -634,8 +640,9 @@
           style="top:64px;z-index:1;" role="contentinfo">
 
           <div class="menu-toggle d-flex flex-row gap-2 small">
-            <button id="button-toc-menu" type="button" class="btn btn-outline-adaptive rounded-1 text-nowrap"
-              data-ae-trigger="toggle" data-ae-target="#toc-collapse" aria-expanded="false" aria-controls="toc-collapse"
+            <button data-ae-point id="button-toc-menu" type="button"
+              class="btn btn-outline-adaptive rounded-1 text-nowrap" data-ae-trigger="toggle"
+              data-ae-target="#toc-collapse" aria-expanded="false" aria-controls="toc-collapse"
               aria-label="Table of Contents" title="Summary">
               <svg class="svg-icon" aria-hidden="true" focusable="false">
                 <use href="#bi-layout-text-sidebar"></use>
@@ -717,10 +724,25 @@ $ae.on(&quot;Ready&quot;, function (event) {
 <p>An empty <code>data-ae-point</code> allows one pointer by default. A non-negative integer sets the maximum number of pointers associated with that element; <code>0</code> disables association and invalid values use the default of one. Each pointer selects the nearest mounted element with available capacity, continuing up the ancestor tree if a nearer element is full or disabled. The mounted controller method <code>$ae(elementOrId).point.pointers()</code> returns the pointers whose current <code>target</code> is that element.</p>
 <p>Each pointer record is an <code>AePointer</code> instance with <code>pointerId</code>, <code>pointerType</code>, <code>initial</code>, <code>current</code>, <code>delta</code>, <code>movement</code>, <code>time</code>, <code>deltaTime</code>, <code>buttons</code>, <code>pressed</code>, <code>hover</code>, <code>target</code>, and <code>pressStart</code>. Positions use viewport <code>clientX</code> and <code>clientY</code> coordinates as <code>{ x, y }</code>; <code>delta</code> is <code>current - initial</code>, while <code>movement</code> is <code>current - last dispatched position</code>. The first dispatched event has zero movement. Events with no recipient do not advance that reference position. <code>time.pressStart</code> and <code>time.pressEnd</code> are <code>performance.now()</code> timestamps in milliseconds. Both are <code>null</code> before a press; <code>pressEnd</code> remains <code>null</code> while pressed. <code>deltaTime</code> returns the elapsed milliseconds from <code>pressStart</code> to the current time while pressed, then the fixed duration between <code>pressStart</code> and <code>pressEnd</code>. Each new press resets the timing. <code>target</code> is the current mounted element or <code>null</code>; <code>pressStart</code> is the element selected on the latest <code>pointerdown</code>, or <code>null</code> before the first press. The array returned by <code>pointers()</code> is a snapshot; its pointer records update in place.</p>
 <p>The Extension listens to <code>pointerdown</code>, <code>pointermove</code>, <code>pointerup</code>, <code>pointercancel</code>, <code>pointerover</code>, and <code>pointerout</code> in the capture phase. It dispatches <code>AelluxJsPointerDown</code>, <code>AelluxJsPointerMove</code>, <code>AelluxJsPointerUp</code>, <code>AelluxJsPointerCancel</code>, and <code>AelluxJsPointerHover</code> directly on the selected element. These events use <code>bubbles: false</code>, so an ancestor does not receive a child&#39;s event unless it becomes the selected target. <code>detail</code> contains <code>pointer</code>, the current <code>target</code>, the <code>pressStart</code> element, and <code>originalEvent</code>. <code>PointerUp</code> and <code>PointerCancel</code> reach the current target and the press origin when they differ, once per element. When release occurs outside every marked element, <code>detail.target</code> is <code>null</code> and the event still reaches <code>pressStart</code>. Unmounting an element clears matching stored references. Hover events also set <code>detail.hover</code> to <code>true</code> or <code>false</code> and are sent only when the selected target changes. The initial position is set on the first observed hover or press and resets on each press. Mouse and pen pointers remain tracked while hovering after release. Touch pointers leave after their <code>PointerUp</code> event; canceled pointers leave after <code>PointerCancel</code>. Destroying the Extension removes its listeners, mount map, and tracked pointers.</p>
+<h2>Tap recognition</h2>
+<p>Mounted <code>button[data-ae-point]</code>, <code>a[data-ae-point]</code> and <code>[role=&quot;button&quot;][data-ae-point]</code> controls also emit <code>AelluxJsTap</code>. The nearest Point target must be eligible and enabled; an attribute on an unmounted element does not activate recognition. Native disabled controls (including disabled fieldsets), <code>aria-disabled=&quot;true&quot;</code>, inert controls and <code>data-ae-point=&quot;0&quot;</code> cannot tap.</p>
+<pre><code class="language-html">&lt;button id=&quot;action&quot; data-ae-point&gt;Activate&lt;/button&gt;
+</code></pre>
+<pre><code class="language-js">$ae.onEvent(document.getElementById(&quot;action&quot;), &quot;tap&quot;, event =&gt; {
+  const { pointerType, pointerId, duration, distance } = event.detail;
+  console.log(pointerType, pointerId, duration, distance);
+});
+</code></pre>
+<p>Recognition uses a primary pointer&#39;s main button and completes synchronously on <code>pointerup</code>, within 300 ms. Maximum radial displacement from the press position is 10 CSS px for touch and pen, or 4 CSS px for mouse. The maximum observed displacement counts even if the pointer returns to its starting position, including coalesced samples when available. <code>pointercancel</code>, excessive movement or duration, release outside the control, and overlapping touch contacts cancel recognition. Captured releases use the control&#39;s bounds at press time. If scrolling retargets an uncaptured release, the same press area remains valid; ancestor scroll offsets are checked only to allow that retargeting, never to cancel a tap.</p>
+<p>The event is a bubbling, composed <code>CustomEvent</code>, named through <code>$ae.eventName(&quot;tap&quot;)</code>. Its <code>detail</code> contains <code>pointerType</code>, <code>pointerId</code>, <code>duration</code> in milliseconds, maximum <code>distance</code> in CSS px, and <code>originalEvent</code> (the releasing PointerEvent). It can cross a Shadow DOM boundary when the control has been explicitly mounted. Unmounting cancels pending taps; remounting enables fresh presses without duplicating listeners.</p>
+<p>Scroll events never independently cancel recognition, including inside Scrollbox. A valid tap still emits when a Point notification or tap handler scrolls an element. Native <code>pointercancel</code> and pointer movement limits continue to apply. Point does not prevent defaults, synthesize clicks, wait for clicks or deduplicate tap against click. A pointer activation can emit both <code>tap</code> and native <code>click</code>; consumers subscribing to both must coordinate their own actions. Keyboard activation keeps its native click path and does not generate tap.</p>
+<h2>Bundle cost</h2>
+<p>Tap recognition adds no dependencies. Against the preceding artifacts, minified Point grows from 4,057 to 5,894 bytes (gzip: 1,550 to 2,236), and Legacy Point from 7,338 to 9,325 bytes (gzip: 2,753 to 3,465). Adding Point alone grows Full by 1,837 bytes / 646 gzip bytes in Modern and 1,989 bytes / 680 gzip bytes in Legacy. Including <a href="present.htm#tap-and-native-click">Present&#39;s tap/click routing</a>, the combined Full delta is 3,016 bytes / 1,052 gzip bytes in Modern and 3,459 bytes / 1,110 gzip bytes in Legacy.</p>
+<p>Modern Point retains its 6 KiB raw / 3 KiB gzip budget. Legacy Point&#39;s budget changes from 8 / 3 KiB to 9.5 / 3.5 KiB. The combined feature changes Modern Full from 131.5 / 42.75 KiB to 135.5 / 44 KiB; Legacy Full&#39;s raw budget changes from 451 to 454.5 KiB and retains its 138 KiB gzip budget. The preceding Modern Full artifact already exceeded its former raw limit by 257 bytes; the measured tap delta above is separate from that baseline excess.</p>
 <h2>Accessibility profile</h2>
 <ul>
 <li><strong>Capabilities:</strong> interaction and input; infrastructure for multi-pointer tracking.</li>
-<li><strong>Owned state:</strong> pointer records, pointable relations and non-bubbling <code>AelluxJsPointer*</code> events.</li>
+<li><strong>Owned state:</strong> pointer records, pointable relations, non-bubbling <code>AelluxJsPointer*</code> events and bubbling <code>AelluxJsTap</code> notifications.</li>
 <li><strong>Consumer responsibility:</strong> every essential pointer action must also have a native keyboard-operable control or equivalent non-pointer path.</li>
 <li><strong>Not applicable:</strong> the Extension creates no controls and changes no semantic, focus, visual or motion state by itself.</li>
 </ul>

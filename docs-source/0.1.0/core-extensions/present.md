@@ -23,6 +23,20 @@
 
 A trigger or dismiss control with neither an ID nor a containing `data-ae-present` reports `ERROR_PRESENT_CONTROL_TARGET_MISSING` (`1111`).
 
+## Tap and native click
+
+Present also consumes Point's `AelluxJsTap` notifications through the same trigger, dismiss and outside-activation routing as native click. Add `data-ae-point` to an eligible button, link or role button and mount it with Point. Full includes Point; Basic must register `$ae.ext("point")` as well as Present.
+
+```html
+<button type="button" data-ae-point data-ae-trigger="toggle" data-ae-target="details">Details</button>
+```
+
+Click keeps priority: Present queues a tap fallback with a 32 ms grace period, allowing touch compatibility clicks delivered in a later input task to arrive first. A click reaching Present before that fallback, on the same control or its descendants and with the same pointer ID when reported consistently, cancels the pending tap and performs the action immediately. WebKit can report a touch/pen compatibility click as mouse input with another ID; that pair is matched by its target within the same grace period. A tap without that click performs the action once when its fallback runs. Different controls and different IDs of the same pointer type remain independent, and a later gesture is accepted normally. This deduplication belongs to Present; Point continues to emit tap immediately and native click remains unchanged.
+
+Keyboard clicks keep their normal path. Mouse taps on an already hovered trigger respect the existing hover suppression; touch taps retain their configured action. Unmounting a related Present target or control, unmounting/remounting its Point controller, or destroying Present cancels the pending fallback. Destroy also removes the tap listener.
+
+The integration adds no dependencies. Minified Present grows from 18,858 to 20,037 bytes (gzip: 6,727 to 7,124), and Legacy Present from 26,358 to 27,825 bytes (gzip: 9,329 to 9,760). Budgets change from 18.5 / 6.5 KiB to 20 / 7.25 KiB for Modern and from 26 / 9 KiB to 28 / 9.75 KiB for Legacy. Both preceding gzip artifacts already exceeded their old limits. Combined Full costs are recorded in [Point](point.md#bundle-cost).
+
 ## Motion and state
 
 The Extension exposes `pop(element)`, `unpop(element)`, `toggle(element, goto)`, and `trigger(element, action)` through `$ae.ext.present`. A mounted element also has controller methods:

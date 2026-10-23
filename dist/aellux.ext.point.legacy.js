@@ -120,6 +120,8 @@
     var pointableElements = /* @__PURE__ */ new Set();
     var pointableAttribute = AelluxJs.attr("point");
     var pointableSelector = "[".concat(pointableAttribute, "]");
+    var tapSelector = 'button, a, [role="button"]';
+    var tapDuration = 300;
     var pointerEvents = [["down", onPointerDown], ["move", onPointerMove], ["up", onPointerUp], ["cancel", onPointerCancel], ["over", onPointerOver], ["out", onPointerOut]];
     AelluxJs.extAttach(extensionName, {
       init: init,
@@ -176,6 +178,7 @@
           var pointer = _step3.value;
           if (pointer.target === element) pointer.target = null;
           if (pointer.pressStart === element) pointer.pressStart = null;
+          if (pointer.tap && pointer.tap.element === element) pointer.tap = null;
         }
       } catch (err) {
         _iterator3.e(err);
@@ -266,13 +269,85 @@
     function canHover(event) {
       return event.pointerType === "mouse" || event.pointerType === "pen";
     }
+    function canTap(element) {
+      return element && pointableElements.has(element) && element.isConnected && element.hasAttribute(pointableAttribute) && limitFor(element) > 0 && element.matches(tapSelector) && !element.matches(":disabled, [disabled]") && !element.closest('[aria-disabled="true"], [inert]');
+    }
+    function startTap(pointer, event, wasPressed) {
+      pointer.tap = null;
+      var multitouch = false;
+      if (event.pointerType === "touch") {
+        var _iterator6 = _createForOfIteratorHelper(trackedPointers.values()), _step6;
+        try {
+          for (_iterator6.s(); !(_step6 = _iterator6.n()).done; ) {
+            var other = _step6.value;
+            if (other !== pointer && other.pressed && other.pointerType === "touch") {
+              other.tap = null;
+              multitouch = true;
+            }
+          }
+        } catch (err) {
+          _iterator6.e(err);
+        } finally {
+          _iterator6.f();
+        }
+      }
+      if (wasPressed || multitouch || !event.isPrimary || event.button !== 0) return;
+      var origin = event.composedPath ? event.composedPath()[0] : event.target;
+      var element = targetFor(origin, pointer);
+      if (!canTap(element)) return;
+      var scrollOffsets = [];
+      var ancestor = element;
+      while (ancestor) {
+        scrollOffsets.push({
+          element: ancestor,
+          x: ancestor.scrollLeft,
+          y: ancestor.scrollTop
+        });
+        ancestor = ancestor.parentElement || ancestor.getRootNode && ancestor.getRootNode().host;
+      }
+      pointer.tap = {
+        element: element,
+        distance: 0,
+        limit: event.pointerType === "mouse" ? 4 : 10,
+        bounds: element.getBoundingClientRect(),
+        scrollOffsets: scrollOffsets
+      };
+    }
+    function finishTap(pointer, event) {
+      var tap = pointer.tap;
+      pointer.tap = null;
+      if (!tap || !event.isPrimary || event.button !== 0 || event.pointerType !== pointer.pointerType || pointer.deltaTime > tapDuration || !canTap(tap.element)) return null;
+      var path = event.composedPath ? event.composedPath() : [];
+      var target = path[0] || event.target;
+      var captured = target && target.hasPointerCapture && target.hasPointerCapture(event.pointerId);
+      if (captured || !path.includes(tap.element) && !tap.element.contains(target)) {
+        var bounds = tap.bounds;
+        if (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom) return null;
+        if (!captured && !tap.scrollOffsets.some(function(offset) {
+          return offset.element.scrollLeft !== offset.x || offset.element.scrollTop !== offset.y;
+        })) return null;
+      }
+      return {
+        element: tap.element,
+        detail: {
+          pointerType: pointer.pointerType,
+          pointerId: pointer.pointerId,
+          duration: pointer.deltaTime,
+          distance: tap.distance,
+          originalEvent: event
+        }
+      };
+    }
     function addPointer(event, pressed, hover) {
       var pointer = new AePointer(event, pressed, hover);
       trackedPointers.set(event.pointerId, pointer);
       return pointer;
     }
     function onPointerDown(event) {
-      var pointer = trackedPointers.get(event.pointerId) || addPointer(event, true, canHover(event));
+      var pointer = trackedPointers.get(event.pointerId);
+      var wasPressed = pointer && pointer.pressed;
+      pointer = pointer || addPointer(event, true, canHover(event));
+      pointer.tap = null;
       pointer.initial.x = event.clientX;
       pointer.initial.y = event.clientY;
       pointer.pointerType = event.pointerType;
@@ -282,6 +357,7 @@
       pointer.update(event);
       pointer.target = targetFor(event.target, pointer);
       pointer.pressStart = pointer.target;
+      startTap(pointer, event, wasPressed);
       dispatchToTarget("PointerDown", pointer, event);
     }
     function onPointerMove(event) {
@@ -301,12 +377,19 @@
       pointer.pressed = false;
       pointer.endPress();
       pointer.target = targetFor(event.target, pointer);
+      var tap = finishTap(pointer, event);
       dispatchRelease("PointerUp", pointer, event);
+      if (tap && canTap(tap.element)) AelluxJs.dispatchFrom(tap.element, "tap", {
+        bubbles: true,
+        composed: true,
+        detail: tap.detail
+      });
       if (!pointer.hover) trackedPointers.delete(event.pointerId);
     }
     function onPointerCancel(event) {
       var pointer = trackedPointers.get(event.pointerId);
       if (pointer) {
+        pointer.tap = null;
         pointer.update(event);
         pointer.pressed = false;
         pointer.endPress();
@@ -370,6 +453,7 @@
         this.hover = hover;
         this.target = null;
         this.pressStart = null;
+        this.tap = null;
       }
       return _createClass(AePointer2, [{
         key: "deltaTime",
@@ -397,6 +481,24 @@
           this.delta.x = this.current.x - this.initial.x;
           this.delta.y = this.current.y - this.initial.y;
           this.buttons = event.buttons;
+          if (this.tap) {
+            var distance = Math.hypot(this.delta.x, this.delta.y);
+            if (event.getCoalescedEvents) {
+              var _iterator7 = _createForOfIteratorHelper(event.getCoalescedEvents()), _step7;
+              try {
+                for (_iterator7.s(); !(_step7 = _iterator7.n()).done; ) {
+                  var sample = _step7.value;
+                  distance = Math.max(distance, Math.hypot(sample.clientX - this.initial.x, sample.clientY - this.initial.y));
+                }
+              } catch (err) {
+                _iterator7.e(err);
+              } finally {
+                _iterator7.f();
+              }
+            }
+            this.tap.distance = Math.max(this.tap.distance, distance);
+            if (distance > this.tap.limit) this.tap = null;
+          }
         }
       }, {
         key: "beforeDispatch",

@@ -6,6 +6,8 @@ All notable changes to aellux.js will be documented in this file.
 
 ### Added
 
+- Point recognizes short primary taps on mounted buttons, links and role buttons, emitting bubbling, composed `AelluxJsTap` events independently of native click and scroll, with lifecycle cleanup and Modern/Legacy coverage.
+- Present routes Point taps through its existing trigger, dismiss and outside activation behavior, deferring tap-only actions so a matching native click takes priority without a duplicate action; pending fallbacks are cleaned up on unmount and destruction.
 - Development diagnostics identify competing transform writers (`2033`) from actual CSS Motion effects and Present declarations on Elastic wrappers. Transformed Snap items now emit the existing `2020` warning.
 - Overflow Marquee waits for the configured delay at both ends of each pass and pauses by default during mouse hover or focus within, preserving the position and remaining endpoint delay until every pause reason clears.
 - A dedicated Overflow Marquee Extension mounts `data-ae-overflow-marquee`, initializing Anchor as its placement dependency. It owns forced single-line weak CSS, linear overflow motion with an instant reset, root reduced-motion ellipsis, and native desktop `title` tooltips. Animation starts only while visible and preserves its position and remaining delay while hidden, offscreen or in a background document. Wrapping preserves original nodes and is reversed on unmount. Full loads its separate Modern or Legacy file on demand; Basic registers only `overflow-marquee`.
