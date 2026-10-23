@@ -3,6 +3,11 @@
 export function buildLayoutScheduler() {
   const MIN_FPS = 5;
   const FPS_STEP = 15;
+  const PRESSURE_WINDOW_MS = 3000;
+  const PRESSURE_MIN_DURATION_MS = 2000;
+  const PRESSURE_MIN_SAMPLES = 24;
+  const PRESSURE_MIN_SLOW_SAMPLES = 12;
+  const PRESSURE_SLOW_RATIO = 0.35;
   const BASE_RECOVERY_DELAY = 1000;
   const MAX_RECOVERY_DELAY = 8000;
   const queues = { read: [], update: [] };
@@ -27,7 +32,6 @@ export function buildLayoutScheduler() {
   let lastFrameTime = null;
   let frameCredit = 0;
   let samples = [];
-  let slowStreak = 0;
   let lastAdjustment = -Infinity;
   let stableSince = null;
   let recoveryDelay = BASE_RECOVERY_DELAY;
@@ -69,7 +73,6 @@ export function buildLayoutScheduler() {
     lastFrameTime = null;
     frameCredit = 0;
     samples = [];
-    slowStreak = 0;
     stableSince = null;
     initialDeltas = [];
     if (resetLimit) {
@@ -125,7 +128,6 @@ export function buildLayoutScheduler() {
     if (delta <= 0 || delta > 250) {
       frameCredit = 0;
       samples = [];
-      slowStreak = 0;
       stableSince = null;
       return true;
     }
@@ -140,9 +142,8 @@ export function buildLayoutScheduler() {
     } else {
       const expected = 1000 / Math.max(MIN_FPS, limitFPS);
       const slow = delta > expected * 1.23;
-      slowStreak = slow ? slowStreak + 1 : 0;
       samples.push({ time, slow, delay: delta, cost: 0 });
-      while (samples.length && time - samples[0].time > 1000) samples.shift();
+      while (samples.length && time - samples[0].time > PRESSURE_WINDOW_MS) samples.shift();
       adjustLimit(time);
     }
     const effectiveFPS = Math.min(limitFPS === null ? Infinity : limitFPS, visualFPSLimit());
@@ -155,9 +156,12 @@ export function buildLayoutScheduler() {
   }
 
   function adjustLimit(time) {
-    if (samples.length < 8 || time - samples[0].time < 700) return;
+    // Require sustained evidence; a short consecutive burst must not lower FPS.
+    if (samples.length < PRESSURE_MIN_SAMPLES ||
+      time - samples[0].time < PRESSURE_MIN_DURATION_MS) return;
     const slowCount = samples.reduce((n, item) => n + (item.slow ? 1 : 0), 0);
-    if (slowStreak >= 4 || slowCount / samples.length >= 0.35) {
+    if (slowCount >= PRESSURE_MIN_SLOW_SAMPLES &&
+      slowCount / samples.length >= PRESSURE_SLOW_RATIO) {
       stableSince = null;
       if (time - lastAdjustment >= 1000 && limitFPS > MIN_FPS) {
         const previous = limitFPS;
@@ -169,7 +173,6 @@ export function buildLayoutScheduler() {
         trialLimit = null;
         lastAdjustment = time;
         samples = [];
-        slowStreak = 0;
         frameCredit = 0;
       }
     } else {
@@ -182,7 +185,6 @@ export function buildLayoutScheduler() {
     lastFrameTime = null;
     frameCredit = 0;
     samples = [];
-    slowStreak = 0;
     initialDeltas = [];
     if (nativeFPS === null || limitFPS >= nativeFPS) return;
     if (stableSince === null) stableSince = idleSince;

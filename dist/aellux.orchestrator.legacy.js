@@ -21659,6 +21659,11 @@
   function buildLayoutScheduler() {
     var MIN_FPS = 5;
     var FPS_STEP = 15;
+    var PRESSURE_WINDOW_MS = 3e3;
+    var PRESSURE_MIN_DURATION_MS = 2e3;
+    var PRESSURE_MIN_SAMPLES = 24;
+    var PRESSURE_MIN_SLOW_SAMPLES = 12;
+    var PRESSURE_SLOW_RATIO = 0.35;
     var BASE_RECOVERY_DELAY = 1e3;
     var MAX_RECOVERY_DELAY = 8e3;
     var queues = {
@@ -21679,7 +21684,6 @@
     var lastFrameTime = null;
     var frameCredit = 0;
     var samples = [];
-    var slowStreak = 0;
     var lastAdjustment = -Infinity;
     var stableSince = null;
     var recoveryDelay = BASE_RECOVERY_DELAY;
@@ -21730,7 +21734,6 @@
       lastFrameTime = null;
       frameCredit = 0;
       samples = [];
-      slowStreak = 0;
       stableSince = null;
       initialDeltas = [];
       if (resetLimit) {
@@ -21778,7 +21781,6 @@
       if (delta <= 0 || delta > 250) {
         frameCredit = 0;
         samples = [];
-        slowStreak = 0;
         stableSince = null;
         return true;
       }
@@ -21795,14 +21797,13 @@
       } else {
         var expected = 1e3 / Math.max(MIN_FPS, limitFPS);
         var slow = delta > expected * 1.23;
-        slowStreak = slow ? slowStreak + 1 : 0;
         samples.push({
           time: time,
           slow: slow,
           delay: delta,
           cost: 0
         });
-        while (samples.length && time - samples[0].time > 1e3) samples.shift();
+        while (samples.length && time - samples[0].time > PRESSURE_WINDOW_MS) samples.shift();
         adjustLimit(time);
       }
       var effectiveFPS = Math.min(limitFPS === null ? Infinity : limitFPS, visualFPSLimit());
@@ -21814,11 +21815,11 @@
       return true;
     }
     function adjustLimit(time) {
-      if (samples.length < 8 || time - samples[0].time < 700) return;
+      if (samples.length < PRESSURE_MIN_SAMPLES || time - samples[0].time < PRESSURE_MIN_DURATION_MS) return;
       var slowCount = samples.reduce(function(n, item) {
         return n + (item.slow ? 1 : 0);
       }, 0);
-      if (slowStreak >= 4 || slowCount / samples.length >= 0.35) {
+      if (slowCount >= PRESSURE_MIN_SLOW_SAMPLES && slowCount / samples.length >= PRESSURE_SLOW_RATIO) {
         stableSince = null;
         if (time - lastAdjustment >= 1e3 && limitFPS > MIN_FPS) {
           var previous = limitFPS;
@@ -21833,7 +21834,6 @@
           trialLimit = null;
           lastAdjustment = time;
           samples = [];
-          slowStreak = 0;
           frameCredit = 0;
         }
       } else {
@@ -21845,7 +21845,6 @@
       lastFrameTime = null;
       frameCredit = 0;
       samples = [];
-      slowStreak = 0;
       initialDeltas = [];
       if (nativeFPS === null || limitFPS >= nativeFPS) return;
       if (stableSince === null) stableSince = idleSince;
