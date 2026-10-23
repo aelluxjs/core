@@ -18,7 +18,7 @@ Choose the method from the outcome of the event, not from the current `verboseLe
 | Method | Use when | Example |
 | --- | --- | --- |
 | `error()` | An operation failed or could not complete as intended. | An Extension failed to initialize. |
-| `warn()` | The system can continue, but a limitation or unexpected condition<br>needs attention. | A browser capability is missing and the Legacy runtime will be used. |
+| `warn()` | <span style="white-space: normal !important;">The system can continue, but a limitation or unexpected condition needs attention.</span> | <span style="white-space: normal !important;">A browser capability is missing and the Legacy runtime will be used.</span> |
 | `info()` | An expected state change is useful to observe. | The Legacy runtime is starting. |
 
 All three methods accept a catalog definition and an optional context object, return an `AelluxJsDiagnosticError`, and record the event in the diagnostic history. `error()` writes to `console.error`, `warn()` to `console.warn`, and `info()` to `console.info` when their level is visible.
@@ -97,17 +97,17 @@ Configuration diagnostics explain what happened, identify the element/attribute/
 
 | Code | Meaning |
 | --- | --- |
-| `2020` | An effective CSS transform is applied directly to a Snap item. Apply<br>visual transforms to its children instead. |
-| `2024` | Likely misspelled Aellux attribute, with a suggested spelling. |
-| `2025` | Declared behavior requires an Extension that is not initialized. |
+| `2020` | <span style="white-space: normal !important;">An effective CSS transform is applied directly to a Snap item. Apply visual transforms to its children instead.</span> |
+| `2024` | <span style="white-space: normal !important;">Likely misspelled Aellux attribute, with a suggested spelling.</span> |
+| `2025` | <span style="white-space: normal !important;">Declared behavior requires an Extension that is not initialized.</span> |
 | `2026` | Invalid attribute, numeric parameter, or pivot. |
-| `2027` | Missing/incompatible target, unmeasurable explicitly updated Anchor<br>target, or invalid/missing AJAX selector. |
-| `2028` | Snap without Scrollbox, an orphan Snap item, a misplaced Elastic<br>wrapper, or PWA without a manifest link/nonempty `href`. |
-| `2029` | Present trigger/dismiss control is not reachable with the keyboard. |
-| `2030` | Effective CSS blocks requested layout/scrolling, or a motion duration<br>is invalid. |
-| `2031` | Present and Anchor both request transform on one element. Anchor takes<br>priority; remove the Present transform token or animate a child. |
-| `2032` | Duplicate HTML attributes on one start tag; the browser keeps the<br>first value and discards subsequent values. Includes `class`, `style`,<br>native and custom attributes. |
-| `2033` | Behaviors replace the same CSS resource on one element. The context<br>identifies the `property` and its `writers`. |
+| `2027` | <span style="white-space: normal !important;">Missing/incompatible target, unmeasurable explicitly updated Anchor target, or invalid/missing AJAX selector.</span> |
+| `2028` | <span style="white-space: normal !important;">Snap without Scrollbox, an orphan Snap item, a misplaced Elastic wrapper, or PWA without a manifest link/nonempty `href`.</span> |
+| `2029` | <span style="white-space: normal !important;">Present trigger/dismiss control is not reachable with the keyboard.</span> |
+| `2030` | <span style="white-space: normal !important;">Effective CSS blocks requested layout/scrolling, or a motion duration is invalid.</span> |
+| `2031` | <span style="white-space: normal !important;">Present and Anchor both request transform on one element. Anchor takes priority; remove the Present transform token or animate a child.</span> |
+| `2032` | <span style="white-space: normal !important;">Duplicate HTML attributes on one start tag; the browser keeps the first value and discards subsequent values. Includes `class`, `style`, native and custom attributes.</span> |
+| `2033` | <span style="white-space: normal !important;">Behaviors replace the same CSS resource on one element. The context identifies the `property` and its `writers`.</span> |
 
 `WARN_RESOURCE_CONFLICT` (`2033`) checks persistent transform writers without a separate ownership registry. Development mounts and explicit updates diagnose Present transform on a valid Elastic wrapper. When CSS Motion captures an actual replacing transform effect, it compares that effect with Anchor, Elastic and Present on the effect's target. Feedback passes its resolved `data-ae-target-transform` destination, so animating a child remains valid. This works with controlled and native CSS Motion when Web Animations exposes keyframes. Opacity-only effects, additive composition, pseudo-elements and separate targets are excluded. Reduced motion with no active effect emits no motion conflict. Browsers without inspectable effects skip this runtime check; production skips all resource checks.
 

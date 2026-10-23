@@ -739,33 +739,33 @@
 </thead>
 <tbody><tr>
 <td>Interaction and input</td>
-<td>Click, keyboard, pointer, drag, selection, or custom controls.</td>
-<td>Semantics, keyboard access, accessible names, focus, input<br>alternatives, and state communication.</td>
+<td><span style="white-space: normal !important;">Click, keyboard, pointer, drag, selection, or custom controls.</span></td>
+<td><span style="white-space: normal !important;">Semantics, keyboard access, accessible names, focus, input alternatives, and state communication.</span></td>
 </tr>
 <tr>
 <td>Structure and state</td>
-<td>Show, hide, insert, remove, reorder, label, select, expand, or relate<br>content.</td>
-<td>DOM order, semantic structure, ARIA or native state, relationships,<br>focus safety, and announcements when needed.</td>
+<td><span style="white-space: normal !important;">Show, hide, insert, remove, reorder, label, select, expand, or relate content.</span></td>
+<td><span style="white-space: normal !important;">DOM order, semantic structure, ARIA or native state, relationships, focus safety, and announcements when needed.</span></td>
 </tr>
 <tr>
 <td>Visual and adaptive presentation</td>
-<td>Layout, theme, scale, contrast, color, viewport, or input-mode<br>adaptation.</td>
-<td>Reflow, zoom, contrast, forced colors, reduced transparency, text and<br>interface scale, and alternatives to color-only meaning.</td>
+<td><span style="white-space: normal !important;">Layout, theme, scale, contrast, color, viewport, or input-mode adaptation.</span></td>
+<td><span style="white-space: normal !important;">Reflow, zoom, contrast, forced colors, reduced transparency, text and interface scale, and alternatives to color-only meaning.</span></td>
 </tr>
 <tr>
 <td>Motion and timing</td>
-<td>Animation, transition, automatic progression, delay, or dismissal.</td>
-<td>Reduced motion, interruption, timing controls, understandable state<br>without animation, and timer cleanup.</td>
+<td><span style="white-space: normal !important;">Animation, transition, automatic progression, delay, or dismissal.</span></td>
+<td><span style="white-space: normal !important;">Reduced motion, interruption, timing controls, understandable state without animation, and timer cleanup.</span></td>
 </tr>
 <tr>
 <td>External data and integration</td>
-<td>Fetch, persistence, synchronization, embedded services, or third-party<br>APIs.</td>
-<td>Pending and failure states when user-facing, recovery, stable focus,<br>meaningful status communication, and asynchronous cleanup.</td>
+<td><span style="white-space: normal !important;">Fetch, persistence, synchronization, embedded services, or third-party APIs.</span></td>
+<td><span style="white-space: normal !important;">Pending and failure states when user-facing, recovery, stable focus, meaningful status communication, and asynchronous cleanup.</span></td>
 </tr>
 <tr>
 <td>Infrastructure and policy</td>
-<td>Diagnostics, scheduling, event routing, rules, registries, or services<br>without direct UI.</td>
-<td>Preservation of existing semantics and state, predictable failure<br>behavior, cleanup, and documentation of indirect UI effects.</td>
+<td><span style="white-space: normal !important;">Diagnostics, scheduling, event routing, rules, registries, or services without direct UI.</span></td>
+<td><span style="white-space: normal !important;">Preservation of existing semantics and state, predictable failure behavior, cleanup, and documentation of indirect UI effects.</span></td>
 </tr>
 </tbody></table>
 <p>Do not force an Extension into a single category. For example, a dialog behavior can declare interaction, structure and state, and motion. A background registry may declare only infrastructure and policy. A network synchronization Extension may declare external data and integration without declaring interaction.</p>
@@ -795,47 +795,47 @@
 </tr>
 <tr>
 <td>Affected output</td>
-<td>Elements, attributes, content, styles, events, stored values, or<br>external results produced or changed.</td>
+<td><span style="white-space: normal !important;">Elements, attributes, content, styles, events, stored values, or external results produced or changed.</span></td>
 </tr>
 <tr>
 <td>Inputs and activation</td>
-<td>Pointer, keyboard, programmatic, lifecycle, media-query, network,<br>storage, or other triggers.</td>
+<td><span style="white-space: normal !important;">Pointer, keyboard, programmatic, lifecycle, media-query, network, storage, or other triggers.</span></td>
 </tr>
 <tr>
 <td>Semantic host</td>
-<td>Expected native elements and any supported non-native host. Required<br>when DOM semantics are affected.</td>
+<td><span style="white-space: normal !important;">Expected native elements and any supported non-native host. Required when DOM semantics are affected.</span></td>
 </tr>
 <tr>
 <td>Accessible name</td>
-<td>Source of the visible label or accessible name for controls the<br>Extension creates or owns.</td>
+<td><span style="white-space: normal !important;">Source of the visible label or accessible name for controls the Extension creates or owns.</span></td>
 </tr>
 <tr>
 <td>State and relationships</td>
-<td>Owned <code>aria-*</code>, <code>hidden</code>, disabled, selected, checked, expanded, busy,<br>IDs, and references.</td>
+<td><span style="white-space: normal !important;">Owned <code>aria-*</code>, <code>hidden</code>, disabled, selected, checked, expanded, busy, IDs, and references.</span></td>
 </tr>
 <tr>
 <td>Focus</td>
-<td>Whether focus can move, become hidden, require restoration, or remain<br>unchanged.</td>
+<td><span style="white-space: normal !important;">Whether focus can move, become hidden, require restoration, or remain unchanged.</span></td>
 </tr>
 <tr>
 <td>Presentation</td>
-<td>Effects on color, contrast, layout, zoom, text scale, interface scale,<br>or forced colors.</td>
+<td><span style="white-space: normal !important;">Effects on color, contrast, layout, zoom, text scale, interface scale, or forced colors.</span></td>
 </tr>
 <tr>
 <td>Motion and timing</td>
-<td>Transitions, delays, automatic actions, dismissal, and relevant user<br>preferences.</td>
+<td><span style="white-space: normal !important;">Transitions, delays, automatic actions, dismissal, and relevant user preferences.</span></td>
 </tr>
 <tr>
 <td>Pending, success, and failure</td>
-<td>User-visible behavior while asynchronous or external work is pending,<br>succeeds, or fails.</td>
+<td><span style="white-space: normal !important;">User-visible behavior while asynchronous or external work is pending, succeeds, or fails.</span></td>
 </tr>
 <tr>
 <td>Announcements</td>
-<td>Changes that require notification beyond native semantics, focus, or<br>control state.</td>
+<td><span style="white-space: normal !important;">Changes that require notification beyond native semantics, focus, or control state.</span></td>
 </tr>
 <tr>
 <td>Lifecycle cleanup</td>
-<td>Attributes, listeners, timers, requests, observers, generated content,<br>relationships, and references released during cleanup.</td>
+<td><span style="white-space: normal !important;">Attributes, listeners, timers, requests, observers, generated content, relationships, and references released during cleanup.</span></td>
 </tr>
 <tr>
 <td>Limitations</td>
@@ -928,27 +928,27 @@
 </thead>
 <tbody><tr>
 <td>Interaction and input</td>
-<td>Keyboard activation, Tab order, input alternatives, accessible names,<br>and owned control state.</td>
+<td><span style="white-space: normal !important;">Keyboard activation, Tab order, input alternatives, accessible names, and owned control state.</span></td>
 </tr>
 <tr>
 <td>Structure and state</td>
-<td>DOM and reading order, focus safety, synchronized native or ARIA<br>state, valid relationships, and necessary announcements.</td>
+<td><span style="white-space: normal !important;">DOM and reading order, focus safety, synchronized native or ARIA state, valid relationships, and necessary announcements.</span></td>
 </tr>
 <tr>
 <td>Visual and adaptive presentation</td>
-<td>Zoom, text and interface scale, contrast, forced colors, reflow, and<br>absence of color-only meaning where affected.</td>
+<td><span style="white-space: normal !important;">Zoom, text and interface scale, contrast, forced colors, reflow, and absence of color-only meaning where affected.</span></td>
 </tr>
 <tr>
 <td>Motion and timing</td>
-<td>Reduced motion, disabled animation, interruption, timing control, and<br>cleanup.</td>
+<td><span style="white-space: normal !important;">Reduced motion, disabled animation, interruption, timing control, and cleanup.</span></td>
 </tr>
 <tr>
 <td>External data and integration</td>
-<td>Pending, success, failure, cancellation, stale responses, focus<br>stability, and cleanup.</td>
+<td><span style="white-space: normal !important;">Pending, success, failure, cancellation, stale responses, focus stability, and cleanup.</span></td>
 </tr>
 <tr>
 <td>Infrastructure and policy</td>
-<td>Stable contracts, failure isolation, indirect state effects, cleanup,<br>and diagnostics behavior.</td>
+<td><span style="white-space: normal !important;">Stable contracts, failure isolation, indirect state effects, cleanup, and diagnostics behavior.</span></td>
 </tr>
 </tbody></table>
 <p>Also validate failed initialization or mounting, repeated lifecycle execution, and the Modern or Legacy environments claimed by the Extension when those lifecycle paths exist.</p>

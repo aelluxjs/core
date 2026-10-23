@@ -61,8 +61,8 @@ The bars normally fade between opacity 0 and 1. Set inherited `--ae-scrollbar-op
 
 | Value | Behavior |
 | --- | --- |
-| `native` | Default, including an empty attribute. Uses browser scrolling and<br>updates the progress properties. |
-| `pointer` | Adds mouse or pen drag-to-scroll on a hover-capable device with a fine<br>pointer. Scrolling, wheel input, and progress remain native. On other<br>devices it behaves like `native`. |
+| `native` | <span style="white-space: normal !important;">Default, including an empty attribute. Uses browser scrolling and updates the progress properties.</span> |
+| `pointer` | <span style="white-space: normal !important;">Adds mouse or pen drag-to-scroll on a hover-capable device with a fine pointer. Scrolling, wheel input, and progress remain native. On other devices it behaves like `native`.</span> |
 
 ```html
 <div data-ae-scrollbox="pointer" style="width: 20rem; height: 12rem">

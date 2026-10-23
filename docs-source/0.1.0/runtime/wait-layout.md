@@ -17,7 +17,7 @@ This reduces forced reflows caused by alternating writes and measurements. A que
 | `update(id, callback, parameters?)` | Queue one identified update. | Promise of the callback's return value. |
 | `sequence(id, ...stages)` | Run ordered, optionally repeated read/update cycles. | Promise of `{ id, status }`. |
 | `cancel(id)` | Cancel work owned by one numeric ID. | `true` if that ID had work. |
-| `clear()` | Cancel queued layout work during full runtime destruction. | Queued Promises resolve with `undefined`; their callbacks do not run. |
+| `clear()` | Cancel queued layout work during full runtime destruction. | <span style="white-space: normal !important;">Queued Promises resolve with `undefined`; their callbacks do not run.</span> |
 
 The optional `parameters` argument is an array passed as the callback's arguments. IDs must be safe integers, including `0`. Calls without an ID keep their original independent queue behavior. These methods schedule work; they do not observe future changes automatically.
 
