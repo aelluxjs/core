@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -32,205 +33,217 @@
 
   <%~ include("./svg-lib.htm") %>
 
-  <div class="section d-flex border-bottom" data-view-frame=0 style="position:sticky;top:0px;z-index:5;height: 64px;">
-    <nav class="animation_header_test navbar navbar-expand-md d-flex flex-fill p-0 m-0 user-select-none bg-white"
-      style=" --bar-color:#55606F; --bar-color2:var(--bs-link-color); --bar-bg:#F0F5F5;">
-      <div class="container-fluid gap-2" style='z-index: 1;'>
+    <div class="section d-flex border-bottom" data-view-frame=0 style="position:sticky;top:0px;z-index:5;height: 64px;">
+      <header class="animation_header_test navbar navbar-expand-md d-flex flex-fill p-0 m-0 user-select-none bg-white"
+        style=" --bar-color:#55606F; --bar-color2:var(--bs-link-color); --bar-bg:#F0F5F5;">
+        <div class="container-fluid gap-2" style='z-index: 1;'>
 
-        <div class="me-auto d-flex flex-row gap-2 align-items-center">
+          <div class="me-auto d-flex flex-row gap-2 align-items-center">
 
-          <a class="navbar-brand m-0 me-auto p-0 lh-1 fw-medium d-flex align-items-center" href="<%= it.homeHref %>"
-            style="font-size:1.5em;letter-spacing:-0.03em;word-spacing: -.2em; color:inherit;">
-            <%= it.title %>
-          </a>
+            <a class="navbar-brand m-0 me-auto p-0 lh-1 fw-medium d-flex align-items-center" href="<%= it.homeHref %>"
+              style="font-size:1.5em;letter-spacing:-0.03em;word-spacing: -.2em; color:inherit;">
+              <%= it.title %>
+            </a>
 
-        </div>
-
-        <button class="navbar-toggler" type="button" data-ae-trigger="toggle" data-ae-target="#navbarSupportedContent"
-          aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-          <div class="hamburger">
-            <span></span>
-            <span></span>
-            <span></span>
           </div>
-        </button>
 
-        <div class="navbar-collapse bg-white border-end d-md-block" id="navbarSupportedContent" hidden
-          data-ae-present="transform">
-          <div class="h-100 w-100" data-ae-scrollbox="pointer" data-ae-scrollbar style="overscroll-behavior: contain;">
-            <ul class="navbar-nav w-100 gap-1 my-0 p-2 ps-md-3 pe-md-3 pb-4 flex-column align-self-start text-white">
+          <button class="navbar-toggler" type="button" data-ae-trigger="toggle" data-ae-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <div class="hamburger">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+          </button>
 
-              <div class="d-flex flex-row gap-2 justify-content-between pb-2 pt-0 pt-md-2">
+          <div class="navbar-collapse bg-white border-end d-md-block" id="navbarSupportedContent" hidden
+            data-ae-present="transform">
+            <nav class="h-100 w-100" data-ae-scrollbox="pointer" data-ae-scrollbar
+              style="overscroll-behavior: contain;">
+              <ul class="navbar-nav w-100 gap-1 my-0 p-2 ps-md-3 pe-md-3 pb-4 flex-column align-self-start text-white">
 
-                <%~ include("./versions-menu.eta.htm") %>
+                <div class="d-flex flex-row gap-2 justify-content-between pb-2 pt-0 pt-md-2">
 
-                  <%~ include("./color-scheme-menu.eta.htm") %>
+                  <%~ include("./versions-menu.eta.htm") %>
 
-              </div>
-              <div class="d-flex flex-column" data-ae-present-group>
-                <% for (const item of it.menuTree) { %>
-                  <li class="nav-item mt-1 small-md fw-bold rounded-1 ps-md-1 bg-light-adaptive" style="flex:0">
-                    <button type="button" class="nav-link w-100 text-start text-capitalize p-2 p-md-1 px-3 px-md-2"
-                      data-ae-trigger="toggle" data-ae-target="#children-<%= item.slug %>">
-                      <%= item.label %>
-                        <% if (item.children !==undefined) { %><span class="chevron"><svg
-                              class="svg-icon small" aria-hidden="true" focusable="false"><use href="#bi-chevron-right"></use></svg></span>
-                          <% } %>
-                    </button>
-                  </li>
+                    <%~ include("./color-scheme-menu.eta.htm") %>
 
-                  <% if (item.children !==undefined && item.children.length) { %>
-                    <div id="children-<%= item.slug %>" class="docs-menu-panel border-start ms-2"
-                      data-ae-present="height opacity" data-ae-unpop-on-outside="false" <% if (!item.active) { %>
-                      hidden
-                      <% } %>>
-                        <div class="ps-2 gap-1 d-flex flex-column overflow-hidden" data-ae-present-motion>
-                          <% for (const child of item.children) { %>
-                            <% if (child.children !==undefined && child.children.length) { %>
+                </div>
+                <div class="d-flex flex-column" data-ae-present-group>
+                  <% for (const item of it.menuTree) { %>
+                    <li class="nav-item mt-1 small-md fw-bold rounded-1 ps-md-1 bg-light-adaptive" style="flex:0">
+                      <button type="button" class="nav-link w-100 text-start text-capitalize p-2 p-md-1 px-3 px-md-2"
+                        data-ae-trigger="toggle" data-ae-target="#children-<%= item.slug %>">
+                        <%= item.label %>
+                          <% if (item.children !==undefined) { %><span class="chevron"><svg class="svg-icon small"
+                                aria-hidden="true" focusable="false">
+                                <use href="#bi-chevron-right"></use>
+                              </svg></span>
+                            <% } %>
+                      </button>
+                    </li>
 
-                              <li class="nav-item mt-1 small-md fw-bold rounded-1 ps-md-1 bg-light-adaptive"
-                                style="flex:0">
-                                <button type="button"
-                                  class="nav-link text-start text-capitalize p-2 p-md-1 px-3 px-md-2"
-                                  data-ae-trigger="toggle" data-ae-target="#children2-<%= child.slug %>">
-                                  <%= child.label %>
-                                    <% if (child.children !==undefined) { %><span class="chevron"><svg
-                                          class="svg-icon small" aria-hidden="true" focusable="false"><use href="#bi-chevron-right"></use></svg></span>
-                                      <% } %>
-                                </button>
-                              </li>
+                    <% if (item.children !==undefined && item.children.length) { %>
+                      <div id="children-<%= item.slug %>" class="docs-menu-panel border-start ms-2"
+                        data-ae-present="height opacity" data-ae-unpop-on-outside="false" <% if (!item.active) { %>
+                        hidden
+                        <% } %>>
+                          <div class="ps-2 gap-1 d-flex flex-column overflow-hidden" data-ae-present-motion>
+                            <% for (const child of item.children) { %>
+                              <% if (child.children !==undefined && child.children.length) { %>
 
-                              <div id="children2-<%= child.slug %>" class="docs-menu-panel border-start ms-2"
-                                data-ae-present="height opacity" data-ae-unpop-on-outside="false" <% if (!child.active)
-                                { %>
-                                hidden<% } %>>
-                                  <div class="ps-2 gap-1 d-flex flex-column overflow-hidden" data-ae-present-motion>
-                                    <% for (const child2 of child.children) { %>
-                                      <li
-                                        class="nav-item mt-1 small-md rounded-1 ps-md-1<% if (child2.active) { %> active<% } %>"
-                                        style="flex:0">
-                                        <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
-                                          href="<%= child2.href %>" data-ae-overflow-marquee="190px">
-                                          <%= child2.label %>
-                                        </a>
-                                      </li>
-                                      <% } %>
-                                  </div>
-                              </div>
-                              <% } else { %>
-                                <li
-                                  class="nav-item mt-1 small-md rounded-1 ps-md-1<% if (child.active) { %> active<% } %>"
+                                <li class="nav-item mt-1 small-md fw-bold rounded-1 ps-md-1 bg-light-adaptive"
                                   style="flex:0">
-                                  <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
-                                    href="<%= child.href %>" data-ae-overflow-marquee="190px">
+                                  <button type="button"
+                                    class="nav-link text-start text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                    data-ae-trigger="toggle" data-ae-target="#children2-<%= child.slug %>">
                                     <%= child.label %>
-                                  </a>
+                                      <% if (child.children !==undefined) { %><span class="chevron"><svg
+                                            class="svg-icon small" aria-hidden="true" focusable="false">
+                                            <use href="#bi-chevron-right"></use>
+                                          </svg></span>
+                                        <% } %>
+                                  </button>
                                 </li>
-                                <% } %>
+
+                                <div id="children2-<%= child.slug %>" class="docs-menu-panel border-start ms-2"
+                                  data-ae-present="height opacity" data-ae-unpop-on-outside="false" <% if
+                                  (!child.active) { %>
+                                  hidden<% } %>>
+                                    <div class="ps-2 gap-1 d-flex flex-column overflow-hidden" data-ae-present-motion>
+                                      <% for (const child2 of child.children) { %>
+                                        <li
+                                          class="nav-item mt-1 small-md rounded-1 ps-md-1<% if (child2.active) { %> active<% } %>"
+                                          style="flex:0">
+                                          <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                            href="<%= child2.href %>" data-ae-overflow-marquee="190px">
+                                            <%= child2.label %>
+                                          </a>
+                                        </li>
+                                        <% } %>
+                                    </div>
+                                </div>
+                                <% } else { %>
+                                  <li
+                                    class="nav-item mt-1 small-md rounded-1 ps-md-1<% if (child.active) { %> active<% } %>"
+                                    style="flex:0">
+                                    <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                      href="<%= child.href %>" data-ae-overflow-marquee="190px">
+                                      <%= child.label %>
+                                    </a>
+                                  </li>
                                   <% } %>
-                        </div>
-                    </div>
-                    <% } %>
+                                    <% } %>
+                          </div>
+                      </div>
                       <% } %>
-              </div>
-            </ul>
+                        <% } %>
+                </div>
+              </ul>
+            </nav>
           </div>
+
         </div>
+      </header>
+    </div>
 
-      </div>
-    </nav>
-  </div>
+    <div id="page-progress"></div>
 
-  <div id="page-progress"></div>
+    <div class="content-block position-relative d-flex justify-content-center">
 
-  <div class="content-block position-relative d-flex justify-content-center">
+      <div class="content-wrapper p-0 position-relative w-100"
+        style=" max-width: 1024px;transition:opacity 0.5s linear;">
 
-    <div class="content-wrapper p-0 position-relative w-100" style=" max-width: 1024px;transition:opacity 0.5s linear;">
+        <div class=" toc-header position-relative bg-white p-2 position-sticky border-bottom border-md-0"
+          style="top:64px;z-index:1;" role="contentinfo">
 
-      <div class=" toc-header position-relative bg-white p-2 position-sticky border-bottom border-md-0"
-        style="top:64px;z-index:1;">
+          <div class="menu-toggle d-flex flex-row gap-2 small">
+            <button id="button-toc-menu" type="button" class="btn btn-outline-adaptive rounded-1 text-nowrap"
+              data-ae-trigger="toggle" data-ae-target="#toc-collapse" aria-expanded="false" aria-controls="toc-collapse"
+              aria-label="Table of Contents" title="Summary">
+              <svg class="svg-icon" aria-hidden="true" focusable="false">
+                <use href="#bi-layout-text-sidebar"></use>
+              </svg>
+            </button>
+            <button type="button"
+              class="p-2 text-nowrap overflow-hidden text-truncate fw-bold border-0 bg-transparent text-start"
+              id="tocbot-current-label" data-ae-trigger="toggle" data-ae-target="#toc-collapse">
+              -
+            </button>
+          </div>
 
-        <div class="menu-toggle d-flex flex-row gap-2 small">
-          <button id="button-toc-menu" type="button" class="btn btn-outline-adaptive rounded-1 text-nowrap"
-            data-ae-trigger="toggle" data-ae-target="#toc-collapse" aria-expanded="false" aria-controls="toc-collapse">
-            <svg class="svg-icon" aria-hidden="true" focusable="false"><use href="#bi-layout-text-sidebar"></use></svg>
-          </button>
-          <button type="button"
-            class="p-2 text-nowrap overflow-hidden text-truncate fw-bold border-0 bg-transparent text-start"
-            id="tocbot-current-label" data-ae-trigger="toggle" data-ae-target="#toc-collapse">
-            -
-          </button>
-        </div>
+          <div class="toc-collapse bg-white overflow-hidden" id="toc-collapse" data-ae-present="transform opacity"
+            hidden>
+            <div data-ae-scrollbox data-ae-scrollbar class="d-block overflow-auto"
+              style="overscroll-behavior: contain;">
+              <div class="pt-1 pt-lg-2 p-4 p-lg-0 d-table w-100">
+                <div class="h6 fw-bold p-2 pb-1">On this page</div>
+                <div class="position-relative">
+                  <div class="js-toc">
 
-        <div class="toc-collapse bg-white overflow-hidden" id="toc-collapse" data-ae-present="transform opacity" hidden>
-          <div data-ae-scrollbox data-ae-scrollbar class="d-block overflow-auto" style="overscroll-behavior: contain;">
-            <div class="pt-1 pt-lg-2 p-4 p-lg-0 d-table w-100">
-              <div class="h6 fw-bold p-2 pb-1">On this page</div>
-              <div class="position-relative">
-                <div class="js-toc">
-
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <div class="article p-4">
+        <div class="article p-4">
 
-        <nav id="doc-breadcrumb" style="--bs-breadcrumb-divider: '›';overflow-x:auto;overflow-y:clip;" class="w-100"
-          aria-label="breadcrumb" ajax-load="doc-breadcrumb" data-ae-scrollbox="pointer">
-          <ol class="breadcrumb flex-nowrap">
+          <nav id="doc-breadcrumb" style="--bs-breadcrumb-divider: '›';overflow-x:auto;overflow-y:clip;" class="w-100"
+            aria-label="breadcrumb" ajax-load="doc-breadcrumb" data-ae-scrollbox="pointer">
+            <ol class="breadcrumb flex-nowrap">
 
-            <% for (const item of it.breadcrumb) { %>
-              <% if (item.href) { %>
-                <li class="breadcrumb-item text-capitalize text-nowrap flex-shrink-0">
-                  <a href="<%= item.href %>">
-                    <%= item.label %>
-                  </a>
-                </li>
-                <% } else { %>
+              <% for (const item of it.breadcrumb) { %>
+                <% if (item.href) { %>
                   <li class="breadcrumb-item text-capitalize text-nowrap flex-shrink-0">
-                    <%= item.label %>
+                    <a href="<%= item.href %>">
+                      <%= item.label %>
+                    </a>
                   </li>
-                  <% } %>
+                  <% } else { %>
+                    <li class="breadcrumb-item text-capitalize text-nowrap flex-shrink-0">
+                      <%= item.label %>
+                    </li>
                     <% } %>
+                      <% } %>
 
-          </ol>
-        </nav>
+            </ol>
+          </nav>
 
-        <div id="doc-navlinks" ajax-load="doc-navlinks">
-          <%~ include("./navlinks.eta.htm") %>
-        </div>
-
-        <div id="doc-content" style="min-height: calc(100vh - 200px);" class="js-toc-content" ajax-load="doc-content">
-          <%~ it.contentHtml %>
-        </div>
-
-        <div id="doc-navlinks2" ajax-load="doc-navlinks2">
-          <%~ include("./navlinks.eta.htm") %>
-        </div>
-
-        <div class="section bg-transparent" style="margin: 50vh 0;">
-          <div class="text-center small text-body opacity-50">
-            <div>
-              <%= new Date().getFullYear() %> &copy;<%= it.title %>
-            </div>
-            <div class="small mb-0 text-body">
-              Special thanks to
-              <a style="color:inherit!important;" href="https://getbootstrap.com/" target="_blank"
-                rel="noopener noreferrer">Bootstrap</a>
-              - this page layout was built around Bootstrap’s responsive components and utility classes.
-            </div>
+          <div id="doc-navlinks" ajax-load="doc-navlinks">
+            <%~ include("./navlinks.eta.htm") %>
           </div>
+
+          <main id="doc-content" style="min-height: calc(100vh - 200px);" class="js-toc-content"
+            ajax-load="doc-content">
+            <%~ it.contentHtml %>
+          </main>
+
+          <div id="doc-navlinks2" ajax-load="doc-navlinks2">
+            <%~ include("./navlinks.eta.htm") %>
+          </div>
+
+          <footer class="section bg-transparent" style="margin: 50vh 0;">
+            <div class="text-center small text-body opacity-50">
+              <div>
+                <%= new Date().getFullYear() %> &copy;<%= it.title %>
+              </div>
+              <div class="small mb-0 text-body">
+                Special thanks to
+                <a style="color:inherit!important;" href="https://getbootstrap.com/" target="_blank"
+                  rel="noopener noreferrer">Bootstrap</a>
+                - this page layout was built around Bootstrap’s responsive components and utility classes.
+              </div>
+            </div>
+          </footer>
         </div>
+
       </div>
 
     </div>
 
-  </div>
-
-  <%~ include("./js-foot.eta.htm") %>
+    <%~ include("./js-foot.eta.htm") %>
 
 </body>
 
