@@ -77,7 +77,7 @@ function ensureHeadingIds(container) {
     heading.setAttribute("id", id);
     heading.innerHTML = `
     <a href='#${id}' style='text-decoration: none;color: inherit;margin-left:-5px;'>
-      <i class="bi bi-link-45deg align-middle opacity-50" style="font-size:0.5em"></i>${heading.innerText}
+      <svg class="svg-icon align-middle opacity-50" style="font-size:0.5em" aria-hidden="true" focusable="false"><use href="#bi-link-45deg"></use></svg>${heading.innerText}
     </a>`;
     used.add(id);
   });

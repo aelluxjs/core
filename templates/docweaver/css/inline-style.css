@@ -31,10 +31,17 @@
   /* Darker grey on hover */
 }
 
+.svg-icon {
+  width: 1em;
+  height: 1em;
+  fill: currentColor;
+  vertical-align: -0.125em;
+}
+
 :root {
   --bs-font-sans-serif: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --bs-body-font-family: var(--bs-font-sans-serif);
-  --bs-headings-font-family: 'Geist', sans-serif;
+  --bs-headings-font-family: var(--bs-font-sans-serif);
 }
 
 [data-ae-present] {
