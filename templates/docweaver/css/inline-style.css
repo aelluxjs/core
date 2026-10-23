@@ -449,7 +449,8 @@ p {
   /*font-family: var(--bs-headings-font-family);*/
   font-weight: 400 !important;
   margin-left: 15px !important;
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  transition: opacity 0.2s ease, padding 0.2s ease;
+  contain: layout paint;
 }
 
 .toc-link:before {
@@ -464,7 +465,7 @@ p {
 .toc-link:hover,
 .toc-link.is-active-link {
   opacity: 1;
-  transform: translateX(8px);
+  padding-left: 8px;
   text-decoration: underline;
 }
 

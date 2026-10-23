@@ -148,11 +148,13 @@
     document.addEventListener("pointerover", onHover);
     document.addEventListener("pointerout", onHover);
     AelluxJs.on("$click", OnClick);
+    AelluxJs.onEvent(root, "$resize", refreshExpandedStates);
   }
 
   function destroy() {
     AelluxJs.mountManager.remove({ extensionName });
     AelluxJs.off("$click", OnClick);
+    AelluxJs.offEvent(root, "$resize", refreshExpandedStates);
     document.removeEventListener("pointerover", onHover);
     document.removeEventListener("pointerout", onHover);
     for (const group of groups.keys()) unmountGroup(group);
@@ -250,9 +252,6 @@
         if (!replacement) restoreMeasuredStyles(element, this);
       }
     };
-    presentController.setAriaExpanded(
-      element.hidden ? "false" : "true"
-    );
     if (!element.hidden) {
       presentController.classList.add(className.pop);
       openPresentElements.add(element);
@@ -273,6 +272,7 @@
       }
     }
     setProgress(element, !element.hidden);
+    syncAriaExpanded(element, presentController);
     queueGroups();
     autoUnpopSchedule(element, presentController);
   }
@@ -483,7 +483,10 @@
     const newDirection = gotoVisible ? POP : UNPOP;
 
     if ((element.hidden && !gotoVisible)
-      || (newDirection === controller.direction && !forceRepop)) { return; }
+      || (newDirection === controller.direction && !forceRepop)) {
+      if (!controller.transition) syncAriaExpanded(element, controller);
+      return;
+    }
 
     let transition = null;
 
@@ -498,7 +501,7 @@
         controller.stop();
         element.hidden = true;
         openPresentElements.delete(element);
-        controller.setAriaExpanded("false");
+        syncAriaExpanded(element, controller);
         element.getBoundingClientRect();
       }
 
@@ -571,7 +574,6 @@
           className.unpopping
         );
         controller.classList.add(transition.className);
-        controller.setAriaExpanded(gotoVisible ? "true" : "false");
         // Clamp private CSS interpolation without adding an animation loop.
         // Stable states use literal endpoints to avoid stale computed-value
         // dependencies after Firefox releases a controlled custom-property effect.
@@ -676,12 +678,15 @@
   }
 
   function finishTransition(element, controller, transition, gotoVisible) {
+    controller.classList.toggle(className.pop, gotoVisible);
     controller.classList.remove(transition.className);
     restoreMeasuredStyles(element, controller);
     const focused = !gotoVisible && element.contains(document.activeElement)
       ? document.activeElement : null;
     element.hidden = gotoVisible ? false : true;
     setProgress(element, gotoVisible);
+    syncAriaExpanded(element, controller);
+    refreshExpandedStates();
     if (element.hidden) openPresentElements.delete(element);
     else openPresentElements.add(element);
     if (focused) {
@@ -795,6 +800,26 @@
     });
   }
 
+  function syncAriaExpanded(element, controller) {
+    // hidden can be overridden by responsive CSS. Read the stable rendered
+    // state rather than the attribute or a transient animation endpoint.
+    let visible = element.isConnected;
+    const visibility = root.getComputedStyle(element).visibility;
+    if (visibility === "hidden" || visibility === "collapse") visible = false;
+    for (let current = element; visible && current; current = current.parentElement) {
+      const style = root.getComputedStyle(current);
+      if (style.display === "none" || style.contentVisibility === "hidden" ||
+        Number(style.opacity) === 0) visible = false;
+    }
+    if (controller.expanded !== visible) controller.setAriaExpanded(String(visible));
+  }
+
+  function refreshExpandedStates() {
+    for (const [element, controller] of presentElements) {
+      if (!controller.transition) syncAriaExpanded(element, controller);
+    }
+  }
+
   function setProgress(element, visible) {
     setPhase(element, "pop", visible ? "1" : "0");
     setPhase(element, "unpop", visible ? "0" : "1");
@@ -845,8 +870,8 @@
         controller.stop();
         member.hidden = !visible;
         controller.classList.toggle(className.pop, visible);
-        controller.setAriaExpanded(String(visible));
         setProgress(member, visible);
+        syncAriaExpanded(member, controller);
         if (!visible) openPresentElements.delete(member);
       }
     }

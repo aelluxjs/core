@@ -37,7 +37,7 @@
   var define_AELLUX_OFFICIAL_EXTENSION_MANIFEST_default;
   var init_define_AELLUX_OFFICIAL_EXTENSION_MANIFEST = __esm({
     "<define:__AELLUX_OFFICIAL_EXTENSION_MANIFEST__>": function() {
-      define_AELLUX_OFFICIAL_EXTENSION_MANIFEST_default = { schemaVersion: 1, coreVersion: "0.1.0-beta.10", extensions: { preference: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.preference.min.js", integrity: "sha384-mSOgb0DekFTRXXZAgyNrPjamdlSqzL4SSGZYVWgVg+WlG+pBj11xT81v/6Xk43yO", regular: { url: "./aellux.ext.preference.js", integrity: "sha384-MlikpdHSzHzF6kz5+oJGtq3eoFsKTsx/g+FTrf+dFOU8iQGHsCpn4fP1jLlbNrj7" } }, legacy: { url: "./aellux.ext.preference.legacy.min.js", integrity: "sha384-1LMsK0W9J/PoM4tXhFgkYLRY4yWdzVoYmFy4OMDGd8lRdtptKoEb1sI9L1kzNaBu", regular: { url: "./aellux.ext.preference.legacy.js", integrity: "sha384-pozuz43OyfXrnkmuBu6KTM2lqRSqcI5LMgwAtqnzXq8xZGdVqpnmOtrBcYcMskWk" } } }, dependencies: [] }, "state-navigation": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.state-navigation.min.js", integrity: "sha384-wAbgAqjAA6wauuG+iuUtfRwxChd6fTJ0fS22fqnu2r00kouoXJWZ0f7AoTYlqBC6", regular: { url: "./aellux.ext.state-navigation.js", integrity: "sha384-PKJ8HTD7eIYDEg2hOaAJjpMYzLr2fBjBRGmIGG7XzGTzVK0yTjt5HYPO55VbWfdS" } }, legacy: { url: "./aellux.ext.state-navigation.legacy.min.js", integrity: "sha384-YkhfU15Mpk8KiO6TyoVU6z1yCiYWwnsOGE0xVaQ8NrE7IGrxOSUL005g5JeUDdJu", regular: { url: "./aellux.ext.state-navigation.legacy.js", integrity: "sha384-kaEUY0Zpw8K6pcwjm+INA5feXftLK2/N1aFpPr2LCTcetX2uoe2GGd1MJyy7u8rZ" } } }, dependencies: [] }, feedback: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.feedback.min.js", integrity: "sha384-oHAcvQwCs/v3ktzXoNdJEDEkaV6NI29MjzjF068Lw0oL9NwVP5THnxzb12f0ySkY", regular: { url: "./aellux.ext.feedback.js", integrity: "sha384-dGcxHfGyV544C6livNJKKrlNWky/fBFkMONowmtlhHZ5exWL8AJOoV40jJhZW6Iq" } }, legacy: { url: "./aellux.ext.feedback.legacy.min.js", integrity: "sha384-S31Sa8B4kbKL/xsEJ3QTTikO+AjuXSc9GXBzNw8kl/b2amk5tzqgQNNKQPfGnYdF", regular: { url: "./aellux.ext.feedback.legacy.js", integrity: "sha384-sy2QmY3L1TlvGPgdebeu5q9ZJl/bOeUstWE0Cu+QJUIYWSF9y1YH6mCpe09/eKrd" } } }, dependencies: [], style: { url: "./aellux.ext.feedback.min.css", integrity: "sha384-OBguCYqF+dMD0Pl84C3FlY/+ohUGfW0OyynmXb/PSDEGOyuI/TQJ3EZAoCeJx+Jk", regular: { url: "./aellux.ext.feedback.css", integrity: "sha384-yk4cW+r/Mc1FRS1ZauBHC6KsKb7sxuJ0E9mmt/+AYASAdZXXMK6iuFBR+TOEh/r4" } } }, focus: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.focus.min.js", integrity: "sha384-AXpUv/Ur2Z4cKvO9EqIFqfxxdSQR5j75q0okOAWPvHhSneQ5LPjrOzk6Sl9MOo4a", regular: { url: "./aellux.ext.focus.js", integrity: "sha384-VjQzcnhLRrvRlbVQ0X4/tO0+8gqJXAmIFoeIVimjOud1wRNuBXNnSQHHW9XQPzTe" } }, legacy: { url: "./aellux.ext.focus.legacy.min.js", integrity: "sha384-I5QpUmKsA1T8NiKfKXQgbdG19Ld1ZGCWSmosygO3yGj43tdxp5zCfLyfBuFoHlKu", regular: { url: "./aellux.ext.focus.legacy.js", integrity: "sha384-5/y3J1NC/qMyV9myEj29+wGbqCVI8ICPafSebtJVfl15Qmup6vMiJzveShd3CLnw" } } }, dependencies: [] }, point: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.point.min.js", integrity: "sha384-n540II5oWbHJRt/a8i+Rgb9A3b9dm7hamg1kd3Nz7KdPQDcaa8S823t9fCrgxBWF", regular: { url: "./aellux.ext.point.js", integrity: "sha384-aDj7I5QEH/0+52E3e6yPZ/D0MEsNBdxeET3G5ToVvgczHtksMh3p8S/KOoAapRRN" } }, legacy: { url: "./aellux.ext.point.legacy.min.js", integrity: "sha384-5UmWvQHfmvttz9yeXbilawGCZH20UdR8yNBOE9kRV34wpfWASl8plzgKtLVQGO9M", regular: { url: "./aellux.ext.point.legacy.js", integrity: "sha384-gG/XONYEC1tchBcJ6bUtKYmWFHz0E+50LmMaXDAiqWBKPuwdHZeYm1uXA22lMZuN" } } }, dependencies: [] }, anchor: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.anchor.min.js", integrity: "sha384-vpHUGJwyY3qnW78C6Yo8CLc2vgbn1KJ8FcOtQawBtCKarQ0CoihuNQ7ZCKnMbOjx", regular: { url: "./aellux.ext.anchor.js", integrity: "sha384-LaYGJ6p9H5QBGJf5j19wHgT+CFcMim2h0Ro+itxYnLkIE29RFtPdj8P8L9EYWAWr" } }, legacy: { url: "./aellux.ext.anchor.legacy.min.js", integrity: "sha384-Ym0BnY5sDflVI4JyPVWymZKurBcJTAbPNe2gy+6qHcD7x6RyIKwvff6o+6BfeZDy", regular: { url: "./aellux.ext.anchor.legacy.js", integrity: "sha384-bN9t1anpKLUDUvnbE845H1+9UvP+XDfrsN5AhrKLUQJ5fm3YcFqiylDNFuE02RlJ" } } }, dependencies: [], style: { url: "./aellux.ext.anchor.min.css", integrity: "sha384-DwxfMH5mNSvmF0U4/dgL6dbe+5U1x97y2H4skxW7nUUzjr99IXNl9aVDwRjfvNGz", regular: { url: "./aellux.ext.anchor.css", integrity: "sha384-tHVCjTT3bvlmkAIDfMyevvrkAB7crjBXQAfY1l8XcaWhBFSersWJk+JndC6Bd9mO" } } }, "overflow-marquee": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.overflow-marquee.min.js", integrity: "sha384-Eqmu0pNMC64qS7kK8HI8nG9sjDDZn62b0O8SY2D7qOcC6rF0mj8XmAmrulQmP99L", regular: { url: "./aellux.ext.overflow-marquee.js", integrity: "sha384-n0Pkh5AsBRtTSSShu9YJf/qSevWP0r7+asYOBqyglI5z7gWTWbjE/0rAlqeoZWJ3" } }, legacy: { url: "./aellux.ext.overflow-marquee.legacy.min.js", integrity: "sha384-lOog++PR/TJTbVS+/TVvp6RuT972idDV+nzb0s6yd8hK9cyDh4d9UR1sROfFMp+S", regular: { url: "./aellux.ext.overflow-marquee.legacy.js", integrity: "sha384-DJwiequ7f6edt0D9cflftvA036vZWLH3RK50O0zX+3F+IbHldPHP92dbDjUTvGWf" } } }, dependencies: [], style: { url: "./aellux.ext.overflow-marquee.min.css", integrity: "sha384-PD8sxZJw/8gWr9Rq2l7wwUzADqBY74KSE1nn258niuXi97P+MSKN6tCxvocJPGd/", regular: { url: "./aellux.ext.overflow-marquee.css", integrity: "sha384-HyIVGE6lr+ZML8gekuK733ELP8Bd2gdj/+to+QhBYPN+tytaTEHP07ub3nAkOG3y" } } }, "ajax-href": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.ajax-href.min.js", integrity: "sha384-DD+XtPvKyNGWtcjYNTTcXU5e+PgMl7Ev81DgYMNEF0hNAxML61MGS9g8fy6hWIY5", regular: { url: "./aellux.ext.ajax-href.js", integrity: "sha384-h5H+QebE/oUgoWuMMOJOXZoqkjRenBh/EtpOIeU67b7mYDV2pBTvA3qMUiXFc8OS" } }, legacy: { url: "./aellux.ext.ajax-href.legacy.min.js", integrity: "sha384-Q1j4je0/BTjMBSZo29omTv/vLo4oyuaqYlG3h41XRJ02fnTm2X7qkhN2bAL2XZTe", regular: { url: "./aellux.ext.ajax-href.legacy.js", integrity: "sha384-snUrmBWZVPLbXiIkVpi0iaYYitOG/Uxa6gnMAg/iKJxPrfvP1of6LtpB0MC4XqrC" } } }, dependencies: [] }, scrollbox: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.scrollbox.min.js", integrity: "sha384-xvvqVjp8L4JLOKOPmIBAQu74doqxHEbcdHXO/678AzEIfnwJ7n4sNLErwAFWT/TF", regular: { url: "./aellux.ext.scrollbox.js", integrity: "sha384-8LkpI3GuwNINJsz6yjIJu379A5JSndRVfaiOYq6DASpouBAtnoGXi3grX1taS/LH" } }, legacy: { url: "./aellux.ext.scrollbox.legacy.min.js", integrity: "sha384-NfjjNIioenO0EAxx9GrcD/I9ILUL4nMzjAdyBF7bel05CRtOfTx1n1qS5zN3W7E1", regular: { url: "./aellux.ext.scrollbox.legacy.js", integrity: "sha384-DHH1dF+lyHWcO+fiwkwOP8c01PIPfOEHHp61yPEcDgDHsy8x+ugcClr/E3SbDJN4" } } }, dependencies: [], style: { url: "./aellux.ext.scrollbox.min.css", integrity: "sha384-+7gbnqlykQX9O8Q2E2+TcXQk0zpdZhUvNgwqlsL914/cBKo/zlEnbiltW4GcrsXT", regular: { url: "./aellux.ext.scrollbox.css", integrity: "sha384-/LJ8wnR9DMXq2PAGEXphThjj0l18YAkatUlI4YFCtCRK8hTB6QSrDVqbSRhNskg1" } } }, "scrollbox-snap": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.scrollbox-snap.min.js", integrity: "sha384-NNIBI4kj4sdGSI+XDs2LeBrjdo7AAN4eVtQeyAGScLBvxkZEFx3OaT9xpaW4b4Wq", regular: { url: "./aellux.ext.scrollbox-snap.js", integrity: "sha384-gmMGaW0wvR61QynjfBKga6/+7NMAWzk6ALIYmMC0hy9gkSvCrvKXueA+ETEgM9wB" } }, legacy: { url: "./aellux.ext.scrollbox-snap.legacy.min.js", integrity: "sha384-a35oytvnpf0myg+Brd+mFDgQBcbNaihANZl5J+GmrEqlyDl8CDQy0OZyu5Ld3l64", regular: { url: "./aellux.ext.scrollbox-snap.legacy.js", integrity: "sha384-9hE1HNRl9mFvr5aLiaRNZSQsTBb1XoicM6xGqeuISTS6OqL1sZm6DlmY6qxcQJk+" } } }, dependencies: [] }, adaptive: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.adaptive.min.js", integrity: "sha384-bkeOnTW/3uzbuhLc8fujaWnWGC+pwNAkZwci9M09paKqudp0v/flMrJ49JXw16vv", regular: { url: "./aellux.ext.adaptive.js", integrity: "sha384-Qzf9wU6DSSaaE+8lr96vnYqjKQqYxep8dhCZmjgNdqreuk9fL3qKMn3NW7DGAEaT" } }, legacy: { url: "./aellux.ext.adaptive.legacy.min.js", integrity: "sha384-YVHHWZOvf+65r/CU89nBPZXhj3j5sn4r2ho+CNUCUaYs1WE6pWIeypcq7n5OCBor", regular: { url: "./aellux.ext.adaptive.legacy.js", integrity: "sha384-gBkxqbBpIqdj5ozJm/NsenI/yKOvEGarZBl2SrPjYiiYx6cez2/FGTMf5XyzHrTj" } } }, dependencies: [], style: { url: "./aellux.ext.adaptive.min.css", integrity: "sha384-8yUP1PStfDqBCyCskP3k9WLIKgv/yl1nyDhmPz7hsX5NZ4z3ZT3ajolA+RhYlUiG", regular: { url: "./aellux.ext.adaptive.css", integrity: "sha384-HfIjX9Zk0VFRimzPvUaTS5AtwuHJHjXKoM/xbNJXj5vE7bSdBGEzbrBHfbNmYah0" } } }, present: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.present.min.js", integrity: "sha384-EIaNqaLi7JHQ2RXOI6kX70LbsXAxcf2EgFoCkbs6m6SmIkvSyueWneyt0al0eymR", regular: { url: "./aellux.ext.present.js", integrity: "sha384-fAf7M1Hv8zdfUOFwdiii5rZC8pkEuOJDbskWXzVWe7Y0Tj0hEGctYMmzEZpKsfny" } }, legacy: { url: "./aellux.ext.present.legacy.min.js", integrity: "sha384-C4SfaexHaP88DdRQ2Nliq+HFljay9nkOxjMMQwh6mXRQsPwMb4Pm9TIwe1IpVUPm", regular: { url: "./aellux.ext.present.legacy.js", integrity: "sha384-NWJMHfgYAytfDxWS6e4l6NkrLKrLcJcvtuvzO8pCi5GrOFB5RsY+wspG8seVp0Mf" } } }, dependencies: [], style: { url: "./aellux.ext.present.min.css", integrity: "sha384-2QoNgFTu/KOOrgaTKZV4VXCoIaU2h5PMPILW5LHseXK2ygNpF6miOfxZUwkTBgPY", regular: { url: "./aellux.ext.present.css", integrity: "sha384-uZ/OPZK9sRFcaejKJHrc0wPaPXFKeGS+pBWWbkMEe3+3M6zLEa7nBc/cD0Tejsmr" } } } } };
+      define_AELLUX_OFFICIAL_EXTENSION_MANIFEST_default = { schemaVersion: 1, coreVersion: "0.1.0-beta.10", extensions: { preference: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.preference.min.js", integrity: "sha384-mSOgb0DekFTRXXZAgyNrPjamdlSqzL4SSGZYVWgVg+WlG+pBj11xT81v/6Xk43yO", regular: { url: "./aellux.ext.preference.js", integrity: "sha384-MlikpdHSzHzF6kz5+oJGtq3eoFsKTsx/g+FTrf+dFOU8iQGHsCpn4fP1jLlbNrj7" } }, legacy: { url: "./aellux.ext.preference.legacy.min.js", integrity: "sha384-1LMsK0W9J/PoM4tXhFgkYLRY4yWdzVoYmFy4OMDGd8lRdtptKoEb1sI9L1kzNaBu", regular: { url: "./aellux.ext.preference.legacy.js", integrity: "sha384-pozuz43OyfXrnkmuBu6KTM2lqRSqcI5LMgwAtqnzXq8xZGdVqpnmOtrBcYcMskWk" } } }, dependencies: [] }, "state-navigation": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.state-navigation.min.js", integrity: "sha384-wAbgAqjAA6wauuG+iuUtfRwxChd6fTJ0fS22fqnu2r00kouoXJWZ0f7AoTYlqBC6", regular: { url: "./aellux.ext.state-navigation.js", integrity: "sha384-PKJ8HTD7eIYDEg2hOaAJjpMYzLr2fBjBRGmIGG7XzGTzVK0yTjt5HYPO55VbWfdS" } }, legacy: { url: "./aellux.ext.state-navigation.legacy.min.js", integrity: "sha384-YkhfU15Mpk8KiO6TyoVU6z1yCiYWwnsOGE0xVaQ8NrE7IGrxOSUL005g5JeUDdJu", regular: { url: "./aellux.ext.state-navigation.legacy.js", integrity: "sha384-kaEUY0Zpw8K6pcwjm+INA5feXftLK2/N1aFpPr2LCTcetX2uoe2GGd1MJyy7u8rZ" } } }, dependencies: [] }, feedback: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.feedback.min.js", integrity: "sha384-oHAcvQwCs/v3ktzXoNdJEDEkaV6NI29MjzjF068Lw0oL9NwVP5THnxzb12f0ySkY", regular: { url: "./aellux.ext.feedback.js", integrity: "sha384-dGcxHfGyV544C6livNJKKrlNWky/fBFkMONowmtlhHZ5exWL8AJOoV40jJhZW6Iq" } }, legacy: { url: "./aellux.ext.feedback.legacy.min.js", integrity: "sha384-S31Sa8B4kbKL/xsEJ3QTTikO+AjuXSc9GXBzNw8kl/b2amk5tzqgQNNKQPfGnYdF", regular: { url: "./aellux.ext.feedback.legacy.js", integrity: "sha384-sy2QmY3L1TlvGPgdebeu5q9ZJl/bOeUstWE0Cu+QJUIYWSF9y1YH6mCpe09/eKrd" } } }, dependencies: [], style: { url: "./aellux.ext.feedback.min.css", integrity: "sha384-OBguCYqF+dMD0Pl84C3FlY/+ohUGfW0OyynmXb/PSDEGOyuI/TQJ3EZAoCeJx+Jk", regular: { url: "./aellux.ext.feedback.css", integrity: "sha384-yk4cW+r/Mc1FRS1ZauBHC6KsKb7sxuJ0E9mmt/+AYASAdZXXMK6iuFBR+TOEh/r4" } } }, focus: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.focus.min.js", integrity: "sha384-AXpUv/Ur2Z4cKvO9EqIFqfxxdSQR5j75q0okOAWPvHhSneQ5LPjrOzk6Sl9MOo4a", regular: { url: "./aellux.ext.focus.js", integrity: "sha384-VjQzcnhLRrvRlbVQ0X4/tO0+8gqJXAmIFoeIVimjOud1wRNuBXNnSQHHW9XQPzTe" } }, legacy: { url: "./aellux.ext.focus.legacy.min.js", integrity: "sha384-I5QpUmKsA1T8NiKfKXQgbdG19Ld1ZGCWSmosygO3yGj43tdxp5zCfLyfBuFoHlKu", regular: { url: "./aellux.ext.focus.legacy.js", integrity: "sha384-5/y3J1NC/qMyV9myEj29+wGbqCVI8ICPafSebtJVfl15Qmup6vMiJzveShd3CLnw" } } }, dependencies: [] }, point: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.point.min.js", integrity: "sha384-n540II5oWbHJRt/a8i+Rgb9A3b9dm7hamg1kd3Nz7KdPQDcaa8S823t9fCrgxBWF", regular: { url: "./aellux.ext.point.js", integrity: "sha384-aDj7I5QEH/0+52E3e6yPZ/D0MEsNBdxeET3G5ToVvgczHtksMh3p8S/KOoAapRRN" } }, legacy: { url: "./aellux.ext.point.legacy.min.js", integrity: "sha384-5UmWvQHfmvttz9yeXbilawGCZH20UdR8yNBOE9kRV34wpfWASl8plzgKtLVQGO9M", regular: { url: "./aellux.ext.point.legacy.js", integrity: "sha384-gG/XONYEC1tchBcJ6bUtKYmWFHz0E+50LmMaXDAiqWBKPuwdHZeYm1uXA22lMZuN" } } }, dependencies: [] }, anchor: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.anchor.min.js", integrity: "sha384-vpHUGJwyY3qnW78C6Yo8CLc2vgbn1KJ8FcOtQawBtCKarQ0CoihuNQ7ZCKnMbOjx", regular: { url: "./aellux.ext.anchor.js", integrity: "sha384-LaYGJ6p9H5QBGJf5j19wHgT+CFcMim2h0Ro+itxYnLkIE29RFtPdj8P8L9EYWAWr" } }, legacy: { url: "./aellux.ext.anchor.legacy.min.js", integrity: "sha384-Ym0BnY5sDflVI4JyPVWymZKurBcJTAbPNe2gy+6qHcD7x6RyIKwvff6o+6BfeZDy", regular: { url: "./aellux.ext.anchor.legacy.js", integrity: "sha384-bN9t1anpKLUDUvnbE845H1+9UvP+XDfrsN5AhrKLUQJ5fm3YcFqiylDNFuE02RlJ" } } }, dependencies: [], style: { url: "./aellux.ext.anchor.min.css", integrity: "sha384-DwxfMH5mNSvmF0U4/dgL6dbe+5U1x97y2H4skxW7nUUzjr99IXNl9aVDwRjfvNGz", regular: { url: "./aellux.ext.anchor.css", integrity: "sha384-tHVCjTT3bvlmkAIDfMyevvrkAB7crjBXQAfY1l8XcaWhBFSersWJk+JndC6Bd9mO" } } }, "overflow-marquee": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.overflow-marquee.min.js", integrity: "sha384-Eqmu0pNMC64qS7kK8HI8nG9sjDDZn62b0O8SY2D7qOcC6rF0mj8XmAmrulQmP99L", regular: { url: "./aellux.ext.overflow-marquee.js", integrity: "sha384-n0Pkh5AsBRtTSSShu9YJf/qSevWP0r7+asYOBqyglI5z7gWTWbjE/0rAlqeoZWJ3" } }, legacy: { url: "./aellux.ext.overflow-marquee.legacy.min.js", integrity: "sha384-lOog++PR/TJTbVS+/TVvp6RuT972idDV+nzb0s6yd8hK9cyDh4d9UR1sROfFMp+S", regular: { url: "./aellux.ext.overflow-marquee.legacy.js", integrity: "sha384-DJwiequ7f6edt0D9cflftvA036vZWLH3RK50O0zX+3F+IbHldPHP92dbDjUTvGWf" } } }, dependencies: [], style: { url: "./aellux.ext.overflow-marquee.min.css", integrity: "sha384-PD8sxZJw/8gWr9Rq2l7wwUzADqBY74KSE1nn258niuXi97P+MSKN6tCxvocJPGd/", regular: { url: "./aellux.ext.overflow-marquee.css", integrity: "sha384-HyIVGE6lr+ZML8gekuK733ELP8Bd2gdj/+to+QhBYPN+tytaTEHP07ub3nAkOG3y" } } }, "ajax-href": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.ajax-href.min.js", integrity: "sha384-DD+XtPvKyNGWtcjYNTTcXU5e+PgMl7Ev81DgYMNEF0hNAxML61MGS9g8fy6hWIY5", regular: { url: "./aellux.ext.ajax-href.js", integrity: "sha384-h5H+QebE/oUgoWuMMOJOXZoqkjRenBh/EtpOIeU67b7mYDV2pBTvA3qMUiXFc8OS" } }, legacy: { url: "./aellux.ext.ajax-href.legacy.min.js", integrity: "sha384-Q1j4je0/BTjMBSZo29omTv/vLo4oyuaqYlG3h41XRJ02fnTm2X7qkhN2bAL2XZTe", regular: { url: "./aellux.ext.ajax-href.legacy.js", integrity: "sha384-snUrmBWZVPLbXiIkVpi0iaYYitOG/Uxa6gnMAg/iKJxPrfvP1of6LtpB0MC4XqrC" } } }, dependencies: [] }, scrollbox: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.scrollbox.min.js", integrity: "sha384-xvvqVjp8L4JLOKOPmIBAQu74doqxHEbcdHXO/678AzEIfnwJ7n4sNLErwAFWT/TF", regular: { url: "./aellux.ext.scrollbox.js", integrity: "sha384-8LkpI3GuwNINJsz6yjIJu379A5JSndRVfaiOYq6DASpouBAtnoGXi3grX1taS/LH" } }, legacy: { url: "./aellux.ext.scrollbox.legacy.min.js", integrity: "sha384-NfjjNIioenO0EAxx9GrcD/I9ILUL4nMzjAdyBF7bel05CRtOfTx1n1qS5zN3W7E1", regular: { url: "./aellux.ext.scrollbox.legacy.js", integrity: "sha384-DHH1dF+lyHWcO+fiwkwOP8c01PIPfOEHHp61yPEcDgDHsy8x+ugcClr/E3SbDJN4" } } }, dependencies: [], style: { url: "./aellux.ext.scrollbox.min.css", integrity: "sha384-+7gbnqlykQX9O8Q2E2+TcXQk0zpdZhUvNgwqlsL914/cBKo/zlEnbiltW4GcrsXT", regular: { url: "./aellux.ext.scrollbox.css", integrity: "sha384-/LJ8wnR9DMXq2PAGEXphThjj0l18YAkatUlI4YFCtCRK8hTB6QSrDVqbSRhNskg1" } } }, "scrollbox-snap": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.scrollbox-snap.min.js", integrity: "sha384-NNIBI4kj4sdGSI+XDs2LeBrjdo7AAN4eVtQeyAGScLBvxkZEFx3OaT9xpaW4b4Wq", regular: { url: "./aellux.ext.scrollbox-snap.js", integrity: "sha384-gmMGaW0wvR61QynjfBKga6/+7NMAWzk6ALIYmMC0hy9gkSvCrvKXueA+ETEgM9wB" } }, legacy: { url: "./aellux.ext.scrollbox-snap.legacy.min.js", integrity: "sha384-a35oytvnpf0myg+Brd+mFDgQBcbNaihANZl5J+GmrEqlyDl8CDQy0OZyu5Ld3l64", regular: { url: "./aellux.ext.scrollbox-snap.legacy.js", integrity: "sha384-9hE1HNRl9mFvr5aLiaRNZSQsTBb1XoicM6xGqeuISTS6OqL1sZm6DlmY6qxcQJk+" } } }, dependencies: [] }, adaptive: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.adaptive.min.js", integrity: "sha384-bkeOnTW/3uzbuhLc8fujaWnWGC+pwNAkZwci9M09paKqudp0v/flMrJ49JXw16vv", regular: { url: "./aellux.ext.adaptive.js", integrity: "sha384-Qzf9wU6DSSaaE+8lr96vnYqjKQqYxep8dhCZmjgNdqreuk9fL3qKMn3NW7DGAEaT" } }, legacy: { url: "./aellux.ext.adaptive.legacy.min.js", integrity: "sha384-YVHHWZOvf+65r/CU89nBPZXhj3j5sn4r2ho+CNUCUaYs1WE6pWIeypcq7n5OCBor", regular: { url: "./aellux.ext.adaptive.legacy.js", integrity: "sha384-gBkxqbBpIqdj5ozJm/NsenI/yKOvEGarZBl2SrPjYiiYx6cez2/FGTMf5XyzHrTj" } } }, dependencies: [], style: { url: "./aellux.ext.adaptive.min.css", integrity: "sha384-8yUP1PStfDqBCyCskP3k9WLIKgv/yl1nyDhmPz7hsX5NZ4z3ZT3ajolA+RhYlUiG", regular: { url: "./aellux.ext.adaptive.css", integrity: "sha384-HfIjX9Zk0VFRimzPvUaTS5AtwuHJHjXKoM/xbNJXj5vE7bSdBGEzbrBHfbNmYah0" } } }, present: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.present.min.js", integrity: "sha384-uRR1f5jQ0XgGQgYDeRllXo7WEu5NrhQHbmxxvko2aqGSu7JK5rIYx5P7Qwc0+u2B", regular: { url: "./aellux.ext.present.js", integrity: "sha384-NZBpHx6Hr6hQtWziyTjop2Crfm7GmoqP9E7/8ifawGkwd4g1zMcapAee/DvhP19N" } }, legacy: { url: "./aellux.ext.present.legacy.min.js", integrity: "sha384-p1xuo+NBV9K4WpmobVNn15xBt+R5pD10AQSASltS8OxTjLqbefUEN5hqnF/vR5NK", regular: { url: "./aellux.ext.present.legacy.js", integrity: "sha384-S9A0l+1GkYXUm9346qTCZqQIpGnmHo6S6PddeQDDTMYAsOjb6OV54vLVS3qI8CNS" } } }, dependencies: [], style: { url: "./aellux.ext.present.min.css", integrity: "sha384-2QoNgFTu/KOOrgaTKZV4VXCoIaU2h5PMPILW5LHseXK2ygNpF6miOfxZUwkTBgPY", regular: { url: "./aellux.ext.present.css", integrity: "sha384-uZ/OPZK9sRFcaejKJHrc0wPaPXFKeGS+pBWWbkMEe3+3M6zLEa7nBc/cD0Tejsmr" } } } } };
     }
   });
 
@@ -31811,12 +31811,14 @@
           document.addEventListener("pointerover", onHover);
           document.addEventListener("pointerout", onHover);
           AelluxJs2.on("$click", OnClick);
+          AelluxJs2.onEvent(root2, "$resize", refreshExpandedStates);
         }
         function destroy() {
           AelluxJs2.mountManager.remove({
             extensionName: extensionName
           });
           AelluxJs2.off("$click", OnClick);
+          AelluxJs2.offEvent(root2, "$resize", refreshExpandedStates);
           document.removeEventListener("pointerover", onHover);
           document.removeEventListener("pointerout", onHover);
           var _iterator = _createForOfIteratorHelper19(groups.keys()), _step;
@@ -31939,7 +31941,6 @@
               if (!replacement) restoreMeasuredStyles(element, this);
             }
           };
-          presentController.setAriaExpanded(element.hidden ? "false" : "true");
           if (!element.hidden) {
             presentController.classList.add(className.pop);
             openPresentElements.add(element);
@@ -31974,6 +31975,7 @@
             }
           }
           setProgress(element, !element.hidden);
+          syncAriaExpanded(element, presentController);
           queueGroups();
           autoUnpopSchedule(element, presentController);
         }
@@ -32249,6 +32251,7 @@
                     _context2.n = 5;
                     break;
                   }
+                  if (!controller.transition) syncAriaExpanded(element, controller);
                   return _context2.a(2);
                 case 5:
                   transition = null;
@@ -32267,7 +32270,7 @@
                     controller.stop();
                     element.hidden = true;
                     openPresentElements.delete(element);
-                    controller.setAriaExpanded("false");
+                    syncAriaExpanded(element, controller);
                     element.getBoundingClientRect();
                   }
                   reusePreparation = !forceRepop && controller.motionEnabled && controller.transition !== null && controller.classList.contains(className.willChange);
@@ -32344,7 +32347,6 @@
                     if (controller.transition !== transition) return;
                     controller.classList.remove(className.pop, className.popping, className.unpopping);
                     controller.classList.add(transition.className);
-                    controller.setAriaExpanded(gotoVisible ? "true" : "false");
                     if (interpolatedProgress) {
                       element.style.setProperty("--ae-pop-progress", "clamp(0, var(--ae-present-pop-phase), 1)");
                       element.style.setProperty("--ae-unpop-progress", "clamp(0, var(--ae-present-unpop-phase), 1)");
@@ -32471,11 +32473,14 @@
           });
         }
         function finishTransition(element, controller, transition, gotoVisible) {
+          controller.classList.toggle(className.pop, gotoVisible);
           controller.classList.remove(transition.className);
           restoreMeasuredStyles(element, controller);
           var focused = !gotoVisible && element.contains(document.activeElement) ? document.activeElement : null;
           element.hidden = gotoVisible ? false : true;
           setProgress(element, gotoVisible);
+          syncAriaExpanded(element, controller);
+          refreshExpandedStates();
           if (element.hidden) openPresentElements.delete(element);
           else openPresentElements.add(element);
           if (focused) {
@@ -32591,6 +32596,29 @@
             suggestion: "Use one existing Present element ID, optionally prefixed with #, and mount it before interacting."
           });
         }
+        function syncAriaExpanded(element, controller) {
+          var visible = element.isConnected;
+          var visibility = root2.getComputedStyle(element).visibility;
+          if (visibility === "hidden" || visibility === "collapse") visible = false;
+          for (var current = element; visible && current; current = current.parentElement) {
+            var style = root2.getComputedStyle(current);
+            if (style.display === "none" || style.contentVisibility === "hidden" || Number(style.opacity) === 0) visible = false;
+          }
+          if (controller.expanded !== visible) controller.setAriaExpanded(String(visible));
+        }
+        function refreshExpandedStates() {
+          var _iterator9 = _createForOfIteratorHelper19(presentElements), _step9;
+          try {
+            for (_iterator9.s(); !(_step9 = _iterator9.n()).done; ) {
+              var _step9$value = _slicedToArray9(_step9.value, 2), element = _step9$value[0], controller = _step9$value[1];
+              if (!controller.transition) syncAriaExpanded(element, controller);
+            }
+          } catch (err) {
+            _iterator9.e(err);
+          } finally {
+            _iterator9.f();
+          }
+        }
         function setProgress(element, visible) {
           setPhase(element, "pop", visible ? "1" : "0");
           setPhase(element, "unpop", visible ? "0" : "1");
@@ -32640,25 +32668,25 @@
           groups.delete(group);
           state.jobs.clear();
           publishGroup(group, state, null);
-          var _iterator9 = _createForOfIteratorHelper19(groupMembers(group)), _step9;
+          var _iterator0 = _createForOfIteratorHelper19(groupMembers(group)), _step0;
           try {
-            for (_iterator9.s(); !(_step9 = _iterator9.n()).done; ) {
-              var member = _step9.value;
+            for (_iterator0.s(); !(_step0 = _iterator0.n()).done; ) {
+              var member = _step0.value;
               var controller = presentElements.get(member);
               if (controller.transition) {
                 var visible = controller.direction === POP;
                 controller.stop();
                 member.hidden = !visible;
                 controller.classList.toggle(className.pop, visible);
-                controller.setAriaExpanded(String(visible));
                 setProgress(member, visible);
+                syncAriaExpanded(member, controller);
                 if (!visible) openPresentElements.delete(member);
               }
             }
           } catch (err) {
-            _iterator9.e(err);
+            _iterator0.e(err);
           } finally {
-            _iterator9.f();
+            _iterator0.f();
           }
           state.memory.restore();
           if (!groups.size && groupObserver) {
@@ -32776,10 +32804,10 @@
               return presentElements.has(member2) && member2.isConnected && member2.closest(groupSelector) === group && member2.id === ids[index] && member2.getAttribute(attr.when) === conditions[index];
             });
           };
-          var _iterator0 = _createForOfIteratorHelper19(changes), _step0;
+          var _iterator1 = _createForOfIteratorHelper19(changes), _step1;
           try {
-            for (_iterator0.s(); !(_step0 = _iterator0.n()).done; ) {
-              var member = _step0.value;
+            for (_iterator1.s(); !(_step1 = _iterator1.n()).done; ) {
+              var member = _step1.value;
               var allowed = AelluxJs2.dispatchFrom(member, member === selected2 ? "BeforePop" : "BeforeUnpop", {
                 bubbles: true,
                 cancelable: true
@@ -32798,9 +32826,9 @@
               }
             }
           } catch (err) {
-            _iterator0.e(err);
+            _iterator1.e(err);
           } finally {
-            _iterator0.f();
+            _iterator1.f();
           }
           state.selected = selected2;
           var complete;
@@ -32808,10 +32836,10 @@
             complete = resolve;
           });
           state.pending = pending;
-          var _iterator1 = _createForOfIteratorHelper19(changes), _step1;
+          var _iterator10 = _createForOfIteratorHelper19(changes), _step10;
           try {
             var _loop2 = function _loop22() {
-              var member2 = _step1.value;
+              var member2 = _step10.value;
               var job = presentTransition(member2, member2 === selected2, false, true);
               if (groups.get(group) !== state || state.revision !== revision) {
                 complete(false);
@@ -32824,14 +32852,14 @@
                 if (state.jobs.get(member2) === job) state.jobs.delete(member2);
               });
             }, _ret;
-            for (_iterator1.s(); !(_step1 = _iterator1.n()).done; ) {
+            for (_iterator10.s(); !(_step10 = _iterator10.n()).done; ) {
               _ret = _loop2();
               if (_ret) return _ret.v;
             }
           } catch (err) {
-            _iterator1.e(err);
+            _iterator10.e(err);
           } finally {
-            _iterator1.f();
+            _iterator10.f();
           }
           publishGroup(group, state, selected2);
           Promise.all(members.map(function(member2) {
@@ -32851,16 +32879,16 @@
         function inHoverRegion(target, node) {
           if (!node || !node.nodeType) return false;
           if (target.contains(node)) return true;
-          var _iterator10 = _createForOfIteratorHelper19(triggerElementsSet), _step10;
+          var _iterator11 = _createForOfIteratorHelper19(triggerElementsSet), _step11;
           try {
-            for (_iterator10.s(); !(_step10 = _iterator10.n()).done; ) {
-              var button = _step10.value;
+            for (_iterator11.s(); !(_step11 = _iterator11.n()).done; ) {
+              var button = _step11.value;
               if (button.getAttribute(attr.triggerOn) === "hover" && triggerTargets.get(button) === target && button.contains(node)) return true;
             }
           } catch (err) {
-            _iterator10.e(err);
+            _iterator11.e(err);
           } finally {
-            _iterator10.f();
+            _iterator11.f();
           }
           return false;
         }
@@ -32885,10 +32913,10 @@
               } else hoveredTriggers.delete(button);
             }
           }
-          var _iterator11 = _createForOfIteratorHelper19(openPresentElements), _step11;
+          var _iterator12 = _createForOfIteratorHelper19(openPresentElements), _step12;
           try {
             var _loop3 = function _loop32() {
-              var target2 = _step11.value;
+              var target2 = _step12.value;
               if (!inHoverRegion(target2, event.target)) return 1;
               if (entering || inHoverRegion(target2, event.relatedTarget)) cancelHoverClose(target2);
               else if (_toConsumableArray8(triggerElementsSet).some(function(control) {
@@ -32901,13 +32929,13 @@
                 }, 120));
               }
             };
-            for (_iterator11.s(); !(_step11 = _iterator11.n()).done; ) {
+            for (_iterator12.s(); !(_step12 = _iterator12.n()).done; ) {
               if (_loop3()) continue;
             }
           } catch (err) {
-            _iterator11.e(err);
+            _iterator12.e(err);
           } finally {
-            _iterator11.f();
+            _iterator12.f();
           }
         }
         function getString2Time(string) {

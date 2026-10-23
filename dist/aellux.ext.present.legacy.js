@@ -287,12 +287,14 @@
       document.addEventListener("pointerover", onHover);
       document.addEventListener("pointerout", onHover);
       AelluxJs.on("$click", OnClick);
+      AelluxJs.onEvent(root, "$resize", refreshExpandedStates);
     }
     function destroy() {
       AelluxJs.mountManager.remove({
         extensionName: extensionName
       });
       AelluxJs.off("$click", OnClick);
+      AelluxJs.offEvent(root, "$resize", refreshExpandedStates);
       document.removeEventListener("pointerover", onHover);
       document.removeEventListener("pointerout", onHover);
       var _iterator = _createForOfIteratorHelper(groups.keys()), _step;
@@ -415,7 +417,6 @@
           if (!replacement) restoreMeasuredStyles(element, this);
         }
       };
-      presentController.setAriaExpanded(element.hidden ? "false" : "true");
       if (!element.hidden) {
         presentController.classList.add(className.pop);
         openPresentElements.add(element);
@@ -450,6 +451,7 @@
         }
       }
       setProgress(element, !element.hidden);
+      syncAriaExpanded(element, presentController);
       queueGroups();
       autoUnpopSchedule(element, presentController);
     }
@@ -725,6 +727,7 @@
                 _context2.n = 5;
                 break;
               }
+              if (!controller.transition) syncAriaExpanded(element, controller);
               return _context2.a(2);
             case 5:
               transition = null;
@@ -743,7 +746,7 @@
                 controller.stop();
                 element.hidden = true;
                 openPresentElements.delete(element);
-                controller.setAriaExpanded("false");
+                syncAriaExpanded(element, controller);
                 element.getBoundingClientRect();
               }
               reusePreparation = !forceRepop && controller.motionEnabled && controller.transition !== null && controller.classList.contains(className.willChange);
@@ -820,7 +823,6 @@
                 if (controller.transition !== transition) return;
                 controller.classList.remove(className.pop, className.popping, className.unpopping);
                 controller.classList.add(transition.className);
-                controller.setAriaExpanded(gotoVisible ? "true" : "false");
                 if (interpolatedProgress) {
                   element.style.setProperty("--ae-pop-progress", "clamp(0, var(--ae-present-pop-phase), 1)");
                   element.style.setProperty("--ae-unpop-progress", "clamp(0, var(--ae-present-unpop-phase), 1)");
@@ -947,11 +949,14 @@
       });
     }
     function finishTransition(element, controller, transition, gotoVisible) {
+      controller.classList.toggle(className.pop, gotoVisible);
       controller.classList.remove(transition.className);
       restoreMeasuredStyles(element, controller);
       var focused = !gotoVisible && element.contains(document.activeElement) ? document.activeElement : null;
       element.hidden = gotoVisible ? false : true;
       setProgress(element, gotoVisible);
+      syncAriaExpanded(element, controller);
+      refreshExpandedStates();
       if (element.hidden) openPresentElements.delete(element);
       else openPresentElements.add(element);
       if (focused) {
@@ -1067,6 +1072,29 @@
         suggestion: "Use one existing Present element ID, optionally prefixed with #, and mount it before interacting."
       });
     }
+    function syncAriaExpanded(element, controller) {
+      var visible = element.isConnected;
+      var visibility = root.getComputedStyle(element).visibility;
+      if (visibility === "hidden" || visibility === "collapse") visible = false;
+      for (var current = element; visible && current; current = current.parentElement) {
+        var style = root.getComputedStyle(current);
+        if (style.display === "none" || style.contentVisibility === "hidden" || Number(style.opacity) === 0) visible = false;
+      }
+      if (controller.expanded !== visible) controller.setAriaExpanded(String(visible));
+    }
+    function refreshExpandedStates() {
+      var _iterator9 = _createForOfIteratorHelper(presentElements), _step9;
+      try {
+        for (_iterator9.s(); !(_step9 = _iterator9.n()).done; ) {
+          var _step9$value = _slicedToArray(_step9.value, 2), element = _step9$value[0], controller = _step9$value[1];
+          if (!controller.transition) syncAriaExpanded(element, controller);
+        }
+      } catch (err) {
+        _iterator9.e(err);
+      } finally {
+        _iterator9.f();
+      }
+    }
     function setProgress(element, visible) {
       setPhase(element, "pop", visible ? "1" : "0");
       setPhase(element, "unpop", visible ? "0" : "1");
@@ -1116,25 +1144,25 @@
       groups.delete(group);
       state.jobs.clear();
       publishGroup(group, state, null);
-      var _iterator9 = _createForOfIteratorHelper(groupMembers(group)), _step9;
+      var _iterator0 = _createForOfIteratorHelper(groupMembers(group)), _step0;
       try {
-        for (_iterator9.s(); !(_step9 = _iterator9.n()).done; ) {
-          var member = _step9.value;
+        for (_iterator0.s(); !(_step0 = _iterator0.n()).done; ) {
+          var member = _step0.value;
           var controller = presentElements.get(member);
           if (controller.transition) {
             var visible = controller.direction === POP;
             controller.stop();
             member.hidden = !visible;
             controller.classList.toggle(className.pop, visible);
-            controller.setAriaExpanded(String(visible));
             setProgress(member, visible);
+            syncAriaExpanded(member, controller);
             if (!visible) openPresentElements.delete(member);
           }
         }
       } catch (err) {
-        _iterator9.e(err);
+        _iterator0.e(err);
       } finally {
-        _iterator9.f();
+        _iterator0.f();
       }
       state.memory.restore();
       if (!groups.size && groupObserver) {
@@ -1252,10 +1280,10 @@
           return presentElements.has(member2) && member2.isConnected && member2.closest(groupSelector) === group && member2.id === ids[index] && member2.getAttribute(attr.when) === conditions[index];
         });
       };
-      var _iterator0 = _createForOfIteratorHelper(changes), _step0;
+      var _iterator1 = _createForOfIteratorHelper(changes), _step1;
       try {
-        for (_iterator0.s(); !(_step0 = _iterator0.n()).done; ) {
-          var member = _step0.value;
+        for (_iterator1.s(); !(_step1 = _iterator1.n()).done; ) {
+          var member = _step1.value;
           var allowed = AelluxJs.dispatchFrom(member, member === selected2 ? "BeforePop" : "BeforeUnpop", {
             bubbles: true,
             cancelable: true
@@ -1274,9 +1302,9 @@
           }
         }
       } catch (err) {
-        _iterator0.e(err);
+        _iterator1.e(err);
       } finally {
-        _iterator0.f();
+        _iterator1.f();
       }
       state.selected = selected2;
       var complete;
@@ -1284,10 +1312,10 @@
         complete = resolve;
       });
       state.pending = pending;
-      var _iterator1 = _createForOfIteratorHelper(changes), _step1;
+      var _iterator10 = _createForOfIteratorHelper(changes), _step10;
       try {
         var _loop2 = function _loop22() {
-          var member2 = _step1.value;
+          var member2 = _step10.value;
           var job = presentTransition(member2, member2 === selected2, false, true);
           if (groups.get(group) !== state || state.revision !== revision) {
             complete(false);
@@ -1300,14 +1328,14 @@
             if (state.jobs.get(member2) === job) state.jobs.delete(member2);
           });
         }, _ret;
-        for (_iterator1.s(); !(_step1 = _iterator1.n()).done; ) {
+        for (_iterator10.s(); !(_step10 = _iterator10.n()).done; ) {
           _ret = _loop2();
           if (_ret) return _ret.v;
         }
       } catch (err) {
-        _iterator1.e(err);
+        _iterator10.e(err);
       } finally {
-        _iterator1.f();
+        _iterator10.f();
       }
       publishGroup(group, state, selected2);
       Promise.all(members.map(function(member2) {
@@ -1327,16 +1355,16 @@
     function inHoverRegion(target, node) {
       if (!node || !node.nodeType) return false;
       if (target.contains(node)) return true;
-      var _iterator10 = _createForOfIteratorHelper(triggerElementsSet), _step10;
+      var _iterator11 = _createForOfIteratorHelper(triggerElementsSet), _step11;
       try {
-        for (_iterator10.s(); !(_step10 = _iterator10.n()).done; ) {
-          var button = _step10.value;
+        for (_iterator11.s(); !(_step11 = _iterator11.n()).done; ) {
+          var button = _step11.value;
           if (button.getAttribute(attr.triggerOn) === "hover" && triggerTargets.get(button) === target && button.contains(node)) return true;
         }
       } catch (err) {
-        _iterator10.e(err);
+        _iterator11.e(err);
       } finally {
-        _iterator10.f();
+        _iterator11.f();
       }
       return false;
     }
@@ -1361,10 +1389,10 @@
           } else hoveredTriggers.delete(button);
         }
       }
-      var _iterator11 = _createForOfIteratorHelper(openPresentElements), _step11;
+      var _iterator12 = _createForOfIteratorHelper(openPresentElements), _step12;
       try {
         var _loop3 = function _loop32() {
-          var target2 = _step11.value;
+          var target2 = _step12.value;
           if (!inHoverRegion(target2, event.target)) return 1;
           if (entering || inHoverRegion(target2, event.relatedTarget)) cancelHoverClose(target2);
           else if (_toConsumableArray(triggerElementsSet).some(function(control) {
@@ -1377,13 +1405,13 @@
             }, 120));
           }
         };
-        for (_iterator11.s(); !(_step11 = _iterator11.n()).done; ) {
+        for (_iterator12.s(); !(_step12 = _iterator12.n()).done; ) {
           if (_loop3()) continue;
         }
       } catch (err) {
-        _iterator11.e(err);
+        _iterator12.e(err);
       } finally {
-        _iterator11.f();
+        _iterator12.f();
       }
     }
     function getString2Time(string) {

@@ -119,10 +119,12 @@
       document.addEventListener("pointerover", onHover);
       document.addEventListener("pointerout", onHover);
       AelluxJs.on("$click", OnClick);
+      AelluxJs.onEvent(root, "$resize", refreshExpandedStates);
     }
     function destroy() {
       AelluxJs.mountManager.remove({ extensionName });
       AelluxJs.off("$click", OnClick);
+      AelluxJs.offEvent(root, "$resize", refreshExpandedStates);
       document.removeEventListener("pointerover", onHover);
       document.removeEventListener("pointerout", onHover);
       for (const group of groups.keys()) unmountGroup(group);
@@ -222,9 +224,6 @@
           if (!replacement) restoreMeasuredStyles(element, this);
         }
       };
-      presentController.setAriaExpanded(
-        element.hidden ? "false" : "true"
-      );
       if (!element.hidden) {
         presentController.classList.add(className.pop);
         openPresentElements.add(element);
@@ -245,6 +244,7 @@
         }
       }
       setProgress(element, !element.hidden);
+      syncAriaExpanded(element, presentController);
       queueGroups();
       autoUnpopSchedule(element, presentController);
     }
@@ -453,6 +453,7 @@
       }
       const newDirection = gotoVisible ? POP : UNPOP;
       if (element.hidden && !gotoVisible || newDirection === controller.direction && !forceRepop) {
+        if (!controller.transition) syncAriaExpanded(element, controller);
         return;
       }
       let transition = null;
@@ -469,7 +470,7 @@
           controller.stop();
           element.hidden = true;
           openPresentElements.delete(element);
-          controller.setAriaExpanded("false");
+          syncAriaExpanded(element, controller);
           element.getBoundingClientRect();
         }
         const reusePreparation = !forceRepop && controller.motionEnabled && controller.transition !== null && controller.classList.contains(className.willChange);
@@ -537,7 +538,6 @@
             className.unpopping
           );
           controller.classList.add(transition.className);
-          controller.setAriaExpanded(gotoVisible ? "true" : "false");
           if (interpolatedProgress) {
             element.style.setProperty("--ae-pop-progress", "clamp(0, var(--ae-present-pop-phase), 1)");
             element.style.setProperty("--ae-unpop-progress", "clamp(0, var(--ae-present-unpop-phase), 1)");
@@ -629,11 +629,14 @@
       });
     }
     function finishTransition(element, controller, transition, gotoVisible) {
+      controller.classList.toggle(className.pop, gotoVisible);
       controller.classList.remove(transition.className);
       restoreMeasuredStyles(element, controller);
       const focused = !gotoVisible && element.contains(document.activeElement) ? document.activeElement : null;
       element.hidden = gotoVisible ? false : true;
       setProgress(element, gotoVisible);
+      syncAriaExpanded(element, controller);
+      refreshExpandedStates();
       if (element.hidden) openPresentElements.delete(element);
       else openPresentElements.add(element);
       if (focused) {
@@ -736,6 +739,21 @@
         suggestion: "Use one existing Present element ID, optionally prefixed with #, and mount it before interacting."
       });
     }
+    function syncAriaExpanded(element, controller) {
+      let visible = element.isConnected;
+      const visibility = root.getComputedStyle(element).visibility;
+      if (visibility === "hidden" || visibility === "collapse") visible = false;
+      for (let current = element; visible && current; current = current.parentElement) {
+        const style = root.getComputedStyle(current);
+        if (style.display === "none" || style.contentVisibility === "hidden" || Number(style.opacity) === 0) visible = false;
+      }
+      if (controller.expanded !== visible) controller.setAriaExpanded(String(visible));
+    }
+    function refreshExpandedStates() {
+      for (const [element, controller] of presentElements) {
+        if (!controller.transition) syncAriaExpanded(element, controller);
+      }
+    }
     function setProgress(element, visible) {
       setPhase(element, "pop", visible ? "1" : "0");
       setPhase(element, "unpop", visible ? "0" : "1");
@@ -786,8 +804,8 @@
           controller.stop();
           member.hidden = !visible;
           controller.classList.toggle(className.pop, visible);
-          controller.setAriaExpanded(String(visible));
           setProgress(member, visible);
+          syncAriaExpanded(member, controller);
           if (!visible) openPresentElements.delete(member);
         }
       }
