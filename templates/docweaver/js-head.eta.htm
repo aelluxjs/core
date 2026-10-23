@@ -6,12 +6,12 @@
 <script src="/core/dist/aellux.min.js"></script>
 <script>
   AelluxJs.ext("ajax-href");
-  AelluxJs.ext("anchor");
-  AelluxJs.ext("present");
-  AelluxJs.ext("scrollbox");
   AelluxJs.ext("preference");
   AelluxJs.ext("state-navigation");
-  AelluxJs.ext("overflow-marquee");
+  AelluxJs.ext("anchor", { loadStyle: true });
+  AelluxJs.ext("present", { loadStyle: true });
+  AelluxJs.ext("scrollbox", { loadStyle: true });
+  AelluxJs.ext("overflow-marquee", { loadStyle: true });
 
   document.addEventListener("DOMContentLoaded", () => {
     prepareAjaxLinks();

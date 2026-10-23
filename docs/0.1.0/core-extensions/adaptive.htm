@@ -39,12 +39,12 @@
 <script src="/core/dist/aellux.min.js"></script>
 <script>
   AelluxJs.ext("ajax-href");
-  AelluxJs.ext("anchor");
-  AelluxJs.ext("present");
-  AelluxJs.ext("scrollbox");
   AelluxJs.ext("preference");
   AelluxJs.ext("state-navigation");
-  AelluxJs.ext("overflow-marquee");
+  AelluxJs.ext("anchor", { loadStyle: true });
+  AelluxJs.ext("present", { loadStyle: true });
+  AelluxJs.ext("scrollbox", { loadStyle: true });
+  AelluxJs.ext("overflow-marquee", { loadStyle: true });
 
   document.addEventListener("DOMContentLoaded", () => {
     prepareAjaxLinks();
@@ -775,26 +775,17 @@
     return null;
   });
 
-  let highlightPending = false;
-
   async function highlightCode() {
-    if (highlightPending) return;
-    highlightPending = true;
-    try {
-      const highlighter = await highlightReady;
-      if (!highlighter) return;
-      if (document.readyState === "loading") {
-        await new Promise(resolve => document.addEventListener("DOMContentLoaded", resolve, { once: true }));
-      }
-      document.querySelectorAll('pre code:not([data-highlighted])').forEach(block => {
-        highlighter.highlightElement(block);
-      });
-    } finally {
-      highlightPending = false;
+    const highlighter = await highlightReady;
+    if (!highlighter) return;
+    if (document.readyState === "loading") {
+      await new Promise(resolve => document.addEventListener("DOMContentLoaded", resolve, { once: true }));
     }
+    document.querySelectorAll('pre code:not([data-highlighted])').forEach(block => {
+      highlighter.highlightElement(block);
+    });
   }
 </script>
-
 </body>
 
 </html>

@@ -17,22 +17,14 @@
     return null;
   });
 
-  let highlightPending = false;
-
   async function highlightCode() {
-    if (highlightPending) return;
-    highlightPending = true;
-    try {
-      const highlighter = await highlightReady;
-      if (!highlighter) return;
-      if (document.readyState === "loading") {
-        await new Promise(resolve => document.addEventListener("DOMContentLoaded", resolve, { once: true }));
-      }
-      document.querySelectorAll('pre code:not([data-highlighted])').forEach(block => {
-        highlighter.highlightElement(block);
-      });
-    } finally {
-      highlightPending = false;
+    const highlighter = await highlightReady;
+    if (!highlighter) return;
+    if (document.readyState === "loading") {
+      await new Promise(resolve => document.addEventListener("DOMContentLoaded", resolve, { once: true }));
     }
+    document.querySelectorAll('pre code:not([data-highlighted])').forEach(block => {
+      highlighter.highlightElement(block);
+    });
   }
 </script>
