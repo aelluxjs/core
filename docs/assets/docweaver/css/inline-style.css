@@ -445,15 +445,16 @@ p {
   display: block;
   padding: 0.35rem 0;
   text-decoration: none;
-  opacity: 0.5;
+  opacity: 0.9;
   /*font-family: var(--bs-headings-font-family);*/
   font-weight: 400 !important;
   margin-left: 15px !important;
+  transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
 .toc-link:before {
   width: 3px !important;
-  background: grey !important;
+  background: #00000024 !important;
 
   /*margin-left:-10px!important;*/
   margin-top: -0.30rem !important;
@@ -463,6 +464,8 @@ p {
 .toc-link:hover,
 .toc-link.is-active-link {
   opacity: 1;
+  transform: translateX(8px);
+  text-decoration: underline;
 }
 
 .toc-link.is-active-link:before {
