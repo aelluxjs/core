@@ -13,11 +13,7 @@
   AelluxJs.ext("present", { loadStyle: true });
   AelluxJs.ext("scrollbox", { loadStyle: true });
   AelluxJs.ext("overflow-marquee", { loadStyle: true });
-
-  document.addEventListener("DOMContentLoaded", () => {
-    prepareAjaxLinks();
-    AelluxJs.init({ mode: "basic", environment: "development" });
-  }, { once: true });
+  AelluxJs.init({ mode: "basic", environment: "development" });
 
   function prepareAjaxLinks() {
     const ajaxAttr = AelluxJs.attr("ajax-href");
@@ -31,9 +27,7 @@
   AelluxJs.on("BeforeMount",
     (event) => {
       initOrRefreshToc();
-
       highlightCode();
-
       prepareAjaxLinks();
 
       document.querySelectorAll("table:not([data-ae-scrollbox])")

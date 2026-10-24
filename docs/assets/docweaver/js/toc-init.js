@@ -18,7 +18,12 @@ const tocOptions = {
   activeListItemClass: "is-active-li",
   scrollEndCallback: function (e) {
     // Example: Adjust active link position
-    const active = document.querySelector('.is-active-link'); //.scrollIntoView()
+    const active = document.querySelector('.is-active-link');
+    active.scrollIntoView({
+      block: "center",
+      container: "nearest",
+      behavior: "smooth"
+    });
     const currentLabel = document.getElementById('tocbot-current-label');
     if (active && currentLabel) currentLabel.innerText = active.innerText;
   }
