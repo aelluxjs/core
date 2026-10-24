@@ -1,6 +1,6 @@
 # Point Extension
 
-`point` tracks the pointers currently pressed or hovering over the document and relates them to mounted elements with `data-ae-point`. It is included in the `full` runtime. In `basic` mode, register it before initialization:
+`point` tracks the pointers currently pressed or hovering over the document and relates them to mounted elements with `data-ae-point`. It is included in the `full` runtime. Basic registers it automatically; explicit registration can force eager loading:
 
 ```html
 <div id="canvas" data-ae-point="2"></div>

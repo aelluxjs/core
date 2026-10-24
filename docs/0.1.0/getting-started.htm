@@ -521,22 +521,8 @@
                                     class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                     style="flex:0">
                                     <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
-                                      href="/core/docs/0.1.0/core-extensions/ajax-href.htm" data-ae-overflow-marquee="190px">
-                                      Ajax Href                                    </a>
-                                  </div>
-                                                                                                                                      <div
-                                    class="nav-item mt-1 small-md rounded-1 ps-md-1"
-                                    style="flex:0">
-                                    <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                       href="/core/docs/0.1.0/core-extensions/anchor.htm" data-ae-overflow-marquee="190px">
                                       Anchor                                    </a>
-                                  </div>
-                                                                                                                                      <div
-                                    class="nav-item mt-1 small-md rounded-1 ps-md-1"
-                                    style="flex:0">
-                                    <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
-                                      href="/core/docs/0.1.0/core-extensions/dialog.htm" data-ae-overflow-marquee="190px">
-                                      Dialog                                    </a>
                                   </div>
                                                                                                                                       <div
                                     class="nav-item mt-1 small-md rounded-1 ps-md-1"
@@ -565,13 +551,6 @@
                                     <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                       href="/core/docs/0.1.0/core-extensions/point.htm" data-ae-overflow-marquee="190px">
                                       Point                                    </a>
-                                  </div>
-                                                                                                                                      <div
-                                    class="nav-item mt-1 small-md rounded-1 ps-md-1"
-                                    style="flex:0">
-                                    <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
-                                      href="/core/docs/0.1.0/core-extensions/pwa.htm" data-ae-overflow-marquee="190px">
-                                      PWA                                    </a>
                                   </div>
                                                                                                                                       <div
                                     class="nav-item mt-1 small-md rounded-1 ps-md-1"
@@ -608,7 +587,46 @@
                                       href="/core/docs/0.1.0/core-extensions/state-navigation.htm" data-ae-overflow-marquee="190px">
                                       State Navigation                                    </a>
                                   </div>
-                                                                                                </div>
+
+                                <div class="nav-item mt-1 small-md fw-bold rounded-1 ps-md-1 bg-light-adaptive"
+                                  style="flex:0">
+                                  <button type="button"
+                                    class="nav-link text-start text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                    data-ae-trigger="toggle" data-ae-target="#children2-experimental">
+                                    Experimental                                      <span class="chevron"><svg
+                                            class="svg-icon small" aria-hidden="true" focusable="false">
+                                            <use href="#bi-chevron-right"></use>
+                                          </svg></span>
+                                                                          </button>
+                                </div>
+
+                                <div id="children2-experimental" class="docs-menu-panel border-start ms-2"
+                                  data-ae-present="height opacity" data-ae-unpop-on-outside="false"                                   hidden>
+                                    <div class="ps-2 gap-1 d-flex flex-column overflow-hidden" data-ae-present-motion>
+                                                                              <div
+                                          class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                          style="flex:0">
+                                          <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                            href="/core/docs/0.1.0/core-extensions/experimental/ajax-href.htm" data-ae-overflow-marquee="190px">
+                                            Ajax Href                                          </a>
+                                        </div>
+                                                                                <div
+                                          class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                          style="flex:0">
+                                          <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                            href="/core/docs/0.1.0/core-extensions/experimental/dialog.htm" data-ae-overflow-marquee="190px">
+                                            Dialog                                          </a>
+                                        </div>
+                                                                                <div
+                                          class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                          style="flex:0">
+                                          <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                            href="/core/docs/0.1.0/core-extensions/experimental/pwa.htm" data-ae-overflow-marquee="190px">
+                                            PWA                                          </a>
+                                        </div>
+                                                                            </div>
+                                </div>
+                                                                                              </div>
                       </div>
                                                                   <div class="nav-item mt-1 small-md fw-bold rounded-1 ps-md-1 bg-light-adaptive" style="flex:0">
                       <button data-ae-point type="button"
@@ -734,18 +752,17 @@ npm run build
   AelluxJs.init({ mode: &quot;full&quot; });
 &lt;/script&gt;
 </code></pre>
-<p>The Full runtime is loaded by the aellux.js boot script; it is not a standalone entry point. <strong>Full means integrated availability, not physical inclusion in one file.</strong> It incorporates Adaptive, Ajax Href, Anchor, Feedback, Focus, Point, Preference, Present, and State Navigation. Adaptive, Ajax Href, Anchor, Feedback, Focus, Point, and Present initialize when matching markup is mounted; Preference and State Navigation initialize at startup. Ajax Href uses <code>a[data-ae-ajax-href]</code>.</p>
-<p>Full also registers Dialog, Overflow Marquee, PWA, Scrollbox and Scrollbox Snap for on-demand loading, keeping their implementations in separate distribution files. Mounting a native <code>&lt;dialog&gt;</code> requests the <a href="core-extensions/dialog.htm">Dialog Extension</a>, whose Legacy script contains its own polyfill and inline CSS. <code>data-ae-overflow-marquee</code> requests its dedicated Extension, which initializes Anchor before registering its mount map. Mounting an element with <code>data-ae-scrollbox</code> requests the compatible Scrollbox script. Mounting one with both <code>data-ae-scrollbox</code> and <code>data-ae-scrollbox-snap</code> also requests Snap, which waits for Scrollbox before mounting. The Full runtime reuses official artifact metadata embedded in the boot script, so these requests do not require a separate manifest download for the current Core version. Modern or Legacy and normal or minified files follow the boot selection. PWA is entirely optional: <code>[data-ae-pwa]</code> requests its external script, and its reusable Service Worker remains a separate application-managed artifact. PWA adds no shared styles. All other generated Core Extension styles are supplied by the shared Full stylesheet. No separate registration is needed for these Core Extensions in <code>full</code> mode.</p>
+<p>The Full runtime is loaded by the aellux.js boot script. It bundles the stable Core Extensions: Adaptive, Anchor, Overflow Marquee, Feedback, Focus, Point, Preference, Present, Scrollbox, Scrollbox Snap and State Navigation. Preference and State Navigation initialize at startup; the remaining implementations initialize when matching markup is mounted, without separate script requests.</p>
+<p>Experimental Extensions (Ajax Href, Dialog and PWA) are registered but excluded from the Full JavaScript bundle. Mounting <code>a[data-ae-ajax-href]</code>, <code>&lt;dialog&gt;</code> or <code>[data-ae-pwa]</code> loads the corresponding signed script using the official metadata embedded in the boot script. Modern/Legacy and normal/minified variants follow boot selection. The Dialog Legacy Extension contains its own polyfill and CSS. PWA keeps its reusable Service Worker as a separate application-managed artifact and adds no shared styles.</p>
 <p>Full automatically loads <code>aellux.full.css</code> (or <code>.min.css</code> with the minified boot) beside the runtime, using the configured base path. Deploy this stylesheet with the JavaScript artifacts. It includes the global defaults and all Core Extension CSS.</p>
 <h2>Basic Mode</h2>
-<p>Basic mode loads the orchestrator and only the Extensions registered by the page:</p>
+<p>Basic mode loads the orchestrator and automatically registers every Core Extension, including Experimental, for lazy loading when matching markup is mounted:</p>
 <pre><code class="language-html">&lt;script src=&quot;./dist/aellux.js&quot;&gt;&lt;/script&gt;
 &lt;script&gt;
-  $ae.ext(&quot;preference&quot;);
-  $ae.ext(&quot;feedback&quot;);
   $ae.init({ mode: &quot;basic&quot; });
 &lt;/script&gt;
 </code></pre>
+<p>State Navigation has no HTML selector; load it explicitly with <code>await $ae.wait(&quot;state-navigation&quot;)</code> when history integration is needed. Preference activates through <code>[data-ae-preference]</code>. Explicit registrations before initialization can customize selectors, eager loading and styles. Basic Extension styles remain opt-in with <code>{ loadStyle: true }</code>.</p>
 <p>Use <code>aellux.min.js</code> to select the matching minified runtime and Extension files.</p>
 <h2>Distribution</h2>
 <p>The boot, runtimes, and Extensions are classic scripts isolated in IIFEs. The separate <code>aellux.esm.js</code> and <code>aellux.esm.min.js</code> module entries export the shared Core API as their default. They do not replace the browser boot script, which starts the runtime through <code>$ae.init()</code>:</p>

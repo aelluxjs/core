@@ -516,7 +516,7 @@
       "references": [
         {
           "name": "AelluxJS pwa",
-          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/pwa.htm"
+          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/experimental/pwa.htm"
         }
       ],
       "values": [
@@ -878,7 +878,7 @@
           "references": [
             {
               "name": "AelluxJS ajax-href",
-              "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/ajax-href.htm"
+              "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/experimental/ajax-href.htm"
             }
           ],
           "values": [

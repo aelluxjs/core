@@ -6,7 +6,7 @@ Set `AELLUX_OFFICIAL_CDN_BASE` to an immutable HTTPS distribution base while bui
 
 ## Resolution and caching
 
-`basic` fetches the official index only when a name-only registration must be resolved. One cached Promise is shared by concurrent requests. `full` reuses the official metadata embedded by the version-matched boot script, so its Core Extensions do not need an index request. It uses bundled implementations for Adaptive, Ajax Href, Anchor, Feedback, Focus, Point, Preference, Present, and State Navigation. Ajax Href initializes when mounting `a[data-ae-ajax-href]`. Dialog, Overflow Marquee, PWA, Scrollbox and Scrollbox Snap are registered in Full but load their separate, signed Extension scripts on demand.
+Both modes reuse the signed official metadata embedded by the version-matched boot script, avoiding an index request for the current Core version. Basic automatically registers all Core Extensions for lazy loading from separate signed files. Full bundles Adaptive, Anchor, Overflow Marquee, Feedback, Focus, Point, Preference, Present, Scrollbox, Scrollbox Snap and State Navigation. Experimental Extensions (Ajax Href, Dialog and PWA) remain external and activate through `a[data-ae-ajax-href]`, `dialog` and `[data-ae-pwa]` in both modes. Full initializes Preference and State Navigation at startup; Basic activates Preference through its markup and State Navigation through `$ae.wait("state-navigation")`.
 
 Resolution order is: an explicit URL/registration, a bundled implementation, official metadata, the configured custom fallback, and finally the historical local filename convention. A custom index cannot silently replace an official entry.
 

@@ -279,21 +279,16 @@ for (const mode of ["basic", "full"]) {
     await page.addScriptTag({ url: "/dist/aellux.min.js" });
     await initialize(page, { mode, skipGlobalMount: true });
     expect(requests.filter(path => /aellux\.ext\.dialog/.test(path))).toEqual([]);
-    expect(await page.evaluate(async mode => {
+    expect(await page.evaluate(async () => {
       const dialog = document.createElement("dialog");
       document.body.appendChild(dialog);
-      if (mode === "basic") {
-        await $ae.mount(dialog);
-        if (typeof dialog.showModal === "function") return false;
-        AelluxJs.ext("dialog", { loadWhen: "dialog" });
-      }
       if (typeof dialog.showModal === "function") return false;
       await $ae.mount(dialog);
       $ae(dialog).dialog.showModal();
       const open = dialog.open;
       $ae(dialog).dialog.close();
       return open;
-    }, mode)).toBe(true);
+    })).toBe(true);
     expect(requests.filter(path => /aellux\.ext\.dialog.*\.js$/.test(path)))
       .toEqual(["/dist/aellux.ext.dialog.legacy.min.js"]);
   });

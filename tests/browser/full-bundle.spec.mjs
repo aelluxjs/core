@@ -5,6 +5,8 @@ import { readFile } from "node:fs/promises";
 
 const coreExtensions = officialExtensionDefinitions
   .map(({ name }) => name.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase())).sort();
+const bundledExtensions = officialExtensionDefinitions.filter(entry => !entry.experimental)
+  .map(({ name }) => name.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase())).sort();
 
 for (const { boot, forceLegacy } of [
   { boot: "aellux.js", forceLegacy: false },
@@ -30,7 +32,7 @@ for (const { boot, forceLegacy } of [
       legacy: AelluxJs.diagnostics.legacy
     }));
     expect(state).toEqual({
-      bundled: coreExtensions.filter(name => !["dialog", "pwa", "scrollbox", "scrollboxSnap", "overflowMarquee"].includes(name)),
+      bundled: bundledExtensions,
       registered: coreExtensions,
       lazy: ["adaptive", "ajaxHref", "anchor", "dialog", "feedback", "focus", "overflowMarquee", "point", "present", "pwa", "scrollbox", "scrollboxSnap"],
       externalScripts: [],

@@ -2409,7 +2409,7 @@ test("full runtime writes the renamed history state marker", async ({ page }) =>
     style: false,
     presentInitialized: false,
     presentStyle: false,
-    ajaxHrefBundled: true
+    ajaxHrefBundled: false
   });
   expect(await page.evaluate(() => history.state?.aelluxJsState)).toBe(true);
   expect(await page.evaluate(() => history.state?.aelluxState)).toBeUndefined();

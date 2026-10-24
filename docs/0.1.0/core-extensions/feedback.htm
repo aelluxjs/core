@@ -521,22 +521,8 @@
                                     class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                     style="flex:0">
                                     <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
-                                      href="/core/docs/0.1.0/core-extensions/ajax-href.htm" data-ae-overflow-marquee="190px">
-                                      Ajax Href                                    </a>
-                                  </div>
-                                                                                                                                      <div
-                                    class="nav-item mt-1 small-md rounded-1 ps-md-1"
-                                    style="flex:0">
-                                    <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                       href="/core/docs/0.1.0/core-extensions/anchor.htm" data-ae-overflow-marquee="190px">
                                       Anchor                                    </a>
-                                  </div>
-                                                                                                                                      <div
-                                    class="nav-item mt-1 small-md rounded-1 ps-md-1"
-                                    style="flex:0">
-                                    <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
-                                      href="/core/docs/0.1.0/core-extensions/dialog.htm" data-ae-overflow-marquee="190px">
-                                      Dialog                                    </a>
                                   </div>
                                                                                                                                       <div
                                     class="nav-item mt-1 small-md rounded-1 ps-md-1"
@@ -565,13 +551,6 @@
                                     <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                       href="/core/docs/0.1.0/core-extensions/point.htm" data-ae-overflow-marquee="190px">
                                       Point                                    </a>
-                                  </div>
-                                                                                                                                      <div
-                                    class="nav-item mt-1 small-md rounded-1 ps-md-1"
-                                    style="flex:0">
-                                    <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
-                                      href="/core/docs/0.1.0/core-extensions/pwa.htm" data-ae-overflow-marquee="190px">
-                                      PWA                                    </a>
                                   </div>
                                                                                                                                       <div
                                     class="nav-item mt-1 small-md rounded-1 ps-md-1"
@@ -608,7 +587,46 @@
                                       href="/core/docs/0.1.0/core-extensions/state-navigation.htm" data-ae-overflow-marquee="190px">
                                       State Navigation                                    </a>
                                   </div>
-                                                                                                </div>
+
+                                <div class="nav-item mt-1 small-md fw-bold rounded-1 ps-md-1 bg-light-adaptive"
+                                  style="flex:0">
+                                  <button type="button"
+                                    class="nav-link text-start text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                    data-ae-trigger="toggle" data-ae-target="#children2-experimental">
+                                    Experimental                                      <span class="chevron"><svg
+                                            class="svg-icon small" aria-hidden="true" focusable="false">
+                                            <use href="#bi-chevron-right"></use>
+                                          </svg></span>
+                                                                          </button>
+                                </div>
+
+                                <div id="children2-experimental" class="docs-menu-panel border-start ms-2"
+                                  data-ae-present="height opacity" data-ae-unpop-on-outside="false"                                   hidden>
+                                    <div class="ps-2 gap-1 d-flex flex-column overflow-hidden" data-ae-present-motion>
+                                                                              <div
+                                          class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                          style="flex:0">
+                                          <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                            href="/core/docs/0.1.0/core-extensions/experimental/ajax-href.htm" data-ae-overflow-marquee="190px">
+                                            Ajax Href                                          </a>
+                                        </div>
+                                                                                <div
+                                          class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                          style="flex:0">
+                                          <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                            href="/core/docs/0.1.0/core-extensions/experimental/dialog.htm" data-ae-overflow-marquee="190px">
+                                            Dialog                                          </a>
+                                        </div>
+                                                                                <div
+                                          class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                          style="flex:0">
+                                          <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                            href="/core/docs/0.1.0/core-extensions/experimental/pwa.htm" data-ae-overflow-marquee="190px">
+                                            PWA                                          </a>
+                                        </div>
+                                                                            </div>
+                                </div>
+                                                                                              </div>
                       </div>
                                                                   <div class="nav-item mt-1 small-md fw-bold rounded-1 ps-md-1 bg-light-adaptive" style="flex:0">
                       <button data-ae-point type="button"
@@ -726,7 +744,7 @@
             ajax-load="doc-content">
             <h1>Feedback Extension</h1>
 <p>Standard motion effects replace <code>transform</code> on the resolved <code>data-ae-target-transform</code> element (the boundary itself by default). Keep that element separate from Anchor positioning, an Elastic Scrollbox wrapper, or Present transform. In development, an inspectable replacing transform effect records diagnostic <code>2033</code> with its writers. Animate a child to compose those behaviors; opacity-only custom effects and additive transforms do not trigger that warning.</p>
-<p><code>feedback</code> sends structured feedback events, lets application code subscribe by type, and updates mounted feedback boundaries. It is included in the <code>full</code> runtime. In <code>basic</code> mode, register it with <code>$ae.ext(&quot;feedback&quot;, { loadStyle: true })</code> to include the standard motion styles, or omit <code>loadStyle</code> if animations are unnecessary.</p>
+<p><code>feedback</code> sends structured feedback events, lets application code subscribe by type, and updates mounted feedback boundaries. It is included in the <code>full</code> runtime. Basic automatically registers this Extension for lazy loading; opt into its stylesheet with <code>$ae.ext(&quot;feedback&quot;, { loadStyle: true })</code> to include the standard motion styles, or omit <code>loadStyle</code> if animations are unnecessary.</p>
 <pre><code class="language-js">const feedback = await $ae.wait(&quot;feedback&quot;);
 const subscription = feedback.on(&quot;warning&quot;, ({ message }) =&gt; {
   console.warn(message);

@@ -5,67 +5,184 @@
       "slug": "overview",
       "active": true,
       "children": [
-        { "label": "aellux.js Docs", "href": "README.md" },
-        { "label": "Getting Started", "href": "getting-started.md" },
-        { "label": "Compatibility", "href": "compatibility.md" },
-        { "label": "Validation Scenarios", "href": "validation-scenarios.md" }
+        {
+          "label": "aellux.js Docs",
+          "href": "README.md"
+        },
+        {
+          "label": "Getting Started",
+          "href": "getting-started.md"
+        },
+        {
+          "label": "Compatibility",
+          "href": "compatibility.md"
+        },
+        {
+          "label": "Validation Scenarios",
+          "href": "validation-scenarios.md"
+        }
       ]
     },
     {
       "label": "Runtime",
       "slug": "runtime",
       "children": [
-        { "label": "Runtime API", "href": "runtime/api.md" },
-        { "label": "waitLayout", "href": "runtime/wait-layout.md" },
-        { "label": "Events", "href": "runtime/events.md" },
-        { "label": "Modern & Legacy", "href": "runtime/modern-legacy.md" },
-        { "label": "Browser Support", "href": "runtime/browser-support.md" },
-        { "label": "Performance and Bundle Budget", "href": "runtime/performance.md" },
-        { "label": "ES5 Support", "href": "runtime/es5-support.md" },
-        { "label": "Visual Mounting", "href": "runtime/visual-mounting.md" },
-        { "label": "Diagnostics", "href": "runtime/diagnostics.md" }
+        {
+          "label": "Runtime API",
+          "href": "runtime/api.md"
+        },
+        {
+          "label": "waitLayout",
+          "href": "runtime/wait-layout.md"
+        },
+        {
+          "label": "Events",
+          "href": "runtime/events.md"
+        },
+        {
+          "label": "Modern & Legacy",
+          "href": "runtime/modern-legacy.md"
+        },
+        {
+          "label": "Browser Support",
+          "href": "runtime/browser-support.md"
+        },
+        {
+          "label": "Performance and Bundle Budget",
+          "href": "runtime/performance.md"
+        },
+        {
+          "label": "ES5 Support",
+          "href": "runtime/es5-support.md"
+        },
+        {
+          "label": "Visual Mounting",
+          "href": "runtime/visual-mounting.md"
+        },
+        {
+          "label": "Diagnostics",
+          "href": "runtime/diagnostics.md"
+        }
       ]
     },
     {
       "label": "Extensions",
       "slug": "extensions",
       "children": [
-        { "label": "Extension Authoring", "href": "extensions/authoring.md" },
-        { "label": "Accessibility Requirements", "href": "extensions/accessibility.md" },
-        { "label": "Registration", "href": "extensions/registration.md" },
-        { "label": "Official Registry", "href": "extensions/official-registry.md" },
-        { "label": "Declarative Loading", "href": "extensions/declarative-loading.md" },
-        { "label": "Lazy Loading", "href": "extensions/lazy-loading.md" },
-        { "label": "Extension Styles", "href": "extensions/styles.md" },
-        { "label": "CSP and Extension Trust", "href": "extensions/csp-and-trust.md" },
-        { "label": "Modern & Legacy Variants", "href": "extensions/legacy-variants.md" }
+        {
+          "label": "Extension Authoring",
+          "href": "extensions/authoring.md"
+        },
+        {
+          "label": "Accessibility Requirements",
+          "href": "extensions/accessibility.md"
+        },
+        {
+          "label": "Registration",
+          "href": "extensions/registration.md"
+        },
+        {
+          "label": "Official Registry",
+          "href": "extensions/official-registry.md"
+        },
+        {
+          "label": "Declarative Loading",
+          "href": "extensions/declarative-loading.md"
+        },
+        {
+          "label": "Lazy Loading",
+          "href": "extensions/lazy-loading.md"
+        },
+        {
+          "label": "Extension Styles",
+          "href": "extensions/styles.md"
+        },
+        {
+          "label": "CSP and Extension Trust",
+          "href": "extensions/csp-and-trust.md"
+        },
+        {
+          "label": "Modern & Legacy Variants",
+          "href": "extensions/legacy-variants.md"
+        }
       ]
     },
     {
       "label": "Core Extensions",
       "slug": "core-extensions",
       "children": [
-        { "label": "Adaptive", "href": "core-extensions/adaptive.md" },
-        { "label": "Ajax Href", "href": "core-extensions/ajax-href.md" },
-        { "label": "Anchor", "href": "core-extensions/anchor.md" },
-        { "label": "Dialog", "href": "core-extensions/dialog.md" },
-        { "label": "Overflow Marquee", "href": "core-extensions/overflow-marquee.md" },
-        { "label": "Feedback", "href": "core-extensions/feedback.md" },
-        { "label": "Focus", "href": "core-extensions/focus.md" },
-        { "label": "Point", "href": "core-extensions/point.md" },
-        { "label": "PWA", "href": "core-extensions/pwa.md" },
-        { "label": "Preference", "href": "core-extensions/preference.md" },
-        { "label": "Present", "href": "core-extensions/present.md" },
-        { "label": "Scrollbox", "href": "core-extensions/scrollbox.md" },
-        { "label": "Scrollbox Snap", "href": "core-extensions/scrollbox-snap.md" },
-        { "label": "State Navigation", "href": "core-extensions/state-navigation.md" }
+        {
+          "label": "Adaptive",
+          "href": "core-extensions/adaptive.md"
+        },
+        {
+          "label": "Anchor",
+          "href": "core-extensions/anchor.md"
+        },
+        {
+          "label": "Overflow Marquee",
+          "href": "core-extensions/overflow-marquee.md"
+        },
+        {
+          "label": "Feedback",
+          "href": "core-extensions/feedback.md"
+        },
+        {
+          "label": "Focus",
+          "href": "core-extensions/focus.md"
+        },
+        {
+          "label": "Point",
+          "href": "core-extensions/point.md"
+        },
+        {
+          "label": "Preference",
+          "href": "core-extensions/preference.md"
+        },
+        {
+          "label": "Present",
+          "href": "core-extensions/present.md"
+        },
+        {
+          "label": "Scrollbox",
+          "href": "core-extensions/scrollbox.md"
+        },
+        {
+          "label": "Scrollbox Snap",
+          "href": "core-extensions/scrollbox-snap.md"
+        },
+        {
+          "label": "State Navigation",
+          "href": "core-extensions/state-navigation.md"
+        },
+        {
+          "label": "Experimental",
+          "slug": "experimental",
+          "children": [
+            {
+              "label": "Ajax Href",
+              "href": "core-extensions/experimental/ajax-href.md"
+            },
+            {
+              "label": "Dialog",
+              "href": "core-extensions/experimental/dialog.md"
+            },
+            {
+              "label": "PWA",
+              "href": "core-extensions/experimental/pwa.md"
+            }
+          ]
+        }
       ]
     },
     {
       "label": "Integrations",
       "slug": "integrations",
       "children": [
-        { "label": "Bootstrap Integration", "href": "integrations/bootstrap.md" }
+        {
+          "label": "Bootstrap Integration",
+          "href": "integrations/bootstrap.md"
+        }
       ]
     }
   ]

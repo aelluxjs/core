@@ -59,7 +59,8 @@ for (const variant of [
       "mount:Old content", "unmount:Old content", "mount:New content"
     ]);
     await expect(page).toHaveURL(/\/ajax-next.htm$/);
-    expect(extensionRequests).toEqual([]);
+    const suffix = `${variant.forceLegacy ? ".legacy" : ""}${variant.boot.includes(".min.") ? ".min" : ""}.js`;
+    expect(extensionRequests.map(url => new URL(url).pathname)).toEqual([`/dist/aellux.ext.ajax-href${suffix}`]);
   });
 }
 

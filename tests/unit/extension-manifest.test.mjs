@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { createHash } from "node:crypto";
+import { readFile } from "node:fs/promises";
 import { officialExtensionDefinitions } from "../../src/official-extension-definitions.js";
 import {
   createOfficialExtensionManifest,
@@ -9,6 +10,25 @@ import {
 
 const version = "1.2.3";
 const sri = "sha384-" + createHash("sha384").update("artifact").digest("base64");
+
+test("Experimental documentation matches the official bundle classification", async () => {
+  const { summary } = JSON.parse(await readFile(new URL("../../docs-source/0.1.0/summary.json", import.meta.url), "utf8"));
+  const experimental = summary.find(group => group.slug === "core-extensions")
+    .children.find(group => group.slug === "experimental");
+  assert.deepEqual(experimental.children.map(entry => entry.href.split("/").pop().replace(/\.md$/, "")).sort(),
+    officialExtensionDefinitions.filter(entry => entry.experimental).map(entry => entry.name).sort());
+});
+
+test("Full artifacts bundle stable Core implementations and Basic bundles none", async () => {
+  const stable = officialExtensionDefinitions.filter(entry => !entry.experimental).map(entry => entry.name).sort();
+  for (const variant of ["", ".min", ".legacy", ".legacy.min"]) {
+    for (const runtime of ["full", "orchestrator"]) {
+      const map = JSON.parse(await readFile(new URL(`../../dist/aellux.${runtime}${variant}.js.map`, import.meta.url), "utf8"));
+      const implementations = map.sources.map(source => source.match(/aellux\.ext\.([\w-]+)\.js$/)?.[1]).filter(Boolean).sort();
+      assert.deepEqual(implementations, runtime === "full" ? stable : [], `${runtime}${variant}`);
+    }
+  }
+});
 
 function integrities() {
   const result = { regular: {}, minified: {} };

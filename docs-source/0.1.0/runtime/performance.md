@@ -13,13 +13,26 @@ The CI workflow runs the same command after `npm run build`. A pull request fail
 
 ## Limits
 
-[`scripts/bundle-budget.config.mjs`](https://github.com/aelluxjs/core/blob/main/scripts/bundle-budget.config.mjs) is the source of truth for every raw and gzip limit. It covers the minified boot, ESM entry, Modern and Legacy orchestrators, Full runtimes, Core Extensions (including separate Dialog and Scrollbox Snap files), and generated Extension stylesheets. The `test:budget` command prints each artifact's measured size beside its current limit and fails if a new minified JavaScript or CSS file has no budget. Full incorporates nine Core Extensions and makes Dialog, Overflow Marquee, PWA, Scrollbox and Scrollbox Snap available through separate on-demand files.
+[`scripts/bundle-budget.config.mjs`](https://github.com/aelluxjs/core/blob/main/scripts/bundle-budget.config.mjs) is the source of truth for every raw and gzip limit. It covers the minified boot, ESM entry, Modern and Legacy orchestrators, Full runtimes, Core Extensions (including separate Dialog and Scrollbox Snap files), and generated Extension stylesheets. The `test:budget` command prints each artifact's measured size beside its current limit and fails if a new minified JavaScript or CSS file has no budget. Full incorporates eleven stable Core Extensions. Only the Experimental Extensions (Ajax Href, Dialog and PWA) use separate on-demand scripts. Basic registers all Core Extensions for lazy loading.
+
+## Core delivery split
+
+Stable Core implementations now ship inside Full, while Experimental Ajax Href, Dialog and PWA remain external. Basic automatically registers all Core Extensions without embedding their implementations. Measured minified raw/gzip level 9 bytes and revised limits:
+
+| Artifact | Before raw / gzip bytes | After raw / gzip bytes | Limits raw / gzip KiB |
+| --- | --- | --- | --- |
+| Modern orchestrator | 63,454 / 21,135 | 65,106 / 21,478 | 64.5 / 21.5 |
+| Legacy orchestrator | 336,063 / 106,151 | 337,826 / 106,564 | 331 / 105 |
+| Modern Full | 128,936 / 40,488 | 190,435 / 58,625 | 188 / 58 |
+| Legacy Full | 439,936 / 130,175 | 517,539 / 152,376 | 508 / 150 |
+
+The Full increase includes Scrollbox, Snap and Overflow Marquee and removes Ajax Href. The two existing standalone Ajax Href budget excesses are unchanged by this delivery split.
 
 ## Scope and Limitations
 
-The [Dialog Extension](../core-extensions/dialog.md) Legacy script exclusively includes `dialog-polyfill` 0.5.6, its CSS and per-element mount registration. Compared with the preceding checked-in artifacts, the measured minified sizes are raw/gzip level 9 bytes:
+The [Dialog Extension](../core-extensions/experimental/dialog.md) Legacy script exclusively includes `dialog-polyfill` 0.5.6, its CSS and per-element mount registration. Compared with the preceding checked-in artifacts, the measured minified sizes are raw/gzip level 9 bytes:
 
-| Artifact | Before raw / gzip bytes | After raw / gzip bytes | Current limits raw / gzip |
+| Artifact | Before raw / gzip bytes | After raw / gzip bytes | Limits at that change raw / gzip |
 | --- | --- | --- | --- |
 | Legacy orchestrator | 349,522 / 109,918 | 336,063 / 106,151 | 328.5 / 104 KiB |
 | Legacy Full | 464,668 / 138,283 | 451,842 / 134,544 | 441.5 / 132 KiB |
@@ -32,4 +45,4 @@ This budget detects distribution-size regressions. It does not measure page-spec
 
 For layout work inside an Extension, use [`waitLayout`](wait-layout.md) to batch geometry reads and dependent CSS or DOM writes. The guide includes code for coalescing frequent scroll and resize notifications.
 
-PWA has independent budgets for its Modern/Legacy Extension and classic reusable worker. Its code and guide styles never enter Full or Core. Full reuses the signed index from the version-matched boot script to avoid duplicating registry metadata. See [PWA](../core-extensions/pwa.md).
+PWA has independent budgets for its Modern/Legacy Extension and classic reusable worker. Its code and guide styles never enter Full or Core. Full reuses the signed index from the version-matched boot script to avoid duplicating registry metadata. See [PWA](../core-extensions/experimental/pwa.md).

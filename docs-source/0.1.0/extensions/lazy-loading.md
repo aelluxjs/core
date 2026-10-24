@@ -2,6 +2,8 @@
 
 Lazy loading delays an Extension until a matching element is found during `$ae.mount(root)`.
 
+Basic automatically registers all Core Extensions, including Experimental, with their activation selectors. Full bundles the stable Core implementations and loads Experimental (Ajax Href, Dialog and PWA) from separate signed files when their selectors match. Full initializes Preference and State Navigation at startup. In Basic, State Navigation has no selector and loads through `$ae.wait("state-navigation")`; Preference uses `[data-ae-preference]`. Explicit host registrations take precedence over unused defaults. Basic styles remain opt-in through `loadStyle: true`.
+
 ```js
 $ae.ext("preference", {
   loadWhen: "[data-ae-preference]"

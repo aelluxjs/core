@@ -521,22 +521,8 @@
                                     class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                     style="flex:0">
                                     <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
-                                      href="/core/docs/0.1.0/core-extensions/ajax-href.htm" data-ae-overflow-marquee="190px">
-                                      Ajax Href                                    </a>
-                                  </div>
-                                                                                                                                      <div
-                                    class="nav-item mt-1 small-md rounded-1 ps-md-1"
-                                    style="flex:0">
-                                    <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                       href="/core/docs/0.1.0/core-extensions/anchor.htm" data-ae-overflow-marquee="190px">
                                       Anchor                                    </a>
-                                  </div>
-                                                                                                                                      <div
-                                    class="nav-item mt-1 small-md rounded-1 ps-md-1"
-                                    style="flex:0">
-                                    <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
-                                      href="/core/docs/0.1.0/core-extensions/dialog.htm" data-ae-overflow-marquee="190px">
-                                      Dialog                                    </a>
                                   </div>
                                                                                                                                       <div
                                     class="nav-item mt-1 small-md rounded-1 ps-md-1"
@@ -565,13 +551,6 @@
                                     <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                       href="/core/docs/0.1.0/core-extensions/point.htm" data-ae-overflow-marquee="190px">
                                       Point                                    </a>
-                                  </div>
-                                                                                                                                      <div
-                                    class="nav-item mt-1 small-md rounded-1 ps-md-1"
-                                    style="flex:0">
-                                    <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
-                                      href="/core/docs/0.1.0/core-extensions/pwa.htm" data-ae-overflow-marquee="190px">
-                                      PWA                                    </a>
                                   </div>
                                                                                                                                       <div
                                     class="nav-item mt-1 small-md rounded-1 ps-md-1"
@@ -608,7 +587,46 @@
                                       href="/core/docs/0.1.0/core-extensions/state-navigation.htm" data-ae-overflow-marquee="190px">
                                       State Navigation                                    </a>
                                   </div>
-                                                                                                </div>
+
+                                <div class="nav-item mt-1 small-md fw-bold rounded-1 ps-md-1 bg-light-adaptive"
+                                  style="flex:0">
+                                  <button type="button"
+                                    class="nav-link text-start text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                    data-ae-trigger="toggle" data-ae-target="#children2-experimental">
+                                    Experimental                                      <span class="chevron"><svg
+                                            class="svg-icon small" aria-hidden="true" focusable="false">
+                                            <use href="#bi-chevron-right"></use>
+                                          </svg></span>
+                                                                          </button>
+                                </div>
+
+                                <div id="children2-experimental" class="docs-menu-panel border-start ms-2"
+                                  data-ae-present="height opacity" data-ae-unpop-on-outside="false"                                   hidden>
+                                    <div class="ps-2 gap-1 d-flex flex-column overflow-hidden" data-ae-present-motion>
+                                                                              <div
+                                          class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                          style="flex:0">
+                                          <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                            href="/core/docs/0.1.0/core-extensions/experimental/ajax-href.htm" data-ae-overflow-marquee="190px">
+                                            Ajax Href                                          </a>
+                                        </div>
+                                                                                <div
+                                          class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                          style="flex:0">
+                                          <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                            href="/core/docs/0.1.0/core-extensions/experimental/dialog.htm" data-ae-overflow-marquee="190px">
+                                            Dialog                                          </a>
+                                        </div>
+                                                                                <div
+                                          class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                          style="flex:0">
+                                          <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                            href="/core/docs/0.1.0/core-extensions/experimental/pwa.htm" data-ae-overflow-marquee="190px">
+                                            PWA                                          </a>
+                                        </div>
+                                                                            </div>
+                                </div>
+                                                                                              </div>
                       </div>
                                                                   <div class="nav-item mt-1 small-md fw-bold rounded-1 ps-md-1 bg-light-adaptive" style="flex:0">
                       <button data-ae-point type="button"
@@ -725,7 +743,7 @@
           <main id="doc-content" style="min-height: calc(100vh - 200px);" class="js-toc-content"
             ajax-load="doc-content">
             <h1>Present Extension</h1>
-<p><code>present</code> controls the visibility of elements marked with <code>data-ae-present</code>. It is included in the <code>full</code> runtime, with CSS supplied by the shared Full stylesheet. In <code>basic</code> mode, register the script and stylesheet with <code>$ae.ext(&quot;present&quot;, { loadStyle: true })</code>.</p>
+<p><code>present</code> controls the visibility of elements marked with <code>data-ae-present</code>. It is included in the <code>full</code> runtime, with CSS supplied by the shared Full stylesheet. Basic automatically registers this Extension for lazy loading; opt into its stylesheet with <code>$ae.ext(&quot;present&quot;, { loadStyle: true })</code>.</p>
 <h2>Accessibility profile</h2>
 <ul>
 <li><strong>Capabilities:</strong> interaction and input; structure and state; motion and timing.</li>
@@ -744,7 +762,7 @@
 <p><code>data-ae-trigger</code> accepts <code>pop</code>, <code>unpop</code>, or <code>toggle</code>; an unrecognized value records a configuration warning and still toggles. <code>data-ae-target</code> and <code>data-ae-dismiss</code> each accept one element ID, with or without a leading <code>#</code> (for example, <code>details</code> or <code>#details</code>). Without an ID, a trigger or dismiss control acts on its closest <code>data-ae-present</code> container. Invalid, missing and incompatible targets are reported through diagnostics.</p>
 <p>A trigger or dismiss control with neither an ID nor a containing <code>data-ae-present</code> reports <code>ERROR_PRESENT_CONTROL_TARGET_MISSING</code> (<code>1111</code>).</p>
 <h2>Tap and native click</h2>
-<p>Present also consumes Point&#39;s <code>AelluxJsTap</code> notifications through the same trigger, dismiss and outside-activation routing as native click. Add <code>data-ae-point</code> to an eligible button, link or role button and mount it with Point. Full includes Point; Basic must register <code>$ae.ext(&quot;point&quot;)</code> as well as Present.</p>
+<p>Present also consumes Point&#39;s <code>AelluxJsTap</code> notifications through the same trigger, dismiss and outside-activation routing as native click. Add <code>data-ae-point</code> to an eligible button, link or role button and mount it with Point. Both modes register Point and Present automatically; <code>data-ae-point</code> activates Point when mounted.</p>
 <pre><code class="language-html">&lt;button type=&quot;button&quot; data-ae-point data-ae-trigger=&quot;toggle&quot; data-ae-target=&quot;details&quot;&gt;Details&lt;/button&gt;
 </code></pre>
 <p>Click keeps priority: Present queues a tap fallback with a 32 ms grace period, allowing touch compatibility clicks delivered in a later input task to arrive first. A click reaching Present before that fallback, on the same control or its descendants and with the same pointer ID when reported consistently, cancels the pending tap and performs the action immediately. WebKit can report a touch/pen compatibility click as mouse input with another ID; that pair is matched by its target within the same grace period. A tap without that click performs the action once when its fallback runs. Different controls and different IDs of the same pointer type remain independent, and a later gesture is accepted normally. This deduplication belongs to Present; Point continues to emit tap immediately and native click remains unchanged.</p>

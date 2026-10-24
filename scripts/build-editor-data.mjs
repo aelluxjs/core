@@ -30,7 +30,14 @@ export async function createSemanticCatalog(metadata, constants = createAelluxCo
   const apiContext = {};
   runInNewContext(await readFile(join(projectRoot, "src/internal/aellux-api-contract.js"), "utf8"), apiContext);
   const docsBase = `https://aelluxjs.github.io/core/docs/${release}/`;
-  const docURL = entry => `${docsBase}${entry.doc || (entry.extension === "core" ? "runtime/api" : `core-extensions/${entry.extension}`)}.htm`;
+  const experimental = new Set(officialExtensionDefinitions.filter(entry => entry.experimental).map(entry => entry.name));
+  const docURL = entry => {
+    let path = entry.doc || (entry.extension === "core" ? "runtime/api" : `core-extensions/${entry.extension}`);
+    if (experimental.has(path.replace(/^core-extensions\//, "").split("#")[0])) {
+      path = path.replace(/^core-extensions\//, "core-extensions/experimental/");
+    }
+    return `${docsBase}${path}.htm`;
+  };
   const attributes = sorted(semanticAttributes.map(entry => ({ ...entry, name: api.attr(entry.name), role: entry.role || "input", docURL: docURL(entry) })));
   const cssProperties = sorted(semanticCSSProperties.map(entry => ({ ...entry, name: entry.literal ? entry.name : api.cssVar(entry.name), role: entry.role || "input", docURL: docURL(entry) })));
   const classes = new Map();

@@ -1267,7 +1267,7 @@
         }
         const waitExtensions = [];
         for (const [key, options] of Object.entries(root.AelluxJs.registry.ext)) {
-          if (options.loadWhen) continue;
+          if (options.load === false) continue;
           waitExtensions.push(AelluxJs2.wait(key));
         }
         await Promise.all(waitExtensions);
@@ -2419,6 +2419,25 @@
     return t < 0.5 ? easeIn(family, 2 * t) / 2 : 1 - easeIn(family, 2 - 2 * t) / 2;
   }
 
+  // src/official-extension-definitions.js
+  /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+  var officialExtensionDefinitions = Object.freeze([
+    Object.freeze({ name: "preference", style: false, dependencies: Object.freeze([]) }),
+    Object.freeze({ name: "state-navigation", style: false, dependencies: Object.freeze([]) }),
+    Object.freeze({ name: "feedback", style: true, dependencies: Object.freeze([]) }),
+    Object.freeze({ name: "focus", style: false, dependencies: Object.freeze([]) }),
+    Object.freeze({ name: "dialog", experimental: true, style: false, dependencies: Object.freeze([]) }),
+    Object.freeze({ name: "pwa", experimental: true, style: false, dependencies: Object.freeze([]) }),
+    Object.freeze({ name: "point", style: false, dependencies: Object.freeze([]) }),
+    Object.freeze({ name: "anchor", style: true, dependencies: Object.freeze([]) }),
+    Object.freeze({ name: "overflow-marquee", style: true, dependencies: Object.freeze([]) }),
+    Object.freeze({ name: "ajax-href", experimental: true, style: false, dependencies: Object.freeze([]) }),
+    Object.freeze({ name: "scrollbox", style: true, dependencies: Object.freeze([]) }),
+    Object.freeze({ name: "scrollbox-snap", style: false, dependencies: Object.freeze([]) }),
+    Object.freeze({ name: "adaptive", style: true, dependencies: Object.freeze([]) }),
+    Object.freeze({ name: "present", style: true, dependencies: Object.freeze([]) })
+  ]);
+
   // src/aellux.orchestrator.js
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   (function(root) {
@@ -2517,6 +2536,23 @@
       }
     );
     root[root.AelluxJs.shortJSName] = root.AelluxJs;
+    registerCoreExtensions();
+    function registerCoreExtensions() {
+      const api = root.AelluxJs;
+      const attr = (name) => `[${api.attr(name)}]`;
+      for (const { name } of officialExtensionDefinitions) {
+        const key = toCamelCase2(name);
+        if (key in api.registry.ext) continue;
+        let loadWhen = name === "dialog" ? "dialog" : attr(name);
+        if (name === "ajax-href") loadWhen = "a" + loadWhen;
+        if (name === "present") {
+          loadWhen = ["present", "present-group", "trigger", "dismiss", "target"].map(attr).join(",");
+        }
+        if (name === "state-navigation" || api.options.mode === "full" && name === "preference") loadWhen = null;
+        api.ext(name, { loadWhen, load: api.options.mode === "full" });
+        api.registry.ext[key].automatic = true;
+      }
+    }
     async function destroyExtensions(extensionNames, onUnmounted) {
       if (typeof extensionNames === "string") extensionNames = [extensionNames];
       if (!extensionNames) extensionNames = Object.keys(AelluxJs.registry.ext);
@@ -2565,6 +2601,7 @@
           { extension: extensionName }
         ));
       }
+      AelluxJs.registry.ext[key].automatic = false;
       if (AelluxJs.ext[key]) {
         if (AelluxJs.ext[key].initialized) {
           extensionPromises[key] = Promise.resolve(AelluxJs.ext[key]);

@@ -521,22 +521,8 @@
                                     class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                     style="flex:0">
                                     <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
-                                      href="/core/docs/0.1.0/core-extensions/ajax-href.htm" data-ae-overflow-marquee="190px">
-                                      Ajax Href                                    </a>
-                                  </div>
-                                                                                                                                      <div
-                                    class="nav-item mt-1 small-md rounded-1 ps-md-1"
-                                    style="flex:0">
-                                    <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                       href="/core/docs/0.1.0/core-extensions/anchor.htm" data-ae-overflow-marquee="190px">
                                       Anchor                                    </a>
-                                  </div>
-                                                                                                                                      <div
-                                    class="nav-item mt-1 small-md rounded-1 ps-md-1"
-                                    style="flex:0">
-                                    <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
-                                      href="/core/docs/0.1.0/core-extensions/dialog.htm" data-ae-overflow-marquee="190px">
-                                      Dialog                                    </a>
                                   </div>
                                                                                                                                       <div
                                     class="nav-item mt-1 small-md rounded-1 ps-md-1"
@@ -565,13 +551,6 @@
                                     <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                       href="/core/docs/0.1.0/core-extensions/point.htm" data-ae-overflow-marquee="190px">
                                       Point                                    </a>
-                                  </div>
-                                                                                                                                      <div
-                                    class="nav-item mt-1 small-md rounded-1 ps-md-1"
-                                    style="flex:0">
-                                    <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
-                                      href="/core/docs/0.1.0/core-extensions/pwa.htm" data-ae-overflow-marquee="190px">
-                                      PWA                                    </a>
                                   </div>
                                                                                                                                       <div
                                     class="nav-item mt-1 small-md rounded-1 ps-md-1"
@@ -608,7 +587,46 @@
                                       href="/core/docs/0.1.0/core-extensions/state-navigation.htm" data-ae-overflow-marquee="190px">
                                       State Navigation                                    </a>
                                   </div>
-                                                                                                </div>
+
+                                <div class="nav-item mt-1 small-md fw-bold rounded-1 ps-md-1 bg-light-adaptive"
+                                  style="flex:0">
+                                  <button type="button"
+                                    class="nav-link text-start text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                    data-ae-trigger="toggle" data-ae-target="#children2-experimental">
+                                    Experimental                                      <span class="chevron"><svg
+                                            class="svg-icon small" aria-hidden="true" focusable="false">
+                                            <use href="#bi-chevron-right"></use>
+                                          </svg></span>
+                                                                          </button>
+                                </div>
+
+                                <div id="children2-experimental" class="docs-menu-panel border-start ms-2"
+                                  data-ae-present="height opacity" data-ae-unpop-on-outside="false"                                   hidden>
+                                    <div class="ps-2 gap-1 d-flex flex-column overflow-hidden" data-ae-present-motion>
+                                                                              <div
+                                          class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                          style="flex:0">
+                                          <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                            href="/core/docs/0.1.0/core-extensions/experimental/ajax-href.htm" data-ae-overflow-marquee="190px">
+                                            Ajax Href                                          </a>
+                                        </div>
+                                                                                <div
+                                          class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                          style="flex:0">
+                                          <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                            href="/core/docs/0.1.0/core-extensions/experimental/dialog.htm" data-ae-overflow-marquee="190px">
+                                            Dialog                                          </a>
+                                        </div>
+                                                                                <div
+                                          class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                          style="flex:0">
+                                          <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                            href="/core/docs/0.1.0/core-extensions/experimental/pwa.htm" data-ae-overflow-marquee="190px">
+                                            PWA                                          </a>
+                                        </div>
+                                                                            </div>
+                                </div>
+                                                                                              </div>
                       </div>
                                                                   <div class="nav-item mt-1 small-md fw-bold rounded-1 ps-md-1 bg-light-adaptive" style="flex:0">
                       <button data-ae-point type="button"
@@ -916,7 +934,7 @@ await $ae.mountManager.update(document.getElementById(&quot;panel&quot;));
 </code></pre>
 <p>See <a href="../core-extensions/state-navigation.htm">State Navigation</a> for validation rules and history behavior. Scrollbox publishes native <code>scroll</code> events rather than a separate <code>AelluxJsScroll</code> event.</p>
 <h2>Optional PWA notifications</h2>
-<p>The external <a href="../core-extensions/pwa.htm">PWA Extension</a> normalizes <code>PwaInstallAvailable</code>, <code>PwaInstallRequested</code>, <code>PwaInstallAccepted</code>, <code>PwaInstallDismissed</code>, <code>PwaInstallManual</code>, <code>PwaInstalled</code>, <code>PwaWorkerRegistered</code>, <code>PwaUpdateAvailable</code>, <code>PwaUpdateComplete</code> and <code>PwaError</code> through <code>AelluxJs.eventName()</code>. All include <code>detail.status</code>; worker notifications include <code>registration</code>, and errors include <code>operation</code> and <code>error</code>. They bubble from an initiating control or dispatch on <code>document</code>. No PWA event listener is installed until the Extension is explicitly initialized.</p>
+<p>The external <a href="../core-extensions/experimental/pwa.htm">PWA Extension</a> normalizes <code>PwaInstallAvailable</code>, <code>PwaInstallRequested</code>, <code>PwaInstallAccepted</code>, <code>PwaInstallDismissed</code>, <code>PwaInstallManual</code>, <code>PwaInstalled</code>, <code>PwaWorkerRegistered</code>, <code>PwaUpdateAvailable</code>, <code>PwaUpdateComplete</code> and <code>PwaError</code> through <code>AelluxJs.eventName()</code>. All include <code>detail.status</code>; worker notifications include <code>registration</code>, and errors include <code>operation</code> and <code>error</code>. They bubble from an initiating control or dispatch on <code>document</code>. No PWA event listener is installed until the Extension is explicitly initialized.</p>
           </main>
 
           <div id="doc-navlinks2" ajax-load="doc-navlinks2">

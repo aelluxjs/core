@@ -108,8 +108,8 @@ for (const mode of ["basic", "full"]) for (const forceLegacy of [false, true]) {
       if (request.resourceType() === "script" && request.url().includes("aellux.ext.overflow-marquee")) requests.push(request.url());
     });
     await start(page, markup(), { mode, forceLegacy });
-    expect(requests).toHaveLength(1);
-    expect(requests[0]).toContain(forceLegacy ? "aellux.ext.overflow-marquee.legacy.js" : "aellux.ext.overflow-marquee.js");
+    expect(requests).toHaveLength(mode === "basic" ? 1 : 0);
+    if (mode === "basic") expect(requests[0]).toContain(forceLegacy ? "aellux.ext.overflow-marquee.legacy.js" : "aellux.ext.overflow-marquee.js");
     expect(await page.evaluate(() => document.querySelector("#label [data-ae-anchor]"))).toBeNull();
     const host = page.locator("#label");
     const content = host.locator("[data-ae-overflow-marquee-content]");
@@ -243,16 +243,17 @@ test("hover preserves the remaining end hold before the instant reset", async ({
   expect(await content.evaluate(element => new DOMMatrixReadOnly(getComputedStyle(element).transform).m41)).toBe(0);
 });
 
-test("Anchor alone does not mount marquees and Full keeps the dedicated extension lazy", async ({ page }) => {
+test("mounting only Anchor does not mount marquees and Full keeps the bundled extension lazy", async ({ page }) => {
   await page.goto("/tests/index.htm");
   await page.addScriptTag({ url: "/dist/aellux.js" });
   await page.evaluate(html => {
     document.body.innerHTML = html;
     AelluxJs.ext("anchor", { loadStyle: true });
-    AelluxJs.init({ mode: "basic" });
+    AelluxJs.init({ mode: "basic", skipGlobalMount: true });
   }, markup());
-  await expect.poll(() => page.evaluate(() => AelluxJs.ext.anchor?.initialized)).toBe(true);
-  await page.evaluate(() => AelluxJs.mount(document));
+  await expect.poll(() => page.evaluate(() => AelluxJs.diagnostics.supported)).toBe(true);
+  await page.evaluate(() => AelluxJs.wait("anchor"));
+  await page.evaluate(() => AelluxJs.mount(document, "anchor"));
   await expect(page.locator("[data-ae-overflow-marquee-content]")).toHaveCount(0);
   const requests = [];
   page.on("request", request => { if (request.url().includes("aellux.ext.overflow-marquee")) requests.push(request.url()); });

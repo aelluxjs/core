@@ -210,7 +210,7 @@
         {
           "name": "data-ae-pwa",
           "description": "Explicitly loads the optional external PWA Extension. Install uses native click and never registers a Service Worker automatically.\n\nValue syntax: enum.",
-          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/pwa.htm",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/experimental/pwa.htm",
           "value": {
             "kind": "plain",
             "type": "\"install\""
@@ -387,7 +387,7 @@
             {
               "name": "data-ae-ajax-href",
               "description": "CSS selectors for regions replaced from a same-origin HTML response. Each selector uses its first match; current and response documents must contain the region.\n\nValue syntax: selector-list.\n\nExamples: `title,#content`.",
-              "doc-url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/ajax-href.htm",
+              "doc-url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/experimental/ajax-href.htm",
               "value": {
                 "kind": "plain",
                 "type": "string"

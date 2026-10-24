@@ -138,7 +138,9 @@ export function createAelluxApi(root, constants) {
       var key = toCamelCase(name);
       var url = nameOrUrl;
       var implicit = url === api.extName(nameOrUrl);
-      if (key in api.registry.ext) {
+      var previous = api.registry.ext[key];
+      // Host declarations may replace an unused automatic Core registration.
+      if (previous && (!previous.automatic || previous.state !== "wait")) {
         diagnostics.error(diagnostics.ERROR_EXTENSION_DUPLICATE, { extension: name });
         return;
       }
@@ -166,10 +168,11 @@ export function createAelluxApi(root, constants) {
       if (!options.loadWhen) options.loadWhen = null;
       options.builds = normalizeExtensionBuilds(options.builds);
       options.explicitBuilds = explicitBuilds;
+      delete api.registry.lazyExtSelectors[key];
       if (options.loadWhen) api.registry.lazyExtSelectors[key] = options.loadWhen;
       options.url = url;
       options.implicit = implicit;
-      options.load = options.loadWhen ? false : true;
+      options.load = options.loadWhen ? false : options.load !== false;
       options.state = "wait";
       api.registry.ext[key] = options;
     },

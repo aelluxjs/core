@@ -29,14 +29,15 @@ $ae.ext("preference", {
 
 - `builds` declares published JavaScript variants: `modern`, `legacy`, or both. Omitting it promises both variants.
 - `loadWhen` delays loading until a matching element is discovered.
+- `load: false` defers loading until `$ae.wait(name)` when no `loadWhen` selector is supplied. Basic uses this for State Navigation, which has no DOM selector.
 - An invalid `loadWhen` selector reports `ERROR_EXTENSION_LOAD_WHEN` (`1114`), and `ext()` leaves the Extension undeclared.
 - `loadStyle: true` requests the stylesheet derived from the Extension script URL; a URL string requests that specific stylesheet.
 - `integrity` supplies SRI hashes for third-party Extension files; `crossOrigin` controls the associated `crossorigin` attribute. See [CSP and Extension trust](csp-and-trust.md#subresource-integrity).
 - `coreCompatibility` declares the supported Core version or range. `skipCompatibilityCheck: true` is an explicit, warned override and does not bypass integrity checks. See the [official registry and compatibility rules](official-registry.md).
 
-Register each name once. Duplicate declarations currently report an error and do not replace the existing registration.
+Register each name once. Duplicate host declarations report an error. An unused automatic Core registration can be replaced by an explicit JavaScript or declarative registration; registrations that have started loading cannot be replaced.
 
-Register Extensions before calling `$ae.init()` in `basic` mode so the first document update can load eager Extensions and index lazy ones:
+Basic automatically registers every Core Extension for lazy loading. Register explicitly before `$ae.init()` to customize styles, selectors or eager loading, or to add third-party Extensions:
 
 ```js
 $ae.ext("feedback");

@@ -64,18 +64,18 @@ Add aellux.js to a page and enable the Extensions it needs. The library coordina
 ## Core Extensions
 
 - [Adaptive](core-extensions/adaptive.md)
-- [Ajax Href](core-extensions/ajax-href.md)
+- [Ajax Href](core-extensions/experimental/ajax-href.md)
 - [Anchor](core-extensions/anchor.md)
 - [Overflow Marquee](core-extensions/overflow-marquee.md)
 - [Feedback](core-extensions/feedback.md)
 - [Focus](core-extensions/focus.md)
 - [Point](core-extensions/point.md)
-- [Dialog](core-extensions/dialog.md)
+- [Dialog](core-extensions/experimental/dialog.md)
 - [Preference](core-extensions/preference.md)
 - [Present](core-extensions/present.md)
 - [Scrollbox](core-extensions/scrollbox.md)
 - [Scrollbox Snap](core-extensions/scrollbox-snap.md)
-- [PWA](core-extensions/pwa.md) (optional external Extension; never incorporated in Full)
+- [PWA](core-extensions/experimental/pwa.md) (optional external Extension; never incorporated in Full)
 - [State navigation](core-extensions/state-navigation.md)
 
 ## Project Documents

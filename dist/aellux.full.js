@@ -49,143 +49,6 @@
     }
   });
 
-  // src/internal/report-configuration.js
-  function reportConfiguration(api, name, context) {
-    if (context.element && context.attribute && !("value" in context))
-      context.value = context.element.getAttribute(context.attribute);
-    return api.diagnostics.warn(api.diagnostics[name], context);
-  }
-  function diagnosePresentTarget(api, element, target, attribute, value) {
-    if (!value || /[\s#]/.test(value.replace(/^#/, ""))) return false;
-    if (target && target.hasAttribute(api.attr("present"))) return true;
-    reportConfiguration(api, "WARN_CONFIGURATION_TARGET", {
-      extension: "present",
-      element,
-      attribute,
-      value,
-      reason: target ? "Target is not a Present container." : "Target element was not found.",
-      suggestion: "Use one existing Present element ID, optionally prefixed with #, and mount it before interacting."
-    });
-    return false;
-  }
-  var init_report_configuration = __esm({
-    "src/internal/report-configuration.js"() {
-      /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
-    }
-  });
-
-  // src/internal/find-duplicate-attributes.js
-  function findDuplicateAttributes(html) {
-    const duplicates = [];
-    const space = /[\t\n\f\r ]/;
-    const lower = (text) => text.replace(/[A-Z]/g, (char) => char.toLowerCase());
-    let index = 0, lineIndex = 0, line = 1, column = 1;
-    while ((index = html.indexOf("<", index)) !== -1) {
-      if (html.startsWith("<!--", index)) {
-        const end = /--!?>/.exec(html.slice(index + 4));
-        index = end ? index + 4 + end.index + end[0].length : html.length;
-        continue;
-      }
-      if (html.startsWith("<![CDATA[", index)) {
-        const end = html.indexOf("]]>", index + 9);
-        index = end < 0 ? html.length : end + 3;
-        continue;
-      }
-      if (/[!?/]/.test(html[index + 1] || "")) {
-        const end = html.indexOf(">", index + 2);
-        index = end < 0 ? html.length : end + 1;
-        continue;
-      }
-      if (!/[a-z]/i.test(html[index + 1] || "")) {
-        index++;
-        continue;
-      }
-      const tagStart = ++index;
-      while (index < html.length && !space.test(html[index]) && !/[/>]/.test(html[index])) index++;
-      const tagName = lower(html.slice(tagStart, index));
-      const attributes = /* @__PURE__ */ new Map();
-      while (index < html.length && html[index] !== ">") {
-        if (space.test(html[index]) || html[index] === "/") {
-          index++;
-          continue;
-        }
-        const offset = index++;
-        while (index < html.length && !space.test(html[index]) && !/[=/>]/.test(html[index])) index++;
-        const attribute = lower(html.slice(offset, index).replace(/\0/g, "\uFFFD"));
-        while (space.test(html[index] || "")) index++;
-        let value = "";
-        if (html[index] === "=") {
-          index++;
-          while (space.test(html[index] || "")) index++;
-          const quote = html[index];
-          if (quote === '"' || quote === "'") {
-            const start = ++index;
-            while (index < html.length && html[index] !== quote) index++;
-            value = html.slice(start, index);
-            if (index < html.length) index++;
-          } else {
-            const start = index;
-            while (index < html.length && !space.test(html[index]) && html[index] !== ">") index++;
-            value = html.slice(start, index);
-          }
-        }
-        const previous = attributes.get(attribute);
-        if (previous) {
-          previous.values.push(value);
-          if (!previous.duplicate) {
-            while (lineIndex < offset) {
-              const char = html[lineIndex++];
-              if (char === "\r" || char === "\n" && html[lineIndex - 2] !== "\r") {
-                line++;
-                column = 1;
-              } else if (char !== "\n") column++;
-            }
-            previous.duplicate = { tagName, attribute, value: previous.values[0], values: previous.values, offset, line, column };
-          }
-        } else attributes.set(attribute, { values: [value] });
-      }
-      if (index >= html.length) break;
-      for (const attribute of attributes.values())
-        if (attribute.duplicate) duplicates.push(attribute.duplicate);
-      index++;
-      if (tagName === "plaintext") break;
-      if (/^(script|style|textarea|title|xmp|iframe|noembed|noframes|noscript)$/.test(tagName)) {
-        const closing = new RegExp(`</${tagName}(?=[\\t\\n\\f\\r />])`, "ig");
-        closing.lastIndex = index;
-        const end = closing.exec(html);
-        index = end ? end.index : html.length;
-      }
-    }
-    return duplicates;
-  }
-  var init_find_duplicate_attributes = __esm({
-    "src/internal/find-duplicate-attributes.js"() {
-      /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
-    }
-  });
-
-  // src/internal/validate-html-source.js
-  function validateHTMLSource(api, html, source) {
-    if (api.options.environment !== "development") return;
-    for (const duplicate of findDuplicateAttributes(html)) {
-      const { attribute } = duplicate;
-      reportConfiguration(api, "WARN_ATTRIBUTE_DUPLICATE", __spreadProps(__spreadValues({
-        extension: "core",
-        source
-      }, duplicate), {
-        reason: `The ${attribute} attribute occurs more than once on the same start tag; the HTML parser keeps the first value and discards the others.`,
-        suggestion: attribute === "class" ? "Combine all class names in one class attribute, separated by spaces." : attribute === "style" ? "Combine the intended CSS declarations in one style attribute, separated by semicolons." : `Keep one ${attribute} attribute with the intended value.`
-      }));
-    }
-  }
-  var init_validate_html_source = __esm({
-    "src/internal/validate-html-source.js"() {
-      init_find_duplicate_attributes();
-      init_report_configuration();
-      /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
-    }
-  });
-
   // src/aellux.ext.preference.js
   var aellux_ext_preference_exports = {};
   var init_aellux_ext_preference = __esm({
@@ -2041,221 +1904,3111 @@
     }
   });
 
-  // src/aellux.ext.ajax-href.js
-  var aellux_ext_ajax_href_exports = {};
-  var init_aellux_ext_ajax_href = __esm({
-    "src/aellux.ext.ajax-href.js"() {
-      init_validate_html_source();
+  // src/internal/parse-overflow-marquee-limit.js
+  function parseOverflowMarqueeLimit(value) {
+    const text = (value || "").trim();
+    if (!text) return null;
+    if (!/^(?:\d+(?:\.\d+)?|\.\d+)(?:px)?$/i.test(text)) return void 0;
+    const limit = parseFloat(text);
+    return Number.isFinite(limit) ? limit : void 0;
+  }
+  var init_parse_overflow_marquee_limit = __esm({
+    "src/internal/parse-overflow-marquee-limit.js"() {
+      /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+    }
+  });
+
+  // src/internal/create-overflow-marquee.js
+  function createOverflowMarquee(root2, api, anchor) {
+    var _a;
+    const attribute = api.attr("overflow-marquee");
+    const contentAttribute = api.attr("overflow-marquee-content");
+    const activeAttribute = api.attr("overflow-marquee-active");
+    const readyAttribute = api.attr("overflow-marquee-ready");
+    const viewportAttribute = api.attr("overflow-marquee-viewport");
+    const fadeAttribute = api.attr("overflow-marquee-fade");
+    const offsetProperty = "--ae-overflow-marquee-offset";
+    const reducedAttribute = api.attr("reduced-motion");
+    const selector = `[${attribute}]`;
+    const states = /* @__PURE__ */ new Map();
+    const desktop = (_a = root2.matchMedia) == null ? void 0 : _a.call(root2, "(any-hover: hover) and (any-pointer: fine)");
+    let observer = null;
+    return { selector, mount, unmount, update, destroy };
+    function listenMedia(add) {
+      if (desktop == null ? void 0 : desktop.addEventListener) desktop[add ? "addEventListener" : "removeEventListener"]("change", refreshAll);
+      else if (desktop == null ? void 0 : desktop.addListener) desktop[add ? "addListener" : "removeListener"](refreshAll);
+    }
+    function refreshAll(event) {
+      for (const [element, state] of states)
+        if (state.enabled || (event == null ? void 0 : event.type) === "resize" || (event == null ? void 0 : event.type) === "loadingdone") schedule(element);
+    }
+    function motionChanged(event) {
+      for (const [element, state] of states) {
+        if (!state.enabled) continue;
+        if (event.target !== state.wrapper && event.target !== state.viewport && (event.target.contains(element) || element.contains(event.target))) schedule(element);
+      }
+    }
+    function visible(state) {
+      if (!state.element.isConnected || root2.document.hidden || state.intersecting === false || anchor.invisible(state.wrapper.isConnected ? state.wrapper : state.element)) return false;
+      const bounds = state.element.getBoundingClientRect();
+      return bounds.width > 0 && bounds.height > 0 && bounds.right > 0 && bounds.bottom > 0 && bounds.left < root2.innerWidth && bounds.top < root2.innerHeight;
+    }
+    function interacting(state) {
+      return state.element.contains(root2.document.activeElement) || !!((desktop == null ? void 0 : desktop.matches) && state.element.matches(":hover"));
+    }
+    function canRun(state) {
+      return visible(state) && !interacting(state);
+    }
+    async function mount(element) {
+      var _a2, _b;
+      if (states.has(element)) return;
+      const wrapper = root2.document.createElement("span");
+      const viewport = root2.document.createElement("span");
+      viewport.setAttribute(viewportAttribute, "");
+      wrapper.setAttribute(contentAttribute, "top-left:top-left");
+      const state = {
+        element,
+        wrapper,
+        viewport,
+        revision: 0,
+        signature: null,
+        pending: null,
+        dirty: false,
+        timer: null,
+        motionId: api.motion.id(),
+        layoutId: api.motion.id(),
+        cycleId: api.motion.id(),
+        ownedTitle: null,
+        paused: true,
+        intersecting: root2.IntersectionObserver ? false : null,
+        phase: "wait",
+        x: 0,
+        memory: api.persist.element.save(element, [activeAttribute, readyAttribute]),
+        resize: null,
+        intersection: null,
+        enabled: false,
+        probeStyle: void 0
+      };
+      states.set(element, state);
+      state.onInteraction = () => schedule(element);
+      if (states.size === 1) {
+        if (root2.MutationObserver) {
+          observer = new root2.MutationObserver((records) => {
+            for (const [host, value] of states) {
+              if (records.some((record) => {
+                const node = record.target;
+                if ((node === value.wrapper || node === value.viewport) && record.type === "attributes") return false;
+                if (record.type === "attributes" && node === host && record.attributeName === activeAttribute) return false;
+                if (record.type === "attributes" && node === host && record.attributeName === "style" && host.getAttribute("style") === value.probeStyle) return false;
+                if (!value.enabled && record.type === "attributes" && [fadeAttribute, reducedAttribute, "dir"].includes(record.attributeName)) return false;
+                return node === root2.document.documentElement || host.contains(node) || node.contains(host);
+              })) schedule(host);
+            }
+          });
+          observer.observe(root2.document, {
+            subtree: true,
+            childList: true,
+            characterData: true,
+            attributes: true,
+            attributeFilter: [attribute, fadeAttribute, reducedAttribute, "class", "style", "hidden", "dir"]
+          });
+        }
+        root2.document.addEventListener("visibilitychange", refreshAll);
+        for (const name of ["transitionend", "transitioncancel", "animationstart", "animationend", "animationcancel"])
+          root2.document.addEventListener(name, motionChanged, true);
+        root2.addEventListener("resize", refreshAll);
+        root2.addEventListener("scroll", refreshAll, { capture: true, passive: true });
+        (_b = (_a2 = root2.document.fonts) == null ? void 0 : _a2.addEventListener) == null ? void 0 : _b.call(_a2, "loadingdone", refreshAll);
+        listenMedia(true);
+      }
+      if (root2.ResizeObserver) {
+        state.resize = new root2.ResizeObserver(() => schedule(element));
+        state.resize.observe(element);
+      }
+      if (root2.IntersectionObserver) {
+        state.intersection = new root2.IntersectionObserver((entries) => {
+          const entry = entries[entries.length - 1];
+          state.intersecting = entry.isIntersecting && entry.intersectionRect.width > 0 && entry.intersectionRect.height > 0;
+          schedule(element);
+        }, { threshold: [0, 1e-6] });
+      }
+      await update(element);
+    }
+    function unwrap(state) {
+      if (state.viewport.parentNode !== state.element) return;
+      reconcile(state);
+      while (state.wrapper.firstChild) state.element.insertBefore(state.wrapper.firstChild, state.viewport);
+      state.viewport.remove();
+    }
+    function enable(state, enabled) {
+      var _a2, _b, _c, _d;
+      if (state.enabled === enabled) return;
+      state.enabled = enabled;
+      const { element, wrapper } = state;
+      for (const name of ["mouseenter", "mouseleave", "focusin", "focusout"])
+        element[enabled ? "addEventListener" : "removeEventListener"](name, state.onInteraction);
+      if (enabled) {
+        element.setAttribute(readyAttribute, "");
+        reconcile(state);
+        anchor.mount(wrapper);
+        (_a2 = state.resize) == null ? void 0 : _a2.observe(wrapper);
+        (_b = state.intersection) == null ? void 0 : _b.observe(element);
+      } else {
+        stop(state);
+        state.paused = true;
+        state.signature = null;
+        state.placements = null;
+        (_c = state.resize) == null ? void 0 : _c.unobserve(wrapper);
+        (_d = state.intersection) == null ? void 0 : _d.disconnect();
+        state.intersecting = root2.IntersectionObserver ? false : null;
+        anchor.unmount(wrapper);
+        unwrap(state);
+        tooltip(state, null);
+        element.removeAttribute(activeAttribute);
+        element.removeAttribute(readyAttribute);
+      }
+    }
+    function exceedsLimit(state, limit) {
+      const { element, wrapper } = state;
+      state.probeStyle = element.getAttribute("style");
+      try {
+        element.style.setProperty("white-space", "nowrap", "important");
+        const range = root2.document.createRange();
+        range.selectNodeContents(state.viewport.parentNode === element && wrapper.parentNode === state.viewport ? wrapper : element);
+        const bounds = range.getBoundingClientRect();
+        const lineHeight = element.textContent.trim() ? parseFloat(root2.getComputedStyle(element).lineHeight) || 0 : 0;
+        return bounds.width > limit || Math.max(bounds.height, lineHeight) > limit;
+      } finally {
+        if (state.probeStyle === null) {
+          element.getAttribute("style");
+          element.removeAttribute("style");
+        } else element.setAttribute("style", state.probeStyle);
+      }
+    }
+    function reconcile(state) {
+      const { element, wrapper, viewport } = state;
+      if (viewport.parentNode !== element || wrapper.parentNode !== viewport) wrapper.textContent = "";
+      if (viewport.parentNode === element && wrapper.parentNode === viewport && element.childNodes.length === 1 && viewport.childNodes.length === 1) return;
+      const contents = root2.document.createDocumentFragment();
+      const collect = (parent) => {
+        for (const node of Array.from(parent.childNodes)) {
+          if (node === viewport || node === wrapper) collect(node);
+          else contents.appendChild(node);
+        }
+      };
+      collect(element);
+      wrapper.appendChild(contents);
+      viewport.appendChild(wrapper);
+      element.appendChild(viewport);
+    }
+    function schedule(element) {
+      const state = states.get(element);
+      if (!state) return;
+      rememberProgress(state);
+      if (state.enabled) {
+        if (!visible(state)) {
+          pause(state);
+          return;
+        }
+        if (interacting(state)) pause(state);
+      }
+      update(element).catch((cause) => api.diagnostics.error(
+        api.diagnostics.ERROR_EXTENSION_MOUNT,
+        { extension: "overflow-marquee", element, method: "update", cause }
+      ));
+    }
+    function update(element) {
+      const state = states.get(element);
+      if (!state) return Promise.resolve();
+      if (state.pending) {
+        state.dirty = true;
+        return state.pending;
+      }
+      state.pending = refresh(state).finally(() => {
+        state.pending = null;
+        if (state.dirty && states.get(element) === state) {
+          state.dirty = false;
+          schedule(element);
+        }
+      });
+      return state.pending;
+    }
+    async function refresh(state) {
+      const { element, wrapper, layoutId } = state;
+      const alive = () => states.get(element) === state;
+      rememberProgress(state);
+      if (state.enabled && !visible(state)) {
+        pause(state);
+        return;
+      }
+      const limit = parseOverflowMarqueeLimit(element.getAttribute(attribute));
+      if (limit != null) {
+        const eligible = await api.waitLayout.read(layoutId, () => alive() && exceedsLimit(state, limit));
+        if (!alive()) return;
+        if (!eligible) {
+          await api.waitLayout.update(layoutId, () => {
+            if (alive()) enable(state, false);
+          });
+          return;
+        }
+      }
+      if (!state.enabled) await api.waitLayout.update(layoutId, () => {
+        if (alive()) enable(state, true);
+      });
+      if (!alive()) return;
+      if (!visible(state)) {
+        pause(state);
+        return;
+      }
+      if (interacting(state)) pause(state);
+      await api.waitLayout.update(layoutId, () => {
+        if (alive()) reconcile(state);
+      });
+      if (!alive()) return;
+      const measured = await api.waitLayout.read(layoutId, () => {
+        const style = root2.getComputedStyle(element);
+        const padding = (parseFloat(style.paddingLeft) || 0) + (parseFloat(style.paddingRight) || 0);
+        const width = element.clientWidth - padding;
+        const content = wrapper.scrollWidth;
+        const overflow = content > width + 1;
+        const reduced = api.currentPreference("reduced-motion") === "reduced";
+        const rawSpeed = Number(style.getPropertyValue("--ae-overflow-marquee-speed").trim());
+        const rawDelay = style.getPropertyValue("--ae-overflow-marquee-delay").trim();
+        const delayValue = /^(?:\d+(?:\.\d+)?|\.\d+)(ms|s)$/.exec(rawDelay);
+        return {
+          width,
+          content,
+          overflow,
+          active: overflow && !reduced,
+          fade: element.getAttribute(fadeAttribute) !== "false",
+          speed: Number.isFinite(rawSpeed) && rawSpeed > 0 ? rawSpeed : 30,
+          delay: delayValue ? parseFloat(rawDelay) * (delayValue[1] === "s" ? 1e3 : 1) : 1200,
+          direction: style.direction,
+          text: wrapper.textContent.replace(/\s+/g, " ").trim()
+        };
+      });
+      if (!alive() || !measured) return;
+      const signature = JSON.stringify(__spreadProps(__spreadValues({}, measured), { fade: void 0 }));
+      await api.waitLayout.update(layoutId, () => {
+        var _a2;
+        if (!alive()) return;
+        tooltip(state, measured.overflow && (desktop == null ? void 0 : desktop.matches) ? measured.text : null);
+        state.viewport.setAttribute(viewportAttribute, measured.overflow && measured.fade && (!measured.active || typeof ((_a2 = root2.CSS) == null ? void 0 : _a2.registerProperty) === "function") ? "fade" : "");
+        if (signature === state.signature) return;
+        stop(state);
+        state.signature = signature;
+        state.measured = measured;
+        state.placements = null;
+        state.phase = "wait";
+        state.remaining = measured.delay;
+        state.x = 0;
+        wrapper.style.transition = "none";
+        wrapper.setAttribute(contentAttribute, "top-left:top-left");
+        wrapper.style.setProperty("--ae-anchor-x", "0px");
+        state.viewport.style.transition = "none";
+        state.viewport.style.setProperty(offsetProperty, "0px");
+        state.viewport.style.setProperty("--ae-overflow-marquee-distance", `${Math.max(0, measured.content - measured.width)}px`);
+        state.viewport.setAttribute("dir", measured.direction);
+        element.toggleAttribute ? element.toggleAttribute(activeAttribute, measured.active) : measured.active ? element.setAttribute(activeAttribute, "") : element.removeAttribute(activeAttribute);
+      });
+      if (!alive() || signature !== state.signature || !measured.active || state.timer !== null || state.running) return;
+      if (!canRun(state)) {
+        pause(state);
+        return;
+      }
+      const revision = state.revision;
+      const placements = state.placements || await api.waitLayout.read(layoutId, () => {
+        const start = anchor.measure(wrapper, false);
+        const end = anchor.measure(wrapper, true);
+        if (!(start == null ? void 0 : start.valid) || !(end == null ? void 0 : end.valid)) return null;
+        const distance = Math.max(0, start.selected.x - end.selected.x);
+        const rtl = measured.direction === "rtl";
+        const placement = (base, x) => __spreadProps(__spreadValues({}, base), { selected: __spreadProps(__spreadValues({}, base.selected), { x, y: 0 }) });
+        return { start: placement(rtl ? end : start, 0), end: placement(rtl ? start : end, rtl ? distance : -distance), distance };
+      });
+      if (!alive() || revision !== state.revision || !placements) return;
+      await api.waitLayout.update(layoutId, () => {
+        if (!alive() || revision !== state.revision) return;
+        state.placements = placements;
+        state.viewport.style.setProperty("--ae-overflow-marquee-distance", `${placements.distance}px`);
+        if (!canRun(state)) {
+          pause(state);
+          return;
+        }
+        state.paused = false;
+        anchor.place(wrapper, at(state, state.x));
+        if (state.phase === "travel") cycle(state);
+        else wait(state);
+      });
+    }
+    function at(state, x) {
+      const base = state.placements.start;
+      return __spreadProps(__spreadValues({}, base), { selected: __spreadProps(__spreadValues({}, base.selected), { x }) });
+    }
+    function freezeFade(state) {
+      state.viewport.style.transition = "none";
+      state.viewport.style.setProperty(offsetProperty, `${Math.abs(state.x)}px`);
+    }
+    function wait(state) {
+      const revision = state.revision;
+      state.deadline = now() + state.remaining;
+      state.timer = root2.setTimeout(() => {
+        if (revision === state.revision && states.get(state.element) === state) cycle(state);
+      }, state.remaining);
+    }
+    function now() {
+      return root2.performance.now();
+    }
+    function rememberProgress(state) {
+      var _a2;
+      if (!state.running || state.started === void 0) return;
+      const time = (_a2 = state.animation) == null ? void 0 : _a2.currentTime;
+      if (time != null) state.elapsed = Number(time);
+      else if (!state.controlled) state.elapsed = now() - state.started;
+      const progress = state.duration > 0 ? Math.min(1, (state.elapsed || 0) / state.duration) : 1;
+      state.x = state.from + (state.placements.end.selected.x - state.from) * progress;
+    }
+    function pause(state) {
+      if (state.paused) return;
+      rememberProgress(state);
+      if (state.timer !== null) state.remaining = Math.max(0, state.deadline - now());
+      stop(state);
+      state.paused = true;
+      state.wrapper.style.transition = "none";
+      freezeFade(state);
+      if (state.placements) anchor.place(state.wrapper, at(state, state.x));
+    }
+    function tooltip(state, text) {
+      const element = state.element;
+      if (state.ownedTitle !== null && element.getAttribute("title") !== state.ownedTitle) state.ownedTitle = null;
+      if (!text) {
+        if (state.ownedTitle !== null) element.removeAttribute("title");
+        state.ownedTitle = null;
+      } else if (state.ownedTitle !== null || !element.hasAttribute("title")) {
+        if (element.getAttribute("title") !== text) element.setAttribute("title", text);
+        state.ownedTitle = text;
+      }
+    }
+    async function cycle(state) {
+      const { measured, placements } = state;
+      const revision = state.revision;
+      const current = () => states.get(state.element) === state && revision === state.revision;
+      state.timer = null;
+      if (!current()) return;
+      state.remaining = 0;
+      if (!canRun(state)) {
+        pause(state);
+        return;
+      }
+      state.running = true;
+      state.started = void 0;
+      try {
+        if (state.phase === "end") {
+          await api.waitLayout.update(state.cycleId, () => {
+            if (!current()) return;
+            state.wrapper.style.transition = "none";
+            state.wrapper.setAttribute(contentAttribute, "top-left:top-left");
+            state.x = 0;
+            freezeFade(state);
+            anchor.place(state.wrapper, placements.start);
+            state.phase = "wait";
+            state.running = false;
+            state.remaining = measured.delay;
+            if (canRun(state)) wait(state);
+            else pause(state);
+          });
+          return;
+        }
+        state.phase = "travel";
+        const duration = Math.abs(placements.end.selected.x - state.x) / measured.speed * 1e3;
+        await api.waitLayout.read(state.cycleId, () => {
+          root2.getComputedStyle(state.viewport).getPropertyValue(offsetProperty);
+          return root2.getComputedStyle(state.wrapper).transform;
+        });
+        if (!current()) return;
+        if (!canRun(state)) {
+          pause(state);
+          return;
+        }
+        state.from = state.x;
+        state.duration = duration;
+        state.elapsed = 0;
+        state.animation = null;
+        state.controlled = api.motion.supported(state.wrapper);
+        state.started = now();
+        const completion = api.motion.run(state.viewport, {
+          id: state.motionId,
+          subtree: true,
+          nativeDuration: duration,
+          maxFPS: api.layoutMaxFPS(state.element),
+          abort() {
+            rememberProgress(state);
+            return !current();
+          },
+          apply() {
+            state.wrapper.style.transition = `transform ${duration}ms linear`;
+            state.viewport.style.transition = `${offsetProperty} ${duration}ms linear`;
+            state.viewport.style.setProperty(offsetProperty, `${placements.distance}px`);
+            state.wrapper.setAttribute(contentAttribute, "bottom-right:bottom-right");
+            anchor.place(state.wrapper, placements.end);
+          }
+        });
+        await api.waitLayout.read(state.cycleId, () => {
+          var _a2, _b;
+          if (current()) state.animation = ((_b = (_a2 = state.wrapper).getAnimations) == null ? void 0 : _b.call(_a2).find((animation) => animation.transitionProperty === "transform")) || null;
+        });
+        const result = await completion;
+        if (!current() || result.status !== "completed") return;
+        await api.waitLayout.update(state.cycleId, () => {
+          if (!current()) return;
+          state.wrapper.style.transition = "none";
+          anchor.place(state.wrapper, placements.end);
+          state.running = false;
+          state.x = placements.end.selected.x;
+          freezeFade(state);
+          state.animation = null;
+          state.phase = "end";
+          state.remaining = measured.delay;
+          if (canRun(state)) wait(state);
+          else pause(state);
+        });
+      } catch (cause) {
+        if (current()) api.diagnostics.error(
+          api.diagnostics.ERROR_EXTENSION_TRANSITION,
+          { extension: "overflow-marquee", element: state.element, cause }
+        );
+      } finally {
+        if (current()) state.running = false;
+      }
+    }
+    function stop(state) {
+      state.revision++;
+      if (state.timer !== null) root2.clearTimeout(state.timer);
+      state.timer = null;
+      state.running = false;
+      api.motion.cancel(state.motionId);
+      api.waitLayout.cancel(state.cycleId);
+      state.animation = null;
+    }
+    async function unmount(element) {
+      var _a2, _b, _c, _d;
+      const state = states.get(element);
+      if (!state) return;
+      states.delete(element);
+      stop(state);
+      api.waitLayout.cancel(state.layoutId);
+      (_a2 = state.resize) == null ? void 0 : _a2.disconnect();
+      (_b = state.intersection) == null ? void 0 : _b.disconnect();
+      for (const name of ["mouseenter", "mouseleave", "focusin", "focusout"])
+        element.removeEventListener(name, state.onInteraction);
+      await anchor.unmount(state.wrapper);
+      unwrap(state);
+      tooltip(state, null);
+      state.memory.restore();
+      if (!states.size) {
+        observer == null ? void 0 : observer.disconnect();
+        observer = null;
+        root2.document.removeEventListener("visibilitychange", refreshAll);
+        for (const name of ["transitionend", "transitioncancel", "animationstart", "animationend", "animationcancel"])
+          root2.document.removeEventListener(name, motionChanged, true);
+        root2.removeEventListener("resize", refreshAll);
+        root2.removeEventListener("scroll", refreshAll, true);
+        (_d = (_c = root2.document.fonts) == null ? void 0 : _c.removeEventListener) == null ? void 0 : _d.call(_c, "loadingdone", refreshAll);
+        listenMedia(false);
+      }
+    }
+    async function destroy() {
+      for (const element of Array.from(states.keys())) await unmount(element);
+    }
+  }
+  var init_create_overflow_marquee = __esm({
+    "src/internal/create-overflow-marquee.js"() {
+      init_parse_overflow_marquee_limit();
+      /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+    }
+  });
+
+  // src/aellux.ext.overflow-marquee.js
+  var aellux_ext_overflow_marquee_exports = {};
+  var init_aellux_ext_overflow_marquee = __esm({
+    "src/aellux.ext.overflow-marquee.js"() {
+      init_create_overflow_marquee();
+      /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+      (function(root2) {
+        "use strict";
+        const api = root2.AelluxJs;
+        const extensionName = "overflow-marquee";
+        if (!api) throw new Error("[aellux.js] Load the boot script before the overflow-marquee extension.");
+        let marquee = null, placements = null;
+        api.extAttach(extensionName, { init, destroy });
+        async function init() {
+          if (!api.registry.ext.anchor) api.ext("anchor");
+          const anchor = await api.wait("anchor");
+          if (!(anchor == null ? void 0 : anchor.createPlacementMap)) throw new Error("[aellux.js] Overflow Marquee requires Anchor's placement map.");
+          placements = anchor.createPlacementMap();
+          marquee = createOverflowMarquee(root2, api, __spreadProps(__spreadValues({}, placements), {
+            measure: (element, end) => placements.measure(element, end ? "bottom-right:bottom-right" : "top-left:top-left")
+          }));
+          api.registerCssProperty(
+            { name: "--ae-overflow-marquee-speed", syntax: "<number>", initialValue: "30" },
+            { name: "--ae-overflow-marquee-delay", syntax: "<time>", initialValue: "1200ms" },
+            { name: "--ae-overflow-marquee-fade-size", syntax: "<length>", initialValue: "16px" },
+            { name: "--ae-overflow-marquee-offset", syntax: "<length>", initialValue: "0px", inherits: false }
+          );
+          api.mountManager.add({
+            extensionName,
+            selector: marquee.selector,
+            mount: marquee.mount,
+            unmount: marquee.unmount,
+            update: marquee.update
+          });
+        }
+        async function destroy() {
+          await (marquee == null ? void 0 : marquee.destroy());
+          placements == null ? void 0 : placements.destroy();
+          api.mountManager.remove({ extensionName });
+          marquee = placements = null;
+        }
+      })(typeof globalThis !== "undefined" ? globalThis : window);
+    }
+  });
+
+  // src/aellux.ext.scrollbox.js
+  var aellux_ext_scrollbox_exports = {};
+  var init_aellux_ext_scrollbox = __esm({
+    "src/aellux.ext.scrollbox.js"() {
       /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
       (function(root2) {
         "use strict";
         const AelluxJs2 = root2.AelluxJs;
-        const extensionName = "ajax-href";
-        if (!AelluxJs2) {
-          throw new Error(`[aellux.js] Cannot attach the "${extensionName}" extension: root.AelluxJs is not defined. Load the aellux.js boot script before this extension.`);
+        const extensionName = "scrollbox";
+        if (!AelluxJs2) throw new Error("[aellux.js] Load the boot script before the scrollbox extension.");
+        const { onEvent, offEvent } = AelluxJs2;
+        const POINTER = "pointer", POINTER_DOWN = `${POINTER}down`, POINTER_MOVE = `${POINTER}move`, POINTER_UP = `${POINTER}up`, POINTER_CANCEL = `${POINTER}cancel`, POINTER_OVER = `${POINTER}over`, POINTER_OUT = `${POINTER}out`, POINTER_ENTER = `${POINTER}enter`, POINTER_LEAVE = `${POINTER}leave`, POINTER_DOWN_TARGET = `$${POINTER_DOWN}`, POINTER_MOVE_TARGET = `$${POINTER_MOVE}`, POINTER_UP_TARGET = `$${POINTER_UP}`, POINTER_CANCEL_TARGET = `$${POINTER_CANCEL}`;
+        const attribute = AelluxJs2.attr(extensionName);
+        const wheelAttribute = AelluxJs2.attr("scrollbox-wheel-horizontal");
+        const momentumAttribute = AelluxJs2.attr("scrollbox-momentum");
+        const snapAttribute = AelluxJs2.attr("scrollbox-snap");
+        const elasticAttribute = AelluxJs2.attr("scrollbox-elastic");
+        const fadeAttribute = AelluxJs2.attr("scrollbox-fade");
+        const fadeStateAttribute = AelluxJs2.attr("scrollbox-fade-state");
+        const scrollbarAttribute = AelluxJs2.attr("scrollbar");
+        const scrollbarVerticalAttribute = AelluxJs2.attr("scrollbar-vertical");
+        const scrollbarHorizontalAttribute = AelluxJs2.attr("scrollbar-horizontal");
+        const elasticReleaseClass = AelluxJs2.className("scrollbox-elastic-release");
+        const pointerScrollingClass = AelluxJs2.className("pointerscrolling");
+        const nativeScrollbarHideClass = AelluxJs2.className("native-sb-hide");
+        const scrollbarVisibleClass = AelluxJs2.className("scrollbar-visible");
+        const scrollEdgeClasses = [
+          AelluxJs2.className("scroll-v-start"),
+          AelluxJs2.className("scroll-v-end"),
+          AelluxJs2.className("scroll-h-start"),
+          AelluxJs2.className("scroll-h-end")
+        ];
+        const pointerScrollExceptionSelector = `a, button, input, select, textarea, [contenteditable], [draggable='true'], [${scrollbarVerticalAttribute}], [${scrollbarHorizontalAttribute}]`;
+        const SCROLL_EDGE_MARGIN_PX = 5;
+        let nextLayoutId = 3e6;
+        const POINTER_SCROLL_THRESHOLD_PX = 3;
+        const POINTER_SCROLL_MULTICLICK_MS = 500;
+        const POINTER_SCROLL_MULTICLICK_DISTANCE_PX = 8;
+        const TEXT_SELECTION_WAIT_MS = 100;
+        const VERTICAL_TEXT_DRAG_PX = 10;
+        const MOMENTUM_LIMIT_TIME_MS = 300;
+        const MOMENTUM_LIMIT_DISTANCE_PX = 15;
+        const MOMENTUM_DECELERATION = 15e-4;
+        const ELASTIC_DAMPING = 1 / 3;
+        const DEFAULT_ELASTIC_LIMIT = { unit: "ratio", value: 1 / 4 };
+        const ELASTIC_RETURN_LERP = 0.15;
+        const ELASTIC_RETURN_EPSILON = 0.01;
+        const ELASTIC_WHEEL_IDLE_MS = 80;
+        const SCROLLBAR_MIN_THUMB_PX = 20;
+        const SCROLLBAR_INTERACTION_HIDE_DELAY_MS = 1e3;
+        const SCROLLBAR_HOVER_HIDE_DELAY_MS = 300;
+        const scrollbarProperties = [
+          "--ae-scrollbar-x",
+          "--ae-scrollbar-y",
+          "--ae-scrollbar-length",
+          "--ae-scrollbar-thumb-size",
+          "--ae-scrollbar-thumb-position",
+          "--ae-scrollbar-display"
+        ];
+        const pointerListeners = [
+          [POINTER_DOWN, "onPointerDown"],
+          [POINTER_OVER, "onPointerOver"],
+          [POINTER_OUT, "onPointerOut"],
+          ["mousedown", "onMouseDown"]
+        ];
+        const scrollbarHoverListeners = [
+          [POINTER_DOWN, "onScrollbarPointerDown"],
+          [POINTER_ENTER, "onScrollbarPointerEnter"],
+          [POINTER_LEAVE, "onScrollbarPointerLeave"],
+          [POINTER_OVER, "onScrollbarPointerOver"],
+          [POINTER_OUT, "onScrollbarPointerOut"],
+          [POINTER_MOVE, "onScrollbarPointerMove"],
+          [POINTER_UP, "onScrollbarPointerEnd"],
+          [POINTER_CANCEL, "onScrollbarPointerEnd"],
+          ["mouseenter", "onScrollbarMouseEnter"],
+          ["mouseleave", "onScrollbarMouseLeave"],
+          ["mouseover", "onScrollbarMouseOver"],
+          ["mouseout", "onScrollbarMouseOut"]
+        ];
+        const scrollbarAxisListeners = [
+          [POINTER_DOWN, "onPointerDown"],
+          [POINTER_MOVE, "onPointerMove"],
+          [POINTER_UP, "onPointerEnd"],
+          [POINTER_CANCEL, "onPointerEnd"]
+        ];
+        const touchListeners = [
+          ["touchstart", "onTouchStart", { passive: true }],
+          ["touchmove", "onTouchMove", { passive: false }],
+          ["touchend", "onTouchEnd", { passive: true }],
+          ["touchcancel", "onTouchEnd", { passive: true }]
+        ];
+        function setListeners(target, owner, entries, active) {
+          const method = active ? onEvent : offEvent;
+          for (const [event, handler, options] of entries) {
+            method(target, `$${event}`, owner[handler], active ? options : options === true || !!(options == null ? void 0 : options.capture));
+          }
         }
-        AelluxJs2.extAttach(extensionName, { init, destroy, load });
-        const attr = {
-          ajaxHref: AelluxJs2.attr(extensionName)
+        function isTouch(callback) {
+          return (event) => {
+            if (event && event.pointerType !== "touch") {
+              callback(event);
+            }
+          };
+        }
+        const pointerScrollMouseEvents = [
+          "mousedown",
+          "mousemove",
+          "mouseup",
+          "click",
+          "dblclick",
+          "auxclick",
+          "contextmenu",
+          "mouseover",
+          "mouseout",
+          "mouseenter",
+          "mouseleave"
+        ];
+        const pointerScrollDragEvents = [
+          "dragstart",
+          "drag",
+          "dragenter",
+          "dragover",
+          "dragleave",
+          "drop",
+          "dragend"
+        ];
+        const mouseHoldEvents = /* @__PURE__ */ new Set([
+          "mousemove",
+          "mouseover",
+          "mouseout",
+          "mouseenter",
+          "mouseleave"
+        ]);
+        const mouseReleaseEvents = /* @__PURE__ */ new Set([
+          "mouseup",
+          "click",
+          "dblclick",
+          "auxclick",
+          "contextmenu"
+        ]);
+        const properties = ["--ae-scroll-y-progress", "--ae-scroll-x-progress"];
+        const fadeProperties = ["top", "right", "bottom", "left"].map((side) => `--ae-scrollbox-hidden-${side}`);
+        const supportsCSS = (name, value) => {
+          var _a, _b;
+          return !!((_b = (_a = root2.CSS) == null ? void 0 : _a.supports) == null ? void 0 : _b.call(_a, name, value));
         };
+        const maskSupported = supportsCSS("mask-image", "linear-gradient(#000,#000)") || supportsCSS("-webkit-mask-image", "linear-gradient(#000,#000)");
+        const compositeSupported = supportsCSS("mask-composite", "intersect") || supportsCSS("-webkit-mask-composite", "source-in");
+        let rtlScrollType = null;
+        const scrollboxes = /* @__PURE__ */ new Map();
+        const elementMemories = /* @__PURE__ */ new WeakMap();
+        const cursorMemories = /* @__PURE__ */ new WeakMap();
+        const scrollbarMemories = /* @__PURE__ */ new WeakMap();
+        const inlineMemories = /* @__PURE__ */ new WeakMap();
+        const elasticMemories = /* @__PURE__ */ new WeakMap();
+        const pointerScrollMemories = /* @__PURE__ */ new WeakMap();
+        let snapController = null;
+        let activePointerScrollState = null;
+        AelluxJs2.extAttach(extensionName, {
+          init,
+          destroy,
+          next,
+          previous,
+          goto,
+          registerSnapController,
+          unregisterSnapController
+        });
         function init() {
-          document.addEventListener("click", onClick);
-          AelluxJs2.on("SnapshotRestore", OnSnapshotRestoreAjax);
+          AelluxJs2.registerCssProperty(
+            ...properties.map((name) => ({ name, syntax: "<number>", initialValue: "0" })),
+            ...fadeProperties.map((name) => ({ name, syntax: "<length>", initialValue: "0px", inherits: false })),
+            { name: "--ae-scrollbox-fade-size", syntax: "<length>", initialValue: "16px" },
+            ...scrollbarProperties.map((name, index) => ({
+              name,
+              syntax: index === 5 ? "block | none" : "<length>",
+              initialValue: index === 5 ? "none" : "0px"
+            })),
+            { name: "--ae-scrollbar-opacity-visible", syntax: "<number>", initialValue: "1" },
+            { name: "--ae-scrollbar-opacity-fade", syntax: "<number>", initialValue: "0" },
+            { name: "--ae-scrollbar-thumb-color", syntax: "*" },
+            { name: "--ae-scrollbar-thumb-hover-color", syntax: "*" },
+            { name: "--ae-scrollbar-track-color", syntax: "*" },
+            {
+              name: "--ae-scrollbar-thumb-radius",
+              syntax: "<length-percentage>",
+              initialValue: "10px"
+            },
+            { name: "--ae-scrollbar-size", syntax: "<length>", initialValue: "8px" }
+          );
+          AelluxJs2.mountManager.add({
+            extensionName,
+            selector: `[${attribute}]`,
+            priority: 0,
+            mount: mountScrollbox,
+            update: updateScrollbox,
+            unmount: unmountScrollbox,
+            controllers: ["next", "previous", "goto"]
+          });
         }
         function destroy() {
-          document.removeEventListener("click", onClick);
-          AelluxJs2.off("SnapshotRestore", OnSnapshotRestoreAjax);
-          if (previousController) {
-            previousController.abort();
-          }
-          previousController = null;
+          for (const element of scrollboxes.keys()) unmountScrollbox(element);
+          AelluxJs2.mountManager.remove({ extensionName });
         }
-        let previousController = null;
-        async function load(url, selectors, options = {}) {
-          options = options || {};
-          const selectorList = parseSelectors(selectors);
-          if (!selectorList) return null;
-          const elements = /* @__PURE__ */ new Map();
-          for (const selector of selectorList) {
-            const currentElement = document.querySelector(selector);
-            if (currentElement) elements.set(selector, currentElement);
-            else selectorDiagnostic(selector, "No current element matches the selector.");
-          }
-          if (!elements.size) return null;
-          if (previousController) {
-            previousController.abort();
-          }
-          const controller = "AbortController" in window ? new AbortController() : { signal: null, abort: () => null };
-          previousController = controller;
-          elements.forEach(function(currentElement) {
-            if (AelluxJs2.ext.feedback) {
-              AelluxJs2.ext.feedback.busy("Ajax loading", currentElement, true);
-              AelluxJs2.ext.feedback.progress("Ajax loading", currentElement, 0);
+        function registerSnapController(controller) {
+          snapController = controller;
+        }
+        function unregisterSnapController(controller) {
+          if (snapController === controller) snapController = null;
+        }
+        function goto(element, index, behavior) {
+          return (snapController == null ? void 0 : snapController.goto(element, index, behavior)) || false;
+        }
+        function next(element) {
+          return (snapController == null ? void 0 : snapController.next(element)) || false;
+        }
+        function previous(element) {
+          return (snapController == null ? void 0 : snapController.previous(element)) || false;
+        }
+        function dispatchInteraction(state, reason, active) {
+          AelluxJs2.dispatchFrom(state.element, "ScrollboxInteraction", {
+            detail: { reason, active: !!active }
+          });
+        }
+        function dispatchSnapGesture(state, phase, pointerScroll) {
+          return AelluxJs2.dispatchFrom(state.element, "ScrollboxSnapGesture", {
+            cancelable: phase !== "start",
+            detail: {
+              phase,
+              axis: pointerScroll.axis,
+              moved: pointerScroll.moved,
+              startX: pointerScroll.startX,
+              startY: pointerScroll.startY,
+              lastX: pointerScroll.lastX,
+              lastY: pointerScroll.lastY,
+              startTime: pointerScroll.startTime,
+              endTime: pointerScroll.endTime
             }
           });
-          AelluxJs2.dispatch("AjaxHrefStart", { detail: { url, selectors } });
-          try {
-            const response = await AelluxJs2.request(url, { signal: controller.signal });
-            const html = await response.text();
-            if (previousController !== controller) return null;
-            validateHTMLSource(AelluxJs2, html, response.url || String(url));
-            const loadedDocument = new DOMParser().parseFromString(html, "text/html");
-            let historyRequested = false;
-            for (const selector of selectorList) {
-              if (previousController !== controller) return null;
-              const currentElement = elements.get(selector);
-              if (!currentElement) continue;
-              const loadedElement = loadedDocument.querySelector(selector);
-              if (!loadedElement || await AelluxJs2.unmount(currentElement) === false) {
-                if (!loadedElement)
-                  selectorDiagnostic(selector, "No response element matches the selector.", currentElement);
-                if (AelluxJs2.ext.feedback) {
-                  AelluxJs2.ext.feedback.busy("Ajax loading", currentElement, false);
-                  AelluxJs2.ext.feedback.progress("Ajax loading", currentElement, 1);
-                }
-                continue;
-              }
-              const replacement = document.importNode(loadedElement, true);
-              if (previousController !== controller) return null;
-              if (!historyRequested && !options.ignoreHistory) {
-                AelluxJs2.dispatch("PushAjaxReplace", { detail: { url, selectors } });
-                historyRequested = true;
-              }
-              currentElement.parentNode.replaceChild(replacement, currentElement);
-              if (selector === "title") {
-                AelluxJs2.dispatch("UpdateBaseTitle", {
-                  detail: { title: replacement.textContent }
-                });
-              }
-              await AelluxJs2.mount(replacement);
-              if (AelluxJs2.ext.feedback) {
-                AelluxJs2.ext.feedback.busy("Ajax loaded", replacement, false);
-                AelluxJs2.ext.feedback.progress("Ajax loaded", replacement, 1);
-              }
-            }
-            AelluxJs2.dispatch("AjaxHrefLoaded", { detail: { url, selectors } });
-          } catch (error) {
-            selectorList.forEach(function(selector) {
-              const currentElement = elements.get(selector);
-              if (!currentElement) return;
-              if (AelluxJs2.ext.feedback) {
-                AelluxJs2.ext.feedback.busy("Ajax loading", currentElement, false);
-                AelluxJs2.ext.feedback.progress("Ajax loading", currentElement, 1);
-              }
-            });
-            AelluxJs2.dispatch("AjaxHrefError");
-            if (error.name === "AbortError") return null;
-            throw error;
-          } finally {
-            if (previousController === controller)
-              previousController = null;
-            AelluxJs2.dispatch("AjaxHrefComplete", { detail: { url, selectors } });
-          }
         }
-        function selectorDiagnostic(value, reason, element = null) {
-          AelluxJs2.diagnostics.warn(AelluxJs2.diagnostics.WARN_CONFIGURATION_TARGET, {
-            extension: extensionName,
+        function dispatchWheel(state, event) {
+          return AelluxJs2.dispatchFrom(state.element, "ScrollboxWheel", {
+            cancelable: true,
+            detail: { event }
+          });
+        }
+        function mountScrollbox(element) {
+          if (scrollboxes.has(element)) return;
+          elementMemories.set(element, AelluxJs2.persist.element.save(element, [fadeStateAttribute], [...properties, ...fadeProperties]));
+          cursorMemories.set(element, AelluxJs2.persist.element.save(element, [], ["cursor"]));
+          const elastic = {
+            wrapper: null,
+            baseTransform: "",
+            baseOrigin: "",
+            baseMargins: null,
+            dimensions: null,
+            invalidReported: false,
+            invalidLimit: null,
+            limits: [DEFAULT_ELASTIC_LIMIT, DEFAULT_ELASTIC_LIMIT],
+            amounts: [0, 0, 0, 0],
+            active: false,
+            owned: false,
+            touch: null,
+            releaseFrame: null,
+            wheelTimeout: null
+          };
+          const inlineWrapper = {
+            element: null,
+            owned: false,
+            reportedDisplay: null
+          };
+          const scrollbar = {
+            x: null,
+            y: null,
+            drag: null,
+            hideOwned: false,
+            visibleOwned: false,
+            listening: false,
+            pointerHover: false,
+            mouseHover: false,
+            hoverVisible: false,
+            hoverTimeout: null,
+            interactionVisible: false,
+            interactionTimeout: null,
+            lastScrollLeft: null,
+            lastScrollTop: null
+          };
+          const state = {
             element,
-            attribute: attr.ajaxHref,
-            value,
-            reason,
-            suggestion: "Use valid CSS selectors identifying content in both the current document and the AJAX response."
+            metrics: null,
+            mode: null,
+            desktop: false,
+            fadeAuthored: null,
+            fadeAxes: null,
+            cursor: { owned: false },
+            wheelEnabled: true,
+            momentumEnabled: true,
+            elasticEnabled: false,
+            wheelListening: false,
+            pointerListening: false,
+            touchListening: false,
+            pointerScroll: null,
+            lastPointerDown: null,
+            mouseReleaseButton: null,
+            mouseReleaseTimeout: null,
+            momentum: null,
+            elastic,
+            inlineWrapper,
+            scrollbar,
+            resizeObserver: null,
+            mutationObserver: null,
+            desktopMedia: null,
+            publishPending: false,
+            publishDirty: false,
+            layoutRevision: 0,
+            resizeLayoutId: nextLayoutId++,
+            publishLayoutId: nextLayoutId++,
+            disposed: false
+          };
+          state.onScroll = (event) => {
+            if (event.target !== element) return;
+            if ((state.scrollbar.x || state.scrollbar.y) && (state.scrollbar.lastScrollLeft !== element.scrollLeft || state.scrollbar.lastScrollTop !== element.scrollTop)) {
+              const metrics = nativeMetrics(element);
+              updateScrollbars(state, readScrollbars(state, metrics, wheelAxes(state, metrics)));
+              state.scrollbar.lastScrollLeft = element.scrollLeft;
+              state.scrollbar.lastScrollTop = element.scrollTop;
+            }
+            publish(state);
+            if (!state.desktop && state.scrollbar.listening) scheduleScrollbarInteractionHide(state);
+          };
+          state.onScrollEnd = (event) => {
+            if (event.target !== element) return;
+          };
+          state.onWheel = (event) => handleWheel(state, event);
+          state.onInteractionStart = () => {
+            cancelMomentum(state);
+            finishElasticRelease(state);
+          };
+          state.onPointerDown = (event) => startPointerScroll(state, event);
+          state.onPointerOver = (event) => updatePointerScrollCursor(
+            state,
+            event.target,
+            event.clientX,
+            event.clientY
+          );
+          state.onPointerOut = (event) => {
+            if (state.pointerScroll && state.pointerScroll.moved) return;
+            if (!event.relatedTarget || !element.contains(event.relatedTarget))
+              restorePointerScrollCursor(state);
+          };
+          state.onMouseDown = (event) => {
+            var _a;
+            if (event.button === 0 && event.detail > 1 && !((_a = state.pointerScroll) == null ? void 0 : _a.afterDrag))
+              endPointerScroll(state);
+          };
+          state.onPointerMove = (event) => movePointerScroll(state, event);
+          state.onMouseEvent = (event) => cancelPointerScrollMouseEvent(state, event);
+          state.onPointerScrollTouchMove = (event) => {
+            if (state.pointerScroll && state.pointerScroll.moved && event.cancelable)
+              event.preventDefault();
+          };
+          state.onPointerScrollNativeEvent = (event) => {
+            if (state.pointerScroll && state.pointerScroll.moved && event.cancelable)
+              event.preventDefault();
+          };
+          state.onPointerEnd = (event) => endPointerScroll(state, event);
+          state.onBlur = () => endPointerScroll(state);
+          state.onTouchStart = (event) => startTouch(state, event);
+          state.onTouchMove = (event) => moveTouch(state, event);
+          state.onTouchEnd = (event) => endTouch(state, event);
+          state.onScrollbarPointerDown = isTouch(() => startScrollbarInteractionVisibility(state));
+          state.onScrollbarPointerEnd = isTouch(() => scheduleScrollbarInteractionHide(state));
+          state.onScrollbarPointerEnter = isTouch(() => setScrollbarHover(state, "pointerHover", true));
+          state.onScrollbarPointerLeave = isTouch(() => setScrollbarHover(state, "pointerHover", false));
+          state.onScrollbarPointerOver = isTouch(() => setScrollbarHover(state, "pointerHover", true));
+          state.onScrollbarPointerOut = isTouch((event) => {
+            if (!event.relatedTarget || !element.contains(event.relatedTarget))
+              setScrollbarHover(state, "pointerHover", false);
           });
+          state.onScrollbarPointerMove = isTouch(() => {
+            if (!state.scrollbar.pointerHover)
+              setScrollbarHover(state, "pointerHover", true);
+          });
+          state.onScrollbarMouseEnter = () => {
+            if (supportsMouseHover()) setScrollbarHover(state, "mouseHover", true);
+          };
+          state.onScrollbarMouseLeave = () => setScrollbarHover(state, "mouseHover", false);
+          state.onScrollbarMouseOver = () => {
+            if (supportsMouseHover()) setScrollbarHover(state, "mouseHover", true);
+          };
+          state.onScrollbarMouseOut = (event) => {
+            if (!event.relatedTarget || !element.contains(event.relatedTarget))
+              setScrollbarHover(state, "mouseHover", false);
+          };
+          state.onScrollbarOutsideDown = (event) => {
+            if (!element.contains(event.target)) {
+              setScrollbarHover(state, "pointerHover", false);
+              setScrollbarHover(state, "mouseHover", false);
+              if (!element.classList.contains(pointerScrollingClass))
+                clearScrollbarInteractionVisibility(state);
+              syncScrollbarVisibility(state);
+            }
+          };
+          scrollboxes.set(element, state);
+          onEvent(element, "$scroll", state.onScroll, { passive: true });
+          onEvent(element, "$scrollend", state.onScrollEnd, { passive: true });
+          onEvent(element, POINTER_DOWN_TARGET, state.onInteractionStart, true);
+          observe(state);
+          configure(state);
         }
-        function parseSelectors(selectors) {
-          const list = [];
-          for (const input of Array.isArray(selectors) ? selectors : [selectors]) {
-            if (typeof input !== "string" || !input.trim()) {
-              selectorDiagnostic(input, "Expected a nonempty selector string or array of strings.");
-              return null;
-            }
-            let start = 0, depth = 0, quote = null;
-            for (let index = 0; index <= input.length; index++) {
-              const char = input[index];
-              if (char === "\\") {
-                index++;
-                continue;
-              }
-              if (quote) {
-                if (char === quote) quote = null;
-                continue;
-              }
-              if (char === '"' || char === "'") {
-                quote = char;
-                continue;
-              }
-              if (char === "(" || char === "[") depth++;
-              if (char === ")" || char === "]") depth--;
-              if (index === input.length || char === "," && depth === 0) {
-                const selector = input.slice(start, index).trim();
-                try {
-                  if (!selector) throw new SyntaxError("Empty selector");
-                  document.querySelector(selector);
-                } catch (_) {
-                  selectorDiagnostic(input, "Invalid CSS selector.");
-                  return null;
-                }
-                if (!list.includes(selector)) list.push(selector);
-                start = index + 1;
-              }
-            }
-            if (quote || depth !== 0) {
-              selectorDiagnostic(input, "Unbalanced CSS selector.");
-              return null;
-            }
-          }
-          if (!list.length) {
-            selectorDiagnostic(selectors, "Expected at least one CSS selector.");
-            return null;
-          }
-          return list;
+        function updateScrollbox(element) {
+          const state = scrollboxes.get(element);
+          if (state) configure(state);
         }
-        function onClick(event) {
-          if (event.defaultPrevented) return;
-          if (event.button !== 0) return;
-          if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
-          const target = event.target && event.target.nodeType === 1 ? event.target : event.target && event.target.parentElement;
-          const link = target && target.closest(`a[${attr.ajaxHref}]`);
-          if (!link || !link.href || link.tagName !== "A") return;
-          const rawHref = link.getAttribute("href");
-          if (link.target && link.target !== "_self") return;
-          if (rawHref && rawHref.startsWith("#")) return;
-          if (link.hasAttribute("download") || link.hasAttribute("data-no-ajax")) return;
-          const selectors = link.getAttribute(attr.ajaxHref);
-          if (!selectors) return;
-          const destinyUrl = comparableUrl(link.href);
-          const currentUrl = comparableUrl(window.location.href);
-          if (destinyUrl.origin !== currentUrl.origin) {
-            AelluxJs2.dispatch("AjaxHrefDropOrigin");
+        function unmountScrollbox(element) {
+          var _a;
+          const state = scrollboxes.get(element);
+          if (!state) return;
+          state.disposed = true;
+          if (activePointerScrollState && activePointerScrollState.pointerScroll && activePointerScrollState.pointerScroll.chain.includes(state))
+            endPointerScroll(activePointerScrollState);
+          endPointerScroll(state);
+          stopPointerScrollMouseEvents(state);
+          restorePointerScrollCursor(state);
+          cancelMomentum(state);
+          resetElastic(state);
+          if (state.elastic.wrapper) elasticMemories.delete(state.elastic.wrapper);
+          restoreInlineWrapper(state);
+          resetScrollbars(state);
+          offEvent(element, "$scroll", state.onScroll);
+          offEvent(element, "$scrollend", state.onScrollEnd);
+          offEvent(element, POINTER_DOWN_TARGET, state.onInteractionStart, true);
+          if (state.wheelListening) offEvent(element, "$wheel", state.onWheel, true);
+          if (state.pointerListening) setListeners(element, state, pointerListeners, false);
+          if (state.touchListening) removeTouchListeners(state);
+          if (state.resizeObserver) state.resizeObserver.disconnect();
+          if (state.mutationObserver) state.mutationObserver.disconnect();
+          if (state.desktopMedia) {
+            if (state.desktopMedia.removeEventListener)
+              state.desktopMedia.removeEventListener("change", state.onDesktopMediaChange);
+            else if (state.desktopMedia.removeListener)
+              state.desktopMedia.removeListener(state.onDesktopMediaChange);
+          }
+          AelluxJs2.waitLayout.cancel(state.resizeLayoutId);
+          AelluxJs2.waitLayout.cancel(state.publishLayoutId);
+          offEvent(root2, "$resize", state.onResize);
+          (_a = elementMemories.get(element)) == null ? void 0 : _a.restore();
+          elementMemories.delete(element);
+          cursorMemories.delete(element);
+          for (const name of scrollEdgeClasses) element.classList.remove(name);
+          scrollboxes.delete(element);
+        }
+        function configure(state) {
+          const element = state.element;
+          state.layoutRevision++;
+          state.mode = readMode(element);
+          state.wheelEnabled = element.getAttribute(wheelAttribute) !== "false";
+          state.momentumEnabled = element.getAttribute(momentumAttribute) !== "false" && !hasSnap(element);
+          configureElastic(state);
+          configureInlineWrapper(state);
+          configureScrollbars(state);
+          state.desktop = isDesktop();
+          if ((state.desktop || state.elasticEnabled) && !state.wheelListening) {
+            onEvent(element, "$wheel", state.onWheel, { passive: false, capture: true });
+            state.wheelListening = true;
+          } else if (!state.desktop && !state.elasticEnabled && state.wheelListening) {
+            offEvent(element, "$wheel", state.onWheel, true);
+            state.wheelListening = false;
+          }
+          if (state.elasticEnabled && !state.touchListening) addTouchListeners(state);
+          else if (!state.elasticEnabled && state.touchListening) removeTouchListeners(state);
+          if (!state.elasticEnabled) resetElastic(state);
+          const pointerEnabled = state.desktop && state.mode === POINTER;
+          if (!pointerEnabled || !state.momentumEnabled) cancelMomentum(state);
+          if (pointerEnabled && !state.pointerListening) {
+            setListeners(element, state, pointerListeners, true);
+            state.pointerListening = true;
+          } else if (!pointerEnabled && state.pointerListening) {
+            if (activePointerScrollState && activePointerScrollState.pointerScroll && activePointerScrollState.pointerScroll.chain.includes(state))
+              endPointerScroll(activePointerScrollState);
+            setListeners(element, state, pointerListeners, false);
+            state.pointerListening = false;
+            endPointerScroll(state);
+            state.lastPointerDown = null;
+            restorePointerScrollCursor(state);
+          }
+          refresh(state);
+        }
+        function hasSnap(element) {
+          return element.hasAttribute(snapAttribute) && element.getAttribute(snapAttribute) !== "false";
+        }
+        function contentChildren(element) {
+          return Array.from(element.children).filter((child) => !child.hasAttribute(scrollbarVerticalAttribute) && !child.hasAttribute(scrollbarHorizontalAttribute));
+        }
+        function scrollbarAxes(value) {
+          if (value === null) return { x: false, y: false };
+          const tokens = value.toLowerCase().trim().split(/[\s,|/+]+/).filter(Boolean);
+          if (!tokens.length) return { x: true, y: true };
+          const axes = { x: false, y: false };
+          for (const token of tokens) {
+            const short = token.replace(/horizontal/g, "h").replace(/vertical/g, "v");
+            if (!/^[vhxy]+$/.test(short)) continue;
+            if (/[hx]/.test(short)) axes.x = true;
+            if (/[vy]/.test(short)) axes.y = true;
+          }
+          return axes;
+        }
+        function supportsMouseHover() {
+          return !!(root2.matchMedia && root2.matchMedia("(any-hover: hover)").matches);
+        }
+        function configureScrollbars(state) {
+          const element = state.element;
+          const value = element.getAttribute(scrollbarAttribute);
+          const axes = scrollbarAxes(value);
+          configureScrollbarAxis(state, "y", axes.y, scrollbarVerticalAttribute);
+          configureScrollbarAxis(state, "x", axes.x, scrollbarHorizontalAttribute);
+          const enabled = axes.x || axes.y;
+          const scrollbar = state.scrollbar;
+          if (enabled && !scrollbar.listening) {
+            scrollbar.mouseHover = element.matches(":hover") && supportsMouseHover();
+            scrollbar.hoverVisible = scrollbar.mouseHover;
+            setListeners(element, state, scrollbarHoverListeners, true);
+            AelluxJs2.on(POINTER_DOWN_TARGET, state.onScrollbarOutsideDown, true);
+            scrollbar.listening = true;
+            syncScrollbarVisibility(state);
+          } else if (!enabled && scrollbar.listening) {
+            setListeners(element, state, scrollbarHoverListeners, false);
+            AelluxJs2.off(POINTER_DOWN_TARGET, state.onScrollbarOutsideDown, true);
+            scrollbar.listening = false;
+            clearScrollbarInteractionVisibility(state);
+            clearScrollbarHover(state);
+            syncScrollbarVisibility(state);
+          }
+          const hideNative = enabled || value !== null && value.trim().toLowerCase() === "none";
+          if (hideNative && !element.classList.contains(nativeScrollbarHideClass)) {
+            element.classList.add(nativeScrollbarHideClass);
+            scrollbar.hideOwned = true;
+          } else if (!hideNative && scrollbar.hideOwned) {
+            element.classList.remove(nativeScrollbarHideClass);
+            scrollbar.hideOwned = false;
+          }
+        }
+        function configureScrollbarAxis(state, axis, enabled, attributeName) {
+          const scrollbar = state.scrollbar;
+          const current = scrollbar[axis];
+          let scrollbarElement = null;
+          if (enabled) scrollbarElement = Array.from(state.element.children).find((child) => child.hasAttribute(attributeName)) || null;
+          if (current && current.element === scrollbarElement && enabled) {
+            positionScrollbarAxis(state, current);
             return;
           }
-          if (destinyUrl.href === currentUrl.href) {
-            if (destinyUrl.hash && destinyUrl.hash !== currentUrl.hash) return;
-            event.preventDefault();
-            const url = link.href;
-            AelluxJs2.dispatch("AjaxHrefStart", { detail: { url, selectors } });
-            AelluxJs2.dispatch("AjaxHrefLoaded", { detail: { url, selectors } });
-            AelluxJs2.dispatch("AjaxHrefComplete", { detail: { url, selectors } });
+          if (current) resetScrollbarAxis(state, axis);
+          if (!enabled) return;
+          const owned = !scrollbarElement;
+          if (!scrollbarElement) {
+            scrollbarElement = root2.document.createElement("div");
+            scrollbarElement.setAttribute(attributeName, "");
+            state.element.appendChild(scrollbarElement);
+          }
+          const marker = owned ? null : root2.document.createComment("scrollbar position");
+          if (marker) scrollbarElement.before(marker);
+          if (!owned) scrollbarMemories.set(scrollbarElement, AelluxJs2.persist.element.save(
+            scrollbarElement,
+            [],
+            scrollbarProperties
+          ));
+          const record = {
+            element: scrollbarElement,
+            owned,
+            axis,
+            marker,
+            thumbPosition: null,
+            thumbSize: null,
+            trackSize: null,
+            max: null,
+            display: null
+          };
+          record.onPointerDown = (event) => startScrollbarDrag(state, record, event);
+          record.onPointerMove = (event) => moveScrollbarDrag(state, record, event);
+          record.onPointerEnd = (event) => endScrollbarDrag(state, record, event);
+          setListeners(scrollbarElement, record, scrollbarAxisListeners, true);
+          scrollbar[axis] = record;
+          positionScrollbarAxis(state, record);
+        }
+        function positionScrollbarAxis(state, record) {
+          const container = state.element;
+          if (record.axis === "y" && container.firstChild !== record.element)
+            container.prepend(record.element);
+          else if (record.axis === "x" && container.lastChild !== record.element)
+            container.append(record.element);
+        }
+        function resetScrollbarAxis(state, axis) {
+          var _a;
+          const record = state.scrollbar[axis];
+          if (!record) return;
+          endScrollbarDrag(state, record);
+          const element = record.element;
+          setListeners(element, record, scrollbarAxisListeners, false);
+          if (record.owned) element.remove();
+          else {
+            (_a = scrollbarMemories.get(element)) == null ? void 0 : _a.restore();
+            if (record.marker.parentNode) record.marker.replaceWith(element);
+            else record.marker.remove();
+          }
+          scrollbarMemories.delete(element);
+          state.scrollbar[axis] = null;
+        }
+        function resetScrollbars(state) {
+          resetScrollbarAxis(state, "x");
+          resetScrollbarAxis(state, "y");
+          const scrollbar = state.scrollbar;
+          if (scrollbar.listening) {
+            setListeners(state.element, state, scrollbarHoverListeners, false);
+            AelluxJs2.off(POINTER_DOWN_TARGET, state.onScrollbarOutsideDown, true);
+            scrollbar.listening = false;
+          }
+          if (scrollbar.hideOwned) state.element.classList.remove(nativeScrollbarHideClass);
+          scrollbar.hideOwned = false;
+          clearScrollbarInteractionVisibility(state);
+          clearScrollbarHover(state);
+          syncScrollbarVisibility(state);
+        }
+        function setScrollbarHover(state, name, active) {
+          const scrollbar = state.scrollbar;
+          scrollbar[name] = active;
+          if (active) {
+            if (scrollbar.hoverTimeout !== null) root2.clearTimeout(scrollbar.hoverTimeout);
+            scrollbar.hoverTimeout = null;
+            scrollbar.hoverVisible = true;
+          } else if (!scrollbar.pointerHover && !scrollbar.mouseHover && scrollbar.hoverVisible && scrollbar.hoverTimeout === null) {
+            scrollbar.hoverTimeout = root2.setTimeout(() => {
+              scrollbar.hoverTimeout = null;
+              scrollbar.hoverVisible = false;
+              syncScrollbarVisibility(state);
+            }, SCROLLBAR_HOVER_HIDE_DELAY_MS);
+          }
+          syncScrollbarVisibility(state);
+        }
+        function clearScrollbarHover(state) {
+          const scrollbar = state.scrollbar;
+          if (scrollbar.hoverTimeout !== null) root2.clearTimeout(scrollbar.hoverTimeout);
+          scrollbar.hoverTimeout = null;
+          scrollbar.hoverVisible = scrollbar.pointerHover = scrollbar.mouseHover = false;
+        }
+        function syncScrollbarVisibility(state) {
+          const scrollbar = state.scrollbar;
+          if (scrollbar.listening && (scrollbar.hoverVisible || scrollbar.drag || scrollbar.interactionVisible || state.cursor.owned)) showScrollbars(state);
+          else hideScrollbars(state);
+        }
+        function clearScrollbarInteractionVisibility(state) {
+          const scrollbar = state.scrollbar;
+          if (scrollbar.interactionTimeout !== null) root2.clearTimeout(scrollbar.interactionTimeout);
+          scrollbar.interactionTimeout = null;
+          scrollbar.interactionVisible = false;
+        }
+        function startScrollbarInteractionVisibility(state) {
+          if (!state.scrollbar.listening) return;
+          clearScrollbarInteractionVisibility(state);
+          state.scrollbar.interactionVisible = true;
+          syncScrollbarVisibility(state);
+        }
+        function scheduleScrollbarInteractionHide(state) {
+          if (!state.scrollbar.listening || state.disposed) return;
+          clearScrollbarInteractionVisibility(state);
+          state.scrollbar.interactionVisible = true;
+          syncScrollbarVisibility(state);
+          state.scrollbar.interactionTimeout = root2.setTimeout(() => {
+            state.scrollbar.interactionTimeout = null;
+            state.scrollbar.interactionVisible = false;
+            syncScrollbarVisibility(state);
+          }, SCROLLBAR_INTERACTION_HIDE_DELAY_MS);
+        }
+        function showScrollbars(state) {
+          if (!state.scrollbar.listening) return;
+          if (!state.element.classList.contains(scrollbarVisibleClass)) {
+            const metrics = nativeMetrics(state.element);
+            updateScrollbars(state, readScrollbars(state, metrics, wheelAxes(state, metrics)));
+            state.element.classList.add(scrollbarVisibleClass);
+            state.scrollbar.visibleOwned = true;
+          }
+        }
+        function hideScrollbars(state) {
+          if (state.scrollbar.drag) return;
+          if (state.scrollbar.visibleOwned)
+            state.element.classList.remove(scrollbarVisibleClass);
+          state.scrollbar.visibleOwned = false;
+        }
+        function readScrollbars(state, metrics, axes) {
+          const element = state.element;
+          const values = [];
+          for (const axis of ["x", "y"]) {
+            const record = state.scrollbar[axis];
+            if (!record) continue;
+            const vertical = axis === "y";
+            const trackSize = vertical ? element.clientHeight : element.clientWidth;
+            const max = vertical ? metrics.maxY : metrics.maxX;
+            const scrollSize = trackSize + max;
+            const thumbSize = max > 1 ? Math.min(
+              trackSize,
+              Math.max(SCROLLBAR_MIN_THUMB_PX, trackSize * trackSize / scrollSize)
+            ) : 0;
+            const position = vertical ? element.scrollTop : element.scrollLeft;
+            const thumbPosition = max > 0 ? (trackSize - thumbSize) * progress(position, max) : 0;
+            const display = axes[axis] ? "block" : "none";
+            values.push({
+              record,
+              trackSize,
+              thumbSize,
+              thumbPosition,
+              max: axes[axis] ? max : 0,
+              display
+            });
+          }
+          return values;
+        }
+        function updateScrollbars(state, values) {
+          for (const { record, trackSize, thumbSize, thumbPosition, max, display } of values) {
+            if (state.scrollbar[record.axis] !== record) continue;
+            const style = record.element.style;
+            if (record.trackSize !== trackSize)
+              style.setProperty(scrollbarProperties[2], `${trackSize}px`);
+            if (record.thumbSize !== thumbSize)
+              style.setProperty(scrollbarProperties[3], `${thumbSize}px`);
+            if (record.thumbPosition !== thumbPosition)
+              style.setProperty(scrollbarProperties[4], `${thumbPosition}px`);
+            if (record.display !== display)
+              style.setProperty(scrollbarProperties[5], display);
+            record.trackSize = trackSize;
+            record.thumbSize = thumbSize;
+            record.thumbPosition = thumbPosition;
+            record.max = max;
+            record.display = display;
+          }
+        }
+        function scrollbarPointerPosition(record, event) {
+          const rect = record.element.getBoundingClientRect();
+          return record.axis === "y" ? event.clientY - rect.top : event.clientX - rect.left;
+        }
+        function visibleScrollbarTrack(record) {
+          const style = root2.getComputedStyle(record.element);
+          if (Number.parseFloat(style.opacity) <= 0) return false;
+          const color = style.backgroundColor;
+          if (!color || color === "transparent") return false;
+          const rgba = color.match(/^rgba\((.+)\)$/);
+          return !rgba || Number.parseFloat(rgba[1].split(",").at(-1)) > 0;
+        }
+        function startScrollbarDrag(state, record, event) {
+          if (state.disposed || event.button !== 0 || !record.max) return;
+          if (activePointerScrollState && activePointerScrollState.pointerScroll && activePointerScrollState.pointerScroll.chain.includes(state))
+            endPointerScroll(activePointerScrollState);
+          if (event.cancelable) event.preventDefault();
+          event.stopPropagation();
+          const position = scrollbarPointerPosition(record, event);
+          if (event.pointerType !== "touch") state.scrollbar.pointerHover = true;
+          showScrollbars(state);
+          if (position < record.thumbPosition || position > record.thumbPosition + record.thumbSize) {
+            if (!visibleScrollbarTrack(record)) return;
+            const travel = record.trackSize - record.thumbSize;
+            const thumbStart = Math.max(0, Math.min(travel, position - record.thumbSize / 2));
+            const destination = travel > 0 ? thumbStart / travel * record.max : 0;
+            if (record.axis === "y") state.element.scrollTo({ top: destination });
+            else state.element.scrollTo({ left: destination });
+            return;
+          }
+          state.scrollbar.drag = {
+            record,
+            pointerId: event.pointerId,
+            offset: position - record.thumbPosition
+          };
+          dispatchInteraction(state, "scrollbar", true);
+          if (record.element.setPointerCapture)
+            record.element.setPointerCapture(event.pointerId);
+        }
+        function moveScrollbarDrag(state, record, event) {
+          const drag = state.scrollbar.drag;
+          if (!drag || drag.record !== record || drag.pointerId !== event.pointerId) return;
+          if (event.cancelable) event.preventDefault();
+          event.stopPropagation();
+          const travel = record.trackSize - record.thumbSize;
+          if (travel <= 0) return;
+          const position = scrollbarPointerPosition(record, event) - drag.offset;
+          const destination = Math.max(0, Math.min(record.max, position / travel * record.max));
+          if (record.axis === "y") state.element.scrollTo({ top: destination, behavior: "instant" });
+          else state.element.scrollTo({ left: destination, behavior: "instant" });
+          updateScrollbars(state, [{
+            record,
+            trackSize: record.trackSize,
+            thumbSize: record.thumbSize,
+            thumbPosition: travel * destination / record.max,
+            max: record.max,
+            display: record.display
+          }]);
+          publish(state);
+        }
+        function endScrollbarDrag(state, record, event) {
+          const drag = state.scrollbar.drag;
+          if (!drag || drag.record !== record || event && drag.pointerId !== event.pointerId) return;
+          if (event) {
+            if (event.cancelable) event.preventDefault();
+            event.stopPropagation();
+          }
+          state.scrollbar.drag = null;
+          if (record.element.hasPointerCapture && record.element.hasPointerCapture(drag.pointerId))
+            record.element.releasePointerCapture(drag.pointerId);
+          syncScrollbarVisibility(state);
+          dispatchInteraction(state, "scrollbar", false);
+        }
+        function configureInlineWrapper(state) {
+          const inline = state.inlineWrapper;
+          const wrapper = state.elastic.wrapper;
+          if (inline.element !== wrapper) {
+            restoreInlineWrapper(state);
+            inline.element = wrapper;
+          }
+          if (!wrapper) return;
+          const display = root2.getComputedStyle(wrapper).display;
+          if (display.startsWith("inline")) return;
+          if (inline.reportedDisplay !== display) {
+            AelluxJs2.diagnostics.warn(
+              AelluxJs2.diagnostics.WARN_SCROLLBOX_WRAPPER_DISPLAY,
+              { element: wrapper, display }
+            );
+            inline.reportedDisplay = display;
+          }
+          const replacement = {
+            block: "inline-block",
+            flex: "inline-flex",
+            grid: "inline-grid",
+            "flow-root": "inline-block",
+            table: "inline-table"
+          }[display];
+          if (!replacement) return;
+          if (!inline.owned) inlineMemories.set(wrapper, AelluxJs2.persist.element.save(
+            wrapper,
+            [],
+            ["display"]
+          ));
+          wrapper.style.setProperty("display", replacement, "important");
+          inline.owned = true;
+        }
+        function restoreInlineWrapper(state) {
+          var _a;
+          const inline = state.inlineWrapper;
+          if (inline.owned && inline.element) (_a = inlineMemories.get(inline.element)) == null ? void 0 : _a.restore();
+          if (inline.element) inlineMemories.delete(inline.element);
+          inline.element = null;
+          inline.owned = false;
+          inline.reportedDisplay = null;
+        }
+        function configureElastic(state) {
+          const element = state.element;
+          const children = contentChildren(element);
+          const child = children.length === 1 ? children[0] : null;
+          const wrapper = child && child.hasAttribute(elasticAttribute) && child.getAttribute(elasticAttribute) !== "false" ? child : null;
+          if (!wrapper) {
+            resetElastic(state);
+            if (state.elastic.wrapper) elasticMemories.delete(state.elastic.wrapper);
+            state.elasticEnabled = false;
+            state.elastic.wrapper = null;
+            const requested = element.hasAttribute(elasticAttribute) || children.some((item) => item.hasAttribute(elasticAttribute) && item.getAttribute(elasticAttribute) !== "false");
+            if (requested && !state.elastic.invalidReported) {
+              AelluxJs2.diagnostics.error(
+                AelluxJs2.diagnostics.ERROR_SCROLLBOX_ELASTIC_WRAPPER,
+                {
+                  extension: extensionName,
+                  element,
+                  attribute: elasticAttribute,
+                  reason: "Elastic content wrapper is missing or is not the only direct child.",
+                  suggestion: "Wrap all Scrollbox content in exactly one direct child with data-ae-scrollbox-elastic."
+                }
+              );
+            }
+            state.elastic.invalidReported = requested;
+            return;
+          }
+          state.elastic.invalidReported = false;
+          if (state.elastic.wrapper !== wrapper) {
+            resetElastic(state);
+            if (state.elastic.wrapper) elasticMemories.delete(state.elastic.wrapper);
+            const computed = root2.getComputedStyle(wrapper);
+            state.elastic.wrapper = wrapper;
+            state.elastic.dimensions = null;
+            state.elastic.baseTransform = computed.transform === "none" ? "" : computed.transform;
+            state.elastic.baseOrigin = computed.transformOrigin;
+            state.elastic.baseMargins = {
+              top: computed.marginTop,
+              right: computed.marginRight,
+              bottom: computed.marginBottom,
+              left: computed.marginLeft
+            };
+            elasticMemories.set(wrapper, AelluxJs2.persist.element.save(
+              wrapper,
+              [],
+              [
+                "transform",
+                "transform-origin",
+                "margin-top",
+                "margin-right",
+                "margin-bottom",
+                "margin-left"
+              ]
+            ));
+          }
+          state.elasticEnabled = true;
+          const value = wrapper.getAttribute(elasticAttribute).trim();
+          const tokens = value ? value.split(/\s+/) : [];
+          const limits = tokens.map(parseElasticLimit);
+          if (tokens.length > 2 || limits.some((limit) => !limit)) {
+            if (state.elastic.invalidLimit !== value) {
+              AelluxJs2.diagnostics.warn(
+                AelluxJs2.diagnostics.WARN_SCROLLBOX_ELASTIC_LIMIT_INVALID,
+                {
+                  extension: extensionName,
+                  element: wrapper,
+                  attribute: elasticAttribute,
+                  value,
+                  reason: "Elastic limits are invalid; using 1/4.",
+                  suggestion: "Use one or two nonnegative fractions or pixel values, such as 1/4 or 80px 40px."
+                }
+              );
+            }
+            state.elastic.invalidLimit = value;
+            state.elastic.limits = [DEFAULT_ELASTIC_LIMIT, DEFAULT_ELASTIC_LIMIT];
+          } else {
+            state.elastic.invalidLimit = null;
+            state.elastic.limits = tokens.length === 2 ? limits : [limits[0] || DEFAULT_ELASTIC_LIMIT, limits[0] || DEFAULT_ELASTIC_LIMIT];
+          }
+        }
+        function parseElasticLimit(token) {
+          const fraction = /^(\d+(?:\.\d+)?)\/(\d+(?:\.\d+)?)$/.exec(token);
+          if (fraction && Number(fraction[2]) > 0) {
+            return { unit: "ratio", value: Number(fraction[1]) / Number(fraction[2]) };
+          }
+          const pixels = /^(\d+(?:\.\d+)?)(?:px)?$/i.exec(token);
+          return pixels ? { unit: "px", value: Number(pixels[1]) } : null;
+        }
+        function elasticLimit(size, limit) {
+          return limit.unit === "px" ? limit.value : size * limit.value;
+        }
+        function elasticResistance(force, current, limit) {
+          if (limit <= 0) return 0;
+          return current + (limit - current) * (1 - Math.exp(-force * ELASTIC_DAMPING / limit));
+        }
+        function readMode(element) {
+          const value = (element.getAttribute(attribute) || "").trim().toLowerCase() || "native";
+          if (value === "native" || value === POINTER) return value;
+          AelluxJs2.diagnostics.warn(
+            AelluxJs2.diagnostics.WARN_SCROLLBOX_MODE_INVALID,
+            {
+              extension: extensionName,
+              element,
+              attribute,
+              value,
+              reason: "Unknown Scrollbox mode; using native.",
+              suggestion: "Use native or pointer, or leave the attribute empty for native scrolling."
+            }
+          );
+          return "native";
+        }
+        function isDesktop() {
+          return !!(root2.matchMedia && root2.matchMedia("(hover: hover) and (pointer: fine)").matches);
+        }
+        function updatePointerScrollCursor(state, target, x, y) {
+          if (!state.pointerListening || state.pointerScroll && state.pointerScroll.moved) return;
+          if (!target || target.nodeType !== 1 || target.closest(`[${attribute}]`) !== state.element || target.closest(pointerScrollExceptionSelector) || isTextAtPoint(target, x, y)) {
+            restorePointerScrollCursor(state);
+            return;
+          }
+          setPointerScrollCursor(state, "grab");
+        }
+        function isTextAtPoint(element, x, y) {
+          if (root2.getComputedStyle(element).userSelect === "none") return false;
+          const range = document.createRange();
+          for (const node of element.childNodes) {
+            if (node.nodeType !== 3 || !node.textContent.trim()) continue;
+            range.selectNodeContents(node);
+            for (const rect of range.getClientRects()) {
+              if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom)
+                return true;
+            }
+          }
+          return false;
+        }
+        function setPointerScrollCursor(state, value) {
+          state.element.style.setProperty("cursor", value, "important");
+          state.cursor.owned = true;
+          syncScrollbarVisibility(state);
+        }
+        function restorePointerScrollCursor(state) {
+          var _a;
+          if (!state.cursor.owned) return;
+          (_a = cursorMemories.get(state.element)) == null ? void 0 : _a.restore();
+          state.cursor.owned = false;
+          syncScrollbarVisibility(state);
+        }
+        function startPointerScroll(state, event) {
+          var _a;
+          if (event.detail > 1 && !((_a = state.lastPointerDown) == null ? void 0 : _a.dragged)) return;
+          if (activePointerScrollState || state.pointerScroll || state.scrollbar.drag || event.defaultPrevented || event.button !== 0 || !event.isPrimary || event.pointerType === "touch" || (event.buttons & 1) === 0) return;
+          const element = state.element;
+          const nested = event.target.closest(`[${attribute}]`);
+          if (nested !== element || event.target.closest(pointerScrollExceptionSelector)) return;
+          const chain = [];
+          let node = element;
+          while (node) {
+            const member = scrollboxes.get(node);
+            if (member && member.pointerListening && !member.disposed) chain.push(member);
+            node = node.parentElement && node.parentElement.closest(`[${attribute}]`);
+          }
+          if (chain.some((member) => member.scrollbar.drag)) return;
+          for (const member of chain) {
+            cancelMomentum(member);
+            if (member.elastic.owned) resetElastic(member);
+          }
+          const axes = new Map(chain.map((member) => {
+            const metrics = nativeMetrics(member.element);
+            member.metrics = metrics;
+            return [member, wheelAxes(member, metrics)];
+          }));
+          const chains = {
+            x: pointerAxisChain(chain, axes, "x"),
+            y: pointerAxisChain(chain, axes, "y")
+          };
+          if (!chains.x.some((member) => axes.get(member).x) && !chains.y.some((member) => axes.get(member).y)) return;
+          const rect = element.getBoundingClientRect();
+          if (event.clientX >= rect.left + element.clientWidth || event.clientY >= rect.top + element.clientHeight) return;
+          const previousDown = state.lastPointerDown;
+          const time = now();
+          state.lastPointerDown = { x: event.clientX, y: event.clientY, time };
+          if (previousDown && !previousDown.dragged && time - previousDown.time <= POINTER_SCROLL_MULTICLICK_MS && Math.abs(event.clientX - previousDown.x) <= POINTER_SCROLL_MULTICLICK_DISTANCE_PX && Math.abs(event.clientY - previousDown.y) <= POINTER_SCROLL_MULTICLICK_DISTANCE_PX) return;
+          const textOrigin = isTextAtPoint(event.target, event.clientX, event.clientY);
+          const selectionAtDown = readSelection();
+          const verticalOnly = chains.y.some((member) => axes.get(member).y) && !chains.x.some((member) => axes.get(member).x);
+          if (!textOrigin && event.cancelable) event.preventDefault();
+          if (state.mouseReleaseTimeout !== null) root2.clearTimeout(state.mouseReleaseTimeout);
+          state.mouseReleaseTimeout = null;
+          state.mouseReleaseButton = null;
+          state.pointerScroll = {
+            pointerId: event.pointerId,
+            pointerType: event.pointerType,
+            button: event.button,
+            startX: event.clientX,
+            startY: event.clientY,
+            lastX: event.clientX,
+            lastY: event.clientY,
+            moved: false,
+            started: false,
+            axis: null,
+            chain,
+            chains,
+            axes,
+            afterDrag: !!(previousDown == null ? void 0 : previousDown.dragged),
+            styles: [],
+            fractions: /* @__PURE__ */ new Map(),
+            momentumState: null,
+            momentumStartX: 0,
+            momentumStartY: 0,
+            elasticForce: 0,
+            startTime: time,
+            endTime: null,
+            selectionAtDown,
+            verticalOnly,
+            selectionReadyTime: textOrigin ? time + TEXT_SELECTION_WAIT_MS : 0,
+            selectionWaitTimeout: null,
+            pendingMove: null,
+            momentumStartTime: time
+          };
+          activePointerScrollState = state;
+          onEvent(root2, POINTER_MOVE_TARGET, state.onPointerMove, { passive: false, capture: true });
+          onEvent(
+            root2,
+            "$touchmove",
+            state.onPointerScrollTouchMove,
+            { passive: false, capture: true }
+          );
+          for (const name of pointerScrollDragEvents) {
+            onEvent(root2, "$" + name, state.onPointerScrollNativeEvent, true);
+          }
+          onEvent(root2, "$selectstart", state.onPointerScrollNativeEvent, true);
+          for (const name of pointerScrollMouseEvents) {
+            onEvent(root2, "$" + name, state.onMouseEvent, { passive: false, capture: true });
+          }
+          onEvent(root2, POINTER_UP_TARGET, state.onPointerEnd, true);
+          onEvent(root2, POINTER_CANCEL_TARGET, state.onPointerEnd, true);
+          onEvent(root2, "$blur", state.onBlur);
+        }
+        function movePointerScroll(state, event) {
+          const pointerScroll = state.pointerScroll;
+          if (!pointerScroll || event.pointerId !== pointerScroll.pointerId) return;
+          if ((event.buttons & 1) === 0) {
+            endPointerScroll(state);
+            return;
+          }
+          const dx = pointerScroll.startX - event.clientX;
+          const dy = pointerScroll.startY - event.clientY;
+          if (!pointerScroll.moved && selectionHasChanged(pointerScroll.selectionAtDown)) {
+            endPointerScroll(state);
+            return;
+          }
+          const previousAxis = pointerScroll.axis;
+          if (!pointerScroll.axis)
+            pointerScroll.axis = Math.abs(dx) >= Math.abs(dy) ? "x" : "y";
+          const chain = pointerScroll.chains[pointerScroll.axis];
+          const threshold = !pointerScroll.moved && chain.some((member) => !member.disposed && pointerAxisMaximum(member, pointerScroll.axis, pointerScroll) > 0 && !dispatchSnapGesture(member, "probe", pointerScroll)) ? 1 : POINTER_SCROLL_THRESHOLD_PX;
+          if (!pointerScroll.moved && dx * dx + dy * dy < threshold * threshold) {
+            pointerScroll.axis = previousAxis;
+            return;
+          }
+          const verticalTextDrag = pointerScroll.verticalOnly && pointerScroll.axis === "y" && Math.abs(dy) > VERTICAL_TEXT_DRAG_PX;
+          if (!pointerScroll.moved && now() < pointerScroll.selectionReadyTime && !verticalTextDrag) {
+            pointerScroll.pendingMove = { x: event.clientX, y: event.clientY };
+            if (pointerScroll.selectionWaitTimeout === null) {
+              pointerScroll.selectionWaitTimeout = root2.setTimeout(() => {
+                pointerScroll.selectionWaitTimeout = null;
+                if (state.pointerScroll !== pointerScroll) return;
+                const pendingMove = pointerScroll.pendingMove;
+                movePointerScroll(state, {
+                  pointerId: pointerScroll.pointerId,
+                  buttons: 1,
+                  cancelable: false,
+                  clientX: pendingMove.x,
+                  clientY: pendingMove.y
+                });
+              }, Math.max(0, pointerScroll.selectionReadyTime - now()));
+            }
+            return;
+          }
+          if (!pointerScroll.moved) {
+            const axis2 = pointerScroll.axis;
+            if (!chain.some((member) => pointerAxisMaximum(member, axis2, pointerScroll) > 0)) {
+              endPointerScroll(state);
+              return;
+            }
+            pointerScroll.chain = chain;
+            activatePointerScroll(state, pointerScroll, axis2);
+            if (state.pointerScroll !== pointerScroll) return;
+          }
+          const axis = pointerScroll.axis;
+          let remaining = axis === "x" ? pointerScroll.lastX - event.clientX : pointerScroll.lastY - event.clientY;
+          pointerScroll.lastX = event.clientX;
+          pointerScroll.lastY = event.clientY;
+          if (event.cancelable) event.preventDefault();
+          if (!remaining) return;
+          let outermost = null;
+          for (const member of pointerScroll.chain) {
+            if (!member.disposed && member.pointerListening && pointerAxisMaximum(member, axis, pointerScroll) > 0) outermost = member;
+          }
+          const allowed = outermost && outermost.elasticEnabled ? elasticAxes(outermost) : null;
+          const canStretch = allowed && allowed[axis];
+          if (canStretch && pointerScroll.elasticForce) {
+            const force = pointerScroll.elasticForce + remaining;
+            if (!force || Math.sign(force) === Math.sign(pointerScroll.elasticForce)) {
+              pointerScroll.elasticForce = force;
+              remaining = 0;
+            } else {
+              pointerScroll.elasticForce = 0;
+              remaining = force;
+            }
+          }
+          let lastUsed = null;
+          let lastStartX = 0, lastStartY = 0;
+          for (const member of pointerScroll.chain) {
+            if (member.disposed || !member.pointerListening || pointerAxisMaximum(member, axis, pointerScroll) <= 0) continue;
+            if (Math.abs(remaining) < 1e-3) continue;
+            const element = member.element;
+            const previousX = element.scrollLeft, previousY = element.scrollTop;
+            const current = axis === "x" ? previousX : previousY;
+            const maximum = pointerAxisMaximum(member, axis, pointerScroll);
+            const logical = Math.max(0, Math.min(
+              maximum,
+              current + (pointerScroll.fractions.get(member) || 0)
+            ));
+            const desired = Math.max(0, Math.min(maximum, logical + remaining));
+            element.scrollTo({
+              left: axis === "x" ? desired : previousX,
+              top: axis === "y" ? desired : previousY,
+              behavior: "instant"
+            });
+            const actual = axis === "x" ? element.scrollLeft : element.scrollTop;
+            pointerScroll.fractions.set(member, desired - actual);
+            remaining -= desired - logical;
+            const used = actual - current;
+            if (!used) continue;
+            publish(member);
+            lastUsed = member;
+            lastStartX = previousX;
+            lastStartY = previousY;
+          }
+          if (canStretch) {
+            pointerScroll.elasticForce += remaining;
+            const element = outermost.element;
+            const desiredX = element.scrollLeft + (axis === "x" ? pointerScroll.elasticForce : 0);
+            const desiredY = element.scrollTop + (axis === "y" ? pointerScroll.elasticForce : 0);
+            applyElasticFromDesired(outermost, desiredX, desiredY, false, axis, allowed);
+            scrollWithinElasticBounds(outermost, desiredX, desiredY);
+            publish(outermost);
+          } else pointerScroll.elasticForce = 0;
+          if (lastUsed) {
+            const time = now();
+            if (pointerScroll.momentumState !== lastUsed) {
+              pointerScroll.momentumState = lastUsed;
+              pointerScroll.momentumStartX = lastStartX;
+              pointerScroll.momentumStartY = lastStartY;
+              pointerScroll.momentumStartTime = time;
+            } else if (time - pointerScroll.momentumStartTime > MOMENTUM_LIMIT_TIME_MS) {
+              pointerScroll.momentumStartX = lastUsed.element.scrollLeft;
+              pointerScroll.momentumStartY = lastUsed.element.scrollTop;
+              pointerScroll.momentumStartTime = time;
+            }
+          }
+        }
+        function readSelection() {
+          const selection = root2.getSelection();
+          if (!selection) return null;
+          return {
+            rangeCount: selection.rangeCount,
+            isCollapsed: selection.isCollapsed,
+            anchorNode: selection.anchorNode,
+            anchorOffset: selection.anchorOffset,
+            focusNode: selection.focusNode,
+            focusOffset: selection.focusOffset
+          };
+        }
+        function selectionHasChanged(initial) {
+          const current = readSelection();
+          const initialSelected = initial && initial.rangeCount && !initial.isCollapsed;
+          const currentSelected = current && current.rangeCount && !current.isCollapsed;
+          if (!initialSelected && !currentSelected) return false;
+          if (!initial || !current) return initial !== current;
+          return current.rangeCount !== initial.rangeCount || current.isCollapsed !== initial.isCollapsed || current.anchorNode !== initial.anchorNode || current.anchorOffset !== initial.anchorOffset || current.focusNode !== initial.focusNode || current.focusOffset !== initial.focusOffset;
+        }
+        function pointerAxisMaximum(state, axis, pointerScroll = null) {
+          const metrics = state.metrics || nativeMetrics(state.element);
+          const axes = pointerScroll && pointerScroll.axes.get(state) || wheelAxes(state, metrics);
+          return axes[axis] ? axis === "x" ? metrics.maxX : metrics.maxY : 0;
+        }
+        function pointerAxisChain(chain, axes, axis) {
+          const result = [];
+          for (const member of chain) {
+            result.push(member);
+            if (axes.get(member)[axis === "x" ? "stopX" : "stopY"]) break;
+          }
+          return result;
+        }
+        function activatePointerScroll(state, pointerScroll, axis) {
+          pointerScroll.axis = axis;
+          pointerScroll.moved = true;
+          pointerScroll.started = true;
+          restorePointerScrollCursor(state);
+          for (const member of pointerScroll.chain) {
+            if (pointerAxisMaximum(member, axis, pointerScroll) <= 0) continue;
+            const element = member.element;
+            pointerScrollMemories.set(element, AelluxJs2.persist.element.save(
+              element,
+              [],
+              ["scroll-behavior"]
+            ));
+            pointerScroll.styles.push({
+              element,
+              classOwned: !element.classList.contains(pointerScrollingClass)
+            });
+            element.style.setProperty("scroll-behavior", "auto", "important");
+            element.classList.add(pointerScrollingClass);
+            dispatchInteraction(member, POINTER, true);
+            dispatchSnapGesture(member, "start", pointerScroll);
+            startScrollbarInteractionVisibility(member);
+          }
+          dispatchPointerScroll(state, pointerScroll, "PointerScrollStart");
+        }
+        function dispatchPointerScroll(state, pointerScroll, name) {
+          AelluxJs2.dispatchFrom(state.element, name, {
+            detail: {
+              axis: pointerScroll.axis,
+              pointerId: pointerScroll.pointerId,
+              pointerType: pointerScroll.pointerType,
+              elements: pointerScroll.styles.map((saved) => saved.element)
+            }
+          });
+        }
+        function endPointerScroll(state, event) {
+          var _a;
+          const pointerScroll = state.pointerScroll;
+          if (!pointerScroll || event && event.pointerId !== pointerScroll.pointerId) return;
+          pointerScroll.endTime = now();
+          if (event && event.type === POINTER_UP) {
+            pointerScroll.lastX = event.clientX;
+            pointerScroll.lastY = event.clientY;
+          }
+          state.pointerScroll = null;
+          if (activePointerScrollState === state) activePointerScrollState = null;
+          if (pointerScroll.selectionWaitTimeout !== null)
+            root2.clearTimeout(pointerScroll.selectionWaitTimeout);
+          offEvent(root2, POINTER_MOVE_TARGET, state.onPointerMove, true);
+          offEvent(root2, "$touchmove", state.onPointerScrollTouchMove, true);
+          for (const name of pointerScrollDragEvents) {
+            offEvent(root2, "$" + name, state.onPointerScrollNativeEvent, true);
+          }
+          offEvent(root2, "$selectstart", state.onPointerScrollNativeEvent, true);
+          offEvent(root2, POINTER_UP_TARGET, state.onPointerEnd, true);
+          offEvent(root2, POINTER_CANCEL_TARGET, state.onPointerEnd, true);
+          offEvent(root2, "$blur", state.onBlur);
+          if (pointerScroll.moved && !state.disposed) {
+            state.mouseReleaseButton = pointerScroll.button;
+            if (state.mouseReleaseTimeout !== null) root2.clearTimeout(state.mouseReleaseTimeout);
+            state.mouseReleaseTimeout = root2.setTimeout(() => stopPointerScrollMouseEvents(state), 0);
+          } else {
+            stopPointerScrollMouseEvents(state);
+          }
+          let snapHandled = false;
+          if (event && event.type === POINTER_UP && pointerScroll.axis && !selectionHasChanged(pointerScroll.selectionAtDown)) {
+            const snapChain = pointerScroll.moved ? pointerScroll.chain : pointerScroll.chains[pointerScroll.axis];
+            for (const member of snapChain) {
+              if (!member.disposed && !dispatchSnapGesture(member, "end", pointerScroll))
+                snapHandled = true;
+            }
+          }
+          if ((pointerScroll.moved || snapHandled) && state.lastPointerDown)
+            state.lastPointerDown.dragged = true;
+          for (const saved of pointerScroll.styles) {
+            if (saved.classOwned) saved.element.classList.remove(pointerScrollingClass);
+            (_a = pointerScrollMemories.get(saved.element)) == null ? void 0 : _a.restore();
+            pointerScrollMemories.delete(saved.element);
+            const member = scrollboxes.get(saved.element);
+            if (member) {
+              dispatchInteraction(member, POINTER, false);
+              scheduleScrollbarInteractionHide(member);
+            }
+          }
+          if (event && event.type === POINTER_UP && state.pointerListening) {
+            updatePointerScrollCursor(
+              state,
+              document.elementFromPoint(event.clientX, event.clientY),
+              event.clientX,
+              event.clientY
+            );
+          } else restorePointerScrollCursor(state);
+          if (pointerScroll.started)
+            dispatchPointerScroll(state, pointerScroll, "PointerScrollEnd");
+          const hadElastic = pointerScroll.chain.some((member) => member.elastic.active);
+          const momentumState = pointerScroll.momentumState;
+          for (const member of pointerScroll.chain) releaseElastic(member);
+          if (!snapHandled && event && event.type === POINTER_UP && pointerScroll.moved && momentumState && momentumState.momentumEnabled && !hadElastic && !momentumState.disposed && now() - pointerScroll.momentumStartTime < MOMENTUM_LIMIT_TIME_MS) {
+            startMomentum(momentumState, pointerScroll);
+          }
+        }
+        function cancelPointerScrollMouseEvent(state, event) {
+          const active = state.pointerScroll && state.pointerScroll.moved;
+          if (!active && !mouseReleaseEvents.has(event.type)) return;
+          const button = active ? state.pointerScroll.button : state.mouseReleaseButton;
+          if (button === null || !event.cancelable) return;
+          if (mouseHoldEvents.has(event.type)) {
+            if ((event.buttons & 1 << button) === 0) return;
+          } else if (event.button !== button) {
             return;
           }
           event.preventDefault();
-          load(link.href, selectors);
         }
-        function OnSnapshotRestoreAjax(event) {
-          if (!event.detail || !event.detail.popState) return;
-          const state = event.detail.popState;
-          if (state.ajaxReplace) {
-            const url = state.ajaxReplace.url;
-            const selectors = state.ajaxReplace.selectors;
-            load(url, selectors, { ignoreHistory: true });
+        function stopPointerScrollMouseEvents(state) {
+          if (state.mouseReleaseTimeout !== null) root2.clearTimeout(state.mouseReleaseTimeout);
+          state.mouseReleaseTimeout = null;
+          state.mouseReleaseButton = null;
+          for (const name of pointerScrollMouseEvents) {
+            offEvent(root2, "$" + name, state.onMouseEvent, true);
           }
         }
-        function comparableUrl(value) {
-          const url = new URL(value, window.location.href);
+        function startMomentum(state, pointerScroll) {
+          const element = state.element;
+          if (hasSnap(element)) return;
+          const elapsed = Math.max(1, now() - pointerScroll.momentumStartTime);
+          const x = pointerScroll.axis === "x" ? momentumAxis(
+            element.scrollLeft,
+            pointerScroll.momentumStartX,
+            elapsed,
+            Math.max(0, element.scrollWidth - element.clientWidth)
+          ) : element.scrollLeft;
+          const y = pointerScroll.axis === "y" ? momentumAxis(
+            element.scrollTop,
+            pointerScroll.momentumStartY,
+            elapsed,
+            Math.max(0, element.scrollHeight - element.clientHeight)
+          ) : element.scrollTop;
+          if (x === element.scrollLeft && y === element.scrollTop) return;
+          const momentum = {
+            currentX: element.scrollLeft,
+            currentY: element.scrollTop,
+            toX: x,
+            toY: y,
+            frame: null
+          };
+          state.momentum = momentum;
+          momentum.frame = root2.requestAnimationFrame(() => stepMomentum(state, momentum));
+        }
+        function momentumAxis(current, start, elapsed, maximum) {
+          const distance = current - start;
+          if (Math.abs(distance) <= MOMENTUM_LIMIT_DISTANCE_PX) return current;
+          const speed = Math.abs(distance) / elapsed;
+          const projected = current + Math.sign(distance) * speed * speed / MOMENTUM_DECELERATION;
+          return Math.max(0, Math.min(maximum, Math.round(projected)));
+        }
+        function stepMomentum(state, momentum) {
+          if (state.momentum !== momentum || state.disposed) return;
+          if (hasSnap(state.element)) {
+            cancelMomentum(state);
+            return;
+          }
+          momentum.currentX += (momentum.toX - momentum.currentX) * 0.1;
+          momentum.currentY += (momentum.toY - momentum.currentY) * 0.1;
+          const done = momentum.currentX.toFixed(3) === momentum.toX.toFixed(3) && momentum.currentY.toFixed(3) === momentum.toY.toFixed(3);
+          const element = state.element;
+          element.scrollTo({
+            left: done ? momentum.toX : momentum.currentX,
+            top: done ? momentum.toY : momentum.currentY,
+            behavior: "instant"
+          });
+          publish(state);
+          if (done) {
+            state.momentum = null;
+            return;
+          }
+          momentum.frame = root2.requestAnimationFrame(() => stepMomentum(state, momentum));
+        }
+        function cancelMomentum(state) {
+          if (!state.momentum) return;
+          root2.cancelAnimationFrame(state.momentum.frame);
+          state.momentum = null;
+        }
+        function addTouchListeners(state) {
+          setListeners(state.element, state, touchListeners, true);
+          state.touchListening = true;
+        }
+        function removeTouchListeners(state) {
+          setListeners(state.element, state, touchListeners, false);
+          state.touchListening = false;
+          restoreTouchOverflow(state);
+          state.elastic.touch = null;
+        }
+        function restoreTouchOverflow(state) {
+          const touch = state.elastic.touch;
+          if (!touch) return;
+          for (const [element, { value, priority }] of touch.scrollBehaviors) {
+            if (value) element.style.setProperty("scroll-behavior", value, priority);
+            else element.style.removeProperty("scroll-behavior");
+          }
+          touch.scrollBehaviors.clear();
+        }
+        function startTouch(state, event) {
+          if (event.target.closest(
+            `[${scrollbarVerticalAttribute}], [${scrollbarHorizontalAttribute}]`
+          )) return;
+          if (event.touches.length !== 1) {
+            restoreTouchOverflow(state);
+            state.elastic.touch = null;
+            releaseElastic(state);
+            return;
+          }
+          if (event.target.closest(`[${attribute}]`) !== state.element) return;
+          cancelMomentum(state);
+          const touch = event.touches[0];
+          restoreTouchOverflow(state);
+          if (state.elastic.owned) {
+            resetElastic(state);
+            refresh(state);
+          }
+          state.elastic.touch = {
+            identifier: touch.identifier,
+            x: touch.clientX,
+            y: touch.clientY,
+            lastX: touch.clientX,
+            lastY: touch.clientY,
+            scrollBehaviors: /* @__PURE__ */ new Map(),
+            scrollLeft: state.element.scrollLeft,
+            scrollTop: state.element.scrollTop
+          };
+        }
+        function moveTouch(state, event) {
+          const start = state.elastic.touch;
+          if (!start) return;
+          let touch = null;
+          for (const item of event.touches) {
+            if (item.identifier === start.identifier) {
+              touch = item;
+              break;
+            }
+          }
+          if (!touch) return;
+          const desiredX = start.scrollLeft + start.x - touch.clientX;
+          const desiredY = start.scrollTop + start.y - touch.clientY;
+          const deltaX = start.lastX - touch.clientX;
+          const deltaY = start.lastY - touch.clientY;
+          start.lastX = touch.clientX;
+          start.lastY = touch.clientY;
+          if (!applyElasticFromDesired(state, desiredX, desiredY, false)) return;
+          const metrics = state.metrics || nativeMetrics(state.element);
+          const style = root2.getComputedStyle(state.element);
+          const scrollable = (value) => value === "auto" || value === "scroll";
+          const blockedX = !scrollable(style.overflowX) || metrics.maxX <= 1;
+          const blockedY = !scrollable(style.overflowY) || metrics.maxY <= 1;
+          if (event.cancelable) {
+            event.preventDefault();
+            if (blockedX && (!style.overscrollBehaviorX || style.overscrollBehaviorX === "auto"))
+              scrollTouchOverflow(state, "x", deltaX);
+            if (blockedY && (!style.overscrollBehaviorY || style.overscrollBehaviorY === "auto"))
+              scrollTouchOverflow(state, "y", deltaY);
+          }
+          scrollWithinElasticBounds(
+            state,
+            blockedX ? state.element.scrollLeft : desiredX,
+            blockedY ? state.element.scrollTop : desiredY
+          );
+          publish(state);
+        }
+        function scrollTouchOverflow(state, axis, delta) {
+          if (!delta) return;
+          const horizontal = axis === "x";
+          for (let parent = state.element.parentElement; parent && delta; parent = parent.parentElement) {
+            const style = root2.getComputedStyle(parent);
+            const overflow = horizontal ? style.overflowX : style.overflowY;
+            const position = horizontal ? parent.scrollLeft : parent.scrollTop;
+            const maximum = horizontal ? parent.scrollWidth - parent.clientWidth : parent.scrollHeight - parent.clientHeight;
+            if ((overflow === "auto" || overflow === "scroll" || parent === root2.document.scrollingElement) && maximum > 0) {
+              const next2 = Math.max(0, Math.min(maximum, position + delta));
+              if (!state.elastic.touch.scrollBehaviors.has(parent)) {
+                state.elastic.touch.scrollBehaviors.set(parent, {
+                  value: parent.style.getPropertyValue("scroll-behavior"),
+                  priority: parent.style.getPropertyPriority("scroll-behavior")
+                });
+                parent.style.setProperty("scroll-behavior", "auto", "important");
+              }
+              if (horizontal) parent.scrollLeft = next2;
+              else parent.scrollTop = next2;
+              delta -= (horizontal ? parent.scrollLeft : parent.scrollTop) - position;
+            }
+            const behavior = horizontal ? style.overscrollBehaviorX : style.overscrollBehaviorY;
+            if (behavior && behavior !== "auto") break;
+          }
+        }
+        function endTouch(state, event) {
+          const touch = state.elastic.touch;
+          if (!touch) return;
+          for (const item of event.touches) {
+            if (item.identifier === touch.identifier) return;
+          }
+          restoreTouchOverflow(state);
+          state.elastic.touch = null;
+          releaseElastic(state);
+        }
+        function elasticAxes(state) {
+          const style = root2.getComputedStyle(state.element);
+          const scrollable = (value) => value === "auto" || value === "scroll";
           return {
-            origin: url.origin,
-            href: `${url.origin}${url.pathname}${url.search}`,
-            hash: url.hash
+            x: scrollable(style.overflowX) && style.overscrollBehaviorX !== "none",
+            y: scrollable(style.overflowY) && style.overscrollBehaviorY !== "none"
+          };
+        }
+        function applyElasticFromDesired(state, desiredX, desiredY, additive, axis = null, allowed = elasticAxes(state)) {
+          if (!state.elasticEnabled) return false;
+          const element = state.element;
+          const metrics = state.metrics || nativeMetrics(element);
+          const elastic = state.elastic;
+          const amounts = [0, 0, 0, 0];
+          if (axis !== "x" && allowed.y && metrics.maxY > 1) {
+            const limitY = elasticLimit(element.clientHeight, elastic.limits[0]);
+            if (desiredY < 0) amounts[0] = elasticResistance(
+              -desiredY,
+              additive ? elastic.amounts[0] : 0,
+              limitY
+            );
+            else if (desiredY > metrics.maxY) amounts[2] = elasticResistance(
+              desiredY - metrics.maxY,
+              additive ? elastic.amounts[2] : 0,
+              limitY
+            );
+          }
+          if (axis !== "y" && allowed.x && metrics.maxX > 1) {
+            const limitX = elasticLimit(element.clientWidth, elastic.limits[1]);
+            if (desiredX > metrics.maxX) amounts[1] = elasticResistance(
+              desiredX - metrics.maxX,
+              additive ? elastic.amounts[1] : 0,
+              limitX
+            );
+            else if (desiredX < 0) amounts[3] = elasticResistance(
+              -desiredX,
+              additive ? elastic.amounts[3] : 0,
+              limitX
+            );
+          }
+          const active = amounts.some((amount) => amount > 0);
+          if (!active && !elastic.owned) return false;
+          const dimensions = elastic.dimensions || measureElasticWrapper(elastic.wrapper);
+          elastic.dimensions = dimensions;
+          if (elastic.releaseFrame !== null) root2.cancelAnimationFrame(elastic.releaseFrame);
+          elastic.releaseFrame = null;
+          elastic.wrapper.classList.remove(elasticReleaseClass);
+          elastic.amounts = amounts;
+          elastic.active = active;
+          elastic.owned = true;
+          if (active) dispatchInteraction(state, "elastic", true);
+          setElasticTransform(state, dimensions);
+          return active;
+        }
+        function measureElasticWrapper(wrapper) {
+          return {
+            offsetWidth: wrapper.offsetWidth,
+            scrollWidth: wrapper.scrollWidth,
+            clientLeft: wrapper.clientLeft,
+            offsetHeight: wrapper.offsetHeight,
+            scrollHeight: wrapper.scrollHeight,
+            clientTop: wrapper.clientTop
+          };
+        }
+        function setElasticTransform(state, dimensions = state.elastic.dimensions) {
+          const elastic = state.elastic;
+          const wrapper = elastic.wrapper;
+          const x = elastic.amounts[3] - elastic.amounts[1];
+          const y = elastic.amounts[0] - elastic.amounts[2];
+          const translate = x || y ? `translate3d(${x}px, ${y}px, 0)` : "";
+          const width = Math.max(dimensions.offsetWidth, dimensions.scrollWidth, 1);
+          const height = Math.max(dimensions.offsetHeight, dimensions.scrollHeight, 1);
+          const scaleX = 1 + 2 * (Math.max(elastic.amounts[1], elastic.amounts[3]) / width);
+          const scaleY = 1 + 2 * (Math.max(elastic.amounts[0], elastic.amounts[2]) / height);
+          const scale = scaleX > 1 || scaleY > 1 ? `scale(${scaleX}, ${scaleY})` : "";
+          if (scaleX > 1 || scaleY > 1) {
+            const baseOrigin = elastic.baseOrigin.split(" ");
+            const originX = elastic.amounts[3] > 0 ? "0%" : elastic.amounts[1] > 0 ? `${Math.max(
+              dimensions.offsetWidth,
+              dimensions.scrollWidth + dimensions.clientLeft
+            )}px` : baseOrigin[0];
+            const originY = elastic.amounts[0] > 0 ? "0%" : elastic.amounts[2] > 0 ? `${Math.max(
+              dimensions.offsetHeight,
+              dimensions.scrollHeight + dimensions.clientTop
+            )}px` : baseOrigin[1];
+            wrapper.style.setProperty(
+              "transform-origin",
+              `${originX} ${originY}`,
+              elasticMemories.get(wrapper).cssProperties["transform-origin"].priority
+            );
+          }
+          wrapper.style.setProperty(
+            "transform",
+            [scale, translate, elastic.baseTransform].filter(Boolean).join(" ") || "none",
+            elasticMemories.get(wrapper).cssProperties.transform.priority
+          );
+          setElasticCompensation(state, scaleX, scaleY);
+        }
+        function setElasticCompensation(state, scaleX, scaleY) {
+          var _a;
+          const elastic = state.elastic;
+          const wrapper = elastic.wrapper;
+          const memory = elasticMemories.get(wrapper).cssProperties;
+          const compensated = {
+            top: 0,
+            right: elastic.amounts[3] * (2 + scaleX),
+            bottom: elastic.amounts[0] * (2 + scaleY),
+            left: 0
+          };
+          for (const side of ["top", "right", "bottom", "left"]) {
+            const base = ((_a = elastic.baseMargins) == null ? void 0 : _a[side]) || "0px";
+            const property = `margin-${side}`;
+            if (compensated[side]) {
+              wrapper.style.setProperty(
+                property,
+                `calc(${base} - ${compensated[side]}px)`,
+                memory[property].priority
+              );
+            } else if (memory[property].present) {
+              wrapper.style.setProperty(property, memory[property].value, memory[property].priority);
+            } else wrapper.style.removeProperty(property);
+          }
+        }
+        function scrollWithinElasticBounds(state, desiredX, desiredY) {
+          const element = state.element;
+          const metrics = state.metrics || nativeMetrics(element);
+          element.scrollTo({
+            left: Math.max(0, Math.min(metrics.maxX, desiredX)),
+            top: Math.max(0, Math.min(metrics.maxY, desiredY)),
+            behavior: "instant"
+          });
+        }
+        function releaseElastic(state) {
+          const elastic = state.elastic;
+          if (!elastic.owned) return;
+          if (elastic.wheelTimeout !== null) root2.clearTimeout(elastic.wheelTimeout);
+          elastic.wheelTimeout = null;
+          if (!elastic.active) {
+            resetElastic(state);
+            return;
+          }
+          if (AelluxJs2.currentPreference("reduced-motion") === "reduced") {
+            resetElastic(state);
+            refresh(state);
+            return;
+          }
+          elastic.wrapper.classList.add(elasticReleaseClass);
+          if (elastic.releaseFrame !== null) root2.cancelAnimationFrame(elastic.releaseFrame);
+          elastic.releaseFrame = root2.requestAnimationFrame(() => stepElasticRelease(state));
+        }
+        function stepElasticRelease(state) {
+          const elastic = state.elastic;
+          elastic.releaseFrame = null;
+          if (state.disposed || !elastic.owned) return;
+          elastic.amounts = elastic.amounts.map((amount) => amount < ELASTIC_RETURN_EPSILON ? 0 : amount * (1 - ELASTIC_RETURN_LERP));
+          if (elastic.amounts.every((amount) => amount === 0)) {
+            resetElastic(state);
+            refresh(state);
+            return;
+          }
+          setElasticTransform(state);
+          publish(state);
+          elastic.releaseFrame = root2.requestAnimationFrame(() => stepElasticRelease(state));
+        }
+        function finishElasticRelease(state) {
+          if (state.elastic.releaseFrame === null) return;
+          resetElastic(state);
+          refresh(state);
+        }
+        function resetElastic(state) {
+          var _a;
+          const elastic = state.elastic;
+          const wasOwned = elastic.owned;
+          if (elastic.releaseFrame !== null) root2.cancelAnimationFrame(elastic.releaseFrame);
+          if (elastic.wheelTimeout !== null) root2.clearTimeout(elastic.wheelTimeout);
+          elastic.releaseFrame = null;
+          elastic.wheelTimeout = null;
+          if (elastic.wrapper) elastic.wrapper.classList.remove(elasticReleaseClass);
+          if (elastic.owned && elastic.wrapper) {
+            (_a = elasticMemories.get(elastic.wrapper)) == null ? void 0 : _a.restore();
+          }
+          elastic.amounts = [0, 0, 0, 0];
+          elastic.active = false;
+          elastic.owned = false;
+          if (wasOwned && !state.disposed) {
+            state.metrics = nativeMetrics(state.element);
+            dispatchInteraction(state, "elastic", false);
+          }
+          if (wasOwned && !state.disposed) publish(state);
+        }
+        function observe(state) {
+          state.onResize = () => scheduleResize(state);
+          onEvent(root2, "$resize", state.onResize, { passive: true });
+          if (root2.matchMedia) {
+            state.desktopMedia = root2.matchMedia("(hover: hover) and (pointer: fine)");
+            state.onDesktopMediaChange = () => configure(state);
+            if (state.desktopMedia.addEventListener)
+              state.desktopMedia.addEventListener("change", state.onDesktopMediaChange);
+            else if (state.desktopMedia.addListener)
+              state.desktopMedia.addListener(state.onDesktopMediaChange);
+          }
+          if (root2.ResizeObserver) {
+            state.resizeObserver = new root2.ResizeObserver(() => scheduleResize(state));
+            state.resizeObserver.observe(state.element);
+            for (const child of state.element.children) state.resizeObserver.observe(child);
+          }
+          if (root2.MutationObserver) {
+            state.mutationObserver = new root2.MutationObserver((records) => {
+              if (state.resizeObserver) {
+                state.resizeObserver.disconnect();
+                state.resizeObserver.observe(state.element);
+                for (const child of state.element.children) state.resizeObserver.observe(child);
+              }
+              if (records.some((record) => record.type === "attributes" || record.target === state.element || record.target === state.elastic.wrapper)) configure(state);
+              else refresh(state);
+            });
+            state.mutationObserver.observe(
+              state.element,
+              {
+                childList: true,
+                subtree: true,
+                characterData: true,
+                attributes: true,
+                attributeFilter: [elasticAttribute, scrollbarAttribute, snapAttribute, fadeAttribute, attribute, "dir"]
+              }
+            );
+          }
+        }
+        function scheduleResize(state) {
+          if (state.disposed) return;
+          AelluxJs2.waitLayout.sequence(state.resizeLayoutId, {
+            update: () => refresh(state),
+            maxFPS: AelluxJs2.layoutMaxFPS(state.element),
+            abort: () => state.disposed
+          });
+        }
+        function now() {
+          return root2.performance && typeof root2.performance.now === "function" ? root2.performance.now() : Date.now();
+        }
+        function refresh(state) {
+          if (state.disposed) return;
+          publish(state);
+        }
+        function nativeMetrics(element) {
+          return {
+            maxX: Math.max(0, element.scrollWidth - element.clientWidth),
+            maxY: Math.max(0, element.scrollHeight - element.clientHeight),
+            page: element.clientHeight || 1
+          };
+        }
+        function wheelAxes(state, metrics, style = root2.getComputedStyle(state.element)) {
+          const available = (value) => value === "auto" || value === "scroll";
+          const stopsChain = (value) => value === "contain" || value === "none";
+          return {
+            x: metrics.maxX > 1 && available(style.overflowX),
+            y: metrics.maxY > 1 && available(style.overflowY),
+            stopX: available(style.overflowX) && stopsChain(style.overscrollBehaviorX),
+            stopY: available(style.overflowY) && stopsChain(style.overscrollBehaviorY)
+          };
+        }
+        function physicalScrollLeft(element, maximum, direction) {
+          let position = element.scrollLeft;
+          if (direction === "rtl" && maximum > 0) {
+            if (rtlScrollType === null) {
+              const probe = root2.document.createElement("div");
+              const child = root2.document.createElement("div");
+              probe.style.cssText = "position:absolute;left:-10000px;top:-10000px;width:4px;height:1px;overflow:scroll;direction:rtl;visibility:hidden;scroll-behavior:auto";
+              child.style.cssText = "width:8px;height:1px";
+              probe.appendChild(child);
+              root2.document.body.appendChild(probe);
+              if (probe.scrollLeft > 0) rtlScrollType = "default";
+              else {
+                probe.scrollLeft = 1;
+                rtlScrollType = probe.scrollLeft === 0 ? "negative" : "reverse";
+              }
+              probe.remove();
+            }
+            if (rtlScrollType === "negative") position += maximum;
+            else if (rtlScrollType === "reverse") position = maximum - position;
+          }
+          return Math.max(0, Math.min(maximum, position));
+        }
+        function readFade(state, metrics, axes, style) {
+          const element = state.element;
+          if (state.fadeAuthored === null)
+            state.fadeAuthored = [style.maskImage, style.webkitMaskImage].some((value) => value && value !== "none");
+          if (state.elastic.owned) {
+            metrics = state.metrics || metrics;
+            axes = state.fadeAxes || axes;
+          } else state.fadeAxes = axes;
+          const x = axes.x ? physicalScrollLeft(element, metrics.maxX, style.direction) : 0;
+          const y = Math.max(0, Math.min(metrics.maxY, element.scrollTop));
+          const distances = [
+            axes.y ? y : 0,
+            axes.x ? metrics.maxX - x : 0,
+            axes.y ? metrics.maxY - y : 0,
+            axes.x ? x : 0
+          ];
+          const snapAxis = hasSnap(element) ? element.getAttribute(snapAttribute) === "vertical" ? "y" : "x" : null;
+          const primary = snapAxis || (axes.y ? "y" : "x");
+          return { distances, mode: maskSupported && !state.fadeAuthored && element.getAttribute(fadeAttribute) !== "false" && (axes.x || axes.y) ? compositeSupported ? "both" : primary : "" };
+        }
+        function publish(state) {
+          if (state.disposed) return;
+          state.publishDirty = true;
+          if (state.publishPending) return;
+          state.publishPending = true;
+          AelluxJs2.waitLayout.read(state.publishLayoutId, () => {
+            if (state.disposed) return null;
+            state.publishDirty = false;
+            const metrics = nativeMetrics(state.element);
+            const scrollTop = state.element.scrollTop;
+            const scrollLeft = state.element.scrollLeft;
+            const style = root2.getComputedStyle(state.element);
+            const axes = wheelAxes(state, metrics, style);
+            const fade = readFade(state, metrics, axes, style);
+            if (!state.elastic.active) state.metrics = metrics;
+            if (state.elasticEnabled && state.elastic.wrapper && !state.elastic.active)
+              state.elastic.dimensions = measureElasticWrapper(state.elastic.wrapper);
+            const bars = state.scrollbar.x || state.scrollbar.y;
+            return {
+              revision: state.layoutRevision,
+              fade,
+              scrollTop,
+              scrollLeft,
+              y: progress(scrollTop, metrics.maxY),
+              x: progress(scrollLeft, metrics.maxX),
+              edges: state.elastic.owned ? null : [
+                scrollTop < SCROLL_EDGE_MARGIN_PX,
+                scrollTop >= metrics.maxY - SCROLL_EDGE_MARGIN_PX,
+                scrollLeft < SCROLL_EDGE_MARGIN_PX,
+                scrollLeft >= metrics.maxX - SCROLL_EDGE_MARGIN_PX
+              ],
+              scrollbars: bars ? readScrollbars(state, metrics, axes) : []
+            };
+          }).then((values) => {
+            if (!values || state.disposed) {
+              state.publishDirty = false;
+              return;
+            }
+            return AelluxJs2.waitLayout.update(state.publishLayoutId, () => {
+              if (state.disposed || state.layoutRevision !== values.revision) return;
+              if (state.element.scrollTop !== values.scrollTop || state.element.scrollLeft !== values.scrollLeft) {
+                state.publishDirty = true;
+                return;
+              }
+              state.element.style.setProperty(properties[0], values.y);
+              state.element.style.setProperty(properties[1], values.x);
+              fadeProperties.forEach((name, index) => {
+                if (state.element.style.getPropertyPriority(name)) state.element.style.removeProperty(name);
+                state.element.style.setProperty(name, `${values.fade.distances[index]}px`);
+              });
+              if (values.fade.mode) state.element.setAttribute(fadeStateAttribute, values.fade.mode);
+              else state.element.removeAttribute(fadeStateAttribute);
+              if (values.edges && !state.elastic.owned) {
+                scrollEdgeClasses.forEach((name, index) => state.element.classList.toggle(name, values.edges[index]));
+              }
+              updateScrollbars(state, values.scrollbars);
+            });
+          }).catch((cause) => {
+            AelluxJs2.diagnostics.error(
+              AelluxJs2.diagnostics.ERROR_EXTENSION_MOUNT,
+              { cause, extension: extensionName, element: state.element, method: "update" }
+            );
+          }).finally(() => {
+            state.publishPending = false;
+            if (state.publishDirty && !state.disposed) publish(state);
+          });
+        }
+        function progress(position, distance) {
+          return distance > 0 ? Math.min(1, Math.max(0, position / distance)) : 0;
+        }
+        function scrollAxis(element, axis, delta, maximum) {
+          const property = axis === "x" ? "scrollLeft" : "scrollTop";
+          const current = element[property];
+          const desired = current + delta;
+          const next2 = Math.max(0, Math.min(maximum, desired));
+          if (next2 !== current) {
+            element.scrollTo(axis === "x" ? { left: next2, behavior: "instant" } : { top: next2, behavior: "instant" });
+          }
+          return desired - next2;
+        }
+        function inheritedWheelAxes(element, metrics) {
+          const style = root2.getComputedStyle(element);
+          const available = (value) => value === "auto" || value === "scroll" || element === document.scrollingElement && value === "visible";
+          const stops = (value) => value === "contain" || value === "none";
+          return {
+            x: metrics.maxX > 1 && available(style.overflowX),
+            y: metrics.maxY > 1 && available(style.overflowY),
+            stopX: available(style.overflowX) && stops(style.overscrollBehaviorX),
+            stopY: available(style.overflowY) && stops(style.overscrollBehaviorY)
+          };
+        }
+        function nextWheelTarget(element) {
+          for (let parent = element.parentElement; parent; parent = parent.parentElement) {
+            const state = scrollboxes.get(parent);
+            const metrics = nativeMetrics(parent);
+            const axes = state ? wheelAxes(state, metrics) : inheritedWheelAxes(parent, metrics);
+            if (axes.x || axes.y || axes.stopX || axes.stopY)
+              return { element: parent, state, metrics, axes };
+          }
+          return null;
+        }
+        function receivesVerticalWheelAsHorizontal(target) {
+          return !!target.state && target.state.desktop && target.state.wheelEnabled && target.axes.x && !target.axes.y;
+        }
+        function handoffWheelEvent(event, target, deltaX, deltaY) {
+          const handed = {
+            ctrlKey: event.ctrlKey,
+            cancelable: event.cancelable,
+            deltaX,
+            deltaY,
+            deltaMode: 0,
+            target: target.element,
+            get defaultPrevented() {
+              return event.defaultPrevented;
+            },
+            preventDefault() {
+              event.preventDefault();
+            }
+          };
+          return dispatchWheel(target.state, handed);
+        }
+        function chainWheel(state, event, metrics, factor) {
+          let deltaX = event.deltaX * factor, deltaY = event.deltaY * factor;
+          let target = { element: state.element, state, metrics, axes: wheelAxes(state, metrics) };
+          let first = true, handled = false;
+          while (target && (deltaX || deltaY)) {
+            const member = target.state, element = target.element;
+            if (!first && member) {
+              if (member.desktop && element.classList.contains(pointerScrollingClass)) {
+                event.preventDefault();
+                return;
+              }
+              cancelMomentum(member);
+              finishElasticRelease(member);
+              target.metrics = nativeMetrics(element);
+              target.axes = wheelAxes(member, target.metrics);
+              if (!handoffWheelEvent(event, target, deltaX, deltaY)) {
+                event.preventDefault();
+                return;
+              }
+            }
+            const bounds = (member == null ? void 0 : member.elastic.active) ? member.metrics : target.metrics;
+            const axes = target.axes;
+            const converted = receivesVerticalWheelAsHorizontal(target) && Math.abs(deltaX) <= Math.abs(deltaY);
+            const x = converted ? deltaY : deltaX, y = converted ? 0 : deltaY;
+            const left = element.scrollLeft, top = element.scrollTop;
+            const desiredX = left + (axes.x ? x : 0), desiredY = top + (axes.y ? y : 0);
+            const nextX = Math.max(0, Math.min(bounds.maxX, desiredX));
+            const nextY = Math.max(0, Math.min(bounds.maxY, desiredY));
+            let remainingX = x - (nextX - left), remainingY = y - (nextY - top);
+            if (first && !converted && !remainingX && !remainingY) {
+              if (member.elastic.owned) resetElastic(member);
+              return;
+            }
+            let stretched = false;
+            if ((member == null ? void 0 : member.elasticEnabled) && (axes.x || axes.y)) {
+              if (!member.elastic.active) member.metrics = bounds;
+              stretched = applyElasticFromDesired(
+                member,
+                desiredX,
+                desiredY,
+                true,
+                axes.x && axes.y ? null : axes.x ? "x" : "y"
+              );
+              if (stretched) {
+                scrollWithinElasticBounds(member, desiredX, desiredY);
+                if (member.elastic.wheelTimeout !== null) root2.clearTimeout(member.elastic.wheelTimeout);
+                member.elastic.wheelTimeout = root2.setTimeout(() => releaseElastic(member), ELASTIC_WHEEL_IDLE_MS);
+              } else if (member.elastic.owned) resetElastic(member);
+            }
+            if (!stretched) {
+              if (axes.x) scrollAxis(element, "x", x, bounds.maxX);
+              if (axes.y) scrollAxis(element, "y", y, bounds.maxY);
+            }
+            const moved = nextX !== left || nextY !== top;
+            if (member && (moved || stretched)) publish(member);
+            const blocked = remainingX && axes.stopX || remainingY && axes.stopY;
+            if (axes.stopX) remainingX = 0;
+            if (axes.stopY) remainingY = 0;
+            handled = handled || moved || stretched || !!blocked;
+            deltaX = converted ? 0 : remainingX;
+            deltaY = converted ? remainingX : remainingY;
+            first = false;
+            target = deltaX || deltaY ? nextWheelTarget(element) : null;
+          }
+          if (handled) event.preventDefault();
+        }
+        function handleWheel(state, event) {
+          cancelMomentum(state);
+          if (event.ctrlKey || !event.cancelable) return;
+          if (state.desktop && state.mode === POINTER && state.element.classList.contains(pointerScrollingClass)) {
+            if (event.cancelable) event.preventDefault();
+            event.stopPropagation();
+            return;
+          }
+          if (event.defaultPrevented) return;
+          if (event.target.closest(`[${attribute}]`) !== state.element) return;
+          finishElasticRelease(state);
+          if (!dispatchWheel(state, event)) return;
+          const metrics = nativeMetrics(state.element);
+          if (!metrics) return;
+          const factor = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? metrics.page : 1;
+          chainWheel(state, event, metrics, factor);
+        }
+      })(typeof globalThis !== "undefined" ? globalThis : window);
+    }
+  });
+
+  // src/aellux.ext.scrollbox-snap.js
+  var aellux_ext_scrollbox_snap_exports = {};
+  var init_aellux_ext_scrollbox_snap = __esm({
+    "src/aellux.ext.scrollbox-snap.js"() {
+      /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+      (function(root2) {
+        "use strict";
+        const AelluxJs2 = root2.AelluxJs;
+        const extensionName = "scrollbox-snap";
+        if (!AelluxJs2) throw new Error("[aellux.js] Load the boot script before the scrollbox-snap extension.");
+        const POINTER = "pointer", GESTURE = "gesture", TOUCH = "touch", HORIZONTAL = "x", VERTICAL = "y", FALSE = "false", INSTANT = "instant", SMOOTH = "smooth", START = "start", END = "end", CENTER = "center", SCROLL_EVENT = "$scroll", SCROLL_END_EVENT = "$scrollend", INTERACTION_EVENT = "$AelluxJsScrollboxInteraction", SNAP_GESTURE_EVENT = "$AelluxJsScrollboxSnapGesture", SCROLLBOX_WHEEL_EVENT = "$AelluxJsScrollboxWheel", POINTER_DOWN_EVENT = "$pointerdown", POINTER_UP_EVENT = "$pointerup", POINTER_CANCEL_EVENT = "$pointercancel", TOUCH_START_EVENT = "$touchstart", TOUCH_END_EVENT = "$touchend", TOUCH_CANCEL_EVENT = "$touchcancel";
+        const SNAP_SCROLL_IDLE_MS = 120;
+        const SNAP_TARGET_IDLE_MS = 500;
+        const SNAP_RELEASE_MS = 300;
+        const SNAP_SWIPE_SPEED_PX_MS = 0.5;
+        const SNAP_FLICK_WINDOW_MS = 100;
+        const SNAP_FLICK_FAST_TIME_MS = 50;
+        const SNAP_FLICK_MAX_DISTANCE_PX = 100;
+        const SNAP_FLICK_MIN_DISTANCE_PX = 1;
+        const scrollboxAttribute = AelluxJs2.attr("scrollbox");
+        const wheelAttribute = AelluxJs2.attr("scrollbox-wheel-horizontal");
+        const snapAttribute = AelluxJs2.attr("scrollbox-snap");
+        const itemAttribute = AelluxJs2.attr("snap-item");
+        const elasticAttribute = AelluxJs2.attr("scrollbox-elastic");
+        const readyClass = AelluxJs2.className("snap-ready");
+        const suspendedClass = AelluxJs2.className("snap-suspended");
+        const properties = ["--ae-snap-viewport", "--ae-snap-focus"];
+        const states = /* @__PURE__ */ new Map();
+        AelluxJs2.extAttach(extensionName, { init, destroy, next, previous, goto });
+        function init() {
+          if (!AelluxJs2.registry.ext.scrollbox) AelluxJs2.ext("scrollbox");
+          return AelluxJs2.wait("scrollbox").then((scrollbox) => {
+            if (!scrollbox) throw new Error("[aellux.js] Scrollbox Snap requires the Scrollbox extension.");
+            AelluxJs2.registerCssProperty(...properties.map((name) => ({ name, syntax: "<number>", initialValue: "0" })));
+            scrollbox.registerSnapController({ next, previous, goto });
+            AelluxJs2.mountManager.add({
+              extensionName,
+              selector: `[${scrollboxAttribute}][${snapAttribute}]:not([${snapAttribute}="${FALSE}"])`,
+              priority: 1,
+              mount,
+              update,
+              unmount,
+              controllers: []
+            });
+          });
+        }
+        function destroy() {
+          var _a;
+          for (const element of states.keys()) unmount(element);
+          (_a = AelluxJs2.ext.scrollbox) == null ? void 0 : _a.unregisterSnapController({ next, previous, goto });
+          AelluxJs2.mountManager.remove({ extensionName });
+        }
+        function mount(element) {
+          if (states.has(element)) return;
+          const state = {
+            element,
+            root: null,
+            index: 0,
+            notifiedItem: null,
+            notifiedIndex: null,
+            target: null,
+            targetAxis: null,
+            timeout: null,
+            wheelTimeout: null,
+            edgeWheelTimeout: null,
+            frame: null,
+            activePointers: /* @__PURE__ */ new Set(),
+            activeTouches: /* @__PURE__ */ new Set(),
+            savedItems: /* @__PURE__ */ new Map(),
+            suspensions: /* @__PURE__ */ new Set(),
+            pointerScroll: null,
+            flick: null,
+            release: false,
+            observer: null,
+            resizeObserver: null,
+            disposed: false
+          };
+          state.onScroll = () => {
+            updateValues(state);
+            scheduleSettle(state, state.target !== null && !targetReached(state));
+          };
+          state.onScrollEnd = (event) => {
+            if (event.target !== state.element || state.target !== null && !targetReached(state)) return;
+            finish(state);
+          };
+          state.onPointerDown = (event) => beginGesture(state, POINTER, event);
+          state.onPointerEnd = (event) => endGesture(state, POINTER, event);
+          state.onTouchStart = (event) => beginGesture(state, TOUCH, event);
+          state.onTouchEnd = (event) => endGesture(state, TOUCH, event);
+          state.onBlur = () => {
+            if (!hasActiveGesture(state)) return;
+            state.activePointers.clear();
+            state.activeTouches.clear();
+            state.pointerScroll = null;
+            state.flick = null;
+            endDesktopGesture(state);
+          };
+          state.onScrollboxWheel = (event) => {
+            var _a;
+            if (handleWheel(state, (_a = event.detail) == null ? void 0 : _a.event)) event.preventDefault();
+          };
+          state.onInteraction = (event) => setSuspension(state, event.detail);
+          state.onSnapGesture = (event) => handlePointerScroll(state, event);
+          states.set(element, state);
+          AelluxJs2.onEvent(element, SCROLL_EVENT, state.onScroll, { passive: true });
+          AelluxJs2.onEvent(element, SCROLL_END_EVENT, state.onScrollEnd, { passive: true });
+          AelluxJs2.onEvent(element, POINTER_DOWN_EVENT, state.onPointerDown, true);
+          AelluxJs2.onEvent(element, TOUCH_START_EVENT, state.onTouchStart, { passive: true, capture: true });
+          AelluxJs2.onEvent(element, INTERACTION_EVENT, state.onInteraction);
+          AelluxJs2.onEvent(element, SNAP_GESTURE_EVENT, state.onSnapGesture);
+          AelluxJs2.onEvent(element, SCROLLBOX_WHEEL_EVENT, state.onScrollboxWheel);
+          AelluxJs2.onEvent(root2, POINTER_UP_EVENT, state.onPointerEnd, true);
+          AelluxJs2.onEvent(root2, POINTER_CANCEL_EVENT, state.onPointerEnd, true);
+          AelluxJs2.onEvent(root2, TOUCH_END_EVENT, state.onTouchEnd, true);
+          AelluxJs2.onEvent(root2, TOUCH_CANCEL_EVENT, state.onTouchEnd, true);
+          AelluxJs2.onEvent(root2, "$blur", state.onBlur);
+          observe(state);
+          configure(state);
+        }
+        function update(element) {
+          const state = states.get(element);
+          if (state) configure(state);
+        }
+        function unmount(element) {
+          var _a, _b;
+          const state = states.get(element);
+          if (!state) return;
+          state.disposed = true;
+          cancelRelease(state);
+          clearTimer(state, "timeout");
+          clearTimer(state, "wheelTimeout");
+          clearTimer(state, "edgeWheelTimeout");
+          (_a = state.observer) == null ? void 0 : _a.disconnect();
+          (_b = state.resizeObserver) == null ? void 0 : _b.disconnect();
+          AelluxJs2.offEvent(element, SCROLL_EVENT, state.onScroll);
+          AelluxJs2.offEvent(element, SCROLL_END_EVENT, state.onScrollEnd);
+          AelluxJs2.offEvent(element, POINTER_DOWN_EVENT, state.onPointerDown, true);
+          AelluxJs2.offEvent(element, TOUCH_START_EVENT, state.onTouchStart, true);
+          AelluxJs2.offEvent(element, INTERACTION_EVENT, state.onInteraction);
+          AelluxJs2.offEvent(element, SNAP_GESTURE_EVENT, state.onSnapGesture);
+          AelluxJs2.offEvent(element, SCROLLBOX_WHEEL_EVENT, state.onScrollboxWheel);
+          AelluxJs2.offEvent(root2, POINTER_UP_EVENT, state.onPointerEnd, true);
+          AelluxJs2.offEvent(root2, POINTER_CANCEL_EVENT, state.onPointerEnd, true);
+          AelluxJs2.offEvent(root2, TOUCH_END_EVENT, state.onTouchEnd, true);
+          AelluxJs2.offEvent(root2, TOUCH_CANCEL_EVENT, state.onTouchEnd, true);
+          AelluxJs2.offEvent(root2, "$blur", state.onBlur);
+          restoreItems(state);
+          element.classList.remove(readyClass, suspendedClass);
+          states.delete(element);
+        }
+        function configure(state) {
+          const nextRoot = elasticRoot(state.element);
+          if (state.root !== nextRoot) {
+            restoreItems(state);
+            state.root = nextRoot;
+            state.index = 0;
+            state.notifiedItem = null;
+            state.notifiedIndex = null;
+          }
+          const items = itemsFor(state);
+          if (state.resizeObserver) {
+            state.resizeObserver.disconnect();
+            state.resizeObserver.observe(state.element);
+            for (const item of items) state.resizeObserver.observe(item);
+          }
+          if (!items.length) {
+            AelluxJs2.diagnostics.error(
+              AelluxJs2.diagnostics.ERROR_SCROLLBOX_SNAP_ITEMS,
+              {
+                extension: extensionName,
+                element: state.element,
+                attribute: itemAttribute,
+                reason: "No eligible snap items belong to this Scrollbox.",
+                suggestion: "Add data-ae-snap-item to content items inside this Scrollbox, outside nested Scrollboxes."
+              }
+            );
+            state.element.classList.remove(readyClass, suspendedClass);
+            return;
+          }
+          state.element.classList.add(readyClass);
+          updateValues(state);
+          if (state.notifiedItem === null) goto(state.element, 0, INSTANT);
+        }
+        function observe(state) {
+          state.observer = new root2.MutationObserver(() => configure(state));
+          state.observer.observe(state.element, {
+            childList: true,
+            subtree: true,
+            attributes: true,
+            attributeFilter: [snapAttribute, itemAttribute, elasticAttribute]
+          });
+          if (root2.ResizeObserver) {
+            state.resizeObserver = new root2.ResizeObserver(() => updateValues(state));
+            state.resizeObserver.observe(state.element);
+          }
+        }
+        function elasticRoot(element) {
+          return Array.from(element.children).find((child) => child.hasAttribute(elasticAttribute)) || element;
+        }
+        function itemsFor(state) {
+          if (!state.root) return [];
+          return Array.from(state.root.querySelectorAll(`[${itemAttribute}]`)).filter((item) => item.closest(`[${scrollboxAttribute}]`) === state.element);
+        }
+        function axisFor(state) {
+          return state.element.getAttribute(snapAttribute) === "vertical" ? VERTICAL : HORIZONTAL;
+        }
+        function alignment(item) {
+          const value = item.getAttribute(itemAttribute);
+          if (value === START || value === "left" || value === "top") return START;
+          if (value === END || value === "right" || value === "bottom") return END;
+          return CENTER;
+        }
+        function offset(state, item, axis = axisFor(state), free, box = state.element.getBoundingClientRect(), target = item.getBoundingClientRect()) {
+          const horizontal = axis === HORIZONTAL;
+          const start = horizontal ? box.left + state.element.clientLeft : box.top + state.element.clientTop;
+          const size = horizontal ? state.element.clientWidth : state.element.clientHeight;
+          const itemStart = horizontal ? target.left : target.top;
+          const itemSize = horizontal ? target.width : target.height;
+          if (free && itemSize > size)
+            return Math.max(itemStart - start, Math.min(itemStart + itemSize - start - size, 0));
+          if (alignment(item) === START) return itemStart - start;
+          if (alignment(item) === END) return itemStart + itemSize - (start + size);
+          return itemStart + itemSize / 2 - (start + size / 2);
+        }
+        function updateValues(state) {
+          if (state.disposed) return;
+          const axis = axisFor(state), element = state.element;
+          const rect = element.getBoundingClientRect();
+          const size = axis === HORIZONTAL ? element.clientWidth : element.clientHeight;
+          if (!size) return;
+          const center = axis === HORIZONTAL ? rect.left + element.clientLeft + size / 2 : rect.top + element.clientTop + size / 2;
+          for (const item of itemsFor(state)) {
+            if (!state.savedItems.has(item)) {
+              state.savedItems.set(item, AelluxJs2.persist.element.save(item, [], properties));
+            }
+            const box = item.getBoundingClientRect();
+            const itemCenter = axis === HORIZONTAL ? box.left + box.width / 2 : box.top + box.height / 2;
+            item.style.setProperty(properties[0], Math.max(-2, Math.min(2, (itemCenter - center) * 2 / size)));
+            item.style.setProperty(properties[1], Math.max(0, 1 - Math.abs(offset(state, item, axis, false, rect, box)) / size));
+          }
+        }
+        function restoreItems(state) {
+          for (const memory of state.savedItems.values()) memory.restore();
+          state.savedItems.clear();
+        }
+        function goto(element, index, behavior = SMOOTH, free) {
+          const state = states.get(element), items = state && itemsFor(state);
+          if (!state || state.activeTouches.size || !Number.isInteger(index) || index < 0 || index >= items.length) return false;
+          const axis = axisFor(state), metrics = metricsFor(element);
+          const position = axis === HORIZONTAL ? element.scrollLeft : element.scrollTop;
+          const destination = Math.max(0, Math.min(
+            metrics[axis],
+            position + offset(state, items[index], axis, free)
+          ));
+          state.index = index;
+          state.target = destination;
+          state.targetAxis = axis;
+          cancelRelease(state);
+          if (state.release && behavior === SMOOTH) animateRelease(state, position, destination, axis);
+          else scrollTo(state, destination, axis, behavior);
+          if (targetReached(state)) {
+            cancelRelease(state);
+            finish(state);
+          }
+          return true;
+        }
+        function scrollTo(state, position, axis, behavior) {
+          state.element.scrollTo(axis === HORIZONTAL ? { left: position, behavior } : { top: position, behavior });
+        }
+        function cancelRelease(state) {
+          if (state.frame !== null) root2.cancelAnimationFrame(state.frame);
+          state.frame = null;
+        }
+        function animateRelease(state, from, to, axis) {
+          const start = root2.performance.now();
+          const step = (time) => {
+            const progress = Math.max(0, Math.min(1, (time - start) / SNAP_RELEASE_MS));
+            scrollTo(state, from + (to - from) * (1 - Math.pow(1 - progress, 3)), axis, INSTANT);
+            if (progress < 1) state.frame = root2.requestAnimationFrame(step);
+            else {
+              cancelRelease(state);
+              finish(state);
+            }
+          };
+          state.frame = root2.requestAnimationFrame(step);
+        }
+        function next(element) {
+          const state = states.get(element);
+          return state ? goto(element, Math.min(itemsFor(state).length - 1, selectedIndex(state) + 1)) : false;
+        }
+        function previous(element) {
+          const state = states.get(element);
+          return state ? goto(element, Math.max(0, selectedIndex(state) - 1)) : false;
+        }
+        function selectedIndex(state, free) {
+          const items = itemsFor(state);
+          const axis = axisFor(state), maximum = metricsFor(state.element)[axis];
+          const position = axis === HORIZONTAL ? state.element.scrollLeft : state.element.scrollTop;
+          if (items.length > 1) {
+            if (position <= 1) return 0;
+            if (maximum > 0 && position >= maximum - 1) return items.length - 1;
+          }
+          let nearest = 0, distance = Infinity;
+          for (let index = 0; index < items.length; index++) {
+            const candidate = Math.abs(Math.max(0, Math.min(
+              maximum,
+              position + offset(state, items[index], axis, free)
+            )) - position);
+            if (candidate < distance) {
+              nearest = index;
+              distance = candidate;
+            }
+          }
+          return nearest;
+        }
+        function handleWheel(state, event) {
+          if (!event || event.ctrlKey || !event.cancelable || event.defaultPrevented || event.target.closest(`[${scrollboxAttribute}]`) !== state.element) return false;
+          const axis = axisFor(state), horizontal = Math.abs(event.deltaX) > Math.abs(event.deltaY);
+          if (axis === HORIZONTAL && !horizontal && state.element.getAttribute(wheelAttribute) === FALSE) return false;
+          const delta = axis === HORIZONTAL ? horizontal ? event.deltaX : event.deltaY : horizontal ? 0 : event.deltaY;
+          if (!delta) return false;
+          const items = itemsFor(state), index = state.target !== null ? state.index : selectedIndex(state);
+          if (!items.length) return false;
+          const nextIndex = index + Math.sign(delta);
+          if (nextIndex < 0 || nextIndex >= items.length) {
+            if (state.target !== null && !targetReached(state)) {
+              event.preventDefault();
+              return true;
+            }
+            const behavior = root2.getComputedStyle(state.element)[axis === HORIZONTAL ? "overscrollBehaviorX" : "overscrollBehaviorY"];
+            if (behavior === "contain" || behavior === "none") {
+              event.preventDefault();
+              return true;
+            }
+            setSuspension(state, { reason: "wheel-edge", active: true });
+            clearTimer(state, "edgeWheelTimeout");
+            state.edgeWheelTimeout = root2.setTimeout(() => {
+              state.edgeWheelTimeout = null;
+              setSuspension(state, { reason: "wheel-edge", active: false });
+            }, SNAP_SCROLL_IDLE_MS);
+            return false;
+          }
+          event.preventDefault();
+          if (state.wheelTimeout !== null) return true;
+          state.wheelTimeout = root2.setTimeout(() => {
+            state.wheelTimeout = null;
+          }, SNAP_SCROLL_IDLE_MS);
+          goto(state.element, nextIndex);
+          return true;
+        }
+        function setSuspension(state, detail) {
+          if (!detail || !detail.reason) return;
+          if (detail.active) state.suspensions.add(detail.reason);
+          else state.suspensions.delete(detail.reason);
+          state.element.classList.toggle(suspendedClass, state.suspensions.size > 0);
+          if (!detail.active) {
+            settlePointer(state);
+            if (!state.suspensions.size) scheduleSettle(state);
+          }
+        }
+        function handlePointerScroll(state, event) {
+          var _a;
+          const detail = event.detail;
+          if (!detail || detail.axis !== axisFor(state)) return;
+          const items = itemsFor(state);
+          if (!items.length) return;
+          if (detail.phase === "start" || detail.phase === "probe") {
+            state.pointerScroll = { axis: detail.axis, index: selectedIndex(state) };
+            if (detail.phase === "start") state.flick = null;
+            else event.preventDefault();
+            return;
+          }
+          if (detail.phase !== "end") return;
+          const start = ((_a = state.pointerScroll) == null ? void 0 : _a.axis) === detail.axis ? state.pointerScroll.index : selectedIndex(state);
+          state.pointerScroll = null;
+          const flick = isFlick(detail);
+          if (!detail.moved && !flick) return;
+          event.preventDefault();
+          if (!flick) return;
+          const distance = detail.axis === HORIZONTAL ? detail.startX - detail.lastX : detail.startY - detail.lastY;
+          const index = Math.max(0, Math.min(
+            items.length - 1,
+            start + Math.sign(distance)
+          ));
+          if (index !== start) state.flick = index;
+        }
+        function isFlick(detail) {
+          const distance = detail.axis === HORIZONTAL ? detail.startX - detail.lastX : detail.startY - detail.lastY;
+          const elapsed = Math.max(1, detail.endTime - detail.startTime);
+          return elapsed <= SNAP_FLICK_WINDOW_MS && Math.abs(distance) > SNAP_FLICK_MIN_DISTANCE_PX && Math.abs(distance) < SNAP_FLICK_MAX_DISTANCE_PX && (elapsed <= SNAP_FLICK_FAST_TIME_MS || Math.abs(distance) / elapsed >= SNAP_SWIPE_SPEED_PX_MS);
+        }
+        function beginGesture(state, kind, event) {
+          const active = kind === POINTER ? state.activePointers : state.activeTouches;
+          if (kind === POINTER) active.add(event.pointerId);
+          else for (const touch of event.changedTouches) active.add(touch.identifier);
+          state.target = null;
+          state.release = false;
+          cancelRelease(state);
+          state.pointerScroll = null;
+          state.flick = null;
+          clearTimer(state, "timeout");
+          if (kind === POINTER && event.pointerType !== TOUCH) {
+            const element = state.element, left = element.scrollLeft, top = element.scrollTop;
+            setSuspension(state, { reason: GESTURE, active: true });
+            element.scrollTo({
+              left: left > 0 ? left - 1 : 1,
+              top: top > 0 ? top - 1 : 1,
+              behavior: INSTANT
+            });
+            element.scrollTo({ left, top, behavior: INSTANT });
+          } else setSuspension(state, { reason: GESTURE, active: false });
+        }
+        function endGesture(state, kind, event) {
+          const active = kind === POINTER ? state.activePointers : state.activeTouches;
+          if (kind === POINTER) active.delete(event.pointerId);
+          else for (const touch of event.changedTouches) active.delete(touch.identifier);
+          if (!hasActiveGesture(state)) endDesktopGesture(state);
+        }
+        function hasActiveGesture(state) {
+          return state.activePointers.size || state.activeTouches.size;
+        }
+        function endDesktopGesture(state) {
+          if (!state.suspensions.has(GESTURE)) {
+            scheduleSettle(state);
+            return;
+          }
+          state.release = true;
+          root2.setTimeout(() => settlePointer(state), 0);
+        }
+        function settlePointer(state) {
+          if (state.disposed || !releaseReady(state) || state.target !== null || hasActiveGesture(state)) return;
+          const flick = state.flick;
+          state.flick = null;
+          goto(
+            state.element,
+            flick !== null ? flick : selectedIndex(state, true),
+            AelluxJs2.currentPreference("reduced-motion") === "reduced" ? INSTANT : SMOOTH,
+            flick === null
+          );
+        }
+        function releaseReady(state) {
+          return state.release && state.suspensions.size === 1;
+        }
+        function scheduleSettle(state, target) {
+          if (!target && (hasActiveGesture(state) || state.suspensions.size && !state.release)) return;
+          clearTimer(state, "timeout");
+          state.timeout = root2.setTimeout(() => finish(state), target ? SNAP_TARGET_IDLE_MS : SNAP_SCROLL_IDLE_MS);
+        }
+        function finish(state) {
+          if (state.disposed || state.frame !== null || hasActiveGesture(state)) return;
+          if (state.suspensions.size) {
+            if (!releaseReady(state) || !targetReached(state)) return;
+            state.release = false;
+            setSuspension(state, { reason: GESTURE, active: false });
+          }
+          clearTimer(state, "timeout");
+          cancelRelease(state);
+          state.target = null;
+          const items = itemsFor(state), index = selectedIndex(state), item = items[index];
+          if (!item || state.notifiedItem === item && state.notifiedIndex === index) return;
+          const previousIndex = state.notifiedIndex;
+          state.index = index;
+          state.notifiedItem = item;
+          state.notifiedIndex = index;
+          AelluxJs2.dispatchFrom(state.element, "ScrollboxSnapChange", {
+            detail: { item, index, previousIndex, axis: axisFor(state) }
+          });
+        }
+        function targetReached(state) {
+          if (state.target === null) return false;
+          const position = state.targetAxis === HORIZONTAL ? state.element.scrollLeft : state.element.scrollTop;
+          return Math.abs(position - state.target) <= 1;
+        }
+        function clearTimer(state, name) {
+          if (state[name] !== null) root2.clearTimeout(state[name]);
+          state[name] = null;
+        }
+        function metricsFor(element) {
+          return {
+            x: Math.max(0, element.scrollWidth - element.clientWidth),
+            y: Math.max(0, element.scrollHeight - element.clientHeight)
           };
         }
       })(typeof globalThis !== "undefined" ? globalThis : window);
@@ -4303,8 +7056,28 @@
     return null;
   }
 
+  // src/internal/report-configuration.js
+  /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+  function reportConfiguration(api, name, context) {
+    if (context.element && context.attribute && !("value" in context))
+      context.value = context.element.getAttribute(context.attribute);
+    return api.diagnostics.warn(api.diagnostics[name], context);
+  }
+  function diagnosePresentTarget(api, element, target, attribute, value) {
+    if (!value || /[\s#]/.test(value.replace(/^#/, ""))) return false;
+    if (target && target.hasAttribute(api.attr("present"))) return true;
+    reportConfiguration(api, "WARN_CONFIGURATION_TARGET", {
+      extension: "present",
+      element,
+      attribute,
+      value,
+      reason: target ? "Target is not a Present container." : "Target element was not found.",
+      suggestion: "Use one existing Present element ID, optionally prefixed with #, and mount it before interacting."
+    });
+    return false;
+  }
+
   // src/internal/validate-declarations.js
-  init_report_configuration();
   init_utils_name_case();
 
   // src/internal/diagnose-resources.js
@@ -4656,8 +7429,109 @@
     return edits + Number(i < left.length || j < right.length) === 1;
   }
 
+  // src/internal/find-duplicate-attributes.js
+  /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+  function findDuplicateAttributes(html) {
+    const duplicates = [];
+    const space = /[\t\n\f\r ]/;
+    const lower = (text) => text.replace(/[A-Z]/g, (char) => char.toLowerCase());
+    let index = 0, lineIndex = 0, line = 1, column = 1;
+    while ((index = html.indexOf("<", index)) !== -1) {
+      if (html.startsWith("<!--", index)) {
+        const end = /--!?>/.exec(html.slice(index + 4));
+        index = end ? index + 4 + end.index + end[0].length : html.length;
+        continue;
+      }
+      if (html.startsWith("<![CDATA[", index)) {
+        const end = html.indexOf("]]>", index + 9);
+        index = end < 0 ? html.length : end + 3;
+        continue;
+      }
+      if (/[!?/]/.test(html[index + 1] || "")) {
+        const end = html.indexOf(">", index + 2);
+        index = end < 0 ? html.length : end + 1;
+        continue;
+      }
+      if (!/[a-z]/i.test(html[index + 1] || "")) {
+        index++;
+        continue;
+      }
+      const tagStart = ++index;
+      while (index < html.length && !space.test(html[index]) && !/[/>]/.test(html[index])) index++;
+      const tagName = lower(html.slice(tagStart, index));
+      const attributes = /* @__PURE__ */ new Map();
+      while (index < html.length && html[index] !== ">") {
+        if (space.test(html[index]) || html[index] === "/") {
+          index++;
+          continue;
+        }
+        const offset = index++;
+        while (index < html.length && !space.test(html[index]) && !/[=/>]/.test(html[index])) index++;
+        const attribute = lower(html.slice(offset, index).replace(/\0/g, "\uFFFD"));
+        while (space.test(html[index] || "")) index++;
+        let value = "";
+        if (html[index] === "=") {
+          index++;
+          while (space.test(html[index] || "")) index++;
+          const quote = html[index];
+          if (quote === '"' || quote === "'") {
+            const start = ++index;
+            while (index < html.length && html[index] !== quote) index++;
+            value = html.slice(start, index);
+            if (index < html.length) index++;
+          } else {
+            const start = index;
+            while (index < html.length && !space.test(html[index]) && html[index] !== ">") index++;
+            value = html.slice(start, index);
+          }
+        }
+        const previous = attributes.get(attribute);
+        if (previous) {
+          previous.values.push(value);
+          if (!previous.duplicate) {
+            while (lineIndex < offset) {
+              const char = html[lineIndex++];
+              if (char === "\r" || char === "\n" && html[lineIndex - 2] !== "\r") {
+                line++;
+                column = 1;
+              } else if (char !== "\n") column++;
+            }
+            previous.duplicate = { tagName, attribute, value: previous.values[0], values: previous.values, offset, line, column };
+          }
+        } else attributes.set(attribute, { values: [value] });
+      }
+      if (index >= html.length) break;
+      for (const attribute of attributes.values())
+        if (attribute.duplicate) duplicates.push(attribute.duplicate);
+      index++;
+      if (tagName === "plaintext") break;
+      if (/^(script|style|textarea|title|xmp|iframe|noembed|noframes|noscript)$/.test(tagName)) {
+        const closing = new RegExp(`</${tagName}(?=[\\t\\n\\f\\r />])`, "ig");
+        closing.lastIndex = index;
+        const end = closing.exec(html);
+        index = end ? end.index : html.length;
+      }
+    }
+    return duplicates;
+  }
+
+  // src/internal/validate-html-source.js
+  /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+  function validateHTMLSource(api, html, source) {
+    if (api.options.environment !== "development") return;
+    for (const duplicate of findDuplicateAttributes(html)) {
+      const { attribute } = duplicate;
+      reportConfiguration(api, "WARN_ATTRIBUTE_DUPLICATE", __spreadProps(__spreadValues({
+        extension: "core",
+        source
+      }, duplicate), {
+        reason: `The ${attribute} attribute occurs more than once on the same start tag; the HTML parser keeps the first value and discards the others.`,
+        suggestion: attribute === "class" ? "Combine all class names in one class attribute, separated by spaces." : attribute === "style" ? "Combine the intended CSS declarations in one style attribute, separated by semicolons." : `Keep one ${attribute} attribute with the intended value.`
+      }));
+    }
+  }
+
   // src/internal/create-mount-helper.js
-  init_validate_html_source();
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   function createMountHelper(root2, mountMaps, mountedElements, elementControllers) {
     const UNMOUNT = "unmount";
@@ -4721,7 +7595,7 @@
         }
         const waitExtensions = [];
         for (const [key, options] of Object.entries(root2.AelluxJs.registry.ext)) {
-          if (options.loadWhen) continue;
+          if (options.load === false) continue;
           waitExtensions.push(AelluxJs2.wait(key));
         }
         await Promise.all(waitExtensions);
@@ -5876,6 +8750,27 @@
 
   // src/aellux.orchestrator.js
   init_utils_name_case();
+
+  // src/official-extension-definitions.js
+  /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+  var officialExtensionDefinitions = Object.freeze([
+    Object.freeze({ name: "preference", style: false, dependencies: Object.freeze([]) }),
+    Object.freeze({ name: "state-navigation", style: false, dependencies: Object.freeze([]) }),
+    Object.freeze({ name: "feedback", style: true, dependencies: Object.freeze([]) }),
+    Object.freeze({ name: "focus", style: false, dependencies: Object.freeze([]) }),
+    Object.freeze({ name: "dialog", experimental: true, style: false, dependencies: Object.freeze([]) }),
+    Object.freeze({ name: "pwa", experimental: true, style: false, dependencies: Object.freeze([]) }),
+    Object.freeze({ name: "point", style: false, dependencies: Object.freeze([]) }),
+    Object.freeze({ name: "anchor", style: true, dependencies: Object.freeze([]) }),
+    Object.freeze({ name: "overflow-marquee", style: true, dependencies: Object.freeze([]) }),
+    Object.freeze({ name: "ajax-href", experimental: true, style: false, dependencies: Object.freeze([]) }),
+    Object.freeze({ name: "scrollbox", style: true, dependencies: Object.freeze([]) }),
+    Object.freeze({ name: "scrollbox-snap", style: false, dependencies: Object.freeze([]) }),
+    Object.freeze({ name: "adaptive", style: true, dependencies: Object.freeze([]) }),
+    Object.freeze({ name: "present", style: true, dependencies: Object.freeze([]) })
+  ]);
+
+  // src/aellux.orchestrator.js
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   (function(root2) {
     "use strict";
@@ -5973,6 +8868,23 @@
       }
     );
     root2[root2.AelluxJs.shortJSName] = root2.AelluxJs;
+    registerCoreExtensions();
+    function registerCoreExtensions() {
+      const api = root2.AelluxJs;
+      const attr = (name) => `[${api.attr(name)}]`;
+      for (const { name } of officialExtensionDefinitions) {
+        const key = toCamelCase2(name);
+        if (key in api.registry.ext) continue;
+        let loadWhen = name === "dialog" ? "dialog" : attr(name);
+        if (name === "ajax-href") loadWhen = "a" + loadWhen;
+        if (name === "present") {
+          loadWhen = ["present", "present-group", "trigger", "dismiss", "target"].map(attr).join(",");
+        }
+        if (name === "state-navigation" || api.options.mode === "full" && name === "preference") loadWhen = null;
+        api.ext(name, { loadWhen, load: api.options.mode === "full" });
+        api.registry.ext[key].automatic = true;
+      }
+    }
     async function destroyExtensions(extensionNames, onUnmounted) {
       if (typeof extensionNames === "string") extensionNames = [extensionNames];
       if (!extensionNames) extensionNames = Object.keys(AelluxJs.registry.ext);
@@ -6021,6 +8933,7 @@
           { extension: extensionName }
         ));
       }
+      AelluxJs.registry.ext[key].automatic = false;
       if (AelluxJs.ext[key]) {
         if (AelluxJs.ext[key].initialized) {
           extensionPromises[key] = Promise.resolve(AelluxJs.ext[key]);
@@ -6458,23 +9371,11 @@
     "focus": () => Promise.resolve().then(() => (init_aellux_ext_focus(), aellux_ext_focus_exports)),
     "point": () => Promise.resolve().then(() => (init_aellux_ext_point(), aellux_ext_point_exports)),
     "anchor": () => Promise.resolve().then(() => (init_aellux_ext_anchor(), aellux_ext_anchor_exports)),
-    "ajaxHref": () => Promise.resolve().then(() => (init_aellux_ext_ajax_href(), aellux_ext_ajax_href_exports)),
+    "overflowMarquee": () => Promise.resolve().then(() => (init_aellux_ext_overflow_marquee(), aellux_ext_overflow_marquee_exports)),
+    "scrollbox": () => Promise.resolve().then(() => (init_aellux_ext_scrollbox(), aellux_ext_scrollbox_exports)),
+    "scrollboxSnap": () => Promise.resolve().then(() => (init_aellux_ext_scrollbox_snap(), aellux_ext_scrollbox_snap_exports)),
     "adaptive": () => Promise.resolve().then(() => (init_aellux_ext_adaptive(), aellux_ext_adaptive_exports)),
     "present": () => Promise.resolve().then(() => (init_aellux_ext_present(), aellux_ext_present_exports))
   });
-  root.AelluxJs.ext("adaptive", { loadWhen: "[data-ae-adaptive]" });
-  root.AelluxJs.ext("anchor", { loadWhen: "[data-ae-anchor]" });
-  root.AelluxJs.ext("overflow-marquee", { loadWhen: "[data-ae-overflow-marquee]" });
-  root.AelluxJs.ext("ajax-href", { loadWhen: "a[data-ae-ajax-href]" });
-  root.AelluxJs.ext("feedback", { loadWhen: "[data-ae-feedback]" });
-  root.AelluxJs.ext("focus", { loadWhen: "[data-ae-focus]" });
-  root.AelluxJs.ext("dialog", { loadWhen: "dialog" });
-  root.AelluxJs.ext("pwa", { loadWhen: "[data-ae-pwa]" });
-  root.AelluxJs.ext("point", { loadWhen: "[data-ae-point]" });
-  root.AelluxJs.ext("present", {
-    loadWhen: "[data-ae-present],[data-ae-present-group],[data-ae-trigger],[data-ae-dismiss],[data-ae-target]"
-  });
-  root.AelluxJs.ext("scrollbox", { loadWhen: "[data-ae-scrollbox]" });
-  root.AelluxJs.ext("scrollbox-snap", { loadWhen: "[data-ae-scrollbox-snap]" });
 })();
 //# sourceMappingURL=aellux.full.js.map

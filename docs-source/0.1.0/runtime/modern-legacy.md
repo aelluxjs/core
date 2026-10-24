@@ -20,7 +20,7 @@ When required capabilities are unavailable, or the Modern runtime fails to load,
 
 The build transpiles the Modern orchestrator and each core Extension into ES5-syntax Legacy variants. Both Legacy runtime files install the Core polyfills before starting the runtime. Individually loaded Extensions reuse that environment and therefore do not duplicate those polyfills in each generated file.
 
-[PWA](../core-extensions/pwa.md) remains external and lazy in both Full variants. Its Legacy Extension detects missing installation and worker APIs without polyfilling them. The independent classic `aellux.pwa.sw.js` runs only in browsers supporting Service Workers; it is never imported into either page runtime.
+[PWA](../core-extensions/experimental/pwa.md) remains external and lazy in both Full variants. Its Legacy Extension detects missing installation and worker APIs without polyfilling them. The independent classic `aellux.pwa.sw.js` runs only in browsers supporting Service Workers; it is never imported into either page runtime.
 
 For `0.1.0`, automated validation forces this profile in the same current Chromium, Firefox, and WebKit engines used by the Modern suite. It verifies boot selection, the Legacy orchestrator, shared polyfill setup, and compatible Extension variants. The release does not claim support for historical Chrome, Firefox, Safari, Edge Legacy, or Internet Explorer versions. A historical browser enters the support matrix only after a separate run on that exact browser and operating system.
 
@@ -28,7 +28,7 @@ For `0.1.0`, automated validation forces this profile in the same current Chromi
 
 The boot script checks the capabilities required by the orchestrator before loading it. Missing capabilities are recorded in `AelluxJs.diagnostics.notAvailable`.
 
-The required APIs include `HTMLDialogElement.prototype.show`, `showModal`, and `close`. If any are missing, Legacy is selected. The fallback and its inline CSS belong exclusively to the [Dialog Extension](../core-extensions/dialog.md) Legacy files, and are installed only when that Extension mounts an element lacking the complete API. Full registers Dialog on demand for `dialog`; Basic requires explicit registration. Existing and dynamically inserted dialogs are registered through `$ae.mount(root)`; see [ES5 support level](es5-support.md) for usage and fallback limitations.
+The required APIs include `HTMLDialogElement.prototype.show`, `showModal`, and `close`. If any are missing, Legacy is selected. The fallback and its inline CSS belong exclusively to the [Dialog Extension](../core-extensions/experimental/dialog.md) Legacy files, and are installed only when that Extension mounts an element lacking the complete API. Full and Basic register Dialog on demand for `dialog`. Existing and dynamically inserted dialogs are registered through `$ae.mount(root)`; see [ES5 support level](es5-support.md) for usage and fallback limitations.
 
 Force Legacy through initialization options or the development query parameter:
 

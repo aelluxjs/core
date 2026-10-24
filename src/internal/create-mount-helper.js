@@ -80,7 +80,7 @@ export function createMountHelper(root, mountMaps, mountedElements, elementContr
       const waitExtensions = [];
       for (const [key, options] of
         Object.entries(root.AelluxJs.registry.ext)) {
-        if (options.loadWhen) continue;
+        if (options.load === false) continue;
         waitExtensions.push(AelluxJs.wait(key));
       }
       await Promise.all(waitExtensions);

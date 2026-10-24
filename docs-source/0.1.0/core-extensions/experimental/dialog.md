@@ -4,9 +4,9 @@ Dialog mounts native `<dialog>` elements without requiring `data-ae-dialog`. It 
 
 ## Loading and mounting
 
-In Full mode, mounting a subtree containing `<dialog>` loads the compatible Dialog Extension on demand. Pages without dialogs do not request its script. The implementation is separate from `bundledExtensions`, like Scrollbox.
+In Full and Basic modes, mounting a subtree containing `<dialog>` loads the compatible Experimental Dialog Extension on demand. Pages without dialogs do not request its script. Its implementation stays outside the Full bundle.
 
-In Basic mode, register Dialog explicitly before initialization:
+Both modes register Dialog automatically:
 
 ```html
 <dialog id="example" aria-labelledby="example-title">
@@ -15,12 +15,11 @@ In Basic mode, register Dialog explicitly before initialization:
 </dialog>
 <script src="./dist/aellux.js"></script>
 <script>
-  $ae.ext("dialog");
   $ae.init({ mode: "basic" });
 </script>
 ```
 
-`$ae.ext("dialog", { loadWhen: "dialog" })` also supports explicit lazy registration in Basic. Missing dialog methods still select the Legacy runtime, but Basic does not install a fallback until Dialog is registered and mounted.
+Explicit registration can customize loading. Missing dialog methods still select the Legacy runtime, but the fallback is installed only when a dialog is mounted.
 
 Await the initial `Ready` event or an explicit mount before using controllers. With `skipGlobalMount: true`, mount the desired element or subtree yourself. Dynamic dialogs use the same lifecycle:
 
@@ -58,4 +57,4 @@ Repeated mounts do not duplicate controllers or polyfill registrations. Unmount 
 
 The fallback supports `show()`, `showModal()`, `close()`, `returnValue`, Escape/cancel and `<form method="dialog">`. It cannot reproduce the native top layer. Place modal dialogs directly under `<body>` where possible because ancestor stacking contexts can obscure a polyfilled modal. Style both `dialog::backdrop` and `dialog + .backdrop` for backdrop customization. See the [upstream limitations](https://github.com/GoogleChrome/dialog-polyfill#limitations).
 
-Consumers provide accessible names, appropriate content and usable controls. The Legacy syntax target does not establish support for untested historical browsers; see [ES5 support](../runtime/es5-support.md). Third-party BSD-3-Clause notices ship with the Legacy Dialog artifact and in the distribution license files.
+Consumers provide accessible names, appropriate content and usable controls. The Legacy syntax target does not establish support for untested historical browsers; see [ES5 support](../../runtime/es5-support.md). Third-party BSD-3-Clause notices ship with the Legacy Dialog artifact and in the distribution license files.

@@ -17,6 +17,7 @@ import { createAriaHelper } from "./internal/create-aria-helper.js";
 import { createCssMotionController } from "./internal/create-css-motion-controller.js";
 import { ease } from "./internal/ease.js";
 import utilsNameCase from "./internal/utils-name-case.js";
+import { officialExtensionDefinitions } from "./official-extension-definitions.js";
 
 (function (root) {
   "use strict";
@@ -124,6 +125,28 @@ import utilsNameCase from "./internal/utils-name-case.js";
     });
 
   root[root.AelluxJs.shortJSName] = root.AelluxJs;
+  // Publish defaults before the boot script dispatches Awake/Legacy.
+  registerCoreExtensions();
+
+  function registerCoreExtensions() {
+    const api = root.AelluxJs;
+    const attr = name => `[${api.attr(name)}]`;
+    for (const { name } of officialExtensionDefinitions) {
+      const key = toCamelCase(name);
+      if (key in api.registry.ext) continue;
+      let loadWhen = name === "dialog" ? "dialog" : attr(name);
+      if (name === "ajax-href") loadWhen = "a" + loadWhen;
+      if (name === "present") {
+        loadWhen = ["present", "present-group", "trigger", "dismiss", "target"].map(attr).join(",");
+      }
+      // State Navigation has an event/API contract rather than a DOM selector.
+      // Full retains its foundational startup; Basic loads it via wait/dependencies.
+      if (name === "state-navigation" ||
+          (api.options.mode === "full" && name === "preference")) loadWhen = null;
+      api.ext(name, { loadWhen, load: api.options.mode === "full" });
+      api.registry.ext[key].automatic = true;
+    }
+  }
 
   async function destroyExtensions(extensionNames, onUnmounted) {
     if (typeof extensionNames === "string") extensionNames = [extensionNames];
@@ -178,6 +201,8 @@ import utilsNameCase from "./internal/utils-name-case.js";
         { extension: extensionName }
       ));
     }
+
+    AelluxJs.registry.ext[key].automatic = false;
 
     if (AelluxJs.ext[key]) {
       if (AelluxJs.ext[key].initialized) {

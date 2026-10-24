@@ -195,7 +195,7 @@ The Legacy orchestrator provides these compatibility layers once for all Extensi
 - `Element.prototype.matches`; and
 - `NodeList.prototype.forEach`.
 
-The Core does not guarantee every browser or application API. Dialog compatibility belongs to the official [Dialog Extension](../core-extensions/dialog.md), which bundles its fallback in its Legacy files and mounts before ordinary consumers. If an Extension requires another capability, such as `WebSocket`, Web Components, a Canvas API, extra `Intl` locale data, or a third-party package, it must feature-detect that dependency and bundle or load its own fallback. Additional polyfills should avoid replacing a native implementation when one is already available.
+The Core does not guarantee every browser or application API. Dialog compatibility belongs to the official [Dialog Extension](../core-extensions/experimental/dialog.md), which bundles its fallback in its Legacy files and mounts before ordinary consumers. If an Extension requires another capability, such as `WebSocket`, Web Components, a Canvas API, extra `Intl` locale data, or a third-party package, it must feature-detect that dependency and bundle or load its own fallback. Additional polyfills should avoid replacing a native implementation when one is already available.
 
 Transpilation only changes syntax. It does not create missing browser APIs, so an Extension is not Legacy-compatible until both its syntax and runtime dependencies are covered.
 

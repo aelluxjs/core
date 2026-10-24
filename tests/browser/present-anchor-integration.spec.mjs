@@ -317,8 +317,9 @@ test("Anchor initialized before Present recovers when the group mounts", async (
   await page.goto("/tests/index.htm");
   await page.evaluate(html => { document.body.innerHTML = html; }, groupFixture);
   await page.addScriptTag({ url: "/dist/aellux.js" });
-  await page.evaluate(() => { AelluxJs.ext("anchor", { loadStyle: true }); AelluxJs.init({ mode: "basic" }); });
-  await expect.poll(() => page.evaluate(() => !!AelluxJs.ext.anchor?.initialized)).toBe(true);
+  await page.evaluate(() => { AelluxJs.ext("anchor", { loadStyle: true }); AelluxJs.init({ mode: "basic", skipGlobalMount: true }); });
+  await expect.poll(() => page.evaluate(() => AelluxJs.diagnostics.supported)).toBe(true);
+  await page.evaluate(() => AelluxJs.wait("anchor"));
   await page.evaluate(() => AelluxJs.mount(document, "anchor"));
   await expect(page.locator("#indicator")).not.toHaveClass(/ae--anchored/);
   await page.evaluate(async () => {

@@ -521,22 +521,8 @@
                                     class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                     style="flex:0">
                                     <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
-                                      href="/core/docs/0.1.0/core-extensions/ajax-href.htm" data-ae-overflow-marquee="190px">
-                                      Ajax Href                                    </a>
-                                  </div>
-                                                                                                                                      <div
-                                    class="nav-item mt-1 small-md rounded-1 ps-md-1"
-                                    style="flex:0">
-                                    <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                       href="/core/docs/0.1.0/core-extensions/anchor.htm" data-ae-overflow-marquee="190px">
                                       Anchor                                    </a>
-                                  </div>
-                                                                                                                                      <div
-                                    class="nav-item mt-1 small-md rounded-1 ps-md-1"
-                                    style="flex:0">
-                                    <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
-                                      href="/core/docs/0.1.0/core-extensions/dialog.htm" data-ae-overflow-marquee="190px">
-                                      Dialog                                    </a>
                                   </div>
                                                                                                                                       <div
                                     class="nav-item mt-1 small-md rounded-1 ps-md-1"
@@ -565,13 +551,6 @@
                                     <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                       href="/core/docs/0.1.0/core-extensions/point.htm" data-ae-overflow-marquee="190px">
                                       Point                                    </a>
-                                  </div>
-                                                                                                                                      <div
-                                    class="nav-item mt-1 small-md rounded-1 ps-md-1"
-                                    style="flex:0">
-                                    <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
-                                      href="/core/docs/0.1.0/core-extensions/pwa.htm" data-ae-overflow-marquee="190px">
-                                      PWA                                    </a>
                                   </div>
                                                                                                                                       <div
                                     class="nav-item mt-1 small-md rounded-1 ps-md-1"
@@ -608,7 +587,46 @@
                                       href="/core/docs/0.1.0/core-extensions/state-navigation.htm" data-ae-overflow-marquee="190px">
                                       State Navigation                                    </a>
                                   </div>
-                                                                                                </div>
+
+                                <div class="nav-item mt-1 small-md fw-bold rounded-1 ps-md-1 bg-light-adaptive"
+                                  style="flex:0">
+                                  <button type="button"
+                                    class="nav-link text-start text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                    data-ae-trigger="toggle" data-ae-target="#children2-experimental">
+                                    Experimental                                      <span class="chevron"><svg
+                                            class="svg-icon small" aria-hidden="true" focusable="false">
+                                            <use href="#bi-chevron-right"></use>
+                                          </svg></span>
+                                                                          </button>
+                                </div>
+
+                                <div id="children2-experimental" class="docs-menu-panel border-start ms-2"
+                                  data-ae-present="height opacity" data-ae-unpop-on-outside="false"                                   hidden>
+                                    <div class="ps-2 gap-1 d-flex flex-column overflow-hidden" data-ae-present-motion>
+                                                                              <div
+                                          class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                          style="flex:0">
+                                          <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                            href="/core/docs/0.1.0/core-extensions/experimental/ajax-href.htm" data-ae-overflow-marquee="190px">
+                                            Ajax Href                                          </a>
+                                        </div>
+                                                                                <div
+                                          class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                          style="flex:0">
+                                          <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                            href="/core/docs/0.1.0/core-extensions/experimental/dialog.htm" data-ae-overflow-marquee="190px">
+                                            Dialog                                          </a>
+                                        </div>
+                                                                                <div
+                                          class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                          style="flex:0">
+                                          <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                            href="/core/docs/0.1.0/core-extensions/experimental/pwa.htm" data-ae-overflow-marquee="190px">
+                                            PWA                                          </a>
+                                        </div>
+                                                                            </div>
+                                </div>
+                                                                                              </div>
                       </div>
                                                                   <div class="nav-item mt-1 small-md fw-bold rounded-1 ps-md-1 bg-light-adaptive" style="flex:0">
                       <button data-ae-point type="button"
@@ -739,7 +757,7 @@
 <li><code>NodeList.prototype.forEach</code>.</li>
 </ul>
 <p>The generated Legacy Extensions do not embed these shared dependencies again. They are loaded after, and share the environment prepared by, the Legacy orchestrator. Extension-specific compatibility belongs to the corresponding Extension.</p>
-<p><code>&lt;dialog&gt;</code> is the standard element for Aellux modal interfaces. Missing dialog methods select the Legacy runtime automatically, but the runtime does not install the fallback globally. The official <a href="../core-extensions/dialog.htm">Dialog Extension</a> embeds <code>dialog-polyfill</code> and its CSS exclusively in its Legacy files. Full loads it on demand for <code>dialog</code>; Basic requires <code>$ae.ext(&quot;dialog&quot;)</code>. Registration occurs during Dialog mounting, before its controllers become available. Await mounting before calling dialog methods; with <code>skipGlobalMount: true</code>, explicitly mount the desired subtree. Native dialog implementations are preserved, including when Legacy is forced.</p>
+<p><code>&lt;dialog&gt;</code> is the standard element for Aellux modal interfaces. Missing dialog methods select the Legacy runtime automatically, but the runtime does not install the fallback globally. The official <a href="../core-extensions/experimental/dialog.htm">Dialog Extension</a> embeds <code>dialog-polyfill</code> and its CSS exclusively in its Legacy files. Full loads it on demand for <code>dialog</code>; Basic requires <code>$ae.ext(&quot;dialog&quot;)</code>. Registration occurs during Dialog mounting, before its controllers become available. Await mounting before calling dialog methods; with <code>skipGlobalMount: true</code>, explicitly mount the desired subtree. Native dialog implementations are preserved, including when Legacy is forced.</p>
 <p>The fallback implements the established dialog API, not newer features such as <code>requestClose()</code> or <code>closedby</code>. Place modal dialogs directly under <code>&lt;body&gt;</code> where possible: unlike the native top layer, the fallback is subject to ancestor stacking contexts. Style both <code>dialog::backdrop</code> and <code>dialog + .backdrop</code> when customizing the backdrop. See the <a href="https://github.com/GoogleChrome/dialog-polyfill#limitations">upstream limitations</a>.</p>
 <p>Third-party Extensions may rely on this list only while running under the aellux.js Legacy runtime. Any additional API must be feature-detected and included by the Extension&#39;s own build or loaded as an explicit dependency. Babel or another transpiler can produce ES5 syntax, but does not automatically provide missing browser APIs.</p>
 <p>Browser primitives such as the DOM, <code>XMLHttpRequest</code> and <code>DOMParser</code> are still expected from the host environment. For <code>0.1.0</code>, the Legacy contract covers the ES5 output, runtime selection and fallback, shared polyfill installation, and generated Extension variants when exercised in the current tested browser engines. It does not declare compatibility with any historical browser version. ES5 syntax must therefore not be interpreted as unrestricted support for old browsers.</p>

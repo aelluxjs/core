@@ -651,7 +651,8 @@ function createAelluxApi(root2, constants) {
       var key = toCamelCase2(name);
       var url = nameOrUrl;
       var implicit = url === api.extName(nameOrUrl);
-      if (key in api.registry.ext) {
+      var previous = api.registry.ext[key];
+      if (previous && (!previous.automatic || previous.state !== "wait")) {
         diagnostics.error(diagnostics.ERROR_EXTENSION_DUPLICATE, { extension: name });
         return;
       }
@@ -683,10 +684,11 @@ function createAelluxApi(root2, constants) {
       if (!options2.loadWhen) options2.loadWhen = null;
       options2.builds = normalizeExtensionBuilds(options2.builds);
       options2.explicitBuilds = explicitBuilds;
+      delete api.registry.lazyExtSelectors[key];
       if (options2.loadWhen) api.registry.lazyExtSelectors[key] = options2.loadWhen;
       options2.url = url;
       options2.implicit = implicit;
-      options2.load = options2.loadWhen ? false : true;
+      options2.load = options2.loadWhen ? false : options2.load !== false;
       options2.state = "wait";
       api.registry.ext[key] = options2;
     },

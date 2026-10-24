@@ -59,12 +59,12 @@ test("full resolves an unbundled official extension from its manifest", async ({
   await expect.poll(() => page.evaluate(() => AelluxJs.orchestratorVersion)).toBe("0.1.0-beta.10");
 
   const artifact = await page.evaluate(async () => {
-    await AelluxJs.wait("scrollbox");
-    return AelluxJs.registry.ext.scrollbox.artifacts.modern;
+    await AelluxJs.wait("ajax-href");
+    return AelluxJs.registry.ext.ajaxHref.artifacts.modern;
   });
 
   expect(manifestRequests).toBe(0);
-  expect(artifact.url).toMatch(/aellux\.ext\.scrollbox\.min\.js$/);
+  expect(artifact.url).toMatch(/aellux\.ext\.ajax-href\.min\.js$/);
   expect(artifact.integrity).toMatch(/^sha384-/);
 });
 
@@ -118,9 +118,8 @@ for (const boot of ["aellux.js", "aellux.min.js"]) {
         };
       });
       expect(result).toEqual({ base: true, snap: true, navigated: true, legacy: forceLegacy });
-      const variant = `${forceLegacy ? ".legacy" : ""}${boot === "aellux.min.js" ? ".min" : ""}.js`;
       expect(requests.filter(file => /^aellux\.ext\.scrollbox(?:-snap)?(?:\.legacy)?(?:\.min)?\.js$/.test(file)).sort())
-        .toEqual([`aellux.ext.scrollbox${variant}`, `aellux.ext.scrollbox-snap${variant}`].sort());
+        .toEqual([]);
       expect(requests).not.toContain("aellux.extensions.min.json");
     });
   }

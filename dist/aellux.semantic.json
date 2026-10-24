@@ -2304,7 +2304,7 @@
         "title,#content"
       ],
       "role": "input",
-      "docURL": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/ajax-href.htm"
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/experimental/ajax-href.htm"
     },
     {
       "name": "data-ae-anchor",
@@ -2792,7 +2792,7 @@
         "install"
       ],
       "role": "input",
-      "docURL": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/pwa.htm"
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/experimental/pwa.htm"
     },
     {
       "name": "data-ae-pwa-guide",
@@ -2800,7 +2800,7 @@
       "description": "Internal marker on the generated installation guide dialog.",
       "role": "internal",
       "syntax": "presence",
-      "docURL": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/pwa.htm"
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/experimental/pwa.htm"
     },
     {
       "name": "data-ae-ready",

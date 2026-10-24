@@ -10,14 +10,16 @@ export const bundleBudget = Object.freeze([
   // Development source inspection and CSS resource conflict diagnostics.
   // Also covers CSS Motion subtree capture; fade costs: core-extensions/overflow-marquee.md.
   // Measured deltas and the superseded limits: runtime/diagnostics.md.
-  { file: "aellux.orchestrator.min.js", maxRawBytes: 62 * 1024, maxGzipBytes: 20.75 * 1024 },
+  { file: "aellux.orchestrator.min.js", maxRawBytes: 64.5 * 1024, maxGzipBytes: 21.5 * 1024 },
   // Dialog-specific compatibility now ships separately; costs: runtime/performance.md.
-  { file: "aellux.orchestrator.legacy.min.js", maxRawBytes: 328.5 * 1024, maxGzipBytes: 104 * 1024 },
+  { file: "aellux.orchestrator.legacy.min.js", maxRawBytes: 331 * 1024, maxGzipBytes: 105 * 1024 },
   // Full uses one external stylesheet shared by all Core Extensions.
   // Includes Point tap recognition and Present click-priority routing;
   // measured deltas: core-extensions/point.md and core-extensions/present.md.
-  { file: "aellux.full.min.js", maxRawBytes: 135.5 * 1024, maxGzipBytes: 44 * 1024 },
-  { file: "aellux.full.legacy.min.js", maxRawBytes: 441.5 * 1024, maxGzipBytes: 132 * 1024 },
+  // Stable Core implementations are bundled; Experimental stays external.
+  // Delivery changes and measured sizes: runtime/performance.md.
+  { file: "aellux.full.min.js", maxRawBytes: 188 * 1024, maxGzipBytes: 58 * 1024 },
+  { file: "aellux.full.legacy.min.js", maxRawBytes: 508 * 1024, maxGzipBytes: 150 * 1024 },
   { file: "aellux.full.min.css", maxRawBytes: 122 * 1024, maxGzipBytes: 12 * 1024 },
   { file: "aellux.ext.adaptive.min.css", maxRawBytes: 121 * 1024, maxGzipBytes: 11 * 1024 },
   { file: "aellux.ext.adaptive.min.js", maxRawBytes: 5 * 1024, maxGzipBytes: 3 * 1024 },
