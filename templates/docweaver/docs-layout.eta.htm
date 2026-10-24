@@ -89,14 +89,15 @@
                         data-ae-present="height opacity" data-ae-unpop-on-outside="false" <% if (!item.active) { %>
                         hidden
                         <% } %>>
-                          <div class="ps-2 gap-1 d-flex flex-column overflow-hidden" data-ae-present-motion>
+                          <div class="ps-2 gap-1 d-flex flex-column overflow-hidden" data-ae-present-motion<% if (item.children.some(child => child.children?.length)) { %>
+                            data-ae-present-group<% } %>>
                             <% for (const child of item.children) { %>
                               <% if (child.children !==undefined && child.children.length) { %>
 
                                 <div class="nav-item mt-1 small-md fw-bold rounded-1 ps-md-1 bg-light-adaptive"
                                   style="flex:0">
-                                  <button type="button"
-                                    class="nav-link text-start text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                  <button data-ae-point type="button"
+                                    class="nav-link w-100 text-start text-capitalize p-2 p-md-1 px-3 px-md-2"
                                     data-ae-trigger="toggle" data-ae-target="#children2-<%= child.slug %>">
                                     <%= child.label %>
                                       <% if (child.children !==undefined) { %><span class="chevron"><svg
