@@ -30,6 +30,7 @@ const tocOptions = {
 };
 
 async function initOrRefreshToc() {
+  if (!tocbot) return;
   ensureHeadingIds(document.querySelector(tocOptions.contentSelector));
 
   const hasHeadings = document.querySelector(

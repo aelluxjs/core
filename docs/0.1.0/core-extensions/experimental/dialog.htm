@@ -833,13 +833,22 @@ $ae(dialog).dialog.close(&quot;accepted&quot;);
 
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/tocbot@4.32/dist/tocbot.min.js" async defer></script>
-<script src="/core/docs/assets/docweaver/js/toc-init.js?t=1"></script>
+    <script src="/core/docs/assets/docweaver/js/toc-init.js?t=1"></script>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tocbot@4.36/dist/tocbot.min.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.12/styles/github-dark.min.css">
 
 <script>
+  const tocbotReady = (async () => {
+    const baseUrl = "https://cdn.jsdelivr.net/npm/tocbot@4.32/dist/tocbot.min.js";
+    await AelluxJs.dep("tocbot", baseUrl);
+    initOrRefreshToc();
+    return window.tocbot;
+  })().catch(error => {
+    console.error("Failed to load tocbot.", error);
+    return null;
+  });
+
   const highlightReady = (async () => {
     const baseUrl = "https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.12/";
     await AelluxJs.dep("highlightjs", `${baseUrl}highlight.min.js`);
