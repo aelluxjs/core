@@ -60,9 +60,9 @@
           "label": "Experimental",
           "slug": "experimental",
           "children":[
-            { "label": "Ajax Href", "href": "core-extensions/ajax-href.md" },
-            { "label": "Dialog", "href": "core-extensions/dialog.md" },
-            { "label": "PWA", "href": "core-extensions/pwa.md" }
+            { "label": "Ajax Href", "href": "core-extensions/experimental/ajax-href.md" },
+            { "label": "Dialog", "href": "core-extensions/experimental/dialog.md" },
+            { "label": "PWA", "href": "core-extensions/experimental/pwa.md" }
           ]
         }
       ]
