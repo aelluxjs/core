@@ -217,7 +217,7 @@ body:after {
   transition: transform 0.2s ease;
   transform-origin: 50% 50%;
   font-size: x-small !important;
-  transform: translateX(-2px) rotate(-0deg);
+  transform: translateX(-2px) rotate(90deg);
 }
 
 .navbar-collapse .nav-item .nav-link[aria-expanded=true] .chevron {
