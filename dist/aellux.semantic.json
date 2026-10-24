@@ -2295,12 +2295,13 @@
     {
       "name": "data-ae-ajax-href",
       "extension": "ajax-href",
-      "description": "CSS selectors for regions replaced from a same-origin HTML response. Each selector uses its first match; current and response documents must contain the region.",
+      "description": "CSS selectors for regions replaced from a same-origin HTML response. Defaults to title,body when empty. Each selector uses its first match; current and response documents must contain the region.",
       "syntax": "selector-list",
       "tags": [
         "a"
       ],
       "examples": [
+        "title,body",
         "title,#content"
       ],
       "role": "input",

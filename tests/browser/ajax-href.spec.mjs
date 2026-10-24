@@ -62,6 +62,65 @@ for (const variant of [
     const suffix = `${variant.forceLegacy ? ".legacy" : ""}${variant.boot.includes(".min.") ? ".min" : ""}.js`;
     expect(extensionRequests.map(url => new URL(url).pathname)).toEqual([`/dist/aellux.ext.ajax-href${suffix}`]);
   });
+
+  test(`Ajax Href defaults to title and body for empty attributes (${variant.boot}, legacy=${variant.forceLegacy})`, async ({ page }) => {
+    await page.route("**/ajax-default-*.htm", route => {
+      const step = Number(new URL(route.request().url()).pathname.match(/ajax-default-(\d+)/)[1]);
+      const attribute = step === 1 ? 'data-ae-ajax-href=""' : 'data-ae-ajax-href="   "';
+      return route.fulfill({
+        contentType: "text/html",
+        body: `<!doctype html><html><head><title>Page ${step}</title><meta name="response-head" content="new"></head><body data-page="${step}"><main data-probe>Page ${step}</main><a id="next" href="/ajax-default-${step + 1}.htm" ${attribute}>Next</a></body></html>`
+      });
+    });
+    await page.goto("/tests/index.htm");
+    await page.evaluate(() => {
+      document.title = "Original page";
+      document.body.innerHTML = '<main data-probe>Original page</main><a id="next" href="/ajax-default-1.htm" data-ae-ajax-href>Next</a>';
+      window.originalHead = document.head;
+      window.originalBody = document.body;
+    });
+    await page.addScriptTag({ url: `/dist/${variant.boot}` });
+    await page.evaluate(forceLegacy => new Promise(resolve => {
+      document.addEventListener("AelluxJsReady", resolve, { once: true });
+      AelluxJs.init({ mode: "full", forceLegacy });
+    }), variant.forceLegacy);
+    await page.evaluate(async () => {
+      window.lifecycle = [];
+      window.ajaxSelectors = [];
+      AelluxJs.on("AjaxHrefComplete", event => window.ajaxSelectors.push(event.detail.selectors));
+      AelluxJs.ext("probe");
+      AelluxJs.extAttach("probe", { init() {} });
+      await AelluxJs.wait("probe");
+      AelluxJs.mountManager.add({
+        extensionName: "probe", selector: "[data-probe]",
+        mount: element => window.lifecycle.push(`mount:${element.textContent}`),
+        unmount: element => window.lifecycle.push(`unmount:${element.textContent}`)
+      });
+      await AelluxJs.mount(document.body);
+    });
+
+    for (let step = 1; step <= 3; step++) {
+      await page.click("#next");
+      await expect(page.locator("body")).toHaveAttribute("data-page", String(step));
+      await expect(page).toHaveTitle(`Page ${step}`);
+      await expect(page).toHaveURL(new RegExp(`/ajax-default-${step}\\.htm$`));
+      await expect.poll(() => page.evaluate(() => window.ajaxSelectors.length)).toBe(step);
+      expect(await page.evaluate(() => ({
+        headPreserved: document.head === window.originalHead,
+        bodyReplaced: document.body !== window.originalBody,
+        selectors: history.state.ajaxReplace.selectors
+      }))).toEqual({ headPreserved: true, bodyReplaced: true, selectors: "title,body" });
+      await expect(page.locator('meta[name="response-head"]')).toHaveCount(0);
+      // State Navigation must retain the newly loaded base title.
+      await page.evaluate(() => AelluxJs.ext.stateNavigation.updateBaseTitle());
+      await expect(page).toHaveTitle(`Page ${step}`);
+    }
+    expect(await page.evaluate(() => window.lifecycle)).toEqual([
+      "mount:Original page", "unmount:Original page", "mount:Page 1",
+      "unmount:Page 1", "mount:Page 2", "unmount:Page 2", "mount:Page 3"
+    ]);
+    expect(await page.evaluate(() => window.ajaxSelectors)).toEqual(["title,body", "title,body", "title,body"]);
+  });
 }
 
 test("Basic resolves Ajax Href through the official registry", async ({ page }) => {

@@ -305,8 +305,7 @@
       if (link.target && link.target !== "_self") return;
       if (rawHref && rawHref.startsWith("#")) return;
       if (link.hasAttribute("download") || link.hasAttribute("data-no-ajax")) return;
-      const selectors = link.getAttribute(attr.ajaxHref);
-      if (!selectors) return;
+      const selectors = link.getAttribute(attr.ajaxHref).trim() || "title,body";
       const destinyUrl = comparableUrl(link.href);
       const currentUrl = comparableUrl(window.location.href);
       if (destinyUrl.origin !== currentUrl.origin) {

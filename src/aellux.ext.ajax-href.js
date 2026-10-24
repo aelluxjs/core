@@ -10,7 +10,8 @@
  * and feedback integration.
  *
  * Inputs and activation: Full initializes lazily for a[data-ae-ajax-href]. The
- * attribute accepts a CSS selector list; load(url, selectors, options) also
+ * attribute accepts a CSS selector list, defaulting to title,body when empty;
+ * load(url, selectors, options) also
  * accepts selector arrays. Click interception handles eligible same-origin links.
  *
  * Outputs and owned state: replaces the first match for each selector, preserves
@@ -220,8 +221,7 @@ import { validateHTMLSource } from "./internal/validate-html-source.js";
     if (rawHref && rawHref.startsWith("#")) return;
     if (link.hasAttribute("download") || link.hasAttribute("data-no-ajax")) return;
 
-    const selectors = link.getAttribute(attr.ajaxHref);
-    if (!selectors) return;
+    const selectors = link.getAttribute(attr.ajaxHref).trim() || "title,body";
 
     const destinyUrl = comparableUrl(link.href);
     const currentUrl = comparableUrl(window.location.href);

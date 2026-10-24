@@ -214,13 +214,14 @@ body:after {
   display: inline-block;
   margin-left: auto;
   aspect-ratio: 1;
-  transition: transform 0.2s ease-in-out;
+  transition: transform 0.2s ease;
   transform-origin: 50% 50%;
   font-size: x-small !important;
+  transform: translateX(-2px) rotate(-0deg);
 }
 
 .navbar-collapse .nav-item .nav-link[aria-expanded=true] .chevron {
-  transform: translateX(-2px) rotate(90deg);
+  transform: translateX(-2px) rotate(-90deg);
 }
 
 .navbar-collapse .docs-menu-panel[data-ae-present] {
@@ -446,6 +447,8 @@ p {
   padding: 0.35rem 0;
   text-decoration: none;
   opacity: 0.8;
+  padding-left: 0;
+  padding-right: 3px;
   /*font-family: var(--bs-headings-font-family);*/
   font-weight: 400 !important;
   margin-left: 15px !important;
@@ -465,6 +468,7 @@ p {
 .toc-link.is-active-link {
   opacity: 1;
   padding-left: 3px;
+  padding-right: 0;
   text-decoration: underline;
 }
 

@@ -738,8 +738,7 @@
       if (link.target && link.target !== "_self") return;
       if (rawHref && rawHref.startsWith("#")) return;
       if (link.hasAttribute("download") || link.hasAttribute("data-no-ajax")) return;
-      var selectors = link.getAttribute(attr.ajaxHref);
-      if (!selectors) return;
+      var selectors = link.getAttribute(attr.ajaxHref).trim() || "title,body";
       var destinyUrl = comparableUrl(link.href);
       var currentUrl = comparableUrl(window.location.href);
       if (destinyUrl.origin !== currentUrl.origin) {

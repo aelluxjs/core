@@ -874,7 +874,7 @@
       "attributes": [
         {
           "name": "data-ae-ajax-href",
-          "description": "CSS selectors for regions replaced from a same-origin HTML response. Each selector uses its first match; current and response documents must contain the region.\n\nValue syntax: selector-list.\n\nExamples: `title,#content`.",
+          "description": "CSS selectors for regions replaced from a same-origin HTML response. Defaults to title,body when empty. Each selector uses its first match; current and response documents must contain the region.\n\nValue syntax: selector-list.\n\nExamples: `title,body`, `title,#content`.",
           "references": [
             {
               "name": "AelluxJS ajax-href",
@@ -882,6 +882,9 @@
             }
           ],
           "values": [
+            {
+              "name": "title,body"
+            },
             {
               "name": "title,#content"
             }

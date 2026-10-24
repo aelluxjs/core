@@ -3,6 +3,7 @@
 `ajax-href` replaces selected page regions with matching elements from a same-origin HTML response. This Experimental Extension is excluded from the Full bundle and loads its separate signed script in both Full and Basic when mounting `a[data-ae-ajax-href]`. Dynamically inserted links activate it through `$ae.mount(container)`.
 
 ```html
+<a href="./next.htm" data-ae-ajax-href>Next page (title and body)</a>
 <a href="./next.htm" data-ae-ajax-href="title,#content">Next page</a>
 <main id="content">Current content</main>
 ```
@@ -14,7 +15,7 @@ $ae.ext("ajax-href", { loadWhen: "a[data-ae-ajax-href]" });
 $ae.init({ mode: "basic" });
 ```
 
-The attribute holds comma-separated CSS selectors, preserving commas inside functions such as `:is()` and quoted attribute values. For each selector, the first current element is unmounted, replaced by the first matching response element, and mounted again. Invalid selectors and missing current/response regions record diagnostic `2027` with a correction suggestion. When no current region matches, `load()` returns `null` without starting a request. Missing response regions preserve current content. Modified clicks, download links, fragment-only links, other browsing targets, `data-no-ajax`, and cross-origin destinations retain native navigation.
+The attribute holds comma-separated CSS selectors, preserving commas inside functions such as `:is()` and quoted attribute values. A bare, empty, or whitespace-only `data-ae-ajax-href` defaults to `title,body`: it replaces the title and the entire body while preserving the rest of the current head. Pages using this default should share compatible head resources. For each selector, the first current element is unmounted, replaced by the first matching response element, and mounted again. Invalid selectors and missing current/response regions record diagnostic `2027` with a correction suggestion. When no current region matches, `load()` returns `null` without starting a request. Missing response regions preserve current content. Modified clicks, download links, fragment-only links, other browsing targets, `data-no-ajax`, and cross-origin destinations retain native navigation.
 
 After activation, `$ae.ext.ajaxHref.load(url, selectors, options)` provides the same replacement operation; `selectors` can also be an array. `{ ignoreHistory: true }` suppresses `PushAjaxReplace`. Otherwise the event is dispatched once, after the response arrives and the first matching region passes its unmount veto, immediately before that replacement. A failed request, a response with no matching regions, or vetoes on every region preserve the current URL and history. State Navigation handles that event and restores Ajax replacements through `SnapshotRestore`; it is already initialized in Full. In Basic mode, call `await $ae.wait("state-navigation")` if history integration is needed.
 
