@@ -14,6 +14,8 @@ Scrollbox uses the external `aellux.ext.scrollbox.css`, requested with `{ loadSt
 
 ## Overflow fade
 
+Scrollbox follows bubbling `AelluxJsLayout` events from its container, ancestors and descendants. A finite positive `detail.durationMs` keeps measurements updated through the transition at the configured layout FPS. Present's final `Pop` and `Unpop` events also refresh the box, so a fade measured while an ancestor has `scale(0)` recovers without scroll input.
+
 Overflowing Scrollboxes receive a visual transparency fade by default. The top, right, bottom and left fades correspond to the actual content hidden beyond each physical edge. User scrolling and programmatic scrolling, including smooth Snap travel, update them through the existing `publish(state)` layout read/update. Fitting content and axes whose computed overflow is not `auto` or `scroll` contribute no fade. RTL scroll offsets are normalized to physical left/right distances, including older positive-coordinate models. Native overscroll is clamped to the real range; Elastic uses the original scroll bounds and axis availability rather than its temporary transformed extent.
 
 ```html
@@ -34,7 +36,7 @@ Use a nonnegative CSS length. Each fade's width is limited to the hidden distanc
 
 When the Scrollbox has exactly one direct content element, the mask is applied to that child, preserving the Scrollbox's background, border and scrollbars. Direct custom scrollbar elements are excluded from this count. With multiple content elements, the mask is applied to the Scrollbox itself. Detection stops at the second content child, avoiding a scan of long lists on every scroll update. Adding, removing or replacing children transfers the mask and restores the previous target's owned values and priorities.
 
-The mask uses a horizontal and a vertical `linear-gradient()`, combined with `mask-composite:intersect` (WebKit's `source-in` equivalent). Their transparency multiplies at the corners. A child mask is sized and positioned against the scroll viewport during the existing `publish(state)` layout read/update, so the fade stays at the visible edges as the child scrolls or Elastic transforms it. If composition is unavailable, one gradient follows the configured Snap axis, otherwise the only scrollable axis or vertical when both scroll. Without mask support, scrolling continues without the effect. No wrappers, overlays or extra frame loop are introduced. Private hidden-distance and mask-geometry properties are restored, including prior priorities, when the target changes or on unmount.
+The mask uses a horizontal and a vertical `linear-gradient()`, combined with `mask-composite:intersect` (WebKit's `source-in` equivalent). Their transparency multiplies at the corners. A child mask is sized and positioned against the scroll viewport during the existing `publish(state)` layout read/update, so the fade stays at the visible edges as the child scrolls or Elastic transforms it. If composition is unavailable, one gradient follows the configured Snap axis, otherwise the only scrollable axis or vertical when both scroll. Without mask support, scrolling continues without the effect. No wrappers or overlays are introduced; transition measurements use the shared layout scheduler. Private hidden-distance and mask-geometry properties are restored, including prior priorities, when the target changes or on unmount.
 
 **Painting limitation:** a CSS mask composites its target together with the target's contents. With one content child, only that child's painting is faded. When the Scrollbox itself is the target, its background, border and any native or custom scrollbar painted in the faded region are also attenuated. Their interaction remains available. Use a single content child, keep decoration on an existing surrounding element, adjust the fade size or disable the effect when an opaque border, background or scrollbar is required. Native scrolling, PDS, Elastic, Snap, nested boxes and sticky descendants retain their structure and behavior. Masking does not change focus, keyboard operation, text selection or pointer hit testing.
 
@@ -224,6 +226,8 @@ gallery.previous();  // Move to the preceding point.
 `index` is zero-based in DOM order. All three methods return `true` when a point is available and `false` otherwise. They work in both native and pointer modes.
 
 ## Distribution cost
+
+Tracking Layout transitions and Present completion adds 421/175 bytes to minified Scrollbox Modern and 477/176 bytes to Legacy (raw/gzip level 9). Legacy's limits change from 47/14.75 to 47.5/15 KiB; the other affected artifacts retain their limits.
 
 The four-edge fade adds 1,958/730 bytes to Scrollbox Modern, 2,108/698 bytes to Legacy and 1,706/242 bytes to its stylesheet (raw/gzip level 9), compared with the preceding checked-in artifacts. The Modern script retains its existing limits. The dedicated CSS raw limit increases from 5 to 6.5 KiB; Legacy changes from 44/14 to 46/14.5 KiB (raw/gzip).
 

@@ -54,6 +54,7 @@
   const elasticAttribute = AelluxJs.attr("scrollbox-elastic");
   const fadeAttribute = AelluxJs.attr("scrollbox-fade");
   const fadeStateAttribute = AelluxJs.attr("scrollbox-fade-state");
+  const layoutEvents = ["Layout", "Pop", "Unpop"].map(name => AelluxJs.eventName(name));
 
   const scrollbarAttribute = AelluxJs.attr("scrollbar");
   const scrollbarVerticalAttribute = AelluxJs.attr("scrollbar-vertical");
@@ -174,6 +175,7 @@
   });
 
   function init() {
+    layoutEvents.forEach(name => onEvent(root.document, name, onLayout));
     AelluxJs.registerCssProperty(
       ...properties.map(name =>
         ({ name, syntax: "<number>", initialValue: "0" })),
@@ -204,6 +206,7 @@
   }
 
   function destroy() {
+    layoutEvents.forEach(name => offEvent(root.document, name, onLayout));
     for (const element of scrollboxes.keys()) unmountScrollbox(element);
     AelluxJs.mountManager.remove({ extensionName });
   }
@@ -288,7 +291,7 @@
       momentum: null, elastic, inlineWrapper, scrollbar,
       resizeObserver: null, mutationObserver: null, desktopMedia: null,
 
-      publishPending: false, publishDirty: false, layoutRevision: 0,
+      publishPending: false, publishDirty: false, layoutRevision: 0, layoutUntil: 0,
       resizeLayoutId: nextLayoutId++, publishLayoutId: nextLayoutId++, disposed: false
     };
 
@@ -1819,12 +1822,30 @@
     }
   }
 
+  function onLayout(event) {
+    const target = event.target;
+    const duration = Number(event.detail?.durationMs);
+    scrollboxes.forEach(state => {
+      if (!target.contains(state.element) && !state.element.contains(target)) return;
+      if (Number.isFinite(duration) && duration > 0)
+        state.layoutUntil = Math.max(state.layoutUntil, now() + duration);
+      scheduleResize(state);
+    });
+  }
+
   function scheduleResize(state) {
     if (state.disposed) return;
+    let complete = false;
     AelluxJs.waitLayout.sequence(state.resizeLayoutId, {
-      update: () => refresh(state),
+      update: () => {
+        // Transforms do not trigger ResizeObserver. Follow explicit Layout
+        // transitions through one final measurement after their duration.
+        complete = now() >= state.layoutUntil;
+        refresh(state);
+      },
+      repeat: { ms: 0 },
       maxFPS: AelluxJs.layoutMaxFPS(state.element),
-      abort: () => state.disposed
+      abort: () => state.disposed || complete
     });
   }
 

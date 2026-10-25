@@ -240,6 +240,44 @@ test("nested boxes retain independent mask geometry and sticky descendants", asy
   expect(await page.locator("#sticky").evaluate(element => element.getBoundingClientRect().top)).toBeCloseTo((await box.boundingBox()).y, 1);
 });
 
+for (const forceLegacy of [false, true]) for (const axis of ["X", "Y"]) {
+  test(`fade follows a Present scaling from zero without scroll input (${axis}, legacy=${forceLegacy})`, async ({ page }) => {
+    const box = await start(page, `<div id="panel" data-ae-present="transform opacity" hidden
+      style="transform-origin:top left;--ae-from-transform:scale${axis}(0);--ae-pop-transform:scale${axis}(1);
+        --ae-unpop-transform:scale${axis}(0);--ae-pop-duration:600ms;--ae-unpop-duration:100ms">
+      ${boxHTML()}</div>`, { forceLegacy });
+    const child = content(box);
+    for (let opening = 0; opening < 2; opening++) {
+      await page.evaluate(() => { window.opening = $ae("panel").present.pop(); });
+      await expect.poll(() => child.evaluate((element, axis) =>
+        element.closest("#panel").classList.contains("ae--popping") &&
+        parseFloat(element.style.getPropertyValue(`--ae-scrollbox-mask-${axis === "X" ? "width" : "height"}`)) > 50,
+      axis), { intervals: [10, 20, 50] }).toBe(true);
+      await page.evaluate(() => window.opening);
+      await expect.poll(() => child.evaluate(element => ["width", "height"].map(dimension =>
+        Math.round(parseFloat(element.style.getPropertyValue(`--ae-scrollbox-mask-${dimension}`)))))).toEqual([120, 100]);
+      expect(await pixels(page, box)).toMatchObject({ middle: 0 });
+      expect(await box.evaluate(element => [element.scrollLeft, element.scrollTop])).toEqual([0, 0]);
+      await page.evaluate(() => $ae("panel").present.unpop());
+    }
+  });
+}
+
+for (const mode of ["low-fps", "reduced-motion"]) {
+  test(`Present completion refreshes the fade without ResizeObserver (${mode})`, async ({ page }) => {
+    await page.addInitScript(() => { window.ResizeObserver = undefined; });
+    if (mode === "reduced-motion") await page.emulateMedia({ reducedMotion: "reduce" });
+    const box = await start(page, `<div id="panel" data-ae-present="transform" data-ae-maxfps="5" hidden
+      style="--ae-from-transform:scaleY(0);--ae-pop-transform:scaleY(1);--ae-pop-duration:300ms">
+      ${boxHTML('data-ae-maxfps="5"')}</div>`, { cssMotionPropertyMaxFPS: 5 });
+    await page.evaluate(() => $ae("panel").present.pop());
+    await expect.poll(() => content(box).evaluate(element => {
+      return Math.round(parseFloat(element.style.getPropertyValue("--ae-scrollbox-mask-height")));
+    })).toBe(100);
+    expect(await pixels(page, box)).toMatchObject({ middle: 0 });
+  });
+}
+
 test("a direct child Scrollbox retains ownership of its own fade", async ({ page }) => {
   const box = await start(page, boxHTML("", '<div id="inner" data-ae-scrollbox data-ae-scrollbar="none" style="width:320px;height:300px">' +
     '<div id="inner-content" style="width:600px;height:500px;background:black"></div></div>'));

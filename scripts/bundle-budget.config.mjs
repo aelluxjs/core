@@ -61,7 +61,8 @@ export const bundleBudget = Object.freeze([
   // Progressive 2D overflow fade; measured deltas: core-extensions/scrollbox.md.
   { file: "aellux.ext.scrollbox.min.css", maxRawBytes: 6.5 * 1024, maxGzipBytes: 1.5 * 1024 },
   // Child-target fade geometry/restoration; measured costs: core-extensions/scrollbox.md.
-  { file: "aellux.ext.scrollbox.legacy.min.js", maxRawBytes: 47 * 1024, maxGzipBytes: 14.75 * 1024 },
+  // Layout transition tracking: +477 raw / +176 gzip bytes; costs: core-extensions/scrollbox.md.
+  { file: "aellux.ext.scrollbox.legacy.min.js", maxRawBytes: 47.5 * 1024, maxGzipBytes: 15 * 1024 },
   { file: "aellux.ext.scrollbox-snap.min.js", maxRawBytes: 10.5 * 1024, maxGzipBytes: 4 * 1024 },
   { file: "aellux.ext.scrollbox-snap.legacy.min.js", maxRawBytes: 15 * 1024, maxGzipBytes: 6 * 1024 },
   { file: "aellux.ext.state-navigation.min.js", maxRawBytes: 5 * 1024, maxGzipBytes: 3 * 1024 },

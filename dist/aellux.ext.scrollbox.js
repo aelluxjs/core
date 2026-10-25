@@ -15,6 +15,7 @@
     const elasticAttribute = AelluxJs.attr("scrollbox-elastic");
     const fadeAttribute = AelluxJs.attr("scrollbox-fade");
     const fadeStateAttribute = AelluxJs.attr("scrollbox-fade-state");
+    const layoutEvents = ["Layout", "Pop", "Unpop"].map((name) => AelluxJs.eventName(name));
     const scrollbarAttribute = AelluxJs.attr("scrollbar");
     const scrollbarVerticalAttribute = AelluxJs.attr("scrollbar-vertical");
     const scrollbarHorizontalAttribute = AelluxJs.attr("scrollbar-horizontal");
@@ -165,6 +166,7 @@
       unregisterSnapController
     });
     function init() {
+      layoutEvents.forEach((name) => onEvent(root.document, name, onLayout));
       AelluxJs.registerCssProperty(
         ...properties.map((name) => ({ name, syntax: "<number>", initialValue: "0" })),
         ...fadeProperties.map((name) => ({ name, syntax: "<length>", initialValue: "0px", inherits: false })),
@@ -197,6 +199,7 @@
       });
     }
     function destroy() {
+      layoutEvents.forEach((name) => offEvent(root.document, name, onLayout));
       for (const element of scrollboxes.keys()) unmountScrollbox(element);
       AelluxJs.mountManager.remove({ extensionName });
     }
@@ -314,6 +317,7 @@
         publishPending: false,
         publishDirty: false,
         layoutRevision: 0,
+        layoutUntil: 0,
         resizeLayoutId: nextLayoutId++,
         publishLayoutId: nextLayoutId++,
         disposed: false
@@ -1780,12 +1784,28 @@
         );
       }
     }
+    function onLayout(event) {
+      var _a;
+      const target = event.target;
+      const duration = Number((_a = event.detail) == null ? void 0 : _a.durationMs);
+      scrollboxes.forEach((state) => {
+        if (!target.contains(state.element) && !state.element.contains(target)) return;
+        if (Number.isFinite(duration) && duration > 0)
+          state.layoutUntil = Math.max(state.layoutUntil, now() + duration);
+        scheduleResize(state);
+      });
+    }
     function scheduleResize(state) {
       if (state.disposed) return;
+      let complete = false;
       AelluxJs.waitLayout.sequence(state.resizeLayoutId, {
-        update: () => refresh(state),
+        update: () => {
+          complete = now() >= state.layoutUntil;
+          refresh(state);
+        },
+        repeat: { ms: 0 },
         maxFPS: AelluxJs.layoutMaxFPS(state.element),
-        abort: () => state.disposed
+        abort: () => state.disposed || complete
       });
     }
     function now() {
