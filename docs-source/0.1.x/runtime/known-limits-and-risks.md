@@ -106,9 +106,9 @@ The [official catalog](https://github.com/aelluxjs/core/blob/update/beta.10/src/
 | [Adaptive](../core-extensions/adaptive.md#known-limits-risks) | [Ajax Href](../core-extensions/experimental/ajax-href.md#known-limits-risks) |
 | [Anchor](../core-extensions/anchor.md#known-limits-risks) | [Dialog](../core-extensions/experimental/dialog.md#known-limits-risks) |
 | [Feedback](../core-extensions/feedback.md#known-limits-risks) | [PWA](../core-extensions/experimental/pwa.md#known-limits-risks) |
-| [Focus](../core-extensions/focus.md#known-limits-risks) | [Viewport](../core-extensions/viewport.md#known-limits-risks) |
+| [Focus](../core-extensions/experimental/focus.md#known-limits-risks) | [Viewport](../core-extensions/experimental/viewport.md#known-limits-risks) |
 | [Overflow Marquee](../core-extensions/overflow-marquee.md#known-limits-risks) | |
-| [Point](../core-extensions/point.md#known-limits-risks) | |
+| [Point](../core-extensions/experimental/point.md#known-limits-risks) | |
 | [Preference](../core-extensions/preference.md#known-limits-risks) | |
 | [Present](../core-extensions/present.md#known-limits-risks) | |
 | [Scrollbox](../core-extensions/scrollbox.md#known-limits-risks) | |

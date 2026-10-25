@@ -45,7 +45,7 @@ The index is zero based. Each method returns `true` when a snap item is availabl
 
 ## Position migration
 
-`--ae-snap-viewport` has been removed. Add `data-ae-viewport="x"` or `data-ae-viewport="y"` to each item requiring position information and use `--ae-viewport-x` or `--ae-viewport-y`. The independent [Viewport Extension](viewport.md) selects the nearest native scroll container, which can differ from the owning Snap box when another scroll container intervenes. Choose the relevant dimension yourself. Snap continues to publish `--ae-snap-focus` and works without Viewport.
+`--ae-snap-viewport` has been removed. Add `data-ae-viewport="x"` or `data-ae-viewport="y"` to each item requiring position information and use `--ae-viewport-x` or `--ae-viewport-y`. The independent [Viewport Extension](experimental/viewport.md) selects the nearest native scroll container, which can differ from the owning Snap box when another scroll container intervenes. Choose the relevant dimension yourself. Snap continues to publish `--ae-snap-focus` and works without Viewport.
 
 ## Interaction hooks
 

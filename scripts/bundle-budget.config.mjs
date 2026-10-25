@@ -7,11 +7,11 @@ export const bundleBudget = Object.freeze([
   // Includes the official entry for the dedicated Overflow Marquee Extension.
   // Viewport's signed Modern/Legacy registry entries: +803 raw / +274 gzip bytes.
   { file: "aellux.min.js", maxRawBytes: 48 * 1024, maxGzipBytes: 16 * 1024 },
-  // Measured raw/gzip bytes: 6672/2851 Modern; 11883/4860 Legacy.
-  { file: "aellux.ext.viewport.js", maxRawBytes: 14 * 1024, maxGzipBytes: 4 * 1024 },
-  { file: "aellux.ext.viewport.min.js", maxRawBytes: 7 * 1024, maxGzipBytes: 3 * 1024 },
-  { file: "aellux.ext.viewport.legacy.js", maxRawBytes: 26 * 1024, maxGzipBytes: 7 * 1024 },
-  { file: "aellux.ext.viewport.legacy.min.js", maxRawBytes: 12 * 1024, maxGzipBytes: 5 * 1024 },
+  // Viewport semantic events; measured costs: core-extensions/viewport.md.
+  { file: "aellux.ext.viewport.js", maxRawBytes: 18.5 * 1024, maxGzipBytes: 5 * 1024 },
+  { file: "aellux.ext.viewport.min.js", maxRawBytes: 9 * 1024, maxGzipBytes: 3.75 * 1024 },
+  { file: "aellux.ext.viewport.legacy.js", maxRawBytes: 32 * 1024, maxGzipBytes: 8.25 * 1024 },
+  { file: "aellux.ext.viewport.legacy.min.js", maxRawBytes: 15 * 1024, maxGzipBytes: 6 * 1024 },
   { file: "aellux.esm.min.js", maxRawBytes: 25 * 1024, maxGzipBytes: 8.5 * 1024 },
   // Development source inspection and CSS resource conflict diagnostics.
   // Also covers CSS Motion subtree capture; fade costs: core-extensions/overflow-marquee.md.
@@ -60,7 +60,8 @@ export const bundleBudget = Object.freeze([
   { file: "aellux.ext.scrollbox.min.js", maxRawBytes: 46 * 1024, maxGzipBytes: 14 * 1024 },
   // Progressive 2D overflow fade; measured deltas: core-extensions/scrollbox.md.
   { file: "aellux.ext.scrollbox.min.css", maxRawBytes: 6.5 * 1024, maxGzipBytes: 1.5 * 1024 },
-  { file: "aellux.ext.scrollbox.legacy.min.js", maxRawBytes: 46 * 1024, maxGzipBytes: 14.5 * 1024 },
+  // Child-target fade geometry/restoration; measured costs: core-extensions/scrollbox.md.
+  { file: "aellux.ext.scrollbox.legacy.min.js", maxRawBytes: 47 * 1024, maxGzipBytes: 14.75 * 1024 },
   { file: "aellux.ext.scrollbox-snap.min.js", maxRawBytes: 10.5 * 1024, maxGzipBytes: 4 * 1024 },
   { file: "aellux.ext.scrollbox-snap.legacy.min.js", maxRawBytes: 15 * 1024, maxGzipBytes: 6 * 1024 },
   { file: "aellux.ext.state-navigation.min.js", maxRawBytes: 5 * 1024, maxGzipBytes: 3 * 1024 },

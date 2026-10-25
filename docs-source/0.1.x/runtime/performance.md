@@ -30,7 +30,7 @@ The Full increase includes Scrollbox, Snap and Overflow Marquee and removes Ajax
 
 ## Viewport delivery
 
-The optional Experimental [Viewport Extension](../core-extensions/viewport.md) ships independently, without CSS, dependencies or implementation code in Full/Orchestrator. The following sizes use raw bytes and gzip level 9, compared with the preceding checked-in artifacts:
+The optional Experimental [Viewport Extension](../core-extensions/experimental/viewport.md) ships independently, without CSS, dependencies or implementation code in Full/Orchestrator. The following sizes use raw bytes and gzip level 9, compared with the preceding checked-in artifacts:
 
 | Artifact | Before raw / gzip bytes | After raw / gzip bytes |
 | --- | --- | --- |

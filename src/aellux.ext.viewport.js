@@ -13,6 +13,8 @@
   const extensionName = "viewport";
   const attribute = AelluxJs.attr(extensionName);
   const properties = ["--ae-viewport-x", "--ae-viewport-y", "--ae-viewport-visible"];
+  // Compare published normalized geometry, never the containment boundaries.
+  const EVENT_EPSILON = 0.000001;
   const document = root.document;
   const states = new Map();
   const groups = new Map();
@@ -39,7 +41,7 @@
     if (states.has(element)) return;
     const state = { element, group: null, configuration: null, axes: "both",
       memories: properties.map(property => AelluxJs.persist.element.save(element, [], [property])),
-      writtenStyle: null, values: [], resizeTargets: new Set() };
+      writtenStyle: null, values: [], snapshot: null, unmountRequest: null, resizeTargets: new Set() };
     states.set(element, state);
     if (states.size === 1) startObserving();
     // Discovery belongs to the read phase too. New elements initially share the
@@ -74,6 +76,7 @@
     AelluxJs.onEvent(root, "$resize", scheduleAll);
     AelluxJs.onEvent(document, "$load", scheduleAll, true);
     AelluxJs.onEvent(document, AelluxJs.eventName("Layout"), onLayout);
+    AelluxJs.onEvent(document, AelluxJs.eventName("BeforeUnmount"), onBeforeUnmount);
     if (root.ResizeObserver) resizeObserver = new root.ResizeObserver(scheduleAll);
     if (root.MutationObserver) {
       mutations = new root.MutationObserver(records => {
@@ -92,6 +95,7 @@
     AelluxJs.offEvent(root, "$resize", scheduleAll);
     AelluxJs.offEvent(document, "$load", scheduleAll, true);
     AelluxJs.offEvent(document, AelluxJs.eventName("Layout"), onLayout);
+    AelluxJs.offEvent(document, AelluxJs.eventName("BeforeUnmount"), onBeforeUnmount);
     mutations?.disconnect();
     resizeObserver?.disconnect();
     mutations = resizeObserver = null;
@@ -105,6 +109,24 @@
         group.layoutUntil = Math.max(group.layoutUntil, root.performance.now() + duration);
       schedule(group);
     }
+  }
+
+  function onBeforeUnmount(event) {
+    const { root: subtree, extensions, detachedOnly } = event.detail;
+    if (extensions && !extensions.includes(extensionName)) return;
+    // Initial mount can still be pending when a Change listener requests
+    // unmount/destroy. The official preflight records that request immediately;
+    // checking defaultPrevented later also respects a canceled preflight.
+    for (const state of states.values()) {
+      if (detachedOnly && state.element.isConnected) continue;
+      if (state.element === subtree || subtree.contains(state.element) ||
+          subtree === document && !state.element.isConnected) state.unmountRequest = event;
+    }
+  }
+
+  function current(state, group) {
+    return states.get(state.element) === state && state.group === group && state.element.isConnected &&
+      state.element.hasAttribute(attribute) && (!state.unmountRequest || state.unmountRequest.defaultPrevented);
   }
 
   function scheduleAll() {
@@ -173,12 +195,13 @@
     const measurements = await AelluxJs.waitLayout.read(group.id, () => measure(group));
     if (!group.active || !measurements) return;
     await AelluxJs.waitLayout.update(group.id, () => {
-      for (const { state, values } of measurements) {
+      for (const { state, values, snapshot, changed } of measurements) {
         if (states.get(state.element) !== state || state.group !== group) continue;
         if (values === null) {
           AelluxJs.mountManager.unmount(state.element, extensionName);
           continue;
         }
+        if (!current(state, group)) continue;
         for (let index = 0; index < properties.length; index++) {
           if (values[index] === state.values[index]) continue;
           // An unselected axis keeps the author's original inline declaration.
@@ -188,6 +211,20 @@
         }
         state.values = values;
         state.writtenStyle = state.element.getAttribute("style");
+        if (changed) {
+          const previous = state.snapshot;
+          state.snapshot = snapshot;
+          const initial = previous === null;
+          const emit = name => AelluxJs.dispatchFrom(state.element, name, {
+            bubbles: true, composed: true, cancelable: false,
+            detail: { ...snapshot, previous: previous && { ...previous }, initial }
+          });
+          emit("ViewportChange");
+          if (current(state, group) && snapshot.measurable && snapshot.state !== previous?.state) {
+            if (snapshot.state === "inside") emit("ViewportFullyInside");
+            else if (snapshot.state === "outside") emit("ViewportFullyOutside");
+          }
+        }
       }
     });
   }
@@ -227,7 +264,8 @@
         continue;
       }
       if (!viewport) viewport = viewportRect(reference);
-      measurements.push({ state, values: valuesFor(state, viewport) });
+      const { values, snapshot } = valuesFor(state, viewport);
+      measurements.push({ state, values, snapshot, changed: geometryChanged(state.snapshot, snapshot) });
     }
     return measurements;
   }
@@ -305,15 +343,42 @@
   function valuesFor(state, viewport) {
     const rect = state.element.getBoundingClientRect();
     let x = 0, y = 0, visible = 0;
-    if ([viewport.left, viewport.top, viewport.width, viewport.height, rect.left, rect.top, rect.width, rect.height].every(Number.isFinite) &&
+    const snapshot = { viewport: state.group.reference, x1: null, y1: null, x2: null, y2: null,
+      x: null, y: null, visible, state: null, measurable: false };
+    if ([viewport.left, viewport.top, viewport.width, viewport.height,
+      rect.left, rect.top, rect.right, rect.bottom, rect.width, rect.height].every(Number.isFinite) &&
         viewport.width > 0 && viewport.height > 0 && rect.width > 0 && rect.height > 0) {
-      x = clamp((rect.left + rect.width / 2 - viewport.left - viewport.width / 2) * 2 / viewport.width, -2, 2);
-      y = clamp((rect.top + rect.height / 2 - viewport.top - viewport.height / 2) * 2 / viewport.height, -2, 2);
+      const centerX = viewport.left + viewport.width / 2, centerY = viewport.top + viewport.height / 2;
+      const x1 = (rect.left - centerX) * 2 / viewport.width, x2 = (rect.right - centerX) * 2 / viewport.width;
+      const y1 = (rect.top - centerY) * 2 / viewport.height, y2 = (rect.bottom - centerY) * 2 / viewport.height;
+      if (![x1, y1, x2, y2, (x1 + x2) / 2, (y1 + y2) / 2].every(Number.isFinite))
+        return { values: [state.axes === "y" ? null : 0, state.axes === "x" ? null : 0, 0], snapshot };
+      snapshot.x1 = x1; snapshot.y1 = y1; snapshot.x2 = x2; snapshot.y2 = y2;
+      snapshot.x = (x1 + x2) / 2; snapshot.y = (y1 + y2) / 2;
+      x = clamp(snapshot.x, -2, 2);
+      y = clamp(snapshot.y, -2, 2);
       const width = Math.max(0, Math.min(rect.right, viewport.left + viewport.width) - Math.max(rect.left, viewport.left));
       const height = Math.max(0, Math.min(rect.bottom, viewport.top + viewport.height) - Math.max(rect.top, viewport.top));
       visible = clamp(width / rect.width * (height / rect.height), 0, 1);
+      snapshot.visible = visible;
+      snapshot.measurable = true;
+      snapshot.state = width > 0 && height > 0 ?
+        rect.left >= viewport.left && rect.top >= viewport.top &&
+          rect.right <= viewport.left + viewport.width && rect.bottom <= viewport.top + viewport.height ?
+          "inside" : "partial" : "outside";
     }
-    return [state.axes === "y" ? null : x, state.axes === "x" ? null : y, visible];
+    return { values: [state.axes === "y" ? null : x, state.axes === "x" ? null : y, visible], snapshot };
+  }
+
+  function geometryChanged(previous, snapshot) {
+    // Unknown initial geometry is silent until the first valid publication.
+    if (!previous) return snapshot.measurable;
+    if (snapshot.viewport !== previous.viewport || snapshot.measurable !== previous.measurable ||
+        snapshot.state !== previous.state) return true;
+    if (snapshot.measurable && ["x1", "y1", "x2", "y2"].some(key => [-1, 1].some(edge =>
+      Math.sign(snapshot[key] - edge) !== Math.sign(previous[key] - edge)))) return true;
+    return ["x1", "y1", "x2", "y2", "x", "y", "visible"].some(key =>
+      Math.abs(snapshot[key] - previous[key]) > EVENT_EPSILON);
   }
 
   function clamp(value, minimum, maximum) {

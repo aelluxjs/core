@@ -510,6 +510,7 @@ h3::before {
   width: 100%;
   margin-bottom: 1.5rem;
   border-radius: var(--bs-border-radius-sm) !important;
+  overflow: hidden;
 }
 
 #doc-content table th {

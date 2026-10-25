@@ -538,20 +538,6 @@
                                     class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                     style="flex:0">
                                     <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
-                                      href="/core/docs/0.1.x/core-extensions/focus.htm" data-ae-overflow-marquee="190px">
-                                      Focus                                    </a>
-                                  </div>
-                                                                                                                                      <div
-                                    class="nav-item mt-1 small-md rounded-1 ps-md-1"
-                                    style="flex:0">
-                                    <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
-                                      href="/core/docs/0.1.x/core-extensions/point.htm" data-ae-overflow-marquee="190px">
-                                      Point                                    </a>
-                                  </div>
-                                                                                                                                      <div
-                                    class="nav-item mt-1 small-md rounded-1 ps-md-1"
-                                    style="flex:0">
-                                    <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                       href="/core/docs/0.1.x/core-extensions/preference.htm" data-ae-overflow-marquee="190px">
                                       Preference                                    </a>
                                   </div>
@@ -612,6 +598,20 @@
                                           <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                             href="/core/docs/0.1.x/core-extensions/experimental/dialog.htm" data-ae-overflow-marquee="190px">
                                             Dialog                                          </a>
+                                        </div>
+                                                                                <div
+                                          class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                          style="flex:0">
+                                          <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                            href="/core/docs/0.1.x/core-extensions/focus.htm" data-ae-overflow-marquee="190px">
+                                            Focus                                          </a>
+                                        </div>
+                                                                                <div
+                                          class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                          style="flex:0">
+                                          <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                            href="/core/docs/0.1.x/core-extensions/point.htm" data-ae-overflow-marquee="190px">
+                                            Point                                          </a>
                                         </div>
                                                                                 <div
                                           class="nav-item mt-1 small-md rounded-1 ps-md-1"
@@ -798,6 +798,121 @@ normalized = Math.max(-2, Math.min(2, normalized));
 <p>Without a suitable ancestor it uses the document viewport and document scrolling. Nested scroll containers use the nearest one, and moving an observed element into another container refreshes its reference.</p>
 <p>Scroll updates positions even while visible area remains constant. Window resize, container/element resize, relevant DOM and style changes, loaded resources and <code>AelluxJsLayout</code> notifications also refresh geometry. A Layout notification with finite positive <code>detail.durationMs</code> requests checks for the duration of that transition. Idle elements do not run a continuous frame loop.</p>
 <p>Elements sharing a reference share one scroll listener, an IntersectionObserver when supported, and a scheduled batch of reads followed by writes. A shared ResizeObserver tracks element, ancestor and sibling size changes that can shift layout. Only changed output values are written. Mutation, load, scroll, resize and Layout notifications provide fallbacks where ResizeObserver or IntersectionObserver is unavailable; in those environments a purely CSS-driven size change without any notification needs an explicit <code>$ae.mountManager.update(element, &quot;viewport&quot;)</code> or Layout event.</p>
+<h2>Viewport Events</h2>
+<p>Viewport dispatches three bubbling, composed, noncancelable events from each observed element through <code>$ae.dispatchFrom()</code>. Subscribe on that element or delegate on <code>document</code> using <code>$ae.eventName()</code>:</p>
+<pre><code class="language-js">document.addEventListener($ae.eventName(&quot;ViewportChange&quot;), event =&gt; {
+  const { x1, y1, x2, y2, visible, state, measurable } = event.detail;
+  if (!measurable) return;
+  console.log(event.target, x1, y1, x2, y2, visible, state);
+});
+
+element.addEventListener($ae.eventName(&quot;ViewportFullyInside&quot;), event =&gt; {
+  console.log(&quot;Fully contained&quot;, event.detail.initial);
+});
+element.addEventListener($ae.eventName(&quot;ViewportFullyOutside&quot;), event =&gt; {
+  console.log(&quot;No positive-area intersection&quot;, event.detail.previous);
+});
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Event</th>
+<th>Publication rule</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>ViewportChange</code></td>
+<td><span style="white-space: normal !important;">The primary notification: first measurable geometry, then relevant changes in relative position, relative dimensions, visible fraction, geometric state, measurability or reference identity. A scroll notification alone does not force an event.</span></td>
+</tr>
+<tr>
+<td><code>ViewportFullyInside</code></td>
+<td><span style="white-space: normal !important;">Entry into <code>inside</code>, including the first measurable publication when already contained. Movement while remaining inside does not repeat it.</span></td>
+</tr>
+<tr>
+<td><code>ViewportFullyOutside</code></td>
+<td><span style="white-space: normal !important;">Entry into <code>outside</code>, including the first measurable publication when already outside. Movement while remaining outside does not repeat it. Unmount, destroy, declaration removal and loss of measurable geometry do not produce this event.</span></td>
+</tr>
+</tbody></table>
+<p>All three share this payload shape:</p>
+<pre><code class="language-js">{
+  viewport: document, // Or the native scroll container element.
+  x1: -0.5, y1: -0.5, x2: 0.5, y2: 0.5,
+  x: 0, y: 0, visible: 1,
+  state: &quot;inside&quot;, measurable: true,
+  previous: null,
+  initial: true
+}
+</code></pre>
+<p><code>viewport</code> identifies the actual reference: a scroll container element, or <code>document</code> for the document viewport. <code>previous</code> is an independent snapshot of the last published geometry, with the same geometric fields but without another <code>previous</code> or <code>initial</code>. It is <code>null</code> on the first publication. <code>initial</code> is <code>true</code> only for the first measurable publication after mount. Event payloads and their <code>previous</code> objects are copies: changing one does not modify the internal snapshot or another event&#39;s payload. The referenced DOM objects retain their identity.</p>
+<p>Coordinates use physical directions even in RTL: the reference&#39;s top-left is <code>(-1, -1)</code>, its center is <code>(0, 0)</code>, and its bottom-right is <code>(1, 1)</code>. The four edges are calculated from the same rectangles as the existing CSS outputs:</p>
+<pre><code class="language-js">x1 = (elementRect.left - viewportCenterX) * 2 / viewportWidth;
+y1 = (elementRect.top - viewportCenterY) * 2 / viewportHeight;
+x2 = (elementRect.right - viewportCenterX) * 2 / viewportWidth;
+y2 = (elementRect.bottom - viewportCenterY) * 2 / viewportHeight;
+x = (x1 + x2) / 2;
+y = (y1 + y2) / 2;
+</code></pre>
+<p><strong>Event coordinates are not clamped.</strong> Distant elements can have coordinates beyond <code>-2</code> or <code>2</code>. The CSS outputs <code>--ae-viewport-x</code> and <code>--ae-viewport-y</code> retain their <code>[-2, 2]</code> clamp. Events always include both axes and all four edges, even with <code>data-ae-viewport=&quot;x&quot;</code> or <code>&quot;y&quot;</code>; axis selection continues to control only CSS position publication. <code>visible</code> uses the existing two-dimensional area fraction.</p>
+<table>
+<thead>
+<tr>
+<th>State</th>
+<th>Geometry</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>inside</code></td>
+<td><span style="white-space: normal !important;">Every edge lies within the reference bounds, including exact coincidence. A larger element cannot be inside.</span></td>
+</tr>
+<tr>
+<td><code>partial</code></td>
+<td><span style="white-space: normal !important;">Intersection has positive area, but at least one edge extends beyond the reference. Oversized overlapping elements are partial.</span></td>
+</tr>
+<tr>
+<td><code>outside</code></td>
+<td><span style="white-space: normal !important;">Intersection has no positive area. Touching a reference edge without overlapping area is outside.</span></td>
+</tr>
+</tbody></table>
+<p>Zero-sized, hidden or non-finite element/reference geometry is unmeasurable. Selected CSS positions and visible area keep publishing neutral <code>0</code>, while the event snapshot uses <code>x1</code>, <code>y1</code>, <code>x2</code>, <code>y2</code>, <code>x</code>, <code>y</code> and <code>state</code> as <code>null</code>, <code>visible: 0</code>, and <code>measurable: false</code>. Unknown initial geometry stays silent until the first valid publication, which has <code>previous: null</code> and <code>initial: true</code>. After a valid publication, losing measurability emits only <code>ViewportChange</code>; repeated unchanged unknown geometry stays silent. Recovery emits Change and, when appropriate, the matching FullyInside/FullyOutside event, with <code>initial: false</code>.</p>
+<p>Notifications share the existing <code>waitLayout.read()</code>/<code>update()</code> batches. Numeric differences must exceed an absolute tolerance of <code>0.000001</code> in normalized coordinates or visible fraction, compared with the last published snapshot. State, measurability and reference identity changes bypass that tolerance, as does an element edge crossing or reaching either reference boundary. This includes oversized elements that remain <code>partial</code> while crossing an edge. Containment and positive-area intersection use exact measured bounds, so even a smaller boundary crossing is reported. At most one Change is emitted per element in a geometry update; no independent event timer, observation system or additional rectangle measurement is introduced.</p>
+<p>For each publication, CSS outputs are applied first, then the internal snapshot advances, then <code>ViewportChange</code> fires, followed by the matching state transition event. Unmount/destroy requests during Change suppress the subsequent state event, including during an initial asynchronous mount; a canceled lifecycle preflight retains the state event. These are asynchronous scheduler notifications and can trail compositor scrolling or animation. They do not guarantee frame-by-frame synchronization or perceptual visibility, and Viewport continues to leave animation, focus, scroll and presentation decisions to consumers.</p>
+<h3>Event delivery cost</h3>
+<p>Measured raw/gzip level 9 bytes, compared with the implementation before these events:</p>
+<table>
+<thead>
+<tr>
+<th>Viewport artifact</th>
+<th>Before</th>
+<th>After</th>
+<th>Delta</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Modern</td>
+<td>13,974 / 3,749</td>
+<td>18,641 / 4,906</td>
+<td>+4,667 / +1,157</td>
+</tr>
+<tr>
+<td>Modern minified</td>
+<td>6,672 / 2,851</td>
+<td>8,876 / 3,693</td>
+<td>+2,204 / +842</td>
+</tr>
+<tr>
+<td>Legacy</td>
+<td>25,775 / 6,758</td>
+<td>32,441 / 8,273</td>
+<td>+6,666 / +1,515</td>
+</tr>
+<tr>
+<td>Legacy minified</td>
+<td>11,883 / 4,860</td>
+<td>15,084 / 5,959</td>
+<td>+3,201 / +1,099</td>
+</tr>
+</tbody></table>
+<p>Only Viewport&#39;s four artifact budgets increase: Modern raw/gzip limits become 18.5/5 KiB (regular) and 9/3.75 KiB (minified); Legacy becomes 32/8.25 KiB and 15/6 KiB. Full and Orchestrator delivery sizes remain unchanged because Viewport stays Experimental, external and lazy. The boot&#39;s embedded signed metadata changes, with the same minified raw/gzip size of 47,129/16,046 bytes. Global budgets remain unchanged.</p>
 <h2>Scrollbox Snap and migration</h2>
 <p>Snap continues to own navigation, native snap behavior, gestures, settling, change events and <code>--ae-snap-focus</code>, the proximity to the requested alignment. It does not require Viewport or add Viewport attributes automatically.</p>
 <pre><code class="language-html">&lt;div data-ae-scrollbox data-ae-scrollbox-snap
@@ -855,8 +970,8 @@ After:  add data-ae-viewport=&quot;x&quot; or &quot;y&quot; to the item
 <td><span style="white-space: normal !important;">Measurements use <code>getBoundingClientRect()</code>. Scrollport calculations compensate for axis-aligned scale; rotation, skew, perspective and other 3D transforms remain rectangular approximations, without polygon intersection accuracy.</span></td>
 </tr>
 <tr>
-<td>L4: Clamped positions</td>
-<td><span style="white-space: normal !important;"><code>--ae-viewport-x</code> and <code>--ae-viewport-y</code> clamp to <code>[-2, 2]</code>. Distant elements can publish identical values beyond those bounds. These outputs do not replace absolute coordinates or unlimited distances.</span></td>
+<td>L4: Clamped CSS positions</td>
+<td><span style="white-space: normal !important;"><code>--ae-viewport-x</code> and <code>--ae-viewport-y</code> clamp to <code>[-2, 2]</code>. Distant elements can publish identical CSS values beyond those bounds. Viewport event coordinates remain unclamped; both describe relative rectangular geometry.</span></td>
 </tr>
 <tr>
 <td>L5: Oversized elements</td>
@@ -864,7 +979,7 @@ After:  add data-ae-viewport=&quot;x&quot; or &quot;y&quot; to the item
 </tr>
 <tr>
 <td>L6: Unmeasurable geometry</td>
-<td><span style="white-space: normal !important;">Zero-sized or non-finite element/reference geometry publishes neutral <code>0</code> for selected positions and visible area. For example, <code>display: none</code> provides no useful spatial geometry. Neutral positions do not prove center alignment or a definitive visibility state; unselected axes retain their authored declarations.</span></td>
+<td><span style="white-space: normal !important;">Zero-sized or non-finite element/reference geometry publishes neutral <code>0</code> for selected CSS positions and visible area. Event coordinates/state are <code>null</code> with <code>measurable: false</code>; unknown initial geometry stays silent. Neutral CSS positions do not prove center alignment or outside state; unselected axes retain their authored declarations.</span></td>
 </tr>
 <tr>
 <td>L7: Physical coordinates</td>
@@ -875,8 +990,8 @@ After:  add data-ae-viewport=&quot;x&quot; or &quot;y&quot; to the item
 <td><span style="white-space: normal !important;">Viewport publishes geometry without controlling scroll, animation, <code>pop()</code>/<code>unpop()</code>, <code>hidden</code>, opacity, transforms or interaction state. Present and other consumers require explicit integration.</span></td>
 </tr>
 <tr>
-<td>L9: Notification contract</td>
-<td><span style="white-space: normal !important;">The current Extension publishes CSS properties and maintains internal geometry state. It emits no <code>ViewportEnter</code>, <code>ViewportLeave</code> or <code>ViewportChange</code> events. The shared <code>Layout</code> event is an input for refreshing geometry.</span></td>
+<td>L9: Notification precision and cadence</td>
+<td><span style="white-space: normal !important;"><code>ViewportChange</code>, <code>ViewportFullyInside</code> and <code>ViewportFullyOutside</code> describe processed scheduler samples. Numeric changes use a normalized <code>0.000001</code> tolerance; state and reference-edge crossings bypass it. Intermediate geometry between processed samples can be missed. Events are asynchronous and are not synchronized frame by frame with the compositor. The shared <code>Layout</code> event remains a refresh input.</span></td>
 </tr>
 </tbody></table>
 <h3>Performance Risks</h3>

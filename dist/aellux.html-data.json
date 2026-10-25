@@ -630,7 +630,7 @@
     },
     {
       "name": "data-ae-scrollbox-fade",
-      "description": "Progressive overflow fade on all scrollable edges. Enabled by default; false disables it. Existing application masks are preserved.\n\nValue syntax: enum.\n\nDefault behavior: \"true\".",
+      "description": "Progressive overflow fade on all scrollable edges. Targets the only content child, excluding custom bars, or the container otherwise. Enabled by default; false disables it. Existing application masks are preserved.\n\nValue syntax: enum.\n\nDefault behavior: \"true\".",
       "references": [
         {
           "name": "AelluxJS scrollbox",

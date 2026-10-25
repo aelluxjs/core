@@ -69,8 +69,8 @@ Add aellux.js to a page and enable the Extensions it needs. The library coordina
 - [Anchor](core-extensions/anchor.md)
 - [Overflow Marquee](core-extensions/overflow-marquee.md)
 - [Feedback](core-extensions/feedback.md)
-- [Focus](core-extensions/focus.md)
-- [Point](core-extensions/point.md)
+- [Focus](core-extensions/experimental/focus.md) (Experimental)
+- [Point](core-extensions/experimental/point.md) (Experimental)
 - [Dialog](core-extensions/experimental/dialog.md)
 - [Preference](core-extensions/preference.md)
 - [Present](core-extensions/present.md)
@@ -78,7 +78,7 @@ Add aellux.js to a page and enable the Extensions it needs. The library coordina
 - [Scrollbox Snap](core-extensions/scrollbox-snap.md)
 - [PWA](core-extensions/experimental/pwa.md) (optional external Extension; never incorporated in Full)
 - [State navigation](core-extensions/state-navigation.md)
-- [Viewport](core-extensions/viewport.md) (Experimental)
+- [Viewport](core-extensions/experimental/viewport.md) (Experimental)
 
 ## Project Documents
 

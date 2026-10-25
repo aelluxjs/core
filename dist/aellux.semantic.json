@@ -2909,7 +2909,7 @@
     {
       "name": "data-ae-scrollbox-fade",
       "extension": "scrollbox",
-      "description": "Progressive overflow fade on all scrollable edges. Enabled by default; false disables it. Existing application masks are preserved.",
+      "description": "Progressive overflow fade on all scrollable edges. Targets the only content child, excluding custom bars, or the container otherwise. Enabled by default; false disables it. Existing application masks are preserved.",
       "syntax": "enum",
       "values": [
         "",
@@ -2923,7 +2923,7 @@
     {
       "name": "data-ae-scrollbox-fade-state",
       "extension": "scrollbox",
-      "description": "Internal Scrollbox mask composition or primary-axis marker.",
+      "description": "Internal mask composition or primary-axis marker on the Scrollbox or its only content child.",
       "syntax": "enum",
       "values": [
         "both",
@@ -15193,6 +15193,33 @@
       "name": "AelluxJsUpdateBaseTitle",
       "extension": "state-navigation",
       "description": "State Navigation command on document. Required detail: { title }.",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/runtime/events.htm"
+    },
+    {
+      "bubbles": true,
+      "cancelable": false,
+      "name": "AelluxJsViewportChange",
+      "extension": "viewport",
+      "composed": true,
+      "description": "Relevant geometry change, including the first measurable publication. Bubbling, composed and noncancelable on the observed element. detail: { viewport, x1, y1, x2, y2, x, y, visible, state, measurable, previous, initial }. Coordinates are unclamped physical values; CSS position outputs stay in -2..2. Unknown geometry uses null coordinates/state and visible: 0; only Change reports its loss after a valid publication. previous is an independent snapshot of the last published geometry.",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/runtime/events.htm"
+    },
+    {
+      "bubbles": true,
+      "cancelable": false,
+      "name": "AelluxJsViewportFullyInside",
+      "extension": "viewport",
+      "composed": true,
+      "description": "Transition to complete containment, including an initial matching measurable state. Bubbling, composed and noncancelable on the observed element. detail: { viewport, x1, y1, x2, y2, x, y, visible, state, measurable, previous, initial }. Coordinates are unclamped physical values; CSS position outputs stay in -2..2. Unknown geometry uses null coordinates/state and visible: 0; only Change reports its loss after a valid publication. previous is an independent snapshot of the last published geometry.",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/runtime/events.htm"
+    },
+    {
+      "bubbles": true,
+      "cancelable": false,
+      "name": "AelluxJsViewportFullyOutside",
+      "extension": "viewport",
+      "composed": true,
+      "description": "Transition to zero positive-area intersection, including an initial matching measurable state. Bubbling, composed and noncancelable on the observed element. detail: { viewport, x1, y1, x2, y2, x, y, visible, state, measurable, previous, initial }. Coordinates are unclamped physical values; CSS position outputs stay in -2..2. Unknown geometry uses null coordinates/state and visible: 0; only Change reports its loss after a valid publication. previous is an independent snapshot of the last published geometry.",
       "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/runtime/events.htm"
     }
   ]

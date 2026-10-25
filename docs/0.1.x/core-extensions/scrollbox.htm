@@ -538,20 +538,6 @@
                                     class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                     style="flex:0">
                                     <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
-                                      href="/core/docs/0.1.x/core-extensions/focus.htm" data-ae-overflow-marquee="190px">
-                                      Focus                                    </a>
-                                  </div>
-                                                                                                                                      <div
-                                    class="nav-item mt-1 small-md rounded-1 ps-md-1"
-                                    style="flex:0">
-                                    <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
-                                      href="/core/docs/0.1.x/core-extensions/point.htm" data-ae-overflow-marquee="190px">
-                                      Point                                    </a>
-                                  </div>
-                                                                                                                                      <div
-                                    class="nav-item mt-1 small-md rounded-1 ps-md-1"
-                                    style="flex:0">
-                                    <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                       href="/core/docs/0.1.x/core-extensions/preference.htm" data-ae-overflow-marquee="190px">
                                       Preference                                    </a>
                                   </div>
@@ -617,6 +603,20 @@
                                           class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                           style="flex:0">
                                           <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                            href="/core/docs/0.1.x/core-extensions/experimental/focus.htm" data-ae-overflow-marquee="190px">
+                                            Focus                                          </a>
+                                        </div>
+                                                                                <div
+                                          class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                          style="flex:0">
+                                          <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                            href="/core/docs/0.1.x/core-extensions/experimental/point.htm" data-ae-overflow-marquee="190px">
+                                            Point                                          </a>
+                                        </div>
+                                                                                <div
+                                          class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                          style="flex:0">
+                                          <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                             href="/core/docs/0.1.x/core-extensions/experimental/pwa.htm" data-ae-overflow-marquee="190px">
                                             PWA                                          </a>
                                         </div>
@@ -624,7 +624,7 @@
                                           class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                           style="flex:0">
                                           <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
-                                            href="/core/docs/0.1.x/core-extensions/viewport.htm" data-ae-overflow-marquee="190px">
+                                            href="/core/docs/0.1.x/core-extensions/experimental/viewport.htm" data-ae-overflow-marquee="190px">
                                             Viewport                                          </a>
                                         </div>
                                                                             </div>
@@ -765,9 +765,10 @@
 }
 </code></pre>
 <p>Use a nonnegative CSS length. Each fade&#39;s width is limited to the hidden distance, this maximum and half the visible axis. Its strength also decreases as the hidden distance approaches zero: 4px of hidden content produces a subtle fade covering at most 4px. <code>0px</code> removes the visual effect. Reduced motion keeps the indication because it adds no animation or artificial transition.</p>
-<p>The stationary mask is applied to the Scrollbox itself using a horizontal and a vertical <code>linear-gradient()</code>, combined with <code>mask-composite:intersect</code> (WebKit&#39;s <code>source-in</code> equivalent). Their transparency multiplies at the corners. If composition is unavailable, one gradient follows the configured Snap axis, otherwise the only scrollable axis or vertical when both scroll. Without mask support, scrolling continues without the effect. No wrappers, overlays, extra frame loop or recurring layout reads are introduced. Four private hidden-distance properties are published with the existing progress update and restored, including prior priorities, on unmount.</p>
-<p><strong>Painting limitation:</strong> a CSS mask composites the container together with its contents. The fade also attenuates the container&#39;s background, border and any native or custom scrollbar painted in the faded region. Their interaction remains available. Keep decoration on an existing surrounding element, adjust the fade size or disable the effect when an opaque border, background or scrollbar is required. Native scrolling, PDS, Elastic, Snap, nested boxes and sticky descendants retain their structure and behavior. Masking does not change focus, keyboard operation, text selection or pointer hit testing.</p>
-<p>An application mask already present at the first publish reserves the container for the application: automatic masking remains disabled for that mount. Scrollbox never writes inline <code>mask-*</code> properties. The generated mask rules use zero-specificity selectors, allowing later application styles to override them. Unmount removes the owned marker and restores the preceding distance values without touching authored masks.</p>
+<p>When the Scrollbox has exactly one direct content element, the mask is applied to that child, preserving the Scrollbox&#39;s background, border and scrollbars. Direct custom scrollbar elements are excluded from this count. With multiple content elements, the mask is applied to the Scrollbox itself. Detection stops at the second content child, avoiding a scan of long lists on every scroll update. Adding, removing or replacing children transfers the mask and restores the previous target&#39;s owned values and priorities.</p>
+<p>The mask uses a horizontal and a vertical <code>linear-gradient()</code>, combined with <code>mask-composite:intersect</code> (WebKit&#39;s <code>source-in</code> equivalent). Their transparency multiplies at the corners. A child mask is sized and positioned against the scroll viewport during the existing <code>publish(state)</code> layout read/update, so the fade stays at the visible edges as the child scrolls or Elastic transforms it. If composition is unavailable, one gradient follows the configured Snap axis, otherwise the only scrollable axis or vertical when both scroll. Without mask support, scrolling continues without the effect. No wrappers, overlays or extra frame loop are introduced. Private hidden-distance and mask-geometry properties are restored, including prior priorities, when the target changes or on unmount.</p>
+<p><strong>Painting limitation:</strong> a CSS mask composites its target together with the target&#39;s contents. With one content child, only that child&#39;s painting is faded. When the Scrollbox itself is the target, its background, border and any native or custom scrollbar painted in the faded region are also attenuated. Their interaction remains available. Use a single content child, keep decoration on an existing surrounding element, adjust the fade size or disable the effect when an opaque border, background or scrollbar is required. Native scrolling, PDS, Elastic, Snap, nested boxes and sticky descendants retain their structure and behavior. Masking does not change focus, keyboard operation, text selection or pointer hit testing.</p>
+<p>An application mask already present on the Scrollbox at the first publish reserves the container for the application: automatic masking remains disabled for that mount. A child with an existing application mask, or a child that is itself a Scrollbox, also retains ownership of its mask; the parent does not add an automatic fade. Scrollbox never writes inline <code>mask-*</code> properties. The generated mask rules use zero-specificity selectors, allowing later application styles to override them. Unmount restores the preceding marker, distance and geometry values without touching authored masks.</p>
 <h2>Custom scrollbars</h2>
 <p>Add <code>data-ae-scrollbar=&quot;vertical&quot;</code>, <code>&quot;horizontal&quot;</code>, or both (for example, <code>&quot;v h&quot;</code> or <code>&quot;y x&quot;</code>) to show custom scrollbars. An empty <code>data-ae-scrollbar</code> enables both axes. Set it to <code>&quot;none&quot;</code> to hide native scrollbars without creating custom bars. Scrollbox creates <code>data-ae-scrollbar-vertical</code> and <code>data-ae-scrollbar-horizontal</code> as direct children of the scrollbox, or reuses existing direct children with those attributes. They sit beside the content and are excluded from the elastic wrapper&#39;s single-child check. A bar is never a snap point unless explicitly marked with <code>data-ae-snap-item</code>. A bar appears only when its axis overflows and its computed <code>overflow-x</code> or <code>overflow-y</code> is <code>auto</code> or <code>scroll</code>; <code>hidden</code> and <code>clip</code> keep that axis&#39;s bar at <code>display: none</code>. Scrollbox adds <code>ae--native-sb-hide</code> for custom bars and for <code>&quot;none&quot;</code> to hide native scrollbars.</p>
 <p>The bars normally fade between opacity 0 and 1. Set inherited <code>--ae-scrollbar-opacity-fade</code> and <code>--ae-scrollbar-opacity-visible</code> on the scrollbox, including through inline CSS, to customize those values. Setting both to <code>1</code> keeps the bars opaque whenever their axis is scrollable. Mouse and pointer hover are tracked separately, so either one keeps the bars visible. They fade out after both hovers end or a click starts outside the box, unless PDS is active. After PDS ends, they remain visible for one second; when that timer ends, any active mouse or pointer hover still keeps them visible. The track overlays the viewport and follows scrolling with <code>translate3d</code>; its thumb uses a separate transform. Drag the thumb with a mouse, pen, or touch to scroll continuously; the track and thumb positions update during the movement so they remain under the pointer. While a scrollbar is being dragged, PDS cannot start on that scrollbox or its scroll chain, and CSS snap alignment is suspended until release. Clicking outside the thumb recenters it on the track only when the computed track background is visible and its opacity is greater than zero; a transparent or invisible track does not respond to that click. The weak CSS uses the same system <code>CanvasText</code> based colors as its native scrollbar styling. Set inherited <code>--ae-scrollbar-thumb-color</code>, <code>--ae-scrollbar-thumb-hover-color</code>, <code>--ae-scrollbar-track-color</code>, <code>--ae-scrollbar-thumb-radius</code>, and <code>--ae-scrollbar-size</code> on the scrollbox, including through inline CSS, to customize the thumb colors, track color, thumb corner radius, and bar thickness. The color properties have no registered initial value, so the weak CSS uses its <code>CanvasText</code> based thumb colors and transparent track when they are unset. The radius and thickness default to <code>10px</code> and <code>8px</code>. The same values style native scrollbars when custom bars are not enabled. Owned bar elements are removed at unmount; pre-existing bars and their original inline scrollbar properties are preserved.</p>
@@ -858,7 +859,7 @@
   console.log(index, item);
 });
 </code></pre>
-<p>Each <code>data-ae-snap-item</code> receives inline <code>--ae-snap-focus</code> at mount and as the box scrolls or refreshes. It uses the snap axis: <code>1</code> means aligned, falls by the alignment distance divided by the viewport size, and clamps to <code>0</code>. Prior inline values and priorities are restored on unmount. For normalized position and visible area, add <code>data-ae-viewport</code> to the item and use the independent <a href="viewport.htm">Viewport Extension</a>. The former <code>--ae-snap-viewport</code> output has been removed; use <code>--ae-viewport-x</code> or <code>--ae-viewport-y</code>. Snap works without Viewport.</p>
+<p>Each <code>data-ae-snap-item</code> receives inline <code>--ae-snap-focus</code> at mount and as the box scrolls or refreshes. It uses the snap axis: <code>1</code> means aligned, falls by the alignment distance divided by the viewport size, and clamps to <code>0</code>. Prior inline values and priorities are restored on unmount. For normalized position and visible area, add <code>data-ae-viewport</code> to the item and use the independent <a href="experimental/viewport.htm">Viewport Extension</a>. The former <code>--ae-snap-viewport</code> output has been removed; use <code>--ae-viewport-x</code> or <code>--ae-viewport-y</code>. Snap works without Viewport.</p>
 <p>Place <code>data-ae-scrollbox-snap</code> on the Scrollbox itself and mark each point with <code>data-ae-snap-item</code>. An empty value or <code>horizontal</code> selects the horizontal axis; <code>vertical</code> selects the vertical axis. Without elastic, marked descendants of the scrollbox are points; with elastic, only marked descendants inside its wrapper are points. Items belonging to a nested scrollbox are excluded. If no eligible item exists, diagnostic 1121 reports the missing points and snap stays disabled. The weak CSS applies <code>scroll-snap-type: x mandatory</code> or <code>y mandatory</code> to the box. An empty <code>data-ae-snap-item</code> aligns its center; <code>start</code>, <code>left</code>, and <code>top</code> align its start, while <code>end</code>, <code>right</code>, and <code>bottom</code> align its end along the selected axis. The directional names are aliases for CSS&#39;s logical <code>start</code> and <code>end</code>. The extension toggles CSS classes to suspend snapping during PDS, elastic pressure, scrollbar thumb dragging, and wheel input beyond the first or last item. At a list end, wheel input follows native scrolling and can reach an ancestor when <code>overscroll-behavior</code> permits it. The snap rule returns 120 ms after the last edge wheel event. The focus and viewport variables keep updating while snapping is suspended. At mount, Scrollbox aligns the first point immediately. Snap does not alter the box&#39;s or items&#39; inline snap declarations.</p>
 <p>For a quick flick in desktop PDS, Scrollbox advances one point from the gesture&#39;s starting item in the gesture direction. Further pointer moves in that drag keep the same starting item. The flick must last no more than 100 ms, move more than 1 px but less than 100 px, and either finish within 50 ms or reach 0.5 px/ms. Only movement along the snap axis counts. A short desktop flick can finish within the 100 ms text-selection wait if selection did not start. Longer PDS gestures let CSS Scroll Snap choose the destination. PDS momentum does not run while snap is enabled. Touch scrolling and its momentum remain native; snap items use <code>scroll-snap-stop: always</code> to prevent a native fling from passing over an intermediate point. Touch release does not trigger scripted flick navigation.</p>
 <p>Native CSS Scroll Snap permits free scrolling within a snap point wider or taller than the viewport. Use points no larger than the viewport when every release must align to one center; flicks and controller navigation can still move between oversized points.</p>
@@ -899,6 +900,54 @@ gallery.previous();  // Move to the preceding point.
 <p><code>index</code> is zero-based in DOM order. All three methods return <code>true</code> when a point is available and <code>false</code> otherwise. They work in both native and pointer modes.</p>
 <h2>Distribution cost</h2>
 <p>The four-edge fade adds 1,958/730 bytes to Scrollbox Modern, 2,108/698 bytes to Legacy and 1,706/242 bytes to its stylesheet (raw/gzip level 9), compared with the preceding checked-in artifacts. The Modern script retains its existing limits. The dedicated CSS raw limit increases from 5 to 6.5 KiB; Legacy changes from 44/14 to 46/14.5 KiB (raw/gzip).</p>
+<p>Applying the fade to a single content child adds viewport geometry and target restoration. Compared with the preceding checked-in artifacts, minified raw/gzip level 9 sizes change as follows:</p>
+<table>
+<thead>
+<tr>
+<th>Artifact</th>
+<th>Before (bytes)</th>
+<th>After (bytes)</th>
+<th>Delta (bytes)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Scrollbox Modern</td>
+<td>41,063 / 13,259</td>
+<td>42,203 / 13,646</td>
+<td>+1,140 / +387</td>
+</tr>
+<tr>
+<td>Scrollbox Legacy</td>
+<td>46,757 / 14,584</td>
+<td>47,993 / 15,019</td>
+<td>+1,236 / +435</td>
+</tr>
+<tr>
+<td>Scrollbox CSS</td>
+<td>6,198 / 1,194</td>
+<td>6,650 / 1,270</td>
+<td>+452 / +76</td>
+</tr>
+<tr>
+<td>Full Modern</td>
+<td>190,334 / 58,564</td>
+<td>191,474 / 59,002</td>
+<td>+1,140 / +438</td>
+</tr>
+<tr>
+<td>Full Legacy</td>
+<td>517,450 / 152,324</td>
+<td>518,689 / 152,708</td>
+<td>+1,239 / +384</td>
+</tr>
+<tr>
+<td>Full CSS</td>
+<td>124,196 / 11,622</td>
+<td>124,648 / 11,701</td>
+<td>+452 / +79</td>
+</tr>
+</tbody></table>
+<p>Scrollbox Legacy&#39;s limits change from 46/14.5 to 47/14.75 KiB (raw/gzip). The other affected artifacts retain their existing limits.</p>
 <table>
 <thead>
 <tr>
@@ -987,8 +1036,8 @@ gallery.previous();  // Move to the preceding point.
 <tr>
 <td>Fade painting</td>
 <td>Known Limit</td>
-<td><span style="white-space: normal !important;">The mask attenuates the container, background, border and bars together. Missing mask/composite support reduces or omits fading; authored masks take precedence as documented.</span></td>
-<td><span style="white-space: normal !important;">Keep decoration outside the masked box or disable fading when it obscures required visuals.</span></td>
+<td><span style="white-space: normal !important;">With one content child, only that child is masked. Otherwise the mask attenuates the container, background, border and bars together. Missing mask/composite support reduces or omits fading; authored masks take precedence as documented.</span></td>
+<td><span style="white-space: normal !important;">Use one content child, keep decoration outside the masked box or disable fading when it obscures required visuals.</span></td>
 </tr>
 <tr>
 <td>Reconfiguration</td>

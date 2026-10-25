@@ -538,20 +538,6 @@
                                     class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                     style="flex:0">
                                     <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
-                                      href="/core/docs/0.1.x/core-extensions/focus.htm" data-ae-overflow-marquee="190px">
-                                      Focus                                    </a>
-                                  </div>
-                                                                                                                                      <div
-                                    class="nav-item mt-1 small-md rounded-1 ps-md-1"
-                                    style="flex:0">
-                                    <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
-                                      href="/core/docs/0.1.x/core-extensions/point.htm" data-ae-overflow-marquee="190px">
-                                      Point                                    </a>
-                                  </div>
-                                                                                                                                      <div
-                                    class="nav-item mt-1 small-md rounded-1 ps-md-1"
-                                    style="flex:0">
-                                    <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                       href="/core/docs/0.1.x/core-extensions/preference.htm" data-ae-overflow-marquee="190px">
                                       Preference                                    </a>
                                   </div>
@@ -617,6 +603,20 @@
                                           class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                           style="flex:0">
                                           <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                            href="/core/docs/0.1.x/core-extensions/experimental/focus.htm" data-ae-overflow-marquee="190px">
+                                            Focus                                          </a>
+                                        </div>
+                                                                                <div
+                                          class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                          style="flex:0">
+                                          <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                            href="/core/docs/0.1.x/core-extensions/experimental/point.htm" data-ae-overflow-marquee="190px">
+                                            Point                                          </a>
+                                        </div>
+                                                                                <div
+                                          class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                          style="flex:0">
+                                          <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                             href="/core/docs/0.1.x/core-extensions/experimental/pwa.htm" data-ae-overflow-marquee="190px">
                                             PWA                                          </a>
                                         </div>
@@ -624,7 +624,7 @@
                                           class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                           style="flex:0">
                                           <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
-                                            href="/core/docs/0.1.x/core-extensions/viewport.htm" data-ae-overflow-marquee="190px">
+                                            href="/core/docs/0.1.x/core-extensions/experimental/viewport.htm" data-ae-overflow-marquee="190px">
                                             Viewport                                          </a>
                                         </div>
                                                                             </div>
@@ -774,7 +774,7 @@ gallery.previous();
 </code></pre>
 <p>The index is zero based. Each method returns <code>true</code> when a snap item is available.</p>
 <h2>Position migration</h2>
-<p><code>--ae-snap-viewport</code> has been removed. Add <code>data-ae-viewport=&quot;x&quot;</code> or <code>data-ae-viewport=&quot;y&quot;</code> to each item requiring position information and use <code>--ae-viewport-x</code> or <code>--ae-viewport-y</code>. The independent <a href="viewport.htm">Viewport Extension</a> selects the nearest native scroll container, which can differ from the owning Snap box when another scroll container intervenes. Choose the relevant dimension yourself. Snap continues to publish <code>--ae-snap-focus</code> and works without Viewport.</p>
+<p><code>--ae-snap-viewport</code> has been removed. Add <code>data-ae-viewport=&quot;x&quot;</code> or <code>data-ae-viewport=&quot;y&quot;</code> to each item requiring position information and use <code>--ae-viewport-x</code> or <code>--ae-viewport-y</code>. The independent <a href="experimental/viewport.htm">Viewport Extension</a> selects the nearest native scroll container, which can differ from the owning Snap box when another scroll container intervenes. Choose the relevant dimension yourself. Snap continues to publish <code>--ae-snap-focus</code> and works without Viewport.</p>
 <h2>Interaction hooks</h2>
 <p>Scrollbox emits <code>AelluxJsScrollboxInteraction</code> from its element while a custom scrollbar thumb, Pointer Drag Scroll, or elastic edge interaction is active. Its <code>detail</code> is <code>{ reason, active }</code>, where <code>reason</code> is <code>&quot;scrollbar&quot;</code>, <code>&quot;pointer&quot;</code>, or <code>&quot;elastic&quot;</code>. Scrollbox Snap uses this event to suspend native snap alignment during those interactions and resume it afterward. Other Extensions can consume the same event without accessing Scrollbox state.</p>
 <p>Desktop Pointer Drag Scroll also emits <code>AelluxJsScrollboxSnapGesture</code> with <code>detail</code> containing <code>phase</code> (<code>&quot;probe&quot;</code>, <code>&quot;start&quot;</code>, or <code>&quot;end&quot;</code>), <code>axis</code>, <code>moved</code>, coordinates, and timestamps. Probe and end are cancelable. Probes occur before PDS starts. Scrollbox Snap accepts an eligible short flick at probe and cancels end for the snap axis, letting snap settle the gesture, including its one-item flick behavior. The starting item stays fixed throughout the drag. An enabled snap declaration disables PDS momentum in all axes, even with <code>data-ae-scrollbox-momentum=&quot;true&quot;</code>; native touch momentum remains unchanged.</p>

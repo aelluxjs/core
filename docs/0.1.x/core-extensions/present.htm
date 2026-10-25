@@ -538,20 +538,6 @@
                                     class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                     style="flex:0">
                                     <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
-                                      href="/core/docs/0.1.x/core-extensions/focus.htm" data-ae-overflow-marquee="190px">
-                                      Focus                                    </a>
-                                  </div>
-                                                                                                                                      <div
-                                    class="nav-item mt-1 small-md rounded-1 ps-md-1"
-                                    style="flex:0">
-                                    <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
-                                      href="/core/docs/0.1.x/core-extensions/point.htm" data-ae-overflow-marquee="190px">
-                                      Point                                    </a>
-                                  </div>
-                                                                                                                                      <div
-                                    class="nav-item mt-1 small-md rounded-1 ps-md-1"
-                                    style="flex:0">
-                                    <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                       href="/core/docs/0.1.x/core-extensions/preference.htm" data-ae-overflow-marquee="190px">
                                       Preference                                    </a>
                                   </div>
@@ -617,6 +603,20 @@
                                           class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                           style="flex:0">
                                           <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                            href="/core/docs/0.1.x/core-extensions/experimental/focus.htm" data-ae-overflow-marquee="190px">
+                                            Focus                                          </a>
+                                        </div>
+                                                                                <div
+                                          class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                          style="flex:0">
+                                          <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                            href="/core/docs/0.1.x/core-extensions/experimental/point.htm" data-ae-overflow-marquee="190px">
+                                            Point                                          </a>
+                                        </div>
+                                                                                <div
+                                          class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                          style="flex:0">
+                                          <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                             href="/core/docs/0.1.x/core-extensions/experimental/pwa.htm" data-ae-overflow-marquee="190px">
                                             PWA                                          </a>
                                         </div>
@@ -624,7 +624,7 @@
                                           class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                           style="flex:0">
                                           <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
-                                            href="/core/docs/0.1.x/core-extensions/viewport.htm" data-ae-overflow-marquee="190px">
+                                            href="/core/docs/0.1.x/core-extensions/experimental/viewport.htm" data-ae-overflow-marquee="190px">
                                             Viewport                                          </a>
                                         </div>
                                                                             </div>
@@ -770,7 +770,7 @@
 </code></pre>
 <p>Click keeps priority: Present queues a tap fallback with a 32 ms grace period, allowing touch compatibility clicks delivered in a later input task to arrive first. A click reaching Present before that fallback, on the same control or its descendants and with the same pointer ID when reported consistently, cancels the pending tap and performs the action immediately. WebKit can report a touch/pen compatibility click as mouse input with another ID; that pair is matched by its target within the same grace period. A tap without that click performs the action once when its fallback runs. Different controls and different IDs of the same pointer type remain independent, and a later gesture is accepted normally. This deduplication belongs to Present; Point continues to emit tap immediately and native click remains unchanged.</p>
 <p>Keyboard clicks keep their normal path. Mouse taps on an already hovered trigger respect the existing hover suppression; touch taps retain their configured action. Unmounting a related Present target or control, unmounting/remounting its Point controller, or destroying Present cancels the pending fallback. Destroy also removes the tap listener.</p>
-<p>The integration adds no dependencies. Minified Present grows from 18,858 to 20,037 bytes (gzip: 6,727 to 7,124), and Legacy Present from 26,358 to 27,825 bytes (gzip: 9,329 to 9,760). Budgets change from 18.5 / 6.5 KiB to 20 / 7.25 KiB for Modern and from 26 / 9 KiB to 28 / 9.75 KiB for Legacy. Both preceding gzip artifacts already exceeded their old limits. Combined Full costs are recorded in <a href="point.htm#bundle-cost">Point</a>.</p>
+<p>The integration adds no dependencies. Minified Present grows from 18,858 to 20,037 bytes (gzip: 6,727 to 7,124), and Legacy Present from 26,358 to 27,825 bytes (gzip: 9,329 to 9,760). Budgets change from 18.5 / 6.5 KiB to 20 / 7.25 KiB for Modern and from 26 / 9 KiB to 28 / 9.75 KiB for Legacy. Both preceding gzip artifacts already exceeded their old limits. Combined Full costs are recorded in <a href="experimental/point.htm#bundle-cost">Point</a>.</p>
 <h2>Motion and state</h2>
 <p>The Extension exposes <code>pop(element)</code>, <code>unpop(element)</code>, <code>toggle(element, goto)</code>, and <code>trigger(element, action)</code> through <code>$ae.ext.present</code>. A mounted element also has controller methods:</p>
 <pre><code class="language-js">const panel = $ae(&quot;details&quot;).present;

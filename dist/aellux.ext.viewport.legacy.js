@@ -1,5 +1,51 @@
 (function() {
   // src/src/aellux.ext.viewport.js
+  function _typeof(o) {
+    "@babel/helpers - typeof";
+    return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
+      return typeof o2;
+    } : function(o2) {
+      return o2 && "function" == typeof Symbol && o2.constructor === Symbol && o2 !== Symbol.prototype ? "symbol" : typeof o2;
+    }, _typeof(o);
+  }
+  function ownKeys(e, r) {
+    var t = Object.keys(e);
+    if (Object.getOwnPropertySymbols) {
+      var o = Object.getOwnPropertySymbols(e);
+      r && (o = o.filter(function(r2) {
+        return Object.getOwnPropertyDescriptor(e, r2).enumerable;
+      })), t.push.apply(t, o);
+    }
+    return t;
+  }
+  function _objectSpread(e) {
+    for (var r = 1; r < arguments.length; r++) {
+      var t = null != arguments[r] ? arguments[r] : {};
+      r % 2 ? ownKeys(Object(t), true).forEach(function(r2) {
+        _defineProperty(e, r2, t[r2]);
+      }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function(r2) {
+        Object.defineProperty(e, r2, Object.getOwnPropertyDescriptor(t, r2));
+      });
+    }
+    return e;
+  }
+  function _defineProperty(e, r, t) {
+    return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: true, configurable: true, writable: true }) : e[r] = t, e;
+  }
+  function _toPropertyKey(t) {
+    var i = _toPrimitive(t, "string");
+    return "symbol" == _typeof(i) ? i : i + "";
+  }
+  function _toPrimitive(t, r) {
+    if ("object" != _typeof(t) || !t) return t;
+    var e = t[Symbol.toPrimitive];
+    if (void 0 !== e) {
+      var i = e.call(t, r || "default");
+      if ("object" != _typeof(i)) return i;
+      throw new TypeError("@@toPrimitive must return a primitive value.");
+    }
+    return ("string" === r ? String : Number)(t);
+  }
   function _regenerator() {
     /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/babel/babel/blob/main/packages/babel-helpers/LICENSE */
     var e, t, r = "function" == typeof Symbol ? Symbol : {}, n = r.iterator || "@@iterator", o = r.toStringTag || "@@toStringTag";
@@ -164,6 +210,7 @@
     var extensionName = "viewport";
     var attribute = AelluxJs.attr(extensionName);
     var properties = ["--ae-viewport-x", "--ae-viewport-y", "--ae-viewport-visible"];
+    var EVENT_EPSILON = 1e-6;
     var document = root.document;
     var states = /* @__PURE__ */ new Map();
     var groups = /* @__PURE__ */ new Map();
@@ -219,6 +266,8 @@
         }),
         writtenStyle: null,
         values: [],
+        snapshot: null,
+        unmountRequest: null,
         resizeTargets: /* @__PURE__ */ new Set()
       };
       states.set(element, state);
@@ -280,6 +329,7 @@
       AelluxJs.onEvent(root, "$resize", scheduleAll);
       AelluxJs.onEvent(document, "$load", scheduleAll, true);
       AelluxJs.onEvent(document, AelluxJs.eventName("Layout"), onLayout);
+      AelluxJs.onEvent(document, AelluxJs.eventName("BeforeUnmount"), onBeforeUnmount);
       if (root.ResizeObserver) resizeObserver = new root.ResizeObserver(scheduleAll);
       if (root.MutationObserver) {
         mutations = new root.MutationObserver(function(records) {
@@ -302,6 +352,7 @@
       AelluxJs.offEvent(root, "$resize", scheduleAll);
       AelluxJs.offEvent(document, "$load", scheduleAll, true);
       AelluxJs.offEvent(document, AelluxJs.eventName("Layout"), onLayout);
+      AelluxJs.offEvent(document, AelluxJs.eventName("BeforeUnmount"), onBeforeUnmount);
       (_mutations = mutations) === null || _mutations === void 0 || _mutations.disconnect();
       (_resizeObserver = resizeObserver) === null || _resizeObserver === void 0 || _resizeObserver.disconnect();
       mutations = resizeObserver = null;
@@ -323,17 +374,36 @@
         _iterator3.f();
       }
     }
-    function scheduleAll() {
-      var _iterator4 = _createForOfIteratorHelper(groups.values()), _step4;
+    function onBeforeUnmount(event) {
+      var _event$detail2 = event.detail, subtree = _event$detail2.root, extensions = _event$detail2.extensions, detachedOnly = _event$detail2.detachedOnly;
+      if (extensions && !extensions.includes(extensionName)) return;
+      var _iterator4 = _createForOfIteratorHelper(states.values()), _step4;
       try {
         for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
-          var group = _step4.value;
-          schedule(group);
+          var state = _step4.value;
+          if (detachedOnly && state.element.isConnected) continue;
+          if (state.element === subtree || subtree.contains(state.element) || subtree === document && !state.element.isConnected) state.unmountRequest = event;
         }
       } catch (err) {
         _iterator4.e(err);
       } finally {
         _iterator4.f();
+      }
+    }
+    function current(state, group) {
+      return states.get(state.element) === state && state.group === group && state.element.isConnected && state.element.hasAttribute(attribute) && (!state.unmountRequest || state.unmountRequest.defaultPrevented);
+    }
+    function scheduleAll() {
+      var _iterator5 = _createForOfIteratorHelper(groups.values()), _step5;
+      try {
+        for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
+          var group = _step5.value;
+          schedule(group);
+        }
+      } catch (err) {
+        _iterator5.e(err);
+      } finally {
+        _iterator5.f();
       }
     }
     function join(state, reference) {
@@ -430,15 +500,16 @@
             case 2:
               _context2.n = 3;
               return AelluxJs.waitLayout.update(group.id, function() {
-                var _iterator8 = _createForOfIteratorHelper(measurements), _step8;
+                var _iterator9 = _createForOfIteratorHelper(measurements), _step9;
                 try {
-                  for (_iterator8.s(); !(_step8 = _iterator8.n()).done; ) {
-                    var _step8$value = _step8.value, state = _step8$value.state, values = _step8$value.values;
-                    if (states.get(state.element) !== state || state.group !== group) continue;
+                  var _loop = function _loop2() {
+                    var _step9$value = _step9.value, state = _step9$value.state, values = _step9$value.values, snapshot = _step9$value.snapshot, changed = _step9$value.changed;
+                    if (states.get(state.element) !== state || state.group !== group) return 0;
                     if (values === null) {
                       AelluxJs.mountManager.unmount(state.element, extensionName);
-                      continue;
+                      return 0;
                     }
+                    if (!current(state, group)) return 0;
                     for (var index = 0; index < properties.length; index++) {
                       if (values[index] === state.values[index]) continue;
                       if (values[index] === null) state.memories[index].restore();
@@ -446,11 +517,36 @@
                     }
                     state.values = values;
                     state.writtenStyle = state.element.getAttribute("style");
+                    if (changed) {
+                      var previous = state.snapshot;
+                      state.snapshot = snapshot;
+                      var initial = previous === null;
+                      var emit = function emit2(name) {
+                        return AelluxJs.dispatchFrom(state.element, name, {
+                          bubbles: true,
+                          composed: true,
+                          cancelable: false,
+                          detail: _objectSpread(_objectSpread({}, snapshot), {}, {
+                            previous: previous && _objectSpread({}, previous),
+                            initial: initial
+                          })
+                        });
+                      };
+                      emit("ViewportChange");
+                      if (current(state, group) && snapshot.measurable && snapshot.state !== (previous === null || previous === void 0 ? void 0 : previous.state)) {
+                        if (snapshot.state === "inside") emit("ViewportFullyInside");
+                        else if (snapshot.state === "outside") emit("ViewportFullyOutside");
+                      }
+                    }
+                  }, _ret;
+                  for (_iterator9.s(); !(_step9 = _iterator9.n()).done; ) {
+                    _ret = _loop();
+                    if (_ret === 0) continue;
                   }
                 } catch (err) {
-                  _iterator8.e(err);
+                  _iterator9.e(err);
                 } finally {
-                  _iterator8.f();
+                  _iterator9.f();
                 }
               });
             case 3:
@@ -478,16 +574,16 @@
         var reference = document;
         for (var parent = element.parentElement; parent; parent = parent.parentElement) {
           targets.add(parent);
-          var _iterator5 = _createForOfIteratorHelper(parent.children), _step5;
+          var _iterator6 = _createForOfIteratorHelper(parent.children), _step6;
           try {
-            for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
-              var sibling = _step5.value;
+            for (_iterator6.s(); !(_step6 = _iterator6.n()).done; ) {
+              var sibling = _step6.value;
               targets.add(sibling);
             }
           } catch (err) {
-            _iterator5.e(err);
+            _iterator6.e(err);
           } finally {
-            _iterator5.f();
+            _iterator6.f();
           }
           var rootStyle = parent === document.body ? root.getComputedStyle(document.documentElement) : null;
           var propagatedBody = rootStyle && rootStyle.overflowX === "visible" && rootStyle.overflowY === "visible";
@@ -501,9 +597,12 @@
           continue;
         }
         if (!viewport) viewport = viewportRect(reference);
+        var _valuesFor = valuesFor(state, viewport), values = _valuesFor.values, snapshot = _valuesFor.snapshot;
         measurements.push({
           state: state,
-          values: valuesFor(state, viewport)
+          values: values,
+          snapshot: snapshot,
+          changed: geometryChanged(state.snapshot, snapshot)
         });
       }
       return measurements;
@@ -533,10 +632,10 @@
     }
     function observeSizes(state, targets) {
       if (!resizeObserver) return;
-      var _iterator6 = _createForOfIteratorHelper(state.resizeTargets), _step6;
+      var _iterator7 = _createForOfIteratorHelper(state.resizeTargets), _step7;
       try {
-        for (_iterator6.s(); !(_step6 = _iterator6.n()).done; ) {
-          var target = _step6.value;
+        for (_iterator7.s(); !(_step7 = _iterator7.n()).done; ) {
+          var target = _step7.value;
           if (targets.has(target)) continue;
           var count = resizeTargets.get(target) - 1;
           if (count) resizeTargets.set(target, count);
@@ -546,23 +645,23 @@
           }
         }
       } catch (err) {
-        _iterator6.e(err);
+        _iterator7.e(err);
       } finally {
-        _iterator6.f();
+        _iterator7.f();
       }
-      var _iterator7 = _createForOfIteratorHelper(targets), _step7;
+      var _iterator8 = _createForOfIteratorHelper(targets), _step8;
       try {
-        for (_iterator7.s(); !(_step7 = _iterator7.n()).done; ) {
-          var _target = _step7.value;
+        for (_iterator8.s(); !(_step8 = _iterator8.n()).done; ) {
+          var _target = _step8.value;
           if (state.resizeTargets.has(_target)) continue;
           var _count = resizeTargets.get(_target) || 0;
           if (!_count) resizeObserver.observe(_target);
           resizeTargets.set(_target, _count + 1);
         }
       } catch (err) {
-        _iterator7.e(err);
+        _iterator8.e(err);
       } finally {
-        _iterator7.f();
+        _iterator8.f();
       }
       state.resizeTargets = targets;
     }
@@ -598,14 +697,57 @@
     function valuesFor(state, viewport) {
       var rect = state.element.getBoundingClientRect();
       var x = 0, y = 0, visible = 0;
-      if ([viewport.left, viewport.top, viewport.width, viewport.height, rect.left, rect.top, rect.width, rect.height].every(Number.isFinite) && viewport.width > 0 && viewport.height > 0 && rect.width > 0 && rect.height > 0) {
-        x = clamp((rect.left + rect.width / 2 - viewport.left - viewport.width / 2) * 2 / viewport.width, -2, 2);
-        y = clamp((rect.top + rect.height / 2 - viewport.top - viewport.height / 2) * 2 / viewport.height, -2, 2);
+      var snapshot = {
+        viewport: state.group.reference,
+        x1: null,
+        y1: null,
+        x2: null,
+        y2: null,
+        x: null,
+        y: null,
+        visible: visible,
+        state: null,
+        measurable: false
+      };
+      if ([viewport.left, viewport.top, viewport.width, viewport.height, rect.left, rect.top, rect.right, rect.bottom, rect.width, rect.height].every(Number.isFinite) && viewport.width > 0 && viewport.height > 0 && rect.width > 0 && rect.height > 0) {
+        var centerX = viewport.left + viewport.width / 2, centerY = viewport.top + viewport.height / 2;
+        var x1 = (rect.left - centerX) * 2 / viewport.width, x2 = (rect.right - centerX) * 2 / viewport.width;
+        var y1 = (rect.top - centerY) * 2 / viewport.height, y2 = (rect.bottom - centerY) * 2 / viewport.height;
+        if (![x1, y1, x2, y2, (x1 + x2) / 2, (y1 + y2) / 2].every(Number.isFinite)) return {
+          values: [state.axes === "y" ? null : 0, state.axes === "x" ? null : 0, 0],
+          snapshot: snapshot
+        };
+        snapshot.x1 = x1;
+        snapshot.y1 = y1;
+        snapshot.x2 = x2;
+        snapshot.y2 = y2;
+        snapshot.x = (x1 + x2) / 2;
+        snapshot.y = (y1 + y2) / 2;
+        x = clamp(snapshot.x, -2, 2);
+        y = clamp(snapshot.y, -2, 2);
         var width = Math.max(0, Math.min(rect.right, viewport.left + viewport.width) - Math.max(rect.left, viewport.left));
         var height = Math.max(0, Math.min(rect.bottom, viewport.top + viewport.height) - Math.max(rect.top, viewport.top));
         visible = clamp(width / rect.width * (height / rect.height), 0, 1);
+        snapshot.visible = visible;
+        snapshot.measurable = true;
+        snapshot.state = width > 0 && height > 0 ? rect.left >= viewport.left && rect.top >= viewport.top && rect.right <= viewport.left + viewport.width && rect.bottom <= viewport.top + viewport.height ? "inside" : "partial" : "outside";
       }
-      return [state.axes === "y" ? null : x, state.axes === "x" ? null : y, visible];
+      return {
+        values: [state.axes === "y" ? null : x, state.axes === "x" ? null : y, visible],
+        snapshot: snapshot
+      };
+    }
+    function geometryChanged(previous, snapshot) {
+      if (!previous) return snapshot.measurable;
+      if (snapshot.viewport !== previous.viewport || snapshot.measurable !== previous.measurable || snapshot.state !== previous.state) return true;
+      if (snapshot.measurable && ["x1", "y1", "x2", "y2"].some(function(key) {
+        return [-1, 1].some(function(edge) {
+          return Math.sign(snapshot[key] - edge) !== Math.sign(previous[key] - edge);
+        });
+      })) return true;
+      return ["x1", "y1", "x2", "y2", "x", "y", "visible"].some(function(key) {
+        return Math.abs(snapshot[key] - previous[key]) > EVENT_EPSILON;
+      });
     }
     function clamp(value, minimum, maximum) {
       return Math.max(minimum, Math.min(maximum, value));

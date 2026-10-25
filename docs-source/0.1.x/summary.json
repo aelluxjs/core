@@ -50,8 +50,6 @@
         { "label": "Anchor", "href": "core-extensions/anchor.md" },
         { "label": "Overflow Marquee", "href": "core-extensions/overflow-marquee.md" },
         { "label": "Feedback", "href": "core-extensions/feedback.md" },
-        { "label": "Focus", "href": "core-extensions/focus.md" },
-        { "label": "Point", "href": "core-extensions/point.md" },
         { "label": "Preference", "href": "core-extensions/preference.md" },
         { "label": "Present", "href": "core-extensions/present.md" },
         { "label": "Scrollbox", "href": "core-extensions/scrollbox.md" },
@@ -63,8 +61,10 @@
           "children":[
             { "label": "Ajax Href", "href": "core-extensions/experimental/ajax-href.md" },
             { "label": "Dialog", "href": "core-extensions/experimental/dialog.md" },
+            { "label": "Focus", "href": "core-extensions/experimental/focus.md" },
+            { "label": "Point", "href": "core-extensions/experimental/point.md" },
             { "label": "PWA", "href": "core-extensions/experimental/pwa.md" },
-            { "label": "Viewport", "href": "core-extensions/viewport.md" }
+            { "label": "Viewport", "href": "core-extensions/experimental/viewport.md" }
           ]
         }
       ]

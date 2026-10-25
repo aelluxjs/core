@@ -11,12 +11,14 @@ import {
 const version = "1.2.3";
 const sri = "sha384-" + createHash("sha384").update("artifact").digest("base64");
 
-test("Experimental documentation matches the official bundle classification", async () => {
+test("Experimental documentation includes external implementations and the documented Focus/Point preview", async () => {
   const { summary } = JSON.parse(await readFile(new URL("../../docs-source/0.1.x/summary.json", import.meta.url), "utf8"));
   const experimental = summary.find(group => group.slug === "core-extensions")
     .children.find(group => group.slug === "experimental");
+  // Focus and Point are classified as Experimental in the documentation while
+  // their implementations remain bundled in Full.
   assert.deepEqual(experimental.children.map(entry => entry.href.split("/").pop().replace(/\.md$/, "")).sort(),
-    officialExtensionDefinitions.filter(entry => entry.experimental).map(entry => entry.name).sort());
+    [...officialExtensionDefinitions.filter(entry => entry.experimental).map(entry => entry.name), "focus", "point"].sort());
 });
 
 test("Full artifacts bundle stable Core implementations and Basic bundles none", async () => {

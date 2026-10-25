@@ -538,20 +538,6 @@
                                     class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                     style="flex:0">
                                     <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
-                                      href="/core/docs/0.1.x/core-extensions/focus.htm" data-ae-overflow-marquee="190px">
-                                      Focus                                    </a>
-                                  </div>
-                                                                                                                                      <div
-                                    class="nav-item mt-1 small-md rounded-1 ps-md-1 active"
-                                    style="flex:0">
-                                    <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
-                                      href="/core/docs/0.1.x/core-extensions/point.htm" data-ae-overflow-marquee="190px">
-                                      Point                                    </a>
-                                  </div>
-                                                                                                                                      <div
-                                    class="nav-item mt-1 small-md rounded-1 ps-md-1"
-                                    style="flex:0">
-                                    <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                       href="/core/docs/0.1.x/core-extensions/preference.htm" data-ae-overflow-marquee="190px">
                                       Preference                                    </a>
                                   </div>
@@ -597,7 +583,7 @@
                                 </div>
 
                                 <div id="children2-experimental" class="docs-menu-panel border-start ms-2"
-                                  data-ae-present="height opacity" data-ae-unpop-on-outside="false"                                   hidden>
+                                  data-ae-present="height opacity" data-ae-unpop-on-outside="false" >
                                     <div class="ps-2 gap-1 d-flex flex-column overflow-hidden" data-ae-present-motion>
                                                                               <div
                                           class="nav-item mt-1 small-md rounded-1 ps-md-1"
@@ -612,6 +598,20 @@
                                           <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                             href="/core/docs/0.1.x/core-extensions/experimental/dialog.htm" data-ae-overflow-marquee="190px">
                                             Dialog                                          </a>
+                                        </div>
+                                                                                <div
+                                          class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                          style="flex:0">
+                                          <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                            href="/core/docs/0.1.x/core-extensions/focus.htm" data-ae-overflow-marquee="190px">
+                                            Focus                                          </a>
+                                        </div>
+                                                                                <div
+                                          class="nav-item mt-1 small-md rounded-1 ps-md-1 active"
+                                          style="flex:0">
+                                          <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                            href="/core/docs/0.1.x/core-extensions/point.htm" data-ae-overflow-marquee="190px">
+                                            Point                                          </a>
                                         </div>
                                                                                 <div
                                           class="nav-item mt-1 small-md rounded-1 ps-md-1"
@@ -720,6 +720,10 @@
                     <a href="/core/docs/0.1.x/core-extensions/adaptive.htm">
                       Core Extensions                    </a>
                   </li>
+                                                                          <li class="breadcrumb-item text-capitalize text-nowrap flex-shrink-0">
+                    <a href="/core/docs/0.1.x/core-extensions/experimental/ajax-href.htm">
+                      Experimental                    </a>
+                  </li>
                                                                             <li class="breadcrumb-item text-capitalize text-nowrap flex-shrink-0">
                       Point                    </li>
 
@@ -734,19 +738,19 @@
         Focus      </span>
     </a>
 
-                  <a href="/core/docs/0.1.x/core-extensions/preference.htm"
+                  <a href="/core/docs/0.1.x/core-extensions/experimental/pwa.htm"
             class="text-decoration-none d-inline-flex flex-row justify-content-end gap-2" style="width: 40%;">
             <span
               class="text-decoration-underline text-truncate overflow-hidden d-inline-block align-middle flex-fill text-end"
               style="max-width:200px" data-ae-overflow-marquee="80">
-              Preference            </span> →
+              PWA            </span> →
           </a>
           </div>          </div>
 
           <main id="doc-content" style="min-height: calc(100vh - 200px);" class="js-toc-content"
             ajax-load="doc-content">
             <h1>Point Extension</h1>
-<p><code>point</code> tracks the pointers currently pressed or hovering over the document and relates them to mounted elements with <code>data-ae-point</code>. It is included in the <code>full</code> runtime. Basic registers it automatically; explicit registration can force eager loading:</p>
+<p><code>point</code> is an <strong>Experimental</strong> official Extension that tracks the pointers currently pressed or hovering over the document and relates them to mounted elements with <code>data-ae-point</code>. It is included in the <code>full</code> runtime. Basic registers it automatically; explicit registration can force eager loading:</p>
 <pre><code class="language-html">&lt;div id=&quot;canvas&quot; data-ae-point=&quot;2&quot;&gt;&lt;/div&gt;
 </code></pre>
 <pre><code class="language-js">$ae.ext(&quot;point&quot;);
@@ -834,12 +838,12 @@ $ae.on(&quot;Ready&quot;, function (event) {
         Focus      </span>
     </a>
 
-                  <a href="/core/docs/0.1.x/core-extensions/preference.htm"
+                  <a href="/core/docs/0.1.x/core-extensions/experimental/pwa.htm"
             class="text-decoration-none d-inline-flex flex-row justify-content-end gap-2" style="width: 40%;">
             <span
               class="text-decoration-underline text-truncate overflow-hidden d-inline-block align-middle flex-fill text-end"
               style="max-width:200px" data-ae-overflow-marquee="80">
-              Preference            </span> →
+              PWA            </span> →
           </a>
           </div>          </div>
 

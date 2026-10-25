@@ -3,6 +3,7 @@ import { expect, test } from "@playwright/test";
 const hiddenProperties = ["top", "right", "bottom", "left"].map(side => `--ae-scrollbox-hidden-${side}`);
 const boxHTML = (extra = "", content = '<div id="content" style="width:320px;height:300px;background:black"></div>') =>
   `<div id="box" data-ae-scrollbox="native" data-ae-scrollbar="none" style="width:120px;height:100px" ${extra}>${content}</div>`;
+const content = box => box.locator(':scope > :not([data-ae-scrollbar-vertical]):not([data-ae-scrollbar-horizontal])').first();
 
 async function start(page, html = boxHTML(), options = {}) {
   await page.goto("/tests/index.htm");
@@ -33,24 +34,41 @@ async function scroll(box, x, y) {
   })).toBe(true);
 }
 
-async function pixels(page, box) {
+async function pixels(page, box, inset = 0) {
   const png = (await box.screenshot()).toString("base64");
-  return page.evaluate(async png => {
+  return page.evaluate(async ({ png, inset }) => {
     const image = new Image(); image.src = `data:image/png;base64,${png}`; await image.decode();
     const canvas = document.createElement("canvas"); canvas.width = image.width; canvas.height = image.height;
     const context = canvas.getContext("2d"); context.drawImage(image, 0, 0);
     const pixel = (x, y) => Array.from(context.getImageData(x, y, 1, 1).data);
     const x = Math.floor(image.width / 2), y = Math.floor(image.height / 2);
-    return { top: pixel(x, 0)[0], right: pixel(image.width - 1, y)[0], bottom: pixel(x, image.height - 1)[0],
-      left: pixel(0, y)[0], middle: pixel(x, y)[0], corners: [pixel(0, 0)[0], pixel(image.width - 1, 0)[0],
+    return { top: pixel(x, inset)[0], right: pixel(image.width - 1 - inset, y)[0], bottom: pixel(x, image.height - 1 - inset)[0],
+      left: pixel(inset, y)[0], middle: pixel(x, y)[0], corners: [pixel(0, 0)[0], pixel(image.width - 1, 0)[0],
         pixel(image.width - 1, image.height - 1)[0], pixel(0, image.height - 1)[0]] };
-  }, png);
+  }, { png, inset });
 }
 
 for (const forceLegacy of [false, true]) {
-  test(`four physical fades compose and weaken continuously at every boundary (${forceLegacy})`, async ({ page }) => {
-    const box = await start(page, boxHTML(), { forceLegacy });
-    await expect(box).toHaveAttribute("data-ae-scrollbox-fade-state", "both");
+  test(`one content child receives the fade while the box keeps its decoration (${forceLegacy})`, async ({ page }) => {
+    const box = await start(page, boxHTML().replace('height:100px',
+      'height:100px;background:yellow;border:4px solid red;padding:6px;transform:scale(1.25);transform-origin:top left')
+      .replace('background:black', 'background:black;margin:8px;transform:scale(1.05);transform-origin:top left'), { forceLegacy });
+    const content = page.locator('#content');
+    await expect(box).toHaveCSS('mask-image', 'none');
+    await expect(content).toHaveCSS('mask-image', /linear-gradient/);
+    await scroll(box, 70, 80);
+    const image = await pixels(page, box);
+    expect(image.top).toBe(255);
+    expect(image.left).toBe(255);
+    expect(image.middle).toBe(0);
+    const inside = await pixels(page, box, 5);
+    for (const side of ["top", "right", "bottom", "left"]) expect(inside[side]).toBeGreaterThan(200);
+    expect(inside.middle).toBe(0);
+  });
+
+  for (const childCount of [1, 2]) test(`four physical fades compose and weaken continuously at every boundary (${childCount} children, ${forceLegacy})`, async ({ page }) => {
+    const box = await start(page, boxHTML().replace('</div></div>', `</div>${childCount === 2 ? '<i hidden></i>' : ''}</div>`), { forceLegacy });
+    await expect(childCount === 1 ? content(box) : box).toHaveAttribute("data-ae-scrollbox-fade-state", "both");
     expect(await distances(box)).toEqual([0, 200, 200, 0]);
     const initial = await pixels(page, box);
     expect(initial.top).toBe(0); expect(initial.left).toBe(0);
@@ -71,19 +89,19 @@ for (const forceLegacy of [false, true]) {
     await box.evaluate(element => element.style.setProperty("--ae-scrollbox-fade-size", "0px"));
     const zero = await pixels(page, box);
     for (const side of ["top", "right", "bottom", "left", "middle"]) expect(zero[side]).toBe(0);
-    expect(await box.locator(":scope > *").count()).toBe(1);
+    expect(await box.locator(":scope > *").count()).toBe(childCount);
   });
 
   for (const axis of ["x", "y", "none"]) test(`only scrollable ${axis} axes contribute, and fitting content has no mask (${forceLegacy})`, async ({ page }) => {
-    const content = `<div style="width:${axis === "x" ? 320 : 100}px;height:${axis === "y" ? 300 : 80}px;background:black"></div>`;
-    const box = await start(page, boxHTML("", content), { forceLegacy });
+    const markup = `<div style="width:${axis === "x" ? 320 : 100}px;height:${axis === "y" ? 300 : 80}px;background:black"></div>`;
+    const box = await start(page, boxHTML("", markup), { forceLegacy });
     expect(await distances(box)).toEqual([0, axis === "x" ? 200 : 0, axis === "y" ? 200 : 0, 0]);
-    if (axis === "none") await expect(box).toHaveCSS("mask-image", "none");
+    if (axis === "none") await expect(content(box)).toHaveCSS("mask-image", "none");
     else {
-      await expect(box).toHaveCSS("mask-image", /linear-gradient/);
+      await expect(content(box)).toHaveCSS("mask-image", /linear-gradient/);
       await box.evaluate((element, axis) => element.style.setProperty(axis === "x" ? "overflow-x" : "overflow-y", "hidden"), axis);
       await page.evaluate(() => AelluxJs.mountManager.update(document));
-      await expect(box).toHaveCSS("mask-image", "none");
+      await expect(content(box)).toHaveCSS("mask-image", "none");
     }
   });
 
@@ -101,22 +119,22 @@ for (const forceLegacy of [false, true]) {
 
   test(`dynamic configuration, geometry, reduced motion and unmount preserve DOM and styles (${forceLegacy})`, async ({ page }) => {
     const box = await start(page, boxHTML('data-ae-scrollbox-fade="false"'), { forceLegacy, environment: "development" });
-    await expect(box).toHaveCSS("mask-image", "none");
+    await expect(content(box)).toHaveCSS("mask-image", "none");
     await box.evaluate(element => element.setAttribute("data-ae-scrollbox-fade", "true"));
-    await expect(box).toHaveCSS("mask-image", /linear-gradient/);
+    await expect(content(box)).toHaveCSS("mask-image", /linear-gradient/);
     await box.evaluate(element => element.setAttribute("data-ae-scrollbox-fade", "invalid"));
     await page.evaluate(() => AelluxJs.mountManager.update(document));
     expect(await page.evaluate(() => AelluxJs.diagnostics.showHistory().filter(entry =>
       entry.context?.attribute === "data-ae-scrollbox-fade").map(entry => entry.code))).toContain(2026);
     await box.evaluate(element => element.removeAttribute("data-ae-scrollbox-fade"));
     await page.evaluate(() => document.documentElement.setAttribute("data-ae-reduced-motion", "reduced"));
-    await expect(box).toHaveCSS("mask-image", /linear-gradient/);
+    await expect(content(box)).toHaveCSS("mask-image", /linear-gradient/);
     await box.evaluate(element => { element.style.width = "400px"; element.style.height = "400px"; });
-    await expect(box).toHaveCSS("mask-image", "none");
+    await expect(content(box)).toHaveCSS("mask-image", "none");
     await box.evaluate(element => { element.style.width = "120px"; element.style.height = "100px"; });
-    await expect(box).toHaveCSS("mask-image", /linear-gradient/);
+    await expect(content(box)).toHaveCSS("mask-image", /linear-gradient/);
     await page.locator("#content").evaluate(element => { element.style.width = "100px"; element.style.height = "80px"; });
-    await expect(box).toHaveCSS("mask-image", "none");
+    await expect(content(box)).toHaveCSS("mask-image", "none");
     const identity = await page.evaluate(async () => {
       const box = document.getElementById("box"), child = document.getElementById("content");
       let clicks = 0; child.addEventListener("click", () => clicks++);
@@ -141,21 +159,71 @@ for (const forceLegacy of [false, true]) {
     await expect(box).toHaveCSS("mask-image", mask);
   });
 
+  test(`child changes transfer the mask and restore preceding values and priorities (${forceLegacy})`, async ({ page }) => {
+    const box = await start(page, boxHTML().replace('background:black',
+      'background:black;--ae-scrollbox-hidden-top:7px!important;--ae-scrollbox-mask-left:3px!important'), { forceLegacy });
+    const child = content(box);
+    await expect(child).toHaveCSS("mask-image", /linear-gradient/);
+    await scroll(box, 70, 80);
+    await box.evaluate(element => element.appendChild(document.createElement('span')));
+    await expect(box).toHaveCSS("mask-image", /linear-gradient/);
+    await expect(child).toHaveCSS("mask-image", "none");
+    const authored = element => ['--ae-scrollbox-hidden-top', '--ae-scrollbox-mask-left'].map(name =>
+      [element.style.getPropertyValue(name), element.style.getPropertyPriority(name)]);
+    expect(await child.evaluate(authored)).toEqual([['7px', 'important'], ['3px', 'important']]);
+    await box.evaluate(element => element.lastElementChild.remove());
+    await expect(box).toHaveCSS("mask-image", "none");
+    await expect(child).toHaveCSS("mask-image", /linear-gradient/);
+    await box.evaluate(element => {
+      window.previousFadeChild = element.firstElementChild;
+      const replacement = document.createElement('div');
+      replacement.id = 'replacement';
+      replacement.style.cssText = 'width:320px;height:300px;background:black';
+      element.replaceChild(replacement, element.firstElementChild);
+    });
+    const replacement = page.locator('#replacement');
+    await expect(replacement).toHaveCSS("mask-image", /linear-gradient/);
+    expect(await page.evaluate(() => {
+      const child = window.previousFadeChild;
+      return [child.hasAttribute('data-ae-scrollbox-fade-state'),
+        child.style.getPropertyValue('--ae-scrollbox-hidden-top'), child.style.getPropertyPriority('--ae-scrollbox-hidden-top'),
+        child.style.getPropertyValue('--ae-scrollbox-mask-left'), child.style.getPropertyPriority('--ae-scrollbox-mask-left')];
+    })).toEqual([false, '7px', 'important', '3px', 'important']);
+    await page.evaluate(() => AelluxJs.unmount(document.getElementById('box'), 'scrollbox'));
+    await expect(replacement).toHaveCSS("mask-image", "none");
+    expect(await replacement.evaluate(authored)).toEqual([['', ''], ['', '']]);
+    await expect(replacement).not.toHaveAttribute('data-ae-scrollbox-fade-state');
+  });
+
+  test(`an authored child mask is preserved without masking its parent (${forceLegacy})`, async ({ page }) => {
+    const box = await start(page, boxHTML().replace('background:black',
+      'background:black;mask-image:linear-gradient(to right,black,transparent)'), { forceLegacy });
+    const child = content(box);
+    const mask = await child.evaluate(element => getComputedStyle(element).maskImage);
+    await expect(box).toHaveCSS('mask-image', 'none');
+    await expect(child).not.toHaveAttribute('data-ae-scrollbox-fade-state');
+    await scroll(box, 80, 90);
+    await expect(child).toHaveCSS('mask-image', mask);
+    await page.evaluate(() => AelluxJs.unmount(document.getElementById('box'), 'scrollbox'));
+    await expect(child).toHaveCSS('mask-image', mask);
+  });
+
   test(`composition fallback selects vertical, Snap's horizontal axis, and no-mask fallback stays scrollable (${forceLegacy})`, async ({ page }) => {
     await page.addInitScript(() => {
       const supports = CSS.supports.bind(CSS);
       CSS.supports = (name, value) => name.includes("mask-composite") ? false : supports(name, value);
     });
     const box = await start(page, boxHTML(), { forceLegacy });
-    await expect(box).toHaveAttribute("data-ae-scrollbox-fade-state", "y");
-    expect((await box.evaluate(element => getComputedStyle(element).maskImage)).match(/linear-gradient/g)).toHaveLength(1);
+    await expect(content(box)).toHaveAttribute("data-ae-scrollbox-fade-state", "y");
+    expect((await content(box).evaluate(element => getComputedStyle(element).maskImage)).match(/linear-gradient/g)).toHaveLength(1);
     await box.evaluate(element => element.setAttribute("data-ae-scrollbox-snap", "horizontal"));
-    await expect(box).toHaveAttribute("data-ae-scrollbox-fade-state", "x");
+    await expect(content(box)).toHaveAttribute("data-ae-scrollbox-fade-state", "x");
     await scroll(box, 80, 70);
     await page.addInitScript(() => { const supports = CSS.supports.bind(CSS);
       CSS.supports = (name, value) => name.includes("mask-image") ? false : supports(name, value); });
     const unsupported = await start(page, boxHTML(), { forceLegacy });
     await expect(unsupported).toHaveCSS("mask-image", "none");
+    await expect(content(unsupported)).toHaveCSS("mask-image", "none");
     await scroll(unsupported, 50, 60);
     expect(await distances(unsupported)).toEqual([60, 150, 140, 50]);
   });
@@ -170,6 +238,21 @@ test("nested boxes retain independent mask geometry and sticky descendants", asy
   expect(await distances(box)).toEqual([40, 170, 160, 30]);
   await expect(page.locator("#sticky")).toHaveCSS("position", "sticky");
   expect(await page.locator("#sticky").evaluate(element => element.getBoundingClientRect().top)).toBeCloseTo((await box.boundingBox()).y, 1);
+});
+
+test("a direct child Scrollbox retains ownership of its own fade", async ({ page }) => {
+  const box = await start(page, boxHTML("", '<div id="inner" data-ae-scrollbox data-ae-scrollbar="none" style="width:320px;height:300px">' +
+    '<div id="inner-content" style="width:600px;height:500px;background:black"></div></div>'));
+  const inner = page.locator("#inner"), innerContent = page.locator("#inner-content");
+  await expect(box).toHaveCSS("mask-image", "none");
+  await expect(inner).toHaveCSS("mask-image", "none");
+  await expect(innerContent).toHaveCSS("mask-image", /linear-gradient/);
+  await scroll(box, 30, 40);
+  await scroll(inner, 20, 10);
+  expect(await distances(inner)).toEqual([10, 260, 190, 20]);
+  await box.evaluate(element => element.setAttribute("data-ae-scrollbox-fade", "false"));
+  await expect(innerContent).toHaveCSS("mask-image", /linear-gradient/);
+  expect(await distances(inner)).toEqual([10, 260, 190, 20]);
 });
 
 test("small viewports keep a visible center and small overflow stays proportional", async ({ page }) => {
@@ -217,11 +300,14 @@ test("custom scrollbars keep their tracks and drag interaction with the stationa
   await page.mouse.down(); await page.mouse.move(rect.x + rect.width / 2, rect.y + 55, { steps: 8 });
   await page.mouse.up();
   await expect.poll(async () => (await distances(box))[0]).toBeGreaterThan(20);
-  await expect(box).toHaveCSS("mask-image", /linear-gradient/);
+  await expect(box).toHaveCSS("mask-image", "none");
+  await expect(content(box)).toHaveCSS("mask-image", /linear-gradient/);
+  await expect(bar).toHaveCSS("mask-image", "none");
   await page.evaluate(() => AelluxJs.unmount(document.getElementById("box"), "scrollbox"));
   await expect(box.locator("[data-ae-scrollbar-vertical]")).toHaveCount(0);
   await expect(box.locator("[data-ae-scrollbar-horizontal]")).toHaveCount(0);
   await expect(box).toHaveCSS("mask-image", "none");
+  await expect(content(box)).toHaveCSS("mask-image", "none");
 });
 
 for (const model of ["default", "reverse"]) test(`historical positive RTL scroll coordinates normalize to physical distances (${model})`, async ({ page }) => {

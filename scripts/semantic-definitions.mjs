@@ -26,8 +26,8 @@ export const semanticAttributes = [
   ...["overflow-marquee-content", "overflow-marquee-active", "overflow-marquee-viewport", "overflow-marquee-ready"].map(name =>
     attribute(name, "overflow-marquee", "Internal Overflow Marquee wrapper or active-state marker.", { syntax: "presence", role: "internal" })),
   attribute("scrollbox", "scrollbox", "Native scrolling with progress state. Pointer mode adds desktop mouse/pen drag scrolling; it requires usable overflow.", { syntax: "enum", values: ["", "native", "pointer"], default: "native" }),
-  attribute("scrollbox-fade", "scrollbox", "Progressive overflow fade on all scrollable edges. Enabled by default; false disables it. Existing application masks are preserved.", { syntax: "enum", values: ["", "true", "false"], default: "true" }),
-  attribute("scrollbox-fade-state", "scrollbox", "Internal Scrollbox mask composition or primary-axis marker.", { syntax: "enum", values: ["both", "x", "y"], role: "internal" }),
+  attribute("scrollbox-fade", "scrollbox", "Progressive overflow fade on all scrollable edges. Targets the only content child, excluding custom bars, or the container otherwise. Enabled by default; false disables it. Existing application masks are preserved.", { syntax: "enum", values: ["", "true", "false"], default: "true" }),
+  attribute("scrollbox-fade-state", "scrollbox", "Internal mask composition or primary-axis marker on the Scrollbox or its only content child.", { syntax: "enum", values: ["both", "x", "y"], role: "internal" }),
   attribute("scrollbox-wheel-horizontal", "scrollbox", "Set false to disable vertical-wheel conversion to horizontal scrolling.", { syntax: "enum", values: ["true", "false"], default: "true" }),
   attribute("scrollbox-momentum", "scrollbox", "Set false to disable desktop pointer momentum. Snap disables momentum on every axis.", { syntax: "enum", values: ["true", "false"], default: "true" }),
   attribute("scrollbox-elastic", "scrollbox", "Mark exactly one direct content child. Empty uses 1/4; one or two nonnegative fractions or px values set vertical/horizontal limits. False disables elastic behavior.", { syntax: "elastic-limits", values: ["", "false", "1/4", "80px", "80px 40px"], default: "1/4" }),
@@ -108,6 +108,11 @@ export const semanticEvents = [
   ...["BeforeMount", "BeforeUnmount"].map(name => ({ name, extension: "core", cancelable: true, description: `${name} pass preflight on document. Cancel to prevent the pass and its completion event. detail: { root, extensions }${name === "BeforeUnmount" ? "; detachedOnly identifies automatic detached cleanup" : ""}.` })),
   ...["Mount", "Unmount", "Update"].map(name => ({ name, extension: "core", description: `${name} pass completed on document. detail: { root, extensions, elements }.` })),
   { name: "AdaptiveUpdate", extension: "adaptive", description: "Element dimensions changed. detail: { width, height, ratio }." },
+  ...["ViewportChange", "ViewportFullyInside", "ViewportFullyOutside"].map(name => ({
+    name, extension: "viewport", composed: true,
+    description: `${name === "ViewportChange" ? "Relevant geometry change, including the first measurable publication" :
+      `Transition to ${name === "ViewportFullyInside" ? "complete containment" : "zero positive-area intersection"}, including an initial matching measurable state`}. Bubbling, composed and noncancelable on the observed element. detail: { viewport, x1, y1, x2, y2, x, y, visible, state, measurable, previous, initial }. Coordinates are unclamped physical values; CSS position outputs stay in -2..2. Unknown geometry uses null coordinates/state and visible: 0; only Change reports its loss after a valid publication. previous is an independent snapshot of the last published geometry.`
+  })),
   { name: "Feedback", extension: "feedback", description: "Cancelable feedback event. detail: { type, message, value, target, motion }; handled boundaries stop propagation.", cancelable: true },
   ...["Down", "Move", "Up", "Cancel", "Hover"].map(name => ({ name: `Pointer${name}`, extension: "point", bubbles: false, description: "Selected element's pointer notification. Does not bubble; detail includes pointer, target, pressStart, originalEvent and hover." })),
   { name: "Tap", extension: "point", composed: true, description: "Short primary pointer activation of an eligible mounted Point control. Bubbles across shadow boundaries; detail: { pointerType, pointerId, duration, distance, originalEvent }. Independent of native click and scroll." },

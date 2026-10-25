@@ -138,6 +138,7 @@
     ]);
     const properties = ["--ae-scroll-y-progress", "--ae-scroll-x-progress"];
     const fadeProperties = ["top", "right", "bottom", "left"].map((side) => `--ae-scrollbox-hidden-${side}`);
+    const fadeGeometryProperties = ["left", "top", "width", "height"].map((part) => `--ae-scrollbox-mask-${part}`);
     const supportsCSS = (name, value) => {
       var _a, _b;
       return !!((_b = (_a = root.CSS) == null ? void 0 : _a.supports) == null ? void 0 : _b.call(_a, name, value));
@@ -289,6 +290,9 @@
         desktop: false,
         fadeAuthored: null,
         fadeAxes: null,
+        fadeTarget: null,
+        fadeMemory: null,
+        fadeMasks: /* @__PURE__ */ new WeakMap(),
         cursor: { owned: false },
         wheelEnabled: true,
         momentumEnabled: true,
@@ -410,7 +414,7 @@
       if (state) configure(state);
     }
     function unmountScrollbox(element) {
-      var _a;
+      var _a, _b;
       const state = scrollboxes.get(element);
       if (!state) return;
       state.disposed = true;
@@ -441,7 +445,8 @@
       AelluxJs.waitLayout.cancel(state.resizeLayoutId);
       AelluxJs.waitLayout.cancel(state.publishLayoutId);
       offEvent(root, "$resize", state.onResize);
-      (_a = elementMemories.get(element)) == null ? void 0 : _a.restore();
+      (_a = state.fadeMemory) == null ? void 0 : _a.restore();
+      (_b = elementMemories.get(element)) == null ? void 0 : _b.restore();
       elementMemories.delete(element);
       cursorMemories.delete(element);
       for (const name of scrollEdgeClasses) element.classList.remove(name);
@@ -486,8 +491,14 @@
     function hasSnap(element) {
       return element.hasAttribute(snapAttribute) && element.getAttribute(snapAttribute) !== "false";
     }
-    function contentChildren(element) {
-      return Array.from(element.children).filter((child) => !child.hasAttribute(scrollbarVerticalAttribute) && !child.hasAttribute(scrollbarHorizontalAttribute));
+    function contentChildren(element, limit) {
+      const children = [];
+      for (let child = element.firstElementChild; child; child = child.nextElementSibling) {
+        if (child.hasAttribute(scrollbarVerticalAttribute) || child.hasAttribute(scrollbarHorizontalAttribute)) continue;
+        children.push(child);
+        if (children.length === limit) break;
+      }
+      return children;
     }
     function scrollbarAxes(value) {
       if (value === null) return { x: false, y: false };
@@ -1827,6 +1838,12 @@
       const element = state.element;
       if (state.fadeAuthored === null)
         state.fadeAuthored = [style.maskImage, style.webkitMaskImage].some((value) => value && value !== "none");
+      const children = contentChildren(element, 2);
+      const target = children.length === 1 ? children[0] : element;
+      if (target !== element && !state.fadeMasks.has(target)) {
+        const targetStyle = root.getComputedStyle(target);
+        state.fadeMasks.set(target, target.hasAttribute(attribute) || [targetStyle.maskImage, targetStyle.webkitMaskImage].some((value) => value && value !== "none"));
+      }
       if (state.elastic.owned) {
         metrics = state.metrics || metrics;
         axes = state.fadeAxes || axes;
@@ -1841,7 +1858,46 @@
       ];
       const snapAxis = hasSnap(element) ? element.getAttribute(snapAttribute) === "vertical" ? "y" : "x" : null;
       const primary = snapAxis || (axes.y ? "y" : "x");
-      return { distances, mode: maskSupported && !state.fadeAuthored && element.getAttribute(fadeAttribute) !== "false" && (axes.x || axes.y) ? compositeSupported ? "both" : primary : "" };
+      const mode = maskSupported && !state.fadeAuthored && !state.fadeMasks.get(target) && element.getAttribute(fadeAttribute) !== "false" && (axes.x || axes.y) ? compositeSupported ? "both" : primary : "";
+      let geometry = null;
+      if (mode && target !== element) {
+        const boxRect = element.getBoundingClientRect();
+        const targetRect = target.getBoundingClientRect();
+        const scaleX = targetRect.width ? (target.offsetWidth || targetRect.width) / targetRect.width : 1;
+        const scaleY = targetRect.height ? (target.offsetHeight || targetRect.height) / targetRect.height : 1;
+        const boxScaleX = element.offsetWidth ? boxRect.width / element.offsetWidth : 1;
+        const boxScaleY = element.offsetHeight ? boxRect.height / element.offsetHeight : 1;
+        geometry = [
+          (boxRect.left + element.clientLeft * boxScaleX - targetRect.left) * scaleX,
+          (boxRect.top + element.clientTop * boxScaleY - targetRect.top) * scaleY,
+          element.clientWidth * boxScaleX * scaleX,
+          element.clientHeight * boxScaleY * scaleY
+        ];
+      }
+      return { distances, mode, target: mode ? target : null, geometry };
+    }
+    function writeFadeProperty(element, name, value) {
+      if (element.style.getPropertyPriority(name)) element.style.removeProperty(name);
+      element.style.setProperty(name, `${value}px`);
+    }
+    function updateFade(state, fade) {
+      var _a;
+      if (state.fadeTarget !== fade.target) {
+        (_a = state.fadeMemory) == null ? void 0 : _a.restore();
+        state.fadeTarget = fade.target;
+        state.fadeMemory = fade.target ? AelluxJs.persist.element.save(
+          fade.target,
+          [fadeStateAttribute],
+          fade.target === state.element ? [] : [...fadeProperties, ...fadeGeometryProperties]
+        ) : null;
+      }
+      fadeProperties.forEach((name, index) => writeFadeProperty(state.element, name, fade.distances[index]));
+      if (!fade.target) return;
+      if (fade.target !== state.element) {
+        fadeProperties.forEach((name, index) => writeFadeProperty(fade.target, name, fade.distances[index]));
+        fadeGeometryProperties.forEach((name, index) => writeFadeProperty(fade.target, name, fade.geometry[index]));
+      }
+      fade.target.setAttribute(fadeStateAttribute, fade.mode);
     }
     function publish(state) {
       if (state.disposed) return;
@@ -1889,12 +1945,7 @@
           }
           state.element.style.setProperty(properties[0], values.y);
           state.element.style.setProperty(properties[1], values.x);
-          fadeProperties.forEach((name, index) => {
-            if (state.element.style.getPropertyPriority(name)) state.element.style.removeProperty(name);
-            state.element.style.setProperty(name, `${values.fade.distances[index]}px`);
-          });
-          if (values.fade.mode) state.element.setAttribute(fadeStateAttribute, values.fade.mode);
-          else state.element.removeAttribute(fadeStateAttribute);
+          updateFade(state, values.fade);
           if (values.edges && !state.elastic.owned) {
             scrollEdgeClasses.forEach((name, index) => state.element.classList.toggle(name, values.edges[index]));
           }

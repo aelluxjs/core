@@ -618,9 +618,12 @@ test("mouseover and pointer down use independent visibility timers", async ({ pa
   await box.evaluate(element => {
     const content = element.querySelector("#content");
     content.dispatchEvent(new MouseEvent("mouseover", { bubbles: true }));
-    content.dispatchEvent(new MouseEvent("mouseout", { bubbles: true }));
   });
   await expect(track).toHaveCSS("opacity", "1");
+  // Establish visibility before starting the short hover-only hide timer, so
+  // polling cannot miss the brief opaque interval between CSS transitions.
+  await box.evaluate(element => element.querySelector("#content")
+    .dispatchEvent(new MouseEvent("mouseout", { bubbles: true })));
   await expect(track).toHaveCSS("opacity", "0");
 });
 

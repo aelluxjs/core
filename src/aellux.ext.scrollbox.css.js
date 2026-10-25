@@ -24,7 +24,17 @@ export function generateScrollboxCSS(AelluxJs) {
   scrollbar-color: color-mix(in srgb, CanvasText 50%, transparent) transparent;
 }
 
-:where([${scrollboxAttribute}][${fadeStateAttribute}]) {
+:where([${fadeStateAttribute}]) {
+  --ae-scrollbox-mask-left: 0px;
+  --ae-scrollbox-mask-top: 0px;
+  --ae-scrollbox-mask-width: 100%;
+  --ae-scrollbox-mask-height: 100%;
+  -webkit-mask-position: var(--ae-scrollbox-mask-left, 0px) var(--ae-scrollbox-mask-top, 0px);
+  mask-position: var(--ae-scrollbox-mask-left, 0px) var(--ae-scrollbox-mask-top, 0px);
+  -webkit-mask-size: var(--ae-scrollbox-mask-width, 100%) var(--ae-scrollbox-mask-height, 100%);
+  mask-size: var(--ae-scrollbox-mask-width, 100%) var(--ae-scrollbox-mask-height, 100%);
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
   --ae-scrollbox-fade-length: max(0px, var(--ae-scrollbox-fade-size, 16px));
   --ae-scrollbox-fade-left: min(50%, var(--ae-scrollbox-fade-length), var(--ae-scrollbox-hidden-left));
   --ae-scrollbox-fade-right: min(50%, var(--ae-scrollbox-fade-length), var(--ae-scrollbox-hidden-right));
@@ -39,17 +49,17 @@ export function generateScrollboxCSS(AelluxJs) {
     #000 var(--ae-scrollbox-fade-top), #000 calc(100% - var(--ae-scrollbox-fade-bottom)),
     transparent calc(100% + var(--ae-scrollbox-fade-length) - var(--ae-scrollbox-fade-bottom)));
 }
-:where([${scrollboxAttribute}][${fadeStateAttribute}="both"]) {
+:where([${fadeStateAttribute}="both"]) {
   -webkit-mask-image: var(--ae-scrollbox-mask-x), var(--ae-scrollbox-mask-y);
   -webkit-mask-composite: source-in;
   mask-image: var(--ae-scrollbox-mask-x), var(--ae-scrollbox-mask-y);
   mask-composite: intersect;
 }
-:where([${scrollboxAttribute}][${fadeStateAttribute}="x"]) {
+:where([${fadeStateAttribute}="x"]) {
   -webkit-mask-image: var(--ae-scrollbox-mask-x);
   mask-image: var(--ae-scrollbox-mask-x);
 }
-:where([${scrollboxAttribute}][${fadeStateAttribute}="y"]) {
+:where([${fadeStateAttribute}="y"]) {
   -webkit-mask-image: var(--ae-scrollbox-mask-y);
   mask-image: var(--ae-scrollbox-mask-y);
 }

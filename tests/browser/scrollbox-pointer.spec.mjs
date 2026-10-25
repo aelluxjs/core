@@ -3673,7 +3673,12 @@ for (const mode of ["native", "pointer"]) {
       return { immediate, afterFrames: wrapper.getAttribute("style"), releasing,
         left: element.scrollLeft };
     });
-    expect(result).toEqual({ immediate: original, afterFrames: original, releasing: false, left: 0 });
+    // Interaction cleanup restores authored styles immediately. Fade geometry
+    // follows the next scheduled publication and must also settle afterward.
+    const withoutFadeGeometry = style => style.replace(/--ae-scrollbox-mask-(?:left|top|width|height):[^;]*;/g, "").trim();
+    expect({ ...result, immediate: withoutFadeGeometry(result.immediate) }).toEqual({
+      immediate: withoutFadeGeometry(original), afterFrames: original, releasing: false, left: 0
+    });
   });
 }
 
