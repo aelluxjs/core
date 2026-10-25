@@ -386,6 +386,13 @@
                                     class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                     style="flex:0">
                                     <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                      href="/core/docs/0.1.x/runtime/known-limits-and-risks.htm" data-ae-overflow-marquee="190px">
+                                      Known Limits &amp; Risks                                    </a>
+                                  </div>
+                                                                                                                                      <div
+                                    class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                    style="flex:0">
+                                    <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                       href="/core/docs/0.1.x/runtime/es5-support.htm" data-ae-overflow-marquee="190px">
                                       ES5 Support                                    </a>
                                   </div>
@@ -764,6 +771,11 @@ An Extension receives its configuration as the <code>options</code> argument to 
 <p>The runtime awaits the value returned by <code>init(options)</code>. The Extension receives <code>initialized: true</code> only after that value resolves, and <code>$ae.wait(extensionName)</code> resolves to its public API at that point. Concurrent calls share the pending initialization. If <code>init()</code> throws or its Promise rejects, the runtime reports <code>ERROR_EXTENSION_INITIALIZE</code> (<code>1102</code>), leaves <code>initialized</code> false, resolves that attempt to <code>null</code>, and allows a later call to retry initialization. Register mount maps and expose usable Extension-wide services before the Promise resolves.</p>
 <p>Every Extension must follow the applicable <a href="accessibility.htm">accessibility requirements</a>. Declare its capability profile and document only the relevant interaction, structure, presentation, motion, integration, infrastructure, lifecycle, and limitation fields. Requirements outside the declared behavior may be marked not applicable with a short reason.</p>
 <p>Document any additional resource origins your Extension requires and see <a href="csp-and-trust.htm">CSP requirements and Extension trust</a> for the host application&#39;s loading constraints.</p>
+<h2>Known Limits &amp; Risks</h2>
+<p>Every official Extension must maintain a <code>## Known Limits &amp; Risks</code> section as part of its public documentation, including Experimental Extensions. Link to the <a href="../runtime/known-limits-and-risks.htm">shared Core boundaries</a> and describe only constraints specific to the Extension.</p>
+<p>Document relevant contract limits, API dependencies and fallbacks, identified operational risks, validation gaps and practical recommendations. Prefer a concise table with <code>Area</code>, <code>Type</code>, <code>Description</code> and <code>Recommendation</code> columns; add explanations or the <code>Known Limits</code>, <code>Performance Risks</code>, <code>Behavioral Risks</code>, <code>Compatibility &amp; Validation Gaps</code> and <code>Recommended Practices</code> subsections only where useful. There is no minimum number of entries, and no requirement to invent risks or fill empty categories.</p>
+<p>Use <strong>Known Limit</strong> for a demonstrated contract restriction, <strong>Potential Risk</strong> for a conditional outcome, and <strong>Validation Gap</strong> for reliability not established by the available checks. Reserve <strong>Known Issue</strong> for a reproducible defect; give the observed behavior and link to a regression test or issue when available. Cite the relevant implementation, existing contract, test or validation matrix. Test presence does not establish a new passing result, and a hypothetical scenario is not a confirmed browser defect.</p>
+<p>Summarize existing explanations with internal links instead of duplicating them. Keep the section proportional to the behavior and revise it when the public contract, compatibility requirements or validation evidence changes.</p>
 <h2>DOM Mount Contract</h2>
 <p>Extensions with element behavior register their selectors and handlers with <code>AelluxJs.mountManager</code> during <code>init()</code>:</p>
 <pre><code class="language-js">AelluxJs.extAttach(extensionName, { init, destroy });

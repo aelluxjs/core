@@ -26,3 +26,19 @@ The Extension dispatches `AjaxHrefStart`, `AjaxHrefLoaded`, `AjaxHrefError`, and
 ## Accessibility profile
 
 Use native anchors with useful `href` destinations. Consumers must manage focus and announce changed content as appropriate; this Extension does not move focus or create a live region. The optional Feedback Extension receives busy and progress updates when available.
+
+## Known Limits & Risks
+
+See [Core Known Limits & Risks](../../runtime/known-limits-and-risks.md) for classifications and shared architecture, loading and lifecycle boundaries.
+
+| Area | Type | Description | Recommendation |
+| --- | --- | --- | --- |
+| Replacement scope | Known Limit | <span style="white-space: normal !important;">Each selector replaces its first current/response match sequentially. Missing regions and unmount vetoes preserve that region; prior replacements are not rolled back.</span> | <span style="white-space: normal !important;">Use distinct, non-overlapping regions and design for partial replacement rather than an atomic page transaction.</span> |
+| Resources/state | Known Limit | <span style="white-space: normal !important;">An empty attribute replaces title and body, preserving other current head resources. Replaced nodes lose component identity/state; mounting does not migrate arbitrary framework state.</span> | <span style="white-space: normal !important;">Share compatible head resources and explicitly preserve or reconstruct application state.</span> |
+| Request order | Known Limit | <span style="white-space: normal !important;">New requests abort old fetches when supported and identity guards reject superseded response work. Regions already replaced before a new request began are not undone.</span> | <span style="white-space: normal !important;">Await load() when dependent work needs completion and coordinate rapid navigation.</span> |
+| Errors/events | Potential Risk | <span style="white-space: normal !important;">Network, parsing or mounting failures can leave partial work. AjaxHrefComplete is also emitted for failed/superseded attempts; it is not a success signal.</span> | <span style="white-space: normal !important;">Handle load() rejection and the lifecycle, including missing-region diagnostics.</span> |
+| Trust | Known Limit | <span style="white-space: normal !important;">Same-origin click filtering and HTML diagnostics do not sanitize imported content. Programmatic URLs, endpoints and response HTML remain application trust decisions.</span> | <span style="white-space: normal !important;">Validate endpoints/content and review CSP and URL handling before insertion.</span> |
+| Focus/history | Potential Risk | <span style="white-space: normal !important;">Replacement can remove the active control. History requires State Navigation and does not restore arbitrary frontend state or announce content.</span> | <span style="white-space: normal !important;">Coordinate focus/announcements, mount/unmount and any external router.</span> |
+| Coverage | Validation Gap | <span style="white-space: normal !important;">Tests cover superseded responses, partial vetoes, missing regions and retained head resources. Third-party teardown races and assistive-technology navigation need integration checks.</span> | <span style="white-space: normal !important;">Exercise rapid navigation with real components and failure responses.</span> |
+
+Evidence: [Implementation](https://github.com/aelluxjs/core/blob/update/beta.10/src/aellux.ext.ajax-href.js), [ajax-href.spec.mjs](https://github.com/aelluxjs/core/blob/update/beta.10/tests/browser/ajax-href.spec.mjs), [extension-composition.spec.mjs](https://github.com/aelluxjs/core/blob/update/beta.10/tests/browser/extension-composition.spec.mjs).

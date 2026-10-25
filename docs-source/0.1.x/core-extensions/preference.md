@@ -66,3 +66,17 @@ The Extension also recognizes `data-ae-label`, `data-ae-next`, and `data-ae-prev
 The cycling order is the order listed in the defaults below. Values loaded from persistence are matched by their string representation, so numeric preferences such as text scale continue from the persisted value.
 
 Defaults currently cover color scheme, contrast, reduced motion, reduced transparency, forced colors, text scale, interface scale, extended timing, large targets, haptics, and sound. User values are loaded from persistence when the Extension initializes.
+
+## Known Limits & Risks
+
+See [Core Known Limits & Risks](../runtime/known-limits-and-risks.md) for classifications and shared architecture, loading and lifecycle boundaries.
+
+| Area | Type | Description | Recommendation |
+| --- | --- | --- | --- |
+| Publication | Known Limit | <span style="white-space: normal !important;">set() saves the choice without publishing it; update() reflects values and emits PreferencesChange, including an empty changed list.</span> | <span style="white-space: normal !important;">Call update() after programmatic set() and inspect changed before expensive subscriber work.</span> |
+| System choices | Known Limit | <span style="white-space: normal !important;">Explicit local values can override device preferences; auto uses available media queries. Reflected attributes do not implement a theme, sound or haptics.</span> | <span style="white-space: normal !important;">Consume resolved HTML attributes/currentPreference() and provide application presentation.</span> |
+| Persistence | Potential Risk | <span style="white-space: normal !important;">Storage is origin/browser-profile state, without account or cross-device synchronization. Storage events update other contexts, but concurrent writers have no conflict-resolution protocol.</span> | <span style="white-space: normal !important;">Coordinate writers and handle access/quota failures using the Core persistence contract.</span> |
+| Controls | Known Limit | <span style="white-space: normal !important;">Generic option/next/previous elements do not acquire native keyboard behavior or control roles. Built-in cycling follows the documented value lists.</span> | <span style="white-space: normal !important;">Use named native buttons or inputs and synchronize additional frontend state.</span> |
+| Coverage | Validation Gap | <span style="white-space: normal !important;">Resolved preferences and controls have browser checks; long-running concurrent tabs and later storage quota/access revocation need targeted validation.</span> | <span style="white-space: normal !important;">Test deployment storage restrictions and required cross-tab flows.</span> |
+
+Evidence: [Implementation](https://github.com/aelluxjs/core/blob/update/beta.10/src/aellux.ext.preference.js), [current-preference.spec.mjs](https://github.com/aelluxjs/core/blob/update/beta.10/tests/browser/current-preference.spec.mjs), [scenarios.spec.mjs](https://github.com/aelluxjs/core/blob/update/beta.10/tests/browser/scenarios.spec.mjs).

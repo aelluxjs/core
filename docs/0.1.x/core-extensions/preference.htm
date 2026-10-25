@@ -386,6 +386,13 @@
                                     class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                     style="flex:0">
                                     <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                      href="/core/docs/0.1.x/runtime/known-limits-and-risks.htm" data-ae-overflow-marquee="190px">
+                                      Known Limits &amp; Risks                                    </a>
+                                  </div>
+                                                                                                                                      <div
+                                    class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                    style="flex:0">
+                                    <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                       href="/core/docs/0.1.x/runtime/es5-support.htm" data-ae-overflow-marquee="190px">
                                       ES5 Support                                    </a>
                                   </div>
@@ -785,6 +792,49 @@ console.log(preference.get(&quot;colorScheme&quot;));
 </code></pre>
 <p>The cycling order is the order listed in the defaults below. Values loaded from persistence are matched by their string representation, so numeric preferences such as text scale continue from the persisted value.</p>
 <p>Defaults currently cover color scheme, contrast, reduced motion, reduced transparency, forced colors, text scale, interface scale, extended timing, large targets, haptics, and sound. User values are loaded from persistence when the Extension initializes.</p>
+<h2>Known Limits &amp; Risks</h2>
+<p>See <a href="../runtime/known-limits-and-risks.htm">Core Known Limits &amp; Risks</a> for classifications and shared architecture, loading and lifecycle boundaries.</p>
+<table>
+<thead>
+<tr>
+<th>Area</th>
+<th>Type</th>
+<th>Description</th>
+<th>Recommendation</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Publication</td>
+<td>Known Limit</td>
+<td><span style="white-space: normal !important;">set() saves the choice without publishing it; update() reflects values and emits PreferencesChange, including an empty changed list.</span></td>
+<td><span style="white-space: normal !important;">Call update() after programmatic set() and inspect changed before expensive subscriber work.</span></td>
+</tr>
+<tr>
+<td>System choices</td>
+<td>Known Limit</td>
+<td><span style="white-space: normal !important;">Explicit local values can override device preferences; auto uses available media queries. Reflected attributes do not implement a theme, sound or haptics.</span></td>
+<td><span style="white-space: normal !important;">Consume resolved HTML attributes/currentPreference() and provide application presentation.</span></td>
+</tr>
+<tr>
+<td>Persistence</td>
+<td>Potential Risk</td>
+<td><span style="white-space: normal !important;">Storage is origin/browser-profile state, without account or cross-device synchronization. Storage events update other contexts, but concurrent writers have no conflict-resolution protocol.</span></td>
+<td><span style="white-space: normal !important;">Coordinate writers and handle access/quota failures using the Core persistence contract.</span></td>
+</tr>
+<tr>
+<td>Controls</td>
+<td>Known Limit</td>
+<td><span style="white-space: normal !important;">Generic option/next/previous elements do not acquire native keyboard behavior or control roles. Built-in cycling follows the documented value lists.</span></td>
+<td><span style="white-space: normal !important;">Use named native buttons or inputs and synchronize additional frontend state.</span></td>
+</tr>
+<tr>
+<td>Coverage</td>
+<td>Validation Gap</td>
+<td><span style="white-space: normal !important;">Resolved preferences and controls have browser checks; long-running concurrent tabs and later storage quota/access revocation need targeted validation.</span></td>
+<td><span style="white-space: normal !important;">Test deployment storage restrictions and required cross-tab flows.</span></td>
+</tr>
+</tbody></table>
+<p>Evidence: <a href="https://github.com/aelluxjs/core/blob/update/beta.10/src/aellux.ext.preference.js">Implementation</a>, <a href="https://github.com/aelluxjs/core/blob/update/beta.10/tests/browser/current-preference.spec.mjs">current-preference.spec.mjs</a>, <a href="https://github.com/aelluxjs/core/blob/update/beta.10/tests/browser/scenarios.spec.mjs">scenarios.spec.mjs</a>.</p>
           </main>
 
           <div id="doc-navlinks2" ajax-load="doc-navlinks2">

@@ -386,6 +386,13 @@
                                     class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                     style="flex:0">
                                     <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                      href="/core/docs/0.1.x/runtime/known-limits-and-risks.htm" data-ae-overflow-marquee="190px">
+                                      Known Limits &amp; Risks                                    </a>
+                                  </div>
+                                                                                                                                      <div
+                                    class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                    style="flex:0">
+                                    <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                       href="/core/docs/0.1.x/runtime/es5-support.htm" data-ae-overflow-marquee="190px">
                                       ES5 Support                                    </a>
                                   </div>
@@ -773,6 +780,49 @@
 <p>The default size thresholds are <code>compact: 0</code>, <code>small: 480</code>, <code>medium: 768</code>, <code>large: 1024</code>, <code>xl: 1280</code>, and <code>xxl: 1600</code>. The default shape thresholds are <code>vertical: 0.8</code> and <code>horizontal: 1.25</code>. <code>adaptiveParams.experienceScale</code> also contains <code>near: 1</code> and <code>far: 1.5</code>, but the current class calculation does not use those values.</p>
 <p>Parameter groups must be objects. Minimum sizes must be finite nonnegative numbers; ratio and experience boundaries must be finite positive numbers, with the lower boundary less than the upper boundary. Invalid values record <code>2026</code> and retain defaults; reversed boundaries restore the default pair. Standard size names with thresholds out of ascending order also record <code>2026</code>, while preserving the configured thresholds. Custom size names remain supported.</p>
 <p>The generated <code>aellux.ext.adaptive.css</code> supplies state-based utility classes. Load it when using those utilities outside the <code>full</code> runtime.</p>
+<h2>Known Limits &amp; Risks</h2>
+<p>See <a href="../runtime/known-limits-and-risks.htm">Core Known Limits &amp; Risks</a> for classifications and shared architecture, loading and lifecycle boundaries.</p>
+<table>
+<thead>
+<tr>
+<th>Area</th>
+<th>Type</th>
+<th>Description</th>
+<th>Recommendation</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Geometry</td>
+<td>Known Limit</td>
+<td><span style="white-space: normal !important;">ResizeObserver supplies content-box sizes; the fallback reads bounding rectangles, including borders and transforms. Hidden or zero-sized content has no useful responsive dimensions.</span></td>
+<td><span style="white-space: normal !important;">Use measurable structural elements and verify the box model for the active observation path.</span></td>
+</tr>
+<tr>
+<td>Refresh</td>
+<td>Known Limit</td>
+<td><span style="white-space: normal !important;">Without ResizeObserver, initial mounting and window resize trigger measurements. Element-only CSS changes have no dedicated observer or mounted update handler.</span></td>
+<td><span style="white-space: normal !important;">Trigger the window resize fallback after undetected size changes; mountManager.update() does not measure Adaptive.</span></td>
+</tr>
+<tr>
+<td>Configuration</td>
+<td>Known Limit</td>
+<td><span style="white-space: normal !important;">Parameters freeze at initialization. Fit classes use sqrt(width * height); experienceScale is currently unused. Invalid values follow the Configuration fallbacks.</span></td>
+<td><span style="white-space: normal !important;">Configure thresholds before initialization and use the documented area-based metric.</span></td>
+</tr>
+<tr>
+<td>Layout feedback</td>
+<td>Potential Risk</td>
+<td><span style="white-space: normal !important;">Styles consuming shape/fit classes can change the observed size and repeatedly cross thresholds. Many changing targets increase callback and layout work.</span></td>
+<td><span style="white-space: normal !important;">Avoid size rules that toggle their own threshold and profile responsive workloads.</span></td>
+</tr>
+<tr>
+<td>Coverage</td>
+<td>Validation Gap</td>
+<td><span style="white-space: normal !important;">Existing cases check resizing, the window fallback, configuration and restoration; they do not establish every hidden/revealed, zoom or transformed-box combination.</span></td>
+<td><span style="white-space: normal !important;">Validate those combinations before depending on exact threshold transitions.</span></td>
+</tr>
+</tbody></table>
+<p>Evidence: <a href="https://github.com/aelluxjs/core/blob/update/beta.10/src/aellux.ext.adaptive.js">Implementation</a>, <a href="https://github.com/aelluxjs/core/blob/update/beta.10/tests/browser/adaptive.spec.mjs">adaptive.spec.mjs</a>.</p>
           </main>
 
           <div id="doc-navlinks2" ajax-load="doc-navlinks2">

@@ -44,6 +44,7 @@ Add aellux.js to a page and enable the Extensions it needs. The library coordina
 
 - [Modern and Legacy runtimes](runtime/modern-legacy.md)
 - [Browser support baseline](runtime/browser-support.md)
+- [Known Limits & Risks](runtime/known-limits-and-risks.md)
 - [ES5 support level](runtime/es5-support.md)
 - [Visual mounting states](runtime/visual-mounting.md)
 - [Diagnostics](runtime/diagnostics.md)
@@ -77,6 +78,7 @@ Add aellux.js to a page and enable the Extensions it needs. The library coordina
 - [Scrollbox Snap](core-extensions/scrollbox-snap.md)
 - [PWA](core-extensions/experimental/pwa.md) (optional external Extension; never incorporated in Full)
 - [State navigation](core-extensions/state-navigation.md)
+- [Viewport](core-extensions/viewport.md) (Experimental)
 
 ## Project Documents
 

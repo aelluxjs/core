@@ -382,6 +382,13 @@
                                       Performance and Bundle Budget                                    </a>
                                   </div>
                                                                                                                                       <div
+                                    class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                    style="flex:0">
+                                    <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                      href="/core/docs/0.1.x/runtime/known-limits-and-risks.htm" data-ae-overflow-marquee="190px">
+                                      Known Limits &amp; Risks                                    </a>
+                                  </div>
+                                                                                                                                      <div
                                     class="nav-item mt-1 small-md rounded-1 ps-md-1 active"
                                     style="flex:0">
                                     <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
@@ -721,10 +728,10 @@
 
           <div id="doc-navlinks" ajax-load="doc-navlinks">
             <div class="d-flex justify-content-between flex-row gap-2 p-2 pb-4 px-0">
-      <a href="/core/docs/0.1.x/runtime/performance.htm" class="text-decoration-none d-inline-flex flex-row gap-2" style="max-width: 45%;">
+      <a href="/core/docs/0.1.x/runtime/known-limits-and-risks.htm" class="text-decoration-none d-inline-flex flex-row gap-2" style="max-width: 45%;">
       ← <span class="text-decoration-underline text-truncate overflow-hidden d-inline-block align-middle flex-fill"
         style="max-width:200px" data-ae-overflow-marquee="80">
-        Performance and Bundle Budget      </span>
+        Known Limits &amp; Risks      </span>
     </a>
 
                   <a href="/core/docs/0.1.x/runtime/visual-mounting.htm"
@@ -753,7 +760,7 @@
 <li><code>NodeList.prototype.forEach</code>.</li>
 </ul>
 <p>The generated Legacy Extensions do not embed these shared dependencies again. They are loaded after, and share the environment prepared by, the Legacy orchestrator. Extension-specific compatibility belongs to the corresponding Extension.</p>
-<p><code>&lt;dialog&gt;</code> is the standard element for Aellux modal interfaces. Missing dialog methods select the Legacy runtime automatically, but the runtime does not install the fallback globally. The official <a href="../core-extensions/experimental/dialog.htm">Dialog Extension</a> embeds <code>dialog-polyfill</code> and its CSS exclusively in its Legacy files. Full loads it on demand for <code>dialog</code>; Basic requires <code>$ae.ext(&quot;dialog&quot;)</code>. Registration occurs during Dialog mounting, before its controllers become available. Await mounting before calling dialog methods; with <code>skipGlobalMount: true</code>, explicitly mount the desired subtree. Native dialog implementations are preserved, including when Legacy is forced.</p>
+<p><code>&lt;dialog&gt;</code> is the standard element for Aellux modal interfaces. Missing dialog methods select the Legacy runtime automatically, but the runtime does not install the fallback globally. The official <a href="../core-extensions/experimental/dialog.htm">Dialog Extension</a> embeds <code>dialog-polyfill</code> and its CSS exclusively in its Legacy files. Full and Basic register it automatically and load it on demand for <code>dialog</code>. Registration occurs during Dialog mounting, before its controllers become available. Await mounting before calling dialog methods; with <code>skipGlobalMount: true</code>, explicitly mount the desired subtree. Native dialog implementations are preserved, including when Legacy is forced.</p>
 <p>The fallback implements the established dialog API, not newer features such as <code>requestClose()</code> or <code>closedby</code>. Place modal dialogs directly under <code>&lt;body&gt;</code> where possible: unlike the native top layer, the fallback is subject to ancestor stacking contexts. Style both <code>dialog::backdrop</code> and <code>dialog + .backdrop</code> when customizing the backdrop. See the <a href="https://github.com/GoogleChrome/dialog-polyfill#limitations">upstream limitations</a>.</p>
 <p>Third-party Extensions may rely on this list only while running under the aellux.js Legacy runtime. Any additional API must be feature-detected and included by the Extension&#39;s own build or loaded as an explicit dependency. Babel or another transpiler can produce ES5 syntax, but does not automatically provide missing browser APIs.</p>
 <p>Browser primitives such as the DOM, <code>XMLHttpRequest</code> and <code>DOMParser</code> are still expected from the host environment. For <code>0.1.0</code>, the Legacy contract covers the ES5 output, runtime selection and fallback, shared polyfill installation, and generated Extension variants when exercised in the current tested browser engines. It does not declare compatibility with any historical browser version. ES5 syntax must therefore not be interpreted as unrestricted support for old browsers.</p>
@@ -764,10 +771,10 @@
 
           <div id="doc-navlinks2" ajax-load="doc-navlinks2">
             <div class="d-flex justify-content-between flex-row gap-2 p-2 pb-4 px-0">
-      <a href="/core/docs/0.1.x/runtime/performance.htm" class="text-decoration-none d-inline-flex flex-row gap-2" style="max-width: 45%;">
+      <a href="/core/docs/0.1.x/runtime/known-limits-and-risks.htm" class="text-decoration-none d-inline-flex flex-row gap-2" style="max-width: 45%;">
       ← <span class="text-decoration-underline text-truncate overflow-hidden d-inline-block align-middle flex-fill"
         style="max-width:200px" data-ae-overflow-marquee="80">
-        Performance and Bundle Budget      </span>
+        Known Limits &amp; Risks      </span>
     </a>
 
                   <a href="/core/docs/0.1.x/runtime/visual-mounting.htm"

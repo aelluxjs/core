@@ -386,6 +386,13 @@
                                     class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                     style="flex:0">
                                     <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                      href="/core/docs/0.1.x/runtime/known-limits-and-risks.htm" data-ae-overflow-marquee="190px">
+                                      Known Limits &amp; Risks                                    </a>
+                                  </div>
+                                                                                                                                      <div
+                                    class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                    style="flex:0">
+                                    <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                       href="/core/docs/0.1.x/runtime/es5-support.htm" data-ae-overflow-marquee="190px">
                                       ES5 Support                                    </a>
                                   </div>
@@ -752,11 +759,11 @@
 &lt;script src=&quot;./dist/aellux.js&quot;&gt;&lt;/script&gt;
 &lt;script&gt;$ae.init({ mode: &quot;full&quot; });&lt;/script&gt;
 </code></pre>
-<p>Basic requires registration:</p>
+<p>Basic also registers PWA automatically for lazy loading. Explicit registration can customize that policy:</p>
 <pre><code class="language-js">$ae.ext(&quot;pwa&quot;, { loadWhen: &quot;[data-ae-pwa]&quot; });
 $ae.init({ mode: &quot;basic&quot; });
 </code></pre>
-<p>To use the API without declarative controls, register the Extension and explicitly load it with <code>await $ae.wait(&quot;pwa&quot;)</code> after runtime initialization. Load it <strong>before</strong> wiring a native installation control: awaiting a lazy load inside a click can lose transient user activation. Once initialized, call either API directly from the user gesture:</p>
+<p>To use the API without declarative controls, explicitly load it with <code>await $ae.wait(&quot;pwa&quot;)</code> after runtime initialization. Load it <strong>before</strong> wiring a native installation control: awaiting a lazy load inside a click can lose transient user activation. Once initialized, call either API directly from the user gesture:</p>
 <pre><code class="language-js">$ae.ext.pwa.install();
 $ae(button).pwa.install(); // Mounted data-ae-pwa control
 </code></pre>
@@ -982,6 +989,73 @@ importScripts(&quot;./vendor/aellux.pwa.sw.min.js&quot;);
 <h2>Distribution and validation scope</h2>
 <p>The build emits <code>aellux.ext.pwa.js</code>, <code>.min.js</code>, <code>.legacy.js</code>, <code>.legacy.min.js</code>, plus the independent <code>aellux.pwa.sw.js</code> and <code>.min.js</code>, with source maps. Extension SRI is in the official catalog; worker hashes are included in generated asset integrity metadata. The worker is never an Extension dependency. Legacy degrades to unavailable capabilities without installation/worker polyfills.</p>
 <p>Automated coverage uses Chromium, Firefox and WebKit for loading, native click/keyboard, controlled prompt events, simulated iOS guidance, real local worker registration and configured offline behavior. It does not claim that headless desktop engines reproduce actual OS installation or physical iOS/iPadOS Share menus. Native prompt semantics follow the <a href="https://wicg.github.io/manifest-incubations/">WICG installation contract</a>; worker scope/cache behavior follows the <a href="https://www.w3.org/TR/service-workers/">Service Workers specification</a>.</p>
+<h2>Known Limits &amp; Risks</h2>
+<p>See <a href="../../runtime/known-limits-and-risks.htm">Core Known Limits &amp; Risks</a> for classifications and shared architecture, loading and lifecycle boundaries.</p>
+<table>
+<thead>
+<tr>
+<th>Area</th>
+<th>Type</th>
+<th>Description</th>
+<th>Recommendation</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Independent capabilities</td>
+<td>Known Limit</td>
+<td><span style="white-space: normal !important;">Installation, worker registration and offline availability are separate. Manifest presence diagnostics do not fetch/validate the file or establish installability.</span></td>
+<td><span style="white-space: normal !important;">Validate the manifest and test each capability independently.</span></td>
+</tr>
+<tr>
+<td>Prompt timing</td>
+<td>Known Limit</td>
+<td><span style="white-space: normal !important;">beforeinstallprompt may be unavailable or missed before lazy initialization. A held prompt is consumed once and requires user activation; accepted does not confirm installation.</span></td>
+<td><span style="white-space: normal !important;">Initialize before wiring installation UI and invoke install() directly from the gesture.</span></td>
+</tr>
+<tr>
+<td>Detection</td>
+<td>Known Limit</td>
+<td><span style="white-space: normal !important;">Manual Safari guidance uses conservative UA/touch heuristics. Unknown is not proof of absence; standalone signals describe this execution context.</span></td>
+<td><span style="white-space: normal !important;">Provide suitable guidance without claiming an installed-app inventory.</span></td>
+</tr>
+<tr>
+<td>Worker origin</td>
+<td>Known Limit</td>
+<td><span style="white-space: normal !important;">Registration needs an available secure-context worker API and a same-origin principal script. Scope restrictions apply; the reusable importScripts worker is classic, although register() also accepts module.</span></td>
+<td><span style="white-space: normal !important;">Use a same-origin classic principal for the reusable worker and configure before importing.</span></td>
+</tr>
+<tr>
+<td>Offline policy</td>
+<td>Known Limit</td>
+<td><span style="white-space: normal !important;">The reusable worker intercepts nothing by default. Configured cache paths stay within origin/scope; cross-origin, opaque and sensitive responses are excluded. HTTP errors are not offline network failures.</span></td>
+<td><span style="white-space: normal !important;">Configure public precache/fallback routes and test offline navigation explicitly.</span></td>
+</tr>
+<tr>
+<td>Private data</td>
+<td>Potential Risk</td>
+<td><span style="white-space: normal !important;">allowCredentials opts configured credentialed requests into caching. Header/path checks cannot prove a response is public or infer every authentication scheme.</span></td>
+<td><span style="white-space: normal !important;">Keep the conservative default unless routes are guaranteed public; never cache personalized content.</span></td>
+</tr>
+<tr>
+<td>Availability/storage</td>
+<td>Potential Risk</td>
+<td><span style="white-space: normal !important;">Network/CDN import failures, unsafe precache responses, quotas and eviction can prevent worker installation or remove offline resources.</span></td>
+<td><span style="white-space: normal !important;">Control assets, version deployments and test network/storage failure paths.</span></td>
+</tr>
+<tr>
+<td>Updates/lifecycle</td>
+<td>Known Limit</td>
+<td><span style="white-space: normal !important;">applyUpdate() messages a waiting worker; the worker must implement that protocol. It does not reload the page. Destroy releases page observers without unregistering persistent workers.</span></td>
+<td><span style="white-space: normal !important;">Coordinate activation, application state and worker/cache ownership.</span></td>
+</tr>
+<tr>
+<td>Coverage</td>
+<td>Validation Gap</td>
+<td><span style="white-space: normal !important;">Unit tests and local workers cover policies and controlled prompts; simulated iOS identities and desktop headless engines do not validate physical iOS/Android installation UI or OS lifecycle.</span></td>
+<td><span style="white-space: normal !important;">Prioritize real-device install/update/offline tests and quota/eviction scenarios.</span></td>
+</tr>
+</tbody></table>
+<p>Evidence: <a href="https://github.com/aelluxjs/core/blob/update/beta.10/src/aellux.ext.pwa.js">Implementation</a>, <a href="https://github.com/aelluxjs/core/blob/update/beta.10/tests/browser/pwa.spec.mjs">pwa.spec.mjs</a>, <a href="https://github.com/aelluxjs/core/blob/update/beta.10/src/aellux.pwa.sw.js">Reusable worker</a>, <a href="https://github.com/aelluxjs/core/blob/update/beta.10/tests/unit/pwa.test.mjs">Page unit checks</a>, <a href="https://github.com/aelluxjs/core/blob/update/beta.10/tests/unit/pwa-sw.test.mjs">Worker unit checks</a>.</p>
           </main>
 
           <div id="doc-navlinks2" ajax-load="doc-navlinks2">

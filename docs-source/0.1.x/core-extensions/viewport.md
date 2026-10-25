@@ -107,3 +107,106 @@ An element can declare both `data-ae-viewport` and `data-ae-present="opacity tra
 ## Lifecycle
 
 Use the normal mount, update, unmount and destroy APIs, including subtree mounting. Viewport saves prior inline output values and priorities through `persist.element.save()`. Unmount removes the element from observation, invalidates its pending writes and restores those values. The last element leaving a reference releases the group's listener, observer, timer and scheduler tasks. Removing mounted elements uses mountManager's detached cleanup. Destroy releases all Extension resources; remounting creates fresh observation without duplicate listeners.
+
+## Known Limits & Risks
+
+See [Core Known Limits & Risks](../runtime/known-limits-and-risks.md) for the shared architecture and classification convention. **Known Limit** means a confirmed implementation or contract restriction. **Potential Risk** describes an outcome that may occur under the stated conditions, without identifying a confirmed defect. **Validation Gap** means the available tests do not establish reliability for that scenario. **Known Issue** is reserved for a reproducible defect. Viewport remains Experimental; evaluate these boundaries before depending on its geometry for interactions or animations. The [implementation](https://github.com/aelluxjs/core/blob/update/beta.10/src/aellux.ext.viewport.js) and the linked spec below provide the evidence for this section.
+
+### Known Limits
+
+All entries below are **Known Limits**. See [Axes and outputs](#axes-and-outputs), [Choosing the reference and keeping it current](#choosing-the-reference-and-keeping-it-current), and [Transforms and Present](#transforms-and-present) for formulas and examples.
+
+| Limit | Contract and impact |
+| --- | --- |
+| L1: Geometric visibility | <span style="white-space: normal !important;">`--ae-viewport-visible` measures rectangular intersection, without evaluating occlusion, opacity, masks, complex clipping, effective content visibility or blocked interaction. A value greater than `0` does not guarantee that the user can see or interact with the element.</span> |
+| L2: Nearest reference only | <span style="white-space: normal !important;">The nearest qualifying native scroll container supplies both axes. Clipping regions from all ancestors are not combined: an element fully inside its immediate reference may still be clipped by an outer container.</span> |
+| L3: Axis-aligned bounds | <span style="white-space: normal !important;">Measurements use `getBoundingClientRect()`. Scrollport calculations compensate for axis-aligned scale; rotation, skew, perspective and other 3D transforms remain rectangular approximations, without polygon intersection accuracy.</span> |
+| L4: Clamped positions | <span style="white-space: normal !important;">`--ae-viewport-x` and `--ae-viewport-y` clamp to `[-2, 2]`. Distant elements can publish identical values beyond those bounds. These outputs do not replace absolute coordinates or unlimited distances.</span> |
+| L5: Oversized elements | <span style="white-space: normal !important;">Visible area is divided by the element's total rectangular area, rather than the viewport's area. An element larger than its reference may never reach `--ae-viewport-visible: 1`.</span> |
+| L6: Unmeasurable geometry | <span style="white-space: normal !important;">Zero-sized or non-finite element/reference geometry publishes neutral `0` for selected positions and visible area. For example, `display: none` provides no useful spatial geometry. Neutral positions do not prove center alignment or a definitive visibility state; unselected axes retain their authored declarations.</span> |
+| L7: Physical coordinates | <span style="white-space: normal !important;">Negative X means left and positive X means right; negative Y means above and positive Y means below. RTL writing direction does not reverse these signs.</span> |
+| L8: Observation only | <span style="white-space: normal !important;">Viewport publishes geometry without controlling scroll, animation, `pop()`/`unpop()`, `hidden`, opacity, transforms or interaction state. Present and other consumers require explicit integration.</span> |
+| L9: Notification contract | <span style="white-space: normal !important;">The current Extension publishes CSS properties and maintains internal geometry state. It emits no `ViewportEnter`, `ViewportLeave` or `ViewportChange` events. The shared `Layout` event is an input for refreshing geometry.</span> |
+
+### Performance Risks
+
+These are **Potential Risks**, not measured performance regressions or numerical capacity limits.
+
+| Risk | Conditions | Potential impact |
+| --- | --- | --- |
+| Large observation sets | <span style="white-space: normal !important;">Hundreds or thousands of mounted elements.</span> | <span style="white-space: normal !important;">More geometry processing and retained observation state.</span> |
+| Frequent scrolling | <span style="white-space: normal !important;">Continuous touch, pointer or programmatic scrolling.</span> | <span style="white-space: normal !important;">Frequent geometry recalculation for the affected reference.</span> |
+| Complex DOM hierarchy | <span style="white-space: normal !important;">Deep nesting and many sibling elements.</span> | <span style="white-space: normal !important;">More ancestor traversal, target collection and size observation.</span> |
+| Frequent layout changes | <span style="white-space: normal !important;">Dynamic content, resizing and announced layout transitions.</span> | <span style="white-space: normal !important;">Repeated scheduling and measurement.</span> |
+| Large observed documents | <span style="white-space: normal !important;">Frequent DOM, text, class or relevant attribute/style changes across the document.</span> | <span style="white-space: normal !important;">Additional mutation processing and refreshes across reference groups.</span> |
+
+`measure()` walks each mounted element's ancestors and collects their children as size targets. `observeSizes()` shares one ResizeObserver and reference-counts targets, but also retains each element's target set. Large overlapping hierarchies can therefore increase memory and notification work even when individual targets share an observer. `viewportRect()` computes reference geometry once per group measurement; each mounted element still needs its own bounding rectangle.
+
+While elements are mounted, MutationObserver watches the document subtree for child, text and selected attribute changes. Viewport filters out style notifications matching its own last publication, but unrelated application changes can still schedule all groups. Dynamic rendering, long lists and repeated class/style updates can amplify this work.
+
+The [shared scheduler](../runtime/wait-layout.md) batches reads and writes, and unchanged outputs are not rewritten. This reduces redundant work without eliminating measurements or guaranteeing constant cost as the document grows. There is no continuous idle animation loop; continuous scroll and layout notifications can still request frequent updates. A finite positive `Layout` duration requests repeated checks only for that interval. Enable `data-ae-viewport` selectively and profile representative workloads. [Bundle budgets](../runtime/performance.md#scope-and-limitations) measure delivery size, not runtime speed or memory use.
+
+### Behavioral Risks
+
+The following are **Potential Risks** with implementation-based conditions, rather than confirmed browser defects.
+
+**R1: Geometric feedback.** Using an observed element's own outputs to drive its transform changes the rectangle measured on later updates. This can produce oscillation, visual instability or recurring updates; timing may vary across engines. Observe a stable structural wrapper and animate a descendant instead. The [wrapper and child example](#transforms-and-present) also shows the explicit inheritance required when CSS properties are registered.
+
+**R2: Delayed geometry.** Outputs describe the last processed scheduler cycle, which can temporarily trail rapid scrolling or animation in the compositor. Scheduler throttling and hidden-page suspension also affect publication timing. Do not treat the values as a guarantee of frame-perfect synchronization; see [waitLayout](../runtime/wait-layout.md).
+
+**R3: Changes without notifications.** CSS-only position or transform changes may produce neither size changes nor relevant mutation/intersection notifications. Detection depends on the available APIs and triggers; not every geometric change is automatically observed. After an otherwise undetected change, request publication explicitly:
+
+```js
+await $ae.mountManager.update(element, "viewport");
+```
+
+For an application-controlled transition, a bubbling `Layout` notification can announce a finite tracking interval:
+
+```js
+$ae.dispatchFrom(element, "Layout", { detail: { durationMs: 250 } });
+```
+
+Use the transition's expected duration; this requests scheduled checks rather than compositor synchronization. See [Events](../runtime/events.md) for the shared event contract.
+
+**R4: Changing scroll containers.** Reparenting or changing CSS overflow can change the selected reference. Relevant updates rediscover the nearest container and transfer the element to its group, but previously published values can remain until the new group's publication. Await an explicit update when subsequent application work depends on the new reference.
+
+**R5: Present and hidden content.** When Present applies `hidden` and removes measurable geometry, neutral outputs are expected. They are not an instruction to start another transition. Observe a stable wrapper when a child's presentation can change, and keep presentation decisions under the application's or Present's control.
+
+**R6: Concurrent CSS writers.** Viewport saves inline output values and priorities at mount, writes selected outputs when its calculated values change, and restores the saved snapshot on unmount or axis deactivation. External writes to the same properties are not merged into that snapshot and are not guaranteed to survive later publication or restoration. Coordinate ownership or use separate application properties. See [Lifecycle](#lifecycle).
+
+### Compatibility & Validation Gaps
+
+**Browser API fallbacks (Known Limits).** These APIs are feature-detected rather than all being mandatory for Viewport:
+
+| Unavailable API | Remaining behavior and boundary |
+| --- | --- |
+| `ResizeObserver` | <span style="white-space: normal !important;">Scroll, window resize, load, mutations and Layout notifications still schedule updates. Size changes without another notification need an explicit refresh.</span> |
+| `IntersectionObserver` | <span style="white-space: normal !important;">Rectangle calculations and scroll updates continue; intersection callbacks no longer provide an additional refresh trigger. IntersectionObserver does not supply the published visible fraction.</span> |
+| `MutationObserver` | <span style="white-space: normal !important;">The Extension's document mutation trigger is absent. Remaining notifications and explicit mount/update calls must cover application changes; automatic discovery of every DOM/style change is not guaranteed.</span> |
+| `CSS.registerProperty` | <span style="white-space: normal !important;">Outputs are still written inline, but unregistered custom properties use native inheritance rather than registered `inherits: false` behavior. Descendant styles must account for this difference.</span> |
+
+Update coverage and freshness depend on the available triggers. Legacy syntax and shared polyfills do not establish support for every historical browser. Forced Legacy execution in current engines is distinct from testing old browsers directly; see [Browser support](../runtime/browser-support.md#legacy-scope).
+
+**Coverage boundaries (Validation Gaps).** The existing [Viewport spec](https://github.com/aelluxjs/core/blob/update/beta.10/tests/browser/viewport.spec.mjs) defines Modern and forced Legacy cases for the desktop engine matrix. Its presence establishes the scope of automated checks, not a new test-run result. See [Validation scenarios](../validation-scenarios.md#core-contract-regression-matrix) for the broader contract matrix.
+
+| Area | Existing checks | Additional validation needed |
+| --- | --- | --- |
+| Mobile viewport | <span style="white-space: normal !important;">Document viewport and window resize cases in desktop engines.</span> | <span style="white-space: normal !important;">Real iOS Safari and Android Chrome, virtual keyboards, browser UI changes, orientation and pinch zoom. The document reference uses document client dimensions with window fallbacks; it does not track VisualViewport offsets, scale or events. Full visual viewport behavior remains unvalidated.</span> |
+| Fractional geometry | <span style="white-space: normal !important;">Fractional element/scrollport dimensions, borders and axis-aligned CSS scales.</span> | <span style="white-space: normal !important;">Browser zoom, high device pixel ratios and platform scrollbar variations require application-specific checks; existing fixtures do not establish every combination.</span> |
+| Nested and dynamic layouts | <span style="white-space: normal !important;">Nearest nested reference, overflow changes, reparenting and explicit updates after group transfer.</span> | <span style="white-space: normal !important;">Sticky/fixed positioning, complex ancestor transforms and advanced layouts with multiple scrolling axes need dedicated checks beyond these fixtures.</span> |
+| Observer fallbacks | <span style="white-space: normal !important;">Cases disable ResizeObserver, IntersectionObserver and CSS registration together, then check publication, scroll, style changes and restoration.</span> | <span style="white-space: normal !important;">The Viewport spec does not disable MutationObserver; its absence and additional API combinations require separate validation.</span> |
+| Feedback and load | <span style="white-space: normal !important;">Idle scheduling and a child-transform case with non-inheriting registered outputs.</span> | <span style="white-space: normal !important;">That child case does not validate self-driven transforms or a child explicitly inheriting changing outputs. Large observation sets and mutation-heavy workloads need reproducible runtime benchmarks.</span> |
+
+These gaps identify where evidence is incomplete; they do not establish defects in a particular browser.
+
+### Recommended Practices
+
+1. Enable Viewport only on elements that need geometric information; profile before mounting hundreds or thousands of elements.
+2. Use stable structural wrappers as references and apply visual transforms to descendants, following the [explicit inheritance example](#transforms-and-present).
+3. Treat `--ae-viewport-visible` as an area fraction, without inferring perceptual visibility or interaction availability.
+4. Use normalized positions for bounded relative effects; obtain absolute coordinates separately when needed.
+5. Allow for scheduled publication delays instead of assuming frame-perfect synchronization.
+6. Await explicit updates after otherwise undetected layout changes or reference changes that subsequent work depends on; use bounded Layout notifications for known transitions.
+7. Coordinate writes to the three output properties and allow lifecycle restoration to restore the original inline snapshot.
+8. Validate mobile behavior on real devices, plus the zoom, transforms, scrolling axes and API fallbacks relevant to the application.
+9. Account for Viewport's Experimental status when choosing production dependencies and recheck its contract when upgrading.

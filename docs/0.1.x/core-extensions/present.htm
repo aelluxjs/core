@@ -386,6 +386,13 @@
                                     class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                     style="flex:0">
                                     <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                      href="/core/docs/0.1.x/runtime/known-limits-and-risks.htm" data-ae-overflow-marquee="190px">
+                                      Known Limits &amp; Risks                                    </a>
+                                  </div>
+                                                                                                                                      <div
+                                    class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                    style="flex:0">
+                                    <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                       href="/core/docs/0.1.x/runtime/es5-support.htm" data-ae-overflow-marquee="190px">
                                       ES5 Support                                    </a>
                                   </div>
@@ -770,8 +777,8 @@
 await panel.pop();
 await panel.unpop();
 </code></pre>
-<p>Each method returns a Promise that resolves after preparation and transition cleanup, including the final visibility, classes, ARIA state and events. Present manages <code>hidden</code>, <code>aria-expanded</code>, <code>ae--pop</code>, <code>ae--popping</code>, and <code>ae--unpopping</code> on the main <code>data-ae-present</code> container and updates <code>aria-expanded</code> and <code>aria-controls</code> on its triggers.</p>
-<p>At animation start, <code>aria-expanded</code> changes to <code>true</code> for opening and <code>false</code> for closing on the region and all associated trigger, dismiss and target controls. This happens after preparation, before <code>Layout</code> and <code>Popping</code>/<code>Unpopping</code>, so controls can animate alongside their region. Canceling <code>BeforePop</code> or <code>BeforeUnpop</code> preserves the previous state. Reversing a transition updates the attribute when the replacement animation starts; closing applies <code>hidden</code> only when it finishes.</p>
+<p>Each method returns a Promise. For a transition that remains current, it resolves after preparation and cleanup, including final visibility, classes, ARIA state and completion events. An interrupted request can settle without reaching its requested endpoint; inspect the current operation or state rather than treating the earlier Promise as successful completion. Present manages <code>hidden</code>, <code>aria-expanded</code>, <code>ae--pop</code>, <code>ae--popping</code>, and <code>ae--unpopping</code> on the main <code>data-ae-present</code> container and updates <code>aria-expanded</code> and <code>aria-controls</code> on its triggers.</p>
+<p>After a <code>BeforePop</code> or <code>BeforeUnpop</code> preflight accepts the action, associated trigger, dismiss and target controls immediately receive the requested <code>aria-expanded</code> value, before preparation. The region retains its prior value during the transition and synchronizes to effective CSS visibility at completion. A closing region can therefore remain expanded while its controls already report <code>false</code>. Vetoes preserve the accepted state; reversals update controls when accepted, and closing applies <code>hidden</code> only when it finishes. CSS that overrides <code>hidden</code> can keep the region effectively visible.</p>
 <p>Calling <code>pop(element)</code> starts a fresh opening even when the region is already open or opening. It interrupts any active transition, removes presentation state classes, hides the region immediately, and starts the new pop from its hidden state. <code>toggle(element, true)</code> keeps its existing idempotent behavior.</p>
 <p><code>data-ae-present-motion</code> is optional. A direct child with that attribute keeps the grid strategy for <code>height</code> and <code>width</code> transitions, without measuring the final dimensions explicitly. Without it, Present leaves the content in place, records <code>INFO_PRESENT_MEASURED_LAYOUT</code> (<code>3001</code>) for size transitions, measures the visible container, and animates <code>max-height</code> and <code>max-width</code> in pixels. This path incurs a layout read. Explicit <code>height</code> and <code>width</code> values in the container&#39;s styles determine the measured final size. Temporary inline maximum dimensions are restored after a transition or interruption. All visibility, classes, and ARIA state remain on the main <code>data-ae-present</code> element.</p>
 <p>Before starting a transition from a stable state, Present makes the container available for layout, adds <code>ae--will-change</code> to it, and waits 100 ms so the browser can prepare the declared properties. During this preparation, the existing <code>ae--pop</code> or <code>ae--popping</code> state remains intact; it is replaced atomically when <code>ae--popping</code> or <code>ae--unpopping</code> is applied. When an active transition is reversed, Present preserves <code>ae--will-change</code> and starts the replacement transition without repeating the preparation delay. Measured-size transitions without that delay wait one layout frame to separate their starting and ending sizes. The class is removed after the final transition finishes or when a transition is interrupted without a replacement. The stable open state uses <code>ae--pop</code> on the container.</p>
@@ -826,7 +833,7 @@ await $ae(&quot;views&quot;).present.show(&quot;home&quot;);
 <h2>Group selection notifications and Anchor</h2>
 <p><code>$ae.ext.present.selected(groupElement)</code> and <code>$ae(&quot;views&quot;).present.selected()</code> return the accepted mounted member, or <code>null</code>. This is a read-only query of the same selection used by <code>show()</code>; it does not select an ID or wait for the opening animation. Existing <code>show()</code>, trigger and transition contracts are preserved.</p>
 <p>Present emits the bubbling <code>AelluxJsPresentGroupChange</code> event when an accepted logical selection changes, including initial confirmation, removal of the selected member and group teardown. Its detail is <code>{ group, previous, current, key }</code>, using element references; <code>key</code> is the current member&#39;s HTML ID, or <code>null</code> when there is no selection. It is emitted after cancelable Before events have accepted the swap and the incoming member has been made available for presentation. A refused swap emits no change. Reentrant or superseded operations cannot publish an obsolete selection. Consumers that load after the event can query <code>selected()</code>.</p>
-<p>For a swap with motion, all required <code>BeforePop</code>/<code>BeforeUnpop</code> events run first. The group accepts its logical selection and starts the member transitions, then publishes <code>PresentGroupChange</code>. After preparation, each member updates its region and control <code>aria-expanded</code>, emits <code>Layout</code> with the intended duration and then <code>Popping</code> or <code>Unpopping</code>. Completion updates <code>hidden</code> and progress before <code>Pop</code> or <code>Unpop</code>. Outgoing and incoming members complete independently; there is no ordering guarantee between their completion events. Interruption does not emit a successful completion event for the obsolete transition. With motion disabled, a member may reach its endpoint before the group notification; consumers should query the logical selection and measure through WaitLayout rather than infer selection from completion order.</p>
+<p>For a swap with motion, all required <code>BeforePop</code>/<code>BeforeUnpop</code> events run first. The group accepts its logical selection, starts member transitions and updates their controls&#39; requested <code>aria-expanded</code>, then publishes <code>PresentGroupChange</code>. After preparation, each member emits <code>Layout</code> with the intended duration and then <code>Popping</code> or <code>Unpopping</code>. Completion updates <code>hidden</code>, progress and the region&#39;s effective-visibility ARIA state before <code>Pop</code> or <code>Unpop</code>. Outgoing and incoming members complete independently; there is no ordering guarantee between their completion events. Interruption does not emit a successful completion event for the obsolete transition. With motion disabled, a member may reach its endpoint before the group notification; consumers should query logical selection and measure through WaitLayout rather than infer selection from completion order.</p>
 <pre><code class="language-html">&lt;div id=&quot;views&quot; data-ae-present-group data-ae-present-active=&quot;home-panel&quot;
      style=&quot;position:relative&quot;&gt;
   &lt;section id=&quot;home-panel&quot; data-ae-present=&quot;opacity&quot;&gt;Home&lt;/section&gt;
@@ -843,6 +850,61 @@ await $ae(&quot;views&quot;).present.show(&quot;home&quot;);
 <p>The Modern budget changes explicitly from 11/5 KiB raw/gzip to 17/6 KiB; Legacy changes from 18/7 KiB to 24/9 KiB. These limits cover the three requested capabilities with a small margin for fixes. The stylesheet retains its existing 4/2 KiB budget. No new dependency, animation service or permanent scheduling loop is added.</p>
 <h2>Delivery C stability cost</h2>
 <p>Delivery C&#39;s preflight validation of synchronous declaration/membership changes, safe registration fallback, expected-cancellation diagnostics and group job cleanup measured 17,717 bytes raw / 6,262 gzip in Modern and 25,112 / 8,822 in Legacy. Relative to Delivery B this added 477 / 156 bytes and 560 / 160 bytes respectively. Its maintenance limits were 18 / 6.25 KiB for Modern and 25 / 9 KiB for Legacy. Subsequent configuration diagnostics raise those limits to 18.5 / 6.5 KiB and 26 / 9 KiB respectively; see <a href="../runtime/diagnostics.htm">Diagnostics</a> for current measurements and runtime bundle limits. The stylesheet limits are unchanged. The repository&#39;s <code>milestones/0.1.0-delivery-c.md</code> audit records the earlier regressions, compatibility and remaining release work.</p>
+<h2>Known Limits &amp; Risks</h2>
+<p>See <a href="../runtime/known-limits-and-risks.htm">Core Known Limits &amp; Risks</a> for classifications and shared architecture, loading and lifecycle boundaries.</p>
+<table>
+<thead>
+<tr>
+<th>Area</th>
+<th>Type</th>
+<th>Description</th>
+<th>Recommendation</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Logical/visual state</td>
+<td>Known Limit</td>
+<td><span style="white-space: normal !important;">Accepted group selection and trigger expanded state can precede visual completion. Outgoing and incoming members may be visible together; completion order is not guaranteed.</span></td>
+<td><span style="white-space: normal !important;">Query selected() for logical membership and await show() for a completed current selection.</span></td>
+</tr>
+<tr>
+<td>Interruption</td>
+<td>Known Limit</td>
+<td><span style="white-space: normal !important;">Superseded transitions do not publish obsolete successful completion. Standalone pop() restarts from hidden; toggle(..., true) and group opening follow their documented idempotent behavior.</span></td>
+<td><span style="white-space: normal !important;">Choose the matching API and handle false from invalid, refused or superseded group show() requests.</span></td>
+</tr>
+<tr>
+<td>Progress</td>
+<td>Known Limit</td>
+<td><span style="white-space: normal !important;">Interpolation requires successful property/phase registration and clamp support. Missing or duplicate registration selects bounded discrete endpoints while visual transitions remain available.</span></td>
+<td><span style="white-space: normal !important;">Validate the registration path before requiring continuous progress; see Present Progress.</span></td>
+</tr>
+<tr>
+<td>CSS ownership</td>
+<td>Potential Risk</td>
+<td><span style="white-space: normal !important;">Present owns hidden and presentation state. Anchor owns a shared element transform; other replacing transform writers can still compete. External hidden/style changes can conflict with transitions.</span></td>
+<td><span style="white-space: normal !important;">Apply independent transforms to descendants and coordinate visibility through the mounted API.</span></td>
+</tr>
+<tr>
+<td>Layout cost</td>
+<td>Potential Risk</td>
+<td><span style="white-space: normal !important;">Size transitions without a direct motion child measure dimensions; many simultaneous transitions or changing content add layout work.</span></td>
+<td><span style="white-space: normal !important;">Use the motion-child strategy where appropriate and profile real content changes.</span></td>
+</tr>
+<tr>
+<td>Semantics</td>
+<td>Known Limit</td>
+<td><span style="white-space: normal !important;">Groups add no tabs/dialog roles. Focus is released when closing hides the active element; restoration relies on Focus or application integration.</span></td>
+<td><span style="white-space: normal !important;">Provide the semantics, keyboard behavior, reduced-motion styles and focus destination required by the UI pattern.</span></td>
+</tr>
+<tr>
+<td>Coverage</td>
+<td>Validation Gap</td>
+<td><span style="white-space: normal !important;">Tests exercise group vetoes, reversal, ARIA, progress fallbacks and tap/click routing. Real assistive-technology workflows and physical hover/touch hybrids are not established by desktop fixtures.</span></td>
+<td><span style="white-space: normal !important;">Validate the UI pattern and devices beyond DOM/ARIA assertions.</span></td>
+</tr>
+</tbody></table>
+<p>Evidence: <a href="https://github.com/aelluxjs/core/blob/update/beta.10/src/aellux.ext.present.js">Implementation</a>, <a href="https://github.com/aelluxjs/core/blob/update/beta.10/tests/browser/present-enhancements.spec.mjs">present-enhancements.spec.mjs</a>, <a href="https://github.com/aelluxjs/core/blob/update/beta.10/tests/browser/present-aria.spec.mjs">present-aria.spec.mjs</a>, <a href="https://github.com/aelluxjs/core/blob/update/beta.10/tests/browser/present-tap.spec.mjs">present-tap.spec.mjs</a>.</p>
           </main>
 
           <div id="doc-navlinks2" ajax-load="doc-navlinks2">

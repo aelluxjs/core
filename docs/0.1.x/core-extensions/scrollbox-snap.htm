@@ -386,6 +386,13 @@
                                     class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                     style="flex:0">
                                     <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                      href="/core/docs/0.1.x/runtime/known-limits-and-risks.htm" data-ae-overflow-marquee="190px">
+                                      Known Limits &amp; Risks                                    </a>
+                                  </div>
+                                                                                                                                      <div
+                                    class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                    style="flex:0">
+                                    <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                       href="/core/docs/0.1.x/runtime/es5-support.htm" data-ae-overflow-marquee="190px">
                                       ES5 Support                                    </a>
                                   </div>
@@ -774,6 +781,61 @@ gallery.previous();
 <p>A new pointer press or cancelable wheel interaction during elastic recovery immediately restores the wrapper and cancels its remaining return frames before processing the input. Wheel snap navigation then measures the restored item positions. Pointer presses on controls or custom scrollbars also finish the recovery.</p>
 <p>A mouse or pen press also interrupts any smooth snap animation immediately and discards a pending flick from the previous gesture. CSS snap stays suspended while the pointer is held, including movement below the PDS threshold and the text-selection wait. The current position stays fixed until the new drag moves it. Releasing or canceling the last pointer restores snap; losing window focus also clears the gesture. Touch input keeps native CSS snap and momentum.</p>
 <p>Snap boxes use <code>scroll-behavior: auto</code> for native snap positioning. Desktop PDS release smoothly settles at the nearest snap point, or advances one point for an eligible flick, using a 300 ms easing that a new press cancels immediately. Native snap stays suspended until this animation finishes; reduced motion settles immediately. Oversized items retain free scrolling while they cover the viewport. Controller navigation and wheel steps keep their explicit smooth behavior. Fractional pointer coordinates are accumulated without turning browser rounding into elastic force or parent scrolling.</p>
+<h2>Known Limits &amp; Risks</h2>
+<p>See <a href="../runtime/known-limits-and-risks.htm">Core Known Limits &amp; Risks</a> for classifications and shared architecture, loading and lifecycle boundaries.</p>
+<table>
+<thead>
+<tr>
+<th>Area</th>
+<th>Type</th>
+<th>Description</th>
+<th>Recommendation</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Dependency</td>
+<td>Known Limit</td>
+<td><span style="white-space: normal !important;">Snap waits for Scrollbox and mounts after its base map. It needs the Scrollbox declaration and CSS; a filtered mount omitting the base element behavior does not satisfy that contract.</span></td>
+<td><span style="white-space: normal !important;">Mount both behaviors together and include Scrollbox styles in Basic.</span></td>
+</tr>
+<tr>
+<td>Native alignment</td>
+<td>Known Limit</td>
+<td><span style="white-space: normal !important;">Oversized snap areas allow free native scrolling while covering the viewport. Touch fling and CSS Scroll Snap remain browser behavior, rather than scripted desktop flick navigation.</span></td>
+<td><span style="white-space: normal !important;">Use viewport-sized items when every release must align to one point.</span></td>
+</tr>
+<tr>
+<td>Outputs</td>
+<td>Known Limit</td>
+<td><span style="white-space: normal !important;">Snap publishes alignment proximity as --ae-snap-focus. Normalized position and visible area belong to the independent Viewport Extension.</span></td>
+<td><span style="white-space: normal !important;">Follow Position migration when replacing --ae-snap-viewport.</span></td>
+</tr>
+<tr>
+<td>Completion</td>
+<td>Known Limit</td>
+<td><span style="white-space: normal !important;">Navigation methods return a boolean for an available request, not a Promise for settled scrolling. New input interrupts pending navigation; settle notifications describe actual selection.</span></td>
+<td><span style="white-space: normal !important;">Use ScrollboxSnapChange for selection changes; true does not mean completed travel.</span></td>
+</tr>
+<tr>
+<td>Wheel/geometry</td>
+<td>Potential Risk</td>
+<td><span style="white-space: normal !important;">Noncancelable wheel events keep native behavior. Item transforms, fractional positions and dynamic layout can change alignment while navigation is pending.</span></td>
+<td><span style="white-space: normal !important;">Animate item descendants, await layout changes and check final selection after interruption.</span></td>
+</tr>
+<tr>
+<td>Observation cost</td>
+<td>Potential Risk</td>
+<td><span style="white-space: normal !important;">Scroll updates visit eligible item rectangles; item resize and membership changes refresh state. Large item sets increase measurement and observation work.</span></td>
+<td><span style="white-space: normal !important;">Limit mounted snap items and profile realistic scrolling.</span></td>
+</tr>
+<tr>
+<td>Coverage</td>
+<td>Validation Gap</td>
+<td><span style="white-space: normal !important;">Release, regrab, nested-wheel and fractional movement paths have fixtures. Physical touch/trackpad sequences and advanced RTL/transformed dynamic layouts need application validation.</span></td>
+<td>Test actual devices and axis/direction combinations.</td>
+</tr>
+</tbody></table>
+<p>Evidence: <a href="https://github.com/aelluxjs/core/blob/update/beta.10/src/aellux.ext.scrollbox-snap.js">Implementation</a>, <a href="https://github.com/aelluxjs/core/blob/update/beta.10/tests/browser/scrollbox-snap-release.spec.mjs">scrollbox-snap-release.spec.mjs</a>, <a href="https://github.com/aelluxjs/core/blob/update/beta.10/tests/browser/scrollbox.spec.mjs">scrollbox.spec.mjs</a>, <a href="https://github.com/aelluxjs/core/blob/update/beta.10/tests/browser/scrollbox-pointer.spec.mjs">scrollbox-pointer.spec.mjs</a>.</p>
           </main>
 
           <div id="doc-navlinks2" ajax-load="doc-navlinks2">

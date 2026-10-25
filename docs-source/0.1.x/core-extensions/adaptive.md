@@ -47,3 +47,17 @@ The default size thresholds are `compact: 0`, `small: 480`, `medium: 768`, `larg
 Parameter groups must be objects. Minimum sizes must be finite nonnegative numbers; ratio and experience boundaries must be finite positive numbers, with the lower boundary less than the upper boundary. Invalid values record `2026` and retain defaults; reversed boundaries restore the default pair. Standard size names with thresholds out of ascending order also record `2026`, while preserving the configured thresholds. Custom size names remain supported.
 
 The generated `aellux.ext.adaptive.css` supplies state-based utility classes. Load it when using those utilities outside the `full` runtime.
+
+## Known Limits & Risks
+
+See [Core Known Limits & Risks](../runtime/known-limits-and-risks.md) for classifications and shared architecture, loading and lifecycle boundaries.
+
+| Area | Type | Description | Recommendation |
+| --- | --- | --- | --- |
+| Geometry | Known Limit | <span style="white-space: normal !important;">ResizeObserver supplies content-box sizes; the fallback reads bounding rectangles, including borders and transforms. Hidden or zero-sized content has no useful responsive dimensions.</span> | <span style="white-space: normal !important;">Use measurable structural elements and verify the box model for the active observation path.</span> |
+| Refresh | Known Limit | <span style="white-space: normal !important;">Without ResizeObserver, initial mounting and window resize trigger measurements. Element-only CSS changes have no dedicated observer or mounted update handler.</span> | <span style="white-space: normal !important;">Trigger the window resize fallback after undetected size changes; mountManager.update() does not measure Adaptive.</span> |
+| Configuration | Known Limit | <span style="white-space: normal !important;">Parameters freeze at initialization. Fit classes use sqrt(width * height); experienceScale is currently unused. Invalid values follow the Configuration fallbacks.</span> | <span style="white-space: normal !important;">Configure thresholds before initialization and use the documented area-based metric.</span> |
+| Layout feedback | Potential Risk | <span style="white-space: normal !important;">Styles consuming shape/fit classes can change the observed size and repeatedly cross thresholds. Many changing targets increase callback and layout work.</span> | <span style="white-space: normal !important;">Avoid size rules that toggle their own threshold and profile responsive workloads.</span> |
+| Coverage | Validation Gap | <span style="white-space: normal !important;">Existing cases check resizing, the window fallback, configuration and restoration; they do not establish every hidden/revealed, zoom or transformed-box combination.</span> | <span style="white-space: normal !important;">Validate those combinations before depending on exact threshold transitions.</span> |
+
+Evidence: [Implementation](https://github.com/aelluxjs/core/blob/update/beta.10/src/aellux.ext.adaptive.js), [adaptive.spec.mjs](https://github.com/aelluxjs/core/blob/update/beta.10/tests/browser/adaptive.spec.mjs).

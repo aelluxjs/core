@@ -386,6 +386,13 @@
                                     class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                     style="flex:0">
                                     <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                      href="/core/docs/0.1.x/runtime/known-limits-and-risks.htm" data-ae-overflow-marquee="190px">
+                                      Known Limits &amp; Risks                                    </a>
+                                  </div>
+                                                                                                                                      <div
+                                    class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                    style="flex:0">
+                                    <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                       href="/core/docs/0.1.x/runtime/es5-support.htm" data-ae-overflow-marquee="190px">
                                       ES5 Support                                    </a>
                                   </div>
@@ -775,6 +782,49 @@ feedback.progress(&quot;Uploading…&quot;, field, 0.5);
 <li><strong>Consumer responsibility:</strong> choose suitable semantics, live region priority, and focus behavior. <code>announce()</code> publishes an event but does not create a live region.</li>
 <li><strong>Motion:</strong> the generated styles respect the AelluxJs reduced-motion attribute. Application supplied motion styles must handle reduced motion themselves.</li>
 </ul>
+<h2>Known Limits &amp; Risks</h2>
+<p>See <a href="../runtime/known-limits-and-risks.htm">Core Known Limits &amp; Risks</a> for classifications and shared architecture, loading and lifecycle boundaries.</p>
+<table>
+<thead>
+<tr>
+<th>Area</th>
+<th>Type</th>
+<th>Description</th>
+<th>Recommendation</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Delivery</td>
+<td>Known Limit</td>
+<td><span style="white-space: normal !important;">A matching boundary stops DOM propagation, but typed and wildcard subscriptions still run after send() dispatches the event, even if it is canceled.</span></td>
+<td><span style="white-space: normal !important;">Coordinate boundary rendering and subscriptions; event cancellation does not cancel subscribers.</span></td>
+</tr>
+<tr>
+<td>Rendering</td>
+<td>Known Limit</td>
+<td><span style="white-space: normal !important;">Boundaries update the first direct text node and retain child markup. Type classes accumulate until application code removes them; announce() creates no live region.</span></td>
+<td><span style="white-space: normal !important;">Choose message targets, reset obsolete type styling and supply appropriate announcement semantics.</span></td>
+</tr>
+<tr>
+<td>Motion</td>
+<td>Potential Risk</td>
+<td><span style="white-space: normal !important;">Standard motion replaces the resolved transform target transform and can compete with Anchor, Present or an elastic wrapper.</span></td>
+<td><span style="white-space: normal !important;">Animate a separate descendant; see the transform ownership guidance at the start of this page.</span></td>
+</tr>
+<tr>
+<td>Messages</td>
+<td>Potential Risk</td>
+<td><span style="white-space: normal !important;">Frequent feedback or multiple renderers can repeat announcements and work. Message and value payloads are visible to application subscribers.</span></td>
+<td><span style="white-space: normal !important;">Coalesce progress, avoid duplicate rendering and exclude sensitive data from shared messages.</span></td>
+</tr>
+<tr>
+<td>Coverage</td>
+<td>Validation Gap</td>
+<td><span style="white-space: normal !important;">Boundary text, filtering, argument checks and motion have automated checks; these do not validate live-region announcements in real screen readers.</span></td>
+<td><span style="white-space: normal !important;">Review announcement priority and repetition with the target assistive technologies.</span></td>
+</tr>
+</tbody></table>
+<p>Evidence: <a href="https://github.com/aelluxjs/core/blob/update/beta.10/src/aellux.ext.feedback.js">Implementation</a>, <a href="https://github.com/aelluxjs/core/blob/update/beta.10/tests/browser/feedback.spec.mjs">feedback.spec.mjs</a>, <a href="https://github.com/aelluxjs/core/blob/update/beta.10/tests/browser/extension-composition.spec.mjs">extension-composition.spec.mjs</a>.</p>
           </main>
 
           <div id="doc-navlinks2" ajax-load="doc-navlinks2">

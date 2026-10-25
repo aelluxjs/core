@@ -386,6 +386,13 @@
                                     class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                     style="flex:0">
                                     <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                      href="/core/docs/0.1.x/runtime/known-limits-and-risks.htm" data-ae-overflow-marquee="190px">
+                                      Known Limits &amp; Risks                                    </a>
+                                  </div>
+                                                                                                                                      <div
+                                    class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                    style="flex:0">
+                                    <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                       href="/core/docs/0.1.x/runtime/es5-support.htm" data-ae-overflow-marquee="190px">
                                       ES5 Support                                    </a>
                                   </div>
@@ -741,7 +748,7 @@
             <h1>CSP and Extension Trust</h1>
 <p>Content Security Policy (CSP) is set by the application serving the page. Review that policy against every aellux.js runtime and Extension asset the page uses. The notes below describe the current loading behavior; they are not a tested CSP compatibility profile.</p>
 <h2>Script and stylesheet sources</h2>
-<p>The boot script adds a <code>&lt;script src&gt;</code> for the selected <code>basic</code> or <code>full</code> runtime, including its Legacy fallback when needed. In <code>basic</code> mode, the orchestrator also adds a <code>&lt;script src&gt;</code> for each registered Extension when it is needed. <code>loadWhen</code> delays that request until a matching element is found; it does not bypass CSP. Full incorporates its bundled Core Extensions; Overflow Marquee, Scrollbox and Scrollbox Snap remain separate scripts loaded when matching elements are mounted. Separately registered third-party Extensions can also require their own files.</p>
+<p>The boot script adds a <code>&lt;script src&gt;</code> for the selected <code>basic</code> or <code>full</code> runtime, including its Legacy fallback when needed. In <code>basic</code> mode, the orchestrator also adds a <code>&lt;script src&gt;</code> for each registered Extension when it is needed. <code>loadWhen</code> delays that request until a matching element is found; it does not bypass CSP. Full incorporates the eleven stable Core Extensions, including Overflow Marquee, Scrollbox and Scrollbox Snap. Experimental Ajax Href, Dialog, PWA and Viewport remain separate scripts loaded on demand. Separately registered third-party Extensions can also require their own files. See <a href="../runtime/known-limits-and-risks.htm#modular-loading">Known Limits &amp; Risks</a> for the shared delivery boundaries.</p>
 <p>Allow the actual runtime and Extension script origins in the page&#39;s <code>script-src</code> policy. A same-origin deployment may use <code>script-src &#39;self&#39;</code> for these external files; a cross-origin Extension requires its specific origin to be allowed by the application&#39;s policy. Account for the Modern, Legacy, and minified artifact URLs that the page can request. A browser that blocks a script with CSP cannot initialize the corresponding runtime or Extension.</p>
 <p>If an Extension has <code>loadStyle: true</code>, the orchestrator derives a <code>.css</code> URL from its script URL. If <code>loadStyle</code> is a string, it uses that URL directly. It adds a <code>&lt;link rel=&quot;stylesheet&quot;&gt;</code>, so the stylesheet origin must be allowed by <code>style-src</code>. A blocked Extension stylesheet is reported as a load warning and the JavaScript Extension may continue without its intended presentation.</p>
 <p>In Basic mode, the boot script inserts one inline <code>&lt;style&gt;</code> for global weak defaults. A policy such as <code>style-src &#39;self&#39;</code> can block it. In Full mode, these defaults and all generated Extension CSS are in the external <code>aellux.full.css</code> or <code>aellux.full.min.css</code>; the boot inserts one <code>&lt;link data-ae-full-style&gt;</code> and no global inline style block. Anchor, Scrollbox and Overflow Marquee do not insert their own inline stylesheets. Individual Extension CSS requested in Basic is also external.</p>

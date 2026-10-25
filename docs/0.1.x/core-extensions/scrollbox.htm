@@ -386,6 +386,13 @@
                                     class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                     style="flex:0">
                                     <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                      href="/core/docs/0.1.x/runtime/known-limits-and-risks.htm" data-ae-overflow-marquee="190px">
+                                      Known Limits &amp; Risks                                    </a>
+                                  </div>
+                                                                                                                                      <div
+                                    class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                    style="flex:0">
+                                    <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                       href="/core/docs/0.1.x/runtime/es5-support.htm" data-ae-overflow-marquee="190px">
                                       ES5 Support                                    </a>
                                   </div>
@@ -942,6 +949,67 @@ gallery.previous();  // Move to the preceding point.
 </tr>
 </tbody></table>
 <p>Together with Overflow Marquee&#39;s fade, the shared controller and semantic validation add 667/168 bytes to Orchestrator Modern and 690/162 bytes to Legacy. Their combined contribution to Full is 667/202 bytes in Modern, 690/162 bytes in Legacy and 3,265/436 bytes in Full CSS. Orchestrator Modern&#39;s gzip limit changes from 20.5 to 20.75 KiB; Orchestrator Legacy&#39;s raw limit changes from 328 to 328.5 KiB. Full Modern changes from 131/42.5 to 131.5/42.75 KiB, and Full CSS&#39;s raw limit changes from 121 to 122 KiB. Full Legacy retains its existing limits.</p>
+<h2>Known Limits &amp; Risks</h2>
+<p>See <a href="../runtime/known-limits-and-risks.htm">Core Known Limits &amp; Risks</a> for classifications and shared architecture, loading and lifecycle boundaries.</p>
+<table>
+<thead>
+<tr>
+<th>Area</th>
+<th>Type</th>
+<th>Description</th>
+<th>Recommendation</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Native input</td>
+<td>Known Limit</td>
+<td><span style="white-space: normal !important;">PDS enhances primary mouse/pen input on hover/fine-pointer devices; touch scrolling and momentum remain native. Excluded controls and active text selection keep their input behavior.</span></td>
+<td><span style="white-space: normal !important;">Choose native mode where appropriate and preserve browser touch-action and keyboard access.</span></td>
+</tr>
+<tr>
+<td>Nested scrolling</td>
+<td>Known Limit</td>
+<td><span style="white-space: normal !important;">Axis availability and overscroll-behavior govern handoff. Ctrl-wheel and noncancelable wheel events stay native; enabling Snap disables PDS momentum.</span></td>
+<td><span style="white-space: normal !important;">Configure each axis deliberately and follow the wheel and Snap interaction contracts.</span></td>
+</tr>
+<tr>
+<td>Elastic structure</td>
+<td>Known Limit</td>
+<td><span style="white-space: normal !important;">Elastic requires a single marked content child, excluding bars. It owns temporary wrapper transforms and adjusts block/flex/grid display to inline equivalents.</span></td>
+<td><span style="white-space: normal !important;">Use a dedicated wrapper and animate descendants instead of competing for transform.</span></td>
+</tr>
+<tr>
+<td>Custom bars</td>
+<td>Known Limit</td>
+<td><span style="white-space: normal !important;">Custom scrollbar dragging is a pointer enhancement. Hiding native bars does not add a complete keyboard or assistive-technology scrollbar widget.</span></td>
+<td><span style="white-space: normal !important;">Retain an operable scroll region and verify keyboard reachability when replacing native affordances.</span></td>
+</tr>
+<tr>
+<td>Fade painting</td>
+<td>Known Limit</td>
+<td><span style="white-space: normal !important;">The mask attenuates the container, background, border and bars together. Missing mask/composite support reduces or omits fading; authored masks take precedence as documented.</span></td>
+<td><span style="white-space: normal !important;">Keep decoration outside the masked box or disable fading when it obscures required visuals.</span></td>
+</tr>
+<tr>
+<td>Reconfiguration</td>
+<td>Potential Risk</td>
+<td><span style="white-space: normal !important;">Frequent mutations, resizing and many boxes add geometry and paint work. Large masks and elastic transforms have page-dependent composition costs; content is not virtualized.</span></td>
+<td><span style="white-space: normal !important;">Profile representative lists and gesture chains; avoid unnecessary active effects.</span></td>
+</tr>
+<tr>
+<td>Competing input</td>
+<td>Potential Risk</td>
+<td><span style="white-space: normal !important;">Other drag, selection and wheel handlers can claim the same gesture. New input cancels owned momentum/elastic recovery before the next interaction.</span></td>
+<td><span style="white-space: normal !important;">Coordinate handlers and allow the documented cancel/cleanup path to run.</span></td>
+</tr>
+<tr>
+<td>Coverage</td>
+<td>Validation Gap</td>
+<td><span style="white-space: normal !important;">Nested axes, repeated drags, fades and scrollbar geometry have fixtures; desktop automation does not establish physical touchpad/pen behavior, mobile overscroll or every OS scrollbar mode.</span></td>
+<td><span style="white-space: normal !important;">Validate these environments and long-content performance directly.</span></td>
+</tr>
+</tbody></table>
+<p>Evidence: <a href="https://github.com/aelluxjs/core/blob/update/beta.10/src/aellux.ext.scrollbox.js">Implementation</a>, <a href="https://github.com/aelluxjs/core/blob/update/beta.10/tests/browser/scrollbox-pointer.spec.mjs">scrollbox-pointer.spec.mjs</a>, <a href="https://github.com/aelluxjs/core/blob/update/beta.10/tests/browser/scrollbox-wheel-chain.spec.mjs">scrollbox-wheel-chain.spec.mjs</a>, <a href="https://github.com/aelluxjs/core/blob/update/beta.10/tests/browser/scrollbox-scrollbar.spec.mjs">scrollbox-scrollbar.spec.mjs</a>, <a href="https://github.com/aelluxjs/core/blob/update/beta.10/tests/browser/scrollbox-fade.spec.mjs">scrollbox-fade.spec.mjs</a>.</p>
           </main>
 
           <div id="doc-navlinks2" ajax-load="doc-navlinks2">

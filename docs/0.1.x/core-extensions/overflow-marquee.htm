@@ -386,6 +386,13 @@
                                     class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                     style="flex:0">
                                     <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                      href="/core/docs/0.1.x/runtime/known-limits-and-risks.htm" data-ae-overflow-marquee="190px">
+                                      Known Limits &amp; Risks                                    </a>
+                                  </div>
+                                                                                                                                      <div
+                                    class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                    style="flex:0">
+                                    <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                       href="/core/docs/0.1.x/runtime/es5-support.htm" data-ae-overflow-marquee="190px">
                                       ES5 Support                                    </a>
                                   </div>
@@ -831,6 +838,55 @@ $ae.init({ mode: &quot;basic&quot; });
 <p>Registering Anchor alone does not download or initialize Overflow Marquee. The progressive fade adds 1,102/292 bytes in Modern, 1,172/284 bytes in Legacy and 1,559/231 bytes in the dedicated stylesheet (raw/gzip), compared with the preceding checked-in artifacts. The Extension&#39;s script limits remain unchanged; its CSS raw limit increases from 1.5 to 2.5 KiB.</p>
 <p>The optional pixel limit adds 1,823/492 bytes in Modern, 2,087/387 bytes in Legacy and 175/24 bytes in CSS (raw/gzip), relative to the fade implementation. This includes measuring intrinsic content, skipping marquee work and styles while dormant, and restoring/reapplying the wrapper lifecycle when content crosses the limit. Its budgets increase from 12/4.5 to 13.5/5 KiB in Modern, from 23.5/8 to 25.5/8 KiB in Legacy, and from 2.5/1 to 2.75/1 KiB in CSS. Shared JavaScript limits remain unchanged.</p>
 <p>The shared CSS Motion subtree option and semantic validation for both overflow fades add 667/168 bytes to Orchestrator Modern and 667/202 bytes to Full Modern. Their gzip limits increase from 20.5 to 20.75 KiB and from 42.5 to 42.75 KiB respectively. Combined distribution costs and the remaining shared budget adjustments are recorded in <a href="scrollbox.htm#distribution-cost">Scrollbox</a>. Anchor and Full Legacy keep their existing limits.</p>
+<h2>Known Limits &amp; Risks</h2>
+<p>See <a href="../runtime/known-limits-and-risks.htm">Core Known Limits &amp; Risks</a> for classifications and shared architecture, loading and lifecycle boundaries.</p>
+<table>
+<thead>
+<tr>
+<th>Area</th>
+<th>Type</th>
+<th>Description</th>
+<th>Recommendation</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Content model</td>
+<td>Known Limit</td>
+<td><span style="white-space: normal !important;">Marquee is horizontal single-line overflow behavior. The optional pixel limit enables behavior without setting layout width; dormant content still receives stylesheet nowrap.</span></td>
+<td><span style="white-space: normal !important;">Set available width through layout and keep a readable static presentation.</span></td>
+</tr>
+<tr>
+<td>Structure</td>
+<td>Known Limit</td>
+<td><span style="white-space: normal !important;">Active behavior moves original nodes into generated viewport/content layers. Node identity survives, but direct-child selectors and parent relationships change.</span></td>
+<td><span style="white-space: normal !important;">Use suitable content containers and account for wrappers in selectors and DOM integrations.</span></td>
+</tr>
+<tr>
+<td>Observation</td>
+<td>Known Limit</td>
+<td><span style="white-space: normal !important;">Visibility checks do not detect coverage by unrelated elements. Without IntersectionObserver, viewport/CSS checks provide reduced clipping coverage.</span></td>
+<td><span style="white-space: normal !important;">Do not treat animation activity as proof that a user can perceive the label.</span></td>
+</tr>
+<tr>
+<td>Compatibility</td>
+<td>Known Limit</td>
+<td><span style="white-space: normal !important;">Anchor placement is required. Missing masks omit fading; missing custom-property interpolation omits the moving fade while motion remains available.</span></td>
+<td><span style="white-space: normal !important;">Provide the stylesheet and a useful no-fade presentation; see the loading and fade contracts above.</span></td>
+</tr>
+<tr>
+<td>Repeated work</td>
+<td>Potential Risk</td>
+<td><span style="white-space: normal !important;">Many visible overflowing labels, repeated text/font changes and wrapper reconciliation increase measurement, motion and paint work.</span></td>
+<td><span style="white-space: normal !important;">Enable selectively and retain focus, hover, visibility and reduced-motion pauses.</span></td>
+</tr>
+<tr>
+<td>Coverage</td>
+<td>Validation Gap</td>
+<td><span style="white-space: normal !important;">Fixtures cover thresholds, pauses, restoration and fade fallbacks; real touch/assistive-technology reading and large-label-set performance need application checks.</span></td>
+<td><span style="white-space: normal !important;">Keep full text available without requiring motion or a desktop tooltip.</span></td>
+</tr>
+</tbody></table>
+<p>Evidence: <a href="https://github.com/aelluxjs/core/blob/update/beta.10/src/aellux.ext.overflow-marquee.js">Implementation</a>, <a href="https://github.com/aelluxjs/core/blob/update/beta.10/tests/browser/overflow-marquee.spec.mjs">overflow-marquee.spec.mjs</a>, <a href="https://github.com/aelluxjs/core/blob/update/beta.10/src/internal/create-overflow-marquee.js">Marquee lifecycle</a>.</p>
           </main>
 
           <div id="doc-navlinks2" ajax-load="doc-navlinks2">

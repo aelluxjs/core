@@ -50,3 +50,17 @@ The transform target receives `ae--feedback-motion-{motion}` for the duration de
 - **Owned state:** subscriptions, mounted listeners, motion classes, and CSS Motion operations.
 - **Consumer responsibility:** choose suitable semantics, live region priority, and focus behavior. `announce()` publishes an event but does not create a live region.
 - **Motion:** the generated styles respect the AelluxJs reduced-motion attribute. Application supplied motion styles must handle reduced motion themselves.
+
+## Known Limits & Risks
+
+See [Core Known Limits & Risks](../runtime/known-limits-and-risks.md) for classifications and shared architecture, loading and lifecycle boundaries.
+
+| Area | Type | Description | Recommendation |
+| --- | --- | --- | --- |
+| Delivery | Known Limit | <span style="white-space: normal !important;">A matching boundary stops DOM propagation, but typed and wildcard subscriptions still run after send() dispatches the event, even if it is canceled.</span> | <span style="white-space: normal !important;">Coordinate boundary rendering and subscriptions; event cancellation does not cancel subscribers.</span> |
+| Rendering | Known Limit | <span style="white-space: normal !important;">Boundaries update the first direct text node and retain child markup. Type classes accumulate until application code removes them; announce() creates no live region.</span> | <span style="white-space: normal !important;">Choose message targets, reset obsolete type styling and supply appropriate announcement semantics.</span> |
+| Motion | Potential Risk | <span style="white-space: normal !important;">Standard motion replaces the resolved transform target transform and can compete with Anchor, Present or an elastic wrapper.</span> | <span style="white-space: normal !important;">Animate a separate descendant; see the transform ownership guidance at the start of this page.</span> |
+| Messages | Potential Risk | <span style="white-space: normal !important;">Frequent feedback or multiple renderers can repeat announcements and work. Message and value payloads are visible to application subscribers.</span> | <span style="white-space: normal !important;">Coalesce progress, avoid duplicate rendering and exclude sensitive data from shared messages.</span> |
+| Coverage | Validation Gap | <span style="white-space: normal !important;">Boundary text, filtering, argument checks and motion have automated checks; these do not validate live-region announcements in real screen readers.</span> | <span style="white-space: normal !important;">Review announcement priority and repetition with the target assistive technologies.</span> |
+
+Evidence: [Implementation](https://github.com/aelluxjs/core/blob/update/beta.10/src/aellux.ext.feedback.js), [feedback.spec.mjs](https://github.com/aelluxjs/core/blob/update/beta.10/tests/browser/feedback.spec.mjs), [extension-composition.spec.mjs](https://github.com/aelluxjs/core/blob/update/beta.10/tests/browser/extension-composition.spec.mjs).

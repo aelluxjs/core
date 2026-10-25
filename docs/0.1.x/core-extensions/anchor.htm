@@ -386,6 +386,13 @@
                                     class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                     style="flex:0">
                                     <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                      href="/core/docs/0.1.x/runtime/known-limits-and-risks.htm" data-ae-overflow-marquee="190px">
+                                      Known Limits &amp; Risks                                    </a>
+                                  </div>
+                                                                                                                                      <div
+                                    class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                    style="flex:0">
+                                    <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                       href="/core/docs/0.1.x/runtime/es5-support.htm" data-ae-overflow-marquee="190px">
                                       ES5 Support                                    </a>
                                   </div>
@@ -791,7 +798,7 @@ await $ae.mountManager.update(anchor, &quot;anchor&quot;);
 </code></pre>
 <p>The matching rules use <code>box-sizing: border-box</code>; application CSS may override that too. Anchor projects the matching dimensions while evaluating viewport candidates, then writes dimensions and position together. The matching transform uses a percentage self-pivot, so the actual CSS box remains aligned without positioning against its previous width or height. Normal width/height declarations, padding, borders and size constraints remain the browser&#39;s responsibility. Applications overriding <code>transform</code> also take responsibility for the resulting positioning. When Anchor and Present share an element, Anchor takes priority over Present transform motion. Present retains opacity and size motion and leaves Anchor transform out of its transitions. Development validation reports <code>WARN_PRESENT_ANCHOR_TRANSFORM</code> (<code>2031</code>) when Present also requests transform (including <code>all</code>); animate a child for an independent visual transform.</p>
 <p>ResizeObserver and existing Layout events keep intermediate target dimensions updated. A known-duration <code>AelluxJsLayout</code> event also works without ResizeObserver. There is no permanent geometry polling: finite layout tracking ends after its announced duration. The global adaptive scheduler and <code>data-ae-maxfps</code> limit geometry measurements and updates. As with existing Anchor tracking, a measured position can lag a moving target by the eligible read/update cadence; a low FPS ceiling trades tracking frequency for less work.</p>
-<p>Anchor installs one owned, zero-specificity stylesheet when the Extension initializes. Independent loading still needs only <code>$ae.ext(&quot;anchor&quot;)</code>; no additional stylesheet request is required. Unmount restores previous inline geometry values and priorities. Destruction removes the Extension&#39;s additional stylesheet. The boot&#39;s original Anchor visibility and positioning rules remain available independently.</p>
+<p>Anchor&#39;s zero-specificity rules are supplied by its external stylesheet in Basic or the shared Full stylesheet. Independent loading needs <code>{ loadStyle: true }</code> or application-supplied equivalent CSS. Unmount restores prior inline geometry values and priorities. Destruction removes an individually loaded stylesheet; the shared Full stylesheet remains.</p>
 <p>Application inline <code>position</code>, <code>left</code>, <code>top</code>, <code>transform</code> and <code>transform-origin</code> declarations remain intact while mounted. They override the weak positioning rules; overriding transform or offsets makes the application responsible for the resulting placement. Matching still publishes the target&#39;s dimensions without writing application width or height. The shared DOM observer filters unrelated mutations before scheduling geometry work; association scans run only when group/Anchor declarations or their DOM membership can change. Stable interfaces have no permanent geometry polling.</p>
 <p>Anchor&#39;s external stylesheet, or the shared Full stylesheet, must be allowed by the application&#39;s CSP. Blocking that CSS disables its default visibility, positioning, matching and switching rules; initialization alone does not prove those rules were applied. See <a href="../extensions/csp-and-trust.htm">CSP and trust</a>.</p>
 <h2>Target Switching Motion</h2>
@@ -861,6 +868,55 @@ await $ae.mountManager.update(anchor, &quot;anchor&quot;);
 <h2>Placement maps for dependent Extensions</h2>
 <p><code>$ae.ext.anchor.createPlacementMap()</code> creates an independently owned set of placements. Wait for Anchor initialization before calling it. The map exposes <code>mount(element)</code>, <code>measure(element, pairs, target = element.parentElement)</code>, <code>place(element, placement)</code>, <code>unmount(element)</code>, <code>invisible(element)</code> and <code>destroy()</code>. Pivot strings use the same <code>target:self</code> syntax as declarative Anchors. An invalid or unmounted measurement returns <code>null</code>; check <code>placement.valid</code> before using its geometry. <code>invisible()</code> checks computed CSS, without viewport intersection.</p>
 <p>The consumer owns its mount selector, wrapping, positioning CSS, observers and timing. The map saves the owned styles and class on mount and restores them on unmount or destruction. Use <code>waitLayout.read()</code> for measurement and <code>waitLayout.update()</code> for placement. Elements in this map need no <code>data-ae-anchor</code> and do not install ordinary Anchor tracking. Overflow Marquee uses this API for its generated wrappers. Destroying Anchor disposes any remaining placement maps.</p>
+<h2>Known Limits &amp; Risks</h2>
+<p>See <a href="../runtime/known-limits-and-risks.htm">Core Known Limits &amp; Risks</a> for classifications and shared architecture, loading and lifecycle boundaries.</p>
+<table>
+<thead>
+<tr>
+<th>Area</th>
+<th>Type</th>
+<th>Description</th>
+<th>Recommendation</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Reference</td>
+<td>Known Limit</td>
+<td><span style="white-space: normal !important;">Anchor and explicit target must share an offsetParent, or the target must be that reference. Missing, effectively hidden or invalid targets leave placement inactive.</span></td>
+<td><span style="white-space: normal !important;">Use a shared positioning context and follow Target Visibility.</span></td>
+</tr>
+<tr>
+<td>Boundaries</td>
+<td>Known Limit</td>
+<td><span style="white-space: normal !important;">Candidate fitting uses the window rectangle and falls back to the first valid pair when none fits. It does not combine all ancestor clipping regions or move content into the top layer.</span></td>
+<td><span style="white-space: normal !important;">Choose a containing context that permits the desired overlay; inspect ancestor overflow.</span></td>
+</tr>
+<tr>
+<td>Transforms</td>
+<td>Known Limit</td>
+<td><span style="white-space: normal !important;">Geometry compensates for axis-aligned reference scale. Rotating or skewing the shared reference is outside this model; application transform/offset overrides control final placement.</span></td>
+<td><span style="white-space: normal !important;">Keep measurement contexts simple and apply decorative transforms to a child.</span></td>
+</tr>
+<tr>
+<td>Matching</td>
+<td>Known Limit</td>
+<td><span style="white-space: normal !important;">Dimension matching requires an out-of-flow Anchor. Present yields transform ownership to Anchor on a shared element.</span></td>
+<td><span style="white-space: normal !important;">Use absolute positioning for matching and separate visual motion from placement.</span></td>
+</tr>
+<tr>
+<td>Tracking</td>
+<td>Potential Risk</td>
+<td><span style="white-space: normal !important;">Unannounced position-only CSS motion may escape observation; scheduled placement can trail a moving target. Many active anchors add geometry work.</span></td>
+<td><span style="white-space: normal !important;">Announce bounded Layout motion or await an explicit update; profile the chosen FPS ceiling.</span></td>
+</tr>
+<tr>
+<td>Coverage</td>
+<td>Validation Gap</td>
+<td><span style="white-space: normal !important;">Fixtures exercise matching, switching, nested scroll and Present integration; physical mobile visual-viewport changes and arbitrary 3D contexts are not established by them.</span></td>
+<td><span style="white-space: normal !important;">Validate mobile overlays and precision-sensitive transforms directly.</span></td>
+</tr>
+</tbody></table>
+<p>Evidence: <a href="https://github.com/aelluxjs/core/blob/update/beta.10/src/aellux.ext.anchor.js">Implementation</a>, <a href="https://github.com/aelluxjs/core/blob/update/beta.10/tests/browser/anchor.spec.mjs">anchor.spec.mjs</a>, <a href="https://github.com/aelluxjs/core/blob/update/beta.10/tests/browser/anchor-enhancements.spec.mjs">anchor-enhancements.spec.mjs</a>, <a href="https://github.com/aelluxjs/core/blob/update/beta.10/tests/browser/present-anchor-integration.spec.mjs">present-anchor-integration.spec.mjs</a>.</p>
           </main>
 
           <div id="doc-navlinks2" ajax-load="doc-navlinks2">

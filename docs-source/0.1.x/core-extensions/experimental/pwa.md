@@ -14,14 +14,14 @@ Full recognizes this explicit declaration, including dynamically inserted elemen
 <script>$ae.init({ mode: "full" });</script>
 ```
 
-Basic requires registration:
+Basic also registers PWA automatically for lazy loading. Explicit registration can customize that policy:
 
 ```js
 $ae.ext("pwa", { loadWhen: "[data-ae-pwa]" });
 $ae.init({ mode: "basic" });
 ```
 
-To use the API without declarative controls, register the Extension and explicitly load it with `await $ae.wait("pwa")` after runtime initialization. Load it **before** wiring a native installation control: awaiting a lazy load inside a click can lose transient user activation. Once initialized, call either API directly from the user gesture:
+To use the API without declarative controls, explicitly load it with `await $ae.wait("pwa")` after runtime initialization. Load it **before** wiring a native installation control: awaiting a lazy load inside a click can lose transient user activation. Once initialized, call either API directly from the user gesture:
 
 ```js
 $ae.ext.pwa.install();
@@ -265,3 +265,21 @@ Normal browser navigation usually carries credentials, so its contents are **not
 The build emits `aellux.ext.pwa.js`, `.min.js`, `.legacy.js`, `.legacy.min.js`, plus the independent `aellux.pwa.sw.js` and `.min.js`, with source maps. Extension SRI is in the official catalog; worker hashes are included in generated asset integrity metadata. The worker is never an Extension dependency. Legacy degrades to unavailable capabilities without installation/worker polyfills.
 
 Automated coverage uses Chromium, Firefox and WebKit for loading, native click/keyboard, controlled prompt events, simulated iOS guidance, real local worker registration and configured offline behavior. It does not claim that headless desktop engines reproduce actual OS installation or physical iOS/iPadOS Share menus. Native prompt semantics follow the [WICG installation contract](https://wicg.github.io/manifest-incubations/); worker scope/cache behavior follows the [Service Workers specification](https://www.w3.org/TR/service-workers/).
+
+## Known Limits & Risks
+
+See [Core Known Limits & Risks](../../runtime/known-limits-and-risks.md) for classifications and shared architecture, loading and lifecycle boundaries.
+
+| Area | Type | Description | Recommendation |
+| --- | --- | --- | --- |
+| Independent capabilities | Known Limit | <span style="white-space: normal !important;">Installation, worker registration and offline availability are separate. Manifest presence diagnostics do not fetch/validate the file or establish installability.</span> | <span style="white-space: normal !important;">Validate the manifest and test each capability independently.</span> |
+| Prompt timing | Known Limit | <span style="white-space: normal !important;">beforeinstallprompt may be unavailable or missed before lazy initialization. A held prompt is consumed once and requires user activation; accepted does not confirm installation.</span> | <span style="white-space: normal !important;">Initialize before wiring installation UI and invoke install() directly from the gesture.</span> |
+| Detection | Known Limit | <span style="white-space: normal !important;">Manual Safari guidance uses conservative UA/touch heuristics. Unknown is not proof of absence; standalone signals describe this execution context.</span> | <span style="white-space: normal !important;">Provide suitable guidance without claiming an installed-app inventory.</span> |
+| Worker origin | Known Limit | <span style="white-space: normal !important;">Registration needs an available secure-context worker API and a same-origin principal script. Scope restrictions apply; the reusable importScripts worker is classic, although register() also accepts module.</span> | <span style="white-space: normal !important;">Use a same-origin classic principal for the reusable worker and configure before importing.</span> |
+| Offline policy | Known Limit | <span style="white-space: normal !important;">The reusable worker intercepts nothing by default. Configured cache paths stay within origin/scope; cross-origin, opaque and sensitive responses are excluded. HTTP errors are not offline network failures.</span> | <span style="white-space: normal !important;">Configure public precache/fallback routes and test offline navigation explicitly.</span> |
+| Private data | Potential Risk | <span style="white-space: normal !important;">allowCredentials opts configured credentialed requests into caching. Header/path checks cannot prove a response is public or infer every authentication scheme.</span> | <span style="white-space: normal !important;">Keep the conservative default unless routes are guaranteed public; never cache personalized content.</span> |
+| Availability/storage | Potential Risk | <span style="white-space: normal !important;">Network/CDN import failures, unsafe precache responses, quotas and eviction can prevent worker installation or remove offline resources.</span> | <span style="white-space: normal !important;">Control assets, version deployments and test network/storage failure paths.</span> |
+| Updates/lifecycle | Known Limit | <span style="white-space: normal !important;">applyUpdate() messages a waiting worker; the worker must implement that protocol. It does not reload the page. Destroy releases page observers without unregistering persistent workers.</span> | <span style="white-space: normal !important;">Coordinate activation, application state and worker/cache ownership.</span> |
+| Coverage | Validation Gap | <span style="white-space: normal !important;">Unit tests and local workers cover policies and controlled prompts; simulated iOS identities and desktop headless engines do not validate physical iOS/Android installation UI or OS lifecycle.</span> | <span style="white-space: normal !important;">Prioritize real-device install/update/offline tests and quota/eviction scenarios.</span> |
+
+Evidence: [Implementation](https://github.com/aelluxjs/core/blob/update/beta.10/src/aellux.ext.pwa.js), [pwa.spec.mjs](https://github.com/aelluxjs/core/blob/update/beta.10/tests/browser/pwa.spec.mjs), [Reusable worker](https://github.com/aelluxjs/core/blob/update/beta.10/src/aellux.pwa.sw.js), [Page unit checks](https://github.com/aelluxjs/core/blob/update/beta.10/tests/unit/pwa.test.mjs), [Worker unit checks](https://github.com/aelluxjs/core/blob/update/beta.10/tests/unit/pwa-sw.test.mjs).

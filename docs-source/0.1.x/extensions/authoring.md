@@ -34,6 +34,16 @@ Every Extension must follow the applicable [accessibility requirements](accessib
 
 Document any additional resource origins your Extension requires and see [CSP requirements and Extension trust](csp-and-trust.md) for the host application's loading constraints.
 
+## Known Limits & Risks
+
+Every official Extension must maintain a `## Known Limits & Risks` section as part of its public documentation, including Experimental Extensions. Link to the [shared Core boundaries](../runtime/known-limits-and-risks.md) and describe only constraints specific to the Extension.
+
+Document relevant contract limits, API dependencies and fallbacks, identified operational risks, validation gaps and practical recommendations. Prefer a concise table with `Area`, `Type`, `Description` and `Recommendation` columns; add explanations or the `Known Limits`, `Performance Risks`, `Behavioral Risks`, `Compatibility & Validation Gaps` and `Recommended Practices` subsections only where useful. There is no minimum number of entries, and no requirement to invent risks or fill empty categories.
+
+Use **Known Limit** for a demonstrated contract restriction, **Potential Risk** for a conditional outcome, and **Validation Gap** for reliability not established by the available checks. Reserve **Known Issue** for a reproducible defect; give the observed behavior and link to a regression test or issue when available. Cite the relevant implementation, existing contract, test or validation matrix. Test presence does not establish a new passing result, and a hypothetical scenario is not a confirmed browser defect.
+
+Summarize existing explanations with internal links instead of duplicating them. Keep the section proportional to the behavior and revise it when the public contract, compatibility requirements or validation evidence changes.
+
 ## DOM Mount Contract
 
 Extensions with element behavior register their selectors and handlers with `AelluxJs.mountManager` during `init()`:

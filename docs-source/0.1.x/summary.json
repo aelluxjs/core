@@ -21,6 +21,7 @@
         { "label": "Modern & Legacy", "href": "runtime/modern-legacy.md" },
         { "label": "Browser Support", "href": "runtime/browser-support.md" },
         { "label": "Performance and Bundle Budget", "href": "runtime/performance.md" },
+        { "label": "Known Limits & Risks", "href": "runtime/known-limits-and-risks.md" },
         { "label": "ES5 Support", "href": "runtime/es5-support.md" },
         { "label": "Visual Mounting", "href": "runtime/visual-mounting.md" },
         { "label": "Diagnostics", "href": "runtime/diagnostics.md" }

@@ -58,3 +58,17 @@ Repeated mounts do not duplicate controllers or polyfill registrations. Unmount 
 The fallback supports `show()`, `showModal()`, `close()`, `returnValue`, Escape/cancel and `<form method="dialog">`. It cannot reproduce the native top layer. Place modal dialogs directly under `<body>` where possible because ancestor stacking contexts can obscure a polyfilled modal. Style both `dialog::backdrop` and `dialog + .backdrop` for backdrop customization. See the [upstream limitations](https://github.com/GoogleChrome/dialog-polyfill#limitations).
 
 Consumers provide accessible names, appropriate content and usable controls. The Legacy syntax target does not establish support for untested historical browsers; see [ES5 support](../../runtime/es5-support.md). Third-party BSD-3-Clause notices ship with the Legacy Dialog artifact and in the distribution license files.
+
+## Known Limits & Risks
+
+See [Core Known Limits & Risks](../../runtime/known-limits-and-risks.md) for classifications and shared architecture, loading and lifecycle boundaries.
+
+| Area | Type | Description | Recommendation |
+| --- | --- | --- | --- |
+| Platform boundary | Known Limit | <span style="white-space: normal !important;">Controllers forward show(), showModal() and close(), preserving native exceptions. They add neither animations nor recent APIs such as requestClose()/closedby.</span> | <span style="white-space: normal !important;">Await mounting and use capabilities available in the native/fallback API.</span> |
+| Fallback rendering | Known Limit | <span style="white-space: normal !important;">The Legacy polyfill cannot reproduce the native top layer and is affected by ancestor stacking contexts. Native implementations are preserved, including with forced Legacy.</span> | <span style="white-space: normal !important;">Prefer dialogs directly under body and style native and polyfill backdrops.</span> |
+| Lifetime | Known Limit | <span style="white-space: normal !important;">Unmount releases controllers, while fallback registrations, CSS and the upstream manager remain for the document lifetime.</span> | <span style="white-space: normal !important;">Do not treat Extension destruction as removing polyfilled methods or shared CSS.</span> |
+| Integration | Potential Risk | <span style="white-space: normal !important;">External CSS, competing modal/focus handlers and dynamic removal can change the usable dialog experience.</span> | <span style="white-space: normal !important;">Provide accessible names and test Escape, cancel, forms and focus return with the actual integration.</span> |
+| Coverage | Validation Gap | <span style="white-space: normal !important;">Tests cover missing/partial APIs, forwarding, dynamic roots, forms and lifecycle. They do not establish native/polyfill equivalence on historical browsers or physical mobile assistive technologies.</span> | Validate required devices and modal workflows directly. |
+
+Evidence: [Implementation](https://github.com/aelluxjs/core/blob/update/beta.10/src/aellux.ext.dialog.js), [dialog-polyfill.spec.mjs](https://github.com/aelluxjs/core/blob/update/beta.10/tests/browser/dialog-polyfill.spec.mjs), [Fallback registration](https://github.com/aelluxjs/core/blob/update/beta.10/src/internal/install-dialog-polyfill.js).
