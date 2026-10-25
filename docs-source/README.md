@@ -1,6 +1,6 @@
 # Documentation source
 
-Versioned pages live under `0.1.0/`; `summary.json` controls their navigation. Edit the Markdown sources and run `npm run build:docs` to update the rendered pages.
+Versioned pages live under `0.1.x/`; `summary.json` controls their navigation. Edit the Markdown sources and run `npm run build:docs` to update the rendered pages.
 
 Prefer a small working code example near each user-facing API or behavior. Show the actual declaration or call before listing its variants and edge cases. Use HTML for declarative attributes, CSS for styling contracts, and JavaScript for lifecycle methods and events. Include the setup, asynchronous handling, and cleanup needed to make an example accurate; keep unrelated implementation details out of it.
 

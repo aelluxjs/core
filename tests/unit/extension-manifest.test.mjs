@@ -12,7 +12,7 @@ const version = "1.2.3";
 const sri = "sha384-" + createHash("sha384").update("artifact").digest("base64");
 
 test("Experimental documentation matches the official bundle classification", async () => {
-  const { summary } = JSON.parse(await readFile(new URL("../../docs-source/0.1.0/summary.json", import.meta.url), "utf8"));
+  const { summary } = JSON.parse(await readFile(new URL("../../docs-source/0.1.x/summary.json", import.meta.url), "utf8"));
   const experimental = summary.find(group => group.slug === "core-extensions")
     .children.find(group => group.slug === "experimental");
   assert.deepEqual(experimental.children.map(entry => entry.href.split("/").pop().replace(/\.md$/, "")).sort(),

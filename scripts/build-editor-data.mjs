@@ -26,7 +26,7 @@ export async function createSemanticCatalog(metadata, constants = createAelluxCo
   // Adaptive's public defaults are read from the actual Extension; no init or
   // DOM emulation is needed to generate its utility classes.
   runInNewContext(await readFile(join(projectRoot, "src/aellux.ext.adaptive.js"), "utf8"), { AelluxJs: api });
-  const release = metadata.version.split("-")[0];
+  const release = `${metadata.version.split(".").slice(0, 2).join(".")}.x`;
   const apiContext = {};
   runInNewContext(await readFile(join(projectRoot, "src/internal/aellux-api-contract.js"), "utf8"), apiContext);
   const docsBase = `https://aelluxjs.github.io/core/docs/${release}/`;

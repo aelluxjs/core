@@ -9,7 +9,7 @@
       "references": [
         {
           "name": "AelluxJS anchor",
-          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/anchor.htm"
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/anchor.htm"
         }
       ]
     },
@@ -20,7 +20,7 @@
       "references": [
         {
           "name": "AelluxJS anchor",
-          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/anchor.htm"
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/anchor.htm"
         }
       ]
     },
@@ -31,7 +31,7 @@
       "references": [
         {
           "name": "AelluxJS anchor",
-          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/anchor.htm"
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/anchor.htm"
         }
       ],
       "values": [
@@ -53,7 +53,7 @@
       "references": [
         {
           "name": "AelluxJS anchor",
-          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/anchor.htm"
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/anchor.htm"
         }
       ],
       "values": [
@@ -75,7 +75,7 @@
       "references": [
         {
           "name": "AelluxJS anchor",
-          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/anchor.htm"
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/anchor.htm"
         }
       ]
     },
@@ -86,7 +86,7 @@
       "references": [
         {
           "name": "AelluxJS anchor",
-          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/anchor.htm"
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/anchor.htm"
         }
       ]
     },
@@ -97,7 +97,7 @@
       "references": [
         {
           "name": "AelluxJS anchor",
-          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/anchor.htm"
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/anchor.htm"
         }
       ]
     },
@@ -108,7 +108,7 @@
       "references": [
         {
           "name": "AelluxJS anchor",
-          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/anchor.htm"
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/anchor.htm"
         }
       ]
     },
@@ -119,7 +119,7 @@
       "references": [
         {
           "name": "AelluxJS present",
-          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/present.htm"
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
         }
       ]
     },
@@ -130,7 +130,7 @@
       "references": [
         {
           "name": "AelluxJS present",
-          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/present.htm"
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
         }
       ]
     },
@@ -141,7 +141,7 @@
       "references": [
         {
           "name": "AelluxJS present",
-          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/present.htm"
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
         }
       ]
     },
@@ -152,7 +152,7 @@
       "references": [
         {
           "name": "AelluxJS present",
-          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/present.htm"
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
         }
       ]
     },
@@ -163,7 +163,7 @@
       "references": [
         {
           "name": "AelluxJS adaptive",
-          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/adaptive.htm"
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/adaptive.htm"
         }
       ]
     },
@@ -174,7 +174,7 @@
       "references": [
         {
           "name": "AelluxJS overflow-marquee",
-          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/overflow-marquee.htm"
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/overflow-marquee.htm"
         }
       ]
     },
@@ -185,7 +185,7 @@
       "references": [
         {
           "name": "AelluxJS overflow-marquee",
-          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/overflow-marquee.htm"
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/overflow-marquee.htm"
         }
       ],
       "values": [
@@ -207,7 +207,7 @@
       "references": [
         {
           "name": "AelluxJS overflow-marquee",
-          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/overflow-marquee.htm"
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/overflow-marquee.htm"
         }
       ]
     },
@@ -218,7 +218,7 @@
       "references": [
         {
           "name": "AelluxJS present",
-          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/present.htm"
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
         }
       ],
       "values": [
@@ -243,7 +243,7 @@
       "references": [
         {
           "name": "AelluxJS present",
-          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/present.htm"
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
         }
       ],
       "values": [
@@ -271,7 +271,7 @@
       "references": [
         {
           "name": "AelluxJS present",
-          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/present.htm"
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
         }
       ]
     },
@@ -282,7 +282,7 @@
       "references": [
         {
           "name": "AelluxJS present",
-          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/present.htm"
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
         }
       ]
     },
@@ -293,7 +293,7 @@
       "references": [
         {
           "name": "AelluxJS present",
-          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/present.htm"
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
         }
       ]
     },
@@ -304,7 +304,7 @@
       "references": [
         {
           "name": "AelluxJS present",
-          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/present.htm"
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
         }
       ]
     },
@@ -315,7 +315,7 @@
       "references": [
         {
           "name": "AelluxJS present",
-          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/present.htm"
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
         }
       ]
     },
@@ -326,7 +326,7 @@
       "references": [
         {
           "name": "AelluxJS scrollbox",
-          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/scrollbox.htm"
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/scrollbox.htm"
         }
       ]
     },
@@ -337,7 +337,7 @@
       "references": [
         {
           "name": "AelluxJS scrollbox",
-          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/scrollbox.htm"
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/scrollbox.htm"
         }
       ]
     },
@@ -348,7 +348,7 @@
       "references": [
         {
           "name": "AelluxJS scrollbox",
-          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/scrollbox.htm"
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/scrollbox.htm"
         }
       ],
       "values": [
@@ -367,7 +367,7 @@
       "references": [
         {
           "name": "AelluxJS scrollbox",
-          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/scrollbox.htm"
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/scrollbox.htm"
         }
       ],
       "values": [
@@ -386,7 +386,7 @@
       "references": [
         {
           "name": "AelluxJS scrollbox",
-          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/scrollbox.htm"
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/scrollbox.htm"
         }
       ]
     },
@@ -397,7 +397,7 @@
       "references": [
         {
           "name": "AelluxJS scrollbox",
-          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/scrollbox.htm"
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/scrollbox.htm"
         }
       ]
     },
@@ -408,7 +408,7 @@
       "references": [
         {
           "name": "AelluxJS scrollbox",
-          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/scrollbox.htm"
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/scrollbox.htm"
         }
       ]
     },
@@ -419,7 +419,7 @@
       "references": [
         {
           "name": "AelluxJS scrollbox",
-          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/scrollbox.htm"
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/scrollbox.htm"
         }
       ]
     },
@@ -430,7 +430,7 @@
       "references": [
         {
           "name": "AelluxJS scrollbox",
-          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/scrollbox.htm"
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/scrollbox.htm"
         }
       ]
     },
@@ -441,7 +441,7 @@
       "references": [
         {
           "name": "AelluxJS scrollbox",
-          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/scrollbox.htm"
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/scrollbox.htm"
         }
       ],
       "values": [
@@ -463,7 +463,7 @@
       "references": [
         {
           "name": "AelluxJS scrollbox-snap",
-          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/scrollbox-snap.htm"
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/scrollbox-snap.htm"
         }
       ]
     },
@@ -474,7 +474,7 @@
       "references": [
         {
           "name": "AelluxJS present",
-          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/present.htm"
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
         }
       ],
       "values": [
@@ -499,7 +499,7 @@
       "references": [
         {
           "name": "AelluxJS present",
-          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/present.htm"
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
         }
       ],
       "values": [
@@ -527,7 +527,7 @@
       "references": [
         {
           "name": "AelluxJS present",
-          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/present.htm"
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
         }
       ]
     },
@@ -538,7 +538,7 @@
       "references": [
         {
           "name": "AelluxJS present",
-          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/present.htm"
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
         }
       ]
     },
@@ -549,7 +549,7 @@
       "references": [
         {
           "name": "AelluxJS present",
-          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/present.htm"
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
         }
       ]
     },
@@ -560,7 +560,7 @@
       "references": [
         {
           "name": "AelluxJS present",
-          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/present.htm"
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
         }
       ]
     },
@@ -571,7 +571,7 @@
       "references": [
         {
           "name": "AelluxJS present",
-          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/present.htm"
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
         }
       ]
     },
@@ -582,7 +582,7 @@
       "references": [
         {
           "name": "AelluxJS viewport",
-          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/viewport.htm"
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/viewport.htm"
         }
       ]
     },
@@ -593,7 +593,7 @@
       "references": [
         {
           "name": "AelluxJS viewport",
-          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/viewport.htm"
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/viewport.htm"
         }
       ]
     },
@@ -604,7 +604,7 @@
       "references": [
         {
           "name": "AelluxJS viewport",
-          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/viewport.htm"
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/viewport.htm"
         }
       ]
     },
@@ -615,7 +615,7 @@
       "references": [
         {
           "name": "AelluxJS adaptive",
-          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/adaptive.htm"
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/adaptive.htm"
         }
       ]
     },
@@ -626,7 +626,7 @@
       "references": [
         {
           "name": "AelluxJS anchor",
-          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/anchor.htm"
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/anchor.htm"
         }
       ]
     }

@@ -7,7 +7,7 @@ const themePath = fileURLToPath(new URL("../../templates/docweaver/", import.met
 const eta = new Eta({ views: themePath });
 
 async function start(page) {
-  const { summary } = JSON.parse(await readFile(new URL("../../docs-source/0.1.0/summary.json", import.meta.url), "utf8"));
+  const { summary } = JSON.parse(await readFile(new URL("../../docs-source/0.1.x/summary.json", import.meta.url), "utf8"));
   for (const group of summary) group.active = false;
   const core = summary.find(group => group.slug === "core-extensions");
   core.active = true;
@@ -17,7 +17,7 @@ async function start(page) {
   const html = eta.render("docs-layout.eta.htm", {
     menuTree: summary, title: "Docs", pageTitle: "Docs", description: "", faviconPath: null,
     homeHref: "#home", outputPath: "/templates/docweaver", breadcrumb: [], contentHtml: "",
-    version: "0.1.0", versions: [], prevLink: null, nextLink: null
+    version: "0.1.x", versions: [], prevLink: null, nextLink: null
   }).replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, "")
     .replace(/<link\b[^>]*>/gi, "");
   await page.route("**/tests/docweaver-menu.htm", route => route.fulfill({ contentType: "text/html", body: html }));
