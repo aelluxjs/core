@@ -315,7 +315,7 @@ body:after {
   border-radius: 3px;
 }
 
-code {
+pre>code {
   background: #0d1117;
   padding: 1em;
   border-radius: 3px;
