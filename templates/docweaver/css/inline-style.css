@@ -63,11 +63,13 @@ body {
   margin: 0;
   padding: 0;
   letter-spacing: 0.01em;
-  scrollbar-gutter: stable;
+  scroll-behavior: smooth;
 }
 
-* {
+div,
+nav {
   scroll-behavior: smooth;
+  scrollbar-gutter: unset;
 }
 
 body:after {
@@ -94,7 +96,6 @@ body:after {
   width: 250px;
   overflow-x: clip;
   overflow-y: auto;
-  scrollbar-gutter: unset;
 }
 
 #navbarSupportedContent {
