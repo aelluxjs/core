@@ -499,9 +499,6 @@ h3::before {
   width: 100%;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
-  border-top: var(--bs-border-width) var(--bs-border-style) var(--bs-border-color) !important;
-  border-bottom: var(--bs-border-width) var(--bs-border-style) var(--bs-border-color) !important;
-  border-radius: var(--bs-border-radius-sm) !important;
 }
 
 #doc-content {
@@ -512,6 +509,9 @@ h3::before {
   max-width: 100%;
   width: 100%;
   margin-bottom: 1.5rem;
+  border-radius: var(--bs-border-radius-sm) !important;
+  border-top: var(--bs-border-width) var(--bs-border-style) var(--bs-border-color) !important;
+  border-bottom: var(--bs-border-width) var(--bs-border-style) var(--bs-border-color) !important;
 }
 
 #doc-content table th {
