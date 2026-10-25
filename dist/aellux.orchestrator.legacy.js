@@ -25126,6 +25126,11 @@
         style: false,
         dependencies: Object.freeze([])
       }), Object.freeze({
+        name: "viewport",
+        experimental: true,
+        style: false,
+        dependencies: Object.freeze([])
+      }), Object.freeze({
         name: "point",
         style: false,
         dependencies: Object.freeze([])

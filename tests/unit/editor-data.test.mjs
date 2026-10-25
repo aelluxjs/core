@@ -58,7 +58,10 @@ test("metadata agrees with runtime defaults and distinguishes outputs from priva
   assert.equal(find(catalog.cssProperties, "--ae-scrollbox-fade-size").default, "16px");
   assert.equal(find(catalog.cssProperties, "--ae-pop-duration").default, "250ms");
   assert.equal(find(catalog.cssProperties, "--ae-snap-focus").role, "output");
-  assert.match(find(catalog.cssProperties, "--ae-snap-viewport").description, /-2\.\.2/);
+  assert.equal(find(catalog.cssProperties, "--ae-snap-viewport"), undefined);
+  assert.match(find(catalog.cssProperties, "--ae-viewport-x").description, /-2\.\.2/);
+  assert.deepEqual(find(catalog.attributes, "data-ae-viewport").values, ["", "both", "x", "y"]);
+  assert.match(find(catalog.cssProperties, "--ae-viewport-visible").docURL, /core-extensions\/viewport\.htm$/);
   assert.ok(find(catalog.cssProperties, "--anchor-opacity"));
   assert.equal(find(output["aellux.css-data.json"].properties, "--ae-present-pop-phase"), undefined);
   assert.equal(find(output["aellux.html-data.json"].globalAttributes, "data-ae-ext"), undefined);

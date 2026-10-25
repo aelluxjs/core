@@ -6,6 +6,40 @@ for (const variant of [
   { boot: "aellux.js", forceLegacy: true },
   { boot: "aellux.min.js", forceLegacy: true }
 ]) {
+  test(`Ajax Href settles Feedback for missing regions and request errors (${variant.boot}, legacy=${variant.forceLegacy})`, async ({ page }) => {
+    await page.goto("/tests/index.htm");
+    await page.addScriptTag({ url: `/dist/${variant.boot}` });
+    const result = await page.evaluate(async forceLegacy => {
+      document.body.innerHTML = '<main id="content">Old</main><aside id="missing">Keep</aside>';
+      await new Promise(resolve => {
+        AelluxJs.on("Ready", resolve, { once: true });
+        AelluxJs.init({ mode: "basic", forceLegacy });
+      });
+      await Promise.all([AelluxJs.wait("ajax-href"), AelluxJs.wait("feedback")]);
+      const payloads = [];
+      AelluxJs.ext.feedback.on("*", payload => payloads.push({
+        type: payload.type, target: payload.target.id, value: payload.value
+      }));
+      AelluxJs.request = async () => ({ url: "/next.htm", text: async () => '<main id="content">New</main>' });
+      await AelluxJs.ext.ajaxHref.load("/next.htm", "#content,#missing", { ignoreHistory: true });
+      const loaded = payloads.splice(0);
+      AelluxJs.request = async () => { throw new Error("Request failed"); };
+      let error;
+      try { await AelluxJs.ext.ajaxHref.load("/failed.htm", "#content,#missing"); }
+      catch (cause) { error = cause.message; }
+      return { loaded, failed: payloads, error,
+        content: document.getElementById("content").textContent,
+        missing: document.getElementById("missing").textContent };
+    }, variant.forceLegacy);
+    const feedback = (target, busy) => [
+      { type: "busy", target, value: busy },
+      { type: "progress", target, value: busy ? 0 : 1 }
+    ];
+    const expected = [...feedback("content", true), ...feedback("missing", true),
+      ...feedback("content", false), ...feedback("missing", false)];
+    expect(result).toEqual({ loaded: expected, failed: expected, error: "Request failed", content: "New", missing: "Keep" });
+  });
+
   test(`Ajax Href activates only for anchors and replaces mounted content (${variant.boot}, legacy=${variant.forceLegacy})`, async ({ page }) => {
     const extensionRequests = [];
     page.on("request", request => {

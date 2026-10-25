@@ -25126,6 +25126,11 @@
         style: false,
         dependencies: Object.freeze([])
       }), Object.freeze({
+        name: "viewport",
+        experimental: true,
+        style: false,
+        dependencies: Object.freeze([])
+      }), Object.freeze({
         name: "point",
         style: false,
         dependencies: Object.freeze([])
@@ -33095,7 +33100,7 @@
         var elasticAttribute = AelluxJs2.attr("scrollbox-elastic");
         var readyClass = AelluxJs2.className("snap-ready");
         var suspendedClass = AelluxJs2.className("snap-suspended");
-        var properties = ["--ae-snap-viewport", "--ae-snap-focus"];
+        var properties = ["--ae-snap-focus"];
         var states = /* @__PURE__ */ new Map();
         AelluxJs2.extAttach(extensionName, {
           init: init,
@@ -33368,7 +33373,6 @@
           var rect = element.getBoundingClientRect();
           var size = axis === HORIZONTAL ? element.clientWidth : element.clientHeight;
           if (!size) return;
-          var center = axis === HORIZONTAL ? rect.left + element.clientLeft + size / 2 : rect.top + element.clientTop + size / 2;
           var _iterator3 = _createForOfIteratorHelper19(itemsFor(state)), _step3;
           try {
             for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
@@ -33377,9 +33381,7 @@
                 state.savedItems.set(item, AelluxJs2.persist.element.save(item, [], properties));
               }
               var box = item.getBoundingClientRect();
-              var itemCenter = axis === HORIZONTAL ? box.left + box.width / 2 : box.top + box.height / 2;
-              item.style.setProperty(properties[0], Math.max(-2, Math.min(2, (itemCenter - center) * 2 / size)));
-              item.style.setProperty(properties[1], Math.max(0, 1 - Math.abs(offset(state, item, axis, false, rect, box)) / size));
+              item.style.setProperty(properties[0], Math.max(0, 1 - Math.abs(offset(state, item, axis, false, rect, box)) / size));
             }
           } catch (err) {
             _iterator3.e(err);

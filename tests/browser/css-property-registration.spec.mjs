@@ -77,7 +77,7 @@ test("extensions register the CSS properties they publish during init", async ({
   await page.evaluate(() => AelluxJs.init({ mode: "full" }));
   await expect.poll(() => page.evaluate(() => AelluxJs.orchestratorVersion)).toBe("0.1.0-beta.10");
   await page.evaluate(() => Promise.all([
-    "adaptive", "anchor", "present", "scrollbox", "scrollbox-snap"
+    "adaptive", "anchor", "present", "scrollbox", "scrollbox-snap", "viewport"
   ].map(name => AelluxJs.wait(name))));
   await expect.poll(() => page.evaluate(() =>
     ["adaptive", "anchor", "present", "scrollbox", "scrollboxSnap"].every(name =>
@@ -98,7 +98,7 @@ test("extensions register the CSS properties they publish during init", async ({
       "--ae-from-width", "--ae-pop-width", "--ae-unpop-width",
       "--ae-pop-ease", "--ae-unpop-ease", "--ae-pop-duration", "--ae-unpop-duration",
       "--ae-scroll-y-progress", "--ae-scroll-x-progress",
-      "--ae-snap-viewport", "--ae-snap-focus",
+      "--ae-snap-focus", "--ae-viewport-x", "--ae-viewport-y", "--ae-viewport-visible",
       "--ae-scrollbar-x", "--ae-scrollbar-y", "--ae-scrollbar-length",
       "--ae-scrollbar-thumb-size", "--ae-scrollbar-thumb-position", "--ae-scrollbar-display",
       "--ae-scrollbar-opacity-visible", "--ae-scrollbar-opacity-fade",
@@ -113,7 +113,7 @@ test("extensions register the CSS properties they publish during init", async ({
     "0", "1", "0", "scale(0.5)", "scale(1)", "scale(1.2)",
     "0fr", "1fr", "0fr", "0fr", "1fr", "0fr",
     "ease-out", "ease-in", "0.25s", "0.25s",
-    "0", "0", "0", "0", "0px", "0px", "0px", "0px", "0px", "none", "1", "0", "10px", "8px"
+    "0", "0", "0", "0", "0", "0", "0px", "0px", "0px", "0px", "0px", "none", "1", "0", "10px", "8px"
   ]);
 
   const colors = await page.evaluate(() => {

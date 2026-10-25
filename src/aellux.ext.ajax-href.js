@@ -38,9 +38,7 @@ import { validateHTMLSource } from "./internal/validate-html-source.js";
     throw new Error(`[aellux.js] Cannot attach the "${extensionName}" extension: root.AelluxJs is not defined. Load the aellux.js boot script before this extension.`);
   }
   AelluxJs.extAttach(extensionName, { init, destroy, load });
-  const attr = {
-    ajaxHref: AelluxJs.attr(extensionName)
-  };
+  const attribute = AelluxJs.attr(extensionName);
 
   function init() {
     document.addEventListener("click", onClick);
@@ -74,14 +72,7 @@ import { validateHTMLSource } from "./internal/validate-html-source.js";
         { signal: null, abort: () => null };
     previousController = controller;
 
-    elements.forEach(function (currentElement) {
-      //feedback busy/progress
-      if (AelluxJs.ext.feedback) {
-        AelluxJs.ext.feedback.busy("Ajax loading", currentElement, true);
-        AelluxJs.ext.feedback.progress("Ajax loading", currentElement, 0);
-      }
-      //AJAX PROGRESS UPDATE VALUE
-    });
+    elements.forEach(currentElement => updateFeedback(currentElement, true));
 
     AelluxJs.dispatch("AjaxHrefStart", { detail: { url, selectors } });
 
@@ -102,10 +93,7 @@ import { validateHTMLSource } from "./internal/validate-html-source.js";
         if (!loadedElement || await AelluxJs.unmount(currentElement) === false) {
           if (!loadedElement)
             selectorDiagnostic(selector, "No response element matches the selector.", currentElement);
-          if (AelluxJs.ext.feedback) {
-            AelluxJs.ext.feedback.busy("Ajax loading", currentElement, false);
-            AelluxJs.ext.feedback.progress("Ajax loading", currentElement, 1);
-          }
+          updateFeedback(currentElement, false);
           continue;
         }
 
@@ -127,25 +115,13 @@ import { validateHTMLSource } from "./internal/validate-html-source.js";
 
         await AelluxJs.mount(replacement);
 
-        //feedback busy/progress
-        if (AelluxJs.ext.feedback) {
-          AelluxJs.ext.feedback.busy("Ajax loaded", replacement, false);
-          AelluxJs.ext.feedback.progress("Ajax loaded", replacement, 1);
-        }
+        updateFeedback(replacement, false, "Ajax loaded");
       }
 
       AelluxJs.dispatch("AjaxHrefLoaded", { detail: { url, selectors } });
     }
     catch (error) {
-      selectorList.forEach(function (selector) {
-        const currentElement = elements.get(selector);
-        if (!currentElement) return;
-        //feedback busy/progress
-        if (AelluxJs.ext.feedback) {
-          AelluxJs.ext.feedback.busy("Ajax loading", currentElement, false);
-          AelluxJs.ext.feedback.progress("Ajax loading", currentElement, 1);
-        }
-      });
+      elements.forEach(currentElement => updateFeedback(currentElement, false));
 
       AelluxJs.dispatch("AjaxHrefError");
 
@@ -159,9 +135,16 @@ import { validateHTMLSource } from "./internal/validate-html-source.js";
     }
   }
 
+  function updateFeedback(element, busy, label = "Ajax loading") {
+    const feedback = AelluxJs.ext.feedback;
+    if (!feedback) return;
+    feedback.busy(label, element, busy);
+    feedback.progress(label, element, busy ? 0 : 1);
+  }
+
   function selectorDiagnostic(value, reason, element = null) {
     AelluxJs.diagnostics.warn(AelluxJs.diagnostics.WARN_CONFIGURATION_TARGET, {
-      extension: extensionName, element, attribute: attr.ajaxHref, value, reason,
+      extension: extensionName, element, attribute, value, reason,
       suggestion: "Use valid CSS selectors identifying content in both the current document and the AJAX response."
     });
   }
@@ -214,14 +197,14 @@ import { validateHTMLSource } from "./internal/validate-html-source.js";
 
     const target = event.target && event.target.nodeType === 1
       ? event.target : event.target && event.target.parentElement;
-    const link = target && target.closest(`a[${attr.ajaxHref}]`);
+    const link = target && target.closest(`a[${attribute}]`);
     if (!link || !link.href || link.tagName !== "A") return;
     const rawHref = link.getAttribute("href");
     if (link.target && link.target !== "_self") return;
     if (rawHref && rawHref.startsWith("#")) return;
     if (link.hasAttribute("download") || link.hasAttribute("data-no-ajax")) return;
 
-    const selectors = link.getAttribute(attr.ajaxHref).trim() || "title,body";
+    const selectors = link.getAttribute(attribute).trim() || "title,body";
 
     const destinyUrl = comparableUrl(link.href);
     const currentUrl = comparableUrl(window.location.href);

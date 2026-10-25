@@ -62,7 +62,8 @@
           "children":[
             { "label": "Ajax Href", "href": "core-extensions/experimental/ajax-href.md" },
             { "label": "Dialog", "href": "core-extensions/experimental/dialog.md" },
-            { "label": "PWA", "href": "core-extensions/experimental/pwa.md" }
+            { "label": "PWA", "href": "core-extensions/experimental/pwa.md" },
+            { "label": "Viewport", "href": "core-extensions/viewport.md" }
           ]
         }
       ]

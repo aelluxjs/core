@@ -857,6 +857,30 @@
       ]
     },
     {
+      "name": "data-ae-viewport",
+      "description": "Observes the nearest native scroll container, or the document. Publishes normalized position on the selected axes and a geometric visible area fraction. Empty and both select both axes; invalid values warn and fall back to both.\n\nValue syntax: enum.\n\nDefault behavior: \"both\".",
+      "references": [
+        {
+          "name": "AelluxJS viewport",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/viewport.htm"
+        }
+      ],
+      "values": [
+        {
+          "name": ""
+        },
+        {
+          "name": "both"
+        },
+        {
+          "name": "x"
+        },
+        {
+          "name": "y"
+        }
+      ]
+    },
+    {
       "name": "data-ae-wait-mounted",
       "description": "Keeps the element hidden until mounting completes and exposes aria-busy during the attempt.\n\nValue syntax: presence.",
       "references": [

@@ -4,6 +4,7 @@
 // Values on open grammars are suggestions, not a closed enum.
 const attribute = (name, extension, description, options = {}) => ({ name, extension, description, ...options });
 export const semanticAttributes = [
+  attribute("viewport", "viewport", "Observes the nearest native scroll container, or the document. Publishes normalized position on the selected axes and a geometric visible area fraction. Empty and both select both axes; invalid values warn and fall back to both.", { syntax: "enum", values: ["", "both", "x", "y"], default: "both", doc: "core-extensions/viewport" }),
   attribute("pwa", "pwa", "Explicitly loads the optional external PWA Extension. Install uses native click and never registers a Service Worker automatically.", { syntax: "enum", values: ["install"] }),
   attribute("pwa-guide", "pwa", "Internal marker on the generated installation guide dialog.", { role: "internal", syntax: "presence" }),
   attribute("present", "present", "Present container. Empty disables motion; all expands to opacity transform height width. Property tokens are whitespace-separated.", { syntax: "token-list", values: ["", "all", "opacity", "transform", "height", "width", "opacity transform", "opacity transform height width"], default: "" }),
@@ -87,7 +88,8 @@ export const semanticCSSProperties = [
   ...["x", "y"].map(axis => property(`scroll-${axis}-progress`, "scrollbox", "<number>", `Scroll progress on ${axis}, from 0 to 1.`, { role: "output" })),
   property("scrollbox-fade-size", "scrollbox", "<length>", "Maximum extent of each progressive overflow fade. Zero removes the visual effect.", { default: "16px", values: ["0px", "16px", "24px"] }),
   ...["hidden-top", "hidden-right", "hidden-bottom", "hidden-left", "fade-length", "fade-top", "fade-right", "fade-bottom", "fade-left", "mask-x", "mask-y"].map(name => property(`scrollbox-${name}`, "scrollbox", "*", "Private Scrollbox overflow mask geometry.", { role: "internal" })),
-  property("snap-viewport", "scrollbox-snap", "<number>", "Per-item normalized center offset from the viewport center, clamped to -2..2.", { role: "output" }),
+  ...["x", "y"].map(axis => property(`viewport-${axis}`, "viewport", "<number>", `Element center on the ${axis} axis relative to the nearest scrollport: 0 at center, -1 at left/top, +1 at right/bottom, clamped to -2..2.`, { role: "output", default: "0", doc: "core-extensions/viewport" })),
+  property("viewport-visible", "viewport", "<number>", "Geometric visible area divided by element area, from 0 to 1, in the selected scrollport. Independent of selected position axes; ignores occlusion and CSS opacity.", { role: "output", default: "0", doc: "core-extensions/viewport" }),
   property("snap-focus", "scrollbox-snap", "<number>", "Per-item alignment proximity from 0 to 1; 1 means aligned with the requested snap position.", { role: "output" }),
   property("scrollbar-size", "scrollbox", "<length>", "Custom scrollbar thickness; inherited by generated bars.", { default: "8px" }),
   property("scrollbar-thumb-radius", "scrollbox", "<length-percentage>", "Custom scrollbar thumb corner radius.", { default: "10px" }),

@@ -40,14 +40,16 @@ test("custom scrollbar stays over the viewport and supports track click and thum
     const size = Number.parseFloat(element.style.getPropertyValue("--ae-scrollbar-thumb-size"));
     return Math.abs(position + size / 2 - 80);
   })).toBeLessThan(1.5);
-  const thumb = await track.evaluate(element =>
-    Number.parseFloat(element.style.getPropertyValue("--ae-scrollbar-thumb-size")));
-  const thumbPosition = await track.evaluate(element =>
-    Number.parseFloat(element.style.getPropertyValue("--ae-scrollbar-thumb-position")));
-  const verticalThumb = await track.evaluate(element => {
+  // Smooth scrolling may advance between protocol calls. Compare authored and
+  // rendered thumb geometry in the same browser task.
+  const { thumb, thumbPosition, verticalThumb } = await track.evaluate(element => {
     const before = getComputedStyle(element, "::before");
-    return { size: Number.parseFloat(before.height),
-      position: new DOMMatrixReadOnly(before.transform).m42 };
+    return {
+      thumb: Number.parseFloat(element.style.getPropertyValue("--ae-scrollbar-thumb-size")),
+      thumbPosition: Number.parseFloat(element.style.getPropertyValue("--ae-scrollbar-thumb-position")),
+      verticalThumb: { size: Number.parseFloat(before.height),
+        position: new DOMMatrixReadOnly(before.transform).m42 }
+    };
   });
   expect(verticalThumb.size).toBeCloseTo(thumb, 1);
   expect(verticalThumb.position).toBeCloseTo(thumbPosition, 0);
@@ -237,7 +239,7 @@ test("snap pauses during scrollbar thumb drag while focus variables update", asy
   await expect.poll(() => box.evaluate(element => element.scrollLeft)).toBeGreaterThan(0);
   await expect.poll(() => box.evaluate(element =>
     Number.parseFloat(element.querySelector("[data-ae-snap-item]")
-      .style.getPropertyValue("--ae-snap-viewport")))).toBeLessThan(0);
+      .style.getPropertyValue("--ae-snap-focus")))).toBeLessThan(1);
 
   await page.mouse.up();
   await expect(box).toHaveCSS("scroll-snap-type", "x mandatory");

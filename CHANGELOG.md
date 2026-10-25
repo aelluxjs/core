@@ -6,6 +6,8 @@ All notable changes to aellux.js will be documented in this file.
 
 ### Added
 
+- Independent Experimental Viewport Extension: lazy `[data-ae-viewport]` geometry observation, normalized X/Y position and visible area, grouped scheduler work, native scroll container discovery and inline-style restoration in Modern and Legacy builds. No implementation is bundled into Full.
+
 - Optional external PWA Extension with lazy declarative install controls, native prompt handling, replaceable English/Portuguese manual guidance, semantic state events, explicit worker registration and application-controlled updates. Its independent classic worker provides scoped, versioned precache and configurable network/cache strategies with conservative privacy defaults; neither implementation nor PWA styles enter Full/Core bundles.
 - Point recognizes short primary taps on mounted buttons, links and role buttons, emitting bubbling, composed `AelluxJsTap` events independently of native click and scroll, with lifecycle cleanup and Modern/Legacy coverage.
 - Present routes Point taps through its existing trigger, dismiss and outside activation behavior, deferring tap-only actions so a matching native click takes priority without a duplicate action; pending fallbacks are cleaned up on unmount and destruction.
@@ -79,7 +81,7 @@ All notable changes to aellux.js will be documented in this file.
 - Snap release prioritizes the point nearest the viewport center, then uses a short flick or significant displacement of the current point to advance wide carousel items.
 - Snap now projects point centers by an additional pointer delta before comparison and accepts very short, fast flicks while rejecting slow short drags.
 - Snap recognizes flicks released during the 100 ms text-selection wait, while preserving any selection that changed during the gesture.
-- Snap children now expose inline `--ae-snap-viewport` and `--ae-snap-focus` values as their centers move through and beyond the viewport.
+- Snap children expose inline `--ae-snap-focus` alignment proximity. The former `--ae-snap-viewport` output is removed: add `data-ae-viewport="x"` or `"y"` and consume `--ae-viewport-x` or `--ae-viewport-y` from the independent Viewport Extension.
 - A single click inside a partly visible snap point now centers it; clicks inside fully visible points leave scrolling unchanged.
 - Snap selection now chooses the first or last point within 10 px of the corresponding scroll limit.
 

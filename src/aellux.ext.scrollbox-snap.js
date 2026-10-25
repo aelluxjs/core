@@ -54,7 +54,7 @@
   const elasticAttribute = AelluxJs.attr("scrollbox-elastic");
   const readyClass = AelluxJs.className("snap-ready");
   const suspendedClass = AelluxJs.className("snap-suspended");
-  const properties = ["--ae-snap-viewport", "--ae-snap-focus"];
+  const properties = ["--ae-snap-focus"];
   const states = new Map();
 
   AelluxJs.extAttach(extensionName, { init, destroy, next, previous, goto });
@@ -251,16 +251,12 @@
     const rect = element.getBoundingClientRect();
     const size = axis === HORIZONTAL ? element.clientWidth : element.clientHeight;
     if (!size) return;
-    const center = axis === HORIZONTAL ? rect.left + element.clientLeft + size / 2 :
-      rect.top + element.clientTop + size / 2;
     for (const item of itemsFor(state)) {
       if (!state.savedItems.has(item)) {
         state.savedItems.set(item, AelluxJs.persist.element.save(item, [], properties));
       }
       const box = item.getBoundingClientRect();
-      const itemCenter = axis === HORIZONTAL ? box.left + box.width / 2 : box.top + box.height / 2;
-      item.style.setProperty(properties[0], Math.max(-2, Math.min(2, (itemCenter - center) * 2 / size)));
-      item.style.setProperty(properties[1], Math.max(0, 1 - Math.abs(offset(state, item, axis, false, rect, box)) / size));
+      item.style.setProperty(properties[0], Math.max(0, 1 - Math.abs(offset(state, item, axis, false, rect, box)) / size));
     }
   }
 

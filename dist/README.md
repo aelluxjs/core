@@ -22,7 +22,7 @@ aellux.js does not require or bundle [Bootstrap](https://getbootstrap.com/). Its
 </script>
 ```
 
-Use `full` to make Adaptive, Ajax Href, Anchor, Dialog, Overflow Marquee, Feedback, Focus, Point, Preference, Present, PWA, Scrollbox, Scrollbox Snap, and State Navigation available without separate registration. Full bundles the stable Core implementations. Experimental Extensions (Ajax Href, Dialog and PWA) load separate signed scripts when matching elements are mounted. [PWA](docs-source/0.1.0/core-extensions/experimental/pwa.md) remains entirely optional: its page code and independent reusable Service Worker are never incorporated into Full/Core or shared CSS. See [Getting Started](docs-source/0.1.0/getting-started.md) for the loading details. Use `basic` to register all Core Extensions automatically for lazy loading:
+Use `full` to make Adaptive, Ajax Href, Anchor, Dialog, Overflow Marquee, Feedback, Focus, Point, Preference, Present, PWA, Scrollbox, Scrollbox Snap, State Navigation, and Viewport available without separate registration. Full bundles the stable Core implementations. Experimental Extensions (Ajax Href, Dialog, PWA and Viewport) load separate signed scripts when matching elements are mounted. [PWA](docs-source/0.1.0/core-extensions/experimental/pwa.md) remains entirely optional: its page code and independent reusable Service Worker are never incorporated into Full/Core or shared CSS. See [Getting Started](docs-source/0.1.0/getting-started.md) for the loading details. Use `basic` to register all Core Extensions automatically for lazy loading:
 
 ```html
 <script src="./dist/aellux.js"></script>

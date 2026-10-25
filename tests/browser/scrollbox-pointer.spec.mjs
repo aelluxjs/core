@@ -450,9 +450,8 @@ test("snap item values align controller navigation on both axes", async ({ page 
   ])).toEqual([80, 80]);
   await expect.poll(() => page.evaluate(() => ["horizontal", "vertical"].map(id => {
     const item = document.getElementById(id).firstElementChild.children[1];
-    return [Number(item.style.getPropertyValue("--ae-snap-viewport")),
-      Number(item.style.getPropertyValue("--ae-snap-focus"))];
-  }))).toEqual([[-0.4, 1], [-0.4, 1]]);
+    return Number(item.style.getPropertyValue("--ae-snap-focus"));
+  }))).toEqual([1, 1]);
 
   await page.evaluate(() => ["horizontal", "vertical"].forEach(id =>
     AelluxJs.mountManager.controller(id).scrollbox.goto(2)));
@@ -462,9 +461,8 @@ test("snap item values align controller navigation on both axes", async ({ page 
   ])).toEqual([120, 120]);
   await expect.poll(() => page.evaluate(() => ["horizontal", "vertical"].map(id => {
     const item = document.getElementById(id).firstElementChild.children[2];
-    return [Number(item.style.getPropertyValue("--ae-snap-viewport")),
-      Number(item.style.getPropertyValue("--ae-snap-focus"))];
-  }))).toEqual([[0.4, 1], [0.4, 1]]);
+    return Number(item.style.getPropertyValue("--ae-snap-focus"));
+  }))).toEqual([1, 1]);
 
   await page.evaluate(() => {
     const box = document.getElementById("horizontal");
@@ -498,7 +496,7 @@ test("snap restores the box and child inline rules on unmount", async ({ page })
     after: ["x", "start"], ready: false, scrollbox: true });
 });
 
-test("snap children publish viewport and focus values through native scrolling", async ({ page }) => {
+test("snap children publish focus only through native scrolling", async ({ page }) => {
   await setup(page, `<div id="gallery" data-ae-scrollbox="native" data-ae-scrollbox-snap
     style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden">
     <div style="display:flex;width:300px">
@@ -516,12 +514,12 @@ test("snap children publish viewport and focus values through native scrolling",
       await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
     }
     return Array.from(element.firstElementChild.children,
-      item => [Number(item.style.getPropertyValue("--ae-snap-viewport")),
+      item => [item.style.getPropertyValue("--ae-snap-viewport"),
         Number(item.style.getPropertyValue("--ae-snap-focus"))]);
   }, left);
-  await expect.poll(values).toEqual([[0, 1], [2, 0], [2, 0]]);
-  expect(await values(50)).toEqual([[-1, 0.5], [1, 0.5], [2, 0]]);
-  expect(await values(100)).toEqual([[-2, 0], [0, 1], [2, 0]]);
+  await expect.poll(values).toEqual([["", 1], ["", 0], ["", 0]]);
+  expect(await values(50)).toEqual([["", 0.5], ["", 0.5], ["", 0]]);
+  expect(await values(100)).toEqual([["", 0], ["", 1], ["", 0]]);
   await page.evaluate(() => AelluxJs.mountManager.unmount(document.body, "scrollbox-snap"));
   expect(await page.evaluate(() => Array.from(
     document.querySelectorAll("[data-ae-snap-item]"), item => [
@@ -544,9 +542,9 @@ test("vertical snap children publish values along the vertical axis", async ({ p
     .scrollTo({ top: 100, behavior: "instant" }));
   await expect.poll(() => page.evaluate(() => Array.from(
     document.querySelectorAll("[data-ae-snap-item]"),
-    item => [Number(item.style.getPropertyValue("--ae-snap-viewport")),
+    item => [item.style.getPropertyValue("--ae-snap-viewport"),
       Number(item.style.getPropertyValue("--ae-snap-focus"))]
-  ))).toEqual([[-2, 0], [0, 1], [2, 0]]);
+  ))).toEqual([["", 0], ["", 1], ["", 0]]);
 });
 
 test("native scroll end snaps the nearest point after scrollbar scrolling", async ({ page }) => {

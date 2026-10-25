@@ -618,6 +618,13 @@
                                             href="/core/docs/0.1.0/core-extensions/experimental/pwa.htm" data-ae-overflow-marquee="190px">
                                             PWA                                          </a>
                                         </div>
+                                                                                <div
+                                          class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                          style="flex:0">
+                                          <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                            href="/core/docs/0.1.0/core-extensions/viewport.htm" data-ae-overflow-marquee="190px">
+                                            Viewport                                          </a>
+                                        </div>
                                                                             </div>
                                 </div>
                                                                                               </div>
@@ -840,7 +847,7 @@ npm run test:browser
 </tr>
 <tr>
 <td>Full distribution coverage</td>
-<td><span style="white-space: normal !important;">Bundled Core Extensions initialize from the Full runtime; Experimental Ajax Href, Dialog and PWA load separate compatible files on demand, without a duplicate script request or a manifest fetch for the current Core version. Modern, Legacy, normal, and minified paths are checked.</span></td>
+<td><span style="white-space: normal !important;">Bundled Core Extensions initialize from the Full runtime; Experimental Ajax Href, Dialog, PWA and Viewport load separate compatible files on demand, without a duplicate script request or a manifest fetch for the current Core version. Modern, Legacy, normal, and minified paths are checked.</span></td>
 </tr>
 <tr>
 <td>Diagnostics</td>
@@ -893,6 +900,10 @@ npm run test:browser
 <tr>
 <td>Scrollbox interactions</td>
 <td><span style="white-space: normal !important;">Native progress, pointer drag and selection rules, nested scroll handoff, momentum, elastic pressure, snap navigation, custom scrollbar dragging, and scroll edge classes.</span></td>
+</tr>
+<tr>
+<td>Viewport geometry</td>
+<td><span style="white-space: normal !important;">Nearest native scrollport and document selection, normalized axes, geometric visible area, borders, scale and fractional dimensions, continuous scroll, native resize/layout changes, bounded Layout notifications, observer fallbacks, awaited mounting, reparenting, inline restoration, grouped cleanup and independent Snap navigation in Modern/Legacy builds. Basic/Full lazy loading and exclusion from global bundles are also checked.</span></td>
 </tr>
 <tr>
 <td>Asset integrity and dependencies</td>

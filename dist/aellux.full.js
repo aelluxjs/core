@@ -4554,7 +4554,7 @@
         const elasticAttribute = AelluxJs2.attr("scrollbox-elastic");
         const readyClass = AelluxJs2.className("snap-ready");
         const suspendedClass = AelluxJs2.className("snap-suspended");
-        const properties = ["--ae-snap-viewport", "--ae-snap-focus"];
+        const properties = ["--ae-snap-focus"];
         const states = /* @__PURE__ */ new Map();
         AelluxJs2.extAttach(extensionName, { init, destroy, next, previous, goto });
         function init() {
@@ -4758,15 +4758,12 @@
           const rect = element.getBoundingClientRect();
           const size = axis === HORIZONTAL ? element.clientWidth : element.clientHeight;
           if (!size) return;
-          const center = axis === HORIZONTAL ? rect.left + element.clientLeft + size / 2 : rect.top + element.clientTop + size / 2;
           for (const item of itemsFor(state)) {
             if (!state.savedItems.has(item)) {
               state.savedItems.set(item, AelluxJs2.persist.element.save(item, [], properties));
             }
             const box = item.getBoundingClientRect();
-            const itemCenter = axis === HORIZONTAL ? box.left + box.width / 2 : box.top + box.height / 2;
-            item.style.setProperty(properties[0], Math.max(-2, Math.min(2, (itemCenter - center) * 2 / size)));
-            item.style.setProperty(properties[1], Math.max(0, 1 - Math.abs(offset(state, item, axis, false, rect, box)) / size));
+            item.style.setProperty(properties[0], Math.max(0, 1 - Math.abs(offset(state, item, axis, false, rect, box)) / size));
           }
         }
         function restoreItems(state) {
@@ -8760,6 +8757,7 @@
     Object.freeze({ name: "focus", style: false, dependencies: Object.freeze([]) }),
     Object.freeze({ name: "dialog", experimental: true, style: false, dependencies: Object.freeze([]) }),
     Object.freeze({ name: "pwa", experimental: true, style: false, dependencies: Object.freeze([]) }),
+    Object.freeze({ name: "viewport", experimental: true, style: false, dependencies: Object.freeze([]) }),
     Object.freeze({ name: "point", style: false, dependencies: Object.freeze([]) }),
     Object.freeze({ name: "anchor", style: true, dependencies: Object.freeze([]) }),
     Object.freeze({ name: "overflow-marquee", style: true, dependencies: Object.freeze([]) }),

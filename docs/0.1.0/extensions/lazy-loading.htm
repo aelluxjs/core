@@ -618,6 +618,13 @@
                                             href="/core/docs/0.1.0/core-extensions/experimental/pwa.htm" data-ae-overflow-marquee="190px">
                                             PWA                                          </a>
                                         </div>
+                                                                                <div
+                                          class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                          style="flex:0">
+                                          <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                            href="/core/docs/0.1.0/core-extensions/viewport.htm" data-ae-overflow-marquee="190px">
+                                            Viewport                                          </a>
+                                        </div>
                                                                             </div>
                                 </div>
                                                                                               </div>
@@ -738,7 +745,7 @@
             ajax-load="doc-content">
             <h1>Lazy Extension Loading</h1>
 <p>Lazy loading delays an Extension until a matching element is found during <code>$ae.mount(root)</code>.</p>
-<p>Basic automatically registers all Core Extensions, including Experimental, with their activation selectors. Full bundles the stable Core implementations and loads Experimental (Ajax Href, Dialog and PWA) from separate signed files when their selectors match. Full initializes Preference and State Navigation at startup. In Basic, State Navigation has no selector and loads through <code>$ae.wait(&quot;state-navigation&quot;)</code>; Preference uses <code>[data-ae-preference]</code>. Explicit host registrations take precedence over unused defaults. Basic styles remain opt-in through <code>loadStyle: true</code>.</p>
+<p>Basic automatically registers all Core Extensions, including Experimental, with their activation selectors. Full bundles the stable Core implementations and loads Experimental (Ajax Href, Dialog, PWA and Viewport) from separate signed files when their selectors match. Full initializes Preference and State Navigation at startup. In Basic, State Navigation has no selector and loads through <code>$ae.wait(&quot;state-navigation&quot;)</code>; Preference uses <code>[data-ae-preference]</code>. Explicit host registrations take precedence over unused defaults. Basic styles remain opt-in through <code>loadStyle: true</code>.</p>
 <pre><code class="language-js">$ae.ext(&quot;preference&quot;, {
   loadWhen: &quot;[data-ae-preference]&quot;
 });

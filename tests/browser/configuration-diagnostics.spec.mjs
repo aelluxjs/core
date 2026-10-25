@@ -1,11 +1,14 @@
 import { expect, test } from "@playwright/test";
 
-async function start(page, markup, options = {}) {
+async function start(page, markup, { deferPresent = false, ...options } = {}) {
   await page.goto("/tests/index.htm");
   await page.addScriptTag({ url: "/dist/aellux.js" });
-  await page.evaluate(options => AelluxJs.init({
-    mode: "full", environment: "development", verboseLevel: "error", skipGlobalMount: true, ...options
-  }), options);
+  await page.evaluate(({ deferPresent, options }) => {
+    if (deferPresent) AelluxJs.ext("present", { load: false });
+    AelluxJs.init({
+      mode: "full", environment: "development", verboseLevel: "error", skipGlobalMount: true, ...options
+    });
+  }, { deferPresent, options });
   await expect.poll(() => page.evaluate(() => AelluxJs.orchestratorVersion)).toBe("0.1.0-beta.10");
   await page.evaluate(async markup => {
     document.body.innerHTML = markup;
@@ -151,7 +154,7 @@ for (const forceLegacy of [false, true]) test(`declarations diagnose typos, targ
 });
 
 test("basic reports missing Extensions after mounting and gives actionable controller errors", async ({ page }) => {
-  await start(page, '<div id="unmounted" data-ae-present></div>', { mode: "basic" });
+  await start(page, '<div id="unmounted" data-ae-present></div>', { mode: "basic", deferPresent: true });
   await page.evaluate(() => AelluxJs("unmounted"));
   expect(await diagnostics(page)).toEqual(expect.arrayContaining([
     expect.objectContaining({ code: 2025, element: "unmounted", suggestion: expect.stringContaining('wait("present")') }),
@@ -266,7 +269,7 @@ test("Anchor targeting a group with no selected member remains quiet", async ({ 
 test("Anchor group targets explain a missing Present Extension", async ({ page }) => {
   await start(page, `<div style="position:relative"><section id="group" data-ae-present-group>
     <div id="member" data-ae-present>Member</div></section>
-    <div id="anchor" data-ae-anchor="bottom-left:top-left" data-ae-anchor-target="group"></div></div>`, { mode: "basic" });
+    <div id="anchor" data-ae-anchor="bottom-left:top-left" data-ae-anchor-target="group"></div></div>`, { mode: "basic", deferPresent: true });
   await page.evaluate(async () => { AelluxJs.ext("anchor", { loadStyle: true }); await AelluxJs.mount(document, "anchor"); });
   expect(await diagnostics(page)).toEqual(expect.arrayContaining([
     expect.objectContaining({ code: 2025, element: "anchor", attribute: "data-ae-anchor-target", reason: "A Present Group target requires Present." })

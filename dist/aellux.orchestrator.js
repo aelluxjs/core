@@ -2428,6 +2428,7 @@
     Object.freeze({ name: "focus", style: false, dependencies: Object.freeze([]) }),
     Object.freeze({ name: "dialog", experimental: true, style: false, dependencies: Object.freeze([]) }),
     Object.freeze({ name: "pwa", experimental: true, style: false, dependencies: Object.freeze([]) }),
+    Object.freeze({ name: "viewport", experimental: true, style: false, dependencies: Object.freeze([]) }),
     Object.freeze({ name: "point", style: false, dependencies: Object.freeze([]) }),
     Object.freeze({ name: "anchor", style: true, dependencies: Object.freeze([]) }),
     Object.freeze({ name: "overflow-marquee", style: true, dependencies: Object.freeze([]) }),

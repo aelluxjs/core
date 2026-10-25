@@ -5,7 +5,13 @@ export const bundleBudget = Object.freeze([
   // Actionable diagnostic catalog/context plus the development-only semantic
   // mount validator. Measured costs and previous limits: runtime/diagnostics.md.
   // Includes the official entry for the dedicated Overflow Marquee Extension.
-  { file: "aellux.min.js", maxRawBytes: 47.5 * 1024, maxGzipBytes: 15.5 * 1024 },
+  // Viewport's signed Modern/Legacy registry entries: +803 raw / +274 gzip bytes.
+  { file: "aellux.min.js", maxRawBytes: 48 * 1024, maxGzipBytes: 16 * 1024 },
+  // Measured raw/gzip bytes: 6672/2851 Modern; 11883/4860 Legacy.
+  { file: "aellux.ext.viewport.js", maxRawBytes: 14 * 1024, maxGzipBytes: 4 * 1024 },
+  { file: "aellux.ext.viewport.min.js", maxRawBytes: 7 * 1024, maxGzipBytes: 3 * 1024 },
+  { file: "aellux.ext.viewport.legacy.js", maxRawBytes: 26 * 1024, maxGzipBytes: 7 * 1024 },
+  { file: "aellux.ext.viewport.legacy.min.js", maxRawBytes: 12 * 1024, maxGzipBytes: 5 * 1024 },
   { file: "aellux.esm.min.js", maxRawBytes: 25 * 1024, maxGzipBytes: 8.5 * 1024 },
   // Development source inspection and CSS resource conflict diagnostics.
   // Also covers CSS Motion subtree capture; fade costs: core-extensions/overflow-marquee.md.

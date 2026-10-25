@@ -8,6 +8,8 @@ async function attachElementMemoryToStub(page) {
     ]);
     AelluxJs.persist = { element: createSaveElementMemoryHelper() };
     AelluxJs.aria = createAriaHelper();
+    AelluxJs.onEvent = (target, event, handler) => target.addEventListener(event.replace(/^\$/, ""), handler);
+    AelluxJs.offEvent = (target, event, handler) => target.removeEventListener(event.replace(/^\$/, ""), handler);
   });
 }
 
@@ -17,7 +19,7 @@ for (const options of [
   { name: "legacy", forceLegacy: true },
   { name: "no motion", motion: "" }
 ]) {
-  test(`present updates controls' expanded state at animation start (${options.name})`, async ({ page }) => {
+  test(`present updates controls on acceptance and panel visibility on completion (${options.name})`, async ({ page }) => {
     await page.goto("/tests/index.htm");
     await page.evaluate(motion => {
       document.body.innerHTML = `
@@ -60,15 +62,17 @@ for (const options of [
     });
     const closed = Array(5).fill("false");
     const opened = Array(5).fill("true");
-    expect(result.preparation).toEqual(options.motion === "" ? opened : closed);
+    const opening = ["false", "true", "true", "true", "true"];
+    const closing = ["true", "false", "false", "false", "false"];
+    expect(result.preparation).toEqual(opening);
     expect(result.events).toEqual([
       { name: "BeforePop", expanded: closed, hidden: true },
-      { name: "Layout", expanded: opened, hidden: false },
-      { name: "Popping", expanded: opened, hidden: false },
+      { name: "Layout", expanded: opening, hidden: false },
+      { name: "Popping", expanded: opening, hidden: false },
       { name: "Pop", expanded: opened, hidden: false },
       { name: "BeforeUnpop", expanded: opened, hidden: false },
-      { name: "Layout", expanded: closed, hidden: false },
-      { name: "Unpopping", expanded: closed, hidden: false },
+      { name: "Layout", expanded: closing, hidden: false },
+      { name: "Unpopping", expanded: closing, hidden: false },
       { name: "Unpop", expanded: closed, hidden: true }
     ]);
   });
@@ -122,10 +126,10 @@ test("present keeps expanded state current through vetoes, reversals and newly m
   });
   expect(result).toEqual({
     vetoedPop: { expanded: ["false", "false"], hidden: true },
-    vetoedUnpop: ["true", "true"],
+    vetoedUnpop: ["false", "true"],
     reversing: { expanded: ["false", "false"], hidden: false },
     mountedDuringClose: "false",
-    reopened: ["true", "true", "true"],
+    reopened: ["false", "true", "true"],
     completions: ["Pop"],
     final: ["true", "true", "true"]
   });
@@ -464,6 +468,7 @@ test("replacement transitions reuse preparation and final interruptions clean it
 
 test("direct pop restarts from hidden during either transition and when already visible", async ({ page }) => {
   await page.goto("/tests/index.htm");
+  // This case builds its own stub inside evaluate rather than using the shared helper.
   const result = await page.evaluate(async () => {
     const [{ createSaveElementMemoryHelper }, { createAriaHelper }] = await Promise.all([
       import("/src/internal/create-save-element-memory-helper.js"),
@@ -479,6 +484,8 @@ test("direct pop restarts from hidden during either transition and when already 
       aria: createAriaHelper(),
       on: (event, handler, options) => document.addEventListener(event.slice(1), handler, options),
       off: (event, handler, options) => document.removeEventListener(event.slice(1), handler, options),
+      onEvent: (target, event, handler) => target.addEventListener(event.replace(/^\$/, ""), handler),
+      offEvent: (target, event, handler) => target.removeEventListener(event.replace(/^\$/, ""), handler),
       attr: name => `data-ae-${name}`,
       className: name => `ae-${name}`,
       diagnostics: {

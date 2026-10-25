@@ -367,12 +367,16 @@ test("Anchor loaded after Present reads the accepted selection without replaying
   await page.goto("/tests/index.htm");
   await page.evaluate(html => { document.body.innerHTML = html; }, `${stage}<div id="ref">${group}${groupIndicator}</div>`);
   await page.addScriptTag({ url: "/dist/aellux.js" });
-  await page.evaluate(() => { AelluxJs.ext("present", { loadStyle: true }); AelluxJs.init({ mode: "basic" }); });
+  await page.evaluate(() => {
+    AelluxJs.ext("present", { loadStyle: true });
+    AelluxJs.ext("anchor", { load: false, loadStyle: true });
+    AelluxJs.init({ mode: "basic" });
+  });
   await expect.poll(() => page.evaluate(() => AelluxJs.ext.present?.initialized)).toBe(true);
   await page.evaluate(() => AelluxJs.mount(document, "present"));
   await page.evaluate(async () => {
     await $ae("group").present.show("b");
-    AelluxJs.ext("anchor", { loadStyle: true });
+    await AelluxJs.wait("anchor");
     await AelluxJs.mount(document, "anchor");
   });
   await expect.poll(() => page.evaluate(() => AelluxJs.ext.anchor?.initialized)).toBe(true);

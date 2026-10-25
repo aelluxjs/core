@@ -34,7 +34,7 @@ for (const { boot, forceLegacy } of [
     expect(state).toEqual({
       bundled: bundledExtensions,
       registered: coreExtensions,
-      lazy: ["adaptive", "ajaxHref", "anchor", "dialog", "feedback", "focus", "overflowMarquee", "point", "present", "pwa", "scrollbox", "scrollboxSnap"],
+      lazy: coreExtensions.filter(name => !["preference", "stateNavigation"].includes(name)),
       externalScripts: [],
       legacy: forceLegacy
     });

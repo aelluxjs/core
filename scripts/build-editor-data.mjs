@@ -33,7 +33,7 @@ export async function createSemanticCatalog(metadata, constants = createAelluxCo
   const experimental = new Set(officialExtensionDefinitions.filter(entry => entry.experimental).map(entry => entry.name));
   const docURL = entry => {
     let path = entry.doc || (entry.extension === "core" ? "runtime/api" : `core-extensions/${entry.extension}`);
-    if (experimental.has(path.replace(/^core-extensions\//, "").split("#")[0])) {
+    if (!entry.doc && experimental.has(path.replace(/^core-extensions\//, "").split("#")[0])) {
       path = path.replace(/^core-extensions\//, "core-extensions/experimental/");
     }
     return `${docsBase}${path}.htm`;

@@ -78,8 +78,9 @@ test("Snap refreshes item variables when content resizes without resizing the bo
   await page.evaluate(() => { document.getElementById("item1").style.width = "150px"; });
   await expect.poll(() => page.locator("#item1").evaluate(el => {
     const box = document.getElementById("box"), rect = el.getBoundingClientRect();
-    const expected = Math.max(-2, Math.min(2, (rect.left + rect.width / 2 - box.getBoundingClientRect().left - box.clientLeft - box.clientWidth / 2) * 2 / box.clientWidth));
-    return Math.abs(Number(el.style.getPropertyValue("--ae-snap-viewport")) - expected);
+    const distance = rect.left - box.getBoundingClientRect().left - box.clientLeft;
+    const expected = Math.max(0, 1 - Math.abs(distance) / box.clientWidth);
+    return Math.abs(Number(el.style.getPropertyValue("--ae-snap-focus")) - expected);
   })).toBeLessThan(.001);
 });
 

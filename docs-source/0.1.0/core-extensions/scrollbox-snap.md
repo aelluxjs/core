@@ -22,7 +22,7 @@ No bundle `full`, `data-ae-scrollbox-snap` carrega a extensão sob demanda. O at
 
 An empty `data-ae-scrollbox-snap` value selects the horizontal axis. Use `vertical` for a vertical list. An empty `data-ae-snap-item` aligns its center; `start`, `left`, and `top` align its start, while `end`, `right`, and `bottom` align its end. Snap items inside a nested Scrollbox are excluded. A missing eligible item reports diagnostic 1121.
 
-The extension applies the native CSS Scroll Snap rules, aligns the first item at mount, and publishes `--ae-snap-viewport` and `--ae-snap-focus` on each item. It preserves and restores pre-existing inline values when unmounted. On a cancelable desktop wheel event targeted at the snap box, it advances one item in the dominant direction; repeated events in 120 ms stay within that one navigation. A nested Scrollbox under the cursor owns its wheel event, so an enclosing snap box does not navigate from it.
+The extension applies the native CSS Scroll Snap rules, aligns the first item at mount, and publishes only `--ae-snap-focus` on each item: alignment proximity from `0` to `1`, where `1` means aligned. It preserves and restores pre-existing inline values when unmounted. On a cancelable desktop wheel event targeted at the snap box, it advances one item in the dominant direction; repeated events in 120 ms stay within that one navigation. A nested Scrollbox under the cursor owns its wheel event, so an enclosing snap box does not navigate from it.
 
 `AelluxJsScrollboxSnapChange` fires when scrolling settles on a new item. Its `detail` is `{ item, index, previousIndex, axis }`; the initial item has `previousIndex: null`.
 
@@ -42,6 +42,10 @@ gallery.previous();
 ```
 
 The index is zero based. Each method returns `true` when a snap item is available.
+
+## Position migration
+
+`--ae-snap-viewport` has been removed. Add `data-ae-viewport="x"` or `data-ae-viewport="y"` to each item requiring position information and use `--ae-viewport-x` or `--ae-viewport-y`. The independent [Viewport Extension](viewport.md) selects the nearest native scroll container, which can differ from the owning Snap box when another scroll container intervenes. Choose the relevant dimension yourself. Snap continues to publish `--ae-snap-focus` and works without Viewport.
 
 ## Interaction hooks
 

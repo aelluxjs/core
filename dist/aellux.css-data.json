@@ -468,17 +468,6 @@
       ]
     },
     {
-      "name": "--ae-snap-viewport",
-      "description": "Per-item normalized center offset from the viewport center, clamped to -2..2.\n\nRuntime output; read it in selectors/styles instead of using it as an activation command.\n\nValue syntax: <number>.",
-      "syntax": "<number>",
-      "references": [
-        {
-          "name": "AelluxJS scrollbox-snap",
-          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/scrollbox-snap.htm"
-        }
-      ]
-    },
-    {
       "name": "--ae-unpop-duration",
       "description": "unpop transition duration.\n\nValue syntax: <time>.\n\nDefault behavior: \"250ms\".\n\nSuggested values: `0s`, `150ms`, `250ms`, `500ms`. This is an open grammar, not a closed enumeration.",
       "syntax": "<time>",
@@ -583,6 +572,39 @@
         {
           "name": "AelluxJS present",
           "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/present.htm"
+        }
+      ]
+    },
+    {
+      "name": "--ae-viewport-visible",
+      "description": "Geometric visible area divided by element area, from 0 to 1, in the selected scrollport. Independent of selected position axes; ignores occlusion and CSS opacity.\n\nRuntime output; read it in selectors/styles instead of using it as an activation command.\n\nValue syntax: <number>.\n\nDefault behavior: \"0\".",
+      "syntax": "<number>",
+      "references": [
+        {
+          "name": "AelluxJS viewport",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/viewport.htm"
+        }
+      ]
+    },
+    {
+      "name": "--ae-viewport-x",
+      "description": "Element center on the x axis relative to the nearest scrollport: 0 at center, -1 at left/top, +1 at right/bottom, clamped to -2..2.\n\nRuntime output; read it in selectors/styles instead of using it as an activation command.\n\nValue syntax: <number>.\n\nDefault behavior: \"0\".",
+      "syntax": "<number>",
+      "references": [
+        {
+          "name": "AelluxJS viewport",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/viewport.htm"
+        }
+      ]
+    },
+    {
+      "name": "--ae-viewport-y",
+      "description": "Element center on the y axis relative to the nearest scrollport: 0 at center, -1 at left/top, +1 at right/bottom, clamped to -2..2.\n\nRuntime output; read it in selectors/styles instead of using it as an activation command.\n\nValue syntax: <number>.\n\nDefault behavior: \"0\".",
+      "syntax": "<number>",
+      "references": [
+        {
+          "name": "AelluxJS viewport",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/viewport.htm"
         }
       ]
     },

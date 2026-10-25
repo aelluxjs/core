@@ -371,6 +371,16 @@
           }
         },
         {
+          "name": "data-ae-viewport",
+          "description": "Observes the nearest native scroll container, or the document. Publishes normalized position on the selected axes and a geometric visible area fraction. Empty and both select both axes; invalid values warn and fall back to both.\n\nValue syntax: enum.\n\nDefault behavior: \"both\".",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/viewport.htm",
+          "default": "both",
+          "value": {
+            "kind": "plain",
+            "type": "\"\" | \"both\" | \"x\" | \"y\""
+          }
+        },
+        {
           "name": "data-ae-wait-mounted",
           "description": "Keeps the element hidden until mounting completes and exposes aria-busy during the attempt.\n\nValue syntax: presence.",
           "doc-url": "https://aelluxjs.github.io/core/docs/0.1.0/runtime/visual-mounting.htm",
@@ -718,11 +728,6 @@
           "doc-url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/scrollbox-snap.htm"
         },
         {
-          "name": "--ae-snap-viewport",
-          "description": "Per-item normalized center offset from the viewport center, clamped to -2..2.\n\nRuntime output; read it in selectors/styles instead of using it as an activation command.\n\nValue syntax: <number>.",
-          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/scrollbox-snap.htm"
-        },
-        {
           "name": "--ae-unpop-duration",
           "description": "unpop transition duration.\n\nValue syntax: <time>.\n\nDefault behavior: \"250ms\".\n\nSuggested values: `0s`, `150ms`, `250ms`, `500ms`. This is an open grammar, not a closed enumeration.",
           "doc-url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/present.htm",
@@ -769,6 +774,21 @@
           "name": "--ae-unpop-width",
           "description": "unpop grid width endpoint.\n\nValue syntax: <flex>.\n\nDefault behavior: \"0fr\".",
           "doc-url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/present.htm"
+        },
+        {
+          "name": "--ae-viewport-visible",
+          "description": "Geometric visible area divided by element area, from 0 to 1, in the selected scrollport. Independent of selected position axes; ignores occlusion and CSS opacity.\n\nRuntime output; read it in selectors/styles instead of using it as an activation command.\n\nValue syntax: <number>.\n\nDefault behavior: \"0\".",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/viewport.htm"
+        },
+        {
+          "name": "--ae-viewport-x",
+          "description": "Element center on the x axis relative to the nearest scrollport: 0 at center, -1 at left/top, +1 at right/bottom, clamped to -2..2.\n\nRuntime output; read it in selectors/styles instead of using it as an activation command.\n\nValue syntax: <number>.\n\nDefault behavior: \"0\".",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/viewport.htm"
+        },
+        {
+          "name": "--ae-viewport-y",
+          "description": "Element center on the y axis relative to the nearest scrollport: 0 at center, -1 at left/top, +1 at right/bottom, clamped to -2..2.\n\nRuntime output; read it in selectors/styles instead of using it as an activation command.\n\nValue syntax: <number>.\n\nDefault behavior: \"0\".",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.0/core-extensions/viewport.htm"
         },
         {
           "name": "--ae-width",
