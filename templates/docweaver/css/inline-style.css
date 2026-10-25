@@ -512,6 +512,10 @@ table {
   border-radius: var(--bs-border-radius-sm) !important;
 }
 
+#doc-content {
+  overflow-x: clip !important;
+}
+
 #doc-content table th {
   background-color: rgba(var(--bs-body-color-rgb), 6%);
 }
