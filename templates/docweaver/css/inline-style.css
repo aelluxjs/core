@@ -495,18 +495,10 @@ h3::before {
   visibility: hidden;
 }
 
-table {
-  max-width: 100%;
-  width: 100%;
-}
-
 .table-scroll-wrapper {
   width: 100%;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
-  /* Smooth scrolling on iOS devices */
-  margin-bottom: 1.5rem;
-  /* Optional layout spacing */
   border-top: var(--bs-border-width) var(--bs-border-style) var(--bs-border-color) !important;
   border-bottom: var(--bs-border-width) var(--bs-border-style) var(--bs-border-color) !important;
   border-radius: var(--bs-border-radius-sm) !important;
@@ -514,6 +506,12 @@ table {
 
 #doc-content {
   overflow-x: clip !important;
+}
+
+#doc-content table {
+  max-width: 100%;
+  width: 100%;
+  margin-bottom: 1.5rem;
 }
 
 #doc-content table th {
