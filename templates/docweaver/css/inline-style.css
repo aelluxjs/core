@@ -512,16 +512,16 @@ table {
   border-radius: var(--bs-border-radius-sm) !important;
 }
 
-.table-scroll-wrapper table th {
+#doc-content table th {
   background-color: rgba(var(--bs-body-color-rgb), 6%);
 }
 
-.table-scroll-wrapper table tr:nth-child(odd) {
+#doc-content table tr:nth-child(odd) {
   background-color: rgba(var(--bs-body-color-rgb), 2%);
 }
 
-.table-scroll-wrapper table th,
-.table-scroll-wrapper table td {
+#doc-content table th,
+#doc-content table td {
   white-space: nowrap;
   vertical-align: top;
   padding: 0.5rem;
