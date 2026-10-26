@@ -39,7 +39,7 @@ const highlightReady = (async () => {
 });
 
 async function updateHljsScheme() {
-  const colorScheme = $ae.ext.preference.get("color-scheme");
+  const colorScheme = document.documentElement.getAttribute("data-ae-color-scheme");
   const light = document.querySelector("link[data-ae-dep='highlightjs-css']");
   const dark = document.querySelector("link[data-ae-dep='highlightjs-css-dark']");
   if (colorScheme === "dark") {
