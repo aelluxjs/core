@@ -243,6 +243,10 @@ body:after {
   text-decoration: underline;
 }
 
+.navbar-collapse .nav-item.active .nav-link[href] {
+  text-decoration: none;
+}
+
 .navbar-collapse .nav-item .nav-link {
   display: flex;
   flex-flow: row;
@@ -492,6 +496,7 @@ p {
 .toc-link {
   display: block;
   padding: 0.35rem 0;
+  text-decoration: none;
   opacity: 0.8;
   padding-left: 0;
   padding-right: 3px;
@@ -517,10 +522,6 @@ p {
   padding-left: 3px;
   padding-right: 0;
   text-decoration: underline;
-}
-
-.toc-link.is-active-link {
-  text-decoration: none;
 }
 
 .toc-link.is-active-link:before {
