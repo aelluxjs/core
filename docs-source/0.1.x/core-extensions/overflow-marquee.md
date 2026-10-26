@@ -1,5 +1,7 @@
 # Overflow Marquee
 
+**Distribution:** Bundled Extension. **Stability:** Stable.
+
 `overflow-marquee` is a dedicated Extension for `[data-ae-overflow-marquee]`. Basic registers it automatically for lazy loading; use `$ae.ext("overflow-marquee", { loadStyle: true })` before initialization to load its stylesheet. During `init()`, it registers Anchor if necessary and awaits `$ae.wait("anchor")` before obtaining a placement map and registering its own mount map. Full bundles its implementation and initializes it only when matching content is mounted, without a separate script request. A mount restricted to Anchor does not mount marquee elements.
 
 ```js

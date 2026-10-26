@@ -1,6 +1,8 @@
 # Point Extension
 
-`point` is an **Experimental** official Extension that tracks the pointers currently pressed or hovering over the document and relates them to mounted elements with `data-ae-point`. It is included in the `full` runtime. Basic registers it automatically; explicit registration can force eager loading:
+**Distribution:** Bundled Extension. **Stability:** Not stable.
+
+`point` is an official **Bundled Extension** that tracks the pointers currently pressed or hovering over the document and relates them to mounted elements with `data-ae-point`. It is included in the `full` runtime. Basic registers it automatically; explicit registration can force eager loading:
 
 ```html
 <div id="canvas" data-ae-point="2"></div>
@@ -44,7 +46,7 @@ Scroll events never independently cancel recognition, including inside Scrollbox
 
 ## Bundle cost
 
-Tap recognition adds no dependencies. Against the preceding artifacts, minified Point grows from 4,057 to 5,894 bytes (gzip: 1,550 to 2,236), and Legacy Point from 7,338 to 9,325 bytes (gzip: 2,753 to 3,465). Adding Point alone grows Full by 1,837 bytes / 646 gzip bytes in Modern and 1,989 bytes / 680 gzip bytes in Legacy. Including [Present's tap/click routing](../present.md#tap-and-native-click), the combined Full delta is 3,016 bytes / 1,052 gzip bytes in Modern and 3,459 bytes / 1,110 gzip bytes in Legacy.
+Tap recognition adds no dependencies. Against the preceding artifacts, minified Point grows from 4,057 to 5,894 bytes (gzip: 1,550 to 2,236), and Legacy Point from 7,338 to 9,325 bytes (gzip: 2,753 to 3,465). Adding Point alone grows Full by 1,837 bytes / 646 gzip bytes in Modern and 1,989 bytes / 680 gzip bytes in Legacy. Including [Present's tap/click routing](present.md#tap-and-native-click), the combined Full delta is 3,016 bytes / 1,052 gzip bytes in Modern and 3,459 bytes / 1,110 gzip bytes in Legacy.
 
 Modern Point retains its 6 KiB raw / 3 KiB gzip budget. Legacy Point's budget changes from 8 / 3 KiB to 9.5 / 3.5 KiB. The combined feature changes Modern Full from 131.5 / 42.75 KiB to 135.5 / 44 KiB; Legacy Full's raw budget changes from 451 to 454.5 KiB and retains its 138 KiB gzip budget. The preceding Modern Full artifact already exceeded its former raw limit by 257 bytes; the measured tap delta above is separate from that baseline excess.
 
@@ -57,7 +59,7 @@ Modern Point retains its 6 KiB raw / 3 KiB gzip budget. Legacy Point's budget ch
 
 ## Known Limits & Risks
 
-See [Core Known Limits & Risks](../../runtime/known-limits-and-risks.md) for classifications and shared architecture, loading and lifecycle boundaries.
+See [Core Known Limits & Risks](../runtime/known-limits-and-risks.md) for classifications and shared architecture, loading and lifecycle boundaries.
 
 | Area | Type | Description | Recommendation |
 | --- | --- | --- | --- |

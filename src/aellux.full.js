@@ -21,5 +21,5 @@ root.AelluxJs.bundledExtensions = Object.freeze({
 // The version-matched boot script already supplies the signed official index.
 // Reuse it instead of embedding a second copy in both Full variants.
 
-// Shared runtime startup registers Core selectors in both modes. Experimental
-// Extensions (Ajax Href, Dialog and PWA) resolve separate signed scripts.
+// Shared runtime startup registers Core selectors in both modes. Optional
+// Extensions (Ajax Href, Dialog, PWA and Viewport) resolve separate signed scripts.

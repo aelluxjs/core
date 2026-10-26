@@ -22,15 +22,15 @@ Full mode makes the supported Core Extensions available through the boot script 
 </script>
 ```
 
-The Full runtime is loaded by the aellux.js boot script. It bundles the stable Core Extensions: Adaptive, Anchor, Overflow Marquee, Feedback, Focus, Point, Preference, Present, Scrollbox, Scrollbox Snap and State Navigation. Preference and State Navigation initialize at startup; the remaining implementations initialize when matching markup is mounted, without separate script requests.
+The Full runtime is loaded by the aellux.js boot script. Its **Bundled Extensions** are Adaptive, Anchor, Overflow Marquee, Feedback, Focus, Point, Preference, Present, Scrollbox, Scrollbox Snap and State Navigation. Preference and State Navigation initialize at startup; the remaining implementations initialize when matching markup is mounted, without separate script requests.
 
-Experimental Extensions (Ajax Href, Dialog, PWA and Viewport) are registered but excluded from the Full JavaScript bundle. Mounting `a[data-ae-ajax-href]`, `<dialog>`, `[data-ae-pwa]` or `[data-ae-viewport]` loads the corresponding signed script using the official metadata embedded in the boot script. Modern/Legacy and normal/minified variants follow boot selection. The Dialog Legacy Extension contains its own polyfill and CSS. PWA keeps its reusable Service Worker as a separate application-managed artifact and adds no shared styles.
+**Optional Extensions** (Ajax Href, Dialog, PWA and Viewport) are registered but excluded from the Full JavaScript bundle. Mounting `a[data-ae-ajax-href]`, `<dialog>`, `[data-ae-pwa]` or `[data-ae-viewport]` loads the corresponding signed script using the official metadata embedded in the boot script. Modern/Legacy and normal/minified variants follow boot selection. The Dialog Legacy Extension contains its own polyfill and CSS. PWA keeps its reusable Service Worker as a separate application-managed artifact and adds no shared styles. Bundled and Optional describe delivery in Full, rather than maturity or stability.
 
 Full automatically loads `aellux.full.css` (or `.min.css` with the minified boot) beside the runtime, using the configured base path. Deploy this stylesheet with the JavaScript artifacts. It includes the global defaults and all Core Extension CSS.
 
 ## Basic Mode
 
-Basic mode loads the orchestrator and automatically registers every Core Extension, including Experimental, for lazy loading when matching markup is mounted:
+Basic mode loads the orchestrator and automatically registers both Bundled and Optional Extensions for lazy loading from separate files when matching markup is mounted:
 
 ```html
 <script src="./dist/aellux.js"></script>

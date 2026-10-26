@@ -11,9 +11,7 @@ async function start(page) {
   for (const group of summary) group.active = false;
   const core = summary.find(group => group.slug === "core-extensions");
   core.active = true;
-  core.children.find(group => group.slug === "experimental").active = true;
-  // Exercise multiple nested panels without adding a fictitious section to the docs.
-  core.children.push({ label: "Preview", slug: "preview", children: [{ label: "Preview page", href: "#preview" }] });
+  core.children.find(group => group.slug === "optional").active = true;
   const html = eta.render("docs-layout.eta.htm", {
     menuTree: summary, title: "Docs", pageTitle: "Docs", description: "", faviconPath: null,
     homeHref: "#home", outputPath: "/templates/docweaver", breadcrumb: [], contentHtml: "",
@@ -40,14 +38,14 @@ for (const width of [1280, 390]) {
     if (width < 768) await page.locator(".navbar-toggler").click();
 
     const core = page.locator("#children-core-extensions");
-    const experimental = page.locator("#children2-experimental");
-    const preview = page.locator("#children2-preview");
+    const optional = page.locator("#children2-optional");
+    const bundled = page.locator("#children2-bundled");
     const coreButton = page.locator('[data-ae-target="#children-core-extensions"]');
-    const experimentalButton = page.locator('[data-ae-target="#children2-experimental"]');
-    const previewButton = page.locator('[data-ae-target="#children2-preview"]');
+    const optionalButton = page.locator('[data-ae-target="#children2-optional"]');
+    const bundledButton = page.locator('[data-ae-target="#children2-bundled"]');
     const selected = () => page.evaluate(() => {
       const parent = document.getElementById("children-core-extensions");
-      const nested = document.getElementById("children2-experimental");
+      const nested = document.getElementById("children2-optional");
       return [parent, nested].map(panel =>
         AelluxJs.ext.present.selected(panel.closest("[data-ae-present-group]"))?.id ?? null);
     });
@@ -56,47 +54,47 @@ for (const width of [1280, 390]) {
       await expect(coreButton).toHaveAttribute("aria-expanded", "true");
     };
 
-    await expect(experimental).toBeVisible();
-    await expect.poll(selected).toEqual(["children-core-extensions", "children2-experimental"]);
-    await experimentalButton.click();
-    await expect(experimental).toHaveJSProperty("hidden", true);
-    await expect(experimentalButton).toHaveAttribute("aria-expanded", "false");
+    await expect(optional).toBeVisible();
+    await expect.poll(selected).toEqual(["children-core-extensions", "children2-optional"]);
+    await optionalButton.click();
+    await expect(optional).toHaveJSProperty("hidden", true);
+    await expect(optionalButton).toHaveAttribute("aria-expanded", "false");
     await parentOpen();
 
-    await experimentalButton.focus();
+    await optionalButton.focus();
     await page.keyboard.press("Enter");
-    await expect(experimentalButton).toHaveAttribute("aria-expanded", "true");
+    await expect(optionalButton).toHaveAttribute("aria-expanded", "true");
     await parentOpen();
-    await previewButton.click();
-    await expect(preview).toBeVisible();
-    await expect(experimental).toHaveJSProperty("hidden", true);
-    await expect.poll(selected).toEqual(["children-core-extensions", "children2-preview"]);
+    await bundledButton.click();
+    await expect(bundled).toBeVisible();
+    await expect(optional).toHaveJSProperty("hidden", true);
+    await expect.poll(selected).toEqual(["children-core-extensions", "children2-bundled"]);
     await parentOpen();
 
-    await previewButton.click();
-    await expect(preview).toHaveJSProperty("hidden", true);
+    await bundledButton.click();
+    await expect(bundled).toHaveJSProperty("hidden", true);
     await expect.poll(selected).toEqual(["children-core-extensions", null]);
     await parentOpen();
-    await experimentalButton.click();
-    await expect(experimentalButton).toHaveAttribute("aria-expanded", "true");
+    await optionalButton.click();
+    await expect(optionalButton).toHaveAttribute("aria-expanded", "true");
     await coreButton.click();
     await expect(core).toHaveJSProperty("hidden", true);
     await coreButton.click();
-    await expect(experimental).toBeVisible();
+    await expect(optional).toBeVisible();
     await parentOpen();
 
     await page.locator('[data-ae-target="#children-runtime"]').click();
     await expect(core).toHaveJSProperty("hidden", true);
     await coreButton.click();
     await expect(page.locator("#children-runtime")).toHaveJSProperty("hidden", true);
-    await expect(experimental).toBeVisible();
-    await expect.poll(selected).toEqual(["children-core-extensions", "children2-experimental"]);
+    await expect(optional).toBeVisible();
+    await expect.poll(selected).toEqual(["children-core-extensions", "children2-optional"]);
 
     await page.setViewportSize({ width: width < 768 ? 1280 : 390, height: 900 });
     if (width >= 768) await page.locator(".navbar-toggler").click();
     await parentOpen();
-    await experimentalButton.click();
-    await expect(experimental).toHaveJSProperty("hidden", true);
+    await optionalButton.click();
+    await expect(optional).toHaveJSProperty("hidden", true);
     await parentOpen();
     expect(await page.evaluate(() => AelluxJs.diagnostics.showHistory().filter(entry => entry.code === 2021))).toEqual([]);
   });

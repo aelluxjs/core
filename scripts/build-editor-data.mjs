@@ -30,11 +30,11 @@ export async function createSemanticCatalog(metadata, constants = createAelluxCo
   const apiContext = {};
   runInNewContext(await readFile(join(projectRoot, "src/internal/aellux-api-contract.js"), "utf8"), apiContext);
   const docsBase = `https://aelluxjs.github.io/core/docs/${release}/`;
-  const experimental = new Set(officialExtensionDefinitions.filter(entry => entry.experimental).map(entry => entry.name));
+  const optional = new Set(officialExtensionDefinitions.filter(entry => entry.optional).map(entry => entry.name));
   const docURL = entry => {
     let path = entry.doc || (entry.extension === "core" ? "runtime/api" : `core-extensions/${entry.extension}`);
-    if (!entry.doc && experimental.has(path.replace(/^core-extensions\//, "").split("#")[0])) {
-      path = path.replace(/^core-extensions\//, "core-extensions/experimental/");
+    if (optional.has(path.replace(/^core-extensions\//, "").split("#")[0])) {
+      path = path.replace(/^core-extensions\//, "core-extensions/optional/");
     }
     return `${docsBase}${path}.htm`;
   };

@@ -1,10 +1,12 @@
 # Dialog Extension
 
+**Distribution:** Optional Extension. **Stability:** Not stable.
+
 Dialog mounts native `<dialog>` elements without requiring `data-ae-dialog`. It exposes the standard element API through the existing Aellux controllers. It adds no animations or custom modal state.
 
 ## Loading and mounting
 
-In Full and Basic modes, mounting a subtree containing `<dialog>` loads the compatible Experimental Dialog Extension on demand. Pages without dialogs do not request its script. Its implementation stays outside the Full bundle.
+In Full and Basic modes, mounting a subtree containing `<dialog>` loads the compatible Optional Dialog Extension on demand. Pages without dialogs do not request its script. Its implementation stays outside the Full bundle.
 
 Both modes register Dialog automatically:
 

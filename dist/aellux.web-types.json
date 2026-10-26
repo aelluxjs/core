@@ -210,7 +210,7 @@
         {
           "name": "data-ae-pwa",
           "description": "Explicitly loads the optional external PWA Extension. Install uses native click and never registers a Service Worker automatically.\n\nValue syntax: enum.",
-          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/experimental/pwa.htm",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/optional/pwa.htm",
           "value": {
             "kind": "plain",
             "type": "\"install\""
@@ -373,7 +373,7 @@
         {
           "name": "data-ae-viewport",
           "description": "Observes the nearest native scroll container, or the document. Publishes normalized position on the selected axes and a geometric visible area fraction. Empty and both select both axes; invalid values warn and fall back to both.\n\nValue syntax: enum.\n\nDefault behavior: \"both\".",
-          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/viewport.htm",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/optional/viewport.htm",
           "default": "both",
           "value": {
             "kind": "plain",
@@ -397,7 +397,7 @@
             {
               "name": "data-ae-ajax-href",
               "description": "CSS selectors for regions replaced from a same-origin HTML response. Defaults to title,body when empty. Each selector uses its first match; current and response documents must contain the region.\n\nValue syntax: selector-list.\n\nExamples: `title,body`, `title,#content`.",
-              "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/experimental/ajax-href.htm",
+              "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/optional/ajax-href.htm",
               "value": {
                 "kind": "plain",
                 "type": "string"
@@ -778,17 +778,17 @@
         {
           "name": "--ae-viewport-visible",
           "description": "Geometric visible area divided by element area, from 0 to 1, in the selected scrollport. Independent of selected position axes; ignores occlusion and CSS opacity.\n\nRuntime output; read it in selectors/styles instead of using it as an activation command.\n\nValue syntax: <number>.\n\nDefault behavior: \"0\".",
-          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/viewport.htm"
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/optional/viewport.htm"
         },
         {
           "name": "--ae-viewport-x",
           "description": "Element center on the x axis relative to the nearest scrollport: 0 at center, -1 at left/top, +1 at right/bottom, clamped to -2..2.\n\nRuntime output; read it in selectors/styles instead of using it as an activation command.\n\nValue syntax: <number>.\n\nDefault behavior: \"0\".",
-          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/viewport.htm"
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/optional/viewport.htm"
         },
         {
           "name": "--ae-viewport-y",
           "description": "Element center on the y axis relative to the nearest scrollport: 0 at center, -1 at left/top, +1 at right/bottom, clamped to -2..2.\n\nRuntime output; read it in selectors/styles instead of using it as an activation command.\n\nValue syntax: <number>.\n\nDefault behavior: \"0\".",
-          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/viewport.htm"
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/optional/viewport.htm"
         },
         {
           "name": "--ae-width",

@@ -582,7 +582,7 @@
       "references": [
         {
           "name": "AelluxJS viewport",
-          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/viewport.htm"
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/optional/viewport.htm"
         }
       ]
     },
@@ -593,7 +593,7 @@
       "references": [
         {
           "name": "AelluxJS viewport",
-          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/viewport.htm"
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/optional/viewport.htm"
         }
       ]
     },
@@ -604,7 +604,7 @@
       "references": [
         {
           "name": "AelluxJS viewport",
-          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/viewport.htm"
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/optional/viewport.htm"
         }
       ]
     },

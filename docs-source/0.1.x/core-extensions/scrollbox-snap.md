@@ -1,5 +1,7 @@
 # Scrollbox Snap Extension
 
+**Distribution:** Bundled Extension. **Stability:** Stable.
+
 In Basic mode, register `$ae.ext("scrollbox", { loadStyle: true })` alongside Scrollbox Snap, or supply Scrollbox CSS yourself. Full includes these styles in its shared stylesheet.
 
 Scrollbox Snap é uma Extensão opcional que adiciona pontos de alinhamento ao [Scrollbox](scrollbox.md). Carregue somente `scrollbox-snap`; durante seu `init`, ela registra Scrollbox caso ainda não esteja registrado e aguarda `AelluxJs.wait("scrollbox")` antes de montar qualquer ponto.
@@ -45,7 +47,7 @@ The index is zero based. Each method returns `true` when a snap item is availabl
 
 ## Position migration
 
-`--ae-snap-viewport` has been removed. Add `data-ae-viewport="x"` or `data-ae-viewport="y"` to each item requiring position information and use `--ae-viewport-x` or `--ae-viewport-y`. The independent [Viewport Extension](experimental/viewport.md) selects the nearest native scroll container, which can differ from the owning Snap box when another scroll container intervenes. Choose the relevant dimension yourself. Snap continues to publish `--ae-snap-focus` and works without Viewport.
+`--ae-snap-viewport` has been removed. Add `data-ae-viewport="x"` or `data-ae-viewport="y"` to each item requiring position information and use `--ae-viewport-x` or `--ae-viewport-y`. The independent [Viewport Extension](optional/viewport.md) selects the nearest native scroll container, which can differ from the owning Snap box when another scroll container intervenes. Choose the relevant dimension yourself. Snap continues to publish `--ae-snap-focus` and works without Viewport.
 
 ## Interaction hooks
 

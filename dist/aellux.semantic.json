@@ -2306,7 +2306,7 @@
         "title,#content"
       ],
       "role": "input",
-      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/experimental/ajax-href.htm"
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/optional/ajax-href.htm"
     },
     {
       "name": "data-ae-anchor",
@@ -2794,7 +2794,7 @@
         "install"
       ],
       "role": "input",
-      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/experimental/pwa.htm"
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/optional/pwa.htm"
     },
     {
       "name": "data-ae-pwa-guide",
@@ -2802,7 +2802,7 @@
       "description": "Internal marker on the generated installation guide dialog.",
       "role": "internal",
       "syntax": "presence",
-      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/experimental/pwa.htm"
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/optional/pwa.htm"
     },
     {
       "name": "data-ae-ready",
@@ -3097,7 +3097,7 @@
       "default": "both",
       "doc": "core-extensions/viewport",
       "role": "input",
-      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/viewport.htm"
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/optional/viewport.htm"
     },
     {
       "name": "data-ae-wait-mounted",
@@ -3767,7 +3767,7 @@
       "role": "output",
       "default": "0",
       "doc": "core-extensions/viewport",
-      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/viewport.htm"
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/optional/viewport.htm"
     },
     {
       "name": "--ae-viewport-x",
@@ -3777,7 +3777,7 @@
       "role": "output",
       "default": "0",
       "doc": "core-extensions/viewport",
-      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/viewport.htm"
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/optional/viewport.htm"
     },
     {
       "name": "--ae-viewport-y",
@@ -3787,7 +3787,7 @@
       "role": "output",
       "default": "0",
       "doc": "core-extensions/viewport",
-      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/viewport.htm"
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/optional/viewport.htm"
     },
     {
       "name": "--ae-width",

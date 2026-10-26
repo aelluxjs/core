@@ -46,25 +46,31 @@
       "label": "Core Extensions",
       "slug": "core-extensions",
       "children": [
-        { "label": "Adaptive", "href": "core-extensions/adaptive.md" },
-        { "label": "Anchor", "href": "core-extensions/anchor.md" },
-        { "label": "Overflow Marquee", "href": "core-extensions/overflow-marquee.md" },
-        { "label": "Feedback", "href": "core-extensions/feedback.md" },
-        { "label": "Preference", "href": "core-extensions/preference.md" },
-        { "label": "Present", "href": "core-extensions/present.md" },
-        { "label": "Scrollbox", "href": "core-extensions/scrollbox.md" },
-        { "label": "Scrollbox Snap", "href": "core-extensions/scrollbox-snap.md" },
-        { "label": "State Navigation", "href": "core-extensions/state-navigation.md" },
         {
-          "label": "Experimental",
-          "slug": "experimental",
-          "children":[
-            { "label": "Ajax Href", "href": "core-extensions/experimental/ajax-href.md" },
-            { "label": "Dialog", "href": "core-extensions/experimental/dialog.md" },
-            { "label": "Focus", "href": "core-extensions/experimental/focus.md" },
-            { "label": "Point", "href": "core-extensions/experimental/point.md" },
-            { "label": "PWA", "href": "core-extensions/experimental/pwa.md" },
-            { "label": "Viewport", "href": "core-extensions/experimental/viewport.md" }
+          "label": "Bundled Extensions",
+          "slug": "bundled",
+          "children": [
+            { "label": "Adaptive", "href": "core-extensions/adaptive.md" },
+            { "label": "Anchor", "href": "core-extensions/anchor.md" },
+            { "label": "Overflow Marquee", "href": "core-extensions/overflow-marquee.md" },
+            { "label": "Feedback", "href": "core-extensions/feedback.md" },
+            { "label": "Focus", "href": "core-extensions/focus.md" },
+            { "label": "Point", "href": "core-extensions/point.md" },
+            { "label": "Preference", "href": "core-extensions/preference.md" },
+            { "label": "Present", "href": "core-extensions/present.md" },
+            { "label": "Scrollbox", "href": "core-extensions/scrollbox.md" },
+            { "label": "Scrollbox Snap", "href": "core-extensions/scrollbox-snap.md" },
+            { "label": "State Navigation", "href": "core-extensions/state-navigation.md" }
+          ]
+        },
+        {
+          "label": "Optional Extensions",
+          "slug": "optional",
+          "children": [
+            { "label": "Ajax Href", "href": "core-extensions/optional/ajax-href.md" },
+            { "label": "Dialog", "href": "core-extensions/optional/dialog.md" },
+            { "label": "PWA", "href": "core-extensions/optional/pwa.md" },
+            { "label": "Viewport", "href": "core-extensions/optional/viewport.md" }
           ]
         }
       ]

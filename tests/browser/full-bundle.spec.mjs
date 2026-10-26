@@ -5,7 +5,7 @@ import { readFile } from "node:fs/promises";
 
 const coreExtensions = officialExtensionDefinitions
   .map(({ name }) => name.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase())).sort();
-const bundledExtensions = officialExtensionDefinitions.filter(entry => !entry.experimental)
+const bundledExtensions = officialExtensionDefinitions.filter(entry => !entry.optional)
   .map(({ name }) => name.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase())).sort();
 
 for (const { boot, forceLegacy } of [

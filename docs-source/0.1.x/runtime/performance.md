@@ -13,11 +13,11 @@ The CI workflow runs the same command after `npm run build`. A pull request fail
 
 ## Limits
 
-[`scripts/bundle-budget.config.mjs`](https://github.com/aelluxjs/core/blob/main/scripts/bundle-budget.config.mjs) is the source of truth for every raw and gzip limit. It covers the minified boot, ESM entry, Modern and Legacy orchestrators, Full runtimes, Core Extensions (including separate Dialog and Scrollbox Snap files), and generated Extension stylesheets. The `test:budget` command prints each artifact's measured size beside its current limit and fails if a new minified JavaScript or CSS file has no budget. Full incorporates eleven stable Core Extensions. Only the Experimental Extensions (Ajax Href, Dialog, PWA and Viewport) use separate on-demand scripts. Basic registers all Core Extensions for lazy loading.
+[`scripts/bundle-budget.config.mjs`](https://github.com/aelluxjs/core/blob/main/scripts/bundle-budget.config.mjs) is the source of truth for every raw and gzip limit. It covers the minified boot, ESM entry, Modern and Legacy orchestrators, Full runtimes, Core Extensions (including separate Dialog and Scrollbox Snap files), and generated Extension stylesheets. The `test:budget` command prints each artifact's measured size beside its current limit and fails if a new minified JavaScript or CSS file has no budget. Full incorporates eleven Bundled Extensions. Only the Optional Extensions (Ajax Href, Dialog, PWA and Viewport) use separate on-demand scripts. Basic registers all Core Extensions for lazy loading.
 
 ## Core delivery split
 
-Stable Core implementations now ship inside Full, while Experimental Ajax Href, Dialog, PWA and Viewport remain external. Basic automatically registers all Core Extensions without embedding their implementations. Measured minified raw/gzip level 9 bytes and revised limits:
+Bundled Extensions now ship inside Full, while Optional Extensions (Ajax Href, Dialog, PWA and Viewport) remain external. Basic automatically registers all Core Extensions without embedding their implementations. Measured minified raw/gzip level 9 bytes and revised limits:
 
 | Artifact | Before raw / gzip bytes | After raw / gzip bytes | Limits raw / gzip KiB |
 | --- | --- | --- | --- |
@@ -30,7 +30,7 @@ The Full increase includes Scrollbox, Snap and Overflow Marquee and removes Ajax
 
 ## Viewport delivery
 
-The optional Experimental [Viewport Extension](../core-extensions/experimental/viewport.md) ships independently, without CSS, dependencies or implementation code in Full/Orchestrator. The following sizes use raw bytes and gzip level 9, compared with the preceding checked-in artifacts:
+The optional [Viewport Extension](../core-extensions/optional/viewport.md) ships independently, without CSS, dependencies or implementation code in Full/Orchestrator. The following sizes use raw bytes and gzip level 9, compared with the preceding checked-in artifacts:
 
 | Artifact | Before raw / gzip bytes | After raw / gzip bytes |
 | --- | --- | --- |
@@ -50,7 +50,7 @@ Viewport's regular budgets are 14/4 KiB raw/gzip for Modern and 26/7 KiB for Leg
 
 ## Scope and Limitations
 
-The [Dialog Extension](../core-extensions/experimental/dialog.md) Legacy script exclusively includes `dialog-polyfill` 0.5.6, its CSS and per-element mount registration. Compared with the preceding checked-in artifacts, the measured minified sizes are raw/gzip level 9 bytes:
+The [Dialog Extension](../core-extensions/optional/dialog.md) Legacy script exclusively includes `dialog-polyfill` 0.5.6, its CSS and per-element mount registration. Compared with the preceding checked-in artifacts, the measured minified sizes are raw/gzip level 9 bytes:
 
 | Artifact | Before raw / gzip bytes | After raw / gzip bytes | Limits at that change raw / gzip |
 | --- | --- | --- | --- |
@@ -65,4 +65,4 @@ This budget detects distribution-size regressions. It does not measure page-spec
 
 For layout work inside an Extension, use [`waitLayout`](wait-layout.md) to batch geometry reads and dependent CSS or DOM writes. The guide includes code for coalescing frequent scroll and resize notifications.
 
-PWA has independent budgets for its Modern/Legacy Extension and classic reusable worker. Its code and guide styles never enter Full or Core. Full reuses the signed index from the version-matched boot script to avoid duplicating registry metadata. See [PWA](../core-extensions/experimental/pwa.md).
+PWA has independent budgets for its Modern/Legacy Extension and classic reusable worker. Its code and guide styles never enter Full or Core. Full reuses the signed index from the version-matched boot script to avoid duplicating registry metadata. See [PWA](../core-extensions/optional/pwa.md).

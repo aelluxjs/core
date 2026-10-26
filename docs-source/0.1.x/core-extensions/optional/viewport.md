@@ -1,6 +1,8 @@
 # Viewport Extension
 
-Viewport is an **Experimental** official Extension that publishes an element's position and geometric visible area relative to its nearest native scroll container. It works with ordinary HTML/CSS, independently of Scrollbox, Snap and Present. It never changes scroll, presentation, focus or DOM structure.
+**Distribution:** Optional Extension. **Stability:** Not stable.
+
+Viewport is an official **Optional Extension** that publishes an element's position and geometric visible area relative to its nearest native scroll container. It works with ordinary HTML/CSS, independently of Scrollbox, Snap and Present. It never changes scroll, presentation, focus or DOM structure.
 
 ```html
 <div style="height:400px;overflow:auto">
@@ -132,7 +134,7 @@ Measured raw/gzip level 9 bytes, compared with the implementation before these e
 | Legacy | 25,775 / 6,758 | 32,441 / 8,273 | +6,666 / +1,515 |
 | Legacy minified | 11,883 / 4,860 | 15,084 / 5,959 | +3,201 / +1,099 |
 
-Only Viewport's four artifact budgets increase: Modern raw/gzip limits become 18.5/5 KiB (regular) and 9/3.75 KiB (minified); Legacy becomes 32/8.25 KiB and 15/6 KiB. Full and Orchestrator delivery sizes remain unchanged because Viewport stays Experimental, external and lazy. The boot's embedded signed metadata changes, with the same minified raw/gzip size of 47,129/16,046 bytes. Global budgets remain unchanged.
+Only Viewport's four artifact budgets increase: Modern raw/gzip limits become 18.5/5 KiB (regular) and 9/3.75 KiB (minified); Legacy becomes 32/8.25 KiB and 15/6 KiB. Full and Orchestrator delivery sizes remain unchanged because Viewport remains an Optional Extension, external and lazy. The boot's embedded signed metadata changes, with the same minified raw/gzip size of 47,129/16,046 bytes. Global budgets remain unchanged.
 
 ## Scrollbox Snap and migration
 
@@ -188,7 +190,7 @@ Use the normal mount, update, unmount and destroy APIs, including subtree mounti
 
 ## Known Limits & Risks
 
-See [Core Known Limits & Risks](../../runtime/known-limits-and-risks.md) for the shared architecture and classification convention. **Known Limit** means a confirmed implementation or contract restriction. **Potential Risk** describes an outcome that may occur under the stated conditions, without identifying a confirmed defect. **Validation Gap** means the available tests do not establish reliability for that scenario. **Known Issue** is reserved for a reproducible defect. Viewport remains Experimental; evaluate these boundaries before depending on its geometry for interactions or animations. The [implementation](https://github.com/aelluxjs/core/blob/update/beta.10/src/aellux.ext.viewport.js) and the linked spec below provide the evidence for this section.
+See [Core Known Limits & Risks](../../runtime/known-limits-and-risks.md) for the shared architecture and classification convention. **Known Limit** means a confirmed implementation or contract restriction. **Potential Risk** describes an outcome that may occur under the stated conditions, without identifying a confirmed defect. **Validation Gap** means the available tests do not establish reliability for that scenario. **Known Issue** is reserved for a reproducible defect. Evaluate these boundaries before depending on Viewport geometry for interactions or animations. The [implementation](https://github.com/aelluxjs/core/blob/update/beta.10/src/aellux.ext.viewport.js) and the linked spec below provide the evidence for this section.
 
 ### Known Limits
 
@@ -287,4 +289,4 @@ These gaps identify where evidence is incomplete; they do not establish defects 
 6. Await explicit updates after otherwise undetected layout changes or reference changes that subsequent work depends on; use bounded Layout notifications for known transitions.
 7. Coordinate writes to the three output properties and allow lifecycle restoration to restore the original inline snapshot.
 8. Validate mobile behavior on real devices, plus the zoom, transforms, scrolling axes and API fallbacks relevant to the application.
-9. Account for Viewport's Experimental status when choosing production dependencies and recheck its contract when upgrading.
+9. Load Viewport where its geometry is needed and recheck its contract when upgrading.

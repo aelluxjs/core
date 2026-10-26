@@ -2,6 +2,10 @@
 
 Versioned pages live under `0.1.x/`; `summary.json` controls their navigation. Edit the Markdown sources and run `npm run build:docs` to update the rendered pages.
 
+Classify official Core Extensions by their delivery in Full: **Bundled Extensions** are included in the Full JavaScript bundle; **Optional Extensions** load separate signed scripts on demand. Keep these groups aligned with `src/aellux.full.js` and the `optional` entries in `src/official-extension-definitions.js`. The labels describe packaging, rather than maturity or stability. Basic registers both groups for lazy loading from separate files.
+
+Declare distribution and stability below each Extension page heading. Ajax Href, Dialog, Focus, Point, PWA and Viewport are **Not stable**; the remaining official Extensions are **Stable**. Keep stability on the pages without creating stability groups in `summary.json`.
+
 Prefer a small working code example near each user-facing API or behavior. Show the actual declaration or call before listing its variants and edge cases. Use HTML for declarative attributes, CSS for styling contracts, and JavaScript for lifecycle methods and events. Include the setup, asynchronous handling, and cleanup needed to make an example accurate; keep unrelated implementation details out of it.
 
 When a paragraph needs a complete call, configuration object, DOM fragment, selector usage, or sequence of operations, introduce it briefly and place the code in a fenced block. Keep inline code for short identifiers, attribute names, literal values, and references to examples already shown. Prefer one small runnable example over a long paragraph that spells out several calls. Do not duplicate the same example in prose immediately after its block.

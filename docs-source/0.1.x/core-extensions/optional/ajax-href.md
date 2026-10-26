@@ -1,6 +1,8 @@
 # Ajax Href Extension
 
-`ajax-href` replaces selected page regions with matching elements from a same-origin HTML response. This Experimental Extension is excluded from the Full bundle and loads its separate signed script in both Full and Basic when mounting `a[data-ae-ajax-href]`. Dynamically inserted links activate it through `$ae.mount(container)`.
+**Distribution:** Optional Extension. **Stability:** Not stable.
+
+`ajax-href` replaces selected page regions with matching elements from a same-origin HTML response. This Optional Extension is excluded from the Full bundle and loads its separate signed script in both Full and Basic when mounting `a[data-ae-ajax-href]`. Dynamically inserted links activate it through `$ae.mount(container)`.
 
 ```html
 <a href="./next.htm" data-ae-ajax-href>Next page (title and body)</a>

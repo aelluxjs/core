@@ -1,5 +1,7 @@
 # State Navigation Extension
 
+**Distribution:** Bundled Extension. **Stability:** Stable.
+
 `state-navigation` manages snapshots through the current window's browser history and, by default, its URL hash. It is included in the `full` runtime. Basic registers it automatically without eager loading. Since it has no HTML selector, load it with `await $ae.wait("state-navigation")`; an explicit `$ae.ext("state-navigation")` before initialization enables eager loading.
 
 ## Accessibility profile

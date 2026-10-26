@@ -64,21 +64,32 @@ Add aellux.js to a page and enable the Extensions it needs. The library coordina
 
 ## Core Extensions
 
+Each Extension page declares its stability independently of its distribution. Ajax Href, Dialog, Focus, Point, PWA and Viewport are **Not stable**; the other nine official Extensions are **Stable**. The navigation groups below describe delivery in Full.
+
+### Bundled Extensions
+
+These eleven official Extensions are included in the Full JavaScript bundle. Matching markup or an explicit request still determines when lazy behavior initializes.
+
 - [Adaptive](core-extensions/adaptive.md)
-- [Ajax Href](core-extensions/experimental/ajax-href.md)
 - [Anchor](core-extensions/anchor.md)
 - [Overflow Marquee](core-extensions/overflow-marquee.md)
 - [Feedback](core-extensions/feedback.md)
-- [Focus](core-extensions/experimental/focus.md) (Experimental)
-- [Point](core-extensions/experimental/point.md) (Experimental)
-- [Dialog](core-extensions/experimental/dialog.md)
+- [Focus](core-extensions/focus.md)
+- [Point](core-extensions/point.md)
 - [Preference](core-extensions/preference.md)
 - [Present](core-extensions/present.md)
 - [Scrollbox](core-extensions/scrollbox.md)
 - [Scrollbox Snap](core-extensions/scrollbox-snap.md)
-- [PWA](core-extensions/experimental/pwa.md) (optional external Extension; never incorporated in Full)
-- [State navigation](core-extensions/state-navigation.md)
-- [Viewport](core-extensions/experimental/viewport.md) (Experimental)
+- [State Navigation](core-extensions/state-navigation.md)
+
+### Optional Extensions
+
+These official Extensions load separate signed scripts on demand in both Full and Basic. The names describe delivery in Full, rather than maturity or stability. Basic automatically registers both groups for lazy loading from separate files.
+
+- [Ajax Href](core-extensions/optional/ajax-href.md)
+- [Dialog](core-extensions/optional/dialog.md)
+- [PWA](core-extensions/optional/pwa.md)
+- [Viewport](core-extensions/optional/viewport.md)
 
 ## Project Documents
 

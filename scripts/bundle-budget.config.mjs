@@ -22,7 +22,7 @@ export const bundleBudget = Object.freeze([
   // Full uses one external stylesheet shared by all Core Extensions.
   // Includes Point tap recognition and Present click-priority routing;
   // measured deltas: core-extensions/point.md and core-extensions/present.md.
-  // Stable Core implementations are bundled; Experimental stays external.
+  // Bundled Extensions ship inside Full; Optional Extensions stay external.
   // Delivery changes and measured sizes: runtime/performance.md.
   { file: "aellux.full.min.js", maxRawBytes: 188 * 1024, maxGzipBytes: 58 * 1024 },
   { file: "aellux.full.legacy.min.js", maxRawBytes: 508 * 1024, maxGzipBytes: 150 * 1024 },

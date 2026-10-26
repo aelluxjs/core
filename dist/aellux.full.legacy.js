@@ -25117,17 +25117,17 @@
         dependencies: Object.freeze([])
       }), Object.freeze({
         name: "dialog",
-        experimental: true,
+        optional: true,
         style: false,
         dependencies: Object.freeze([])
       }), Object.freeze({
         name: "pwa",
-        experimental: true,
+        optional: true,
         style: false,
         dependencies: Object.freeze([])
       }), Object.freeze({
         name: "viewport",
-        experimental: true,
+        optional: true,
         style: false,
         dependencies: Object.freeze([])
       }), Object.freeze({
@@ -25144,7 +25144,7 @@
         dependencies: Object.freeze([])
       }), Object.freeze({
         name: "ajax-href",
-        experimental: true,
+        optional: true,
         style: false,
         dependencies: Object.freeze([])
       }), Object.freeze({

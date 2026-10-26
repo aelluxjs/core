@@ -6,7 +6,7 @@ All notable changes to aellux.js will be documented in this file.
 
 ### Added
 
-- Independent Experimental Viewport Extension: lazy `[data-ae-viewport]` geometry observation, normalized X/Y position and visible area, grouped scheduler work, native scroll container discovery and inline-style restoration in Modern and Legacy builds. No implementation is bundled into Full.
+- Independent Optional Viewport Extension: lazy `[data-ae-viewport]` geometry observation, normalized X/Y position and visible area, grouped scheduler work, native scroll container discovery and inline-style restoration in Modern and Legacy builds. No implementation is bundled into Full.
 
 - Optional external PWA Extension with lazy declarative install controls, native prompt handling, replaceable English/Portuguese manual guidance, semantic state events, explicit worker registration and application-controlled updates. Its independent classic worker provides scoped, versioned precache and configurable network/cache strategies with conservative privacy defaults; neither implementation nor PWA styles enter Full/Core bundles.
 - Point recognizes short primary taps on mounted buttons, links and role buttons, emitting bubbling, composed `AelluxJsTap` events independently of native click and scroll, with lifecycle cleanup and Modern/Legacy coverage.
