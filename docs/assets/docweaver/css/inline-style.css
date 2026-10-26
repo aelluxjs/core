@@ -57,12 +57,12 @@ a:is(h1 *, h2 *, h3 *, h4 *, h5 *, h6 *) {
   position: absolute;
   left: -1em;
   bottom: 0.5em;
-  opacity: 0;
+  opacity: 0 !important;
   transition: opacity 0.2s ease;
 }
 
 a:hover .svg-icon {
-  opacity: 1;
+  opacity: 1 !important;
 }
 
 h1,
