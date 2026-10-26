@@ -74,6 +74,27 @@ h6 {
   font-family: var(--bs-headings-font-family);
 }
 
+h1::before,
+h2::before,
+h3::before {
+  display: block;
+  content: " ";
+  height: 100px;
+  pointer-events: none;
+  margin-top: -100px;
+  visibility: hidden;
+}
+
+h2::before {
+  height: 90px;
+  margin-top: -90px;
+}
+
+h3::before {
+  height: 80px;
+  margin-top: -80px;
+}
+
 html,
 body {
   margin: 0;
@@ -499,19 +520,6 @@ p {
 .toc-link.is-active-link:before {
   background: var(--bs-link-color) !important;
   transition: none !important;
-}
-
-
-
-h1::before,
-h2::before,
-h3::before {
-  display: block;
-  content: " ";
-  height: 100px;
-  pointer-events: none;
-  margin-top: -100px;
-  visibility: hidden;
 }
 
 .table-scroll-wrapper {
