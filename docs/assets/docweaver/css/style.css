@@ -227,6 +227,7 @@ body:after {
 }
 
 .navbar-collapse .nav-item.active {
+  text-decoration: none;
   background: rgba(var(--bs-link-color-rgb), 15%);
   color: var(--bs-body-color) !important;
   opacity: 1;
@@ -239,6 +240,7 @@ body:after {
 
 .navbar-collapse .nav-item .nav-link[href] {
   color: inherit !important;
+  text-decoration: underline;
 }
 
 .navbar-collapse .nav-item .nav-link {
