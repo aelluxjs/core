@@ -492,7 +492,7 @@ p {
 .toc-link {
   display: block;
   padding: 0.35rem 0;
-  text-decoration: none;
+  text-decoration: none !important;
   opacity: 0.8;
   padding-left: 0;
   padding-right: 3px;
