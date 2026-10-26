@@ -240,7 +240,7 @@ body:after {
 
 .navbar-collapse .nav-item .nav-link[href] {
   color: inherit !important;
-  text-decoration: underline;
+  text-decoration: none;
 }
 
 .navbar-collapse .nav-item.active .nav-link[href] {
