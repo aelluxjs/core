@@ -43,11 +43,11 @@ async function updateHljsScheme() {
   const light = document.querySelector("link[data-ae-dep='highlightjs-css']");
   const dark = document.querySelector("link[data-ae-dep='highlightjs-css-dark']");
   if (colorScheme === "dark") {
-    light.removeAttribute("disabled");
-    dark.setAttribute("disabled", "disabled");
-  } else {
     dark.removeAttribute("disabled");
     light.setAttribute("disabled", "disabled");
+  } else {
+    light.removeAttribute("disabled");
+    dark.setAttribute("disabled", "disabled");
   }
 }
 
@@ -57,6 +57,9 @@ async function highlightCode() {
   if (document.readyState === "loading") {
     await new Promise(resolve => document.addEventListener("DOMContentLoaded", resolve, { once: true }));
   }
+  document.querySelectorAll('pre:not(.hljs)').forEach(block => {
+    block.classList.add("hljs");
+  });
   document.querySelectorAll('pre code:not([data-highlighted])').forEach(block => {
     highlighter.highlightElement(block);
   });
