@@ -53,7 +53,7 @@ function prepareAjaxLinks() {
 }
 
 AelluxJs.on("BeforeMount", (event) => {
-  initOrRefreshToc();
+  if ("initOrRefreshToc" in window) { initOrRefreshToc(); }
   highlightCode();
   prepareAjaxLinks();
 
