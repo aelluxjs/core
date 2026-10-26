@@ -27,10 +27,8 @@ const highlightReady = (async () => {
     AelluxJs.dep(`highlightjs-${language}`, `${baseUrl}languages/${language}.min.js`)
   ));
 
-  if ("preference" in AelluxJs.ext) {
-    updateHljsScheme();
-    AelluxJs.on("PreferencesChange", updateHljsScheme);
-  }
+  updateHljsScheme();
+  AelluxJs.on("PreferencesChange", updateHljsScheme);
 
   return window.hljs;
 })().catch(error => {
@@ -38,7 +36,7 @@ const highlightReady = (async () => {
   return null;
 });
 
-async function updateHljsScheme() {
+function updateHljsScheme() {
   const colorScheme = document.documentElement.getAttribute("data-ae-color-scheme");
   const light = document.querySelector("link[data-ae-dep='highlightjs-css']");
   const dark = document.querySelector("link[data-ae-dep='highlightjs-css-dark']");
