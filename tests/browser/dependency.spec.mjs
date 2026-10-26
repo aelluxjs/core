@@ -1,6 +1,77 @@
 import { expect, test } from "@playwright/test";
 import { createHash } from "node:crypto";
 
+for (const forceLegacy of [false, true]) {
+  test(`dep loads and shares a stylesheet before init (${forceLegacy ? "legacy" : "modern"})`, async ({ page }) => {
+    const css = "body { --dependency-ready: loaded; }";
+    const integrity = "sha384-" + createHash("sha384").update(css).digest("base64");
+    let requests = 0;
+    await page.route("**/dependency.CSS?version=1", async route => {
+      requests++;
+      await new Promise(resolve => setTimeout(resolve, 80));
+      await route.fulfill({ contentType: "text/css", body: css });
+    });
+    await page.goto("/tests/index.htm");
+    await page.addScriptTag({ url: "/dist/aellux.js" });
+    const result = await page.evaluate(async ({ integrity, forceLegacy }) => {
+      const url = "./dependency.CSS?version=1#theme";
+      const first = AelluxJs.dep("theme", url, integrity, "anonymous");
+      const pending = AelluxJs.registry.dep.theme.state;
+      AelluxJs.init({ mode: "basic", forceLegacy });
+      const second = AelluxJs.dep("theme", url);
+      const link = await first;
+      return {
+        shared: first === second && first === AelluxJs.dep("theme", url),
+        pending,
+        loaded: AelluxJs.registry.dep.theme.state,
+        tag: link.tagName,
+        rel: link.rel,
+        url: link.href.slice(location.origin.length),
+        security: [link.integrity, link.crossOrigin],
+        count: document.querySelectorAll('[data-ae-dep="theme"]').length,
+        applied: getComputedStyle(document.body).getPropertyValue("--dependency-ready").trim(),
+        handlersCleared: link.onload === null && link.onerror === null
+      };
+    }, { integrity, forceLegacy });
+    expect(requests).toBe(1);
+    expect(result).toEqual({
+      shared: true, pending: "loading", loaded: "loaded", tag: "LINK", rel: "stylesheet",
+      url: "/dist/dependency.CSS?version=1#theme", security: [integrity, "anonymous"],
+      count: 1, applied: "loaded", handlersCleared: true
+    });
+  });
+}
+
+test("dep rejects a failed stylesheet, removes it and allows retry", async ({ page }) => {
+  let requests = 0;
+  await page.route("**/retry-dependency.css", route => {
+    requests++;
+    if (requests === 1) return route.abort("failed");
+    return route.fulfill({ contentType: "text/css", body: "body { --retry-ready: loaded; }" });
+  });
+  await startRuntime(page);
+  const result = await page.evaluate(async () => {
+    const url = "/virtual/retry-dependency.css";
+    const first = AelluxJs.dep("theme-retry", url);
+    const second = AelluxJs.dep("theme-retry", url);
+    const conflict = await AelluxJs.dep("theme-retry", "/virtual/other.js").catch(error => error.code);
+    const failed = await first.catch(error => error.code);
+    const cleaned = !Object.hasOwn(AelluxJs.registry.dep, "theme-retry") &&
+      !document.querySelector('[data-ae-dep="theme-retry"]');
+    const link = await AelluxJs.dep("theme-retry", url, { crossOrigin: "anonymous" });
+    return {
+      shared: first === second, conflict, failed, cleaned,
+      tag: link.tagName, crossOrigin: link.crossOrigin,
+      applied: getComputedStyle(document.body).getPropertyValue("--retry-ready").trim()
+    };
+  });
+  expect(requests).toBe(2);
+  expect(result).toEqual({
+    shared: true, conflict: 1117, failed: 1118, cleaned: true,
+    tag: "LINK", crossOrigin: "anonymous", applied: "loaded"
+  });
+});
+
 async function startRuntime(page, forceLegacy = false) {
   await page.goto("/tests/index.htm");
   await page.addScriptTag({ url: "/dist/aellux.js" });

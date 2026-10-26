@@ -696,7 +696,7 @@ function createAelluxApi(root2, constants) {
       if (typeof label !== "string" || !label.trim() || typeof url !== "string" || !url.trim()) {
         return root2.Promise.reject(diagnostics.error(
           diagnostics.ERROR_DEPENDENCY_ARGUMENT,
-          { label, url, expected: "a nonempty label and script URL" }
+          { label, url, expected: "a nonempty label and script or stylesheet URL" }
         ));
       }
       var options2 = integrity && typeof integrity === "object" && !Array.isArray(integrity) ? integrity : { integrity, crossOrigin };
@@ -706,9 +706,12 @@ function createAelluxApi(root2, constants) {
           { label, url, expected: "integrity and crossOrigin strings" }
         ));
       }
-      var script = document2.createElement("script");
-      script.src = url.replace(/^\.\//, api.aelluxBasePath);
-      var resolvedURL = script.src;
+      var isStyle = /\.css$/i.test(url.split(/[?#]/)[0]);
+      var asset = document2.createElement(isStyle ? "link" : "script");
+      var sourceAttribute = isStyle ? "href" : "src";
+      if (isStyle) asset.rel = "stylesheet";
+      asset[sourceAttribute] = url.replace(/^\.\//, api.aelluxBasePath);
+      var resolvedURL = asset[sourceAttribute];
       var registry = api.registry.dep;
       var existing = Object.prototype.hasOwnProperty.call(registry, label) ? registry[label] : null;
       if (existing) {
@@ -720,25 +723,26 @@ function createAelluxApi(root2, constants) {
         }
         return existing.promise;
       }
-      var registration = { url: resolvedURL, state: "loading", script, promise: null };
+      var registration = { url: resolvedURL, state: "loading", promise: null };
+      registration[isStyle ? "style" : "script"] = asset;
       registry[label] = registration;
-      script.setAttribute(api.attr("dep"), label);
-      if (options2 && options2.integrity) script.setAttribute("integrity", options2.integrity);
+      asset.setAttribute(api.attr("dep"), label);
+      if (options2 && options2.integrity) asset.setAttribute("integrity", options2.integrity);
       if (options2 && (options2.integrity || options2.crossOrigin) || api.options.crossOrigin) {
-        script.setAttribute(
+        asset.setAttribute(
           "crossorigin",
           options2 && options2.crossOrigin || api.options.crossOrigin || "anonymous"
         );
       }
       registration.promise = new root2.Promise(function(resolve, reject) {
         try {
-          assetLoadHelper(script, {
+          assetLoadHelper(asset, {
             loadCallback: function() {
               registration.state = "loaded";
-              resolve(script);
+              resolve(asset);
             },
             errorCallback: function(cause) {
-              if (script.parentNode) script.parentNode.removeChild(script);
+              if (asset.parentNode) asset.parentNode.removeChild(asset);
               delete registry[label];
               reject(diagnostics.error(
                 diagnostics.ERROR_DEPENDENCY_LOAD,
@@ -747,7 +751,7 @@ function createAelluxApi(root2, constants) {
             }
           });
         } catch (cause) {
-          if (script.parentNode) script.parentNode.removeChild(script);
+          if (asset.parentNode) asset.parentNode.removeChild(asset);
           delete registry[label];
           reject(diagnostics.error(
             diagnostics.ERROR_DEPENDENCY_LOAD,
