@@ -772,7 +772,7 @@
           <main id="doc-content" style="min-height: calc(100vh - 200px);" class="js-toc-content"
             ajax-load="doc-content">
             <h1>Events</h1>
-<p>AelluxJs names its DOM events with the <code>AelluxJs</code> prefix. The main API listens on <code>document</code>; <code>onEvent</code> and <code>offEvent</code> listen on an explicit target; a mounted element controller listens on its element. A document listener also receives bubbling events from elements:</p>
+<p>AelluxJs uses the <code>AelluxJs</code> prefix for its DOM events by default. Its event helpers also accept exact names without this prefix. The main API listens on <code>document</code>; <code>onEvent</code> and <code>offEvent</code> listen on an explicit target; a mounted element controller listens on its element. A document listener also receives bubbling events from elements:</p>
 <pre><code class="language-js">const onUpdate = event =&gt; console.log(event.type);
 $ae.on(&quot;Update&quot;, onUpdate);
 $ae.off(&quot;Update&quot;, onUpdate);
@@ -783,6 +783,102 @@ panel.on(&quot;Layout&quot;, onLayout);
 panel.off(&quot;Layout&quot;, onLayout);
 </code></pre>
 <p>The modern runtime dispatches <code>CustomEvent</code> objects; the boot API uses a regular <code>Event</code> until the runtime starts. Unless noted below, events bubble, are not cancelable, and have no <code>detail</code> payload.</p>
+<h2>Event names and formatting</h2>
+<p><code>$ae.eventName(name)</code> returns the DOM event type used by AelluxJs. The same conversion applies to <code>on</code>, <code>off</code>, <code>onEvent</code>, <code>offEvent</code>, <code>dispatch</code>, <code>dispatchFrom</code>, and a mounted element controller&#39;s <code>on</code>, <code>off</code> and <code>dispatch</code>. Naming follows the same rules in the boot API and the Modern and Legacy runtimes.</p>
+<pre><code class="language-js">$ae.eventName(&quot;ready&quot;);           // &quot;AelluxJsReady&quot;
+$ae.eventName(&quot;viewportChange&quot;);  // &quot;AelluxJsViewportChange&quot;
+$ae.eventName(&quot;viewport-change&quot;); // &quot;AelluxJsViewportChange&quot;
+$ae.eventName(&quot;AelluxJsReady&quot;);   // &quot;AelluxJsReady&quot;
+</code></pre>
+<p>For a name without an escape marker, a name already starting with the exact <code>AelluxJs</code> prefix is returned unchanged. Otherwise, the helper uppercases an initial lowercase ASCII letter and lowercase letters following <code>-</code>, removes those hyphens, and adds the prefix. Existing uppercase letters and other characters are preserved. The table below uses the default prefix shipped with aellux.js:</p>
+<table>
+<thead>
+<tr>
+<th>Input</th>
+<th>DOM event type</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>ready</code>, <code>Ready</code></td>
+<td><code>AelluxJsReady</code></td>
+</tr>
+<tr>
+<td><code>viewportChange</code>, <code>ViewportChange</code>, <code>viewport-change</code></td>
+<td><code>AelluxJsViewportChange</code></td>
+</tr>
+<tr>
+<td><code>pointerDown</code>, <code>PointerDown</code>, <code>pointer-down</code></td>
+<td><code>AelluxJsPointerDown</code></td>
+</tr>
+<tr>
+<td><code>pointerdown</code></td>
+<td><code>AelluxJsPointerdown</code></td>
+</tr>
+<tr>
+<td><code>AelluxJsPointerDown</code></td>
+<td><code>AelluxJsPointerDown</code></td>
+</tr>
+<tr>
+<td><code>AelluxJsready</code></td>
+<td><code>AelluxJsready</code></td>
+</tr>
+<tr>
+<td><code>my_event</code></td>
+<td><code>AelluxJsMy_event</code></td>
+</tr>
+<tr>
+<td><code>my.event</code></td>
+<td><code>AelluxJsMy.event</code></td>
+</tr>
+<tr>
+<td><code>click</code></td>
+<td><code>AelluxJsClick</code></td>
+</tr>
+<tr>
+<td><code>$click</code>, <code>#click</code>, <code>_click</code>, <code>!click</code></td>
+<td><code>click</code></td>
+</tr>
+<tr>
+<td><code>!my-CustomEvent</code></td>
+<td><code>my-CustomEvent</code></td>
+</tr>
+</tbody></table>
+<p>Event types are case-sensitive. The helper does not infer word boundaries in an all-lowercase name, so <code>pointerdown</code> does not identify the official <code>AelluxJsPointerDown</code> notification. Already-prefixed names are not reformatted or repaired. Underscores and dots inside a name are preserved, and unescaped names are not trimmed. Pass one event name per call; spaces and commas do not declare multiple listeners.</p>
+<h3>Exact names without the prefix</h3>
+<p>A leading <code>$</code>, <code>#</code>, <code>_</code> or <code>!</code> bypasses prefixing and capitalization. These four markers have identical naming behavior: exactly one leading marker is removed, then surrounding whitespace is trimmed from the remaining name. Case, punctuation and internal whitespace are preserved. The marker must be the first character of the input.</p>
+<pre><code class="language-js">$ae.eventName(&quot;$  resize  &quot;);    // &quot;resize&quot;
+$ae.eventName(&quot;!my-CustomEvent&quot;); // &quot;my-CustomEvent&quot;
+$ae.eventName(&quot;!!custom&quot;);        // &quot;!custom&quot;
+</code></pre>
+<p>Use an exact name to listen for a native DOM event through the Aellux helpers:</p>
+<pre><code class="language-js">const button = document.createElement(&quot;button&quot;);
+const onClick = event =&gt; console.log(event.type); // &quot;click&quot;
+
+$ae.onEvent(button, &quot;$click&quot;, onClick);
+button.click();
+$ae.offEvent(button, &quot;$click&quot;, onClick);
+</code></pre>
+<p>Without the marker, <code>onEvent(button, &quot;click&quot;, handler)</code> listens for <code>AelluxJsClick</code>. The same escape syntax works for custom events from other libraries; it is not restricted to native event names.</p>
+<p>The markers only select the event name. They do not enable delegation, change propagation or cancellation, or convert a dispatched <code>CustomEvent</code> into a <code>MouseEvent</code> or <code>PointerEvent</code>. For example, <code>dispatch(&quot;$click&quot;)</code> emits an event named <code>click</code> using the dispatch implementation described above.</p>
+<h3>Native DOM APIs and listener removal</h3>
+<p>Native <code>addEventListener</code>, <code>removeEventListener</code>, <code>Event</code> and <code>CustomEvent</code> use the exact string supplied to them. They do not apply Aellux prefixes or remove escape markers. Use <code>click</code> directly for a native click listener, and use <code>$ae.eventName(name)</code> to obtain an Aellux event type:</p>
+<pre><code class="language-js">const type = $ae.eventName(&quot;panel-ready&quot;);
+const onPanelReady = event =&gt; console.log(event.detail.panelId);
+
+document.addEventListener(type, onPanelReady);
+$ae.dispatch(&quot;panel-ready&quot;, { detail: { panelId: &quot;main&quot; } });
+document.removeEventListener(type, onPanelReady);
+</code></pre>
+<p>Here <code>panel-ready</code> is an application-defined event. To remove a listener, use the same target, handler reference, resulting DOM event type and <code>capture</code> value. Different input spellings can identify the same resulting event type, as shown in the conversion table.</p>
+<h2>Listener targets and dispatch options</h2>
+<p><code>on(event, handler, options)</code> and <code>off(event, handler, options)</code> listen on <code>document</code>. Use <code>onEvent(target, event, handler, options)</code> and <code>offEvent(target, event, handler, options)</code> for any other <code>EventTarget</code>, including <code>window</code>, an element, or a media query. A mounted element controller&#39;s <code>on</code> and <code>off</code> use its element. The optional <code>options</code> argument is passed to the native listener methods; use the same <code>capture</code> value when removing a listener.</p>
+<pre><code class="language-js">const onResize = event =&gt; console.log(event.type); // &quot;resize&quot;
+$ae.onEvent(window, &quot;$resize&quot;, onResize, { passive: true });
+// When the listener is no longer needed:
+$ae.offEvent(window, &quot;$resize&quot;, onResize);
+</code></pre>
+<p><code>dispatch(event, options?)</code> dispatches from <code>document</code>, and <code>dispatchFrom(target, event, options?)</code> dispatches from another event target. A mounted element controller&#39;s <code>dispatch</code> uses its element. These methods return the native <code>dispatchEvent()</code> boolean: <code>false</code> if a cancelable event was canceled, otherwise <code>true</code>.</p>
+<p>Events bubble by default and are not cancelable unless requested. Pass <code>detail</code>, <code>bubbles</code> or <code>cancelable</code> in <code>options</code>. The boot API includes <code>detail</code> on its regular <code>Event</code> objects before the orchestrator replaces dispatch with <code>CustomEvent</code> creation. A raw name selects the exact event type under either implementation.</p>
 <h2>Runtime lifecycle</h2>
 <table>
 <thead>

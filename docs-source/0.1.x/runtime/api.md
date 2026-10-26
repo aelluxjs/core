@@ -18,17 +18,7 @@ The naming helpers use the configured AelluxJs prefixes and convert camelCase na
 
 ## Events
 
-`$ae.eventName(name)` applies the `AelluxJs` prefix and capitalizes an unformatted name. It returns names already beginning with `AelluxJs` unchanged. To use an exact DOM event name with `$ae.on()`, `$ae.off()`, `$ae.onEvent()`, `$ae.offEvent()`, `$ae.dispatch()`, or `$ae.dispatchFrom()`, start it with `$`, `#`, `_`, or `!`; the marker is removed without changing the remaining name. For example, `$ae.dispatch("_pointerdown")` dispatches `pointerdown`.
-
-`on(event, handler, options)` and `off(event, handler, options)` listen on `document`. Use `onEvent(target, event, handler, options)` and `offEvent(target, event, handler, options)` for any other `EventTarget`, including `window`, an element, or a media query. The optional `options` argument is passed to the native listener methods; use the same `capture` value when removing a listener.
-
-`dispatch(event, options?)` dispatches from `document`, and `dispatchFrom(target, event, options?)` dispatches from another event target. Both return the native `dispatchEvent()` boolean. Events bubble by default and are not cancelable unless requested; pass `detail`, `bubbles`, or `cancelable` in `options`. The boot API includes `detail` on its regular `Event` objects before the orchestrator replaces this method with `CustomEvent` dispatch.
-
-```js
-const onResize = event => console.log(event.type);
-$ae.onEvent(window, "$resize", onResize, { passive: true });
-$ae.offEvent(window, "$resize", onResize);
-```
+Use `eventName()` to resolve an event name, `on`/`off` or `onEvent`/`offEvent` to manage listeners, and `dispatch`/`dispatchFrom` to emit events. See [Events](events.md) for prefix and formatting rules, exact DOM names, targets, options, examples and the event reference.
 
 ## Initialization
 
@@ -182,18 +172,6 @@ Preference media queries are available in `$ae.registry.preferenceMediaQueries`.
 `$ae.currentPreference(name)` reads the resolved preference attribute from `<html>` and returns its string value or `null` when absent. It accepts kebab-case and camelCase names, for example `$ae.currentPreference("reduced-motion")` and `$ae.currentPreference("reducedMotion")`. It is available before `init()` and reflects the latest device and local preference after the boot or Preference Extension updates the root attributes. Use it instead of reading the HTML attribute directly in application JavaScript.
 
 `$ae.updatePreferenceAttributesHTML(preferences?)` recomputes the root preference attributes from a supplied preference object, or from persisted preferences when omitted. The boot and Preference Extension call it as part of normal preference updates. `$ae.request(url, options?)` is available after runtime initialization; it calls `fetch` with default `GET` and `credentials: "same-origin"`, resolves to a successful `Response`, and rejects unsuccessful HTTP responses with an `AelluxJsRequestError` containing `status`, `statusText`, and `response`.
-
-## Events
-
-```js
-$ae.on("Ready", handler);
-$ae.off("Ready", handler);
-$ae.dispatch("Example", { detail: {} });
-```
-
-aellux.js event names use the `AelluxJs` prefix. `Ready` becomes `AelluxJsReady`. Readiness means the orchestrator is available; it does not guarantee that every Extension or element mounted successfully.
-
-See [Events](events.md) for the complete runtime and Core Extension event list, including `AelluxJsUpdate`.
 
 ## Persistence
 

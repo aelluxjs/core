@@ -1,6 +1,6 @@
 # Events
 
-AelluxJs names its DOM events with the `AelluxJs` prefix. The main API listens on `document`; `onEvent` and `offEvent` listen on an explicit target; a mounted element controller listens on its element. A document listener also receives bubbling events from elements:
+AelluxJs uses the `AelluxJs` prefix for its DOM events by default. Its event helpers also accept exact names without this prefix. The main API listens on `document`; `onEvent` and `offEvent` listen on an explicit target; a mounted element controller listens on its element. A document listener also receives bubbling events from elements:
 
 ```js
 const onUpdate = event => console.log(event.type);
@@ -14,6 +14,90 @@ panel.off("Layout", onLayout);
 ```
 
 The modern runtime dispatches `CustomEvent` objects; the boot API uses a regular `Event` until the runtime starts. Unless noted below, events bubble, are not cancelable, and have no `detail` payload.
+
+## Event names and formatting
+
+`$ae.eventName(name)` returns the DOM event type used by AelluxJs. The same conversion applies to `on`, `off`, `onEvent`, `offEvent`, `dispatch`, `dispatchFrom`, and a mounted element controller's `on`, `off` and `dispatch`. Naming follows the same rules in the boot API and the Modern and Legacy runtimes.
+
+```js
+$ae.eventName("ready");           // "AelluxJsReady"
+$ae.eventName("viewportChange");  // "AelluxJsViewportChange"
+$ae.eventName("viewport-change"); // "AelluxJsViewportChange"
+$ae.eventName("AelluxJsReady");   // "AelluxJsReady"
+```
+
+For a name without an escape marker, a name already starting with the exact `AelluxJs` prefix is returned unchanged. Otherwise, the helper uppercases an initial lowercase ASCII letter and lowercase letters following `-`, removes those hyphens, and adds the prefix. Existing uppercase letters and other characters are preserved. The table below uses the default prefix shipped with aellux.js:
+
+| Input | DOM event type |
+| --- | --- |
+| `ready`, `Ready` | `AelluxJsReady` |
+| `viewportChange`, `ViewportChange`, `viewport-change` | `AelluxJsViewportChange` |
+| `pointerDown`, `PointerDown`, `pointer-down` | `AelluxJsPointerDown` |
+| `pointerdown` | `AelluxJsPointerdown` |
+| `AelluxJsPointerDown` | `AelluxJsPointerDown` |
+| `AelluxJsready` | `AelluxJsready` |
+| `my_event` | `AelluxJsMy_event` |
+| `my.event` | `AelluxJsMy.event` |
+| `click` | `AelluxJsClick` |
+| `$click`, `#click`, `_click`, `!click` | `click` |
+| `!my-CustomEvent` | `my-CustomEvent` |
+
+Event types are case-sensitive. The helper does not infer word boundaries in an all-lowercase name, so `pointerdown` does not identify the official `AelluxJsPointerDown` notification. Already-prefixed names are not reformatted or repaired. Underscores and dots inside a name are preserved, and unescaped names are not trimmed. Pass one event name per call; spaces and commas do not declare multiple listeners.
+
+### Exact names without the prefix
+
+A leading `$`, `#`, `_` or `!` bypasses prefixing and capitalization. These four markers have identical naming behavior: exactly one leading marker is removed, then surrounding whitespace is trimmed from the remaining name. Case, punctuation and internal whitespace are preserved. The marker must be the first character of the input.
+
+```js
+$ae.eventName("$  resize  ");    // "resize"
+$ae.eventName("!my-CustomEvent"); // "my-CustomEvent"
+$ae.eventName("!!custom");        // "!custom"
+```
+
+Use an exact name to listen for a native DOM event through the Aellux helpers:
+
+```js
+const button = document.createElement("button");
+const onClick = event => console.log(event.type); // "click"
+
+$ae.onEvent(button, "$click", onClick);
+button.click();
+$ae.offEvent(button, "$click", onClick);
+```
+
+Without the marker, `onEvent(button, "click", handler)` listens for `AelluxJsClick`. The same escape syntax works for custom events from other libraries; it is not restricted to native event names.
+
+The markers only select the event name. They do not enable delegation, change propagation or cancellation, or convert a dispatched `CustomEvent` into a `MouseEvent` or `PointerEvent`. For example, `dispatch("$click")` emits an event named `click` using the dispatch implementation described above.
+
+### Native DOM APIs and listener removal
+
+Native `addEventListener`, `removeEventListener`, `Event` and `CustomEvent` use the exact string supplied to them. They do not apply Aellux prefixes or remove escape markers. Use `click` directly for a native click listener, and use `$ae.eventName(name)` to obtain an Aellux event type:
+
+```js
+const type = $ae.eventName("panel-ready");
+const onPanelReady = event => console.log(event.detail.panelId);
+
+document.addEventListener(type, onPanelReady);
+$ae.dispatch("panel-ready", { detail: { panelId: "main" } });
+document.removeEventListener(type, onPanelReady);
+```
+
+Here `panel-ready` is an application-defined event. To remove a listener, use the same target, handler reference, resulting DOM event type and `capture` value. Different input spellings can identify the same resulting event type, as shown in the conversion table.
+
+## Listener targets and dispatch options
+
+`on(event, handler, options)` and `off(event, handler, options)` listen on `document`. Use `onEvent(target, event, handler, options)` and `offEvent(target, event, handler, options)` for any other `EventTarget`, including `window`, an element, or a media query. A mounted element controller's `on` and `off` use its element. The optional `options` argument is passed to the native listener methods; use the same `capture` value when removing a listener.
+
+```js
+const onResize = event => console.log(event.type); // "resize"
+$ae.onEvent(window, "$resize", onResize, { passive: true });
+// When the listener is no longer needed:
+$ae.offEvent(window, "$resize", onResize);
+```
+
+`dispatch(event, options?)` dispatches from `document`, and `dispatchFrom(target, event, options?)` dispatches from another event target. A mounted element controller's `dispatch` uses its element. These methods return the native `dispatchEvent()` boolean: `false` if a cancelable event was canceled, otherwise `true`.
+
+Events bubble by default and are not cancelable unless requested. Pass `detail`, `bubbles` or `cancelable` in `options`. The boot API includes `detail` on its regular `Event` objects before the orchestrator replaces dispatch with `CustomEvent` creation. A raw name selects the exact event type under either implementation.
 
 ## Runtime lifecycle
 
