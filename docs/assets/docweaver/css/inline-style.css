@@ -49,6 +49,22 @@
   --ae-unpop-aellux-ease: ease-in-cubic;
 }
 
+a:is(h1 *, h2 *, h3 *, h4 *, h5 *, h6 *) {
+  position: relative;
+}
+
+.svg-icon:is(h1 *, h2 *, h3 *, h4 *, h5 *, h6 *) {
+  position: absolute;
+  left: -1em;
+  bottom: 0.5em;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+a:hover .svg-icon {
+  opacity: 1;
+}
+
 h1,
 h2,
 h3,
