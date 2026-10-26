@@ -485,6 +485,7 @@ p {
   /*margin-left:-10px!important;*/
   margin-top: -0.30rem !important;
   height: calc(100% - 0.1rem);
+  transition: background 0.25s ease-out;
 }
 
 .toc-link:hover,
@@ -497,6 +498,7 @@ p {
 
 .toc-link.is-active-link:before {
   background: var(--bs-link-color) !important;
+  transition: none !important;
 }
 
 
