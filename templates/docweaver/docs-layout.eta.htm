@@ -89,53 +89,54 @@
                         data-ae-present="height opacity" data-ae-unpop-on-outside="false" <% if (!item.active) { %>
                         hidden
                         <% } %>>
-                          <div class="ps-2 gap-1 d-flex flex-column overflow-hidden" data-ae-present-motion<% if (item.children.some(child => child.children?.length)) { %>
+                          <div class="ps-2 gap-1 d-flex flex-column overflow-hidden" data-ae-present-motion<% if
+                            (item.children.some(child=> child.children?.length)) { %>
                             data-ae-present-group<% } %>>
-                            <% for (const child of item.children) { %>
-                              <% if (child.children !==undefined && child.children.length) { %>
+                              <% for (const child of item.children) { %>
+                                <% if (child.children !==undefined && child.children.length) { %>
 
-                                <div class="nav-item mt-1 small-md fw-bold rounded-1 ps-md-1 bg-light-adaptive"
-                                  style="flex:0">
-                                  <button data-ae-point type="button"
-                                    class="nav-link w-100 text-start text-capitalize p-2 p-md-1 px-3 px-md-2"
-                                    data-ae-trigger="toggle" data-ae-target="#children2-<%= child.slug %>">
-                                    <%= child.label %>
-                                      <% if (child.children !==undefined) { %><span class="chevron"><svg
-                                            class="svg-icon small" aria-hidden="true" focusable="false">
-                                            <use href="#bi-chevron-right"></use>
-                                          </svg></span>
-                                        <% } %>
-                                  </button>
-                                </div>
-
-                                <div id="children2-<%= child.slug %>" class="docs-menu-panel border-start ms-2"
-                                  data-ae-present="height opacity" data-ae-unpop-on-outside="false" <% if
-                                  (!child.active) { %>
-                                  hidden<% } %>>
-                                    <div class="ps-2 gap-1 d-flex flex-column overflow-hidden" data-ae-present-motion>
-                                      <% for (const child2 of child.children) { %>
-                                        <div
-                                          class="nav-item mt-1 small-md rounded-1 ps-md-1<% if (child2.active) { %> active<% } %>"
-                                          style="flex:0">
-                                          <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
-                                            href="<%= child2.href %>" data-ae-overflow-marquee="190px">
-                                            <%= child2.label %>
-                                          </a>
-                                        </div>
-                                        <% } %>
-                                    </div>
-                                </div>
-                                <% } else { %>
-                                  <div
-                                    class="nav-item mt-1 small-md rounded-1 ps-md-1<% if (child.active) { %> active<% } %>"
+                                  <div class="nav-item mt-1 small-md fw-bold rounded-1 ps-md-1 bg-light-adaptive"
                                     style="flex:0">
-                                    <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
-                                      href="<%= child.href %>" data-ae-overflow-marquee="190px">
+                                    <button data-ae-point type="button"
+                                      class="nav-link w-100 text-start text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                      data-ae-trigger="toggle" data-ae-target="#children2-<%= child.slug %>">
                                       <%= child.label %>
-                                    </a>
+                                        <% if (child.children !==undefined) { %><span class="chevron"><svg
+                                              class="svg-icon small" aria-hidden="true" focusable="false">
+                                              <use href="#bi-chevron-right"></use>
+                                            </svg></span>
+                                          <% } %>
+                                    </button>
                                   </div>
-                                  <% } %>
+
+                                  <div id="children2-<%= child.slug %>" class="docs-menu-panel border-start ms-2"
+                                    data-ae-present="height opacity" data-ae-unpop-on-outside="false" <% if
+                                    (!child.active) { %>
+                                    hidden<% } %>>
+                                      <div class="ps-2 gap-1 d-flex flex-column overflow-hidden" data-ae-present-motion>
+                                        <% for (const child2 of child.children) { %>
+                                          <div
+                                            class="nav-item mt-1 small-md rounded-1 ps-md-1<% if (child2.active) { %> active<% } %>"
+                                            style="flex:0">
+                                            <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                              href="<%= child2.href %>" data-ae-overflow-marquee="190px">
+                                              <%= child2.label %>
+                                            </a>
+                                          </div>
+                                          <% } %>
+                                      </div>
+                                  </div>
+                                  <% } else { %>
+                                    <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1<% if (child.active) { %> active<% } %>"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="<%= child.href %>" data-ae-overflow-marquee="190px">
+                                        <%= child.label %>
+                                      </a>
+                                    </div>
                                     <% } %>
+                                      <% } %>
                           </div>
                       </div>
                       <% } %>
@@ -230,13 +231,22 @@
           <footer class="section bg-transparent" style="margin: 50vh 0;">
             <div class="text-center small text-body opacity-50">
               <div>
-                <%= new Date().getFullYear() %> &copy;<%= it.title %>
+                2026 ©aellux.js Docs
               </div>
               <div class="small mb-0 text-body">
                 Special thanks to
+                <a style="color:inherit!important;" href="https://chatgpt.com/" target="_blank"
+                  rel="noopener noreferrer">ChatGPT</a>,
+                <a style="color:inherit!important;" href="https://openai.com/codex/" target="_blank"
+                  rel="noopener noreferrer">Codex</a>,
+                <a style="color:inherit!important;" href="https://code.visualstudio.com/" target="_blank"
+                  rel="noopener noreferrer">Visual Studio Code</a>,
                 <a style="color:inherit!important;" href="https://getbootstrap.com/" target="_blank"
-                  rel="noopener noreferrer">Bootstrap</a>
-                - this page layout was built around its responsive components and utility classes.
+                  rel="noopener noreferrer">Bootstrap</a>,
+                and
+                <a style="color:inherit!important;" href="https://github.com/" target="_blank"
+                  rel="noopener noreferrer">GitHub</a>
+                for the tools and technologies that supported the development of Aellux.
               </div>
             </div>
           </footer>

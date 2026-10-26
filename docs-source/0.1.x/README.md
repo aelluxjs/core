@@ -87,3 +87,7 @@ Add aellux.js to a page and enable the Extensions it needs. The library coordina
 - [Milestone: aellux.js 0.1.0 Beta 1](https://github.com/aelluxjs/core/blob/main/milestones/0.1.0-beta.1.md)
 - [Extension scaffold](https://github.com/aelluxjs/core/blob/main/templates/README.md)
 - [Changelog](https://github.com/aelluxjs/core/blob/main/CHANGELOG.md)
+
+## Acknowledgments
+
+Special thanks to [ChatGPT](https://chatgpt.com/), [Codex](https://openai.com/codex/), [Visual Studio Code](https://code.visualstudio.com/), [Bootstrap](https://getbootstrap.com/), and [GitHub](https://github.com/) for the tools and technologies that supported the development of Aellux.

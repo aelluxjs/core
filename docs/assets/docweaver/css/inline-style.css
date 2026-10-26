@@ -502,12 +502,10 @@ h3::before {
   -webkit-overflow-scrolling: touch;
 }
 
-#doc-content {
-  overflow-x: clip !important;
-}
+#doc-content {}
 
 #doc-content table {
-  max-width: 100%;
+  max-width: 90dvw;
   width: 100%;
   margin-bottom: 1.5rem;
   border-radius: var(--bs-border-radius-sm) !important;
