@@ -719,31 +719,31 @@ $ae(dialog).dialog.close(&quot;accepted&quot;);
 <tbody><tr>
 <td>Platform boundary</td>
 <td>Known Limit</td>
-<td><span style="white-space: normal !important;">Controllers forward show(), showModal() and close(), preserving native exceptions. They add neither animations nor recent APIs such as requestClose()/closedby.</span></td>
-<td><span style="white-space: normal !important;">Await mounting and use capabilities available in the native/fallback API.</span></td>
+<td><span class="large">Controllers forward show(), showModal() and close(), preserving native exceptions. They add neither animations nor recent APIs such as requestClose()/closedby.</span></td>
+<td><span class="large">Await mounting and use capabilities available in the native/fallback API.</span></td>
 </tr>
 <tr>
 <td>Fallback rendering</td>
 <td>Known Limit</td>
-<td><span style="white-space: normal !important;">The Legacy polyfill cannot reproduce the native top layer and is affected by ancestor stacking contexts. Native implementations are preserved, including with forced Legacy.</span></td>
-<td><span style="white-space: normal !important;">Prefer dialogs directly under body and style native and polyfill backdrops.</span></td>
+<td><span class="large">The Legacy polyfill cannot reproduce the native top layer and is affected by ancestor stacking contexts. Native implementations are preserved, including with forced Legacy.</span></td>
+<td><span class="large">Prefer dialogs directly under body and style native and polyfill backdrops.</span></td>
 </tr>
 <tr>
 <td>Lifetime</td>
 <td>Known Limit</td>
-<td><span style="white-space: normal !important;">Unmount releases controllers, while fallback registrations, CSS and the upstream manager remain for the document lifetime.</span></td>
-<td><span style="white-space: normal !important;">Do not treat Extension destruction as removing polyfilled methods or shared CSS.</span></td>
+<td><span class="large">Unmount releases controllers, while fallback registrations, CSS and the upstream manager remain for the document lifetime.</span></td>
+<td><span class="large">Do not treat Extension destruction as removing polyfilled methods or shared CSS.</span></td>
 </tr>
 <tr>
 <td>Integration</td>
 <td>Potential Risk</td>
-<td><span style="white-space: normal !important;">External CSS, competing modal/focus handlers and dynamic removal can change the usable dialog experience.</span></td>
-<td><span style="white-space: normal !important;">Provide accessible names and test Escape, cancel, forms and focus return with the actual integration.</span></td>
+<td><span class="large">External CSS, competing modal/focus handlers and dynamic removal can change the usable dialog experience.</span></td>
+<td><span class="large">Provide accessible names and test Escape, cancel, forms and focus return with the actual integration.</span></td>
 </tr>
 <tr>
 <td>Coverage</td>
 <td>Validation Gap</td>
-<td><span style="white-space: normal !important;">Tests cover missing/partial APIs, forwarding, dynamic roots, forms and lifecycle. They do not establish native/polyfill equivalence on historical browsers or physical mobile assistive technologies.</span></td>
+<td><span class="large">Tests cover missing/partial APIs, forwarding, dynamic roots, forms and lifecycle. They do not establish native/polyfill equivalence on historical browsers or physical mobile assistive technologies.</span></td>
 <td>Validate required devices and modal workflows directly.</td>
 </tr>
 </tbody></table>

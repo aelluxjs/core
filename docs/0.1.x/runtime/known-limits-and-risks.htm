@@ -654,19 +654,19 @@
 </thead>
 <tbody><tr>
 <td>Known Limit</td>
-<td><span style="white-space: normal !important;">A restriction established by the implementation or public contract.</span></td>
+<td><span class="large">A restriction established by the implementation or public contract.</span></td>
 </tr>
 <tr>
 <td>Potential Risk</td>
-<td><span style="white-space: normal !important;">An outcome that may occur under stated operating conditions; it is not a confirmed defect.</span></td>
+<td><span class="large">An outcome that may occur under stated operating conditions; it is not a confirmed defect.</span></td>
 </tr>
 <tr>
 <td>Validation Gap</td>
-<td><span style="white-space: normal !important;">A scenario whose reliability is not established by the available validation.</span></td>
+<td><span class="large">A scenario whose reliability is not established by the available validation.</span></td>
 </tr>
 <tr>
 <td>Known Issue</td>
-<td><span style="white-space: normal !important;">A reproducible defect, requiring an observed result and a regression test or issue reference when available. A missing test alone is not a Known Issue.</span></td>
+<td><span class="large">A reproducible defect, requiring an observed result and a regression test or issue reference when available. A missing test alone is not a Known Issue.</span></td>
 </tr>
 </tbody></table>
 <h2>Known Limits</h2>
@@ -691,19 +691,19 @@
 </tr>
 </thead>
 <tbody><tr>
-<td><span style="white-space: normal !important;">Many geometry consumers, large DOM subtrees, or frequent resize/scroll/mutations.</span></td>
-<td><span style="white-space: normal !important;">More measurements, callbacks, style calculation and layout work on the main thread.</span></td>
-<td><span style="white-space: normal !important;">Mount only needed behavior and profile representative content and input.</span></td>
+<td><span class="large">Many geometry consumers, large DOM subtrees, or frequent resize/scroll/mutations.</span></td>
+<td><span class="large">More measurements, callbacks, style calculation and layout work on the main thread.</span></td>
+<td><span class="large">Mount only needed behavior and profile representative content and input.</span></td>
 </tr>
 <tr>
-<td><span style="white-space: normal !important;">Expensive scheduled callbacks or unrelated application work.</span></td>
-<td><span style="white-space: normal !important;">Reduced publication cadence and delayed interaction feedback.</span></td>
-<td><span style="white-space: normal !important;">Keep callbacks bounded and avoid extra layout reads in event subscribers.</span></td>
+<td><span class="large">Expensive scheduled callbacks or unrelated application work.</span></td>
+<td><span class="large">Reduced publication cadence and delayed interaction feedback.</span></td>
+<td><span class="large">Keep callbacks bounded and avoid extra layout reads in event subscribers.</span></td>
 </tr>
 <tr>
-<td><span style="white-space: normal !important;">Effects change the same geometry that determines their input.</span></td>
-<td><span style="white-space: normal !important;">Feedback and repeated layout or paint work.</span></td>
-<td><span style="white-space: normal !important;">Separate structural measurement elements from visual effects.</span></td>
+<td><span class="large">Effects change the same geometry that determines their input.</span></td>
+<td><span class="large">Feedback and repeated layout or paint work.</span></td>
+<td><span class="large">Separate structural measurement elements from visual effects.</span></td>
 </tr>
 </tbody></table>
 <p><code>waitLayout</code> batches geometry reads and dependent writes; it cannot remove the cost of the requested operations or coordinate arbitrary work in other libraries. Its adaptive FPS policy, explicit ceilings and hidden-page suspension mean callbacks need not run every browser frame. Native CSS and compositor animation can progress between measurements. A resolved scheduled task describes that task&#39;s result, not a frame-perfect lock to the compositor or the final settlement of all future observer notifications. See <a href="wait-layout.htm">waitLayout</a> and <a href="css-motion.htm">CSS Motion</a>.</p>
@@ -733,23 +733,23 @@
 </thead>
 <tbody><tr>
 <td>Unit tests</td>
-<td><span style="white-space: normal !important;">Exercise the supplied helper logic and controlled environments; they do not establish rendered browser or device behavior.</span></td>
+<td><span class="large">Exercise the supplied helper logic and controlled environments; they do not establish rendered browser or device behavior.</span></td>
 </tr>
 <tr>
 <td>Playwright Chromium, Firefox and WebKit</td>
-<td><span style="white-space: normal !important;">Exercise current desktop engines and available capabilities. Capability skips remain gaps for the skipped paths; Chromium is not an installed Chrome/Edge test and WebKit is not full iOS Safari validation.</span></td>
+<td><span class="large">Exercise current desktop engines and available capabilities. Capability skips remain gaps for the skipped paths; Chromium is not an installed Chrome/Edge test and WebKit is not full iOS Safari validation.</span></td>
 </tr>
 <tr>
 <td>Forced Legacy</td>
-<td><span style="white-space: normal !important;">Exercises the Legacy distribution in current engines, without establishing historical-browser support.</span></td>
+<td><span class="large">Exercises the Legacy distribution in current engines, without establishing historical-browser support.</span></td>
 </tr>
 <tr>
 <td>Commercial browsers and physical devices</td>
-<td><span style="white-space: normal !important;">OS input, real mobile keyboards, touch/pen hardware, installation UI and visual viewport changes need direct validation beyond desktop emulation.</span></td>
+<td><span class="large">OS input, real mobile keyboards, touch/pen hardware, installation UI and visual viewport changes need direct validation beyond desktop emulation.</span></td>
 </tr>
 <tr>
 <td>Application integration</td>
-<td><span style="white-space: normal !important;">Screen readers, restrictive CSP deployments, heavy workloads, storage failure combinations and third-party asynchronous races require their own reproducible checks.</span></td>
+<td><span class="large">Screen readers, restrictive CSP deployments, heavy workloads, storage failure combinations and third-party asynchronous races require their own reproducible checks.</span></td>
 </tr>
 </tbody></table>
 <p>The unestablished scenarios above are <strong>Validation Gaps</strong>, not browser-specific Known Issues. Existing checks include lifecycle vetoes, async mounting/removal, resource integrity, storage-access fallback and several cross-Extension combinations. They do not cover every possible interleaving or deployment. Consult <a href="browser-support.htm">Browser support</a>, <a href="../compatibility.htm">Compatibility</a>, and <a href="../validation-scenarios.htm">Validation scenarios</a> for the current recorded scope. Test presence is distinct from a fresh successful run; preserve failures, infrastructure failures and capability skips as separate results.</p>

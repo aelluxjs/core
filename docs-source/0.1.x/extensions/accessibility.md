@@ -10,12 +10,12 @@ Describe an Extension with one or more capabilities. These categories may overla
 
 | Capability | Typical responsibility | Requirements that apply |
 | --- | --- | --- |
-| Interaction and input | <span style="white-space: normal !important;">Click, keyboard, pointer, drag, selection, or custom controls.</span> | <span style="white-space: normal !important;">Semantics, keyboard access, accessible names, focus, input alternatives, and state communication.</span> |
-| Structure and state | <span style="white-space: normal !important;">Show, hide, insert, remove, reorder, label, select, expand, or relate content.</span> | <span style="white-space: normal !important;">DOM order, semantic structure, ARIA or native state, relationships, focus safety, and announcements when needed.</span> |
-| Visual and adaptive presentation | <span style="white-space: normal !important;">Layout, theme, scale, contrast, color, viewport, or input-mode adaptation.</span> | <span style="white-space: normal !important;">Reflow, zoom, contrast, forced colors, reduced transparency, text and interface scale, and alternatives to color-only meaning.</span> |
-| Motion and timing | <span style="white-space: normal !important;">Animation, transition, automatic progression, delay, or dismissal.</span> | <span style="white-space: normal !important;">Reduced motion, interruption, timing controls, understandable state without animation, and timer cleanup.</span> |
-| External data and integration | <span style="white-space: normal !important;">Fetch, persistence, synchronization, embedded services, or third-party APIs.</span> | <span style="white-space: normal !important;">Pending and failure states when user-facing, recovery, stable focus, meaningful status communication, and asynchronous cleanup.</span> |
-| Infrastructure and policy | <span style="white-space: normal !important;">Diagnostics, scheduling, event routing, rules, registries, or services without direct UI.</span> | <span style="white-space: normal !important;">Preservation of existing semantics and state, predictable failure behavior, cleanup, and documentation of indirect UI effects.</span> |
+| Interaction and input | <span class="large">Click, keyboard, pointer, drag, selection, or custom controls.</span> | <span class="large">Semantics, keyboard access, accessible names, focus, input alternatives, and state communication.</span> |
+| Structure and state | <span class="large">Show, hide, insert, remove, reorder, label, select, expand, or relate content.</span> | <span class="large">DOM order, semantic structure, ARIA or native state, relationships, focus safety, and announcements when needed.</span> |
+| Visual and adaptive presentation | <span class="large">Layout, theme, scale, contrast, color, viewport, or input-mode adaptation.</span> | <span class="large">Reflow, zoom, contrast, forced colors, reduced transparency, text and interface scale, and alternatives to color-only meaning.</span> |
+| Motion and timing | <span class="large">Animation, transition, automatic progression, delay, or dismissal.</span> | <span class="large">Reduced motion, interruption, timing controls, understandable state without animation, and timer cleanup.</span> |
+| External data and integration | <span class="large">Fetch, persistence, synchronization, embedded services, or third-party APIs.</span> | <span class="large">Pending and failure states when user-facing, recovery, stable focus, meaningful status communication, and asynchronous cleanup.</span> |
+| Infrastructure and policy | <span class="large">Diagnostics, scheduling, event routing, rules, registries, or services without direct UI.</span> | <span class="large">Preservation of existing semantics and state, predictable failure behavior, cleanup, and documentation of indirect UI effects.</span> |
 
 Do not force an Extension into a single category. For example, a dialog behavior can declare interaction, structure and state, and motion. A background registry may declare only infrastructure and policy. A network synchronization Extension may declare external data and integration without declaring interaction.
 
@@ -40,17 +40,17 @@ Define the applicable fields on the Extension's page. State `Not applicable` wit
 | Field | Required definition |
 | --- | --- |
 | Capabilities | Every applicable category from the capability profile. |
-| Affected output | <span style="white-space: normal !important;">Elements, attributes, content, styles, events, stored values, or external results produced or changed.</span> |
-| Inputs and activation | <span style="white-space: normal !important;">Pointer, keyboard, programmatic, lifecycle, media-query, network, storage, or other triggers.</span> |
-| Semantic host | <span style="white-space: normal !important;">Expected native elements and any supported non-native host. Required when DOM semantics are affected.</span> |
-| Accessible name | <span style="white-space: normal !important;">Source of the visible label or accessible name for controls the Extension creates or owns.</span> |
-| State and relationships | <span style="white-space: normal !important;">Owned `aria-*`, `hidden`, disabled, selected, checked, expanded, busy, IDs, and references.</span> |
-| Focus | <span style="white-space: normal !important;">Whether focus can move, become hidden, require restoration, or remain unchanged.</span> |
-| Presentation | <span style="white-space: normal !important;">Effects on color, contrast, layout, zoom, text scale, interface scale, or forced colors.</span> |
-| Motion and timing | <span style="white-space: normal !important;">Transitions, delays, automatic actions, dismissal, and relevant user preferences.</span> |
-| Pending, success, and failure | <span style="white-space: normal !important;">User-visible behavior while asynchronous or external work is pending, succeeds, or fails.</span> |
-| Announcements | <span style="white-space: normal !important;">Changes that require notification beyond native semantics, focus, or control state.</span> |
-| Lifecycle cleanup | <span style="white-space: normal !important;">Attributes, listeners, timers, requests, observers, generated content, relationships, and references released during cleanup.</span> |
+| Affected output | <span class="large">Elements, attributes, content, styles, events, stored values, or external results produced or changed.</span> |
+| Inputs and activation | <span class="large">Pointer, keyboard, programmatic, lifecycle, media-query, network, storage, or other triggers.</span> |
+| Semantic host | <span class="large">Expected native elements and any supported non-native host. Required when DOM semantics are affected.</span> |
+| Accessible name | <span class="large">Source of the visible label or accessible name for controls the Extension creates or owns.</span> |
+| State and relationships | <span class="large">Owned `aria-*`, `hidden`, disabled, selected, checked, expanded, busy, IDs, and references.</span> |
+| Focus | <span class="large">Whether focus can move, become hidden, require restoration, or remain unchanged.</span> |
+| Presentation | <span class="large">Effects on color, contrast, layout, zoom, text scale, interface scale, or forced colors.</span> |
+| Motion and timing | <span class="large">Transitions, delays, automatic actions, dismissal, and relevant user preferences.</span> |
+| Pending, success, and failure | <span class="large">User-visible behavior while asynchronous or external work is pending, succeeds, or fails.</span> |
+| Announcements | <span class="large">Changes that require notification beyond native semantics, focus, or control state.</span> |
+| Lifecycle cleanup | <span class="large">Attributes, listeners, timers, requests, observers, generated content, relationships, and references released during cleanup.</span> |
 | Limitations | Any relevant scenario that has not been validated. |
 
 ## Capability-Specific Behavior
@@ -138,12 +138,12 @@ Validate the universal requirements and each declared capability. Tests or docum
 
 | Capability | Minimum validation |
 | --- | --- |
-| Interaction and input | <span style="white-space: normal !important;">Keyboard activation, Tab order, input alternatives, accessible names, and owned control state.</span> |
-| Structure and state | <span style="white-space: normal !important;">DOM and reading order, focus safety, synchronized native or ARIA state, valid relationships, and necessary announcements.</span> |
-| Visual and adaptive presentation | <span style="white-space: normal !important;">Zoom, text and interface scale, contrast, forced colors, reflow, and absence of color-only meaning where affected.</span> |
-| Motion and timing | <span style="white-space: normal !important;">Reduced motion, disabled animation, interruption, timing control, and cleanup.</span> |
-| External data and integration | <span style="white-space: normal !important;">Pending, success, failure, cancellation, stale responses, focus stability, and cleanup.</span> |
-| Infrastructure and policy | <span style="white-space: normal !important;">Stable contracts, failure isolation, indirect state effects, cleanup, and diagnostics behavior.</span> |
+| Interaction and input | <span class="large">Keyboard activation, Tab order, input alternatives, accessible names, and owned control state.</span> |
+| Structure and state | <span class="large">DOM and reading order, focus safety, synchronized native or ARIA state, valid relationships, and necessary announcements.</span> |
+| Visual and adaptive presentation | <span class="large">Zoom, text and interface scale, contrast, forced colors, reflow, and absence of color-only meaning where affected.</span> |
+| Motion and timing | <span class="large">Reduced motion, disabled animation, interruption, timing control, and cleanup.</span> |
+| External data and integration | <span class="large">Pending, success, failure, cancellation, stale responses, focus stability, and cleanup.</span> |
+| Infrastructure and policy | <span class="large">Stable contracts, failure isolation, indirect state effects, cleanup, and diagnostics behavior.</span> |
 
 Also validate failed initialization or mounting, repeated lifecycle execution, and the Modern or Legacy environments claimed by the Extension when those lifecycle paths exist.
 

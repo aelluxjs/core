@@ -698,43 +698,43 @@ gallery.previous();
 <tbody><tr>
 <td>Dependency</td>
 <td>Known Limit</td>
-<td><span style="white-space: normal !important;">Snap waits for Scrollbox and mounts after its base map. It needs the Scrollbox declaration and CSS; a filtered mount omitting the base element behavior does not satisfy that contract.</span></td>
-<td><span style="white-space: normal !important;">Mount both behaviors together and include Scrollbox styles in Basic.</span></td>
+<td><span class="large">Snap waits for Scrollbox and mounts after its base map. It needs the Scrollbox declaration and CSS; a filtered mount omitting the base element behavior does not satisfy that contract.</span></td>
+<td><span class="large">Mount both behaviors together and include Scrollbox styles in Basic.</span></td>
 </tr>
 <tr>
 <td>Native alignment</td>
 <td>Known Limit</td>
-<td><span style="white-space: normal !important;">Oversized snap areas allow free native scrolling while covering the viewport. Touch fling and CSS Scroll Snap remain browser behavior, rather than scripted desktop flick navigation.</span></td>
-<td><span style="white-space: normal !important;">Use viewport-sized items when every release must align to one point.</span></td>
+<td><span class="large">Oversized snap areas allow free native scrolling while covering the viewport. Touch fling and CSS Scroll Snap remain browser behavior, rather than scripted desktop flick navigation.</span></td>
+<td><span class="large">Use viewport-sized items when every release must align to one point.</span></td>
 </tr>
 <tr>
 <td>Outputs</td>
 <td>Known Limit</td>
-<td><span style="white-space: normal !important;">Snap publishes alignment proximity as --ae-snap-focus. Normalized position and visible area belong to the independent Viewport Extension.</span></td>
-<td><span style="white-space: normal !important;">Follow Position migration when replacing --ae-snap-viewport.</span></td>
+<td><span class="large">Snap publishes alignment proximity as --ae-snap-focus. Normalized position and visible area belong to the independent Viewport Extension.</span></td>
+<td><span class="large">Follow Position migration when replacing --ae-snap-viewport.</span></td>
 </tr>
 <tr>
 <td>Completion</td>
 <td>Known Limit</td>
-<td><span style="white-space: normal !important;">Navigation methods return a boolean for an available request, not a Promise for settled scrolling. New input interrupts pending navigation; settle notifications describe actual selection.</span></td>
-<td><span style="white-space: normal !important;">Use ScrollboxSnapChange for selection changes; true does not mean completed travel.</span></td>
+<td><span class="large">Navigation methods return a boolean for an available request, not a Promise for settled scrolling. New input interrupts pending navigation; settle notifications describe actual selection.</span></td>
+<td><span class="large">Use ScrollboxSnapChange for selection changes; true does not mean completed travel.</span></td>
 </tr>
 <tr>
 <td>Wheel/geometry</td>
 <td>Potential Risk</td>
-<td><span style="white-space: normal !important;">Noncancelable wheel events keep native behavior. Item transforms, fractional positions and dynamic layout can change alignment while navigation is pending.</span></td>
-<td><span style="white-space: normal !important;">Animate item descendants, await layout changes and check final selection after interruption.</span></td>
+<td><span class="large">Noncancelable wheel events keep native behavior. Item transforms, fractional positions and dynamic layout can change alignment while navigation is pending.</span></td>
+<td><span class="large">Animate item descendants, await layout changes and check final selection after interruption.</span></td>
 </tr>
 <tr>
 <td>Observation cost</td>
 <td>Potential Risk</td>
-<td><span style="white-space: normal !important;">Scroll updates visit eligible item rectangles; item resize and membership changes refresh state. Large item sets increase measurement and observation work.</span></td>
-<td><span style="white-space: normal !important;">Limit mounted snap items and profile realistic scrolling.</span></td>
+<td><span class="large">Scroll updates visit eligible item rectangles; item resize and membership changes refresh state. Large item sets increase measurement and observation work.</span></td>
+<td><span class="large">Limit mounted snap items and profile realistic scrolling.</span></td>
 </tr>
 <tr>
 <td>Coverage</td>
 <td>Validation Gap</td>
-<td><span style="white-space: normal !important;">Release, regrab, nested-wheel and fractional movement paths have fixtures. Physical touch/trackpad sequences and advanced RTL/transformed dynamic layouts need application validation.</span></td>
+<td><span class="large">Release, regrab, nested-wheel and fractional movement paths have fixtures. Physical touch/trackpad sequences and advanced RTL/transformed dynamic layouts need application validation.</span></td>
 <td>Test actual devices and axis/direction combinations.</td>
 </tr>
 </tbody></table>

@@ -695,38 +695,38 @@ $ae.dispatch(&quot;UpdateBaseTitle&quot;, {
 <tbody><tr>
 <td>State model</td>
 <td>Known Limit</td>
-<td><span style="white-space: normal !important;">Snapshots serialize through URLSearchParams and use history/hash, not durable application storage. Reload reconstructs hash data when enabled; it does not restore arbitrary component memory or form state.</span></td>
-<td><span style="white-space: normal !important;">Store serializable navigation keys and implement application restoration separately.</span></td>
+<td><span class="large">Snapshots serialize through URLSearchParams and use history/hash, not durable application storage. Reload reconstructs hash data when enabled; it does not restore arbitrary component memory or form state.</span></td>
+<td><span class="large">Store serializable navigation keys and implement application restoration separately.</span></td>
 </tr>
 <tr>
 <td>History ownership</td>
 <td>Potential Risk</td>
-<td><span style="white-space: normal !important;">Only marked Aellux popstate entries are restored. Current-entry replacement merges external fields, but a newly pushed entry does not promise to copy another router state.</span></td>
-<td><span style="white-space: normal !important;">Coordinate history and title ownership rather than interleaving independent writers.</span></td>
+<td><span class="large">Only marked Aellux popstate entries are restored. Current-entry replacement merges external fields, but a newly pushed entry does not promise to copy another router state.</span></td>
+<td><span class="large">Coordinate history and title ownership rather than interleaving independent writers.</span></td>
 </tr>
 <tr>
 <td>Restoration</td>
 <td>Known Limit</td>
-<td><span style="white-space: normal !important;">SnapshotRestore publishes state after title/snapshot updates; it does not itself mount or render UI. Ajax replacement requires the separately loaded Ajax Href consumer.</span></td>
-<td><span style="white-space: normal !important;">Load consumers before relying on commands and handle their asynchronous completion.</span></td>
+<td><span class="large">SnapshotRestore publishes state after title/snapshot updates; it does not itself mount or render UI. Ajax replacement requires the separately loaded Ajax Href consumer.</span></td>
+<td><span class="large">Load consumers before relying on commands and handle their asynchronous completion.</span></td>
 </tr>
 <tr>
 <td>Iframe scope</td>
 <td>Known Limit</td>
-<td><span style="white-space: normal !important;">Each window has its own snapshot and handlers. The Extension is not a cross-origin state-sharing or message-routing layer.</span></td>
-<td><span style="white-space: normal !important;">Implement explicit, origin-checked communication when parent and frame must coordinate.</span></td>
+<td><span class="large">Each window has its own snapshot and handlers. The Extension is not a cross-origin state-sharing or message-routing layer.</span></td>
+<td><span class="large">Implement explicit, origin-checked communication when parent and frame must coordinate.</span></td>
 </tr>
 <tr>
 <td>History volume</td>
 <td>Potential Risk</td>
-<td><span style="white-space: normal !important;">Frequent non-silent updates create navigation entries and trigger subscribers. Browser history limits and application listener costs remain relevant.</span></td>
-<td><span style="white-space: normal !important;">Use silent replacement for transient state and keep secrets out of URL hashes.</span></td>
+<td><span class="large">Frequent non-silent updates create navigation entries and trigger subscribers. Browser history limits and application listener costs remain relevant.</span></td>
+<td><span class="large">Use silent replacement for transient state and keep secrets out of URL hashes.</span></td>
 </tr>
 <tr>
 <td>Coverage</td>
 <td>Validation Gap</td>
-<td><span style="white-space: normal !important;">Tests cover marked state, copied details and same-origin parent/iframe traversal. Reload/session recovery and coordination with cross-origin frames or independent routers need additional checks.</span></td>
-<td><span style="white-space: normal !important;">Validate the intended navigation topology and refresh behavior.</span></td>
+<td><span class="large">Tests cover marked state, copied details and same-origin parent/iframe traversal. Reload/session recovery and coordination with cross-origin frames or independent routers need additional checks.</span></td>
+<td><span class="large">Validate the intended navigation topology and refresh behavior.</span></td>
 </tr>
 </tbody></table>
 <p>Evidence: <a href="https://github.com/aelluxjs/core/blob/update/beta.10/src/aellux.ext.state-navigation.js">Implementation</a>, <a href="https://github.com/aelluxjs/core/blob/update/beta.10/tests/browser/scenarios.spec.mjs">scenarios.spec.mjs</a>, <a href="https://github.com/aelluxjs/core/blob/update/beta.10/tests/browser/state-navigation-iframe.spec.mjs">state-navigation-iframe.spec.mjs</a>.</p>

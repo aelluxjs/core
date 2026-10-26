@@ -667,8 +667,8 @@
 </tr>
 <tr>
 <td><code>warn()</code></td>
-<td><span style="white-space: normal !important;">The system can continue, but a limitation or unexpected condition needs attention.</span></td>
-<td><span style="white-space: normal !important;">A browser capability is missing and the Legacy runtime will be used.</span></td>
+<td><span class="large">The system can continue, but a limitation or unexpected condition needs attention.</span></td>
+<td><span class="large">A browser capability is missing and the Legacy runtime will be used.</span></td>
 </tr>
 <tr>
 <td><code>info()</code></td>
@@ -751,15 +751,15 @@ $ae.init({ environment: &quot;production&quot;, verboseLevel: &quot;warn&quot; }
 </thead>
 <tbody><tr>
 <td><code>2020</code></td>
-<td><span style="white-space: normal !important;">An effective CSS transform is applied directly to a Snap item. Apply visual transforms to its children instead.</span></td>
+<td><span class="large">An effective CSS transform is applied directly to a Snap item. Apply visual transforms to its children instead.</span></td>
 </tr>
 <tr>
 <td><code>2024</code></td>
-<td><span style="white-space: normal !important;">Likely misspelled Aellux attribute, with a suggested spelling.</span></td>
+<td><span class="large">Likely misspelled Aellux attribute, with a suggested spelling.</span></td>
 </tr>
 <tr>
 <td><code>2025</code></td>
-<td><span style="white-space: normal !important;">Declared behavior requires an Extension that is not initialized.</span></td>
+<td><span class="large">Declared behavior requires an Extension that is not initialized.</span></td>
 </tr>
 <tr>
 <td><code>2026</code></td>
@@ -767,31 +767,31 @@ $ae.init({ environment: &quot;production&quot;, verboseLevel: &quot;warn&quot; }
 </tr>
 <tr>
 <td><code>2027</code></td>
-<td><span style="white-space: normal !important;">Missing/incompatible target, unmeasurable explicitly updated Anchor target, or invalid/missing AJAX selector.</span></td>
+<td><span class="large">Missing/incompatible target, unmeasurable explicitly updated Anchor target, or invalid/missing AJAX selector.</span></td>
 </tr>
 <tr>
 <td><code>2028</code></td>
-<td><span style="white-space: normal !important;">Snap without Scrollbox, an orphan Snap item, a misplaced Elastic wrapper, or PWA without a manifest link/nonempty <code>href</code>.</span></td>
+<td><span class="large">Snap without Scrollbox, an orphan Snap item, a misplaced Elastic wrapper, or PWA without a manifest link/nonempty <code>href</code>.</span></td>
 </tr>
 <tr>
 <td><code>2029</code></td>
-<td><span style="white-space: normal !important;">Present trigger/dismiss control is not reachable with the keyboard.</span></td>
+<td><span class="large">Present trigger/dismiss control is not reachable with the keyboard.</span></td>
 </tr>
 <tr>
 <td><code>2030</code></td>
-<td><span style="white-space: normal !important;">Effective CSS blocks requested layout/scrolling, or a motion duration is invalid.</span></td>
+<td><span class="large">Effective CSS blocks requested layout/scrolling, or a motion duration is invalid.</span></td>
 </tr>
 <tr>
 <td><code>2031</code></td>
-<td><span style="white-space: normal !important;">Present and Anchor both request transform on one element. Anchor takes priority; remove the Present transform token or animate a child.</span></td>
+<td><span class="large">Present and Anchor both request transform on one element. Anchor takes priority; remove the Present transform token or animate a child.</span></td>
 </tr>
 <tr>
 <td><code>2032</code></td>
-<td><span style="white-space: normal !important;">Duplicate HTML attributes on one start tag; the browser keeps the first value and discards subsequent values. Includes <code>class</code>, <code>style</code>, native and custom attributes.</span></td>
+<td><span class="large">Duplicate HTML attributes on one start tag; the browser keeps the first value and discards subsequent values. Includes <code>class</code>, <code>style</code>, native and custom attributes.</span></td>
 </tr>
 <tr>
 <td><code>2033</code></td>
-<td><span style="white-space: normal !important;">Behaviors replace the same CSS resource on one element. The context identifies the <code>property</code> and its <code>writers</code>.</span></td>
+<td><span class="large">Behaviors replace the same CSS resource on one element. The context identifies the <code>property</code> and its <code>writers</code>.</span></td>
 </tr>
 </tbody></table>
 <p><code>WARN_RESOURCE_CONFLICT</code> (<code>2033</code>) checks persistent transform writers without a separate ownership registry. Development mounts and explicit updates diagnose Present transform on a valid Elastic wrapper. When CSS Motion captures an actual replacing transform effect, it compares that effect with Anchor, Elastic and Present on the effect&#39;s target. Feedback passes its resolved <code>data-ae-target-transform</code> destination, so animating a child remains valid. This works with controlled and native CSS Motion when Web Animations exposes keyframes. Opacity-only effects, additive composition, pseudo-elements and separate targets are excluded. Reduced motion with no active effect emits no motion conflict. Browsers without inspectable effects skip this runtime check; production skips all resource checks.</p>

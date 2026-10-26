@@ -697,32 +697,32 @@
 <tbody><tr>
 <td>Geometry</td>
 <td>Known Limit</td>
-<td><span style="white-space: normal !important;">ResizeObserver supplies content-box sizes; the fallback reads bounding rectangles, including borders and transforms. Hidden or zero-sized content has no useful responsive dimensions.</span></td>
-<td><span style="white-space: normal !important;">Use measurable structural elements and verify the box model for the active observation path.</span></td>
+<td><span class="large">ResizeObserver supplies content-box sizes; the fallback reads bounding rectangles, including borders and transforms. Hidden or zero-sized content has no useful responsive dimensions.</span></td>
+<td><span class="large">Use measurable structural elements and verify the box model for the active observation path.</span></td>
 </tr>
 <tr>
 <td>Refresh</td>
 <td>Known Limit</td>
-<td><span style="white-space: normal !important;">Without ResizeObserver, initial mounting and window resize trigger measurements. Element-only CSS changes have no dedicated observer or mounted update handler.</span></td>
-<td><span style="white-space: normal !important;">Trigger the window resize fallback after undetected size changes; mountManager.update() does not measure Adaptive.</span></td>
+<td><span class="large">Without ResizeObserver, initial mounting and window resize trigger measurements. Element-only CSS changes have no dedicated observer or mounted update handler.</span></td>
+<td><span class="large">Trigger the window resize fallback after undetected size changes; mountManager.update() does not measure Adaptive.</span></td>
 </tr>
 <tr>
 <td>Configuration</td>
 <td>Known Limit</td>
-<td><span style="white-space: normal !important;">Parameters freeze at initialization. Fit classes use sqrt(width * height); experienceScale is currently unused. Invalid values follow the Configuration fallbacks.</span></td>
-<td><span style="white-space: normal !important;">Configure thresholds before initialization and use the documented area-based metric.</span></td>
+<td><span class="large">Parameters freeze at initialization. Fit classes use sqrt(width * height); experienceScale is currently unused. Invalid values follow the Configuration fallbacks.</span></td>
+<td><span class="large">Configure thresholds before initialization and use the documented area-based metric.</span></td>
 </tr>
 <tr>
 <td>Layout feedback</td>
 <td>Potential Risk</td>
-<td><span style="white-space: normal !important;">Styles consuming shape/fit classes can change the observed size and repeatedly cross thresholds. Many changing targets increase callback and layout work.</span></td>
-<td><span style="white-space: normal !important;">Avoid size rules that toggle their own threshold and profile responsive workloads.</span></td>
+<td><span class="large">Styles consuming shape/fit classes can change the observed size and repeatedly cross thresholds. Many changing targets increase callback and layout work.</span></td>
+<td><span class="large">Avoid size rules that toggle their own threshold and profile responsive workloads.</span></td>
 </tr>
 <tr>
 <td>Coverage</td>
 <td>Validation Gap</td>
-<td><span style="white-space: normal !important;">Existing cases check resizing, the window fallback, configuration and restoration; they do not establish every hidden/revealed, zoom or transformed-box combination.</span></td>
-<td><span style="white-space: normal !important;">Validate those combinations before depending on exact threshold transitions.</span></td>
+<td><span class="large">Existing cases check resizing, the window fallback, configuration and restoration; they do not establish every hidden/revealed, zoom or transformed-box combination.</span></td>
+<td><span class="large">Validate those combinations before depending on exact threshold transitions.</span></td>
 </tr>
 </tbody></table>
 <p>Evidence: <a href="https://github.com/aelluxjs/core/blob/update/beta.10/src/aellux.ext.adaptive.js">Implementation</a>, <a href="https://github.com/aelluxjs/core/blob/update/beta.10/tests/browser/adaptive.spec.mjs">adaptive.spec.mjs</a>.</p>

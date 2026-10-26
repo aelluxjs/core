@@ -767,44 +767,44 @@ await $ae(&quot;views&quot;).present.show(&quot;home&quot;);
 <tbody><tr>
 <td>Logical/visual state</td>
 <td>Known Limit</td>
-<td><span style="white-space: normal !important;">Accepted group selection and trigger expanded state can precede visual completion. Outgoing and incoming members may be visible together; completion order is not guaranteed.</span></td>
-<td><span style="white-space: normal !important;">Query selected() for logical membership and await show() for a completed current selection.</span></td>
+<td><span class="large">Accepted group selection and trigger expanded state can precede visual completion. Outgoing and incoming members may be visible together; completion order is not guaranteed.</span></td>
+<td><span class="large">Query selected() for logical membership and await show() for a completed current selection.</span></td>
 </tr>
 <tr>
 <td>Interruption</td>
 <td>Known Limit</td>
-<td><span style="white-space: normal !important;">Superseded transitions do not publish obsolete successful completion. Standalone pop() restarts from hidden; toggle(..., true) and group opening follow their documented idempotent behavior.</span></td>
-<td><span style="white-space: normal !important;">Choose the matching API and handle false from invalid, refused or superseded group show() requests.</span></td>
+<td><span class="large">Superseded transitions do not publish obsolete successful completion. Standalone pop() restarts from hidden; toggle(..., true) and group opening follow their documented idempotent behavior.</span></td>
+<td><span class="large">Choose the matching API and handle false from invalid, refused or superseded group show() requests.</span></td>
 </tr>
 <tr>
 <td>Progress</td>
 <td>Known Limit</td>
-<td><span style="white-space: normal !important;">Interpolation requires successful property/phase registration and clamp support. Missing or duplicate registration selects bounded discrete endpoints while visual transitions remain available.</span></td>
-<td><span style="white-space: normal !important;">Validate the registration path before requiring continuous progress; see Present Progress.</span></td>
+<td><span class="large">Interpolation requires successful property/phase registration and clamp support. Missing or duplicate registration selects bounded discrete endpoints while visual transitions remain available.</span></td>
+<td><span class="large">Validate the registration path before requiring continuous progress; see Present Progress.</span></td>
 </tr>
 <tr>
 <td>CSS ownership</td>
 <td>Potential Risk</td>
-<td><span style="white-space: normal !important;">Present owns hidden and presentation state. Anchor owns a shared element transform; other replacing transform writers can still compete. External hidden/style changes can conflict with transitions.</span></td>
-<td><span style="white-space: normal !important;">Apply independent transforms to descendants and coordinate visibility through the mounted API.</span></td>
+<td><span class="large">Present owns hidden and presentation state. Anchor owns a shared element transform; other replacing transform writers can still compete. External hidden/style changes can conflict with transitions.</span></td>
+<td><span class="large">Apply independent transforms to descendants and coordinate visibility through the mounted API.</span></td>
 </tr>
 <tr>
 <td>Layout cost</td>
 <td>Potential Risk</td>
-<td><span style="white-space: normal !important;">Size transitions without a direct motion child measure dimensions; many simultaneous transitions or changing content add layout work.</span></td>
-<td><span style="white-space: normal !important;">Use the motion-child strategy where appropriate and profile real content changes.</span></td>
+<td><span class="large">Size transitions without a direct motion child measure dimensions; many simultaneous transitions or changing content add layout work.</span></td>
+<td><span class="large">Use the motion-child strategy where appropriate and profile real content changes.</span></td>
 </tr>
 <tr>
 <td>Semantics</td>
 <td>Known Limit</td>
-<td><span style="white-space: normal !important;">Groups add no tabs/dialog roles. Focus is released when closing hides the active element; restoration relies on Focus or application integration.</span></td>
-<td><span style="white-space: normal !important;">Provide the semantics, keyboard behavior, reduced-motion styles and focus destination required by the UI pattern.</span></td>
+<td><span class="large">Groups add no tabs/dialog roles. Focus is released when closing hides the active element; restoration relies on Focus or application integration.</span></td>
+<td><span class="large">Provide the semantics, keyboard behavior, reduced-motion styles and focus destination required by the UI pattern.</span></td>
 </tr>
 <tr>
 <td>Coverage</td>
 <td>Validation Gap</td>
-<td><span style="white-space: normal !important;">Tests exercise group vetoes, reversal, ARIA, progress fallbacks and tap/click routing. Real assistive-technology workflows and physical hover/touch hybrids are not established by desktop fixtures.</span></td>
-<td><span style="white-space: normal !important;">Validate the UI pattern and devices beyond DOM/ARIA assertions.</span></td>
+<td><span class="large">Tests exercise group vetoes, reversal, ARIA, progress fallbacks and tap/click routing. Real assistive-technology workflows and physical hover/touch hybrids are not established by desktop fixtures.</span></td>
+<td><span class="large">Validate the UI pattern and devices beyond DOM/ARIA assertions.</span></td>
 </tr>
 </tbody></table>
 <p>Evidence: <a href="https://github.com/aelluxjs/core/blob/update/beta.10/src/aellux.ext.present.js">Implementation</a>, <a href="https://github.com/aelluxjs/core/blob/update/beta.10/tests/browser/present-enhancements.spec.mjs">present-enhancements.spec.mjs</a>, <a href="https://github.com/aelluxjs/core/blob/update/beta.10/tests/browser/present-aria.spec.mjs">present-aria.spec.mjs</a>, <a href="https://github.com/aelluxjs/core/blob/update/beta.10/tests/browser/present-tap.spec.mjs">present-tap.spec.mjs</a>.</p>

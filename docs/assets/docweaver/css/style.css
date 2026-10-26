@@ -558,6 +558,10 @@ p {
   background-color: rgba(var(--bs-body-color-rgb), 2%);
 }
 
+#doc-content span.large {
+  white-space: normal !important;
+}
+
 #doc-content table th,
 #doc-content table td {
   white-space: nowrap;
@@ -566,4 +570,11 @@ p {
   /*border-inline-start: var(--bs-border-width) var(--bs-border-style) var(--bs-border-color) !important;
   border-inline-end: var(--bs-border-width) var(--bs-border-style) var(--bs-border-color) !important;*/
   line-height: 1.5;
+}
+
+#doc-content table span.large {
+  white-space: normal !important;
+  display: inline-block;
+  min-width: 250px;
+  max-width: 400px;
 }

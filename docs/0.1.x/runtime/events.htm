@@ -769,27 +769,27 @@ $ae.offEvent(window, &quot;$resize&quot;, onResize);
 </tr>
 <tr>
 <td><code>AelluxJsBeforeMount</code></td>
-<td><span style="white-space: normal !important;">Cancelable before a valid mount pass changes waiting state, processes declarative links, loads Extensions or invokes mount callbacks.</span></td>
+<td><span class="large">Cancelable before a valid mount pass changes waiting state, processes declarative links, loads Extensions or invokes mount callbacks.</span></td>
 </tr>
 <tr>
 <td><code>AelluxJsMount</code></td>
-<td><span style="white-space: normal !important;">A valid mount pass finishes. It can also fire when the pass finds no new elements.</span></td>
+<td><span class="large">A valid mount pass finishes. It can also fire when the pass finds no new elements.</span></td>
 </tr>
 <tr>
 <td><code>AelluxJsReady</code></td>
-<td><span style="white-space: normal !important;">Startup completes its initial mount pass. The orchestrator is available, although individual Extensions or elements may have failed to mount.</span></td>
+<td><span class="large">Startup completes its initial mount pass. The orchestrator is available, although individual Extensions or elements may have failed to mount.</span></td>
 </tr>
 <tr>
 <td><code>AelluxJsBeforeUnmount</code></td>
-<td><span style="white-space: normal !important;">Cancelable before a valid unmount pass invokes cleanup callbacks or removes registrations and controllers.</span></td>
+<td><span class="large">Cancelable before a valid unmount pass invokes cleanup callbacks or removes registrations and controllers.</span></td>
 </tr>
 <tr>
 <td><code>AelluxJsUnmount</code></td>
-<td><span style="white-space: normal !important;">A valid unmount pass finishes. It can also fire when no matching elements were mounted.</span></td>
+<td><span class="large">A valid unmount pass finishes. It can also fire when no matching elements were mounted.</span></td>
 </tr>
 <tr>
 <td><code>AelluxJsUpdate</code></td>
-<td><span style="white-space: normal !important;">A valid <code>$ae.mountManager.update(...)</code> pass finishes after awaiting the matching mounted <code>update</code> callbacks. It also fires if no matching callback exists.</span></td>
+<td><span class="large">A valid <code>$ae.mountManager.update(...)</code> pass finishes after awaiting the matching mounted <code>update</code> callbacks. It also fires if no matching callback exists.</span></td>
 </tr>
 </tbody></table>
 <p>These lifecycle events are dispatched on <code>document</code>. <code>Mount</code>, <code>Unmount</code>, and <code>Update</code> carry <code>detail: { root, extensions, elements }</code>. <code>root</code> is the resolved root of the pass, <code>extensions</code> is the selected name array or <code>null</code> for all Extensions, and <code>elements</code> contains distinct elements actually mounted, unmounted, or passed to an <code>update</code> callback. An update callback that throws still counts as invoked. The array is empty for a pass with no affected elements. An invalid root does not start a pass or dispatch its event. <code>$ae(element).update()</code> and an Extension controller&#39;s <code>update()</code> use this same mount manager. For a size update on one Adaptive element, listen for <code>AelluxJsAdaptiveUpdate</code> instead.</p>
@@ -829,32 +829,32 @@ await $ae.mountManager.update(document.getElementById(&quot;panel&quot;));
 <tr>
 <td>Viewport</td>
 <td><code>AelluxJsViewportChange</code></td>
-<td><span style="white-space: normal !important;">Observed element; bubbling, composed and noncancelable. First measurable publication, then relevant geometry/reference changes, including loss and recovery of measurability. <code>detail</code> is <code>{ viewport, x1, y1, x2, y2, x, y, visible, state, measurable, previous, initial }</code>. Coordinates are unclamped, physical and always include both axes. CSS positions remain clamped. <code>previous</code> is an independent snapshot; initial unknown geometry is silent.</span></td>
+<td><span class="large">Observed element; bubbling, composed and noncancelable. First measurable publication, then relevant geometry/reference changes, including loss and recovery of measurability. <code>detail</code> is <code>{ viewport, x1, y1, x2, y2, x, y, visible, state, measurable, previous, initial }</code>. Coordinates are unclamped, physical and always include both axes. CSS positions remain clamped. <code>previous</code> is an independent snapshot; initial unknown geometry is silent.</span></td>
 </tr>
 <tr>
 <td>Viewport</td>
 <td><code>AelluxJsViewportFullyInside</code>, <code>AelluxJsViewportFullyOutside</code></td>
-<td><span style="white-space: normal !important;">Same target, propagation and payload as Change. Emitted after Change only on entry into <code>inside</code> (all edges contained, inclusive) or <code>outside</code> (no positive-area intersection), including an initial matching measurable state. Unknown geometry uses null coordinates/state and never generates a Fully event; unmount/destroy do not imply FullyOutside. See <a href="../core-extensions/optional/viewport.htm#viewport-events">Viewport Events</a> for ordering, tolerance and scheduling limits.</span></td>
+<td><span class="large">Same target, propagation and payload as Change. Emitted after Change only on entry into <code>inside</code> (all edges contained, inclusive) or <code>outside</code> (no positive-area intersection), including an initial matching measurable state. Unknown geometry uses null coordinates/state and never generates a Fully event; unmount/destroy do not imply FullyOutside. See <a href="../core-extensions/optional/viewport.htm#viewport-events">Viewport Events</a> for ordering, tolerance and scheduling limits.</span></td>
 </tr>
 <tr>
 <td>Feedback</td>
 <td><code>AelluxJsFeedback</code></td>
-<td><span style="white-space: normal !important;">Feedback target, or <code>document</code>; <code>detail</code> is <code>{ type, message, value, target, motion }</code>. The event is cancelable. A matching mounted feedback boundary stops propagation.</span></td>
+<td><span class="large">Feedback target, or <code>document</code>; <code>detail</code> is <code>{ type, message, value, target, motion }</code>. The event is cancelable. A matching mounted feedback boundary stops propagation.</span></td>
 </tr>
 <tr>
 <td>Point</td>
-<td><span style="white-space: normal !important;"><code>AelluxJsPointerDown</code>, <code>AelluxJsPointerMove</code>, <code>AelluxJsPointerUp</code>, <code>AelluxJsPointerCancel</code>, <code>AelluxJsPointerHover</code></span></td>
-<td><span style="white-space: normal !important;">Selected element; <code>detail</code> includes <code>pointer</code>, <code>target</code>, <code>pressStart</code>, <code>originalEvent</code>, and <code>hover</code>. These events do <strong>not</strong> bubble.</span></td>
+<td><span class="large"><code>AelluxJsPointerDown</code>, <code>AelluxJsPointerMove</code>, <code>AelluxJsPointerUp</code>, <code>AelluxJsPointerCancel</code>, <code>AelluxJsPointerHover</code></span></td>
+<td><span class="large">Selected element; <code>detail</code> includes <code>pointer</code>, <code>target</code>, <code>pressStart</code>, <code>originalEvent</code>, and <code>hover</code>. These events do <strong>not</strong> bubble.</span></td>
 </tr>
 <tr>
 <td>Point</td>
 <td><code>AelluxJsTap</code></td>
-<td><span style="white-space: normal !important;">Eligible mounted button, link or role button; bubbling and composed. <code>detail</code> is <code>{ pointerType, pointerId, duration, distance, originalEvent }</code>. Emitted on a valid short primary release, independently of native click and scroll.</span></td>
+<td><span class="large">Eligible mounted button, link or role button; bubbling and composed. <code>detail</code> is <code>{ pointerType, pointerId, duration, distance, originalEvent }</code>. Emitted on a valid short primary release, independently of native click and scroll.</span></td>
 </tr>
 <tr>
 <td>Preference</td>
 <td><code>AelluxJsPreferencesChange</code></td>
-<td><span style="white-space: normal !important;"><code>document</code>; <code>detail</code> is <code>{ changed, preferences }</code>, with a changed-key array and a snapshot of current values. <code>changed</code> can be empty.</span></td>
+<td><span class="large"><code>document</code>; <code>detail</code> is <code>{ changed, preferences }</code>, with a changed-key array and a snapshot of current values. <code>changed</code> can be empty.</span></td>
 </tr>
 <tr>
 <td>Present</td>
@@ -863,48 +863,48 @@ await $ae.mountManager.update(document.getElementById(&quot;panel&quot;));
 </tr>
 <tr>
 <td>Present</td>
-<td><span style="white-space: normal !important;"><code>AelluxJsPopping</code>, <code>AelluxJsUnpopping</code>, <code>AelluxJsPop</code>, <code>AelluxJsUnpop</code></span></td>
-<td><span style="white-space: normal !important;">Present element; transition start and completion notifications.</span></td>
+<td><span class="large"><code>AelluxJsPopping</code>, <code>AelluxJsUnpopping</code>, <code>AelluxJsPop</code>, <code>AelluxJsUnpop</code></span></td>
+<td><span class="large">Present element; transition start and completion notifications.</span></td>
 </tr>
 <tr>
 <td>Present</td>
 <td><code>AelluxJsLayout</code></td>
-<td><span style="white-space: normal !important;">Present element; bubbles when a Pop or Unpop transition starts. <code>detail</code> contains <code>origin</code> (<code>&quot;present.pop&quot;</code> or <code>&quot;present.unpop&quot;</code>) and <code>durationMs</code>, the maximum expected layout change time in milliseconds. Anchor listens on the shared positioning parent.</span></td>
+<td><span class="large">Present element; bubbles when a Pop or Unpop transition starts. <code>detail</code> contains <code>origin</code> (<code>&quot;present.pop&quot;</code> or <code>&quot;present.unpop&quot;</code>) and <code>durationMs</code>, the maximum expected layout change time in milliseconds. Anchor listens on the shared positioning parent.</span></td>
 </tr>
 <tr>
 <td>Present</td>
 <td><code>AelluxJsUnpopFocusLost</code></td>
-<td><span style="white-space: normal !important;"><code>document</code>; <code>detail</code> is <code>{ element, focused }</code>, identifying the closed Present region and the element that lost focus.</span></td>
+<td><span class="large"><code>document</code>; <code>detail</code> is <code>{ element, focused }</code>, identifying the closed Present region and the element that lost focus.</span></td>
 </tr>
 <tr>
 <td>Scrollbox</td>
 <td><code>AelluxJsScrollboxSnapChange</code></td>
-<td><span style="white-space: normal !important;">Scrollbox element; <code>detail</code> is <code>{ item, index, previousIndex, axis }</code> after a new snap item is selected and scrolling settles. The initial item uses <code>previousIndex: null</code>.</span></td>
+<td><span class="large">Scrollbox element; <code>detail</code> is <code>{ item, index, previousIndex, axis }</code> after a new snap item is selected and scrolling settles. The initial item uses <code>previousIndex: null</code>.</span></td>
 </tr>
 <tr>
 <td>Scrollbox</td>
 <td><code>AelluxJsScrollboxInteraction</code></td>
-<td><span style="white-space: normal !important;">Scrollbox element; <code>detail</code> is <code>{ reason, active }</code> for <code>scrollbar</code>, <code>pointer</code>, or <code>elastic</code>. It is the integration hook used by Scrollbox Snap to suspend and resume native snap alignment.</span></td>
+<td><span class="large">Scrollbox element; <code>detail</code> is <code>{ reason, active }</code> for <code>scrollbar</code>, <code>pointer</code>, or <code>elastic</code>. It is the integration hook used by Scrollbox Snap to suspend and resume native snap alignment.</span></td>
 </tr>
 <tr>
 <td>Scrollbox</td>
 <td><code>AelluxJsScrollboxSnapGesture</code></td>
-<td><span style="white-space: normal !important;">Scrollbox element; desktop PDS integration event. <code>detail</code> includes <code>phase</code> (<code>&quot;probe&quot;</code>, <code>&quot;start&quot;</code>, or <code>&quot;end&quot;</code>), <code>axis</code>, <code>moved</code>, start and final coordinates, and timestamps. Probe and end are cancelable; Scrollbox Snap accepts a short eligible flick at probe, then cancels end to prevent PDS momentum before snap settles the gesture.</span></td>
+<td><span class="large">Scrollbox element; desktop PDS integration event. <code>detail</code> includes <code>phase</code> (<code>&quot;probe&quot;</code>, <code>&quot;start&quot;</code>, or <code>&quot;end&quot;</code>), <code>axis</code>, <code>moved</code>, start and final coordinates, and timestamps. Probe and end are cancelable; Scrollbox Snap accepts a short eligible flick at probe, then cancels end to prevent PDS momentum before snap settles the gesture.</span></td>
 </tr>
 <tr>
 <td>Scrollbox</td>
 <td><code>AelluxJsScrollboxWheel</code></td>
-<td><span style="white-space: normal !important;">Scrollbox element; cancelable before Scrollbox handles a cancelable wheel event targeted at that box. <code>detail.event</code> is the native wheel event. Scrollbox Snap cancels it when it advances an item.</span></td>
+<td><span class="large">Scrollbox element; cancelable before Scrollbox handles a cancelable wheel event targeted at that box. <code>detail.event</code> is the native wheel event. Scrollbox Snap cancels it when it advances an item.</span></td>
 </tr>
 <tr>
 <td>Scrollbox</td>
 <td><code>AelluxJsPointerScrollStart</code>, <code>AelluxJsPointerScrollEnd</code></td>
-<td><span style="white-space: normal !important;">Pointer gesture&#39;s originating scrollbox; <code>detail</code> is <code>{ axis, pointerId, pointerType, elements }</code>. <code>elements</code> lists the scrollboxes activated for that gesture. A short flick that never activates PDS does not emit them.</span></td>
+<td><span class="large">Pointer gesture&#39;s originating scrollbox; <code>detail</code> is <code>{ axis, pointerId, pointerType, elements }</code>. <code>elements</code> lists the scrollboxes activated for that gesture. A short flick that never activates PDS does not emit them.</span></td>
 </tr>
 <tr>
 <td>State Navigation</td>
 <td><code>AelluxJsSnapshotChange</code>, <code>AelluxJsSnapshotRestore</code></td>
-<td><span style="white-space: normal !important;"><code>document</code>; <code>detail</code> contains copies of <code>snapshot</code>, <code>removeSnapshot</code>, and <code>popState</code>.</span></td>
+<td><span class="large"><code>document</code>; <code>detail</code> contains copies of <code>snapshot</code>, <code>removeSnapshot</code>, and <code>popState</code>.</span></td>
 </tr>
 </tbody></table>
 <pre><code class="language-js">panel.addEventListener(&quot;AelluxJsLayout&quot;, event =&gt; {
@@ -923,7 +923,7 @@ await $ae.mountManager.update(document.getElementById(&quot;panel&quot;));
 </thead>
 <tbody><tr>
 <td><code>AelluxJsPushState</code></td>
-<td><span style="white-space: normal !important;">State Navigation; <code>{ key, value, title? }</code>. Focus dispatches it when the focused element has an ID.</span></td>
+<td><span class="large">State Navigation; <code>{ key, value, title? }</code>. Focus dispatches it when the focused element has an ID.</span></td>
 </tr>
 <tr>
 <td><code>AelluxJsPushAjaxReplace</code></td>

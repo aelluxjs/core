@@ -743,75 +743,75 @@ npm run test:browser
 </thead>
 <tbody><tr>
 <td>API normalization and builds</td>
-<td><span style="white-space: normal !important;">Global and ESM identity, camelCase Extension keys and options, compound filenames, Modern and Legacy selection, minified files, optional styles, and incompatible builds.</span></td>
+<td><span class="large">Global and ESM identity, camelCase Extension keys and options, compound filenames, Modern and Legacy selection, minified files, optional styles, and incompatible builds.</span></td>
 </tr>
 <tr>
 <td>Full distribution coverage</td>
-<td><span style="white-space: normal !important;">Bundled Extensions initialize from the Full runtime; Optional Extensions (Ajax Href, Dialog, PWA and Viewport) load separate compatible files on demand, without a duplicate script request or a manifest fetch for the current Core version. Modern, Legacy, normal, and minified paths are checked.</span></td>
+<td><span class="large">Bundled Extensions initialize from the Full runtime; Optional Extensions (Ajax Href, Dialog, PWA and Viewport) load separate compatible files on demand, without a duplicate script request or a manifest fetch for the current Core version. Modern, Legacy, normal, and minified paths are checked.</span></td>
 </tr>
 <tr>
 <td>Basic registration policy</td>
-<td><span style="white-space: normal !important;">Basic starts with empty Extension and lazy-selector registries before Awake/Legacy and Ready. Matching markup alone loads nothing. Explicit JavaScript and link declarations select the registered Extensions, selectors and styles; deferred State Navigation requires its own registration before wait(). Normal/minified Modern/Legacy paths are checked.</span></td>
+<td><span class="large">Basic starts with empty Extension and lazy-selector registries before Awake/Legacy and Ready. Matching markup alone loads nothing. Explicit JavaScript and link declarations select the registered Extensions, selectors and styles; deferred State Navigation requires its own registration before wait(). Normal/minified Modern/Legacy paths are checked.</span></td>
 </tr>
 <tr>
 <td>Diagnostics</td>
-<td><span style="white-space: normal !important;">Severity, verbosity updates, retained history, invalid selectors and registrations, unavailable storage, callback failures, transitions, and lifecycle failures.</span></td>
+<td><span class="large">Severity, verbosity updates, retained history, invalid selectors and registrations, unavailable storage, callback failures, transitions, and lifecycle failures.</span></td>
 </tr>
 <tr>
 <td>Configuration diagnostics</td>
-<td><span style="white-space: normal !important;">Development-only semantic mount/update checks, scoped Extensions, configured prefixes, custom selector attributes, actionable targets/values/structure, CSS and keyboard reachability, quiet hidden/group states, Modern/Legacy paths, runtime AJAX validation and Adaptive numeric fallbacks.</span></td>
+<td><span class="large">Development-only semantic mount/update checks, scoped Extensions, configured prefixes, custom selector attributes, actionable targets/values/structure, CSS and keyboard reachability, quiet hidden/group states, Modern/Legacy paths, runtime AJAX validation and Adaptive numeric fallbacks.</span></td>
 </tr>
 <tr>
 <td>Loading</td>
-<td><span style="white-space: normal !important;">Eager and lazy loading, shared concurrent Promises, failed <code>init()</code> retry, failed script retry, optional stylesheet failure, and lazy-index cleanup after success or destruction.</span></td>
+<td><span class="large">Eager and lazy loading, shared concurrent Promises, failed <code>init()</code> retry, failed script retry, optional stylesheet failure, and lazy-index cleanup after success or destruction.</span></td>
 </tr>
 <tr>
 <td>Lifecycle failure isolation</td>
-<td><span style="white-space: normal !important;">Rejected initialization, partial element mounting, failed update and unmount callbacks, failed destroy callbacks, and continued work for unaffected elements, registrations, and Extensions.</span></td>
+<td><span class="large">Rejected initialization, partial element mounting, failed update and unmount callbacks, failed destroy callbacks, and continued work for unaffected elements, registrations, and Extensions.</span></td>
 </tr>
 <tr>
 <td>Controllers and mount maps</td>
-<td><span style="white-space: normal !important;">Controller lookup, bound public methods and element-scoped events, forced mount/update/unmount, missing methods, duplicate maps, ascending map priorities, active-map removal protection, and cleanup after the last registration.</span></td>
+<td><span class="large">Controller lookup, bound public methods and element-scoped events, forced mount/update/unmount, missing methods, duplicate maps, ascending map priorities, active-map removal protection, and cleanup after the last registration.</span></td>
 </tr>
 <tr>
 <td>Mount results and attributes</td>
-<td><span style="white-space: normal !important;">Unique return values, partial success results, concurrent mounts, failed-mount rollback, overlapping registrations, lifecycle event details with distinct affected elements, and restoration of <code>data-ae-*</code>, <code>aria-*</code>, and <code>hidden</code>.</span></td>
+<td><span class="large">Unique return values, partial success results, concurrent mounts, failed-mount rollback, overlapping registrations, lifecycle event details with distinct affected elements, and restoration of <code>data-ae-*</code>, <code>aria-*</code>, and <code>hidden</code>.</span></td>
 </tr>
 <tr>
 <td>Resource cleanup</td>
-<td><span style="white-space: normal !important;">Element and global listeners, Extension scripts and styles, mount maps, controllers, layout queues, failed and dormant lazy registrations, and the mount manager observer.</span></td>
+<td><span class="large">Element and global listeners, Extension scripts and styles, mount maps, controllers, layout queues, failed and dormant lazy registrations, and the mount manager observer.</span></td>
 </tr>
 <tr>
 <td>Detached elements</td>
-<td><span style="white-space: normal !important;">Removal during async mount, observer cleanup, moves within the document, explicit unmount races, and global cleanup when <code>MutationObserver</code> is unavailable.</span></td>
+<td><span class="large">Removal during async mount, observer cleanup, moves within the document, explicit unmount races, and global cleanup when <code>MutationObserver</code> is unavailable.</span></td>
 </tr>
 <tr>
 <td>Accessibility contracts</td>
-<td><span style="white-space: normal !important;">Native keyboard activation for Preference controls, Focus restoration and hint cleanup, Present focus release plus ARIA state synchronization, failed-mount <code>aria-busy</code> cleanup, and root attributes for reduced motion, contrast, and forced colors.</span></td>
+<td><span class="large">Native keyboard activation for Preference controls, Focus restoration and hint cleanup, Present focus release plus ARIA state synchronization, failed-mount <code>aria-busy</code> cleanup, and root attributes for reduced motion, contrast, and forced colors.</span></td>
 </tr>
 <tr>
 <td>Extension event details</td>
-<td><span style="white-space: normal !important;">Adaptive dimensions, Preference changes, Scrollbox snap and pointer scroll events, and State Navigation snapshot copies.</span></td>
+<td><span class="large">Adaptive dimensions, Preference changes, Scrollbox snap and pointer scroll events, and State Navigation snapshot copies.</span></td>
 </tr>
 <tr>
 <td>Feedback</td>
-<td><span style="white-space: normal !important;">Boundary type filtering, text and class updates, generated motion stylesheet loading, and invalid argument diagnostics.</span></td>
+<td><span class="large">Boundary type filtering, text and class updates, generated motion stylesheet loading, and invalid argument diagnostics.</span></td>
 </tr>
 <tr>
 <td>Layout and presentation</td>
-<td><span style="white-space: normal !important;">Anchor geometry, event-driven refresh and throttling; Adaptive resize fallback; Present transitions, focus release, ARIA state, and generated styles.</span></td>
+<td><span class="large">Anchor geometry, event-driven refresh and throttling; Adaptive resize fallback; Present transitions, focus release, ARIA state, and generated styles.</span></td>
 </tr>
 <tr>
 <td>Scrollbox interactions</td>
-<td><span style="white-space: normal !important;">Native progress, pointer drag and selection rules, nested scroll handoff, momentum, elastic pressure, snap navigation, custom scrollbar dragging, and scroll edge classes.</span></td>
+<td><span class="large">Native progress, pointer drag and selection rules, nested scroll handoff, momentum, elastic pressure, snap navigation, custom scrollbar dragging, and scroll edge classes.</span></td>
 </tr>
 <tr>
 <td>Viewport geometry</td>
-<td><span style="white-space: normal !important;">Nearest native scrollport and document selection, normalized axes, geometric visible area, borders, scale and fractional dimensions, continuous scroll, native resize/layout changes, bounded Layout notifications, observer fallbacks, awaited mounting, reparenting, inline restoration, grouped cleanup and independent Snap navigation in Modern/Legacy builds. Explicit Basic registration, automatic Full lazy loading and exclusion from global bundles are also checked.</span></td>
+<td><span class="large">Nearest native scrollport and document selection, normalized axes, geometric visible area, borders, scale and fractional dimensions, continuous scroll, native resize/layout changes, bounded Layout notifications, observer fallbacks, awaited mounting, reparenting, inline restoration, grouped cleanup and independent Snap navigation in Modern/Legacy builds. Explicit Basic registration, automatic Full lazy loading and exclusion from global bundles are also checked.</span></td>
 </tr>
 <tr>
 <td>Asset integrity and dependencies</td>
-<td><span style="white-space: normal !important;">Variant-specific SRI, changed-byte rejection, <code>crossorigin</code>, CSS property registration, and dependency registration and retry.</span></td>
+<td><span class="large">Variant-specific SRI, changed-byte rejection, <code>crossorigin</code>, CSS property registration, and dependency registration and retry.</span></td>
 </tr>
 </tbody></table>
 <p>The contract suite does not establish support for historical or mobile browsers and does not replace the separate accessibility review or additional iframe scenarios.</p>

@@ -902,56 +902,56 @@ importScripts(&quot;./vendor/aellux.pwa.sw.min.js&quot;);
 <tbody><tr>
 <td>Independent capabilities</td>
 <td>Known Limit</td>
-<td><span style="white-space: normal !important;">Installation, worker registration and offline availability are separate. Manifest presence diagnostics do not fetch/validate the file or establish installability.</span></td>
-<td><span style="white-space: normal !important;">Validate the manifest and test each capability independently.</span></td>
+<td><span class="large">Installation, worker registration and offline availability are separate. Manifest presence diagnostics do not fetch/validate the file or establish installability.</span></td>
+<td><span class="large">Validate the manifest and test each capability independently.</span></td>
 </tr>
 <tr>
 <td>Prompt timing</td>
 <td>Known Limit</td>
-<td><span style="white-space: normal !important;">beforeinstallprompt may be unavailable or missed before lazy initialization. A held prompt is consumed once and requires user activation; accepted does not confirm installation.</span></td>
-<td><span style="white-space: normal !important;">Initialize before wiring installation UI and invoke install() directly from the gesture.</span></td>
+<td><span class="large">beforeinstallprompt may be unavailable or missed before lazy initialization. A held prompt is consumed once and requires user activation; accepted does not confirm installation.</span></td>
+<td><span class="large">Initialize before wiring installation UI and invoke install() directly from the gesture.</span></td>
 </tr>
 <tr>
 <td>Detection</td>
 <td>Known Limit</td>
-<td><span style="white-space: normal !important;">Manual Safari guidance uses conservative UA/touch heuristics. Unknown is not proof of absence; standalone signals describe this execution context.</span></td>
-<td><span style="white-space: normal !important;">Provide suitable guidance without claiming an installed-app inventory.</span></td>
+<td><span class="large">Manual Safari guidance uses conservative UA/touch heuristics. Unknown is not proof of absence; standalone signals describe this execution context.</span></td>
+<td><span class="large">Provide suitable guidance without claiming an installed-app inventory.</span></td>
 </tr>
 <tr>
 <td>Worker origin</td>
 <td>Known Limit</td>
-<td><span style="white-space: normal !important;">Registration needs an available secure-context worker API and a same-origin principal script. Scope restrictions apply; the reusable importScripts worker is classic, although register() also accepts module.</span></td>
-<td><span style="white-space: normal !important;">Use a same-origin classic principal for the reusable worker and configure before importing.</span></td>
+<td><span class="large">Registration needs an available secure-context worker API and a same-origin principal script. Scope restrictions apply; the reusable importScripts worker is classic, although register() also accepts module.</span></td>
+<td><span class="large">Use a same-origin classic principal for the reusable worker and configure before importing.</span></td>
 </tr>
 <tr>
 <td>Offline policy</td>
 <td>Known Limit</td>
-<td><span style="white-space: normal !important;">The reusable worker intercepts nothing by default. Configured cache paths stay within origin/scope; cross-origin, opaque and sensitive responses are excluded. HTTP errors are not offline network failures.</span></td>
-<td><span style="white-space: normal !important;">Configure public precache/fallback routes and test offline navigation explicitly.</span></td>
+<td><span class="large">The reusable worker intercepts nothing by default. Configured cache paths stay within origin/scope; cross-origin, opaque and sensitive responses are excluded. HTTP errors are not offline network failures.</span></td>
+<td><span class="large">Configure public precache/fallback routes and test offline navigation explicitly.</span></td>
 </tr>
 <tr>
 <td>Private data</td>
 <td>Potential Risk</td>
-<td><span style="white-space: normal !important;">allowCredentials opts configured credentialed requests into caching. Header/path checks cannot prove a response is public or infer every authentication scheme.</span></td>
-<td><span style="white-space: normal !important;">Keep the conservative default unless routes are guaranteed public; never cache personalized content.</span></td>
+<td><span class="large">allowCredentials opts configured credentialed requests into caching. Header/path checks cannot prove a response is public or infer every authentication scheme.</span></td>
+<td><span class="large">Keep the conservative default unless routes are guaranteed public; never cache personalized content.</span></td>
 </tr>
 <tr>
 <td>Availability/storage</td>
 <td>Potential Risk</td>
-<td><span style="white-space: normal !important;">Network/CDN import failures, unsafe precache responses, quotas and eviction can prevent worker installation or remove offline resources.</span></td>
-<td><span style="white-space: normal !important;">Control assets, version deployments and test network/storage failure paths.</span></td>
+<td><span class="large">Network/CDN import failures, unsafe precache responses, quotas and eviction can prevent worker installation or remove offline resources.</span></td>
+<td><span class="large">Control assets, version deployments and test network/storage failure paths.</span></td>
 </tr>
 <tr>
 <td>Updates/lifecycle</td>
 <td>Known Limit</td>
-<td><span style="white-space: normal !important;">applyUpdate() messages a waiting worker; the worker must implement that protocol. It does not reload the page. Destroy releases page observers without unregistering persistent workers.</span></td>
-<td><span style="white-space: normal !important;">Coordinate activation, application state and worker/cache ownership.</span></td>
+<td><span class="large">applyUpdate() messages a waiting worker; the worker must implement that protocol. It does not reload the page. Destroy releases page observers without unregistering persistent workers.</span></td>
+<td><span class="large">Coordinate activation, application state and worker/cache ownership.</span></td>
 </tr>
 <tr>
 <td>Coverage</td>
 <td>Validation Gap</td>
-<td><span style="white-space: normal !important;">Unit tests and local workers cover policies and controlled prompts; simulated iOS identities and desktop headless engines do not validate physical iOS/Android installation UI or OS lifecycle.</span></td>
-<td><span style="white-space: normal !important;">Prioritize real-device install/update/offline tests and quota/eviction scenarios.</span></td>
+<td><span class="large">Unit tests and local workers cover policies and controlled prompts; simulated iOS identities and desktop headless engines do not validate physical iOS/Android installation UI or OS lifecycle.</span></td>
+<td><span class="large">Prioritize real-device install/update/offline tests and quota/eviction scenarios.</span></td>
 </tr>
 </tbody></table>
 <p>Evidence: <a href="https://github.com/aelluxjs/core/blob/update/beta.10/src/aellux.ext.pwa.js">Implementation</a>, <a href="https://github.com/aelluxjs/core/blob/update/beta.10/tests/browser/pwa.spec.mjs">pwa.spec.mjs</a>, <a href="https://github.com/aelluxjs/core/blob/update/beta.10/src/aellux.pwa.sw.js">Reusable worker</a>, <a href="https://github.com/aelluxjs/core/blob/update/beta.10/tests/unit/pwa.test.mjs">Page unit checks</a>, <a href="https://github.com/aelluxjs/core/blob/update/beta.10/tests/unit/pwa-sw.test.mjs">Worker unit checks</a>.</p>
