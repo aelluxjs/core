@@ -528,6 +528,7 @@ p {
 .table-scroll-wrapper {
   width: 100%;
   overflow-x: auto;
+  margin-bottom: 0.75rem;
   -webkit-overflow-scrolling: touch;
 }
 
@@ -536,7 +537,7 @@ p {
 #doc-content table {
   max-width: 90dvw;
   width: 100%;
-  margin-bottom: 1.5rem;
+  margin-bottom: 0.75rem;
   border-radius: var(--bs-border-radius-sm) !important;
   overflow: hidden;
 }
