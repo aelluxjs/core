@@ -532,6 +532,10 @@ h3::before {
   background-color: rgba(var(--bs-body-color-rgb), 6%);
 }
 
+#doc-content table tr:not(:last-child) {
+  border-bottom: var(--bs-border-width) var(--bs-border-style) var(--bs-border-color) !important;
+}
+
 #doc-content table tr:nth-child(odd) {
   background-color: rgba(var(--bs-body-color-rgb), 2%);
 }
