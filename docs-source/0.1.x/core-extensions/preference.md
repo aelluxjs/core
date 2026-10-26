@@ -2,7 +2,7 @@
 
 **Distribution:** Bundled Extension. **Stability:** Stable.
 
-`preference` stores user choices, combines them with defaults, and reflects the result in document attributes. It is included in the `full` runtime. Basic registers it automatically and loads it when `[data-ae-preference]` is mounted. Use `await $ae.wait("preference")` for API-only usage.
+`preference` stores user choices, combines them with defaults, and reflects the result in document attributes. It is included in the `full` runtime. In Basic, register it explicitly with `$ae.ext("preference")` before initialization. Add `loadWhen: "[data-ae-preference]"` to activate it through markup, or `load: false` to defer loading until `await $ae.wait("preference")` after runtime initialization.
 
 ## Accessibility profile
 

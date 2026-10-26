@@ -35,7 +35,7 @@
         <link rel="preconnect" href="https://cdn.jsdelivr.net">
 
 <link rel="preload" as="script" href="/core/dist/aellux.full.min.js"
-  integrity="sha384-8W+5QGB5VxTNFm7kn0eSlDB4cmu+eeZPOEap1GLRULyTIuoO2nMoQeb+4CmhWcp6" crossorigin="anonymous">
+  integrity="sha384-/EgOix3QlZtjoeNxjR0v0jee1G/Pa/iAOPWX5MjHn9BLMWc2sgSBv3Tnpbyv9wxo" crossorigin="anonymous">
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3/dist/css/bootstrap.min.css">
 <link rel="stylesheet" href="/core/docs/assets/docweaver/css/inline-style.css">
@@ -166,6 +166,7 @@
     }
   });
 </script>
+
 </head>
 
 <body>
@@ -506,6 +507,13 @@
                                           <div id="children-core-extensions" class="docs-menu-panel border-start ms-2"
                         data-ae-present="height opacity" data-ae-unpop-on-outside="false" >
                           <div class="ps-2 gap-1 d-flex flex-column overflow-hidden" data-ae-present-motion                            data-ae-present-group>
+                                                                                                  <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/core-extensions/index.htm" data-ae-overflow-marquee="190px">
+                                        Overview                                      </a>
+                                    </div>
 
                                   <div class="nav-item mt-1 small-md fw-bold rounded-1 ps-md-1 bg-light-adaptive"
                                     style="flex:0">
@@ -734,9 +742,11 @@
                     <a href="/core/docs/0.1.x/index.htm">
                       Home                    </a>
                   </li>
-                                                                            <li class="breadcrumb-item text-capitalize text-nowrap flex-shrink-0">
-                      Core Extensions                    </li>
-                                                                            <li class="breadcrumb-item text-capitalize text-nowrap flex-shrink-0">
+                                                                          <li class="breadcrumb-item text-capitalize text-nowrap flex-shrink-0">
+                    <a href="/core/docs/0.1.x/core-extensions/index.htm">
+                      Core Extensions                    </a>
+                  </li>
+                                                                          <li class="breadcrumb-item text-capitalize text-nowrap flex-shrink-0">
                     <a href="/core/docs/0.1.x/core-extensions/optional/ajax-href.htm">
                       Optional Extensions                    </a>
                   </li>
@@ -774,10 +784,13 @@
 &lt;/div&gt;
 </code></pre>
 <h2>Loading</h2>
-<p>Basic and Full automatically register <code>[data-ae-viewport]</code> for lazy loading. Full does not bundle the implementation. Without matching mounted markup there is no Viewport download, initialization, observer or scroll listener. No stylesheet, extra dependency or global polyfill is required. Modern and Legacy scripts are distributed separately, including minified variants.</p>
-<pre><code class="language-js">$ae.init({ mode: &quot;basic&quot; }); // mode: &quot;full&quot; also supports Viewport
-// After inserting new markup:
-await $ae.mount(document.getElementById(&quot;new-content&quot;));
+<p>Full automatically registers <code>[data-ae-viewport]</code> for lazy loading without bundling the implementation. Basic requires an explicit registration, as below. With this lazy selector, absent matching mounted markup there is no Viewport download, initialization, observer or scroll listener. No stylesheet, extra dependency or global polyfill is required. Modern and Legacy scripts are distributed separately, including minified variants.</p>
+<pre><code class="language-js">$ae.ext(&quot;viewport&quot;, { loadWhen: &quot;[data-ae-viewport]&quot; });
+$ae.on(&quot;Ready&quot;, async () =&gt; {
+  // After inserting new markup:
+  await $ae.mount(document.getElementById(&quot;new-content&quot;));
+});
+$ae.init({ mode: &quot;basic&quot; });
 </code></pre>
 <h2>Axes and outputs</h2>
 <p>Only <code>data-ae-viewport</code> configures the Extension:</p>

@@ -46,6 +46,7 @@
       "label": "Core Extensions",
       "slug": "core-extensions",
       "children": [
+        { "label": "Overview", "href": "core-extensions/README.md" },
         {
           "label": "Bundled Extensions",
           "slug": "bundled",

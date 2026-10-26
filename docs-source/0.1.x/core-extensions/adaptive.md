@@ -2,7 +2,7 @@
 
 **Distribution:** Bundled Extension. **Stability:** Stable.
 
-`adaptive` adds size and shape classes to elements marked with `data-ae-adaptive`. It is included in the `full` runtime and its CSS is supplied by the shared Full stylesheet. Basic automatically registers this Extension for lazy loading; opt into its stylesheet with `$ae.ext("adaptive", { loadStyle: true })` before initialization.
+`adaptive` adds size and shape classes to elements marked with `data-ae-adaptive`. It is included in the `full` runtime and its CSS is supplied by the shared Full stylesheet. In Basic, register it explicitly with `$ae.ext("adaptive", { loadStyle: true })` before initialization. Add `loadWhen: "[data-ae-adaptive]"` for lazy loading.
 
 ```html
 <div id="responsive" data-ae-adaptive>Responsive content</div>

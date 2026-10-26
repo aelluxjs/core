@@ -64,32 +64,10 @@ Add aellux.js to a page and enable the Extensions it needs. The library coordina
 
 ## Core Extensions
 
-Each Extension page declares its stability independently of its distribution. Ajax Href, Dialog, Focus, Point, PWA and Viewport are **Not stable**; the other nine official Extensions are **Stable**. The navigation groups below describe delivery in Full.
+The [Core Extensions overview](core-extensions/README.md) explains distribution and stability and links to all fifteen official Extensions.
 
-### Bundled Extensions
-
-These eleven official Extensions are included in the Full JavaScript bundle. Matching markup or an explicit request still determines when lazy behavior initializes.
-
-- [Adaptive](core-extensions/adaptive.md)
-- [Anchor](core-extensions/anchor.md)
-- [Overflow Marquee](core-extensions/overflow-marquee.md)
-- [Feedback](core-extensions/feedback.md)
-- [Focus](core-extensions/focus.md)
-- [Point](core-extensions/point.md)
-- [Preference](core-extensions/preference.md)
-- [Present](core-extensions/present.md)
-- [Scrollbox](core-extensions/scrollbox.md)
-- [Scrollbox Snap](core-extensions/scrollbox-snap.md)
-- [State Navigation](core-extensions/state-navigation.md)
-
-### Optional Extensions
-
-These official Extensions load separate signed scripts on demand in both Full and Basic. The names describe delivery in Full, rather than maturity or stability. Basic automatically registers both groups for lazy loading from separate files.
-
-- [Ajax Href](core-extensions/optional/ajax-href.md)
-- [Dialog](core-extensions/optional/dialog.md)
-- [PWA](core-extensions/optional/pwa.md)
-- [Viewport](core-extensions/optional/viewport.md)
+- [Bundled Extensions](core-extensions/README.md#bundled-extensions)
+- [Optional Extensions](core-extensions/README.md#optional-extensions)
 
 ## Project Documents
 

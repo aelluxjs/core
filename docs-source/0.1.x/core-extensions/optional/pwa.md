@@ -16,7 +16,7 @@ Full recognizes this explicit declaration, including dynamically inserted elemen
 <script>$ae.init({ mode: "full" });</script>
 ```
 
-Basic also registers PWA automatically for lazy loading. Explicit registration can customize that policy:
+Basic requires an explicit PWA registration. To load it only when its controls are mounted:
 
 ```js
 $ae.ext("pwa", { loadWhen: "[data-ae-pwa]" });

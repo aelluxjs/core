@@ -35,7 +35,7 @@
         <link rel="preconnect" href="https://cdn.jsdelivr.net">
 
 <link rel="preload" as="script" href="/core/dist/aellux.full.min.js"
-  integrity="sha384-8W+5QGB5VxTNFm7kn0eSlDB4cmu+eeZPOEap1GLRULyTIuoO2nMoQeb+4CmhWcp6" crossorigin="anonymous">
+  integrity="sha384-/EgOix3QlZtjoeNxjR0v0jee1G/Pa/iAOPWX5MjHn9BLMWc2sgSBv3Tnpbyv9wxo" crossorigin="anonymous">
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3/dist/css/bootstrap.min.css">
 <link rel="stylesheet" href="/core/docs/assets/docweaver/css/inline-style.css">
@@ -166,6 +166,7 @@
     }
   });
 </script>
+
 </head>
 
 <body>
@@ -506,6 +507,13 @@
                         data-ae-present="height opacity" data-ae-unpop-on-outside="false"                         hidden
                         >
                           <div class="ps-2 gap-1 d-flex flex-column overflow-hidden" data-ae-present-motion                            data-ae-present-group>
+                                                                                                  <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/core-extensions/index.htm" data-ae-overflow-marquee="190px">
+                                        Overview                                      </a>
+                                    </div>
 
                                   <div class="nav-item mt-1 small-md fw-bold rounded-1 ps-md-1 bg-light-adaptive"
                                     style="flex:0">
@@ -765,7 +773,7 @@
             ajax-load="doc-content">
             <h1>Lazy Extension Loading</h1>
 <p>Lazy loading delays an Extension until a matching element is found during <code>$ae.mount(root)</code>.</p>
-<p>Basic automatically registers both Bundled and Optional Extensions with their activation selectors and loads their separate files on demand. Full includes the Bundled Extensions and loads Optional Extensions (Ajax Href, Dialog, PWA and Viewport) from separate signed files when their selectors match. Full initializes Preference and State Navigation at startup. In Basic, State Navigation has no selector and loads through <code>$ae.wait(&quot;state-navigation&quot;)</code>; Preference uses <code>[data-ae-preference]</code>. Explicit host registrations take precedence over unused defaults. Basic styles remain opt-in through <code>loadStyle: true</code>.</p>
+<p>Basic starts with no Extension registrations. Declare each desired Extension explicitly and supply <code>loadWhen</code> to select the markup that activates it. Full registers the official Extensions automatically, includes the Bundled implementations and loads Optional Extensions (Ajax Href, Dialog, PWA and Viewport) from separate signed files when their selectors match. Full initializes Preference and State Navigation at startup. Explicit host registrations can replace unused Full defaults. Basic styles remain opt-in through <code>loadStyle: true</code>.</p>
 <pre><code class="language-js">$ae.ext(&quot;preference&quot;, {
   loadWhen: &quot;[data-ae-preference]&quot;
 });
@@ -775,6 +783,7 @@
       data-ae-load-when=&quot;[data-ae-preference]&quot;&gt;
 </code></pre>
 <p>When the selector matches, the orchestrator loads and initializes the Extension, registers its mount selectors, and mounts matching elements in the affected scope.</p>
+<p><code>$ae.ext(name)</code> without <code>loadWhen</code> registers an eager load during mounting. With <code>{ load: false }</code>, register first and then use <code>$ae.wait(name)</code> to load the Extension explicitly. State Navigation has no activation selector and uses this option for deferred API access. <code>$ae.wait(name)</code> rejects an unregistered name, even when the official catalog contains it.</p>
 <p>Loading promises are cached while a load or initialization attempt is pending, so concurrent requests share one attempt. The runtime removes the Extension from the lazy selector index only after successful initialization. If loading or initialization fails, the attempt resolves to <code>null</code>, its cached promise is cleared, and the lazy selector remains registered so a later request can retry. An incompatible build is terminal for the active runtime: its lazy selector is removed and its <code>null</code> result remains cached.</p>
           </main>
 

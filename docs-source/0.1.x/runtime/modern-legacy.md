@@ -28,7 +28,7 @@ For `0.1.0`, automated validation forces this profile in the same current Chromi
 
 The boot script checks the capabilities required by the orchestrator before loading it. Missing capabilities are recorded in `AelluxJs.diagnostics.notAvailable`.
 
-The required APIs include `HTMLDialogElement.prototype.show`, `showModal`, and `close`. If any are missing, Legacy is selected. The fallback and its inline CSS belong exclusively to the [Dialog Extension](../core-extensions/optional/dialog.md) Legacy files, and are installed only when that Extension mounts an element lacking the complete API. Full and Basic register Dialog on demand for `dialog`. Existing and dynamically inserted dialogs are registered through `$ae.mount(root)`; see [ES5 support level](es5-support.md) for usage and fallback limitations.
+The required APIs include `HTMLDialogElement.prototype.show`, `showModal`, and `close`. If any are missing, Legacy is selected. The fallback and its inline CSS belong exclusively to the [Dialog Extension](../core-extensions/optional/dialog.md) Legacy files, and are installed only when that Extension mounts an element lacking the complete API. Full supplies lazy Dialog registration for `dialog`; Basic requires an explicit Extension declaration. Once declared, existing and dynamically inserted dialogs are mounted through `$ae.mount(root)`; see [ES5 support level](es5-support.md) for usage and fallback limitations.
 
 Force Legacy through initialization options or the development query parameter:
 

@@ -35,7 +35,7 @@
         <link rel="preconnect" href="https://cdn.jsdelivr.net">
 
 <link rel="preload" as="script" href="/core/dist/aellux.full.min.js"
-  integrity="sha384-8W+5QGB5VxTNFm7kn0eSlDB4cmu+eeZPOEap1GLRULyTIuoO2nMoQeb+4CmhWcp6" crossorigin="anonymous">
+  integrity="sha384-/EgOix3QlZtjoeNxjR0v0jee1G/Pa/iAOPWX5MjHn9BLMWc2sgSBv3Tnpbyv9wxo" crossorigin="anonymous">
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3/dist/css/bootstrap.min.css">
 <link rel="stylesheet" href="/core/docs/assets/docweaver/css/inline-style.css">
@@ -166,6 +166,7 @@
     }
   });
 </script>
+
 </head>
 
 <body>
@@ -506,6 +507,13 @@
                         data-ae-present="height opacity" data-ae-unpop-on-outside="false"                         hidden
                         >
                           <div class="ps-2 gap-1 d-flex flex-column overflow-hidden" data-ae-present-motion                            data-ae-present-group>
+                                                                                                  <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/core-extensions/index.htm" data-ae-overflow-marquee="190px">
+                                        Overview                                      </a>
+                                    </div>
 
                                   <div class="nav-item mt-1 small-md fw-bold rounded-1 ps-md-1 bg-light-adaptive"
                                     style="flex:0">
@@ -782,14 +790,14 @@
 <ul>
 <li><code>builds</code> declares published JavaScript variants: <code>modern</code>, <code>legacy</code>, or both. Omitting it promises both variants.</li>
 <li><code>loadWhen</code> delays loading until a matching element is discovered.</li>
-<li><code>load: false</code> defers loading until <code>$ae.wait(name)</code> when no <code>loadWhen</code> selector is supplied. Basic uses this for State Navigation, which has no DOM selector.</li>
+<li><code>load: false</code> defers loading until <code>$ae.wait(name)</code> when no <code>loadWhen</code> selector is supplied. This can defer State Navigation, which has no DOM selector.</li>
 <li>An invalid <code>loadWhen</code> selector reports <code>ERROR_EXTENSION_LOAD_WHEN</code> (<code>1114</code>), and <code>ext()</code> leaves the Extension undeclared.</li>
 <li><code>loadStyle: true</code> requests the stylesheet derived from the Extension script URL; a URL string requests that specific stylesheet.</li>
 <li><code>integrity</code> supplies SRI hashes for third-party Extension files; <code>crossOrigin</code> controls the associated <code>crossorigin</code> attribute. See <a href="csp-and-trust.htm#subresource-integrity">CSP and Extension trust</a>.</li>
 <li><code>coreCompatibility</code> declares the supported Core version or range. <code>skipCompatibilityCheck: true</code> is an explicit, warned override and does not bypass integrity checks. See the <a href="official-registry.htm">official registry and compatibility rules</a>.</li>
 </ul>
-<p>Register each name once. Duplicate host declarations report an error. An unused automatic Core registration can be replaced by an explicit JavaScript or declarative registration; registrations that have started loading cannot be replaced.</p>
-<p>Basic automatically registers every Core Extension for lazy loading. Register explicitly before <code>$ae.init()</code> to customize styles, selectors or eager loading, or to add third-party Extensions:</p>
+<p>Register each name once. Duplicate host declarations report an error. An unused automatic Full registration can be replaced by an explicit JavaScript or declarative registration; registrations that have started loading cannot be replaced.</p>
+<p>Basic starts with no Extension registrations. Declare every desired official or third-party Extension explicitly through JavaScript or a link declaration. Markup attributes alone do not activate an undeclared Extension. Register before <code>$ae.init()</code> or before a later mount, choosing styles, selectors and eager or deferred loading:</p>
 <pre><code class="language-js">$ae.ext(&quot;feedback&quot;);
 $ae.init({ mode: &quot;basic&quot; });
 </code></pre>

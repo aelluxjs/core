@@ -2,7 +2,7 @@
 
 **Distribution:** Optional Extension. **Stability:** Not stable.
 
-`ajax-href` replaces selected page regions with matching elements from a same-origin HTML response. This Optional Extension is excluded from the Full bundle and loads its separate signed script in both Full and Basic when mounting `a[data-ae-ajax-href]`. Dynamically inserted links activate it through `$ae.mount(container)`.
+`ajax-href` replaces selected page regions with matching elements from a same-origin HTML response. This Optional Extension is excluded from the Full bundle. Full registers it for lazy loading when mounting `a[data-ae-ajax-href]`; Basic requires explicit registration. With the selector registered, dynamically inserted links activate it through `$ae.mount(container)`.
 
 ```html
 <a href="./next.htm" data-ae-ajax-href>Next page (title and body)</a>
@@ -10,7 +10,7 @@
 <main id="content">Current content</main>
 ```
 
-Basic registers it automatically; explicit registration can customize the activation selector:
+In Basic, declare its activation selector explicitly:
 
 ```js
 $ae.ext("ajax-href", { loadWhen: "a[data-ae-ajax-href]" });

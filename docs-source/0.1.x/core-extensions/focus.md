@@ -2,7 +2,7 @@
 
 **Distribution:** Bundled Extension. **Stability:** Not stable.
 
-`focus` is an official **Bundled Extension** included in the `full` runtime. Basic registers it automatically for lazy loading.
+`focus` is an official **Bundled Extension** included in the `full` runtime. Basic requires explicit registration.
 
 `data-ae-focus="next"` adds `enterkeyhint="next"` to text-entry inputs, textareas and editable elements when `enterkeyhint` is absent. An explicit hint is preserved. Pressing Enter on a mounted element moves focus to the next connected, visible, enabled focusable control in document order. If there is no next control, Enter keeps its usual behavior. This also applies when a mobile keyboard sends Enter for its Next or confirmation key.
 
@@ -12,9 +12,10 @@
 <button type="submit">Continue</button>
 ```
 
-Basic needs no explicit Focus registration:
+Register Focus before initializing Basic:
 
 ```js
+$ae.ext("focus");
 $ae.init({ mode: "basic" });
 ```
 

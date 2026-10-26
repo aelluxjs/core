@@ -13,12 +13,15 @@ Viewport is an official **Optional Extension** that publishes an element's posit
 
 ## Loading
 
-Basic and Full automatically register `[data-ae-viewport]` for lazy loading. Full does not bundle the implementation. Without matching mounted markup there is no Viewport download, initialization, observer or scroll listener. No stylesheet, extra dependency or global polyfill is required. Modern and Legacy scripts are distributed separately, including minified variants.
+Full automatically registers `[data-ae-viewport]` for lazy loading without bundling the implementation. Basic requires an explicit registration, as below. With this lazy selector, absent matching mounted markup there is no Viewport download, initialization, observer or scroll listener. No stylesheet, extra dependency or global polyfill is required. Modern and Legacy scripts are distributed separately, including minified variants.
 
 ```js
-$ae.init({ mode: "basic" }); // mode: "full" also supports Viewport
-// After inserting new markup:
-await $ae.mount(document.getElementById("new-content"));
+$ae.ext("viewport", { loadWhen: "[data-ae-viewport]" });
+$ae.on("Ready", async () => {
+  // After inserting new markup:
+  await $ae.mount(document.getElementById("new-content"));
+});
+$ae.init({ mode: "basic" });
 ```
 
 ## Axes and outputs

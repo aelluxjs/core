@@ -2,7 +2,7 @@
 
 Versioned pages live under `0.1.x/`; `summary.json` controls their navigation. Edit the Markdown sources and run `npm run build:docs` to update the rendered pages.
 
-Classify official Core Extensions by their delivery in Full: **Bundled Extensions** are included in the Full JavaScript bundle; **Optional Extensions** load separate signed scripts on demand. Keep these groups aligned with `src/aellux.full.js` and the `optional` entries in `src/official-extension-definitions.js`. The labels describe packaging, rather than maturity or stability. Basic registers both groups for lazy loading from separate files.
+Classify official Core Extensions by their delivery in Full: **Bundled Extensions** are included in the Full JavaScript bundle; **Optional Extensions** load separate signed scripts on demand. Keep these groups aligned with `src/aellux.full.js` and the `optional` entries in `src/official-extension-definitions.js`. The labels describe packaging, rather than maturity or stability. Full registers all official Extensions automatically. Basic starts with no registrations and requires explicit JavaScript or link declarations for the chosen Extensions.
 
 Declare distribution and stability below each Extension page heading. Ajax Href, Dialog, Focus, Point, PWA and Viewport are **Not stable**; the remaining official Extensions are **Stable**. Keep stability on the pages without creating stability groups in `summary.json`.
 

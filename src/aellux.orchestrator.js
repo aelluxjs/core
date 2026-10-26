@@ -125,8 +125,9 @@ import { officialExtensionDefinitions } from "./official-extension-definitions.j
     });
 
   root[root.AelluxJs.shortJSName] = root.AelluxJs;
-  // Publish defaults before the boot script dispatches Awake/Legacy.
-  registerCoreExtensions();
+  // Publish Full defaults before the boot script dispatches Awake/Legacy.
+  // Basic keeps registration under the host's control.
+  if (root.AelluxJs.options.mode === "full") registerCoreExtensions();
 
   function registerCoreExtensions() {
     const api = root.AelluxJs;
@@ -139,11 +140,9 @@ import { officialExtensionDefinitions } from "./official-extension-definitions.j
       if (name === "present") {
         loadWhen = ["present", "present-group", "trigger", "dismiss", "target"].map(attr).join(",");
       }
-      // State Navigation has an event/API contract rather than a DOM selector.
-      // Full retains its foundational startup; Basic loads it via wait/dependencies.
-      if (name === "state-navigation" ||
-          (api.options.mode === "full" && name === "preference")) loadWhen = null;
-      api.ext(name, { loadWhen, load: api.options.mode === "full" });
+      // Full initializes its foundational services without a DOM selector.
+      if (name === "state-navigation" || name === "preference") loadWhen = null;
+      api.ext(name, { loadWhen, load: true });
       api.registry.ext[key].automatic = true;
     }
   }

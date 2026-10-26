@@ -2,7 +2,7 @@
 
 **Distribution:** Bundled Extension. **Stability:** Not stable.
 
-`point` is an official **Bundled Extension** that tracks the pointers currently pressed or hovering over the document and relates them to mounted elements with `data-ae-point`. It is included in the `full` runtime. Basic registers it automatically; explicit registration can force eager loading:
+`point` is an official **Bundled Extension** that tracks the pointers currently pressed or hovering over the document and relates them to mounted elements with `data-ae-point`. It is included in the `full` runtime. Basic requires explicit registration; the example below loads it eagerly during mounting:
 
 ```html
 <div id="canvas" data-ae-point="2"></div>

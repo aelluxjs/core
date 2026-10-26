@@ -11,6 +11,8 @@ for (const variant of [
     await page.addScriptTag({ url: `/dist/${variant.boot}` });
     const result = await page.evaluate(async forceLegacy => {
       document.body.innerHTML = '<main id="content">Old</main><aside id="missing">Keep</aside>';
+      AelluxJs.ext("ajax-href", { load: false });
+      AelluxJs.ext("feedback", { load: false });
       await new Promise(resolve => {
         AelluxJs.on("Ready", resolve, { once: true });
         AelluxJs.init({ mode: "basic", forceLegacy });

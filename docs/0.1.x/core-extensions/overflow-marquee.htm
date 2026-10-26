@@ -35,7 +35,7 @@
         <link rel="preconnect" href="https://cdn.jsdelivr.net">
 
 <link rel="preload" as="script" href="/core/dist/aellux.full.min.js"
-  integrity="sha384-8W+5QGB5VxTNFm7kn0eSlDB4cmu+eeZPOEap1GLRULyTIuoO2nMoQeb+4CmhWcp6" crossorigin="anonymous">
+  integrity="sha384-/EgOix3QlZtjoeNxjR0v0jee1G/Pa/iAOPWX5MjHn9BLMWc2sgSBv3Tnpbyv9wxo" crossorigin="anonymous">
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3/dist/css/bootstrap.min.css">
 <link rel="stylesheet" href="/core/docs/assets/docweaver/css/inline-style.css">
@@ -166,6 +166,7 @@
     }
   });
 </script>
+
 </head>
 
 <body>
@@ -506,6 +507,13 @@
                                           <div id="children-core-extensions" class="docs-menu-panel border-start ms-2"
                         data-ae-present="height opacity" data-ae-unpop-on-outside="false" >
                           <div class="ps-2 gap-1 d-flex flex-column overflow-hidden" data-ae-present-motion                            data-ae-present-group>
+                                                                                                  <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/core-extensions/index.htm" data-ae-overflow-marquee="190px">
+                                        Overview                                      </a>
+                                    </div>
 
                                   <div class="nav-item mt-1 small-md fw-bold rounded-1 ps-md-1 bg-light-adaptive"
                                     style="flex:0">
@@ -734,9 +742,11 @@
                     <a href="/core/docs/0.1.x/index.htm">
                       Home                    </a>
                   </li>
-                                                                            <li class="breadcrumb-item text-capitalize text-nowrap flex-shrink-0">
-                      Core Extensions                    </li>
-                                                                            <li class="breadcrumb-item text-capitalize text-nowrap flex-shrink-0">
+                                                                          <li class="breadcrumb-item text-capitalize text-nowrap flex-shrink-0">
+                    <a href="/core/docs/0.1.x/core-extensions/index.htm">
+                      Core Extensions                    </a>
+                  </li>
+                                                                          <li class="breadcrumb-item text-capitalize text-nowrap flex-shrink-0">
                     <a href="/core/docs/0.1.x/core-extensions/adaptive.htm">
                       Bundled Extensions                    </a>
                   </li>
@@ -767,7 +777,7 @@
             ajax-load="doc-content">
             <h1>Overflow Marquee</h1>
 <p><strong>Distribution:</strong> Bundled Extension. <strong>Stability:</strong> Stable.</p>
-<p><code>overflow-marquee</code> is a dedicated Extension for <code>[data-ae-overflow-marquee]</code>. Basic registers it automatically for lazy loading; use <code>$ae.ext(&quot;overflow-marquee&quot;, { loadStyle: true })</code> before initialization to load its stylesheet. During <code>init()</code>, it registers Anchor if necessary and awaits <code>$ae.wait(&quot;anchor&quot;)</code> before obtaining a placement map and registering its own mount map. Full bundles its implementation and initializes it only when matching content is mounted, without a separate script request. A mount restricted to Anchor does not mount marquee elements.</p>
+<p><code>overflow-marquee</code> is a dedicated Extension for <code>[data-ae-overflow-marquee]</code>. In Basic, register it explicitly with <code>$ae.ext(&quot;overflow-marquee&quot;, { loadStyle: true })</code> before initialization to include its stylesheet. Add <code>loadWhen: &quot;[data-ae-overflow-marquee]&quot;</code> for lazy loading. During <code>init()</code>, it registers Anchor if necessary and awaits <code>$ae.wait(&quot;anchor&quot;)</code> before obtaining a placement map and registering its own mount map. Full bundles its implementation and initializes it only when matching content is mounted, without a separate script request. A mount restricted to Anchor does not mount marquee elements.</p>
 <pre><code class="language-js">$ae.ext(&quot;overflow-marquee&quot;, { loadStyle: true });
 $ae.init({ mode: &quot;basic&quot; });
 </code></pre>

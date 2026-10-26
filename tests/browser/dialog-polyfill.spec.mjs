@@ -277,6 +277,7 @@ for (const mode of ["basic", "full"]) {
     await page.goto("/tests/index.htm");
     await removeDialogAPI(page);
     await page.addScriptTag({ url: "/dist/aellux.min.js" });
+    if (mode === "basic") await page.evaluate(() => AelluxJs.ext("dialog", { loadWhen: "dialog" }));
     await initialize(page, { mode, skipGlobalMount: true });
     expect(requests.filter(path => /aellux\.ext\.dialog/.test(path))).toEqual([]);
     expect(await page.evaluate(async () => {

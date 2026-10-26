@@ -35,7 +35,7 @@
         <link rel="preconnect" href="https://cdn.jsdelivr.net">
 
 <link rel="preload" as="script" href="/core/dist/aellux.full.min.js"
-  integrity="sha384-8W+5QGB5VxTNFm7kn0eSlDB4cmu+eeZPOEap1GLRULyTIuoO2nMoQeb+4CmhWcp6" crossorigin="anonymous">
+  integrity="sha384-/EgOix3QlZtjoeNxjR0v0jee1G/Pa/iAOPWX5MjHn9BLMWc2sgSBv3Tnpbyv9wxo" crossorigin="anonymous">
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3/dist/css/bootstrap.min.css">
 <link rel="stylesheet" href="/core/docs/assets/docweaver/css/inline-style.css">
@@ -166,6 +166,7 @@
     }
   });
 </script>
+
 </head>
 
 <body>
@@ -506,6 +507,13 @@
                         data-ae-present="height opacity" data-ae-unpop-on-outside="false"                         hidden
                         >
                           <div class="ps-2 gap-1 d-flex flex-column overflow-hidden" data-ae-present-motion                            data-ae-present-group>
+                                                                                                  <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/core-extensions/index.htm" data-ae-overflow-marquee="190px">
+                                        Overview                                      </a>
+                                    </div>
 
                                   <div class="nav-item mt-1 small-md fw-bold rounded-1 ps-md-1 bg-light-adaptive"
                                     style="flex:0">
@@ -767,7 +775,7 @@
 <p>The build publishes <code>dist/aellux.extensions.min.json</code> with schema version <code>1</code>. Its <code>coreVersion</code> comes from <code>package.json</code>; every approved entry has an exact <code>coreCompatibility</code>, Modern and Legacy URLs with SHA-384 integrity, optional stylesheet metadata, and a dependency list. Approval is controlled by the explicit list in <code>src/official-extension-definitions.js</code>: the presence of an Extension source file alone never makes it official.</p>
 <p>Set <code>AELLUX_OFFICIAL_CDN_BASE</code> to an immutable HTTPS distribution base while building release artifacts. The build appends the encoded package version and filename. Without that release setting, package builds use <code>./</code> URLs so the registry remains usable beside the files in <code>dist</code>. The build validates all required local artifacts and final-byte hashes and writes <code>aellux.extensions.report.json</code>; invalid or incomplete official metadata fails the build.</p>
 <h2>Resolution and caching</h2>
-<p>Both modes reuse the signed official metadata embedded by the version-matched boot script, avoiding an index request for the current Core version. Basic automatically registers all Core Extensions for lazy loading from separate signed files. Full bundles Adaptive, Anchor, Overflow Marquee, Feedback, Focus, Point, Preference, Present, Scrollbox, Scrollbox Snap and State Navigation. Optional Extensions (Ajax Href, Dialog, PWA and Viewport) remain external and activate through <code>a[data-ae-ajax-href]</code>, <code>dialog</code>, <code>[data-ae-pwa]</code> and <code>[data-ae-viewport]</code> in both modes. Full initializes Preference and State Navigation at startup; Basic activates Preference through its markup and State Navigation through <code>$ae.wait(&quot;state-navigation&quot;)</code>.</p>
+<p>Both modes reuse the signed official metadata embedded by the version-matched boot script, avoiding an index request for the current Core version. This metadata resolves explicitly registered names; it does not register Extensions in Basic. Basic requires <code>$ae.ext(...)</code> or a link declaration for each desired Extension and loads its separate compatible script according to the supplied options. Full automatically registers all official Extensions and bundles Adaptive, Anchor, Overflow Marquee, Feedback, Focus, Point, Preference, Present, Scrollbox, Scrollbox Snap and State Navigation. Optional Extensions (Ajax Href, Dialog, PWA and Viewport) remain external; Full supplies their activation selectors. Full initializes Preference and State Navigation at startup. In Basic, choose their loading policy explicitly, registering a name before calling <code>$ae.wait(name)</code>.</p>
 <p>Resolution order is: an explicit URL/registration, a bundled implementation, official metadata, the configured custom fallback, and finally the historical local filename convention. A custom index cannot silently replace an official entry.</p>
 <pre><code class="language-js">$ae.extIndex.setFallback(&quot;https://example.org/my-extensions.json&quot;);
 $ae.ext(&quot;my-extension&quot;);

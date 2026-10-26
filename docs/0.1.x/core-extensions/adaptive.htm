@@ -35,7 +35,7 @@
         <link rel="preconnect" href="https://cdn.jsdelivr.net">
 
 <link rel="preload" as="script" href="/core/dist/aellux.full.min.js"
-  integrity="sha384-8W+5QGB5VxTNFm7kn0eSlDB4cmu+eeZPOEap1GLRULyTIuoO2nMoQeb+4CmhWcp6" crossorigin="anonymous">
+  integrity="sha384-/EgOix3QlZtjoeNxjR0v0jee1G/Pa/iAOPWX5MjHn9BLMWc2sgSBv3Tnpbyv9wxo" crossorigin="anonymous">
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3/dist/css/bootstrap.min.css">
 <link rel="stylesheet" href="/core/docs/assets/docweaver/css/inline-style.css">
@@ -166,6 +166,7 @@
     }
   });
 </script>
+
 </head>
 
 <body>
@@ -506,6 +507,13 @@
                                           <div id="children-core-extensions" class="docs-menu-panel border-start ms-2"
                         data-ae-present="height opacity" data-ae-unpop-on-outside="false" >
                           <div class="ps-2 gap-1 d-flex flex-column overflow-hidden" data-ae-present-motion                            data-ae-present-group>
+                                                                                                  <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/core-extensions/index.htm" data-ae-overflow-marquee="190px">
+                                        Overview                                      </a>
+                                    </div>
 
                                   <div class="nav-item mt-1 small-md fw-bold rounded-1 ps-md-1 bg-light-adaptive"
                                     style="flex:0">
@@ -734,9 +742,11 @@
                     <a href="/core/docs/0.1.x/index.htm">
                       Home                    </a>
                   </li>
-                                                                            <li class="breadcrumb-item text-capitalize text-nowrap flex-shrink-0">
-                      Core Extensions                    </li>
-                                                                            <li class="breadcrumb-item text-capitalize text-nowrap flex-shrink-0">
+                                                                          <li class="breadcrumb-item text-capitalize text-nowrap flex-shrink-0">
+                    <a href="/core/docs/0.1.x/core-extensions/index.htm">
+                      Core Extensions                    </a>
+                  </li>
+                                                                          <li class="breadcrumb-item text-capitalize text-nowrap flex-shrink-0">
                     <a href="/core/docs/0.1.x/core-extensions/adaptive.htm">
                       Bundled Extensions                    </a>
                   </li>
@@ -748,10 +758,10 @@
 
           <div id="doc-navlinks" ajax-load="doc-navlinks">
             <div class="d-flex justify-content-between flex-row gap-2 p-2 pb-4 px-0">
-      <a href="/core/docs/0.1.x/extensions/legacy-variants.htm" class="text-decoration-none d-inline-flex flex-row gap-2" style="max-width: 45%;">
+      <a href="/core/docs/0.1.x/core-extensions/index.htm" class="text-decoration-none d-inline-flex flex-row gap-2" style="max-width: 45%;">
       ← <span class="text-decoration-underline text-truncate overflow-hidden d-inline-block align-middle flex-fill"
         style="max-width:200px" data-ae-overflow-marquee="80">
-        Modern &amp; Legacy Variants      </span>
+        Overview      </span>
     </a>
 
                   <a href="/core/docs/0.1.x/core-extensions/anchor.htm"
@@ -767,7 +777,7 @@
             ajax-load="doc-content">
             <h1>Adaptive Extension</h1>
 <p><strong>Distribution:</strong> Bundled Extension. <strong>Stability:</strong> Stable.</p>
-<p><code>adaptive</code> adds size and shape classes to elements marked with <code>data-ae-adaptive</code>. It is included in the <code>full</code> runtime and its CSS is supplied by the shared Full stylesheet. Basic automatically registers this Extension for lazy loading; opt into its stylesheet with <code>$ae.ext(&quot;adaptive&quot;, { loadStyle: true })</code> before initialization.</p>
+<p><code>adaptive</code> adds size and shape classes to elements marked with <code>data-ae-adaptive</code>. It is included in the <code>full</code> runtime and its CSS is supplied by the shared Full stylesheet. In Basic, register it explicitly with <code>$ae.ext(&quot;adaptive&quot;, { loadStyle: true })</code> before initialization. Add <code>loadWhen: &quot;[data-ae-adaptive]&quot;</code> for lazy loading.</p>
 <pre><code class="language-html">&lt;div id=&quot;responsive&quot; data-ae-adaptive&gt;Responsive content&lt;/div&gt;
 </code></pre>
 <p>The Extension measures each marked element with <code>ResizeObserver</code>, or uses the window resize event when that API is unavailable. With <code>ResizeObserver</code>, the first observer entry supplies the initial size; otherwise the initial size is read in the next layout frame. It applies one shape class (<code>ae--shape-vertical</code>, <code>ae--shape-square</code>, or <code>ae--shape-horizontal</code>) according to width divided by height. It also sets <code>aria-orientation</code> to <code>vertical</code> when height exceeds width and to <code>horizontal</code> otherwise, including square elements. It toggles <code>ae--fits-&lt;size&gt;</code> classes when <code>sqrt(width * height)</code> reaches each configured minimum. The element receives inline <code>--ae-width</code> and <code>--ae-height</code> values as unitless numbers in pixels. After an update it dispatches <code>AelluxJsAdaptiveUpdate</code> from the element. Initial <code>ae--*</code> classes are discarded before mounting. Unmounting removes the managed classes and restores the initial <code>aria-orientation</code>, <code>--ae-width</code>, and <code>--ae-height</code> values and priorities; unrelated classes and inline styles are left as they are.</p>
@@ -848,10 +858,10 @@
 
           <div id="doc-navlinks2" ajax-load="doc-navlinks2">
             <div class="d-flex justify-content-between flex-row gap-2 p-2 pb-4 px-0">
-      <a href="/core/docs/0.1.x/extensions/legacy-variants.htm" class="text-decoration-none d-inline-flex flex-row gap-2" style="max-width: 45%;">
+      <a href="/core/docs/0.1.x/core-extensions/index.htm" class="text-decoration-none d-inline-flex flex-row gap-2" style="max-width: 45%;">
       ← <span class="text-decoration-underline text-truncate overflow-hidden d-inline-block align-middle flex-fill"
         style="max-width:200px" data-ae-overflow-marquee="80">
-        Modern &amp; Legacy Variants      </span>
+        Overview      </span>
     </a>
 
                   <a href="/core/docs/0.1.x/core-extensions/anchor.htm"

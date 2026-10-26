@@ -35,7 +35,7 @@
         <link rel="preconnect" href="https://cdn.jsdelivr.net">
 
 <link rel="preload" as="script" href="/core/dist/aellux.full.min.js"
-  integrity="sha384-8W+5QGB5VxTNFm7kn0eSlDB4cmu+eeZPOEap1GLRULyTIuoO2nMoQeb+4CmhWcp6" crossorigin="anonymous">
+  integrity="sha384-/EgOix3QlZtjoeNxjR0v0jee1G/Pa/iAOPWX5MjHn9BLMWc2sgSBv3Tnpbyv9wxo" crossorigin="anonymous">
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3/dist/css/bootstrap.min.css">
 <link rel="stylesheet" href="/core/docs/assets/docweaver/css/inline-style.css">
@@ -166,6 +166,7 @@
     }
   });
 </script>
+
 </head>
 
 <body>
@@ -506,6 +507,13 @@
                                           <div id="children-core-extensions" class="docs-menu-panel border-start ms-2"
                         data-ae-present="height opacity" data-ae-unpop-on-outside="false" >
                           <div class="ps-2 gap-1 d-flex flex-column overflow-hidden" data-ae-present-motion                            data-ae-present-group>
+                                                                                                  <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/core-extensions/index.htm" data-ae-overflow-marquee="190px">
+                                        Overview                                      </a>
+                                    </div>
 
                                   <div class="nav-item mt-1 small-md fw-bold rounded-1 ps-md-1 bg-light-adaptive"
                                     style="flex:0">
@@ -734,9 +742,11 @@
                     <a href="/core/docs/0.1.x/index.htm">
                       Home                    </a>
                   </li>
-                                                                            <li class="breadcrumb-item text-capitalize text-nowrap flex-shrink-0">
-                      Core Extensions                    </li>
-                                                                            <li class="breadcrumb-item text-capitalize text-nowrap flex-shrink-0">
+                                                                          <li class="breadcrumb-item text-capitalize text-nowrap flex-shrink-0">
+                    <a href="/core/docs/0.1.x/core-extensions/index.htm">
+                      Core Extensions                    </a>
+                  </li>
+                                                                          <li class="breadcrumb-item text-capitalize text-nowrap flex-shrink-0">
                     <a href="/core/docs/0.1.x/core-extensions/adaptive.htm">
                       Bundled Extensions                    </a>
                   </li>
@@ -767,7 +777,7 @@
             ajax-load="doc-content">
             <h1>Present Extension</h1>
 <p><strong>Distribution:</strong> Bundled Extension. <strong>Stability:</strong> Stable.</p>
-<p><code>present</code> controls the visibility of elements marked with <code>data-ae-present</code>. It is included in the <code>full</code> runtime, with CSS supplied by the shared Full stylesheet. Basic automatically registers this Extension for lazy loading; opt into its stylesheet with <code>$ae.ext(&quot;present&quot;, { loadStyle: true })</code>.</p>
+<p><code>present</code> controls the visibility of elements marked with <code>data-ae-present</code>. It is included in the <code>full</code> runtime, with CSS supplied by the shared Full stylesheet. In Basic, register it explicitly with <code>$ae.ext(&quot;present&quot;, { loadStyle: true })</code>. Supply <code>loadWhen</code> to choose a lazy activation selector, including trigger markup when needed.</p>
 <h2>Accessibility profile</h2>
 <ul>
 <li><strong>Capabilities:</strong> interaction and input; structure and state; motion and timing.</li>
@@ -786,7 +796,7 @@
 <p><code>data-ae-trigger</code> accepts <code>pop</code>, <code>unpop</code>, or <code>toggle</code>; an unrecognized value records a configuration warning and still toggles. <code>data-ae-target</code> and <code>data-ae-dismiss</code> each accept one element ID, with or without a leading <code>#</code> (for example, <code>details</code> or <code>#details</code>). Without an ID, a trigger or dismiss control acts on its closest <code>data-ae-present</code> container. Invalid, missing and incompatible targets are reported through diagnostics.</p>
 <p>A trigger or dismiss control with neither an ID nor a containing <code>data-ae-present</code> reports <code>ERROR_PRESENT_CONTROL_TARGET_MISSING</code> (<code>1111</code>).</p>
 <h2>Tap and native click</h2>
-<p>Present also consumes Point&#39;s <code>AelluxJsTap</code> notifications through the same trigger, dismiss and outside-activation routing as native click. Add <code>data-ae-point</code> to an eligible button, link or role button and mount it with Point. Both modes register Point and Present automatically; <code>data-ae-point</code> activates Point when mounted.</p>
+<p>Present also consumes Point&#39;s <code>AelluxJsTap</code> notifications through the same trigger, dismiss and outside-activation routing as native click. Add <code>data-ae-point</code> to an eligible button, link or role button and mount it with Point. Full registers Point and Present automatically; Basic requires explicit declarations for both Extensions.</p>
 <pre><code class="language-html">&lt;button type=&quot;button&quot; data-ae-point data-ae-trigger=&quot;toggle&quot; data-ae-target=&quot;details&quot;&gt;Details&lt;/button&gt;
 </code></pre>
 <p>Click keeps priority: Present queues a tap fallback with a 32 ms grace period, allowing touch compatibility clicks delivered in a later input task to arrive first. A click reaching Present before that fallback, on the same control or its descendants and with the same pointer ID when reported consistently, cancels the pending tap and performs the action immediately. WebKit can report a touch/pen compatibility click as mouse input with another ID; that pair is matched by its target within the same grace period. A tap without that click performs the action once when its fallback runs. Different controls and different IDs of the same pointer type remain independent, and a later gesture is accepted normally. This deduplication belongs to Present; Point continues to emit tap immediately and native click remains unchanged.</p>

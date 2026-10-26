@@ -25547,7 +25547,7 @@
           mountManager: mountManager
         });
         root2[root2.AelluxJs.shortJSName] = root2.AelluxJs;
-        registerCoreExtensions();
+        if (root2.AelluxJs.options.mode === "full") registerCoreExtensions();
         function registerCoreExtensions() {
           var api = root2.AelluxJs;
           var attr = function attr2(name2) {
@@ -25564,10 +25564,10 @@
               if (name === "present") {
                 loadWhen = ["present", "present-group", "trigger", "dismiss", "target"].map(attr).join(",");
               }
-              if (name === "state-navigation" || api.options.mode === "full" && name === "preference") loadWhen = null;
+              if (name === "state-navigation" || name === "preference") loadWhen = null;
               api.ext(name, {
                 loadWhen: loadWhen,
-                load: api.options.mode === "full"
+                load: true
               });
               api.registry.ext[key].automatic = true;
             }

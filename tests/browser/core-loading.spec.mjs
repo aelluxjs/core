@@ -6,7 +6,7 @@ const keys = officialExtensionDefinitions.map(({ name }) =>
 
 for (const boot of ["aellux.js", "aellux.min.js"]) for (const forceLegacy of [false, true]) {
   for (const mode of ["basic", "full"]) {
-    test(`${mode} ${boot} registers Core and loads matching markup (Legacy=${forceLegacy})`, async ({ page }) => {
+    test(`${mode} ${boot} honors its registration policy (Legacy=${forceLegacy})`, async ({ page }) => {
       const scripts = [];
       page.on("request", request => {
         if (/\/aellux\.ext\..*\.js$/.test(request.url())) scripts.push(new URL(request.url()).pathname.split("/").pop());
@@ -23,11 +23,11 @@ for (const boot of ["aellux.js", "aellux.min.js"]) for (const forceLegacy of [fa
         });
       }, { mode, forceLegacy });
       expect(scripts).toEqual([]);
-      expect(await page.evaluate(() => Object.keys(AelluxJs.registry.ext).sort())).toEqual(keys);
-      expect(await page.evaluate(() => window.registeredAtAwake)).toEqual(keys);
+      expect(await page.evaluate(() => Object.keys(AelluxJs.registry.ext).sort())).toEqual(mode === "full" ? keys : []);
+      expect(await page.evaluate(() => window.registeredAtAwake)).toEqual(mode === "full" ? keys : []);
       if (mode === "basic") {
         expect(await page.evaluate(() => Object.keys(AelluxJs.ext))).toEqual([]);
-        expect(await page.evaluate(() => Object.values(AelluxJs.registry.ext).every(data => data.load === false))).toBe(true);
+        expect(await page.evaluate(() => Object.keys(AelluxJs.registry.lazyExtSelectors))).toEqual([]);
       }
       await page.evaluate(async () => {
         document.body.innerHTML = `<div id="scope">
@@ -40,6 +40,22 @@ for (const boot of ["aellux.js", "aellux.min.js"]) for (const forceLegacy of [fa
         await AelluxJs.mount(document.getElementById("scope"));
       });
       const loaded = ["point", "preference", "present", "scrollbox", "scrollboxSnap", "ajaxHref", "dialog", "pwa", "viewport"];
+      if (mode === "basic") {
+        expect(scripts).toEqual([]);
+        expect(await page.evaluate(() => Object.keys(AelluxJs.registry.ext))).toEqual([]);
+        expect(await page.evaluate(() => Object.keys(AelluxJs.ext))).toEqual([]);
+        expect(await page.evaluate(async () => AelluxJs.wait("point").catch(error => error.code))).toBe(1110);
+        await page.evaluate(async () => {
+          for (const [name, loadWhen] of [
+            ["point", "[data-ae-point]"], ["preference", "[data-ae-preference]"],
+            ["present", "[data-ae-trigger]"], ["scrollbox", "[data-ae-scrollbox]"],
+            ["scrollbox-snap", "[data-ae-scrollbox-snap]"], ["ajax-href", "a[data-ae-ajax-href]"],
+            ["dialog", "dialog"], ["pwa", "[data-ae-pwa]"], ["viewport", "[data-ae-viewport]"]
+          ]) AelluxJs.ext(name, { loadWhen });
+          await AelluxJs.mount(document.getElementById("scope"));
+        });
+        expect(await page.evaluate(() => Object.keys(AelluxJs.registry.ext).sort())).toEqual([...loaded].sort());
+      }
       expect(await page.evaluate(loaded => loaded.filter(key => !AelluxJs.ext[key]?.initialized), loaded)).toEqual([]);
       const suffix = `${forceLegacy ? ".legacy" : ""}${boot.includes(".min.") ? ".min" : ""}.js`;
       const external = mode === "full" ? ["ajax-href", "dialog", "pwa", "viewport"] :
@@ -48,6 +64,7 @@ for (const boot of ["aellux.js", "aellux.min.js"]) for (const forceLegacy of [fa
       await page.evaluate(() => AelluxJs.mount(document.getElementById("scope")));
       expect(scripts).toHaveLength(external.length);
       if (mode === "basic") {
+        await page.evaluate(() => AelluxJs.ext("state-navigation", { load: false }));
         expect(await page.evaluate(async () => !!(await AelluxJs.wait("state-navigation")))).toBe(true);
         expect(scripts).toContain(`aellux.ext.state-navigation${suffix}`);
       }
@@ -55,7 +72,7 @@ for (const boot of ["aellux.js", "aellux.min.js"]) for (const forceLegacy of [fa
   }
 }
 
-test("host declarations override unused defaults and retain explicit styles and selectors", async ({ page }) => {
+test("Basic accepts only host declarations and retains explicit styles and selectors", async ({ page }) => {
   await page.goto("/tests/index.htm");
   await page.addScriptTag({ url: "/dist/aellux.js" });
   const result = await page.evaluate(async () => {
@@ -72,8 +89,10 @@ test("host declarations override unused defaults and retain explicit styles and 
       anchor: AelluxJs.registry.ext.anchor.loadWhen,
       style: AelluxJs.registry.ext.anchor.loadStyle,
       preference: AelluxJs.registry.ext.preference.load,
+      registered: Object.keys(AelluxJs.registry.ext).sort(),
       errors: AelluxJs.diagnostics.showHistory().filter(entry => entry.code === 1101)
     };
   });
-  expect(result).toEqual({ feedback: "#custom-feedback", anchor: "#custom-anchor", style: "true", preference: false, errors: [] });
+  expect(result).toEqual({ feedback: "#custom-feedback", anchor: "#custom-anchor", style: "true", preference: false,
+    registered: ["anchor", "feedback", "preference"], errors: [] });
 });

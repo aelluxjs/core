@@ -2,7 +2,7 @@
 
 **Distribution:** Bundled Extension. **Stability:** Stable.
 
-`present` controls the visibility of elements marked with `data-ae-present`. It is included in the `full` runtime, with CSS supplied by the shared Full stylesheet. Basic automatically registers this Extension for lazy loading; opt into its stylesheet with `$ae.ext("present", { loadStyle: true })`.
+`present` controls the visibility of elements marked with `data-ae-present`. It is included in the `full` runtime, with CSS supplied by the shared Full stylesheet. In Basic, register it explicitly with `$ae.ext("present", { loadStyle: true })`. Supply `loadWhen` to choose a lazy activation selector, including trigger markup when needed.
 
 ## Accessibility profile
 
@@ -27,7 +27,7 @@ A trigger or dismiss control with neither an ID nor a containing `data-ae-presen
 
 ## Tap and native click
 
-Present also consumes Point's `AelluxJsTap` notifications through the same trigger, dismiss and outside-activation routing as native click. Add `data-ae-point` to an eligible button, link or role button and mount it with Point. Both modes register Point and Present automatically; `data-ae-point` activates Point when mounted.
+Present also consumes Point's `AelluxJsTap` notifications through the same trigger, dismiss and outside-activation routing as native click. Add `data-ae-point` to an eligible button, link or role button and mount it with Point. Full registers Point and Present automatically; Basic requires explicit declarations for both Extensions.
 
 ```html
 <button type="button" data-ae-point data-ae-trigger="toggle" data-ae-target="details">Details</button>

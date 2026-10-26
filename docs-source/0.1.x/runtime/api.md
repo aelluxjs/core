@@ -36,7 +36,7 @@ $ae.offEvent(window, "$resize", onResize);
 $ae.init({ mode: "full" });
 ```
 
-Supported runtime modes are `full` and `basic`. See [Getting Started](../getting-started.md) for their loading behavior.
+Supported runtime modes are `full` and `basic`. Full registers the official Extensions automatically. Basic starts with no Extension registrations: declare each desired Extension through `$ae.ext(...)` or a link declaration before loading it. See [Getting Started](../getting-started.md) for their loading behavior.
 The optional `crossOrigin` initialization setting controls the `crossorigin` attribute on runtime and Extension assets; integrity-protected assets use `anonymous` by default. See [CSP and Extension trust](../extensions/csp-and-trust.md#subresource-integrity).
 The `autoViewportMeta` option defaults to `true`. During initialization, the boot checks for `<meta name="viewport">` and adds `<meta name="viewport" content="width=device-width, initial-scale=1">` when it is absent. Set `autoViewportMeta: false` to leave the document head unchanged.
 The `skipGlobalMount` option defaults to `false`. Set it to `true` to finish orchestrator initialization and dispatch `Ready` without automatically mounting the document. Call `$ae.mount(document)` later to mount it explicitly.

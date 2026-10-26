@@ -22,11 +22,12 @@ aellux.js does not require or bundle [Bootstrap](https://getbootstrap.com/). Its
 </script>
 ```
 
-Use `full` to make all fifteen official Core Extensions available without separate registration. **Bundled Extensions** are included in the Full JavaScript bundle: Adaptive, Anchor, Overflow Marquee, Feedback, Focus, Point, Preference, Present, Scrollbox, Scrollbox Snap and State Navigation. **Optional Extensions** (Ajax Href, Dialog, PWA and Viewport) load separate signed scripts when matching elements are mounted. These names describe delivery, rather than maturity or stability. [PWA](docs-source/0.1.x/core-extensions/optional/pwa.md) keeps its page code and independent reusable Service Worker outside Full/Core and shared CSS. See [Getting Started](docs-source/0.1.x/getting-started.md) for the loading details. Use `basic` to register all Core Extensions automatically for lazy loading:
+Use `full` to make all fifteen official Core Extensions available without separate registration. **Bundled Extensions** are included in the Full JavaScript bundle: Adaptive, Anchor, Overflow Marquee, Feedback, Focus, Point, Preference, Present, Scrollbox, Scrollbox Snap and State Navigation. **Optional Extensions** (Ajax Href, Dialog, PWA and Viewport) load separate signed scripts when matching elements are mounted. These names describe delivery, rather than maturity or stability. [PWA](docs-source/0.1.x/core-extensions/optional/pwa.md) keeps its page code and independent reusable Service Worker outside Full/Core and shared CSS. See [Getting Started](docs-source/0.1.x/getting-started.md) for the loading details. Use `basic` to choose every Extension through explicit JavaScript or HTML declarations. Basic starts with no Extension registrations:
 
 ```html
 <script src="./dist/aellux.js"></script>
 <script>
+  $ae.ext("scrollbox", { loadWhen: "[data-ae-scrollbox]", loadStyle: true });
   $ae.init({ mode: "basic" });
 </script>
 ```
@@ -47,6 +48,7 @@ See [Getting Started](docs-source/0.1.x/getting-started.md) for build instructio
 
 - [Published documentation](https://aelluxjs.github.io/core/docs/0.1.x/)
 - [Documentation source index](docs-source/0.1.x/README.md)
+- [Core Extensions, distribution and stability](docs-source/0.1.x/core-extensions/README.md)
 - [Beta compatibility](docs-source/0.1.x/compatibility.md)
 - [Runtime API](docs-source/0.1.x/runtime/api.md)
 - [Runtime and Extension events](docs-source/0.1.x/runtime/events.md)

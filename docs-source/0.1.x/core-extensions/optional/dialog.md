@@ -6,9 +6,9 @@ Dialog mounts native `<dialog>` elements without requiring `data-ae-dialog`. It 
 
 ## Loading and mounting
 
-In Full and Basic modes, mounting a subtree containing `<dialog>` loads the compatible Optional Dialog Extension on demand. Pages without dialogs do not request its script. Its implementation stays outside the Full bundle.
+Full registers the Optional Dialog Extension for lazy loading when a subtree containing `<dialog>` is mounted. Basic requires explicit registration and can use the same selector. With lazy registration, pages without dialogs do not request its script. Its implementation stays outside the Full bundle.
 
-Both modes register Dialog automatically:
+Declare Dialog explicitly when using Basic:
 
 ```html
 <dialog id="example" aria-labelledby="example-title">
@@ -17,6 +17,7 @@ Both modes register Dialog automatically:
 </dialog>
 <script src="./dist/aellux.js"></script>
 <script>
+  $ae.ext("dialog", { loadWhen: "dialog" });
   $ae.init({ mode: "basic" });
 </script>
 ```

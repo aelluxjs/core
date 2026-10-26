@@ -4,6 +4,7 @@ async function setup(page, markup, forceLegacy = false, fallback = false, events
   await page.goto("/tests/index.htm");
   await page.addScriptTag({ url: "/dist/aellux.js" });
   await page.evaluate(async ({ forceLegacy, fallback, events }) => {
+    AelluxJs.ext("viewport", { loadWhen: "[data-ae-viewport]" });
     await new Promise(resolve => {
       AelluxJs.on("Ready", resolve, { once: true });
       AelluxJs.init({ mode: "basic", forceLegacy, environment: "development" });
@@ -351,6 +352,10 @@ for (const legacy of [false, true]) test.describe(`Viewport ${legacy ? "Legacy" 
       style="width:200px;height:100px;overflow:auto"><div style="display:flex;width:600px">
       ${[0, 1, 2].map(i => `<article id="item${i}" data-ae-snap-item style="flex:none;width:200px;height:100px"></article>`).join("")}
       </div></div>`, legacy);
+    await page.evaluate(async () => {
+      AelluxJs.ext("scrollbox-snap");
+      await AelluxJs.mount(document.getElementById("box"));
+    });
     expect(await page.evaluate(() => !!AelluxJs.ext.viewport)).toBe(false);
     await page.evaluate(() => AelluxJs.mountManager.controller("box").scrollbox.goto(1));
     await expect.poll(() => page.locator("#box").evaluate(el => el.scrollLeft)).toBe(200);

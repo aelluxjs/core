@@ -48,6 +48,7 @@ All notable changes to aellux.js will be documented in this file.
 
 ### Changed
 
+- Basic starts with no Extension registrations. Applications explicitly declare each desired Extension through `$ae.ext(...)` or `<link rel="aelluxjs-ext">`, choosing eager loading, a `loadWhen` selector or a deferred `load: false` request. Official metadata still resolves declared names and their compatible signed artifacts.
 - Raised only the affected Orchestrator and Full bundle limits for shared transform diagnostics and integration fixes; the diagnostics guide records previous limits and measured raw/gzip costs.
 - AJAX Href commits history only when the first response region is accepted for replacement; network failures, missing response regions and total unmount vetoes preserve the URL. Superseded responses cannot replace current content. Busy/progress Feedback calls use the public argument order.
 - Scrollbox Snap observes item sizes as well as its viewport so item geometry variables refresh when content resizes independently.

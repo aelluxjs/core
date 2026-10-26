@@ -30,16 +30,29 @@ Full automatically loads `aellux.full.css` (or `.min.css` with the minified boot
 
 ## Basic Mode
 
-Basic mode loads the orchestrator and automatically registers both Bundled and Optional Extensions for lazy loading from separate files when matching markup is mounted:
+Basic mode loads the orchestrator with no Extension registrations. Declare each Extension through `$ae.ext(...)` or `<link rel="aelluxjs-ext">`. Markup attributes alone do not register or load Extensions. For example, register Scrollbox with its stylesheet and an explicit lazy selector:
 
 ```html
 <script src="./dist/aellux.js"></script>
 <script>
+  $ae.ext("scrollbox", { loadWhen: "[data-ae-scrollbox]", loadStyle: true });
   $ae.init({ mode: "basic" });
 </script>
 ```
 
-State Navigation has no HTML selector; load it explicitly with `await $ae.wait("state-navigation")` when history integration is needed. Preference activates through `[data-ae-preference]`. Explicit registrations before initialization can customize selectors, eager loading and styles. Basic Extension styles remain opt-in with `{ loadStyle: true }`.
+`$ae.ext(name)` registers an Extension for eager loading during mounting. Supply `loadWhen` to load it only when your selector matches, or `load: false` to defer it until an explicit `$ae.wait(name)`. Registrations can be made before initialization or before a later mount. `$ae.wait(name)` requires an existing registration.
+
+State Navigation has no HTML selector. Register it explicitly when history integration is needed:
+
+```js
+$ae.ext("state-navigation", { load: false });
+$ae.on("Ready", async () => {
+  await $ae.wait("state-navigation");
+});
+$ae.init({ mode: "basic" });
+```
+
+Basic Extension styles remain opt-in with `{ loadStyle: true }`. Selected Extensions can declare and load their own required Extension dependencies; see [Extension dependencies](extensions/registration.md#extension-dependencies).
 
 Use `aellux.min.js` to select the matching minified runtime and Extension files.
 
