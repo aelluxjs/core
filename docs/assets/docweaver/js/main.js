@@ -15,18 +15,41 @@ const tocbotReady = (async () => {
 });
 
 const highlightReady = (async () => {
-  const cssUrl = "https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.12/styles/github-dark.min.css";
   const baseUrl = "https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.12/";
-  await AelluxJs.dep("highlightjs", `${baseUrl}highlight.min.js`);
+  const cssUrl = baseUrl + "styles/github.min.css";
+  const cssDarkUrl = baseUrl + "styles/github-dark.min.css";
+  await Promise.all([
+    AelluxJs.dep("highlightjs", `${baseUrl}highlight.min.js`),
+    AelluxJs.dep("highlightjs-css", cssUrl),
+    AelluxJs.dep("highlightjs-css-dark", cssDarkUrl)
+  ]);
   await Promise.all(["xml", "json", "bash", "javascript"].map(language =>
     AelluxJs.dep(`highlightjs-${language}`, `${baseUrl}languages/${language}.min.js`)
   ));
-  await AelluxJs.dep("highlightjs-css", cssUrl);
+
+  if ("preference" in AelluxJs.ext) {
+    updateHljsScheme();
+    AelluxJs.on("PreferencesChange", updateHljsScheme);
+  }
+
   return window.hljs;
 })().catch(error => {
   console.error("Failed to load syntax highlighting.", error);
   return null;
 });
+
+async function updateHljsScheme() {
+  const colorScheme = $ae.ext.preference.get("color-scheme");
+  const light = document.querySelector("[dep='highlightjs-css']");
+  const dark = document.querySelector("[dep='highlightjs-dark-css']");
+  if (colorScheme === "dark") {
+    light.removeAttribute("disabled");
+    dark.setAttribute("disabled", "disabled");
+  } else {
+    dark.removeAttribute("disabled");
+    light.setAttribute("disabled", "disabled");
+  }
+}
 
 async function highlightCode() {
   const highlighter = await highlightReady;
