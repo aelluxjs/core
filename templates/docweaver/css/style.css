@@ -348,9 +348,10 @@ body:after {
   pointer-events: none;
 }
 
-.code-wrapper {
-  background: #0d1117;
-  border-radius: 3px;
+.code-wrapper {}
+
+html[data-ae-color-scheme='light'] .hljs {
+  background: rgba(255 255 255 /95%) !important;
 }
 
 pre {
