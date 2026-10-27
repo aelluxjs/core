@@ -191,23 +191,23 @@
     }
     function _destroy() {
       _destroy = _asyncToGenerator(/* @__PURE__ */ _regenerator().m(function _callee() {
-        var _iterator3, _step3, operation;
+        var _iterator2, _step2, operation;
         return _regenerator().w(function(_context) {
           while (1) switch (_context.n) {
             case 0:
               AelluxJs.mountManager.remove({
                 extensionName: extensionName
               });
-              _iterator3 = _createForOfIteratorHelper(motionOperations.values());
+              _iterator2 = _createForOfIteratorHelper(motionOperations.values());
               try {
-                for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
-                  operation = _step3.value;
+                for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
+                  operation = _step2.value;
                   AelluxJs.motion.cancel(operation.id);
                 }
               } catch (err) {
-                _iterator3.e(err);
+                _iterator2.e(err);
               } finally {
-                _iterator3.f();
+                _iterator2.f();
               }
               motionOperations.clear();
               handlers.clear();
@@ -280,18 +280,8 @@
           var presentElement = AelluxJs.elementOrId(presentTarget);
           if (presentElement) present.pop(presentElement);
         } else {
-          var targets = /* @__PURE__ */ new Set([messageElement === null || messageElement === void 0 ? void 0 : messageElement.closest(presentSelector), transformElement === null || transformElement === void 0 ? void 0 : transformElement.closest(presentSelector)]);
-          var _iterator2 = _createForOfIteratorHelper(targets), _step2;
-          try {
-            for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
-              var _target = _step2.value;
-              if (_target) present.pop(_target);
-            }
-          } catch (err) {
-            _iterator2.e(err);
-          } finally {
-            _iterator2.f();
-          }
+          var _target = (messageElement === null || messageElement === void 0 ? void 0 : messageElement.closest(presentSelector)) || (transformElement === null || transformElement === void 0 ? void 0 : transformElement.closest(presentSelector));
+          if (_target) present.pop(_target);
         }
       }
       if (transformElement) {

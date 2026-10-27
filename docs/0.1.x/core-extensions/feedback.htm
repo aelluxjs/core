@@ -41,7 +41,7 @@
   integrity="sha384-/EgOix3QlZtjoeNxjR0v0jee1G/Pa/iAOPWX5MjHn9BLMWc2sgSBv3Tnpbyv9wxo" crossorigin="anonymous">
 </head>
 
-<body data-ae-feedback data-ae-message-target="#toast-message">
+<body data-ae-feedback data-ae-message-target="#toast-message" data-ae-present-target>
 
   <svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute">
   <symbol id="bi-circle-half" fill="currentColor"
@@ -705,14 +705,14 @@ controller.feedback.send({ type: &quot;progress&quot;, message: &quot;Uploading&
 </tr>
 <tr>
 <td>Empty or whitespace-only</td>
-<td>Find the closest <code>data-ae-present</code> element for each resolved message and transform target, including the target itself. Request pop once per distinct Present element.</td>
+<td>Use the message target&#39;s closest <code>data-ae-present</code> element, including the target itself. If none exists, use the transform target&#39;s closest Present element. Request pop only on that element.</td>
 </tr>
 <tr>
 <td>Element ID, with or without <code>#</code></td>
 <td>Request pop only on that element.</td>
 </tr>
 </tbody></table>
-<p>Feedback updates the text and type classes before requesting the pop, then starts any requested feedback motion. The call also applies when the Present target is already open, following the usual Present replay behavior, auto-unpop timing, groups and cancelable <code>BeforePop</code> event. Feedback does not await the transition. Present must already be initialized and targets mounted; its public API ignores unmounted elements. In Basic, explicitly register Present as well as Feedback. If Present is unavailable, message and motion handling still run. An invalid explicit target ID records <code>2011</code> when Present is initialized. Automatic discovery skips unresolved message/transform targets and does not open further ancestors above their nearest Present element.</p>
+<p>Feedback updates the text and type classes before requesting the pop, then starts any requested feedback motion. The call also applies when the Present target is already open, following the usual Present replay behavior, auto-unpop timing, groups and cancelable <code>BeforePop</code> event. Feedback does not await the transition. Present must already be initialized and targets mounted; its public API ignores unmounted elements. In Basic, explicitly register Present as well as Feedback. If Present is unavailable, message and motion handling still run. An invalid explicit target ID records <code>2011</code> when Present is initialized. Automatic discovery falls back to the transform target when the message target is unresolved or has no closest Present element. It does not open additional Present elements or search above the selected nearest container.</p>
 <pre><code class="language-html">&lt;section data-ae-feedback
          data-ae-message-target=&quot;status-message&quot;
          data-ae-transform-target=&quot;status-message&quot;

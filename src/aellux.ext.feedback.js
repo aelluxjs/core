@@ -118,11 +118,9 @@
         const presentElement = AelluxJs.elementOrId(presentTarget);
         if (presentElement) present.pop(presentElement);
       } else {
-        const targets = new Set([
-          messageElement?.closest(presentSelector),
-          transformElement?.closest(presentSelector)
-        ]);
-        for (const target of targets) if (target) present.pop(target);
+        const target = messageElement?.closest(presentSelector) ||
+          transformElement?.closest(presentSelector);
+        if (target) present.pop(target);
       }
     }
 

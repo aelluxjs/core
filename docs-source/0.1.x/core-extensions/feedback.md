@@ -60,10 +60,10 @@ Set `data-ae-present-target` on the boundary to request `Present.pop()` for each
 | Attribute | Present behavior |
 | --- | --- |
 | Omitted | No Present request. |
-| Empty or whitespace-only | Find the closest `data-ae-present` element for each resolved message and transform target, including the target itself. Request pop once per distinct Present element. |
+| Empty or whitespace-only | Use the message target's closest `data-ae-present` element, including the target itself. If none exists, use the transform target's closest Present element. Request pop only on that element. |
 | Element ID, with or without `#` | Request pop only on that element. |
 
-Feedback updates the text and type classes before requesting the pop, then starts any requested feedback motion. The call also applies when the Present target is already open, following the usual Present replay behavior, auto-unpop timing, groups and cancelable `BeforePop` event. Feedback does not await the transition. Present must already be initialized and targets mounted; its public API ignores unmounted elements. In Basic, explicitly register Present as well as Feedback. If Present is unavailable, message and motion handling still run. An invalid explicit target ID records `2011` when Present is initialized. Automatic discovery skips unresolved message/transform targets and does not open further ancestors above their nearest Present element.
+Feedback updates the text and type classes before requesting the pop, then starts any requested feedback motion. The call also applies when the Present target is already open, following the usual Present replay behavior, auto-unpop timing, groups and cancelable `BeforePop` event. Feedback does not await the transition. Present must already be initialized and targets mounted; its public API ignores unmounted elements. In Basic, explicitly register Present as well as Feedback. If Present is unavailable, message and motion handling still run. An invalid explicit target ID records `2011` when Present is initialized. Automatic discovery falls back to the transform target when the message target is unresolved or has no closest Present element. It does not open additional Present elements or search above the selected nearest container.
 
 ```html
 <section data-ae-feedback

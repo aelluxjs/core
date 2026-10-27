@@ -207,13 +207,13 @@ for (const options of [
     expect(result).toEqual({ calls: 0, hidden: true, message: "default targets" });
   });
 
-  test(`empty present target discovers nearest containers and deduplicates shared targets (${label})`, async ({ page }) => {
+  test(`empty present target prefers the message container and falls back to the transform container (${label})`, async ({ page }) => {
     await startFeedback(page, `<section id="boundary" data-ae-feedback data-ae-message-target="message"
       data-ae-transform-target="motion" data-ae-present-target=""></section>
       <aside id="outer" data-ae-present hidden>
         <aside id="message-panel" data-ae-present hidden><p id="message"></p></aside>
         <aside id="motion-panel" data-ae-present hidden><span id="motion"></span></aside>
-      </aside>`, options);
+      </aside><p id="outside"></p>`, options);
     const result = await page.evaluate(async () => {
       const boundary = document.getElementById("boundary");
       const panels = ["message-panel", "motion-panel"].map(id => document.getElementById(id));
@@ -223,8 +223,8 @@ for (const options of [
       function opened(panel) {
         return new Promise(resolve => panel.addEventListener(AelluxJs.eventName("Pop"), resolve, { once: true }));
       }
-      const separate = Promise.all(panels.map(opened));
-      AelluxJs.ext.feedback.error("separate", boundary);
+      const separate = opened(panels[0]);
+      $ae(boundary).feedback.error("separate");
       await separate;
       const first = panels.map(panel => !panel.hidden);
       boundary.setAttribute("data-ae-present-target", "   ");
@@ -232,12 +232,21 @@ for (const options of [
       const shared = opened(panels[0]);
       AelluxJs.ext.feedback.error("shared", boundary, null, "shake");
       await shared;
+      boundary.setAttribute("data-ae-transform-target", "motion");
+      boundary.setAttribute("data-ae-message-target", "outside");
+      const fallback = opened(panels[1]);
+      $ae(boundary).feedback.error("fallback");
+      await fallback;
+      boundary.setAttribute("data-ae-message-target", "missing-message");
+      const missing = opened(panels[1]);
+      $ae(boundary).feedback.error("missing");
+      await missing;
       return { calls, first, outerHidden: document.getElementById("outer").hidden,
         message: document.getElementById("message").textContent,
         invalidIDs: AelluxJs.diagnostics.showHistory().filter(entry => entry.code === 2011).length };
     });
-    expect(result).toEqual({ calls: ["message-panel", "motion-panel", "message-panel"], first: [true, true],
-      outerHidden: true, message: "shared", invalidIDs: 0 });
+    expect(result).toEqual({ calls: ["message-panel", "message-panel", "motion-panel", "motion-panel"], first: [true, false],
+      outerHidden: true, message: "shared", invalidIDs: 1 });
   });
 
   test(`empty present target supports the boundary itself and ignores unmounted containers (${label})`, async ({ page }) => {

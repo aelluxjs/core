@@ -622,11 +622,8 @@
               const presentElement = AelluxJs2.elementOrId(presentTarget);
               if (presentElement) present.pop(presentElement);
             } else {
-              const targets = /* @__PURE__ */ new Set([
-                messageElement == null ? void 0 : messageElement.closest(presentSelector),
-                transformElement == null ? void 0 : transformElement.closest(presentSelector)
-              ]);
-              for (const target of targets) if (target) present.pop(target);
+              const target = (messageElement == null ? void 0 : messageElement.closest(presentSelector)) || (transformElement == null ? void 0 : transformElement.closest(presentSelector));
+              if (target) present.pop(target);
             }
           }
           if (transformElement) {

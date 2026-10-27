@@ -123,7 +123,7 @@ AelluxJs.on("AjaxHrefComplete", (e) => {
 });
 
 AelluxJs.on("AjaxHrefError", (e) => {
-  $ae(document.body).feedback.error();
+  $ae(document.body).feedback.error("failed");
 });
 
 function comparableUrl(value) {
