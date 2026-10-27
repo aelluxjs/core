@@ -2,6 +2,7 @@
 
 import { createMountHelper } from "./create-mount-helper.js";
 import { resolveElementOrId } from "./resolve-element-or-id.js";
+import { validateSelector } from "./create-selector-helper.js";
 import utilsNameCase from "./utils-name-case.js";
 
 export function buildMountMapManager(root) {
@@ -133,13 +134,8 @@ export function buildMountMapManager(root) {
       return reject("extensionName");
     if (!Object.prototype.hasOwnProperty.call(root.AelluxJs.registry.ext, key))
       return reject("extensionName");
-    if (typeof selector !== "string" || !selector.trim())
-      return reject("selector");
-    try {
-      root.document.querySelector(selector);
-    } catch (cause) {
-      return reject("selector", cause);
-    }
+    const invalidSelector = validateSelector(root.document, selector);
+    if (invalidSelector) return reject("selector", invalidSelector.cause);
     if (typeof mount !== "function") return reject("mount");
     if (typeof priority !== "number" || !isFinite(priority)) return reject("priority");
     if (unmount !== undefined && typeof unmount !== "function") return reject("unmount");

@@ -517,6 +517,91 @@ function resolveElementOrId(root2, elementOrId, options) {
   return null;
 }
 
+// src/internal/create-selector-helper.js
+/*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+function validateSelector(document2, value) {
+  if (typeof value !== "string" || !value.trim())
+    return { value, reason: "Expected a nonempty selector string." };
+  try {
+    document2.querySelector(value);
+    return null;
+  } catch (cause) {
+    return { value, reason: "Invalid CSS selector.", cause };
+  }
+}
+function createSelectorHelper(document2) {
+  function isValidSelector(value) {
+    return validateSelector(document2, value) === null;
+  }
+  function parseSelectors(value, onInvalid) {
+    var list = [];
+    var inputs = Array.isArray(value) ? value : [value];
+    function reject(input2, reason, cause) {
+      if (typeof onInvalid === "function")
+        onInvalid({ value: input2, reason, cause });
+      return null;
+    }
+    function append(input2, start2, end) {
+      var selector = input2.slice(start2, end).trim();
+      var invalid = validateSelector(document2, selector);
+      if (invalid) {
+        reject(input2, "Invalid CSS selector.", invalid.cause);
+        return false;
+      }
+      if (list.indexOf(selector) === -1) list.push(selector);
+      return true;
+    }
+    for (var inputIndex = 0; inputIndex < inputs.length; inputIndex++) {
+      var input = inputs[inputIndex];
+      if (typeof input !== "string" || !input.trim())
+        return reject(input, "Expected a nonempty selector string or array of strings.");
+      var start = 0, stack = [], quote = null, comment = false;
+      for (var index = 0; index < input.length; index++) {
+        var char = input[index];
+        if (comment) {
+          if (char === "*" && input[index + 1] === "/") {
+            comment = false;
+            index++;
+          }
+          continue;
+        }
+        if (char === "\\") {
+          index++;
+          continue;
+        }
+        if (quote) {
+          if (char === quote) quote = null;
+          continue;
+        }
+        if (char === "/" && input[index + 1] === "*") {
+          comment = true;
+          index++;
+          continue;
+        }
+        if (char === '"' || char === "'") {
+          quote = char;
+          continue;
+        }
+        if (char === "(" || char === "[") stack.push(char);
+        if (char === ")" || char === "]") {
+          if (stack.pop() !== (char === ")" ? "(" : "["))
+            return reject(input, "Invalid CSS selector.");
+        }
+        if (char === "," && !stack.length) {
+          if (!append(input, start, index)) return null;
+          start = index + 1;
+        }
+      }
+      if (!append(input, start, input.length)) return null;
+      if (quote || stack.length || comment)
+        return reject(input, "Unbalanced CSS selector.");
+    }
+    if (!list.length) return reject(value, "Expected at least one CSS selector.");
+    return list;
+  }
+  return { isValidSelector, parseSelectors };
+}
+
 // src/internal/aellux-api-integration.js
 /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
 function createAelluxApi(root2, constants) {
@@ -527,6 +612,7 @@ function createAelluxApi(root2, constants) {
   var diagnostics = buildDiagnostics(constants.AELLUXJS_DIAGNOSTICS);
   var oldShortInstance = root2[constants.AELLUXJS_SHORT_JS_NAME];
   var document2 = root2.document;
+  var selectors = createSelectorHelper(document2);
   var preferenceHtml = createPreferenceHtmlHelper(root2, function() {
     return api;
   });
@@ -555,6 +641,8 @@ function createAelluxApi(root2, constants) {
     updatePreferenceAttributesHTML: preferenceHtml.updatePreferenceAttributesHTML,
     currentPreference: preferenceHtml.currentPreference,
     elementOrId: (elementOrId, options2) => resolveElementOrId(root2, elementOrId, options2),
+    isValidSelector: selectors.isValidSelector,
+    parseSelectors: selectors.parseSelectors,
     on: function(event, handler, options2) {
       api.onEvent(document2, event, handler, options2);
     },
@@ -661,21 +749,13 @@ function createAelluxApi(root2, constants) {
       var explicitBuilds = Object.prototype.hasOwnProperty.call(options2, "builds");
       var selector = options2.loadWhen;
       if (selector !== null && typeof selector !== "undefined") {
-        if (typeof selector !== "string" || !selector.trim()) {
+        var invalidSelector = validateSelector(document2, selector);
+        if (invalidSelector) {
           diagnostics.error(diagnostics.ERROR_EXTENSION_LOAD_WHEN, {
             extension: name,
             selector,
-            expected: "a valid nonempty CSS selector"
-          });
-          return;
-        }
-        try {
-          document2.querySelector(selector);
-        } catch (cause) {
-          diagnostics.error(diagnostics.ERROR_EXTENSION_LOAD_WHEN, {
-            extension: name,
-            selector,
-            cause
+            cause: invalidSelector.cause,
+            expected: invalidSelector.cause ? void 0 : "a valid nonempty CSS selector"
           });
           return;
         }
@@ -805,23 +885,14 @@ function createAelluxApi(root2, constants) {
       var registration = api.registry.ext[key];
       var selector = registration && registration.loadWhen;
       if (selector !== null && typeof selector !== "undefined") {
-        if (typeof selector !== "string" || !selector.trim()) {
+        var invalidSelector = validateSelector(document2, selector);
+        if (invalidSelector) {
           diagnostics.error(diagnostics.ERROR_EXTENSION_ATTACH, {
             extension: name,
             argument: "loadWhen",
             selector,
-            expected: "a valid nonempty CSS selector"
-          });
-          return;
-        }
-        try {
-          document2.querySelector(selector);
-        } catch (cause) {
-          diagnostics.error(diagnostics.ERROR_EXTENSION_ATTACH, {
-            extension: name,
-            argument: "loadWhen",
-            selector,
-            cause
+            cause: invalidSelector.cause,
+            expected: invalidSelector.cause ? void 0 : "a valid nonempty CSS selector"
           });
           return;
         }

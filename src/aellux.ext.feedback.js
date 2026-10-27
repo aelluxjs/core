@@ -44,8 +44,10 @@
   const motionOperations = new Map();
   const motionIds = new WeakMap();
   const feedbackAttribute = AelluxJs.attr(extensionName);
-  const targetMessageAttribute = AelluxJs.attr("targetMessage");
-  const targetTransformAttribute = AelluxJs.attr("targetTransform");
+  const messageTargetAttribute = AelluxJs.attr("messageTarget");
+  const transformTargetAttribute = AelluxJs.attr("transformTarget");
+  const presentTargetAttribute = AelluxJs.attr("presentTarget");
+  const presentSelector = `[${AelluxJs.attr("present")}]`;
 
   function init() {
     AelluxJs.mountManager.add({
@@ -84,8 +86,8 @@
     event.stopPropagation();
     if (!event.detail) return;
     const { message, type, motion } = event.detail;
-    const messageTarget = element.getAttribute(targetMessageAttribute);
-    const transformTarget = element.getAttribute(targetTransformAttribute);
+    const messageTarget = element.getAttribute(messageTargetAttribute);
+    const transformTarget = element.getAttribute(transformTargetAttribute);
     const messageElement = AelluxJs.elementOrId(messageTarget, { defaultElement: element });
     const transformElement = AelluxJs.elementOrId(transformTarget, { defaultElement: element });
 
@@ -105,6 +107,21 @@
       const typeClass = AelluxJs.className(`feedback-${type}`);
       for (const target of [element, messageElement, transformElement]) {
         if (target) target.classList.add(typeClass);
+      }
+    }
+
+    const presentTarget = element.getAttribute(presentTargetAttribute);
+    const present = AelluxJs.ext.present;
+    if (presentTarget !== null && present?.initialized) {
+      if (presentTarget.trim()) {
+        const presentElement = AelluxJs.elementOrId(presentTarget);
+        if (presentElement) present.pop(presentElement);
+      } else {
+        const targets = new Set([
+          messageElement?.closest(presentSelector),
+          transformElement?.closest(presentSelector)
+        ]);
+        for (const target of targets) if (target) present.pop(target);
       }
     }
 

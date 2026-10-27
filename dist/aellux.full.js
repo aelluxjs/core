@@ -553,8 +553,10 @@
         const motionOperations = /* @__PURE__ */ new Map();
         const motionIds = /* @__PURE__ */ new WeakMap();
         const feedbackAttribute = AelluxJs2.attr(extensionName);
-        const targetMessageAttribute = AelluxJs2.attr("targetMessage");
-        const targetTransformAttribute = AelluxJs2.attr("targetTransform");
+        const messageTargetAttribute = AelluxJs2.attr("messageTarget");
+        const transformTargetAttribute = AelluxJs2.attr("transformTarget");
+        const presentTargetAttribute = AelluxJs2.attr("presentTarget");
+        const presentSelector = `[${AelluxJs2.attr("present")}]`;
         function init() {
           AelluxJs2.mountManager.add({
             extensionName,
@@ -591,8 +593,8 @@
           event.stopPropagation();
           if (!event.detail) return;
           const { message, type, motion } = event.detail;
-          const messageTarget = element.getAttribute(targetMessageAttribute);
-          const transformTarget = element.getAttribute(targetTransformAttribute);
+          const messageTarget = element.getAttribute(messageTargetAttribute);
+          const transformTarget = element.getAttribute(transformTargetAttribute);
           const messageElement = AelluxJs2.elementOrId(messageTarget, { defaultElement: element });
           const transformElement = AelluxJs2.elementOrId(transformTarget, { defaultElement: element });
           if (messageElement && typeof message === "string") {
@@ -610,6 +612,20 @@
             const typeClass = AelluxJs2.className(`feedback-${type}`);
             for (const target of [element, messageElement, transformElement]) {
               if (target) target.classList.add(typeClass);
+            }
+          }
+          const presentTarget = element.getAttribute(presentTargetAttribute);
+          const present = AelluxJs2.ext.present;
+          if (presentTarget !== null && (present == null ? void 0 : present.initialized)) {
+            if (presentTarget.trim()) {
+              const presentElement = AelluxJs2.elementOrId(presentTarget);
+              if (presentElement) present.pop(presentElement);
+            } else {
+              const targets = /* @__PURE__ */ new Set([
+                messageElement == null ? void 0 : messageElement.closest(presentSelector),
+                transformElement == null ? void 0 : transformElement.closest(presentSelector)
+              ]);
+              for (const target of targets) if (target) present.pop(target);
             }
           }
           if (transformElement) {
@@ -7200,8 +7216,9 @@
     point: "point",
     adaptive: "adaptive",
     "ajax-href": "ajax-href",
+    viewport: "viewport viewport-target",
     preference: "preference option label next prev ready",
-    feedback: "feedback target-message target-transform"
+    feedback: "feedback message-target transform-target present-target"
   };
   var coreAttributes = "maxfps wait-mounted ext ext-style dep load-when builds load-style weak-style full-style legacy esm theme-color";
   var activation = {
@@ -7214,6 +7231,7 @@
     point: "point",
     adaptive: "adaptive",
     "ajax-href": "ajax-href",
+    viewport: "viewport",
     preference: "preference",
     feedback: "feedback"
   };
@@ -7445,12 +7463,11 @@
         if (extension === "point" && value("point") !== "" && (!/^\d+$/.test(value("point")) || !Number.isSafeInteger(Number(value("point")))))
           invalid(extension, "point", "Pointer count must be a nonnegative integer.", "Use an integer such as 1; 0 disables pointer association.");
         if (extension === "ajax-href") {
-          try {
-            if (!value("ajax-href").trim() || !root2.document.querySelector(value("ajax-href")))
-              invalid(extension, "ajax-href", "No current content matches the AJAX selector.", "Provide a CSS selector present in both the current page and the response.");
-          } catch (_) {
+          const selectors = api.parseSelectors(value("ajax-href").trim() || "title,body");
+          if (!selectors) {
             invalid(extension, "ajax-href", "The AJAX selector is invalid.", "Provide a valid CSS selector such as #content.");
-          }
+          } else if (selectors.some((selector) => !root2.document.querySelector(selector)))
+            invalid(extension, "ajax-href", "No current content matches the AJAX selector.", "Provide a CSS selector present in both the current page and the response.");
         }
       }
       if ((!selected || selected.has("scrollbox")) && has("scrollbox-elastic") && value("scrollbox-elastic") !== "false" && !((_b = element.parentElement) == null ? void 0 : _b.hasAttribute(attr("scrollbox"))))
@@ -8055,6 +8072,19 @@
     }
   }
 
+  // src/internal/create-selector-helper.js
+  /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+  function validateSelector(document2, value) {
+    if (typeof value !== "string" || !value.trim())
+      return { value, reason: "Expected a nonempty selector string." };
+    try {
+      document2.querySelector(value);
+      return null;
+    } catch (cause) {
+      return { value, reason: "Invalid CSS selector.", cause };
+    }
+  }
+
   // src/internal/build-mount-map-manager.js
   init_utils_name_case();
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
@@ -8174,13 +8204,8 @@
         return reject("extensionName");
       if (!Object.prototype.hasOwnProperty.call(root2.AelluxJs.registry.ext, key))
         return reject("extensionName");
-      if (typeof selector !== "string" || !selector.trim())
-        return reject("selector");
-      try {
-        root2.document.querySelector(selector);
-      } catch (cause) {
-        return reject("selector", cause);
-      }
+      const invalidSelector = validateSelector(root2.document, selector);
+      if (invalidSelector) return reject("selector", invalidSelector.cause);
       if (typeof mount !== "function") return reject("mount");
       if (typeof priority !== "number" || !isFinite(priority)) return reject("priority");
       if (unmount !== void 0 && typeof unmount !== "function") return reject("unmount");

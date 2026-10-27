@@ -56,7 +56,8 @@ import { validateHTMLSource } from "./internal/validate-html-source.js";
 
   async function load(url, selectors, options = {}) {
     options = options || {};
-    const selectorList = parseSelectors(selectors);
+    const selectorList = AelluxJs.parseSelectors(selectors, invalid =>
+      selectorDiagnostic(invalid.value, invalid.reason));
     if (!selectorList) return null;
     const elements = new Map();
     for (const selector of selectorList) {
@@ -147,47 +148,6 @@ import { validateHTMLSource } from "./internal/validate-html-source.js";
       extension: extensionName, element, attribute, value, reason,
       suggestion: "Use valid CSS selectors identifying content in both the current document and the AJAX response."
     });
-  }
-
-  function parseSelectors(selectors) {
-    const list = [];
-    // Split only top-level commas, preserving :is(), attribute values and escapes.
-    for (const input of Array.isArray(selectors) ? selectors : [selectors]) {
-      if (typeof input !== "string" || !input.trim()) {
-        selectorDiagnostic(input, "Expected a nonempty selector string or array of strings.");
-        return null;
-      }
-      let start = 0, depth = 0, quote = null;
-      for (let index = 0; index <= input.length; index++) {
-        const char = input[index];
-        if (char === "\\") { index++; continue; }
-        if (quote) { if (char === quote) quote = null; continue; }
-        if (char === '"' || char === "'") { quote = char; continue; }
-        if (char === "(" || char === "[") depth++;
-        if (char === ")" || char === "]") depth--;
-        if (index === input.length || char === "," && depth === 0) {
-          const selector = input.slice(start, index).trim();
-          try {
-            if (!selector) throw new SyntaxError("Empty selector");
-            document.querySelector(selector);
-          } catch (_) {
-            selectorDiagnostic(input, "Invalid CSS selector.");
-            return null;
-          }
-          if (!list.includes(selector)) list.push(selector);
-          start = index + 1;
-        }
-      }
-      if (quote || depth !== 0) {
-        selectorDiagnostic(input, "Unbalanced CSS selector.");
-        return null;
-      }
-    }
-    if (!list.length) {
-      selectorDiagnostic(selectors, "Expected at least one CSS selector.");
-      return null;
-    }
-    return list;
   }
 
   function onClick(event) {

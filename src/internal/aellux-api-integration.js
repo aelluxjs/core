@@ -9,6 +9,7 @@ import { createNamingNormalization } from "./create-naming-normalization.js";
 import { createPreferenceHtmlHelper } from "./create-preference-html-helper.js";
 import { assetLoadHelper } from "./asset-load-helper.js";
 import { resolveElementOrId } from "./resolve-element-or-id.js";
+import { createSelectorHelper, validateSelector } from "./create-selector-helper.js";
 
 // Build-time imports aside, keep this factory ES5-compatible for the boot bundle.
 // The caller publishes the returned function and replaces init with the boot loader.
@@ -21,6 +22,7 @@ export function createAelluxApi(root, constants) {
   var diagnostics = buildDiagnostics(constants.AELLUXJS_DIAGNOSTICS);
   var oldShortInstance = root[constants.AELLUXJS_SHORT_JS_NAME];
   var document = root.document;
+  var selectors = createSelectorHelper(document);
   var preferenceHtml = createPreferenceHtmlHelper(root, function () { return api; });
 
   var api = function (elementOrId) {
@@ -46,6 +48,8 @@ export function createAelluxApi(root, constants) {
     updatePreferenceAttributesHTML: preferenceHtml.updatePreferenceAttributesHTML,
     currentPreference: preferenceHtml.currentPreference,
     elementOrId: (elementOrId, options) => resolveElementOrId(root, elementOrId, options),
+    isValidSelector: selectors.isValidSelector,
+    parseSelectors: selectors.parseSelectors,
     on: function (event, handler, options) {
       api.onEvent(document, event, handler, options);
     },
@@ -149,17 +153,11 @@ export function createAelluxApi(root, constants) {
       var explicitBuilds = Object.prototype.hasOwnProperty.call(options, "builds");
       var selector = options.loadWhen;
       if (selector !== null && typeof selector !== "undefined") {
-        if (typeof selector !== "string" || !selector.trim()) {
+        var invalidSelector = validateSelector(document, selector);
+        if (invalidSelector) {
           diagnostics.error(diagnostics.ERROR_EXTENSION_LOAD_WHEN, {
-            extension: name, selector: selector, expected: "a valid nonempty CSS selector"
-          });
-          return;
-        }
-        try {
-          document.querySelector(selector);
-        } catch (cause) {
-          diagnostics.error(diagnostics.ERROR_EXTENSION_LOAD_WHEN, {
-            extension: name, selector: selector, cause: cause
+            extension: name, selector: selector, cause: invalidSelector.cause,
+            expected: invalidSelector.cause ? undefined : "a valid nonempty CSS selector"
           });
           return;
         }
@@ -293,18 +291,12 @@ export function createAelluxApi(root, constants) {
       var registration = api.registry.ext[key];
       var selector = registration && registration.loadWhen;
       if (selector !== null && typeof selector !== "undefined") {
-        if (typeof selector !== "string" || !selector.trim()) {
+        var invalidSelector = validateSelector(document, selector);
+        if (invalidSelector) {
           diagnostics.error(diagnostics.ERROR_EXTENSION_ATTACH, {
             extension: name, argument: "loadWhen", selector: selector,
-            expected: "a valid nonempty CSS selector"
-          });
-          return;
-        }
-        try {
-          document.querySelector(selector);
-        } catch (cause) {
-          diagnostics.error(diagnostics.ERROR_EXTENSION_ATTACH, {
-            extension: name, argument: "loadWhen", selector: selector, cause: cause
+            cause: invalidSelector.cause,
+            expected: invalidSelector.cause ? undefined : "a valid nonempty CSS selector"
           });
           return;
         }

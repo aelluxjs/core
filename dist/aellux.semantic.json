@@ -2584,6 +2584,17 @@
       "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/runtime/wait-layout.htm"
     },
     {
+      "name": "data-ae-message-target",
+      "extension": "feedback",
+      "description": "One element ID, optionally prefixed with #, receiving message text. Omitted uses the boundary itself.",
+      "syntax": "id",
+      "examples": [
+        "status-message"
+      ],
+      "role": "input",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/feedback.htm"
+    },
+    {
       "name": "data-ae-next",
       "extension": "preference",
       "description": "Cycles forward through the enclosing preference's built-in values; use a keyboard-operable control.",
@@ -2765,6 +2776,19 @@
       "syntax": "presence",
       "role": "input",
       "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
+    },
+    {
+      "name": "data-ae-present-target",
+      "extension": "feedback",
+      "description": "One mounted Present element ID, optionally prefixed with #. Empty requests pop on the closest Present of each resolved message/transform target, once per distinct element. Omitted makes no Present request. Requires initialized Present.",
+      "syntax": "id",
+      "examples": [
+        "",
+        "status-panel",
+        "#status-panel"
+      ],
+      "role": "input",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/feedback.htm"
     },
     {
       "name": "data-ae-present-when",
@@ -3006,30 +3030,6 @@
       "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
     },
     {
-      "name": "data-ae-target-message",
-      "extension": "feedback",
-      "description": "One element ID, optionally prefixed with #, receiving message text. Empty uses the boundary itself.",
-      "syntax": "id",
-      "default": "",
-      "examples": [
-        "status-message"
-      ],
-      "role": "input",
-      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/feedback.htm"
-    },
-    {
-      "name": "data-ae-target-transform",
-      "extension": "feedback",
-      "description": "One element ID, optionally prefixed with #, receiving feedback classes and motion. Empty uses the boundary itself.",
-      "syntax": "id",
-      "default": "",
-      "examples": [
-        "status-icon"
-      ],
-      "role": "input",
-      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/feedback.htm"
-    },
-    {
       "name": "data-ae-theme-color",
       "extension": "core",
       "description": "Marker on the runtime-managed theme-color meta tag.",
@@ -3040,6 +3040,17 @@
       "role": "output",
       "doc": "runtime/api",
       "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/runtime/api.htm"
+    },
+    {
+      "name": "data-ae-transform-target",
+      "extension": "feedback",
+      "description": "One element ID, optionally prefixed with #, receiving feedback classes and motion. Omitted uses the boundary itself.",
+      "syntax": "id",
+      "examples": [
+        "status-icon"
+      ],
+      "role": "input",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/feedback.htm"
     },
     {
       "name": "data-ae-trigger",
@@ -3095,6 +3106,19 @@
         "y"
       ],
       "default": "both",
+      "doc": "core-extensions/viewport",
+      "role": "input",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/optional/viewport.htm"
+    },
+    {
+      "name": "data-ae-viewport-target",
+      "extension": "viewport",
+      "description": "Publishes CSS outputs on one existing element ID, optionally prefixed with #, instead of the observed element. Geometry and events remain on the observer. Retargeting restores previous inline styles; conflicting Viewport writers are rejected.",
+      "syntax": "id",
+      "examples": [
+        "indicator",
+        "#indicator"
+      ],
       "doc": "core-extensions/viewport",
       "role": "input",
       "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/optional/viewport.htm"

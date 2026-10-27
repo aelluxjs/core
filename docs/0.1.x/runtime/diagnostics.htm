@@ -41,7 +41,7 @@
   integrity="sha384-/EgOix3QlZtjoeNxjR0v0jee1G/Pa/iAOPWX5MjHn9BLMWc2sgSBv3Tnpbyv9wxo" crossorigin="anonymous">
 </head>
 
-<body>
+<body data-ae-feedback data-ae-message-target="#toast-message">
 
   <svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute">
   <symbol id="bi-circle-half" fill="currentColor"
@@ -79,6 +79,13 @@
       <header class="animation_header_test navbar navbar-expand-md d-flex flex-fill p-0 m-0 user-select-none bg-white"
         style=" --bar-color:#55606F; --bar-color2:var(--bs-link-color); --bar-bg:#F0F5F5;">
         <div class="container-fluid gap-2" style='z-index: 1;'>
+
+          <div id="toast-present" class="position-fixed w-100 p-4 d-flex justify-content-center align-items-center"
+            data-ae-present="opacity" data-ae-auto-unpop="1s" hidden="true">
+            <div id="toast-message" class="bg-light-adaptive text-body rounded-1 p-2 w-100" style="max-width: 300px;">
+              -
+            </div>
+          </div>
 
           <div class="me-auto d-flex flex-row gap-2 align-items-center">
 
@@ -794,7 +801,7 @@ $ae.init({ environment: &quot;production&quot;, verboseLevel: &quot;warn&quot; }
 <td><span class="large">Behaviors replace the same CSS resource on one element. The context identifies the <code>property</code> and its <code>writers</code>.</span></td>
 </tr>
 </tbody></table>
-<p><code>WARN_RESOURCE_CONFLICT</code> (<code>2033</code>) checks persistent transform writers without a separate ownership registry. Development mounts and explicit updates diagnose Present transform on a valid Elastic wrapper. When CSS Motion captures an actual replacing transform effect, it compares that effect with Anchor, Elastic and Present on the effect&#39;s target. Feedback passes its resolved <code>data-ae-target-transform</code> destination, so animating a child remains valid. This works with controlled and native CSS Motion when Web Animations exposes keyframes. Opacity-only effects, additive composition, pseudo-elements and separate targets are excluded. Reduced motion with no active effect emits no motion conflict. Browsers without inspectable effects skip this runtime check; production skips all resource checks.</p>
+<p><code>WARN_RESOURCE_CONFLICT</code> (<code>2033</code>) checks persistent transform writers without a separate ownership registry. Development mounts and explicit updates diagnose Present transform on a valid Elastic wrapper. When CSS Motion captures an actual replacing transform effect, it compares that effect with Anchor, Elastic and Present on the effect&#39;s target. Feedback passes its resolved <code>data-ae-transform-target</code> destination, so animating a child remains valid. This works with controlled and native CSS Motion when Web Animations exposes keyframes. Opacity-only effects, additive composition, pseudo-elements and separate targets are excluded. Reduced motion with no active effect emits no motion conflict. Browsers without inspectable effects skip this runtime check; production skips all resource checks.</p>
 <p>The checks report incompatible composition and preserve the requested animation. Move visual animation onto a child to keep positioning and elastic transforms independent. They do not automatically merge transforms, inspect arbitrary application animations outside CSS Motion, or infer a conflict merely from two Extension declarations.</p>
 <p><code>WARN_ATTRIBUTE_DUPLICATE</code> (<code>2032</code>) inspects original HTML text in development, since duplicate attributes no longer exist in the parsed DOM. After the first unscoped document mount, Core makes one asynchronous GET for the initial document URL with <code>cache: &quot;force-cache&quot;</code>, preferring the HTTP cache. This inspection does not delay mounting or <code>Ready</code>; unavailable source is skipped without failing the mount. Scoped mounts and explicit updates do not request source. AJAX Href inspects each response text before parsing, using the existing response without an additional request. Production skips both checks, even with warning verbosity enabled.</p>
 <p>Duplicate warnings identify <code>source</code>, <code>tagName</code>, <code>attribute</code>, the first raw <code>value</code>, all raw <code>values</code>, and the one-based <code>line</code>/<code>column</code> of the first repeated attribute, plus a zero-based character <code>offset</code>. These locations refer to the inspected response, so no live <code>element</code> is inferred. Repeated <code>class</code> attributes should become one space-separated class list; repeated <code>style</code> attributes should become one list of intended CSS declarations. Attribute names are compared without ASCII case distinctions. Comments, quoted attribute contents and HTML text elements such as script/style/textarea are skipped. Repeated class tokens and repeated CSS declarations inside one attribute are outside this check.</p>

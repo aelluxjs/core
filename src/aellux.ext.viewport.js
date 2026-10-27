@@ -12,6 +12,7 @@
   if (!AelluxJs) throw new Error("[aellux.js] Load the boot script before the viewport extension.");
   const extensionName = "viewport";
   const attribute = AelluxJs.attr(extensionName);
+  const targetAttribute = AelluxJs.attr("viewport-target");
   const properties = ["--ae-viewport-x", "--ae-viewport-y", "--ae-viewport-visible"];
   // Compare published normalized geometry, never the containment boundaries.
   const EVENT_EPSILON = 0.000001;
@@ -19,6 +20,8 @@
   const states = new Map();
   const groups = new Map();
   const resizeTargets = new Map();
+  const owners = new Map();
+  const writtenStyles = new WeakMap();
   let nextLayoutId = 6000000;
   let mutations = null, resizeObserver = null;
 
@@ -40,8 +43,8 @@
   function mount(element) {
     if (states.has(element)) return;
     const state = { element, group: null, configuration: null, axes: "both",
-      memories: properties.map(property => AelluxJs.persist.element.save(element, [], [property])),
-      writtenStyle: null, values: [], snapshot: null, unmountRequest: null, resizeTargets: new Set() };
+      target: null, memories: [], targetWarning: null, conflict: null,
+      values: [], snapshot: null, unmountRequest: null, resizeTargets: new Set() };
     states.set(element, state);
     if (states.size === 1) startObserving();
     // Discovery belongs to the read phase too. New elements initially share the
@@ -68,7 +71,7 @@
     states.delete(element);
     leave(state);
     observeSizes(state, new Set());
-    for (const memory of state.memories) memory.restore();
+    releaseTarget(state);
     if (!states.size) stopObserving();
   }
 
@@ -81,13 +84,12 @@
     if (root.MutationObserver) {
       mutations = new root.MutationObserver(records => {
         if (records.some(record => {
-          const state = states.get(record.target);
           return record.type !== "attributes" || record.attributeName !== "style" ||
-            !state || record.target.getAttribute("style") !== state.writtenStyle;
+            !writtenStyles.has(record.target) || record.target.getAttribute("style") !== writtenStyles.get(record.target);
         })) scheduleAll();
       });
       mutations.observe(document, { childList: true, subtree: true, characterData: true,
-        attributes: true, attributeFilter: [attribute, "class", "style", "hidden", "open", "width", "height", "src"] });
+        attributes: true, attributeFilter: [attribute, targetAttribute, "id", "class", "style", "hidden", "open", "width", "height", "src"] });
     }
   }
 
@@ -195,22 +197,25 @@
     const measurements = await AelluxJs.waitLayout.read(group.id, () => measure(group));
     if (!group.active || !measurements) return;
     await AelluxJs.waitLayout.update(group.id, () => {
-      for (const { state, values, snapshot, changed } of measurements) {
+      for (const { state, target, values, snapshot, changed } of measurements) {
         if (states.get(state.element) !== state || state.group !== group) continue;
         if (values === null) {
           AelluxJs.mountManager.unmount(state.element, extensionName);
           continue;
         }
         if (!current(state, group)) continue;
-        for (let index = 0; index < properties.length; index++) {
+        selectTarget(state, target?.isConnected ? target : null);
+        for (let index = 0; state.target && index < properties.length; index++) {
           if (values[index] === state.values[index]) continue;
           // An unselected axis keeps the author's original inline declaration.
           if (values[index] === null) state.memories[index].restore();
-          else state.element.style.setProperty(properties[index], String(values[index]),
+          else state.target.style.setProperty(properties[index], String(values[index]),
             state.memories[index].cssProperties[properties[index]].priority);
         }
-        state.values = values;
-        state.writtenStyle = state.element.getAttribute("style");
+        if (state.target) {
+          state.values = values;
+          writtenStyles.set(state.target, state.target.getAttribute("style"));
+        }
         if (changed) {
           const previous = state.snapshot;
           state.snapshot = snapshot;
@@ -265,7 +270,8 @@
       }
       if (!viewport) viewport = viewportRect(reference);
       const { values, snapshot } = valuesFor(state, viewport);
-      measurements.push({ state, values, snapshot, changed: geometryChanged(state.snapshot, snapshot) });
+      measurements.push({ state, target: resolveTarget(state), values, snapshot,
+        changed: geometryChanged(state.snapshot, snapshot) });
     }
     return measurements;
   }
@@ -282,6 +288,61 @@
         suggestion: 'Use an empty value, "both", "x", or "y".'
       });
     }
+  }
+
+  function resolveTarget(state) {
+    const value = state.element.getAttribute(targetAttribute);
+    if (value === null) {
+      state.targetWarning = null;
+      return state.element;
+    }
+    // One native ID, optionally prefixed with #; never interpret CSS selectors.
+    const id = value.trim().replace(/^#/, "");
+    const target = id && !/\s/.test(id) ? document.getElementById(id) : null;
+    if (!target || !target.style) {
+      if (state.targetWarning !== value) AelluxJs.diagnostics.warn(AelluxJs.diagnostics.WARN_CONFIGURATION_TARGET, {
+        extension: extensionName, element: state.element, attribute: targetAttribute, value,
+        reason: "Viewport target does not exist or is not a styleable element ID.",
+        suggestion: "Use one existing element ID, optionally prefixed with #, or remove the target attribute."
+      });
+      state.targetWarning = value;
+      return null;
+    }
+    state.targetWarning = null;
+    return target;
+  }
+
+  function releaseTarget(state) {
+    if (!state.target) return;
+    for (const memory of state.memories) memory.restore();
+    writtenStyles.set(state.target, state.target.getAttribute("style"));
+    owners.delete(state.target);
+    state.target = null;
+    state.memories = [];
+    state.values = [];
+    // A previously rejected writer can now acquire the restored destination.
+    scheduleAll();
+  }
+
+  function selectTarget(state, target) {
+    if (state.target === target) return;
+    releaseTarget(state);
+    const owner = owners.get(target);
+    if (owner) {
+      if (state.conflict !== owner) AelluxJs.diagnostics.warn(AelluxJs.diagnostics.WARN_RESOURCE_CONFLICT, {
+        extension: extensionName, element: state.element, attribute: targetAttribute,
+        target, property: "--ae-viewport-visible", writers: [owner.element, state.element],
+        reason: "Two Viewport observers publish the same CSS properties on this target.",
+        suggestion: "Use a separate target for each Viewport observer."
+      });
+      state.conflict = owner;
+      return;
+    }
+    state.conflict = null;
+    if (!target) return;
+    owners.set(target, state);
+    state.target = target;
+    state.memories = properties.map(property => AelluxJs.persist.element.save(target, [], [property]));
   }
 
   function scrollable(element) {

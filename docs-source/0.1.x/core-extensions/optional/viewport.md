@@ -26,7 +26,7 @@ $ae.init({ mode: "basic" });
 
 ## Axes and outputs
 
-Only `data-ae-viewport` configures the Extension:
+`data-ae-viewport` selects the position axes:
 
 | Value | Position outputs |
 | --- | --- |
@@ -50,6 +50,31 @@ normalized = Math.max(-2, Math.min(2, normalized));
 This is rectangular geometry, not CSS opacity or effective visibility. It does not account for occlusion by other elements, rounded clipping, masks, or clipping by other ancestors outside the chosen reference. A viewport or element without measurable dimensions publishes neutral `0` values until measurable again.
 
 All three properties are registered as numbers with initial value `0` and `inherits: false`. Values are still written inline when `CSS.registerProperty` is unavailable.
+
+## Publishing on another element
+
+Set `data-ae-viewport-target` to one existing element ID, optionally prefixed with `#`. Geometry and all three Viewport events still belong to the observed source; selected CSS outputs are written only on the target. Without this attribute, outputs remain on the source.
+
+```html
+<section data-ae-viewport="y" data-ae-viewport-target="indicator">
+  Observed content
+</section>
+<div id="indicator" class="viewport-indicator"></div>
+```
+
+```css
+.viewport-indicator {
+  position: fixed;
+  transform: translateY(calc(20px * var(--ae-viewport-y)));
+  opacity: var(--ae-viewport-visible);
+}
+```
+
+This separates measured geometry from visual effects, including sibling decorations and fixed indicators. Keep the source's layout independent of target effects to avoid geometric feedback. The properties do not need inheritance when used directly on the target.
+
+Changing or removing the target attribute restores the previous target's saved inline values and priorities before publishing at the new destination. Target removal, replacement or ID changes are rediscovered on relevant notifications. Empty, invalid or missing IDs report `WARN_CONFIGURATION_TARGET` and suspend CSS publication without falling back to the source; geometry events continue. The attribute accepts an ID, not a CSS selector. Without MutationObserver, request an explicit update after target changes.
+
+Each destination has one Viewport author because every observer publishes `--ae-viewport-visible`, even with different selected axes. The first observer to acquire it retains ownership; another observer reports `WARN_RESOURCE_CONFLICT` and leaves its CSS untouched while continuing geometry events. It can acquire the destination after the owner releases it. Give independent observers separate targets; acquisition order is not an application coordination API. Authored inline values are saved when ownership is acquired and restored on release.
 
 ## Choosing the reference and keeping it current
 
@@ -124,7 +149,7 @@ Zero-sized, hidden or non-finite element/reference geometry is unmeasurable. Sel
 
 Notifications share the existing `waitLayout.read()`/`update()` batches. Numeric differences must exceed an absolute tolerance of `0.000001` in normalized coordinates or visible fraction, compared with the last published snapshot. State, measurability and reference identity changes bypass that tolerance, as does an element edge crossing or reaching either reference boundary. This includes oversized elements that remain `partial` while crossing an edge. Containment and positive-area intersection use exact measured bounds, so even a smaller boundary crossing is reported. At most one Change is emitted per element in a geometry update; no independent event timer, observation system or additional rectangle measurement is introduced.
 
-For each publication, CSS outputs are applied first, then the internal snapshot advances, then `ViewportChange` fires, followed by the matching state transition event. Unmount/destroy requests during Change suppress the subsequent state event, including during an initial asynchronous mount; a canceled lifecycle preflight retains the state event. These are asynchronous scheduler notifications and can trail compositor scrolling or animation. They do not guarantee frame-by-frame synchronization or perceptual visibility, and Viewport continues to leave animation, focus, scroll and presentation decisions to consumers.
+For each publication, available CSS outputs are applied to the configured destination first, then the internal snapshot advances, then `ViewportChange` fires on the observed source, followed by the matching state transition event. An invalid or conflicting CSS target does not suppress geometry events; target changes alone do not constitute geometry changes. Unmount/destroy requests during Change suppress the subsequent state event, including during an initial asynchronous mount; a canceled lifecycle preflight retains the state event. These are asynchronous scheduler notifications and can trail compositor scrolling or animation. They do not guarantee frame-by-frame synchronization or perceptual visibility, and Viewport continues to leave animation, focus, scroll and presentation decisions to consumers.
 
 ### Event delivery cost
 
@@ -137,7 +162,20 @@ Measured raw/gzip level 9 bytes, compared with the implementation before these e
 | Legacy | 25,775 / 6,758 | 32,441 / 8,273 | +6,666 / +1,515 |
 | Legacy minified | 11,883 / 4,860 | 15,084 / 5,959 | +3,201 / +1,099 |
 
-Only Viewport's four artifact budgets increase: Modern raw/gzip limits become 18.5/5 KiB (regular) and 9/3.75 KiB (minified); Legacy becomes 32/8.25 KiB and 15/6 KiB. Full and Orchestrator delivery sizes remain unchanged because Viewport remains an Optional Extension, external and lazy. The boot's embedded signed metadata changes, with the same minified raw/gzip size of 47,129/16,046 bytes. Global budgets remain unchanged.
+These measurements describe the event addition before CSS targeting. Viewport remains an Optional Extension, external and lazy.
+
+### CSS target delivery cost
+
+Measured raw/gzip level 9 bytes against the version immediately before `data-ae-viewport-target`:
+
+| Viewport artifact | Before | After | Delta |
+| --- | --- | --- | --- |
+| Modern | 18,641 / 4,906 | 21,282 / 5,479 | +2,641 / +573 |
+| Modern minified | 8,876 / 3,693 | 10,193 / 4,152 | +1,317 / +459 |
+| Legacy | 32,441 / 8,273 | 35,097 / 8,851 | +2,656 / +578 |
+| Legacy minified | 15,084 / 5,959 | 16,406 / 6,420 | +1,322 / +461 |
+
+The four Viewport raw/gzip budgets are now 21/5.5 KiB (Modern), 10.25/4.25 KiB (Modern minified), 34.5/8.75 KiB (Legacy) and 16.25/6.5 KiB (Legacy minified). Other budgets are unchanged. Global runtimes include the declaration catalog entry, while Viewport's implementation remains external.
 
 ## Scrollbox Snap and migration
 
@@ -165,6 +203,8 @@ The new reference is the nearest native scroll container, which can differ from 
 
 ## Transforms and Present
 
+Prefer `data-ae-viewport-target` when the visual effect belongs to another element: the [target example](#publishing-on-another-element) leaves the measured source stable and requires no output inheritance. Targets whose effects change the source's layout can still cause geometric feedback.
+
 Viewport reads bounding rectangles and compensates for ancestor axis-aligned scale when measuring scrollport borders and dimensions. Rotation, skew and perspective use rectangular bounds and are approximations, not polygon intersections.
 
 A transform applied to the observed element changes its measured rectangle. Driving that transform from the same element's Viewport outputs can cause geometric feedback. Observe a structural wrapper and apply effects to a child. Because the registered outputs do not inherit, opt the child into inheritance explicitly:
@@ -189,7 +229,7 @@ An element can declare both `data-ae-viewport` and `data-ae-present="opacity tra
 
 ## Lifecycle
 
-Use the normal mount, update, unmount and destroy APIs, including subtree mounting. Viewport saves prior inline output values and priorities through `persist.element.save()`. Unmount removes the element from observation, invalidates its pending writes and restores those values. The last element leaving a reference releases the group's listener, observer, timer and scheduler tasks. Removing mounted elements uses mountManager's detached cleanup. Destroy releases all Extension resources; remounting creates fresh observation without duplicate listeners.
+Use the normal mount, update, unmount and destroy APIs, including subtree mounting. Viewport saves prior inline output values and priorities on the CSS destination through `persist.element.save()` when acquiring it. Unmounting the observed source removes it from observation, invalidates its pending writes and restores the destination's saved values, including when the destination is outside the source subtree. Retargeting also releases and restores the previous destination. The last element leaving a reference releases the group's listener, observer, timer and scheduler tasks. Removing mounted elements uses mountManager's detached cleanup. Destroy releases all Extension resources; remounting creates fresh observation without duplicate listeners.
 
 ## Known Limits & Risks
 
@@ -255,7 +295,7 @@ Use the transition's expected duration; this requests scheduled checks rather th
 
 **R5: Present and hidden content.** When Present applies `hidden` and removes measurable geometry, neutral outputs are expected. They are not an instruction to start another transition. Observe a stable wrapper when a child's presentation can change, and keep presentation decisions under the application's or Present's control.
 
-**R6: Concurrent CSS writers.** Viewport saves inline output values and priorities at mount, writes selected outputs when its calculated values change, and restores the saved snapshot on unmount or axis deactivation. External writes to the same properties are not merged into that snapshot and are not guaranteed to survive later publication or restoration. Coordinate ownership or use separate application properties. See [Lifecycle](#lifecycle).
+**R6: Concurrent CSS writers.** Viewport saves inline output values and priorities when acquiring a destination, writes selected outputs when its calculated values change, and restores the saved snapshot on release or axis deactivation. Multiple Viewport observers targeting the same destination are diagnosed and later writers are rejected until ownership is released. External application writes to the same properties are not merged into that snapshot and are not guaranteed to survive later publication or restoration. Coordinate ownership or use separate application properties. See [Lifecycle](#lifecycle).
 
 ### Compatibility & Validation Gaps
 

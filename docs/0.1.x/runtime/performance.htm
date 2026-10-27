@@ -41,7 +41,7 @@
   integrity="sha384-/EgOix3QlZtjoeNxjR0v0jee1G/Pa/iAOPWX5MjHn9BLMWc2sgSBv3Tnpbyv9wxo" crossorigin="anonymous">
 </head>
 
-<body>
+<body data-ae-feedback data-ae-message-target="#toast-message">
 
   <svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute">
   <symbol id="bi-circle-half" fill="currentColor"
@@ -79,6 +79,13 @@
       <header class="animation_header_test navbar navbar-expand-md d-flex flex-fill p-0 m-0 user-select-none bg-white"
         style=" --bar-color:#55606F; --bar-color2:var(--bs-link-color); --bar-bg:#F0F5F5;">
         <div class="container-fluid gap-2" style='z-index: 1;'>
+
+          <div id="toast-present" class="position-fixed w-100 p-4 d-flex justify-content-center align-items-center"
+            data-ae-present="opacity" data-ae-auto-unpop="1s" hidden="true">
+            <div id="toast-message" class="bg-light-adaptive text-body rounded-1 p-2 w-100" style="max-width: 300px;">
+              -
+            </div>
+          </div>
 
           <div class="me-auto d-flex flex-row gap-2 align-items-center">
 
@@ -652,6 +659,43 @@ npm run test:budget
 <p>The CI workflow runs the same command after <code>npm run build</code>. A pull request fails if an artifact exceeds either limit. Review the generated artifact and its delivery cost before changing a limit.</p>
 <h2>Limits</h2>
 <p><a href="https://github.com/aelluxjs/core/blob/main/scripts/bundle-budget.config.mjs"><code>scripts/bundle-budget.config.mjs</code></a> is the source of truth for every raw and gzip limit. It covers the minified boot, ESM entry, Modern and Legacy orchestrators, Full runtimes, Core Extensions (including separate Dialog and Scrollbox Snap files), and generated Extension stylesheets. The <code>test:budget</code> command prints each artifact&#39;s measured size beside its current limit and fails if a new minified JavaScript or CSS file has no budget. Full incorporates eleven Bundled Extensions. Only the Optional Extensions (Ajax Href, Dialog, PWA and Viewport) use separate on-demand scripts in Full. Basic loads separately the Extensions explicitly registered by the developer and their declared dependencies.</p>
+<h2>Shared selector helpers</h2>
+<p>The public <code>isValidSelector()</code> and <code>parseSelectors()</code> helpers ship in the boot and ESM entries so they are available before initialization. Ajax Href delegates selector parsing to the global API, while Extension registration and mount-map validation reuse the internal validator. Compared with the preceding checked-in artifacts, measured minified raw/gzip level 9 bytes are:</p>
+<table>
+<thead>
+<tr>
+<th>Artifact</th>
+<th>Before raw / gzip bytes</th>
+<th>After raw / gzip bytes</th>
+<th>Limits raw / gzip</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Boot</td>
+<td>47,243 / 16,115</td>
+<td>48,424 / 16,572</td>
+<td>48 / 16.5 KiB</td>
+</tr>
+<tr>
+<td>ESM entry</td>
+<td>25,430 / 8,698</td>
+<td>26,614 / 9,143</td>
+<td>26.5 / 9.25 KiB</td>
+</tr>
+<tr>
+<td>Ajax Href Modern</td>
+<td>7,002 / 3,068</td>
+<td>6,349 / 2,800</td>
+<td>7 / 3 KiB</td>
+</tr>
+<tr>
+<td>Ajax Href Legacy</td>
+<td>14,697 / 5,577</td>
+<td>13,992 / 5,285</td>
+<td>14.5 / 5.5 KiB</td>
+</tr>
+</tbody></table>
+<p>The boot measurements include the current signed Viewport registry entries. The boot gzip limit increases from 16 to 16.5 KiB, and the ESM limits increase from 25/8.5 to 26.5/9.25 KiB. Ajax Href&#39;s limits remain unchanged. Sharing the parser reduces the separate Ajax Href scripts while adding the public capability to every core entry.</p>
 <h2>Core delivery split</h2>
 <p>Bundled Extensions ship inside Full, while Optional Extensions (Ajax Href, Dialog, PWA and Viewport) remain external. Basic embeds no Extension implementations and starts with no registrations. The following measurements record the earlier Full delivery split; they are not updated measurements for later registration changes. Measured minified raw/gzip level 9 bytes and revised limits:</p>
 <table>

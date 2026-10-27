@@ -22284,11 +22284,12 @@
           }
           if (_extension === "point" && value("point") !== "" && (!/^\d+$/.test(value("point")) || !Number.isSafeInteger(Number(value("point"))))) invalid(_extension, "point", "Pointer count must be a nonnegative integer.", "Use an integer such as 1; 0 disables pointer association.");
           if (_extension === "ajax-href") {
-            try {
-              if (!value("ajax-href").trim() || !root.document.querySelector(value("ajax-href"))) invalid(_extension, "ajax-href", "No current content matches the AJAX selector.", "Provide a CSS selector present in both the current page and the response.");
-            } catch (_) {
+            var selectors = api.parseSelectors(value("ajax-href").trim() || "title,body");
+            if (!selectors) {
               invalid(_extension, "ajax-href", "The AJAX selector is invalid.", "Provide a valid CSS selector such as #content.");
-            }
+            } else if (selectors.some(function(selector2) {
+              return !root.document.querySelector(selector2);
+            })) invalid(_extension, "ajax-href", "No current content matches the AJAX selector.", "Provide a CSS selector present in both the current page and the response.");
           }
         }
         if ((!selected || selected.has("scrollbox")) && has("scrollbox-elastic") && value("scrollbox-elastic") !== "false" && !((_element$parentElemen = element.parentElement) !== null && _element$parentElemen !== void 0 && _element$parentElemen.hasAttribute(attr("scrollbox")))) invalid("scrollbox", "scrollbox-elastic", "Elastic wrapper must be a direct child of Scrollbox.", "Place exactly one marked wrapper directly inside data-ae-scrollbox.", "WARN_CONFIGURATION_STRUCTURE");
@@ -22505,8 +22506,9 @@
         point: "point",
         adaptive: "adaptive",
         "ajax-href": "ajax-href",
+        viewport: "viewport viewport-target",
         preference: "preference option label next prev ready",
-        feedback: "feedback target-message target-transform"
+        feedback: "feedback message-target transform-target present-target"
       };
       coreAttributes = "maxfps wait-mounted ext ext-style dep load-when builds load-style weak-style full-style legacy esm theme-color";
       activation = {
@@ -22519,6 +22521,7 @@
         point: "point",
         adaptive: "adaptive",
         "ajax-href": "ajax-href",
+        viewport: "viewport",
         preference: "preference",
         feedback: "feedback"
       };
@@ -23944,6 +23947,29 @@
     }
   });
 
+  // src/internal/create-selector-helper.js
+  function validateSelector(document2, value) {
+    if (typeof value !== "string" || !value.trim()) return {
+      value: value,
+      reason: "Expected a nonempty selector string."
+    };
+    try {
+      document2.querySelector(value);
+      return null;
+    } catch (cause) {
+      return {
+        value: value,
+        reason: "Invalid CSS selector.",
+        cause: cause
+      };
+    }
+  }
+  var init_create_selector_helper = __esm({
+    "src/internal/create-selector-helper.js": function() {
+      /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+    }
+  });
+
   // src/internal/build-mount-map-manager.js
   function _toConsumableArray4(r) {
     return _arrayWithoutHoles4(r) || _iterableToArray4(r) || _unsupportedIterableToArray8(r) || _nonIterableSpread4();
@@ -24137,12 +24163,8 @@
       var key = keyFor(extensionName);
       if (key in Object.prototype || key === "prototype") return reject("extensionName");
       if (!Object.prototype.hasOwnProperty.call(root.AelluxJs.registry.ext, key)) return reject("extensionName");
-      if (typeof selector !== "string" || !selector.trim()) return reject("selector");
-      try {
-        root.document.querySelector(selector);
-      } catch (cause) {
-        return reject("selector", cause);
-      }
+      var invalidSelector = validateSelector(root.document, selector);
+      if (invalidSelector) return reject("selector", invalidSelector.cause);
       if (typeof mount !== "function") return reject("mount");
       if (typeof priority !== "number" || !isFinite(priority)) return reject("priority");
       if (unmount !== void 0 && typeof unmount !== "function") return reject("unmount");
@@ -24229,6 +24251,7 @@
     "src/internal/build-mount-map-manager.js": function() {
       init_create_mount_helper();
       init_resolve_element_or_id();
+      init_create_selector_helper();
       init_utils_name_case();
       /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
     }

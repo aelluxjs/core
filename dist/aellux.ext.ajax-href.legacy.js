@@ -448,13 +448,15 @@
     }
     function _load() {
       _load = _asyncToGenerator(/* @__PURE__ */ _regenerator().m(function _callee(url, selectors) {
-        var options, selectorList, elements, _iterator2, _step2, _selector, _currentElement, controller, response, html, loadedDocument, historyRequested, _iterator3, _step3, selector, currentElement, loadedElement, replacement, _args = arguments, _t, _t2, _t3, _t4;
+        var options, selectorList, elements, _iterator, _step, _selector, _currentElement, controller, response, html, loadedDocument, historyRequested, _iterator2, _step2, selector, currentElement, loadedElement, replacement, _args = arguments, _t, _t2, _t3, _t4;
         return _regenerator().w(function(_context) {
           while (1) switch (_context.p = _context.n) {
             case 0:
               options = _args.length > 2 && _args[2] !== void 0 ? _args[2] : {};
               options = options || {};
-              selectorList = parseSelectors(selectors);
+              selectorList = AelluxJs.parseSelectors(selectors, function(invalid) {
+                return selectorDiagnostic(invalid.value, invalid.reason);
+              });
               if (selectorList) {
                 _context.n = 1;
                 break;
@@ -462,18 +464,18 @@
               return _context.a(2, null);
             case 1:
               elements = /* @__PURE__ */ new Map();
-              _iterator2 = _createForOfIteratorHelper3(selectorList);
+              _iterator = _createForOfIteratorHelper3(selectorList);
               try {
-                for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
-                  _selector = _step2.value;
+                for (_iterator.s(); !(_step = _iterator.n()).done; ) {
+                  _selector = _step.value;
                   _currentElement = document.querySelector(_selector);
                   if (_currentElement) elements.set(_selector, _currentElement);
                   else selectorDiagnostic(_selector, "No current element matches the selector.");
                 }
               } catch (err) {
-                _iterator2.e(err);
+                _iterator.e(err);
               } finally {
-                _iterator2.f();
+                _iterator.f();
               }
               if (elements.size) {
                 _context.n = 2;
@@ -520,15 +522,15 @@
               validateHTMLSource(AelluxJs, html, response.url || String(url));
               loadedDocument = new DOMParser().parseFromString(html, "text/html");
               historyRequested = false;
-              _iterator3 = _createForOfIteratorHelper3(selectorList);
+              _iterator2 = _createForOfIteratorHelper3(selectorList);
               _context.p = 7;
-              _iterator3.s();
+              _iterator2.s();
             case 8:
-              if ((_step3 = _iterator3.n()).done) {
+              if ((_step2 = _iterator2.n()).done) {
                 _context.n = 17;
                 break;
               }
-              selector = _step3.value;
+              selector = _step2.value;
               if (!(previousController !== controller)) {
                 _context.n = 9;
                 break;
@@ -599,10 +601,10 @@
             case 18:
               _context.p = 18;
               _t3 = _context.v;
-              _iterator3.e(_t3);
+              _iterator2.e(_t3);
             case 19:
               _context.p = 19;
-              _iterator3.f();
+              _iterator2.f();
               return _context.f(19);
             case 20:
               AelluxJs.dispatch("AjaxHrefLoaded", {
@@ -661,62 +663,6 @@
         reason: reason,
         suggestion: "Use valid CSS selectors identifying content in both the current document and the AJAX response."
       });
-    }
-    function parseSelectors(selectors) {
-      var list = [];
-      var _iterator = _createForOfIteratorHelper3(Array.isArray(selectors) ? selectors : [selectors]), _step;
-      try {
-        for (_iterator.s(); !(_step = _iterator.n()).done; ) {
-          var input = _step.value;
-          if (typeof input !== "string" || !input.trim()) {
-            selectorDiagnostic(input, "Expected a nonempty selector string or array of strings.");
-            return null;
-          }
-          var start = 0, depth = 0, quote = null;
-          for (var index = 0; index <= input.length; index++) {
-            var char = input[index];
-            if (char === "\\") {
-              index++;
-              continue;
-            }
-            if (quote) {
-              if (char === quote) quote = null;
-              continue;
-            }
-            if (char === '"' || char === "'") {
-              quote = char;
-              continue;
-            }
-            if (char === "(" || char === "[") depth++;
-            if (char === ")" || char === "]") depth--;
-            if (index === input.length || char === "," && depth === 0) {
-              var selector = input.slice(start, index).trim();
-              try {
-                if (!selector) throw new SyntaxError("Empty selector");
-                document.querySelector(selector);
-              } catch (_) {
-                selectorDiagnostic(input, "Invalid CSS selector.");
-                return null;
-              }
-              if (!list.includes(selector)) list.push(selector);
-              start = index + 1;
-            }
-          }
-          if (quote || depth !== 0) {
-            selectorDiagnostic(input, "Unbalanced CSS selector.");
-            return null;
-          }
-        }
-      } catch (err) {
-        _iterator.e(err);
-      } finally {
-        _iterator.f();
-      }
-      if (!list.length) {
-        selectorDiagnostic(selectors, "Expected at least one CSS selector.");
-        return null;
-      }
-      return list;
     }
     function onClick(event) {
       if (event.defaultPrevented) return;

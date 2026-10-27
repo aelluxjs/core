@@ -110,6 +110,109 @@ async function expectGeometry(page, expected, id = "item", tolerance = .015) {
 }
 
 for (const legacy of [false, true]) test.describe(`Viewport ${legacy ? "Legacy" : "Modern"}`, () => {
+  test("CSS target receives source geometry while events remain on the source without feedback", async ({ page }) => {
+    await setup(page, fixture("", "left:0", "hidden").replace("data-ae-viewport", 'data-ae-viewport data-ae-viewport-target="#indicator"') +
+      '<div id="indicator" style="position:fixed;transform:translateX(calc(10px * var(--ae-viewport-x)))"></div>', legacy, false, true);
+    await expectGeometry(page, [-.5, 0, 1], "indicator");
+    expect(await values(page)).toEqual(["", "", ""]);
+    expect(await page.evaluate(() => viewportEvents.every(event => event.target === "item"))).toBe(true);
+    expect(await page.evaluate(() => viewportEvents.map(event => event.name))).toEqual(["ViewportChange", "ViewportFullyInside"]);
+    await page.locator("#box").evaluate(el => el.scrollTo(50, 50));
+    await expectGeometry(page, [-1, -.5, .5], "indicator");
+    const reads = await page.evaluate(async () => {
+      await new Promise(resolve => setTimeout(resolve, 200));
+      const before = viewportProbe.reads;
+      await new Promise(resolve => setTimeout(resolve, 150));
+      return viewportProbe.reads - before;
+    });
+    expect(reads).toBe(0);
+    await page.locator("#box").evaluate(el => el.scrollTo(500, 500));
+    await expect.poll(() => page.evaluate(() => viewportEvents.some(event => event.name === "ViewportFullyOutside"))).toBe(true);
+    expect(await page.evaluate(() => viewportEvents.every(event => event.target === "item"))).toBe(true);
+  });
+
+  test("CSS target changes, axes, self target and unmount restore saved values and priorities", async ({ page }) => {
+    await setup(page, fixture("", "--ae-viewport-x:9!important", "hidden").replace("data-ae-viewport", 'data-ae-viewport data-ae-viewport-target="first"') +
+      '<div id="first" style="--ae-viewport-x:7!important;--ae-viewport-y:8!important;--ae-viewport-visible:.25!important"></div><div id="second"></div>', legacy);
+    await expectGeometry(page, [0, 0, 1], "first");
+    expect(await values(page)).toEqual(["9", "", ""]);
+    await page.locator("#item").evaluate(el => el.setAttribute("data-ae-viewport", "y"));
+    await expectGeometry(page, [7, 0, 1], "first");
+    expect(await page.locator("#first").evaluate(el => el.style.getPropertyPriority("--ae-viewport-x"))).toBe("important");
+    await page.locator("#item").evaluate(el => {
+      el.setAttribute("data-ae-viewport", "both"); el.setAttribute("data-ae-viewport-target", "second");
+    });
+    await expectGeometry(page, [0, 0, 1], "second");
+    expect(await values(page, "first")).toEqual(["7", "8", ".25"]);
+    expect(await page.locator("#first").evaluate(el => ["x", "y", "visible"].map(name => el.style.getPropertyPriority(`--ae-viewport-${name}`))))
+      .toEqual(["important", "important", "important"]);
+    await page.locator("#item").evaluate(el => el.setAttribute("data-ae-viewport-target", "item"));
+    await expectGeometry(page, [0, 0, 1]);
+    expect(await values(page, "second")).toEqual(["", "", ""]);
+    await page.locator("#item").evaluate(el => el.removeAttribute("data-ae-viewport-target"));
+    await page.evaluate(() => AelluxJs.mountManager.update(document.getElementById("item"), "viewport"));
+    await expectGeometry(page, [0, 0, 1]);
+    await page.evaluate(() => AelluxJs.unmount(document.getElementById("item"), "viewport"));
+    expect(await values(page)).toEqual(["9", "", ""]);
+  });
+
+  test("invalid CSS targets warn without fallback and recover on ID changes and replacement", async ({ page }) => {
+    await setup(page, fixture("", "", "hidden") + '<div id="indicator"></div>', legacy);
+    for (const target of ["", "#", "missing", "div, #indicator"]) {
+      await page.locator("#item").evaluate((el, target) => el.setAttribute("data-ae-viewport-target", target), target);
+      await page.evaluate(() => AelluxJs.mountManager.update(document.getElementById("item"), "viewport"));
+      expect(await values(page)).toEqual(["", "", ""]);
+      expect(await page.evaluate(value => AelluxJs.diagnostics.showHistory().some(entry =>
+        entry.code === AelluxJs.diagnostics.WARN_CONFIGURATION_TARGET.code && entry.context?.value === value), target)).toBe(true);
+    }
+    await page.locator("#item").evaluate(el => el.setAttribute("data-ae-viewport-target", "indicator"));
+    await expectGeometry(page, [0, 0, 1], "indicator");
+    await page.locator("#indicator").evaluate(el => { window.oldTarget = el; el.id = "renamed"; });
+    await expect.poll(() => values(page, "renamed")).toEqual(["", "", ""]);
+    await page.evaluate(() => { const el = document.createElement("div"); el.id = "indicator"; document.body.appendChild(el); });
+    await expectGeometry(page, [0, 0, 1], "indicator");
+    await page.locator("#indicator").evaluate(el => { window.detachedTarget = el; el.remove(); });
+    await expect.poll(() => page.evaluate(() => detachedTarget.style.getPropertyValue("--ae-viewport-visible"))).toBe("");
+    await page.evaluate(() => document.body.appendChild(detachedTarget));
+    await expectGeometry(page, [0, 0, 1], "indicator");
+    await page.evaluate(() => AelluxJs.destroyExtensions("viewport"));
+    expect(await values(page, "indicator")).toEqual(["", "", ""]);
+  });
+
+  test("conflicting CSS target writers preserve the owner and acquire only after release", async ({ page }) => {
+    await setup(page, fixture("", "", "hidden").replace("data-ae-viewport", 'data-ae-viewport data-ae-viewport-target="indicator"') +
+      '<div id="indicator" style="--ae-viewport-x:7!important"></div>', legacy, false, true);
+    await expectGeometry(page, [0, 0, 1], "indicator");
+    await page.evaluate(async () => {
+      const second = document.getElementById("item").cloneNode(); second.id = "second"; second.style.left = "0px";
+      const box = document.getElementById("box").cloneNode(); box.id = "second-box";
+      const content = document.createElement("div"); content.style.cssText = "position:relative;width:1000px;height:1000px";
+      content.appendChild(second); box.appendChild(content); document.body.appendChild(box);
+      await AelluxJs.mount(second, "viewport");
+    });
+    await expectGeometry(page, [0, 0, 1], "indicator");
+    expect(await page.evaluate(() => AelluxJs.diagnostics.showHistory().some(entry =>
+      entry.code === AelluxJs.diagnostics.WARN_RESOURCE_CONFLICT.code && entry.context?.extension === "viewport"))).toBe(true);
+    expect(await page.evaluate(() => viewportEvents.some(event => event.target === "second" && event.name === "ViewportChange"))).toBe(true);
+    await page.locator("#item").evaluate(el => el.removeAttribute("data-ae-viewport-target"));
+    await expectGeometry(page, [0, 0, 1]);
+    await expectGeometry(page, [-.5, 0, 1], "indicator");
+    await page.evaluate(() => AelluxJs.unmount(document.getElementById("second"), "viewport"));
+    expect(await values(page, "indicator")).toEqual(["7", "", ""]);
+    expect(await page.locator("#indicator").evaluate(el => el.style.getPropertyPriority("--ae-viewport-x"))).toBe("important");
+  });
+
+  test("CSS target restores on source detach with observer and registration fallbacks", async ({ page }) => {
+    await setup(page, fixture("", "", "hidden").replace("data-ae-viewport", 'data-ae-viewport data-ae-viewport-target="indicator"') +
+      '<div id="indicator" style="--ae-viewport-y:8!important"></div>', legacy, true);
+    await expectGeometry(page, [0, 0, 1], "indicator");
+    await page.locator("#box").evaluate(el => el.scrollTo(50, 50));
+    await expectGeometry(page, [-.5, -.5, 1], "indicator");
+    await page.locator("#item").evaluate(el => el.remove());
+    await expect.poll(() => values(page, "indicator")).toEqual(["", "8", ""]);
+    expect(await page.locator("#indicator").evaluate(el => el.style.getPropertyPriority("--ae-viewport-y"))).toBe("important");
+  });
+
   test("centers, four edges, visibility and clamping use the inner bordered scrollport", async ({ page }) => {
     // Hidden overflow scrolls programmatically and avoids platform scrollbar widths.
     await setup(page, fixture("", "", "hidden"), legacy);

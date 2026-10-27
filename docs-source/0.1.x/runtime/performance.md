@@ -15,6 +15,19 @@ The CI workflow runs the same command after `npm run build`. A pull request fail
 
 [`scripts/bundle-budget.config.mjs`](https://github.com/aelluxjs/core/blob/main/scripts/bundle-budget.config.mjs) is the source of truth for every raw and gzip limit. It covers the minified boot, ESM entry, Modern and Legacy orchestrators, Full runtimes, Core Extensions (including separate Dialog and Scrollbox Snap files), and generated Extension stylesheets. The `test:budget` command prints each artifact's measured size beside its current limit and fails if a new minified JavaScript or CSS file has no budget. Full incorporates eleven Bundled Extensions. Only the Optional Extensions (Ajax Href, Dialog, PWA and Viewport) use separate on-demand scripts in Full. Basic loads separately the Extensions explicitly registered by the developer and their declared dependencies.
 
+## Shared selector helpers
+
+The public `isValidSelector()` and `parseSelectors()` helpers ship in the boot and ESM entries so they are available before initialization. Ajax Href delegates selector parsing to the global API, while Extension registration and mount-map validation reuse the internal validator. Compared with the preceding checked-in artifacts, measured minified raw/gzip level 9 bytes are:
+
+| Artifact | Before raw / gzip bytes | After raw / gzip bytes | Limits raw / gzip |
+| --- | --- | --- | --- |
+| Boot | 47,243 / 16,115 | 48,424 / 16,572 | 48 / 16.5 KiB |
+| ESM entry | 25,430 / 8,698 | 26,614 / 9,143 | 26.5 / 9.25 KiB |
+| Ajax Href Modern | 7,002 / 3,068 | 6,349 / 2,800 | 7 / 3 KiB |
+| Ajax Href Legacy | 14,697 / 5,577 | 13,992 / 5,285 | 14.5 / 5.5 KiB |
+
+The boot measurements include the current signed Viewport registry entries. The boot gzip limit increases from 16 to 16.5 KiB, and the ESM limits increase from 25/8.5 to 26.5/9.25 KiB. Ajax Href's limits remain unchanged. Sharing the parser reduces the separate Ajax Href scripts while adding the public capability to every core entry.
+
 ## Core delivery split
 
 Bundled Extensions ship inside Full, while Optional Extensions (Ajax Href, Dialog, PWA and Viewport) remain external. Basic embeds no Extension implementations and starts with no registrations. The following measurements record the earlier Full delivery split; they are not updated measurements for later registration changes. Measured minified raw/gzip level 9 bytes and revised limits:

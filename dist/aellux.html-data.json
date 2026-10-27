@@ -212,6 +212,21 @@
       ]
     },
     {
+      "name": "data-ae-message-target",
+      "description": "One element ID, optionally prefixed with #, receiving message text. Omitted uses the boundary itself.\n\nValue syntax: id.\n\nExamples: `status-message`.",
+      "references": [
+        {
+          "name": "AelluxJS feedback",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/feedback.htm"
+        }
+      ],
+      "values": [
+        {
+          "name": "status-message"
+        }
+      ]
+    },
+    {
       "name": "data-ae-next",
       "description": "Cycles forward through the enclosing preference's built-in values; use a keyboard-operable control.\n\nValue syntax: presence.",
       "references": [
@@ -483,6 +498,27 @@
         }
       ],
       "valueSet": "v"
+    },
+    {
+      "name": "data-ae-present-target",
+      "description": "One mounted Present element ID, optionally prefixed with #. Empty requests pop on the closest Present of each resolved message/transform target, once per distinct element. Omitted makes no Present request. Requires initialized Present.\n\nValue syntax: id.\n\nExamples: ``, `status-panel`, `#status-panel`.",
+      "references": [
+        {
+          "name": "AelluxJS feedback",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/feedback.htm"
+        }
+      ],
+      "values": [
+        {
+          "name": ""
+        },
+        {
+          "name": "status-panel"
+        },
+        {
+          "name": "#status-panel"
+        }
+      ]
     },
     {
       "name": "data-ae-present-when",
@@ -764,23 +800,8 @@
       ]
     },
     {
-      "name": "data-ae-target-message",
-      "description": "One element ID, optionally prefixed with #, receiving message text. Empty uses the boundary itself.\n\nValue syntax: id.\n\nDefault behavior: \"\".\n\nExamples: `status-message`.",
-      "references": [
-        {
-          "name": "AelluxJS feedback",
-          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/feedback.htm"
-        }
-      ],
-      "values": [
-        {
-          "name": "status-message"
-        }
-      ]
-    },
-    {
-      "name": "data-ae-target-transform",
-      "description": "One element ID, optionally prefixed with #, receiving feedback classes and motion. Empty uses the boundary itself.\n\nValue syntax: id.\n\nDefault behavior: \"\".\n\nExamples: `status-icon`.",
+      "name": "data-ae-transform-target",
+      "description": "One element ID, optionally prefixed with #, receiving feedback classes and motion. Omitted uses the boundary itself.\n\nValue syntax: id.\n\nExamples: `status-icon`.",
       "references": [
         {
           "name": "AelluxJS feedback",
@@ -877,6 +898,24 @@
         },
         {
           "name": "y"
+        }
+      ]
+    },
+    {
+      "name": "data-ae-viewport-target",
+      "description": "Publishes CSS outputs on one existing element ID, optionally prefixed with #, instead of the observed element. Geometry and events remain on the observer. Retargeting restores previous inline styles; conflicting Viewport writers are rejected.\n\nValue syntax: id.\n\nExamples: `indicator`, `#indicator`.",
+      "references": [
+        {
+          "name": "AelluxJS viewport",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/optional/viewport.htm"
+        }
+      ],
+      "values": [
+        {
+          "name": "indicator"
+        },
+        {
+          "name": "#indicator"
         }
       ]
     },

@@ -12,9 +12,17 @@ This entry creates the core API when it is absent. The browser boot script start
 
 ## Naming and element lookup
 
-The naming helpers use the configured AelluxJs prefixes and convert camelCase names to kebab-case. For example, `$ae.attr("targetMessage")` returns `data-ae-target-message`, `$ae.className("feedbackError")` returns `ae--feedback-error`, and `$ae.cssVar("panelWidth")` returns `--ae-panel-width`. `extFilename(name)` returns the matching Extension script filename for the current minified setting; `extName(filename)` extracts an Extension name from that filename.
+The naming helpers use the configured AelluxJs prefixes and convert camelCase names to kebab-case. For example, `$ae.attr("messageTarget")` returns `data-ae-message-target`, `$ae.className("feedbackError")` returns `ae--feedback-error`, and `$ae.cssVar("panelWidth")` returns `--ae-panel-width`. `extFilename(name)` returns the matching Extension script filename for the current minified setting; `extName(filename)` extracts an Extension name from that filename.
 
 `$ae.elementOrId(value, options?)` resolves a DOM element or an element ID, with or without a leading `#`. By default, only element nodes are accepted. Pass `{ defaultElement: element }` to use a fallback when `value` is `null` or `undefined`, or `{ allowedNodeTypes: [...] }` to accept other node types. Invalid values and missing IDs record `WARN_INVALID_ELEMENT_OR_ID` (`2011`) and return `null`; `options.method` can identify the caller in that diagnostic. This helper is available before runtime initialization.
+
+`$ae.isValidSelector(value)` returns whether a nonempty string is a valid CSS selector in the current browser, even when no element matches. `$ae.parseSelectors(value, onInvalid?)` accepts a selector string or an array of strings and returns a trimmed, deduplicated array in input order, or `null` if any input is invalid or the array is empty. Only top-level commas split selectors; functions, attribute values, escapes and CSS comments are preserved. Neither helper records diagnostics automatically. The optional `onInvalid` callback receives `{ value, reason, cause }` once on failure; `cause` contains the native selector exception when available. Both helpers are available before runtime initialization.
+
+```js
+$ae.isValidSelector("#future-content"); // true, even before it exists
+$ae.parseSelectors([':is(main, article), [data-region="a,b"]', 'main']);
+// [':is(main, article)', '[data-region="a,b"]', 'main']
+```
 
 ## Events
 

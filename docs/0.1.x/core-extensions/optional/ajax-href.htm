@@ -41,7 +41,7 @@
   integrity="sha384-/EgOix3QlZtjoeNxjR0v0jee1G/Pa/iAOPWX5MjHn9BLMWc2sgSBv3Tnpbyv9wxo" crossorigin="anonymous">
 </head>
 
-<body>
+<body data-ae-feedback data-ae-message-target="#toast-message">
 
   <svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute">
   <symbol id="bi-circle-half" fill="currentColor"
@@ -79,6 +79,13 @@
       <header class="animation_header_test navbar navbar-expand-md d-flex flex-fill p-0 m-0 user-select-none bg-white"
         style=" --bar-color:#55606F; --bar-color2:var(--bs-link-color); --bar-bg:#F0F5F5;">
         <div class="container-fluid gap-2" style='z-index: 1;'>
+
+          <div id="toast-present" class="position-fixed w-100 p-4 d-flex justify-content-center align-items-center"
+            data-ae-present="opacity" data-ae-auto-unpop="1s" hidden="true">
+            <div id="toast-message" class="bg-light-adaptive text-body rounded-1 p-2 w-100" style="max-width: 300px;">
+              -
+            </div>
+          </div>
 
           <div class="me-auto d-flex flex-row gap-2 align-items-center">
 

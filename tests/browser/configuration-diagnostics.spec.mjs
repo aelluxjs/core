@@ -331,6 +331,21 @@ test("AJAX reports invalid, absent current, and absent response selectors", asyn
   ]);
 });
 
+test("AJAX declarations accept empty defaults and diagnose each selector in a list", async ({ page }) => {
+  await start(page, `<main id="content">original</main>
+    <a id="empty" href="/next" data-ae-ajax-href></a>
+    <a id="whitespace" href="/next" data-ae-ajax-href="   "></a>
+    <a id="valid" href="/next" data-ae-ajax-href=':is(#content, #other), body'></a>
+    <a id="partial" href="/next" data-ae-ajax-href="#content, #absent"></a>
+    <a id="invalid" href="/next" data-ae-ajax-href="["></a>`);
+  const entries = (await diagnostics(page)).filter(entry =>
+    entry.attribute === "data-ae-ajax-href" && entry.code === 2026);
+  expect(entries.map(entry => ({ element: entry.element, reason: entry.reason }))).toEqual([
+    { element: "partial", reason: "No current content matches the AJAX selector." },
+    { element: "invalid", reason: "The AJAX selector is invalid." }
+  ]);
+});
+
 test("AJAX preserves commas within valid selectors and replaces multiple regions", async ({ page }) => {
   await start(page, '<main id="content">old</main><aside data-region="a,b">old</aside>');
   await page.evaluate(() => AelluxJs.wait("ajax-href"));

@@ -44,7 +44,7 @@ test("Elastic wrapper conflicts are diagnosed but opacity and child motion remai
     ["scrollbox-elastic", "present"], ["scrollbox-elastic", "feedback"], ["present", "feedback"]
   ]);
   await start(page, gallery("", 'data-ae-scrollbox-elastic data-ae-present="opacity"') +
-    '<div data-ae-feedback data-ae-target-transform="child" data-ae-anchor="bottom-left:top-left"><span id="child">Child</span></div>');
+    '<div data-ae-feedback data-ae-transform-target="child" data-ae-anchor="bottom-left:top-left"><span id="child">Child</span></div>');
   await page.evaluate(() => AelluxJs.ext.feedback.error("", document.getElementById("child"), null, "shake"));
   await page.waitForTimeout(100);
   expect(await page.evaluate(() => AelluxJs.diagnostics.showHistory().filter(e => e.code === 2033).length)).toBe(0);

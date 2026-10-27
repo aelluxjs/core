@@ -804,8 +804,9 @@
     point: "point",
     adaptive: "adaptive",
     "ajax-href": "ajax-href",
+    viewport: "viewport viewport-target",
     preference: "preference option label next prev ready",
-    feedback: "feedback target-message target-transform"
+    feedback: "feedback message-target transform-target present-target"
   };
   var coreAttributes = "maxfps wait-mounted ext ext-style dep load-when builds load-style weak-style full-style legacy esm theme-color";
   var activation = {
@@ -818,6 +819,7 @@
     point: "point",
     adaptive: "adaptive",
     "ajax-href": "ajax-href",
+    viewport: "viewport",
     preference: "preference",
     feedback: "feedback"
   };
@@ -1049,12 +1051,11 @@
         if (extension === "point" && value("point") !== "" && (!/^\d+$/.test(value("point")) || !Number.isSafeInteger(Number(value("point")))))
           invalid(extension, "point", "Pointer count must be a nonnegative integer.", "Use an integer such as 1; 0 disables pointer association.");
         if (extension === "ajax-href") {
-          try {
-            if (!value("ajax-href").trim() || !root.document.querySelector(value("ajax-href")))
-              invalid(extension, "ajax-href", "No current content matches the AJAX selector.", "Provide a CSS selector present in both the current page and the response.");
-          } catch (_) {
+          const selectors = api.parseSelectors(value("ajax-href").trim() || "title,body");
+          if (!selectors) {
             invalid(extension, "ajax-href", "The AJAX selector is invalid.", "Provide a valid CSS selector such as #content.");
-          }
+          } else if (selectors.some((selector) => !root.document.querySelector(selector)))
+            invalid(extension, "ajax-href", "No current content matches the AJAX selector.", "Provide a CSS selector present in both the current page and the response.");
         }
       }
       if ((!selected || selected.has("scrollbox")) && has("scrollbox-elastic") && value("scrollbox-elastic") !== "false" && !((_b = element.parentElement) == null ? void 0 : _b.hasAttribute(attr("scrollbox"))))
@@ -1659,6 +1660,19 @@
     }
   }
 
+  // src/internal/create-selector-helper.js
+  /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+  function validateSelector(document2, value) {
+    if (typeof value !== "string" || !value.trim())
+      return { value, reason: "Expected a nonempty selector string." };
+    try {
+      document2.querySelector(value);
+      return null;
+    } catch (cause) {
+      return { value, reason: "Invalid CSS selector.", cause };
+    }
+  }
+
   // src/internal/build-mount-map-manager.js
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   function buildMountMapManager(root) {
@@ -1777,13 +1791,8 @@
         return reject("extensionName");
       if (!Object.prototype.hasOwnProperty.call(root.AelluxJs.registry.ext, key))
         return reject("extensionName");
-      if (typeof selector !== "string" || !selector.trim())
-        return reject("selector");
-      try {
-        root.document.querySelector(selector);
-      } catch (cause) {
-        return reject("selector", cause);
-      }
+      const invalidSelector = validateSelector(root.document, selector);
+      if (invalidSelector) return reject("selector", invalidSelector.cause);
       if (typeof mount !== "function") return reject("mount");
       if (typeof priority !== "number" || !isFinite(priority)) return reject("priority");
       if (unmount !== void 0 && typeof unmount !== "function") return reject("unmount");

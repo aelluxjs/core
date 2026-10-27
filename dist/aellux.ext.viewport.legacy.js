@@ -209,12 +209,15 @@
     if (!AelluxJs) throw new Error("[aellux.js] Load the boot script before the viewport extension.");
     var extensionName = "viewport";
     var attribute = AelluxJs.attr(extensionName);
+    var targetAttribute = AelluxJs.attr("viewport-target");
     var properties = ["--ae-viewport-x", "--ae-viewport-y", "--ae-viewport-visible"];
     var EVENT_EPSILON = 1e-6;
     var document = root.document;
     var states = /* @__PURE__ */ new Map();
     var groups = /* @__PURE__ */ new Map();
     var resizeTargets = /* @__PURE__ */ new Map();
+    var owners = /* @__PURE__ */ new Map();
+    var writtenStyles = /* @__PURE__ */ new WeakMap();
     var nextLayoutId = 6e6;
     var mutations = null, resizeObserver = null;
     AelluxJs.extAttach(extensionName, {
@@ -261,10 +264,10 @@
         group: null,
         configuration: null,
         axes: "both",
-        memories: properties.map(function(property) {
-          return AelluxJs.persist.element.save(element, [], [property]);
-        }),
-        writtenStyle: null,
+        target: null,
+        memories: [],
+        targetWarning: null,
+        conflict: null,
         values: [],
         snapshot: null,
         unmountRequest: null,
@@ -312,17 +315,7 @@
       states.delete(element);
       leave(state);
       observeSizes(state, /* @__PURE__ */ new Set());
-      var _iterator2 = _createForOfIteratorHelper(state.memories), _step2;
-      try {
-        for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
-          var memory = _step2.value;
-          memory.restore();
-        }
-      } catch (err) {
-        _iterator2.e(err);
-      } finally {
-        _iterator2.f();
-      }
+      releaseTarget(state);
       if (!states.size) stopObserving();
     }
     function startObserving() {
@@ -334,8 +327,7 @@
       if (root.MutationObserver) {
         mutations = new root.MutationObserver(function(records) {
           if (records.some(function(record) {
-            var state = states.get(record.target);
-            return record.type !== "attributes" || record.attributeName !== "style" || !state || record.target.getAttribute("style") !== state.writtenStyle;
+            return record.type !== "attributes" || record.attributeName !== "style" || !writtenStyles.has(record.target) || record.target.getAttribute("style") !== writtenStyles.get(record.target);
           })) scheduleAll();
         });
         mutations.observe(document, {
@@ -343,7 +335,7 @@
           subtree: true,
           characterData: true,
           attributes: true,
-          attributeFilter: [attribute, "class", "style", "hidden", "open", "width", "height", "src"]
+          attributeFilter: [attribute, targetAttribute, "id", "class", "style", "hidden", "open", "width", "height", "src"]
         });
       }
     }
@@ -361,12 +353,28 @@
     function onLayout(event) {
       var _event$detail;
       var duration = Number((_event$detail = event.detail) === null || _event$detail === void 0 ? void 0 : _event$detail.durationMs);
-      var _iterator3 = _createForOfIteratorHelper(groups.values()), _step3;
+      var _iterator2 = _createForOfIteratorHelper(groups.values()), _step2;
       try {
-        for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
-          var group = _step3.value;
+        for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
+          var group = _step2.value;
           if (Number.isFinite(duration) && duration > 0) group.layoutUntil = Math.max(group.layoutUntil, root.performance.now() + duration);
           schedule(group);
+        }
+      } catch (err) {
+        _iterator2.e(err);
+      } finally {
+        _iterator2.f();
+      }
+    }
+    function onBeforeUnmount(event) {
+      var _event$detail2 = event.detail, subtree = _event$detail2.root, extensions = _event$detail2.extensions, detachedOnly = _event$detail2.detachedOnly;
+      if (extensions && !extensions.includes(extensionName)) return;
+      var _iterator3 = _createForOfIteratorHelper(states.values()), _step3;
+      try {
+        for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
+          var state = _step3.value;
+          if (detachedOnly && state.element.isConnected) continue;
+          if (state.element === subtree || subtree.contains(state.element) || subtree === document && !state.element.isConnected) state.unmountRequest = event;
         }
       } catch (err) {
         _iterator3.e(err);
@@ -374,36 +382,20 @@
         _iterator3.f();
       }
     }
-    function onBeforeUnmount(event) {
-      var _event$detail2 = event.detail, subtree = _event$detail2.root, extensions = _event$detail2.extensions, detachedOnly = _event$detail2.detachedOnly;
-      if (extensions && !extensions.includes(extensionName)) return;
-      var _iterator4 = _createForOfIteratorHelper(states.values()), _step4;
+    function current(state, group) {
+      return states.get(state.element) === state && state.group === group && state.element.isConnected && state.element.hasAttribute(attribute) && (!state.unmountRequest || state.unmountRequest.defaultPrevented);
+    }
+    function scheduleAll() {
+      var _iterator4 = _createForOfIteratorHelper(groups.values()), _step4;
       try {
         for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
-          var state = _step4.value;
-          if (detachedOnly && state.element.isConnected) continue;
-          if (state.element === subtree || subtree.contains(state.element) || subtree === document && !state.element.isConnected) state.unmountRequest = event;
+          var group = _step4.value;
+          schedule(group);
         }
       } catch (err) {
         _iterator4.e(err);
       } finally {
         _iterator4.f();
-      }
-    }
-    function current(state, group) {
-      return states.get(state.element) === state && state.group === group && state.element.isConnected && state.element.hasAttribute(attribute) && (!state.unmountRequest || state.unmountRequest.defaultPrevented);
-    }
-    function scheduleAll() {
-      var _iterator5 = _createForOfIteratorHelper(groups.values()), _step5;
-      try {
-        for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
-          var group = _step5.value;
-          schedule(group);
-        }
-      } catch (err) {
-        _iterator5.e(err);
-      } finally {
-        _iterator5.f();
       }
     }
     function join(state, reference) {
@@ -503,20 +495,23 @@
                 var _iterator9 = _createForOfIteratorHelper(measurements), _step9;
                 try {
                   var _loop = function _loop2() {
-                    var _step9$value = _step9.value, state = _step9$value.state, values = _step9$value.values, snapshot = _step9$value.snapshot, changed = _step9$value.changed;
+                    var _step9$value = _step9.value, state = _step9$value.state, target = _step9$value.target, values = _step9$value.values, snapshot = _step9$value.snapshot, changed = _step9$value.changed;
                     if (states.get(state.element) !== state || state.group !== group) return 0;
                     if (values === null) {
                       AelluxJs.mountManager.unmount(state.element, extensionName);
                       return 0;
                     }
                     if (!current(state, group)) return 0;
-                    for (var index = 0; index < properties.length; index++) {
+                    selectTarget(state, target !== null && target !== void 0 && target.isConnected ? target : null);
+                    for (var index = 0; state.target && index < properties.length; index++) {
                       if (values[index] === state.values[index]) continue;
                       if (values[index] === null) state.memories[index].restore();
-                      else state.element.style.setProperty(properties[index], String(values[index]), state.memories[index].cssProperties[properties[index]].priority);
+                      else state.target.style.setProperty(properties[index], String(values[index]), state.memories[index].cssProperties[properties[index]].priority);
                     }
-                    state.values = values;
-                    state.writtenStyle = state.element.getAttribute("style");
+                    if (state.target) {
+                      state.values = values;
+                      writtenStyles.set(state.target, state.target.getAttribute("style"));
+                    }
                     if (changed) {
                       var previous = state.snapshot;
                       state.snapshot = snapshot;
@@ -574,16 +569,16 @@
         var reference = document;
         for (var parent = element.parentElement; parent; parent = parent.parentElement) {
           targets.add(parent);
-          var _iterator6 = _createForOfIteratorHelper(parent.children), _step6;
+          var _iterator5 = _createForOfIteratorHelper(parent.children), _step5;
           try {
-            for (_iterator6.s(); !(_step6 = _iterator6.n()).done; ) {
-              var sibling = _step6.value;
+            for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
+              var sibling = _step5.value;
               targets.add(sibling);
             }
           } catch (err) {
-            _iterator6.e(err);
+            _iterator5.e(err);
           } finally {
-            _iterator6.f();
+            _iterator5.f();
           }
           var rootStyle = parent === document.body ? root.getComputedStyle(document.documentElement) : null;
           var propagatedBody = rootStyle && rootStyle.overflowX === "visible" && rootStyle.overflowY === "visible";
@@ -600,6 +595,7 @@
         var _valuesFor = valuesFor(state, viewport), values = _valuesFor.values, snapshot = _valuesFor.snapshot;
         measurements.push({
           state: state,
+          target: resolveTarget(state),
           values: values,
           snapshot: snapshot,
           changed: geometryChanged(state.snapshot, snapshot)
@@ -622,6 +618,75 @@
           suggestion: 'Use an empty value, "both", "x", or "y".'
         });
       }
+    }
+    function resolveTarget(state) {
+      var value = state.element.getAttribute(targetAttribute);
+      if (value === null) {
+        state.targetWarning = null;
+        return state.element;
+      }
+      var id = value.trim().replace(/^#/, "");
+      var target = id && !/\s/.test(id) ? document.getElementById(id) : null;
+      if (!target || !target.style) {
+        if (state.targetWarning !== value) AelluxJs.diagnostics.warn(AelluxJs.diagnostics.WARN_CONFIGURATION_TARGET, {
+          extension: extensionName,
+          element: state.element,
+          attribute: targetAttribute,
+          value: value,
+          reason: "Viewport target does not exist or is not a styleable element ID.",
+          suggestion: "Use one existing element ID, optionally prefixed with #, or remove the target attribute."
+        });
+        state.targetWarning = value;
+        return null;
+      }
+      state.targetWarning = null;
+      return target;
+    }
+    function releaseTarget(state) {
+      if (!state.target) return;
+      var _iterator6 = _createForOfIteratorHelper(state.memories), _step6;
+      try {
+        for (_iterator6.s(); !(_step6 = _iterator6.n()).done; ) {
+          var memory = _step6.value;
+          memory.restore();
+        }
+      } catch (err) {
+        _iterator6.e(err);
+      } finally {
+        _iterator6.f();
+      }
+      writtenStyles.set(state.target, state.target.getAttribute("style"));
+      owners.delete(state.target);
+      state.target = null;
+      state.memories = [];
+      state.values = [];
+      scheduleAll();
+    }
+    function selectTarget(state, target) {
+      if (state.target === target) return;
+      releaseTarget(state);
+      var owner = owners.get(target);
+      if (owner) {
+        if (state.conflict !== owner) AelluxJs.diagnostics.warn(AelluxJs.diagnostics.WARN_RESOURCE_CONFLICT, {
+          extension: extensionName,
+          element: state.element,
+          attribute: targetAttribute,
+          target: target,
+          property: "--ae-viewport-visible",
+          writers: [owner.element, state.element],
+          reason: "Two Viewport observers publish the same CSS properties on this target.",
+          suggestion: "Use a separate target for each Viewport observer."
+        });
+        state.conflict = owner;
+        return;
+      }
+      state.conflict = null;
+      if (!target) return;
+      owners.set(target, state);
+      state.target = target;
+      state.memories = properties.map(function(property) {
+        return AelluxJs.persist.element.save(target, [], [property]);
+      });
     }
     function scrollable(element) {
       var style = root.getComputedStyle(element);

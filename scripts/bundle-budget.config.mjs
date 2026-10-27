@@ -6,13 +6,14 @@ export const bundleBudget = Object.freeze([
   // mount validator. Measured costs and previous limits: runtime/diagnostics.md.
   // Includes the official entry for the dedicated Overflow Marquee Extension.
   // Viewport's signed Modern/Legacy registry entries: +803 raw / +274 gzip bytes.
-  { file: "aellux.min.js", maxRawBytes: 48 * 1024, maxGzipBytes: 16 * 1024 },
+  // Public selector helpers are available before init; measurements: runtime/performance.md.
+  { file: "aellux.min.js", maxRawBytes: 48 * 1024, maxGzipBytes: 16.5 * 1024 },
   // Viewport semantic events; measured costs: core-extensions/viewport.md.
-  { file: "aellux.ext.viewport.js", maxRawBytes: 18.5 * 1024, maxGzipBytes: 5 * 1024 },
-  { file: "aellux.ext.viewport.min.js", maxRawBytes: 9 * 1024, maxGzipBytes: 3.75 * 1024 },
-  { file: "aellux.ext.viewport.legacy.js", maxRawBytes: 32 * 1024, maxGzipBytes: 8.25 * 1024 },
-  { file: "aellux.ext.viewport.legacy.min.js", maxRawBytes: 15 * 1024, maxGzipBytes: 6 * 1024 },
-  { file: "aellux.esm.min.js", maxRawBytes: 25 * 1024, maxGzipBytes: 8.5 * 1024 },
+  { file: "aellux.ext.viewport.js", maxRawBytes: 21 * 1024, maxGzipBytes: 5.5 * 1024 },
+  { file: "aellux.ext.viewport.min.js", maxRawBytes: 10.25 * 1024, maxGzipBytes: 4.25 * 1024 },
+  { file: "aellux.ext.viewport.legacy.js", maxRawBytes: 34.5 * 1024, maxGzipBytes: 8.75 * 1024 },
+  { file: "aellux.ext.viewport.legacy.min.js", maxRawBytes: 16.25 * 1024, maxGzipBytes: 6.5 * 1024 },
+  { file: "aellux.esm.min.js", maxRawBytes: 26.5 * 1024, maxGzipBytes: 9.25 * 1024 },
   // Development source inspection and CSS resource conflict diagnostics.
   // Also covers CSS Motion subtree capture; fade costs: core-extensions/overflow-marquee.md.
   // Measured deltas and the superseded limits: runtime/diagnostics.md.
@@ -43,7 +44,8 @@ export const bundleBudget = Object.freeze([
   { file: "aellux.ext.ajax-href.min.js", maxRawBytes: 7 * 1024, maxGzipBytes: 3 * 1024 },
   { file: "aellux.ext.ajax-href.legacy.min.js", maxRawBytes: 14.5 * 1024, maxGzipBytes: 5.5 * 1024 },
   { file: "aellux.ext.feedback.min.css", maxRawBytes: 3 * 1024, maxGzipBytes: 2 * 1024 },
-  { file: "aellux.ext.feedback.min.js", maxRawBytes: 4 * 1024, maxGzipBytes: 2 * 1024 },
+  // Explicit Present target integration; measured bytes: core-extensions/feedback.md.
+  { file: "aellux.ext.feedback.min.js", maxRawBytes: 4.25 * 1024, maxGzipBytes: 2 * 1024 },
   { file: "aellux.ext.feedback.legacy.min.js", maxRawBytes: 9 * 1024, maxGzipBytes: 4 * 1024 },
   { file: "aellux.ext.focus.min.js", maxRawBytes: 5 * 1024, maxGzipBytes: 3 * 1024 },
   { file: "aellux.ext.focus.legacy.min.js", maxRawBytes: 5 * 1024, maxGzipBytes: 3 * 1024 },

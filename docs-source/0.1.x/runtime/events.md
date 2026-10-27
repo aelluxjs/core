@@ -140,6 +140,8 @@ await $ae.mountManager.update(document.getElementById("panel"));
 
 ## Core Extension notifications
 
+Viewport events always originate from the observed element, including when `data-ae-viewport-target` redirects CSS outputs to another element. Missing or conflicting CSS destinations do not suppress geometry events. See [Viewport CSS targets](../core-extensions/optional/viewport.md#publishing-on-another-element).
+
 These events are available when the corresponding Extension is loaded. Events from elements bubble to `document` unless marked otherwise.
 
 | Extension | Event | Target and payload |

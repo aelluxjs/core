@@ -41,7 +41,7 @@
   integrity="sha384-/EgOix3QlZtjoeNxjR0v0jee1G/Pa/iAOPWX5MjHn9BLMWc2sgSBv3Tnpbyv9wxo" crossorigin="anonymous">
 </head>
 
-<body>
+<body data-ae-feedback data-ae-message-target="#toast-message">
 
   <svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute">
   <symbol id="bi-circle-half" fill="currentColor"
@@ -79,6 +79,13 @@
       <header class="animation_header_test navbar navbar-expand-md d-flex flex-fill p-0 m-0 user-select-none bg-white"
         style=" --bar-color:#55606F; --bar-color2:var(--bs-link-color); --bar-bg:#F0F5F5;">
         <div class="container-fluid gap-2" style='z-index: 1;'>
+
+          <div id="toast-present" class="position-fixed w-100 p-4 d-flex justify-content-center align-items-center"
+            data-ae-present="opacity" data-ae-auto-unpop="1s" hidden="true">
+            <div id="toast-message" class="bg-light-adaptive text-body rounded-1 p-2 w-100" style="max-width: 300px;">
+              -
+            </div>
+          </div>
 
           <div class="me-auto d-flex flex-row gap-2 align-items-center">
 
@@ -650,8 +657,13 @@
 </code></pre>
 <p>This entry creates the core API when it is absent. The browser boot script starts the runtime through <code>init()</code>.</p>
 <h2>Naming and element lookup</h2>
-<p>The naming helpers use the configured AelluxJs prefixes and convert camelCase names to kebab-case. For example, <code>$ae.attr(&quot;targetMessage&quot;)</code> returns <code>data-ae-target-message</code>, <code>$ae.className(&quot;feedbackError&quot;)</code> returns <code>ae--feedback-error</code>, and <code>$ae.cssVar(&quot;panelWidth&quot;)</code> returns <code>--ae-panel-width</code>. <code>extFilename(name)</code> returns the matching Extension script filename for the current minified setting; <code>extName(filename)</code> extracts an Extension name from that filename.</p>
+<p>The naming helpers use the configured AelluxJs prefixes and convert camelCase names to kebab-case. For example, <code>$ae.attr(&quot;messageTarget&quot;)</code> returns <code>data-ae-message-target</code>, <code>$ae.className(&quot;feedbackError&quot;)</code> returns <code>ae--feedback-error</code>, and <code>$ae.cssVar(&quot;panelWidth&quot;)</code> returns <code>--ae-panel-width</code>. <code>extFilename(name)</code> returns the matching Extension script filename for the current minified setting; <code>extName(filename)</code> extracts an Extension name from that filename.</p>
 <p><code>$ae.elementOrId(value, options?)</code> resolves a DOM element or an element ID, with or without a leading <code>#</code>. By default, only element nodes are accepted. Pass <code>{ defaultElement: element }</code> to use a fallback when <code>value</code> is <code>null</code> or <code>undefined</code>, or <code>{ allowedNodeTypes: [...] }</code> to accept other node types. Invalid values and missing IDs record <code>WARN_INVALID_ELEMENT_OR_ID</code> (<code>2011</code>) and return <code>null</code>; <code>options.method</code> can identify the caller in that diagnostic. This helper is available before runtime initialization.</p>
+<p><code>$ae.isValidSelector(value)</code> returns whether a nonempty string is a valid CSS selector in the current browser, even when no element matches. <code>$ae.parseSelectors(value, onInvalid?)</code> accepts a selector string or an array of strings and returns a trimmed, deduplicated array in input order, or <code>null</code> if any input is invalid or the array is empty. Only top-level commas split selectors; functions, attribute values, escapes and CSS comments are preserved. Neither helper records diagnostics automatically. The optional <code>onInvalid</code> callback receives <code>{ value, reason, cause }</code> once on failure; <code>cause</code> contains the native selector exception when available. Both helpers are available before runtime initialization.</p>
+<pre><code class="language-js">$ae.isValidSelector(&quot;#future-content&quot;); // true, even before it exists
+$ae.parseSelectors([&#39;:is(main, article), [data-region=&quot;a,b&quot;]&#39;, &#39;main&#39;]);
+// [&#39;:is(main, article)&#39;, &#39;[data-region=&quot;a,b&quot;]&#39;, &#39;main&#39;]
+</code></pre>
 <h2>Events</h2>
 <p>Use <code>eventName()</code> to resolve an event name, <code>on</code>/<code>off</code> or <code>onEvent</code>/<code>offEvent</code> to manage listeners, and <code>dispatch</code>/<code>dispatchFrom</code> to emit events. See <a href="events.htm">Events</a> for prefix and formatting rules, exact DOM names, targets, options, examples and the event reference.</p>
 <h2>Initialization</h2>

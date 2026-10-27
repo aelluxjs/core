@@ -13,14 +13,16 @@ const attributesByExtension = {
   scrollbox: "scrollbox scrollbox-fade scrollbox-fade-state scrollbox-wheel-horizontal scrollbox-momentum scrollbox-elastic scrollbar scrollbar-vertical scrollbar-horizontal",
   "scrollbox-snap": "scrollbox-snap snap-item",
   focus: "focus", point: "point", adaptive: "adaptive", "ajax-href": "ajax-href",
+  viewport: "viewport viewport-target",
   preference: "preference option label next prev ready",
-  feedback: "feedback target-message target-transform"
+  feedback: "feedback message-target transform-target present-target"
 };
 const coreAttributes = "maxfps wait-mounted ext ext-style dep load-when builds load-style weak-style full-style legacy esm theme-color";
 const activation = {
   present: "present present-group trigger dismiss", anchor: "anchor", "overflow-marquee": "overflow-marquee",
   scrollbox: "scrollbox", "scrollbox-snap": "scrollbox-snap",
   focus: "focus", point: "point", adaptive: "adaptive", "ajax-href": "ajax-href",
+  viewport: "viewport",
   preference: "preference", feedback: "feedback"
 };
 
@@ -95,12 +97,11 @@ export function validateDeclarations(root, scope, extensionNames = null, method 
           (!/^\d+$/.test(value("point")) || !Number.isSafeInteger(Number(value("point")))))
         invalid(extension, "point", "Pointer count must be a nonnegative integer.", "Use an integer such as 1; 0 disables pointer association.");
       if (extension === "ajax-href") {
-        try {
-          if (!value("ajax-href").trim() || !root.document.querySelector(value("ajax-href")))
-            invalid(extension, "ajax-href", "No current content matches the AJAX selector.", "Provide a CSS selector present in both the current page and the response.");
-        } catch (_) {
+        const selectors = api.parseSelectors(value("ajax-href").trim() || "title,body");
+        if (!selectors) {
           invalid(extension, "ajax-href", "The AJAX selector is invalid.", "Provide a valid CSS selector such as #content.");
-        }
+        } else if (selectors.some(selector => !root.document.querySelector(selector)))
+          invalid(extension, "ajax-href", "No current content matches the AJAX selector.", "Provide a CSS selector present in both the current page and the response.");
       }
     }
     if ((!selected || selected.has("scrollbox")) && has("scrollbox-elastic") && value("scrollbox-elastic") !== "false" && !element.parentElement?.hasAttribute(attr("scrollbox")))
