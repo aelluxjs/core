@@ -8,11 +8,12 @@ export const bundleBudget = Object.freeze([
   // Viewport's signed Modern/Legacy registry entries: +803 raw / +274 gzip bytes.
   // Public selector helpers are available before init; measurements: runtime/performance.md.
   { file: "aellux.min.js", maxRawBytes: 48 * 1024, maxGzipBytes: 16.5 * 1024 },
-  // Viewport semantic events; measured costs: core-extensions/viewport.md.
-  { file: "aellux.ext.viewport.js", maxRawBytes: 21 * 1024, maxGzipBytes: 5.5 * 1024 },
-  { file: "aellux.ext.viewport.min.js", maxRawBytes: 10.25 * 1024, maxGzipBytes: 4.25 * 1024 },
-  { file: "aellux.ext.viewport.legacy.js", maxRawBytes: 34.5 * 1024, maxGzipBytes: 8.75 * 1024 },
-  { file: "aellux.ext.viewport.legacy.min.js", maxRawBytes: 16.25 * 1024, maxGzipBytes: 6.5 * 1024 },
+  // Viewport error events and observed automatic work; bounded independent
+  // cleanup also preserves completion of an initial mount.
+  { file: "aellux.ext.viewport.js", maxRawBytes: 21.75 * 1024, maxGzipBytes: 5.75 * 1024 },
+  { file: "aellux.ext.viewport.min.js", maxRawBytes: 10.5 * 1024, maxGzipBytes: 4.25 * 1024 },
+  { file: "aellux.ext.viewport.legacy.js", maxRawBytes: 35.5 * 1024, maxGzipBytes: 9 * 1024 },
+  { file: "aellux.ext.viewport.legacy.min.js", maxRawBytes: 16.75 * 1024, maxGzipBytes: 6.5 * 1024 },
   { file: "aellux.esm.min.js", maxRawBytes: 26.5 * 1024, maxGzipBytes: 9.25 * 1024 },
   // Development source inspection and CSS resource conflict diagnostics.
   // Also covers CSS Motion subtree capture; fade costs: core-extensions/overflow-marquee.md.
@@ -25,7 +26,8 @@ export const bundleBudget = Object.freeze([
   // measured deltas: core-extensions/point.md and core-extensions/present.md.
   // Bundled Extensions ship inside Full; Optional Extensions stay external.
   // Delivery changes and measured sizes: runtime/performance.md.
-  { file: "aellux.full.min.js", maxRawBytes: 188 * 1024, maxGzipBytes: 58 * 1024 },
+  // Startup and State Navigation failure forwarding: +295 raw / +79 gzip bytes.
+  { file: "aellux.full.min.js", maxRawBytes: 188.25 * 1024, maxGzipBytes: 58.25 * 1024 },
   { file: "aellux.full.legacy.min.js", maxRawBytes: 508 * 1024, maxGzipBytes: 150 * 1024 },
   { file: "aellux.full.min.css", maxRawBytes: 122 * 1024, maxGzipBytes: 12 * 1024 },
   { file: "aellux.ext.adaptive.min.css", maxRawBytes: 121 * 1024, maxGzipBytes: 11 * 1024 },
@@ -68,5 +70,6 @@ export const bundleBudget = Object.freeze([
   { file: "aellux.ext.scrollbox-snap.min.js", maxRawBytes: 10.5 * 1024, maxGzipBytes: 4 * 1024 },
   { file: "aellux.ext.scrollbox-snap.legacy.min.js", maxRawBytes: 15 * 1024, maxGzipBytes: 6 * 1024 },
   { file: "aellux.ext.state-navigation.min.js", maxRawBytes: 5 * 1024, maxGzipBytes: 3 * 1024 },
-  { file: "aellux.ext.state-navigation.legacy.min.js", maxRawBytes: 8 * 1024, maxGzipBytes: 3 * 1024 }
+  // Original-error event and Promise handling: +280 raw / +106 gzip bytes.
+  { file: "aellux.ext.state-navigation.legacy.min.js", maxRawBytes: 8 * 1024, maxGzipBytes: 3.125 * 1024 }
 ]);

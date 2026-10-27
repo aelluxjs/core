@@ -138,6 +138,33 @@ document.addEventListener("AelluxJsMount", event => {
 await $ae.mountManager.update(document.getElementById("panel"));
 ```
 
+## Asynchronous failures
+
+Automatic operations report failures through the following noncancelable events on `document`. `detail.error` preserves the original error object. Handling an event does not consume the rejection of a public Promise: callers must still use `await` with `try/catch` or `.catch()`.
+
+| Event | Detail and behavior |
+| --- | --- |
+| `RuntimeStartError` | <span class="large">`{ operation: "mount", error }`. The initial mount pass rejected. `startAelluxJs()` rejects with the same error and does not emit `Ready` for that attempt; the bootstrap retains its startup diagnostics and fallback handling.</span> |
+| `StateNavigationError` | <span class="large">`{ operation: "setState", key, value, title, silent, error }`. A state change failed. `setState()` rejects; the automatic `PushState` handler observes the rejection and records a callback diagnostic.</span> |
+| `ViewportError` | <span class="large">`{ operation, reference, elements, error }`, where `operation` is `"refresh"` or `"unmount"` (attribute-removal cleanup). `reference` is the group's scroll reference and `elements` contains its observed sources, or the source whose cleanup failed. A failed refresh rejects for direct callers; observer work is handled and diagnosed. Cleanup failure is reported separately without blocking a pending mount. A failed refresh stops automatic retries for the current Layout transition; a new external update can retry.</span> |
+| `DocweaverError` | <span class="large">Theme only: `{ operation, error }`, where `operation` is `"toc"`, `"highlight"` or `"highlight-scheme"`. Reports dependency, initialization, enhancement or theme update failures; automatic theme work also logs the error.</span> |
+
+Register startup listeners before calling `init()`:
+
+```js
+$ae.on("RuntimeStartError", event => {
+  showStartupFailure(event.detail.error);
+});
+$ae.on("StateNavigationError", event => {
+  showNavigationFailure(event.detail.error);
+});
+$ae.on("ViewportError", event => {
+  console.error(event.detail.reference, event.detail.error);
+});
+```
+
+These notifications do not roll back partially applied state or DOM changes. Exceptions thrown by application event listeners remain the application's responsibility.
+
 ## Core Extension notifications
 
 Viewport events always originate from the observed element, including when `data-ae-viewport-target` redirects CSS outputs to another element. Missing or conflicting CSS destinations do not suppress geometry events. See [Viewport CSS targets](../core-extensions/optional/viewport.md#publishing-on-another-element).

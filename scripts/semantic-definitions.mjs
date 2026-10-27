@@ -105,6 +105,9 @@ export const semanticCSSProperties = [
 ];
 
 export const semanticEvents = [
+  { name: "RuntimeStartError", extension: "core", description: "Initial mount failure on document. detail: { operation: 'mount', error }. startAelluxJs also rejects with the original error." },
+  { name: "StateNavigationError", extension: "state-navigation", description: "Failed state change on document. detail: { operation: 'setState', key, value, title, silent, error }. setState also rejects with the original error." },
+  { name: "ViewportError", extension: "viewport", description: "Scheduled failure on document. detail: { operation: 'refresh' or 'unmount', reference, elements, error }. Automatic work is observed; direct refresh callers retain rejection." },
   ...["PwaInstallAvailable", "PwaInstallRequested", "PwaInstallAccepted", "PwaInstallDismissed", "PwaInstallManual", "PwaInstalled", "PwaWorkerRegistered", "PwaUpdateAvailable", "PwaUpdateComplete", "PwaError"].map(name => ({ name, extension: "pwa", description: "PWA notification on the initiating control or document. detail includes status; worker events include registration; errors include operation and error." })),
   ...["Awake", "Legacy", "Ready"].map(name => ({ name, extension: "core", description: `${name} runtime startup notification on document.` })),
   ...["BeforeMount", "BeforeUnmount"].map(name => ({ name, extension: "core", cancelable: true, description: `${name} pass preflight on document. Cancel to prevent the pass and its completion event. detail: { root, extensions }${name === "BeforeUnmount" ? "; detachedOnly identifies automatic detached cleanup" : ""}.` })),

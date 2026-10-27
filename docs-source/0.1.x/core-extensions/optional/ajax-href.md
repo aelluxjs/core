@@ -31,7 +31,7 @@ Canceled or superseded attempts resolve to `null` without emitting `AjaxHrefErro
 
 ## Accessibility profile
 
-Use native anchors with useful `href` destinations. Consumers must manage focus and announce changed content as appropriate; this Extension does not move focus or create a live region. The optional Feedback Extension receives busy and progress updates when available.
+Use native anchors with useful `href` destinations. Consumers must manage focus and announce changed content as appropriate; this Extension does not move focus or create a live region. Ajax Href does not call the Feedback Extension, even when it is loaded. Applications can connect `AjaxHrefStart`, `AjaxHrefError` and `AjaxHrefComplete` to their own busy, progress and error presentation. Completion also fires for canceled or superseded attempts, so shared indicators must account for overlapping requests.
 
 ## Known Limits & Risks
 

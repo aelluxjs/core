@@ -182,12 +182,20 @@ test("Production skips resource and transformed Snap diagnostics", async ({ page
   expect(await page.evaluate(() => AelluxJs.diagnostics.showHistory().filter(e => [2020, 2033].includes(e.code)).length)).toBe(0);
 });
 
-test("Ajax commits one history entry after a partial veto and sends valid Feedback payloads", async ({ page }) => {
+test("Ajax commits one history entry after a partial veto with external Feedback listeners", async ({ page }) => {
   await start(page, '<a data-ae-ajax-href="#one,#two" href="/next.htm">Next</a><main id="one">Old one</main><aside id="two">Old two</aside>');
   const result = await page.evaluate(async () => {
     await AelluxJs.wait("feedback");
     const payloads = [];
     AelluxJs.ext.feedback.on("*", payload => payloads.push({ type: payload.type, target: payload.target.id, value: payload.value }));
+    // The application owns this connection; Ajax Href only emits lifecycle events.
+    for (const [name, busy] of [["AjaxHrefStart", true], ["AjaxHrefComplete", false]]) {
+      AelluxJs.on(name, () => {
+        for (const id of ["one", "two"]) {
+          AelluxJs.ext.feedback.busy("Navigation", document.getElementById(id), busy);
+        }
+      });
+    }
     AelluxJs.request = async () => ({ url: "/next.htm", text: async () => '<main id="one">New one</main><aside id="two">New two</aside>' });
     AelluxJs.on("BeforeUnmount", event => { if (event.detail.root.id === "two") event.preventDefault(); });
     const before = history.length;

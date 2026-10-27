@@ -7,7 +7,7 @@
  * response and coordinates their unmount and mount lifecycle.
  *
  * Capability profile: asynchronous content navigation with optional history
- * and feedback integration.
+ * integration and lifecycle events for application integrations.
  *
  * Inputs and activation: Full initializes lazily for a[data-ae-ajax-href]. The
  * attribute accepts a CSS selector list, defaulting to title,body when empty;
@@ -16,7 +16,7 @@
  *
  * Outputs and owned state: replaces the first match for each selector, preserves
  * regions missing from the response, and emits AjaxHref lifecycle events. It
- * requests history and title updates and publishes optional busy/progress feedback.
+ * requests history and title updates. Feedback presentation belongs to consumers.
  *
  * Lifecycle: a new request aborts the previous one when supported. Snapshot
  * restoration reloads recorded regions without pushing history. Destruction
@@ -73,8 +73,6 @@ import { validateHTMLSource } from "./internal/validate-html-source.js";
         { signal: null, abort: () => null };
     previousController = controller;
 
-    elements.forEach(currentElement => updateFeedback(currentElement, true));
-
     AelluxJs.dispatch("AjaxHrefStart", { detail: { url, selectors } });
 
     try {
@@ -94,7 +92,6 @@ import { validateHTMLSource } from "./internal/validate-html-source.js";
         if (!loadedElement || await AelluxJs.unmount(currentElement) === false) {
           if (!loadedElement)
             selectorDiagnostic(selector, "No response element matches the selector.", currentElement);
-          updateFeedback(currentElement, false);
           continue;
         }
 
@@ -116,13 +113,11 @@ import { validateHTMLSource } from "./internal/validate-html-source.js";
 
         await AelluxJs.mount(replacement);
 
-        updateFeedback(replacement, false, "Ajax loaded");
       }
 
       AelluxJs.dispatch("AjaxHrefLoaded", { detail: { url, selectors } });
     }
     catch (error) {
-      elements.forEach(currentElement => updateFeedback(currentElement, false));
       // Superseded requests must not report failures for the active navigation.
       if (previousController !== controller) return null;
       if (controller.signal?.aborted || error?.name === "AbortError") return null;
@@ -136,13 +131,6 @@ import { validateHTMLSource } from "./internal/validate-html-source.js";
         previousController = null;
       AelluxJs.dispatch("AjaxHrefComplete", { detail: { url, selectors } });
     }
-  }
-
-  function updateFeedback(element, busy, label = "Ajax loading") {
-    const feedback = AelluxJs.ext.feedback;
-    if (!feedback) return;
-    feedback.busy(label, element, busy);
-    feedback.progress(label, element, busy ? 0 : 1);
   }
 
   function selectorDiagnostic(value, reason, element = null) {

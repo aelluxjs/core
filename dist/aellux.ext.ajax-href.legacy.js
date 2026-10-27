@@ -493,9 +493,6 @@
                 }
               };
               previousController = controller;
-              elements.forEach(function(currentElement2) {
-                return updateFeedback(currentElement2, true);
-              });
               AelluxJs.dispatch("AjaxHrefStart", {
                 detail: {
                   url: url,
@@ -527,7 +524,7 @@
               _iterator2.s();
             case 8:
               if ((_step2 = _iterator2.n()).done) {
-                _context.n = 17;
+                _context.n = 16;
                 break;
               }
               selector = _step2.value;
@@ -542,7 +539,7 @@
                 _context.n = 10;
                 break;
               }
-              return _context.a(3, 16);
+              return _context.a(3, 15);
             case 10:
               loadedElement = loadedDocument.querySelector(selector);
               _t = !loadedElement;
@@ -561,8 +558,7 @@
                 break;
               }
               if (!loadedElement) selectorDiagnostic(selector, "No response element matches the selector.", currentElement);
-              updateFeedback(currentElement, false);
-              return _context.a(3, 16);
+              return _context.a(3, 15);
             case 13:
               replacement = document.importNode(loadedElement, true);
               if (!(previousController !== controller)) {
@@ -591,48 +587,43 @@
               _context.n = 15;
               return AelluxJs.mount(replacement);
             case 15:
-              updateFeedback(replacement, false, "Ajax loaded");
-            case 16:
               _context.n = 8;
               break;
-            case 17:
-              _context.n = 19;
+            case 16:
+              _context.n = 18;
               break;
-            case 18:
-              _context.p = 18;
+            case 17:
+              _context.p = 17;
               _t3 = _context.v;
               _iterator2.e(_t3);
-            case 19:
-              _context.p = 19;
+            case 18:
+              _context.p = 18;
               _iterator2.f();
-              return _context.f(19);
-            case 20:
+              return _context.f(18);
+            case 19:
               AelluxJs.dispatch("AjaxHrefLoaded", {
                 detail: {
                   url: url,
                   selectors: selectors
                 }
               });
-              _context.n = 24;
+              _context.n = 23;
               break;
-            case 21:
-              _context.p = 21;
+            case 20:
+              _context.p = 20;
               _t4 = _context.v;
-              elements.forEach(function(currentElement2) {
-                return updateFeedback(currentElement2, false);
-              });
               if (!(previousController !== controller)) {
+                _context.n = 21;
+                break;
+              }
+              return _context.a(2, null);
+            case 21:
+              if (!((_controller$signal = controller.signal) !== null && _controller$signal !== void 0 && _controller$signal.aborted || (_t4 === null || _t4 === void 0 ? void 0 : _t4.name) === "AbortError")) {
                 _context.n = 22;
                 break;
               }
               return _context.a(2, null);
             case 22:
-              if (!((_controller$signal = controller.signal) !== null && _controller$signal !== void 0 && _controller$signal.aborted || (_t4 === null || _t4 === void 0 ? void 0 : _t4.name) === "AbortError")) {
-                _context.n = 23;
-                break;
-              }
-              return _context.a(2, null);
-            case 23:
               status = (_ref = (_error$response$statu = _t4 === null || _t4 === void 0 || (_error$response = _t4.response) === null || _error$response === void 0 ? void 0 : _error$response.status) !== null && _error$response$statu !== void 0 ? _error$response$statu : _t4 === null || _t4 === void 0 ? void 0 : _t4.status) !== null && _ref !== void 0 ? _ref : null;
               AelluxJs.dispatch("AjaxHrefError", {
                 detail: {
@@ -643,8 +634,8 @@
                 }
               });
               throw _t4;
-            case 24:
-              _context.p = 24;
+            case 23:
+              _context.p = 23;
               if (previousController === controller) previousController = null;
               AelluxJs.dispatch("AjaxHrefComplete", {
                 detail: {
@@ -652,20 +643,13 @@
                   selectors: selectors
                 }
               });
-              return _context.f(24);
-            case 25:
+              return _context.f(23);
+            case 24:
               return _context.a(2);
           }
-        }, _callee, null, [[7, 18, 19, 20], [3, 21, 24, 25]]);
+        }, _callee, null, [[7, 17, 18, 19], [3, 20, 23, 24]]);
       }));
       return _load.apply(this, arguments);
-    }
-    function updateFeedback(element, busy) {
-      var label = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : "Ajax loading";
-      var feedback = AelluxJs.ext.feedback;
-      if (!feedback) return;
-      feedback.busy(label, element, busy);
-      feedback.progress(label, element, busy ? 0 : 1);
     }
     function selectorDiagnostic(value, reason) {
       var element = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : null;

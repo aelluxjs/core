@@ -25464,22 +25464,29 @@
                       });
                     }
                     _context.n = 1;
-                    return new Promise(function(resolve) {
+                    return new Promise(function(resolve, reject) {
                       var _startCallback = function startCallback() {
+                        AelluxJs.off("$DOMContentLoaded", _startCallback);
                         if (AelluxJs.options.skipGlobalMount === true) {
-                          AelluxJs.off("$DOMContentLoaded", _startCallback);
                           resolve();
                           return;
                         }
-                        AelluxJs.mount().then(function() {
-                          AelluxJs.off("$DOMContentLoaded", _startCallback);
-                          resolve();
-                        });
+                        Promise.resolve().then(function() {
+                          return AelluxJs.mount();
+                        }).then(resolve, reject);
                       };
                       if (document.readyState === "loading") AelluxJs.on("$DOMContentLoaded", _startCallback, {
                         once: true
                       });
                       else _startCallback();
+                    }).catch(function(error2) {
+                      AelluxJs.dispatch("RuntimeStartError", {
+                        detail: {
+                          error: error2,
+                          operation: "mount"
+                        }
+                      });
+                      throw error2;
                     });
                   case 1:
                     AelluxJs.dispatch("Ready");
@@ -26850,18 +26857,19 @@
         }
         function _change() {
           _change = _asyncToGenerator3(/* @__PURE__ */ _regenerator3().m(function _callee2(key, value) {
-            var title, silent, state, url, _args2 = arguments;
+            var title, silent, state, url, _args2 = arguments, _t;
             return _regenerator3().w(function(_context2) {
-              while (1) switch (_context2.n) {
+              while (1) switch (_context2.p = _context2.n) {
                 case 0:
                   title = _args2.length > 2 && _args2[2] !== void 0 ? _args2[2] : void 0;
                   silent = _args2.length > 3 && _args2[3] !== void 0 ? _args2[3] : false;
+                  _context2.p = 1;
                   if (!(globalSnapshot.title === title && globalSnapshot[key] === value)) {
-                    _context2.n = 1;
+                    _context2.n = 2;
                     break;
                   }
                   return _context2.a(2);
-                case 1:
+                case 2:
                   if (title) globalSnapshot.title = title.replace(/\s+/g, " ");
                   else delete globalSnapshot.title;
                   globalSnapshot[key] = value;
@@ -26874,10 +26882,26 @@
                   if (silent) history.replaceState(mergeHistoryState(state), "", url);
                   else history.pushState(state, "", url);
                   dispatchSnapshotEvent("SnapshotChange");
-                case 2:
+                  _context2.n = 4;
+                  break;
+                case 3:
+                  _context2.p = 3;
+                  _t = _context2.v;
+                  AelluxJs2.dispatch("StateNavigationError", {
+                    detail: {
+                      operation: "setState",
+                      key: key,
+                      value: value,
+                      title: title,
+                      silent: silent,
+                      error: _t
+                    }
+                  });
+                  throw _t;
+                case 4:
                   return _context2.a(2);
               }
-            }, _callee2);
+            }, _callee2, null, [[1, 3]]);
           }));
           return _change.apply(this, arguments);
         }
@@ -26985,7 +27009,13 @@
               });
               return;
             }
-            setState(detail.key, detail.value, detail.title);
+            setState(detail.key, detail.value, detail.title).catch(function(cause) {
+              AelluxJs2.diagnostics.error(AelluxJs2.diagnostics.ERROR_CALLBACK, {
+                extension: extensionName,
+                event: "PushState",
+                cause: cause
+              });
+            });
           } catch (cause) {
             AelluxJs2.diagnostics.error(AelluxJs2.diagnostics.ERROR_CALLBACK, {
               extension: extensionName,

@@ -45,6 +45,8 @@ $ae.dispatch("UpdateBaseTitle", {
 
 Each history entry stores `ajaxReplace: { url, selectors }`; the target entry has `snapshot: null`. The optional `ajaxHref` Extension can use this history metadata when available. It is not part of the `full` runtime's bundled Extension list. Malformed event details produce a navigation warning.
 
+Failures from `setState()` emit `StateNavigationError` on `document` and reject its Promise with the original error. Await the call with `try/catch` when using the API directly. The `PushState` event handler handles its own rejection and records a callback diagnostic. See [Asynchronous failures](../runtime/events.md#asynchronous-failures) for the event payload. An error does not roll back state already changed before the failure.
+
 ## Parent page and iframe
 
 A browser fixture runs this Extension in `basic` mode in both a parent page and an iframe, keeping Focus out of this history-isolation test. Its test confirms that after a parent state followed by an iframe `ajaxReplace` state, the first Back fires `popstate` and `AelluxJsSnapshotRestore` only in the iframe; the next Back fires them only in the parent. The test passes in Chromium, Firefox and WebKit. Build `dist/` first, then run `npx playwright test tests/browser/state-navigation-iframe.spec.mjs` to repeat it, or start `node tests/browser/server.mjs` and open `/tests/browser/state-navigation-iframe-parent.html` to use the buttons manually.

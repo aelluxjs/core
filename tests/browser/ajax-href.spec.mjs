@@ -103,7 +103,7 @@ for (const variant of [
     });
   });
 
-  test(`Ajax Href settles Feedback for missing regions and request errors (${variant.boot}, legacy=${variant.forceLegacy})`, async ({ page }) => {
+  test(`Ajax Href leaves Feedback to consumers for missing regions and request errors (${variant.boot}, legacy=${variant.forceLegacy})`, async ({ page }) => {
     await page.goto("/tests/index.htm");
     await page.addScriptTag({ url: `/dist/${variant.boot}` });
     const result = await page.evaluate(async forceLegacy => {
@@ -130,13 +130,7 @@ for (const variant of [
         content: document.getElementById("content").textContent,
         missing: document.getElementById("missing").textContent };
     }, variant.forceLegacy);
-    const feedback = (target, busy) => [
-      { type: "busy", target, value: busy },
-      { type: "progress", target, value: busy ? 0 : 1 }
-    ];
-    const expected = [...feedback("content", true), ...feedback("missing", true),
-      ...feedback("content", false), ...feedback("missing", false)];
-    expect(result).toEqual({ loaded: expected, failed: expected, error: "Request failed", content: "New", missing: "Keep" });
+    expect(result).toEqual({ loaded: [], failed: [], error: "Request failed", content: "New", missing: "Keep" });
   });
 
   test(`Ajax Href activates only for anchors and replaces mounted content (${variant.boot}, legacy=${variant.forceLegacy})`, async ({ page }) => {

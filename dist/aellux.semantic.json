@@ -15117,6 +15117,14 @@
     {
       "bubbles": true,
       "cancelable": false,
+      "name": "AelluxJsRuntimeStartError",
+      "extension": "core",
+      "description": "Initial mount failure on document. detail: { operation: 'mount', error }. startAelluxJs also rejects with the original error.",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/runtime/events.htm"
+    },
+    {
+      "bubbles": true,
+      "cancelable": false,
       "name": "AelluxJsScrollboxInteraction",
       "extension": "scrollbox",
       "description": "Snap suspension integration. detail: { reason, active }; reasons are scrollbar, pointer and elastic.",
@@ -15160,6 +15168,14 @@
       "name": "AelluxJsSnapshotRestore",
       "extension": "state-navigation",
       "description": "SnapshotRestore on document. detail includes snapshot, removeSnapshot and popState copies.",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/runtime/events.htm"
+    },
+    {
+      "bubbles": true,
+      "cancelable": false,
+      "name": "AelluxJsStateNavigationError",
+      "extension": "state-navigation",
+      "description": "Failed state change on document. detail: { operation: 'setState', key, value, title, silent, error }. setState also rejects with the original error.",
       "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/runtime/events.htm"
     },
     {
@@ -15226,6 +15242,14 @@
       "extension": "viewport",
       "composed": true,
       "description": "Relevant geometry change, including the first measurable publication. Bubbling, composed and noncancelable on the observed element. detail: { viewport, x1, y1, x2, y2, x, y, visible, state, measurable, previous, initial }. Coordinates are unclamped physical values; CSS position outputs stay in -2..2. Unknown geometry uses null coordinates/state and visible: 0; only Change reports its loss after a valid publication. previous is an independent snapshot of the last published geometry.",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/runtime/events.htm"
+    },
+    {
+      "bubbles": true,
+      "cancelable": false,
+      "name": "AelluxJsViewportError",
+      "extension": "viewport",
+      "description": "Scheduled failure on document. detail: { operation: 'refresh' or 'unmount', reference, elements, error }. Automatic work is observed; direct refresh callers retain rejection.",
       "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/runtime/events.htm"
     },
     {

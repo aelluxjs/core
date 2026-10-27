@@ -19,7 +19,7 @@ const tocOptions = {
   scrollEndCallback: function (e) {
     // Example: Adjust active link position
     const active = document.querySelector('.is-active-link');
-    active.scrollIntoView({
+    active?.scrollIntoView({
       block: "center",
       container: "nearest",
       behavior: "smooth"

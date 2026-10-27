@@ -170,7 +170,6 @@
       }
       const controller = "AbortController" in window ? new AbortController() : { signal: null, abort: () => null };
       previousController = controller;
-      elements.forEach((currentElement) => updateFeedback(currentElement, true));
       AelluxJs.dispatch("AjaxHrefStart", { detail: { url, selectors } });
       try {
         const response = await AelluxJs.request(url, { signal: controller.signal });
@@ -187,7 +186,6 @@
           if (!loadedElement || await AelluxJs.unmount(currentElement) === false) {
             if (!loadedElement)
               selectorDiagnostic(selector, "No response element matches the selector.", currentElement);
-            updateFeedback(currentElement, false);
             continue;
           }
           const replacement = document.importNode(loadedElement, true);
@@ -203,11 +201,9 @@
             });
           }
           await AelluxJs.mount(replacement);
-          updateFeedback(replacement, false, "Ajax loaded");
         }
         AelluxJs.dispatch("AjaxHrefLoaded", { detail: { url, selectors } });
       } catch (error) {
-        elements.forEach((currentElement) => updateFeedback(currentElement, false));
         if (previousController !== controller) return null;
         if (((_a = controller.signal) == null ? void 0 : _a.aborted) || (error == null ? void 0 : error.name) === "AbortError") return null;
         const status = (_d = (_c = (_b = error == null ? void 0 : error.response) == null ? void 0 : _b.status) != null ? _c : error == null ? void 0 : error.status) != null ? _d : null;
@@ -218,12 +214,6 @@
           previousController = null;
         AelluxJs.dispatch("AjaxHrefComplete", { detail: { url, selectors } });
       }
-    }
-    function updateFeedback(element, busy, label = "Ajax loading") {
-      const feedback = AelluxJs.ext.feedback;
-      if (!feedback) return;
-      feedback.busy(label, element, busy);
-      feedback.progress(label, element, busy ? 0 : 1);
     }
     function selectorDiagnostic(value, reason, element = null) {
       AelluxJs.diagnostics.warn(AelluxJs.diagnostics.WARN_CONFIGURATION_TARGET, {

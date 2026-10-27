@@ -52,16 +52,23 @@
       return change(key, value, title, silent);
     }
     async function change(key, value, title = void 0, silent = false) {
-      if (globalSnapshot.title === title && globalSnapshot[key] === value) return;
-      if (title) globalSnapshot.title = title.replace(/\s+/g, " ");
-      else delete globalSnapshot.title;
-      globalSnapshot[key] = value;
-      updateSnapshotData(snapshotToString(globalSnapshot));
-      const state = { aelluxJsState: true, snapshot: Object.assign({}, globalSnapshot) };
-      const url = useHash ? `#${globalSnapshotString}` : void 0;
-      if (silent) history.replaceState(mergeHistoryState(state), "", url);
-      else history.pushState(state, "", url);
-      dispatchSnapshotEvent("SnapshotChange");
+      try {
+        if (globalSnapshot.title === title && globalSnapshot[key] === value) return;
+        if (title) globalSnapshot.title = title.replace(/\s+/g, " ");
+        else delete globalSnapshot.title;
+        globalSnapshot[key] = value;
+        updateSnapshotData(snapshotToString(globalSnapshot));
+        const state = { aelluxJsState: true, snapshot: Object.assign({}, globalSnapshot) };
+        const url = useHash ? `#${globalSnapshotString}` : void 0;
+        if (silent) history.replaceState(mergeHistoryState(state), "", url);
+        else history.pushState(state, "", url);
+        dispatchSnapshotEvent("SnapshotChange");
+      } catch (error) {
+        AelluxJs.dispatch("StateNavigationError", {
+          detail: { operation: "setState", key, value, title, silent, error }
+        });
+        throw error;
+      }
     }
     function updateSnapshotData(string = "") {
       globalSnapshotString = string;
@@ -164,7 +171,13 @@
           });
           return;
         }
-        setState(detail.key, detail.value, detail.title);
+        setState(detail.key, detail.value, detail.title).catch((cause) => {
+          AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_CALLBACK, {
+            extension: extensionName,
+            event: "PushState",
+            cause
+          });
+        });
       } catch (cause) {
         AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_CALLBACK, {
           extension: extensionName,

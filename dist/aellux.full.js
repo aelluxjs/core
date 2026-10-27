@@ -356,16 +356,23 @@
           return change(key, value, title, silent);
         }
         async function change(key, value, title = void 0, silent = false) {
-          if (globalSnapshot.title === title && globalSnapshot[key] === value) return;
-          if (title) globalSnapshot.title = title.replace(/\s+/g, " ");
-          else delete globalSnapshot.title;
-          globalSnapshot[key] = value;
-          updateSnapshotData(snapshotToString(globalSnapshot));
-          const state = { aelluxJsState: true, snapshot: Object.assign({}, globalSnapshot) };
-          const url = useHash ? `#${globalSnapshotString}` : void 0;
-          if (silent) history.replaceState(mergeHistoryState(state), "", url);
-          else history.pushState(state, "", url);
-          dispatchSnapshotEvent("SnapshotChange");
+          try {
+            if (globalSnapshot.title === title && globalSnapshot[key] === value) return;
+            if (title) globalSnapshot.title = title.replace(/\s+/g, " ");
+            else delete globalSnapshot.title;
+            globalSnapshot[key] = value;
+            updateSnapshotData(snapshotToString(globalSnapshot));
+            const state = { aelluxJsState: true, snapshot: Object.assign({}, globalSnapshot) };
+            const url = useHash ? `#${globalSnapshotString}` : void 0;
+            if (silent) history.replaceState(mergeHistoryState(state), "", url);
+            else history.pushState(state, "", url);
+            dispatchSnapshotEvent("SnapshotChange");
+          } catch (error) {
+            AelluxJs2.dispatch("StateNavigationError", {
+              detail: { operation: "setState", key, value, title, silent, error }
+            });
+            throw error;
+          }
         }
         function updateSnapshotData(string = "") {
           globalSnapshotString = string;
@@ -468,7 +475,13 @@
               });
               return;
             }
-            setState(detail.key, detail.value, detail.title);
+            setState(detail.key, detail.value, detail.title).catch((cause) => {
+              AelluxJs2.diagnostics.error(AelluxJs2.diagnostics.ERROR_CALLBACK, {
+                extension: extensionName,
+                event: "PushState",
+                cause
+              });
+            });
           } catch (cause) {
             AelluxJs2.diagnostics.error(AelluxJs2.diagnostics.ERROR_CALLBACK, {
               extension: extensionName,
@@ -8909,22 +8922,22 @@
               }
             });
           }
-          await new Promise((resolve) => {
+          await new Promise((resolve, reject) => {
             const startCallback = function() {
+              AelluxJs.off("$DOMContentLoaded", startCallback);
               if (AelluxJs.options.skipGlobalMount === true) {
-                AelluxJs.off("$DOMContentLoaded", startCallback);
                 resolve();
                 return;
               }
-              AelluxJs.mount().then(function() {
-                AelluxJs.off("$DOMContentLoaded", startCallback);
-                resolve();
-              });
+              Promise.resolve().then(() => AelluxJs.mount()).then(resolve, reject);
             };
             if (document.readyState === "loading")
               AelluxJs.on("$DOMContentLoaded", startCallback, { once: true });
             else
               startCallback();
+          }).catch((error) => {
+            AelluxJs.dispatch("RuntimeStartError", { detail: { error, operation: "mount" } });
+            throw error;
           });
           AelluxJs.dispatch("Ready");
           return true;

@@ -25465,22 +25465,29 @@
                       });
                     }
                     _context.n = 1;
-                    return new Promise(function(resolve) {
+                    return new Promise(function(resolve, reject) {
                       var _startCallback = function startCallback() {
+                        AelluxJs.off("$DOMContentLoaded", _startCallback);
                         if (AelluxJs.options.skipGlobalMount === true) {
-                          AelluxJs.off("$DOMContentLoaded", _startCallback);
                           resolve();
                           return;
                         }
-                        AelluxJs.mount().then(function() {
-                          AelluxJs.off("$DOMContentLoaded", _startCallback);
-                          resolve();
-                        });
+                        Promise.resolve().then(function() {
+                          return AelluxJs.mount();
+                        }).then(resolve, reject);
                       };
                       if (document.readyState === "loading") AelluxJs.on("$DOMContentLoaded", _startCallback, {
                         once: true
                       });
                       else _startCallback();
+                    }).catch(function(error2) {
+                      AelluxJs.dispatch("RuntimeStartError", {
+                        detail: {
+                          error: error2,
+                          operation: "mount"
+                        }
+                      });
+                      throw error2;
                     });
                   case 1:
                     AelluxJs.dispatch("Ready");

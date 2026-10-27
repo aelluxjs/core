@@ -2485,22 +2485,22 @@
               }
             });
           }
-          await new Promise((resolve) => {
+          await new Promise((resolve, reject) => {
             const startCallback = function() {
+              AelluxJs.off("$DOMContentLoaded", startCallback);
               if (AelluxJs.options.skipGlobalMount === true) {
-                AelluxJs.off("$DOMContentLoaded", startCallback);
                 resolve();
                 return;
               }
-              AelluxJs.mount().then(function() {
-                AelluxJs.off("$DOMContentLoaded", startCallback);
-                resolve();
-              });
+              Promise.resolve().then(() => AelluxJs.mount()).then(resolve, reject);
             };
             if (document.readyState === "loading")
               AelluxJs.on("$DOMContentLoaded", startCallback, { once: true });
             else
               startCallback();
+          }).catch((error) => {
+            AelluxJs.dispatch("RuntimeStartError", { detail: { error, operation: "mount" } });
+            throw error;
           });
           AelluxJs.dispatch("Ready");
           return true;

@@ -454,7 +454,11 @@
         group.dirty = true;
         return group.pending;
       }
-      group.pending = refresh(group).finally(function() {
+      group.pending = refresh(group).catch(function(error) {
+        group.dirty = false;
+        group.layoutUntil = 0;
+        throw error;
+      }).finally(function() {
         group.pending = null;
         if (!group.active) return;
         if (group.dirty) {
@@ -467,7 +471,29 @@
           }, 16);
         }
       });
+      group.pending.catch(function(error) {
+        return reportError(group, "refresh", error);
+      });
       return group.pending;
+    }
+    function reportError(group, operation, error) {
+      var element = arguments.length > 3 && arguments[3] !== void 0 ? arguments[3] : group.reference;
+      AelluxJs.dispatch("ViewportError", {
+        detail: {
+          error: error,
+          operation: operation,
+          reference: group.reference,
+          elements: operation === "unmount" ? [element] : Array.from(group.states, function(state) {
+            return state.element;
+          })
+        }
+      });
+      AelluxJs.diagnostics.error(operation === "unmount" ? AelluxJs.diagnostics.ERROR_EXTENSION_UNMOUNT : AelluxJs.diagnostics.ERROR_EXTENSION_MOUNT, {
+        extension: extensionName,
+        cause: error,
+        operation: operation,
+        element: element
+      });
     }
     function refresh(_x2) {
       return _refresh.apply(this, arguments);
@@ -498,7 +524,9 @@
                     var _step9$value = _step9.value, state = _step9$value.state, target = _step9$value.target, values = _step9$value.values, snapshot = _step9$value.snapshot, changed = _step9$value.changed;
                     if (states.get(state.element) !== state || state.group !== group) return 0;
                     if (values === null) {
-                      AelluxJs.mountManager.unmount(state.element, extensionName);
+                      AelluxJs.mountManager.unmount(state.element, extensionName).catch(function(error) {
+                        return reportError(group, "unmount", error, state.element);
+                      });
                       return 0;
                     }
                     if (!current(state, group)) return 0;

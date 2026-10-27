@@ -820,6 +820,44 @@ $ae.off(&quot;BeforeUnmount&quot;, preventUnmount);
 
 await $ae.mountManager.update(document.getElementById(&quot;panel&quot;));
 </code></pre>
+<h2>Asynchronous failures</h2>
+<p>Automatic operations report failures through the following noncancelable events on <code>document</code>. <code>detail.error</code> preserves the original error object. Handling an event does not consume the rejection of a public Promise: callers must still use <code>await</code> with <code>try/catch</code> or <code>.catch()</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Event</th>
+<th>Detail and behavior</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>RuntimeStartError</code></td>
+<td><span class="large"><code>{ operation: &quot;mount&quot;, error }</code>. The initial mount pass rejected. <code>startAelluxJs()</code> rejects with the same error and does not emit <code>Ready</code> for that attempt; the bootstrap retains its startup diagnostics and fallback handling.</span></td>
+</tr>
+<tr>
+<td><code>StateNavigationError</code></td>
+<td><span class="large"><code>{ operation: &quot;setState&quot;, key, value, title, silent, error }</code>. A state change failed. <code>setState()</code> rejects; the automatic <code>PushState</code> handler observes the rejection and records a callback diagnostic.</span></td>
+</tr>
+<tr>
+<td><code>ViewportError</code></td>
+<td><span class="large"><code>{ operation, reference, elements, error }</code>, where <code>operation</code> is <code>&quot;refresh&quot;</code> or <code>&quot;unmount&quot;</code> (attribute-removal cleanup). <code>reference</code> is the group&#39;s scroll reference and <code>elements</code> contains its observed sources, or the source whose cleanup failed. A failed refresh rejects for direct callers; observer work is handled and diagnosed. Cleanup failure is reported separately without blocking a pending mount. A failed refresh stops automatic retries for the current Layout transition; a new external update can retry.</span></td>
+</tr>
+<tr>
+<td><code>DocweaverError</code></td>
+<td><span class="large">Theme only: <code>{ operation, error }</code>, where <code>operation</code> is <code>&quot;toc&quot;</code>, <code>&quot;highlight&quot;</code> or <code>&quot;highlight-scheme&quot;</code>. Reports dependency, initialization, enhancement or theme update failures; automatic theme work also logs the error.</span></td>
+</tr>
+</tbody></table>
+<p>Register startup listeners before calling <code>init()</code>:</p>
+<pre><code class="language-js">$ae.on(&quot;RuntimeStartError&quot;, event =&gt; {
+  showStartupFailure(event.detail.error);
+});
+$ae.on(&quot;StateNavigationError&quot;, event =&gt; {
+  showNavigationFailure(event.detail.error);
+});
+$ae.on(&quot;ViewportError&quot;, event =&gt; {
+  console.error(event.detail.reference, event.detail.error);
+});
+</code></pre>
+<p>These notifications do not roll back partially applied state or DOM changes. Exceptions thrown by application event listeners remain the application&#39;s responsibility.</p>
 <h2>Core Extension notifications</h2>
 <p>Viewport events always originate from the observed element, including when <code>data-ae-viewport-target</code> redirects CSS outputs to another element. Missing or conflicting CSS destinations do not suppress geometry events. See <a href="../core-extensions/optional/viewport.htm#publishing-on-another-element">Viewport CSS targets</a>.</p>
 <p>These events are available when the corresponding Extension is loaded. Events from elements bubble to <code>document</code> unless marked otherwise.</p>

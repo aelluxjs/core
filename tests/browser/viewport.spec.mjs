@@ -302,7 +302,9 @@ for (const legacy of [false, true]) test.describe(`Viewport ${legacy ? "Legacy" 
     await expectGeometry(page, [0, 0, 1]);
     await page.locator("#item").evaluate(el => el.setAttribute("data-ae-viewport", "invalid"));
     await expectGeometry(page, [0, 0, 1]);
-    expect(await page.evaluate(() => AelluxJs.diagnostics.showHistory().some(entry =>
+    // Neutral geometry can already match before the asynchronous invalid-axis
+    // update runs, so wait for its diagnostic independently.
+    await expect.poll(() => page.evaluate(() => AelluxJs.diagnostics.showHistory().some(entry =>
       entry.context?.extension === "viewport" && entry.context?.value === "invalid"))).toBe(true);
   });
 

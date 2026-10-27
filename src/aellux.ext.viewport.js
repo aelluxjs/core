@@ -176,7 +176,13 @@
       group.dirty = true;
       return group.pending;
     }
-    group.pending = refresh(group).finally(() => {
+    group.pending = refresh(group).catch(error => {
+      // Wait for a new external update after a failure instead of retrying it
+      // throughout the current Layout transition.
+      group.dirty = false;
+      group.layoutUntil = 0;
+      throw error;
+    }).finally(() => {
       group.pending = null;
       if (!group.active) return;
       if (group.dirty) {
@@ -190,7 +196,20 @@
         }, 16);
       }
     });
+    // Observe automatic work while preserving rejection for mount/update callers.
+    group.pending.catch(error => reportError(group, "refresh", error));
     return group.pending;
+  }
+
+  function reportError(group, operation, error, element = group.reference) {
+    AelluxJs.dispatch("ViewportError", {
+      detail: { error, operation, reference: group.reference,
+        elements: operation === "unmount" ? [element] : Array.from(group.states, state => state.element) }
+    });
+    AelluxJs.diagnostics.error(operation === "unmount"
+      ? AelluxJs.diagnostics.ERROR_EXTENSION_UNMOUNT : AelluxJs.diagnostics.ERROR_EXTENSION_MOUNT, {
+      extension: extensionName, cause: error, operation, element
+    });
   }
 
   async function refresh(group) {
@@ -200,7 +219,10 @@
       for (const { state, target, values, snapshot, changed } of measurements) {
         if (states.get(state.element) !== state || state.group !== group) continue;
         if (values === null) {
-          AelluxJs.mountManager.unmount(state.element, extensionName);
+          // Cleanup may wait for the current mount to finish. Observe its
+          // failure independently so this refresh can release that mount.
+          AelluxJs.mountManager.unmount(state.element, extensionName)
+            .catch(error => reportError(group, "unmount", error, state.element));
           continue;
         }
         if (!current(state, group)) continue;

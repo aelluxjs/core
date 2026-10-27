@@ -7,10 +7,10 @@ const tocbotReady = (async () => {
     AelluxJs.dep("tocbot-css", css),
     AelluxJs.dep("tocbot-init", initUrl)
   ]);
-  initOrRefreshToc();
+  await initOrRefreshToc();
   return window.tocbot;
 })().catch(error => {
-  console.error("Failed to load tocbot.", error);
+  reportDocweaverError("toc", error);
   return null;
 });
 
@@ -28,13 +28,21 @@ const highlightReady = (async () => {
   ));
 
   updateHljsScheme();
-  AelluxJs.on("PreferencesChange", updateHljsScheme);
+  AelluxJs.on("PreferencesChange", () => {
+    try { updateHljsScheme(); }
+    catch (error) { reportDocweaverError("highlight-scheme", error); }
+  });
 
   return window.hljs;
 })().catch(error => {
-  console.error("Failed to load syntax highlighting.", error);
+  reportDocweaverError("highlight", error);
   return null;
 });
+
+function reportDocweaverError(operation, error) {
+  AelluxJs.dispatch("DocweaverError", { detail: { operation, error } });
+  console.error(`Docweaver ${operation} failed.`, error);
+}
 
 function updateHljsScheme() {
   const colorScheme = document.documentElement.getAttribute("data-ae-color-scheme");
@@ -77,8 +85,11 @@ function prepareAjaxLinks() {
 }
 
 AelluxJs.on("BeforeMount", (event) => {
-  if ("initOrRefreshToc" in window) { initOrRefreshToc(); }
-  highlightCode();
+  if ("initOrRefreshToc" in window) {
+    Promise.resolve().then(() => initOrRefreshToc())
+      .catch(error => reportDocweaverError("toc", error));
+  }
+  highlightCode().catch(error => reportDocweaverError("highlight", error));
   prepareAjaxLinks();
 
   document.querySelectorAll("table:not([data-ae-scrollbox])")
