@@ -621,7 +621,12 @@
               elements.forEach(function(currentElement2) {
                 return updateFeedback(currentElement2, false);
               });
-              AelluxJs.dispatch("AjaxHrefError");
+              AelluxJs.dispatch("AjaxHrefError", {
+                detail: {
+                  url: url,
+                  selectors: selectors
+                }
+              });
               if (!(_t4.name === "AbortError")) {
                 _context.n = 22;
                 break;

@@ -674,6 +674,12 @@ feedback.progress(&quot;Uploading…&quot;, field, 0.5);
 </code></pre>
 <p>Each call dispatches a bubbling, cancelable <code>AelluxJsFeedback</code> event from the target. Its <code>detail</code> contains <code>{ type, message, value, target, motion }</code>. <code>on(type, handler)</code> subscribes to one type; <code>on(&quot;*&quot;, handler)</code> receives every type. Use <code>off(type, handler)</code> or the object returned by <code>on()</code> to unsubscribe. Subscribers run after the event dispatch, even when a boundary stops propagation or a listener cancels the event. The Extension clears subscriptions when destroyed.</p>
 <h2>Mounted feedback boundaries</h2>
+<p>Mounted elements expose a <code>feedback</code> controller with <code>warning(message, value?, motion?)</code>, <code>error(...)</code>, <code>success(...)</code>, <code>announce(...)</code>, <code>busy(...)</code>, <code>validate(...)</code>, <code>progress(...)</code>, and <code>send({ type, message, value, motion })</code>. These methods dispatch from the mounted element automatically; <code>send()</code> also uses that element if its payload contains a different <code>target</code>. The controller is removed on unmount and recreated on remount.</p>
+<pre><code class="language-js">const boundary = document.querySelector(&quot;[data-ae-feedback]&quot;);
+const controller = $ae.mountManager.controller(boundary);
+controller.feedback.error(&quot;Check the form.&quot;, null, &quot;shake&quot;);
+controller.feedback.send({ type: &quot;progress&quot;, message: &quot;Uploading&quot;, value: 0.5 });
+</code></pre>
 <p>Add <code>data-ae-feedback</code> to an element to handle feedback events that reach it. An empty value accepts every type; a space-separated list accepts only the named types. The nearest matching boundary stops propagation. A boundary updates the message and applies a type class to itself, the message target, and the transform target. Type classes have the form <code>ae--feedback-warning</code>, <code>ae--feedback-error</code>, and so on; previously added type classes remain until application code removes them.</p>
 <pre><code class="language-html">&lt;section data-ae-feedback=&quot;error warning&quot;
          data-ae-message-target=&quot;email-message&quot;

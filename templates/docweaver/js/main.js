@@ -122,6 +122,10 @@ AelluxJs.on("AjaxHrefComplete", (e) => {
   container.style.opacity = null;
 });
 
+AelluxJs.on("AjaxHrefError", (e) => {
+  $ae(document.body).feedback.error();
+});
+
 function comparableUrl(value) {
   const url = new URL(value, window.location.href);
   return `${url.origin}${url.pathname}${url.search}`;

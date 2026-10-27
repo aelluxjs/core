@@ -38,7 +38,8 @@
         selector: `[${feedbackAttribute}]`,
         priority: 0,
         mount: mountFeedback,
-        unmount: unmountFeedback
+        unmount: unmountFeedback,
+        controllers: feedbackTypes.concat("send")
       });
     }
     async function destroy() {
@@ -153,27 +154,37 @@
       return removeHandler(type, handler);
     }
     function warning(message, target, value, motion) {
-      send({ type: "warning", message, value, target, motion });
+      publish("warning", message, target, value, motion);
     }
     function error(message, target, value, motion) {
-      send({ type: "error", message, value, target, motion });
+      publish("error", message, target, value, motion);
     }
     function success(message, target, value, motion) {
-      send({ type: "success", message, value, target, motion });
+      publish("success", message, target, value, motion);
     }
     function announce(message, target, value, motion) {
-      send({ type: "announce", message, value, target, motion });
+      publish("announce", message, target, value, motion);
     }
     function busy(message, target, value, motion) {
-      send({ type: "busy", message, value, target, motion });
+      publish("busy", message, target, value, motion);
     }
     function validate(message, target, value, motion) {
-      send({ type: "validate", message, value, target, motion });
+      publish("validate", message, target, value, motion);
     }
     function progress(message, target, value, motion) {
-      send({ type: "progress", message, value, target, motion });
+      publish("progress", message, target, value, motion);
     }
-    function send({ type, message, value, target, motion }) {
+    function publish(type, message, target, value, motion) {
+      if (message && message.nodeType === 1) {
+        const element = message;
+        message = target;
+        target = element;
+      }
+      send({ type, message, value, target, motion });
+    }
+    function send(input, payload) {
+      let { type, message, value, target, motion } = payload || input;
+      if (input && input.nodeType === 1) target = input;
       if (typeof message !== "string") {
         reportInvalidArgument("message", message);
         return;

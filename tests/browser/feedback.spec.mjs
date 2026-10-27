@@ -93,6 +93,42 @@ for (const options of [
   { mode: "basic", forceLegacy: true, boot: "aellux.min.js" }
 ]) {
   const label = `${options.mode}, legacy=${options.forceLegacy}`;
+  test(`feedback controllers publish from their boundary and follow mount lifecycle (${label})`, async ({ page }) => {
+    await startFeedback(page, '<p id="boundary" data-ae-feedback></p><p id="other" data-ae-feedback></p>', options);
+    const result = await page.evaluate(async () => {
+      const boundary = document.getElementById("boundary");
+      const other = document.getElementById("other");
+      const controller = AelluxJs.mountManager.controller(boundary);
+      const feedback = controller.feedback;
+      const types = ["warning", "error", "success", "announce", "busy", "validate", "progress"];
+      const received = [];
+      const subscription = AelluxJs.ext.feedback.on("*", detail => received.push({
+        type: detail.type, message: detail.message, value: detail.value,
+        target: detail.target.id, motion: detail.motion
+      }));
+      for (const type of types) feedback[type](`controller ${type}`, 0.5, "pulse");
+      feedback.send({ type: "success", message: "sent", value: 1, target: other });
+      const rendered = boundary.textContent;
+      const otherText = other.textContent;
+      await controller.unmount("feedback");
+      const removed = !controller.feedback && Object.keys(feedback).length === 0;
+      await controller.mount("feedback");
+      AelluxJs.mountManager.controller(boundary).feedback.error("remounted");
+      subscription.off();
+      return { received, rendered, otherText, removed, remounted: boundary.textContent };
+    });
+    expect(result).toEqual({
+      received: [
+        ...["warning", "error", "success", "announce", "busy", "validate", "progress"].map(type => ({
+          type, message: `controller ${type}`, value: 0.5, target: "boundary", motion: "pulse"
+        })),
+        { type: "success", message: "sent", value: 1, target: "boundary", motion: undefined },
+        { type: "error", message: "remounted", value: undefined, target: "boundary", motion: undefined }
+      ],
+      rendered: "sent", otherText: "", removed: true, remounted: "remounted"
+    });
+  });
+
   test(`feedback pops only the explicit target once per accepted event (${label})`, async ({ page }) => {
     await startFeedback(page, `<section id="boundary" data-ae-feedback="error"
       data-ae-message-target="#message" data-ae-transform-target="message" data-ae-present-target="#panel"></section>

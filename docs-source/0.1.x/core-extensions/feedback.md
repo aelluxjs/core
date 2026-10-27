@@ -30,6 +30,15 @@ Each call dispatches a bubbling, cancelable `AelluxJsFeedback` event from the ta
 
 ## Mounted feedback boundaries
 
+Mounted elements expose a `feedback` controller with `warning(message, value?, motion?)`, `error(...)`, `success(...)`, `announce(...)`, `busy(...)`, `validate(...)`, `progress(...)`, and `send({ type, message, value, motion })`. These methods dispatch from the mounted element automatically; `send()` also uses that element if its payload contains a different `target`. The controller is removed on unmount and recreated on remount.
+
+```js
+const boundary = document.querySelector("[data-ae-feedback]");
+const controller = $ae.mountManager.controller(boundary);
+controller.feedback.error("Check the form.", null, "shake");
+controller.feedback.send({ type: "progress", message: "Uploading", value: 0.5 });
+```
+
 Add `data-ae-feedback` to an element to handle feedback events that reach it. An empty value accepts every type; a space-separated list accepts only the named types. The nearest matching boundary stops propagation. A boundary updates the message and applies a type class to itself, the message target, and the transform target. Type classes have the form `ae--feedback-warning`, `ae--feedback-error`, and so on; previously added type classes remain until application code removes them.
 
 ```html

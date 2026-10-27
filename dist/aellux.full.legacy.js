@@ -27224,7 +27224,8 @@
             selector: "[".concat(feedbackAttribute, "]"),
             priority: 0,
             mount: mountFeedback,
-            unmount: unmountFeedback
+            unmount: unmountFeedback,
+            controllers: feedbackTypes.concat("send")
           });
         }
         function destroy() {
@@ -27396,70 +27397,43 @@
           return removeHandler(type, handler);
         }
         function warning(message, target, value, motion) {
-          send({
-            type: "warning",
-            message: message,
-            value: value,
-            target: target,
-            motion: motion
-          });
+          publish("warning", message, target, value, motion);
         }
         function error(message, target, value, motion) {
-          send({
-            type: "error",
-            message: message,
-            value: value,
-            target: target,
-            motion: motion
-          });
+          publish("error", message, target, value, motion);
         }
         function success(message, target, value, motion) {
-          send({
-            type: "success",
-            message: message,
-            value: value,
-            target: target,
-            motion: motion
-          });
+          publish("success", message, target, value, motion);
         }
         function announce(message, target, value, motion) {
-          send({
-            type: "announce",
-            message: message,
-            value: value,
-            target: target,
-            motion: motion
-          });
+          publish("announce", message, target, value, motion);
         }
         function busy(message, target, value, motion) {
-          send({
-            type: "busy",
-            message: message,
-            value: value,
-            target: target,
-            motion: motion
-          });
+          publish("busy", message, target, value, motion);
         }
         function validate(message, target, value, motion) {
-          send({
-            type: "validate",
-            message: message,
-            value: value,
-            target: target,
-            motion: motion
-          });
+          publish("validate", message, target, value, motion);
         }
         function progress(message, target, value, motion) {
+          publish("progress", message, target, value, motion);
+        }
+        function publish(type, message, target, value, motion) {
+          if (message && message.nodeType === 1) {
+            var element = message;
+            message = target;
+            target = element;
+          }
           send({
-            type: "progress",
+            type: type,
             message: message,
             value: value,
             target: target,
             motion: motion
           });
         }
-        function send(_ref) {
-          var type = _ref.type, message = _ref.message, value = _ref.value, target = _ref.target, motion = _ref.motion;
+        function send(input, payload) {
+          var _ref = payload || input, type = _ref.type, message = _ref.message, value = _ref.value, target = _ref.target, motion = _ref.motion;
+          if (input && input.nodeType === 1) target = input;
           if (typeof message !== "string") {
             reportInvalidArgument("message", message);
             return;
