@@ -123,7 +123,8 @@ AelluxJs.on("AjaxHrefComplete", (e) => {
 });
 
 AelluxJs.on("AjaxHrefError", (e) => {
-  $ae(document.body).feedback.error("failed");
+  $ae(document.body).feedback.error("failed", null, "no");
+  setNavActiveByUrl(window.location.href);
 });
 
 function comparableUrl(value) {
