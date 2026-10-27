@@ -1,11 +1,108 @@
 import { expect, test } from "@playwright/test";
 
+test("Docweaver chooses navigation messages from technical failure details", async ({ page }) => {
+  await page.goto("/tests/index.htm");
+  await page.evaluate(() => {
+    window.messages = [];
+    window.handlers = {};
+    window.AelluxJs = {
+      dep: () => new Promise(() => {}), init() {},
+      on: (name, handler) => { window.handlers[name] = handler; }
+    };
+    window.$ae = () => ({ feedback: { error: message => window.messages.push(message) } });
+  });
+  await page.addScriptTag({ url: "/templates/docweaver/js/main.js" });
+  const messages = await page.evaluate(() => {
+    const fail = (status, name, online = true) => {
+      Object.defineProperty(navigator, "onLine", { configurable: true, value: online });
+      window.handlers.AjaxHrefError({ detail: { status, error: { name } } });
+    };
+    for (const status of [404, 403, 429, 503, 418]) fail(status, "AelluxJsRequestError", false);
+    fail(null, "TimeoutError");
+    fail(null, "TypeError");
+    fail(null, "TypeError", false);
+    fail(null, "Error", false);
+    fail(null, "AbortError");
+    return window.messages;
+  });
+  expect(messages).toEqual([
+    "Page not found.",
+    "You do not have permission to access this content.",
+    "Too many requests. Please try again later.",
+    "The server encountered a problem. Please try again later.",
+    "Unable to load this page. Please try again.",
+    "The request took too long. Please try again.",
+    "Unable to connect to the server.",
+    "Please check your internet connection.",
+    "Unable to load this page. Please try again."
+  ]);
+});
+
 for (const variant of [
   { boot: "aellux.js", forceLegacy: false },
   { boot: "aellux.min.js", forceLegacy: false },
   { boot: "aellux.js", forceLegacy: true },
   { boot: "aellux.min.js", forceLegacy: true }
 ]) {
+  test(`Ajax Href preserves failure causes and silences canceled navigation (${variant.boot}, legacy=${variant.forceLegacy})`, async ({ page }) => {
+    await page.route("**/ajax-error/*", route => route.fulfill({
+      status: Number(new URL(route.request().url()).pathname.split("/").pop()),
+      contentType: "text/html", body: '<main id="content">Error response</main>'
+    }));
+    await page.goto("/tests/index.htm");
+    await page.addScriptTag({ url: `/dist/${variant.boot}` });
+    const result = await page.evaluate(async forceLegacy => {
+      document.body.innerHTML = '<main id="content">Old</main>';
+      AelluxJs.ext("ajax-href", { load: false });
+      await new Promise(resolve => {
+        AelluxJs.on("Ready", resolve, { once: true });
+        AelluxJs.init({ mode: "basic", forceLegacy });
+      });
+      await AelluxJs.wait("ajax-href");
+      const failures = [];
+      const completions = [];
+      let lastError;
+      AelluxJs.on("AjaxHrefError", event => {
+        lastError = event.detail.error;
+        failures.push({ status: event.detail.status, name: lastError.name });
+      });
+      AelluxJs.on("AjaxHrefComplete", event => completions.push(event.detail.url));
+      const identities = [];
+      for (const status of [404, 403, 429, 503]) {
+        try { await AelluxJs.ext.ajaxHref.load(`/ajax-error/${status}`, "#content"); }
+        catch (error) { identities.push(error === lastError && error.response.status === status); }
+      }
+      for (const error of [new TypeError("Network failure"), new DOMException("Timed out", "TimeoutError")]) {
+        AelluxJs.request = async () => { throw error; };
+        try { await AelluxJs.ext.ajaxHref.load("/failure", "#content"); }
+        catch (cause) { identities.push(cause === error && cause === lastError); }
+      }
+      AelluxJs.request = async () => { throw new DOMException("Canceled", "AbortError"); };
+      const aborted = await AelluxJs.ext.ajaxHref.load("/abort", "#content");
+
+      // Keep the successor pending until the aborted fetch has settled.
+      let resolveNext;
+      AelluxJs.request = (_url, { signal }) => new Promise((_resolve, reject) => {
+        // Some custom request implementations do not preserve AbortError.
+        signal.addEventListener("abort", () => reject(new TypeError("Obsolete network failure")));
+      });
+      const previous = AelluxJs.ext.ajaxHref.load("/previous", "#content");
+      AelluxJs.request = () => new Promise(resolve => { resolveNext = resolve; });
+      const next = AelluxJs.ext.ajaxHref.load("/next", "#content", { ignoreHistory: true });
+      const superseded = await previous;
+      resolveNext({ text: async () => '<main id="content">New</main>' });
+      await next;
+      return { failures, identities, aborted, superseded, completions: completions.length,
+        content: document.querySelector("#content").textContent };
+    }, variant.forceLegacy);
+    expect(result).toEqual({
+      failures: [404, 403, 429, 503].map(status => ({ status, name: "AelluxJsRequestError" })).concat([
+        { status: null, name: "TypeError" }, { status: null, name: "TimeoutError" }
+      ]),
+      identities: Array(6).fill(true), aborted: null, superseded: null, completions: 9, content: "New"
+    });
+  });
+
   test(`Ajax Href settles Feedback for missing regions and request errors (${variant.boot}, legacy=${variant.forceLegacy})`, async ({ page }) => {
     await page.goto("/tests/index.htm");
     await page.addScriptTag({ url: `/dist/${variant.boot}` });

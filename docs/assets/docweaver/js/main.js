@@ -123,7 +123,21 @@ AelluxJs.on("AjaxHrefComplete", (e) => {
 });
 
 AelluxJs.on("AjaxHrefError", (e) => {
-  $ae(document.body).feedback.error("failed", null, "no");
+  const { error, status } = e.detail;
+  if (error?.name === "AbortError") return;
+
+  let message = "Unable to load this page. Please try again.";
+  if (status === 404) message = "Page not found.";
+  else if (status === 403) message = "You do not have permission to access this content.";
+  else if (status === 429) message = "Too many requests. Please try again later.";
+  else if (status >= 500 && status <= 599) message = "The server encountered a problem. Please try again later.";
+  else if (error?.name === "TimeoutError") message = "The request took too long. Please try again.";
+  else if (error?.name === "TypeError") {
+    message = navigator.onLine === false
+      ? "Please check your internet connection."
+      : "Unable to connect to the server.";
+  }
+  $ae(document.body).feedback.error(message, null, "no");
   setNavActiveByUrl(window.location.href);
 });
 

@@ -448,7 +448,7 @@
     }
     function _load() {
       _load = _asyncToGenerator(/* @__PURE__ */ _regenerator().m(function _callee(url, selectors) {
-        var options, selectorList, elements, _iterator, _step, _selector, _currentElement, controller, response, html, loadedDocument, historyRequested, _iterator2, _step2, selector, currentElement, loadedElement, replacement, _args = arguments, _t, _t2, _t3, _t4;
+        var options, selectorList, elements, _iterator, _step, _selector, _currentElement, controller, response, html, loadedDocument, historyRequested, _iterator2, _step2, selector, currentElement, loadedElement, replacement, _controller$signal, _ref, _error$response$statu, _error$response, status, _args = arguments, _t, _t2, _t3, _t4;
         return _regenerator().w(function(_context) {
           while (1) switch (_context.p = _context.n) {
             case 0:
@@ -613,7 +613,7 @@
                   selectors: selectors
                 }
               });
-              _context.n = 22;
+              _context.n = 24;
               break;
             case 21:
               _context.p = 21;
@@ -621,18 +621,30 @@
               elements.forEach(function(currentElement2) {
                 return updateFeedback(currentElement2, false);
               });
+              if (!(previousController !== controller)) {
+                _context.n = 22;
+                break;
+              }
+              return _context.a(2, null);
+            case 22:
+              if (!((_controller$signal = controller.signal) !== null && _controller$signal !== void 0 && _controller$signal.aborted || (_t4 === null || _t4 === void 0 ? void 0 : _t4.name) === "AbortError")) {
+                _context.n = 23;
+                break;
+              }
+              return _context.a(2, null);
+            case 23:
+              status = (_ref = (_error$response$statu = _t4 === null || _t4 === void 0 || (_error$response = _t4.response) === null || _error$response === void 0 ? void 0 : _error$response.status) !== null && _error$response$statu !== void 0 ? _error$response$statu : _t4 === null || _t4 === void 0 ? void 0 : _t4.status) !== null && _ref !== void 0 ? _ref : null;
               AelluxJs.dispatch("AjaxHrefError", {
                 detail: {
                   url: url,
                   selectors: selectors,
-                  error: _t4
+                  error: _t4,
+                  status: status
                 }
               });
-              console.error(_t4);
-            //if (error.name === "AbortError") return null;
-            //throw error;
-            case 22:
-              _context.p = 22;
+              throw _t4;
+            case 24:
+              _context.p = 24;
               if (previousController === controller) previousController = null;
               AelluxJs.dispatch("AjaxHrefComplete", {
                 detail: {
@@ -640,11 +652,11 @@
                   selectors: selectors
                 }
               });
-              return _context.f(22);
-            case 23:
+              return _context.f(24);
+            case 25:
               return _context.a(2);
           }
-        }, _callee, null, [[7, 18, 19, 20], [3, 21, 22, 23]]);
+        }, _callee, null, [[7, 18, 19, 20], [3, 21, 24, 25]]);
       }));
       return _load.apply(this, arguments);
     }
@@ -709,7 +721,8 @@
         return;
       }
       event.preventDefault();
-      load(link.href, selectors);
+      load(link.href, selectors).catch(function() {
+      });
     }
     function OnSnapshotRestoreAjax(event) {
       if (!event.detail || !event.detail.popState) return;
@@ -719,6 +732,7 @@
         var selectors = state.ajaxReplace.selectors;
         load(url, selectors, {
           ignoreHistory: true
+        }).catch(function() {
         });
       }
     }

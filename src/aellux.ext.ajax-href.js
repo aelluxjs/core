@@ -123,13 +123,13 @@ import { validateHTMLSource } from "./internal/validate-html-source.js";
     }
     catch (error) {
       elements.forEach(currentElement => updateFeedback(currentElement, false));
+      // Superseded requests must not report failures for the active navigation.
+      if (previousController !== controller) return null;
+      if (controller.signal?.aborted || error?.name === "AbortError") return null;
 
-      AelluxJs.dispatch("AjaxHrefError", { detail: { url, selectors, error } });
-
-      console.error(error);
-
-      //if (error.name === "AbortError") return null;
-      //throw error;
+      const status = error?.response?.status ?? error?.status ?? null;
+      AelluxJs.dispatch("AjaxHrefError", { detail: { url, selectors, error, status } });
+      throw error;
     }
     finally {
       if (previousController === controller)
@@ -185,7 +185,8 @@ import { validateHTMLSource } from "./internal/validate-html-source.js";
     }
 
     event.preventDefault();
-    load(link.href, selectors);
+    // The error event reports failures from fire-and-forget navigation.
+    load(link.href, selectors).catch(() => {});
   }
 
   function OnSnapshotRestoreAjax(event) {
@@ -195,7 +196,7 @@ import { validateHTMLSource } from "./internal/validate-html-source.js";
     if (state.ajaxReplace) {
       const url = state.ajaxReplace.url;
       const selectors = state.ajaxReplace.selectors;
-      load(url, selectors, { ignoreHistory: true });
+      load(url, selectors, { ignoreHistory: true }).catch(() => {});
     }
   }
 

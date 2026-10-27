@@ -154,6 +154,7 @@
     }
     let previousController = null;
     async function load(url, selectors, options = {}) {
+      var _a, _b, _c, _d;
       options = options || {};
       const selectorList = AelluxJs.parseSelectors(selectors, (invalid) => selectorDiagnostic(invalid.value, invalid.reason));
       if (!selectorList) return null;
@@ -207,8 +208,11 @@
         AelluxJs.dispatch("AjaxHrefLoaded", { detail: { url, selectors } });
       } catch (error) {
         elements.forEach((currentElement) => updateFeedback(currentElement, false));
-        AelluxJs.dispatch("AjaxHrefError", { detail: { url, selectors, error } });
-        console.error(error);
+        if (previousController !== controller) return null;
+        if (((_a = controller.signal) == null ? void 0 : _a.aborted) || (error == null ? void 0 : error.name) === "AbortError") return null;
+        const status = (_d = (_c = (_b = error == null ? void 0 : error.response) == null ? void 0 : _b.status) != null ? _c : error == null ? void 0 : error.status) != null ? _d : null;
+        AelluxJs.dispatch("AjaxHrefError", { detail: { url, selectors, error, status } });
+        throw error;
       } finally {
         if (previousController === controller)
           previousController = null;
@@ -259,7 +263,8 @@
         return;
       }
       event.preventDefault();
-      load(link.href, selectors);
+      load(link.href, selectors).catch(() => {
+      });
     }
     function OnSnapshotRestoreAjax(event) {
       if (!event.detail || !event.detail.popState) return;
@@ -267,7 +272,8 @@
       if (state.ajaxReplace) {
         const url = state.ajaxReplace.url;
         const selectors = state.ajaxReplace.selectors;
-        load(url, selectors, { ignoreHistory: true });
+        load(url, selectors, { ignoreHistory: true }).catch(() => {
+        });
       }
     }
     function comparableUrl(value) {
