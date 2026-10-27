@@ -613,7 +613,7 @@
                   selectors: selectors
                 }
               });
-              _context.n = 23;
+              _context.n = 22;
               break;
             case 21:
               _context.p = 21;
@@ -624,18 +624,15 @@
               AelluxJs.dispatch("AjaxHrefError", {
                 detail: {
                   url: url,
-                  selectors: selectors
+                  selectors: selectors,
+                  error: _t4
                 }
               });
-              if (!(_t4.name === "AbortError")) {
-                _context.n = 22;
-                break;
-              }
-              return _context.a(2, null);
+              console.error(_t4);
+            //if (error.name === "AbortError") return null;
+            //throw error;
             case 22:
-              throw _t4;
-            case 23:
-              _context.p = 23;
+              _context.p = 22;
               if (previousController === controller) previousController = null;
               AelluxJs.dispatch("AjaxHrefComplete", {
                 detail: {
@@ -643,11 +640,11 @@
                   selectors: selectors
                 }
               });
-              return _context.f(23);
-            case 24:
+              return _context.f(22);
+            case 23:
               return _context.a(2);
           }
-        }, _callee, null, [[7, 18, 19, 20], [3, 21, 23, 24]]);
+        }, _callee, null, [[7, 18, 19, 20], [3, 21, 22, 23]]);
       }));
       return _load.apply(this, arguments);
     }

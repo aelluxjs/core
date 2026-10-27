@@ -124,10 +124,12 @@ import { validateHTMLSource } from "./internal/validate-html-source.js";
     catch (error) {
       elements.forEach(currentElement => updateFeedback(currentElement, false));
 
-      AelluxJs.dispatch("AjaxHrefError", { detail: { url, selectors } });
+      AelluxJs.dispatch("AjaxHrefError", { detail: { url, selectors, error } });
 
-      if (error.name === "AbortError") return null;
-      throw error;
+      console.error(error);
+
+      //if (error.name === "AbortError") return null;
+      //throw error;
     }
     finally {
       if (previousController === controller)

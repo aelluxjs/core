@@ -207,9 +207,8 @@
         AelluxJs.dispatch("AjaxHrefLoaded", { detail: { url, selectors } });
       } catch (error) {
         elements.forEach((currentElement) => updateFeedback(currentElement, false));
-        AelluxJs.dispatch("AjaxHrefError", { detail: { url, selectors } });
-        if (error.name === "AbortError") return null;
-        throw error;
+        AelluxJs.dispatch("AjaxHrefError", { detail: { url, selectors, error } });
+        console.error(error);
       } finally {
         if (previousController === controller)
           previousController = null;
