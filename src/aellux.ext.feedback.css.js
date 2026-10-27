@@ -22,8 +22,8 @@ export function generateFeedbackCSS(AelluxJs) {
       duration: "550ms",
       frames: `
         0%, 100% { transform: translateX(0) rotate(0); }
-        25%, 75% { transform: translateX(-5px) rotate(-3deg); }
-        50% { transform: translateX(5px) rotate(3deg); }
+        25%, 75% { transform: translateX(-10px) rotate(-0.5deg); }
+        50% { transform: translateX(10px) rotate(0.5deg); }
       `
     },
     breathe: {
